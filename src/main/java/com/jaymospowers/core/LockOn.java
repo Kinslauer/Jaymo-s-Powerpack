@@ -1,11 +1,12 @@
-package com.jaymospowers.power.zfighter;
+package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.core.Powers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,12 +18,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.45, Andy's NOEA picks) Lock-on, the server half. The client picks the living thing nearest the crosshair and
- * sends its id ({@link LockOn}); the server checks it (alive, in sight, within {@link #RANGE}) and keeps it. While it
- * holds, the hold combo, Flash Step and the ki blasts aim at it ({@link #target}, {@link #aim}). It lets go on its own
- * past {@link #RANGE}, or after {@link #BLIND_TICKS} out of sight.
+ * (0.17.45, Andy's NOEA picks) Lock-on, the server half, for everyone (Andy: "make lock on middle mouse, and it should
+ * work across the board"). The client picks the living thing nearest the crosshair and sends its id ({@link Packet});
+ * the server checks it (alive, in sight, within {@link #RANGE}) and keeps it. The client turns the camera to it, so
+ * every power, bow and blow aims there; a Z Fighter's hold combo, Flash Step and ki blasts also aim at it directly
+ * ({@link #target}, {@link #aim}). It lets go on its own past {@link #RANGE}, or after {@link #BLIND_TICKS} out of sight.
  */
-public final class ZFighterLock {
+public final class LockOn {
 	public static final double RANGE = 32.0;
 	/** The server allows this much more than the client's range, so the two never disagree at the edge. */
 	static final double SLACK = 2.0;
@@ -30,14 +32,14 @@ public final class ZFighterLock {
 	static final int BLIND_TICKS = 15;
 
 	/** Client to server: lock onto entity {@code id}, or let go (-1). */
-	public record LockOn(int id) implements CustomPacketPayload {
-		public static final Type<LockOn> TYPE = new Type<>(JaymosPowers.id("zfighter_lock_on"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, LockOn> CODEC = CustomPacketPayload.codec(
+	public record Packet(int id) implements CustomPacketPayload {
+		public static final Type<Packet> TYPE = new Type<>(JaymosPowers.id("lock_on"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Packet> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> buf.writeVarInt(p.id),
-			buf -> new LockOn(buf.readVarInt()));
+			buf -> new Packet(buf.readVarInt()));
 
 		@Override
-		public Type<LockOn> type() {
+		public Type<Packet> type() {
 			return TYPE;
 		}
 	}
@@ -53,16 +55,22 @@ public final class ZFighterLock {
 
 	private static final Map<UUID, Lock> LOCKS = new HashMap<>();
 
-	private ZFighterLock() {
+	private LockOn() {
 	}
 
-	static void register() {
-		PayloadTypeRegistry.serverboundPlay().register(LockOn.TYPE, LockOn.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(LockOn.TYPE, (payload, ctx) -> set(ctx.player(), payload.id()));
+	public static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Packet.TYPE, Packet.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Packet.TYPE, (payload, ctx) -> set(ctx.player(), payload.id()));
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				tick(player);
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> drop(handler.player));
 	}
 
 	private static void set(ServerPlayer player, int id) {
-		if (id < 0 || !Powers.has(player, ZFighterPower.INSTANCE) || !player.isAlive()) {
+		if (id < 0 || !player.isAlive()) {
 			LOCKS.remove(player.getUUID());
 			return;
 		}
@@ -77,7 +85,7 @@ public final class ZFighterLock {
 	}
 
 	/** Every tick: drops a lock whose target is gone, too far, or has been out of sight too long. */
-	static void tick(ServerPlayer player) {
+	private static void tick(ServerPlayer player) {
 		Lock lock = LOCKS.get(player.getUUID());
 		if (lock == null) {
 			return;
@@ -93,7 +101,7 @@ public final class ZFighterLock {
 		}
 	}
 
-	static void drop(ServerPlayer player) {
+	public static void drop(ServerPlayer player) {
 		LOCKS.remove(player.getUUID());
 	}
 
@@ -106,7 +114,7 @@ public final class ZFighterLock {
 		return player.level().getEntity(lock.target) instanceof LivingEntity living && usable(player, living) ? living : null;
 	}
 
-	/** The way his ki goes: at the locked foe, else wherever he looks. */
+	/** The way his shot goes: at the locked foe, else wherever he looks. */
 	public static Vec3 aim(ServerPlayer player) {
 		LivingEntity locked = target(player);
 		if (locked != null) {

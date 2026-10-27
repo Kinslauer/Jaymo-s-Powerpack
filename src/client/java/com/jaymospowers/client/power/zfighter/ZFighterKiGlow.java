@@ -73,7 +73,7 @@ public final class ZFighterKiGlow {
 	}
 
 	/** His ki colour in base form, the form's in a form. */
-	static int color(Player player, int form) {
+	public static int color(Player player, int form) {
 		Integer ki = player.getAttached(ZFighterPower.KI_COLOR);
 		return form > 0 || ki == null ? ZFighterLineage.color(ZFighterLineage.of(player), form) : ki;
 	}

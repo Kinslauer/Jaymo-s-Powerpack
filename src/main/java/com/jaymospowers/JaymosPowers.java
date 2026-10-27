@@ -34,6 +34,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.FlightRoll.init();
+		com.jaymospowers.core.LockOn.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.wounds.Wounds.init();

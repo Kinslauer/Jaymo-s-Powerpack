@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -158,7 +159,7 @@ public final class ZFighterRush {
 
 	/** The foe: the locked one if it is in range, else the nearest in front that he can see. */
 	private static @Nullable LivingEntity find(ServerPlayer player) {
-		LivingEntity locked = ZFighterLock.target(player);
+		LivingEntity locked = LockOn.target(player);
 		if (locked != null && valid(player, locked) && player.distanceTo(locked) <= FIND_RANGE) {
 			return locked;
 		}

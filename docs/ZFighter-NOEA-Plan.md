@@ -13,8 +13,9 @@ The picks are split into eight patches, each its own PR (Andy merges to test, se
 patch the work runs as two agent tracks at a time that don't touch the same files.
 
 ## Patch 1: combat feel and senses (Powers)
-- **Lock-on** (new key, default unbound until Andy picks one): locks camera and attacks onto one target in sight; the
-  hold combo, Flash Step and ki attacks aim at it; breaks past 32 blocks or out of sight.
+- **Lock-on** (middle mouse, everyone, Andy 2026-10-27): locks the camera onto one target in sight so every power
+  aims there; scroll swaps to the next target left or right; the hold combo, Flash Step and ki attacks aim at it
+  directly; breaks past 32 blocks or out of sight. Now `core/LockOn` + `client/LockOnClient`.
 - **Poise and K.O.**: every living thing gets a hidden poise bar. Blows wear it (heavier blows more), a parry wears
   the attacker's. Broken: staggered for a second (open to a counter); broken again while staggered: K.O. for 2 s. Ties
   into the existing downed state, never kills on its own.

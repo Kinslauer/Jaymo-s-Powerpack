@@ -1,9 +1,9 @@
-package com.jaymospowers.client.power.zfighter;
+package com.jaymospowers.client;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.client.JaymosPowersClient;
+import com.jaymospowers.client.power.zfighter.ZFighterKiGlow;
 import com.jaymospowers.core.Powers;
-import com.jaymospowers.power.zfighter.ZFighterLock;
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -26,13 +26,15 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.45, Andy's NOEA picks) Lock-on, the client half. The key (Left Alt by default, shared with the zoom mod's) locks
- * onto the living thing nearest the crosshair within {@link ZFighterLock#RANGE} blocks that he can see, and sends its id
- * to the server ({@link ZFighterLock.LockOn}); pressed again, or out of sight for a moment, or past the range, it lets
- * go. While it holds the camera eases round to the target ({@link #EASE}) and a small bracket is drawn on it.
+ * (0.17.45, Andy's NOEA picks) Lock-on, the client half, for everyone (Andy: "make lock on middle mouse, and it should
+ * work across the board. You can swap targets to the left and right by scrolling"). Middle mouse locks onto the living
+ * thing nearest the crosshair within {@link LockOn#RANGE} blocks that he can see, and sends its id to the server
+ * ({@link LockOn.Packet}); pressed again, or out of sight for a moment, or past the range, it lets go. While it holds the
+ * camera eases round to the target ({@link #EASE}), so whatever he aims (a power, a bow, a blow) goes there, a small
+ * bracket is drawn on it, and the scroll wheel moves the lock to the next one to the left or right ({@link #scroll}).
  */
-public final class ZFighterLockClient {
-	static final String KEY_NAME = "key.jaymospowers.zfighter_lock";
+public final class LockOnClient {
+	static final String KEY_NAME = "key.jaymospowers.lock_on";
 	/** Only things this far round from where he looks can be locked (cosine of the angle). */
 	static final double PICK_COSINE = 0.7;
 	/** The camera closes this share of the gap a tick, at most {@link #MAX_TURN} degrees. */
@@ -40,6 +42,8 @@ public final class ZFighterLockClient {
 	static final float MAX_TURN = 25.0F;
 	/** Ticks out of sight before he lets go (as the server's). */
 	static final int BLIND_TICKS = 15;
+	/** The bracket's colour for anyone but a Z Fighter (his is his ki's). */
+	static final int COLOR = 0xFFFFE6A0;
 	/** The bracket's half size in pixels, and the length of each corner's arms. */
 	static final int MARKER = 9;
 	static final int ARM = 4;
@@ -48,19 +52,20 @@ public final class ZFighterLockClient {
 	private static int locked = -1;
 	private static int blind;
 
-	private ZFighterLockClient() {
+	private LockOnClient() {
 	}
 
-	static void init() {
-		key = KeyMappingHelper.registerKeyMapping(new KeyMapping(KEY_NAME, InputConstants.KEY_LALT, JaymosPowersClient.CATEGORY));
-		ClientTickEvents.START_CLIENT_TICK.register(ZFighterLockClient::input);
-		ClientTickEvents.END_CLIENT_TICK.register(ZFighterLockClient::ease);
-		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("zfighter_lock_marker"), ZFighterLockClient::marker);
+	public static void init() {
+		key = KeyMappingHelper.registerKeyMapping(new KeyMapping(KEY_NAME, InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_MIDDLE,
+			JaymosPowersClient.CATEGORY));
+		ClientTickEvents.START_CLIENT_TICK.register(LockOnClient::input);
+		ClientTickEvents.END_CLIENT_TICK.register(LockOnClient::ease);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("lock_on_marker"), LockOnClient::marker);
 	}
 
 	private static void release(boolean tell) {
 		if (locked >= 0 && tell) {
-			ClientPlayNetworking.send(new ZFighterLock.LockOn(-1));
+			ClientPlayNetworking.send(new LockOn.Packet(-1));
 		}
 		locked = -1;
 		blind = 0;
@@ -75,7 +80,7 @@ public final class ZFighterLockClient {
 
 	private static void input(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		if (player == null || !Powers.has(player, ZFighterPower.INSTANCE)) {
+		if (player == null) {
 			if (locked >= 0) {
 				release(false);
 			}
@@ -96,7 +101,7 @@ public final class ZFighterLockClient {
 		if (pick != null) {
 			locked = pick.getId();
 			blind = 0;
-			ClientPlayNetworking.send(new ZFighterLock.LockOn(locked));
+			ClientPlayNetworking.send(new LockOn.Packet(locked));
 		}
 	}
 
@@ -106,22 +111,69 @@ public final class ZFighterLockClient {
 		Vec3 look = player.getViewVector(1.0F);
 		LivingEntity best = null;
 		double bestFacing = PICK_COSINE;
-		for (Entity entity : minecraft.level.getEntities(player, new AABB(eye, eye).inflate(ZFighterLock.RANGE))) {
-			if (!(entity instanceof LivingEntity living) || !living.isAlive() || living.isSpectator()) {
+		for (Entity entity : minecraft.level.getEntities(player, new AABB(eye, eye).inflate(LockOn.RANGE))) {
+			if (!(entity instanceof LivingEntity living) || !candidate(player, living)) {
 				continue;
 			}
 			Vec3 to = living.getBoundingBox().getCenter().subtract(eye);
-			double distance = to.length();
-			if (distance > ZFighterLock.RANGE || distance < 1.0E-3) {
-				continue;
-			}
-			double facing = to.scale(1.0 / distance).dot(look);
-			if (facing > bestFacing && player.hasLineOfSight(living)) {
+			double facing = to.normalize().dot(look);
+			if (facing > bestFacing) {
 				best = living;
 				bestFacing = facing;
 			}
 		}
 		return best;
+	}
+
+	private static boolean candidate(LocalPlayer player, LivingEntity living) {
+		if (!living.isAlive() || living.isSpectator() || living == player) {
+			return false;
+		}
+		double distance = living.getBoundingBox().getCenter().distanceTo(player.getEyePosition());
+		return distance <= LockOn.RANGE && distance > 1.0E-3 && player.hasLineOfSight(living);
+	}
+
+	/**
+	 * The scroll wheel while locked: the lock moves to the nearest one beside the target, to the right for a scroll
+	 * down and to the left for a scroll up (the hotbar's way round). True when it took the scroll (the hotbar keeps
+	 * still); with nothing on that side the lock stays.
+	 */
+	public static boolean scroll(double yOffset) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		LivingEntity current = target(minecraft);
+		if (current == null || player == null || yOffset == 0.0 || minecraft.gui.screen() != null) {
+			return false;
+		}
+		Camera camera = minecraft.gameRenderer.mainCamera();
+		double from = bearing(camera, current);
+		boolean right = yOffset < 0.0;
+		LivingEntity best = null;
+		double bestGap = Double.MAX_VALUE;
+		Vec3 eye = player.getEyePosition();
+		for (Entity entity : minecraft.level.getEntities(player, new AABB(eye, eye).inflate(LockOn.RANGE))) {
+			if (entity == current || !(entity instanceof LivingEntity living) || !candidate(player, living)) {
+				continue;
+			}
+			double gap = right ? from - bearing(camera, living) : bearing(camera, living) - from;
+			if (gap > 1.0E-3 && gap < bestGap) {
+				best = living;
+				bestGap = gap;
+			}
+		}
+		if (best != null) {
+			locked = best.getId();
+			blind = 0;
+			ClientPlayNetworking.send(new LockOn.Packet(locked));
+		}
+		return true;
+	}
+
+	/** How far round to the left of the camera's line it is, in radians (negative: to the right). */
+	private static double bearing(Camera camera, LivingEntity living) {
+		Vec3 d = living.getBoundingBox().getCenter().subtract(camera.position());
+		Vector3fc forward = camera.forwardVector(), left = camera.leftVector();
+		return Math.atan2(d.x * left.x() + d.y * left.y() + d.z * left.z(), d.x * forward.x() + d.y * forward.y() + d.z * forward.z());
 	}
 
 	/** Every tick: lets go of a target that is gone, too far or unseen; otherwise turns the camera toward it. */
@@ -131,7 +183,7 @@ public final class ZFighterLockClient {
 			return;
 		}
 		LivingEntity target = target(minecraft);
-		if (target == null || !target.isAlive() || !player.isAlive() || player.distanceTo(target) > ZFighterLock.RANGE) {
+		if (target == null || !target.isAlive() || !player.isAlive() || player.distanceTo(target) > LockOn.RANGE) {
 			release(true);
 			return;
 		}
@@ -176,7 +228,7 @@ public final class ZFighterLockClient {
 		int sx = (int)(w / 2.0 * (1.0 - x / z / (tan * w / h)));
 		int sy = (int)(h / 2.0 * (1.0 - y / z / tan));
 		Integer form = player.getAttached(ZFighterPower.FORM);
-		int color = 0xFF000000 | ZFighterKiGlow.color(player, form == null ? 0 : form);
+		int color = Powers.has(player, ZFighterPower.INSTANCE) ? 0xFF000000 | ZFighterKiGlow.color(player, form == null ? 0 : form) : COLOR;
 		int s = MARKER + Math.round(1.5F * Mth.sin((player.tickCount + partial) * 0.3F));
 		for (int sideX = -1; sideX <= 1; sideX += 2) {
 			for (int sideY = -1; sideY <= 1; sideY += 2) {

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -535,7 +536,7 @@ public final class ZFighterCombo {
 		double keep = REACH_BONUS + LUNGE_RANGE;
 		double far = reach + LUNGE_RANGE;
 		// (0.17.45) locked on: he fights the one he locked
-		LivingEntity locked = ZFighterLock.target(player);
+		LivingEntity locked = LockOn.target(player);
 		if (locked != null && valid(player, locked) && player.isWithinEntityInteractionRange(locked, far)) {
 			return locked;
 		}

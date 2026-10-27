@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
 import java.util.HashMap;
@@ -224,9 +225,9 @@ public final class ZFighterGrab {
 		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		release(player);
 		Vec3 look = player.getViewVector(1.0F);
-		LivingEntity locked = ZFighterLock.target(player);
+		LivingEntity locked = LockOn.target(player);
 		if (locked != null && locked != foe) {
-			look = ZFighterLock.aim(player);
+			look = LockOn.aim(player);
 		}
 		double speed = Math.min(THROW_MAX, THROW_BASE + fists * THROW_PER_FIST) * power;
 		foe.setDeltaMovement(look.x * speed, look.y * speed + THROW_LIFT, look.z * speed);

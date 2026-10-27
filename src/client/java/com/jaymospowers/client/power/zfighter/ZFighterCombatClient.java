@@ -11,7 +11,7 @@ import net.minecraft.world.item.Items;
 
 /**
  * (0.17.45, Andy's NOEA picks) The client side of the combat feel that isn't a drawing of its own: it wires lock-on
- * ({@link ZFighterLockClient}), takes the left click for the throw while he holds something
+ * ({@link com.jaymospowers.client.LockOnClient}, now everyone's), takes the left click for the throw while he holds something
  * ({@link ZFighterGrab}), and gives the new G techniques their icons.
  */
 public final class ZFighterCombatClient {
@@ -19,7 +19,6 @@ public final class ZFighterCombatClient {
 	}
 
 	public static void init() {
-		ZFighterLockClient.init();
 		ClientTickEvents.START_CLIENT_TICK.register(ZFighterCombatClient::grab);
 	}
 

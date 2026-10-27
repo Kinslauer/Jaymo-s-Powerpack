@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.45, Andy's NOEA picks) The combat feel of round two, wired in one place: lock-on ({@link ZFighterLock}), poise and
+ * (0.17.45, Andy's NOEA picks) The combat feel of round two, wired in one place: lock-on ({@link com.jaymospowers.core.LockOn}), poise and
  * K.O. ({@link ZFighterPoise}), the rush attacks ({@link ZFighterRush}), grab and throw ({@link ZFighterGrab}), the
  * meditation dodge ({@link ZFighterSidestep}) and the ki weapons ({@link ZFighterKiWeapon}). {@link #init} is the one
  * call from {@link ZFighterPower#init}; {@link #quick} the one from G's handler.
@@ -34,7 +34,6 @@ public final class ZFighterCombat {
 	}
 
 	public static void init() {
-		ZFighterLock.register();
 		ZFighterPoise.init();
 		ZFighterGrab.init();
 		ZFighterSidestep.init();
@@ -48,7 +47,6 @@ public final class ZFighterCombat {
 					continue;
 				}
 				ZFighterPower.Live live = ZFighterPower.live(player);
-				ZFighterLock.tick(player);
 				ZFighterRush.tick(player, live);
 				ZFighterGrab.tick(player);
 				ZFighterKiWeapon.tick(player, live);
@@ -64,7 +62,6 @@ public final class ZFighterCombat {
 
 	/** He lost the power, died or left: everything of his that was running ends. */
 	static void drop(ServerPlayer player) {
-		ZFighterLock.drop(player);
 		ZFighterRush.drop(player);
 		ZFighterGrab.drop(player);
 		if (ZFighterKiWeapon.out(player) >= 0) {
