@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom",
+    "minecraft:shelf_mushroom",
+    "minecraft:podzol",
+    "minecraft:mycelium",
+    "jaymoskitchen:organic_compost",
+    "jaymoskitchen:rich_soil",
+    "jaymoskitchen:rich_soil_farmland",
+    "#jaymoskitchen:mushroom_colonies"
+  ]
+}

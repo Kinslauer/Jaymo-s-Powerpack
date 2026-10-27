@@ -69,6 +69,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.delight.Delight.register();
 		// (0.5.29) the rest of Farmer's Delight's food: slices, milk bottle, ham, dog food and horse feed, and its pies
 		com.jaymoskitchen.delight.DelightDishes.register();
+		// (0.5.29) Farmer's Delight's tomatoes, onions, rope, wild crops, rich soil, compost, mushroom colonies, villages
+		com.jaymoskitchen.delight.DelightFarm.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();

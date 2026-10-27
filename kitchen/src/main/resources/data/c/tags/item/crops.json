@@ -3,6 +3,8 @@
   "values": [
     "jaymoskitchen:hemp_fibre",
     "jaymoskitchen:cabbage",
-    "jaymoskitchen:rice"
+    "jaymoskitchen:rice",
+    "#c:crops/tomato",
+    "#c:crops/onion"
   ]
 }

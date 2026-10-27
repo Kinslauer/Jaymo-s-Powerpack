@@ -1,0 +1,104 @@
+{
+  "type": "minecraft:block",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  },
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymoskitchen:red_mushroom_colony",
+                "state": {
+                  "age": "0"
+                }
+              },
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": 2
+              },
+              "name": "minecraft:red_mushroom"
+            },
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymoskitchen:red_mushroom_colony",
+                "state": {
+                  "age": "1"
+                }
+              },
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": 3
+              },
+              "name": "minecraft:red_mushroom"
+            },
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymoskitchen:red_mushroom_colony",
+                "state": {
+                  "age": "2"
+                }
+              },
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": 4
+              },
+              "name": "minecraft:red_mushroom"
+            },
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:all_of",
+                "terms": [
+                  {
+                    "type": "minecraft:inverted",
+                    "term": "minecraft:tool/can_shear"
+                  },
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymoskitchen:red_mushroom_colony",
+                    "state": {
+                      "age": "3"
+                    }
+                  }
+                ]
+              },
+              "modifier": {
+                "type": "minecraft:set_count",
+                "count": 5
+              },
+              "name": "minecraft:red_mushroom"
+            },
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:all_of",
+                "terms": [
+                  "minecraft:tool/can_shear",
+                  {
+                    "type": "minecraft:match_block",
+                    "blocks": "jaymoskitchen:red_mushroom_colony",
+                    "state": {
+                      "age": "3"
+                    }
+                  }
+                ]
+              },
+              "name": "jaymoskitchen:red_mushroom_colony"
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}
