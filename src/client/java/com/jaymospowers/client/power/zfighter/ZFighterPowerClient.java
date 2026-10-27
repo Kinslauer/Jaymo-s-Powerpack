@@ -246,7 +246,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	}
 
 	/** The icon on G or V for the technique set there. */
-	private static Item techniqueIcon(int technique) {
+	static Item techniqueIcon(int technique) {
 		return switch (technique) {
 			case ZFighterTraining.KI_DISC -> Items.BOWL;
 			case ZFighterTraining.HOMING_VOLLEY -> Items.FIREWORK_STAR;
@@ -262,7 +262,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.waveFrom() < 0) {
 			return;
 		}
-		float fill = Mth.clamp((now - state.waveFrom()) / (float)WAVE_FULL, 0.0F, 1.0F);
+		float fill = Mth.clamp((now - state.waveFrom()) / (float)com.jaymospowers.power.zfighter.ZFighterArts.full(ZFighterTraining.of(player).charged(), WAVE_FULL), 0.0F, 1.0F);
 		// (0.13.27) his own ki colour in base form
 		Integer ki = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getAttached(ZFighterPower.KI_COLOR);
 		int color = state.has(ZFighterState.SUPER) ? SUPER_COLOR : ki != null ? ki : WAVE_COLOR;

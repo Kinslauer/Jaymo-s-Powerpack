@@ -95,13 +95,24 @@ public final class ZFighterTraining {
 	public static final int KI_WEAPON = 12;
 	/** (0.17.45) Instant Teleport: a late technique on B in place of Flash Step ({@link ZFighterTeleport}). */
 	public static final int TELEPORT = 13;
-	public static final int TECHNIQUES = 14;
+	/** (0.17.46) The round-2 patch-2 techniques ({@link ZFighterArts}): the drill beam, triangle cannon and nova sphere go on V, the rest on G. */
+	public static final int DRILL_BEAM = 14;
+	public static final int RING_OF_ORBS = 15;
+	public static final int TRIANGLE_CANNON = 16;
+	public static final int RISING_DOME = 17;
+	public static final int KI_RAIN = 18;
+	public static final int NOVA_SPHERE = 19;
+	public static final int RAGE_SCREAM = 20;
+	public static final int AFTERIMAGE = 21;
+	public static final int TECHNIQUES = 22;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
-		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport"};
+		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
+		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
-	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000};
+	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
+		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
@@ -464,7 +475,7 @@ public final class ZFighterTraining {
 		if (index == TELEPORT && formsOpen(player) < 2) {
 			return "screen.jaymospowers.zfighter_senses.need_super2";
 		}
-		if (data.tp() < TECHNIQUE_TP[index]) {
+		if (data.tp() < techniqueCost(player, index)) {
 			return "screen.jaymospowers.zfighter.need_tp";
 		}
 		return null;
@@ -475,7 +486,7 @@ public final class ZFighterTraining {
 			return;
 		}
 		Data data = of(player);
-		learn(player, data.withTp(data.tp() - TECHNIQUE_TP[index]), index);
+		learn(player, data.withTp(data.tp() - techniqueCost(player, index)), index);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_learned",
 			Component.translatable(ZFighterLineage.techniqueKey(player, index))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
@@ -489,6 +500,7 @@ public final class ZFighterTraining {
 	 */
 	static void learn(ServerPlayer player, Data data, int index) {
 		player.setAttached(DATA, data.withLearned(index));
+		ZFighterSlots.add(player, index);
 		if (index == TELEPORT) {
 			ZFighterTeleport.setOnB(player, true);
 		}
@@ -513,9 +525,14 @@ public final class ZFighterTraining {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.2F);
 	}
 
+	/** What technique {@code index} costs him in TP: its price, halved for a Frost-born's Nova Sphere. */
+	public static int techniqueCost(Player player, int index) {
+		return index == NOVA_SPHERE && ZFighterLineage.of(player) == ZFighterLineage.FROST ? TECHNIQUE_TP[index] / 2 : TECHNIQUE_TP[index];
+	}
+
 	/** Whether technique {@code index} goes on V (held and let go) rather than G. */
 	public static boolean charged(int index) {
-		return index == KI_WAVE || index == KI_BOMB;
+		return index == KI_WAVE || index == KI_BOMB || ZFighterArts.charged(index);
 	}
 
 	// ---------------------------------------------------------------- what the stats and mastery give

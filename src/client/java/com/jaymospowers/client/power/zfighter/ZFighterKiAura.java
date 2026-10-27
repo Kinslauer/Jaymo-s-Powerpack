@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ZFighterAura;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -34,9 +35,13 @@ import org.jspecify.annotations.Nullable;
  * one brighter, turning against each other. Full while charging; held after a full charge ({@link ZFighterPower#AURA_HOLD});
  * in a form it flares up and dies back every so often, quicker each form. The faint {@link ZFighterKiGlow} stays the
  * look in between. Not on the Great Ape, while hidden, nor round your own camera in first person.
+ * <p>
+ * (0.17.46, Andy's NOEA picks) Three styles ({@link ZFighterAura}, picked on the training screen): this flame is
+ * "Sparking" (with {@link ZFighterKiAuraStyles#sparks} on it); Smooth and Godly are drawn by {@link ZFighterKiAuraStyles}
+ * under the same rules. The fourth number on the render state is the style.
  */
 public final class ZFighterKiAura {
-	/** On his render state: the aura's colour (RGB), strength (0-1) and size, or null for none. */
+	/** On his render state: the aura's colour (RGB), strength (0-1), size and style, or null for none. */
 	public static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ki_aura");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_ki_aura.png");
 	private static final RenderType TYPE = RenderTypes.energySwirl(TEXTURE, 0.0F, 0.0F);
@@ -118,7 +123,7 @@ public final class ZFighterKiAura {
 		}
 		float size = 1.0F + SIZE_PER_FORM * f + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
 			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F);
-		return new float[] {ZFighterKiGlow.color(player, f), strength, size};
+		return new float[] {ZFighterKiGlow.color(player, f), strength, size, ZFighterAura.style(player)};
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -134,6 +139,16 @@ public final class ZFighterKiAura {
 			}
 			int color = (int)aura[0];
 			float age = state.ageInTicks;
+			// (0.17.46) the style he picked: smooth and godly have shells of their own; sparking is the flame below plus sparks
+			int style = (int)aura[3];
+			if (style == ZFighterAura.SMOOTH) {
+				ZFighterKiAuraStyles.smooth(poseStack, collector, color, aura[1], aura[2], age);
+				return;
+			}
+			if (style == ZFighterAura.GODLY) {
+				ZFighterKiAuraStyles.godly(poseStack, collector, color, aura[1], aura[2], age);
+				return;
+			}
 			for (int layer = 0; layer < LAYER_SIZE.length; layer++) {
 				float light = Mth.clamp(LAYER_LIGHT[layer] * aura[1], 0.0F, 1.0F);
 				float size = LAYER_SIZE[layer] * aura[2];
@@ -144,6 +159,7 @@ public final class ZFighterKiAura {
 				collector.order(6 + layer).submitCustomGeometry(poseStack, TYPE,
 					(pose, buffer) -> shell(pose, buffer, color, light, size, spin, rise, age, seed));
 			}
+			ZFighterKiAuraStyles.sparks(poseStack, collector, color, aura[1], aura[2], age);
 		}
 
 		/** One layer: a ring of columns, each a strip of quads from his feet up to its tongue's tip. */
@@ -182,12 +198,12 @@ public final class ZFighterKiAura {
 		}
 
 		/** Additive: the colour's brightness is how strongly it shows. */
-		private static int tint(int color, float light) {
+		static int tint(int color, float light) {
 			light = Mth.clamp(light, 0.0F, 1.0F);
 			return ARGB.color(255, (int)(ARGB.red(color) * light), (int)(ARGB.green(color) * light), (int)(ARGB.blue(color) * light));
 		}
 
-		private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, float x, float y, float z, float u, float v, int color) {
+		static void vertex(PoseStack.Pose pose, VertexConsumer buffer, float x, float y, float z, float u, float v, int color) {
 			buffer.addVertex(pose, x, y, z).setColor(color).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT)
 				.setNormal(pose, 0.0F, -1.0F, 0.0F);
 		}

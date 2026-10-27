@@ -8,7 +8,10 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 
-/** (0.6.5) The Combat Arts' key ({@link CombatArts}): {@code Y} charges; sneak and {@code Y} is the war cry. */
+/**
+ * (0.6.5) The Combat Arts' key ({@link CombatArts}): it charges; sneak and the key is the war cry. On mouse side button 1
+ * since 0.7.255 (Y went to the Z Fighter technique wheel).
+ */
 final class CombatArtKey {
 	private static KeyMapping key;
 
@@ -16,7 +19,7 @@ final class CombatArtKey {
 	}
 
 	static void register() {
-		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_art", InputConstants.KEY_Y,
+		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_art", InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_4,
 			KeyMapping.Category.register(JaymosKingdoms.id("combat_arts"))));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {

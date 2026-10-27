@@ -414,6 +414,8 @@ public final class ZFighterPower implements Power {
 		ZFighterImpact.init();
 		// (0.17.45) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
 		ZFighterCombat.init();
+		// (0.17.46) drill beam, ring of orbs, triangle cannon, rising dome, ki rain, nova sphere, rage scream, afterimage
+		ZFighterArts.init();
 		// (0.17.45) ki sense, scouter, instant teleport, lend ki, air burst, impact frames
 		ZFighterSenses.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
@@ -429,6 +431,7 @@ public final class ZFighterPower implements Power {
 			ZFighterKi.clear();
 			ZFighterWaveBeam.clear();
 			ZFighterDisc.clear();
+			ZFighterArts.clear();
 		});
 	}
 
@@ -763,7 +766,7 @@ public final class ZFighterPower implements Power {
 						ZFighterKi.pressBarrage(player, live);
 					}
 				} else if (ZFighterKi.releaseWave(player, live)) {
-					cooldown(player, ZFighterState.WAVE, ZFighterKi.WAVE_COOLDOWN);
+					cooldown(player, ZFighterState.WAVE, ZFighterArts.waveCooldown(player));
 				} else {
 					ZFighterKi.releaseBarrage(player, live);
 				}
@@ -789,6 +792,10 @@ public final class ZFighterPower implements Power {
 
 	/** G: whichever quick technique is on it. */
 	private static void quick(ServerPlayer player, Live live) {
+		// (0.17.46) the round-2 patch-2 techniques
+		if (ZFighterArts.quick(player, live, ZFighterTraining.of(player).quick())) {
+			return;
+		}
 		if (ZFighterCombat.quick(player, live)) {
 			return;
 		}
