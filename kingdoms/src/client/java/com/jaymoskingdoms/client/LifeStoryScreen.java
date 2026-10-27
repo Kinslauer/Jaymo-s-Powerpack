@@ -7,6 +7,7 @@ import com.jaymoskingdoms.LifeStory;
 import com.jaymoskingdoms.LifeStory.Answer;
 import com.jaymoskingdoms.LifeStory.Question;
 import com.jaymoskingdoms.Voices;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,13 +38,15 @@ import org.jspecify.annotations.Nullable;
  * this life" seals it. It can't be shut; the answers so far are kept if something else closes it.
  */
 final class LifeStoryScreen extends Screen {
-	static final int MAX_W = 440, MAX_H = 300, TELL_W = 168, LIST_ROW = 19, MIN_ROW = 12, HEADER = 34, FOOTER = 24;
+	static final int MAX_W = 440, MAX_H = 300, TELL_W = 168, LIST_ROW = 19, MIN_ROW = 12, HEADER = 24, FOOTER = 24;
 	/** The story's accent: an old parchment brown, apart from the heritage teal and the class gold. */
 	static final int ACCENT = 0xFFC89A5A;
 	/** After "Live this life", how long the story may take to come back before the screen is put up again (ms). */
 	static final long LIVE_GRACE_MS = 3000L;
 	/** Pixels the story page moves for one notch of the wheel. */
 	static final int SCROLL_STEP = 12;
+	/** (0.7.269) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
+	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
 	private record Step(@Nullable Question question, boolean realm) {
@@ -72,9 +75,12 @@ final class LifeStoryScreen extends Screen {
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
 	private static Draft draft = new Draft();
-	/** (0.7.251) The question the narrator last read (its title key), and the reading, so it reads each page once. */
+	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
 	private static @Nullable SimpleSoundInstance reading;
+	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
+	/** (0.7.269) When the line being read began, and when the next may (ms). */
+	private static long readFrom, readNext;
 
 	LifeStoryScreen(boolean forced) {
 		super(Component.translatable("gui.jaymoskingdoms.story.title"));
@@ -103,6 +109,7 @@ final class LifeStoryScreen extends Screen {
 			owed = false;
 			draft = new Draft();
 			narrated = null;
+			toRead.clear();
 		});
 	}
 
@@ -319,25 +326,65 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.251) The narrator reads a question's title and the line under it when its page first shows, if that question has
-	 * a voice ({@link Voices}); turning the page cuts the reading short.
+	 * (0.7.251) The narrator reads a page when it first shows ({@link Voices}): a question's title and the line under it,
+	 * a realm page's ask, and (0.7.269) on the story page the whole tale, line by line with {@link #READ_GAP_MS} between,
+	 * then the closing line. Turning the page cuts the reading short. The realm a tale names isn't read: the clip says
+	 * "the realm".
 	 */
 	private static void narrate(Step s) {
-		String key = s.question != null && !s.realm ? "story.jaymoskingdoms." + s.question.key() + ".title" : null;
-		if (key == null || key.equals(narrated)) {
+		Minecraft minecraft = Minecraft.getInstance();
+		long now = System.currentTimeMillis();
+		String page = s.question == null ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
+		if (!page.equals(narrated)) {
+			narrated = page;
+			if (reading != null) {
+				minecraft.getSoundManager().stop(reading);
+				reading = null;
+			}
+			toRead.clear();
+			toRead.addAll(lines(s));
+			readNext = 0L;
+		}
+		if (reading != null) {
+			// (a sound only counts as playing once the engine has picked it up, so give it a moment first)
+			if (now - readFrom < READ_START_MS || minecraft.getSoundManager().isActive(reading)) {
+				return;
+			}
+			reading = null;
+			readNext = now + READ_GAP_MS;
+		}
+		if (now < readNext) {
 			return;
 		}
-		narrated = key;
-		Minecraft minecraft = Minecraft.getInstance();
-		if (reading != null) {
-			minecraft.getSoundManager().stop(reading);
-			reading = null;
+		while (!toRead.isEmpty()) {
+			Holder<SoundEvent> voice = Voices.of(toRead.poll());
+			if (voice != null) {
+				reading = SimpleSoundInstance.forUI(voice.value(), 1.0F, 1.0F);
+				readFrom = now;
+				minecraft.getSoundManager().play(reading);
+				return;
+			}
 		}
-		Holder<SoundEvent> voice = Voices.of(key);
-		if (voice != null) {
-			reading = SimpleSoundInstance.forUI(voice.value(), 1.0F, 1.0F);
-			minecraft.getSoundManager().play(reading);
+	}
+
+	/** The lines the narrator reads on page {@code s}, as lang keys. */
+	private static List<String> lines(Step s) {
+		if (s.question == null) {
+			List<String> out = new ArrayList<>();
+			for (Question q : Question.values()) {
+				Answer a = q.asked() ? picked(q) : null;
+				if (a != null) {
+					out.add("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale");
+				}
+			}
+			out.add(Voices.STORY_END);
+			return out;
 		}
+		if (s.realm) {
+			Answer a = picked(s.question);
+			return List.of("story.jaymoskingdoms.realm." + (a == null ? "raised" : a.key()));
+		}
+		return List.of("story.jaymoskingdoms." + s.question.key() + ".title");
 	}
 
 	/** Next: on to the next page, or on the last, live this life. */
@@ -441,10 +488,9 @@ final class LifeStoryScreen extends Screen {
 		Ui.panel(graphics, x, y, w, h, ACCENT);
 		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
 
-		// the header over the right: the question (or the realm's, or the story's) and the line under it
+		// the header over the right: the question (or the realm's, or the story's); (0.7.269) the line under it is only heard
 		int px = paneX(), pw = paneW();
 		Ui.line(graphics, this.font, heading(s), px + 8, y + 7, pw - 16, Ui.TEXT);
-		Ui.line(graphics, this.font, subheading(s), px + 8, y + 18, pw - 16, Ui.DIM);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
 
 		int viewTop = y + HEADER, viewBottom = y + h - FOOTER;
@@ -499,17 +545,6 @@ final class LifeStoryScreen extends Screen {
 			return Component.translatable("gui.jaymoskingdoms.story.summary");
 		}
 		return s.realm ? Component.translatable("story.jaymoskingdoms.realm.title") : Component.translatable("story.jaymoskingdoms." + s.question.key() + ".title");
-	}
-
-	private Component subheading(Step s) {
-		if (s.question == null) {
-			return Component.translatable("gui.jaymoskingdoms.story.summary_sub");
-		}
-		if (s.realm) {
-			Answer a = picked(s.question);
-			return Component.translatable("story.jaymoskingdoms.realm." + (a == null ? "raised" : a.key()));
-		}
-		return Component.translatable("story.jaymoskingdoms." + s.question.key() + ".sub");
 	}
 
 	/** A question's answers (or the realms) down the right, the picked one marked. */

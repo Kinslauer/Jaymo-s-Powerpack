@@ -7,6 +7,646 @@
 			}
 		]
 	},
+	"voice.narrator.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.plains.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_plains_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.mountain.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_mountain_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.coast.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_coast_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.forest.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_forest_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.valley.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_valley_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.forge.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_forge_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.north.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_north_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.moors.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_moors_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.warband.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_warband_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.scholars.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_scholars_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.temple.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_temple_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.shrine.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_shrine_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.vats.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_vats_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.fair.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_fair_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.wizard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_wizard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.outlaws.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_outlaws_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.realm.nobles": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/realm_nobles",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.nobles.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_nobles_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.caves.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_caves_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.fights.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_fights_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.books.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_books_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.swimming.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_swimming_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.storms.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_storms_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.fire.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_fire_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.snow.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_snow_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.bells.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_bells_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.blades.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_blades_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.cutpurses.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_cutpurses_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.levy.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_levy_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.apprentice.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_apprentice_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.hermit.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_hermit_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.hunted.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_hunted_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.winter.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_winter_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.pits.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_pits_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.gunsmith.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_gunsmith_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.messenger.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_messenger_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.bite.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_bite_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.weapon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_weapon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.fall.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_fall_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.storm.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_storm_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.clock.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_clock_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.bell.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_bell_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.sea.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_sea_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.fists.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_fists_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.smoke.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_smoke_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.blizzard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_blizzard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.fate.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_fate_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.city.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_city_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.realm.banished": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/realm_banished",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.banished.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_banished_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.cave.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_cave_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.shipwreck.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_shipwreck_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.realm.sworn": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/realm_sworn",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.sworn.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_sworn_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.village.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_village_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.monolith.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_monolith_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.wild.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_wild_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.skyfall.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_skyfall_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.timelost.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_timelost_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.burned.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_burned_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.snowed.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_snowed_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.captive.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_captive_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.whalers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_whalers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.fate.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_fate_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.unarmed.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_unarmed_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.summary.end": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/summary_end",
+				"stream": true
+			}
+		]
+	},
 	"voice.grimsby.summon.1": {
 		"sounds": [
 			{
