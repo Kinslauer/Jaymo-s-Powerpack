@@ -99,7 +99,7 @@ public final class ZFighterGuard {
 			return 0.0F;
 		}
 		float blocked = damage * BLOCK_SHARE;
-		float cost = blocked * KI_PER_DAMAGE;
+		float cost = blocked * KI_PER_DAMAGE * ZFighterAndroid.costFactor(player);
 		if (!player.isCreative() && !live.raging()) {
 			if (live.ki < cost) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.8F, 0.6F);

@@ -408,6 +408,8 @@ public final class ZFighterPower implements Power {
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
 		ZFighterCorruption.init();
+		// (0.17.47) branch forms, Ego, the android upgrade, the metal rebuild
+		ZFighterBranchForms.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		ZFighterCombo.init();
@@ -565,6 +567,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(KI_FULL);
 		ZFighterDisc.forget(player);
 		ZFighterCorruption.clear(player);
+		ZFighterBranchForms.clear(player);
 		ZFighterLineage.tailTags(player, false, false);
 		player.removeAttached(FORM);
 		player.removeAttached(DEFEATS);
@@ -601,6 +604,7 @@ public final class ZFighterPower implements Power {
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
 		ZFighterCorruption.tick(player, live);
+		ZFighterBranchForms.tick(player, live);
 
 		// a Z Fighter eats like three men, and every bite comes back as ki
 		if (live.lastFood >= 0 && food > live.lastFood) {
@@ -651,7 +655,7 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= FLY_KI + FLY_KI_PER_SPEED * (float)moved;
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player);
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
@@ -670,7 +674,8 @@ public final class ZFighterPower implements Power {
 
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
-			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
+			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form)
+				* ZFighterBranchForms.drainFactor(player, live);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
 			// (0.15.59) and a little harder the stronger he's grown
@@ -930,8 +935,9 @@ public final class ZFighterPower implements Power {
 		}
 		// (0.15.148) with Super 4 open, C in Super 3 is Super 4 and the Spirit Bomb is raised from there
 		boolean super4 = ApeRage.super4(player);
+		// (0.17.47) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
 		if (!player.isShiftKeyDown() && (live.form == ApeRage.SUPER_4 || live.form == ZFighterTraining.FORMS && !super4)
-			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)) {
+			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !ZFighterBranchForms.canAscend(player, live)) {
 			if (ZFighterTechniques.canRaise(player, live)) {
 				ZFighterTechniques.raise(player, live);
 				refresh(player, live);
@@ -946,7 +952,9 @@ public final class ZFighterPower implements Power {
 				ZFighterCorruption.toggle(player, live);
 			}
 		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+			if (!ZFighterBranchForms.ascend(player, live)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+			}
 		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
 			// (past his highest bought form: Super 4)
 			int next = live.form >= ZFighterTraining.formsOpen(player) ? ApeRage.SUPER_4 : live.form + 1;
@@ -1025,6 +1033,10 @@ public final class ZFighterPower implements Power {
 
 	/** Down one form (to base from Super). */
 	static void descend(ServerPlayer player, Live live) {
+		// (0.17.47) out of a branch form first
+		if (ZFighterBranchForms.descend(player, live)) {
+			return;
+		}
 		if (live.form <= 1) {
 			endSuper(player, live);
 			return;
@@ -1449,6 +1461,7 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.GRAVITY, APE_GRAVITY_ID, ape ? -ZFighterLineage.APE_LIGHT : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID, ape ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ZFighterCorruption.attributes(player, live);
+		ZFighterBranchForms.attributes(player, live);
 		// fused: the partner's fists and health added, and a little more
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.BONUS_ID, ZFighterFusion.bonus(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -1562,6 +1575,7 @@ public final class ZFighterPower implements Power {
 		if (player.isCreative() || live.raging()) {
 			return true;
 		}
+		cost *= ZFighterAndroid.costFactor(player);
 		if (live.ki < cost) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			return false;
@@ -1596,6 +1610,6 @@ public final class ZFighterPower implements Power {
 		float form = 1.0F + (FORM_KI[live.form] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form));
 		float trained = 1.0F + ZFighterTraining.KI_POWER_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.KI_POWER);
 		return ZFighterFusion.power(player, ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained
-			* ZFighterCorruption.kiFactor(player, live));
+			* ZFighterCorruption.kiFactor(player, live) * ZFighterBranchForms.kiFactor(player, live));
 	}
 }
