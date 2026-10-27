@@ -3051,3 +3051,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `getItemBySlot(HEAD)` with nothing while it draws your own body, so the helmet seemed to come off and go back on all
   the time. `client/mixin/tnm/TnmArmorDonMixin` (optional, `@Pseudo`) makes ArmorDon read the armour slots from the
   inventory instead, which First-person Model doesn't touch.
+- **0.17.36, attuning waits till you can see it (Kingdoms 0.7.247):** a Mage or Sorcerer start's attunement flare
+  plays 2 s after the start screens and MCA's creator are gone, not behind them. No Powers changes.

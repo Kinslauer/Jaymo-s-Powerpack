@@ -5400,3 +5400,10 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
 - **Ship stairs are steps**: a ship's collision took each stair as a full block (`Hull` lo/hi), so a stairwell under a
   deck beam could be neither stepped up nor jumped. `Hull.steps` keeps a stair's own boxes and `Ships.collisions`
   turns them as she lies.
+
+## 0.7.247: attuning waits till a newcomer can see it (pack 0.17.36)
+Andy: "delay the player's spawn at the start because if they spawn attuned they miss the animation."
+- `StoryGround.unseen(player)`: true while their story is owed, the loading screen is up (or settling), or MCA's
+  creator is still to come, and for `REVEAL_TICKS` (2 s) after they come out from behind all of those.
+- `Mana.tick` only attunes a Mage or Sorcerer (or an amethyst-touched player) when they aren't `unseen`, so the
+  flare, the sound and the blue sight play once they're standing in the world. Not seen in game.
