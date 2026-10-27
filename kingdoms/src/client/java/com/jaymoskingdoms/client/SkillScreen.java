@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * (hovered) what each rank's perk does.
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16, PIP_W = 9, PERK_W = 98, PERK_H = 18, TIER_H = 26,
+	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16, PIP_W = 9, PERK_W = 104, PERK_H = 18, TIER_H = 26,
 		COLUMN_GAP = 106, TREE_Y = 56, DETAIL_Y = 156, DETAIL_LINES = 5, FOOTER = 22, XP_BAR_W = 120;
 	static final int COLOR_LINE_OFF = 0xFF3A3A44;
 
@@ -520,7 +520,7 @@ final class SkillScreen extends Screen {
 			String ranks = rank + "/" + perk.maxRank;
 			int ranksW = this.font.width(ranks);
 			int color = rank > 0 || open ? Ui.TEXT : Ui.DIM;
-			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), px + 6, py + 5, PERK_W - ranksW - 14, color);
+			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), px + 5, py + 5, PERK_W - ranksW - 12, color);
 			graphics.text(this.font, ranks, px + PERK_W - ranksW - 5, py + 5, full ? accent : rank > 0 ? Ui.TEXT : Ui.HINT);
 		}
 	}

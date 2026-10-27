@@ -841,29 +841,49 @@ final class LifeStoryScreen extends Screen {
 		ty += 28;
 		// (on the story page, above the heritage and class buttons)
 		int bottom = y + panelH() - FOOTER - 2 - (s.question == null ? 40 : 0);
+		// (UI text pass) laid out first; a tale longer than the room scrolls slowly through it and back
+		List<FormattedCharSequence> seqs = new ArrayList<>();
+		List<Integer> at = new ArrayList<>(), colors = new ArrayList<>();
+		int oy = 0, ruleAt = -1;
 		for (Component line : lines) {
 			int color = line.getStyle().getColor() != null ? 0xFF000000 | line.getStyle().getColor().getValue() : Ui.TEXT;
 			for (FormattedCharSequence seq : this.font.split(line, textW)) {
-				if (ty + Ui.LINE > bottom) {
-					return;
-				}
-				graphics.text(this.font, seq, x + 9, ty, color);
-				ty += Ui.LINE;
+				seqs.add(seq);
+				at.add(oy);
+				colors.add(color);
+				oy += Ui.LINE;
 			}
-			ty += 3;
+			oy += 3;
 		}
 		if (!good.isEmpty()) {
-			ty += 2;
-			Ui.rule(graphics, x + 6, x + w - 6, ty - 3);
+			oy += 2;
+			ruleAt = oy - 3;
 		}
 		for (Component line : good) {
 			for (FormattedCharSequence seq : this.font.split(line, textW)) {
-				if (ty + Ui.LINE > bottom) {
-					return;
-				}
-				graphics.text(this.font, seq, x + 9, ty, Ui.GOOD);
-				ty += Ui.LINE;
+				seqs.add(seq);
+				at.add(oy);
+				colors.add(Ui.GOOD);
+				oy += Ui.LINE;
 			}
+		}
+		int view = Math.max(0, bottom - ty), over = Math.max(0, oy - view);
+		int shift = over > 0 ? Ui.slide(over, Ui.SCROLL_MS_PER_LINE / Ui.LINE, Ui.SCROLL_PAUSE_MS) : 0;
+		if (over > 0) {
+			graphics.enableScissor(x, ty - 1, x + w, bottom);
+		}
+		if (ruleAt >= 0) {
+			Ui.rule(graphics, x + 6, x + w - 6, ty + ruleAt - shift);
+		}
+		for (int i = 0; i < seqs.size(); i++) {
+			int ly = ty + at.get(i) - shift;
+			if (ly > ty - Ui.LINE && ly < bottom) {
+				graphics.text(this.font, seqs.get(i), x + 9, ly, colors.get(i));
+			}
+		}
+		if (over > 0) {
+			graphics.disableScissor();
+			Ui.scrollbar(graphics, x + w - 6, ty, view - 1, view, oy, shift);
 		}
 	}
 

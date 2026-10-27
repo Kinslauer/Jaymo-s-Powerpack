@@ -382,26 +382,32 @@ public class PowerScreen extends Screen {
 		graphics.blit(RenderPipelines.GUI_TEXTURED, id, x, y, 0.0F, 0.0F, 16, 16, 16, 16);
 	}
 
-	/** One line of text, cut with "..." if it would run past {@code width}. */
+	/** One line of text; one too long for {@code width} slides back and forth inside it ({@link UiStyle#slide}). */
 	private void line(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color) {
-		String s = text.getString();
-		if (this.font.width(s) > width) {
-			s = this.font.plainSubstrByWidth(s, Math.max(0, width - this.font.width("..."))) + "...";
-		}
-		graphics.text(this.font, s, x, y, color, false);
+		line(graphics, text, x, y, width, color, false);
 	}
 
-	/** Text wrapped to {@code width}, at most {@code lines} lines (cut with "..."). Returns the lines used. */
+	private void line(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color, boolean shadow) {
+		String s = text.getString();
+		int over = this.font.width(s) - width;
+		if (over <= 0) {
+			graphics.text(this.font, s, x, y, color, shadow);
+			return;
+		}
+		graphics.enableScissor(x, y - 1, x + Math.max(0, width), y + 10);
+		graphics.text(this.font, s, x - UiStyle.slide(over, UiStyle.SLIDE_MS_PER_PX, UiStyle.SLIDE_PAUSE_MS), y, color, shadow);
+		graphics.disableScissor();
+	}
+
+	/** The same, centred on {@code centre}, with a shadow (as {@code centeredText}). */
+	private void lineCentred(GuiGraphicsExtractor graphics, Component text, int centre, int y, int width, int color) {
+		int textW = this.font.width(text.getString());
+		line(graphics, text, textW <= width ? centre - textW / 2 : centre - width / 2, y, width, color, true);
+	}
+
+	/** Text wrapped to {@code width} in {@code lines} lines, scrolling through any more ({@link UiStyle#wrapped}). Returns the lines used. */
 	private int wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int lines, int color) {
-		List<FormattedCharSequence> split = this.font.split(text, width);
-		int n = Math.min(lines, split.size());
-		for (int i = 0; i < n; i++) {
-			graphics.text(this.font, split.get(i), x, y + i * 9, color, false);
-		}
-		if (split.size() > lines && n > 0) {
-			graphics.text(this.font, "...", x + Math.min(width - 9, this.font.width(split.get(n - 1))), y + (n - 1) * 9, COLOR_DIM, false);
-		}
-		return n;
+		return UiStyle.wrapped(graphics, this.font, text, x, y, width, lines, 9, color, false);
 	}
 
 	private void bar(GuiGraphicsExtractor graphics, int x, int y, int w, float progress, int color) {
@@ -469,9 +475,7 @@ public class PowerScreen extends Screen {
 			Component label = i == 0 ? modeLabel() : Component.translatable("screen.jaymospowers.toggle." + id);
 			// (0.16.6) a power's Mode is named for what it does, so cut a long name to the slot's room
 			int room = (CANVAS_W - 3 * SLOT) / 4 + SLOT - 2;
-			Component shown = this.font.width(label) <= room ? label
-				: Component.literal(this.font.plainSubstrByWidth(label.getString(), room - this.font.width("...")) + "...");
-			graphics.centeredText(this.font, shown, tx + SLOT / 2, ty + SLOT + 2, open ? COLOR_TEXT : COLOR_DIM);
+			lineCentred(graphics, label, tx + SLOT / 2, ty + SLOT + 2, room, open ? COLOR_TEXT : COLOR_DIM);
 			if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
 				hover = i == 0 ? modeHover(open) : Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
 			}
@@ -603,8 +607,7 @@ public class PowerScreen extends Screen {
 			int x = wellX(i), y = wellY(i);
 			bottom = Math.max(bottom, y + SLOT + 4);
 			well(graphics, x, y);
-			String key = this.font.plainSubstrByWidth(line.key().getString(), SLOT - 4);
-			graphics.centeredText(this.font, Component.literal(key), x + SLOT / 2, y + 5, line.locked() ? COLOR_DIM : line.color());
+			lineCentred(graphics, line.key(), x + SLOT / 2, y + 5, SLOT - 4, line.locked() ? COLOR_DIM : line.color());
 			// a cooldown greys the slot from the top, as vanilla's item cooldowns do
 			PowerKey ability = abilityKey(line);
 			float cooldown = client != null && ability != null ? client.cooldown((net.minecraft.client.player.LocalPlayer)player, ability) : 0.0F;
@@ -756,9 +759,8 @@ public class PowerScreen extends Screen {
 				graphics.fill(bx + 1, by + 1, bx + SLOT - 1, by + SLOT - 1, 0x40FFFFFF);
 			}
 			if (b <= ChronoDirectives.RECORD_BUTTON) {
-				String label = Component.translatable("screen.jaymospowers.order." + name).getString();
-				label = this.font.plainSubstrByWidth(label, SLOT + 10);
-				graphics.centeredText(this.font, label, bx + SLOT / 2, by + SLOT + 2, earned ? COLOR_TEXT : COLOR_DIM);
+				lineCentred(graphics, Component.translatable("screen.jaymospowers.order." + name), bx + SLOT / 2, by + SLOT + 2, SLOT + 10,
+					earned ? COLOR_TEXT : COLOR_DIM);
 			}
 			if (over(mouseX, mouseY, bx, by, SLOT, SLOT)) {
 				hover = desc;
