@@ -211,7 +211,7 @@ public final class Introductions {
 			Component title = Rulers.title(Rulers.role(villager), McaCompat.female(villager));
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
-		// (0.7.252) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
+		// (0.7.254) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
 		// might be awkward": one whose first dealing with you was like that says so (SharedHistory)
 		Component met = fresh ? SharedHistory.introduction(player, villager, name) : null;
 		if (met != null) {

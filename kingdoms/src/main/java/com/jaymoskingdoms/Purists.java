@@ -338,7 +338,7 @@ public final class Purists {
 		whom.push(push.x, 0.15, push.z);
 		if (whom instanceof ServerPlayer sp) {
 			sp.syncVelocity = true;
-			// (0.7.252) remembered on both sides ({@link SharedHistory})
+			// (0.7.254) remembered on both sides ({@link SharedHistory})
 			Recollections.remember(by, sp, Recollections.Kind.SHOVED_YOU, Component.empty());
 		}
 		level.playSound(null, whom.blockPosition(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 0.5F, 1.1F);

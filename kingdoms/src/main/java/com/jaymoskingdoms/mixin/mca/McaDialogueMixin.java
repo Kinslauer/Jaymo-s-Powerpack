@@ -58,7 +58,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.230) The stranger page's Introduce ({@link Introductions#INTRODUCE}): asks their name, or offers a handshake without a shared tongue.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
- * (0.7.252) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
+ * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
@@ -174,28 +174,28 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && SharedHistory.THANK.equals(answer)) {
-			// (0.7.252) thanks for getting you up, or for walking you to the ruler
+			// (0.7.254) thanks for getting you up, or for walking you to the ruler
 			villager.sendChatMessage(SharedHistory.thank(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && SharedHistory.APOLOGISE.equals(answer)) {
-			// (0.7.252) sorry for the latest wrong they hold against you: taken, or not
+			// (0.7.254) sorry for the latest wrong they hold against you: taken, or not
 			villager.sendChatMessage(SharedHistory.apologise(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && SharedHistory.AIR.equals(answer)) {
-			// (0.7.252) the shove, the search, the stop in the street, had out
+			// (0.7.254) the shove, the search, the stop in the street, had out
 			villager.sendChatMessage(SharedHistory.air(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
-			// (0.7.252) one you saved, freed or brought home: how they are
+			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();

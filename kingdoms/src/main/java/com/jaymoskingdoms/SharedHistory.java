@@ -22,7 +22,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.252) Andy: "add context based talk options with villagers, for example i was revived by a villager and would
+ * (0.7.254) Andy: "add context based talk options with villagers, for example i was revived by a villager and would
  * have liked to get up and thank them, or if a guard i havent met before's first interaction is a shove or searching
  * me, the introduction might be awkward". MCA's menu offers what your history with this villager calls for, from what
  * they remember ({@link Recollections}), and each shows only while there's something to take up:
