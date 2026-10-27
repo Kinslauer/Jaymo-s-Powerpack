@@ -46,6 +46,8 @@ public class ZFighterTrainingScreen extends Screen {
 	private final List<Button> techniqueButtons = new ArrayList<>();
 	private final List<Button> tabButtons = new ArrayList<>();
 	private Button limitButton;
+	/** (0.17.46) The stats page's aura style button: each press picks the next style. */
+	private Button auraButton;
 	/** Which page is open (kept between openings). */
 	private static int page;
 	/** (0.17.45) The techniques page shows this many rows; the wheel scrolls the rest. */
@@ -104,6 +106,10 @@ public class ZFighterTrainingScreen extends Screen {
 			formButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_FORM, f))
 				.bounds(buttonX(), contentY() + (form - 1) * FORM_ROW - 3, BUTTON_W, 14).build()));
 		}
+		auraButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+			int next = (com.jaymospowers.power.zfighter.ZFighterAura.style(this.minecraft.player) + 1) % com.jaymospowers.power.zfighter.ZFighterAura.STYLES;
+			send(ZFighterNet.AURA_STYLE, next);
+		}).bounds(buttonX(), auraY() - 3, BUTTON_W, 14).build());
 		limitButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_LIMIT, 0))
 			.bounds(buttonX(), limitY() - 3, BUTTON_W, 14).build());
 		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
@@ -111,6 +117,11 @@ public class ZFighterTrainingScreen extends Screen {
 			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
 				.bounds(buttonX(), contentY() + i * ROW - 3, BUTTON_W, 14).build()));
 		}
+	}
+
+	/** (0.17.46) The aura style row, under the five stats. */
+	private int auraY() {
+		return contentY() + 12 + ZFighterTraining.STATS * ROW + 6;
 	}
 
 	private int limitY() {
@@ -190,6 +201,7 @@ public class ZFighterTrainingScreen extends Screen {
 		show(statButtons, page == STATS_PAGE);
 		show(formButtons, page == FORMS_PAGE);
 		limitButton.visible = page == FORMS_PAGE;
+		auraButton.visible = page == STATS_PAGE;
 		show(techniqueButtons, page == TECHNIQUES_PAGE);
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtons.get(i).active = page != i;
@@ -227,6 +239,15 @@ public class ZFighterTrainingScreen extends Screen {
 			if (over(mouseX, mouseY, x + 6, ry - 4, w - 38, ROW - 1)) {
 				detail = growthDetail(player, growth, i, level, fill);
 			}
+		}
+		// (0.17.46) the aura style row: what his ki looks like when it flares
+		int style = com.jaymospowers.power.zfighter.ZFighterAura.style(player);
+		int ay = auraY();
+		graphics.fill(x + 6, ay - 4, x + w - 6, ay + 11, COLOR_ROW);
+		line(graphics, Component.translatable("screen.jaymospowers.zfighter_aura.label"), x + 10, ay, 66, COLOR_TEXT);
+		auraButton.setMessage(Component.translatable("screen.jaymospowers.zfighter_aura." + com.jaymospowers.power.zfighter.ZFighterAura.KEYS[style]));
+		if (over(mouseX, mouseY, x + 6, ay - 4, w - 12, ROW - 1)) {
+			detail = Component.translatable("screen.jaymospowers.zfighter_aura." + com.jaymospowers.power.zfighter.ZFighterAura.KEYS[style] + ".desc");
 		}
 		return detail;
 	}
