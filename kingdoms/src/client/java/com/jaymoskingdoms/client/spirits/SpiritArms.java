@@ -9,6 +9,7 @@ import com.jaymoskingdoms.spirits.SpiritSickness;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.Spirits;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -42,6 +43,9 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -67,8 +71,15 @@ public final class SpiritArms {
 	static final int MANIFEST_TICKS = 10;
 	/** A pose is lerped in over {@code POSE_IN} ticks, held until {@code POSE_TICKS} after it was stamped, and lerped out over {@code POSE_OUT}. */
 	static final int POSE_IN = 4, POSE_TICKS = 16, POSE_OUT = 6;
-	/** Model pixels the arm is pushed behind the shoulder, per unit of size. */
+	/** Model pixels the arm is pushed behind the shoulder, per unit of size (the spirits that sit on your arm: Grimsby, Thessaly). */
 	static final float BEHIND = 2.0F;
+	/**
+	 * The spirits that float free of your arm (Varro, Ambrose, the Quiet One) hover above and ahead of the shoulder, as a stand
+	 * does (Andy, 2026-10-27): model pixels up, ahead and out, per unit of size (the size counted to at most {@code FLOAT_SIZE_CAP},
+	 * so the biggest don't float off), and their idle angle (raised forward, a little out).
+	 */
+	static final float FLOAT_UP = 5.0F, FLOAT_AHEAD = 5.0F, FLOAT_OUT = 1.5F, FLOAT_SIZE_CAP = 1.6F;
+	private static final float[] FLOAT_IDLE = {-1.05F, 0.0F, 0.30F};
 	/** The arms are the whole form of the spirit: this many times the aura's shell light. */
 	static final float ARM_LIGHT = 2.2F;
 	/** How much the kind colour shows against mana's blue (0 all blue, 1 all kind). */
@@ -323,6 +334,57 @@ public final class SpiritArms {
 		return ARGB.color(255, r, g, b);
 	}
 
+	/** Whether {@code kind}'s arms float free of yours (above and ahead) rather than sitting on your own arm. */
+	static boolean floats(int kind) {
+		return kind == Spirits.VARRO || kind == Spirits.AMBROSE || kind == Spirits.QUIET;
+	}
+
+	// ---- first person ------------------------------------------------------------------------------------------------------
+
+	/** The player layer's arms, kept for the first-person draw (the player isn't drawn in first person, so its layers aren't). */
+	private static @Nullable Arms firstPersonArms;
+
+	/**
+	 * First person (after the hands, from {@code SpiritFirstPersonMixin}): your own spirit's arms, placed where they are on your
+	 * body in third person, so the floating ones hover in view and a strike comes out in front of you (Andy: "more of the spirit
+	 * should be visible in first person, especially when it strikes in front of you"). The pose stack is the hands' view space:
+	 * the camera's turn and your body's are put back on it, then the living renderer's own steps.
+	 */
+	public static void firstPerson(PoseStack poseStack, SubmitNodeCollector collector, @Nullable AvatarRenderState avatar) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		Arms arms = firstPersonArms;
+		if (player == null || avatar == null || arms == null || avatar.isInvisible) {
+			return;
+		}
+		// (the hands' state may not carry the arms and the glow: read them fresh)
+		ManaClient.extract(player, avatar);
+		Look look = avatar.getData(LOOK);
+		if (look == null || look.manifest() <= 0.01F) {
+			return;
+		}
+		Camera camera = minecraft.gameRenderer.mainCamera();
+		Vec3 eye = camera.position();
+		poseStack.pushPose();
+		// the hands have their own, narrower lens: squeeze across so the arms sit where the world would show them
+		float widen = (float)(Math.tan(Math.toRadians(camera.getFov() * 0.5)) / Math.tan(Math.toRadians(HAND_FOV * 0.5)));
+		poseStack.scale(1.0F / widen, 1.0F / widen, 1.0F);
+		poseStack.rotate(new Quaternionf(camera.rotation()).conjugate());
+		poseStack.translate(avatar.x - eye.x, avatar.y - eye.y, avatar.z - eye.z);
+		poseStack.scale(avatar.scale, avatar.scale, avatar.scale);
+		poseStack.rotateDegrees(Axis.YP, 180.0F - avatar.bodyRot);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		poseStack.scale(PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
+		poseStack.translate(0.0F, MODEL_DROP, 0.0F);
+		arms.submit(poseStack, collector, avatar.lightCoords, avatar);
+		poseStack.popPose();
+	}
+
+	/** The player renderer's own scale, and the drop from the feet to the model's origin (LivingEntityRenderer.submit). */
+	static final float PLAYER_SCALE = 0.9375F, MODEL_DROP = -1.501F;
+	/** The field of view the hands are drawn with (GameRenderer's item-in-hand projection). */
+	static final double HAND_FOV = 70.0;
+
 	// ---- the layers --------------------------------------------------------------------------------------------------------
 
 	/** The arms on a player. */
@@ -332,6 +394,7 @@ public final class SpiritArms {
 		Player(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
 			this.arms = new Arms(this::getParentModel);
+			firstPersonArms = this.arms;
 		}
 
 		@Override
@@ -424,7 +487,9 @@ public final class SpiritArms {
 				return;
 			}
 			float size = look.size() * Math.max(0.001F, look.manifest());
-			float[] idle = TABLE[Poses.IDLE];
+			boolean floats = floats(look.kind());
+			float reach = Math.min(size, FLOAT_SIZE_CAP);
+			float[] idle = floats ? FLOAT_IDLE : TABLE[Poses.IDLE];
 			float[] pose = TABLE[Mth.clamp(look.pose(), 0, Poses.COUNT - 1)];
 			for (int i = 0; i < 2; i++) {
 				ModelPart arm = i == 0 ? this.rightArm : this.leftArm;
@@ -445,8 +510,15 @@ public final class SpiritArms {
 				arm.xRot += x + drift;
 				arm.yRot += y * side;
 				arm.zRot += z * side;
-				// grown about the shoulder, and pushed behind (the model's +z is the back)
-				arm.z += BEHIND * size;
+				if (floats) {
+					// hovering above and ahead of the shoulder (model -y is up, -z ahead; the right arm's outside is -x)
+					arm.y -= FLOAT_UP * reach;
+					arm.z -= FLOAT_AHEAD * reach;
+					arm.x -= side * FLOAT_OUT * reach;
+				} else {
+					// grown about the shoulder, and pushed behind (the model's +z is the back)
+					arm.z += BEHIND * size;
+				}
 				arm.xScale = size;
 				arm.yScale = size;
 				arm.zScale = size;
