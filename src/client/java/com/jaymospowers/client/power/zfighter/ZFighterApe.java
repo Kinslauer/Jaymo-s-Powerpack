@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.ZFighterGoldenApe;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -37,6 +38,9 @@ public final class ZFighterApe {
 	/** (0.12.3) Whether the Great Ape lies crippled (flat on his back), on his render state. */
 	public static final RenderStateDataKey<Boolean> CRIPPLED = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_crippled");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape.png");
+	/** (0.17.50) The golden Great Ape's skin ({@code tools/gen_golden_ape.py}), worn by a Z Fighter who has gone Super. */
+	static final Identifier GOLDEN_TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape_golden.png");
+	public static final RenderStateDataKey<Boolean> GOLDEN = RenderStateDataKey.create(() -> "jaymospowers:zfighter_golden_ape");
 	/** (0.16.36) Whose ape it is: its build and fur. */
 	public static final RenderStateDataKey<WarriorLooks.Ape> STYLE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_style");
 
@@ -54,6 +58,7 @@ public final class ZFighterApe {
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
+		state.setData(GOLDEN, ZFighterGoldenApe.golden((Player)entity) ? Boolean.TRUE : null);
 		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
@@ -251,7 +256,9 @@ public final class ZFighterApe {
 				poseStack.translate(0.0F, -1.5F, -0.25F);
 			}
 			// not the "copy layer" call: that skips invisible states, and the body was made invisible
-			renderColoredCutoutModel(model(), TEXTURE, poseStack, collector, lightCoords, state, fur(state), 1);
+			// (0.17.50) the golden ape's fur is painted gold already: no tint on top
+			boolean golden = Boolean.TRUE.equals(state.getData(GOLDEN));
+			renderColoredCutoutModel(model(), golden ? GOLDEN_TEXTURE : TEXTURE, poseStack, collector, lightCoords, state, golden ? -1 : fur(state), 1);
 			if (down) {
 				poseStack.popPose();
 			}
