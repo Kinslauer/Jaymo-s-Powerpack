@@ -103,6 +103,8 @@ public final class MobCombat {
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** (0.7.267) A gun's red glint comes this long (ticks) before the shot; an aim not fired this long after goes stale. */
+	static final int GUN_WINDUP = 10, AIM_STALE = 20;
 
 	private static final Identifier COMBO_DAMAGE = JaymosKingdoms.id("combo_damage");
 	private static final Identifier SWING_SLOW = JaymosKingdoms.id("swing_slow");
@@ -131,6 +133,8 @@ public final class MobCombat {
 
 	private static final Map<Mob, Swing> SWINGS = new WeakHashMap<>();
 	private static final Map<LivingEntity, Long> DODGED = new WeakHashMap<>();
+	/** (0.7.267) A gunman aiming → when the shot goes (game time). */
+	private static final Map<Mob, Long> AIMS = new WeakHashMap<>();
 
 	/** Server → watchers: play {@code animation} on the mob, stretched over {@code length} ticks. */
 	public record MobSwing(int entityId, String animation, int length, float upswing) implements CustomPacketPayload {
@@ -247,6 +251,36 @@ public final class MobCombat {
 		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(heavy ? HEAVY_TELL_COLOR : TELL_COLOR, TELL_SIZE),
 			at.x, at.y, at.z, heavy ? 8 : 5, 0.08, 0.08, 0.08, 0.0);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
+	}
+
+	/**
+	 * (0.7.267) A gun's tell (Andy: "All guns should red glint too"): the first call glints red at the muzzle with a
+	 * flint's click and returns false; once {@link #GUN_WINDUP} ticks have passed it returns true and the shot goes. An
+	 * aim not taken up within {@link #AIM_STALE} ticks of being ready starts over.
+	 */
+	static boolean aimed(ServerLevel level, Mob mob, LivingEntity foe) {
+		long now = level.getGameTime();
+		Long fireAt = AIMS.get(mob);
+		if (fireAt != null && now < fireAt) {
+			return false;
+		}
+		if (fireAt != null && now <= fireAt + AIM_STALE) {
+			AIMS.remove(mob);
+			return true;
+		}
+		AIMS.put(mob, now + GUN_WINDUP);
+		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		Vec3 to = foe.getEyePosition().subtract(mob.getEyePosition());
+		Vec3 at = mob.getEyePosition().add(to.lengthSqr() > 1.0E-4 ? to.normalize().scale(0.8) : Vec3.ZERO).add(0.0, -0.25, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(HEAVY_TELL_COLOR, TELL_SIZE), at.x, at.y, at.z, 8, 0.06, 0.06, 0.06, 0.0);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.04, 0.04, 0.04, 0.05);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.FLINTANDSTEEL_USE, SoundSource.HOSTILE, 0.7F, 1.4F);
+		return false;
+	}
+
+	/** (0.7.267) A gun's ball or shot: nobody parries it (Jaymo's Powers' guard reads the tag); a shield still blocks it. */
+	static void unparryable(net.minecraft.world.entity.Entity shot) {
+		shot.addTag(UNPARRYABLE_TAG);
 	}
 
 	/** (0.7.267) Its next swing may start at once (a parry answered, {@link MobParry}). */

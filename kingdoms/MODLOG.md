@@ -5599,4 +5599,12 @@ Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
   heavy one (two-handed, or 1.4x damage and up) that carries `jaymospowers.unparryable` while it lands, so Powers'
   guard only blocks it.
 - `Crewmen`: a crewman's blade glints and lands 6 ticks later (`MELEE_WINDUP`), as every mob's blow now does in Powers.
+- Guns glint red (Andy: "All guns should red glint too"): `MobCombat.aimed` shows a red glint and a flint's click at the
+  muzzle 10 ticks before a pirate's pistol or a guard's musket fires (an aim not fired within 20 ticks starts over), and
+  `MobCombat.unparryable` tags the ball so Powers' guard only blocks it.
+- Every sailor carries a flintlock (Andy: "all sailors should have at least one flintlock as a side weapon, some carry
+  more"): each crewman who fights (`Crewmen.sidearm`) takes one up in a free hand when they arm; their brace (`brace`) is
+  one pistol, two for 25% (gunners always at least two), three for 10%, fired 12-16 ticks apart, each after its glint,
+  at a foe 3-22 blocks off, then all reloaded together. Pirate crew pistols moved here from `Pirates.crewFight` (shouts
+  only now). Folk pirate deckhands carry one in the off hand and fire it too.
 

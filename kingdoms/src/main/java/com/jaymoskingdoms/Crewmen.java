@@ -78,6 +78,16 @@ public final class Crewmen {
 	static final int SWING_GAP = 20;
 	/** (0.7.267) Ticks from a blade's glint to its blow. */
 	static final int MELEE_WINDUP = 6;
+	/**
+	 * (0.7.267) Andy: "all sailors should have at least one flintlock as a side weapon, some carry more". Every hand
+	 * that fights carries a brace of flintlocks: one, two for {@link #BRACE_TWO_PERCENT}% of them (a gunner at least
+	 * two), three for {@link #BRACE_THREE_PERCENT}%. Each fires after its red glint, {@link #BRACE_GAP} ticks (plus up
+	 * to {@link #BRACE_GAP_JITTER}) after the last, at a foe from {@code Pirates.PISTOL_NEAREST} to
+	 * {@code Pirates.PISTOL_FURTHEST} blocks; spent, all are loaded again in {@code Pirates.PISTOL_RELOAD} ticks (plus
+	 * up to its jitter).
+	 */
+	static final int BRACE_TWO_PERCENT = 25, BRACE_THREE_PERCENT = 10;
+	static final int BRACE_GAP = 12, BRACE_GAP_JITTER = 4;
 	/** A bow: from this far to this far, this often (ticks, plus up to the jitter). */
 	static final double BOW_NEAREST = 3.0, BOW_FURTHEST = 24.0;
 	static final int BOW_RELOAD = 50, BOW_JITTER = 30;
@@ -104,6 +114,8 @@ public final class Crewmen {
 
 	/** Each crewman's next swing and next shot (game time); each ship's next line; who her captain has welcomed. */
 	private static final Map<LivingEntity, long[]> READY = new WeakHashMap<>();
+	/** (0.7.267) Each hand's brace of pistols: how many are loaded, and when the next may fire (game time). */
+	private static final Map<LivingEntity, long[]> BRACES = new WeakHashMap<>();
 	private static final Map<UUID, Long> NEXT_LINE = new HashMap<>();
 	private static final Map<UUID, java.util.Set<UUID>> WELCOMED = new HashMap<>();
 	/** A cove's villager captain's boss bar. */
@@ -115,6 +127,7 @@ public final class Crewmen {
 	static void register() {
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			READY.clear();
+			BRACES.clear();
 			LAST_FOE.clear();
 			NEXT_LINE.clear();
 			WELCOMED.clear();
@@ -341,6 +354,65 @@ public final class Crewmen {
 		mob.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 	}
 
+	/**
+	 * (0.7.267) A hand who fights and has no flintlock in hand takes one up: in their off hand if it's free, else
+	 * their main hand if that is; with both hands full they draw it from their belt to fire ({@link #pistols}).
+	 */
+	static void sidearm(LivingEntity mob, int role) {
+		if (!combatant(role)) {
+			return;
+		}
+		ItemStack pistol = Pirates.pistol();
+		if (mob.getMainHandItem().is(pistol.getItem()) || mob.getOffhandItem().is(pistol.getItem())) {
+			return;
+		}
+		if (mob.getOffhandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.OFFHAND, pistol);
+		} else if (mob.getMainHandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.MAINHAND, pistol);
+		}
+	}
+
+	/** (0.7.267) How many flintlocks {@code mob} carries: the same every time for the same hand. */
+	static int brace(LivingEntity mob, int role) {
+		UUID id = mob.getUUID();
+		long h = id.getMostSignificantBits() * 0x9E3779B97F4A7C15L ^ id.getLeastSignificantBits();
+		h ^= h >>> 29;
+		int roll = (int)Math.floorMod(h, 100L);
+		int n = roll < BRACE_THREE_PERCENT ? 3 : roll < BRACE_THREE_PERCENT + BRACE_TWO_PERCENT ? 2 : 1;
+		return role == Pirates.GUNNER ? Math.max(n, 2) : n;
+	}
+
+	/**
+	 * (0.7.267) Their brace at {@code foe}, {@code d} away: true while a pistol is being aimed or has just fired (nothing
+	 * else this tick).
+	 */
+	private static boolean pistols(ServerLevel level, PathfinderMob mob, int role, LivingEntity foe, double d, long now) {
+		if (!combatant(role)) {
+			return false;
+		}
+		long[] brace = BRACES.computeIfAbsent(mob, m -> new long[] {brace(m, role), now + level.getRandom().nextInt(Pirates.PISTOL_JITTER + 1)});
+		if (now < brace[1]) {
+			return false;
+		}
+		if (brace[0] <= 0) {
+			brace[0] = brace(mob, role);
+		}
+		if (d < Pirates.PISTOL_NEAREST || d > Pirates.PISTOL_FURTHEST || !mob.hasLineOfSight(foe)) {
+			return false;
+		}
+		if (!MobCombat.aimed(level, mob, foe)) {
+			return true;
+		}
+		Pirates.shoot(level, mob, foe);
+		mob.swing(mob.getOffhandItem().is(Pirates.pistol().getItem()) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND,
+			net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		brace[0]--;
+		brace[1] = brace[0] > 0 ? now + BRACE_GAP + level.getRandom().nextInt(BRACE_GAP_JITTER + 1)
+			: now + Pirates.PISTOL_RELOAD + level.getRandom().nextInt(Pirates.PISTOL_JITTER + 1);
+		return true;
+	}
+
 	/** (0.7.259) {@code mob} takes up their stowed weapons; true if they had any. */
 	static boolean arm(LivingEntity mob) {
 		List<ItemStack> kit = mob.getAttached(STOWED);
@@ -549,6 +621,7 @@ public final class Crewmen {
 			// (0.7.259) weapons up
 			LAST_FOE.put(mob.getUUID(), now);
 			arm(mob);
+			sidearm(mob, w.role());
 			fight(level, mob, w, foe, now);
 		} else if (McaCompat.busy(mob)) {
 			// someone's talking to them: they look at them
@@ -640,7 +713,7 @@ public final class Crewmen {
 		return role != Pirates.POWDER_MONKEY;
 	}
 
-	/** At their foe: pistols for a pirate's captain and gunners (and shouts), a bow if they hold one, and their blade at arm's length. */
+	/** At their foe: their blade at arm's length, else (0.7.267) their brace of pistols (and a pirate's shouts), else a bow if they hold one. */
 	private static void fight(ServerLevel level, PathfinderMob mob, Worker w, LivingEntity foe, long now) {
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		int role = w.role();
@@ -666,10 +739,12 @@ public final class Crewmen {
 		}
 		if (Pirates.isPirate(role)) {
 			Pirates.crewFight(level, mob, role);
+		}
+		if (pistols(level, mob, role, foe, d, now)) {
 			return;
 		}
 		ItemStack held = mob.getMainHandItem();
-		if ((held.getItem() instanceof BowItem || held.getItem() instanceof CrossbowItem) && now >= ready[1] && d >= BOW_NEAREST && d <= BOW_FURTHEST
+		if ((held.getItem() instanceof BowItem || held.getItem() instanceof CrossbowItem) && !held.is(Pirates.pistol().getItem()) && now >= ready[1] && d >= BOW_NEAREST && d <= BOW_FURTHEST
 			&& mob.hasLineOfSight(foe)) {
 			ready[1] = now + BOW_RELOAD + level.getRandom().nextInt(BOW_JITTER + 1);
 			loose(level, mob, held, foe);

@@ -54,7 +54,17 @@ Andy: "Can you make every mob use this glint mechanic?"
   whose blows carry the unparryable tag.
 - Custom attacks given the glint by hand: the Burrukai's charge, the Bladeshroom Hunter's cut, ship crews' blades
   (Kingdoms `Crewmen`, now with the same 6-tick wind-up). Kingdoms' Better Combat fighters keep their own wind-up glint.
-- Left out: contact damage (slimes, magma cubes, the Wraith flying into you), ranged attacks, and powers' own summons.
+- Left out: contact damage (slimes, magma cubes, the Wraith flying into you), bows, and powers' own summons.
+
+## Guns glint red; every sailor has a flintlock
+Andy: "All guns should red glint too, all sailors should have at least one flintlock as a side weapon, some carry more".
+- A red glint and a flint's click at the muzzle 10 ticks before a mob fires a gun: pirates' pistols, guards' muskets
+  (Kingdoms `MobCombat.aimed`), and Powers' future gunners before each burst (`FutureGuns.AIM_TICKS`).
+- Gun balls and bullets are blocked by a raised guard or shield but never parried (tagged unparryable; any TaCZ bullet
+  counts too). Hitscan shots now count as projectiles, not melee, so they don't cost guard feathers or get parried.
+- Every ship's crewman who fights takes up a flintlock with their weapons (off hand if free, else main hand): one,
+  two for a quarter of them (gunners always two or more), three for a tenth. They fire one after another, each after
+  its glint, then reload them all (Kingdoms `Crewmen.sidearm`, `brace`, `pistols`).
 
 ## To check in game
 1. Sword, empty off hand: right click raises it; a zombie's blow right after raising is a perfect parry (ring, sparks,
@@ -66,3 +76,5 @@ Andy: "Can you make every mob use this glint mechanic?"
 6. A sword-armed guard raises its blade now and then; hitting it right after it does gets parried (sparks, you're pushed back, it swings back).
 7. A white glint before a fighter's swing; a red one on two-handed swings, and those can't be parried.
 8. A plain zombie glints before each blow and misses if you step back in time; an iron golem's glint is red.
+9. A pirate or musketeer glints red with a click before each shot; a raised sword blocks the ball but never parries it.
+10. Every ship's crew who fight draw a flintlock; some fire two or three in a row before reloading.

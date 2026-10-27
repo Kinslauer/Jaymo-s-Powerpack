@@ -220,14 +220,21 @@ public final class Guard {
 		return raise;
 	}
 
+	/** (0.17.64) A gun's ball or bullet (tagged by whoever fired it, or any of TaCZ's): blocked, never parried. */
+	private static boolean shot(@Nullable Entity direct) {
+		return direct instanceof Projectile && (direct.entityTags().contains(UNPARRYABLE_TAG)
+			|| "tacz".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(direct.getType()).getNamespace()));
+	}
+
 	/** Damage on its way to {@code player}: true when the guard met it whole (a parry), so none of it lands. */
 	private static boolean met(ServerPlayer player, DamageSource source, float amount) {
 		if (!raised(player) || amount <= 0.0F || source.is(DamageTypeTags.BYPASSES_SHIELD) || source.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		}
 		Entity direct = source.getDirectEntity();
-		boolean projectile = direct instanceof Projectile;
-		boolean melee = direct instanceof LivingEntity && direct == source.getEntity();
+		// (0.17.64) a gunman's hitscan shot comes as the gunman himself: a projectile all the same
+		boolean projectile = direct instanceof Projectile || source.is(DamageTypeTags.IS_PROJECTILE);
+		boolean melee = !projectile && direct instanceof LivingEntity && direct == source.getEntity();
 		if (!projectile && !melee) {
 			return false;
 		}
@@ -242,7 +249,7 @@ public final class Guard {
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 		boolean watching = attacker != null && LockOn.target(player) == attacker;
 		int held = player.getTicksUsingItem();
-		boolean heavy = attacker != null && attacker.entityTags().contains(UNPARRYABLE_TAG);
+		boolean heavy = attacker != null && attacker.entityTags().contains(UNPARRYABLE_TAG) || shot(direct);
 		if (!raise.eager && !heavy) {
 			if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
 				parry(player, raise, melee ? attacker : null, source, true);

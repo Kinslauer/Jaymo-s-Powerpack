@@ -3177,4 +3177,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Every mob too (`combat/AttackTells`, `mixin/AttackTellGoalMixin` on MeleeAttackGoal, `mixin/AttackTellBrainMixin` on the
   MeleeAttack behaviour): a melee blow glints and lands 6 ticks later if the target is still in reach and sight (red and
   unparryable for 10+ attack damage or 1.35+ wide bodies); the Burrukai's charge and Bladeshroom Hunter's cut glint too.
+  Guns (Andy: "All guns should red glint too"): `FutureGuns` gunners glint red with a click 10 ticks before each burst, and
+  their bullets carry the unparryable tag; `Guard` now counts hitscan shots as projectiles, and a tagged ball or any TaCZ
+  bullet is blocked but never parried.
 
