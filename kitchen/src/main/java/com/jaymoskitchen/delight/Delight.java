@@ -105,8 +105,18 @@ public final class Delight {
 	/** A feast's block and the item that sets it down (from ModItems, for the feast dishes). */
 	public static Item feast(Dish dish, ResourceKey<Item> key) {
 		Feast feast = Feast.of(dish);
-		FeastBlock block = block(dish.id(), p -> new FeastBlock(p, feast), BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-			.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
+		BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+			.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED);
+		Block block;
+		if (feast == null) {
+			// (0.5.33) the rice roll medley: eight servings, so its own block
+			block = block(dish.id(), MedleyBlock::new, properties);
+		} else if (feast == Feast.GLEAMING_SALAD) {
+			block = block(dish.id(), p -> new FeastBlock(p, feast), properties
+				.lightLevel(state -> state.getValue(FeastBlock.SERVINGS) * FeastBlock.SALAD_LIGHT_PER_SERVING));
+		} else {
+			block = block(dish.id(), p -> new FeastBlock(p, feast), properties);
+		}
 		Item item = Registry.register(BuiltInRegistries.ITEM, key,
 			new FeastItem(block, new Item.Properties().stacksTo(1).setId(key)));
 		FEASTS.add(item);

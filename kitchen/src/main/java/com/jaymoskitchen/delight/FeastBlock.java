@@ -3,6 +3,7 @@ package com.jaymoskitchen.delight;
 import com.jaymoskitchen.cooking.Quality;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
@@ -40,6 +42,10 @@ public class FeastBlock extends HorizontalDirectionalBlock {
 	private static final VoxelShape TRAY = Block.box(1, 0, 1, 15, 2, 15);
 	private static final VoxelShape FULL = Block.box(1, 0, 1, 15, 10, 15);
 	private static final VoxelShape PUMPKIN = Block.box(2, 0, 2, 14, 12, 14);
+	/** The gleaming salad's bowl and heap. */
+	private static final VoxelShape SALAD = Shapes.or(Block.box(3, 0, 3, 13, 2, 13), Block.box(2, 2, 2, 14, 6, 14));
+	/** How much light a gleaming salad gives for each serving left. */
+	public static final int SALAD_LIGHT_PER_SERVING = 3;
 
 	private final Feast feast;
 
@@ -69,7 +75,19 @@ public class FeastBlock extends HorizontalDirectionalBlock {
 		if (feast == Feast.STUFFED_PUMPKIN) {
 			return PUMPKIN;
 		}
+		if (feast == Feast.GLEAMING_SALAD) {
+			return SALAD;
+		}
 		return state.getValue(SERVINGS) == 0 ? TRAY : FULL;
+	}
+
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		int servings = state.getValue(SERVINGS);
+		if (feast == Feast.GLEAMING_SALAD && servings > 0 && random.nextFloat() < 0.05F * servings) {
+			level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5 + (random.nextDouble() * 0.5 - 0.25), pos.getY() + 0.5,
+				pos.getZ() + 0.5 + (random.nextDouble() * 0.5 - 0.25), 0.0, 0.0, 0.0);
+		}
 	}
 
 	@Override

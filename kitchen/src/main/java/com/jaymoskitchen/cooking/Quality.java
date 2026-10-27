@@ -9,9 +9,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 
 public enum Quality {
@@ -91,8 +93,8 @@ public enum Quality {
 
 	/** Stamps food stats, name and tooltip for this quality onto a freshly made dish. */
 	public void apply(ItemStack stack, Dish dish) {
-		if (dish.feast()) {
-			// (0.5.28) a feast isn't eaten as it is: only its name says how it went (its servings carry it, see FeastItem)
+		if (dish.placeable()) {
+			// (0.5.28) a feast (0.5.33: or a pie) isn't eaten as it is: only its name says how it went (its servings carry it, see FeastItem)
 			name(stack, switch (this) {
 				case BURNT -> List.of(Component.translatable("tooltip.jaymoskitchen.burnt").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 				case CHARRED -> List.of(Component.translatable("tooltip.jaymoskitchen.charred").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
@@ -109,7 +111,10 @@ public enum Quality {
 	public void apply(ItemStack stack, int baseNutrition, float baseSaturation, List<Dish.Buff> perfectBuffs) {
 		int nutrition;
 		float saturation;
-		Consumable.Builder consumable = Consumables.defaultFood();
+		// (0.5.33) a bottled dish (melon juice, custard) is drunk, not eaten
+		UseRemainder remainder = stack.get(DataComponents.USE_REMAINDER);
+		boolean drink = remainder != null && remainder.convertInto().item().value() == Items.GLASS_BOTTLE;
+		Consumable.Builder consumable = drink ? Consumables.defaultDrink() : Consumables.defaultFood();
 		List<Component> lore = new ArrayList<>();
 		switch (this) {
 			case BURNT -> {

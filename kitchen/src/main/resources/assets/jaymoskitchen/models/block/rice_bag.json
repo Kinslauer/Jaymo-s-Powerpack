@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "jaymoskitchen:block/rice_bag_bottom",
+    "east": "jaymoskitchen:block/rice_bag_side",
+    "north": "jaymoskitchen:block/rice_bag_side_tied",
+    "particle": "jaymoskitchen:block/rice_bag_top",
+    "south": "jaymoskitchen:block/rice_bag_side_tied",
+    "up": "jaymoskitchen:block/rice_bag_top",
+    "west": "jaymoskitchen:block/rice_bag_side"
+  }
+}

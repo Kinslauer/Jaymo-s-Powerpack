@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskitchen:full_tatami_mat",
+            "state": {
+              "part": "head"
+            }
+          },
+          "name": "jaymoskitchen:full_tatami_mat"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

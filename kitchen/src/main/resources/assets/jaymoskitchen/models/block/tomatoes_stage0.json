@@ -1,0 +1,7 @@
+{
+  "parent": "jaymoskitchen:block/template_crop_cross",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "cross": "jaymoskitchen:block/tomatoes_stage0"
+  }
+}

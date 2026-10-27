@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": "jaymoskitchen:canvas",
+    "b": "minecraft:bamboo"
+  },
+  "pattern": [
+    "b#b",
+    "b b",
+    "b b"
+  ],
+  "result": {
+    "count": 6,
+    "id": "minecraft:scaffolding"
+  }
+}

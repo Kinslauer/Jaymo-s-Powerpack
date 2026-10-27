@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "/": "minecraft:stick",
+    "r": "jaymoskitchen:rope"
+  },
+  "pattern": [
+    "/r/",
+    "/r/"
+  ],
+  "result": {
+    "id": "jaymoskitchen:rope_fence_gate"
+  }
+}

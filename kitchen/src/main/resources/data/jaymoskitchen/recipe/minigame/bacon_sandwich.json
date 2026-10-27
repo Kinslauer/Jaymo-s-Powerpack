@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "fabric:registry_contains",
+          "registry": "minecraft:item",
+          "values": [
+            "jaymoskitchen:tomato"
+          ]
+        },
+        {
+          "condition": "fabric:registry_contains",
+          "registry": "minecraft:item",
+          "values": [
+            "pantryforblockheads:tomato"
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "jaymoskitchen:minigame",
+  "category": "misc",
+  "dish": "bacon_sandwich"
+}

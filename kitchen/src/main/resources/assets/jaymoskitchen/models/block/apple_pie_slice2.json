@@ -1,0 +1,9 @@
+{
+  "parent": "jaymoskitchen:block/template_pie_slice2",
+  "textures": {
+    "bottom": "jaymoskitchen:block/pie_bottom",
+    "inner": "jaymoskitchen:block/apple_pie_inner",
+    "side": "jaymoskitchen:block/pie_side",
+    "top": "jaymoskitchen:block/apple_pie_top"
+  }
+}

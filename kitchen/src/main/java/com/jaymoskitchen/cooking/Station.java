@@ -106,6 +106,9 @@ public enum Station {
 		if (state.getBlock() instanceof CampfireBlock) {
 			return state.getValue(CampfireBlock.LIT) ? CAMPFIRE : null;
 		}
+		if (state.getBlock() instanceof com.jaymoskitchen.delight.StoveBlock) {
+			return state.getValue(com.jaymoskitchen.delight.StoveBlock.LIT) ? CAMPFIRE : null;
+		}
 		if (state.getBlock() instanceof CuttingBoardBlock || state.getBlock() instanceof com.jaymoskitchen.delight.CuttingBoardBlock) {
 			return BOARD;
 		}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    [
+      "jaymoskitchen:tomato",
+      "jaymoskitchen:rotten_tomato"
+    ]
+  ],
+  "result": {
+    "id": "jaymoskitchen:tomato_seeds"
+  }
+}

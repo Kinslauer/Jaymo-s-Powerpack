@@ -15,6 +15,8 @@ public final class OptionalItems {
 	public static final String PANTRY = "pantryforblockheads";
 	public static final String NATURALIST = "naturalist";
 	public static final String POWERS = "jaymospowers";
+	/** This mod itself, for items another part of it adds (looked up by id, with no link to the class that registers them). */
+	public static final String KITCHEN = "jaymoskitchen";
 
 	private OptionalItems() {
 	}

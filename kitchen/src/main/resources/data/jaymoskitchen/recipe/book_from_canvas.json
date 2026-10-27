@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:paper",
+    "jaymoskitchen:canvas"
+  ],
+  "result": {
+    "id": "minecraft:book"
+  }
+}

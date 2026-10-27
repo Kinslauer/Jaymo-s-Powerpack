@@ -1,0 +1,48 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "jaymoskitchen:brown_mushroom_colony",
+          "properties": {
+            "age": "0"
+          }
+        },
+        "weight": 1
+      },
+      {
+        "data": {
+          "id": "jaymoskitchen:brown_mushroom_colony",
+          "properties": {
+            "age": "1"
+          }
+        },
+        "weight": 1
+      },
+      {
+        "data": {
+          "id": "jaymoskitchen:brown_mushroom_colony",
+          "properties": {
+            "age": "2"
+          }
+        },
+        "weight": 1
+      },
+      {
+        "data": {
+          "id": "jaymoskitchen:brown_mushroom_colony",
+          "properties": {
+            "age": "3"
+          }
+        },
+        "weight": 1
+      },
+      {
+        "data": "minecraft:brown_mushroom",
+        "weight": 4
+      }
+    ]
+  }
+}
