@@ -260,6 +260,10 @@ public class BladeshroomHunter extends AetherMonster {
 				if (h.distanceTo(target) <= STRIKE_START && h.hasLineOfSight(target)) {
 					h.getNavigation().stop();
 					h.entityData.set(STRIKE, 0);
+					// (0.17.64) the cut glints as it winds up (AttackTells)
+					if (h.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+						com.jaymospowers.combat.AttackTells.tell(serverLevel, h, com.jaymospowers.combat.AttackTells.heavy(h));
+					}
 				} else {
 					h.getNavigation().moveTo(target, 1.2);
 				}

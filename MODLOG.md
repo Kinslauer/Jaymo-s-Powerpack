@@ -3174,3 +3174,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Enemies too (Kingdoms 0.7.267): fighters raise their blade and parry players (first 8 ticks of their guard, else
   12%/30% by experience), and every Better Combat swing a fighter starts shows a glint, red for heavy blows that carry
   `Guard.UNPARRYABLE_TAG` and can't be parried.
+  Every mob too (`combat/AttackTells`, `mixin/AttackTellGoalMixin` on MeleeAttackGoal, `mixin/AttackTellBrainMixin` on the
+  MeleeAttack behaviour): a melee blow glints and lands 6 ticks later if the target is still in reach and sight (red and
+  unparryable for 10+ attack damage or 1.35+ wide bodies); the Burrukai's charge and Bladeshroom Hunter's cut glint too.
+

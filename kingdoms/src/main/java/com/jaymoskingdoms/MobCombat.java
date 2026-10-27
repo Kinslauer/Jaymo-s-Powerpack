@@ -240,7 +240,7 @@ public final class MobCombat {
 	}
 
 	/** (0.7.267) The glint as a swing begins, at the weapon hand. */
-	private static void tell(ServerLevel level, Mob mob, boolean heavy) {
+	static void tell(ServerLevel level, Mob mob, boolean heavy) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
 		Vec3 at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);

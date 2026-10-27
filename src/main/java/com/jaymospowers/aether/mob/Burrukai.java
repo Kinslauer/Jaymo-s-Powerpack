@@ -210,6 +210,10 @@ public class Burrukai extends ZoneAnimal {
 		@Override
 		public void start() {
 			Burrukai.this.windUp = WIND_UP;
+			// (0.17.64) its charge glints as it winds up (AttackTells)
+			if (Burrukai.this.level() instanceof net.minecraft.server.level.ServerLevel level) {
+				com.jaymospowers.combat.AttackTells.tell(level, Burrukai.this, com.jaymospowers.combat.AttackTells.heavy(Burrukai.this));
+			}
 			this.charge = 0;
 			this.rest = 0;
 			this.hit = false;

@@ -45,6 +45,17 @@ Andy: "Build those ideas too".
 - Every fighter's swing (Better Combat moves) starts with a glint at the weapon: white means you can parry it, red means
   a heavy blow (two-handed or 1.4x+) that Guard won't parry, only block or dodge (`Guard.UNPARRYABLE_TAG`).
 
+## Every mob's blow glints first (Powers `combat/AttackTells`)
+Andy: "Can you make every mob use this glint mechanic?"
+- Every melee mob that attacks through vanilla's MeleeAttackGoal (zombies, spiders, endermen, iron golems, wolves,
+  ravagers, our own monsters) or the MeleeAttack brain behaviour (piglins, hoglins, zoglins) now winds up: the glint
+  shows at its weapon (or head), and the blow lands 6 ticks later only if you're still in reach and in sight. Its attack
+  cooldown is unchanged. Red for heavy hitters (10+ attack damage or a body 1.35+ wide: iron golems, ravagers, wardens),
+  whose blows carry the unparryable tag.
+- Custom attacks given the glint by hand: the Burrukai's charge, the Bladeshroom Hunter's cut, ship crews' blades
+  (Kingdoms `Crewmen`, now with the same 6-tick wind-up). Kingdoms' Better Combat fighters keep their own wind-up glint.
+- Left out: contact damage (slimes, magma cubes, the Wraith flying into you), ranged attacks, and powers' own summons.
+
 ## To check in game
 1. Sword, empty off hand: right click raises it; a zombie's blow right after raising is a perfect parry (ring, sparks,
    zombie thrown back and frozen), later ones are blocked for feathers.
@@ -54,3 +65,4 @@ Andy: "Build those ideas too".
 5. Darktide katana guard and Z Fighter bare-hand guard work as before.
 6. A sword-armed guard raises its blade now and then; hitting it right after it does gets parried (sparks, you're pushed back, it swings back).
 7. A white glint before a fighter's swing; a red one on two-handed swings, and those can't be parried.
+8. A plain zombie glints before each blow and misses if you step back in time; an iron golem's glint is red.

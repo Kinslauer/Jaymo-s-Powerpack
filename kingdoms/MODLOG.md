@@ -5598,3 +5598,5 @@ Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
 - `MobCombat` attack tells: a glint at the weapon as each swing winds up, white for a blow you can parry, red for a
   heavy one (two-handed, or 1.4x damage and up) that carries `jaymospowers.unparryable` while it lands, so Powers'
   guard only blocks it.
+- `Crewmen`: a crewman's blade glints and lands 6 ticks later (`MELEE_WINDUP`), as every mob's blow now does in Powers.
+

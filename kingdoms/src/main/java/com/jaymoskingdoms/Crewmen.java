@@ -76,6 +76,8 @@ public final class Crewmen {
 	/** A blow: how far they reach, and how often they swing (ticks). */
 	static final double REACH = 2.6;
 	static final int SWING_GAP = 20;
+	/** (0.7.267) Ticks from a blade's glint to its blow. */
+	static final int MELEE_WINDUP = 6;
 	/** A bow: from this far to this far, this often (ticks, plus up to the jitter). */
 	static final double BOW_NEAREST = 3.0, BOW_FURTHEST = 24.0;
 	static final int BOW_RELOAD = 50, BOW_JITTER = 30;
@@ -642,12 +644,24 @@ public final class Crewmen {
 	private static void fight(ServerLevel level, PathfinderMob mob, Worker w, LivingEntity foe, long now) {
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		int role = w.role();
-		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1)});
+		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1), -1L});
 		double d = mob.distanceTo(foe);
+		// (0.7.267) the blade glints first and lands MELEE_WINDUP later (a parry's chance, as every mob's blow gives)
+		if (ready[2] >= 0 && now >= ready[2]) {
+			ready[2] = -1L;
+			if (d <= REACH + foe.getBbWidth() * 0.5) {
+				mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				mob.doHurtTarget(level, foe);
+			}
+			return;
+		}
+		if (ready[2] >= 0) {
+			return;
+		}
 		if (d <= REACH + foe.getBbWidth() * 0.5 && now >= ready[0]) {
 			ready[0] = now + SWING_GAP;
-			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			mob.doHurtTarget(level, foe);
+			ready[2] = now + MELEE_WINDUP;
+			MobCombat.tell(level, mob, false);
 			return;
 		}
 		if (Pirates.isPirate(role)) {
