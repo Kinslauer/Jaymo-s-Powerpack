@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -57,12 +59,12 @@ import org.jspecify.annotations.Nullable;
 public final class Crewmen {
 	/** The entity tag every crew villager carries (kept in their save): a ship's crewman, not any town's. */
 	public static final String TAG = "jaymoskingdoms.crewman";
-	/** (0.7.246) Her one knight: the only crewman in mail or plate. */
+	/** (0.7.246) Her one knight, 0.7.246-0.7.258 (since 0.7.259 there are none: the tag is taken off). */
 	static final String KNIGHT = TAG + ".knight";
-	/** (0.7.246) What an armour piece's id holds if it's mail or plate. */
-	private static final List<String> PLATE = List.of("chainmail", "iron", "gold", "diamond", "netherite", "copper", "steel", "knight");
-	/** (0.7.246) How often (ticks) a crew from before is looked over for plate. */
+	/** (0.7.246) How often (ticks) a crew is looked over: no armour, no guards, weapons stowed while all's calm. */
 	static final int DRESS_EVERY = 100;
+	/** (0.7.259) How long (ticks) after their last foe they put their weapons away. */
+	static final int CALM_TICKS = 400;
 	/** (0.7.246) One deck line in this many is said to a hand of hers near, by their berth; and how many there are. */
 	static final int MATE_ONE_IN = 2, TO_HAND_LINES = 6;
 	/** (0.7.246) A hand's cry on running to a downed shipmate, and words to a player they got up. */
@@ -111,6 +113,7 @@ public final class Crewmen {
 	static void register() {
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			READY.clear();
+			LAST_FOE.clear();
 			NEXT_LINE.clear();
 			WELCOMED.clear();
 			for (ServerBossEvent bar : BARS.values()) {
@@ -157,17 +160,13 @@ public final class Crewmen {
 	 * {@code folk}, set up for its role and not yet in the world (or one of a crew already aboard), as an MCA villager
 	 * at its place; null without MCA or if one couldn't be made (then the folk sails).
 	 */
-	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side, Ship ship, boolean captain) {
-		// (0.7.246) Andy: "you're not wearing full plate out to sea": her first hand in mail or plate (never her captain)
-		// is her one knight, a guard in his armour; everyone else sails as a sailor, in cloth and leather
-		boolean knight = !captain && plated(folk) && !knighted(ship, null);
-		PathfinderMob v = McaCompat.crewman(level, folk, knight);
+	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side) {
+		// (0.7.259) Andy: "I dont want any guards on these ships ... all the sailors should double as both. just picking up
+		// their weapons when the time comes": every one a sailor (MCA's fisherman) in no armour, their weapons stowed
+		PathfinderMob v = McaCompat.crewman(level, folk);
 		if (v != null) {
 			v.addTag(TAG);
 			v.addTag(sideTag(side));
-			if (knight) {
-				v.addTag(KNIGHT);
-			}
 		}
 		return v;
 	}
@@ -323,53 +322,55 @@ public final class Crewmen {
 
 	// ---- (0.7.246) dressed for the sea ---------------------------------------------------------------------------------
 
-	/** Whether {@code worn} (an armour piece) is mail or plate: no deck wear but for her one knight. */
-	static boolean plate(ItemStack worn) {
-		if (worn.isEmpty()) {
+	/** (0.7.259) Their weapons while they're about their work: stowed, out of their hands, till there's a fight. */
+	static final AttachmentType<List<ItemStack>> STOWED = AttachmentRegistry.create(JaymosKingdoms.id("crew_stowed"),
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()));
+	/** (0.7.259) The last tick each one had a foe (they stow their weapons a while after). */
+	private static final Map<UUID, Long> LAST_FOE = new HashMap<>();
+
+	/** (0.7.259) {@code mob}'s main and off hand put away (stowed), their hands empty; nothing if they're already stowed. */
+	static void stow(LivingEntity mob) {
+		ItemStack main = mob.getMainHandItem(), off = mob.getOffhandItem();
+		if (main.isEmpty() && off.isEmpty() || mob.hasAttached(STOWED)) {
+			return;
+		}
+		mob.setAttached(STOWED, List.of(main.copy(), off.copy()));
+		mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+		mob.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+	}
+
+	/** (0.7.259) {@code mob} takes up their stowed weapons; true if they had any. */
+	static boolean arm(LivingEntity mob) {
+		List<ItemStack> kit = mob.getAttached(STOWED);
+		if (kit == null) {
 			return false;
 		}
-		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath();
-		for (String metal : PLATE) {
-			if (path.contains(metal)) {
-				return true;
-			}
+		mob.removeAttached(STOWED);
+		if (kit.size() > 0 && mob.getMainHandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.MAINHAND, kit.get(0).copy());
 		}
-		return false;
-	}
-
-	/** Whether {@code mob} wears any mail or plate. */
-	static boolean plated(LivingEntity mob) {
-		for (EquipmentSlot slot : EquipmentSlot.values()) {
-			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && plate(mob.getItemBySlot(slot))) {
-				return true;
-			}
+		if (kit.size() > 1 && mob.getOffhandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.OFFHAND, kit.get(1).copy());
 		}
-		return false;
-	}
-
-	/** Whether {@code ship} already carries her knight (besides {@code but}). */
-	private static boolean knighted(Ship ship, @Nullable LivingEntity but) {
-		for (LivingEntity e : ship.crewAboard()) {
-			if (e != but && e.entityTags().contains(KNIGHT)) {
-				return true;
-			}
-		}
-		return false;
+		mob.playSound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.8F, 1.0F);
+		return true;
 	}
 
 	/**
-	 * A crew from before (0.7.242-0.7.245, every fighter in his folk's plate): the first in plate who isn't her captain is
-	 * her knight, and the rest take theirs off and sail as sailors.
+	 * (0.7.259) A crew from before (guards, some in plate): out of their armour, worn and packed, sailors by trade, their
+	 * weapons stowed unless there's a fight on.
 	 */
-	private static void dress(Ship ship, Crew crew, PathfinderMob mob) {
-		if (mob.entityTags().contains(KNIGHT) || !plated(mob)) {
-			return;
-		}
-		if (!mob.getUUID().equals(crew.captain) && !knighted(ship, mob)) {
-			mob.addTag(KNIGHT);
-			return;
+	private static void dress(PathfinderMob mob, boolean fighting) {
+		mob.removeTag(KNIGHT);
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !mob.getItemBySlot(slot).isEmpty()) {
+				mob.setItemSlot(slot, ItemStack.EMPTY);
+			}
 		}
 		McaCompat.toSea(mob);
+		if (!fighting) {
+			stow(mob);
+		}
 	}
 
 	/**
@@ -386,7 +387,7 @@ public final class Crewmen {
 		if (seat == null) {
 			return false;
 		}
-		PathfinderMob v = villager(level, folk, crew.side, ship, folk.getUUID().equals(crew.captain));
+		PathfinderMob v = villager(level, folk, crew.side);
 		if (v == null) {
 			return false;
 		}
@@ -530,7 +531,8 @@ public final class Crewmen {
 		Crew crew = ship.crew;
 		long now = level.getGameTime();
 		if ((mob.tickCount + mob.getId()) % DRESS_EVERY == 0) {
-			dress(ship, crew, mob);
+			Long had = LAST_FOE.get(mob.getUUID());
+			dress(mob, crew.target >= 0 || had != null && now - had < CALM_TICKS);
 			if (crew.side == Crew.Side.WHALER) {
 				// (0.7.246) her own hands aboard and her crew know each other: no introductions among shipmates
 				for (ServerPlayer p : Corsairs.playersAboard(level, ship)) {
@@ -542,6 +544,9 @@ public final class Crewmen {
 		}
 		LivingEntity foe = foe(level, mob, w, ship, crew);
 		if (foe != null) {
+			// (0.7.259) weapons up
+			LAST_FOE.put(mob.getUUID(), now);
+			arm(mob);
 			fight(level, mob, w, foe, now);
 		} else if (McaCompat.busy(mob)) {
 			// someone's talking to them: they look at them
@@ -783,7 +788,7 @@ public final class Crewmen {
 			case "gunner" -> "a gunner";
 			case "monkey" -> "a powder monkey (a ship's boy who runs powder to the guns)";
 			case "deckhand" -> "a deckhand";
-			case "marine" -> "a marine (a knight serving aboard)";
+			case "seaman" -> "an able seaman (a sailor who takes up arms when there's a fight)";
 			case "whaleman" -> "a whaleman";
 			default -> "a hand";
 		};
@@ -815,7 +820,8 @@ public final class Crewmen {
 			return "deckhand";
 		}
 		return switch (side) {
-			case NAVY -> "marine";
+			// (0.7.259) no marines: her sailors fight
+			case NAVY -> "seaman";
 			case WHALER -> "whaleman";
 			default -> "hand";
 		};

@@ -141,7 +141,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			state.blocks.add(block);
 			state.pieces.add(piece);
 		}
-		state.dryMask = h.enclosed.length == 0 || ship.foundering() ? null : MASKS.computeIfAbsent(h, ShipRenderer::mask);
+		state.dryMask = h.masked.length == 0 || ship.foundering() ? null : MASKS.computeIfAbsent(h, ShipRenderer::mask);
 		state.yaw = Mth.rotLerp(partialTicks, ship.yRotO, ship.getYRot());
 		float storm = level.getThunderLevel(partialTicks), t = (ship.tickCount + partialTicks) * SWELL_SPEED;
 		// a bigger ship rocks less
@@ -153,7 +153,8 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	/** A box over each column of the hold, from its lowest dry cell to the top of its highest. */
 	private static Model.Simple mask(Hull h) {
 		Map<Long, int[]> columns = new HashMap<>();
-		for (long cell : h.enclosed) {
+		// (0.7.259) and the part-blocks inside her walls (Hull.masked)
+		for (long cell : h.masked) {
 			BlockPos p = BlockPos.of(cell);
 			int[] span = columns.computeIfAbsent(BlockPos.asLong(p.getX(), 0, p.getZ()), k -> new int[] {Integer.MAX_VALUE, Integer.MIN_VALUE});
 			span[0] = Math.min(span[0], p.getY());
