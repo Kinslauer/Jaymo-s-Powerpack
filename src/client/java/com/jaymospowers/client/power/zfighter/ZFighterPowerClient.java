@@ -319,7 +319,7 @@ public final class ZFighterPowerClient implements PowerClient {
 			ZFighterInputClient.keyLabel(Minecraft.getInstance()), limit ? pulse(0xFF3A2A, 0xFFB0A0, time * 0.6F) : CHIP_COLOR);
 		if (ultimate) {
 			// in Super 3 with the Spirit Bomb learned, C raises it: its icon and its cooldown
-			boolean spirit = state.form() >= ZFighterTraining.FORMS && training.knows(ZFighterTraining.SPIRIT_BOMB);
+			boolean spirit = com.jaymospowers.power.zfighter.ZFighterForms.bombForm(state.form()) && training.knows(ZFighterTraining.SPIRIT_BOMB);
 			int slot = spirit ? ZFighterState.SPIRIT : ZFighterState.SUPER_SLOT;
 			special(graphics, font, x + step * next, y, new ItemStack(spirit ? Items.ENDER_EYE : Items.NETHER_STAR), state.left(slot, now),
 				state.length()[slot], JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(),

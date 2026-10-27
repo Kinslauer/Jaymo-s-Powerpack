@@ -267,12 +267,16 @@ public final class ZFighterLineage {
 
 	/** The aura's colour for this lineage and form. */
 	public static int color(int lineage, int form) {
+		// (0.17.47) the newer forms (False Super, god, legendary) have a colour of their own, whatever the lineage
+		if (form > ApeRage.SUPER_4) {
+			return ZFighterForms.color(form);
+		}
 		return COLORS[Math.clamp(lineage, 0, LINEAGES - 1)][Math.clamp(form, 0, ApeRage.SUPER_4)];
 	}
 
 	/** The lang key of form {@code form} (1-3) for this lineage: Super, Giant or Frost-born's evolutions. */
 	public static String formKey(int lineage, int form) {
-		String kind = lineage == VERDANT ? "verdant." : lineage == FROST ? "frost." : "";
+		String kind = form > ApeRage.SUPER_4 ? "" : lineage == VERDANT ? "verdant." : lineage == FROST ? "frost." : "";
 		return "form.jaymospowers.zfighter." + kind + form;
 	}
 
@@ -284,6 +288,10 @@ public final class ZFighterLineage {
 	}
 
 	public static String formKey(Player player, int form) {
+		// (0.17.47) a legendary-born's Super line is the legendary one
+		if (form >= 1 && form <= ZFighterTraining.FORMS && ZFighterLegendary.mutant(player)) {
+			return "form.jaymospowers.zfighter." + (ZFighterForms.LEGEND_1 + form - 1);
+		}
 		return formKey(of(player), form);
 	}
 
@@ -691,6 +699,8 @@ public final class ZFighterLineage {
 		live.fleeRestUntil = 0L;
 		live.roamAt = 0L;
 		player.setAttached(GREAT_APE, true);
+		// (0.17.47) a fighter who has gone Super turns golden
+		ZFighterGoldenApe.began(player);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 3.0F, 0.4F);
@@ -709,6 +719,7 @@ public final class ZFighterLineage {
 		}
 		player.removeAttached(ApeSmash.CHARGE);
 		player.removeAttached(GREAT_APE);
+		ZFighterGoldenApe.ended(player);
 		player.removeAttached(CRIPPLED);
 		player.removeAttached(BERSERK);
 		player.removeAttached(WILD_GOAL);

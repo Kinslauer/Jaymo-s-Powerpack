@@ -64,7 +64,7 @@ public final class ZFighterKiGlow {
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
 		int f = form == null ? 0 : form;
-		float strength = Math.min(1.0F, f > 0 ? FORM + PER_FORM * f : BASE);
+		float strength = Math.min(1.0F, f > 0 ? FORM + PER_FORM * com.jaymospowers.power.zfighter.ZFighterForms.tier(f) : BASE);
 		// ki full: a flash that fades over a second
 		Long full = player.getAttached(ZFighterPower.KI_FULL);
 		long since = full == null ? Long.MAX_VALUE : player.level().getGameTime() - full;
@@ -75,6 +75,10 @@ public final class ZFighterKiGlow {
 	/** His ki colour in base form, the form's in a form. */
 	public static int color(Player player, int form) {
 		Integer ki = player.getAttached(ZFighterPower.KI_COLOR);
+		// (0.17.47) silver instinct
+		if (com.jaymospowers.power.zfighter.ZFighterInstinct.active(player)) {
+			return com.jaymospowers.power.zfighter.ZFighterInstinct.COLOR;
+		}
 		return form > 0 || ki == null ? ZFighterLineage.color(ZFighterLineage.of(player), form) : ki;
 	}
 

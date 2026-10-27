@@ -340,6 +340,12 @@ public final class ZFighterTraining {
 
 	/** Mastery for the form he's in. */
 	static void master(ServerPlayer player, int form, int amount) {
+		// (0.17.47) the god form keeps its own mastery; a legendary line's forms count as Super's 1-3
+		if (form == ZFighterForms.GOD) {
+			ZFighterGod.master(player, Math.round(amount * rate(player)));
+			return;
+		}
+		form = ZFighterLegendary.chain(form);
 		if (form < 1 || form > FORMS || amount <= 0) {
 			return;
 		}
@@ -539,6 +545,10 @@ public final class ZFighterTraining {
 
 	/** 0-1 mastery of the form he's in (0 in base). */
 	static float mastery(Player player, int form) {
+		if (form == ZFighterForms.GOD) {
+			return ZFighterGod.mastery(player) / (float)MASTERY_MAX;
+		}
+		form = ZFighterLegendary.chain(form);
 		return form <= 0 ? 0.0F : of(player).mastery(form) / (float)MASTERY_MAX;
 	}
 
