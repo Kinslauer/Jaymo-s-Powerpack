@@ -31,6 +31,9 @@ final class StoryHoldScreen extends Screen {
 		ClientPlayNetworking.registerGlobalReceiver(StoryGround.Hold.TYPE, (payload, context) -> {
 			holding = payload.key();
 			Minecraft minecraft = context.client();
+			if (!holding.isEmpty()) {
+				StoryCurtain.raise();
+			}
 			if (holding.isEmpty()) {
 				if (minecraft.gui.screen() instanceof StoryHoldScreen) {
 					minecraft.gui.setScreen(null);
@@ -48,6 +51,10 @@ final class StoryHoldScreen extends Screen {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> holding = "");
 	}
 
+	static boolean holding() {
+		return !holding.isEmpty();
+	}
+
 	@Override
 	public boolean isPauseScreen() {
 		return false;
@@ -56,6 +63,11 @@ final class StoryHoldScreen extends Screen {
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
+	}
+
+	@Override
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		StoryCurtain.background(graphics, this);
 	}
 
 	@Override

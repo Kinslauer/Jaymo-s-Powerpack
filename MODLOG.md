@@ -3020,3 +3020,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   which #550 had already used, so renumbered here. Not seen in game.
 - **0.17.25, a loading screen for a story's start (Kingdoms 0.7.236):** newcomers wait behind a loading screen while their
   capital, whaler or future is made and their landing loads; MCA's creator shows your heritage's look. No Powers changes.
+- **0.17.27, black until MCA's creator (Kingdoms 0.7.238):** the life story and loading screens sit on black, and the
+  world stays blacked out between them until MCA's creator opens. 0.17.26 is left for the mana spirits PR. No Powers
+  changes.
