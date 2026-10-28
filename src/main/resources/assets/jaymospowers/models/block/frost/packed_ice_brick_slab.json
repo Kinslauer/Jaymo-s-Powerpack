@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "jaymospowers:block/frost/packed_ice_bricks",
+    "side": "jaymospowers:block/frost/packed_ice_bricks",
+    "top": "jaymospowers:block/frost/packed_ice_bricks"
+  }
+}

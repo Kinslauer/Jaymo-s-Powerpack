@@ -6060,3 +6060,13 @@ Andy: "villagers now keep and throw water bottles instead of placing buckets". `
 instead of setting a water block and lifting it again. Vanilla's splash puts out the fire and its neighbours, and
 Powers' `SplashWaterDouseMixin` widens that to 2 blocks round. A fire still burning 2 s after a throw is answered
 again (`SPLASHES`). Beating it out and golems are unchanged. Compile-checked, not seen in game.
+
+## 0.7.301: the Frostborn ice prison freezes like 26.4's Potion of Freezing (pack 0.17.115)
+
+Andy: "I just really want the way the chilling potion works transferred to frostborn's prison". `FrostPrison` no longer
+freezes the prisoner through on the spot or weakens them: it gives Jaymo's Powers' `jaymospowers:freezing` (26.4's
+Freezing, see the pack MODLOG) at level II for the 10 s stay plus 5 s after (`FREEZING_LEVEL`, `LINGER_TICKS`). The
+frost creeps over them and they're frozen through in about 3.5 s, then shake and take a point every 2 s (blazes and
+other fire-blooded mobs five times that; leather spares the damage), and the chill keeps biting after the ice falls
+before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
+the old freeze is kept. Compile-checked, not seen in game.

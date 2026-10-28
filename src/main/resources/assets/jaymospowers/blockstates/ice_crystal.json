@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "jaymospowers:block/frost/ice_crystal"
+    },
+    "facing=down": {
+      "model": "jaymospowers:block/frost/ice_crystal",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "jaymospowers:block/frost/ice_crystal",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/frost/ice_crystal",
+      "x": 90,
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/frost/ice_crystal",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/frost/ice_crystal",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
