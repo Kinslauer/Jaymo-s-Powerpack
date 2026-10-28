@@ -3301,3 +3301,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   numbers (constants at the top). Flying, they bend back toward the feet (the way the cruise pose lays you out) and
   narrow into a comet's tail (`ZFighterKiAura` passes a trail amount from speed). Sparks and motes kept. The old shell
   textures and their generators are removed. Compile-checked, not seen in game.
+- **0.17.86, life story: skip fix, acting figure, right-click back (Kingdoms 0.7.282):** after "Skip the story", the story page's Next ("Live this
+  life") and Back buttons stayed hidden, so the story could never be lived. They come back once the ask is answered.
+  Same release: every life-story page shows a figure of you at the foot of the left side, slowly looking about
+  (Andy: "an animated simulation of the character in every story frame, like in bannerlord"). It wears the heritage
+  and look of the birthplace or childhood you point at or picked, holds that answer's picture, and on the story page
+  follows the heritage, look and class buttons (holding the class's picture). The heritage and held item are lent to
+  your own player only while it's drawn. Compile-checked here (only the usual Loom-only attachment errors), not seen
+  in game.
+  The figure acts each answer out (Andy: "make it act out? or at least find different gear"): client `StoryFigure`
+  gives every answer a scene of gear and an act. Farmers hoe in leather legs, soldiers swing a sword behind a shield
+  in mail, hunters draw a bow, healers drink, the sworn stand guard in full iron, cave starts dig by torchlight,
+  storm and sky answers look up, book answers look down at the book, birthplaces walk in plain clothes so the
+  heritage shows, and so on. Gear, arm swings and item use are lent to your player only while the figure is drawn.
+  Right-clicking the story page's Heritage, Class and Look buttons (and the spell or element chips) steps back to
+  the one before (Andy: "right clicking should take you back on any of these options").
