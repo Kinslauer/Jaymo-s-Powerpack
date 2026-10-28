@@ -3529,7 +3529,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and fight their way out by hitting the heart, lungs and stomach, or get digested. `SwallowedPower.drop` is public for
   it. See the Kingdoms MODLOG.
 
-- **0.17.135, Bio-built remade after Cell (Kingdoms 0.7.313):** made by the Mad Tinkerer from every heritage's blood but
+- **0.17.136, Bio-built remade after Cell (Kingdoms 0.7.313):** made by the Mad Tinkerer from every heritage's blood but
   the Dawnborn's and the Divine's, the Bio-built now absorb anyone downed or crippled who isn't one of those two (monsters,
   villagers, players), not only downed monsters; a crippled foe (a leg broken or cut off) counts too. Their three forms
   are three different bodies: Imperfect (hunched, grotesque, a long stinger tail that does the absorbing: it arcs over the
