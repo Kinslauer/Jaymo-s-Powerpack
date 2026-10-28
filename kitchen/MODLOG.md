@@ -1194,3 +1194,11 @@ three tracks. Not taken: the other knives and Backstabbing (Andy wanted only the
   `Quality.apply` makes a bottled dish a drink.
 - 26.3 notes: `FriendlyByteBuf.writeBitSet`; `Player.drop(stack, bool, Prediction)`; `LivingEntity.getLootTable()` is an
   `Optional<ResourceKey>`; block loot pools use the singular `"condition"`.
+
+## 0.5.33.1: the server starts again (pack 0.17.80)
+- The friends' server wouldn't start on 0.5.33: five crafting recipes (apple, chocolate and pumpkin pie and sweet
+  berry cheesecake from slices, pumpkin pie from crust) had `"category": "food"`, which 26.3 only takes on cooking
+  recipes, and one bad recipe stops the whole server ("Failed to load datapacks"). They're `misc` now.
+- The pack's `libs/jaymos-kitchen-0.5.33.1.jar` is the 0.5.33 jar with only those five files and the version changed
+  (cloud builds can't reach Fabric's Maven). 0.5.34's UI text scrolling is in the source but not in that jar yet:
+  the next Kitchen build on the home PC (0.5.34) carries both.
