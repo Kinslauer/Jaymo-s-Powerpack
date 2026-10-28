@@ -48,7 +48,10 @@ public final class Layers {
 			}
 			String id = Identifier.parse(baseId).getPath() + "_layer";
 			ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosPowers.id(id));
-			Block layer = Registry.register(BuiltInRegistries.BLOCK, key, new LayerBlock(BlockBehaviour.Properties.ofFullCopy(base).setId(key)));
+			// (0.17.117) the base's own map colour, fixed: a log's is a function of its AXIS, which a layer doesn't have (the
+			// copied function threw "Cannot get property axis" building the layer's states, and the game crashed on start)
+			Block layer = Registry.register(BuiltInRegistries.BLOCK, key,
+				new LayerBlock(BlockBehaviour.Properties.ofFullCopy(base).mapColor(base.defaultMapColor()).setId(key)));
 			ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
 			Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(layer, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
 			if (base.defaultBlockState().ignitedByLava()) {

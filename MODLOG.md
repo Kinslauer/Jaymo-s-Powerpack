@@ -3479,3 +3479,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Station) with the block in a crafting grid gives 8 and stays in the grid; stone: the stonecutter, 8 a block. 8
   layers craft back into the block. Everything comes from `tools/gen_layers.py <26.3.jar>` (reads each block's own
   model for its textures, writes `LayerList.java` too); add a block to its lists and rerun.
+- **0.17.117, layer blocks of logs (crash fix):** 0.17.116 crashed on start, client and server ("Cannot get property
+  ... axis ... as it does not exist" in `LayerBlock.<init>`): `Properties.ofFullCopy` copied a log's map colour, a function
+  of its `AXIS`. Layers now take the base's `defaultMapColor()` as a fixed colour. No other base in `LayerList` has a
+  state-dependent property (light or colour).
