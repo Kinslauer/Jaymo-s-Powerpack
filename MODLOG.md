@@ -3294,3 +3294,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.84, villagers stay put while you deal with them (Kingdoms 0.7.281):** a villager you talked to, traded with,
   hit or opened the menu of no longer teleports (MCA's walk-target teleport, Kingdoms' stuck puffs and return-to-post)
   for 30 seconds, or while you're still in their menu. Compile-checked here, not playtested.
+- **0.17.85, wisp auras:** Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a
+  solid mesh" (four reference pictures). The flame, smooth and godly shells are gone; every style is now ~40-70 single
+  tongues of light (`ZFighterKiAuraStyles.wisps`, texture `tools/gen_ki_wisp.py`) born touching the body, licking up
+  and off it, drifting away and fading over a short life, then reborn elsewhere. Styles differ only in their wisps'
+  numbers (constants at the top). Flying, they bend back toward the feet (the way the cruise pose lays you out) and
+  narrow into a comet's tail (`ZFighterKiAura` passes a trail amount from speed). Sparks and motes kept. The old shell
+  textures and their generators are removed. Compile-checked, not seen in game.
