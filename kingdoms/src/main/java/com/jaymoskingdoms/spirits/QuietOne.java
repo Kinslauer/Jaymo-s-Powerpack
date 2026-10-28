@@ -82,6 +82,8 @@ public final class QuietOne extends Spirit {
 	/** Echo strike: mana per echo, ticks after the blow, share of the blow's damage, and how far off the foe may be by then. */
 	static final float ECHO_COST = 6.0F, ECHO_SHARE = 0.5F;
 	static final int ECHO_DELAY = 10;
+	/** How far from the foe an echo's streak starts (blocks), on a side of its own each time. */
+	static final double ECHO_FROM = 1.6;
 	static final double ECHO_LOSE = 8.0;
 	/** Mirror step: blocks stepped, ticks the double lasts, how far it draws mobs (blocks), and how often it re-aims them (ticks). */
 	static final double MIRROR_STEP = 3.0, MIRROR_DRAW = 16.0;
@@ -174,6 +176,7 @@ public final class QuietOne extends Spirit {
 		MOVES.add(new Def("mirror", 10.0F, 120, 3, Poses.MIRROR, Mana.WARD, QuietOne::mirrorStep));
 		MOVES.add(new Def("still", 30.0F, 1200, 6, Poses.STILL, Mana.WARD, QuietOne::stillness));
 		MOVES.add(new Def("silent", 40.0F, 24000, 8, Poses.SILENT, Mana.HARM, QuietOne::silentEnd));
+		MOVES.add(SpiritExecutions.move("execute_quiet", Spirits.QUIET));
 	}
 
 	QuietOne() {
@@ -342,6 +345,12 @@ public final class QuietOne extends Spirit {
 			}
 			Spirits.show(player, Poses.ECHO);
 			Vec3 at = victim.getBoundingBox().getCenter();
+			// (0.7.280) each echo comes in from its own side (Andy: "echo strike should attack from different angles"): a streak
+			// from a point around the foe, high or low, into it
+			double around = player.getRandom().nextDouble() * Math.PI * 2.0;
+			Vec3 from = at.add(Math.cos(around) * ECHO_FROM, (player.getRandom().nextDouble() - 0.35) * ECHO_FROM, Math.sin(around) * ECHO_FROM);
+			SpiritFoes.line(level, ParticleTypes.ENCHANTED_HIT, from, at, 8);
+			level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ParticleTypes.ENCHANTED_HIT, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.2);
 			level.sendParticles(ParticleTypes.WHITE_ASH, at.x, at.y, at.z, 8, 0.3, 0.3, 0.3, 0.02);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.7F, 0.5F);

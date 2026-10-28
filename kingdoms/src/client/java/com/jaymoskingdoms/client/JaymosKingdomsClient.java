@@ -135,6 +135,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.SpiritKey.register();
 		com.jaymoskingdoms.client.spirits.SpiritArms.register();
 		com.jaymoskingdoms.client.spirits.SpiritHud.register();
+		com.jaymoskingdoms.client.spirits.SpiritVoiceSound.register();
 		com.jaymoskingdoms.client.spirits.ClashCinematic.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();

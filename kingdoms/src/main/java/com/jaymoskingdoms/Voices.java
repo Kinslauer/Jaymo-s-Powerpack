@@ -7,6 +7,11 @@ import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,6 +41,22 @@ public final class Voices {
 
 	/** How loud a spirit is: it speaks at its keeper's shoulder. */
 	static final float SPIRIT_VOLUME = 1.0F;
+
+	/**
+	 * (0.7.280) Server to the keeper: a spirit says the line {@code key}. Andy: "the voices will fade if you are moving while
+	 * they activate. they should emit from behind you." A sound packet plays where it was sent from and stays there, so the
+	 * client plays this one itself, from the spirit behind you, following you ({@code SpiritVoiceSound}).
+	 */
+	public record Spoken(String key) implements CustomPacketPayload {
+		public static final Type<Spoken> TYPE = new Type<>(JaymosKingdoms.id("spirit_voice"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Spoken> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeUtf(p.key), buf -> new Spoken(buf.readUtf()));
+
+		@Override
+		public Type<Spoken> type() {
+			return TYPE;
+		}
+	}
 
 	private static final Map<String, Holder<SoundEvent>> SOUNDS = new HashMap<>();
 
@@ -69,6 +90,7 @@ public final class Voices {
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, soundPath(key));
 			SOUNDS.put(key, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
 		}
+		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
 	}
 
 	/** {@code story.jaymoskingdoms.born.title} -> {@code voice.narrator.born.title}; {@code spirit.jaymoskingdoms.varro.summon.1} -> {@code voice.varro.summon.1}. */
@@ -84,10 +106,15 @@ public final class Voices {
 		return SOUNDS.get(key);
 	}
 
-	/** Speak {@code key} to {@code player} alone (a spirit's line: only its keeper hears it). */
+	/** Speak {@code key} to {@code player} alone (a spirit's line: only its keeper hears it), from behind them and following them. */
 	public static void speak(ServerPlayer player, String key) {
 		Holder<SoundEvent> sound = of(key);
-		if (sound != null) {
+		if (sound == null) {
+			return;
+		}
+		if (ServerPlayNetworking.canSend(player, Spoken.TYPE)) {
+			ServerPlayNetworking.send(player, new Spoken(key));
+		} else {
 			player.connection.send(new ClientboundSoundPacket(sound, SoundSource.VOICE, player.getX(), player.getEyeY(), player.getZ(),
 				SPIRIT_VOLUME, 1.0F, player.getRandom().nextLong()));
 		}
