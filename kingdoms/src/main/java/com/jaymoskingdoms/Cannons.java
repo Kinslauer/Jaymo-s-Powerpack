@@ -108,6 +108,11 @@ final class Cannons {
 
 	/** A gunner for {@code cannon}: an archer of its kingdom's, hired onto it and counted in its roster. */
 	private static void gunner(ServerLevel level, Faction f, Cannon cannon) {
+		if (McaGunner.seat(level, f, cannon)) {
+			// (0.7.295) with MCA, one of the realm's villagers
+			Factions.update(level.getServer(), f.id(), x -> x.withHoldings(x.holdings().adjust(Folk.ARCHER, 1)));
+			return;
+		}
 		Folk archer = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
 		if (archer == null) {
 			return;

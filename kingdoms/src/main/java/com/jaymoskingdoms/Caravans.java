@@ -995,7 +995,9 @@ final class Caravans {
 	static boolean villagerStep(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
 		Vec3 to = HEADING.get(mob.getUUID());
-		if (mob instanceof Folk || to == null || w.role() != CARTER && Rulers.target(mob) != null || McaCompat.busy(mob)) {
+		// (a guard's brain has him for a fight: a foe on him, or near, which only his brain's senses would find)
+		if (mob instanceof Folk || to == null || w.role() != CARTER && (Rulers.target(mob) != null || Rulers.foeNear(level, mob))
+			|| McaCompat.busy(mob)) {
 			return w.role() == CARTER && mob.isPassenger();
 		}
 		double d = mob.position().distanceTo(to);

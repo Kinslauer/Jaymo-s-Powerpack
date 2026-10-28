@@ -377,8 +377,10 @@ public final class Rulers {
 	 * caravan, war party or assault, not downed or making an arrest), so an MCA guard may take its post.
 	 */
 	static boolean guardMayConvert(ServerLevel level, Folk folk) {
-		// ((0.7.293) and a wall archer at his post, WallArchers)
-		if (folk.role() != Folk.GUARD && !WallArchers.posted(level, folk) || !folk.task().isEmpty() || folk.escort() != null || folk.getTarget() != null || folk.isPassenger()
+		// ((0.7.293) and a wall archer at his post, WallArchers; (0.7.295) a guard or archer in the saddle too, Cavalry)
+		boolean rider = Cavalry.mounted(folk) && (folk.role() == Folk.GUARD || folk.role() == Folk.ARCHER);
+		if (folk.role() != Folk.GUARD && !WallArchers.posted(level, folk) && !rider || !folk.task().isEmpty() || folk.escort() != null || folk.getTarget() != null
+			|| folk.isPassenger() && !rider
 			|| Caravans.isCaravanFolk(folk) || WarParties.isSoldier(folk) || Assault.attacker(folk) || Downed.isDowned(folk) || Arrests.busy(folk)) {
 			return false;
 		}
@@ -594,7 +596,7 @@ public final class Rulers {
 		return true;
 	}
 
-	private static boolean foeNear(ServerLevel level, PathfinderMob guard) {
+	static boolean foeNear(ServerLevel level, PathfinderMob guard) {
 		return !level.getEntitiesOfClass(LivingEntity.class, guard.getBoundingBox().inflate(ESCORT_THREAT_RANGE),
 			e -> e.isAlive() && e != guard && (e instanceof Enemy || McaCompat.foe(guard, e))).isEmpty();
 	}

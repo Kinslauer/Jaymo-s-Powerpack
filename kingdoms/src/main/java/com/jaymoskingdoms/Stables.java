@@ -1152,7 +1152,7 @@ public final class Stables {
 	}
 
 	/** (From {@link Raids#start}) A barbarian raider on a steppe pony (saddled, no barding), gone with him. */
-	static void pony(ServerLevel level, Folk raider, Faction camp, int i) {
+	static void pony(ServerLevel level, Worker raider, Faction camp, int i) {
 		if (i % RAIDER_RIDES_ONE_IN != 0) {
 			return;
 		}

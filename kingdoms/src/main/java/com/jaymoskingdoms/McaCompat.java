@@ -426,9 +426,34 @@ public final class McaCompat {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
 	}
 
+	/** (0.7.295) With MCA, a stranger of no settlement in {@code role} (a looter), kept to {@code radius} of {@code home}; or null. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob stranger(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, int role,
+		net.minecraft.core.BlockPos home, int radius) {
+		if (!LOADED) {
+			return null;
+		}
+		return McaBridge.stranger(level, at, yaw, role, home, radius);
+	}
+
+	/** (0.7.295) With MCA, an assassin ({@link Assassins}): a villager stranger at {@code at}, on his way to {@code mark}; or null. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob assassin(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, net.minecraft.core.BlockPos mark) {
+		return LOADED ? McaBridge.stranger(level, at, yaw, Assassins.ASSASSIN, mark, 64) : null;
+	}
+
 	/** (0.7.294) With MCA, one of {@code f}'s villagers to drive its horses ({@link Drivers}), or null. */
 	static @Nullable Worker driver(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
 		return LOADED ? McaBridge.driver(level, f, at, yaw, task, radius) : null;
+	}
+
+	/**
+	 * (0.7.295) With MCA, a raider just mustered ({@link Raids}) as an MCA villager in his place (a barbarian, a pirate,
+	 * an orc of the war band), or null (he stays folk).
+	 */
+	static net.minecraft.world.entity.@Nullable PathfinderMob raider(ServerLevel level, Folk folk) {
+		if (!LOADED) {
+			return null;
+		}
+		return Greenskins.brood(folk.role()) != null ? McaBridge.greenskinOf(level, folk) : McaBridge.raiderOf(level, folk);
 	}
 
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
@@ -523,6 +548,10 @@ public final class McaCompat {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
 			return Barbarians.villagerPrey(w.role(), w.factionId(), target);
 		}
+		if (Assassins.revealed(target)) {
+			// (0.7.295) an assassin with his cloak off
+			return guard instanceof Worker g && (g.role() == Folk.GUARD || g.role() == Folk.ARCHER);
+		}
 		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD && w.role() != Folk.ARCHER || guard.level().getServer() == null) {
 			return false;
 		}
@@ -534,6 +563,11 @@ public final class McaCompat {
 		}
 		if (target instanceof Folk folk) {
 			return folk.factionId() != faction && (folk.style() == FactionType.BARBARIAN || Relations.between(server, faction, folk.factionId()) == Relation.WAR);
+		}
+		if (target instanceof Worker other && (other.role() == Folk.GUARD || other.role() == Folk.ARCHER) && other.factionId() >= 0 && other.factionId() != faction
+			&& Relations.between(server, faction, other.factionId()) == Relation.WAR) {
+			// (0.7.295) a realm's at war: its guards, archers and soldiers, villagers now as its own are
+			return true;
 		}
 		// (0.7.148) a barbarian camp's MCA villager
 		return Barbarians.isCampVillager(target);

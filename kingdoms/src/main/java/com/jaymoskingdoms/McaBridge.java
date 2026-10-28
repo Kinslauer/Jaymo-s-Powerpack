@@ -462,6 +462,19 @@ final class McaBridge {
 		return w;
 	}
 
+	/** (0.7.295) {@link McaCompat#assassin}, {@link McaCompat#stranger}: a grown villager of no settlement, enlisted to none in {@code role}. */
+	static @Nullable PathfinderMob stranger(ServerLevel level, BlockPos at, float yaw, int role, BlockPos home, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(role, -1);
+		villager.setHomeTo(home, radius);
+		return villager;
+	}
+
 	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */
 	static void forgetVillager(net.minecraft.world.entity.Entity e) {
 		if (e instanceof VillagerEntityMCA v && e.level() instanceof ServerLevel level) {
@@ -488,9 +501,16 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
+		// ((0.7.295) a rider's horse is the villager's now: Cavalry)
+		net.minecraft.world.entity.Entity horse = Cavalry.horse(folk);
+		if (horse != null) {
+			folk.stopRiding();
+			villager.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), 0.0F);
+			villager.startRiding(horse);
+		}
 		worker(villager).enlist(archer ? Folk.ARCHER : Folk.GUARD, f.id());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
-		if (archer) {
+		if (archer && horse == null) {
 			villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
 		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
@@ -503,6 +523,11 @@ final class McaBridge {
 	 * axe, a deckhand's cutlass), takes {@code folk}'s place in its camp, enlisted to it in the same role (on its roster as before).
 	 */
 	static boolean convertRaider(ServerLevel level, Folk folk) {
+		return raiderOf(level, folk) != null;
+	}
+
+	/** (0.7.295) {@link #convertRaider}'s villager, or null. */
+	static @Nullable VillagerEntityMCA raiderOf(ServerLevel level, Folk folk) {
 		// (0.7.293) a chief: a man, with his own name
 		boolean chief = folk.role() == Folk.CHIEF;
 		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD);
@@ -514,7 +539,7 @@ final class McaBridge {
 		}
 		VillagerEntityMCA villager = make.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
-			return false;
+			return null;
 		}
 		Heritage.Kind kind = VillagerHeritage.of(folk);
 		if (kind != null) {
@@ -554,7 +579,7 @@ final class McaBridge {
 		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
-		return true;
+		return villager;
 	}
 
 	/**
@@ -564,9 +589,14 @@ final class McaBridge {
 	 * before). A king or warchief is the camp's leader in his folk's stead.
 	 */
 	static boolean convertGreenskin(ServerLevel level, Folk folk) {
+		return greenskinOf(level, folk) != null;
+	}
+
+	/** (0.7.295) {@link #convertGreenskin}'s villager, or null. */
+	static @Nullable VillagerEntityMCA greenskinOf(ServerLevel level, Folk folk) {
 		Heritage.Kind kind = Greenskins.brood(folk.role());
 		if (kind == null) {
-			return false;
+			return null;
 		}
 		boolean chief = Greenskins.chief(folk.role());
 		String name = chief && folk.getCustomName() != null ? folk.getCustomName().getString()
@@ -574,7 +604,7 @@ final class McaBridge {
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withName(name).withPosition(folk.position()).withAge(0)
 			.withProfession(Greenskins.ranged(folk.role()) ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD).spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
-			return false;
+			return null;
 		}
 		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
 		broodBorn(villager, kind, chief);
@@ -599,7 +629,7 @@ final class McaBridge {
 		takeLead(level, folk, villager);
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
-		return true;
+		return villager;
 	}
 
 	/** (0.7.293) {@code villager} takes {@code folk}'s health, blows, toughness, steadiness, sight (where they're more) and size. */

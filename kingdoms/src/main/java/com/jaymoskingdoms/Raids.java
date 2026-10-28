@@ -135,10 +135,10 @@ final class Raids {
 		return folk.task().equals(TASK);
 	}
 
-	/** A raider of either kind: a barbarian on a raid, or an illager mustered for one. */
+	/** A raider of either kind: a barbarian on a raid (a folk or (0.7.295) an MCA villager), or an illager mustered for one. */
 	static boolean isRaider(Entity entity) {
-		if (entity instanceof Folk folk) {
-			return isRaider(folk);
+		if (entity instanceof Worker folk) {
+			return TASK.equals(folk.task());
 		}
 		Illagers.Tag tag = entity instanceof Mob ? Illagers.tag(entity) : null;
 		return tag != null && tag.raid();
@@ -147,11 +147,11 @@ final class Raids {
 	// ---- what raiders carry (a barbarian in his hands, an illager in his off hand) ---------------------------------------
 
 	static boolean carrying(Mob raider) {
-		return raider instanceof Folk folk ? folk.isCarrying() : !Illagers.carried(raider).isEmpty();
+		return raider instanceof Worker folk ? folk.isCarrying() : !Illagers.carried(raider).isEmpty();
 	}
 
 	static void setCarried(Mob raider, ItemStack load) {
-		if (raider instanceof Folk folk) {
+		if (raider instanceof Worker folk) {
 			folk.setCarried(load);
 		} else {
 			Illagers.setCarried(raider, load);
@@ -159,7 +159,7 @@ final class Raids {
 	}
 
 	static ItemStack takeCarried(Mob raider) {
-		return raider instanceof Folk folk ? folk.takeCarried() : Illagers.takeCarried(raider);
+		return raider instanceof Worker folk ? folk.takeCarried() : Illagers.takeCarried(raider);
 	}
 
 	// ---- starting ------------------------------------------------------------------------------------------------
@@ -271,12 +271,17 @@ final class Raids {
 				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
+			// (0.7.295) with MCA, an MCA villager in his place (Andy, retiring the folk: "all mca please")
+			Worker member = raider;
+			if (McaCompat.raider(level, raider) instanceof Worker v) {
+				member = v;
+			}
 			// (after it's added: its load mustn't take it for a stray)
-			raider.setTask(TASK);
-			raid.party.add(raider.getUUID());
+			member.setTask(TASK);
+			raid.party.add(member.getUUID());
 			// (0.5.47) some ride steppe ponies (not pirates: they come ashore from their ship)
 			if (!pirates) {
-				Stables.pony(level, raider, camp, i);
+				Stables.pony(level, member, camp, i);
 			}
 		}
 		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager"
@@ -378,7 +383,7 @@ final class Raids {
 			case MARCH -> {
 				boolean arrived = now - raid.phaseAt > MARCH_TICKS;
 				for (Mob raider : party) {
-					if (raider.getTarget() == null) {
+					if (target(raider) == null) {
 						walk(level, raider, target.seat());
 					}
 					arrived |= raider.distanceToSqr(Vec3.atCenterOf(target.seat())) < ARRIVE_RANGE * ARRIVE_RANGE;
@@ -404,7 +409,7 @@ final class Raids {
 						continue;
 					}
 					done = false;
-					if (raider.getTarget() != null) {
+					if (target(raider) != null) {
 						continue;
 					}
 					if (raider.distanceToSqr(Vec3.atCenterOf(depot)) <= LOOT_REACH * LOOT_REACH || nearStorage(raider, target)) {
@@ -427,7 +432,7 @@ final class Raids {
 						goHome(level, camp, raider);
 						raid.party.remove(raider.getUUID());
 						raid.home++;
-					} else if (raider.getTarget() == null) {
+					} else if (target(raider) == null) {
 						walk(level, raider, camp.seat());
 					}
 				}
@@ -442,6 +447,24 @@ final class Raids {
 				}
 			}
 		}
+	}
+
+	/** (0.7.295) A raider's foe: a villager's is its brain's. */
+	private static @Nullable LivingEntity target(Mob raider) {
+		return raider instanceof net.minecraft.world.entity.PathfinderMob m ? Rulers.target(m) : raider.getTarget();
+	}
+
+	/**
+	 * (0.7.295) A raider who's an MCA villager ({@code Workers.step}): true while he marches, makes for the storehouse or
+	 * goes home as his raid sends him (in place of his brain); false for a fight (a foe on him or near).
+	 */
+	static boolean villagerStep(ServerLevel level, Worker w) {
+		net.minecraft.world.entity.PathfinderMob mob = w.mob();
+		if (mob instanceof Folk || !isRaider(mob) || Rulers.target(mob) != null || McaCompat.busy(mob) || Downed.isDowned(mob)) {
+			return false;
+		}
+		Raid raid = ACTIVE.get(w.factionId());
+		return raid != null && raid.party.contains(mob.getUUID()) && !Rulers.foeNear(level, mob);
 	}
 
 	private static boolean nearStorage(Mob raider, Faction target) {
@@ -497,7 +520,8 @@ final class Raids {
 		} else if (!load.isEmpty()) {
 			raider.spawnAtLocation(level, load);
 		}
-		raider.discard();
+		// ((0.7.295) a villager out of MCA's family tree too)
+		McaCompat.vanish(raider);
 	}
 
 	private static void end(ServerLevel level, Raid raid, List<Mob> party, @Nullable Faction camp) {
@@ -514,9 +538,9 @@ final class Raids {
 	 * roster: {@code folk}); a player who killed him earns the target's thanks.
 	 */
 	static void raiderDied(ServerLevel level, LivingEntity raider, int camp, DamageSource source, boolean folk) {
-		if (folk && !(raider instanceof Folk sailor && Pirates.offRoster(sailor.role()))) {
+		if (folk && !(raider instanceof Worker sailor && Pirates.offRoster(sailor.role()))) {
 			// ((0.7.42) a pirate gunner in a landing party was never on the roster)
-			UNDO.add(new int[] {camp, raider instanceof Folk f ? f.role() : Folk.BARBARIAN});
+			UNDO.add(new int[] {camp, raider instanceof Worker f ? f.role() : Folk.BARBARIAN});
 		}
 		Raid raid = ACTIVE.get(camp);
 		if (raid == null) {
@@ -541,7 +565,7 @@ final class Raids {
 
 	/** The camp a raider (of either kind) belongs to. */
 	private static int campOf(Mob raider) {
-		if (raider instanceof Folk folk) {
+		if (raider instanceof Worker folk) {
 			return folk.factionId();
 		}
 		Illagers.Tag tag = Illagers.tag(raider);
@@ -561,7 +585,7 @@ final class Raids {
 					raider.spawnAtLocation(level, load);
 				}
 				level.sendParticles(ParticleTypes.POOF, raider.getX(), raider.getY() + 1.0, raider.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
-				raider.discard();
+				McaCompat.vanish(raider);
 			}
 		}
 	}

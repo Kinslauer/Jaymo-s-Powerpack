@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -85,7 +86,7 @@ final class Cavalry {
 		return e != null && e.getVehicle() instanceof AbstractHorse horse ? horse : null;
 	}
 
-	static boolean mounted(Folk folk) {
+	static boolean mounted(Entity folk) {
 		return horse(folk) != null;
 	}
 
@@ -195,18 +196,19 @@ final class Cavalry {
 			if (tier == Wealth.Tier.POOR) {
 				continue;
 			}
-			List<Folk> folk = level.getEntitiesOfClass(Folk.class, round, x -> x.isAlive() && x.factionId() == f.id());
+			// ((0.7.295) its guards and archers, folk or (with MCA) its villagers)
+			List<Worker> folk = Workers.near(level, round, x -> x.isAlive() && x.factionId() == f.id());
 			Castle.Keep keep = Factions.keep(server, f.id());
 			int wantGuards = tier == Wealth.Tier.WEALTHY ? GUARDS_WEALTHY : GUARDS_PROSPEROUS;
-			long riding = folk.stream().filter(x -> x.role() == Folk.GUARD && mounted(x) && !WarParties.isSoldier(x)).count();
+			long riding = folk.stream().filter(x -> x.role() == Folk.GUARD && mounted(x.mob()) && !soldier(x)).count();
 			if (riding < wantGuards) {
-				List<Folk> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x) && !x.isPassenger()
-					&& x.getTarget() == null && x.escort() == null && !WarParties.isSoldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
-					&& (keep == null || !x.getHomePosition().closerThan(keep.gate(), POST_ON_FOOT) && !x.getHomePosition().closerThan(keep.throne(),
-						POST_ON_FOOT))).toList());
+				List<PathfinderMob> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x.mob()) && !x.mob().isPassenger()
+					&& Rulers.target(x.mob()) == null && !escorting(x) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
+					&& !x.mob().isSleeping() && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
+						&& !x.mob().getHomePosition().closerThan(keep.throne(), POST_ON_FOOT))).map(Worker::mob).toList());
 				walkers.sort(Comparator.comparingDouble(x -> x.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat()))));
 				if (!walkers.isEmpty()) {
-					Folk rider = walkers.getFirst();
+					PathfinderMob rider = walkers.getFirst();
 					// a horse whose rider fell first, else a new one bought
 					AbstractHorse spare = level.getEntitiesOfClass(AbstractHorse.class, rider.getBoundingBox().inflate(48.0),
 						h -> ours(h, f.id()) && !h.isVehicle() && !h.entityTags().contains(LENT) && h.isAlive()).stream().findFirst().orElse(null);
@@ -216,17 +218,17 @@ final class Cavalry {
 					} else if (tier == Wealth.Tier.WEALTHY && elephantLand(Climate.at(level, f.seat())) && elephants(level, round, f) < ELEPHANTS_ARID) {
 						// (0.5.34) a wealthy desert realm's war elephant, a snowy one's woolly mammoth
 						if (buy(server, f, ELEPHANT_COST)) {
-							mount(level, rider, f, false, Climate.at(level, f.seat()) == Climate.SNOWY ? Breed.WOOLLY_MAMMOTH : Breed.WAR_ELEPHANT);
+							mount(level, (Worker)rider, f, false, Climate.at(level, f.seat()) == Climate.SNOWY ? Breed.WOOLLY_MAMMOTH : Breed.WAR_ELEPHANT);
 							neigh(level, rider.blockPosition());
 						}
 					} else if (buy(server, f)) {
-						mount(level, rider, f, false);
+						mount(level, (Worker)rider, f, false);
 						neigh(level, rider.blockPosition());
 					}
 				}
 			}
 			if (tier == Wealth.Tier.WEALTHY) {
-				long archers = folk.stream().filter(x -> x.role() == Folk.ARCHER && mounted(x)).count();
+				long archers = folk.stream().filter(x -> x.role() == Folk.ARCHER && mounted(x.mob())).count();
 				if (archers < ARCHERS_WEALTHY && buy(server, f)) {
 					mountedArcher(level, f);
 				}
@@ -258,13 +260,34 @@ final class Cavalry {
 		return level.getEntitiesOfClass(WarElephant.class, round, e -> e.isAlive() && ours(e, f.id())).size();
 	}
 
+	/** (0.7.295) {@code w} is on a war party ({@link WarParties}). */
+	private static boolean soldier(Worker w) {
+		return w instanceof Folk folk && WarParties.isSoldier(folk);
+	}
+
+	/** (0.7.295) {@code w} rides at a ruler's back. */
+	private static boolean escorting(Worker w) {
+		return w instanceof Folk folk ? folk.escort() != null : w instanceof Enlisted e && Royals.escortOf(e) != null;
+	}
+
 	/** A mounted archer for a wealthy realm (on its roster), riding round its town. */
-	private static @Nullable Folk mountedArcher(ServerLevel level, Faction f) {
+	private static @Nullable Worker mountedArcher(ServerLevel level, Faction f) {
+		BlockPos at = Construction.standable(level, f.seat(), 6);
+		if (Workers.inPlace(f, Folk.ARCHER)) {
+			// (0.7.295) with MCA, one of its villagers, in the saddle
+			Worker w = McaCompat.enlist(level, f, Folk.ARCHER, at, f.seat(), ARCHER_ROAM);
+			if (w != null) {
+				w.mob().snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+				Factions.update(level.getServer(), f.id(), x -> x.withHoldings(x.holdings().adjust(Folk.ARCHER, 1)));
+				mount(level, w, f, false);
+				neigh(level, at);
+				return w;
+			}
+		}
 		Folk archer = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (archer == null) {
 			return null;
 		}
-		BlockPos at = Construction.standable(level, f.seat(), 6);
 		archer.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		archer.setup(Folk.ARCHER, f, f.seat(), ARCHER_ROAM);
 		level.addFreshEntity(archer);

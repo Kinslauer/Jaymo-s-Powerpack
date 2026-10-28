@@ -94,6 +94,15 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (w.role() == Looters.LOOTER && !(mob instanceof Folk)) {
+			// (0.7.295) a looter: his creeping and robbing are Looters' doing
+			return true;
+		}
+		if (w.role() == Assassins.ASSASSIN) {
+			// (0.7.295) an assassin, his own doings in place of his brain
+			Assassins.act(level, mob);
+			return true;
+		}
 		if (Crewmen.tagged(mob)) {
 			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
 			return Crewmen.step(level, w);
@@ -133,6 +142,10 @@ public final class Workers {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);
 		}
+		if (WarParties.isSoldier(w)) {
+			// (0.7.295) a soldier of a war party: on the march as it sends him
+			return WarParties.villagerStep(level, w);
+		}
 		if (w.role() == Folk.ARCHER && w instanceof Enlisted) {
 			// (0.7.293) a wall archer, held to his post
 			return WallArchers.step(level, w);
@@ -156,6 +169,14 @@ public final class Workers {
 		if (CampChiefs.isRole(w.role())) {
 			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally
 			CampChiefs.step(level, w);
+		}
+		if (!(mob instanceof Folk) && Raids.isRaider(mob)) {
+			// (0.7.295) a camp's villager out on a raid: its march and plunder; its ways in a fight as at home
+			if (Greenskins.isRole(w.role())) {
+				Greenskins.step(level, w);
+			}
+			Javelins.tick(level, w);
+			return Pirates.villagerStep(level, w) || Raids.villagerStep(level, w);
 		}
 		if (Greenskins.isRole(w.role())) {
 			// (0.7.292) a goblin village's or an orc camp's villager: an orc's rage and slam, a grunt's javelins; MCA's guard
@@ -190,6 +211,10 @@ public final class Workers {
 		CourtWizards.died(level, w, source);
 		Greenskins.died(level, w, source);
 		CampChiefs.died(level, w, source);
+		if (!(w.mob() instanceof Folk)) {
+			// (0.7.295) a villager assassin
+			Assassins.died(level, w.mob(), source);
+		}
 		KingdomEvents.workerDied(level, w, source);
 	}
 }

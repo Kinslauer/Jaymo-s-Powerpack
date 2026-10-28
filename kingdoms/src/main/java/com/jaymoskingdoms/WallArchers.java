@@ -59,7 +59,8 @@ final class WallArchers {
 	 */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
-		if (mob instanceof Folk || !mob.hasHome() || mob.isSleeping() || mob.isPassenger() || McaCompat.busy(mob) || Downed.isDowned(mob)) {
+		// (a mounted archer riding round the town isn't posted: kept to 1 block of a post)
+		if (mob instanceof Folk || !mob.hasHome() || mob.getHomeRadius() > 1 || mob.isSleeping() || mob.isPassenger() || McaCompat.busy(mob) || Downed.isDowned(mob)) {
 			return false;
 		}
 		BlockPos post = mob.getHomePosition();

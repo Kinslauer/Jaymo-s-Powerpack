@@ -20,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -134,7 +135,7 @@ final class WarParties {
 	/** Realms whose soldier fell (the roster's loss is undone next tick: parties aren't on it). */
 	private static final List<Integer> UNDO = new ArrayList<>();
 	/** Soldiers loaded with no party to belong to (sent home next tick). */
-	private static final List<Folk> STRAYS = new ArrayList<>();
+	private static final List<PathfinderMob> STRAYS = new ArrayList<>();
 	/** Spoils carts (carter, horse, wagon) loaded with no party (sent away next tick). */
 	private static final List<Entity> STRAY_CARTS = new ArrayList<>();
 
@@ -145,7 +146,7 @@ final class WarParties {
 		return war + "|" + side;
 	}
 
-	static boolean isSoldier(Folk folk) {
+	static boolean isSoldier(Worker folk) {
 		return folk.task().equals(TASK);
 	}
 
@@ -240,15 +241,11 @@ final class WarParties {
 			size += GreatWars.draftMercs(server, war, side, GreatWars.MERCS_PER_PARTY);
 		}
 		for (int i = 0; i < size; i++) {
-			Folk soldier = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
+			Worker soldier = soldier(level, from, at, random.nextFloat() * 360.0F, target.seat());
 			if (soldier == null) {
 				continue;
 			}
-			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
-			soldier.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			soldier.setup(Folk.GUARD, from, target.seat(), Raids.RAID_HOME_RADIUS);
-			level.addFreshEntity(soldier);
-			soldier.setTask(TASK);
 			// (0.5.14) a prosperous realm's soldiers ride, some of them
 			if (i % Cavalry.PARTY_RIDER_ONE_IN == 0 && Wealth.atLeast(server, from, Wealth.Tier.PROSPEROUS)) {
 				Cavalry.mount(level, soldier, from, true);
@@ -258,9 +255,9 @@ final class WarParties {
 		if (party.soldiers.isEmpty() || !hitchCart(level, party, from, muster, target)) {
 			// (no spoils cart, no march)
 			for (UUID id : party.soldiers) {
-				if (level.getEntity(id) instanceof Folk soldier) {
+				if (level.getEntity(id) instanceof PathfinderMob soldier) {
 					Cavalry.dismiss(soldier);
-					soldier.discard();
+					McaCompat.vanish(soldier);
 				}
 			}
 			ACTIVE.remove(key(war.id(), side));
@@ -274,6 +271,47 @@ final class WarParties {
 		Treasuries.wages(server, from, party.soldiers.size());
 		JaymosKingdoms.LOGGER.info("{} sends {} soldiers against {} from {}", from.name(), party.soldiers.size(), target.name(), muster);
 		return party;
+	}
+
+	/**
+	 * (0.7.295) One of {@code from}'s soldiers at {@code at}, marching on {@code goal}: with MCA an MCA guard of its
+	 * people (Andy, retiring the folk), else a folk.
+	 */
+	private static @Nullable Worker soldier(ServerLevel level, Faction from, BlockPos at, float yaw, BlockPos goal) {
+		if (from.type().isRealm()) {
+			Worker w = McaCompat.escort(level, from, at, yaw, TASK, Raids.RAID_HOME_RADIUS);
+			if (w != null) {
+				w.mob().setHomeTo(goal, Raids.RAID_HOME_RADIUS);
+				return w;
+			}
+		}
+		Folk soldier = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		if (soldier == null) {
+			return null;
+		}
+		soldier.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		soldier.setup(Folk.GUARD, from, goal, Raids.RAID_HOME_RADIUS);
+		level.addFreshEntity(soldier);
+		soldier.setTask(TASK);
+		return soldier;
+	}
+
+	/**
+	 * (0.7.295) A soldier who's an MCA villager ({@code Workers.step}, before its brain): true while he marches as his
+	 * party sends him (in place of his brain); false for a fight (a foe near), or at the siege where his brain fights
+	 * round the banner.
+	 */
+	static boolean villagerStep(ServerLevel level, Worker w) {
+		PathfinderMob mob = w.mob();
+		if (mob instanceof Folk || Rulers.target(mob) != null || mob.isSleeping() || McaCompat.busy(mob) || Downed.isDowned(mob)) {
+			return false;
+		}
+		for (Party party : ACTIVE.values()) {
+			if (party.soldiers.contains(mob.getUUID())) {
+				return party.phase != Phase.SIEGE && !party.holders.contains(mob.getUUID()) && !Rulers.foeNear(level, mob);
+			}
+		}
+		return false;
 	}
 
 	// ---- players marching with a party ------------------------------------------------------------------------------
@@ -305,7 +343,7 @@ final class WarParties {
 			if (out != null && out.phase != Phase.RETURN) {
 				out.players.add(player.getUUID());
 				Faction target = Factions.get(server, out.target);
-				Folk lead = out.soldiers.stream().map(level::getEntity).filter(e -> e instanceof Folk).map(e -> (Folk)e).findFirst().orElse(null);
+				Entity lead = out.soldiers.stream().map(level::getEntity).filter(e -> e instanceof Worker).findFirst().orElse(null);
 				BlockPos at = lead != null ? lead.blockPosition() : out.lastAt != null ? out.lastAt : target != null ? target.seat() : player.blockPosition();
 				return new Joined(true, Component.translatable("message.jaymoskingdoms.war.joined", name(Factions.get(server, out.faction)), name(target), at.getX(), at.getZ()));
 			}
@@ -424,19 +462,16 @@ final class WarParties {
 		BlockPos spot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
 			muster.offset(Mth.floor(dx / len * CART_BEHIND), 0, Mth.floor(dz / len * CART_BEHIND)));
 		float yaw = (float)(Math.atan2(-dz, -dx) * (180.0 / Math.PI)) - 90.0F;
-		Folk carter = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		// ((0.7.295) with MCA, one of the realm's people: Drivers)
+		Worker carter = Drivers.hire(level, from, spot, yaw, Caravans.TASK, 64, null);
 		if (carter == null) {
 			return false;
 		}
-		carter.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0.0F);
-		carter.setup(Caravans.CARTER, from, spot, 64);
-		carter.setTask(Caravans.TASK);
-		level.addFreshEntity(carter);
 		// (tagged once in the world, so its own loading doesn't count it a stray)
-		carter.addTag(CART_TAG);
+		carter.mob().addTag(CART_TAG);
 		Entity horse = Cavalry.mount(level, carter, from, true);
 		if (horse == null) {
-			carter.discard();
+			McaCompat.vanish(carter.mob());
 			return false;
 		}
 		horse.addTag(CART_TAG);
@@ -456,14 +491,14 @@ final class WarParties {
 	}
 
 	/** The cart follows the party: behind its lead on the march, back from the fighting at the siege, home after. */
-	private static void driveCart(ServerLevel level, String key, Party party, List<Folk> soldiers, @Nullable Faction from, @Nullable Faction target) {
+	private static void driveCart(ServerLevel level, String key, Party party, List<PathfinderMob> soldiers, @Nullable Faction from, @Nullable Faction target) {
 		Wagon wagon = cart(level, party);
 		if (wagon == null) {
 			return;
 		}
 		Entity carter = party.carter == null ? null : level.getEntity(party.carter);
 		Entity horse = party.horse == null ? null : level.getEntity(party.horse);
-		if (!(carter instanceof Folk driver) || !driver.isAlive() || horse == null || !horse.isAlive()) {
+		if (!(carter instanceof PathfinderMob driver) || !(carter instanceof Worker) || !driver.isAlive() || horse == null || !horse.isAlive()) {
 			// (its carter or horse fell: the cart is left where it stands, broken open)
 			Caravans.cartLost(level, wagon);
 			return;
@@ -486,8 +521,8 @@ final class WarParties {
 			to = Vec3.atBottomCenterOf(from.seat());
 		} else {
 			BlockPos toward = party.phase == Phase.SIEGE && party.rally != null ? party.rally : null;
-			Folk lead = null;
-			for (Folk s : soldiers) {
+			PathfinderMob lead = null;
+			for (PathfinderMob s : soldiers) {
 				if (!party.holders.contains(s.getUUID()) && (lead == null
 					|| s.distanceToSqr(Vec3.atCenterOf(target.seat())) < lead.distanceToSqr(Vec3.atCenterOf(target.seat())))) {
 					lead = s;
@@ -525,11 +560,9 @@ final class WarParties {
 		for (UUID id : new UUID[] {party.carter, party.horse, party.wagon}) {
 			Entity e = id == null ? null : level.getEntity(id);
 			if (e != null) {
-				if (e instanceof Folk f) {
-					Caravans.steer(f, null);
-				}
+				Caravans.steer(e, null);
 				level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 1.0, e.getZ(), 8, 0.4, 0.5, 0.4, 0.02);
-				e.discard();
+				McaCompat.vanish(e);
 			}
 		}
 		party.carter = party.horse = party.wagon = null;
@@ -624,9 +657,9 @@ final class WarParties {
 		}
 		UNDO.clear();
 		if (!STRAYS.isEmpty()) {
-			List<Folk> strays = List.copyOf(STRAYS);
+			List<PathfinderMob> strays = List.copyOf(STRAYS);
 			STRAYS.clear();
-			for (Folk stray : strays) {
+			for (PathfinderMob stray : strays) {
 				if (stray.isAlive()) {
 					vanish(level, stray);
 				}
@@ -636,7 +669,7 @@ final class WarParties {
 			List<Entity> strays = List.copyOf(STRAY_CARTS);
 			STRAY_CARTS.clear();
 			for (Entity stray : strays) {
-				stray.discard();
+				McaCompat.vanish(stray);
 			}
 		}
 		if (now % CHECK_TICKS == 0) {
@@ -655,9 +688,10 @@ final class WarParties {
 		War war = WarData.war(server, party.war);
 		Faction from = Factions.get(server, party.faction);
 		Faction target = Factions.get(server, party.target);
-		List<Folk> soldiers = new ArrayList<>();
+		List<PathfinderMob> soldiers = new ArrayList<>();
 		for (UUID id : party.soldiers) {
-			if (level.getEntity(id) instanceof Folk folk && folk.isAlive()) {
+			// ((0.7.295) folk, or MCA guards)
+			if (level.getEntity(id) instanceof PathfinderMob folk && folk instanceof Worker && folk.isAlive()) {
 				soldiers.add(folk);
 			}
 		}
@@ -697,11 +731,11 @@ final class WarParties {
 				boolean arrived = now - party.phaseAt > (joined ? JOINED_MARCH_TICKS : MARCH_TICKS);
 				Wagon wagon = cart(level, party);
 				Vec3 seat = Vec3.atCenterOf(target.seat());
-				for (Folk soldier : soldiers) {
+				for (PathfinderMob soldier : soldiers) {
 					if (party.holders.contains(soldier.getUUID())) {
 						continue;
 					}
-					if (soldier.getTarget() == null) {
+					if (Rulers.target(soldier) == null) {
 						if (wagon != null && soldier.distanceToSqr(wagon) > CART_WAIT * CART_WAIT
 							&& soldier.distanceToSqr(seat) < wagon.distanceToSqr(seat)) {
 							// (too far ahead of the cart: they wait for it)
@@ -716,7 +750,7 @@ final class WarParties {
 					party.phase = Phase.SIEGE;
 					party.phaseAt = now;
 					Economy.noteAttack(server, target, soldiers.getFirst());
-					Folk bearer = soldiers.stream().filter(s -> !party.holders.contains(s.getUUID()))
+					PathfinderMob bearer = soldiers.stream().filter(s -> !party.holders.contains(s.getUUID()))
 						.min((a, b) -> Double.compare(a.distanceToSqr(Vec3.atCenterOf(target.seat())), b.distanceToSqr(Vec3.atCenterOf(target.seat()))))
 						.orElse(soldiers.getFirst());
 					BlockPos at = bearer.blockPosition();
@@ -727,7 +761,7 @@ final class WarParties {
 					party.seatPlanted = planted != null;
 					BlockPos rally = planted != null ? planted : target.seat();
 					party.rally = rally;
-					for (Folk soldier : soldiers) {
+					for (PathfinderMob soldier : soldiers) {
 						if (!party.holders.contains(soldier.getUUID())) {
 							soldier.setHomeTo(rally, SIEGE_RADIUS);
 						}
@@ -746,16 +780,16 @@ final class WarParties {
 				}
 			}
 			case RETURN -> {
-				for (Folk soldier : soldiers) {
+				for (PathfinderMob soldier : soldiers) {
 					boolean home = from != null && soldier.distanceToSqr(Vec3.atCenterOf(from.seat())) < HOME_REACH * HOME_REACH;
 					if (home || !Raids.playerNear(level, soldier.blockPosition(), VANISH_RANGE)) {
 						vanish(level, soldier);
 						party.soldiers.remove(soldier.getUUID());
-					} else if (soldier.getTarget() == null && from != null) {
+					} else if (Rulers.target(soldier) == null && from != null) {
 						walk(level, soldier, from.seat());
 					}
 				}
-				party.soldiers.removeIf(id -> !(level.getEntity(id) instanceof Folk));
+				party.soldiers.removeIf(id -> !(level.getEntity(id) instanceof Worker));
 				if (party.soldiers.isEmpty() && cart(level, party) == null) {
 					// (the cart out of sight gets home unseen; a broken one's spoils were spilled, and what's left the soldiers carried)
 					deliver(level, party, from);
@@ -766,10 +800,10 @@ final class WarParties {
 	}
 
 	/** The bearer plants the party's banner on the first claimable chunk of the enemy's land he stands on, and some stay to hold it. */
-	private static void plantFrontier(ServerLevel level, War war, Party party, List<Folk> soldiers, Faction from, Faction target) {
+	private static void plantFrontier(ServerLevel level, War war, Party party, List<PathfinderMob> soldiers, Faction from, Faction target) {
 		MinecraftServer server = level.getServer();
 		int enemy = Wars.otherSide(war, party.side);
-		for (Folk bearer : soldiers) {
+		for (PathfinderMob bearer : soldiers) {
 			ChunkPos chunk = ChunkPos.containing(bearer.blockPosition());
 			Faction owner = Banners.owner(server, chunk);
 			if (owner == null || !Wars.onSide(server, owner.id(), enemy) || !Banners.claimable(server, party.side, chunk)) {
@@ -781,7 +815,7 @@ final class WarParties {
 				return;
 			}
 			int keep = Math.min(BANNER_GUARDS, soldiers.size() - MARCHERS_KEPT);
-			for (Folk guard : soldiers) {
+			for (PathfinderMob guard : soldiers) {
 				if (keep <= 0) {
 					break;
 				}
@@ -793,20 +827,20 @@ final class WarParties {
 		}
 	}
 
-	private static void withdraw(Party party, List<Folk> soldiers, @Nullable Faction from, long now) {
+	private static void withdraw(Party party, List<PathfinderMob> soldiers, @Nullable Faction from, long now) {
 		if (party.phase == Phase.RETURN) {
 			return;
 		}
 		party.phase = Phase.RETURN;
 		party.phaseAt = now;
-		for (Folk soldier : soldiers) {
+		for (PathfinderMob soldier : soldiers) {
 			if (from != null) {
 				soldier.setHomeTo(from.seat(), Folk.HOME_RADIUS);
 			}
 		}
 	}
 
-	private static void walk(ServerLevel level, Folk soldier, BlockPos to) {
+	private static void walk(ServerLevel level, PathfinderMob soldier, BlockPos to) {
 		if (!soldier.getNavigation().isDone() && level.getGameTime() % (TICK * 4) != 0) {
 			return;
 		}
@@ -820,10 +854,11 @@ final class WarParties {
 		soldier.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, MARCH_SPEED);
 	}
 
-	private static void vanish(ServerLevel level, Folk soldier) {
+	private static void vanish(ServerLevel level, PathfinderMob soldier) {
 		Cavalry.dismiss(soldier);
 		level.sendParticles(ParticleTypes.POOF, soldier.getX(), soldier.getY() + 1.0, soldier.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
-		soldier.discard();
+		// ((0.7.295) a villager out of MCA's family tree too)
+		McaCompat.vanish(soldier);
 	}
 
 	private static String name(@Nullable Faction f) {
@@ -833,7 +868,7 @@ final class WarParties {
 	// ---- events ------------------------------------------------------------------------------------------------------
 
 	/** A soldier fell: off his party, and his realm doesn't count the loss (he was never on its roster). */
-	static void soldierDied(Folk folk) {
+	static void soldierDied(Worker folk) {
 		if (!isSoldier(folk)) {
 			return;
 		}
@@ -855,7 +890,7 @@ final class WarParties {
 			STRAY_CARTS.add(entity);
 			return;
 		}
-		if (entity instanceof Folk folk && isSoldier(folk)) {
+		if (entity instanceof PathfinderMob folk && folk instanceof Worker w && isSoldier(w)) {
 			for (Party party : ACTIVE.values()) {
 				if (party.soldiers.contains(folk.getUUID())) {
 					return;

@@ -197,6 +197,17 @@ final class Javelins {
 		if (thrower instanceof Folk folk) {
 			return harms(folk, victim);
 		}
+		if (thrower instanceof Worker w && !Barbarians.isCampVillager(thrower)) {
+			// (0.7.295) a realm's MCA villager (a gunner at his cannon): never his own side, nor the villagers and golems
+			// he guards; others only if they're his foes
+			if (victim == thrower || victim instanceof Worker o && o.factionId() == w.factionId() || victim instanceof Villager || victim instanceof IronGolem) {
+				return false;
+			}
+			if (victim instanceof Player p) {
+				return !p.isCreative();
+			}
+			return victim instanceof net.minecraft.world.entity.monster.Enemy || McaCompat.foe(thrower, victim);
+		}
 		if (victim == thrower || Barbarians.isCampVillager(victim)) {
 			return false;
 		}

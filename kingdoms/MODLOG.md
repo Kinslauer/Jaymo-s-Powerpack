@@ -5910,3 +5910,24 @@ Andy, retiring the folk: "all mca please." The fourth part: the road.
 - These come and go (a caravan out of sight, a coach's trip over), so a villager who leaves for good is taken out of
   MCA's family tree too (`McaCompat.vanish`), and the tree doesn't fill with them.
 - Compile-checked, not seen in game.
+
+## 0.7.295: war parties, raiders, riders, gunners, assassins and looters are MCA villagers (pack 0.17.106)
+Andy, retiring the folk: "all mca please." The fifth part: the fighting folk.
+- **Riders** (`Cavalry`): a prosperous realm's mounted guards and a wealthy one's mounted archers are its MCA guards and
+  archers in the saddle; folk riders from before hand their horse to a villager (`McaBridge.convertGuard`).
+- **Cannon gunners** (`Cannon`, `McaGunner`): an MCA archer of the realm mans each cannon (the wall archers of 0.7.293
+  would otherwise have left them unmanned); a folk gunner hands over his seat. A ball from a villager gunner spares his
+  own side and the townsfolk (`Javelins.harms`).
+- **War parties** (`WarParties`): soldiers and the spoils cart's carter are MCA guards and a villager carter; they march
+  as their party sends them (`WarParties.villagerStep`, the brain set aside) and fight through their brains when a foe
+  comes near and at the siege. A realm's MCA guards now count an enemy realm's guards, archers and soldiers foes in a
+  war (`McaCompat.foe`).
+- **Raids** (`Raids`): a barbarian camp's, orc camp's or pirate cove's raiders are mustered as folk and handed to MCA
+  villagers at once (`McaCompat.raider`: the same gear, names and ways as at home); they march, plunder and go home as
+  before (`Raids.villagerStep`), and their losses are undone on the roster as their folk's were.
+- **Assassins** (`Assassins`): the stranger is a villager of no settlement; his stalk, stab, smoke and flight run as
+  before in place of his brain, and he fights with his own blade (`Assassins.fight`). Guards know him once his cloak is off.
+- **Looters** (`Looters`): the ragged strangers are villagers of no settlement, driven by the same creeping and robbing;
+  the MCA guards and archers now spot them and take them in.
+- Caravan guards and soldiers on the march sense foes every tick so their brains get the fight.
+- Compile-checked, not seen in game.

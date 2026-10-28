@@ -198,7 +198,8 @@ public final class Looters {
 	}
 
 	static boolean is(Entity e) {
-		return e instanceof Folk f && f.role() == LOOTER;
+		// ((0.7.295) a folk or a villager)
+		return e instanceof Worker w && w.role() == LOOTER;
 	}
 
 	/** {@code corpse} is some robber's mark just now (so a bearer leaves it a moment). */
@@ -356,18 +357,23 @@ public final class Looters {
 		if (spot == null || dress == null) {
 			return false;
 		}
-		Folk l = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		// (0.7.295) with MCA, a villager stranger (Andy, retiring the folk: "all mca please")
+		PathfinderMob l = McaCompat.stranger(level, spot, random.nextFloat() * 360.0F, LOOTER, field, (int)LOOT_REACH * 2);
 		if (l == null) {
-			return false;
+			Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+			if (folk == null) {
+				return false;
+			}
+			folk.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+			folk.setup(LOOTER, dress, field, (int)LOOT_REACH * 2);
+			folk.setFactionId(-1);
+			level.addFreshEntity(folk);
+			l = folk;
 		}
-		l.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-		l.setup(LOOTER, dress, field, (int)LOOT_REACH * 2);
-		l.setFactionId(-1);
 		l.getAttribute(Attributes.MAX_HEALTH).setBaseValue(HEALTH);
 		l.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(SPEED);
 		l.setHealth((float)HEALTH);
 		dress(l);
-		level.addFreshEntity(l);
 		PLOTS.put(l.getUUID(), new Plot(l.getUUID(), field, l.position(), false, now, now + WORK_TICKS));
 		return true;
 	}
@@ -394,7 +400,7 @@ public final class Looters {
 	}
 
 	/** Rags and a sack: a dyed leather cap and tunic, a bundle at his side, a looter's name. */
-	static void dress(Folk l) {
+	static void dress(PathfinderMob l) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			l.setItemSlot(slot, ItemStack.EMPTY);
 			l.setDropChance(slot, 0.0F);
@@ -488,7 +494,7 @@ public final class Looters {
 				boolean far = who.distanceToSqr(Vec3.atCenterOf(p.field)) > GONE * GONE;
 				if (far && !watched(level, who) || p.stage == Stage.LEAVE && now - p.stageAt > LEAVE_TICKS && !watched(level, who)) {
 					// slipped away with his sack
-					who.discard();
+					McaCompat.vanish(who);
 					return false;
 				}
 				if (who.getNavigation().isDone() || now % 20 == 0) {
@@ -553,9 +559,11 @@ public final class Looters {
 
 	/** One who keeps the law: a realm's or village's fighting folk, or an iron golem a village made. */
 	private static boolean guard(LivingEntity e) {
-		if (e instanceof Folk f) {
-			Faction faction = f.level().getServer() == null ? null : Factions.get(f.level().getServer(), f.factionId());
-			return f.combatant() && !is(f) && !Assassins.is(f) && faction != null && !faction.fallen() && faction.type() != FactionType.BARBARIAN;
+		if (e instanceof Worker f) {
+			// ((0.7.295) folk, or the MCA guards and archers that keep a realm's peace now)
+			Faction faction = e.level().getServer() == null ? null : Factions.get(e.level().getServer(), f.factionId());
+			boolean fighter = f instanceof Folk folk ? folk.combatant() : f.role() == Folk.GUARD || f.role() == Folk.ARCHER;
+			return fighter && !is(e) && !Assassins.is(e) && faction != null && !faction.fallen() && faction.type() != FactionType.BARBARIAN;
 		}
 		return e instanceof IronGolem g && !g.isPlayerCreated();
 	}
@@ -685,14 +693,14 @@ public final class Looters {
 			if (bringer == null) {
 				continue;
 			}
-			Folk guard = null;
+			PathfinderMob guard = null;
 			Faction law = null;
 			double best = HAND_REACH * HAND_REACH;
-			for (Folk f : level.getEntitiesOfClass(Folk.class, who.getBoundingBox().inflate(HAND_REACH), Looters::free)) {
-				double d = f.distanceToSqr(who);
+			for (Worker f : Workers.near(level, who.getBoundingBox().inflate(HAND_REACH), Looters::free)) {
+				double d = f.mob().distanceToSqr(who);
 				if (d < best) {
 					best = d;
-					guard = f;
+					guard = f.mob();
 					law = Factions.get(level.getServer(), f.factionId());
 				}
 			}
@@ -717,9 +725,11 @@ public final class Looters {
 	}
 
 	/** A guard free to take a prisoner: a settlement's fighting folk, not its ruler, not busy, fighting or down. */
-	private static boolean free(Folk f) {
-		Folk.Role role = Folk.role(f.role());
-		return f.isAlive() && guard(f) && (role == null || !role.leader()) && f.getTarget() == null && !Downed.isDowned(f) && !Arrests.busy(f)
+	private static boolean free(Worker w) {
+		// ((0.7.295) a folk or an MCA guard)
+		PathfinderMob f = w.mob();
+		Folk.Role role = Folk.role(w.role());
+		return f.isAlive() && guard(f) && (role == null || !role.leader()) && Rulers.target(f) == null && !Downed.isDowned(f) && !Arrests.busy(f)
 			&& !Bearers.busy(f);
 	}
 
