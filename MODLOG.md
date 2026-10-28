@@ -3291,3 +3291,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.82, a floating spirit hand (Kingdoms 0.7.279):** Far Hand and Catch now send out a floating hand made of the
   ki glow's wisps (after Mage Hand): it flies to the chest or item before it opens or comes to you, and catches shots in
   front of you. Only the attuned see it. Not seen in game.
+- **0.17.83, wisp auras:** Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a
+  solid mesh" (four reference pictures). The flame, smooth and godly shells are gone; every style is now ~40-70 single
+  tongues of light (`ZFighterKiAuraStyles.wisps`, texture `tools/gen_ki_wisp.py`) born touching the body, licking up
+  and off it, drifting away and fading over a short life, then reborn elsewhere. Styles differ only in their wisps'
+  numbers (constants at the top). Flying, they bend back toward the feet (the way the cruise pose lays you out) and
+  narrow into a comet's tail (`ZFighterKiAura` passes a trail amount from speed). Sparks and motes kept. The old shell
+  textures and their generators are removed. Compile-checked, not seen in game.

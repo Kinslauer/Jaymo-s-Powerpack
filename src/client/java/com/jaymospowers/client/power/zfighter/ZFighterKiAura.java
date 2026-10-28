@@ -1,6 +1,5 @@
 package com.jaymospowers.client.power.zfighter;
 
-import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAura;
 import com.jaymospowers.power.zfighter.ZFighterBranchForms;
@@ -17,10 +16,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -32,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * "the aura i want appears when charging, after achieving max it stays for a bit until your ki falls, and it pulses as
  * you are transformed with the current rising debris". A flame-shaped shell of light round the whole body, widest at
  * the hips and breaking at the top into tongues that flicker and lick up past the head, with flames scrolling up it
- * (original texture, {@code tools/gen_ki_aura.py}), in his ki colour (a form's colour in a form). Two layers, the inner
+ * (original texture), in his ki colour (a form's colour in a form). Two layers, the inner
  * one brighter, turning against each other. Full while charging; held after a full charge ({@link ZFighterPower#AURA_HOLD});
  * in a form it flares up and dies back every so often, quicker each form. The faint {@link ZFighterKiGlow} stays the
  * look in between. Not on the Great Ape, while hidden, nor round your own camera in first person.
@@ -40,31 +36,16 @@ import org.jspecify.annotations.Nullable;
  * (0.17.46, Andy's NOEA picks) Three styles ({@link ZFighterAura}, picked on the training screen): this flame is
  * "Sparking" (with {@link ZFighterKiAuraStyles#sparks} on it); Smooth and Godly are drawn by {@link ZFighterKiAuraStyles}
  * under the same rules. The fourth number on the render state is the style.
+ * <p>
+ * (0.17.63) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh":
+ * the shells are gone. Every style is now wisps of light that touch the body, lick off it and fade
+ * ({@link ZFighterKiAuraStyles#draw}); this class still decides when it shows, how strong, how big and what colour, and
+ * the fifth number is how far it streams back in flight.
  */
 public final class ZFighterKiAura {
-	/** On his render state: the aura's colour (RGB), strength (0-1), size and style, or null for none. */
+	/** On his render state: the aura's colour (RGB), strength (0-1), size, style and trail (0-1), or null for none. */
 	public static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ki_aura");
-	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_ki_aura.png");
-	private static final RenderType TYPE = RenderTypes.energySwirl(TEXTURE, 0.0F, 0.0F);
 	static final int FULL_BRIGHT = 0xF000F0;
-
-	/** The shape (model units, y down from the hips' pivot): radius at each ring, bottom (his feet) to top (the tips). */
-	static final float[] RADIUS = {0.30F, 0.56F, 0.72F, 0.80F, 0.79F, 0.72F, 0.58F, 0.40F, 0.14F};
-	static final float BOTTOM = 1.62F, TOP = -1.2F;
-	/** Columns round it; rings from this one up break into tongues that reach up to this much higher (every other one less). */
-	static final int COLUMNS = 18, TONGUE_FROM = 5;
-	static final float TONGUE = 0.55F, SHORT_TONGUE = 0.45F, TONGUE_SPEED = 0.35F;
-	/** The sides' flutter (share of the radius) and how fast it moves. */
-	static final float WOBBLE = 0.06F, WOBBLE_SPEED = 0.7F;
-	/** How bright each ring is, bottom to top (fading out at his feet and the tips). */
-	static final float[] RING_LIGHT = {0.15F, 0.6F, 0.85F, 1.0F, 1.0F, 0.95F, 0.8F, 0.5F, 0.0F};
-	/** The layers, inside out: size, brightness, how fast the flames rise and how fast it turns (degrees a tick). */
-	static final float[] LAYER_SIZE = {0.82F, 1.0F};
-	static final float[] LAYER_LIGHT = {0.55F, 0.34F};
-	static final float[] LAYER_RISE = {0.05F, 0.035F};
-	static final float[] LAYER_SPIN = {2.2F, -1.4F};
-	/** The texture's repeats round and up the aura. */
-	static final float U_REPEAT = 2.0F, V_REPEAT = 1.0F;
 
 	/** Strength while charging, and held after a full charge; how fast it grows in and dies out (share a tick). */
 	static final float CHARGING = 1.0F, HOLDING = 0.85F, GROW = 0.35F, FADE = 0.12F;
@@ -78,6 +59,8 @@ public final class ZFighterKiAura {
 	static final float PULSE_RISE = 0.12F, PULSE_DECAY = 5.0F, PULSE_HIGH = 0.75F, PULSE_LOW = 0.0F;
 	/** A pulse swells the aura out by this much at its height. */
 	static final float PULSE_SWELL = 0.1F;
+	/** Flying: the aura starts to stream back at this speed (blocks a tick) and fully at this one. */
+	static final double TRAIL_FROM = 0.2, TRAIL_FULL = 1.0;
 
 	/** How strong each one's charge/hold aura is now (eased in and out), and the age it was last eased at. */
 	private static final Map<Player, float[]> EASED = new WeakHashMap<>();
@@ -125,7 +108,15 @@ public final class ZFighterKiAura {
 		}
 		float size = 1.0F + SIZE_PER_FORM * com.jaymospowers.power.zfighter.ZFighterForms.tier(f) + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
 			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F);
-		return new float[] {ZFighterKiGlow.color(player, f), strength, size, ZFighterAura.style(player)};
+		float trail = 0.0F;
+		Integer flight = player.getAttached(ZFighterPower.FLIGHT);
+		if (flight != null && flight > 0) {
+			// (from where he was last tick: a remote player's motion isn't sent)
+			double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
+			double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
+			trail = (float)Mth.clamp((speed - TRAIL_FROM) / (TRAIL_FULL - TRAIL_FROM), 0.0, 1.0);
+		}
+		return new float[] {ZFighterKiGlow.color(player, f), strength, size, ZFighterAura.style(player), trail};
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -139,64 +130,8 @@ public final class ZFighterKiAura {
 			if (aura == null || state.isInvisible) {
 				return;
 			}
-			int color = (int)aura[0];
-			float age = state.ageInTicks;
-			// (0.17.46) the style he picked: smooth and godly have shells of their own; sparking is the flame below plus sparks
-			int style = (int)aura[3];
-			if (style == ZFighterAura.SMOOTH) {
-				ZFighterKiAuraStyles.smooth(poseStack, collector, color, aura[1], aura[2], age);
-				return;
-			}
-			if (style == ZFighterAura.GODLY) {
-				ZFighterKiAuraStyles.godly(poseStack, collector, color, aura[1], aura[2], age);
-				return;
-			}
-			for (int layer = 0; layer < LAYER_SIZE.length; layer++) {
-				float light = Mth.clamp(LAYER_LIGHT[layer] * aura[1], 0.0F, 1.0F);
-				float size = LAYER_SIZE[layer] * aura[2];
-				float spin = age * LAYER_SPIN[layer] * Mth.DEG_TO_RAD;
-				float rise = age * LAYER_RISE[layer];
-				int seed = layer * 7;
-				// after the glow's shells, inner layer first, so the light piles up outward
-				collector.order(6 + layer).submitCustomGeometry(poseStack, TYPE,
-					(pose, buffer) -> shell(pose, buffer, color, light, size, spin, rise, age, seed));
-			}
-			ZFighterKiAuraStyles.sparks(poseStack, collector, color, aura[1], aura[2], age);
-		}
-
-		/** One layer: a ring of columns, each a strip of quads from his feet up to its tongue's tip. */
-		private static void shell(PoseStack.Pose pose, VertexConsumer buffer, int color, float light, float size, float spin, float rise,
-			float age, int seed) {
-			int rings = RADIUS.length;
-			float[][] x = new float[COLUMNS + 1][rings], y = new float[COLUMNS + 1][rings], z = new float[COLUMNS + 1][rings];
-			for (int c = 0; c <= COLUMNS; c++) {
-				int col = c % COLUMNS;
-				float a = Mth.TWO_PI * col / COLUMNS + spin;
-				float cos = Mth.cos(a), sin = Mth.sin(a);
-				float reach = (col % 2 == 0 ? 1.0F : SHORT_TONGUE)
-					* (0.5F + 0.5F * Mth.sin(age * TONGUE_SPEED * (1.0F + 0.13F * ((col * 5 + seed) % 7)) + col * 2.3F + seed));
-				for (int r = 0; r < rings; r++) {
-					float t = (float)r / (rings - 1);
-					float wobble = 1.0F + WOBBLE * Mth.sin(age * WOBBLE_SPEED + col * 1.7F + r * 0.9F + seed);
-					float radius = RADIUS[r] * size * wobble;
-					float up = r >= TONGUE_FROM ? TONGUE * reach * (r - TONGUE_FROM + 1) / (rings - TONGUE_FROM) : 0.0F;
-					x[c][r] = cos * radius;
-					z[c][r] = sin * radius;
-					// grown from his feet up, so a bigger aura stands on the same ground
-					y[c][r] = BOTTOM - (BOTTOM - Mth.lerp(t, BOTTOM, TOP)) * size - up * size;
-				}
-			}
-			for (int c = 0; c < COLUMNS; c++) {
-				float u0 = U_REPEAT * c / COLUMNS, u1 = U_REPEAT * (c + 1) / COLUMNS;
-				for (int r = 0; r < rings - 1; r++) {
-					float v0 = V_REPEAT * (1.0F - (float)r / (rings - 1)) + rise, v1 = V_REPEAT * (1.0F - (float)(r + 1) / (rings - 1)) + rise;
-					int lo = tint(color, light * RING_LIGHT[r]), hi = tint(color, light * RING_LIGHT[r + 1]);
-					vertex(pose, buffer, x[c][r], y[c][r], z[c][r], u0, v0, lo);
-					vertex(pose, buffer, x[c + 1][r], y[c + 1][r], z[c + 1][r], u1, v0, lo);
-					vertex(pose, buffer, x[c + 1][r + 1], y[c + 1][r + 1], z[c + 1][r + 1], u1, v1, hi);
-					vertex(pose, buffer, x[c][r + 1], y[c][r + 1], z[c][r + 1], u0, v1, hi);
-				}
-			}
+			// (0.17.63) whichever style, wisps now; the style decides their look
+			ZFighterKiAuraStyles.draw(poseStack, collector, (int)aura[3], (int)aura[0], aura[1], aura[2], aura[4], state.ageInTicks);
 		}
 
 		/** Additive: the colour's brightness is how strongly it shows. */
