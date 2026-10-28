@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import com.jaymoskingdoms.monsters.Monsters;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -57,9 +56,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  * raiders, orcs, goblins, assassins) that come near a player take that player's tier, the highest of anyone who's
  * come near them: more health, armour, toughness, damage and speed. In return the player's luck rises (better chest
  * and fishing loot), their kills give more experience, and both a tiered foe's drops and the chests they open can come
- * with stacks doubled. Tiers unlock by feats: great foes slain (anything with a boss bar, a monster of legend, a
- * vanilla boss), a trip to the Nether, the Wither, the Ender Dragon. Everyone near a great foe when it falls shares the
- * kill. A player can go back down at any time, a minute after their last change.
+ * with stacks doubled. Tiers unlock by feats: great foes slain (anything with a boss bar, a vanilla boss), a trip to
+ * the Nether, the Wither, the Ender Dragon. Everyone near a great foe when it falls shares the kill. A player can go
+ * back down at any time, a minute after their last change. (0.7.287, Andy) The monsters of legend (ogres, werewolves,
+ * wraiths and the rest) are no longer great foes: one ogre was enough to open Borderlands.
  * <p>
  * (0.7.145) The world itself has a tier too, its floor: no one plays below it. It starts at Hearth; the first of the
  * Aether's Giants to fall ({@code remnants/Monoliths}) raises it to Borderlands, lifting everyone (and everyone who joins
@@ -451,7 +451,7 @@ public final class WorldTiers {
 		}
 		EntityType<?> type = entity.getType();
 		boolean dragon = type == EntityTypes.ENDER_DRAGON, wither = type == EntityTypes.WITHER;
-		if (!(dragon || wither || type == EntityTypes.ELDER_GUARDIAN || type == EntityTypes.WARDEN || Monsters.legend(type) || BossBars.boss(entity))) {
+		if (!(dragon || wither || type == EntityTypes.ELDER_GUARDIAN || type == EntityTypes.WARDEN || BossBars.boss(entity))) {
 			return;
 		}
 		// a great foe: everyone near shares the kill
