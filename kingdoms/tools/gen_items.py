@@ -4,6 +4,8 @@ plot_stake: a pointed wooden stake with a little red pennant tied on near the to
 awareness_eye (0.7.111): the stealth gauge's eye, four frames.
 hidden_blade (0.7.101): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
 top-right, no black outlines, light from the top-left, vanilla's own iron ramp).
+horse_handbook (0.7.305): the Horsekeeper's Handbook, a brown leather book with a gold horseshoe on its cover and the
+pages' cream edge down its right side, lit from the top-left.
 dynamite (0.7.107): a fat red stick wrapped in a paper band, its fuse lit at the top right; drawn as a capsule along the
 diagonal and shaded across it (lit edge top-left), vanilla style.
 """
@@ -191,7 +193,48 @@ def awareness_eye():
     img.save(os.path.join(GUI, "awareness_eye.png"))
 
 
+def horse_handbook():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    cover = [(0x3a, 0x22, 0x12), (0x5a, 0x36, 0x1c), (0x74, 0x47, 0x25), (0x8c, 0x58, 0x2f), (0xa2, 0x6a, 0x3a)]
+    page = [(0x9a, 0x90, 0x78), (0xc8, 0xbe, 0xa2), (0xe8, 0xe0, 0xc8)]
+    gold = [(0x8a, 0x5c, 0x10), (0xc8, 0x92, 0x1e), (0xf0, 0xc8, 0x40), (0xff, 0xec, 0x90)]
+    x0, x1, y0, y1 = 2, 12, 1, 14
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            edge = x in (x0, x1) or y in (y0, y1)
+            shade = 0 if edge else 3 if x <= x0 + 1 or y <= y0 + 1 else 2
+            if x == x0 + 1 and not edge:
+                shade = 1  # the spine's crease
+            px[x, y] = cover[shade] + (255,)
+    # the pages' edge down the right, under the cover's lip
+    for y in range(y0 + 1, y1 + 1):
+        px[x1 + 1, y] = page[1 if y % 2 else 2] + (255,)
+        px[x1 + 2, y] = page[0] + (255,) if y < y1 else (0, 0, 0, 0)
+    px[x1 + 1, y1] = page[0] + (255,)
+    # the horseshoe, open end down
+    shoe = ["  .....  ",
+            " ..   .. ",
+            " .     . ",
+            ".       .",
+            ".       .",
+            ".       .",
+            "..     ..",
+            " .     . "]
+    sx, sy = 3, 4
+    for j, row in enumerate(shoe):
+        for i, c in enumerate(row):
+            if c == ".":
+                lit = 3 if j <= 1 and i <= 4 else 2 if i <= 4 else 1
+                px[sx + i, sy + j] = gold[lit] + (255,)
+    # nail holes
+    for (i, j) in ((1, 3), (7, 3), (1, 5), (7, 5)):
+        px[sx + i, sy + j] = gold[0] + (255,)
+    img.save(os.path.join(OUT, "horse_handbook.png"))
+
+
 if __name__ == "__main__":
+    horse_handbook()
     plot_stake()
     hidden_blade()
     dynamite()

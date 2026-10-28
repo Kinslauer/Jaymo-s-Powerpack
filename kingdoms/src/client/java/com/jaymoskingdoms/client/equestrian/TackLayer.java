@@ -26,7 +26,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BannerRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.EquineRenderState;
@@ -36,8 +40,14 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WoolCarpetBlock;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -46,11 +56,13 @@ import org.jspecify.annotations.Nullable;
  * the blanket (in its dye) and horseshoes. The pieces are boxes on {@link BreedHorseModel}'s bones (every build has them
  * in the same places), read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py}); the models
  * follow the horse's own animation (they're horse models themselves). Also carries the kneel onto the render state, for
- * {@code LivingEntityRendererMixin}.
+ * {@code LivingEntityRendererMixin}. (0.7.305) A carpet in the blanket's place is drawn as the blanket in its colour, and
+ * a banner flies from a pole at the back of the saddle.
  */
 public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, BreedHorseModel> {
 	/** What it wears: its saddle (0 none or vanilla's, 1 war, 2 racing), bridle, blanket colour (0 none), shoes; ridden; how far it kneels (0-1). */
-	public record Look(int saddle, boolean bridle, int blanket, boolean shod, boolean ridden, float kneel) {
+	public record Look(int saddle, boolean bridle, int blanket, boolean shod, boolean ridden, float kneel, @Nullable DyeColor banner,
+		BannerPatternLayers patterns) {
 	}
 
 	public static final RenderStateDataKey<Look> LOOK = RenderStateDataKey.create(() -> "jaymoskingdoms:tack_look");
@@ -62,14 +74,20 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 	private static final String[] GROUPS = {"war_saddle", "racing_saddle", "bridle", "bridle_reins", "shoes", "blanket"};
 	/** A kneel takes this many ticks to go down (and come up). */
 	private static final float KNEEL_TICKS = 6.0F;
+	/** (0.7.305) The banner: how big against a standing one, and where its pole stands on the saddle bone (px: to the side, down the flank, behind). */
+	private static final float BANNER_SCALE = 0.42F, BANNER_SIDE = 5.5F, BANNER_DROP = 5.0F, BANNER_BACK = 5.0F;
+	/** (0.7.305) A moss carpet's colour, as a saddle cloth. */
+	private static final int MOSS_COLOR = 0x5A6C2C;
 	private static @Nullable LayerDefinition mainLayer;
 	private static @Nullable LayerDefinition blanketLayer;
 
 	private final @Nullable TackModel main;
 	private final @Nullable TackModel blanket;
+	private final BannerRenderer banner;
 
-	TackLayer(RenderLayerParent<BreedHorseRenderer.State, BreedHorseModel> parent) {
+	TackLayer(RenderLayerParent<BreedHorseRenderer.State, BreedHorseModel> parent, EntityRendererProvider.Context context) {
 		super(parent);
+		this.banner = new BannerRenderer(context.getModelSet(), context.getSprites());
 		this.main = mainLayer == null ? null : new TackModel(mainLayer.bakeRoot());
 		this.blanket = blanketLayer == null ? null : new TackModel(blanketLayer.bakeRoot());
 	}
@@ -145,10 +163,16 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 		int kind = saddle.is(Tackroom.WAR_SADDLE) ? 1 : saddle.is(Tackroom.RACING_SADDLE) ? 2 : 0;
 		Tack t = Bonding.tack(horse);
 		int blanket = 0;
-		if (!t.blanket().isEmpty()) {
+		if (t.blanket().is(Tackroom.HORSE_BLANKET)) {
 			DyedItemColor dyed = t.blanket().get(DataComponents.DYED_COLOR);
 			blanket = ARGB.opaque(dyed != null ? dyed.rgb() : Tackroom.BLANKET_COLOR);
+		} else if (!t.blanket().isEmpty()) {
+			// (0.7.305) a carpet: the blanket in the carpet's colour
+			blanket = ARGB.opaque(Block.byItem(t.blanket().getItem()) instanceof WoolCarpetBlock carpet
+				? carpet.getColor().getTextureDiffuseColor() : MOSS_COLOR);
 		}
+		DyeColor banner = t.banner().getItem() instanceof BannerItem item ? item.getColor() : null;
+		BannerPatternLayers patterns = t.banner().getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
 		var b = horse.getAttached(Bonding.BOND);
 		boolean shod = b != null && b.shod();
 		Long until = horse.getAttached(Bonding.KNEEL);
@@ -161,7 +185,7 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 			state.setData(LOOK, null);
 			return;
 		}
-		state.setData(LOOK, new Look(kind, !t.bridle().isEmpty(), blanket, shod, horse.isVehicle(), kneel));
+		state.setData(LOOK, new Look(kind, !t.bridle().isEmpty(), blanket, shod, horse.isVehicle(), kneel, banner, patterns));
 	}
 
 	@Override
@@ -171,11 +195,33 @@ public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, Breed
 			return;
 		}
 		if (look.blanket() != 0 && this.blanket != null) {
-			renderColoredCutoutModel(this.blanket, BLANKET_TEXTURE, poseStack, collector, lightCoords, state, look.blanket(), 1);
+			BreedHorseRenderer.layer(this.blanket, BLANKET_TEXTURE, poseStack, collector, lightCoords, state, look.blanket(), 1);
 		}
 		if ((look.saddle() != 0 || look.bridle() || look.shod()) && this.main != null) {
-			renderColoredCutoutModel(this.main, TEXTURE, poseStack, collector, lightCoords, state, -1, 3);
+			BreedHorseRenderer.layer(this.main, TEXTURE, poseStack, collector, lightCoords, state, -1, 3);
 		}
+		if (look.banner() != null && this.main != null && state.fade >= 1.0F) {
+			banner(poseStack, collector, lightCoords, state, look);
+		}
+	}
+
+	/** (0.7.305) Its banner on a pole at the back of the saddle, to one side, the flag streaming out behind. */
+	private void banner(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, BreedHorseRenderer.State state, Look look) {
+		TackModel model = this.main;
+		model.setupAnim(state);
+		poseStack.pushPose();
+		model.root().translateAndRotate(poseStack);
+		ModelPart group = model.root().getChild(BreedHorseModel.TACK_BUILD);
+		group.translateAndRotate(poseStack);
+		group.getChild("saddle").translateAndRotate(poseStack);
+		poseStack.translate(BANNER_SIDE / 16.0F, BANNER_DROP / 16.0F, BANNER_BACK / 16.0F);
+		poseStack.rotate(Axis.YP.rotationDegrees(90.0F));
+		poseStack.scale(BANNER_SCALE, BANNER_SCALE, BANNER_SCALE);
+		// the flag hangs off the pole's back, not across it
+		poseStack.translate(-10.0F / 16.0F, 0.0F, 0.0F);
+		this.banner.submitSpecial(BannerBlock.AttachmentType.GROUND, poseStack, collector, lightCoords, OverlayTexture.NO_OVERLAY, look.banner(),
+			look.patterns(), state.outlineColor);
+		poseStack.popPose();
 	}
 
 	/** The tack's pieces on the horse's bones; each group shown as the render state says. */

@@ -467,6 +467,14 @@ public final class Bonding {
 		if (!horse.isTamed() || horse.isBaby()) {
 			return InteractionResult.PASS;
 		}
+		// (0.7.305) a second rider climbs up behind the first
+		if (stack.isEmpty() && !player.isSecondaryUseActive() && !horse.hasPassenger(player) && player.getVehicle() == null
+			&& Mounted.pillion(horse, player)) {
+			if (!level.isClientSide()) {
+				player.startRiding(horse);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (stack.is(Items.BRUSH)) {
 			if (level instanceof ServerLevel server) {
 				brush(server, horse, player, stack, hand);
@@ -775,7 +783,7 @@ public final class Bonding {
 			Stride s = Equestrian.stride(horse);
 			work = s.sprint() ? SPRINT_APPETITE : GAIT_APPETITE[Math.min(s.gaitOf().ordinal(), GAIT_APPETITE.length - 1)];
 		}
-		boolean blanket = !tack(horse).blanket().isEmpty();
+		boolean blanket = tack(horse).warm();
 		float appetite = appetite(e.breed()) * (Equestrian.cold(horse) && !blanket ? COLD_APPETITE : 1.0F);
 		float thirsting = (e.breed() == Breed.DESERT_HORSE ? DESERT_THIRST : Equestrian.hot(horse) ? HEAT_THIRST : 1.0F);
 		float hunger = b.hunger() - HUNGER_RATE * appetite * work * minutes;
@@ -930,6 +938,9 @@ public final class Bonding {
 		}
 		if (!t.blanket().isEmpty()) {
 			horse.spawnAtLocation(level, t.blanket().copy());
+		}
+		if (!t.banner().isEmpty()) {
+			horse.spawnAtLocation(level, t.banner().copy());
 		}
 		horse.setAttached(TACK, Tack.NONE);
 	}

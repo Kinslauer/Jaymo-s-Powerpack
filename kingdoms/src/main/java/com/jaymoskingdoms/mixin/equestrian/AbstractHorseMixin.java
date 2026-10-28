@@ -2,6 +2,11 @@ package com.jaymoskingdoms.mixin.equestrian;
 
 import com.jaymoskingdoms.equestrian.Bonding;
 import com.jaymoskingdoms.equestrian.Equestrian;
+import com.jaymoskingdoms.equestrian.Herding;
+import com.jaymoskingdoms.equestrian.Mounted;
+import com.jaymoskingdoms.mixin.MobAccessor;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -18,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.5.34) Horses ride at their rider's gait, are broken in by their temper, and pass their breed to their foals ({@link Equestrian}).
  * (0.5.44) They turn wide at speed without a bridle, side-pass, eat to fill their bellies and bond with whoever tames them ({@link Bonding}).
+ * (0.7.305) They take their owner's orders ({@link Herding}), carry a second rider, swim with their rider and ride on
+ * when told to ({@link Mounted}).
  */
 @Mixin(AbstractHorse.class)
 abstract class AbstractHorseMixin {
@@ -64,6 +71,31 @@ abstract class AbstractHorseMixin {
 			// (0.7.110) free rein: the rider is turned toward the camera, so the horse just goes on
 			cir.setReturnValue(com.jaymoskingdoms.equestrian.FreeRein.input(controller, v));
 		}
+		if (Equestrian.covered(self)) {
+			// (0.7.305) riding on without holding forward
+			cir.setReturnValue(Mounted.input(self, controller, cir.getReturnValue()));
+		}
+	}
+
+	@Inject(method = "registerGoals", at = @At("TAIL"))
+	private void jaymoskingdoms$orders(CallbackInfo ci) {
+		AbstractHorse self = (AbstractHorse)(Object)this;
+		if (Equestrian.covered(self)) {
+			((MobAccessor)self).jaymoskingdoms$goals().addGoal(0, new Herding.OrderGoal(self));
+		}
+	}
+
+	@Inject(method = "getPassengerAttachmentPoint", at = @At("RETURN"), cancellable = true)
+	private void jaymoskingdoms$pillion(Entity passenger, EntityDimensions dimensions, float scale, CallbackInfoReturnable<Vec3> cir) {
+		AbstractHorse self = (AbstractHorse)(Object)this;
+		if (Equestrian.covered(self)) {
+			cir.setReturnValue(Mounted.seat(self, passenger, cir.getReturnValue(), scale));
+		}
+	}
+
+	@Inject(method = "tickRidden", at = @At("TAIL"))
+	private void jaymoskingdoms$swim(Player controller, Vec3 riddenInput, CallbackInfo ci) {
+		Mounted.swim((AbstractHorse)(Object)this);
 	}
 
 	@Inject(method = "handleEating", at = @At("HEAD"), cancellable = true)

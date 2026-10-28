@@ -3506,4 +3506,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 
 - **0.17.121, new horses (Kingdoms 0.7.305):** every horse, skeleton horse and zombie horse is drawn in our own model,
   a build per breed (feathered drafts, slim coursers, crested destriers, stocky ponies, dished desert horses, the bat
-  horse's wings), with every coat and armour repainted for it. See the Kingdoms MODLOG.
+  horse's wings), with every coat and armour repainted for it. Plus Andy's picks: mares and stallions, a command
+  wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
+  two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
+  Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.

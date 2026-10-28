@@ -14,20 +14,20 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.44) The tack screen ({@link Bonding}): the horse's saddle and barding (vanilla's equipment slots), its bridle and
- * its blanket (the {@link Bonding#TACK} attachment) down the left, and what it thinks of you and has learnt on the right
+ * (0.5.44) The tack screen ({@link Bonding}): the horse's saddle and barding (vanilla's equipment slots), its bridle,
+ * its blanket (or a carpet) and (0.7.305) its banner (the {@link Bonding#TACK} attachment) down the left, and what it thinks of you and has learnt on the right
  * ({@code TackScreen} draws that from the synced {@link Bond}). Opened from the "Tack" button on the horse's own screen.
  */
 public class TackMenu extends AbstractContainerMenu {
-	public static final int SLOT_X = 8, SADDLE_Y = 18, BRIDLE_Y = 36, BLANKET_Y = 54, BARDING_Y = 72, INVENTORY_Y = 102;
-	private static final int OWN = 4;
+	public static final int SLOT_X = 8, SADDLE_Y = 18, BRIDLE_Y = 36, BLANKET_Y = 54, BARDING_Y = 72, BANNER_Y = 90, INVENTORY_Y = 122;
+	private static final int OWN = 5;
 	private static final Identifier SADDLE_SPRITE = Identifier.withDefaultNamespace("container/slot/saddle");
 	private static final Identifier ARMOR_SPRITE = Identifier.withDefaultNamespace("container/slot/horse_armor");
 	public final @Nullable AbstractHorse horse;
 
 	/** Client side: the horse by its network id. */
 	public TackMenu(int id, Inventory inventory, Integer horseId) {
-		this(id, inventory, inventory.player.level().getEntity(horseId) instanceof AbstractHorse h ? h : null, new SimpleContainer(2));
+		this(id, inventory, inventory.player.level().getEntity(horseId) instanceof AbstractHorse h ? h : null, new SimpleContainer(Tack.SLOTS));
 	}
 
 	/** Server side. */
@@ -57,7 +57,8 @@ public class TackMenu extends AbstractContainerMenu {
 		addSlot(new Slot(tack, 1, SLOT_X, BLANKET_Y) {
 			@Override
 			public boolean mayPlace(ItemStack stack) {
-				return stack.is(Tackroom.HORSE_BLANKET);
+				// (0.7.305) or a carpet, as a saddle cloth
+				return Tack.cloth(stack);
 			}
 
 			@Override
@@ -75,6 +76,18 @@ public class TackMenu extends AbstractContainerMenu {
 		} else {
 			addSlot(new Slot(new SimpleContainer(1), 0, SLOT_X, BARDING_Y));
 		}
+		// (0.7.305) a banner, flown behind the saddle
+		addSlot(new Slot(tack, 2, SLOT_X, BANNER_Y) {
+			@Override
+			public boolean mayPlace(ItemStack stack) {
+				return stack.is(net.minecraft.tags.ItemTags.BANNERS);
+			}
+
+			@Override
+			public int getMaxStackSize() {
+				return 1;
+			}
+		});
 		addStandardInventorySlots(inventory, 8, INVENTORY_Y);
 	}
 
@@ -128,7 +141,7 @@ public class TackMenu extends AbstractContainerMenu {
 
 		@Override
 		public int getContainerSize() {
-			return 2;
+			return Tack.SLOTS;
 		}
 
 		@Override

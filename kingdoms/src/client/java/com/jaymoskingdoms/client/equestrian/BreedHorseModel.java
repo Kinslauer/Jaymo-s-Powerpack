@@ -48,6 +48,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static final float MOUTH_OPEN = 0.3F;
 	/** How far a mane that falls over the neck swings out at a gallop (radians), and how fast it ripples. */
 	private static final float MANE_SWAY = 0.12F, MANE_RIPPLE = 0.35F;
+	/** (0.7.305) Ridden by you in first person, the head dips this far (degrees, and px down) to clear your view. */
+	private static final float HEAD_DIP = 25.0F * DEG, HEAD_DIP_DROP = 3.0F;
 	/** The build the tack is hung on (every build has the same bones in the same places). */
 	static final String TACK_BUILD = "palfrey";
 
@@ -260,6 +262,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze;
 			float headX = (HEAD_TILT + pitch) * rest + (HEAD_TILT_REARED + pitch) * stand + HEAD_TILT_GRAZING * graze;
 			float headYaw = yaw * (rest + stand);
+			headX += HEAD_DIP * state.headDip * rest;
+			headY += HEAD_DIP_DROP * state.headDip * rest;
 			boolean open = state.feedingAnimation > MOUTH_OPEN;
 			for (ModelPart part : this.headParts) {
 				pose(part, headY, headZ, headX, headYaw);
