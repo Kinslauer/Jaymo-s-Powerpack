@@ -34,7 +34,7 @@
   "message.jaymospowers.zfighter_scientist_operating": "Lie still. This will hurt, and then it will not. Do not leave my bench.",
   "message.jaymospowers.zfighter_scientist_interrupted": "The operation was interrupted. Speak to the tinkerer to begin again.",
   "message.jaymospowers.zfighter_scientist_done": "A fine piece of work, if I do say so myself.",
-  "message.jaymospowers.zfighter_android_done": "You are rebuilt. Ki costs are halved and ki floods back, but your ki attacks hit a little weaker. Two android forms wait past your highest form.",
+  "message.jaymospowers.zfighter_android_done": "You wake on the tinkerer's table, rebuilt. Your ki is endless now and burns with no aura. Two android forms wait past your highest form.",
   "message.jaymospowers.zfighter_android_undone": "Your body is flesh again.",
   "message.jaymospowers.zfighter_metal_begin": "Your body fails. Something beneath the ice hums, and begins to rebuild you.",
   "message.jaymospowers.zfighter_metal_done": "You rise rebuilt in metal: tougher, heavier, unbroken."
