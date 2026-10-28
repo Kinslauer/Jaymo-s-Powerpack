@@ -1,11 +1,13 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.sailing.Crew;
+import com.jaymoskingdoms.sailing.Deck;
 import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Ship;
 import com.jaymoskingdoms.whaling.GreatWhale;
 import com.jaymoskingdoms.whaling.Harpoon;
+import com.jaymoskingdoms.whaling.TryworksBlock;
 import com.jaymoskingdoms.whaling.WhaleCarcass;
 import com.jaymoskingdoms.whaling.Whaling;
 import com.mojang.serialization.Codec;
@@ -16,14 +18,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,7 +37,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +48,9 @@ import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -105,6 +114,19 @@ public final class Whalers {
 	/** Her boats are found within this of her; a towed carcass this near her side is taken alongside; she follows them under this sail when farther than this. */
 	static final double BOAT_RANGE = 160.0, TOW_IN = 8.0, STAND_OFF = 40.0;
 	static final float FOLLOW_SAIL = 0.3F;
+	/**
+	 * (0.7.307) Cutting in (Andy: "the boat should weigh anchor when the whale is attached, then the crew should start
+	 * filling the tryworks. and they burn as we either return home or search for another"): the carcass lashed this far
+	 * off her side (blocks, past its half width), her anchor renewed for this long (ticks) while she lies to it; her
+	 * cutting-in gang this many hands, walking this fast (blocks a tick), carrying this much blubber at a time to the
+	 * tryworks, and this long (ticks) at the pots pitching it in.
+	 */
+	static final double LASH_GAP = 0.6;
+	static final int ANCHOR_HOLD = 20;
+	static final int GANG = 3, CARRY = 4, AT_WORK = 12;
+	static final double GANG_PACE = 0.09;
+	/** (0.7.307) Where her tryworks go on her deck if she has none: this share of her length forward of her middle. */
+	static final double WORKS_FORWARD = 0.25;
 	/** Her complement besides her captain. */
 	static final int HANDS = 5;
 	/** A whaler not seen (out of any player's reach) this long has made her voyage unseen; given up for lost after this long out. */
@@ -209,11 +231,45 @@ public final class Whalers {
 	static final AttachmentType<Whaleboat> WHALEBOAT = AttachmentRegistry.create(JaymosKingdoms.id("whaleboat"),
 		builder -> builder.persistent(Whaleboat.CODEC));
 
+	/**
+	 * (0.7.307) A whaleboat her crew are pulling, sent to every game: nobody else steers it, not even a player who gets
+	 * in (Andy: "When you join on a harpoon boat the ai should retain control, all you are doing is helping throw
+	 * harpoons"; {@code BoatCrewedMixin}).
+	 */
+	public static final AttachmentType<Boolean> CREWED = AttachmentRegistry.create(JaymosKingdoms.id("whaleboat_crewed"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
 	/** What a boat is about, from her captain's last look (its rowing is done every tick by {@link #helm}): after a whale, towing, or coming back. */
 	private enum Pull { CHASE, TOW, RETURN }
 
 	private record Order(AbstractBoat boat, Entity target, Pull pull) {
 	}
+
+	/** (0.7.307) A whaler cutting in: her carcass, the side it's lashed on, the blubber cut and waiting at her rail, and her gang at work. */
+	private static final class Cutting {
+		final UUID carcass;
+		final int side;
+		int waiting;
+		final Map<UUID, Job> gang = new HashMap<>();
+
+		Cutting(UUID carcass, int side) {
+			this.carcass = carcass;
+			this.side = side;
+		}
+	}
+
+	/** (0.7.307) One of her gang: the cutter (at the rail with the spade) or a carrier; bound for the tryworks or not, the blubber in their arms, when they're done at the pots, what they held before. */
+	private static final class Job {
+		boolean cutter, toWorks;
+		int carrying;
+		long until;
+		ItemStack was = ItemStack.EMPTY;
+	}
+
+	/** (0.7.307) Each whaler cutting in (ship id → it); not saved, taken up again at her captain's next look. */
+	private static final Map<UUID, Cutting> CUTTING = new HashMap<>();
+	/** (0.7.307) Each hull's tryworks piece (-1: none). */
+	private static final Map<Hull, Integer> WORKS = new java.util.WeakHashMap<>();
 
 	/** Each whaler's boats' orders (ship id → them); not saved, given again at her captain's next look. */
 	private static final Map<UUID, List<Order>> ORDERS = new HashMap<>();
@@ -576,8 +632,7 @@ public final class Whalers {
 			if (!fastTo(level, carcass, ship) && !boats.isEmpty()) {
 				// her boats tow it back on their lines while she closes with it
 				if (ship.getBoundingBox().inflate(TOW_IN, 4.0, TOW_IN).intersects(carcass.getBoundingBox())) {
-					passLines(level, ship, carcass);
-					crew.mode = "cutting";
+					begin(level, ship, crew, carcass, true);
 					return hold(ship);
 				}
 				for (AbstractBoat boat : boats) {
@@ -586,7 +641,7 @@ public final class Whalers {
 				return ship.distanceTo(carcass) > ship.getBbWidth() * 0.5 + TOW_IN
 					? new float[] {Fleet.bearing(ship, carcass.getX(), carcass.getZ()), FOLLOW_SAIL} : hold(ship);
 			}
-			crew.mode = "cutting";
+			begin(level, ship, crew, carcass, true);
 			return hold(ship);
 		}
 		GreatWhale whale = sighted(level, ship);
@@ -639,13 +694,26 @@ public final class Whalers {
 
 	/** Hove to beside her catch, her crew cutting it in. */
 	private static float[] cutting(ServerLevel level, Ship ship, Crew crew, Voyage v, List<AbstractBoat> boats) {
-		WhaleCarcass carcass = ours(level, ship, boats);
+		Cutting work = CUTTING.get(ship.getUUID());
+		WhaleCarcass carcass = work != null && level.getEntity(work.carcass) instanceof WhaleCarcass c && c.isAlive() && c.left() > 0.0F ? c
+			: ours(level, ship, boats);
 		if (carcass == null) {
-			// stripped and sunk (or lost)
+			// stripped and sunk (or lost): her anchor weighed, and her tryworks burn on as she hunts the next or sails home
 			v.whales++;
 			v.huntFrom = level.getGameTime();
 			crew.mode = v.whales >= WHALES ? "homeward" : "hunting";
 			crew.bound = v.whales >= WHALES ? crew.home : null;
+			done(level, ship, crew, v);
+			return hold(ship);
+		}
+		if (work == null || !work.carcass.equals(carcass.getUUID())) {
+			// (taken up again after a restart, or another carcass come alongside)
+			done(level, ship, crew, v);
+			begin(level, ship, crew, carcass, false);
+			work = CUTTING.get(ship.getUUID());
+		}
+		if (work != null && !work.gang.isEmpty()) {
+			// her gang cut it in, a stroke at a time (gangwork)
 			return hold(ship);
 		}
 		if (level.getGameTime() % STROKE_EVERY < Corsairs.THINK) {
@@ -675,7 +743,9 @@ public final class Whalers {
 
 	/** Home: her hold into the stores, her catch's worth into the purse, her hands paid their lay; she's laid up (gone). */
 	private static void home(ServerLevel level, Ship ship, Crew crew, Voyage v, Faction f) {
-		// (what's still blubber is rendered at the harbour)
+		// (what's still blubber, in her hold and her tryworks' pots, is rendered at the harbour)
+		done(level, ship, crew, v);
+		v.add("blubber", emptyWorks(ship, crew));
 		v.add("oil", v.get("blubber") / TRY_BLUBBER);
 		v.hold.remove("blubber");
 		int worth = unload(level, f, v);
@@ -706,32 +776,400 @@ public final class Whalers {
 		}
 	}
 
-	/** Every tick she's sailed (from Corsairs): her boats rowed, and her tryworks. */
+	/** Every tick she's sailed (from Corsairs): her boats rowed, her catch lashed alongside and cut in, and her tryworks. */
 	static void helm(ServerLevel level, Ship ship, Crew crew) {
 		row(level, ship);
-		tryworks(level, ship, crew);
+		Voyage v = voyage(level.getServer(), crew.faction);
+		if (v == null || !v.ship.equals(ship.getUUID())) {
+			return;
+		}
+		if ("cutting".equals(crew.mode)) {
+			Cutting work = CUTTING.get(ship.getUUID());
+			if (work != null && level.getEntity(work.carcass) instanceof WhaleCarcass carcass && carcass.isAlive()) {
+				ship.rideAtAnchor(ANCHOR_HOLD);
+				lash(ship, carcass, work.side);
+				gangwork(level, ship, crew, v, work, carcass);
+			}
+		}
+		tryworks(level, ship, crew, v);
 	}
 
-	/** Her tryworks at sea: blubber in her hold rendered to oil, its smoke going up from her deck. */
-	private static void tryworks(ServerLevel level, Ship ship, Crew crew) {
+	/**
+	 * (0.7.307) Cutting in begins: her anchor let go, her boats' lines passed up to her, the carcass lashed alongside on
+	 * the side it lies, and her gang turned to with the spade and the blubber. {@code say}: her captain gives the word.
+	 */
+	private static void begin(ServerLevel level, Ship ship, Crew crew, WhaleCarcass carcass, boolean say) {
+		passLines(level, ship, carcass);
+		crew.mode = "cutting";
+		int side = ship.toLocal(carcass.position()).x >= 0.0 ? 1 : -1;
+		Cutting work = new Cutting(carcass.getUUID(), side);
+		CUTTING.put(ship.getUUID(), work);
+		ship.rideAtAnchor(ANCHOR_HOLD);
+		Hull h = ship.hull();
+		Deck deck = Deck.of(ship, crew);
+		Vec3 rail = deck == null ? null : rail(ship, deck, side);
+		if (rail != null) {
+			List<LivingEntity> hands = new ArrayList<>();
+			for (LivingEntity hand : ship.crewAboard()) {
+				if (!hand.getUUID().equals(crew.captain) && !Downed.isDowned(hand) && hand.hasAttached(Ship.SEAT)
+					&& !crew.gunners.containsValue(hand.getUUID())) {
+					hands.add(hand);
+				}
+			}
+			// the nearest to the rail cuts, the rest carry
+			hands.sort(java.util.Comparator.comparingDouble(e -> e.getAttached(Ship.SEAT).distanceToSqr(rail)));
+			for (int i = 0; i < Math.min(GANG, hands.size()); i++) {
+				LivingEntity hand = hands.get(i);
+				Job job = new Job();
+				job.cutter = i == 0;
+				job.was = hand.getMainHandItem().copy();
+				work.gang.put(hand.getUUID(), job);
+				if (job.cutter) {
+					hand.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
+				}
+				walkTo(crew, deck, hand, rail);
+			}
+		}
+		if (say) {
+			Vec3 bow = h == null ? ship.position() : ship.toWorld(0.0, h.draft, h.maxZ);
+			level.playSound(null, bow.x, bow.y, bow.z, SoundEvents.CHAIN_BREAK, SoundSource.NEUTRAL, 1.4F, 0.6F);
+			level.playSound(null, bow.x, bow.y, bow.z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1.2F, 0.7F);
+			level.sendParticles(ParticleTypes.SPLASH, bow.x, bow.y + 0.5, bow.z, 30, 0.6, 0.2, 0.6, 0.2);
+			LivingEntity captain = captain(level, ship, crew);
+			if (captain != null) {
+				Speech.say(level, captain, Component.translatable("message.jaymoskingdoms.whaler.anchor"), Speech.YELLOW, 48.0);
+			}
+		}
+	}
+
+	/** (0.7.307) Cutting in's done: her gang back to their own work (what blubber they still hold to her hold), and her anchor weighed. */
+	private static void done(ServerLevel level, Ship ship, Crew crew, Voyage v) {
+		Cutting work = CUTTING.remove(ship.getUUID());
+		if (work == null) {
+			return;
+		}
+		v.add("blubber", work.waiting);
+		for (Map.Entry<UUID, Job> e : work.gang.entrySet()) {
+			Job job = e.getValue();
+			v.add("blubber", job.carrying);
+			if (level.getEntity(e.getKey()) instanceof LivingEntity hand) {
+				hand.setItemSlot(EquipmentSlot.MAINHAND, job.was);
+			}
+			Crew.Walk walk = crew.walks.get(e.getKey());
+			if (walk != null) {
+				walk.rest = level.getGameTime() + AT_WORK;
+			}
+		}
+		put(level.getServer(), crew.faction, v);
+	}
+
+	/** (0.7.307) The carcass held lashed alongside her on {@code side}, amidships, lying along her. */
+	private static void lash(Ship ship, WhaleCarcass carcass, int side) {
+		Hull h = ship.hull();
+		if (h == null) {
+			return;
+		}
+		double off = carcass.getBbWidth() * 0.5 + LASH_GAP + 0.5;
+		Vec3 at = ship.toWorld(side > 0 ? h.maxX + off : h.minX - off, 0.0, (h.minZ + h.maxZ) * 0.5);
+		carcass.lash(new Vec3(at.x, carcass.getY(), at.z), ship.getYRot());
+	}
+
+	/** (0.7.307) Where her cutter stands at her rail on {@code side}, abreast of the carcass (in her frame); null: no such place. */
+	private static @Nullable Vec3 rail(Ship ship, Deck deck, int side) {
+		Hull h = ship.hull();
+		if (h == null) {
+			return null;
+		}
+		double z = (h.minZ + h.maxZ) * 0.5;
+		Vec3 best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Vec3 p : deck.places.values()) {
+			// as far out on her side as her deck goes, as near abreast of it, on her lowest open deck
+			double d = (p.z - z) * (p.z - z) - p.x * side * 4.0 + p.y * 2.0;
+			if (p.x * side > 0.0 && d < bestD) {
+				best = p;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** (0.7.307) Where her tryworks are tended from: the place on her deck nearest them (in her frame); null: none. */
+	private static @Nullable Vec3 worksSide(Ship ship, Crew crew, Deck deck) {
+		int i = works(ship, crew);
+		Hull h = ship.hull();
+		if (i < 0 || h == null) {
+			return null;
+		}
+		Ship.Piece p = h.pieces.get(i);
+		return deck.nearest(new Vec3(p.x(), p.y(), p.z()));
+	}
+
+	/** (0.7.307) {@code hand} sent along her deck to {@code to} (in her frame), kept from strolling off till they're given more. */
+	private static void walkTo(Crew crew, Deck deck, LivingEntity hand, Vec3 to) {
+		Vec3 seat = hand.getAttached(Ship.SEAT);
+		Crew.Walk walk = crew.walks.computeIfAbsent(hand.getUUID(), k -> new Crew.Walk());
+		List<Vec3> way = seat == null ? null : deck.path(seat, to);
+		walk.way = way == null ? new ArrayList<>() : new ArrayList<>(way);
+		walk.pace = GANG_PACE;
+		walk.rest = Long.MAX_VALUE;
+	}
+
+	/** (0.7.307) Whether {@code hand} has got where they were walking (or as near as her deck lets them). */
+	private static boolean at(Crew crew, LivingEntity hand) {
+		Vec3 seat = hand.getAttached(Ship.SEAT);
+		Crew.Walk walk = crew.walks.get(hand.getUUID());
+		return seat != null && (walk == null || walk.way.isEmpty());
+	}
+
+	/**
+	 * (0.7.307) Her gang at work, each tick: her cutter at the rail over the carcass, a stroke of the spade at a time (the
+	 * meat, bone and ambergris struck below into her hold); her carriers taking the blubber from the rail to the tryworks
+	 * in their arms, pitching it in, and going back for more (a lone hand does both).
+	 */
+	private static void gangwork(ServerLevel level, Ship ship, Crew crew, Voyage v, Cutting work, WhaleCarcass carcass) {
+		Deck deck = Deck.of(ship, crew);
+		Vec3 rail = deck == null ? null : rail(ship, deck, work.side);
+		if (rail == null) {
+			return;
+		}
+		Vec3 works = worksSide(ship, crew, deck), pots = worksAt(ship, crew);
+		long now = level.getGameTime();
+		boolean carriers = false;
+		for (Map.Entry<UUID, Job> e : work.gang.entrySet()) {
+			carriers |= !e.getValue().cutter && able(level, ship, e.getKey());
+		}
+		for (Map.Entry<UUID, Job> e : work.gang.entrySet()) {
+			Job job = e.getValue();
+			if (!able(level, ship, e.getKey()) || !(level.getEntity(e.getKey()) instanceof LivingEntity hand)) {
+				// (fallen, or gone over the side: what they held goes to her hold)
+				v.add("blubber", job.carrying);
+				job.carrying = 0;
+				job.toWorks = false;
+				continue;
+			}
+			if (job.toWorks) {
+				if (!at(crew, hand)) {
+					continue;
+				}
+				face(hand, pots);
+				if (job.until == 0L) {
+					job.until = now + AT_WORK;
+				}
+				if (now < job.until) {
+					continue;
+				}
+				// pitched into the pots (what won't go in, down to the blubber room)
+				hand.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				feed(level, ship, crew, v, job.carrying);
+				job.carrying = 0;
+				job.toWorks = false;
+				job.until = 0L;
+				hand.setItemSlot(EquipmentSlot.MAINHAND, job.cutter ? new ItemStack(Items.IRON_SHOVEL) : job.was);
+				walkTo(crew, deck, hand, rail);
+				continue;
+			}
+			if (!at(crew, hand)) {
+				continue;
+			}
+			face(hand, carcass.position());
+			if (job.cutter && (carriers || work.waiting < CARRY)) {
+				if (now % STROKE_EVERY == 0) {
+					hand.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					for (ItemStack piece : carcass.cutByCrew(level)) {
+						if (piece.is(Whaling.WHALE_BLUBBER)) {
+							work.waiting += piece.getCount();
+						} else {
+							v.add(key(piece.getItem()), piece.getCount());
+						}
+					}
+					put(level.getServer(), crew.faction, v);
+				}
+				continue;
+			}
+			if (work.waiting >= CARRY || work.waiting > 0 && (carcass.left() <= 0.0F || job.cutter)) {
+				// an armful of blubber to the tryworks
+				job.carrying = Math.min(CARRY, work.waiting);
+				work.waiting -= job.carrying;
+				job.toWorks = true;
+				job.until = 0L;
+				hand.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Whaling.WHALE_BLUBBER, job.carrying));
+				if (works != null) {
+					walkTo(crew, deck, hand, works);
+				}
+			}
+		}
+	}
+
+	/** (0.7.307) Whether {@code id} of her gang is still aboard her and on their feet. */
+	private static boolean able(ServerLevel level, Ship ship, UUID id) {
+		return level.getEntity(id) instanceof LivingEntity hand && hand.isAlive() && hand.getVehicle() == ship && !Downed.isDowned(hand);
+	}
+
+	/** (0.7.307) {@code hand} turned to face {@code at} (in the world). */
+	private static void face(LivingEntity hand, @Nullable Vec3 at) {
+		if (at == null) {
+			return;
+		}
+		float yaw = (float)(Mth.atan2(at.z - hand.getZ(), at.x - hand.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+		hand.setYRot(yaw);
+		hand.setYBodyRot(yaw);
+		hand.setYHeadRot(yaw);
+	}
+
+	/**
+	 * (0.7.307) Her tryworks (Andy: "the whale just didnt ... visibly get harvested into the tryworks"): the piece of her
+	 * that is one, set on her deck forward of her middle if she has none (a whaler already at sea gets hers too); -1 if
+	 * there's nowhere for them.
+	 */
+	private static int works(Ship ship, Crew crew) {
+		Hull h = ship.hull();
+		if (h == null) {
+			return -1;
+		}
+		Integer known = WORKS.get(h);
+		if (known != null) {
+			return known;
+		}
+		for (int i = 0; i < h.pieces.size(); i++) {
+			if (h.pieces.get(i).blockState().is(Whaling.TRYWORKS)) {
+				WORKS.put(h, i);
+				return i;
+			}
+		}
+		Deck deck = Deck.of(ship, crew);
+		if (deck == null) {
+			WORKS.put(h, -1);
+			return -1;
+		}
+		double want = (h.minZ + h.maxZ) * 0.5 + (h.maxZ - h.minZ) * WORKS_FORWARD;
+		Vec3 best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Vec3 p : deck.places.values()) {
+			int x = Mth.floor(p.x + 0.5), y = Mth.floor(p.y + 0.01), z = Mth.floor(p.z + 0.5);
+			if (Math.abs(x) > 1 || h.at(x, y, z) >= 0 || h.at(x, y + 1, z) >= 0 || deck.guns.containsValue(p)) {
+				continue;
+			}
+			// on her centreline, forward, on her lowest open deck there
+			double d = (p.z - want) * (p.z - want) + x * x * 4.0 + p.y * 2.0;
+			if (d < bestD) {
+				best = p;
+				bestD = d;
+			}
+		}
+		if (best == null) {
+			WORKS.put(h, -1);
+			return -1;
+		}
+		int x = Mth.floor(best.x + 0.5), y = Mth.floor(best.y + 0.01), z = Mth.floor(best.z + 0.5);
+		ship.setPieceAt(x, y, z, Whaling.TRYWORKS.defaultBlockState().setValue(TryworksBlock.FACING, Direction.SOUTH));
+		Hull now = ship.hull();
+		int i = now == null ? -1 : now.at(x, y, z);
+		if (now != null) {
+			WORKS.put(now, i);
+		}
+		return i;
+	}
+
+	/** (0.7.307) The top of her tryworks' pots, in the world (null: she has none). */
+	private static @Nullable Vec3 worksAt(Ship ship, Crew crew) {
+		int i = works(ship, crew);
+		Hull h = ship.hull();
+		if (i < 0 || h == null) {
+			return null;
+		}
+		Ship.Piece p = h.pieces.get(i);
+		return ship.toWorld(p.x(), p.y() + 1.0, p.z());
+	}
+
+	/** (0.7.307) {@code blubber} pitched into her tryworks, lighting them; what's more than they hold goes to her hold. */
+	private static void feed(ServerLevel level, Ship ship, Crew crew, Voyage v, int blubber) {
+		int i = works(ship, crew);
+		Hull h = ship.hull();
+		if (i < 0 || h == null) {
+			v.add("blubber", blubber);
+			put(level.getServer(), crew.faction, v);
+			return;
+		}
+		Ship.Piece p = h.pieces.get(i);
+		BlockState state = p.blockState();
+		int in = state.getValue(TryworksBlock.BLUBBER), into = Math.min(TryworksBlock.MOST_BLUBBER - in, blubber);
+		v.add("blubber", blubber - into);
+		if (into > 0 || !state.getValue(TryworksBlock.LIT)) {
+			ship.setPieceAt(p.x(), p.y(), p.z(), state.setValue(TryworksBlock.BLUBBER, in + into).setValue(TryworksBlock.LIT, in + into > 0));
+		}
+		Vec3 at = ship.toWorld(p.x(), p.y() + 1.0, p.z());
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.NEUTRAL, 0.9F, 0.6F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.5F, 0.8F);
+		put(level.getServer(), crew.faction, v);
+	}
+
+	/**
+	 * Her tryworks at sea: the blubber in their pots rendered to oil, fire under them and smoke going up from her deck,
+	 * at the cutting-in and after it as she hunts the next whale or sails home, fed again from the blubber in her hold
+	 * till it's all rendered.
+	 */
+	private static void tryworks(ServerLevel level, Ship ship, Crew crew, Voyage v) {
 		if (level.getGameTime() % 10 != 0) {
 			return;
 		}
-		Voyage v = voyage(level.getServer(), crew.faction);
-		if (v == null || !v.ship.equals(ship.getUUID()) || v.get("blubber") < TRY_BLUBBER && !"cutting".equals(crew.mode)) {
+		int i = works(ship, crew);
+		Hull hull = ship.hull();
+		if (i < 0 || hull == null) {
+			// (no deck for them: rendered in her hold, as before)
+			if (v.get("blubber") >= TRY_BLUBBER && level.getGameTime() % TRY_EVERY == 0) {
+				v.add("blubber", -TRY_BLUBBER);
+				v.add("oil", 1);
+				put(level.getServer(), crew.faction, v);
+			}
 			return;
 		}
-		Hull hull = ship.hull();
-		Vec3 at = ship.toWorld(0.0, hull == null ? 3.0 : hull.maxY + 1.0, 0.0);
-		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y, at.z, 1, 0.3, 0.2, 0.3, 0.01);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 3, 0.4, 0.2, 0.4, 0.02);
-		level.sendParticles(ParticleTypes.FLAME, at.x, at.y - 0.6, at.z, 2, 0.3, 0.1, 0.3, 0.0);
-		if (level.getGameTime() % TRY_EVERY == 0 && v.get("blubber") >= TRY_BLUBBER) {
-			v.add("blubber", -TRY_BLUBBER);
-			v.add("oil", 1);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.LAVA_POP, SoundSource.NEUTRAL, 0.8F, 0.7F);
+		Ship.Piece p = hull.pieces.get(i);
+		BlockState state = p.blockState();
+		int in = state.getValue(TryworksBlock.BLUBBER);
+		if (in < TRY_BLUBBER && v.get("blubber") > 0 && !CUTTING.containsKey(ship.getUUID())) {
+			// fed again from the blubber room, a hand pitching it in
+			int more = Math.min(TryworksBlock.MOST_BLUBBER - in, v.get("blubber"));
+			v.add("blubber", -more);
+			in += more;
+			LivingEntity hand = harpooner(level, ship, crew, ship);
+			if (hand != null) {
+				hand.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			}
+			state = state.setValue(TryworksBlock.BLUBBER, in).setValue(TryworksBlock.LIT, true);
+			ship.setPieceAt(p.x(), p.y(), p.z(), state);
 			put(level.getServer(), crew.faction, v);
 		}
+		if (in <= 0) {
+			if (state.getValue(TryworksBlock.LIT)) {
+				ship.setPieceAt(p.x(), p.y(), p.z(), state.setValue(TryworksBlock.LIT, false));
+			}
+			return;
+		}
+		Vec3 at = ship.toWorld(p.x(), p.y() + 1.0, p.z());
+		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y + 0.2, at.z, 1, 0.2, 0.1, 0.2, 0.01);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 2, 0.3, 0.1, 0.3, 0.02);
+		level.sendParticles(ParticleTypes.FLAME, at.x, at.y - 0.3, at.z, 2, 0.25, 0.05, 0.25, 0.0);
+		if (level.getGameTime() % TRY_EVERY == 0 && in >= TRY_BLUBBER) {
+			in -= TRY_BLUBBER;
+			v.add("oil", 1);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.LAVA_POP, SoundSource.NEUTRAL, 0.8F, 0.7F);
+			ship.setPieceAt(p.x(), p.y(), p.z(), state.setValue(TryworksBlock.BLUBBER, in).setValue(TryworksBlock.LIT, in > 0 || v.get("blubber") > 0));
+			put(level.getServer(), crew.faction, v);
+		}
+	}
+
+	/** (0.7.307) What's still in her tryworks' pots (blubber), taken out (she's home). */
+	private static int emptyWorks(Ship ship, Crew crew) {
+		int i = works(ship, crew);
+		Hull h = ship.hull();
+		if (i < 0 || h == null) {
+			return 0;
+		}
+		Ship.Piece p = h.pieces.get(i);
+		int in = p.blockState().getValue(TryworksBlock.BLUBBER);
+		ship.setPieceAt(p.x(), p.y(), p.z(), p.blockState().setValue(TryworksBlock.BLUBBER, 0).setValue(TryworksBlock.LIT, false));
+		return in;
 	}
 
 	/** Her whaler was sunk: the voyage is over. */
@@ -886,6 +1324,7 @@ public final class Whalers {
 				}
 			}
 			boat.setAttached(WHALEBOAT, new Whaleboat(ship.getUUID(), List.copyOf(in)));
+			boat.setAttached(CREWED, true);
 			level.sendParticles(ParticleTypes.SPLASH, at.x, at.y + 0.5, at.z, 24, 1.0, 0.2, 1.0, 0.2);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1.0F, 0.9F);
 			lowered.add(boat);
@@ -924,9 +1363,14 @@ public final class Whalers {
 				continue;
 			}
 			if (boatHarpooner(boat) == null) {
-				// no one left to pull her: cast adrift
+				// no one left to pull her: cast adrift (whoever's in her may take her oars)
 				boat.removeAttached(WHALEBOAT);
+				boat.removeAttached(CREWED);
 				continue;
+			}
+			if (!boat.hasAttached(CREWED)) {
+				// (a boat lowered before 0.7.307)
+				boat.setAttached(CREWED, true);
 			}
 			if (h != null && Math.sqrt(horizontal(boat.position(), alongside(ship, h, boat.position()))) < HOIST_REACH) {
 				hoist(level, ship, crew, boat);
@@ -951,9 +1395,18 @@ public final class Whalers {
 		Whaleboat wb = boat.getAttached(WHALEBOAT);
 		LivingEntity captain = captain(level, ship, crew);
 		Vec3 spare = captain != null && captain.getAttached(Ship.SEAT) instanceof Vec3 s ? s.add(1.0, 0.0, 0.0) : null;
+		Deck deck = Deck.of(ship, crew);
 		for (Entity e : List.copyOf(boat.getPassengers())) {
 			e.stopRiding();
-			if (e instanceof Player || !(e instanceof LivingEntity hand)) {
+			if (e instanceof ServerPlayer player) {
+				// (0.7.307) hoisted in with the boat: set on her deck by the falls, not left in the sea beside her
+				Vec3 place = deck == null ? null : deck.nearest(ship.toLocal(boat.position()));
+				Vec3 at = place != null ? ship.toWorld(place.x, place.y + 0.05, place.z) : ship.helmStand().add(0.0, 0.1, 0.0);
+				player.teleportTo(level, at.x, at.y, at.z, java.util.Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), player.getXRot(), false);
+				player.resetFallDistance();
+				continue;
+			}
+			if (!(e instanceof LivingEntity hand)) {
 				continue;
 			}
 			Vec3 seat = spare;

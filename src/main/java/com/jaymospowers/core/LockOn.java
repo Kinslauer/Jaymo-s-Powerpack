@@ -56,7 +56,7 @@ public final class LockOn {
 	}
 
 	private static final Map<UUID, Lock> LOCKS = new HashMap<>();
-	/** (0.17.122) The client's own lock (LockOnClient fills it in), so code run on both sides can ask either. */
+	/** (0.17.130) The client's own lock (LockOnClient fills it in), so code run on both sides can ask either. */
 	public static Function<Player, @Nullable LivingEntity> clientTarget = player -> null;
 
 	private LockOn() {
@@ -118,7 +118,7 @@ public final class LockOn {
 		return player.level().getEntity(lock.target) instanceof LivingEntity living && usable(player, living) ? living : null;
 	}
 
-	/** (0.17.122) Who {@code player} is locked onto on whichever side this runs, or null. */
+	/** (0.17.130) Who {@code player} is locked onto on whichever side this runs, or null. */
 	public static @Nullable LivingEntity target(Player player) {
 		return player instanceof ServerPlayer serverPlayer ? target(serverPlayer)
 			: player.level().isClientSide() ? clientTarget.apply(player) : null;

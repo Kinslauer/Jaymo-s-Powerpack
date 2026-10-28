@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class RapierItem extends Item {
 	/**
-	 * The lunge: speed (blocks/tick) forward and up, and how long it can still run someone through (ticks). (0.17.122)
+	 * The lunge: speed (blocks/tick) forward and up, and how long it can still run someone through (ticks). (0.17.130)
 	 * Andy: shorter across the board, about 2.8 blocks; only a lunge at a foe you're locked onto (or a mob's at its
 	 * target) runs further, just as far as it needs to reach them, up to the old 1.1 (about 4.7 blocks).
 	 */

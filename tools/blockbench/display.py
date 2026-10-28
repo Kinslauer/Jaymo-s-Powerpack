@@ -1,6 +1,6 @@
 import math
 
-# (0.17.122) where vanilla's handheld sword puts the middle of its grip (the sprite's pixel 3,12), right hand: the held
+# (0.17.130) where vanilla's handheld sword puts the middle of its grip (the sprite's pixel 3,12), right hand: the held
 # models put the middle of theirs there too, so they sit in the fist as deep as a sword does (Andy: the dagger sat high)
 GRIP_ANCHOR = {"thirdperson": (0.0, -1.33, 1.44), "firstperson": (1.13, -0.87, -0.35)}
 

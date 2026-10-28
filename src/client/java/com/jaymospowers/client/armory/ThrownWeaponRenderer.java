@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 /**
  * A thrown Armory weapon, drawn as its item: point first along its flight (sprites have their tip in the top-right
  * corner, so it's rolled 45 degrees, as RiftBladeRenderer does), or tumbling end over end for hatchets, sticks and stars.
- * (0.17.122) Andy: the dagger lands tip first. The 3D Blockbench models stand upright (tip straight up), so they're rolled
+ * (0.17.130) Andy: the dagger lands tip first. The 3D Blockbench models stand upright (tip straight up), so they're rolled
  * 90 instead of 45, and a point-first weapon is drawn back along its flight so only its tip sinks into what it hits.
  */
 public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWeaponRenderer.State> {

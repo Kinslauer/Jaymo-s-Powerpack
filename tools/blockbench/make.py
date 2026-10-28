@@ -102,7 +102,7 @@ def build(name, cubes, display):
             fh.write("\n")
     print(name, t.validate_quality()["data"]["verdict"], t.validate_quality()["data"]["counts"])
 
-# Model stands upright along Y. (0.17.122) Andy: the rapier's blade was too short, so its hilt sits 12 lower and the
+# Model stands upright along Y. (0.17.130) Andy: the rapier's blade was too short, so its hilt sits 12 lower and the
 # blade runs from just over it to the top; display() puts each grip in the fist where a vanilla sword's would be.
 RAPIER = [
     ("pommel",       [7, -8, 7],      [9, -6, 9],         "pommel"),
