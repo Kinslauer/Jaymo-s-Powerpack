@@ -39,7 +39,7 @@ public final class Hull {
 	/**
 	 * (0.7.246) A stair's own boxes (in its cell, 0-1), so its steps are steps to whoever walks her: as one full block
 	 * (lo/hi), a stairway under a deck beam was a wall you could neither step up nor jump (Andy got stuck in a whaler's
-	 * stairwell). Null for every other piece.
+	 * stairwell). (0.7.285) And every other piece that isn't one box the width of its cell. Null for the rest.
 	 */
 	public final AABB[][] steps;
 	public final int minX, minY, minZ, maxX, maxY, maxZ;
@@ -101,8 +101,14 @@ public final class Hull {
 				AABB b = shape.bounds();
 				this.lo[i] = (float)Math.max(0.0, b.minY);
 				this.hi[i] = (float)Math.min(1.5, b.maxY);
-				if (state.getBlock() instanceof net.minecraft.world.level.block.StairBlock) {
-					this.steps[i] = shape.toAabbs().toArray(new AABB[0]);
+				// (0.7.285) and any piece that isn't one box the width of its cell (an open hatch, a door, a fence, a
+				// ladder): as one full block, the open hatches round a cargo ship's mast walled off the head of the
+				// stair below decks, and characters stuck there (Andy: "characters get stuck below decks on the ship's
+				// stairs constantly")
+				List<AABB> boxes = shape.toAabbs();
+				if (state.getBlock() instanceof net.minecraft.world.level.block.StairBlock || boxes.size() > 1
+					|| b.minX > 0.01 || b.minZ > 0.01 || b.maxX < 0.99 || b.maxZ < 0.99) {
+					this.steps[i] = boxes.toArray(new AABB[0]);
 				}
 			}
 			float volume = 0.0F;

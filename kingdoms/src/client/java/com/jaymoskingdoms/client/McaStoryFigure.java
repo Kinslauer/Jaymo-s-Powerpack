@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.284) The life story's figure with MCA loaded ({@link StoryFigure}). Andy: "the player's character doesnt load.
+ * (0.7.286) The life story's figure with MCA loaded ({@link StoryFigure}). Andy: "the player's character doesnt load.
  * only armor": the story comes before MCA's creator, so the player has no MCA body yet, and MCA draws no plain one in its
  * place. So the figure is a stand-in MCA villager that is never put in the world (as MCA's own editor figure is): your
  * body and gender guessed from your id, in clothes from MCA's job wardrobe that fit the scene (none of the banned ones,

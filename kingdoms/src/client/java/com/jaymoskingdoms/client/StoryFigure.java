@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.282) The figure of you on the life story's pages ({@link LifeStoryScreen}). Andy: "make it act out? or at least
  * find different gear". Each answer is a little scene ({@link #SCENES}, by {@code question.answer}): what you wear, what
  * you hold, and what you do (walk, work, swing, raise the thing held, look up or down), all the while looking slowly
- * about. A birthplace walks in plain clothes so the heritage shows. (0.7.284) With MCA the figure is a stand-in MCA
+ * about. A birthplace walks in plain clothes so the heritage shows. (0.7.286) With MCA the figure is a stand-in MCA
  * villager in job clothes for the scene ({@link McaStoryFigure}): before MCA's creator the player has no MCA body to draw.
  * Without MCA it's you: your heritage, gear and arm are lent to the figure only while it's drawn (nothing of it reaches
  * the server: client attachments aren't synced, a client swing isn't sent, and equipping on the client makes no
@@ -65,7 +65,7 @@ final class StoryFigure {
 	}
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
-	/** (0.7.284) The MCA job whose clothes the stand-in wears, by answer key ({@code "none"}: everyday clothes). */
+	/** (0.7.286) The MCA job whose clothes the stand-in wears, by answer key ({@code "none"}: everyday clothes). */
 	static final Map<String, String> JOBS = new HashMap<>();
 
 	private static long lastSwing, lastStep, lastTick;

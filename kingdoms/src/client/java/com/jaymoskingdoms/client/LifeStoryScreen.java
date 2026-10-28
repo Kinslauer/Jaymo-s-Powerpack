@@ -135,7 +135,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public void removed() {
-		// (0.7.284) the stand-in figure is no longer MCA's editor figure
+		// (0.7.286) the stand-in figure is no longer MCA's editor figure
 		StoryFigure.closed();
 		super.removed();
 	}
