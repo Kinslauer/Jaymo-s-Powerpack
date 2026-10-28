@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Our named characters wear only our own outfits (MCA clothing in {@code assets/jaymoskingdoms/skins/clothing}, drawn by
  * {@code tools/gen_uniforms.py} from our folk's and sailors' skins, the head left for the villager's own face and hair):
- * a ship's crew by side and role (a pirate captain's red coat, a navy captain's blue one, a merchant's or whaler's master
+ * (0.7.291) the court's and the camps' casters in their robes ({@link Casters}, {@link CourtWizards}); a ship's crew by side and role (a pirate captain's red coat, a navy captain's blue one, a merchant's or whaler's master
  * in brown; pirate deckhands, gunners, powder monkeys, bombardiers; plain seamen on the realms' ships), a king's robe or a
  * queen's gown, a lord's surcoat or a lady's gown in their overlord's colour, and a guard's gambeson by the land of their
  * realm's seat. MCA's own pick is never used for them ({@code McaClothingPoolMixin}), and anyone wearing something else
@@ -33,6 +33,16 @@ public final class Uniforms {
 		SHIPWRIGHTS = ids("crew/shipwright"), DECKHANDS = ids("crew/deckhand", 6), SEAMEN = ids("crew/seaman", 6), GUNNERS = ids("crew/gunner"),
 		POWDER_MONKEYS = ids("crew/powder_monkey"), BOMBARDIERS = ids("crew/bombardier");
 	static final List<String> KINGS = ids("royal/king"), QUEENS = ids("royal/queen");
+	/** (0.7.291) A necromancer's hooded robes and a blood witch's (a shaman's and a court wizard's go by their side's colour). */
+	static final List<String> NECROMANCERS = ids("caster/necromancer"), BLOOD_WITCHES = ids("caster/blood_witch");
+	/**
+	 * (0.7.292) A goblin village's rags, a slinger's hood and hides, a king's robe and crown; an orc camp's hide kilts and
+	 * harness, a ranger's hood, a shaman's bone-strung hides and mask, a warchief's iron (all over a goblin's or an orc's
+	 * own green: {@link Greenskins}).
+	 */
+	static final List<String> GOBLINS = ids("greenskin/goblin"), GOBLIN_SLINGERS = ids("greenskin/goblin_slinger"), GOBLIN_KINGS = ids("greenskin/goblin_king"),
+		ORC_GRUNTS = ids("greenskin/orc_grunt"), ORC_RANGERS = ids("greenskin/orc_ranger"), ORC_SHAMANS = ids("greenskin/orc_shaman"),
+		ORC_WARCHIEFS = ids("greenskin/orc_warchief");
 	/** A guard's gambesons by their realm's land ({@link Climate#skinGroup}: temperate, sunny, cold). */
 	static final List<List<String>> GUARDS = List.of(ids("guard/temperate"), ids("guard/sunny"), ids("guard/cold"));
 
@@ -112,6 +122,28 @@ public final class Uniforms {
 				return ids((female ? "lady/" : "lord/") + colour.getName());
 			}
 			return female ? QUEENS : KINGS;
+		}
+		// (0.7.291) the casters in the office (Casters, CourtWizards): robes, a shaman's furs and paint, a wizard's stars
+		if (role == Sorcery.NECROMANCER) {
+			return NECROMANCERS;
+		}
+		if (role == Sorcery.BLOOD_WITCH) {
+			return BLOOD_WITCHES;
+		}
+		if (role == Sorcery.SHAMAN || role == Sorcery.WIZARD) {
+			DyeColor colour = f == null ? DyeColor.PURPLE : f.styleColor(server);
+			return ids("caster/" + (role == Sorcery.SHAMAN ? "shaman/" : "wizard/") + colour.getName());
+		}
+		// (0.7.296) a cove's captain waiting ashore for his ship, a harbour's shipwright on his pier
+		if (role == Pirates.CAPTAIN) {
+			return PIRATE_CAPTAINS;
+		}
+		if (role == Pirates.SHIPWRIGHT) {
+			return SHIPWRIGHTS;
+		}
+		if (Greenskins.isRole(role) || role == Orcs.SHAMAN) {
+			return role == Goblins.GOBLIN ? GOBLINS : role == Goblins.SLINGER ? GOBLIN_SLINGERS : role == Goblins.KING ? GOBLIN_KINGS
+				: role == Orcs.RANGER ? ORC_RANGERS : role == Orcs.SHAMAN ? ORC_SHAMANS : role == Orcs.WARCHIEF ? ORC_WARCHIEFS : ORC_GRUNTS;
 		}
 		if (role == Folk.GUARD || villager.isGuard()) {
 			int land = f == null || !(villager.level() instanceof ServerLevel level) ? 0

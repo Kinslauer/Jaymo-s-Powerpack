@@ -71,6 +71,11 @@ public final class VillagerLooks {
 
 	/** From the living renderer's extractRenderState: a villager's heritage look (nothing for players or plain Heartlanders). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		if (GreenskinLooks.extract(entity, state)) {
+			// (0.7.292) a goblin or an orc: its look is GreenskinLooks'
+			state.setData(KEY, null);
+			return;
+		}
 		Heritage.Kind heritage = entity instanceof Player ? null : VillagerHeritage.of(entity);
 		// (0.7.214) a plain Heartlander or Warrior-born has no look; their variants do
 		VariantLooks.Style style = heritage == null ? null : VariantLooks.of(entity);

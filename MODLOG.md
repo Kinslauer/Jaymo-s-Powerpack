@@ -3368,3 +3368,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   up (attachment `HammerSlam.GUARD`, synced), so the cooldown ending mid-guard never fires a smash; charging the smash
   isn't a block. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin, HammerChargeBlockMixin,
   client HammerPoseMixin/HammerFirstPersonMixin. Compile-checked, not seen in game.
+- **0.17.102, Kingdoms 0.7.291:** court necromancers and the barbarian camps' necromancers, shamans and blood witches are
+  MCA villagers in our robes, and court wizards wear our robes too (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.103, Kingdoms 0.7.292:** goblins and orcs are MCA villagers: goblins smaller, orcs bigger, both their own
+  greens with ears, noses, tusks, warts and scars in several shapes (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.104, Kingdoms 0.7.293:** barbarian chiefs and the realms' wall archers are MCA villagers, chiefs keeping their
+  boss bars and rallies, archers held to their posts (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.105, Kingdoms 0.7.294:** cab drivers, coachmen, milestone coaches' drivers and the caravans' carters and guards
+  are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.106, Kingdoms 0.7.295:** war parties, raiders, mounted guards and archers, cannon gunners, assassins and looters
+  are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.107, Kingdoms 0.7.296:** harbour shipwrights and pirate captains ashore are MCA villagers; coves no longer
+  pile up bombardiers (see Kingdoms' MODLOG). Compile-checked, not seen in game.

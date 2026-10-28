@@ -564,7 +564,7 @@ public final class Spirits {
 
 	/** What kind of foe {@code threat} is, for the advice key: caster, archer, creeper, armoured, many, big, foe. */
 	public static String foeKey(ServerPlayer player, LivingEntity threat) {
-		if (threat instanceof Folk folk && Sorcery.isCaster(folk.role()) || threat instanceof Witch || threat instanceof Evoker
+		if (threat instanceof com.jaymoskingdoms.Worker w && Sorcery.isCaster(w.role()) || threat instanceof Witch || threat instanceof Evoker
 			|| threat instanceof Illusioner || threat instanceof ServerPlayer p && Classes.is(p, Classes.PlayerClass.SORCERER)) {
 			return "caster";
 		}

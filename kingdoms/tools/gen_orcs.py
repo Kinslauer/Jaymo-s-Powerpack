@@ -199,10 +199,10 @@ def ranger(i):
     save(img, "entity/orc/ranger_%d" % i)
 
 
-def shaman():
-    rnd = random.Random("orc-shaman")
+def shaman(skin=(96, 108, 80), seed="orc-shaman", out="entity/orc/shaman"):
+    """The shaman (Kingdoms 0.7.292: {skin}, {seed} and {out} for gen_uniforms' MCA outfits; the default is as before)."""
+    rnd = random.Random(seed)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (96, 108, 80)
     head(img, rnd, skin, (150, 230, 90), None, topknot=False)
     # the bone mask over the eyes and nose (hat layer front), dark eye holes; feathers up the crown
     hx, hy, hw, hh = HAT["front"]
@@ -239,13 +239,13 @@ def shaman():
         for name in SIDES:
             rx, ry, rw, rh = leg[name]
             paint(img, (rx, ry, rw, 9), robe, 10, rnd)
-    save(img, "entity/orc/shaman")
+    save(img, out)
 
 
-def warchief():
-    rnd = random.Random("orc-warchief")
+def warchief(skin=(86, 102, 70), seed="orc-warchief", out="entity/orc/warchief"):
+    """The warchief (Kingdoms 0.7.292: {skin}, {seed} and {out} for gen_uniforms' MCA outfits; the default is as before)."""
+    rnd = random.Random(seed)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (86, 102, 70)
     head(img, rnd, skin, (230, 30, 20), BLOOD)
     fx, fy, fw, fh = HEAD["front"]
     # a scar down through one eye
@@ -277,7 +277,7 @@ def warchief():
             rx, ry, rw, rh = arm[name]
             paint(img, (rx, ry, rw, 3), IRON, 10, rnd)
             px(img, rx + rw // 2, ry, shade(IRON, 60))
-    save(img, "entity/orc/warchief")
+    save(img, out)
 
 
 def save(img, name):

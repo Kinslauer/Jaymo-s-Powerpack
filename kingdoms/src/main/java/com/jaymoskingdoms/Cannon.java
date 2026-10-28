@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -116,18 +117,23 @@ public final class Cannon extends Entity {
 		return this.post;
 	}
 
-	/** Its gunner, or null. */
+	/** Its gunner (a folk archer, or (0.7.295) an MCA one), or null. */
 	@Nullable
-	Folk gunner() {
-		return this.getFirstPassenger() instanceof Folk f ? f : null;
+	PathfinderMob gunner() {
+		return this.getFirstPassenger() instanceof PathfinderMob m && gunnerOf(m) ? m : null;
+	}
+
+	/** {@code e} is an archer (a folk or a villager) of its kingdom's. */
+	private boolean gunnerOf(Entity e) {
+		return e instanceof Worker w && w.role() == Folk.ARCHER && w.factionId() == this.faction;
 	}
 
 	/** An archer of its kingdom's, near it and on no cannon, who'd man it; or null. */
 	@Nullable
-	Folk crew(ServerLevel level, double reach) {
-		for (Folk f : level.getEntitiesOfClass(Folk.class, this.getBoundingBox().inflate(reach),
-			f -> f.isAlive() && f.role() == Folk.ARCHER && f.factionId() == this.faction && !f.isPassenger() && !f.isSleeping())) {
-			return f;
+	PathfinderMob crew(ServerLevel level, double reach) {
+		for (Worker w : Workers.near(level, this.getBoundingBox().inflate(reach),
+			w -> w.isAlive() && w.role() == Folk.ARCHER && w.factionId() == this.faction && !w.mob().isPassenger() && !w.mob().isSleeping())) {
+			return w.mob();
 		}
 		return null;
 	}
@@ -154,10 +160,17 @@ public final class Cannon extends Entity {
 			this.discard();
 			return;
 		}
-		Folk gunner = this.gunner();
+		PathfinderMob gunner = this.gunner();
+		if (gunner instanceof Folk folk && (now + this.getId()) % CREW_CHECK == 0 && folk.getTarget() == null
+			&& Factions.get(level.getServer(), this.faction) instanceof Faction f && McaGunner.seat(level, f, this)) {
+			// (0.7.295) with MCA, its folk gunner hands his place to one of the realm's villagers
+			folk.stopRiding();
+			folk.discard();
+			return;
+		}
 		if (gunner == null) {
 			if ((now + this.getId()) % CREW_CHECK == 0) {
-				Folk crew = this.crew(level, CREW_REACH);
+				PathfinderMob crew = this.crew(level, CREW_REACH);
 				if (crew != null) {
 					crew.startRiding(this);
 				}
@@ -165,7 +178,8 @@ public final class Cannon extends Entity {
 			this.settle();
 			return;
 		}
-		LivingEntity foe = gunner.getTarget();
+		// ((0.7.295) a villager's foe is its brain's)
+		LivingEntity foe = Rulers.target(gunner);
 		if (foe == null || !foe.isAlive()) {
 			this.settle();
 			return;
@@ -214,7 +228,7 @@ public final class Cannon extends Entity {
 		return Vec3.directionFromRotation(-this.barrelPitch(), this.getYRot());
 	}
 
-	private void fire(ServerLevel level, Folk gunner, Vec3 pivot, double flat) {
+	private void fire(ServerLevel level, PathfinderMob gunner, Vec3 pivot, double flat) {
 		Vec3 dir = this.barrel();
 		double stray = SPREAD * flat / Cannonball.SPEED;
 		dir = dir.add(level.getRandom().triangle(0.0, stray), level.getRandom().triangle(0.0, stray * 0.5), level.getRandom().triangle(0.0, stray)).normalize();
@@ -239,7 +253,7 @@ public final class Cannon extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return passenger instanceof Folk f && f.role() == Folk.ARCHER && this.getPassengers().isEmpty();
+		return this.gunnerOf(passenger) && this.getPassengers().isEmpty();
 	}
 
 	/** The gunner sits on the trail, behind the breech. */

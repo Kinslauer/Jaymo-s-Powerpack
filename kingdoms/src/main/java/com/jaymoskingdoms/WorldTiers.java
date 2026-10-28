@@ -396,6 +396,10 @@ public final class WorldTiers {
 		if (mob instanceof Folk folk) {
 			return folk.style() == FactionType.BARBARIAN || Orcs.isOrc(folk) || Goblins.isGoblin(folk) || Assassins.is(folk);
 		}
+		if (Orcs.isOrc(mob) || Goblins.isGoblin(mob)) {
+			// (0.7.292) a goblin or an orc as an MCA villager
+			return true;
+		}
 		if (!(mob instanceof Enemy) || Thralls.isThrall(mob)) {
 			return false;
 		}

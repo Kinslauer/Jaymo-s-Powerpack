@@ -435,9 +435,9 @@ final class PirateCoves {
 		}
 		UUID captain = crew.captain;
 		UUID old = camp.leader().orElse(null);
-		if (old != null && !old.equals(captain) && level.getEntity(old) instanceof Folk ashore && !(ashore.getVehicle() instanceof Ship)) {
+		if (old != null && !old.equals(captain) && level.getEntity(old) instanceof Worker ashore && !(ashore.mob().getVehicle() instanceof Ship)) {
 			// (he waited ashore for her: now he's aboard her, and the one ashore goes)
-			ashore.discard();
+			McaCompat.vanish(ashore.mob());
 		}
 		Factions.update(server, camp.id(), f -> f.withLeader(Optional.ofNullable(captain)));
 		putCove(server, camp.id(), cove.withShip(ship.getUUID(), ship.blockPosition(), -1L));
@@ -486,8 +486,9 @@ final class PirateCoves {
 		}
 		int bombers = data.grown() >= DAYS_TO_SECOND_BOMBARDIER ? MAX_BOMBARDIERS : BOMBARDIERS;
 		BlockPos center = data.center();
-		int around = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(center).inflate(RADIUS * 4),
-			f -> f.isAlive() && f.factionId() == camp.id() && f.role() == Pirates.BOMBARDIER).size();
+		// ((0.7.296) folk or villagers: they were counted only as folk, so a cove whose bombardiers had become villagers kept sending more)
+		int around = Workers.near(level, new net.minecraft.world.phys.AABB(center).inflate(RADIUS * 4),
+			w -> w.mob().isAlive() && w.factionId() == camp.id() && w.role() == Pirates.BOMBARDIER).size();
 		if (around < bombers) {
 			bombardier(level, camp, spot(level, center, level.getRandom()), center);
 		}

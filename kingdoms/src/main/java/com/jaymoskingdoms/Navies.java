@@ -68,6 +68,8 @@ final class Navies {
 	static final double ESCORT_START = 48.0;
 	/** Reputation with a realm for sinking its ship, and for seeing its merchantman in. */
 	static final int REP_SINK = -150, REP_ESCORT = 25;
+	/** (0.7.296) How far from the pier's land end the shipwright goes (blocks). */
+	static final int WRIGHT_RADIUS = 8;
 	/** A shipwright missing this long (ticks) is replaced. */
 	static final long WRIGHT_MISSING = 20 * 240;
 
@@ -216,14 +218,49 @@ final class Navies {
 			return;
 		}
 		WRIGHT_GONE.remove(f.id());
+		// (0.7.296) with MCA, one of MCA's villagers, new to the realm (Andy retiring the folk)
+		Entity hired = McaCompat.shipwright(level, f, null, h.shore());
+		if (hired != null) {
+			put(level.getServer(), f.id(), h.withWright(hired.getUUID()));
+			return;
+		}
 		Folk wright = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 		if (wright == null) {
 			return;
 		}
 		wright.snapTo(h.shore().getX() + 0.5, h.shore().getY(), h.shore().getZ() + 0.5, 0.0F, 0.0F);
-		wright.setup(Pirates.SHIPWRIGHT, f, h.shore(), 8);
+		wright.setup(Pirates.SHIPWRIGHT, f, h.shore(), WRIGHT_RADIUS);
 		level.addFreshEntity(wright);
 		put(level.getServer(), f.id(), h.withWright(wright.getUUID()));
+	}
+
+	/** (0.7.296) {@code mob} is {@code realm}'s shipwright, the one its harbour knows. */
+	static boolean isWright(MinecraftServer server, int realm, Entity mob) {
+		Harbour h = harbour(server, realm);
+		return h != null && h.wright().map(mob.getUUID()::equals).orElse(false);
+	}
+
+	/**
+	 * (0.7.296) With MCA, a harbour's folk shipwright at peace on his pier becomes one of MCA's villagers in his place,
+	 * the one the harbour knows. True if so (the folk is gone).
+	 */
+	static boolean becomeVillager(ServerLevel level, Folk folk) {
+		if (!McaCompat.LOADED || folk.role() != Pirates.SHIPWRIGHT || folk.getTarget() != null || folk.isPassenger() || Downed.isDowned(folk)) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		Faction f = Factions.get(server, folk.factionId());
+		Harbour h = harbour(server, folk.factionId());
+		if (f == null || f.fallen() || h == null || !isWright(server, f.id(), folk)) {
+			return false;
+		}
+		Entity hired = McaCompat.shipwright(level, f, folk, h.shore());
+		if (hired == null) {
+			return false;
+		}
+		put(server, f.id(), h.withWright(hired.getUUID()));
+		folk.discard();
+		return true;
 	}
 
 	/** Its warship kept track of, and built again (her crew mustered) when she's lost and it's been long enough. */

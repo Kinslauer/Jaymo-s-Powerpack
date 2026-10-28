@@ -256,7 +256,11 @@ public final class Heritage {
 		// (0.7.262, Andy's NOEA picks) three new bloods, picked at the start like the first ten
 		DIVINE(0, Items.TOTEM_OF_UNDYING, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
 		BIOBUILT(0, Items.COPPER_INGOT, Stats.Stat.MIGHT, Stats.Stat.GRIT),
-		RUBBERFOLK(0, Items.PINK_PETALS, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE);
+		RUBBERFOLK(0, Items.PINK_PETALS, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE),
+		// (0.7.292) Andy: goblins and orcs as MCA villagers, "still monstrous with their proportions, Orcs are bigger,
+		// goblins smaller, both green and repulsive with variations" ({@link Greenskins}): broods, never a player's
+		GOBLIN(true, true, 0, Items.ROTTEN_FLESH, Stats.Stat.AGILITY, Stats.Stat.FINESSE),
+		ORC(true, true, 0, Items.BONE, Stats.Stat.MIGHT, Stats.Stat.GRIT);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -264,13 +268,20 @@ public final class Heritage {
 		public final List<Stats.Stat> bonuses;
 		/** (0.7.106) Woken in play, not picked at the start. */
 		public final boolean earned;
+		/** (0.7.292) A monstrous brood (goblins, orcs): only ever born to their own, never a player's, never woken. */
+		public final boolean brood;
 
 		Kind(int freePoints, Item icon, Stats.Stat... bonuses) {
 			this(false, freePoints, icon, bonuses);
 		}
 
 		Kind(boolean earned, int freePoints, Item icon, Stats.Stat... bonuses) {
+			this(earned, false, freePoints, icon, bonuses);
+		}
+
+		Kind(boolean earned, boolean brood, int freePoints, Item icon, Stats.Stat... bonuses) {
 			this.earned = earned;
+			this.brood = brood;
 			this.freePoints = freePoints;
 			this.icon = icon;
 			this.bonuses = List.of(bonuses);
@@ -278,6 +289,11 @@ public final class Heritage {
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
+		}
+
+		/** (0.7.292) Every heritage a player could ever have: all but the broods. */
+		public static Kind[] playable() {
+			return java.util.Arrays.stream(values()).filter(k -> !k.brood).toArray(Kind[]::new);
 		}
 
 		/** Free points in {@code stat}. */
@@ -965,6 +981,10 @@ public final class Heritage {
 
 	/** Whether {@code player} has woken earned heritage {@code kind} (any heritage that isn't earned is always open). */
 	public static boolean unlocked(Player player, Kind kind) {
+		if (kind.brood) {
+			// (0.7.292) a goblin's or an orc's blood is never a player's
+			return false;
+		}
 		if (!kind.earned) {
 			return true;
 		}
@@ -974,7 +994,7 @@ public final class Heritage {
 
 	/** Wakes earned heritage {@code kind} in {@code player}, once: the word of it ((0.7.184) their children can carry it). */
 	static void unlock(ServerPlayer player, Kind kind) {
-		if (!kind.earned || unlocked(player, kind)) {
+		if (!kind.earned || kind.brood || unlocked(player, kind)) {
 			return;
 		}
 		List<String> keys = new ArrayList<>(player.getAttachedOrElse(UNLOCKED, List.of()));
@@ -1062,7 +1082,7 @@ public final class Heritage {
 		// (0.7.106) wake an earned heritage in them, as if they'd earned it
 		var unlockPlayers = Commands.argument("players", EntityArgument.players());
 		for (Kind kind : Kind.values()) {
-			if (!kind.earned) {
+			if (!kind.earned || kind.brood) {
 				continue;
 			}
 			unlockPlayers.then(Commands.literal(kind.key()).executes(c -> {
@@ -1078,6 +1098,10 @@ public final class Heritage {
 			}));
 		}
 		for (Kind kind : Kind.values()) {
+			if (kind.brood) {
+				// (0.7.292) goblins and orcs are villagers only
+				continue;
+			}
 			players.then(Commands.literal(kind.key()).executes(c -> {
 				int n = 0;
 				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {

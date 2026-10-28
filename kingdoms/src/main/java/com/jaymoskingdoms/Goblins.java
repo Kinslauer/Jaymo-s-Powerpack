@@ -101,14 +101,25 @@ public final class Goblins {
 		return name + " " + KING_BYNAMES[random.nextInt(KING_BYNAMES.length)];
 	}
 
-	/** One of a village's goblins (a goblin, a slinger or the king). */
-	public static boolean isGoblin(Folk folk) {
-		int role = folk.role();
+	/** (0.7.292) A goblin by name alone, the same every time for the same seed (one of a village's MCA villagers). */
+	static String commonName(long seed) {
+		RandomSource random = RandomSource.create(seed ^ 0x60B12L);
+		return KING_FIRST[random.nextInt(KING_FIRST.length)] + KING_SECOND[random.nextInt(KING_SECOND.length)];
+	}
+
+	/** One of a village's roles (a goblin, a slinger or the king). */
+	public static boolean isGoblin(int role) {
 		return role == GOBLIN || role == SLINGER || role == KING;
 	}
 
+	/** One of a village's goblins (a goblin, a slinger or the king). */
+	public static boolean isGoblin(Folk folk) {
+		return isGoblin(folk.role());
+	}
+
+	/** One of a village's goblins, folk or ((0.7.292) {@link Greenskins}) MCA villager. */
 	public static boolean isGoblin(LivingEntity entity) {
-		return entity instanceof Folk folk && isGoblin(folk);
+		return entity instanceof Worker w && isGoblin(w.role());
 	}
 
 	/** It shoots rather than closing in. */
@@ -126,8 +137,13 @@ public final class Goblins {
 
 	/** What a goblin of {@code folk}'s village attacks on sight. */
 	static boolean prey(Folk folk, LivingEntity target) {
+		return prey(folk.factionId(), target);
+	}
+
+	/** What a goblin of village {@code village} attacks on sight ((0.7.292) a villager goblin's too, {@link Greenskins}). */
+	static boolean prey(int village, LivingEntity target) {
 		if (target instanceof ServerPlayer player) {
-			return !player.isCreative() && !player.isSpectator() && !Disguise.fooled(player, folk.factionId());
+			return !player.isCreative() && !player.isSpectator() && !Disguise.fooled(player, village);
 		}
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;
@@ -137,7 +153,12 @@ public final class Goblins {
 
 	/** A goblin died (not the king: his death clears the village): now and then it leaves its mask behind. */
 	static void died(ServerLevel level, Folk goblin, DamageSource source) {
-		if (goblin.role() != KING && source.getEntity() instanceof ServerPlayer && level.getRandom().nextInt(MASK_DROP_ONE_IN) == 0) {
+		died(level, goblin, goblin.role(), source);
+	}
+
+	/** (0.7.292) The same for any of a village's goblins ({@code role}), folk or villager. */
+	static void died(ServerLevel level, LivingEntity goblin, int role, DamageSource source) {
+		if (role != KING && source.getEntity() instanceof ServerPlayer && level.getRandom().nextInt(MASK_DROP_ONE_IN) == 0) {
 			goblin.spawnAtLocation(level, new ItemStack(Disguise.MASK));
 		}
 	}

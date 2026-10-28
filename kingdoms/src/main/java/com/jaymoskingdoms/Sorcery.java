@@ -31,6 +31,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -59,6 +60,8 @@ import org.jspecify.annotations.Nullable;
  * that drags you to her, hemorrhages that burst every cut near, and she drinks the bleeding to heal ({@link Hemomancy}).</li>
  * </ul>
  * Casters keep their distance and cast; a player who kills one takes a spell scroll from the body ({@link Arcana}).
+ * (0.7.291) With MCA, every caster is a villager in the office ({@link Casters}, {@link CourtWizards}), and the spells
+ * here take a {@link Caster}: one of those, or (without MCA, and an orc camp's shaman) one of our folk.
  */
 public final class Sorcery {
 	/** The roles (folk ids; clear of the realms', the camps' 20-24 and the goblins' 30-32). */
@@ -138,6 +141,85 @@ public final class Sorcery {
 	private static final List<Rising> RISING = new ArrayList<>();
 
 	private Sorcery() {
+	}
+
+	/**
+	 * (0.7.291) Whoever casts: one of our folk ({@link #of}), or (with MCA) a villager in the office ({@link Casters}).
+	 * Andy (2026-10-28): "no more folk im retiring the folk. all mca please."
+	 */
+	interface Caster {
+		PathfinderMob mob();
+
+		int role();
+
+		int factionId();
+
+		int[] timers();
+
+		/** Their foe just now, or null. */
+		@Nullable LivingEntity target();
+
+		/** The land of their side's seat: what kind of dead they raise. */
+		Climate climate();
+
+		/** {@code e} is fair game for their blasts: their foe, or something fighting their side; never their own side. */
+		boolean foe(LivingEntity e);
+
+		/** Their own side near them with a fight on (themselves left out). */
+		List<LivingEntity> fightingAllies(ServerLevel level);
+
+		/** Their own side near them, themselves too (whom they mend). */
+		List<LivingEntity> side(ServerLevel level);
+	}
+
+	/** {@code folk} as a {@link Caster}. */
+	static Caster of(Folk folk) {
+		return new Caster() {
+			@Override
+			public PathfinderMob mob() {
+				return folk;
+			}
+
+			@Override
+			public int role() {
+				return folk.role();
+			}
+
+			@Override
+			public int factionId() {
+				return folk.factionId();
+			}
+
+			@Override
+			public int[] timers() {
+				return folk.spellTimers();
+			}
+
+			@Override
+			public @Nullable LivingEntity target() {
+				return folk.getTarget();
+			}
+
+			@Override
+			public Climate climate() {
+				return folk.climate();
+			}
+
+			@Override
+			public boolean foe(LivingEntity e) {
+				return Sorcery.foe(folk, e);
+			}
+
+			@Override
+			public List<LivingEntity> fightingAllies(ServerLevel level) {
+				return new ArrayList<>(Sorcery.fightingAllies(level, folk));
+			}
+
+			@Override
+			public List<LivingEntity> side(ServerLevel level) {
+				return new ArrayList<>(level.getEntitiesOfClass(Folk.class, folk.getBoundingBox().inflate(SUPPORT_RANGE), f -> f == folk || folk.sameSide(f)));
+			}
+		};
 	}
 
 	static void register() {
@@ -270,6 +352,10 @@ public final class Sorcery {
 		if (CourtWizards.inPlace(faction, role)) {
 			return CourtWizards.enlist(level, faction, null);
 		}
+		if (Casters.inPlace(faction, role)) {
+			// (0.7.291) with MCA, a court's necromancer is one of its people, a camp's caster a villager by its fire
+			return Casters.enlist(level, faction, role, null);
+		}
 		Folk folk = KingdomEvents.spawn(level, faction, role);
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		if (folk != null && keep != null && faction.type().isRealm()) {
@@ -296,6 +382,20 @@ public final class Sorcery {
 				source.sendFailure(Component.translatable("message.jaymoskingdoms.wizard_none"));
 				return 0;
 			}
+			source.sendSuccess(() -> Component.translatable("message.jaymoskingdoms.caster_summoned", w.mob().getDisplayName(), f.name()), true);
+			return 1;
+		}
+		if (Casters.inPlace(f, role)) {
+			// (0.7.291) with MCA: the grown villager nearest you takes a court's office; a camp's newcomer is at your feet
+			PathfinderMob near = f.type().isRealm() ? McaCompat.nearestGrown(level, player) : null;
+			Worker w = Casters.enlist(level, f, role, near);
+			if (w == null) {
+				return 0;
+			}
+			if (near == null) {
+				w.mob().snapTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 0.0F);
+			}
+			w.mob().setHomeTo(player.blockPosition(), Folk.HOME_RADIUS);
 			source.sendSuccess(() -> Component.translatable("message.jaymoskingdoms.caster_summoned", w.mob().getDisplayName(), f.name()), true);
 			return 1;
 		}
@@ -330,14 +430,7 @@ public final class Sorcery {
 			folk.getNavigation().moveTo(target, 1.0);
 		}
 		switch (folk.role()) {
-			case BLOOD_WITCH -> Hemomancy.witchTick(level, folk);
-			case SHAMAN, Orcs.SHAMAN -> {
-				if (timers[T_CHANT] <= 0 && fightingAllies(level, folk).size() >= CHANT_ALLIES) {
-					chant(level, folk);
-				} else if (timers[T_MEND] <= 0) {
-					mend(level, folk);
-				}
-			}
+			case BLOOD_WITCH, SHAMAN, Orcs.SHAMAN -> support(level, of(folk));
 			case WIZARD -> {
 				com.jaymoskingdoms.spirits.FolkSpirits.tick(level, folk, target);
 				List<Folk> fighting = fightingAllies(level, folk);
@@ -345,7 +438,7 @@ public final class Sorcery {
 					fighting.add(folk);
 					ward(level, folk, timers, fighting);
 				} else if (timers[T_MEND] <= 0) {
-					mend(level, folk);
+					mend(level, folk, timers, of(folk).side(level));
 				} else if (timers[T_BANISH] <= 0) {
 					banish(level, folk, timers);
 				}
@@ -357,39 +450,65 @@ public final class Sorcery {
 
 	/** A spell at {@code target} (from {@link Folk#performRangedAttack}, as an archer looses). */
 	static void cast(Folk folk, LivingEntity target) {
-		if (!(folk.level() instanceof ServerLevel level)) {
+		cast(of(folk), target);
+	}
+
+	/** (0.7.291) {@code caster}'s spell at {@code target}: a folk's, or a villager's in the office ({@link Casters}). */
+	static void cast(Caster caster, LivingEntity target) {
+		PathfinderMob mob = caster.mob();
+		if (!(mob.level() instanceof ServerLevel level)) {
 			return;
 		}
-		int[] timers = folk.spellTimers();
-		double d = folk.distanceTo(target);
-		folk.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		switch (folk.role()) {
+		int[] timers = caster.timers();
+		double d = mob.distanceTo(target);
+		mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		switch (caster.role()) {
 			case NECROMANCER -> {
 				if (d <= CLOSE && timers[T_SPIKES] <= 0) {
-					spikes(level, folk, target);
-				} else if (timers[T_RAISE] <= 0 && Thralls.count(folk.getUUID()) < MAX_THRALLS) {
-					raiseDead(level, folk, target);
+					spikes(level, caster, target);
+				} else if (timers[T_RAISE] <= 0 && Thralls.count(mob.getUUID()) < MAX_THRALLS) {
+					raiseDead(level, caster, target);
 				} else {
-					drain(level, folk, target, DRAIN_DAMAGE, DRAIN_HEAL);
+					drain(level, mob, target, DRAIN_DAMAGE, DRAIN_HEAL);
 				}
 			}
-			case BLOOD_WITCH -> Hemomancy.witchCast(level, folk, target, timers);
+			case BLOOD_WITCH -> Hemomancy.witchCast(level, caster, target, timers);
 			case SHAMAN, Orcs.SHAMAN -> {
 				if (d <= CLOSE && timers[T_RING] <= 0) {
-					ring(level, folk);
+					ring(level, caster);
 				} else if (target instanceof ServerPlayer && timers[T_HEX] <= 0) {
-					hex(level, folk, target);
+					hex(level, caster, target);
 				} else {
-					fireBolt(level, folk, target);
+					fireBolt(level, mob, target);
 				}
 			}
 			case WIZARD -> {
 				if (d <= CLOSE && timers[T_REPULSE] <= 0) {
-					repulse(level, folk, timers, e -> foe(folk, e));
+					repulse(level, mob, timers, caster::foe);
 				} else if (Thralls.isThrall(target) && timers[T_BANISH] <= 0) {
-					banish(level, folk, timers);
+					banish(level, mob, timers);
 				} else {
-					arcaneBolt(level, folk, target);
+					arcaneBolt(level, mob, target);
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * (0.7.291) {@code caster}'s help for their side, a fight on or not: a shaman's war chant, else his mending; a blood
+	 * witch drinks from the bleeding round her.
+	 */
+	static void support(ServerLevel level, Caster caster) {
+		int[] timers = caster.timers();
+		switch (caster.role()) {
+			case BLOOD_WITCH -> Hemomancy.witchTick(level, caster);
+			case SHAMAN, Orcs.SHAMAN -> {
+				if (timers[T_CHANT] <= 0 && caster.fightingAllies(level).size() >= CHANT_ALLIES) {
+					chant(level, caster);
+				} else if (timers[T_MEND] <= 0) {
+					mend(level, caster.mob(), timers, caster.side(level));
 				}
 			}
 			default -> {
@@ -449,9 +568,10 @@ public final class Sorcery {
 	}
 
 	/** Bone spikes: a line of them bursting up from the ground at the foe, cutting whatever of the other side stands there. */
-	private static void spikes(ServerLevel level, Folk folk, LivingEntity target) {
+	private static void spikes(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.HARM);
-		folk.spellTimers()[T_SPIKES] = SPIKES_COOLDOWN;
+		caster.timers()[T_SPIKES] = SPIKES_COOLDOWN;
 		Vec3 dir = new Vec3(target.getX() - folk.getX(), 0.0, target.getZ() - folk.getZ());
 		dir = dir.lengthSqr() < 1.0E-4 ? folk.getLookAngle().multiply(1.0, 0.0, 1.0).normalize() : dir.normalize();
 		List<LivingEntity> hit = new ArrayList<>();
@@ -460,7 +580,7 @@ public final class Sorcery {
 			level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 0.3, p.z, 6, 0.2, 0.4, 0.2, 0.15);
 			level.sendParticles(new DustParticleOptions(0xE8E2CF, 1.6F), p.x, p.y + 0.5, p.z, 8, 0.15, 0.5, 0.15, 0.0);
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(p.x - 0.7, p.y - 0.5, p.z - 0.7, p.x + 0.7, p.y + 2.0, p.z + 0.7),
-				e -> !hit.contains(e) && foe(folk, e))) {
+				e -> !hit.contains(e) && caster.foe(e))) {
 				hit.add(e);
 				if (e.hurtServer(level, magic(level, folk), SPIKES_DAMAGE)) {
 					e.setDeltaMovement(e.getDeltaMovement().add(0.0, 0.45, 0.0));
@@ -475,9 +595,10 @@ public final class Sorcery {
 	 * Raise dead: the corpses lying near him (Jaymo's Kitchen's, not players') get up first; else the dead claw their way
 	 * out of the ground beside him, a zombie and a skeleton (of his land's kind).
 	 */
-	private static void raiseDead(ServerLevel level, Folk folk, LivingEntity target) {
+	private static void raiseDead(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.WILL);
-		folk.spellTimers()[T_RAISE] = RAISE_COOLDOWN;
+		caster.timers()[T_RAISE] = RAISE_COOLDOWN;
 		int room = Math.min(RAISE_COUNT, MAX_THRALLS - Thralls.count(folk.getUUID()));
 		int raised = 0;
 		if (KitchenCompat.loaded()) {
@@ -487,18 +608,18 @@ public final class Sorcery {
 				if (raised >= room) {
 					break;
 				}
-				EntityType<? extends Mob> type = risenAs(KitchenCompat.sourceType(corpse), folk.climate());
-				if (type != null && Thralls.raise(level, type, corpse.position(), folk.factionId(), folk.getUUID(), false, RAISE_LIFE, target) != null) {
+				EntityType<? extends Mob> type = risenAs(KitchenCompat.sourceType(corpse), caster.climate());
+				if (type != null && Thralls.raise(level, type, corpse.position(), caster.factionId(), folk.getUUID(), false, RAISE_LIFE, target) != null) {
 					beam(level, folk, corpse.position().add(0.0, 0.3, 0.0), new DustParticleOptions(DRAIN_COLOUR, 1.0F));
 					corpse.discard();
 					raised++;
 				}
 			}
 		}
-		Climate climate = folk.climate();
+		Climate climate = caster.climate();
 		for (int i = raised; i < room; i++) {
 			EntityType<? extends Mob> type = i % 2 == 0 ? zombieOf(climate) : skeletonOf(climate);
-			Thralls.raise(level, type, groundNear(level, folk), folk.factionId(), folk.getUUID(), false, RAISE_LIFE, target);
+			Thralls.raise(level, type, groundNear(level, folk), caster.factionId(), folk.getUUID(), false, RAISE_LIFE, target);
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.HOSTILE, 1.2F, 0.7F);
 		level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, folk.getX(), folk.getY() + 1.0, folk.getZ(), 20, 0.4, 0.8, 0.4, 0.02);
@@ -552,7 +673,7 @@ public final class Sorcery {
 	// the shaman's
 
 	/** Fire bolt: a small fireball, as a blaze throws. */
-	private static void fireBolt(ServerLevel level, Folk folk, LivingEntity target) {
+	private static void fireBolt(ServerLevel level, PathfinderMob folk, LivingEntity target) {
 		Mana.ripple(folk, Mana.HARM);
 		Vec3 dir = new Vec3(target.getX() - folk.getX(), target.getY(0.5) - folk.getEyeY() + 0.2, target.getZ() - folk.getZ()).normalize();
 		SmallFireball bolt = new SmallFireball(level, folk, dir);
@@ -562,14 +683,15 @@ public final class Sorcery {
 	}
 
 	/** Ring of fire: everything of the other side close to him catches fire and is thrown back. */
-	private static void ring(ServerLevel level, Folk folk) {
+	private static void ring(ServerLevel level, Caster caster) {
+		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.HARM);
-		folk.spellTimers()[T_RING] = RING_COOLDOWN;
+		caster.timers()[T_RING] = RING_COOLDOWN;
 		for (int i = 0; i < 24; i++) {
 			double a = i * Math.PI * 2.0 / 24.0;
 			level.sendParticles(ParticleTypes.FLAME, folk.getX() + Math.cos(a) * 2.5, folk.getY() + 0.2, folk.getZ() + Math.sin(a) * 2.5, 3, 0.1, 0.2, 0.1, 0.02);
 		}
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, folk.getBoundingBox().inflate(CLOSE), e -> foe(folk, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, folk.getBoundingBox().inflate(CLOSE), caster::foe)) {
 			e.igniteForSeconds(RING_SECONDS);
 			e.knockback(0.8, folk.getX() - e.getX(), folk.getZ() - e.getZ(), magic(level, folk), 0.0F);
 		}
@@ -577,9 +699,10 @@ public final class Sorcery {
 	}
 
 	/** Hex: green smoke round the foe; weak and slow for a while. */
-	private static void hex(ServerLevel level, Folk folk, LivingEntity target) {
+	private static void hex(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.HARM);
-		folk.spellTimers()[T_HEX] = HEX_COOLDOWN;
+		caster.timers()[T_HEX] = HEX_COOLDOWN;
 		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(HEX_COLOUR, 1.0F));
 		target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, HEX_TICKS, 0), folk);
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HEX_TICKS, 1), folk);
@@ -588,12 +711,13 @@ public final class Sorcery {
 	}
 
 	/** War chant: a drumbeat and a shout; the raiders fighting near him hit harder and run faster. */
-	private static void chant(ServerLevel level, Folk folk) {
+	private static void chant(ServerLevel level, Caster caster) {
+		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.WARD);
-		folk.spellTimers()[T_CHANT] = CHANT_COOLDOWN;
-		List<Folk> allies = fightingAllies(level, folk);
+		caster.timers()[T_CHANT] = CHANT_COOLDOWN;
+		List<LivingEntity> allies = caster.fightingAllies(level);
 		allies.add(folk);
-		for (Folk ally : allies) {
+		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.STRENGTH, CHANT_TICKS, 0), folk);
 			ally.addEffect(new MobEffectInstance(MobEffects.SPEED, CHANT_TICKS, 0), folk);
 			level.sendParticles(ParticleTypes.ANGRY_VILLAGER, ally.getX(), ally.getY() + 2.1, ally.getZ(), 1, 0.1, 0.1, 0.1, 0.0);
@@ -601,12 +725,6 @@ public final class Sorcery {
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 3.0F, 0.6F);
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.6F, 1.4F);
 		Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.chant_" + level.getRandom().nextInt(4)), Speech.RED, 24.0);
-	}
-
-	/** Mending: the worst hurt of his side near him (himself too) is healed. */
-	private static void mend(ServerLevel level, Folk folk) {
-		mend(level, folk, folk.spellTimers(), level.getEntitiesOfClass(Folk.class, folk.getBoundingBox().inflate(SUPPORT_RANGE),
-			f -> f == folk || folk.sameSide(f)));
 	}
 
 	/** Mending: the worst hurt of {@code side} (the caster's own, near him) is healed. */
@@ -689,25 +807,27 @@ public final class Sorcery {
 		if (!(entity.level() instanceof ServerLevel level)) {
 			return;
 		}
-		if (entity instanceof Folk folk && isCaster(folk.role())) {
-			if (folk.role() == NECROMANCER) {
-				Thralls.release(level, folk.getUUID());
+		// ((0.7.291) a villager in the office too; a court wizard's scroll is CourtWizards')
+		if (entity instanceof Worker caster && isCaster(caster.role()) && (entity instanceof Folk || caster.role() != WIZARD)) {
+			int role = caster.role();
+			if (role == NECROMANCER) {
+				Thralls.release(level, entity.getUUID());
 			}
-			if (source.getEntity() instanceof ServerPlayer && (folk.role() != SHAMAN && folk.role() != Orcs.SHAMAN || level.getRandom().nextFloat() < SHAMAN_SCROLL_CHANCE)) {
-				folk.spawnAtLocation(level, Arcana.scrollFor(folk.role(), level.getRandom()));
+			if (source.getEntity() instanceof ServerPlayer && (role != SHAMAN && role != Orcs.SHAMAN || level.getRandom().nextFloat() < SHAMAN_SCROLL_CHANCE)) {
+				entity.spawnAtLocation(level, Arcana.scrollFor(role, level.getRandom()));
 			}
 			return;
 		}
 		if (Thralls.isThrall(entity)) {
 			return;
 		}
-		Folk necromancer = level.getEntitiesOfClass(Folk.class, entity.getBoundingBox().inflate(TOLL_RANGE),
-				f -> f.role() == NECROMANCER && f.isAlive() && f.getTarget() != null && Thralls.count(f.getUUID()) < MAX_THRALLS).stream()
-			.min(Comparator.comparingDouble(entity::distanceToSqr)).orElse(null);
+		LivingEntity necromancer = level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(TOLL_RANGE),
+				e -> e instanceof Worker w && w.role() == NECROMANCER && e.isAlive() && Casters.foeOf(e) != null && Thralls.count(e.getUUID()) < MAX_THRALLS)
+			.stream().min(Comparator.comparingDouble(entity::distanceToSqr)).orElse(null);
 		if (necromancer == null) {
 			return;
 		}
-		EntityType<? extends Mob> type = risenAs(entity.getType(), necromancer.climate());
+		EntityType<? extends Mob> type = risenAs(entity.getType(), Casters.climateOf(level, necromancer));
 		if (type == null) {
 			return;
 		}
@@ -723,15 +843,15 @@ public final class Sorcery {
 			}
 			RISING.remove(r);
 			ServerLevel level = server.getLevel(r.dimension());
-			if (level == null || !(level.getEntity(r.necromancer()) instanceof Folk necromancer) || !necromancer.isAlive()
-				|| Thralls.count(necromancer.getUUID()) >= MAX_THRALLS) {
+			if (level == null || !(level.getEntity(r.necromancer()) instanceof Worker necromancer) || necromancer.role() != NECROMANCER
+				|| !necromancer.mob().isAlive() || Thralls.count(r.necromancer()) >= MAX_THRALLS) {
 				continue;
 			}
 			if (KitchenCompat.loaded()) {
 				level.getEntities((Entity)null, new AABB(r.at(), r.at()).inflate(2.0), KitchenCompat::isRaisableCorpse).stream()
 					.min(Comparator.comparingDouble(e -> e.position().distanceToSqr(r.at()))).ifPresent(Entity::discard);
 			}
-			Thralls.raise(level, r.type(), r.at(), necromancer.factionId(), necromancer.getUUID(), false, TOLL_LIFE, necromancer.getTarget());
+			Thralls.raise(level, r.type(), r.at(), necromancer.factionId(), r.necromancer(), false, TOLL_LIFE, Casters.foeOf(necromancer.mob()));
 		}
 	}
 }

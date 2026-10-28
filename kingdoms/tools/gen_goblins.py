@@ -174,10 +174,10 @@ def slinger(i):
     save(img, "entity/goblin/slinger_%d" % i)
 
 
-def king():
-    rnd = random.Random("goblin-king")
+def king(skin=(104, 132, 58), robe=(91, 44, 111), seed="goblin-king", out="entity/goblin/king"):
+    """The king (Kingdoms 0.7.292: {skin}, {robe}, {seed} and {out} for gen_uniforms' MCA outfits; the default is as before)."""
+    rnd = random.Random(seed)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (104, 132, 58)
     head(img, rnd, skin, (240, 200, 40), None)
     # a gold tooth
     fx, fy, fw, fh = HEAD["front"]
@@ -195,7 +195,6 @@ def king():
     px(img, hx + 3, hy, (200, 30, 40))
     px(img, hx + 4, hy, (40, 170, 60))
     # a purple robe over a fat bare belly, a gold chain
-    robe = (91, 44, 111)
     box(img, BODY, robe, 10, rnd)
     bx, by, bw, bh = BODY["front"]
     paint(img, (bx + 2, by + 3, 4, 6), shade(skin, 18), 6, rnd)
@@ -216,7 +215,7 @@ def king():
             paint(img, (rx, ry, rw, 7), robe, 10, rnd)
             for x in range(rx, rx + rw):
                 px(img, x, ry + 7, (225, 210, 190))
-    save(img, "entity/goblin/king")
+    save(img, out)
 
 
 def mask_worn():

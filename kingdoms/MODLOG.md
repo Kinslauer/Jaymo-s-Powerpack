@@ -5831,3 +5831,117 @@ Andy: "stone borns should be able to be naturally wider and taller, where sylvan
   the rope to the body as the foe shrinks inside. Swallowed, their body and arms swell round (`SWELL` 0.28) and settle
   back with a wobble over 16 ticks, into the build the foe shifted them to. Everyone sees it. Texture from
   `tools/gen_rubber_skin.py`.
+
+## 0.7.291: court and camp casters are MCA villagers (pack 0.17.102)
+Andy: "court necromancers need to be mca too", then "all of em, no more folk im retiring the folk. all mca please."
+This is the first part (the casters); goblins and orcs, then the remaining folk, follow.
+- `Casters`: with MCA, a tyrant's court necromancer is one of the realm's villagers with no work (else someone moves in
+  to the hall), and a barbarian camp's necromancer, shaman and blood witch are villagers by its fire, as its raiders
+  are. They take a profession (`Professions.NECROMANCER`, `SHAMAN`, `BLOOD_WITCH`, never a player's pick), carry their
+  staff, and are never frailer than their folk were. Standing folk casters hand over in place (`McaBridge.convertCaster`,
+  blood and home kept, their thralls let go).
+- They live as villagers until a foe comes near, then keep their distance and cast (`Casters.step` from `Workers.step`,
+  as `CourtWizards` does): the spells now take a `Sorcery.Caster` (a folk or a villager), so drain, raised dead, bone
+  spikes, fire bolts, the ring, the hex, the war chant, mending and all of the blood witch's work are unchanged. The dead
+  near a villager necromancer in a fight still rise; his scroll still drops. A camp's casters count as its own
+  (`Barbarians.isCampVillager`). `/kingdom caster necromancer|shaman|blood_witch` makes one with MCA too.
+- Our robes (`Uniforms`, drawn by `tools/gen_uniforms.py` from `tools/gen_sorcery.py`'s casters without their faces):
+  4 necromancer robes, 4 blood witch robes, a shaman's furs and paint in the camp's colour (4 furs each) and, new for the
+  court wizard too, his starred robe in the realm's colour (4 trims each, no hat model on a villager), 136 in all.
+- Orc camps' shamans stay folk until the goblin and orc patch.
+- Compile-checked only, not seen in game.
+
+## 0.7.292: goblins and orcs are MCA villagers, green and monstrous (pack 0.17.103)
+Andy, retiring the folk: "yes make them MCA too, but they still need to be monstrous with their proportions, Orcs are
+bigger, goblins smaller, both green and repulsive with variations". The second part (the casters were the first).
+- Two broods (`Heritage.Kind.GOBLIN`, `ORC`, flag `brood`): born only to their own, never a player's pick, never woken,
+  left off the heritage screen and commands. `Greenskins` holds the rest.
+- **Proportions** (`BodySizes.GOBLIN`, `ORC`): a goblin is short and stringy on top of its 0.7 scale (about 0.6-0.7 of a
+  man); an orc is drawn the tallest and broadest there is (1.1-1.25x), while MCA keeps its box a man's size so it still
+  fits a door. The king and warchief keep their folk's scale (0.95, 1.35) and are born at the top of their brood's range.
+- **Green**: `Greenskins.skin` replaces MCA's skin colour (in `McaVerdantSkinMixin`): a goblin's lime to bog green, an
+  orc's grey-green, each its own shade by UUID. Two more looks each (`HeritageVariants`): goblin Boggart (swamp yellow,
+  quieter sneaking) and Cavegrub (pale, +1 heart); orc Ashskin (near black, +1.5 armour) and Bloodtusk (red-brown,
+  harder blows).
+- **Repulsive, with variations** (client `GreenskinLooks`, `tools/gen_greenskins.py`): in the skin's green, a goblin's
+  long ears and hooked nose or tall bat ears and a needle nose on a warty bulb; an orc's tusks, heavy brow and swept
+  ears or an underbite with long tusks, a heavier brow and a torn ear. Over the body, one of four sets of warts,
+  wrinkles and blotches each, and an orc one of four of scars (three with soot, blood or bone war paint).
+- **Hand-over**: a goblin village's goblins, slingers and king, and an orc camp's grunts, rangers and warchief, at home
+  and at peace, become MCA villagers in place (`McaBridge.convertGreenskin`): guards (slingers and rangers archers),
+  male, with goblin or orc names (the king and warchief keep theirs), their folk's gear, health, blows, toughness and
+  size, enlisted to the camp in the same role; the camp's leader passes to the villager. An orc camp's shaman is a
+  villager in office like the other camps' casters (`Casters`). War bands out raiding stay folk.
+- **Ways kept**: they hunt what their folk did (`McaCompat.foe` → `Greenskins.prey`; a goblin mask still fools a goblin
+  village, striking one still gives you away); an orc's blood rage and war cries, a grunt's javelins and the
+  warchief's ground slam run on the villager (`Greenskins.step` from `Workers.step`); the king's green and the
+  warchief's red boss bars and their rally; their deaths clear the camp (`Greenskins.died`), and a goblin still drops
+  its mask now and then. Orcs frighten villagers as before; both count as foes for world tiers and only court their own.
+- **Dress** (`Uniforms`, `tools/gen_uniforms.py` from `tools/gen_goblins.py` and `tools/gen_orcs.py` without the face,
+  skin or features): goblin rags, slinger hoods, king's robes (4 colours), orc kilts, ranger hoods, shaman hides and
+  masks, warchief iron; 28 outfits.
+- Also: villager raiders' javelins (and the orcs' rage and slam) read the villager brain's foe, not the folk target
+  (`Rulers.target`); a fallen camp's casters scatter with its raiders.
+- Compile-checked only, not seen in game.
+
+## 0.7.293: barbarian chiefs and wall archers are MCA villagers (pack 0.17.104)
+Andy, retiring the folk: "all of em, no more folk im retiring the folk. all mca please." The third part.
+- **Chiefs**: a barbarian camp's chief, at home and at peace, becomes an MCA guard in place (`McaBridge.convertRaider`):
+  a man with his own name, his folk's gear, health, blows and toughness, on his throne's spot, the camp's leader. The
+  boss bar, the rally at a quarter health and the camp cleared on his death now live in `CampChiefs` for every camp
+  leader (chief, goblin king, orc warchief; moved out of `Greenskins`). He throws rocks, frightens villagers and counts
+  for the chief bounties as his folk did.
+- **Wall archers** (`WallArchers`): a realm's archers on its keep's posts become MCA archers (`McaBridge.convertGuard`),
+  and new ones are its villagers taken on (`KingdomEvents.spawnArcher`). MCA's archers kite, which would walk them off
+  a wall, so each is held to his post: strayed more than 3 blocks, he walks back unless a foe is right on him. They
+  fight the realm's foes as its guards do (`McaCompat.foe`). Cavalry and cannon archers stay folk for now.
+- Compile-checked, not seen in game.
+
+## 0.7.294: the realms' drivers and caravan men are MCA villagers (pack 0.17.105)
+Andy, retiring the folk: "all mca please." The fourth part: the road.
+- **Drivers** (`Drivers`): a cab's driver, a king's coachman and a milestone coach's coachman are, with MCA, men new to the
+  realm's people (`McaBridge.driver`), in the saddle of the same horses (`Cavalry.mount` and `Stables.equip` take any
+  worker now). While he drives, his brain is set aside (`Workers.step`); out of the saddle he's put back on his horse as
+  before. A cab's or carriage's folk driver from before hands his seat to a villager (`Drivers.recast`).
+- **Caravans**: a fiefdom's caravan comes into the world with villager carters and MCA guards (`Caravans.guard`,
+  `McaBridge.escort`), steered along the road as its folk were (`Caravans.villagerStep` in place of the `Drive` goal); a
+  guard's brain has him when there's a fight. A player striking a cart sets them on him (`Rulers.charge`). They're
+  still off the roster. A roaming merchant's realm escort is the same.
+- These come and go (a caravan out of sight, a coach's trip over), so a villager who leaves for good is taken out of
+  MCA's family tree too (`McaCompat.vanish`), and the tree doesn't fill with them.
+- Compile-checked, not seen in game.
+
+## 0.7.295: war parties, raiders, riders, gunners, assassins and looters are MCA villagers (pack 0.17.106)
+Andy, retiring the folk: "all mca please." The fifth part: the fighting folk.
+- **Riders** (`Cavalry`): a prosperous realm's mounted guards and a wealthy one's mounted archers are its MCA guards and
+  archers in the saddle; folk riders from before hand their horse to a villager (`McaBridge.convertGuard`).
+- **Cannon gunners** (`Cannon`, `McaGunner`): an MCA archer of the realm mans each cannon (the wall archers of 0.7.293
+  would otherwise have left them unmanned); a folk gunner hands over his seat. A ball from a villager gunner spares his
+  own side and the townsfolk (`Javelins.harms`).
+- **War parties** (`WarParties`): soldiers and the spoils cart's carter are MCA guards and a villager carter; they march
+  as their party sends them (`WarParties.villagerStep`, the brain set aside) and fight through their brains when a foe
+  comes near and at the siege. A realm's MCA guards now count an enemy realm's guards, archers and soldiers foes in a
+  war (`McaCompat.foe`).
+- **Raids** (`Raids`): a barbarian camp's, orc camp's or pirate cove's raiders are mustered as folk and handed to MCA
+  villagers at once (`McaCompat.raider`: the same gear, names and ways as at home); they march, plunder and go home as
+  before (`Raids.villagerStep`), and their losses are undone on the roster as their folk's were.
+- **Assassins** (`Assassins`): the stranger is a villager of no settlement; his stalk, stab, smoke and flight run as
+  before in place of his brain, and he fights with his own blade (`Assassins.fight`). Guards know him once his cloak is off.
+- **Looters** (`Looters`): the ragged strangers are villagers of no settlement, driven by the same creeping and robbing;
+  the MCA guards and archers now spot them and take them in.
+- Caravan guards and soldiers on the march sense foes every tick so their brains get the fight.
+- Compile-checked, not seen in game.
+
+## 0.7.296: harbour shipwrights and pirate captains ashore are MCA villagers (pack 0.17.107)
+Andy, retiring the folk: "all mca please." The sixth part: the sea folk ashore.
+- **Shipwrights** (`Navies`): a realm's harbour shipwright is a man of MCA's (a fisherman by its reckoning) on his pier,
+  axe in hand, in our shipwright's clothes; a folk shipwright hands over his pier (`Navies.becomeVillager`), and the
+  harbour knows the villager as its wright, so he isn't replaced. He keeps the post while his realm stands.
+- **Cove captains ashore** (`PirateCoves`): a captain waiting ashore for his ship is an MCA guard with his own name,
+  health and blows, in a pirate captain's coat, still the cove's leader; his boss bar and rally run as a camp chief's
+  (`CampChiefs`), he fires his pistols as the cove's gunners do, and his death clears the cove. When his ship is built
+  the one ashore goes.
+- A cove counted its bombardiers ashore only as folk, so one whose bombardiers were villagers kept sending more; it
+  counts both now. The cove's gunners, bombardiers and captain ashore and the harbour's shipwright, as villagers, no
+  longer leave a vacancy on the roster when they die (as their folk never did).
+- Compile-checked, not seen in game.
