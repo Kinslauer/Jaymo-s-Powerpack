@@ -116,6 +116,9 @@ public final class WindPower implements Power {
 		WindModes.register();
 		WindTempest.init();
 		SorasDagger.register();
+		SorasLineage.register();
+		SorasBladeChild.register();
+		SorasBladeDisplay.register();
 		WindStaff.register();
 		WindStaffSurge.register();
 		WindDagger.register();

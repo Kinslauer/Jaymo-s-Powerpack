@@ -58,6 +58,8 @@ PARTS = [
     ("fishing_hook", "Fishing Hook", "drawn:fishing_hook", ["iron"]),
     ("brush_ferrule", "Brush Ferrule", "drawn:brush_ferrule", ["copper"]),
     ("kitchen_knife_blade", "Kitchen Knife Blade", "drawn:kitchen_knife_blade", ["iron"]),
+    # (0.17.110) Sora's Dagger's iron stage
+    ("soras_dagger_blade", "Sora's Dagger Blade", "drawn:soras_dagger_blade", ["iron"]),
 ]
 # our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
 DRAWN = {
@@ -113,6 +115,23 @@ DRAWN = {
         "................",
         "................"],
 }
+DRAWN["soras_dagger_blade"] = [
+    "................",
+    "..............#.",
+    ".............#o#",
+    "............#ox#",
+    "...........#oxx#",
+    "..........#oxx#.",
+    ".........#oxx#..",
+    "........#oxx#...",
+    ".......#oxx#....",
+    "......#oxx#.....",
+    ".....#oxx#......",
+    "....#oxxx#......",
+    "...#oxxx#.......",
+    "....####........",
+    "................",
+    "................"]
 # outline, metal, shine
 DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
                  "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128))}
