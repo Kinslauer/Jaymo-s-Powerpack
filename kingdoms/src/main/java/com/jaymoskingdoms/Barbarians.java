@@ -144,9 +144,9 @@ public final class Barbarians {
 		return folk.style() == FactionType.BARBARIAN || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF;
 	}
 
-	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand. */
+	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand; (0.7.291) its casters. */
 	public static boolean isCampVillager(Entity e) {
-		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role());
+		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role()) || Casters.campCaster(e);
 	}
 
 	/**

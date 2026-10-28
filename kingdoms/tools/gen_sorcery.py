@@ -107,10 +107,11 @@ def save(img, name):
 
 # ---- the necromancer ------------------------------------------------------------------------------------------------
 
-def necromancer(i):
-    rnd = random.Random("necromancer-%d" % i)
+def necromancer(i, skin=None, cloth=(34, 28, 40), hood=(28, 24, 34), lining=(90, 30, 120), stripe=(70, 26, 96), seed=None, out=None):
+    """(Kingdoms 0.7.291) {skin}, the robe's colours, {seed} and {out} for the MCA outfits (tools/gen_uniforms.py)."""
+    rnd = random.Random(seed or "necromancer-%d" % i)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = [(178, 182, 166), (160, 168, 158)][i]
+    skin = skin or [(178, 182, 166), (160, 168, 158)][i]
     violet = (176, 70, 230)
     face(img, rnd, skin, violet, glow=True)
     fx, fy, fw, fh = HEAD["front"]
@@ -126,25 +127,23 @@ def necromancer(i):
         for x in (fx + 2, fx + 4):
             px(img, x, fy + 7, (60, 40, 60))
     # the hood (hat layer): black, lined in violet, over the crown and back, open at the face
-    hood = (28, 24, 34)
-    for name in ("top", "back", "right", "left"):
-        paint(img, HAT[name], hood, 6, rnd)
+    for side in ("top", "back", "right", "left"):
+        paint(img, HAT[side], hood, 6, rnd)
     hx, hy, hw, hh = HAT["front"]
     paint(img, (hx, hy, hw, 2), hood, 6, rnd)
     for y in range(hy + 2, hy + hh):
         px(img, hx, y, hood)
         px(img, hx + hw - 1, y, hood)
     for x in range(hx + 1, hx + hw - 1):
-        px(img, x, hy + 2, (90, 30, 120))
+        px(img, x, hy + 2, lining)
     # the robe: black over violet, a bone belt, a skull clasp at the chest, bones hung at the hip
-    cloth = (34, 28, 40)
     box(img, BODY, cloth, 7, rnd)
     bx, by, bw, bh = BODY["front"]
     for y in range(by, by + bh):
-        px(img, bx + 3, y, (70, 26, 96))
-        px(img, bx + 4, y, (70, 26, 96))
-    for name in SIDES:
-        rx, ry, rw, rh = BODY[name]
+        px(img, bx + 3, y, stripe)
+        px(img, bx + 4, y, stripe)
+    for side in SIDES:
+        rx, ry, rw, rh = BODY[side]
         for x in range(rx, rx + rw):
             px(img, x, ry + 7, shade(BONE, rnd.randint(-20, 0)))
     # the skull: 3x3, two sockets
@@ -157,16 +156,17 @@ def necromancer(i):
     for k in range(3):
         px(img, bx + 1 + 2 * k, by + 9, BONE)
         px(img, bx + 1 + 2 * k, by + 10, shade(BONE, -30))
-    robe_limbs(img, rnd, cloth, (90, 30, 120), skin)
-    save(img, "entity/sorcery/necromancer_%d" % i)
+    robe_limbs(img, rnd, cloth, lining, skin)
+    save(img, out or "entity/sorcery/necromancer_%d" % i)
 
 
 # ---- the shaman -----------------------------------------------------------------------------------------------------
 
-def shaman(dye, paint_colour):
-    rnd = random.Random("shaman-" + dye)
+def shaman(dye, paint_colour, skin=None, fur=(96, 74, 52), seed=None, out=None):
+    """(Kingdoms 0.7.291) {skin}, {fur}, {seed} and {out} for the MCA outfits (tools/gen_uniforms.py)."""
+    rnd = random.Random(seed or "shaman-" + dye)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (176, 128, 92)
+    skin = skin or (176, 128, 92)
     face(img, rnd, skin, (60, 40, 25))
     fx, fy, fw, fh = HEAD["front"]
     # war paint in the camp's colour: a band across the eyes, stripes down the chin
@@ -206,7 +206,6 @@ def shaman(dye, paint_colour):
             px(img, bx_ + k, y, shade(colour, -12 * (y - by_) // 2))
     # bare chest under a fur mantle, a bone necklace, a hide kilt
     box(img, BODY, skin, 6, rnd)
-    fur = (96, 74, 52)
     for name in SIDES:
         rx, ry, rw, rh = BODY[name]
         paint(img, (rx, ry, rw, 3 if name == "front" else 6), fur, 14, rnd)
@@ -237,15 +236,17 @@ def shaman(dye, paint_colour):
             rx, ry, rw, rh = leg[name]
             paint(img, (rx, ry + 5, rw, 4), skin, 6, rnd)
             paint(img, (rx, ry + 9, rw, 3), (90, 66, 44), 8, rnd)
-    save(img, "entity/sorcery/shaman/" + dye)
+    save(img, out or "entity/sorcery/shaman/" + dye)
 
 
 # ---- the court wizard -----------------------------------------------------------------------------------------------
 
-def wizard(dye, colour):
-    rnd = random.Random("wizard-" + dye)
+def wizard(dye, colour, skin=None, trim=GOLD, beard=True, hat=True, seed=None, out=None):
+    """(Kingdoms 0.7.291) {skin}, {trim}, no beard on the robe nor hat model ({beard}, {hat}), {seed} and {out} for the
+    MCA outfits (tools/gen_uniforms.py: a villager has no hat model, and the hat's corners are a villager's outer layers)."""
+    rnd = random.Random(seed or "wizard-" + dye)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (214, 172, 140)
+    skin = skin or (214, 172, 140)
     face(img, rnd, skin, (60, 90, 160))
     fx, fy, fw, fh = HEAD["front"]
     grey = (205, 205, 210)
@@ -269,26 +270,30 @@ def wizard(dye, colour):
         rx, ry, rw, rh = HAT[name]
         paint(img, (rx, ry, rw, 2), colour, 10, rnd)
         for x in range(rx, rx + rw):
-            px(img, x, ry + 2, GOLD)
+            px(img, x, ry + 2, trim)
     paint(img, HAT["top"], colour, 10, rnd)
     # the robe in the realm's colour, trimmed gold down the front, a belt, a scatter of stars
     dark = shade(colour, -35) if sum(colour) > 120 else shade(colour, 25)
     box(img, BODY, colour, 10, rnd)
     bx, by, bw, bh = BODY["front"]
     for y in range(by, by + bh):
-        px(img, bx + 3, y, GOLD)
-    paint(img, (bx + 2, by, 4, 5), grey, 14, rnd)
+        px(img, bx + 3, y, trim)
+    if beard:
+        paint(img, (bx + 2, by, 4, 5), grey, 14, rnd)
     for name in SIDES:
         rx, ry, rw, rh = BODY[name]
         for x in range(rx, rx + rw):
             px(img, x, ry + 7, (80, 55, 35))
         px(img, rx + rnd.randrange(rw), ry + 9 + rnd.randrange(2), (250, 236, 150))
-    robe_limbs(img, rnd, colour, GOLD, skin)
+    robe_limbs(img, rnd, colour, trim, skin)
     for part in ARMS + LEGS:
         for name in SIDES:
             rx, ry, rw, rh = part[name]
             if rnd.random() < 0.7:
                 px(img, rx + rnd.randrange(rw), ry + 2 + rnd.randrange(rh - 5), (250, 236, 150))
+    if not hat:
+        save(img, out)
+        return
     # the pointed hat: brim and tiers in the robe's colour, a gold band on the lowest tier, the tip bent dark
     box(img, BRIM, dark, 8, rnd)
     for k, tier in enumerate(TIERS):

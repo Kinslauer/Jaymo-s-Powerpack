@@ -136,6 +136,10 @@ public final class Workers {
 			}
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
 		}
+		if (Casters.isOffice(w.role()) && w instanceof Enlisted e) {
+			// (0.7.291) a court's necromancer, a camp's necromancer, shaman or blood witch: a villager until a foe comes near
+			return !mob.isSleeping() && !McaCompat.busy(mob) && Casters.step(level, e);
+		}
 		if (Barbarians.villagerRole(w.role())) {
 			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
 			Javelins.tick(level, w);

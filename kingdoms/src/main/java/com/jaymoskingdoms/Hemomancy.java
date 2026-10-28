@@ -270,12 +270,14 @@ public final class Hemomancy {
 	// ---- the blood witch -----------------------------------------------------------------------------------------------
 
 	/** Her spell at {@code target} ({@link Sorcery#cast}): a hemorrhage when foes near bleed, a grip, else a bolt that cuts. */
-	static void witchCast(ServerLevel level, Folk witch, LivingEntity target, int[] timers) {
+	static void witchCast(ServerLevel level, Sorcery.Caster caster, LivingEntity target, int[] timers) {
+		// ((0.7.291) one of our folk, or a villager in the office: Casters)
+		LivingEntity witch = caster.mob();
 		Mana.ripple(witch, Mana.HARM);
 		if (timers[Sorcery.T_SPIKES] <= 0 && bleeding(target)) {
 			timers[Sorcery.T_SPIKES] = WITCH_HEMORRHAGE_COOLDOWN;
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witch.getBoundingBox().inflate(HEMORRHAGE_RANGE),
-				e -> Sorcery.foe(witch, e) && bleeding(e))) {
+				e -> caster.foe(e) && bleeding(e))) {
 				Sorcery.beam(level, witch, e.getBoundingBox().getCenter(), BLOOD_MOTE);
 				PowersCompat.hemorrhage(e, witch, HEMORRHAGE_TIMES);
 				splash(level, e, 12);
@@ -302,13 +304,14 @@ public final class Hemomancy {
 	}
 
 	/** Her own tick ({@link Sorcery#tick}): she drinks from the bleeding foes round her. */
-	static void witchTick(ServerLevel level, Folk witch) {
+	static void witchTick(ServerLevel level, Sorcery.Caster caster) {
+		LivingEntity witch = caster.mob();
 		if (witch.tickCount % WITCH_DRINK_EVERY != 0 || witch.getHealth() >= witch.getMaxHealth()) {
 			return;
 		}
 		int drank = 0;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witch.getBoundingBox().inflate(DRINK_RANGE),
-			e -> Sorcery.foe(witch, e) && bleeding(e))) {
+			e -> caster.foe(e) && bleeding(e))) {
 			Sorcery.beam(level, e, witch.getBoundingBox().getCenter(), BLOOD_MOTE);
 			drank++;
 		}

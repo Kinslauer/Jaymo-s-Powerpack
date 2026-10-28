@@ -3368,3 +3368,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   up (attachment `HammerSlam.GUARD`, synced), so the cooldown ending mid-guard never fires a smash; charging the smash
   isn't a block. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin, HammerChargeBlockMixin,
   client HammerPoseMixin/HammerFirstPersonMixin. Compile-checked, not seen in game.
+- **0.17.102, Kingdoms 0.7.291:** court necromancers and the barbarian camps' necromancers, shamans and blood witches are
+  MCA villagers in our robes, and court wizards wear our robes too (see Kingdoms' MODLOG). Compile-checked, not seen in game.

@@ -362,6 +362,16 @@ public final class McaCompat {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;
 	}
 
+	/** (0.7.291) {@code f}'s new court or camp caster ({@link Casters}): {@code chosen}, else a villager; null without MCA. */
+	static @Nullable Worker enlistCaster(ServerLevel level, Faction f, int role, @Nullable PathfinderMob chosen) {
+		return LOADED ? McaBridge.enlistCaster(level, f, role, chosen) : null;
+	}
+
+	/** (0.7.291) With MCA, a court's necromancer or a camp's caster at peace becomes one of MCA's villagers. True if so (the folk is gone). */
+	static boolean becomeCaster(ServerLevel level, Folk folk) {
+		return LOADED && Casters.mayConvert(level, folk) && McaBridge.convertCaster(level, folk);
+	}
+
 	/** (0.5.53) The grown MCA villager nearest {@code player} (a few blocks), or null. */
 	static @Nullable PathfinderMob nearestGrown(ServerLevel level, ServerPlayer player) {
 		return LOADED ? McaBridge.nearestGrown(level, player) : null;

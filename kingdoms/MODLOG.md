@@ -5831,3 +5831,22 @@ Andy: "stone borns should be able to be naturally wider and taller, where sylvan
   the rope to the body as the foe shrinks inside. Swallowed, their body and arms swell round (`SWELL` 0.28) and settle
   back with a wobble over 16 ticks, into the build the foe shifted them to. Everyone sees it. Texture from
   `tools/gen_rubber_skin.py`.
+
+## 0.7.291: court and camp casters are MCA villagers (pack 0.17.102)
+Andy: "court necromancers need to be mca too", then "all of em, no more folk im retiring the folk. all mca please."
+This is the first part (the casters); goblins and orcs, then the remaining folk, follow.
+- `Casters`: with MCA, a tyrant's court necromancer is one of the realm's villagers with no work (else someone moves in
+  to the hall), and a barbarian camp's necromancer, shaman and blood witch are villagers by its fire, as its raiders
+  are. They take a profession (`Professions.NECROMANCER`, `SHAMAN`, `BLOOD_WITCH`, never a player's pick), carry their
+  staff, and are never frailer than their folk were. Standing folk casters hand over in place (`McaBridge.convertCaster`,
+  blood and home kept, their thralls let go).
+- They live as villagers until a foe comes near, then keep their distance and cast (`Casters.step` from `Workers.step`,
+  as `CourtWizards` does): the spells now take a `Sorcery.Caster` (a folk or a villager), so drain, raised dead, bone
+  spikes, fire bolts, the ring, the hex, the war chant, mending and all of the blood witch's work are unchanged. The dead
+  near a villager necromancer in a fight still rise; his scroll still drops. A camp's casters count as its own
+  (`Barbarians.isCampVillager`). `/kingdom caster necromancer|shaman|blood_witch` makes one with MCA too.
+- Our robes (`Uniforms`, drawn by `tools/gen_uniforms.py` from `tools/gen_sorcery.py`'s casters without their faces):
+  4 necromancer robes, 4 blood witch robes, a shaman's furs and paint in the camp's colour (4 furs each) and, new for the
+  court wizard too, his starred robe in the realm's colour (4 trims each, no hat model on a villager), 136 in all.
+- Orc camps' shamans stay folk until the goblin and orc patch.
+- Compile-checked only, not seen in game.

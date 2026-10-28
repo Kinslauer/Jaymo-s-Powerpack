@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_folk as folk  # noqa: E402
 import gen_pirates as sea  # noqa: E402
+import gen_sorcery as sorc  # noqa: E402
 
 OUT = "src/main/resources/assets/jaymoskingdoms/skins/clothing/{}.png"
 # two skin tones nothing in the clothes is painted in, so every pixel that changes between them is skin
@@ -350,6 +351,38 @@ def ladies(colour):
             gown(colour, GOLD_TRIM, seed=6, bodice=folk.shade(colour, -40), sash=GOLD_TRIM)]
 
 
+# ---- the casters (tools/gen_sorcery.py), (Kingdoms 0.7.291) -----------------------------------------------------------
+
+def caster(fn, *args, **kw):
+    """{fn(*args, **kw)} from gen_sorcery without its face (and a wizard without his hat model, which a villager hasn't)."""
+    def draw(tone):
+        sorc.save = capture("x")
+        fn(*args, skin=tone, out="x", **kw)
+        return DRAWN["x"]
+    return twice(draw)
+
+
+# a necromancer's robe, hood, lining and stripe: black and violet; ash and grave-green; deep violet and black; black and bone
+NECROMANCER_ROBES = [((34, 28, 40), (28, 24, 34), (90, 30, 120), (70, 26, 96)),
+                     ((70, 72, 66), (40, 42, 38), (70, 110, 60), (52, 80, 46)),
+                     ((54, 26, 72), (24, 20, 28), (140, 60, 180), (30, 22, 36)),
+                     ((26, 24, 26), (20, 18, 20), (200, 192, 168), (120, 112, 96))]
+# a blood witch's: crimson over black, dried-blood brown, wine and gold, scarlet and bone
+BLOOD_WITCH_ROBES = [((110, 22, 28), (60, 14, 20), (200, 40, 44), (40, 12, 14)),
+                     ((84, 34, 26), (44, 20, 16), (150, 40, 30), (60, 24, 18)),
+                     ((78, 16, 40), (40, 10, 22), (210, 170, 70), (120, 24, 50)),
+                     ((150, 28, 30), (70, 18, 20), (220, 210, 186), (90, 20, 22))]
+# a shaman's mantle: wolf brown, grey wolf, black bear, white fox
+SHAMAN_FURS = [(96, 74, 52), (120, 118, 112), (44, 38, 34), (214, 208, 196)]
+# a court wizard's trim: gold, silver, bronze, and gold again with another scatter of stars
+WIZARD_TRIMS = [sorc.GOLD, SILVER, (176, 112, 52), sorc.GOLD]
+
+
+def necromancers(robes, key):
+    return [caster(sorc.necromancer, 0, cloth=c, hood=h, lining=li, stripe=st, seed="%s-%d" % (key, i))
+            for i, (c, h, li, st) in enumerate(robes)]
+
+
 # ---- all of them ----------------------------------------------------------------------------------------------------
 
 def numbered(out, name, imgs):
@@ -376,6 +409,13 @@ def all_outfits():
     for name, colour in folk.DYES.items():
         numbered(out, "lord/" + name, lords(name, colour))
         numbered(out, "lady/" + name, ladies(colour))
+    numbered(out, "caster/necromancer", necromancers(NECROMANCER_ROBES, "necromancer-robe"))
+    numbered(out, "caster/blood_witch", necromancers(BLOOD_WITCH_ROBES, "blood-witch-robe"))
+    for name, colour in sorc.DYES.items():
+        numbered(out, "caster/shaman/" + name, [caster(sorc.shaman, name, colour, fur=f, seed="shaman-%s-%d" % (name, i))
+                                                for i, f in enumerate(SHAMAN_FURS)])
+        numbered(out, "caster/wizard/" + name, [caster(sorc.wizard, name, colour, trim=t, beard=False, hat=False, seed="wizard-%s-%d" % (name, i))
+                                                for i, t in enumerate(WIZARD_TRIMS)])
     return out
 
 

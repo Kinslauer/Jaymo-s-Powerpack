@@ -304,7 +304,7 @@ final class McaBridge {
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {
 		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER,
-			Professions.STABLEHAND, Professions.FARRIER, Professions.WIZARD)) {
+			Professions.STABLEHAND, Professions.FARRIER, Professions.WIZARD, Professions.NECROMANCER, Professions.SHAMAN, Professions.BLOOD_WITCH)) {
 			ResourceKey<VillagerProfession> key = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(profession).orElseThrow();
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
@@ -693,8 +693,9 @@ final class McaBridge {
 			}
 			return false;
 		}
-		if (job == Sorcery.WIZARD) {
+		if (Sorcery.isCaster(job)) {
 			// (0.5.53) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
+			// ((0.7.291) and only a court or a camp a necromancer, shaman or blood witch)
 			noTrade(villager);
 			return false;
 		}
@@ -794,10 +795,94 @@ final class McaBridge {
 		Castle.Keep keep = Factions.keep(server, f.id());
 		villager.setHomeTo(keep != null ? keep.hall() : f.seat(), Folk.HOME_RADIUS);
 		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(Sorcery.WIZARD, 1)));
+		// (0.7.291) in our robes in their realm's colour
+		Uniforms.fit(villager);
 		level.sendParticles(ParticleTypes.ENCHANT, villager.getX(), villager.getY() + 1.2, villager.getZ(), 40, 0.4, 0.8, 0.4, 0.6);
 		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
 		return w;
+	}
+
+	// ---- court and camp casters (0.7.291) ------------------------------------------------------------------------------
+
+	/**
+	 * {@link McaCompat#enlistCaster}: {@code f}'s new {@code role} ({@link Casters}): {@code chosen}, else one of a
+	 * realm's villagers with no work, else (and always for a camp) someone who moves in, by its hall or its fire.
+	 */
+	static @Nullable Worker enlistCaster(ServerLevel level, Faction f, int role, @Nullable PathfinderMob chosen) {
+		VillagerProfession job = Professions.of(role);
+		if (job == null) {
+			return null;
+		}
+		MinecraftServer server = level.getServer();
+		Castle.Keep keep = Factions.keep(server, f.id());
+		BlockPos home = keep != null && f.type().isRealm() ? keep.hall() : f.seat();
+		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : f.type().isRealm() ? candidate(level, f, role) : null;
+		if (villager == null) {
+			BlockPos open = ShutIn.openGround(level, home);
+			villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(open != null ? open : home)).withAge(0).withProfession(job)
+				.spawn(EntitySpawnReason.MOB_SUMMONED);
+			if (villager == null) {
+				return null;
+			}
+		}
+		Enlisted w = worker(villager);
+		if (w.role() >= 0) {
+			// (an old hand leaves their work for the office: that place is to be filled)
+			Economy.lost(server, w.factionId(), w.role());
+			w.discharge();
+		}
+		takeOffice(villager, role, f.id(), home, keep != null && f.type().isRealm() ? 8 : Folk.HOME_RADIUS);
+		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(role, 1)));
+		level.sendParticles(role == Sorcery.SHAMAN ? ParticleTypes.FLAME : ParticleTypes.SOUL, villager.getX(), villager.getY() + 1.2, villager.getZ(),
+			24, 0.4, 0.8, 0.4, 0.03);
+		level.playSound(null, villager.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.NEUTRAL, 0.7F, 1.1F);
+		JaymosKingdoms.LOGGER.debug("{} made {} its {}", f.name(), villager.getName().getString(), Folk.roleName(role));
+		return w;
+	}
+
+	/** {@link McaCompat#becomeCaster}: an MCA villager of the same blood takes {@code folk}'s office (and its roster place) where it stands. */
+	static boolean convertCaster(ServerLevel level, Folk folk) {
+		VillagerProfession job = Professions.of(folk.role());
+		if (job == null) {
+			return false;
+		}
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
+			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		takeOffice(villager, folk.role(), folk.factionId(), folk.getHomePosition(), folk.getHomeRadius());
+		// his thralls go with the folk that raised them
+		Thralls.release(level, folk.getUUID());
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
+	}
+
+	/** {@code villager} takes {@code role} for {@code faction}: the profession, the staff, a caster's toughness, their robe. */
+	private static void takeOffice(VillagerEntityMCA villager, int role, int faction, BlockPos home, int radius) {
+		VillagerProfession job = Professions.of(role);
+		if (job != null && villager.getProfession() != job) {
+			villager.setProfession(job);
+		}
+		worker(villager).enlist(role, faction);
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Casters.staff(role)));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		var health = villager.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+		if (health != null && health.getBaseValue() < Casters.health(role)) {
+			health.setBaseValue(Casters.health(role));
+			villager.setHealth(villager.getMaxHealth());
+		}
+		villager.setPersistenceRequired();
+		villager.setHomeTo(home, radius);
+		Uniforms.fit(villager);
 	}
 
 	/** (0.5.62) {@code villager}, found on a floating island, made its hermit wizard ({@link Hermits}): no kingdom's. */

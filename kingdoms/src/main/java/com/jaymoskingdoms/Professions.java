@@ -26,6 +26,8 @@ public final class Professions {
 	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER, PULLER, STABLEHAND, FARRIER;
 	/** (0.5.53) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
 	public static VillagerProfession WIZARD;
+	/** (0.7.291) A court's necromancer, a camp's shaman and blood witch: villagers in the office ({@link Casters}), never a player's pick. */
+	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
 
 	private Professions() {
 	}
@@ -42,6 +44,10 @@ public final class Professions {
 		FARRIER = register("farrier", SoundEvents.VILLAGER_WORK_ARMORER);
 		// (0.5.53)
 		WIZARD = register("wizard", SoundEvents.VILLAGER_WORK_CLERIC);
+		// (0.7.291)
+		NECROMANCER = register("necromancer", SoundEvents.VILLAGER_WORK_CLERIC);
+		SHAMAN = register("shaman", SoundEvents.VILLAGER_WORK_LEATHERWORKER);
+		BLOOD_WITCH = register("blood_witch", SoundEvents.VILLAGER_WORK_CLERIC);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -57,7 +63,8 @@ public final class Professions {
 			return BUILDER;
 		}
 		return role == Folk.FARMER ? FARMER : role == Folk.MINER ? MINER : role == Folk.WOODCUTTER ? WOODCUTTER : role == Folk.PULLER ? PULLER
-			: role == Folk.STABLEHAND ? STABLEHAND : role == Folk.FARRIER ? FARRIER : role == Sorcery.WIZARD ? WIZARD : null;
+			: role == Folk.STABLEHAND ? STABLEHAND : role == Folk.FARRIER ? FARRIER : role == Sorcery.WIZARD ? WIZARD
+			: role == Sorcery.NECROMANCER ? NECROMANCER : role == Sorcery.SHAMAN ? SHAMAN : role == Sorcery.BLOOD_WITCH ? BLOOD_WITCH : null;
 	}
 
 	/** The role {@code profession} is (a builder's is {@link Folk#WORKER}), or -1 if it isn't one of these. */
@@ -71,7 +78,8 @@ public final class Professions {
 		}
 		return profession == FARMER ? Folk.FARMER : profession == MINER ? Folk.MINER : profession == WOODCUTTER ? Folk.WOODCUTTER
 			: profession == PULLER ? Folk.PULLER : profession == STABLEHAND ? Folk.STABLEHAND : profession == FARRIER ? Folk.FARRIER
-			: profession == WIZARD ? Sorcery.WIZARD : -1;
+			: profession == WIZARD ? Sorcery.WIZARD : profession == NECROMANCER ? Sorcery.NECROMANCER : profession == SHAMAN ? Sorcery.SHAMAN
+			: profession == BLOOD_WITCH ? Sorcery.BLOOD_WITCH : -1;
 	}
 
 	/** The role a job's name (one of {@link #JOBS}) is, or -1. */
