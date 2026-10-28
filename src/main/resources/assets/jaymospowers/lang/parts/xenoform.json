@@ -7,6 +7,7 @@
 	"power.jaymospowers.xenoform.key.starter": "The band: hold %5$s and scroll to turn the dial, let go of %5$s to slam it and become the dialled alien (as an alien, hold it to turn back). A form lasts 1-5 minutes (always 5 once mastered); when its health is gone you're knocked back into your own body. Fists only while changed. A corrupted band glitches: slams can give the wrong alien, and it may change you on its own",
 	"power.jaymospowers.xenoform.key.starter.name": "The Band",
 	"power.jaymospowers.xenoform.key.ability_1": "The dialled alien's first move (slam the band with %5$s to change first)",
+	"power.jaymospowers.xenoform.swallowed": "a flicker of an alien's quickness",
 	"power.jaymospowers.xenoform.key.ability_1.name": "First Move",
 	"power.jaymospowers.xenoform.key.ability_2": "The dialled alien's second move",
 	"power.jaymospowers.xenoform.key.ability_2.name": "Second Move",

@@ -51,6 +51,8 @@ final class ZFighterGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new ZFighterGift());
+		// (0.17.103) a Rubber-folk who swallowed one: a ki blast (they have no ki of their own to charge)
+		com.jaymospowers.core.SwallowedPower.register(ZFighterPower.INSTANCE.id(), 40, ZFighterGift::swallowed);
 	}
 
 	@Override
@@ -183,6 +185,23 @@ final class ZFighterGift implements GiftKit {
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WAVE_SLOW_TICKS, 1), caster);
 			push(e, dir.horizontal().scale(WAVE_THROW), 0.2);
 		}
+		return true;
+	}
+
+	/** (0.17.103) Z Fighter's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): a ki blast at what they look at. */
+	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
+		LivingEntity foe = com.jaymospowers.core.SwallowedPower.sighted(player, BLAST_RANGE);
+		if (foe == null) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 from = player.getEyePosition().add(0.0, -0.3, 0.0), to = foe.getBoundingBox().getCenter();
+		line(level, from, to, BLAST_COLOR, 1.2F, 2.0);
+		level.sendParticles(new DustParticleOptions(BLAST_COLOR, 1.8F), to.x, to.y, to.z, 16, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.2);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.8F);
+		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
+		foe.hurtServer(level, level.damageSources().playerAttack(player), BLAST_DAMAGE * 1.5F);
 		return true;
 	}
 }

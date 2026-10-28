@@ -5662,11 +5662,13 @@ her harbour.
 - **Wedged ships come off.** A ship with some of her hull already in the ground (run up a beach, or land built up round
   her) could make no move at all, since every move still struck. Now any move that drives her no further in is allowed
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
-- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
-  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
-  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
-  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
-  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them", then "maybe
+  they just get the power's R ability, and keep their power if they have one"): a downed player or villager (a
+  kingdom's folk too) can be swallowed. You keep your own power and take a one-shot of theirs, the R (Powers'
+  `SwallowedPower`, through `PowersCompat.takePower`), used with the heritage key when nothing is in sight to swallow
+  (`PowersCompat.useSwallowed`); the next swallow replaces it, death takes it. They die of it (`Downed.execute`,
+  credited to you, so the law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as
+  usual with their power. One who survives it grows back.
 - Compile-checked only, not seen in game.
 ## 0.7.276: grand seats, real castles for kingdoms built from nothing (pack 0.17.79)
 Andy: "the default hold you generate for a kingdom needs to switch, its way to blocky and novice looking. swap it for

@@ -138,6 +138,9 @@ public final class ChronoPower implements Power {
 		ChronoSpeed.register();
 		ChronoEchoes.init();
 		ChronoDirectives.init();
+		// (0.17.103) a Rubber-folk who swallowed one: no rewind (there's no past of theirs kept), but time nudged: what they
+		// look at slowed (sneaking), or themselves quickened
+		com.jaymospowers.core.SwallowedPower.register(ID, 160, ChronoPower::nudge);
 		StoppedClockItem.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);

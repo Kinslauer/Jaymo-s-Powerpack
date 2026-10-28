@@ -2,6 +2,7 @@
 	"power.jaymospowers.arsenal": "Pocket Arsenal",
 	"power.jaymospowers.arsenal.desc": "Reach into other dimensions and pull out whatever weapon answers. Summoned weapons return to their dimension after a while.",
 	"power.jaymospowers.arsenal.key.ability_1": "Reach Through (pull a random weapon). Sneak + %1$s: mark this spot as a place (needs %4$s)",
+	"power.jaymospowers.arsenal.swallowed": "a blade out of a rift, thrown at what you look at",
 	"power.jaymospowers.arsenal.key.ability_1.name": "Reach Through",
 	"power.jaymospowers.arsenal.key.ability_2": "Return held weapon (refunds Reach). Hold Sneak + %2$s: the places menu; let go over a place to open a standing portal there (needs %4$s)",
 	"power.jaymospowers.arsenal.key.ability_2.name": "Return Weapon",

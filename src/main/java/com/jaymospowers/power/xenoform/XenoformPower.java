@@ -245,6 +245,16 @@ public final class XenoformPower implements Power {
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		FallingStars.init();
+		// (0.17.103) a Rubber-folk who swallowed one: no band on their wrist, only a flicker of an alien's quickness
+		com.jaymospowers.core.SwallowedPower.register(ID, 200, player -> {
+			player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SPEED, 100, 1, false, false, true));
+			player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP_BOOST, 100, 1, false, false, true));
+			player.level().sendParticles(new net.minecraft.core.particles.DustParticleOptions(0x5CFF4A, 1.4F), player.getX(), player.getY() + 1.0, player.getZ(),
+				40, 0.4, 0.7, 0.4, 0.0);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE,
+				net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.8F);
+			return true;
+		});
 		// the alien's health is a second life bar: at zero you're knocked back into your own body instead of dying
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
 			if (!(entity instanceof ServerPlayer player) || !has(player) || live(player).form == null) {

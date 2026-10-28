@@ -47,7 +47,6 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.GroundCracks.register();
 		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
-		com.jaymospowers.core.SwallowedPower.register();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();

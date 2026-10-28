@@ -95,6 +95,8 @@ final class WindGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new WindGift());
+		// (0.17.103) a Rubber-folk who swallowed one: Flight, as an updraft
+		com.jaymospowers.core.SwallowedPower.register(WindPower.ID, 80, WindGift::swallowed);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FLIGHTS.clear());
 	}
 
@@ -381,5 +383,19 @@ final class WindGift implements GiftKit {
 	@Override
 	public void corrupted(ServerLevel level, PathfinderMob mob) {
 		bolt(level, mob.position());
+	}
+
+	/** (0.17.103) Wind's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): an updraft lifts them, and they come down soft. */
+	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
+		ServerLevel level = player.level();
+		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), 30, 0.5, 0.1, 0.5, 0.15);
+		level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 0.5, player.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.0F, 0.9F);
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x, 1.3, v.z);
+		player.syncVelocity = true;
+		player.resetFallDistance();
+		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 80, 0, false, false, true));
+		return true;
 	}
 }

@@ -53,6 +53,8 @@ final class DarktideGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new DarktideGift());
+		// (0.17.103) a Rubber-folk who swallowed one: a dark strike, as a lash of ink
+		com.jaymospowers.core.SwallowedPower.register(DarktidePower.ID, 50, DarktideGift::swallowed);
 	}
 
 	@Override
@@ -189,6 +191,26 @@ final class DarktideGift implements GiftKit {
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, TIDE_SLOW_TICKS, 2), caster);
 			push(e, away, TIDE_LIFT);
 		}
+		return true;
+	}
+
+	/** (0.17.103) Darktide's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): a lash of ink at what they look at. */
+	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
+		LivingEntity foe = com.jaymospowers.core.SwallowedPower.sighted(player, LASH_RANGE);
+		if (foe == null) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 from = player.getEyePosition(), to = foe.getBoundingBox().getCenter();
+		Vec3 step = to.subtract(from);
+		int steps = Math.max(1, (int)(step.length() * 2.0));
+		for (int i = 1; i <= steps; i++) {
+			Vec3 p = from.add(step.scale((double)i / steps));
+			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+		}
+		level.sendParticles(ParticleTypes.SPLASH, to.x, to.y, to.z, 14, 0.3, 0.3, 0.3, 0.2);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.9F);
+		foe.hurtServer(level, level.damageSources().playerAttack(player), LASH_DAMAGE * 1.5F);
 		return true;
 	}
 }

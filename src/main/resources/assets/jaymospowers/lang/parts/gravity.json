@@ -2,6 +2,7 @@
 	"power.jaymospowers.gravity": "Gravity",
 	"power.jaymospowers.gravity.desc": "Take the weight out of things, or pile it on. Lift creatures, float yourself, pull and crush.",
 	"power.jaymospowers.gravity.key.ability_1": "Hold: Lift a creature, or tear a chunk from a block. Right click: choke, then slam. Left click: push or throw. Sneak as you let go: it falls sideways, the way you look",
+	"power.jaymospowers.gravity.swallowed": "a toss: what you look at is thrown up",
 	"power.jaymospowers.gravity.key.ability_1.name": "Lift",
 	"power.jaymospowers.gravity.key.ability_2": "Gravity Well: a bubble of pressure bursts out around you; everything that touches it is weighed down, to its knees. Sneak: everything around falls sideways, out into the walls",
 	"power.jaymospowers.gravity.key.ability_2.name": "Gravity Well",

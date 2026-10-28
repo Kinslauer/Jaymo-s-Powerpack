@@ -978,4 +978,32 @@ public final class PowersCompat {
 			return null;
 		}
 	}
+
+	/** (0.7.292) Powers' {@code SwallowedPower.use(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle useSwallowed;
+	private static boolean lookedForUse;
+
+	/** (0.7.292) The heritage key with nothing in sight: a swallowed power's R, if {@code player} holds one. */
+	public static boolean useSwallowed(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForUse) {
+			lookedForUse = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					useSwallowed = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SwallowedPower"), "use",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' swallowed powers (older Powers?)", e);
+				}
+			}
+		}
+		if (useSwallowed == null) {
+			return false;
+		}
+		try {
+			return (boolean)useSwallowed.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't use a swallowed power", e);
+			return false;
+		}
+	}
 }

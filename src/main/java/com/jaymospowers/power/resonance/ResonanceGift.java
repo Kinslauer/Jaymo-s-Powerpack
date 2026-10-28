@@ -52,6 +52,8 @@ final class ResonanceGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new ResonanceGift());
+		// (0.17.103) a Rubber-folk who swallowed one: the Pulse itself
+		com.jaymospowers.core.SwallowedPower.register(ResonancePower.ID, ResonancePower.PULSE_COOLDOWN, ResonancePulse::fire);
 	}
 
 	@Override

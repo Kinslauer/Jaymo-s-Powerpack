@@ -50,6 +50,8 @@ final class SmokeGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new SmokeGift());
+		// (0.17.103) a Rubber-folk who swallowed one: Vapour Form, as a dart of smoke ahead
+		com.jaymospowers.core.SwallowedPower.register(SmokePower.ID, 60, SmokeGift::swallowed);
 	}
 
 	@Override
@@ -172,5 +174,27 @@ final class SmokeGift implements GiftKit {
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ASH_TICKS, 1), caster);
 		}
 		return true;
+	}
+
+	/** (0.17.103) Smoke's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): they go to smoke and come out ahead. */
+	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 ahead = player.getLookAngle().horizontal();
+		if (ahead.lengthSqr() < 1.0E-4) {
+			return false;
+		}
+		ahead = ahead.normalize();
+		for (double d = STEP_DISTANCE; d >= 2.0; d -= 1.0) {
+			Vec3 dest = player.position().add(ahead.scale(d));
+			if (level.noCollision(player, player.getBoundingBox().move(dest.subtract(player.position())))) {
+				cloud(level, player.position().add(0.0, 1.0, 0.0), 40, 0.5);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 1.3F);
+				player.teleportTo(dest.x, dest.y, dest.z);
+				player.resetFallDistance();
+				cloud(level, dest.add(0.0, 1.0, 0.0), 40, 0.5);
+				return true;
+			}
+		}
+		return false;
 	}
 }
