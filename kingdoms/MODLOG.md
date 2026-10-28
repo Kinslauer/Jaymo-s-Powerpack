@@ -5883,3 +5883,16 @@ bigger, goblins smaller, both green and repulsive with variations". The second p
 - Also: villager raiders' javelins (and the orcs' rage and slam) read the villager brain's foe, not the folk target
   (`Rulers.target`); a fallen camp's casters scatter with its raiders.
 - Compile-checked only, not seen in game.
+
+## 0.7.293: barbarian chiefs and wall archers are MCA villagers (pack 0.17.104)
+Andy, retiring the folk: "all of em, no more folk im retiring the folk. all mca please." The third part.
+- **Chiefs**: a barbarian camp's chief, at home and at peace, becomes an MCA guard in place (`McaBridge.convertRaider`):
+  a man with his own name, his folk's gear, health, blows and toughness, on his throne's spot, the camp's leader. The
+  boss bar, the rally at a quarter health and the camp cleared on his death now live in `CampChiefs` for every camp
+  leader (chief, goblin king, orc warchief; moved out of `Greenskins`). He throws rocks, frightens villagers and counts
+  for the chief bounties as his folk did.
+- **Wall archers** (`WallArchers`): a realm's archers on its keep's posts become MCA archers (`McaBridge.convertGuard`),
+  and new ones are its villagers taken on (`KingdomEvents.spawnArcher`). MCA's archers kite, which would walk them off
+  a wall, so each is held to his post: strayed more than 3 blocks, he walks back unless a foe is right on him. They
+  fight the realm's foes as its guards do (`McaCompat.foe`). Cavalry and cannon archers stay folk for now.
+- Compile-checked, not seen in game.

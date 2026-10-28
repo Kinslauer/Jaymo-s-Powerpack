@@ -455,7 +455,7 @@ public final class KingdomEvents {
 	}
 
 	/** An archer on one of the faction's posts (walls, towers, watchtowers) that has none, counted in its roster. */
-	public static @Nullable Folk spawnArcher(ServerLevel level, @Nullable Faction faction) {
+	public static @Nullable Worker spawnArcher(ServerLevel level, @Nullable Faction faction) {
 		if (faction == null) {
 			return null;
 		}
@@ -463,16 +463,14 @@ public final class KingdomEvents {
 		if (keep == null || keep.posts().isEmpty()) {
 			return spawn(level, faction, Folk.GUARD);
 		}
-		BlockPos post = null;
-		for (BlockPos candidate : keep.posts()) {
-			if (level.getEntitiesOfClass(Folk.class, new AABB(candidate).inflate(2.0), f -> f.role() == Folk.ARCHER).isEmpty()) {
-				post = candidate;
-				break;
+		if (Workers.inPlace(faction, Folk.ARCHER)) {
+			// (0.7.293) with MCA, one of its villagers takes the post (WallArchers)
+			Worker w = WallArchers.enlist(level, faction, keep);
+			if (w != null) {
+				return w;
 			}
 		}
-		if (post == null) {
-			post = keep.posts().get(level.getRandom().nextInt(keep.posts().size()));
-		}
+		BlockPos post = WallArchers.freePost(level, keep);
 		Folk archer = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
 		if (archer == null) {
 			return null;

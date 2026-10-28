@@ -3372,3 +3372,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   MCA villagers in our robes, and court wizards wear our robes too (see Kingdoms' MODLOG). Compile-checked, not seen in game.
 - **0.17.103, Kingdoms 0.7.292:** goblins and orcs are MCA villagers: goblins smaller, orcs bigger, both their own
   greens with ears, noses, tusks, warts and scars in several shapes (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.104, Kingdoms 0.7.293:** barbarian chiefs and the realms' wall archers are MCA villagers, chiefs keeping their
+  boss bars and rallies, archers held to their posts (see Kingdoms' MODLOG). Compile-checked, not seen in game.

@@ -317,7 +317,8 @@ final class McaBridge {
 	}
 
 	static @Nullable Worker enlist(ServerLevel level, Faction f, int role, BlockPos at, BlockPos home, int radius) {
-		VillagerProfession job = role == Folk.GUARD ? (level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD) : Professions.of(role);
+		VillagerProfession job = role == Folk.GUARD ? (level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD)
+			: role == Folk.ARCHER ? ProfessionsMCA.ARCHER : Professions.of(role);
 		if (job == null) {
 			return null;
 		}
@@ -433,7 +434,9 @@ final class McaBridge {
 		if (f == null || !Workers.inPlace(f, Folk.GUARD)) {
 			return false;
 		}
-		VillagerProfession job = level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD;
+		// ((0.7.293) a wall archer an MCA archer, at his post: WallArchers)
+		boolean archer = folk.role() == Folk.ARCHER;
+		VillagerProfession job = archer || level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD;
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
@@ -444,8 +447,11 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
-		worker(villager).enlist(Folk.GUARD, f.id());
+		worker(villager).enlist(archer ? Folk.ARCHER : Folk.GUARD, f.id());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		if (archer) {
+			villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
 		return true;
@@ -456,8 +462,16 @@ final class McaBridge {
 	 * axe, a deckhand's cutlass), takes {@code folk}'s place in its camp, enlisted to it in the same role (on its roster as before).
 	 */
 	static boolean convertRaider(ServerLevel level, Folk folk) {
-		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD)
-			.spawn(EntitySpawnReason.CONVERSION);
+		// (0.7.293) a chief: a man, with his own name
+		boolean chief = folk.role() == Folk.CHIEF;
+		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD);
+		if (chief) {
+			make = make.withGender(Gender.MALE);
+			if (folk.getCustomName() != null) {
+				make = make.withName(folk.getCustomName().getString());
+			}
+		}
+		VillagerEntityMCA villager = make.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
 			return false;
 		}
@@ -483,9 +497,20 @@ final class McaBridge {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
-		Barbarians.harden(villager);
+		if (chief) {
+			// (0.7.293) his health, blows and toughness, on his throne's spot as the camp's leader
+			keepBuild(folk, villager);
+			villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+			villager.setPersistenceRequired();
+		} else {
+			Barbarians.harden(villager);
+		}
 		worker(villager).enlist(folk.role(), folk.factionId());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		if (chief) {
+			Uniforms.fit(villager);
+			takeLead(level, folk, villager);
+		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
 		return true;
@@ -525,6 +550,19 @@ final class McaBridge {
 			villager.setDropChance(slot, 0.0F);
 		}
 		// their folk's toughness and size: a king's health, a warchief's blows and bulk, a goblin's smallness
+		keepBuild(folk, villager);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(folk.role(), folk.factionId());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		Uniforms.fit(villager);
+		takeLead(level, folk, villager);
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
+	}
+
+	/** (0.7.293) {@code villager} takes {@code folk}'s health, blows, toughness, steadiness, sight (where they're more) and size. */
+	static void keepBuild(PathfinderMob folk, PathfinderMob villager) {
 		for (var attribute : List.of(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
 			net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS, net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
 			net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE, net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
@@ -535,18 +573,15 @@ final class McaBridge {
 			}
 		}
 		villager.setHealth(villager.getMaxHealth());
-		villager.setPersistenceRequired();
-		worker(villager).enlist(folk.role(), folk.factionId());
-		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
-		Uniforms.fit(villager);
+	}
+
+	/** (0.7.293) If {@code folk} led its faction, {@code villager} leads it now. */
+	static void takeLead(ServerLevel level, PathfinderMob folk, PathfinderMob villager) {
 		MinecraftServer server = level.getServer();
-		Faction camp = Factions.get(server, folk.factionId());
-		if (camp != null && camp.leader().map(folk.getUUID()::equals).orElse(false)) {
-			Factions.update(server, camp.id(), f -> f.withLeader(java.util.Optional.of(villager.getUUID())));
+		Faction f = folk instanceof Worker w ? Factions.get(server, w.factionId()) : null;
+		if (f != null && f.leader().map(folk.getUUID()::equals).orElse(false)) {
+			Factions.update(server, f.id(), x -> x.withLeader(java.util.Optional.of(villager.getUUID())));
 		}
-		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
-		folk.discard();
-		return true;
 	}
 
 	/**
@@ -752,7 +787,9 @@ final class McaBridge {
 		if (e.role() >= 0) {
 			Faction f = Factions.get(server, e.factionId());
 			// ((0.7.292) an orc camp's shaman wears a shaman's profession under a role of his own)
-			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role() || Professions.of(e.role()) == villager.getProfession());
+			// ((0.7.293) a wall archer is an MCA archer, whom MCA counts a guard)
+			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role() || Professions.of(e.role()) == villager.getProfession()
+				|| e.role() == Folk.ARCHER && villager.getProfession() == ProfessionsMCA.ARCHER);
 			if (fits && f != null && !f.fallen() && !villager.isBaby()) {
 				return true;
 			}

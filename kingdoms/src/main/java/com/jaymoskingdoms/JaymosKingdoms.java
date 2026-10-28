@@ -141,7 +141,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.242: ship crews as MCA villagers
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
-		Greenskins.register();
+		CampChiefs.register();
 		StoryTalk.register();
 		ShipTalk.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood

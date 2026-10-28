@@ -377,12 +377,13 @@ public final class Rulers {
 	 * caravan, war party or assault, not downed or making an arrest), so an MCA guard may take its post.
 	 */
 	static boolean guardMayConvert(ServerLevel level, Folk folk) {
-		if (folk.role() != Folk.GUARD || !folk.task().isEmpty() || folk.escort() != null || folk.getTarget() != null || folk.isPassenger()
+		// ((0.7.293) and a wall archer at his post, WallArchers)
+		if (folk.role() != Folk.GUARD && !WallArchers.posted(level, folk) || !folk.task().isEmpty() || folk.escort() != null || folk.getTarget() != null || folk.isPassenger()
 			|| Caravans.isCaravanFolk(folk) || WarParties.isSoldier(folk) || Assault.attacker(folk) || Downed.isDowned(folk) || Arrests.busy(folk)) {
 			return false;
 		}
 		Faction f = Factions.get(level.getServer(), folk.factionId());
-		return f != null && !f.fallen() && f.type().isRealm() && Workers.inPlace(f, Folk.GUARD)
+		return f != null && !f.fallen() && f.type().isRealm() && Workers.inPlace(f, folk.role())
 			&& folk.getHomePosition().closerThan(f.seat(), Economy.POPULATION_RANGE);
 	}
 

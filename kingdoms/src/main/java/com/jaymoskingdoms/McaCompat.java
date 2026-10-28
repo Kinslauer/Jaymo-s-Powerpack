@@ -502,7 +502,7 @@ public final class McaCompat {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
 			return Barbarians.villagerPrey(w.role(), w.factionId(), target);
 		}
-		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD || guard.level().getServer() == null) {
+		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD && w.role() != Folk.ARCHER || guard.level().getServer() == null) {
 			return false;
 		}
 		MinecraftServer server = guard.level().getServer();

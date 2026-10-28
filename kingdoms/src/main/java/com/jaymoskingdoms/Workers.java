@@ -37,7 +37,8 @@ public final class Workers {
 	 * worker's job, or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
 	 */
 	static boolean inPlace(Faction f, int role) {
-		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || role == Folk.GUARD && f.type().isRealm());
+		// ((0.7.293) and its wall archers, WallArchers)
+		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
 	}
 
 	/** A worker's day's work (a {@link Folk}'s from its own tick; an MCA villager's from {@link #step}). */
@@ -124,6 +125,10 @@ public final class Workers {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);
 		}
+		if (w.role() == Folk.ARCHER && w instanceof Enlisted) {
+			// (0.7.293) a wall archer, held to his post
+			return WallArchers.step(level, w);
+		}
 		if (w.role() == Folk.GUARD && w instanceof Enlisted e) {
 			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
 			return Rulers.guardStep(level, e);
@@ -140,9 +145,13 @@ public final class Workers {
 			// (0.7.291) a court's necromancer, a camp's necromancer, shaman or blood witch: a villager until a foe comes near
 			return !mob.isSleeping() && !McaCompat.busy(mob) && Casters.step(level, e);
 		}
+		if (CampChiefs.isRole(w.role())) {
+			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally
+			CampChiefs.step(level, w);
+		}
 		if (Greenskins.isRole(w.role())) {
-			// (0.7.292) a goblin village's or an orc camp's villager: an orc's rage and slam, a chief's bar and rally, a grunt's
-			// javelins; MCA's guard brain does the rest
+			// (0.7.292) a goblin village's or an orc camp's villager: an orc's rage and slam, a grunt's javelins; MCA's guard
+			// brain does the rest
 			Greenskins.step(level, w);
 			Javelins.tick(level, w);
 			return false;
@@ -172,6 +181,7 @@ public final class Workers {
 		}
 		CourtWizards.died(level, w, source);
 		Greenskins.died(level, w, source);
+		CampChiefs.died(level, w, source);
 		KingdomEvents.workerDied(level, w, source);
 	}
 }

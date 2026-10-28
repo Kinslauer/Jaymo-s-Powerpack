@@ -1,27 +1,10 @@
 package com.jaymoskingdoms;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -46,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * an archer), with their gear and toughness, a goblin's or an orc's name, enlisted to the camp in the same role. They
  * fight through MCA's guard brain ({@code McaCompat.foe}) for the same prey; an orc's blood rage and war cries, and the
  * warchief's ground slam, run on the villager's body ({@link #step}); the king and warchief keep their boss bars and
- * their rally, and their deaths still clear the camp ({@link #died}). An orc camp's shaman is a villager in office
+ * their rally, and their deaths still clear the camp ({@link CampChiefs}). An orc camp's shaman is a villager in office
  * ({@link Casters}). War bands sent out raiding stay folk.</li>
  * </ul>
  */
@@ -54,38 +37,7 @@ public final class Greenskins {
 	/** A goblin's green from palest to deepest, and an orc's; how far a shade leans yellow or blue. */
 	static final int GOBLIN_PALE = 0x9CC25A, GOBLIN_DEEP = 0x587A30, ORC_PALE = 0x8C9A70, ORC_DEEP = 0x46553A;
 	static final int LEAN = 18;
-	/** How hard a king or warchief rallies (as a folk leader did: {@link Folk#RALLY_AT}), for how long (ticks), and how far he calls his own in. */
-	static final int RALLY_TICKS = 20 * 60;
-	static final double RALLY_CALL = 48.0;
-
-	/** A king's or warchief's boss bar, by his UUID. */
-	private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
-	/** The kings and warchiefs who've had their second wind (kept in memory: a restart gives it back). */
-	private static final Set<UUID> RALLIED = new HashSet<>();
-
 	private Greenskins() {
-	}
-
-	static void register() {
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			for (ServerBossEvent bar : BARS.values()) {
-				bar.removeAllPlayers();
-			}
-			BARS.clear();
-			RALLIED.clear();
-		});
-		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> dropBar(entity.getUUID()));
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			dropBar(entity.getUUID());
-			RALLIED.remove(entity.getUUID());
-		});
-	}
-
-	private static void dropBar(UUID id) {
-		ServerBossEvent bar = BARS.remove(id);
-		if (bar != null) {
-			bar.removeAllPlayers();
-		}
 	}
 
 	// ---- who they are -------------------------------------------------------------------------------------------------
@@ -106,7 +58,7 @@ public final class Greenskins {
 		return kind != null && kind.brood ? kind : null;
 	}
 
-	/** The camp's leader: a goblin king, an orc warchief. */
+	/** The camp's leader: a goblin king, an orc warchief ({@link CampChiefs}). */
 	static boolean chief(int role) {
 		return role == Goblins.KING || role == Orcs.WARCHIEF;
 	}
@@ -162,57 +114,18 @@ public final class Greenskins {
 
 	// ---- their day ----------------------------------------------------------------------------------------------------
 
-	/**
-	 * One of a camp's villager goblins or orcs ({@code Workers.step}, its brain runs after): an orc's rage, cries and slam;
-	 * a king's or warchief's bar to those who've struck him, and his rally.
-	 */
+	/** One of a camp's villager goblins or orcs ({@code Workers.step}, its brain runs after): an orc's rage, cries and slam. */
 	static void step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
-		int role = w.role();
-		if (mob.isSleeping() || Downed.isDowned(mob)) {
-			return;
-		}
-		Orcs.tick(level, mob, role, w.factionId());
-		if (!chief(role)) {
-			return;
-		}
-		if (mob.tickCount % 5 == 0) {
-			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(),
-				role == Goblins.KING ? BossEvent.BossBarColor.GREEN : BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
-			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
-			BossBars.show(level, mob, bar);
-		}
-		if (mob.getHealth() <= mob.getMaxHealth() * Folk.RALLY_AT && RALLIED.add(mob.getUUID())) {
-			rally(level, mob, w.factionId());
+		if (!mob.isSleeping() && !Downed.isDowned(mob)) {
+			Orcs.tick(level, mob, w.role(), w.factionId());
 		}
 	}
 
-	/** His second wind, as a folk leader's: stronger, harder, quicker, and his own called to his foe. */
-	private static void rally(ServerLevel level, PathfinderMob chief, int camp) {
-		chief.addEffect(new MobEffectInstance(MobEffects.STRENGTH, RALLY_TICKS, 1));
-		chief.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, RALLY_TICKS, 1));
-		chief.addEffect(new MobEffectInstance(MobEffects.SPEED, RALLY_TICKS, 0));
-		LivingEntity foe = Rulers.target(chief) != null ? Rulers.target(chief) : chief.getLastHurtByMob();
-		if (foe != null) {
-			for (Worker w : Workers.near(level, chief.getBoundingBox().inflate(RALLY_CALL), x -> x.factionId() == camp && x.mob() != chief)) {
-				Rulers.charge(w.mob(), foe);
-			}
-		}
-		level.playSound(null, chief.getX(), chief.getY(), chief.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4.0F, 1.0F);
-		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, chief.getBoundingBox().inflate(32.0))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", chief.getDisplayName()).withStyle(ChatFormatting.GOLD));
-		}
-	}
-
-	/** One of them died ({@code Workers.died}): a king's or warchief's death clears the camp; a goblin now and then leaves its mask. */
+	/** One of them died ({@code Workers.died}): a goblin now and then leaves its mask (a king's or warchief's death is {@link CampChiefs}'). */
 	static void died(ServerLevel level, Worker w, DamageSource source) {
 		PathfinderMob mob = w.mob();
-		if (mob instanceof Folk || !isRole(w.role())) {
-			return;
-		}
-		if (chief(w.role())) {
-			Camps.chiefSlain(level, mob, w.factionId(), source);
-		} else if (Goblins.isGoblin(w.role())) {
+		if (!(mob instanceof Folk) && Goblins.isGoblin(w.role()) && !chief(w.role())) {
 			Goblins.died(level, mob, w.role(), source);
 		}
 	}
