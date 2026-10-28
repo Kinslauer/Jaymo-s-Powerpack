@@ -76,6 +76,32 @@ public final class Ships {
 	}
 
 	/**
+	 * (0.7.285) Whether {@code entity} is on a ladder (or vines, or anything climbable) aboard a ship: her ladders aren't in
+	 * the world as she sails, so the game's own look finds none (Andy: "the ship should have a ladder somewhere along the
+	 * side so you can get back in if you fall over").
+	 */
+	public static boolean climbing(Entity entity) {
+		if (entity instanceof Ship || entity.isPassenger()) {
+			return false;
+		}
+		for (Ship s : in(entity.level())) {
+			if (!s.getBoundingBox().inflate(1.0).contains(entity.position()) || s.foundering()) {
+				continue;
+			}
+			Hull h = s.hull();
+			if (h == null) {
+				continue;
+			}
+			Vec3 l = s.toLocal(entity.position());
+			int i = h.at(Mth.floor(l.x + 0.5), Mth.floor(l.y), Mth.floor(l.z + 0.5));
+			if (i >= 0 && h.pieces.get(i).blockState().is(net.minecraft.tags.BlockTags.CLIMBABLE)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Every ship's blocks inside {@code area}, as {@code entity} runs into them: each one an upright box at its block's
 	 * middle as the ship now lies, as high as the block's own collision (so a slab is half a step).
 	 */

@@ -5771,3 +5771,27 @@ Andy (2026-10-28): "it doesnt seem like MCA villagers have animations when attac
   since they keep to their deck paths); their old glint-then-flick stays for packs without Better Combat.
 - MCA villagers count as `MobCombat.humanoid`, so the blade guard and parry window reach them too.
 - Compile-checked only, not seen in game.
+## 0.7.285: boarding ladders, sweeps, stairs you can climb, and a captain who finds the sea (pack 0.17.89)
+Andy: "the ship should have a ladder somewhere along the side so you can get back in if you fall over", "characters
+get stuck below decks on the ship's stairs constantly too", "the captain keeps getting stuck, can there be oars? it
+needs a way to back up and manuever better", and "maybe the captain's AI isnt navigating to the ocean?"
+- **Fittings** (`sailing/ShipFittings`, from `Fleet.lay`, so every crewed ship whoever drew her): a boarding ladder down
+  each side amidships, from a block under her waterline (her hull worked out ahead) to her rail's sill, on a batten of
+  her own planking where her side falls away, the rail over it opened as a gangway. A ship drawn with no oars gets
+  `SWEEPS` 2 a side in her rail, a quarter of her length fore and aft of her middle.
+- **Climbing aboard as she sails**: `Ships.climbing` finds a climbable piece where you are in her frame, and
+  `LivingShipLadderMixin` makes `onClimbable` say so (both sides), since her ladders aren't in the world while she's
+  under way.
+- **Stairs below decks**: every piece that isn't one box the width of its cell (an open hatch, a door, a fence, a
+  ladder) now collides as its own boxes, as stairs already did (`Hull.steps`). As full blocks, the open hatches round
+  the cargo ship's mast walled off the head of her stair below decks.
+- **Sweeps at work**: her captain rows whenever she's in close water (no clear heading, a detour, stuck, not moving,
+  or more than `TURN_UNDER_OARS` 35 degrees to come round), not only head to wind. A crew at the sweeps makes at least
+  `CREW_SWEEPS` 0.07 a tick however heavy she is, and under oars or warped off she turns as hard as she would under way.
+- **Her course** (`sailing/SeaRoutes`): her captain works out a way round the land on a chart of 4-block squares out to
+  224 blocks (A*, at most 6000 squares, each with water enough for her keel and her beam clear of the shore, no cutting
+  corners of land), to where she's making for (a whaler's ground or harbour, a merchant's port, a raid, a patrol
+  waypoint, a foe she chases; otherwise a point 160 blocks along her heading), or as near it as the water goes. She
+  steers for the turn two ahead, works it out again every 10 s, when her goal moves, or when she's stuck. Not while
+  she lays her guns on a foe close by.
+- Compile-checked only, not seen in game.

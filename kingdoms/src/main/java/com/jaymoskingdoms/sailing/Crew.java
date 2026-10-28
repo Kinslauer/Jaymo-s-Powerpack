@@ -78,6 +78,13 @@ public final class Crew {
 	public @Nullable BlockPos detour, stuckAt;
 	public long detourUntil;
 	public int detours;
+	/**
+	 * (0.7.285) Not saved: where she's making for this look (null: along her heading), and her course round the land to
+	 * it ({@link SeaRoutes}): its turns, where it was worked out to, and when.
+	 */
+	public @Nullable BlockPos goal, routeTo;
+	public java.util.@Nullable List<BlockPos> route;
+	public long routeAt;
 	public final Map<Long, Long> loading = new HashMap<>();
 	/** Not saved: the helm her captain has set (a heading, a share of sail, rowing, backing water). */
 	public float wantYaw;
