@@ -5824,3 +5824,10 @@ Andy: "stone borns should be able to be naturally wider and taller, where sylvan
   when a look is saved, when a heritage is chosen and every 10 s. MCA's editor sliders are kept to them on your own
   figure (`McaEditorSkinMixin`, `McaEditorHeritageMixin`), and the life story's figure stands at the middle of them.
 - Compile-checked only, not seen in game.
+- **Rubber-folk swallowing, drawn** (client `RubberEngulf`; Andy: "the absorb should animate the user's body leeching onto
+  and over the enemy, like rubber, then it engulfs the body and adds the mass to the user"): over the 3 s swallow a pink
+  rubber rope stretches out of the reaching hand and slaps onto the foe (first quarter), spreads over it from where it
+  struck as a skin creeping round to the far side (0.2-0.65), then the sealed skin wobbles while three lumps gulp down
+  the rope to the body as the foe shrinks inside. Swallowed, their body and arms swell round (`SWELL` 0.28) and settle
+  back with a wobble over 16 ticks, into the build the foe shifted them to. Everyone sees it. Texture from
+  `tools/gen_rubber_skin.py`.

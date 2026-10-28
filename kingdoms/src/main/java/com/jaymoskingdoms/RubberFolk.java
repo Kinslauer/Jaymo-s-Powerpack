@@ -50,7 +50,8 @@ public final class RubberFolk {
 	 * one may be bigger.
 	 */
 	static final double ABSORB_REACH = 2.5;
-	static final int ABSORB_TICKS = 60, ABSORB_FOOD = 2;
+	public static final int ABSORB_TICKS = 60;
+	static final int ABSORB_FOOD = 2;
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;

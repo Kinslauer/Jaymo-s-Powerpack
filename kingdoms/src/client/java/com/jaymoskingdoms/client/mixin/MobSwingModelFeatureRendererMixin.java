@@ -19,6 +19,7 @@ abstract class MobSwingModelFeatureRendererMixin {
 		PullerPose.apply(submit.model(), submit.state());
 		PickpocketPose.apply(submit.model(), submit.state());
 		com.jaymoskingdoms.client.BioAbsorbPose.apply(submit.model(), submit.state());
+		com.jaymoskingdoms.client.RubberEngulf.apply(submit.model(), submit.state());
 		com.jaymoskingdoms.client.HandshakePose.apply(submit.model(), submit.state());
 		MobAnimations.apply(submit.model(), submit.state());
 		HiddenBladeClient.pose(submit.model(), submit.state());
