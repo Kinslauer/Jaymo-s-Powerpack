@@ -155,12 +155,13 @@ public final class Barbarians {
 	 * and bombardiers ashore too (their pistols and dynamite now run on a villager's body: {@code Pirates.villagerStep}).
 	 */
 	static boolean villagerRole(int role) {
-		return role == Folk.BARBARIAN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER;
+		// ((0.7.292) and a goblin village's and an orc camp's own, Greenskins)
+		return role == Folk.BARBARIAN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER || Greenskins.isRole(role);
 	}
 
 	/** (0.7.148) What a camp's villager of {@code role} goes for: a raider's prey, or a pirate's. */
 	static boolean villagerPrey(int role, int camp, LivingEntity target) {
-		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : prey(camp, target);
+		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : Greenskins.brood(role) != null ? Greenskins.prey(role, camp, target) : prey(camp, target);
 	}
 
 	/** It fights for a camp (a raider or the chief). */

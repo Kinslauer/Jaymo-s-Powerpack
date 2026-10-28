@@ -47,7 +47,8 @@ public final class Casters {
 
 	/** {@code role} is one of the offices a villager takes here (the wizard's is {@link CourtWizards}'). */
 	public static boolean isOffice(int role) {
-		return role == Sorcery.NECROMANCER || role == Sorcery.SHAMAN || role == Sorcery.BLOOD_WITCH;
+		// ((0.7.292) and an orc camp's shaman, an orc himself: Greenskins)
+		return role == Sorcery.NECROMANCER || role == Sorcery.SHAMAN || role == Sorcery.BLOOD_WITCH || role == Orcs.SHAMAN;
 	}
 
 	/** With MCA, {@code f}'s {@code role} is a villager's: a realm's necromancer, a barbarian camp's casters. */
@@ -78,12 +79,13 @@ public final class Casters {
 
 	/** The staff {@code role} carries. */
 	static Item staff(int role) {
-		return role == Sorcery.SHAMAN ? Arcana.TOTEM_STAFF : Arcana.BONE_STAFF;
+		return role == Sorcery.SHAMAN || role == Orcs.SHAMAN ? Arcana.TOTEM_STAFF : Arcana.BONE_STAFF;
 	}
 
 	/** The health their folk had: a villager in the office is never frailer. */
 	static double health(int role) {
-		return role == Sorcery.NECROMANCER ? Sorcery.NECROMANCER_HEALTH : role == Sorcery.SHAMAN ? Sorcery.SHAMAN_HEALTH : Sorcery.BLOOD_WITCH_HEALTH;
+		return role == Sorcery.NECROMANCER ? Sorcery.NECROMANCER_HEALTH : role == Sorcery.SHAMAN ? Sorcery.SHAMAN_HEALTH
+			: role == Orcs.SHAMAN ? Orcs.SHAMAN_HEALTH : Sorcery.BLOOD_WITCH_HEALTH;
 	}
 
 	/** {@code e} is a camp's caster (a villager): one of the camp's own, as its raiders are ({@link Barbarians#isCampVillager}). */

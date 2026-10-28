@@ -169,7 +169,8 @@ final class McaBridge {
 		EntityRelationship rx = x.getRelationships(), ry = y.getRelationships();
 		Gender gx = rx.getGender(), gy = ry.getGender();
 		boolean pair = gx == Gender.MALE && gy == Gender.FEMALE || gx == Gender.FEMALE && gy == Gender.MALE;
-		return pair && unattached(rx) && unattached(ry) && !rx.getFamilyEntry().isRelative(y.getUUID());
+		// (0.7.292) goblins and orcs only ever court their own
+		return pair && Greenskins.of(x) == Greenskins.of(y) && unattached(rx) && unattached(ry) && !rx.getFamilyEntry().isRelative(y.getUUID());
 	}
 
 	private static boolean unattached(EntityRelationship r) {
@@ -491,6 +492,77 @@ final class McaBridge {
 	}
 
 	/**
+	 * (0.7.292) {@link McaCompat#becomeGreenskin}: an MCA villager of {@code folk}'s brood ({@link Greenskins}) takes its place
+	 * in its goblin village or orc camp: a guard (a slinger or ranger an archer), male, with a goblin's or an orc's name (a
+	 * king or warchief keeps his), its gear, toughness and size, enlisted to the camp in the same role (on its roster as
+	 * before). A king or warchief is the camp's leader in his folk's stead.
+	 */
+	static boolean convertGreenskin(ServerLevel level, Folk folk) {
+		Heritage.Kind kind = Greenskins.brood(folk.role());
+		if (kind == null) {
+			return false;
+		}
+		boolean chief = Greenskins.chief(folk.role());
+		String name = chief && folk.getCustomName() != null ? folk.getCustomName().getString()
+			: Greenskins.name(kind, folk.getUUID().getLeastSignificantBits());
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withName(name).withPosition(folk.position()).withAge(0)
+			.withProfession(Greenskins.ranged(folk.role()) ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD).spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		broodBorn(villager, kind, chief);
+		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
+			EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				// worn, and kept in their pack too: MCA's guards dress from what they carry
+				villager.setItemSlot(slot, worn.copy());
+				if (slot != EquipmentSlot.OFFHAND) {
+					villager.getInventory().addItem(worn.copy());
+				}
+			}
+			villager.setDropChance(slot, 0.0F);
+		}
+		// their folk's toughness and size: a king's health, a warchief's blows and bulk, a goblin's smallness
+		for (var attribute : List.of(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+			net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS, net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
+			net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE, net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
+			var from = folk.getAttribute(attribute);
+			var to = villager.getAttribute(attribute);
+			if (from != null && to != null && (from.getBaseValue() > to.getBaseValue() || attribute == net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
+				to.setBaseValue(from.getBaseValue());
+			}
+		}
+		villager.setHealth(villager.getMaxHealth());
+		villager.setPersistenceRequired();
+		worker(villager).enlist(folk.role(), folk.factionId());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		Uniforms.fit(villager);
+		MinecraftServer server = level.getServer();
+		Faction camp = Factions.get(server, folk.factionId());
+		if (camp != null && camp.leader().map(folk.getUUID()::equals).orElse(false)) {
+			Factions.update(server, camp.id(), f -> f.withLeader(java.util.Optional.of(villager.getUUID())));
+		}
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
+	}
+
+	/**
+	 * (0.7.292) {@code villager} born a goblin or an orc ({@code kind}): their brood's body, a look of theirs; a king or
+	 * warchief ({@code chief}) the biggest and broadest of them.
+	 */
+	static void broodBorn(VillagerEntityMCA villager, Heritage.Kind kind, boolean chief) {
+		VillagerHeritage.born(villager, kind, null);
+		if (chief) {
+			BodySizes.Body body = BodySizes.of(kind);
+			villager.getGenetics().setGene(Genetics.SIZE, body.maxSize());
+			villager.getGenetics().setGene(Genetics.WIDTH, body.maxWidth());
+		}
+	}
+
+	/**
 	 * (0.7.242) {@link McaCompat#crewman}: a new grown MCA villager in {@code folk}'s place (a ship's crewman set up for
 	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a
 	 * fisherman), enlisted to the folk's side in its role. The folk is left for the caller.
@@ -679,7 +751,8 @@ final class McaBridge {
 		MinecraftServer server = level.getServer();
 		if (e.role() >= 0) {
 			Faction f = Factions.get(server, e.factionId());
-			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role());
+			// ((0.7.292) an orc camp's shaman wears a shaman's profession under a role of his own)
+			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role() || Professions.of(e.role()) == villager.getProfession());
 			if (fits && f != null && !f.fallen() && !villager.isBaby()) {
 				return true;
 			}
@@ -820,10 +893,18 @@ final class McaBridge {
 		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : f.type().isRealm() ? candidate(level, f, role) : null;
 		if (villager == null) {
 			BlockPos open = ShutIn.openGround(level, home);
-			villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(open != null ? open : home)).withAge(0).withProfession(job)
-				.spawn(EntitySpawnReason.MOB_SUMMONED);
+			Heritage.Kind brood = Greenskins.brood(role);
+			VillagerFactory make = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(open != null ? open : home)).withAge(0).withProfession(job);
+			if (brood != null) {
+				// (0.7.292) an orc camp's new shaman is an orc
+				make = make.withGender(Gender.MALE).withName(Greenskins.name(brood, level.getRandom().nextLong()));
+			}
+			villager = make.spawn(EntitySpawnReason.MOB_SUMMONED);
 			if (villager == null) {
 				return null;
+			}
+			if (brood != null) {
+				broodBorn(villager, brood, false);
 			}
 		}
 		Enlisted w = worker(villager);
@@ -854,7 +935,11 @@ final class McaBridge {
 		}
 		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
 		Heritage.Kind kind = VillagerHeritage.of(folk);
-		if (kind != null) {
+		Heritage.Kind brood = Greenskins.brood(folk.role());
+		if (brood != null) {
+			// (0.7.292) an orc camp's shaman is an orc
+			broodBorn(villager, brood, false);
+		} else if (kind != null) {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}

@@ -84,7 +84,8 @@ final class Javelins {
 
 	/** (0.7.184) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */
 	static boolean thrower(Worker w) {
-		return w.role() == Folk.BARBARIAN;
+		// ((0.7.292) and an orc camp's grunts)
+		return w.role() == Folk.BARBARIAN || w.role() == Orcs.GRUNT;
 	}
 
 	/** (0.5.64) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
@@ -107,7 +108,8 @@ final class Javelins {
 	}
 
 	private static void tick(ServerLevel level, PathfinderMob folk, int faction) {
-		LivingEntity foe = folk.getTarget();
+		// ((0.7.292) a villager's foe is its brain's)
+		LivingEntity foe = Rulers.target(folk);
 		if (foe == null || !foe.isAlive() || folk.isPassenger() || Downed.isDowned(folk)) {
 			return;
 		}

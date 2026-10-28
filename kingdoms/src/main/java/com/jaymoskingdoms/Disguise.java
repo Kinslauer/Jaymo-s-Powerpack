@@ -145,12 +145,14 @@ public final class Disguise {
 
 	/** A disguised player struck a goblin: a backstab if it wasn't looking; then, if it lived or anyone saw, the mask is seen through. */
 	private static void struck(LivingEntity victim, DamageSource source, float baseDamage, float damage, boolean blocked) {
-		if (backstabbing || !(source.getEntity() instanceof ServerPlayer player) || !(victim instanceof Folk goblin) || !Goblins.isGoblin(goblin)
-			|| !(victim.level() instanceof ServerLevel level) || !fooled(player, goblin.factionId())) {
+		// ((0.7.292) a goblin folk or an MCA villager one, Greenskins)
+		if (backstabbing || !(source.getEntity() instanceof ServerPlayer player) || !(victim instanceof Worker w) || !Goblins.isGoblin(victim)
+			|| !(victim.level() instanceof ServerLevel level) || !fooled(player, w.factionId())) {
 			return;
 		}
-		int camp = goblin.factionId();
-		if (source.getDirectEntity() == player && goblin.getTarget() != player && goblin.isAlive() && damage > 0.0F) {
+		net.minecraft.world.entity.PathfinderMob goblin = w.mob();
+		int camp = w.factionId();
+		if (source.getDirectEntity() == player && Rulers.target(goblin) != player && goblin.isAlive() && damage > 0.0F) {
 			// it never saw it coming
 			backstabbing = true;
 			try {
@@ -201,9 +203,9 @@ public final class Disguise {
 			Speech.say(level, crier, Component.translatable("message.jaymoskingdoms.goblin.cry." + why), Speech.RED, CRY_RANGE);
 			level.playSound(null, crier.getX(), crier.getY(), crier.getZ(), SoundEvents.PIGLIN_ANGRY, SoundSource.HOSTILE, 1.5F, 1.6F);
 		}
-		for (Folk goblin : level.getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(ALARM_RANGE),
-			g -> g.factionId() == village.id() && Goblins.isGoblin(g) && g.isAlive())) {
-			goblin.setTarget(player);
+		for (Worker goblin : Workers.near(level, player.getBoundingBox().inflate(ALARM_RANGE),
+			g -> g.factionId() == village.id() && Goblins.isGoblin(g.mob()) && g.mob().isAlive())) {
+			Rulers.charge(goblin.mob(), player);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.goblin.exposed", village.name()).withStyle(ChatFormatting.RED));
 		JaymosKingdoms.LOGGER.debug("{} saw through {}'s disguise ({})", village.name(), player.getName().getString(), why);

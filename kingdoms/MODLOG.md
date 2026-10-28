@@ -5850,3 +5850,36 @@ This is the first part (the casters); goblins and orcs, then the remaining folk,
   court wizard too, his starred robe in the realm's colour (4 trims each, no hat model on a villager), 136 in all.
 - Orc camps' shamans stay folk until the goblin and orc patch.
 - Compile-checked only, not seen in game.
+
+## 0.7.292: goblins and orcs are MCA villagers, green and monstrous (pack 0.17.103)
+Andy, retiring the folk: "yes make them MCA too, but they still need to be monstrous with their proportions, Orcs are
+bigger, goblins smaller, both green and repulsive with variations". The second part (the casters were the first).
+- Two broods (`Heritage.Kind.GOBLIN`, `ORC`, flag `brood`): born only to their own, never a player's pick, never woken,
+  left off the heritage screen and commands. `Greenskins` holds the rest.
+- **Proportions** (`BodySizes.GOBLIN`, `ORC`): a goblin is short and stringy on top of its 0.7 scale (about 0.6-0.7 of a
+  man); an orc is drawn the tallest and broadest there is (1.1-1.25x), while MCA keeps its box a man's size so it still
+  fits a door. The king and warchief keep their folk's scale (0.95, 1.35) and are born at the top of their brood's range.
+- **Green**: `Greenskins.skin` replaces MCA's skin colour (in `McaVerdantSkinMixin`): a goblin's lime to bog green, an
+  orc's grey-green, each its own shade by UUID. Two more looks each (`HeritageVariants`): goblin Boggart (swamp yellow,
+  quieter sneaking) and Cavegrub (pale, +1 heart); orc Ashskin (near black, +1.5 armour) and Bloodtusk (red-brown,
+  harder blows).
+- **Repulsive, with variations** (client `GreenskinLooks`, `tools/gen_greenskins.py`): in the skin's green, a goblin's
+  long ears and hooked nose or tall bat ears and a needle nose on a warty bulb; an orc's tusks, heavy brow and swept
+  ears or an underbite with long tusks, a heavier brow and a torn ear. Over the body, one of four sets of warts,
+  wrinkles and blotches each, and an orc one of four of scars (three with soot, blood or bone war paint).
+- **Hand-over**: a goblin village's goblins, slingers and king, and an orc camp's grunts, rangers and warchief, at home
+  and at peace, become MCA villagers in place (`McaBridge.convertGreenskin`): guards (slingers and rangers archers),
+  male, with goblin or orc names (the king and warchief keep theirs), their folk's gear, health, blows, toughness and
+  size, enlisted to the camp in the same role; the camp's leader passes to the villager. An orc camp's shaman is a
+  villager in office like the other camps' casters (`Casters`). War bands out raiding stay folk.
+- **Ways kept**: they hunt what their folk did (`McaCompat.foe` → `Greenskins.prey`; a goblin mask still fools a goblin
+  village, striking one still gives you away); an orc's blood rage and war cries, a grunt's javelins and the
+  warchief's ground slam run on the villager (`Greenskins.step` from `Workers.step`); the king's green and the
+  warchief's red boss bars and their rally; their deaths clear the camp (`Greenskins.died`), and a goblin still drops
+  its mask now and then. Orcs frighten villagers as before; both count as foes for world tiers and only court their own.
+- **Dress** (`Uniforms`, `tools/gen_uniforms.py` from `tools/gen_goblins.py` and `tools/gen_orcs.py` without the face,
+  skin or features): goblin rags, slinger hoods, king's robes (4 colours), orc kilts, ranger hoods, shaman hides and
+  masks, warchief iron; 28 outfits.
+- Also: villager raiders' javelins (and the orcs' rage and slam) read the villager brain's foe, not the folk target
+  (`Rulers.target`); a fallen camp's casters scatter with its raiders.
+- Compile-checked only, not seen in game.

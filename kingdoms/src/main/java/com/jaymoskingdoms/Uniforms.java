@@ -35,6 +35,14 @@ public final class Uniforms {
 	static final List<String> KINGS = ids("royal/king"), QUEENS = ids("royal/queen");
 	/** (0.7.291) A necromancer's hooded robes and a blood witch's (a shaman's and a court wizard's go by their side's colour). */
 	static final List<String> NECROMANCERS = ids("caster/necromancer"), BLOOD_WITCHES = ids("caster/blood_witch");
+	/**
+	 * (0.7.292) A goblin village's rags, a slinger's hood and hides, a king's robe and crown; an orc camp's hide kilts and
+	 * harness, a ranger's hood, a shaman's bone-strung hides and mask, a warchief's iron (all over a goblin's or an orc's
+	 * own green: {@link Greenskins}).
+	 */
+	static final List<String> GOBLINS = ids("greenskin/goblin"), GOBLIN_SLINGERS = ids("greenskin/goblin_slinger"), GOBLIN_KINGS = ids("greenskin/goblin_king"),
+		ORC_GRUNTS = ids("greenskin/orc_grunt"), ORC_RANGERS = ids("greenskin/orc_ranger"), ORC_SHAMANS = ids("greenskin/orc_shaman"),
+		ORC_WARCHIEFS = ids("greenskin/orc_warchief");
 	/** A guard's gambesons by their realm's land ({@link Climate#skinGroup}: temperate, sunny, cold). */
 	static final List<List<String>> GUARDS = List.of(ids("guard/temperate"), ids("guard/sunny"), ids("guard/cold"));
 
@@ -125,6 +133,10 @@ public final class Uniforms {
 		if (role == Sorcery.SHAMAN || role == Sorcery.WIZARD) {
 			DyeColor colour = f == null ? DyeColor.PURPLE : f.styleColor(server);
 			return ids("caster/" + (role == Sorcery.SHAMAN ? "shaman/" : "wizard/") + colour.getName());
+		}
+		if (Greenskins.isRole(role) || role == Orcs.SHAMAN) {
+			return role == Goblins.GOBLIN ? GOBLINS : role == Goblins.SLINGER ? GOBLIN_SLINGERS : role == Goblins.KING ? GOBLIN_KINGS
+				: role == Orcs.RANGER ? ORC_RANGERS : role == Orcs.SHAMAN ? ORC_SHAMANS : role == Orcs.WARCHIEF ? ORC_WARCHIEFS : ORC_GRUNTS;
 		}
 		if (role == Folk.GUARD || villager.isGuard()) {
 			int land = f == null || !(villager.level() instanceof ServerLevel level) ? 0

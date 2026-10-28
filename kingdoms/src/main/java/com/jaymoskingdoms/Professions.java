@@ -64,7 +64,7 @@ public final class Professions {
 		}
 		return role == Folk.FARMER ? FARMER : role == Folk.MINER ? MINER : role == Folk.WOODCUTTER ? WOODCUTTER : role == Folk.PULLER ? PULLER
 			: role == Folk.STABLEHAND ? STABLEHAND : role == Folk.FARRIER ? FARRIER : role == Sorcery.WIZARD ? WIZARD
-			: role == Sorcery.NECROMANCER ? NECROMANCER : role == Sorcery.SHAMAN ? SHAMAN : role == Sorcery.BLOOD_WITCH ? BLOOD_WITCH : null;
+			: role == Sorcery.NECROMANCER ? NECROMANCER : role == Sorcery.SHAMAN || role == Orcs.SHAMAN ? SHAMAN : role == Sorcery.BLOOD_WITCH ? BLOOD_WITCH : null;
 	}
 
 	/** The role {@code profession} is (a builder's is {@link Folk#WORKER}), or -1 if it isn't one of these. */

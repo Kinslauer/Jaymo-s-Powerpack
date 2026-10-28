@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_folk as folk  # noqa: E402
 import gen_pirates as sea  # noqa: E402
 import gen_sorcery as sorc  # noqa: E402
+import gen_goblins as gob  # noqa: E402
+import gen_orcs as orcs  # noqa: E402
 
 OUT = "src/main/resources/assets/jaymoskingdoms/skins/clothing/{}.png"
 # two skin tones nothing in the clothes is painted in, so every pixel that changes between them is skin
@@ -383,6 +385,42 @@ def necromancers(robes, key):
             for i, (c, h, li, st) in enumerate(robes)]
 
 
+# ---- goblins and orcs (tools/gen_goblins.py, tools/gen_orcs.py), (Kingdoms 0.7.292) -------------------------------------
+
+def greenskin(module, fn, *args, skin_list=None, **kw):
+    """{module.fn(*args)} without its face or green skin, and without its features (ears, nose, tusks, brow at x < 24,
+    y 32-40, which a villager's own look draws: GreenskinLooks)."""
+    def draw(tone):
+        module.save = capture("x")
+        if skin_list is not None:
+            saved = list(getattr(module, skin_list))
+            setattr(module, skin_list, [tone] * len(saved))
+            fn(*args, **kw)
+            setattr(module, skin_list, saved)
+        else:
+            fn(*args, skin=tone, out="x", **kw)
+        return DRAWN["x"]
+    img = twice(draw)
+    for y in range(32, 40):
+        for x in range(24):
+            img.putpixel((x, y), (0, 0, 0, 0))
+    return img
+
+
+# a goblin king's robe: purple, blood red, bog green, mud brown; an orc warchief's and shaman's by seed alone
+GOBLIN_ROBES = [(91, 44, 111), (120, 30, 34), (52, 70, 40), (96, 70, 44)]
+
+
+def greenskins(out):
+    numbered(out, "greenskin/goblin", [greenskin(gob, gob.goblin, i, skin_list="GREENS") for i in range(4)])
+    numbered(out, "greenskin/goblin_slinger", [greenskin(gob, gob.slinger, i, skin_list="GREENS") for i in range(4)])
+    numbered(out, "greenskin/goblin_king", [greenskin(gob, gob.king, robe=r, seed="goblin-king-%d" % i) for i, r in enumerate(GOBLIN_ROBES)])
+    numbered(out, "greenskin/orc_grunt", [greenskin(orcs, orcs.grunt, i, skin_list="SKINS") for i in range(4)])
+    numbered(out, "greenskin/orc_ranger", [greenskin(orcs, orcs.ranger, i, skin_list="SKINS") for i in range(4)])
+    numbered(out, "greenskin/orc_shaman", [greenskin(orcs, orcs.shaman, seed="orc-shaman-%d" % i) for i in range(4)])
+    numbered(out, "greenskin/orc_warchief", [greenskin(orcs, orcs.warchief, seed="orc-warchief-%d" % i) for i in range(4)])
+
+
 # ---- all of them ----------------------------------------------------------------------------------------------------
 
 def numbered(out, name, imgs):
@@ -416,6 +454,7 @@ def all_outfits():
                                                 for i, f in enumerate(SHAMAN_FURS)])
         numbered(out, "caster/wizard/" + name, [caster(sorc.wizard, name, colour, trim=t, beard=False, hat=False, seed="wizard-%s-%d" % (name, i))
                                                 for i, t in enumerate(WIZARD_TRIMS)])
+    greenskins(out)
     return out
 
 

@@ -410,6 +410,11 @@ public final class McaCompat {
 		return LOADED && Barbarians.mayBecomeVillager(level, folk) && McaBridge.convertRaider(level, folk);
 	}
 
+	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
+	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
+		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);
+	}
+
 	/**
 	 * (0.7.242) With MCA, a ship's crewman as one of its villagers: in {@code folk}'s place (set up for its role), in
 	 * the world, with its blood, gear and side; (0.7.259) a fisherman (a sailor) in no armour, their weapons
@@ -459,7 +464,8 @@ public final class McaCompat {
 	/** (0.7.148) A fallen camp's MCA villagers scatter (gone, as its folk are). */
 	static void scatterRaiders(ServerLevel level, int camp, AABB box) {
 		if (LOADED) {
-			for (Worker w : McaBridge.workers(level, box, w -> Barbarians.villagerRole(w.role()) && w.factionId() == camp)) {
+			// ((0.7.292) its casters too)
+			for (Worker w : McaBridge.workers(level, box, w -> (Barbarians.villagerRole(w.role()) || Casters.isOffice(w.role())) && w.factionId() == camp)) {
 				level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, w.mob().getX(), w.mob().getY() + 1.0, w.mob().getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 				w.mob().discard();
 			}

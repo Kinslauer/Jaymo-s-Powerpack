@@ -140,6 +140,13 @@ public final class Workers {
 			// (0.7.291) a court's necromancer, a camp's necromancer, shaman or blood witch: a villager until a foe comes near
 			return !mob.isSleeping() && !McaCompat.busy(mob) && Casters.step(level, e);
 		}
+		if (Greenskins.isRole(w.role())) {
+			// (0.7.292) a goblin village's or an orc camp's villager: an orc's rage and slam, a chief's bar and rally, a grunt's
+			// javelins; MCA's guard brain does the rest
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return false;
+		}
 		if (Barbarians.villagerRole(w.role())) {
 			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
 			Javelins.tick(level, w);
@@ -164,6 +171,7 @@ public final class Workers {
 			w.mob().spawnAtLocation(level, w.takeCarried());
 		}
 		CourtWizards.died(level, w, source);
+		Greenskins.died(level, w, source);
 		KingdomEvents.workerDied(level, w, source);
 	}
 }

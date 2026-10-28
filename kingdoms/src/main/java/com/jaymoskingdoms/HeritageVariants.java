@@ -174,7 +174,13 @@ public final class HeritageVariants {
 		OPALINE(Heritage.Kind.BIOBUILT, 0xD8E4E0, 0.35F, Land.NONE, null, null, Trait.share(Attributes.MOVEMENT_SPEED, 0.03)),
 		// ---- Rubber-folk: candy-striped and berry-glossed (over the pink every one of them wears)
 		CANDYSTRIPE(Heritage.Kind.RUBBERFOLK, 0xFFD0DC, 0.35F, Land.PLAINS, null, null, Trait.share(Attributes.MOVEMENT_SPEED, 0.03)),
-		BERRYGLOSS(Heritage.Kind.RUBBERFOLK, 0xB04C88, 0.45F, Land.SWAMP, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.04));
+		BERRYGLOSS(Heritage.Kind.RUBBERFOLK, 0xB04C88, 0.45F, Land.SWAMP, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.04)),
+		// ---- (0.7.292) goblins: the bog's yellow-sick and the caves' pale grubs (over their green, Greenskins.skin)
+		BOGGART(Heritage.Kind.GOBLIN, 0xB4B040, 0.45F, Land.SWAMP, null, null, Trait.share(Attributes.SNEAKING_SPEED, 0.15)),
+		CAVEGRUB(Heritage.Kind.GOBLIN, 0xA8B4A0, 0.5F, Land.DEEP, null, null, Trait.add(Attributes.MAX_HEALTH, 2.0)),
+		// ---- orcs: the ash-black of the burnt lands, and the red-brown bloodtusks of the badlands
+		ASHSKIN(Heritage.Kind.ORC, 0x34372E, 0.55F, Land.HOT, null, null, Trait.add(Attributes.ARMOR, 1.5)),
+		BLOODTUSK(Heritage.Kind.ORC, 0x7A4E34, 0.4F, Land.BADLANDS, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.05));
 
 		public final Heritage.Kind heritage;
 		/** Over the skin (RGB), by {@code tintAmount} (0: none). */
@@ -308,7 +314,8 @@ public final class HeritageVariants {
 	 */
 	public static int skin(Entity entity, int color) {
 		Heritage.Kind kind = VillagerHeritage.of(entity);
-		if (kind == null || kind == Heritage.Kind.VERDANT) {
+		if (kind == null || kind == Heritage.Kind.VERDANT || kind.brood) {
+			// (0.7.292) a goblin's or an orc's green is all its own (Greenskins.skin), its look's tint and all
 			return color;
 		}
 		Variant v = of(entity);

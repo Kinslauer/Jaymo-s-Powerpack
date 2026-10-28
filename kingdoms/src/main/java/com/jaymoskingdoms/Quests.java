@@ -997,6 +997,10 @@ public final class Quests {
 		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF || Pirates.isCoveCaptain(folk))) {
 			return folk.factionId();
 		}
+		if (entity instanceof Worker w && !(entity instanceof Folk) && w.role() == Orcs.WARCHIEF) {
+			// (0.7.292) a warchief as an MCA villager
+			return w.factionId();
+		}
 		if (entity instanceof Worker w && entity instanceof net.minecraft.world.entity.LivingEntity living && Pirates.isCoveCaptain(living)) {
 			// (0.7.242) a cove's captain at his wheel, one of MCA's villagers
 			return w.factionId();

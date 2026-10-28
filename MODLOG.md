@@ -3370,3 +3370,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   client HammerPoseMixin/HammerFirstPersonMixin. Compile-checked, not seen in game.
 - **0.17.102, Kingdoms 0.7.291:** court necromancers and the barbarian camps' necromancers, shamans and blood witches are
   MCA villagers in our robes, and court wizards wear our robes too (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.103, Kingdoms 0.7.292:** goblins and orcs are MCA villagers: goblins smaller, orcs bigger, both their own
+  greens with ears, noses, tusks, warts and scars in several shapes (see Kingdoms' MODLOG). Compile-checked, not seen in game.

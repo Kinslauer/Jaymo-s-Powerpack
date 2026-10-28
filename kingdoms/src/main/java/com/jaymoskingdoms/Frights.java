@@ -117,6 +117,10 @@ final class Frights {
 		if (m instanceof Folk folk) {
 			return Assault.attacker(folk) || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF || Orcs.isOrc(folk);
 		}
+		if (Orcs.isOrc(m)) {
+			// (0.7.292) a camp's orc, an MCA villager now
+			return true;
+		}
 		return m instanceof Enemy || Vampires.exposed(m);
 	}
 

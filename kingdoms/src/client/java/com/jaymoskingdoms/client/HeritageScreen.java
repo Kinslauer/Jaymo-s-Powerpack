@@ -121,7 +121,7 @@ final class HeritageScreen extends Screen {
 
 	/** (0.7.106) A list row's height: as tall as {@link #LIST_ROW}, shrunk so every heritage fits. */
 	private int rowH() {
-		int fit = (panelH() - HEADER - 4) / Heritage.Kind.values().length;
+		int fit = (panelH() - HEADER - 4) / Heritage.Kind.playable().length;
 		return Math.clamp(fit, MIN_ROW, LIST_ROW);
 	}
 
@@ -177,7 +177,7 @@ final class HeritageScreen extends Screen {
 	}
 
 	private Heritage.@Nullable Kind rowAt(int mouseX, int mouseY) {
-		Heritage.Kind[] all = Heritage.Kind.values();
+		Heritage.Kind[] all = Heritage.Kind.playable();
 		int rh = rowH();
 		for (int i = 0; i < all.length; i++) {
 			int ry = rowY(i);
@@ -357,12 +357,12 @@ final class HeritageScreen extends Screen {
 
 	/** What the right pane shows before anything's pointed at or picked: the first that can be picked. */
 	private Heritage.Kind firstPickable() {
-		for (Heritage.Kind kind : Heritage.Kind.values()) {
+		for (Heritage.Kind kind : Heritage.Kind.playable()) {
 			if (pickable(kind)) {
 				return kind;
 			}
 		}
-		return Heritage.Kind.values()[0];
+		return Heritage.Kind.playable()[0];
 	}
 
 	/** The screen's accent: teal. */
@@ -378,7 +378,7 @@ final class HeritageScreen extends Screen {
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.heritage.sub"),
 			x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
-		Heritage.Kind[] all = Heritage.Kind.values();
+		Heritage.Kind[] all = Heritage.Kind.playable();
 		Heritage.Kind hover = rowAt(mouseX, mouseY);
 		int rh = rowH();
 		boolean icons = rh >= ICON_ROW;
