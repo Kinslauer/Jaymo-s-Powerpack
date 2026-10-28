@@ -106,7 +106,7 @@ public final class GuardClient {
 			graphics.fill(cx - BAR_HALF - grow, y - 1, cx + BAR_HALF + grow + 1, y + BAR_HEIGHT + 1, color);
 			return;
 		}
-		if (!player.isUsingItem() || !player.getUseItem().has(DataComponents.BLOCKS_ATTACKS)) {
+		if (!Guard.raised(player)) {
 			return;
 		}
 		boolean locked = LockOnClient.locked() != null;
