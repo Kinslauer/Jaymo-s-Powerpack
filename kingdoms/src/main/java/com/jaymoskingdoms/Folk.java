@@ -572,6 +572,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.7.138) with MCA, a realm's posted guards are its villagers: an MCA guard of its blood takes this post
 			return;
 		}
+		if (this.tickCount % 20 == 0 && this.role() == Pirates.SHIPWRIGHT && Navies.becomeVillager(level, this)) {
+			// (0.7.296) with MCA, a harbour's shipwright is a villager: a man of its blood takes his pier
+			return;
+		}
 		if (this.tickCount % 20 == 0 && Casters.isOffice(this.role()) && McaCompat.becomeCaster(level, this)) {
 			// (0.7.291) with MCA, a court's necromancer and a camp's casters are villagers: one of its blood takes this office
 			return;

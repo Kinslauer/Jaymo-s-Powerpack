@@ -157,7 +157,8 @@ public final class Barbarians {
 	 */
 	static boolean villagerRole(int role) {
 		// ((0.7.292) and a goblin village's and an orc camp's own, Greenskins; (0.7.293) and the chief, CampChiefs)
-		return role == Folk.BARBARIAN || role == Folk.CHIEF || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER || Greenskins.isRole(role);
+		// ((0.7.296) and a cove's captain ashore, waiting for his ship)
+		return role == Folk.BARBARIAN || role == Folk.CHIEF || role == Pirates.CAPTAIN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER || Greenskins.isRole(role);
 	}
 
 	/** (0.7.148) What a camp's villager of {@code role} goes for: a raider's prey, or a pirate's. */

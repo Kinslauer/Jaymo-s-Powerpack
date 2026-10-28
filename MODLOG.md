@@ -3378,3 +3378,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
 - **0.17.106, Kingdoms 0.7.295:** war parties, raiders, mounted guards and archers, cannon gunners, assassins and looters
   are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.107, Kingdoms 0.7.296:** harbour shipwrights and pirate captains ashore are MCA villagers; coves no longer
+  pile up bombardiers (see Kingdoms' MODLOG). Compile-checked, not seen in game.

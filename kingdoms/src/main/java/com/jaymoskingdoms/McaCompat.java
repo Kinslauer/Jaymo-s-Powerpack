@@ -440,6 +440,14 @@ public final class McaCompat {
 		return LOADED ? McaBridge.stranger(level, at, yaw, Assassins.ASSASSIN, mark, 64) : null;
 	}
 
+	/**
+	 * (0.7.296) With MCA, {@code f}'s harbour shipwright ({@link Navies}) as an MCA villager by its pier at {@code shore}:
+	 * in {@code folk}'s place (his blood and spot; the folk is left for the caller), or new to the realm; or null.
+	 */
+	static net.minecraft.world.entity.@Nullable PathfinderMob shipwright(ServerLevel level, Faction f, @Nullable Folk folk, net.minecraft.core.BlockPos shore) {
+		return LOADED ? McaBridge.shipwright(level, f, folk, shore) : null;
+	}
+
 	/** (0.7.294) With MCA, one of {@code f}'s villagers to drive its horses ({@link Drivers}), or null. */
 	static @Nullable Worker driver(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
 		return LOADED ? McaBridge.driver(level, f, at, yaw, task, radius) : null;

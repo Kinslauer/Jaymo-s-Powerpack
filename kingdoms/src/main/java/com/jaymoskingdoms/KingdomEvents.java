@@ -506,9 +506,10 @@ public final class KingdomEvents {
 		MinecraftServer server = level.getServer();
 		Faction faction = Factions.get(server, w.factionId());
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		if (faction != null && Crewmen.tagged(w.mob())) {
+		if (faction != null && (Crewmen.tagged(w.mob()) || Pirates.offRoster(w.role()))) {
 			// (0.7.242) one of a ship's crew, an MCA villager: never on a roster, as the folk crews; a cove's captain is
-			// its leader, and his death clears it
+			// its leader, and his death clears it ((0.7.296) and the same ashore: a captain waiting for his ship, a
+			// harbour's shipwright, a cove's gunners and bombardiers)
 			if (faction.leader().map(w.getUUID()::equals).orElse(false)) {
 				if (Pirates.isCoveCaptain(w.mob())) {
 					Camps.chiefSlain(level, w.mob(), faction.id(), source);

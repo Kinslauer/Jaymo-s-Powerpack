@@ -134,6 +134,13 @@ public final class Uniforms {
 			DyeColor colour = f == null ? DyeColor.PURPLE : f.styleColor(server);
 			return ids("caster/" + (role == Sorcery.SHAMAN ? "shaman/" : "wizard/") + colour.getName());
 		}
+		// (0.7.296) a cove's captain waiting ashore for his ship, a harbour's shipwright on his pier
+		if (role == Pirates.CAPTAIN) {
+			return PIRATE_CAPTAINS;
+		}
+		if (role == Pirates.SHIPWRIGHT) {
+			return SHIPWRIGHTS;
+		}
 		if (Greenskins.isRole(role) || role == Orcs.SHAMAN) {
 			return role == Goblins.GOBLIN ? GOBLINS : role == Goblins.SLINGER ? GOBLIN_SLINGERS : role == Goblins.KING ? GOBLIN_KINGS
 				: role == Orcs.RANGER ? ORC_RANGERS : role == Orcs.SHAMAN ? ORC_SHAMANS : role == Orcs.WARCHIEF ? ORC_WARCHIEFS : ORC_GRUNTS;

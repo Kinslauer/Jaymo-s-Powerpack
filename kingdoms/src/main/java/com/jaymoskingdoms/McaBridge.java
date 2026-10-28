@@ -447,6 +447,33 @@ final class McaBridge {
 		return w;
 	}
 
+	/** (0.7.296) {@link McaCompat#shipwright}: a man of the harbour, a fisherman by MCA's reckoning, with an axe in hand and a shipwright's clothes. */
+	static @Nullable PathfinderMob shipwright(ServerLevel level, Faction f, @Nullable Folk folk, BlockPos shore) {
+		Vec3 at = folk != null ? folk.position() : Vec3.atBottomCenterOf(shore);
+		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(at).withAge(0).withProfession(job)
+			.spawn(folk != null ? EntitySpawnReason.CONVERSION : EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.x, at.y, at.z, folk != null ? folk.getYRot() : 0.0F, 0.0F);
+		if (folk != null) {
+			Heritage.Kind kind = VillagerHeritage.of(folk);
+			if (kind != null) {
+				VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+					: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+			}
+			level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		}
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_AXE));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(Pirates.SHIPWRIGHT, f.id());
+		villager.setHomeTo(shore, Navies.WRIGHT_RADIUS);
+		Uniforms.fit(villager);
+		return villager;
+	}
+
 	/** (0.7.294) {@link McaCompat#escort}: an MCA guard new to {@code f}'s people, on {@code task} at {@code at}. */
 	static @Nullable Worker escort(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius) {
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0)
@@ -528,8 +555,8 @@ final class McaBridge {
 
 	/** (0.7.295) {@link #convertRaider}'s villager, or null. */
 	static @Nullable VillagerEntityMCA raiderOf(ServerLevel level, Folk folk) {
-		// (0.7.293) a chief: a man, with his own name
-		boolean chief = folk.role() == Folk.CHIEF;
+		// (0.7.293) a chief: a man, with his own name; (0.7.296) so too a cove's captain ashore
+		boolean chief = folk.role() == Folk.CHIEF || folk.role() == Pirates.CAPTAIN;
 		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD);
 		if (chief) {
 			make = make.withGender(Gender.MALE);
@@ -839,6 +866,16 @@ final class McaBridge {
 			}
 			e.discharge();
 			Rulers.unfit(villager);
+			return false;
+		}
+		if (e.role() == Pirates.SHIPWRIGHT) {
+			// (0.7.296) a harbour's shipwright, while his realm stands and its harbour knows him
+			Faction f = Factions.get(level.getServer(), e.factionId());
+			if (f != null && !f.fallen() && Navies.isWright(level.getServer(), f.id(), villager)) {
+				return true;
+			}
+			e.discharge();
+			Uniforms.fit(villager);
 			return false;
 		}
 		if (e.role() == Caravans.CARTER) {

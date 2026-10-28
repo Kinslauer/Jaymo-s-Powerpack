@@ -255,7 +255,7 @@ public final class Pirates {
 	static boolean villagerStep(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
 		int role = w.role();
-		if ((role != GUNNER && role != BOMBARDIER && role != DECKHAND) || mob.isSleeping() || mob.isBaby() || Downed.isDowned(mob) || mob.isPassenger()) {
+		if ((role != CAPTAIN && role != GUNNER && role != BOMBARDIER && role != DECKHAND) || mob.isSleeping() || mob.isBaby() || Downed.isDowned(mob) || mob.isPassenger()) {
 			return false;
 		}
 		fight(level, mob, role);

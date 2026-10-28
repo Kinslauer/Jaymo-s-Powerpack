@@ -166,8 +166,8 @@ public final class Workers {
 			// (0.7.291) a court's necromancer, a camp's necromancer, shaman or blood witch: a villager until a foe comes near
 			return !mob.isSleeping() && !McaCompat.busy(mob) && Casters.step(level, e);
 		}
-		if (CampChiefs.isRole(w.role())) {
-			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally
+		if (CampChiefs.isRole(w.role()) || w.role() == Pirates.CAPTAIN && !Crewmen.tagged(mob) && Pirates.isCoveCaptain(mob)) {
+			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally; (0.7.296) a cove's captain ashore too
 			CampChiefs.step(level, w);
 		}
 		if (!(mob instanceof Folk) && Raids.isRaider(mob)) {

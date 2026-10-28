@@ -5931,3 +5931,17 @@ Andy, retiring the folk: "all mca please." The fifth part: the fighting folk.
   the MCA guards and archers now spot them and take them in.
 - Caravan guards and soldiers on the march sense foes every tick so their brains get the fight.
 - Compile-checked, not seen in game.
+
+## 0.7.296: harbour shipwrights and pirate captains ashore are MCA villagers (pack 0.17.107)
+Andy, retiring the folk: "all mca please." The sixth part: the sea folk ashore.
+- **Shipwrights** (`Navies`): a realm's harbour shipwright is a man of MCA's (a fisherman by its reckoning) on his pier,
+  axe in hand, in our shipwright's clothes; a folk shipwright hands over his pier (`Navies.becomeVillager`), and the
+  harbour knows the villager as its wright, so he isn't replaced. He keeps the post while his realm stands.
+- **Cove captains ashore** (`PirateCoves`): a captain waiting ashore for his ship is an MCA guard with his own name,
+  health and blows, in a pirate captain's coat, still the cove's leader; his boss bar and rally run as a camp chief's
+  (`CampChiefs`), he fires his pistols as the cove's gunners do, and his death clears the cove. When his ship is built
+  the one ashore goes.
+- A cove counted its bombardiers ashore only as folk, so one whose bombardiers were villagers kept sending more; it
+  counts both now. The cove's gunners, bombardiers and captain ashore and the harbour's shipwright, as villagers, no
+  longer leave a vacancy on the roster when they die (as their folk never did).
+- Compile-checked, not seen in game.
