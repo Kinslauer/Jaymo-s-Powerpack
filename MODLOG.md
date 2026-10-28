@@ -3405,3 +3405,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   The Armory's iron rapier (cup hilt, knuckle bow, wire grip) and iron dagger are 3D Blockbench models with 32x32
   textures now too (`tools/blockbench/make.py`, built with WaitMyDawn/blockbench-mcp, MIT); `tools/armory_assets.py`
   leaves them alone. Compile-checked, not seen in game; how they sit in the hand may need a tweak.
+- **0.17.110, Sora's Dagger is forged** (Andy: "the dagger needs a way to be crafted with tinkers"): its crafting recipe
+  is gone; the iron dagger is put together at the Tool Station from a **Sora's Dagger Blade** (`soras_dagger_blade`, a
+  `WeaponParts` kind: shape a stone one at the Part Builder, pour gold over it for its Weapon Cast, then 2 ingots of
+  molten iron over the cast), a Tool Handle and a Tool Binding, like the Armory's weapons. Gilding and the later stages
+  are unchanged. Blade sprite drawn in `tools/weapon_parts_assets.py` (DRAWN). Compile-checked, not seen in game.

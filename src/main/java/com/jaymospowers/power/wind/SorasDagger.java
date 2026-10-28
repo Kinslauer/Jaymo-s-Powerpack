@@ -52,7 +52,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Sora's Dagger: Wind's weapon, a curved dagger that grows with you over four stages.
  * <ol>
- * <li><b>Iron</b>, crafted: a quick plain dagger.</li>
+ * <li><b>Iron</b>, forged (0.17.110): a Sora's Dagger Blade with a Tool Handle and a Tool Binding at the Tool Station
+ * ({@link com.jaymospowers.tinkering.WeaponParts}): a quick plain dagger.</li>
  * <li><b>Gilded</b> (smithing: a feather, the dagger, a gold block): the wind follows its edge, more knockback and a
  * puff of air on every hit.</li>
  * <li><b>Diamond</b> (smithing: a breeze rod, the gilded dagger, a diamond block): harder knockback, and right click

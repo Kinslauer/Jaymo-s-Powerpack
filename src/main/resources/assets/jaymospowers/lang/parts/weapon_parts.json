@@ -43,5 +43,6 @@
   "tooltip.jaymospowers.tinkering.weapon_part.with2": "with a %s and a %s",
   "tooltip.jaymospowers.tinkering.weapon_part.alone": "on its own",
   "tooltip.jaymospowers.tinkering.weapon_part.makes": "Makes: %s",
-  "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it)."
+  "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it).",
+  "item.jaymospowers.soras_dagger_blade": "Sora's Dagger Blade"
 }
