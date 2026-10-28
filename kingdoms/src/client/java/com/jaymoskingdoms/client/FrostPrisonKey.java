@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.FrostPrison;
 import com.jaymoskingdoms.Heritage;
-import com.jaymoskingdoms.HeritageHold;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,16 +26,11 @@ final class FrostPrisonKey {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null
-					&& (Heritage.is(minecraft.player, Heritage.Kind.WARRIORBORN) || Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT))
+					&& (Heritage.is(minecraft.player, Heritage.Kind.WARRIORBORN) || Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT)
+					|| Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK))
 					&& ClientPlayNetworking.canSend(FrostPrison.Cast.TYPE)) {
 					ClientPlayNetworking.send(new FrostPrison.Cast());
 				}
-			}
-			// (0.7.262) held: the Bio-built and the Rubber-folk absorb
-			if (key.isDown() && minecraft.player != null && minecraft.gui.screen() == null && minecraft.player.tickCount % 2 == 0
-				&& (Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT) || Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK))
-				&& ClientPlayNetworking.canSend(HeritageHold.Held.TYPE)) {
-				ClientPlayNetworking.send(new HeritageHold.Held());
 			}
 		});
 	}

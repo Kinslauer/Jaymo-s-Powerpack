@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.17.93) Balkon's warhammer smash swings down from overhead first ({@link HammerSlam}). */
+/** (0.17.94) Balkon's warhammer smash swings down from overhead first ({@link HammerSlam}). */
 @Mixin(targets = "ckathode.weaponmod.item.MeleeCompWarhammer")
 abstract class WeaponModWarhammerMixin {
 	/** Set while the delayed smash runs WeaponMod's own, so it isn't taken over again. */

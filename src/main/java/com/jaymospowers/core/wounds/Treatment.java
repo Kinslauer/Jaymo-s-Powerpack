@@ -3,6 +3,7 @@ package com.jaymospowers.core.wounds;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.power.web.KitchenCompat;
+import com.jaymospowers.power.zfighter.ZFighterAndroid;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,6 +85,11 @@ public final class Treatment {
 	public static final int BANDAGE_TICKS = 200;
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
 	public static final float NEEDLE_HURT = 1.0F, CAUTERY_BURN = 2.0F;
+	/**
+	 * (0.17.94, Andy: androids "use metal parts to repair instead of bandages") An iron or copper ingot worked into an
+	 * android's part: its leak stops, a break is set, and it mends this much (health points) at once.
+	 */
+	public static final float METAL_HEAL = 4.0F;
 	/** (0.14.4) Leeches' cost (health off the body). */
 	public static final float LEECH_COST = 1.0F;
 	/** (0.14.4) Smelling salts: up with this much health (half a heart in head and body), Speed I this long, then dazed (Nausea) this long. */
@@ -105,7 +111,9 @@ public final class Treatment {
 	/** (0.14.4) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
 	public enum Remedy {
 		BANDAGE(40, true), RAG(40, true), SPLINT(60, true), NEEDLE(60, true), CAUTERY(20, true), SPIRITS(20, true), HONEY(20, true),
-		SALTS(20, false), LEECHES(40, false), POPPY(40, false);
+		SALTS(20, false), LEECHES(40, false), POPPY(40, false),
+		/** (0.17.94) Metal parts: an android's only repair (sneak + use, like spirits). */
+		METAL(40, true);
 
 		public final int ticks;
 		public final boolean part;
@@ -277,6 +285,9 @@ public final class Treatment {
 		if (KitchenCompat.isStrongSpirits(stack)) {
 			return Remedy.SPIRITS;
 		}
+		if (stack.is(Items.IRON_INGOT) || stack.is(Items.COPPER_INGOT)) {
+			return Remedy.METAL;
+		}
 		return hot(stack, level) ? Remedy.CAUTERY : null;
 	}
 
@@ -328,10 +339,15 @@ public final class Treatment {
 
 	// ---- what a remedy can help ---------------------------------------------------------------------------------------------
 
+	/** (0.17.94) An android's body: mended with metal, and nothing else works on it. */
+	static boolean machine(LivingEntity body) {
+		return body instanceof Player player && ZFighterAndroid.android(player);
+	}
+
 	/** Whether {@code remedy} can do anything for {@code part} of {@code body}. */
 	static boolean helps(Remedy remedy, LivingEntity body, BodyPart part) {
 		BodyPlan plan = BodyPlan.of(body);
-		if (plan == null || plan.index(part) < 0) {
+		if (plan == null || plan.index(part) < 0 || machine(body) != (remedy == Remedy.METAL)) {
 			return false;
 		}
 		int bit = Breaks.bit(part);
@@ -343,12 +359,16 @@ public final class Treatment {
 			case NEEDLE -> bleeding && !missing;
 			case CAUTERY -> bleeding;
 			case SPIRITS, HONEY -> ((Bleeding.festering(body) | Bleeding.dirty(body) | Bleeding.bleeding(body)) & bit) != 0;
+			case METAL -> !missing && (bleeding || Breaks.splintable(body, part) || Wounds.fraction(body, part) < 0.999F);
 			default -> false;
 		};
 	}
 
 	/** Whether {@code remedy} (a whole-body one) can do anything for {@code body} given by {@code healer}. */
 	static boolean helpsBody(Remedy remedy, Player healer, LivingEntity body) {
+		if (machine(body)) {
+			return false;
+		}
 		return switch (remedy) {
 			case SALTS -> body != healer && Downed.isDowned(body);
 			case LEECHES -> BodyPlan.of(body) != null;
@@ -465,7 +485,8 @@ public final class Treatment {
 			return InteractionResult.PASS;
 		}
 		Remedy remedy = remedy(player.getItemInHand(hand), world);
-		if (remedy == null) {
+		// (0.17.94) an ingot is only medicine to an android (an iron golem's repair, or a trade, goes on as ever)
+		if (remedy == null || remedy == Remedy.METAL && !machine(body)) {
 			return InteractionResult.PASS;
 		}
 		boolean sneak = player.isShiftKeyDown();
@@ -533,7 +554,7 @@ public final class Treatment {
 			return InteractionResult.PASS;
 		}
 		Remedy remedy = remedy(stack, world);
-		if (remedy != Remedy.SPIRITS && remedy != Remedy.HONEY && remedy != Remedy.CAUTERY) {
+		if (remedy != Remedy.SPIRITS && remedy != Remedy.HONEY && remedy != Remedy.CAUTERY && !(remedy == Remedy.METAL && machine(player))) {
 			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer server) {
@@ -837,6 +858,14 @@ public final class Treatment {
 					done = Component.translatable("message.jaymospowers.wounds.leeches_bad_blood", body.getDisplayName());
 				}
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 1.3F);
+				stack.consume(1, player);
+			}
+			case METAL -> {
+				Bleeding.stop(body, part, false);
+				Breaks.splint(body, part);
+				Wounds.healPart(body, part, METAL_HEAL);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.5F, 1.6F);
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, body.getX(), body.getY() + body.getBbHeight() * 0.5, body.getZ(), 8, 0.2, 0.3, 0.2, 0.05);
 				stack.consume(1, player);
 			}
 			case POPPY -> {

@@ -3341,7 +3341,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
   Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
   Legend) even with enough. Compile-checked, not seen in game.
-- **0.17.93, the warhammer smash swings down from overhead:** Andy: "warhammer rightclick should animate swinging down
+- **0.17.93, androids: endless ki, no aura, revived after the operation (Kingdoms 0.7.288: Bio-built and Rubber-folk absorbing is a toggle with a hand on the foe, see its MODLOG):** Andy: "the mad tinkerer should revive you
+  after making you an android. androids need to have infinite ki and no aura, no other debuff." Nothing kills you on the
+  tinkerer's table (a killing blow leaves you at half a heart), and when the operation ends he brings you round: up if
+  you went down (no Battered), full health, the hold lifted. An android's ki bar stays full and nothing costs ki; it
+  draws no aura (Overdrive and Reactor too); the 15% weaker ki attacks are gone.
+  Andy: "they also dont have to eat, but they use metal parts to repair instead of bandages": an android's food bar
+  stays full, and medicine does nothing for it. A new Metal remedy (`Treatment.Remedy.METAL`, iron or copper ingot,
+  sneak + use like spirits) stops a part's leak, sets a break and mends 4 health; an ingot is medicine only to an
+  android, so golem repair and trades are untouched. Compile-checked, not seen in game.
+- **0.17.94, the warhammer smash swings down from overhead:** Andy: "warhammer rightclick should animate swinging down
   from overhead like the better combat swing". Balkon's warhammer charges its smash while you hold use (it used to be
   drawn like a bow); it now charges with the hammer held up over your head, and letting go with a full charge plays
   Better Combat's two-handed slam, the same swing as its left-click, in first and third person and for everyone who

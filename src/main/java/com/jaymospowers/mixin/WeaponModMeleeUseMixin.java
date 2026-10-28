@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.15.148) Balkon's flail is held in use while it whirls (its melee base class, which the flail doesn't override,
- * decides how long use lasts and what letting go does). (0.17.93) The warhammer charges held overhead
+ * decides how long use lasts and what letting go does). (0.17.94) The warhammer charges held overhead
  * ({@link HammerSlam}). Every other WeaponMod weapon is left as it was.
  */
 @Mixin(targets = "ckathode.weaponmod.item.ItemMelee")
@@ -35,7 +35,7 @@ abstract class WeaponModMeleeUseMixin {
 		if (this.jaymospowers$flail()) {
 			cir.setReturnValue(Lash.useAnimation(Lash.FLAIL));
 		} else if (HammerSlam.isWarhammer((Item)(Object)this)) {
-			// (0.17.93) the smash charges with the hammer held up overhead
+			// (0.17.94) the smash charges with the hammer held up overhead
 			cir.setReturnValue(HammerSlam.chargePose());
 		}
 	}

@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.93) Balkon's warhammer smash (hold use to charge, let go) is swung down from overhead. Andy: "warhammer
+ * (0.17.94) Balkon's warhammer smash (hold use to charge, let go) is swung down from overhead. Andy: "warhammer
  * rightclick should animate swinging down from overhead like the better combat swing".
  * <ul>
  * <li>While charging, the hammer is held up over your head (the trident's raised arm, not the bow's draw).</li>

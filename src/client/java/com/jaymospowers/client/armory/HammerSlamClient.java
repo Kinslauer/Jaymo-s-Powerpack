@@ -6,7 +6,7 @@ import net.bettercombat.logic.AnimatedHand;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * (0.17.93) Your own warhammer smash plays Better Combat's two-handed slam ({@link HammerSlam}), drawn by Better Combat
+ * (0.17.94) Your own warhammer smash plays Better Combat's two-handed slam ({@link HammerSlam}), drawn by Better Combat
  * in first and third person like its own swings. Only touches Better Combat when it's loaded.
  */
 public final class HammerSlamClient {
