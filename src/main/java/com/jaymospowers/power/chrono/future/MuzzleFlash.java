@@ -25,15 +25,14 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
 
 /**
  * (0.17.135) Andy: "there should be more muzzle flash on the guns from the future". Every shot from a future gun (a
  * gunner's, a mech's cannons, or a player's TaCZ gun) throws a bright burst at the muzzle that everyone around sees:
  * our own {@link Flash} (a full-bright star that pops and is gone in a few ticks, the client's {@code MuzzleFlashParticle}),
- * a couple of smaller ones thrown forward as a plume, and a puff of smoke. Bigger guns flash bigger. A player's own shot
- * isn't sent to them (TaCZ draws its flash on the gun in their hands, which the client's {@code TaczMuzzleFlashMixin}
- * makes bigger); a silenced gun doesn't flash. Players' shots are heard through TaCZ's own fire event, found by
+ * a couple of smaller ones thrown forward as a plume, and a puff of smoke. Bigger guns flash bigger. Everyone sees the
+ * burst, the shooter too (Andy: "if it is visible at all everyone should see it"); on top of it TaCZ's own flash on
+ * the gun is drawn bigger (the client's {@code TaczMuzzleFlashMixin}). A silenced gun doesn't flash. Players' shots are heard through TaCZ's own fire event, found by
  * reflection, so nothing here without TaCZ.
  */
 public final class MuzzleFlash {
@@ -107,20 +106,19 @@ public final class MuzzleFlash {
 		}
 	}
 
-	/** A shot from a TaCZ gun in someone's hands (a player's, mostly): the burst, for everyone but them. */
+	/** A shot from a TaCZ gun in someone's hands (a player's, mostly): the burst, for everyone. */
 	private static void playerShot(ServerLevel level, LivingEntity who, ItemStack gun) {
 		if (silenced(gun)) {
 			return;
 		}
 		Vec3 aim = who.getLookAngle();
 		FutureGuns.Gun known = FutureGuns.BY_ID.get(TaczGuns.gunId(gun));
-		flash(level, muzzle(who, aim, PLAYER_AHEAD, PLAYER_SIDE, PLAYER_DOWN), aim, known == null ? UNKNOWN : size(known.kind()),
-			who instanceof ServerPlayer player ? player : null);
+		flash(level, muzzle(who, aim, PLAYER_AHEAD, PLAYER_SIDE, PLAYER_DOWN), aim, known == null ? UNKNOWN : size(known.kind()));
 	}
 
 	/** A gunner's (or mech's) shot along {@code aim}: the burst, for everyone. */
 	static void mobShot(ServerLevel level, LivingEntity mob, Vec3 aim, FutureGuns.Kind kind) {
-		flash(level, muzzle(mob, aim, MOB_AHEAD, MOB_SIDE, MOB_DOWN), aim, size(kind), null);
+		flash(level, muzzle(mob, aim, MOB_AHEAD, MOB_SIDE, MOB_DOWN), aim, size(kind));
 	}
 
 	/** Where the muzzle of a gun in {@code who}'s main hand is, pointed along {@code aim}. */
@@ -152,16 +150,13 @@ public final class MuzzleFlash {
 		return String.valueOf(gun.get(DataComponents.CUSTOM_DATA)).contains("silencer");
 	}
 
-	/** The burst at {@code at}, pointed along {@code aim}, this size; sent to every player near but {@code skip}. */
-	static void flash(ServerLevel level, Vec3 at, Vec3 aim, float size, @Nullable ServerPlayer skip) {
+	/** The burst at {@code at}, pointed along {@code aim}, this size; sent to every player near. */
+	static void flash(ServerLevel level, Vec3 at, Vec3 aim, float size) {
 		RandomSource random = level.getRandom();
 		Flash core = new Flash(size * (0.9F + random.nextFloat() * 0.2F));
 		Flash plume = new Flash(size * PLUME_SHARE);
 		int smoke = SMOKE + Math.round(size * 2.0F);
 		for (ServerPlayer player : level.players()) {
-			if (player == skip) {
-				continue;
-			}
 			level.sendParticles(player, core, true, true, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			for (int i = 0; i < PLUME; i++) {
 				// a count of 0 sends the offsets as the direction, times the speed

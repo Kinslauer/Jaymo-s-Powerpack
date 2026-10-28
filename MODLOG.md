@@ -3532,7 +3532,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   future"):** every shot from a future gun (gunners, mech cannons, players' TaCZ guns) throws a full-bright star burst
   at the muzzle, two smaller ones forward as a plume, and smoke that everyone near sees (`chrono/future/MuzzleFlash`,
   particle `jaymospowers:muzzle_flash`, our own three 16px sprites under `textures/particle/muzzle/`, client
-  `MuzzleFlashParticle`). Sizes per gun kind (pistol 0.9 up to sniper 1.8) at the top of `MuzzleFlash`. A player's own
-  shot isn't sent back to them; TaCZ's flash on the gun in their hands is drawn 2.2x instead (`TaczMuzzleFlashMixin`,
+  `MuzzleFlashParticle`). Sizes per gun kind (pistol 0.9 up to sniper 1.8) at the top of `MuzzleFlash`. Everyone sees
+  the burst, the shooter too; TaCZ's flash on the gun in your hands is also drawn 2.2x (`TaczMuzzleFlashMixin`,
   optional config `jaymospowers.tacz.client.mixins.json`). Players' shots come from TaCZ's `GunFireEvent`, hooked by
   reflection. Silenced guns don't flash. Gunners' muzzles now sit at the gun hand, not straight ahead of the eye.
