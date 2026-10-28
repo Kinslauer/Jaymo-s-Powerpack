@@ -3304,3 +3304,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   in mail, hunters draw a bow, healers drink, the sworn stand guard in full iron, cave starts dig by torchlight,
   storm and sky answers look up, book answers look down at the book, birthplaces walk in plain clothes so the
   heritage shows, and so on. Gear, arm swings and item use are lent to your player only while the figure is drawn.
+  Right-clicking the story page's Heritage, Class and Look buttons (and the spell or element chips) steps back to
+  the one before (Andy: "right clicking should take you back on any of these options").

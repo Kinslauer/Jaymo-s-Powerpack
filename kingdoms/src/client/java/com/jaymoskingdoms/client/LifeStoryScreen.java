@@ -213,8 +213,11 @@ final class LifeStoryScreen extends Screen {
 		return born == null ? null : born.heritage();
 	}
 
-	/** The next heritage open to them after the one shown (wrapping); back at the story's, the override is dropped. */
-	private static void cycleHeritage() {
+	/**
+	 * The next heritage open to them after the one shown (wrapping), or (0.7.276, a right click) the one before; back at
+	 * the story's, the override is dropped.
+	 */
+	private static void cycleHeritage(int step) {
 		Heritage.Kind story = storyHeritage(), now = heritage();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (story == null || now == null || minecraft.player == null) {
@@ -222,7 +225,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		Heritage.Kind[] kinds = Heritage.Kind.values();
 		for (int i = 1; i <= kinds.length; i++) {
-			Heritage.Kind next = kinds[(now.ordinal() + i) % kinds.length];
+			Heritage.Kind next = kinds[Math.floorMod(now.ordinal() + i * step, kinds.length)];
 			if (Heritage.unlocked(minecraft.player, next)) {
 				draft.heritage = next == story ? -1 : next.ordinal();
 				draft.look = -1;
@@ -231,17 +234,25 @@ final class LifeStoryScreen extends Screen {
 		}
 	}
 
-	/** The next class after the one shown (wrapping); back at the story's, the override is dropped. */
-	private static void cycleClass() {
+	/** The next class after the one shown (wrapping), or the one before; back at the story's, the override is dropped. */
+	private static void cycleClass(int step) {
 		Answer youth = picked(Question.YOUTH);
 		Classes.PlayerClass story = youth == null ? null : youth.cls(), now = youthClass();
 		if (story == null || now == null) {
 			return;
 		}
 		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
-		Classes.PlayerClass next = classes[(now.ordinal() + 1) % classes.length];
+		Classes.PlayerClass next = classes[Math.floorMod(now.ordinal() + step, classes.length)];
 		draft.cls = next == story ? -1 : next.ordinal();
 		draft.option = -1;
+	}
+
+	/** The heritage's next look after the one shown (wrapping), or the one before. */
+	private static void cycleLook(int step) {
+		Heritage.Kind kind = heritage();
+		if (kind != null) {
+			draft.look = Math.floorMod(lookIndex() + step, HeritageVariants.of(kind).size() + 1);
+		}
 	}
 
 	private static int lookIndex() {
@@ -320,15 +331,10 @@ final class LifeStoryScreen extends Screen {
 			this.scroll = 0;
 		}).bounds(paneX() + 6, y, 60, 16).build());
 		// on the story page: the heritage's look, stepped through on each press
-		this.look = addRenderableWidget(Button.builder(Component.empty(), b -> {
-			Heritage.Kind kind = heritage();
-			if (kind != null) {
-				draft.look = (lookIndex() + 1) % (HeritageVariants.of(kind).size() + 1);
-			}
-		}).bounds(left() + 6, y, TELL_W - 12, 16).build());
+		this.look = addRenderableWidget(Button.builder(Component.empty(), b -> cycleLook(1)).bounds(left() + 6, y, TELL_W - 12, 16).build());
 		// (Andy: "allow a player override AFTER the result") the heritage and class, stepped past the story's on each press
-		this.heritageButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleHeritage()).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
-		this.classButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleClass()).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
+		this.heritageButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleHeritage(1)).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
+		this.classButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleClass(1)).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
 		if (!this.forced) {
 			this.later = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
 		}
@@ -466,6 +472,27 @@ final class LifeStoryScreen extends Screen {
 		}
 		Step s = step();
 		int mx = (int)event.x(), my = (int)event.y();
+		// (0.7.276) Andy: "right clicking should take you back on any of these options": the heritage, class and look
+		// buttons step back, and the element or spell chips too
+		if (event.button() == 1) {
+			Runnable back = null;
+			if (over(this.heritageButton, mx, my)) {
+				back = () -> cycleHeritage(-1);
+			} else if (over(this.classButton, mx, my)) {
+				back = () -> cycleClass(-1);
+			} else if (over(this.look, mx, my)) {
+				back = () -> cycleLook(-1);
+			} else if (s.question == null && chipAt(mx, my) >= 0) {
+				Classes.PlayerClass cls = youthClass();
+				int n = cls == null ? 0 : cls.options.size();
+				back = () -> draft.option = n == 0 ? -1 : Math.floorMod((draft.option < 0 ? 0 : draft.option) - 1, n);
+			}
+			if (back != null) {
+				back.run();
+				click();
+				return true;
+			}
+		}
 		if (s.question != null) {
 			int row = rowAt(s, mx, my);
 			if (row >= 0) {
@@ -518,6 +545,10 @@ final class LifeStoryScreen extends Screen {
 			return true;
 		}
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	}
+
+	private static boolean over(@Nullable Button b, int mx, int my) {
+		return b != null && b.visible && b.active && b.isMouseOver(mx, my);
 	}
 
 	private void click() {
