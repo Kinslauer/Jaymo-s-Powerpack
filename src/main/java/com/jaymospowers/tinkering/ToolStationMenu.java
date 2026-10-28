@@ -263,10 +263,14 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			}
 			List<Integer> left = new ArrayList<>(parts);
 			List<TinkerMaterial> materials = new ArrayList<>();
+			int head = -1;
 			for (ToolType.Slot slot : type.parts) {
 				Integer match = left.stream().filter(i -> ((ToolPartItem) inputs.getItem(i).getItem()).part == slot.part()).findFirst().orElse(null);
 				if (match == null) {
 					break;
+				}
+				if (head == -1) {
+					head = match;
 				}
 				left.remove(match);
 				materials.add(ToolPartItem.material(inputs.getItem(match)));
@@ -277,10 +281,17 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 					status = forge;
 					return ItemStack.EMPTY;
 				}
+				// (Smithing) a hot head must be quenched first; the head's grade carries onto the tool
+				Component refusal = refusal(parts);
+				if (refusal != null) {
+					status = refusal;
+					return ItemStack.EMPTY;
+				}
 				for (int i : parts) {
 					uses[i] = 1;
 				}
 				ItemStack built = ToolStats.build(type, materials);
+				com.jaymospowers.tinkering.smithing.Grades.carry(inputs.getItem(head), built);
 				built.setCount(type.ranged.yield());
 				return built;
 			}
@@ -329,12 +340,30 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			status = forge;
 			return ItemStack.EMPTY;
 		}
+		// (Smithing) a hot head must be quenched first; the head's grade carries onto the weapon
+		Component refusal = com.jaymospowers.tinkering.smithing.Grades.refusal(inputs.getItem(head));
+		if (refusal != null) {
+			status = refusal;
+			return ItemStack.EMPTY;
+		}
+		com.jaymospowers.tinkering.smithing.Grades.carry(inputs.getItem(head), out);
 		for (int i = 0; i < inputCount; i++) {
 			if (!inputs.getItem(i).isEmpty()) {
 				uses[i] = 1;
 			}
 		}
 		return out;
+	}
+
+	/** (Smithing) Why the station won't take one of these parts yet, or null. */
+	private @Nullable Component refusal(List<Integer> slots) {
+		for (int i : slots) {
+			Component why = com.jaymospowers.tinkering.smithing.Grades.refusal(inputs.getItem(i));
+			if (why != null) {
+				return why;
+			}
+		}
+		return null;
 	}
 
 	/** A damaged tool and its head material: as much repair as the material covers. */

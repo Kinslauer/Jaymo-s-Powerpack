@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/weapon_part/copper_smithing_hammer_head_copper"
+  }
+}

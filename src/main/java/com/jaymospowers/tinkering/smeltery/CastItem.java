@@ -80,6 +80,7 @@ public class CastItem extends Item {
 	@SuppressWarnings("deprecation")
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
+		com.jaymospowers.tinkering.smithing.Finishing.tooltip(stack, builder);
 		if (shape == Shape.WEAPON) {
 			WeaponParts.Kind kind = WeaponParts.ofCast(stack);
 			if (kind == null) {

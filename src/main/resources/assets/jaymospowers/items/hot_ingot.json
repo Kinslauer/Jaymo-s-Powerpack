@@ -1,0 +1,136 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/iron_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "gold",
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/gold_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "copper",
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/copper_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/silver_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "rose_gold",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/rose_gold_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "amethyst_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/amethyst_bronze_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "pig_iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/pig_iron_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "slimesteel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/slimesteel_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "steel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/steel_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_ingot",
+      "tints": [
+        {
+          "type": "minecraft:constant",
+          "value": -26040
+        }
+      ]
+    }
+  }
+}

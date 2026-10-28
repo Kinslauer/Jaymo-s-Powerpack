@@ -1,5 +1,9 @@
 package com.jaymospowers.tinkering.forge;
 
+import com.jaymospowers.tinkering.smithing.HearthEntity;
+import com.jaymospowers.tinkering.smithing.HotMetal;
+import com.jaymospowers.tinkering.smithing.Smithing;
+import com.jaymospowers.tinkering.smithing.TongsItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -8,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -17,20 +22,26 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The forge hearth: a brick hearth that burns coal or charcoal (right-click it in, up to {@link #HEARTH_FUEL_MAX}) and,
  * once lit (flint and steel, a fire charge, or an Emberborn's bare hand), burns hot: heat 2 for a kiln over it and
  * anything else that reads heat ({@link com.jaymospowers.tinkering.kiln.Heat}). Each piece lasts {@link #HEARTH_BURN_TICKS}.
+ * (Smithing) Ingots or a forging blank laid in its coals heat up for the Smithing Anvil ({@link HearthEntity}).
  */
-public class ForgeHearthBlock extends HorizontalDirectionalBlock {
+public class ForgeHearthBlock extends HorizontalDirectionalBlock implements EntityBlock {
 	/** Coal it holds at most, and how long each piece burns (ticks; a furnace gets as long from one). */
 	public static final int HEARTH_FUEL_MAX = 8, HEARTH_BURN_TICKS = 1600;
 	/** Light it gives while lit. */
@@ -56,8 +67,48 @@ public class ForgeHearthBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return new HearthEntity(pos, state);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+		return level.isClientSide() || type != Smithing.HEARTH_ENTITY ? null
+			: (BlockEntityTicker<T>) (BlockEntityTicker<HearthEntity>) HearthEntity::serverTick;
+	}
+
+	/** The hearth's coals (hearths set down before smithing came get theirs on first use). */
+	private static HearthEntity coals(Level level, BlockPos pos, BlockState state) {
+		if (level.getBlockEntity(pos) instanceof HearthEntity hearth) {
+			return hearth;
+		}
+		HearthEntity hearth = new HearthEntity(pos, state);
+		level.setBlockEntity(hearth);
+		return hearth;
+	}
+
+	/** (Smithing) Takes what's heating in the coals. */
+	private static InteractionResult takeHeld(Level level, BlockPos pos, Player player) {
+		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof HearthEntity hearth) {
+			player.getInventory().placeItemBackInInventory(hearth.take(), Prediction.SERVER_ONLY);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
 		InteractionHand hand, BlockHitResult hit) {
+		// (Smithing) metal goes in the coals; tongs take it out
+		if (HotMetal.heatable(stack)) {
+			if (!level.isClientSide() && coals(level, pos, state).put(stack)) {
+				level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.6F, 0.7F);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (stack.getItem() instanceof TongsItem && level.getBlockEntity(pos) instanceof HearthEntity hearth && !hearth.held().isEmpty()) {
+			return takeHeld(level, pos, player);
+		}
 		int fuel = state.getValue(FUEL);
 		if (stack.is(ItemTags.COALS)) {
 			if (fuel >= HEARTH_FUEL_MAX) {
@@ -96,6 +147,9 @@ public class ForgeHearthBlock extends HorizontalDirectionalBlock {
 	/** An Emberborn lights it with a bare hand. */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (level.getBlockEntity(pos) instanceof HearthEntity hearth && !hearth.held().isEmpty()) {
+			return takeHeld(level, pos, player);
+		}
 		if (state.getValue(LIT) || !player.entityTags().contains(EMBERBORN_TAG)) {
 			return InteractionResult.PASS;
 		}

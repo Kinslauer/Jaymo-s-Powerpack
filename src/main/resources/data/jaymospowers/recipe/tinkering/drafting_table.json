@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "p": "minecraft:paper",
+    "w": "#minecraft:planks"
+  },
+  "pattern": [
+    "pp",
+    "ww",
+    "ww"
+  ],
+  "result": {
+    "id": "jaymospowers:drafting_table",
+    "count": 1
+  }
+}

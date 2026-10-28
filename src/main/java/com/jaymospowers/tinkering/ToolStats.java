@@ -293,7 +293,9 @@ public final class ToolStats {
 		}
 		ToolType type = item.type();
 		List<TinkerMaterial> materials = materials(stack);
-		Stats stats = compute(type, materials);
+		// (Smithing) a hammered head's grade works into the tool's numbers
+		Stats stats = com.jaymospowers.tinkering.smithing.Grades.scale(compute(type, materials),
+			com.jaymospowers.tinkering.smithing.Grades.of(stack), stack);
 		if (!stack.has(Tinkering.TOOL_MATERIALS)) {
 			stack.set(Tinkering.TOOL_MATERIALS, materials.stream().map(m -> m.id).toList());
 		}

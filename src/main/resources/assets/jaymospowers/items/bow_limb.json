@@ -1,97 +1,275 @@
 {
   "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:custom_model_data",
-    "index": 0,
-    "cases": [
-      {
-        "when": "wood",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_wood"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood_crimson",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood_warped",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_silver",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_rose_gold",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_amethyst_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_pig_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_slimesteel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
-      },
-      {
-        "when": "wood_crimson",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_wood_crimson"
-        }
-      },
-      {
-        "when": "wood_warped",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_wood_warped"
-        }
-      },
-      {
-        "when": "bone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_bone"
-        }
-      },
-      {
-        "when": "copper",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_copper"
-        }
-      },
-      {
-        "when": "iron",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_iron"
-        }
-      },
-      {
-        "when": "silver",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_silver"
-        }
-      },
-      {
-        "when": "rose_gold",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_rose_gold"
-        }
-      },
-      {
-        "when": "amethyst_bronze",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_amethyst_bronze"
-        }
-      },
-      {
-        "when": "pig_iron",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_pig_iron"
-        }
-      },
-      {
-        "when": "slimesteel",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_slimesteel"
-        }
-      },
-      {
-        "when": "steel",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/bow_limb_steel"
-        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/bow_limb_wood",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
       }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "jaymospowers:item/tinkering/part/bow_limb_wood"
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood"
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood_crimson"
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_wood_warped"
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_bone"
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_copper"
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_iron"
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_silver"
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_rose_gold"
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_amethyst_bronze"
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_pig_iron"
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_slimesteel"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_steel"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/bow_limb_wood"
+      }
     }
   }
 }
