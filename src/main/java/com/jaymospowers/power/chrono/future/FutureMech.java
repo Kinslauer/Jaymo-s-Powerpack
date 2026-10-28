@@ -40,6 +40,9 @@ import net.minecraft.world.phys.Vec3;
  * the dead alike), raises its arm cannons and hoses them with bursts, lobs a shell every few seconds that bursts
  * where its target stands (no blocks broken), and smashes anything that gets close. It carries a boss bar. It leaves
  * no body, only a heap of scrap.
+ * <p>(0.17.135) The same class is the smaller <b>android mech</b> ({@link FutureMachines#ANDROID_MECH}): lighter cannons, no
+ * shells. One leads a patrol now and then, and the Mad Tinkerer sets one on you as his test unit. Both are drawn on our own
+ * mech model in one of four builds (tools/gen_android_mech.py).
  */
 public class FutureMech extends Monster {
 	static final double HEALTH = 220.0, DAMAGE = 16.0, SPEED = 0.2, FOLLOW = 64.0, ARMOR = 20.0, TOUGHNESS = 8.0;
@@ -52,19 +55,28 @@ public class FutureMech extends Monster {
 	/** The boss bar shows to players this close. */
 	static final double BAR_SEEN = 48.0;
 	static final FutureGuns.Gun CANNON = new FutureGuns.Gun("tacz:m249", FutureGuns.MG, "", 0);
+	/** The android mech: smaller and lighter than the war mech, with rapid-fire arm guns. */
+	static final double ANDROID_HEALTH = 100.0, ANDROID_DAMAGE = 9.0, ANDROID_SPEED = 0.25, ANDROID_ARMOR = 8.0, ANDROID_TOUGHNESS = 2.0;
+	static final FutureGuns.Gun ANDROID_CANNON = new FutureGuns.Gun("tacz:p90", FutureGuns.SMG, "", 0);
 
 	private static final EntityDataAccessor<Boolean> DATA_AIMING = SynchedEntityData.defineId(FutureMech.class, EntityDataSerializers.BOOLEAN);
 
 	private int attackAnimationTick;
 	private int aimingFor;
 	private int shellIn = SHELL_EVERY;
-	private final ServerBossEvent bar = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.jaymospowers.future_mech"),
-		BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+	private final ServerBossEvent bar;
 
 	public FutureMech(EntityType<? extends FutureMech> type, Level level) {
 		super(type, level);
-		this.xpReward = 60;
+		this.xpReward = android() ? 25 : 60;
+		this.bar = new ServerBossEvent(java.util.UUID.randomUUID(), type.getDescription(), BossEvent.BossBarColor.RED,
+			BossEvent.BossBarOverlay.NOTCHED_10);
 		addTag("jaymoskitchen.no_corpse");
+	}
+
+	/** The smaller android mech rather than the war mech? */
+	public boolean android() {
+		return getType() == FutureMachines.ANDROID_MECH;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -77,6 +89,17 @@ public class FutureMech extends Monster {
 			.add(Attributes.ARMOR_TOUGHNESS, TOUGHNESS)
 			.add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
 			.add(Attributes.STEP_HEIGHT, 1.5);
+	}
+
+	public static AttributeSupplier.Builder createAndroidAttributes() {
+		return createAttributes()
+			.add(Attributes.MAX_HEALTH, ANDROID_HEALTH)
+			.add(Attributes.ATTACK_DAMAGE, ANDROID_DAMAGE)
+			.add(Attributes.MOVEMENT_SPEED, ANDROID_SPEED)
+			.add(Attributes.FOLLOW_RANGE, 48.0)
+			.add(Attributes.ARMOR, ANDROID_ARMOR)
+			.add(Attributes.ARMOR_TOUGHNESS, ANDROID_TOUGHNESS)
+			.add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override
@@ -126,16 +149,16 @@ public class FutureMech extends Monster {
 				getLookControl().setLookAt(foe, 30.0F, 30.0F);
 				this.entityData.set(DATA_AIMING, true);
 				aimingFor = 30;
-				FutureGuns.tickWith(level, this, foe, CANNON);
-				if (--shellIn <= 0 && d > SHELL_NEAREST) {
+				FutureGuns.tickWith(level, this, foe, android() ? ANDROID_CANNON : CANNON);
+				if (!android() && --shellIn <= 0 && d > SHELL_NEAREST) {
 					shell(level, foe);
 					shellIn = SHELL_EVERY + getRandom().nextInt(40);
 				}
 			}
 		}
 		if (getHealth() < getMaxHealth() * 0.3F && this.tickCount % 6 == 0) {
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 3.2, getZ(), 2, 0.4, 0.3, 0.4, 0.01);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 2.5, getZ(), 3, 0.6, 0.6, 0.6, 0.1);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + getBbHeight() * 0.8, getZ(), 2, 0.4, 0.3, 0.4, 0.01);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + getBbHeight() * 0.62, getZ(), 3, 0.6, 0.6, 0.6, 0.1);
 		}
 		bar.setProgress(getHealth() / getMaxHealth());
 		if (this.tickCount % 20 == 0) {
@@ -192,6 +215,14 @@ public class FutureMech extends Monster {
 	@Override
 	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
 		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		if (android()) {
+			// the android mech: about half the war mech's scrap
+			spawnAtLocation(level, new ItemStack(Items.IRON_INGOT, 2 + getRandom().nextInt(3)));
+			spawnAtLocation(level, new ItemStack(Items.REDSTONE, 3 + getRandom().nextInt(4)));
+			spawnAtLocation(level, new ItemStack(Items.COPPER_INGOT, 1 + getRandom().nextInt(2)));
+			level.explode(this, getX(), getY() + 1.2, getZ(), 1.0F, Level.ExplosionInteraction.NONE);
+			return;
+		}
 		spawnAtLocation(level, new ItemStack(Items.IRON_INGOT, 4 + getRandom().nextInt(6)));
 		spawnAtLocation(level, new ItemStack(Items.REDSTONE, 6 + getRandom().nextInt(7)));
 		spawnAtLocation(level, new ItemStack(Items.COPPER_INGOT, 2 + getRandom().nextInt(4)));

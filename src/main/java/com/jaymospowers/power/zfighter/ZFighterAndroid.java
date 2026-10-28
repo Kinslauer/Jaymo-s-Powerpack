@@ -3,6 +3,8 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.power.chrono.future.FutureMachines;
+import com.jaymospowers.power.chrono.future.FutureMech;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,10 +36,10 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -53,7 +55,7 @@ import net.minecraft.world.phys.Vec3;
  * who leaves after {@link #LIFETIME} ticks; right-click him). Four steps, kept in {@link #STAGE}:
  * <ol>
  * <li>he asks for <b>parts</b> ({@link #PARTS}: iron, redstone blocks, diamonds, lightning rods, copper);</li>
- * <li>he wheels out a <b>test unit</b> (a glowing iron golem, {@link #TEST_HEALTH} health, {@link #TEST_DAMAGE} a blow,
+ * <li>he wheels out a <b>test unit</b> (a glowing android mech from the future, {@link #TEST_HEALTH} health, {@link #TEST_DAMAGE} a blow,
  * set on you): beat it before {@link #TEST_LIFE} ticks run out and without going further than {@link #TEST_LEASH} from
  * him, or he builds another (free);</li>
  * <li>the <b>operation</b> ({@link #OPERATION_TICKS}): you lie held in place, sparks, a few hearts of pain, and he must
@@ -89,6 +91,8 @@ public final class ZFighterAndroid {
 	/** The test unit: health, damage a blow, how long it runs (ticks), and how far from the scientist you may go (blocks). */
 	static final double TEST_HEALTH = 100.0;
 	static final double TEST_DAMAGE = 8.0;
+	/** (0.17.135) The test mech's plating: lighter than a wild one's, since it also fires its arm guns. */
+	static final double TEST_ARMOR = 4.0;
 	static final int TEST_LIFE = 4800;
 	static final double TEST_LEASH = 64.0;
 	/** The operation: ticks, hearts of pain (half-hearts total), how near he must stay (blocks), health he needs to begin. */
@@ -425,7 +429,8 @@ public final class ZFighterAndroid {
 
 	private static void startTest(ServerPlayer player, Entity scientist) {
 		ServerLevel level = player.level();
-		IronGolem unit = EntityTypes.IRON_GOLEM.create(level, EntitySpawnReason.MOB_SUMMONED);
+		// (0.17.135) an android mech from the future, not an iron golem
+		FutureMech unit = FutureMachines.ANDROID_MECH.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (unit == null) {
 			return;
 		}
@@ -437,6 +442,10 @@ public final class ZFighterAndroid {
 		var health = unit.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.setBaseValue(TEST_HEALTH);
+		}
+		var armor = unit.getAttribute(Attributes.ARMOR);
+		if (armor != null) {
+			armor.setBaseValue(TEST_ARMOR);
 		}
 		var damage = unit.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (damage != null) {
@@ -455,6 +464,7 @@ public final class ZFighterAndroid {
 		TEST_STARTS.put(player.getUUID(), level.getGameTime());
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, unit.getX(), unit.getY() + 1.5, unit.getZ(), 30, 0.5, 1.0, 0.5, 0.3);
 		level.playSound(null, unit.getX(), unit.getY(), unit.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.HOSTILE, 1.5F, 0.6F);
+		level.playSound(null, unit.getX(), unit.getY(), unit.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.2F, 1.4F);
 	}
 
 	/** Once a second: keep each unit on its fighter, and end the test when it is won, lost or abandoned. */
@@ -480,8 +490,8 @@ public final class ZFighterAndroid {
 				}
 				continue;
 			}
-			if (unit instanceof IronGolem golem && golem.getTarget() != owner) {
-				golem.setTarget(owner);
+			if (unit instanceof Mob mob && mob.getTarget() != owner) {
+				mob.setTarget(owner);
 			}
 			if (unit != null && com.jaymospowers.core.wounds.Downed.isDowned(unit)) {
 				// (a downed unit is a beaten one)
