@@ -1,6 +1,7 @@
 package com.jaymospowers.tinkering;
 
 import com.jaymospowers.power.wind.SorasDagger;
+import com.jaymospowers.power.wind.SorasLineage;
 import com.jaymospowers.tinkering.table.TableExtras;
 import com.jaymospowers.tinkering.table.Tables;
 import com.jaymospowers.tinkering.table.TinkerTableMenu;
@@ -314,7 +315,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			return null;
 		}
 		List<PartType> needed = new ArrayList<>(((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().parts);
-		ItemStack out = WeaponPartItem.weapon(inputs.getItem(head));
+		ItemStack out = SorasLineage.carry(inputs.getItem(head), WeaponPartItem.weapon(inputs.getItem(head)));
 		for (PartType part : others) {
 			if (!needed.remove(part)) {
 				return ItemStack.EMPTY;

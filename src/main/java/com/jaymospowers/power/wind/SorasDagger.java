@@ -62,9 +62,8 @@ import net.minecraft.world.phys.Vec3;
  * carrying the spoils of three bosses (a Nether Star, Dragon's Breath and a Heavy Core). Its Flurry is longer, and in a
  * wind user's hand it's carried by the winds: every slash a gust, a lunge on the wind, and a burst at the end.</li>
  * </ol>
- * Upgrading keeps what's on the dagger (enchantments, name, wear). Its gifts answer only a wind: in anyone else's hand an
- * upgraded dagger is just a blade of its tier (no gusts, no extra knockback, no Flurry), and the Tempest dagger won't stay
- * in their hand at all.
+ * Upgrading keeps what's on the dagger (enchantments, name, wear). (0.17.110) Anyone can find the blade and forge it, but
+ * no stage stays in anyone's hand but a wind's. Only one dagger line is out at a time ({@link SorasLineage}).
  */
 public final class SorasDagger extends Item {
 	public static final int IRON = 0, GILDED = 1, DIAMOND = 2, TEMPEST = 3;
@@ -199,10 +198,13 @@ public final class SorasDagger extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** The Tempest dagger won't be held by anyone but a wind: it slips from their hand into their pack (or to the ground). */
+	/**
+	 * (0.17.110, was the Tempest dagger's alone) Andy: "anyone can take the blade, anyone can forge it, but only wind users
+	 * can use it." No stage will be held by anyone but a wind: it slips from their hand into their pack (or to the ground).
+	 */
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, net.minecraft.world.entity.Entity owner, EquipmentSlot slot) {
-		if (this.stage != TEMPEST || !(owner instanceof ServerPlayer player) || wind(player)) {
+		if (!(owner instanceof ServerPlayer player) || wind(player)) {
 			return;
 		}
 		InteractionHand hand = player.getMainHandItem() == stack ? InteractionHand.MAIN_HAND : player.getOffhandItem() == stack ? InteractionHand.OFF_HAND : null;

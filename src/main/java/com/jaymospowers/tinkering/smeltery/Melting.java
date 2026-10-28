@@ -1,6 +1,7 @@
 package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.power.wind.SorasDagger;
+import com.jaymospowers.power.wind.SorasLineage;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
 import com.jaymospowers.tinkering.TinkerTool;
@@ -198,6 +199,10 @@ public final class Melting {
 
 	/** What one of this item melts into, or null. (0.15.36) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
+		if (SorasLineage.marked(stack)) {
+			// (0.17.110) the one Sora's Dagger line (found blade, its cast, the dagger) never melts
+			return null;
+		}
 		Result result = builtIn(stack);
 		if (result == null) {
 			result = extra.get(stack.getItem());
@@ -307,7 +312,8 @@ public final class Melting {
 				case NUGGET -> nugget(molten);
 				case WEAPON -> {
 					WeaponParts.Kind kind = WeaponParts.ofCast(cast);
-					yield kind == null ? null : WeaponParts.castResult(kind, molten);
+					ItemStack head = kind == null ? null : WeaponParts.castResult(kind, molten);
+					yield head == null ? null : SorasLineage.carry(cast, head);
 				}
 				default -> {
 					PartType part = castItem.shape.part;
@@ -321,7 +327,8 @@ public final class Melting {
 		if (molten != Molten.GOLD || shape == null) {
 			return null;
 		}
-		return shape == CastItem.Shape.WEAPON ? WeaponParts.cast(((WeaponPartItem) cast.getItem()).kind) : new ItemStack(Tinkering.CASTS.get(shape));
+		return shape == CastItem.Shape.WEAPON ? SorasLineage.carry(cast, WeaponParts.cast(((WeaponPartItem) cast.getItem()).kind))
+			: new ItemStack(Tinkering.CASTS.get(shape));
 	}
 
 	/** How much liquid the table needs for this cast and liquid (0: it can't cast it). */
@@ -351,7 +358,8 @@ public final class Melting {
 
 	/** Whether pouring onto this item uses it up (making a cast does; casting on a cast doesn't). */
 	public static boolean usesUpCast(ItemStack cast) {
-		return !(cast.getItem() instanceof CastItem);
+		// (0.17.110) the cast poured over a found Sora's Dagger Blade makes one iron blade only
+		return !(cast.getItem() instanceof CastItem) || SorasLineage.marked(cast);
 	}
 
 	private static @Nullable ItemStack ingot(Molten molten) {

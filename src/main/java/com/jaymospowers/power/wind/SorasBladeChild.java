@@ -6,6 +6,7 @@ import com.jaymospowers.tinkering.WeaponParts;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -29,10 +30,10 @@ import net.minecraft.world.item.ItemStack;
  * the child in any village as a wind user, and you can interact with the child to get it from him, you will have to
  * tell him not to play with things like that, and you take it instead."
  * <p>
- * The stone Sora's Dagger Blade isn't shaped at the Part Builder ({@link WeaponParts#FOUND}); it's found. When a Wind
- * user walks into a village they roll once ({@link #CHANCE}): a village child nearby is given the blade to play with and
- * comes running up. Right-click the child (anyone can) to tell him off and take it. Its gold cast, the iron blade and the
- * dagger then go the usual Tinkering way.
+ * The stone Sora's Dagger Blade isn't shaped at the Part Builder ({@link WeaponParts#FOUND}); it's found, here or on a
+ * blacksmith's wall ({@link SorasBladeDisplay}), while no Sora's Dagger line is out ({@link SorasLineage}). When a Wind
+ * user walks into a village they roll once ({@link #CHANCE}): a village child nearby is playing with the blade and comes
+ * running up. Right-click the child (anyone can) to tell him off and take it.
  */
 public final class SorasBladeChild {
 	static final String TAG = "jaymospowers_soras_blade_child";
@@ -42,14 +43,25 @@ public final class SorasBladeChild {
 	/** A village counts as new once you're this far (blocks) from where you last rolled, or after a day. */
 	static final double NEW_VILLAGE_DISTANCE = 256.0;
 	static final long REROLL_AFTER = 24000L;
+	/** A child no one has taken the blade from is passed over for a new one after this long (ticks, two days). */
+	static final long REPLANT_AFTER = 48000L;
 	/** How far (blocks) a child can be to be picked, and how fast he runs over to you. */
 	static final double CHILD_RADIUS = 48.0;
 	static final double RUN_SPEED = 0.7;
 
-	private record Roll(BlockPos at, long time) {
+	/** Where and when someone last rolled for a find (shared with {@link SorasBladeDisplay}, which keeps its own map). */
+	record Roll(BlockPos at, long time) {
+		/** Whether {@code pos} at {@code now} is a new village for whoever rolled this. */
+		static boolean fresh(Map<UUID, Roll> rolls, ServerPlayer player, BlockPos pos, long now) {
+			Roll last = rolls.get(player.getUUID());
+			if (last != null && now - last.time() < REROLL_AFTER && last.at().closerThan(pos, NEW_VILLAGE_DISTANCE)) {
+				return false;
+			}
+			rolls.put(player.getUUID(), new Roll(pos, now));
+			return true;
+		}
 	}
 
-	/** Where and when each Wind user last rolled for the child. */
 	private static final Map<UUID, Roll> ROLLS = new HashMap<>();
 
 	private SorasBladeChild() {
@@ -69,7 +81,7 @@ public final class SorasBladeChild {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (server.getTickCount() % CHECK_EVERY != 0) {
+		if (server.getTickCount() % CHECK_EVERY != 0 || !SorasLineage.open(server)) {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -78,16 +90,10 @@ public final class SorasBladeChild {
 			}
 			ServerLevel level = player.level();
 			BlockPos pos = player.blockPosition();
-			if (!level.isVillage(pos)) {
-				continue;
-			}
 			long now = level.getGameTime();
-			Roll last = ROLLS.get(player.getUUID());
-			if (last != null && now - last.time() < REROLL_AFTER && last.at().closerThan(pos, NEW_VILLAGE_DISTANCE)) {
-				continue;
-			}
-			ROLLS.put(player.getUUID(), new Roll(pos, now));
-			if (hasBlade(player) || level.getRandom().nextFloat() >= CHANCE) {
+			SorasLineage.State state = SorasLineage.state(server);
+			if (!level.isVillage(pos) || state.child().isPresent() && now - state.childAt() < REPLANT_AFTER
+				|| !Roll.fresh(ROLLS, player, pos, now) || hasBlade(player) || level.getRandom().nextFloat() >= CHANCE) {
 				continue;
 			}
 			List<Villager> children = level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(CHILD_RADIUS),
@@ -96,16 +102,24 @@ public final class SorasBladeChild {
 				continue;
 			}
 			Villager child = children.get(level.getRandom().nextInt(children.size()));
-			child.setItemSlot(EquipmentSlot.MAINHAND, blade());
+			child.setItemSlot(EquipmentSlot.MAINHAND, SorasLineage.foundBlade(server));
 			child.setDropChance(EquipmentSlot.MAINHAND, 1.0F);
 			child.addTag(TAG);
 			child.getNavigation().moveTo(player, RUN_SPEED);
+			SorasLineage.set(server, new SorasLineage.State(state.serial(), false, Optional.of(child.getUUID()), now,
+				state.display(), state.displayAt()));
+			return;
 		}
 	}
 
 	private static void takeBlade(ServerPlayer player, Villager child) {
+		MinecraftServer server = player.level().getServer();
 		ItemStack held = child.getMainHandItem();
-		ItemStack blade = held.is(kind().item()) ? held.copy() : blade();
+		if (!SorasLineage.marked(held)) {
+			child.removeTag(TAG);
+			return;
+		}
+		ItemStack blade = held.copy();
 		child.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		child.removeTag(TAG);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.soras_blade_child.scold", player.getDisplayName())
@@ -116,10 +130,11 @@ public final class SorasBladeChild {
 		if (!player.getInventory().add(blade)) {
 			player.drop(blade, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
+		SorasLineage.claim(server);
 	}
 
 	/** Whether you already carry the blade (any metal) or a Sora's Dagger. */
-	private static boolean hasBlade(Player player) {
+	static boolean hasBlade(Player player) {
 		for (ItemStack stack : player.getInventory()) {
 			if (stack.is(kind().item()) || stack.getItem() instanceof SorasDagger) {
 				return true;
@@ -132,7 +147,7 @@ public final class SorasBladeChild {
 		return WeaponParts.KINDS.get(WeaponParts.SORAS_DAGGER_BLADE);
 	}
 
-	private static ItemStack blade() {
+	static ItemStack blade() {
 		return WeaponPartItem.of(kind(), WeaponParts.Metal.STONE, 1);
 	}
 }

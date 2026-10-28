@@ -3415,3 +3415,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   day later) there's a 60% chance a village child nearby is playing with it and runs over (`power/wind/SorasBladeChild`,
   tagged, drops it if killed). Right-click him (anyone can) to tell him off and take it. Not rolled while you already
   carry the blade or a Sora's Dagger. Blade sprite drawn in `tools/weapon_parts_assets.py` (DRAWN). Compile-checked, not seen in game.
+  **Found two ways, one dagger at a time** (Andy: "anyone can take the blade, anyone can forge it, but only wind users
+  can use it. another way to find it is to stumble across it on display at a blacksmith ... only one discovery method
+  per dagger. if one is used the other dissappears until the dagger is gone"): anyone walking into a new village may
+  also find the blade in an item frame by a smith's work block (35%, `SorasBladeDisplay`); right-click it and the smith
+  says he forged it but it never answered his hand. One line is out at a time (`SorasLineage`, an Overworld
+  attachment): the found blade, its gold cast (used up by its one iron blade), the iron blade and every dagger stage
+  carry the line's mark; the first time the blade reaches a player the other find is taken away, and no new finds
+  appear until a marked piece is destroyed (a dropped one despawns, burns or falls into the void, or the dagger wears
+  out, `mixin/SorasBreakMixin`). Marked pieces never melt. Every stage of the dagger now slips out of a non-Wind user's
+  hand (was only the Tempest dagger).
