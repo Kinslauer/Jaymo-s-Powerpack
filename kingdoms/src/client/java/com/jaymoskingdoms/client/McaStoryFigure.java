@@ -116,6 +116,9 @@ final class McaStoryFigure {
 		}
 	}
 
+	/** The figure's entity id: negative, so it can't be a real entity's. */
+	private static final int FIGURE_ID = -7_770_001;
+
 	private static @Nullable VillagerEntityMCA make(LocalPlayer player, ClientLevel level) {
 		UUID id = player.getUUID();
 		boolean female = (id.getLeastSignificantBits() & 1L) != 0L;
@@ -124,6 +127,9 @@ final class McaStoryFigure {
 		if (type == null || !(type.create(level, EntitySpawnReason.LOAD) instanceof VillagerEntityMCA v)) {
 			return null;
 		}
+		// (0.7.302) never added to the level, so it has no entity ID, and render hooks that ask for one (Jaymo's Powers'
+		// Rig scan glow) crashed the game on the life story screen; negative ids never meet a real entity's
+		v.setId(FIGURE_ID);
 		Genetics genes = v.getGenetics();
 		genes.randomize();
 		genes.setGender(female ? Gender.FEMALE : Gender.MALE);

@@ -6070,3 +6070,6 @@ frost creeps over them and they're frozen through in about 3.5 s, then shake and
 other fire-blooded mobs five times that; leather spares the damage), and the chill keeps biting after the ice falls
 before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
 the old freeze is kept. Compile-checked, not seen in game.
+- **0.7.302, the life story figure gets an entity id (crash fix):** `McaStoryFigure` makes an MCA villager that's never
+  added to the level, so it had no entity id, and render hooks that ask for one (Jaymo's Powers' Rig scan glow) crashed
+  the game on the life story screen. It's given a fixed negative id (`FIGURE_ID`), which no real entity has.

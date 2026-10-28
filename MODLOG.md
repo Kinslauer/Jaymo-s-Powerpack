@@ -3483,3 +3483,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   ... axis ... as it does not exist" in `LayerBlock.<init>`): `Properties.ofFullCopy` copied a log's map colour, a function
   of its `AXIS`. Layers now take the base's `defaultMapColor()` as a fixed colour. No other base in `LayerList` has a
   state-dependent property (light or colour).
+- **0.17.118, Rig scan glow and screen figures (crash fix):** `RigScanClient.color` (via `shouldEntityAppearGlowing`)
+  called `getId()` on every entity drawn, and Kingdoms' life story screen draws an MCA villager that was never added to the
+  level, so it has no id yet (26.3 throws "Tried to access entity ID before ID assignment"): the client crashed on the
+  intro. Entities without an id never glow now; Kingdoms 0.7.302 also gives the figure an id.
