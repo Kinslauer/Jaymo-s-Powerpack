@@ -1021,4 +1021,35 @@ public final class PowersCompat {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' forging (older Powers?)", e);
 		}
 	}
+
+	/** (0.7.313) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
+	private static boolean lookedForZFighterTalk;
+
+	/**
+	 * (0.7.313) "Talk about work" (or "Talk about training") with one of Powers' Z Fighter characters ({@link ZFighterFolk}):
+	 * their talk screen. False without Powers, or when they had nothing to say.
+	 */
+	public static boolean zfighterTalk(net.minecraft.server.level.ServerPlayer player, LivingEntity speaker) {
+		if (!lookedForZFighterTalk) {
+			lookedForZFighterTalk = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					zfighterTalk = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterNpcs"), "talk",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Z Fighter talk (older Powers?)", e);
+				}
+			}
+		}
+		if (zfighterTalk == null) {
+			return false;
+		}
+		try {
+			return (boolean)zfighterTalk.invoke(player, speaker);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't talk with {}", speaker.getName().getString(), e);
+			return false;
+		}
+	}
 }

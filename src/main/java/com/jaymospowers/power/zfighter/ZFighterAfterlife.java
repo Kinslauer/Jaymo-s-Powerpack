@@ -223,7 +223,8 @@ public final class ZFighterAfterlife {
 			boolean judge = entity.entityTags().contains(JUDGE_TAG);
 			boolean master = entity.entityTags().contains(MASTER_TAG);
 			boolean teller = entity.entityTags().contains(TELLER_TAG);
-			if (!judge && !master && !teller) {
+			if (!judge && !master && !teller || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.135) as MCA villagers, their menus lead to their talk: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -425,12 +426,17 @@ public final class ZFighterAfterlife {
 
 	/** The road's master: one lesson a stay (a good master's), and a bonus of TP. */
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master) {
+		teach(player, master, false);
+	}
+
+	/** (0.17.135) {@code asked}: asked for on his talk screen (no sneaking up to him). */
+	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master, boolean asked) {
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_no_spark", master.getDisplayName())
 				.withStyle(ChatFormatting.AQUA));
 			return;
 		}
-		if (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty()) {
+		if (!asked && (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty())) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_hint", master.getDisplayName())
 				.withStyle(ChatFormatting.AQUA));
 			return;
@@ -483,6 +489,80 @@ public final class ZFighterAfterlife {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
 			.withStyle(ChatFormatting.LIGHT_PURPLE));
 		returnHome(player);
+	}
+
+	// ---------------------------------------------------------------- talking (0.17.135)
+
+	/** A character of the Other World's talk (MCA's "Talk about work"): the Judge, the road's master, the fortune teller. */
+	static void talk(ServerPlayer player, LivingEntity npc, String tag) {
+		Runnable back = () -> talk(player, npc, tag);
+		switch (tag) {
+			case JUDGE_TAG -> ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.greet"), List.of(
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ask", true, () -> ZFighterNpcs.reply(player, npc, () -> judge(player, npc), back)),
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
+					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
+			case MASTER_TAG -> {
+				boolean taught = Boolean.TRUE.equals(player.getAttached(TAUGHT)) && !player.isCreative();
+				ZFighterNpcs.ask(player, npc, Component.translatable(taught ? "talk.jaymospowers.road_master.greet_taught" : "talk.jaymospowers.road_master.greet"),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.lesson", !taught && Powers.has(player, ZFighterPower.INSTANCE),
+						() -> ZFighterNpcs.reply(player, npc, () -> teach(player, npc, true), back))));
+			}
+			default -> {
+				if (!among(player) || Boolean.TRUE.equals(player.getAttached(CHAMPION))) {
+					ZFighterNpcs.ask(player, npc, Component.translatable(among(player) ? "talk.jaymospowers.teller.champion" : "talk.jaymospowers.teller.alive"),
+						among(player) ? List.of(ZFighterNpcs.Option.of("talk.jaymospowers.teller.go", true, () -> ZFighterNpcs.reply(player, npc, () -> tell(player, npc), back)))
+							: List.of());
+					return;
+				}
+				boolean emeralds = count(player, Items.EMERALD) >= PRICE_EMERALDS;
+				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", PRICE_EMERALDS, PRICE_TP), List.of(
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, true), back), PRICE_EMERALDS),
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, false), back), PRICE_TP)));
+			}
+		}
+	}
+
+	/** (0.17.135) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
+	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
+		if (!among(player)) {
+			return;
+		}
+		if (emeralds) {
+			if (count(player, Items.EMERALD) < PRICE_EMERALDS) {
+				return;
+			}
+			int left = PRICE_EMERALDS;
+			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
+				ItemStack stack = player.getInventory().getItem(i);
+				if (stack.is(Items.EMERALD)) {
+					int take = Math.min(left, stack.getCount());
+					stack.shrink(take);
+					left -= take;
+				}
+			}
+		} else {
+			ZFighterTraining.Data data = ZFighterTraining.of(player);
+			if (data.tp() < PRICE_TP) {
+				return;
+			}
+			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
+			.withStyle(ChatFormatting.LIGHT_PURPLE));
+		returnHome(player);
+	}
+
+	private static int count(ServerPlayer player, net.minecraft.world.item.Item item) {
+		int n = 0;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack stack = player.getInventory().getItem(i);
+			if (stack.is(item)) {
+				n += stack.getCount();
+			}
+		}
+		return n;
 	}
 
 	// ---------------------------------------------------------------- the tournament of the dead

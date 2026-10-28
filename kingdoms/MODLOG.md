@@ -6188,3 +6188,20 @@ rubber's internal organs."
   going down or dying lets them out; a server stop puts them down where they were swallowed.
 - Powers 0.17.134: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
 Compile-checked, not seen in game.
+
+## 0.7.313: Jaymo's Powers' Z Fighter characters are MCA villagers with talk screens (pack 0.17.135)
+Andy: "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys immersion seeing one of those
+things instead of a humanoid. ... they should have context sensitive talk interactions that handle the quest objectives
+instead of them appearing in chat like now."
+- `ZFighterFolk.spawn` (called by Powers): a grown MCA villager named for the part, tagged with Powers' tag, enlisted to
+  no settlement in role 95, out of the family tree, permanently invulnerable, home set at the spot. `Workers.step` hands
+  them to `ZFighterFolk.step` first: navigation stopped, stepped back if pushed 1.5+ blocks off their post, facing the
+  nearest player; the brain never runs (no wandering, beds, homes, old age). Kept out of `McaBridge.workers`, and they
+  speak to anyone (`Languages.look` gives them no tongue).
+- Outfits (`Uniforms.zfighter`, `tools/gen_zfighter_outfits.py`, four each, registered neutral): the Keeper's temple
+  robe and mantle, the Hermit's beach shirt, shorts and straw hat, the Tinkerer's lab coat, gloves and brass goggles, the
+  Judge's black robe with bands and stole, the road master's travelling gi, the teller's robe, shawl and headscarf, a
+  demon master's dark gi with spiked pauldrons. Hermit and Tinkerer go grey.
+- MCA's "Talk about work" on them goes to Powers' talk (`PowersCompat.zfighterTalk`), and a Z Fighter master (a town's
+  villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
+  `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).

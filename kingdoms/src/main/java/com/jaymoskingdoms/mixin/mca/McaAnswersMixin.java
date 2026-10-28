@@ -30,6 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement, (0.7.270) or one of a
  * ship's crew ({@link ShipTalk}).
+ * (0.7.313) "Talk about work" also shows on Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}); "Talk
+ * about training" only on a Z Fighter master.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up.
@@ -56,9 +58,13 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(Introductions.ANSWER);
 			cir.getReturnValue().remove(Introductions.HANDSHAKE);
 		}
-		if ("main".equals(name) && !Careers.offersWork(villager) && !ShipTalk.offersWork(villager)) {
+		if ("main".equals(name) && !Careers.offersWork(villager) && !ShipTalk.offersWork(villager) && !com.jaymoskingdoms.ZFighterFolk.is(villager)) {
 			// (0.7.220) only a grown villager of a settlement talks work; (0.7.270) or one of a ship's crew
 			cir.getReturnValue().remove(Careers.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ZFighterFolk.trains(villager)) {
+			// (0.7.313) only a Z Fighter master talks training
+			cir.getReturnValue().remove(com.jaymoskingdoms.ZFighterFolk.TRAINING);
 		}
 		if ("main".equals(name) && !Hermits.is(villager)) {
 			// (0.7.215) only the floating islands' hermits talk alchemy

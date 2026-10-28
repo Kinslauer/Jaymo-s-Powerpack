@@ -444,6 +444,8 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
+		// (0.17.135) the Z Fighter characters as MCA villagers, and their talk screens
+		ZFighterNpcs.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();

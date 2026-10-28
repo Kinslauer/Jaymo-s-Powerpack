@@ -188,7 +188,8 @@ public final class ZFighterSagas {
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterSagas::afterDeath);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			boolean master = entity.entityTags().contains(ZFighterMasters.TAG) || entity.entityTags().contains(ZFighterMasters.DARK_TAG);
-			if (!master || hand != InteractionHand.MAIN_HAND || player.getMainHandItem().isEmpty() || !player.isShiftKeyDown()) {
+			if (!master || hand != InteractionHand.MAIN_HAND || player.getMainHandItem().isEmpty() || !player.isShiftKeyDown() || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.135) with MCA, "Talk about training" in a master's menu: ZFighterMasters.talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {

@@ -131,7 +131,8 @@ public final class ZFighterAndroid {
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterAndroid::tickServer);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!entity.entityTags().contains(TAG)) {
+			if (!entity.entityTags().contains(TAG) || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.135) as an MCA villager, his menu leads to his talk: talkMenu)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server && hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
@@ -282,7 +283,7 @@ public final class ZFighterAndroid {
 	/** Sets a scientist up near {@code player}, unless one is already about. False if there was no room. */
 	static boolean summon(ServerPlayer player) {
 		ServerLevel level = player.level();
-		if (!level.getEntitiesOfClass(WanderingTrader.class, player.getBoundingBox().inflate(ALONE), e -> e.entityTags().contains(TAG)).isEmpty()) {
+		if (!level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(ALONE), e -> e.entityTags().contains(TAG)).isEmpty()) {
 			return false;
 		}
 		RandomSource random = level.getRandom();
@@ -294,21 +295,26 @@ public final class ZFighterAndroid {
 			if (!level.getFluidState(at.below()).isEmpty() || !level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
 				continue;
 			}
-			WanderingTrader npc = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
+			// (0.17.135) with Kingdoms and MCA, an MCA villager held at his bench; else the old frozen trader
+			Entity npc = ZFighterNpcs.villager(level, Vec3.atBottomCenterOf(at), random.nextFloat() * 360.0F, TAG, "entity.jaymospowers.scientist", false);
 			if (npc == null) {
-				return false;
+				WanderingTrader trader = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
+				if (trader == null) {
+					return false;
+				}
+				trader.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+				trader.setNoAi(true);
+				trader.setPermanentlyInvulnerable(true);
+				trader.setPersistenceRequired();
+				trader.setDespawnDelay(0);
+				trader.addTag(TAG);
+				trader.setCustomName(Component.translatable("entity.jaymospowers.scientist"));
+				trader.setCustomNameVisible(true);
+				trader.getOffers().clear();
+				level.addFreshEntity(trader);
+				npc = trader;
 			}
-			npc.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			npc.setNoAi(true);
-			npc.setPermanentlyInvulnerable(true);
-			npc.setPersistenceRequired();
-			npc.setDespawnDelay(0);
-			npc.addTag(TAG);
 			npc.addTag(UNTIL_TAG + (level.getGameTime() + LIFETIME));
-			npc.setCustomName(Component.translatable("entity.jaymospowers.scientist"));
-			npc.setCustomNameVisible(true);
-			npc.getOffers().clear();
-			level.addFreshEntity(npc);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, npc.getX(), npc.getY() + 1.2, npc.getZ(), 20, 0.4, 0.8, 0.4, 0.2);
 			level.playSound(null, npc.getX(), npc.getY(), npc.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1.0F, 1.8F);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_scientist_here", npc.getBlockX(), npc.getBlockZ())
@@ -361,6 +367,35 @@ public final class ZFighterAndroid {
 			case OPERATION_STAGE -> operate(player, scientist);
 			default -> say(player, name, "message.jaymospowers.zfighter_scientist_done");
 		}
+	}
+
+	/**
+	 * (0.17.135) His talk (MCA's "Talk about work"): where your rebuild stands, and the one thing to do next (what he
+	 * says back comes on the screen, {@link ZFighterNpcs#reply}).
+	 */
+	static void talkMenu(ServerPlayer player, net.minecraft.world.entity.LivingEntity scientist) {
+		Runnable back = () -> talkMenu(player, scientist);
+		Runnable next = () -> ZFighterNpcs.reply(player, scientist, () -> talk(player, scientist), back);
+		if (!ZFighterBranchForms.fighter(player) || OPERATIONS.containsKey(player.getUUID())) {
+			ZFighterNpcs.ask(player, scientist, Component.translatable(OPERATIONS.containsKey(player.getUUID())
+				? "message.jaymospowers.zfighter_scientist_operating" : "message.jaymospowers.zfighter_scientist_no_spark"), java.util.List.of());
+			return;
+		}
+		int stage = stage(player);
+		java.util.List<ZFighterNpcs.Option> options = new java.util.ArrayList<>();
+		switch (stage) {
+			case 0 -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.ask", true, next));
+			case PARTS_STAGE -> {
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.parts", hasParts(player), next));
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.list", true, () -> ZFighterNpcs.ask(player, scientist,
+					Component.translatable("talk.jaymospowers.tinkerer.needs", partsList(player)), java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
+			}
+			case TEST_STAGE -> options.add(ZFighterNpcs.Option.of(TEST_UNITS.containsKey(player.getUUID()) ? "talk.jaymospowers.tinkerer.test_running"
+				: "talk.jaymospowers.tinkerer.test", true, next));
+			case OPERATION_STAGE -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.operate", true, next));
+			default -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.after", true, next));
+		}
+		ZFighterNpcs.ask(player, scientist, Component.translatable("talk.jaymospowers.tinkerer.greet." + Math.min(stage, DONE)), options);
 	}
 
 	private static void say(ServerPlayer player, Component name, String key) {

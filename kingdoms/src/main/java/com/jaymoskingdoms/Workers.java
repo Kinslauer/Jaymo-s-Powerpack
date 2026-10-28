@@ -103,6 +103,10 @@ public final class Workers {
 			Assassins.act(level, mob);
 			return true;
 		}
+		if (ZFighterFolk.is(mob)) {
+			// (0.7.313) one of Powers' Z Fighter characters: held at their post
+			return ZFighterFolk.step(level, w);
+		}
 		if (Crewmen.tagged(mob)) {
 			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
 			return Crewmen.step(level, w);
