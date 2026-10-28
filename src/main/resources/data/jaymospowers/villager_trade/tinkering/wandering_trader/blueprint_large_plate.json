@@ -1,0 +1,25 @@
+{
+  "gives": {
+    "id": "jaymospowers:blueprint",
+    "components": {
+      "jaymospowers:blueprint_data": {
+        "shape": "part/large_plate",
+        "xp": 0
+      },
+      "minecraft:item_name": {
+        "translate": "item.jaymospowers.blueprint.named",
+        "with": [
+          {
+            "translate": "item.jaymospowers.large_plate"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 1,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 16
+  }
+}

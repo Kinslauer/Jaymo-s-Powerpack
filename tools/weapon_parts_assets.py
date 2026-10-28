@@ -62,6 +62,11 @@ PARTS = [
     ("soras_dagger_blade", "Sora's Dagger Blade", "drawn:soras_dagger_blade", ["iron"]),
     # (0.17.116) the layer blocks' saw (layers/SawItem)
     ("saw_blade", "Saw Blade", "drawn:saw_blade", ["iron"]),
+    # (Smithing) the smith's own tools: tongs and the Smithing Hammer
+    ("tongs_jaws", "Tongs Jaws", "drawn:tongs_jaws", ["iron"]),
+    ("steel_tongs_jaws", "Steel Tongs Jaws", "drawn:tongs_jaws", ["steel"]),
+    ("copper_smithing_hammer_head", "Smithing Hammer Head", "drawn:smithing_hammer_head", ["copper"]),
+    ("steel_smithing_hammer_head", "Steel Smithing Hammer Head", "drawn:smithing_hammer_head", ["steel"]),
 ]
 # our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
 DRAWN = {
@@ -151,9 +156,44 @@ DRAWN["saw_blade"] = [
     "....##..........",
     "................",
     "................"]
+DRAWN["tongs_jaws"] = [
+    "................",
+    "................",
+    "................",
+    "...##.....##....",
+    "..#ox#...#ox#...",
+    "..#xx#...#xx#...",
+    "...#ox#.#ox#....",
+    "....#ox#ox#.....",
+    ".....#oxx#......",
+    ".....#xox#......",
+    "....#ox#ox#.....",
+    "....#x#.#x#.....",
+    "....##...##.....",
+    "................",
+    "................",
+    "................"]
+DRAWN["smithing_hammer_head"] = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "...##########...",
+    "..#oooooooooo#..",
+    "..#xxxxxxxxxx#..",
+    "..#xxxxxxxxxx#..",
+    "..#xxxxxxxxxx#..",
+    "...####xx####...",
+    "......#xx#......",
+    "......####......",
+    "................",
+    "................",
+    "................",
+    "................"]
 # outline, metal, shine
 DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
-                 "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128))}
+                 "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128)),
+                 "steel": ((34, 38, 46), (112, 122, 136), (186, 196, 210))}
 # (0.15.138) Andy's redrawn iron heads (made with Gemini), 16x16 so each fills its own weapon cast 1:1. They replace the
 # cut sprites for these parts; the other metals are the iron one recoloured. Kept in tools/redrawn_heads/<part>.png, with
 # the gold Weapon Cast of each in tools/redrawn_heads/cast/<part>.png (the cast shows its head's shape).
@@ -161,7 +201,7 @@ REDRAWN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "redrawn_head
 # dark to light, for recolouring a redrawn iron head
 RAMPS = {"gold": ((92, 46, 6), (182, 111, 24), (237, 200, 52), (255, 250, 170)),
          "copper": ((80, 34, 20), (156, 78, 46), (210, 120, 82), (246, 182, 140))}
-METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper"}
+METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper", "steel": "Steel"}
 ARMORY_TIER = {"stone": "stone", "iron": "iron", "gold": "golden"}
 
 
@@ -303,6 +343,24 @@ def raw_sprites(source, balkon):
     return {"stone": as_stone(iron), "iron": iron}
 
 
+# (Smithing) a head fresh off the Smithing Anvil (it has jaymospowers:heated_at) glows orange until it's quenched
+HOT_TINT = 0xFFFF9A48 - (1 << 32)
+
+
+def hot(node):
+    """`node`, drawn orange while the stack is hot."""
+    def tinted(n):
+        if isinstance(n, dict):
+            n = {k: tinted(v) for k, v in n.items()}
+            if n.get("type") == "minecraft:model":
+                n["tints"] = [{"type": "minecraft:constant", "value": HOT_TINT}]
+        elif isinstance(n, list):
+            n = [tinted(v) for v in n]
+        return n
+    return {"type": "minecraft:condition", "property": "minecraft:has_component", "component": "jaymospowers:heated_at",
+            "on_true": tinted(node), "on_false": node}
+
+
 def main(balkon):
     tex_dir = os.path.join(ASSETS, "textures", OUT)
     shutil.rmtree(tex_dir, ignore_errors=True)
@@ -318,9 +376,9 @@ def main(balkon):
             write(os.path.join(ASSETS, "models", path + ".json"),
                   {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymospowers:" + path}})
             cases.append({"when": metal, "model": {"type": "minecraft:model", "model": "jaymospowers:" + path}})
-        write(os.path.join(ASSETS, "items", part + ".json"), {"model": {
+        write(os.path.join(ASSETS, "items", part + ".json"), {"model": hot({
             "type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 0, "cases": cases,
-            "fallback": cases[0]["model"]}})
+            "fallback": cases[0]["model"]})})
         lang["item.jaymospowers." + part] = name
     lang.update({
         "gui.jaymospowers.part_builder.tools": "Tool Parts",

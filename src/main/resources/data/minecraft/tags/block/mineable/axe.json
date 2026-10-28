@@ -66,6 +66,7 @@
     "jaymospowers:crafting_station",
     "jaymospowers:pattern_chest",
     "jaymospowers:part_chest",
-    "#jaymospowers:wood_layers"
+    "#jaymospowers:wood_layers",
+    "jaymospowers:drafting_table"
   ]
 }

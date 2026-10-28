@@ -1,0 +1,21 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/tinkering/smithing/forging_blank",
+      "tints": [
+        {
+          "type": "minecraft:constant",
+          "value": -26040
+        }
+      ]
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/tinkering/smithing/forging_blank"
+    }
+  }
+}

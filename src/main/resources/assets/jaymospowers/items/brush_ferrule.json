@@ -1,27 +1,75 @@
 {
   "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:custom_model_data",
-    "index": 0,
-    "cases": [
-      {
-        "when": "stone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
-      },
-      {
-        "when": "copper",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_copper"
-        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
       }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone"
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone"
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_copper"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/weapon_part/brush_ferrule_stone"
+      }
     }
   }
 }

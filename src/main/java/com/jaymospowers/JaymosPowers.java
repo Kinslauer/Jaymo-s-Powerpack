@@ -79,6 +79,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();
+		// sneak + use a rock to knap a stone head on a 3x3 grid
+		com.jaymospowers.ground.knapping.Knapping.init();
+		// the fletching table opens a station: iron and steel arrows, Tinkers arrows, lingering arrows
+		com.jaymospowers.tinkering.fletching.Fletching.init();
 		// Enchanting System Overhaul (MIT) ported: learn from books, pay items at the table
 		com.jaymospowers.enchanting.Enchanting.init();
 		com.jaymospowers.alchemy.Alchemy.init();
