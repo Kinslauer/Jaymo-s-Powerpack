@@ -1,0 +1,8 @@
+{
+  "gui.jaymospowers.fletching": "Fletching Station",
+  "gui.jaymospowers.fletching.potion": "Lingering",
+  "item.jaymospowers.iron_arrow": "Iron Arrow",
+  "item.jaymospowers.steel_arrow": "Steel Arrow",
+  "item.jaymospowers.lingering_arrow": "Lingering Arrow",
+  "item.jaymospowers.lingering_arrow.named": "Lingering %s"
+}

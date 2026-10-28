@@ -102,3 +102,28 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
 - Wandering traders sometimes sell a blueprint (16 emeralds): data in `villager_trade/tinkering/wandering_trader`, added to the
   trader's uncommon pool. The creative tab has a blueprint for each hammer-only shape.
 - Test: `/give @s jaymospowers:blueprint[jaymospowers:blueprint_data={shape:"weapon/claymore_blade",xp:40}]`.
+## Knapping (code: `ground/knapping/`, screen `client/tinkering/KnappingScreen`)
+- **Sneak + use a loose rock** (in hand, aimed at air or at a hard block such as stone, ore or bricks) opens a 3x3 grid of
+  chips. Right click on air still throws the rock, a rock with flint in the other hand still strikes fire, and sneak + use
+  on soft ground (dirt, grass) still sets it down. Every rock you hold goes into the grid's rock slot and comes back when
+  you close it.
+- Click a chip to knock it out (the server keeps the grid; the client only sends the cell). When the chips left are one of
+  the shapes in the panel beside the grid (hover a shape to see where its chips lie) the head appears in the output slot.
+  Taking it uses up one rock and the next starts whole. Knocking out every chip, or Start over, spoils the rock.
+- Shapes (`Knapping.SHAPES`, one 9-character string each): pick head, small axe head, adze head, small blade, arrow head (two
+  from one rock), and the weapon heads dagger blade, hatchet head, spear tip, skewer head, knife blade (only when that
+  weapon exists: the knife is Balkon's, so it needs WeaponMod). They are the same stone parts the Part Builder makes
+  (Granite and Diorite rocks give granite and diorite heads, every other rock plain stone). A static table, not a data
+  recipe, because the results carry materials.
+
+## Fletching Station and tiered arrows (code: `tinkering/fletching/`, screen `client/tinkering/FletchingScreen`)
+- Right click a vanilla **fletching table** (it did nothing before) to open the station: head, shaft and fletching slots, a
+  lingering potion slot, and the result. Shift-click the result to make up to 16 sets.
+- Flint + stick + feather: 4 arrows. An **iron or steel nugget** for the head: 4 iron or steel arrows
+  (`TieredArrowItem.Tier`: 2.6 and 3.2 base damage, a vanilla arrow's is 2). Any Tinkers arrow head, shaft or fletching
+  (flint, stick and feather stand in for the rest) makes a Tinkers arrow, 4 at a time, as at the Tool Station.
+- A **lingering potion** in the potion slot turns the arrows of a flint-stick-feather set into **lingering arrows** (4), or
+  dips up to 8 plain arrows put in the head slot (the bottle comes back). A lingering arrow hits like a tipped arrow and
+  bursts into a small cloud of its potion where it lands (`LingeringArrow`: radius 1.75, 10 s); the arrow is spent.
+- The three arrows are in the `minecraft:arrows` tag, so every bow, crossbow and dispenser takes them. Textures:
+  `tools/gen_fletching.py`.
