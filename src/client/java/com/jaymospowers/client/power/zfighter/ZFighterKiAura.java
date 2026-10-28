@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ApeRage;
+import com.jaymospowers.power.zfighter.ZFighterAndroid;
 import com.jaymospowers.power.zfighter.ZFighterAura;
 import com.jaymospowers.power.zfighter.ZFighterBranchForms;
 import com.jaymospowers.power.zfighter.ZFighterForms;
@@ -80,7 +81,9 @@ public final class ZFighterKiAura {
 	}
 
 	private static float @Nullable [] aura(Player player, float age) {
-		if (!Powers.has(player, ZFighterPower.INSTANCE) || player.isInvisible() || player.isSpectator() || ZFighterLineage.ape(player)) {
+		if (!Powers.has(player, ZFighterPower.INSTANCE) || player.isInvisible() || player.isSpectator() || ZFighterLineage.ape(player)
+			// (0.17.93) an android has no aura: its ki doesn't burn off it
+			|| ZFighterAndroid.android(player)) {
 			EASED.remove(player);
 			return null;
 		}

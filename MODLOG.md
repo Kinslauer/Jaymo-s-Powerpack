@@ -3341,6 +3341,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
   Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
   Legend) even with enough. Compile-checked, not seen in game.
+- **0.17.93, androids: endless ki, no aura, revived after the operation (Kingdoms 0.7.288: Bio-built and Rubber-folk absorbing is a toggle with a hand on the foe, see its MODLOG):** Andy: "the mad tinkerer should revive you
+  after making you an android. androids need to have infinite ki and no aura, no other debuff." Nothing kills you on the
+  tinkerer's table (a killing blow leaves you at half a heart), and when the operation ends he brings you round: up if
+  you went down (no Battered), full health, the hold lifted. An android's ki bar stays full and nothing costs ki; it
+  draws no aura (Overdrive and Reactor too); the 15% weaker ki attacks are gone.
+  Andy: "they also dont have to eat, but they use metal parts to repair instead of bandages": an android's food bar
+  stays full, and medicine does nothing for it. A new Metal remedy (`Treatment.Remedy.METAL`, iron or copper ingot,
+  sneak + use like spirits) stops a part's leak, sets a break and mends 4 health; an ingot is medicine only to an
+  android, so golem repair and trades are untouched. Compile-checked, not seen in game.
 - **0.17.97, no swings while charging an execution:** Andy: "stop attacking while charging an execution". While you held
   sneak + attack on someone downed, Better Combat kept swinging at them (its hold-to-attack), and the click that began the
   hold was a blow of its own. Now, sneaking with the crosshair on someone you could finish (bare hands, a weapon or a tool),
