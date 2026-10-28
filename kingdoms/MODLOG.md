@@ -6003,3 +6003,18 @@ but only one at a time".
   and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
   law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
+
+## 0.7.298: mana spirits show a larger figure behind you, their arms hung from its shoulders (pack 0.17.111)
+Andy: "can you make some models for all the mana spirits hands? start with a larger figure that pulses behind you like
+now, and build the arms off their frame. they should fade, while the arms stay."
+- Each spirit has its own figure over your back (`client/spirits/SpiritFigure`), bigger than you and made of the same
+  aura shells as its arms (thinner and dimmer): Grimsby a cowled wraith with ribs (x1.6), Varro a crested warlord in
+  plate (x1.9), Ambrose a hooded, bearded elder in a flaring robe (x1.8), Thessaly slim with a circlet, shawl and
+  ribbons (x1.2), the Quiet One faceless under a ring (x1.7, with its summon size). No legs: each thins into a
+  swaying ghost's tail; its head turns half as far as yours.
+- The arms hang from its frame: their pivots at the figure's shoulders and depth (clear of your head and back), their
+  tops level with its torso. `Anchor.out` is gone; Grimsby's figure stands 1 higher.
+- Whenever the projection forms (a move, a summon, a word) the figure shows with it, pulsing, holds 8 ticks and fades
+  over 16 while the arms carry on. Not drawn in first person.
+- Models and renders: `tools/blockbench/spirit-figures/` (`figures.py` is the spec; `gen.py` writes `SpiritFigure.java`,
+  `bbexport.py` the .bbmodels, `render.py` the renders). Compile-checked, not seen in game.
