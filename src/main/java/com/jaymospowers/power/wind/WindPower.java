@@ -76,6 +76,8 @@ public final class WindPower implements Power {
 	static final double TAILWIND_DOUSE_RADIUS = 3.0, BARRIER_DOUSE_RADIUS = 2.5;
 	/** Descending slower than this (blocks/tick) while flying doesn't build up fall distance (vanilla's elytra rule). */
 	static final double GLIDE_SAFE_SINK = 0.5;
+	/** Chance each second that the wind tears a held weapon (not a shield, dagger, quarterstaff or spear) away. */
+	static final float WEAPON_TEAR_CHANCE_PER_SECOND = 0.001F;
 	/**
 	 * Hunger while flying, per tick: a base plus more per block/tick of speed. Sprinting costs about 0.028/tick, so a
 	 * hover (0.03) is a bit hungrier and full sonic (0.105) burns through a full bar in under a minute.
@@ -424,31 +426,51 @@ public final class WindPower implements Power {
 		}
 	}
 
-	/** A wind can't keep hold of a shield: its own wind tears it out of the hand, into the pack (or onto the ground). */
+	/**
+	 * A wind can't keep hold of a shield: its own wind tears it out of the hand, into the pack (or onto the ground),
+	 * every time. (0.17.98) Every weapon blocks now ({@link com.jaymospowers.combat.Guard}), so a weapon guard is no
+	 * shield: other weapons are only torn away now and then ({@link #WEAPON_TEAR_CHANCE_PER_SECOND}), and daggers,
+	 * quarterstaffs and spears never are.
+	 */
 	private static void blowShieldAway(ServerPlayer player, ServerLevel level) {
 		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
 			net.minecraft.world.item.ItemStack held = player.getItemInHand(hand);
-			// (0.13.32) a quarterstaff blocks too now, but it's a staff, not a shield: the wind leaves it be
-			if (held.isEmpty() || !held.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS) || WindStaff.isStaff(held)) {
+			if (held.isEmpty() || windHeld(held)) {
 				continue;
 			}
-			net.minecraft.world.item.ItemStack shield = held.copy();
+			boolean shield = held.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS)
+				&& !held.has(net.minecraft.core.component.DataComponents.WEAPON);
+			if (!shield && !(held.has(net.minecraft.core.component.DataComponents.WEAPON) && player.tickCount % 20 == 0
+				&& !player.isCreative() && player.getRandom().nextFloat() < WEAPON_TEAR_CHANCE_PER_SECOND)) {
+				continue;
+			}
+			net.minecraft.world.item.ItemStack torn = held.copy();
 			player.setItemInHand(hand, net.minecraft.world.item.ItemStack.EMPTY);
 			boolean stowed = false;
 			for (int i = 9; i < 36 && !stowed; i++) {
 				if (player.getInventory().getItem(i).isEmpty()) {
-					player.getInventory().setItem(i, shield);
+					player.getInventory().setItem(i, torn);
 					stowed = true;
 				}
 			}
 			if (!stowed) {
-				player.drop(shield, true, net.minecraft.util.Prediction.SERVER_ONLY);
+				player.drop(torn, true, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
-			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.shield_blown")
+			player.sendOverlayMessage((shield ? net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.shield_blown")
+				: net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.fumble", torn.getHoverName()))
 				.withStyle(net.minecraft.ChatFormatting.GRAY));
 			level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.8F, 1.0F);
 		}
+	}
+
+	/** Weapons a wind always keeps hold of: daggers (and knives, kunai), quarterstaffs and spears. */
+	static boolean windHeld(net.minecraft.world.item.ItemStack stack) {
+		if (WindDagger.isDagger(stack) || WindStaff.isStaff(stack) || stack.is(net.minecraft.tags.ItemTags.SPEARS)) {
+			return true;
+		}
+		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return path.contains("spear") || path.contains("quarterstaff");
 	}
 
 	@Override
