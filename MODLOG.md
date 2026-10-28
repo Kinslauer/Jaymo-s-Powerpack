@@ -3356,5 +3356,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Better Combat's two-handed slam, the same swing as its left-click, in first and third person and for everyone who
   can see you. The smash (WeaponMod's blast, knockback and cooldown) lands as the hammer comes down, 7 ticks after the
   release, not on it; it is skipped if you've put the hammer away by then. Without Better Combat, and for mobs, the
-  smash is as before. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin. Compile-checked, not
-  seen in game.
+  smash is as before. Andy: "it should gain the parry while on cooldown": while the smash cools down (WeaponMod's 20
+  seconds), right click raises the weapon guard instead, with the same block, parry windows and feathers as a sword's
+  (`combat/Guard`), drawn as a guard, and letting it down does nothing. The server decides which a raise is as it goes
+  up (attachment `HammerSlam.GUARD`, synced), so the cooldown ending mid-guard never fires a smash; charging the smash
+  isn't a block. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin, HammerChargeBlockMixin,
+  client HammerPoseMixin/HammerFirstPersonMixin. Compile-checked, not seen in game.

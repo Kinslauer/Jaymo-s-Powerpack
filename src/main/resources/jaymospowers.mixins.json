@@ -36,6 +36,7 @@
 		"WeaponModFlailMixin",
 		"WeaponModMeleeUseMixin",
 		"WeaponModWarhammerMixin",
+		"HammerChargeBlockMixin",
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
 		"WoundsRegenMixin"

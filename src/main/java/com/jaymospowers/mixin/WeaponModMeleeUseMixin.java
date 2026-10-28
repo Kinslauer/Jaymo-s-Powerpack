@@ -2,7 +2,10 @@ package com.jaymospowers.mixin;
 
 import com.jaymospowers.armory.HammerSlam;
 import com.jaymospowers.armory.Lash;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
@@ -15,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.15.148) Balkon's flail is held in use while it whirls (its melee base class, which the flail doesn't override,
  * decides how long use lasts and what letting go does). (0.17.94) The warhammer charges held overhead
- * ({@link HammerSlam}). Every other WeaponMod weapon is left as it was.
+ * ({@link HammerSlam}), and raises a guard while the smash cools down. Every other WeaponMod weapon is left as it was.
  */
 @Mixin(targets = "ckathode.weaponmod.item.ItemMelee")
 abstract class WeaponModMeleeUseMixin {
@@ -45,6 +48,17 @@ abstract class WeaponModMeleeUseMixin {
 		if (this.jaymospowers$flail()) {
 			Lash.release(level, entity);
 			cir.setReturnValue(false);
+		} else if (HammerSlam.isWarhammer((Item)(Object)this) && HammerSlam.releasesAsGuard(entity)) {
+			// (0.17.94) a guard let down: no smash
+			cir.setReturnValue(false);
+		}
+	}
+
+	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
+	private void jaymospowers$raise(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+		if (HammerSlam.isWarhammer((Item)(Object)this) && !player.getItemInHand(hand).isEmpty()) {
+			// (0.17.94) the smash's charge, or the guard while it cools down
+			cir.setReturnValue(HammerSlam.use(player, hand));
 		}
 	}
 
