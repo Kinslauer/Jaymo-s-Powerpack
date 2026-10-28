@@ -4,6 +4,8 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"GuardFirstPersonMixin",
+		"HammerFirstPersonMixin",
+		"HammerPoseMixin",
 		"LashSocketFirstPersonMixin",
 		"LashSocketItemInHandLayerMixin",
 		"LashSocketItemLayerMixin",
