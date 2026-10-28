@@ -91,6 +91,7 @@ public final class WindDagger {
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
 			if (hand != InteractionHand.MAIN_HAND || !isDagger(stack) || stack.getItem() instanceof ThrowingWeaponItem
+				|| stack.getItem() instanceof SorasDagger // its own staged Flurry
 				|| !WindStaff.wind(player)) {
 				return InteractionResult.PASS;
 			}

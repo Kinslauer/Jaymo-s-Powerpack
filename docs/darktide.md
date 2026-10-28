@@ -5,7 +5,7 @@ All numbers are `static final` constants at the top of the class named in bracke
 
 ## Weapons
 
-- Katana: WeaponMod `weaponmod:katana.<tier>`. Knife: `weaponmod:knife.<tier>`.
+- Katana: WeaponMod `weaponmod:katana.<tier>`. Knife: `weaponmod:knife.<tier>`. Sora's Daggers never count.
 - Darktide works bare-handed without WeaponMod; blade-only moves then say "This needs a blade" (`DarktideWeapons`).
 - **Right click with a WeaponMod knife or katana is the guard, not WeaponMod's use.** A Darktide user who is not
   sneaking gets the item use cancelled (Fabric `UseItemCallback` returns FAIL), so knives don't throw and katanas don't

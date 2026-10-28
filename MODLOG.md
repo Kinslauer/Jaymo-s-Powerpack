@@ -3395,3 +3395,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   don't reach it; its flight and dashes count for the server's floating and moving checks. Gained with `onGained`,
   dropped with `onLost`. Its client side (HUD, client-run visuals) doesn't run, and anything it gates on
   `Powers.has` stays off. The swallowed player keeps their power. Compile-checked, not seen in game.
+- **0.17.109, Sora's Dagger is back, in 3D** (Andy: "a friend made this, can you reimplement soras dagger with this
+  model"): Wind's four-stage dagger returns as it was before 0.10.27 (`power/wind/SorasDagger`: crafted iron, gilded
+  under a block of molten gold on a casting table, diamonds set along its edge at a Tool Station with a breeze rod, then
+  Tempest-forged by an ascended wind; Flurry, wind puffs, Better Combat dagger preset). Every stage now uses the friend's
+  Blockbench model (`tools/blockbench/soras_dagger.bbmodel`, converted by `tools/blockbench/sora.py`: its 90-degree cube
+  straightened, second texture merged into one 64x64 atlas), recoloured per stage: iron hilt, the friend's gold, a
+  diamond edge, storm-blue Tempest. A wind sorcerer's right click with it is the dagger's own Flurry, not `WindDagger`'s.
+  The Armory's iron rapier (cup hilt, knuckle bow, wire grip) and iron dagger are 3D Blockbench models with 32x32
+  textures now too (`tools/blockbench/make.py`, built with WaitMyDawn/blockbench-mcp, MIT); `tools/armory_assets.py`
+  leaves them alone. Compile-checked, not seen in game; how they sit in the hand may need a tweak.

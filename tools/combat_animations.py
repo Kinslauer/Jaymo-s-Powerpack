@@ -464,10 +464,12 @@ COMBOS = {
 }
 
 
-# weapons outside the Armory (its own are written by armory_assets.py): vanilla swords and axes
-# (Better Combat would otherwise give them its plain presets)
+# weapons outside the Armory (its own are written by armory_assets.py): Wind's Sora's Daggers, and vanilla swords and
+# axes (Better Combat would otherwise give them its plain presets)
 TIERS = ("wooden", "stone", "copper", "iron", "golden", "diamond", "netherite")
 OTHER_WEAPONS = {
+    **{NS + ":" + d: "dagger" for d in ("soras_dagger", "soras_dagger_gold", "soras_dagger_diamond",
+                                        "soras_dagger_tempest")},
     **{f"minecraft:{t}_sword": "sword" for t in TIERS},
     **{f"minecraft:{t}_axe": "axe" for t in TIERS},
 }

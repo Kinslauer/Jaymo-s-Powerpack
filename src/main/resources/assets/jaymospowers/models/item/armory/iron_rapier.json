@@ -1,6 +1,823 @@
 {
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "jaymospowers:item/armory/iron_rapier"
-  }
+	"texture_size": [
+		32,
+		32
+	],
+	"textures": {
+		"0": "jaymospowers:item/armory/iron_rapier",
+		"particle": "jaymospowers:item/armory/iron_rapier"
+	},
+	"elements": [
+		{
+			"from": [
+				7,
+				4,
+				7
+			],
+			"to": [
+				9,
+				6,
+				9
+			],
+			"name": "pommel",
+			"faces": {
+				"north": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						8,
+						0,
+						11,
+						3
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				7.5,
+				6,
+				7.5
+			],
+			"to": [
+				8.5,
+				10.5,
+				8.5
+			],
+			"name": "grip",
+			"faces": {
+				"north": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						6,
+						4,
+						7,
+						12
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				3,
+				10.5,
+				7.5
+			],
+			"to": [
+				13,
+				11.5,
+				8.5
+			],
+			"name": "quillons",
+			"faces": {
+				"north": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				5.5,
+				11,
+				6
+			],
+			"to": [
+				10.5,
+				12,
+				10
+			],
+			"name": "cup",
+			"faces": {
+				"north": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						8,
+						4,
+						13,
+						9
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				11.5,
+				5,
+				7.6
+			],
+			"to": [
+				12.5,
+				10.5,
+				8.4
+			],
+			"name": "knuckle_bow",
+			"faces": {
+				"north": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				9,
+				5,
+				7.6
+			],
+			"to": [
+				11.5,
+				6,
+				8.4
+			],
+			"name": "bow_foot",
+			"faces": {
+				"north": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				7.5,
+				12,
+				7.7
+			],
+			"to": [
+				8.5,
+				13.5,
+				8.3
+			],
+			"name": "ricasso",
+			"faces": {
+				"north": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						4,
+						0,
+						8,
+						4
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				7.6,
+				13.5,
+				7.85
+			],
+			"to": [
+				8.4,
+				31,
+				8.15
+			],
+			"name": "blade",
+			"faces": {
+				"north": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						0,
+						0,
+						2,
+						16
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				7.75,
+				13.5,
+				7.8
+			],
+			"to": [
+				8.25,
+				31,
+				8.2
+			],
+			"name": "blade_edge",
+			"faces": {
+				"north": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						2,
+						0,
+						3,
+						16
+					],
+					"texture": "#0"
+				}
+			}
+		},
+		{
+			"from": [
+				7.8,
+				31,
+				7.9
+			],
+			"to": [
+				8.2,
+				32,
+				8.1
+			],
+			"name": "tip",
+			"faces": {
+				"north": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						3,
+						0,
+						4,
+						2
+					],
+					"texture": "#0"
+				}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [
+				0,
+				-90,
+				0
+			],
+			"translation": [
+				0,
+				1.5,
+				0.5
+			],
+			"scale": [
+				0.55,
+				0.55,
+				0.55
+			]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [
+				0,
+				90,
+				0
+			],
+			"translation": [
+				0,
+				1.5,
+				0.5
+			],
+			"scale": [
+				0.55,
+				0.55,
+				0.55
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				0,
+				-90,
+				25
+			],
+			"translation": [
+				1.13,
+				3.2,
+				1.13
+			],
+			"scale": [
+				0.5,
+				0.5,
+				0.5
+			]
+		},
+		"firstperson_lefthand": {
+			"rotation": [
+				0,
+				90,
+				-25
+			],
+			"translation": [
+				1.13,
+				3.2,
+				1.13
+			],
+			"scale": [
+				0.5,
+				0.5,
+				0.5
+			]
+		},
+		"ground": {
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				2,
+				0
+			],
+			"scale": [
+				0.33,
+				0.33,
+				0.33
+			]
+		},
+		"gui": {
+			"rotation": [
+				0,
+				0,
+				-45
+			],
+			"translation": [
+				-3.32,
+				-3.32,
+				0
+			],
+			"scale": [
+				0.47,
+				0.47,
+				0.47
+			]
+		},
+		"fixed": {
+			"rotation": [
+				0,
+				0,
+				-45
+			],
+			"translation": [
+				-3.32,
+				-3.32,
+				0
+			],
+			"scale": [
+				0.47,
+				0.47,
+				0.47
+			]
+		}
+	}
 }
