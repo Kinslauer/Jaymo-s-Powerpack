@@ -5,7 +5,7 @@ import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.288) Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest". Each
+ * (0.7.290) Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest". Each
  * heritage's body, as MCA's Size (height) and Width genes (0 .. 1; MCA draws 0.75x at 0 and 1.25x at 1):
  * <ul>
  * <li>Villagers are born into their blood's ranges (a fresh one spread across them, {@code McaGeneticsMixin}; a child or

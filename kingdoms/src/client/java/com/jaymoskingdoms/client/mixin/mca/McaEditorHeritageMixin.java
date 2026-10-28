@@ -66,7 +66,7 @@ abstract class McaEditorHeritageMixin {
 		if (SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin) != melanin) {
 			genes.setGene(Genetics.MELANIN, SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin));
 		}
-		// (0.7.288) and its height and width to the heritage's body (BodySizes)
+		// (0.7.290) and its height and width to the heritage's body (BodySizes)
 		float size = genes.getGene(Genetics.SIZE), width = genes.getGene(Genetics.WIDTH);
 		if (BodySizes.clampSize(VillagerHeritage.of(this.villager), size) != size) {
 			genes.setGene(Genetics.SIZE, BodySizes.clampSize(VillagerHeritage.of(this.villager), size));

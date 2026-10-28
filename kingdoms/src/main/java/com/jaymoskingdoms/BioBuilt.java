@@ -32,8 +32,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
- * first form), and each downed foe they take into themselves ({@link #absorb}: look at it, hold the heritage key close
- * by, and it is consumed) adds to their worth until the body folds into the next of three forms: the second (Andy's
+ * first form), and each downed foe they take into themselves ({@link #absorb}: look at it close by and press the heritage
+ * key; (0.7.288) a hand goes to it, pulses run through you both and it shrinks away to nothing, unless you're hurt or
+ * press the key again) adds to their worth until the body folds into the next of three forms: the second (Andy's
  * "changed look": plated forearms, a duller skin) and the third (plating to the shoulders and the cheeks, nodes alight).
  * Each form is stronger and tougher ({@link #HEALTH}, {@link #DAMAGE}, {@link #ARMOR}), and every blow they land drains a
  * little life back into them ({@link #DRAIN}). In the third form the heritage key, pressed on no foe, buds up to
@@ -53,7 +54,7 @@ public final class BioBuilt {
 	static final float DRAIN_MAX = 3.0F;
 	/** Absorbing: how far the foe may be, how long the hold takes (ticks), the share of its health they take back (at most), and food. */
 	static final double ABSORB_REACH = 3.0;
-	static final int ABSORB_TICKS = 60, ABSORB_FOOD = 3;
+	static final int ABSORB_TICKS = 100, ABSORB_FOOD = 3;
 	static final float ABSORB_HEAL_SHARE = 0.5F, ABSORB_HEAL_MAX = 12.0F;
 	/** A foe with more max health than this can't be taken in (no dragons). */
 	static final float ABSORB_MAX_HEALTH = 150.0F;
@@ -75,7 +76,6 @@ public final class BioBuilt {
 	static final AttachmentType<Integer> WORTH = AttachmentRegistry.create(JaymosKingdoms.id("bio_worth"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
-	private static final Map<UUID, HeritageHold.Channel> CHANNELS = new HashMap<>();
 	/** When each may bud again (game time). */
 	private static final Map<UUID, Long> BUD_READY = new HashMap<>();
 
@@ -91,7 +91,6 @@ public final class BioBuilt {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			CHANNELS.remove(handler.player.getUUID());
 			BUD_READY.remove(handler.player.getUUID());
 		});
 	}
@@ -133,16 +132,34 @@ public final class BioBuilt {
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (!Heritage.is(player, Heritage.Kind.BIOBUILT)) {
-				if (!CHANNELS.isEmpty()) {
-					CHANNELS.remove(player.getUUID());
+				// (a heritage changed mid-absorb lets go)
+				if (!Heritage.is(player, Heritage.Kind.RUBBERFOLK) && HeritageHold.channel(player) != null) {
+					HeritageHold.stop(player, null);
 				}
 				continue;
 			}
-			LivingEntity foe = HeritageHold.advance(CHANNELS, player, e -> HeritageHold.foe(player, e) && Downed.isDowned(e) && e.getMaxHealth() <= ABSORB_MAX_HEALTH,
-				ABSORB_REACH, ABSORB_TICKS, NODE, "message.jaymoskingdoms.bio.absorbing");
-			if (foe != null && player.level() instanceof ServerLevel level) {
-				absorb(level, player, foe);
+			if (player.level() instanceof ServerLevel level) {
+				LivingEntity foe = HeritageHold.step(level, player, e -> Downed.isDowned(e), ABSORB_REACH, ABSORB_TICKS, NODE,
+					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing");
+				if (foe != null) {
+					absorb(level, player, foe);
+				}
 			}
+		}
+	}
+
+	/** Whether {@code player} may take {@code foe} in: a foe, downed, and not too big. */
+	static boolean absorbable(ServerPlayer player, LivingEntity foe) {
+		return HeritageHold.foe(player, foe) && Downed.isDowned(foe) && foe.getMaxHealth() <= ABSORB_MAX_HEALTH;
+	}
+
+	/**
+	 * (0.7.288) The heritage key pressed (a toggle, Andy: "instead of a hold this is a toggle"): absorbing, it lets go; on
+	 * a downed foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
+	 */
+	static void press(ServerPlayer player) {
+		if (!HeritageHold.press(player, e -> absorbable(player, e), ABSORB_REACH, "message.jaymoskingdoms.bio.absorbing")) {
+			bud(player);
 		}
 	}
 
@@ -187,14 +204,14 @@ public final class BioBuilt {
 		HeritageHold.pull(level, target, player, NODE, 0.0);
 	}
 
-	/** The heritage key pressed: in the third form, on no downed foe, bud copies. */
+	/** The heritage key pressed on no downed foe: in the third form, bud copies. */
 	static void bud(ServerPlayer player) {
 		if (!(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
 		LivingEntity sighted = Arcana.sighted(player);
 		if (sighted != null && HeritageHold.foe(player, sighted) && Downed.isDowned(sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
-			// (the hold is taking that foe in, not budding)
+			// (the key is taking that foe in, not budding)
 			return;
 		}
 		if (form(player) < FORM_AT.length - 1) {

@@ -222,7 +222,7 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
 	}
 
-	// ---- player size (0.7.87; 0.7.288 every heritage's body, BodySizes) ---------------------------------------------------
+	// ---- player size (0.7.87; 0.7.290 every heritage's body, BodySizes) ---------------------------------------------------
 
 	/** MCA's Size and Width genes, as a player's look stores them (under {@code MCAData}, or at the top). */
 	private static final String SIZE_GENE = "GeneSize", WIDTH_GENE = "GeneWidth";
@@ -257,7 +257,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.288) An MCA villager's height and width brought into {@code kind}'s body: freshly rolled ones
+	 * (0.7.290) An MCA villager's height and width brought into {@code kind}'s body: freshly rolled ones
 	 * ({@link BodySizes#FRESH}) spread across it, anyone else kept in it ({@link BodySizes#keep}). Anyone not MCA's: nothing.
 	 */
 	static void keepBody(net.minecraft.world.entity.Entity entity, Heritage.Kind kind) {

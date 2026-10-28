@@ -5795,7 +5795,21 @@ needs a way to back up and manuever better", and "maybe the captain's AI isnt na
   steers for the turn two ahead, works it out again every 10 s, when her goal moves, or when she's stuck. Not while
   she lays her guns on a foe close by.
 - Compile-checked only, not seen in game.
-## 0.7.288: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.94)
+
+## 0.7.288: absorbing is a toggle, with a hand on the foe (Bio-built and Rubber-folk; pack 0.17.93)
+Andy: "it should animate with some part of the body touching the enemy, and pulsing through both entities, until it
+gradually shrinks to nothing. instead of a hold this is a toggle. that gets interrupted if you are damaged." Then, of
+the Rubber-folk's swallowing: "yes switch it too".
+- `HeritageHold` is now the shared toggle (the old held-key packet is gone): the heritage key pressed once on a fitting
+  foe close by starts it (`HeritageHold.press`, from `Heritage.gift`), pressed again lets go. Bio-built: a downed foe
+  within 3 blocks, 5 s; on no foe the third form buds as before. Rubber-folk: a weak foe within 2.5 blocks, 3 s.
+- While it runs (`HeritageHold.step`): the foe is drawn in to 0.9 blocks, under your main hand, which reaches out and down
+  onto it (`HeritageHold.ABSORBING` synced, client `BioAbsorbPose`, the body leaning in, the hand trembling); rings of
+  motes (amber or pink) pulse round both bodies and run along the arm, quicker as it goes; the foe shrinks (a SCALE
+  modifier) to nothing and is taken in.
+- Any damage you take ends it ("Hurt, you lose your hold on it."), as does the foe getting up (Bio-built), dying, or being
+  dragged 1.5 blocks past reach; a foe let go grows back.
+## 0.7.290: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.96)
 Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest".
 - **Bodies** (`BodySizes`): each heritage has a range of MCA's Size (height) and Width genes (0 .. 1, drawn 0.75x ..
   1.25x). Stoneborn 0.55-0.9 tall, 0.6-1.0 wide; Sylvan 0-0.4 tall, 0-0.35 wide; plain folk 0.15-0.75 both; the rest

@@ -34,7 +34,7 @@ abstract class McaGeneticsMixin {
 		if (mob.level() instanceof ServerLevel) {
 			// (0.7.236: kept to their blood's range, if they're of one yet)
 			((Genetics)(Object)this).setGene(Genetics.MELANIN, SkinTones.bornSkin(com.jaymoskingdoms.VillagerHeritage.of(mob), SkinTones.melanin(mob, this.random), this.random));
-			// (0.7.288) their height and width are spread across their blood's body once they're born to it (BodySizes)
+			// (0.7.290) their height and width are spread across their blood's body once they're born to it (BodySizes)
 			mob.addTag(com.jaymoskingdoms.BodySizes.FRESH);
 		}
 	}

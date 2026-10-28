@@ -227,7 +227,7 @@ public final class Heritage {
 	/** How often the heritages that change with the light and the frost are looked at (ticks). */
 	static final int TICK_EVERY = 20;
 	/**
-	 * (0.7.87) Andy: "max height should only be accessible to verdant". (0.7.288) Every heritage's MCA Size and Width
+	 * (0.7.87) Andy: "max height should only be accessible to verdant". (0.7.290) Every heritage's MCA Size and Width
 	 * are kept to its body ({@link BodySizes}), checked this often (ticks) and whenever they save their MCA look.
 	 */
 	static final int SIZE_CHECK_EVERY = 200;
@@ -789,8 +789,11 @@ public final class Heritage {
 		if (kind == Kind.WARRIORBORN) {
 			player.addTag(TAIL_TOGGLE_TAG);
 		} else if (kind == Kind.BIOBUILT) {
-			// (0.7.262) in the last form, bud copies (held on a downed foe it absorbs instead: HeritageHold)
-			BioBuilt.bud(player);
+			// (0.7.288) on a downed foe it starts (or stops) absorbing it; else, in the last form, it buds copies
+			BioBuilt.press(player);
+		} else if (kind == Kind.RUBBERFOLK) {
+			// (0.7.288) starts (or stops) swallowing a weak foe
+			RubberFolk.press(player);
 		}
 	}
 

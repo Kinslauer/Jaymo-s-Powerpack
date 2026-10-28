@@ -60,7 +60,7 @@ public final class McaCompat {
 	}
 
 	/**
-	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.288) its Size and Width are kept to
+	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.290) its Size and Width are kept to
 	 * their heritage's body ({@link BodySizes}).
 	 */
 	public static void capSaved(ServerPlayer player, net.minecraft.nbt.CompoundTag data) {

@@ -76,7 +76,7 @@ final class McaStoryFigure {
 		if (kept != melanin) {
 			genes.setGene(Genetics.MELANIN, kept);
 		}
-		// (0.7.288) the middle of the heritage's body: a Stoneborn stands tall and broad, a Sylvan small (BodySizes)
+		// (0.7.290) the middle of the heritage's body: a Stoneborn stands tall and broad, a Sylvan small (BodySizes)
 		if (genes.getGene(Genetics.SIZE) != BodySizes.middleSize(kind)) {
 			genes.setGene(Genetics.SIZE, BodySizes.middleSize(kind));
 		}

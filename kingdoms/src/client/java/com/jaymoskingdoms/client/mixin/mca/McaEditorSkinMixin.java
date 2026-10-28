@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 /**
  * (0.7.236) Andy: "the sliders should only allow the color ranges that the heritage allows". On the figure of your
  * own character in MCA's editor ({@link EditorFigure}), melanin set by the skin picker is kept within your heritage's
- * range ({@link SkinTones#skinRange}), so that is what the editor saves. (0.7.288) Its Size and Width sliders too, to the
+ * range ({@link SkinTones#skinRange}), so that is what the editor saves. (0.7.290) Its Size and Width sliders too, to the
  * heritage's body ({@link BodySizes}).
  */
 @Mixin(Genetics.class)

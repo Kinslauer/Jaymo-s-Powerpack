@@ -248,7 +248,7 @@ public final class VillagerHeritage {
 		// (0.7.236) the skin their land gave them, kept to their blood's range (SkinTones.skinRange)
 		if (McaCompat.LOADED) {
 			McaBridge.keepSkin(villager, kind);
-			// (0.7.288) and their height and width to its body (BodySizes)
+			// (0.7.290) and their height and width to its body (BodySizes)
 			McaBridge.keepBody(villager, kind);
 		}
 		if (kind == Heritage.Kind.VERDANT && !Verdants.is(villager)) {
@@ -357,7 +357,7 @@ public final class VillagerHeritage {
 			fit(living);
 			// (0.7.214) one born before variants came is born to one now
 			HeritageVariants.settle(living);
-			// (0.7.288) one born before bodies came is brought into its blood's (BodySizes)
+			// (0.7.290) one born before bodies came is brought into its blood's (BodySizes)
 			if (McaCompat.LOADED) {
 				McaBridge.keepBody(living, kind);
 			}
