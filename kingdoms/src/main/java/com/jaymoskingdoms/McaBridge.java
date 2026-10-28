@@ -310,6 +310,8 @@ final class McaBridge {
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
 		}
+		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
 	}
 
 	private static Enlisted worker(VillagerEntityMCA villager) {
@@ -356,7 +358,9 @@ final class McaBridge {
 			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0 && !v.isProfessionImportant()
 				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID()))
 				// (0.7.141) never a wind dragon in disguise
-				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null);
+				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null
+				// (0.7.299) nor a visitor, here for the day
+				&& !Visitors.is(v));
 		if (role == Folk.GUARD && Purists.is(f)) {
 			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();
 			if (!kin.isEmpty()) {
@@ -500,6 +504,15 @@ final class McaBridge {
 		worker(villager).enlist(role, -1);
 		villager.setHomeTo(home, radius);
 		return villager;
+	}
+
+	/** (0.7.299) {@link McaCompat#visitor}: a grown villager (or a child) in {@code job}, or none, spawned at {@code at}. */
+	static @Nullable Villager visitor(ServerLevel level, Vec3 at, @Nullable VillagerProfession job, boolean child) {
+		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(at).withAge(child ? AgeState.CHILD.toAge() : 0);
+		if (job != null) {
+			make = make.withProfession(job);
+		}
+		return make.spawn(EntitySpawnReason.EVENT);
 	}
 
 	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */

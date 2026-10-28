@@ -3430,13 +3430,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   "Rose Gold Sora's Dagger Blade Cast"; it breaks with a crack after its one iron blade. JEI shows both.
 - **0.17.111, mana spirits show their figure** (Kingdoms 0.7.298; Andy: "start with a larger figure that pulses behind
   you like now, and build the arms off their frame. they should fade, while the arms stay"): see Kingdoms' MODLOG.
+- **0.17.112, Kingdoms 0.7.299:** visitors for the day, and every villager cooks at home or buys a meal at a new
+  cookhouse or the tavern, from cooks who bake from the storehouse; meal prices follow the larder and realms trade their
+  surplus or buy bread in (see Kingdoms' MODLOG). Dev-server checked, not seen in a client.
 - **0.17.113, cauldron brewing:** Andy wanted "an early route to alchemy using cauldrons". A full water cauldron over
   heat (`Heat`, or a lit block in Kitchen's `jaymoskitchen:heat_sources`) takes ingredients thrown in, in the brewing
   stand's order and by its recipes (data ones too). Each one must be stirred in (6 use clicks with a stick or a shovel,
-  holding use works) before the next; one thrown in unstirred, or one the brew won't take, is spat out. A stirred brew
+  holding use works) before the next; one thrown in unstirred, or one the brew won't take, is spat out. Andy: "all the
+  ingredients should display in world inside the cauldron before stirring": the thrown item itself floats in the pot
+  (tagged `jaymospowers_brewing`, no gravity, never picked up), swirls round with each stir turn and goes when stirred
+  through. A stirred brew
   fills 3 bottles; gunpowder thrown in makes it splash (dragon's breath, lingering). Buckets and water on a brew are
   refused; a brew whose level changes otherwise (rain, washing) is water again. Brews are a chunk attachment
   (`alchemy/cauldron/CauldronBrewing`, `CauldronBrewItemMixin`). Sneak-use a water bottle to throw it as splash water,
   and any splash of water now puts out fire within 2 blocks of where it lands (`SplashWaterDouseMixin`). A dev server
   test brewed awkward, swiftness, splash swiftness (3 bottles) and a splash doused a 3 x 5 patch of fire. Not seen in a
   client.
+  Kingdoms 0.7.300: firefighters throw splash water bottles at fires instead of leaving water source blocks (see
+  Kingdoms' log).

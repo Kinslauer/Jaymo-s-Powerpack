@@ -6018,3 +6018,45 @@ now, and build the arms off their frame. they should fade, while the arms stay."
   over 16 while the arms carry on. Not drawn in first person.
 - Models and renders: `tools/blockbench/spirit-figures/` (`figures.py` is the spec; `gen.py` writes `SpiritFigure.java`,
   `bbexport.py` the .bbmodels, `render.py` the renders). Compile-checked, not seen in game.
+## 0.7.299: visitors for the day, and every villager cooks at home or buys a meal (pack 0.17.112)
+Andy: "Can we add more to villages? ... Kingdoms should get visitors, and the villagers should all either cook or have
+somewhere to buy food, further influencing the economy." Ideas from Visiting Villagers (All Rights Reserved) and Chef's
+Delight (MIT, but 26.2 only and it needs the real Farmer's Delight); nothing of either is copied.
+- **Meals** (`Meals`): at lunch (5000-7000) and supper (10000-11800) every townsperson of a kingdom, fiefdom or village
+  (children too; not the ruler, who dines at court, nor folk on duty or guards) has a meal. With a furnace, smoker, lit
+  campfire or Kitchen hot block within 6 of their bed they cook at home: an item of raw food from the storehouse makes
+  two meals, cooked at the stove (smoke, crackle) then eaten. Otherwise they buy it at the nearest cookhouse or tavern,
+  else at the stalls by the bell: meals come out of the eatery's pot, filled from the storehouse (a cook's dish makes 3
+  servings, a soup, stew or pie 4, anything else 2). With nothing in store they go without (MCA mood -2). Routines'
+  lunch is gone (the real one replaces it); a trade or shift breaks off for a meal.
+- **Prices**: a meal is 2 bits (16 to an emerald) times the price index, the food a town wants (2 per head, at least 16)
+  over its stock, 50-300%. A realm takes 25% of townsfolk's meals in tax and a visitor's whole price. Dear food (175%+)
+  sours and grumbles, cheap (75% or less) cheers, a tavern meal cheers. `/kingdom larder` shows a town's stock, want,
+  price, eateries, cooks and visitors.
+- **Food trade** (realms, once a day at 1000): over 3x the want, the surplus (up to 32, raw first) is sold at 8 an
+  emerald; under half the want, bread is bought in at 4 loaves an emerald, as far as the treasury goes.
+- **Cookhouse** (`Buildings.cookhouse`, 9 x 7): an open-fronted kitchen with two smokers, a chimney, barrels, a
+  counter and two tables. Realms build one from 12 people, villages from 8.
+- **Cooks** (`Professions.COOK`, MCA dresses them as butchers): each cookhouse and tavern takes on an idle townsperson.
+  By day (3000-11800) they work at it, and every minute make a batch for the storehouse: bread from wheat, baked
+  potatoes, roasts, beetroot soup or mushroom stew (bowls carved from a log if there are none), pumpkin pie. They trade
+  at the day's prices (`Meals.wares`, set out each dawn): bread, baked potatoes, beef and stew for an emerald (more the
+  cheaper food is), and while the town is short they buy wheat, potatoes, carrots and beef. What they sell comes out of
+  the storehouse and what they buy goes in (`VillagerTradeMixin`).
+- **Visitors** (`Visitors`, attachment `jaymoskingdoms:visit`): from 300 to 4500 a settlement with 6 villagers of its
+  own and a guard (an iron golem, or a realm's guards), at peace, gets 0 to its appeal in parties (1, plus 1 a cookhouse
+  or tavern, 1 a prosperous realm, 1 cheap food, 2 a festival, -1 dear food; at most 5). A party is 1-2 grown MCA
+  villagers (a random trade 3 times in 4, so players can trade with them) and 1 time in 4 a child, walking in from 40-56
+  out. They say where they're from (the nearest settlement at peace, or an MCA town, or far off), mill about the
+  market, the eateries and the streets, eat in town and spend half an emerald at the stalls (realms), and at 11000 head
+  back and are gone at their road's end or once nobody's within 40. They take no job sites, posts, homes or MCA village
+  (`McaVisitorResidencyMixin` stops MCA's residency for them), and aren't counted, hired, recruited or emigrated.
+  `/kingdom visitors now` (ops) brings a party.
+- Dev-server checked: a kingdom on a flat world, its townsfolk went for lunch, a cook was taken on, two parties of
+  visitors came and left at dusk, food in store went down and back up as the cook baked. Not seen in a client.
+## 0.7.300: firefighters throw water bottles (pack 0.17.113)
+Andy: "villagers now keep and throw water bottles instead of placing buckets". `Firefighting.putOut`'s water answer
+(half the time, and always against a wildfire) now throws a splash water bottle at the fire (`throwWater`, a short lob)
+instead of setting a water block and lifting it again. Vanilla's splash puts out the fire and its neighbours, and
+Powers' `SplashWaterDouseMixin` widens that to 2 blocks round. A fire still burning 2 s after a throw is answered
+again (`SPLASHES`). Beating it out and golems are unchanged. Compile-checked, not seen in game.

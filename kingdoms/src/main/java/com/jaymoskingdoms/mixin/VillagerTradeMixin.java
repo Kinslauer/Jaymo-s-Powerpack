@@ -21,6 +21,8 @@ abstract class VillagerTradeMixin {
 			Languages.traded(v);
 			// (0.7.211) contraband warms the city, and dealt in the street it's a crime
 			com.jaymoskingdoms.Underworld.traded(v, offer);
+			// (0.7.299) a cook's meals come out of the storehouse, and produce sold to them goes in
+			com.jaymoskingdoms.Meals.traded(v, offer);
 			if (v.getTradingPlayer() instanceof net.minecraft.server.level.ServerPlayer player) {
 				// (0.7.109) and they remember a customer
 				com.jaymoskingdoms.Recollections.trade(v, player);

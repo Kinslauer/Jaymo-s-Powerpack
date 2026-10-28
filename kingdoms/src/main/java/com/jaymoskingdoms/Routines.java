@@ -187,9 +187,8 @@ final class Routines {
 
 	/** {@link #free}, a festival aside (Festivals asks this of its own). */
 	static boolean freeOf(Villager v, long t) {
-		if (Neighbours.meeting(v) || Couriers.carrying(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
-			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
-			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v) || Downed.helping(v)) {
+		// ((0.7.299) at a meal, or a visitor about their own day: Meals, Visitors)
+		if (!idle(v) || Meals.eating(v) || Visitors.is(v)) {
 			return false;
 		}
 		if (v instanceof Worker w && w.role() >= 0) {
@@ -206,6 +205,16 @@ final class Routines {
 		return !trade || t < WORK_FROM || t >= WORK_TO;
 	}
 
+	/**
+	 * (0.7.299) Nothing else has {@code v} just now: awake, unafraid, not fighting, talking, carrying, rioting or playing
+	 * ({@link Meals} asks this of a meal, which a trade breaks off for).
+	 */
+	static boolean idle(Villager v) {
+		return !(Neighbours.meeting(v) || Couriers.carrying(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
+			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v) || Downed.helping(v));
+	}
+
 	/** {@code v} takes up something fitting the hour. */
 	private static void start(ServerLevel level, Faction f, Landmarks marks, Villager v, List<Villager> folk, long t, long now) {
 		RandomSource random = level.getRandom();
@@ -220,10 +229,7 @@ final class Routines {
 		} else if (t < EVENING) {
 			kinds.addAll(List.of(Kind.MARKET, Kind.MARKET, Kind.CHAT, Kind.CHAT, Kind.STROLL, Kind.GARDEN, Kind.WATER, Kind.CHORES, Kind.READ,
 				Kind.SHOP, Kind.SHOP, Kind.ANIMALS, Kind.WATCH));
-			// (0.7.46) nobody has lunch when the storehouse is bare
-			if (t >= LUNCH_FROM && t < LUNCH_TO && !Spirits.hungry(level, f)) {
-				kinds.addAll(List.of(Kind.LUNCH, Kind.LUNCH, Kind.LUNCH));
-			}
+			// ((0.7.299) lunch is a real meal now, cooked at home or bought in town: Meals)
 		} else {
 			kinds.addAll(List.of(Kind.FIRE, Kind.FIRE, Kind.HOME, Kind.CHAT, Kind.DANCE, Kind.CHORES, Kind.READ, Kind.SWEEP));
 		}

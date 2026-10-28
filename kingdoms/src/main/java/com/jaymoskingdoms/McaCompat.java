@@ -421,6 +421,25 @@ public final class McaCompat {
 		e.discard();
 	}
 
+	/** (0.7.299) A visitor for the day ({@link Visitors}) at {@code at}: MCA's villager with MCA, else the game's; already in the world, or null. */
+	static @Nullable Villager visitor(ServerLevel level, net.minecraft.world.phys.Vec3 at, net.minecraft.world.entity.npc.villager.@Nullable VillagerProfession job, boolean child) {
+		if (LOADED) {
+			return McaBridge.visitor(level, at, job, child);
+		}
+		Villager v = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		if (v == null) {
+			return null;
+		}
+		v.snapTo(at.x, at.y, at.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		if (job != null) {
+			v.setVillagerData(v.getVillagerData().withProfession(net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.wrapAsHolder(job)));
+		}
+		if (child) {
+			v.setAge(-24000);
+		}
+		return level.addFreshEntity(v) ? v : null;
+	}
+
 	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */
 	static @Nullable Worker escort(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
