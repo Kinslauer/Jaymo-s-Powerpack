@@ -6128,7 +6128,7 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
-## 0.7.306: barding of its own, and more detailed horses (pack 0.17.122)
+## 0.7.309: barding of its own, and more detailed horses (pack 0.17.127)
 
 Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
 anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or

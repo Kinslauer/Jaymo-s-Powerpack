@@ -60,7 +60,7 @@ def rig(build):
         add("croup_split", "body", (0, 0, 0, 0, 0, 0), Cube((-3.5, -9.6, 1.5), (7, 1, 2), region="croup"))
     add("belly", "body", (0, 0, 0, 0, 0, 0), Cube((-4, 2, -15), (8, 1, 15 if not slim else 13), region="belly"))
 
-    # (0.7.306) the shoulders, a little proud of the barrel in front, and the barrel's rounded underside
+    # (0.7.309) the shoulders, a little proud of the barrel in front, and the barrel's rounded underside
     add("shoulder", "body", (0, 0, 0, 0, 0, 0), Cube((-5.4, -7, -19), (10.8, 7, 5), region="body"))
     add("barrel", "body", (0, 0, 0, 0, 0, 0), Cube((-5.2, -4, -12), (10.4, 5, 10), region="body"))
 
@@ -88,7 +88,7 @@ def rig(build):
         zc = -0.1 if front else 0.0
         leg_a = add(f"leg{k}_a", None, (x, 9, z, 0, 0, 0),
                     Cube((cx - upper[0] / 2, top, zc - upper[2] / 2), upper, region="leg_a"))
-        # (0.7.306) the knee in front, the hock behind (its point sticks out at the back)
+        # (0.7.309) the knee in front, the hock behind (its point sticks out at the back)
         if front:
             leg_a.cubes.append(Cube((cx - upper[0] / 2 - 0.3, 4.6, zc - upper[2] / 2 - 0.3), (upper[0] + 0.6, 2.2, upper[2] + 0.6),
                                     region="leg_a"))
@@ -107,7 +107,7 @@ def rig(build):
                                     region="fetlock"))
         leg_c = add(f"leg{k}_c", None, (x, 16, z, 0, 0, 0), Cube((cx - 2, 5.1, zc - 2), (4, 3, 4), kind="hoof", region="hoof"))
         if not heavy and b != "destrier":
-            # (0.7.306) the coronet band round the top of the hoof, and the ergot's tuft behind the fetlock
+            # (0.7.309) the coronet band round the top of the hoof, and the ergot's tuft behind the fetlock
             leg_c.cubes.append(Cube((cx - 2.2, 4.8, zc - 2.2), (4.4, 0.8, 4.4), region="fetlock"))
             leg_c.cubes.append(Cube((cx - 0.75, 4.0, zc + 1.6), (1.5, 1.5, 1), kind="hair", region="feather", axis="y", tip=1))
 
@@ -118,7 +118,7 @@ def rig(build):
     add("head", None, HEAD_POSE, Cube((hx, -10, -1.5), head, region="head"))
     if b != "desert_horse":
         add("jowl", "head", (0, 0, 0, 0, 0, 0), Cube((hx + 0.5, -10 + head[1], 1.5), (head[0] - 1, 1, 3), region="jowl"))
-    # (0.7.306) the cheeks, round behind the eyes
+    # (0.7.309) the cheeks, round behind the eyes
     add("cheek", "head", (0, 0, 0, 0, 0, 0), Cube((hx - 0.3, -8.8, 1.6), (head[0] + 0.6, 3.2, 3), region="jowl"))
     # the forelock over the brow
     fl = {"destrier": (3, 1, 5), "draft": (3, 1, 5), "palfrey": (3, 1, 5), "steppe_pony": (2, 1, 3)}.get(b, (2, 1, 4))
@@ -137,7 +137,7 @@ def rig(build):
         upper, lower = Cube((-2, -10, -6), (4, 3, 5), region="muzzle"), Cube((-2, -7, -5.5), (4, 2, 4), region="lip")
     else:
         upper, lower = Cube((-2, -10, -7), (4, 3, 6), region="muzzle"), Cube((-2, -7, -6.5), (4, 2, 5), region="lip")
-    # (0.7.306) the nostrils flare at the nose's corners
+    # (0.7.309) the nostrils flare at the nose's corners
     nw = upper.size[0]
     for side, nx in (("left", upper.pos[0] + nw - 1.1), ("right", upper.pos[0] + 0.1)):
         upper_n = Cube((nx - 0.1, upper.pos[1] + 0.3, upper.pos[2] - 0.2), (1.2, 1.4, 1.4), region="muzzle")
@@ -199,11 +199,11 @@ def rig(build):
     return parts
 
 
-ARMOR_TEXTURE = (128, 64)  # (0.7.306) the barding's own texture space (every build's); painted at twice that
+ARMOR_TEXTURE = (128, 64)  # (0.7.309) the barding's own texture space (every build's); painted at twice that
 
 
 def armour(build, parts):
-    """(0.7.306) The barding, its own pieces hung on the horse's bones (as Blockbench would lay them out): a chanfron
+    """(0.7.309) The barding, its own pieces hung on the horse's bones (as Blockbench would lay them out): a chanfron
     over the face and nose with a ridge and guards over and behind the eyes and cheek plates, a crinet of overlapping
     lames down the neck with a crest that closes over the mane, a peytral over the chest with a boss and wings over the
     shoulders, flanchards on the flanks (clear of the stirrups) and a crupper over the croup and haunches. Shaped from

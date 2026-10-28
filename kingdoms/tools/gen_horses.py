@@ -258,7 +258,7 @@ def mouth(x, col, tint):
     return col
 
 
-# (0.7.306) The horse's form, painted in: light on the muscles (shoulder, forearm, hip and gaskin, the crest of the
+# (0.7.309) The horse's form, painted in: light on the muscles (shoulder, forearm, hip and gaskin, the crest of the
 # neck), shadow in the hollows (behind the elbow, the flank, under the belly and the jaw). World space, model pixels.
 FORM = [
     # (centre (|x| or None for the midline), y, z), radius, how much lighter (+) or darker (-)
@@ -414,7 +414,7 @@ def coat(build, breed, name, spec, pxs, seed):
         col = hide(x)
         col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise) + form(x))
         if getattr(c, "nostril", False) and x.face in ("front", "a", "b") and 0.3 < x.s < 0.7 and 0.25 < x.t < 0.75:
-            col = (38, 26, 24)  # (0.7.306) the nostril's opening
+            col = (38, 26, 24)  # (0.7.309) the nostril's opening
         if "shimmer" in marks and (x.face == "top" or x.t < 0.45) and h3(x.X, x.Y, 11, seed) < 0.07 and eye(x) == 0:
             col = shade(col, 30)
         out[(x.X, x.Y)] = light(x, col) + (255,)
@@ -639,7 +639,7 @@ def undead(pxs):
     }
 
 
-# ---- horse armour (0.7.306: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
+# ---- horse armour (0.7.309: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
 METAL, TRIM, LINING, HOLE = 0, 1, 2, 3
 
 
@@ -825,7 +825,7 @@ ARMOURED_HIDDEN = HIDDEN + ("mane", "mane_flow", "forelock", "forelock_tip")
 
 
 def preview_armour(rigs, armour_rigs, written):
-    """(0.7.306) Each build in each barding, larger, from the front quarter and the back quarter."""
+    """(0.7.309) Each build in each barding, larger, from the front quarter and the back quarter."""
     for build in hr.BUILDS:
         coat_rel = next(rel for rel, (b, _) in written.items() if b == build and not rel.startswith("armor/"))
         coat_img = written[coat_rel][1]

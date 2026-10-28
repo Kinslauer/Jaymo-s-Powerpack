@@ -3511,6 +3511,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
 
-- **0.17.122, horse barding (Kingdoms 0.7.306):** armour is its own model now (chanfron with eye guards, lapped crinet
+- **0.17.127, horse barding (Kingdoms 0.7.309):** armour is its own model now (chanfron with eye guards, lapped crinet
   that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
   (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. See the Kingdoms MODLOG.

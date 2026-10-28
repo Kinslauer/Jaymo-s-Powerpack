@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * hoof comes forward), the head, neck and mane together, the mouth opening to eat, the tail lifting with speed and
  * swishing, vanilla's rear and graze as blends, the saddle, stirrups, headstall and reins of a vanilla saddle; so the
  * tack ({@link TackLayer}) hangs on any build's bones. The pieces hung from the bones (forelock, mane, feathering...)
- * follow them. Texture 128x192 (coats drawn at twice that). (0.7.306) Its barding is a model of its own on the same
+ * follow them. Texture 128x192 (coats drawn at twice that). (0.7.309) Its barding is a model of its own on the same
  * bones ({@link #createArmorLayer}): chanfron, crinet and crest, peytral, flanchards and crupper, shaped to each build
  * (texture 128x64); while it's worn the mane and forelock lie hidden under it.
  */
@@ -64,7 +64,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	/** The builds, by name, as read from builds.json; and its texture size. */
 	private static final Map<String, List<Piece>> BUILDS = new LinkedHashMap<>();
 	private static int textureWidth = 128, textureHeight = 192;
-	/** (0.7.306) The barding's pieces on each build's bones, and their texture's size. */
+	/** (0.7.309) The barding's pieces on each build's bones, and their texture's size. */
 	private static final Map<String, List<Piece>> ARMOR = new LinkedHashMap<>();
 	private static int armorWidth = 128, armorHeight = 64;
 
@@ -146,7 +146,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.0F), textureWidth, textureHeight);
 	}
 
-	/** (0.7.306) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
+	/** (0.7.309) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
 	static LayerDefinition createArmorLayer() {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), false, 0.0F, true), armorWidth, armorHeight);
 	}
@@ -218,7 +218,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		final ModelPart headSaddle, saddle, saddleB, saddleC, stirrupLeft, stirrupLeftIron, stirrupRight, stirrupRightIron;
 		final ModelPart bitLeft, bitRight, reinLeft, reinRight;
 		final ModelPart[] headParts, saddleParts;
-		/** (0.7.306) The forelock's pieces (hidden under a chanfron). */
+		/** (0.7.309) The forelock's pieces (hidden under a chanfron). */
 		final List<ModelPart> forelock = new ArrayList<>();
 		/** The mane that falls over the neck, on the long-maned builds. */
 		final @Nullable ModelPart maneFlow;
@@ -383,7 +383,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				part.visible = saddled;
 			}
 			this.headSaddle.visible = this.bitLeft.visible = this.bitRight.visible = state.headstall;
-			// (0.7.306) under barding the mane and forelock lie hidden beneath the crinet and chanfron
+			// (0.7.309) under barding the mane and forelock lie hidden beneath the crinet and chanfron
 			boolean barded = state.armor != null;
 			this.mane.visible = !barded;
 			for (ModelPart part : this.forelock) {
