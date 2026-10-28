@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.wounds.Downed;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,9 +60,9 @@ import net.minecraft.world.phys.Vec3;
  * not be left;</li>
  * <li>you are rebuilt.</li>
  * </ol>
- * After it, for good: every ki cost is halved ({@link #COST}: techniques, flight, guarding, forms), ki comes back at
- * {@link #REGEN} a tick (eight times the usual, fed or not), ki attacks hit {@link #KI_WEAKER} as hard, and two android
- * forms open past the top of his ladder ({@link ZFighterBranchForms#OVERDRIVE} at once, {@link ZFighterBranchForms#REACTOR}
+ * After it, for good (0.17.93, Andy: "infinite ki and no aura, no other debuff"): his ki never runs out (every cost is
+ * free and the bar stays full: techniques, flight, guarding, forms), he shows no aura, and two android forms open past
+ * the top of his ladder ({@link ZFighterBranchForms#OVERDRIVE} at once, {@link ZFighterBranchForms#REACTOR}
  * after time in it). Saved, kept through death. {@link #undo} takes it all back (a wish, later).
  */
 public final class ZFighterAndroid {
@@ -71,10 +72,8 @@ public final class ZFighterAndroid {
 	static final int OPERATION_STAGE = 3;
 	public static final int DONE = 4;
 
-	/** An android's ki costs (times), regen (a tick), ki attack power (times). */
-	static final float COST = 0.5F;
-	static final float REGEN = 0.2F;
-	static final float KI_WEAKER = 0.85F;
+	/** An android's ki costs (times): nothing, his ki is endless. */
+	static final float COST = 0.0F;
 
 	/** The parts: what he asks for, and how many. */
 	static final Item[] PARTS = {Items.IRON_INGOT, Items.REDSTONE_BLOCK, Items.DIAMOND, Items.LIGHTNING_ROD.asList().get(0), Items.COPPER_INGOT};
@@ -147,6 +146,15 @@ public final class ZFighterAndroid {
 				passed(level.getServer().getPlayerList().getPlayer(owner), entity.getUUID());
 			}
 		});
+		// (0.17.93) he doesn't let you die on his table: whatever would kill you mid-operation leaves you at the edge, and he
+		// brings you round when he's done (rebuilt)
+		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			if (entity instanceof ServerPlayer player && OPERATIONS.containsKey(player.getUUID())) {
+				player.setHealth(1.0F);
+				return false;
+			}
+			return true;
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OPERATIONS.clear();
 			TEST_OWNERS.clear();
@@ -168,10 +176,6 @@ public final class ZFighterAndroid {
 
 	static float costFactor(ServerPlayer player) {
 		return android(player) ? COST : 1.0F;
-	}
-
-	static float kiFactor(ServerPlayer player) {
-		return android(player) ? KI_WEAKER : 1.0F;
 	}
 
 	static void setStage(ServerPlayer player, int stage) {
@@ -212,10 +216,11 @@ public final class ZFighterAndroid {
 		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, android(player) ? 0.02 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
-	/** Every tick of the power: an android's ki flows back, fed or not. */
+	/** Every tick of the power: an android's ki is always full, and (0.17.93) it never needs to eat. */
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
-		if (android(player) && !player.isCreative() && !live.flying) {
-			live.ki += REGEN;
+		if (android(player)) {
+			live.ki = ZFighterPower.maxKi(player);
+			player.getFoodData().setFoodLevel(20);
 		}
 	}
 
@@ -550,6 +555,12 @@ public final class ZFighterAndroid {
 		ServerLevel level = player.level();
 		player.setAttached(STAGE, DONE);
 		ZFighterPower.Live live = ZFighterPower.live(player);
+		// (0.17.93) he brings you round: up off the table if you went down, whole, and none of the operation's weight left on you
+		if (Downed.isDowned(player)) {
+			Downed.undo(level, player);
+		}
+		player.removeEffect(MobEffects.SLOWNESS);
+		player.removeEffect(MobEffects.JUMP_BOOST);
 		player.setHealth(player.getMaxHealth());
 		live.ki = ZFighterPower.maxKi(player);
 		ZFighterBranchForms.grant(player, ZFighterBranchForms.OVERDRIVE);
