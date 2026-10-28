@@ -151,6 +151,12 @@ public final class HeritageHold {
 	 */
 	static @Nullable LivingEntity step(ServerLevel level, ServerPlayer player, Predicate<LivingEntity> still, double reach, int need,
 		ParticleOptions fx, SoundEvent throb, String bar) {
+		return step(level, player, still, reach, need, fx, throb, bar, TOUCH);
+	}
+
+	/** (0.7.313) As above, with the foe drawn in only to {@code touch} blocks (the Bio-built's tail reaches farther than a hand). */
+	static @Nullable LivingEntity step(ServerLevel level, ServerPlayer player, Predicate<LivingEntity> still, double reach, int need,
+		ParticleOptions fx, SoundEvent throb, String bar, double touch) {
 		Channel channel = CHANNELS.get(player.getUUID());
 		if (channel == null) {
 			return null;
@@ -166,7 +172,7 @@ public final class HeritageHold {
 		// drawn in close, under the hand
 		Vec3 away = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 		if (away.lengthSqr() > 1.0E-4) {
-			Vec3 to = player.position().add(away.normalize().scale(TOUCH)).subtract(foe.position()).multiply(1.0, 0.0, 1.0);
+			Vec3 to = player.position().add(away.normalize().scale(touch)).subtract(foe.position()).multiply(1.0, 0.0, 1.0);
 			double length = to.length();
 			if (length > 0.1) {
 				Vec3 move = to.scale(Math.min(DRAW, length) / length);

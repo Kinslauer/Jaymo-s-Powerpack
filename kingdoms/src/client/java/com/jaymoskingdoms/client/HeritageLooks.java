@@ -77,7 +77,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Divine-born:</b> (0.7.262, textures from {@code kingdoms/tools/gen_race_looks.py}) a faint gold glow in fine
  * filigree up the forearms and on the brow, warm white eyes, a halo (a flat gold ring, a model part) floating over the head,
  * and motes of light drifting off the skin.</li>
- * <li><b>Bio-built:</b> (0.7.262) steel-green seams and plating that grow with each form ({@link BioBuilt#form}: three drawings,
+ * <li><b>Bio-built:</b> (0.7.313: a player is drawn as their form's own body instead, {@link BioForms}; villagers keep these) (0.7.262) steel-green seams and plating that grow with each form ({@link BioBuilt#form}: three drawings,
  * the second plated to the elbow, the third to the shoulder and the cheeks), amber nodes that glow; amber eyes. A variant's
  * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
@@ -329,6 +329,10 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			}
 		}
 		Kind kind = look.kind();
+		if (kind == Kind.BIOBUILT && BioForms.submit(poseStack, collector, lightCoords, state, marks, glowing, headFinsCovered, armFinsCovered)) {
+			// (0.7.313) a Bio-built player is their form's body, not marks
+			return;
+		}
 		VariantLooks.Style style = look.style();
 		// (0.7.184) under a costume no marks or glow either (Andy: the Earthling's ki glow "costume clipping is back"):
 		// they're drawn on the plain body's pose, the costume on MCA's, so where the cut leaves skin bare (the gi's

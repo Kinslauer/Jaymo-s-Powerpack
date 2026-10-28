@@ -224,7 +224,7 @@ public final class ZFighterAfterlife {
 			boolean master = entity.entityTags().contains(MASTER_TAG);
 			boolean teller = entity.entityTags().contains(TELLER_TAG);
 			if (!judge && !master && !teller || ZFighterNpcs.viaMca(entity)) {
-				// ((0.17.135) as MCA villagers, their menus lead to their talk: talk)
+				// ((0.17.139) as MCA villagers, their menus lead to their talk: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -429,7 +429,7 @@ public final class ZFighterAfterlife {
 		teach(player, master, false);
 	}
 
-	/** (0.17.135) {@code asked}: asked for on his talk screen (no sneaking up to him). */
+	/** (0.17.139) {@code asked}: asked for on his talk screen (no sneaking up to him). */
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master, boolean asked) {
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_no_spark", master.getDisplayName())
@@ -491,7 +491,7 @@ public final class ZFighterAfterlife {
 		returnHome(player);
 	}
 
-	// ---------------------------------------------------------------- talking (0.17.135)
+	// ---------------------------------------------------------------- talking (0.17.139)
 
 	/** A character of the Other World's talk (MCA's "Talk about work"): the Judge, the road's master, the fortune teller. */
 	static void talk(ServerPlayer player, LivingEntity npc, String tag) {
@@ -524,7 +524,7 @@ public final class ZFighterAfterlife {
 		}
 	}
 
-	/** (0.17.135) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
+	/** (0.17.139) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
 	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
 		if (!among(player)) {
 			return;

@@ -149,7 +149,7 @@ public final class ZFighterDemonRealm {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !entity.entityTags().contains(MASTER_TAG) || ZFighterNpcs.viaMca(entity)) {
-				// ((0.17.135) as an MCA villager, his menu leads to his talk: talk)
+				// ((0.17.139) as an MCA villager, his menu leads to his talk: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -411,7 +411,7 @@ public final class ZFighterDemonRealm {
 
 	// ---------------------------------------------------------------- the dark master
 
-	/** (0.17.135) A demon master's talk (MCA's "Talk about work"): a lesson in blood, once a day. */
+	/** (0.17.139) A demon master's talk (MCA's "Talk about work"): a lesson in blood, once a day. */
 	static void talk(ServerPlayer player, net.minecraft.world.entity.LivingEntity master) {
 		Long last = player.getAttached(LESSON);
 		boolean today = last != null && last >= player.level().getGameTime() / DAY && !player.isCreative();
@@ -424,7 +424,7 @@ public final class ZFighterDemonRealm {
 		teach(player, master, false);
 	}
 
-	/** (0.17.135) {@code asked}: asked for on his talk screen (no sneaking up to him). */
+	/** (0.17.139) {@code asked}: asked for on his talk screen (no sneaking up to him). */
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master, boolean asked) {
 		String voice = "message.jaymospowers.zfighter_demon_master";
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {

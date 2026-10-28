@@ -138,7 +138,7 @@ public final class ZFighterSites {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterSites::tick);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (level.isClientSide() || !entity.entityTags().contains(KEEPER_TAG) || ZFighterNpcs.viaMca(entity)) {
-				// ((0.17.135) as an MCA villager, the Keeper's menu leads to his talk: keeperTalk)
+				// ((0.17.139) as an MCA villager, the Keeper's menu leads to his talk: keeperTalk)
 				return InteractionResult.PASS;
 			}
 			// (0.17.61) sneak and right-click holding anything: talk about the story and jobs, not the blessing
@@ -400,7 +400,7 @@ public final class ZFighterSites {
 
 	/**
 	 * A trader who never leaves, never moves and can't be hurt: the Hermit (who sells) or the Keeper (who blesses).
-	 * (0.17.135) With Kingdoms and MCA, an MCA villager held at the spot instead ({@link ZFighterNpcs#villager}).
+	 * (0.17.139) With Kingdoms and MCA, an MCA villager held at the spot instead ({@link ZFighterNpcs#villager}).
 	 */
 	static void spawnNpc(ServerLevel level, Vec3 at, String tag, String name, MerchantOffers offers) {
 		if (ZFighterNpcs.villager(level, at, 180.0F, tag, name, ZFighterNpcs.female(tag)) != null) {
@@ -432,7 +432,7 @@ public final class ZFighterSites {
 		return offers;
 	}
 
-	// ---------------------------------------------------------------- talking (0.17.135)
+	// ---------------------------------------------------------------- talking (0.17.139)
 
 	/** The Keeper's talk (MCA's "Talk about work"): his blessing, and the old story and its jobs. */
 	static void keeperTalk(ServerPlayer player, LivingEntity keeper) {

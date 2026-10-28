@@ -6189,7 +6189,54 @@ rubber's internal organs."
 - Powers 0.17.134: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
 Compile-checked, not seen in game.
 
-## 0.7.313: Jaymo's Powers' Z Fighter characters are MCA villagers with talk screens (pack 0.17.135)
+## 0.7.313: the Bio-built remade after Cell: three bodies, a tail that swallows, absorb anyone but the Dawnborn and Divine (pack 0.17.138)
+Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed". The heritage key
+(`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'
+`jaymospowers_crippled` tag, splinted or not), has a leg cut off (`jaymoskitchen.missing.left_leg`/`right_leg`), or is
+Crippled by a hidden blade. The rest is as before: up close, a toggle, broken off by any harm; a crippled foe that
+can still swing at you will break it. The Rubber-folk swallow is unchanged.
+
+Then Andy on the buds: "the buds should use a charge of your absorption and they should look like smaller versions of
+the user, not zombies."
+- **Charges** (`BioBuilt.CHARGES`, saved, lost on death): every foe absorbed stores one, up to 4. Each bud spends one
+  (two buds, two charges; one charge, one bud). Budding no longer costs health or hunger, and the wait is 20 s (was
+  60). With nothing stored the key says so. In the third form the absorb message shows the charges.
+- **Small copies** (`BioBud`, entity `jaymoskingdoms:bio_copy`): a zombie's brain so `Thralls` leads it as before, but
+  drawn by `BioBudRenderer` as its maker: their skin on a player's body (slim or wide arms, as theirs), at 0.6 size,
+  with the third form's plates, glowing nodes and amber eyes. No rag, nothing in its hands. The sun doesn't burn it,
+  water doesn't turn it, it never makes zombie villagers, it doesn't groan, and it drops nothing.
+
+Then Andy: "bio-built's lore involves it being created by the mad tinkerer, and they contain DNA from all other
+heritages except dawn and divine. This allows them to absorb anyone who isnt that race. I also want the forms to be
+drastically different from each other. with the third form becoming the most powerful, and stable. as a z fighter they
+gain various buffs per form and are more akin to Cell from dragon ball ... the first form shouldnt necessarily be larval,
+but intensely grotesque and with a tail ... The tail should now be what absorbs in first form. it extends overhead, and
+down upon the target. stretching over and engulfing them into a bulge that flows down the tail and into the BB".
+- **Who** (`BioBuilt.absorbable`): any monster as before, and now any person too (a villager, a kingdom's folk, another
+  player not in creative), downed or crippled, unless they are Dawnborn or Divine (`BioBuilt.alien`). A person is
+  worth the most (4) and dies of it, credited to you, leaving no body (as with the Rubber-folk). Lore in the heritage's
+  description and gift.
+- **The forms** (client `BioForms`, textures and parts table from `tools/gen_bio_forms.py`, in three palettes: the
+  seamed green, the Brassbound's bronze, the Opaline's pearl): Imperfect, hunched (head thrust low and forward, arms
+  hanging forward), spotted carapace, black chest plates, orange segmented belly, insect face with a beak and pink slit
+  eyes, V horns, wing cases, claws, spine ridge, a shoulder growth, steel bracers, a long swaying segmented tail with a
+  stinger; Semi-Perfect, a size up (`BioBuilt.SIZE`, +15%) and bulked (wider body and arms), black forearms and shins,
+  heavy lips and no nose, a crown of horns, pauldrons, steel gauntlets over the fists and steel plates down a short thick
+  tail; Perfect, as tall as the second but sleek, pale face with purple cheek stripes, black chest, the old steel
+  plating from shoulder to wrist and on the cheekbones, slim steel plates over the shoulders and shoulder blades (no
+  wings: Andy, "no wings, and instead the armor plates"), slim crown horns, the tail folded to a steel stinger nub. The
+  steel is the old forms' plating ("I do want the steel plating to reintegrate like it did before"). Twelve beads in the
+  heritages' colours glow down every form's spine. The form is the whole body: MCA's face, clothes and hair are left off
+  (`McaBioFormLayerMixin`), and a skin's hat and sleeves. Villagers of the heritage keep their old marks.
+- **The tail swallow** (`BioTailEngulf`, all three forms; the Perfect form unfurls it from its stinger): the tail rises
+  off the back in an arch over your head and comes down on the foe's crown, splits and stretches down over it like a
+  sheath until it's swallowed, then the sheath tightens as the foe shrinks and the bulges run up the arch and into your
+  back. Reach 4.5 blocks; the foe is held 1.8 blocks off (`HeritageHold.step` takes a touch distance now). No more hand
+  reach for the Bio-built.
+- **Buds** (`BioBudRenderer`): small copies of the Perfect form in their maker's palette.
+- **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
+Compile-checked against 26.3 with javac (changed files), not seen in game.
+## 0.7.314: Jaymo's Powers' Z Fighter characters are MCA villagers with talk screens (pack 0.17.139)
 Andy: "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys immersion seeing one of those
 things instead of a humanoid. ... they should have context sensitive talk interactions that handle the quest objectives
 instead of them appearing in chat like now."

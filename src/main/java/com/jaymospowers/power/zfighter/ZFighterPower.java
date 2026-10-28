@@ -444,7 +444,7 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
-		// (0.17.135) the Z Fighter characters as MCA villagers, and their talk screens
+		// (0.17.139) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
@@ -686,7 +686,7 @@ public final class ZFighterPower implements Power {
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
-			live.ki += KI_REGEN * ZFighterRealism.kiRegen();
+			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player);
 		}
 
 		ZFighterKi.tickWave(player, live);
@@ -700,7 +700,7 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost();
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player);
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
@@ -1551,7 +1551,8 @@ public final class ZFighterPower implements Power {
 	static double fistBonus(Player player) {
 		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
-			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH);
+			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH)
+			+ ZFighterBioForms.fists(player);
 	}
 
 	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
@@ -1672,7 +1673,7 @@ public final class ZFighterPower implements Power {
 	public static int maxKi(Player player) {
 		return BASE_MAX_KI + KI_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY)
-			+ ZFighterVerdantMerge.ki(player)
+			+ ZFighterVerdantMerge.ki(player) + ZFighterBioForms.ki(player)
 			+ (player instanceof ServerPlayer server ? ZFighterFusion.ki(server) : 0);
 	}
 

@@ -68,7 +68,7 @@ final class ZFighterMasters {
 			boolean dark = entity.entityTags().contains(DARK_TAG);
 			if (!dark && !entity.entityTags().contains(TAG) || hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty()
 				|| !player.isShiftKeyDown() || ZFighterNpcs.viaMca(entity)) {
-				// ((0.17.135) with MCA, "Talk about training" in his menu: talk)
+				// ((0.17.139) with MCA, "Talk about training" in his menu: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -147,7 +147,7 @@ final class ZFighterMasters {
 	}
 
 	/**
-	 * (0.17.135) A master's talk (MCA's "Talk about training"): his lesson for the day, and the old story and its jobs
+	 * (0.17.139) A master's talk (MCA's "Talk about training"): his lesson for the day, and the old story and its jobs
 	 * (the sagas, side jobs and the town's errands, {@link ZFighterSagas#speak}).
 	 */
 	static void talk(ServerPlayer player, LivingEntity master) {
