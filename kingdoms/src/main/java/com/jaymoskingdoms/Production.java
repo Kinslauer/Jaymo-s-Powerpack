@@ -183,7 +183,7 @@ public final class Production {
 		if (!level.isPositionEntityTicking(seat)) {
 			return faction;
 		}
-		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(seat).inflate(SURVEY_RANGE), v -> v.isAlive());
+		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(seat).inflate(SURVEY_RANGE), v -> v.isAlive() && !Visitors.is(v));
 		int farms = 0;
 		for (int dx = -FARM_RANGE; dx <= FARM_RANGE; dx++) {
 			for (int dz = -FARM_RANGE; dz <= FARM_RANGE; dz++) {

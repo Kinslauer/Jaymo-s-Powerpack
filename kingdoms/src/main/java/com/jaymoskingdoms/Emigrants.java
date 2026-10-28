@@ -436,7 +436,7 @@ public final class Emigrants {
 
 	/** Whether {@code v} has had enough, and if so, off they go (with their household). */
 	private static void decide(ServerLevel level, Villager v) {
-		if (v.isBaby() || Rulers.is(v) || v.hasAttached(Elders.JOURNEY) || McaCompat.following(v) != null || Downed.isDowned(v) || v.isSleeping()) {
+		if (v.isBaby() || Rulers.is(v) || Visitors.is(v) || v.hasAttached(Elders.JOURNEY) || McaCompat.following(v) != null || Downed.isDowned(v) || v.isSleeping()) {
 			return;
 		}
 		long now = level.getGameTime();
