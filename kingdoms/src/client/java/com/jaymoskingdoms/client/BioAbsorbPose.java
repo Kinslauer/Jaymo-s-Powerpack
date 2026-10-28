@@ -1,6 +1,6 @@
 package com.jaymoskingdoms.client;
 
-import com.jaymoskingdoms.BioBuilt;
+import com.jaymoskingdoms.HeritageHold;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -16,8 +16,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.288, Andy: "it should animate with some part of the body touching the enemy") A Bio-built absorbing a foe
- * ({@link BioBuilt#ABSORBING}) reaches their main hand out and down onto it, leaning in, the hand trembling with each
+ * (0.7.288, Andy: "it should animate with some part of the body touching the enemy") A Bio-built or Rubber-folk absorbing a foe
+ * ({@link HeritageHold#ABSORBING}) reaches their main hand out and down onto it, leaning in, the hand trembling with each
  * pulse. Laid over the player's model right after it's posed, like {@link PickpocketPose}.
  */
 public final class BioAbsorbPose {
@@ -40,7 +40,7 @@ public final class BioAbsorbPose {
 		if (!(entity instanceof Avatar)) {
 			return;
 		}
-		Integer id = entity.getAttached(BioBuilt.ABSORBING);
+		Integer id = entity.getAttached(HeritageHold.ABSORBING);
 		Entity foe = id == null ? null : entity.level().getEntity(id);
 		if (foe == null) {
 			STARTED.remove(entity.getId());

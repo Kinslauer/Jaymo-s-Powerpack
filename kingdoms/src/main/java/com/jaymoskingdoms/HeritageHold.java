@@ -4,50 +4,62 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.262, Andy's NOEA picks) The heritage key held down ({@code ;}, the same key as a Warrior-born's tail): the Bio-built
- * and the Rubber-folk absorb with it. The client sends {@link Held} every other tick while the key is down; the server
- * counts it held for a few ticks after ({@link #HELD_GRACE}). {@link #advance} runs one absorbing channel: look at a
- * fitting foe up close, keep holding, and when the bar fills the foe is yours to take.
+ * (0.7.262, Andy's NOEA picks) Absorbing with the heritage key ({@code ;}, the same key as a Warrior-born's tail): the
+ * Bio-built and the Rubber-folk take a foe into themselves.
+ * <p>
+ * (0.7.288, Andy: "it should animate with some part of the body touching the enemy, and pulsing through both entities,
+ * until it gradually shrinks to nothing. instead of a hold this is a toggle. that gets interrupted if you are damaged.")
+ * A press on a fitting foe up close starts it ({@link #start}), another press lets go ({@link #stop}). While it runs
+ * ({@link #step}) the foe is drawn in under the reaching hand ({@link #ABSORBING}, synced: the client's
+ * {@code BioAbsorbPose}), pulses run round both bodies and along the arm, quicker as it goes, and the foe shrinks away to
+ * nothing; then it's theirs. Any harm to them breaks it off, and a foe let go grows back.
  */
 public final class HeritageHold {
-	/** The key counts as held this many ticks past the last packet (they come every other tick). */
-	static final int HELD_GRACE = 4;
 	/** A message on the action bar every this many ticks while absorbing. */
 	static final int PROGRESS_EVERY = 5;
+	/**
+	 * The foe is drawn in to this far (blocks) at up to this much a tick, so the reaching hand is on it; it slips free this
+	 * much past the reach it was taken at; and it is this much smaller (share) when it's gone.
+	 */
+	static final double TOUCH = 0.9, DRAW = 0.08, SLACK = 1.5, SHRINK = 0.95;
+	/** A pulse every this many ticks at first, and at the end. */
+	static final int PULSE_FIRST = 14, PULSE_LAST = 4;
 
-	/** Player → server: the heritage key is down. */
-	public record Held() implements CustomPacketPayload {
-		public static final Type<Held> TYPE = new Type<>(JaymosKingdoms.id("heritage_held"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Held> CODEC = StreamCodec.unit(new Held());
+	/** The foe's entity id while a player is absorbing it, synced to everyone (the reaching hand). */
+	public static final AttachmentType<Integer> ABSORBING = AttachmentRegistry.create(JaymosKingdoms.id("heritage_absorbing"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** The foe shrinking away as it's taken in. */
+	private static final Identifier SHRINK_ID = JaymosKingdoms.id("heritage_absorb_shrink");
 
-		@Override
-		public Type<Held> type() {
-			return TYPE;
-		}
-	}
-
-	/** One absorbing under way: the foe, and how many ticks of the hold it has had. */
+	/** One absorbing under way: the foe, and how many ticks it has run. */
 	static final class Channel {
 		final LivingEntity target;
 		int ticks;
@@ -57,23 +69,20 @@ public final class HeritageHold {
 		}
 	}
 
-	/** When each player's key was last seen down (game time). */
-	private static final Map<UUID, Long> HELD = new HashMap<>();
+	/** Player → the foe they are taking in. */
+	private static final Map<UUID, Channel> CHANNELS = new HashMap<>();
 
 	private HeritageHold() {
 	}
 
 	static void register() {
-		PayloadTypeRegistry.serverboundPlay().register(Held.TYPE, Held.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Held.TYPE, (payload, context) -> HELD.put(context.player().getUUID(), context.player().level().getGameTime()));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> HELD.remove(handler.player.getUUID()));
-	}
-
-	/** Whether {@code player} is holding the heritage key now. */
-	static boolean held(ServerPlayer player) {
-		Long at = HELD.get(player.getUUID());
-		long now = player.level().getGameTime();
-		return at != null && now - at <= HELD_GRACE && now >= at;
+		// hurt while absorbing, they lose hold of it
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (taken > 0.0F && entity instanceof ServerPlayer player && CHANNELS.containsKey(player.getUUID())) {
+				stop(player, "message.jaymoskingdoms.absorb_hurt");
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> stop(handler.player, null));
 	}
 
 	/**
@@ -87,51 +96,117 @@ public final class HeritageHold {
 		return e instanceof Enemy || e instanceof Mob m && m.getTarget() == player;
 	}
 
+	/** The channel {@code player} has running, or null. */
+	static @Nullable Channel channel(ServerPlayer player) {
+		return CHANNELS.get(player.getUUID());
+	}
+
 	/**
-	 * One tick of an absorbing for {@code player}: holding the key while looking at a foe {@code fits} within {@code reach}
-	 * starts it (and keeps it going while they hold on and the foe stays in sight and in reach), a stream of {@code fx} runs
-	 * from the foe to them, and the bar shows on the action bar ({@code bar}). Returns the foe once {@code need} ticks
-	 * are held, else null; letting go, looking away or the foe moving off starts it over.
+	 * The heritage key pressed: absorbing, it lets go (true); looking at a foe that {@code fits} within {@code reach}, it
+	 * starts taking it in (true, {@code bar} shown); else false, for the heritage to do whatever else the key does.
 	 */
-	static @Nullable LivingEntity advance(Map<UUID, Channel> channels, ServerPlayer player, Predicate<LivingEntity> fits, double reach, int need,
-		ParticleOptions fx, String bar) {
-		Channel channel = channels.get(player.getUUID());
-		if (!player.isAlive() || player.isSpectator() || !held(player)) {
-			if (channel != null) {
-				channels.remove(player.getUUID());
-			}
-			return null;
+	static boolean press(ServerPlayer player, Predicate<LivingEntity> fits, double reach, String bar) {
+		if (CHANNELS.containsKey(player.getUUID())) {
+			stop(player, "message.jaymoskingdoms.absorb_stopped");
+			return true;
+		}
+		if (!player.isAlive() || player.isSpectator() || Downed.isDowned(player)) {
+			return false;
 		}
 		LivingEntity sighted = Arcana.sighted(player);
-		boolean ok = sighted != null && fits.test(sighted) && player.distanceTo(sighted) <= reach;
-		if (!ok) {
-			if (channel != null) {
-				channels.remove(player.getUUID());
-			}
+		if (sighted == null || !fits.test(sighted) || player.distanceTo(sighted) > reach) {
+			return false;
+		}
+		CHANNELS.put(player.getUUID(), new Channel(sighted));
+		player.setAttached(ABSORBING, sighted.getId());
+		player.sendOverlayMessage(Component.translatable(bar, 0));
+		return true;
+	}
+
+	/** Lets go of the foe being absorbed (if any): it grows back, and {@code why} says so (null: nothing said). */
+	static void stop(ServerPlayer player, @Nullable String why) {
+		Channel channel = CHANNELS.remove(player.getUUID());
+		if (player.hasAttached(ABSORBING)) {
+			player.removeAttached(ABSORBING);
+		}
+		if (channel == null) {
+			return;
+		}
+		shrink(channel.target, 0.0);
+		if (why != null) {
+			player.sendOverlayMessage(Component.translatable(why).withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	/**
+	 * One tick of {@code player}'s absorbing, if they have one running: the foe drawn in under the hand, a pulse through both
+	 * now and then ({@code fx}, {@code throb}), the foe shrinking, the bar ({@code bar}). It ends if the foe stops being one
+	 * that {@code still} fits or gets past {@code reach}. Returns the foe once {@code need} ticks have run, else null.
+	 */
+	static @Nullable LivingEntity step(ServerLevel level, ServerPlayer player, Predicate<LivingEntity> still, double reach, int need,
+		ParticleOptions fx, SoundEvent throb, String bar) {
+		Channel channel = CHANNELS.get(player.getUUID());
+		if (channel == null) {
 			return null;
 		}
-		if (channel == null || channel.target != sighted) {
-			channel = new Channel(sighted);
-			channels.put(player.getUUID(), channel);
+		LivingEntity foe = channel.target;
+		if (!player.isAlive() || player.isSpectator() || Downed.isDowned(player) || !foe.isAlive() || foe.isRemoved() || foe.level() != level
+			|| !still.test(foe) || player.distanceTo(foe) > reach + SLACK) {
+			stop(player, "message.jaymoskingdoms.absorb_lost");
+			return null;
 		}
 		channel.ticks++;
-		if (!(player.level() instanceof ServerLevel level)) {
-			return null;
+		double progress = Math.min(1.0, channel.ticks / (double)need);
+		// drawn in close, under the hand
+		Vec3 away = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+		if (away.lengthSqr() > 1.0E-4) {
+			Vec3 to = player.position().add(away.normalize().scale(TOUCH)).subtract(foe.position()).multiply(1.0, 0.0, 1.0);
+			double length = to.length();
+			if (length > 0.1) {
+				Vec3 move = to.scale(Math.min(DRAW, length) / length);
+				foe.setDeltaMovement(move.x, foe.getDeltaMovement().y, move.z);
+				foe.needsSync = true;
+			}
 		}
-		if (channel.ticks % 2 == 0) {
-			pull(level, channel.target, player, fx, channel.ticks / (double)need);
+		shrink(foe, SHRINK * progress * progress * (3.0 - 2.0 * progress));
+		int every = Math.max(PULSE_LAST, Math.round(Mth.lerp((float)progress, PULSE_FIRST, PULSE_LAST)));
+		if (channel.ticks % every == 0) {
+			pulse(level, player, foe, fx, throb, progress);
 		}
 		if (channel.ticks % PROGRESS_EVERY == 0) {
-			player.sendOverlayMessage(Component.translatable(bar, Math.min(100, channel.ticks * 100 / need)));
+			player.sendOverlayMessage(Component.translatable(bar, (int)(progress * 100)));
 		}
-		if (channel.ticks % 10 == 1) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.5F, 0.6F + channel.ticks / (float)need);
+		if (channel.ticks < need) {
+			return null;
 		}
-		if (channel.ticks >= need) {
-			channels.remove(player.getUUID());
-			return channel.target;
+		CHANNELS.remove(player.getUUID());
+		player.removeAttached(ABSORBING);
+		return foe;
+	}
+
+	private static void shrink(LivingEntity foe, double share) {
+		AttributeInstance scale = foe.getAttribute(Attributes.SCALE);
+		if (scale == null) {
+			return;
 		}
-		return null;
+		if (share <= 0.0) {
+			scale.removeModifier(SHRINK_ID);
+		} else {
+			scale.addOrUpdateTransientModifier(new AttributeModifier(SHRINK_ID, -share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+	}
+
+	/** A pulse through both: a ring of motes round each body and a run of them along the arm between, with a throb. */
+	private static void pulse(ServerLevel level, ServerPlayer player, LivingEntity foe, ParticleOptions fx, SoundEvent throb, double progress) {
+		for (LivingEntity body : new LivingEntity[] {foe, player}) {
+			double w = body.getBbWidth() * 0.6, h = body.getBbHeight();
+			for (int i = 0; i < 10; i++) {
+				double a = i * (Math.PI * 2.0 / 10.0);
+				level.sendParticles(fx, body.getX() + Math.cos(a) * w, body.getY() + h * 0.5, body.getZ() + Math.sin(a) * w, 1, 0.0, h * 0.25, 0.0, 0.0);
+			}
+		}
+		pull(level, foe, player, fx, progress);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), throb, SoundSource.PLAYERS, 0.6F, 0.5F + (float)progress * 0.8F);
 	}
 
 	/** A few motes along the line from {@code from} to {@code to}, thicker toward the end ({@code progress} 0..1). */

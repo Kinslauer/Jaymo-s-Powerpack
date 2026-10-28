@@ -30,7 +30,8 @@ import net.minecraft.world.level.block.Blocks;
  * (0.7.262, Andy's NOEA picks) Rubber-folk: pink and stretchy. Their reach is longer ({@link #REACH}: the stretch, as a
  * longer arm and not a drawn one), a lost limb grows back on its own ({@link #REGROW_EVERY}, as a Verdant's does, through
  * Jaymo's Powers' dismemberment), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
- * that lies downed, and hold the heritage key close by ({@link HeritageHold}) to swallow it for a heal ({@link #absorb}).
+ * that lies downed, and press the heritage key close by ((0.7.288) a toggle, {@link HeritageHold}: the hand on it, pulses
+ * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}).
  * They have a sweet tooth: cookies, pie, honey, berries, melon, cake, and Jaymo's Kitchen's tarts, pies, cobbler and
  * brownies mend them ({@link #sweet}). Flaw: rubber burns, and pops: fire burns them longer, and arrows hurt more
  * ({@link Heritage#dealt}).
@@ -44,12 +45,12 @@ public final class RubberFolk {
 	/** A lost limb grows back this often (ticks), one at a time. */
 	static final int REGROW_EVERY = 400;
 	/**
-	 * Absorbing: how far the foe may be (blocks), how long the hold takes (ticks), the share of its health they take back, at
+	 * Absorbing: how far the foe may be (blocks), how long it takes (ticks), the share of its health they take back, at
 	 * least and at most, and food. A weak foe is small (at most this wide and tall) with this little health at most; a downed
 	 * one may be bigger.
 	 */
 	static final double ABSORB_REACH = 2.5;
-	static final int ABSORB_TICKS = 40, ABSORB_FOOD = 2;
+	static final int ABSORB_TICKS = 60, ABSORB_FOOD = 2;
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;
@@ -58,7 +59,6 @@ public final class RubberFolk {
 	/** Pink motes. */
 	private static final DustParticleOptions PINK = new DustParticleOptions(0xF08CB8, 0.8F);
 
-	private static final Map<UUID, HeritageHold.Channel> CHANNELS = new HashMap<>();
 	/** The sweet each is eating now, and the ticks it had left when last seen. */
 	private static final Map<UUID, ItemStack> EATING = new HashMap<>();
 	private static final Map<UUID, Integer> LEFT = new HashMap<>();
@@ -80,7 +80,6 @@ public final class RubberFolk {
 			return InteractionResult.PASS;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			CHANNELS.remove(handler.player.getUUID());
 			EATING.remove(handler.player.getUUID());
 			LEFT.remove(handler.player.getUUID());
 		});
@@ -103,9 +102,6 @@ public final class RubberFolk {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			UUID id = player.getUUID();
 			if (!Heritage.is(player, Heritage.Kind.RUBBERFOLK)) {
-				if (!CHANNELS.isEmpty()) {
-					CHANNELS.remove(id);
-				}
 				if (!EATING.isEmpty()) {
 					EATING.remove(id);
 					LEFT.remove(id);
@@ -129,12 +125,19 @@ public final class RubberFolk {
 					relish(player, was.is(Items.CAKE) ? CAKE_HEAL : KitchenCompat.sweet(was) ? KITCHEN_HEAL : SWEET_HEAL);
 				}
 			}
-			LivingEntity foe = HeritageHold.advance(CHANNELS, player, e -> HeritageHold.foe(player, e) && weak(e), ABSORB_REACH, ABSORB_TICKS, PINK,
-				"message.jaymoskingdoms.rubber.absorbing");
-			if (foe != null && player.level() instanceof ServerLevel level) {
-				absorb(level, player, foe);
+			if (player.level() instanceof ServerLevel level) {
+				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, ABSORB_TICKS, PINK, SoundEvents.SLIME_SQUISH_SMALL,
+					"message.jaymoskingdoms.rubber.absorbing");
+				if (foe != null) {
+					absorb(level, player, foe);
+				}
 			}
 		}
+	}
+
+	/** (0.7.288) The heritage key pressed: starts (or stops) swallowing a weak foe close by. */
+	static void press(ServerPlayer player) {
+		HeritageHold.press(player, e -> HeritageHold.foe(player, e) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
 	}
 
 	/** Small and low in health, or downed and not too big: weak enough to swallow. */

@@ -15,7 +15,6 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,12 +25,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
@@ -58,14 +55,6 @@ public final class BioBuilt {
 	/** Absorbing: how far the foe may be, how long the hold takes (ticks), the share of its health they take back (at most), and food. */
 	static final double ABSORB_REACH = 3.0;
 	static final int ABSORB_TICKS = 100, ABSORB_FOOD = 3;
-	/**
-	 * (0.7.288, Andy: "some part of the body touching the enemy, and pulsing through both entities, until it gradually
-	 * shrinks to nothing") While absorbing: the foe is drawn in to this far (blocks) at up to this much a tick, so the
-	 * reaching hand is on it; it lets go past this far; a pulse every this many ticks at first and at the end; and the foe
-	 * is this much smaller (share) when it's gone.
-	 */
-	static final double ABSORB_TOUCH = 0.9, ABSORB_DRAW = 0.08, ABSORB_KEEP = 4.5, ABSORB_SHRINK = 0.95;
-	static final int PULSE_FIRST = 14, PULSE_LAST = 4;
 	static final float ABSORB_HEAL_SHARE = 0.5F, ABSORB_HEAL_MAX = 12.0F;
 	/** A foe with more max health than this can't be taken in (no dragons). */
 	static final float ABSORB_MAX_HEALTH = 150.0F;
@@ -87,13 +76,6 @@ public final class BioBuilt {
 	static final AttachmentType<Integer> WORTH = AttachmentRegistry.create(JaymosKingdoms.id("bio_worth"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
-	/** (0.7.288) The foe's entity id while they're absorbing it, synced to everyone (the reaching hand, {@code BioAbsorbPose}). */
-	public static final AttachmentType<Integer> ABSORBING = AttachmentRegistry.create(JaymosKingdoms.id("bio_absorbing"),
-		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** (0.7.288) The foe shrinking away as it's taken in. */
-	private static final Identifier SHRINK_ID = JaymosKingdoms.id("bio_absorb_shrink");
-
-	private static final Map<UUID, HeritageHold.Channel> CHANNELS = new HashMap<>();
 	/** When each may bud again (game time). */
 	private static final Map<UUID, Long> BUD_READY = new HashMap<>();
 
@@ -107,13 +89,8 @@ public final class BioBuilt {
 				&& Heritage.is(player, Heritage.Kind.BIOBUILT)) {
 				drain(player, entity, taken);
 			}
-			// (0.7.288) hurt while absorbing, they lose hold of it
-			if (taken > 0.0F && entity instanceof ServerPlayer player && CHANNELS.containsKey(player.getUUID())) {
-				stop(player, "message.jaymoskingdoms.bio.absorb_hurt");
-			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			stop(handler.player, null);
 			BUD_READY.remove(handler.player.getUUID());
 		});
 	}
@@ -155,14 +132,18 @@ public final class BioBuilt {
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (!Heritage.is(player, Heritage.Kind.BIOBUILT)) {
-				if (!CHANNELS.isEmpty()) {
-					CHANNELS.remove(player.getUUID());
+				// (a heritage changed mid-absorb lets go)
+				if (!Heritage.is(player, Heritage.Kind.RUBBERFOLK) && HeritageHold.channel(player) != null) {
+					HeritageHold.stop(player, null);
 				}
 				continue;
 			}
-			HeritageHold.Channel channel = CHANNELS.get(player.getUUID());
-			if (channel != null && player.level() instanceof ServerLevel level) {
-				absorbing(level, player, channel);
+			if (player.level() instanceof ServerLevel level) {
+				LivingEntity foe = HeritageHold.step(level, player, e -> Downed.isDowned(e), ABSORB_REACH, ABSORB_TICKS, NODE,
+					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing");
+				if (foe != null) {
+					absorb(level, player, foe);
+				}
 			}
 		}
 	}
@@ -174,102 +155,12 @@ public final class BioBuilt {
 
 	/**
 	 * (0.7.288) The heritage key pressed (a toggle, Andy: "instead of a hold this is a toggle"): absorbing, it lets go; on
-	 * a downed foe close by, it starts taking it in; else, in the third form, it buds.
+	 * a downed foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
 	 */
 	static void press(ServerPlayer player) {
-		if (CHANNELS.containsKey(player.getUUID())) {
-			stop(player, "message.jaymoskingdoms.bio.absorb_stopped");
-			return;
+		if (!HeritageHold.press(player, e -> absorbable(player, e), ABSORB_REACH, "message.jaymoskingdoms.bio.absorbing")) {
+			bud(player);
 		}
-		LivingEntity sighted = Arcana.sighted(player);
-		if (sighted != null && player.isAlive() && !Downed.isDowned(player) && absorbable(player, sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
-			CHANNELS.put(player.getUUID(), new HeritageHold.Channel(sighted));
-			player.setAttached(ABSORBING, sighted.getId());
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.absorbing", 0));
-			return;
-		}
-		bud(player);
-	}
-
-	/** (0.7.288) Lets go of the foe being absorbed (if any): it grows back, and {@code why} says so (null: nothing said). */
-	static void stop(ServerPlayer player, @Nullable String why) {
-		HeritageHold.Channel channel = CHANNELS.remove(player.getUUID());
-		if (player.hasAttached(ABSORBING)) {
-			player.removeAttached(ABSORBING);
-		}
-		if (channel == null) {
-			return;
-		}
-		shrink(channel.target, 0.0);
-		if (why != null) {
-			player.sendOverlayMessage(Component.translatable(why).withStyle(ChatFormatting.GRAY));
-		}
-	}
-
-	private static void shrink(LivingEntity foe, double share) {
-		AttributeInstance scale = foe.getAttribute(Attributes.SCALE);
-		if (scale == null) {
-			return;
-		}
-		if (share <= 0.0) {
-			scale.removeModifier(SHRINK_ID);
-		} else {
-			scale.addOrUpdateTransientModifier(new AttributeModifier(SHRINK_ID, -share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-		}
-	}
-
-	/**
-	 * (0.7.288) One tick of an absorbing: the foe drawn in under the reaching hand, pulses through both bodies (quicker as
-	 * it goes), the foe shrinking, and at the end taken in.
-	 */
-	private static void absorbing(ServerLevel level, ServerPlayer player, HeritageHold.Channel channel) {
-		LivingEntity foe = channel.target;
-		if (!player.isAlive() || player.isSpectator() || Downed.isDowned(player) || !foe.isAlive() || foe.isRemoved() || foe.level() != level
-			|| !Downed.isDowned(foe) || player.distanceTo(foe) > ABSORB_KEEP) {
-			stop(player, "message.jaymoskingdoms.bio.absorb_lost");
-			return;
-		}
-		channel.ticks++;
-		double progress = Math.min(1.0, channel.ticks / (double)ABSORB_TICKS);
-		// drawn in close, under the hand
-		Vec3 away = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
-		if (away.lengthSqr() > 1.0E-4) {
-			Vec3 spot = player.position().add(away.normalize().scale(ABSORB_TOUCH));
-			Vec3 to = spot.subtract(foe.position()).multiply(1.0, 0.0, 1.0);
-			double length = to.length();
-			if (length > 0.1) {
-				Vec3 step = to.scale(Math.min(ABSORB_DRAW, length) / length);
-				foe.setDeltaMovement(step.x, foe.getDeltaMovement().y, step.z);
-				foe.needsSync = true;
-			}
-		}
-		shrink(foe, ABSORB_SHRINK * progress * progress * (3.0 - 2.0 * progress));
-		int every = Math.max(PULSE_LAST, Math.round(Mth.lerp((float)progress, PULSE_FIRST, PULSE_LAST)));
-		if (channel.ticks % every == 0) {
-			pulse(level, player, foe, progress);
-		}
-		if (channel.ticks % HeritageHold.PROGRESS_EVERY == 0) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.absorbing", (int)(progress * 100)));
-		}
-		if (channel.ticks >= ABSORB_TICKS) {
-			CHANNELS.remove(player.getUUID());
-			player.removeAttached(ABSORBING);
-			absorb(level, player, foe);
-		}
-	}
-
-	/** A pulse through both: a ring of motes round each body and a run of them along the arm between, with a throb. */
-	private static void pulse(ServerLevel level, ServerPlayer player, LivingEntity foe, double progress) {
-		for (LivingEntity body : new LivingEntity[] {foe, player}) {
-			double w = body.getBbWidth() * 0.6, h = body.getBbHeight();
-			for (int i = 0; i < 10; i++) {
-				double a = i * (Math.PI * 2.0 / 10.0);
-				level.sendParticles(NODE, body.getX() + Math.cos(a) * w, body.getY() + h * 0.5, body.getZ() + Math.sin(a) * w, 1, 0.0, h * 0.25, 0.0, 0.0);
-			}
-		}
-		HeritageHold.pull(level, foe, player, NODE, progress);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.6F,
-			0.5F + (float)progress * 0.8F);
 	}
 
 	/** What a foe adds to their worth. */
