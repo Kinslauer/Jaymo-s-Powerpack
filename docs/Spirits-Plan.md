@@ -359,7 +359,7 @@ side only, so add `int scale` (×100) to `SpiritState` is track G's job: it adds
 CODEC and STREAM_CODEC, and `Spirit.size(SpiritState)` reads it; track I uses it). `SpiritHud`: the clash tug bar is H's;
 the steady/armour/echo toggles show "on" after the move name. Lang keys in `spirits_i.json`.
 
-## Leave a Hand (Kingdoms 0.7.277)
+## Leave a Hand (Kingdoms 0.7.278)
 
 Andy (2026-10-27), linking Mage Hand (GPL-3.0, ideas only): "can this be implemented with our mana spirits?" A seventh
 shared move, `leave_hand` (level 6, cost 15): the hand stays at a container (`spirits/TendedHand`, drawn by

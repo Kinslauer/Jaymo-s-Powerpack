@@ -45,7 +45,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
-		// (0.7.277) the hands left behind at a chest
+		// (0.7.278) the hands left behind at a chest
 		com.jaymoskingdoms.client.spirits.TendedHandRenderer.register();
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		CampSkins.register();
