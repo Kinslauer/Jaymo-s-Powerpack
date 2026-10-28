@@ -5809,4 +5809,25 @@ the Rubber-folk's swallowing: "yes switch it too".
   modifier) to nothing and is taken in.
 - Any damage you take ends it ("Hurt, you lose your hold on it."), as does the foe getting up (Bio-built), dying, or being
   dragged 1.5 blocks past reach; a foe let go grows back.
+## 0.7.290: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.101)
+Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest".
+- **Bodies** (`BodySizes`): each heritage has a range of MCA's Size (height) and Width genes (0 .. 1, drawn 0.75x ..
+  1.25x). Stoneborn 0.55-0.9 tall, 0.6-1.0 wide; Sylvan 0-0.4 tall, 0-0.35 wide; plain folk 0.15-0.75 both; the rest
+  in between (Endborn tall and thin, Deepborn squat, Frostborn big-boned, Nightborn lean). Divine-born and Rubber-folk span the whole slider (Andy: "divine born should vary from the most extreme ends of
+  the spectrum, so should rubber, but they change with what they absorb"): each foe a Rubber-folk player swallows moves
+  their height and width `ABSORB_SHIFT` 0.75 of the way (Andy) toward its own (`McaBridge.shiftBody`). Verdant are naturally the
+  tallest (0.6-1.0; Andy: "verdants are naturally taller"), the top of the Size slider still theirs alone as in 0.7.87. A heritage with no line of its own gets the plain one.
+- **Villagers**: one MCA has just rolled (`McaGeneticsMixin` tags it `BodySizes.FRESH`) is spread across its blood's
+  ranges when it's born to it, so they vary as much as before; children and villagers already in the world are brought
+  in from the nearer edge (`McaBridge.keepBody`, from `VillagerHeritage.born` and on load).
+- **Players**: the old Verdant-only size cap (`Heritage.MCA_SIZE_CAP`) is now the heritage's ranges for both genes, held
+  when a look is saved, when a heritage is chosen and every 10 s. MCA's editor sliders are kept to them on your own
+  figure (`McaEditorSkinMixin`, `McaEditorHeritageMixin`), and the life story's figure stands at the middle of them.
 - Compile-checked only, not seen in game.
+- **Rubber-folk swallowing, drawn** (client `RubberEngulf`; Andy: "the absorb should animate the user's body leeching onto
+  and over the enemy, like rubber, then it engulfs the body and adds the mass to the user"): over the 3 s swallow a pink
+  rubber rope stretches out of the reaching hand and slaps onto the foe (first quarter), spreads over it from where it
+  struck as a skin creeping round to the far side (0.2-0.65), then the sealed skin wobbles while three lumps gulp down
+  the rope to the body as the foe shrinks inside. Swallowed, their body and arms swell round (`SWELL` 0.28) and settle
+  back with a wobble over 16 ticks, into the build the foe shifted them to. Everyone sees it. Texture from
+  `tools/gen_rubber_skin.py`.

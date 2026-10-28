@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
+import com.jaymoskingdoms.BodySizes;
 import com.jaymoskingdoms.SkinTones;
 import com.jaymoskingdoms.VillagerHeritage;
 import com.jaymoskingdoms.client.EditorFigure;
@@ -14,7 +15,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 /**
  * (0.7.236) Andy: "the sliders should only allow the color ranges that the heritage allows". On the figure of your
  * own character in MCA's editor ({@link EditorFigure}), melanin set by the skin picker is kept within your heritage's
- * range ({@link SkinTones#skinRange}), so that is what the editor saves.
+ * range ({@link SkinTones#skinRange}), so that is what the editor saves. (0.7.290) Its Size and Width sliders too, to the
+ * heritage's body ({@link BodySizes}).
  */
 @Mixin(Genetics.class)
 abstract class McaEditorSkinMixin {
@@ -24,9 +26,16 @@ abstract class McaEditorSkinMixin {
 
 	@ModifyVariable(method = "setGene", at = @At("HEAD"), argsOnly = true)
 	private float jaymoskingdoms$heritageSkin(float value, Genetics.GeneType type) {
-		if (type != Genetics.MELANIN || this.entity == null || this.entity.asEntity() != EditorFigure.current()) {
+		if (this.entity == null || this.entity.asEntity() != EditorFigure.current()) {
 			return value;
 		}
-		return SkinTones.clampSkin(VillagerHeritage.of(this.entity.asEntity()), value);
+		if (type == Genetics.MELANIN) {
+			return SkinTones.clampSkin(VillagerHeritage.of(this.entity.asEntity()), value);
+		} else if (type == Genetics.SIZE) {
+			return BodySizes.clampSize(VillagerHeritage.of(this.entity.asEntity()), value);
+		} else if (type == Genetics.WIDTH) {
+			return BodySizes.clampWidth(VillagerHeritage.of(this.entity.asEntity()), value);
+		}
+		return value;
 	}
 }

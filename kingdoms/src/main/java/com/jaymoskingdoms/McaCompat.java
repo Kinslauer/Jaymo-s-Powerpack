@@ -60,13 +60,11 @@ public final class McaCompat {
 	}
 
 	/**
-	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): its Size is held under the top of the
-	 * slider unless they're Verdant ({@link Heritage#MCA_SIZE_CAP}).
+	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.290) its Size and Width are kept to
+	 * their heritage's body ({@link BodySizes}).
 	 */
 	public static void capSaved(ServerPlayer player, net.minecraft.nbt.CompoundTag data) {
-		if (Heritage.sizeCapped(player)) {
-			McaBridge.capSize(data, Heritage.MCA_SIZE_CAP);
-		}
+		McaBridge.keepBody(data, Heritage.of(player));
 	}
 
 	/** The reputation {@code player}'s hearts with the people round {@code factionId}'s seat add (0 without MCA). */

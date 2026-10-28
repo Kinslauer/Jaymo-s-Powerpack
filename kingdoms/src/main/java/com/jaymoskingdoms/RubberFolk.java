@@ -50,7 +50,8 @@ public final class RubberFolk {
 	 * one may be bigger.
 	 */
 	static final double ABSORB_REACH = 2.5;
-	static final int ABSORB_TICKS = 60, ABSORB_FOOD = 2;
+	public static final int ABSORB_TICKS = 60;
+	static final int ABSORB_FOOD = 2;
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;
@@ -155,6 +156,12 @@ public final class RubberFolk {
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 		foe.discard();
 		player.heal(heal);
+		// (0.7.290) Andy: "they change with what they absorb": their build shifts toward the foe's (BodySizes.ABSORB_SHIFT)
+		if (McaCompat.LOADED) {
+			// (its standing shape, not as it lies downed)
+			net.minecraft.world.entity.EntityDimensions shape = foe.getType().getDimensions().scale(foe.getScale());
+			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
+		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.absorbed"));
 	}

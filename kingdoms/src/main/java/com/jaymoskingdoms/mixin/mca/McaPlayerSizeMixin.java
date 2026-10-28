@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.87) Andy: "max height should only be accessible to verdant". A player's MCA look is held under the top of the
- * Size slider as it's saved, unless they're Verdant ({@link McaCompat#capSaved}). The editor hands this same tag on to
+ * (0.7.87) Andy: "max height should only be accessible to verdant". A player's MCA look is kept to their heritage's
+ * body as it's saved (0.7.290: Size and Width, {@code BodySizes}; {@link McaCompat#capSaved}). The editor hands this same tag on to
  * every client, so they see it held too.
  */
 @Mixin(PlayerSaveData.class)
