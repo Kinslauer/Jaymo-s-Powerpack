@@ -358,3 +358,10 @@ featureless: the plain arm box, no hand); tune `TABLE` for the new poses; the Qu
 side only, so add `int scale` (×100) to `SpiritState` is track G's job: it adds the field (default 100) to the record,
 CODEC and STREAM_CODEC, and `Spirit.size(SpiritState)` reads it; track I uses it). `SpiritHud`: the clash tug bar is H's;
 the steady/armour/echo toggles show "on" after the move name. Lang keys in `spirits_i.json`.
+
+## The floating hand (Kingdoms 0.7.279)
+
+Andy (2026-10-28), after Mage Hand (GPL-3.0, ideas only): "the hands shouldnt stay behind. just make the hand follow the
+wispy ki glow texture, and only use it for the far reach, and catch." `spirits/SpiritHand` (never saved) and
+`client/spirits/SpiritHandRenderer` (the ki glow's texture and shells on `SpiritRig`'s hand): Far hand flies it out and
+acts on arrival; Catch hovers one ahead and closes one on each shot. The arms don't show for these two (pose IDLE).

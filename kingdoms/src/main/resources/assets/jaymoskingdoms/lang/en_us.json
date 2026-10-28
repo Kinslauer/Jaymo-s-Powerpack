@@ -6454,6 +6454,7 @@
 	"spirit.jaymoskingdoms.move.shove": "Shove",
 	"spirit.jaymoskingdoms.move.pin": "Hold the Line",
 	"spirit.jaymoskingdoms.move.hold": "Second Pair of Hands",
+	"entity.jaymoskingdoms.spirit_hand": "Spirit Hand",
 	"message.jaymoskingdoms.spirit.hold.on": "The spirit takes hold of what is in your off hand.",
 	"message.jaymoskingdoms.spirit.hold.off": "The spirit puts its hands away.",
 	"message.jaymoskingdoms.spirit.hold.nothing": "Carry a shield or a torch in your off hand for the spirit to hold.",

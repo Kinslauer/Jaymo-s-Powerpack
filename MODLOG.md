@@ -3288,3 +3288,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   in the jungle now gets its jungle fortress for a seat, and its villages and outposts join the shared pools (outposts
   now pool by any id with "outpost" in it, since Repurposed Structures leaves off "pillager"). Compile-checked here,
   not playtested.
+- **0.17.82, a floating spirit hand (Kingdoms 0.7.279):** Far Hand and Catch now send out a floating hand made of the
+  ki glow's wisps (after Mage Hand): it flies to the chest or item before it opens or comes to you, and catches shots in
+  front of you. Only the attuned see it. Not seen in game.

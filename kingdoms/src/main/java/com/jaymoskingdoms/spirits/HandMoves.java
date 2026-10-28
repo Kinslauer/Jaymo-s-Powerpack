@@ -78,9 +78,11 @@ import org.jspecify.annotations.Nullable;
  * spirit's move list starts with these six:
  * <ol>
  * <li><b>Far hand</b>: opens the chest, throws the lever, swings the door in sight, from as far as the hands reach
- * ({@link #REACH}, more with every level); or pulls a dropped item to its keeper.</li>
+ * ({@link #REACH}, more with every level); or pulls a dropped item to its keeper. (0.7.279) A floating hand of the ki glow's
+ * wisps flies there to do it ({@link SpiritHand}).</li>
  * <li><b>Grab and throw</b>: seizes the mob or item in sight and holds it ahead of its keeper, then hurls it.</li>
- * <li><b>Catch</b>: for a moment the arms snatch every arrow, fireball and potion that flies at its keeper.</li>
+ * <li><b>Catch</b>: for a moment the hands snatch every arrow, fireball and potion that flies at its keeper (0.7.279: a
+ * floating hand waits ahead of them and closes on each shot).</li>
  * <li><b>Shove</b>: a push that throws the foes in front of its keeper back.</li>
  * <li><b>Hold the line</b>: holds the mob in sight fast where it stands.</li>
  * <li><b>Second pair of hands</b>: holds its keeper's shield (or torch) for them, so a shield turns blows even with both
@@ -141,6 +143,9 @@ public final class HandMoves {
 		@Override
 		boolean act(ServerPlayer player, SpiritState state, int charge) {
 			CATCHING.put(player.getUUID(), tick(player) + CATCH_TICKS);
+			// (0.7.279) an open floating hand waits ahead of you for the shots, not the arms
+			SpiritHand.guard(player, state, CATCH_TICKS);
+			CastHints.setPose(player, Poses.IDLE);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.2F);
 			return true;
 		}
@@ -242,6 +247,7 @@ public final class HandMoves {
 		for (Move move : SHARED) {
 			Moves.register(move);
 		}
+		SpiritHand.register();
 		ServerTickEvents.END_SERVER_TICK.register(HandMoves::tick);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(HandMoves::allowDamage);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HandGrip.letGo());
@@ -324,6 +330,10 @@ public final class HandMoves {
 		}
 	}
 
+	/**
+	 * (0.7.279) The far hand is a floating hand ({@link SpiritHand}), not the arm: it flies to what is in sight, and only when it
+	 * gets there is the chest opened or the item taken, which it then carries home (Andy, after Mage Hand).
+	 */
 	private static boolean farHand(ServerPlayer player, SpiritState state, Hand move) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return false;
@@ -338,35 +348,43 @@ public final class HandMoves {
 		if (found != null) {
 			Entity target = found.getEntity();
 			if (target instanceof ItemEntity item) {
-				HandGrip.pull(player, item);
-				line(level, player, item.position());
-				CastHints.setPose(player, Poses.GRAB);
-				CastHints.setReach(player, eye.distanceTo(item.position()));
+				SpiritHand hand = SpiritHand.reach(player, state, item.position().add(0.0, 0.2, 0.0), null);
+				hand.onArrive(() -> {
+					if (item.isAlive() && player.isAlive()) {
+						HandGrip.pull(player, item);
+						hand.carry(item);
+					}
+				});
+				CastHints.setPose(player, Poses.IDLE);
 				return true;
 			}
 			if (target instanceof ItemFrame frame) {
-				InteractionResult result = frame.interact(player, InteractionHand.MAIN_HAND, found.getLocation().subtract(frame.position()));
-				if (result.consumesAction()) {
-					line(level, player, frame.position());
-					CastHints.setReach(player, eye.distanceTo(frame.position()));
-					return true;
-				}
+				Vec3 at = found.getLocation();
+				SpiritHand.reach(player, state, at, () -> {
+					if (frame.isAlive() && player.isAlive()) {
+						frame.interact(player, InteractionHand.MAIN_HAND, at.subtract(frame.position()));
+					}
+				});
+				CastHints.setPose(player, Poses.IDLE);
+				return true;
 			}
 		}
 		if (hit instanceof BlockHitResult block && hit.getType() == HitResult.Type.BLOCK) {
-			BlockState there = level.getBlockState(block.getBlockPos());
-			if (!reachable(there)) {
+			if (!reachable(level.getBlockState(block.getBlockPos()))) {
 				return false;
 			}
-			InteractionResult result = there.useWithoutItem(level, player, block);
-			if (!result.consumesAction()) {
-				return false;
-			}
-			line(level, player, hit.getLocation());
-			CastHints.setReach(player, eye.distanceTo(hit.getLocation()));
-			if (player.containerMenu != player.inventoryMenu) {
-				stretch(player, eye.distanceTo(hit.getLocation()) + 2.0);
-			}
+			Vec3 at = hit.getLocation();
+			SpiritHand.reach(player, state, at, () -> {
+				BlockState there = level.getBlockState(block.getBlockPos());
+				if (!player.isAlive() || player.level() != level || !reachable(there)) {
+					return;
+				}
+				InteractionResult result = there.useWithoutItem(level, player, block);
+				if (result.consumesAction() && player.containerMenu != player.inventoryMenu) {
+					stretch(player, player.getEyePosition().distanceTo(at) + 2.0);
+				}
+			});
+			CastHints.setPose(player, Poses.IDLE);
 			return true;
 		}
 		return false;
@@ -461,6 +479,11 @@ public final class HandMoves {
 		}
 		level.sendParticles(ParticleTypes.END_ROD, shot.getX(), shot.getY(), shot.getZ(), 6, 0.1, 0.1, 0.1, 0.05);
 		level.playSound(null, shot.getX(), shot.getY(), shot.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.6F);
+		SpiritState state = Spirits.state(player);
+		if (state != null) {
+			// (0.7.279) a floating hand closes on it where it was caught
+			SpiritHand.snatch(player, state, shot.position());
+		}
 		shot.discard();
 	}
 
@@ -481,7 +504,6 @@ public final class HandMoves {
 		}
 		Moves.start(player, CATCH, now);
 		snatch(player, shot);
-		Spirits.show(player, Poses.CATCH);
 		return true;
 	}
 
@@ -574,7 +596,6 @@ public final class HandMoves {
 		SpiritState state = Spirits.state(player);
 		if (state != null && catching(player) && source.getDirectEntity() instanceof Projectile shot && catchable(player, shot)) {
 			snatch(player, shot);
-			Spirits.show(player, Poses.CATCH);
 			return false;
 		}
 		if (HOLDING.containsKey(player.getUUID()) && shield(player.getOffhandItem()) && !source.is(DamageTypeTags.BYPASSES_SHIELD)) {
@@ -630,7 +651,6 @@ public final class HandMoves {
 			for (Projectile shot : owner.level().getEntitiesOfClass(Projectile.class, owner.getBoundingBox().inflate(CATCH_RANGE),
 				s -> s.isAlive() && catchable(owner, s))) {
 				snatch(owner, shot);
-				Spirits.show(owner, Poses.CATCH);
 			}
 		}
 	}

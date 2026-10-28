@@ -5718,3 +5718,19 @@ Grand Capitals, Epic Villages).
   and the like (12 in `outposts_overworld`), which the old "pillager" check missed.
   Its villages (`villages_overworld`, 11, and the one-village sets) already pool by name.
 - Compile-checked only, not seen in game.
+
+## 0.7.279: a floating ki-glow hand for Far Hand and Catch (pack 0.17.82)
+
+Andy linked Mage Hand (CurseForge, SkylorBeck; GPL-3.0, ideas only, our own code and look). After a first try with hands
+left behind at chests: "I dont like any of the functionality, the hands shouldnt stay behind. just make the hand follow
+the wispy ki glow texture, and only use it for the far reach, and catch."
+- **The floating hand** (`spirits/SpiritHand`, short lived, never saved): the spirit's own hand from its arms with no arm,
+  drawn (`client/spirits/SpiritHandRenderer`) as the ki glow is: three hollow shells of scrolling wisps in the spirit's
+  colour, added like light, with no solid core (`textures/entity/spirit_hand_glow.png`, Powers' ki glow texture). Only
+  the attuned (and those who read magic) see it.
+- **Far hand** sends it instead of stretching the arm: it flies out open (2 blocks a tick) to the chest, lever, door,
+  item frame or item in sight; only when it gets there does the chest open or the item come away, and it closes on it,
+  then flies home carrying the item with it and fades at your side.
+- **Catch**: while the catch lasts an open hand hovers ahead of you instead of the arms; each shot snatched (cast or the
+  spirit's own catch), a hand closes on it where it was caught and fades.
+- Compile-checked only, not seen in game.
