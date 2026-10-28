@@ -1,4 +1,4 @@
-"""(0.17.84) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh".
+"""(0.17.85) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh".
 Generates the one texture every aura style's wisps are drawn with: a single tongue of light, root at the bottom (v = 1),
 tip at the top (v = 0), bright down its middle and soft at its edges, narrowing and wavering up to a point, with a few
 fine streaks running up it. Additive (dark is clear, light glows); the colour is the aura's, given per vertex.

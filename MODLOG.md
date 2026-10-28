@@ -3291,7 +3291,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.82, a floating spirit hand (Kingdoms 0.7.279):** Far Hand and Catch now send out a floating hand made of the
   ki glow's wisps (after Mage Hand): it flies to the chest or item before it opens or comes to you, and catches shots in
   front of you. Only the attuned see it. Not seen in game.
-- **0.17.84, wisp auras:** Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a
+- **0.17.84, villagers stay put while you deal with them (Kingdoms 0.7.281):** a villager you talked to, traded with,
+  hit or opened the menu of no longer teleports (MCA's walk-target teleport, Kingdoms' stuck puffs and return-to-post)
+  for 30 seconds, or while you're still in their menu. Compile-checked here, not playtested.
+- **0.17.85, wisp auras:** Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a
   solid mesh" (four reference pictures). The flame, smooth and godly shells are gone; every style is now ~40-70 single
   tongues of light (`ZFighterKiAuraStyles.wisps`, texture `tools/gen_ki_wisp.py`) born touching the body, licking up
   and off it, drifting away and fading over a short life, then reborn elsewhere. Styles differ only in their wisps'

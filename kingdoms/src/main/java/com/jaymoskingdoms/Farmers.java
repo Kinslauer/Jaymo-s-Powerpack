@@ -442,8 +442,8 @@ public final class Farmers {
 			job.best = d;
 			job.improvedAt = now;
 		}
-		if (now - job.improvedAt > STUCK_TICKS) {
-			// (no way there: he turns up there in a puff, as builders do)
+		if (now - job.improvedAt > STUCK_TICKS && !Attention.held(farmer.mob())) {
+			// (no way there: he turns up there in a puff, as builders do; not with a player just dealing with him)
 			ServerLevel level = (ServerLevel)farmer.level();
 			BlockPos at = Construction.standable(level, to, 3);
 			level.sendParticles(ParticleTypes.POOF, farmer.getX(), farmer.getY() + 1.0, farmer.getZ(), 12, 0.3, 0.5, 0.3, 0.02);

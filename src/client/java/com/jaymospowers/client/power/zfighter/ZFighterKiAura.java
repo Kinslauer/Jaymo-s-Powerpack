@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * "Sparking" (with {@link ZFighterKiAuraStyles#sparks} on it); Smooth and Godly are drawn by {@link ZFighterKiAuraStyles}
  * under the same rules. The fourth number on the render state is the style.
  * <p>
- * (0.17.84) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh":
+ * (0.17.85) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh":
  * the shells are gone. Every style is now wisps of light that touch the body, lick off it and fade
  * ({@link ZFighterKiAuraStyles#draw}); this class still decides when it shows, how strong, how big and what colour, and
  * the fifth number is how far it streams back in flight.
@@ -130,7 +130,7 @@ public final class ZFighterKiAura {
 			if (aura == null || state.isInvisible) {
 				return;
 			}
-			// (0.17.84) whichever style, wisps now; the style decides their look
+			// (0.17.85) whichever style, wisps now; the style decides their look
 			ZFighterKiAuraStyles.draw(poseStack, collector, (int)aura[3], (int)aura[0], aura[1], aura[2], aura[4], state.ageInTicks);
 		}
 

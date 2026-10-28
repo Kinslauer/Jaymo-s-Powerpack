@@ -1,5 +1,5 @@
 """(0.17.46, Andy's NOEA picks) Generates the Sparking aura's little electric bolts and the motes (one strip of five
-16 px cells: four bolts and a soft dot). All additive (dark is clear, light glows). (0.17.84) The Smooth and Godly
+16 px cells: four bolts and a soft dot). All additive (dark is clear, light glows). (0.17.85) The Smooth and Godly
 shell textures went with the shells; the wisps are tools/gen_ki_wisp.py. Original art, painterly pixel:
 the greys are posterised into a few steps with a little grain, like the flame aura's. Run from the repo root:
 python3 -I tools/gen_ki_aura_styles.py"""

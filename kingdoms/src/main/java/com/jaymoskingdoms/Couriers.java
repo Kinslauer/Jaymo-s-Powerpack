@@ -395,7 +395,8 @@ final class Couriers {
 		Villager courier;
 		if (level.getEntity(e.courier()) instanceof Villager v && !v.isRemoved()) {
 			STALE.remove(v);
-			v.teleportTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5);
+			// (0.7.281) back from the road: wherever a player last saw them
+			Attention.carry(() -> v.teleportTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5));
 			courier = v;
 		} else {
 			Entity loaded = EntityType.loadEntityRecursive(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), e.body()), level,

@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 /**
  * (0.17.46, Andy's NOEA picks) The three looks of the ki aura, picked on the training screen.
  * <p>
- * (0.17.84) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh",
+ * (0.17.85) Andy: "all auras need to be more of a wisp making contact and dissipating rather than being a solid mesh",
  * with four pictures: thin blue-white tongues clinging to a fighter and flaking off him, a blaze of flame tongues
  * licking up past a fighter and breaking into sparks, fighters flying with their aura streaming behind them like a
  * comet, and a soft wavering glow hugging a fighter's outline, flecked with sparkles. So no style is a shell any more:

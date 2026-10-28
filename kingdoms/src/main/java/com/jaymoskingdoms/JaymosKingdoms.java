@@ -38,6 +38,8 @@ public final class JaymosKingdoms implements ModInitializer {
 			.clientTrackingRange(10)
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
+		// (0.7.281) first, so a use or hit another listener answers still counts: villagers just dealt with don't teleport
+		Attention.register();
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
 		McaCompat.register();

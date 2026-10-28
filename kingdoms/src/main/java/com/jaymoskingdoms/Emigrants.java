@@ -306,7 +306,8 @@ public final class Emigrants {
 		Villager v;
 		if (there instanceof Villager mob && !mob.isRemoved()) {
 			STALE.remove(mob);
-			mob.teleportTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5);
+			// (0.7.281) back from the road: wherever a player last saw them
+			Attention.carry(() -> mob.teleportTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5));
 			v = mob;
 		} else {
 			Entity loaded = EntityType.loadEntityRecursive(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), road.body()), level,

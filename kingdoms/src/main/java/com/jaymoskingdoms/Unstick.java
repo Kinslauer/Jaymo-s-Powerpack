@@ -116,7 +116,7 @@ public final class Unstick {
 
 	/** Our folk out of a fight, not breaking in and not on a caravan (they have their own), turn up where they were going. */
 	private static boolean puff(ServerLevel level, Folk folk, BlockPos target) {
-		if (folk.getTarget() != null || Assault.attacker(folk) || Caravans.isCaravanFolk(folk)) {
+		if (folk.getTarget() != null || Assault.attacker(folk) || Caravans.isCaravanFolk(folk) || Attention.held(folk)) {
 			return false;
 		}
 		BlockPos at = Construction.standable(level, target, 3);

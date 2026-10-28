@@ -717,7 +717,8 @@ public final class Construction {
 					return false;
 				}
 				BlockPos out = standable(level, at.offset(0, 1, 0), 3);
-				in.teleportTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5);
+				// (0.7.281) out of the block going in, held or not
+				Attention.carry(() -> in.teleportTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5));
 			}
 		}
 		BlockState state = shaped(level, at, op.state());
