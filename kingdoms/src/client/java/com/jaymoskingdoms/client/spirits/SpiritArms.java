@@ -75,12 +75,12 @@ public final class SpiritArms {
 	/**
 	 * (0.7.280) Where a spirit's arms come from. Andy (2026-10-28): "imagine the arms as emitting from the large ki figure that
 	 * emanates from the character behind the player. simulate all the arms like this." Every spirit's arms grow from the
-	 * shoulders of an unseen figure standing over your back, not from your own arm: model pixels {@code up}, {@code back} and
-	 * {@code out} (each arm to its own side) per unit of size (counted at least 1 and at most {@link #FLOAT_SIZE_CAP}), the
-	 * whole figure {@code right} of you, the arm's resting angle ({@code idle}, as the {@link #TABLE}'s), and whether the
-	 * resting hand is held open, ready to grab.
+	 * shoulders of a figure standing over your back, not from your own arm: model pixels {@code up} and {@code back} per unit of
+	 * size (counted at least 1 and at most {@link #FLOAT_SIZE_CAP}), the whole figure {@code right} of you, the arm's resting angle
+	 * ({@code idle}, as the {@link #TABLE}'s), and whether the resting hand is held open, ready to grab. (0.7.298) The figure is
+	 * seen now ({@link SpiritFigure}): how far out its shoulders are is its own, and it stands clear of you.
 	 */
-	record Anchor(float up, float back, float out, float right, float[] idle, boolean open) {
+	record Anchor(float up, float back, float right, float[] idle, boolean open) {
 	}
 
 	/** Each spirit's figure, by kind (the Quiet One takes one of the four each time it is called: {@link #style}). */
@@ -88,13 +88,13 @@ public final class SpiritArms {
 
 	static {
 		// Grimsby: his blade held up over your shoulder, edge forward, always in sight (Andy: "Grimsby's blade ... should always be visible")
-		ANCHORS[Spirits.GRIMSBY] = new Anchor(3.0F, 3.5F, 1.0F, 0.0F, new float[] {-1.35F, -0.15F, 0.30F}, false);
+		ANCHORS[Spirits.GRIMSBY] = new Anchor(4.0F, 3.5F, 0.0F, new float[] {-1.35F, -0.15F, 0.30F}, false);
 		// Varro: "imposing and above and behind and out to the right at an angle, as if it were ready to grab"
-		ANCHORS[Spirits.VARRO] = new Anchor(6.5F, 5.0F, 2.5F, 2.5F, new float[] {-1.15F, 0.35F, 0.55F}, true);
+		ANCHORS[Spirits.VARRO] = new Anchor(6.5F, 5.0F, 2.5F, new float[] {-1.15F, 0.35F, 0.55F}, true);
 		// Ambrose: "float above and behind you", the great hands hovering over your shoulders
-		ANCHORS[Spirits.AMBROSE] = new Anchor(6.0F, 4.5F, 2.0F, 0.0F, new float[] {-1.0F, 0.0F, 0.35F}, false);
+		ANCHORS[Spirits.AMBROSE] = new Anchor(6.0F, 4.5F, 0.0F, new float[] {-1.0F, 0.0F, 0.35F}, false);
 		// Thessaly: the glove at your shoulder, a little out, where you can always see it
-		ANCHORS[Spirits.THESSALY] = new Anchor(2.5F, 3.0F, 1.5F, 0.0F, new float[] {-1.2F, -0.2F, 0.30F}, false);
+		ANCHORS[Spirits.THESSALY] = new Anchor(2.5F, 3.0F, 0.0F, new float[] {-1.2F, -0.2F, 0.30F}, false);
 		ANCHORS[Spirits.QUIET] = ANCHORS[Spirits.AMBROSE];
 	}
 
@@ -129,9 +129,11 @@ public final class SpiritArms {
 
 	/**
 	 * What one being's spirit looks like this frame: its {@code kind}, how far manifest it is (0-1), the {@code pose} it holds
-	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}).
+	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}),
+	 * and how strong its {@code figure} is (0-1, {@link SpiritFigure#strength}).
 	 */
-	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach, int style, long shown) {
+	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach, int style, long shown,
+		float figure) {
 	}
 
 	/**
@@ -279,7 +281,7 @@ public final class SpiritArms {
 		if (spirit == null) {
 			TRACKS.remove(entity.getId());
 			if (flickerLeft > 0 && entity == minecraft.player) {
-				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0, style(flickerKind, 100), 0L);
+				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0, style(flickerKind, 100), 0L, 0.0F);
 			}
 			return null;
 		}
@@ -310,8 +312,10 @@ public final class SpiritArms {
 			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
+		// the figure shows each time the projection forms, and fades while the arms go on
+		float figure = spirit.show() != 0L ? manifest * SpiritFigure.strength(age) : 0.0F;
 		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit), spirit.reach(),
-			style(spirit.kind(), spirit.scale()), spirit.shownAt());
+			style(spirit.kind(), spirit.scale()), spirit.shownAt(), figure);
 	}
 
 	/** How far beyond its keeper's box a being's spirit hand reaches now (blocks), for the culling box; 0 for none. */
@@ -425,9 +429,10 @@ public final class SpiritArms {
 			}
 			// from the figure's shoulder over your back, a little toward where the hand rests
 			Anchor a = anchor(style(kind, spirit == null ? 100 : spirit.scale()));
-			double lift = Mth.clamp(size, 1.0F, FLOAT_SIZE_CAP) * PX;
-			double side = (i == 0 ? 1.0 : -1.0) * (SHOULDER_OUT + a.out() * lift) + a.right() * lift;
-			double back = a.back() * lift - 0.35 * Math.min(size, FLOAT_SIZE_CAP);
+			float lifted = Mth.clamp(size, 1.0F, FLOAT_SIZE_CAP);
+			double lift = lifted * PX;
+			double side = (i == 0 ? 1.0 : -1.0) * SpiritFigure.shoulder(kind, size) * PX + a.right() * lift;
+			double back = SpiritFigure.back(kind, a, lifted, size) * PX - 0.35 * Math.min(size, FLOAT_SIZE_CAP);
 			double x = entity.getX() - Mth.cos(yaw) * side + behindX * back;
 			double z = entity.getZ() - Mth.sin(yaw) * side + behindZ * back;
 			double y = entity.getY() + SHOULDER_Y + a.up() * lift;
@@ -512,8 +517,10 @@ public final class SpiritArms {
 		return ARGB.color(255, r, g, b);
 	}
 
-	/** Blocks a model pixel is, and the shoulder's place on a standing player (blocks out from the middle, up from the feet). */
-	static final double PX = SpiritArms.PLAYER_SCALE / 16.0, SHOULDER_OUT = 0.31, SHOULDER_Y = 1.3;
+	/** Blocks a model pixel is, and the shoulder's height on a standing player (blocks up from the feet). */
+	static final double PX = SpiritArms.PLAYER_SCALE / 16.0, SHOULDER_Y = 1.3;
+	/** The vanilla arm's pivot below the shoulder line (model pixels): the figure's arms hang from as high on it. */
+	static final float ARM_PIVOT_Y = 2.0F;
 
 	// ---- first person ------------------------------------------------------------------------------------------------------
 
@@ -552,7 +559,7 @@ public final class SpiritArms {
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.scale(PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 		poseStack.translate(0.0F, MODEL_DROP, 0.0F);
-		arms.submit(poseStack, collector, avatar.lightCoords, avatar);
+		arms.submit(poseStack, collector, avatar.lightCoords, avatar, false);
 		poseStack.popPose();
 	}
 
@@ -575,7 +582,7 @@ public final class SpiritArms {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			this.arms.submit(poseStack, collector, lightCoords, state);
+			this.arms.submit(poseStack, collector, lightCoords, state, true);
 		}
 	}
 
@@ -590,7 +597,7 @@ public final class SpiritArms {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			this.arms.submit(poseStack, collector, lightCoords, state);
+			this.arms.submit(poseStack, collector, lightCoords, state, true);
 		}
 	}
 
@@ -599,6 +606,7 @@ public final class SpiritArms {
 		private final Supplier<HumanoidModel<?>> wearer;
 		private final ArmModel[][] models = new ArmModel[Spirits.QUIET + 1][ARM_SHELLS.length];
 		private final ArmModel[][] trails = new ArmModel[Spirits.QUIET + 1][TRAIL_LAG.length];
+		private final SpiritFigure.Model[][] figures = new SpiritFigure.Model[Spirits.QUIET + 1][SpiritFigure.SHELLS.length];
 
 		Arms(Supplier<HumanoidModel<?>> wearer) {
 			this.wearer = wearer;
@@ -619,11 +627,20 @@ public final class SpiritArms {
 			return this.trails[kind][ghost];
 		}
 
+		private SpiritFigure.Model figure(int kind, int shell) {
+			if (this.figures[kind][shell] == null) {
+				this.figures[kind][shell] = new SpiritFigure.Model(LayerDefinition.create(SpiritFigure.mesh(kind, SpiritFigure.SHELLS[shell]), 64, 64)
+					.bakeRoot(), kind);
+			}
+			return this.figures[kind][shell];
+		}
+
 		private static ModelPart bake(int kind, int shell) {
 			return LayerDefinition.create(SpiritRig.mesh(kind, ARM_SHELLS[shell]), 64, 64).bakeRoot();
 		}
 
-		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state) {
+		/** Draws the arms, and the figure behind them unless {@code withFigure} is false (first person: it would stand round the camera). */
+		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state, boolean withFigure) {
 			Look look = state.getData(LOOK);
 			Glow glow = state.getData(ManaClient.KEY);
 			if (look == null || glow == null || state.isInvisible || look.manifest() <= 0.01F) {
@@ -644,6 +661,16 @@ public final class SpiritArms {
 			float strike = look.pose() == Poses.IDLE ? 0.0F : look.poseWeight();
 			// the projection is called up at its full: only a little dimmer for a dim glow
 			float strength = Math.max(glow.strength(), MIN_STRENGTH);
+			if (withFigure && look.figure() > 0.01F) {
+				// the figure first, behind its arms: pulsing, pale at the core, fading as it goes
+				float pulse = SpiritFigure.pulse(state.ageInTicks);
+				for (int i = 0; i < SpiritFigure.SHELLS.length; i++) {
+					float light = Mth.clamp(SpiritFigure.SHELL_LIGHT[i] * strength * pulse * look.figure(), 0.0F, 1.0F);
+					collector.order(ORDER + i).submitModel(this.figure(kind, i), state, poseStack,
+						RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.37F + 0.21F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
+						ManaClient.tint(i == 0 ? ghost(color) : color, light), null, 0);
+				}
+			}
 			for (int i = 0; i < ARM_SHELLS.length; i++) {
 				float light = Mth.clamp(ARM_SHELL_LIGHT[i] * strength * breathe * fade, 0.0F, 1.0F);
 				if (i > 0) {
@@ -737,7 +764,6 @@ public final class SpiritArms {
 			// forming: it fades in and swells the last little way, rather than growing from nothing
 			float size = look.size() * (FORM_FROM + (1.0F - FORM_FROM) * look.manifest());
 			Anchor anchor = anchor(look.style());
-			float lift = Mth.clamp(size, 1.0F, FLOAT_SIZE_CAP);
 			int poseId = Mth.clamp(look.pose(), 0, Poses.COUNT - 1);
 			float[] idle = anchor.idle();
 			float[] target = poseId == Poses.SPEAK ? idle : poseId == Poses.ECHO ? echoAngle(look.shown()) : TABLE[poseId];
@@ -774,9 +800,11 @@ public final class SpiritArms {
 				arm.zRot += f.sz * side;
 				boolean shaped = mode != NORMAL && !waits;
 				// at the figure's shoulder, above and behind yours (model -y is up, +z behind; the right arm's outside is -x)
-				arm.y -= anchor.up() * lift;
-				arm.z += anchor.back() * lift;
-				arm.x -= (side * anchor.out() + anchor.right()) * lift;
+				// (placed by the size it is called at, not the forming size, so the arms stay on the figure's frame as they form)
+				float built = Mth.clamp(look.size(), 1.0F, FLOAT_SIZE_CAP);
+				arm.x = -side * SpiritFigure.shoulder(look.kind(), look.size()) - anchor.right() * built;
+				arm.y = ARM_PIVOT_Y - anchor.up() * built;
+				arm.z = SpiritFigure.back(look.kind(), anchor, built, look.size());
 				if (shaped) {
 					shape(arm, f, mode, look, state, age, w, size, side, look.arms() >= 2);
 				}
