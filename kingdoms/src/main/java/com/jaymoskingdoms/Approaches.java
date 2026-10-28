@@ -1115,6 +1115,10 @@ public final class Approaches {
 			// (0.7.141) a villager who isn't one, questioning you
 			return;
 		}
+		if (Handshakes.answerGreeting(player, answer)) {
+			// (0.7.288) a first meeting: shake their hand, or wave
+			return;
+		}
 		if (Careers.answer(player, answer)) {
 			// (0.7.220) a talk about work
 			return;
