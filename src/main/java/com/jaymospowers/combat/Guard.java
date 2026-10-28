@@ -1,6 +1,7 @@
 package com.jaymospowers.combat;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.armory.HammerSlam;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.darktide.DarktidePower;
@@ -72,6 +73,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Mashing doesn't work: a raise within {@link #EAGER_TICKS} of the last one, when that one parried nothing, is only
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
+ * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  */
 public final class Guard {
@@ -134,7 +136,7 @@ public final class Guard {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
-		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(Guard::guardable, (builder, lookup, item) ->
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item), (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
 				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, GUARD_SHARE)),
 				new BlocksAttacks.ItemDamageFunction(3.0F, 0.0F, 0.5F),
@@ -192,7 +194,8 @@ public final class Guard {
 	 * guard.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
-		if (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()) {
+		if (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
+			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem())) {
 			return InteractionResult.PASS;
 		}
 		ItemStack off = player.getOffhandItem();
@@ -205,9 +208,9 @@ public final class Guard {
 		return InteractionResult.PASS;
 	}
 
-	/** Whether {@code player} holds anything up that blocks (a shield or a weapon's guard). */
-	private static boolean raised(Player player) {
-		return player.isUsingItem() && player.getUseItem().has(DataComponents.BLOCKS_ATTACKS);
+	/** Whether {@code player} holds anything up that blocks (a shield or a weapon's guard; not a warhammer's smash charge). */
+	public static boolean raised(Player player) {
+		return player.isUsingItem() && player.getUseItem().has(DataComponents.BLOCKS_ATTACKS) && !HammerSlam.charging(player);
 	}
 
 	private static Raise raise(ServerPlayer player) {

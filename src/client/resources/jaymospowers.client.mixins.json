@@ -4,6 +4,8 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"GuardFirstPersonMixin",
+		"HammerFirstPersonMixin",
+		"HammerPoseMixin",
 		"LashSocketFirstPersonMixin",
 		"LashSocketItemInHandLayerMixin",
 		"LashSocketItemLayerMixin",
@@ -11,6 +13,7 @@
 		"WeaponModFlailHandMixin",
 		"BackpackAvatarRendererMixin",
 		"BombGliderAttackMixin",
+		"FinisherAttackMixin",
 		"BombGliderAvatarRendererMixin",
 		"BombGliderInputMixin",
 		"BodyCoverAvatarRendererMixin",
