@@ -3327,4 +3327,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   burns Godly, or Smooth if that's your pick; other forms keep your pick. `/powerdebug zfighter forms mutation on`
   says whether the legendary line is live (it needs Warrior-born heritage). Afterimage (and the sparring partner)
   registered its copy only after spawning it, so the leftover sweep on entity load discarded it at once; it is now
-  known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it. Compile-checked, not seen in game.
+  known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
+  Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
+  Legend) even with enough. Compile-checked, not seen in game.

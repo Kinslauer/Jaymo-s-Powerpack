@@ -285,9 +285,12 @@ public final class ZFighterPower implements Power {
 		0x40F0E0, // cyan
 	};
 
-	/** Hardship lived through (the road to Super). Saved, kept through death. */
+	/**
+	 * Hardship lived through (the road to Super). Saved, kept through death. (0.17.90) Synced to its owner, whose training
+	 * screen checks it before Learn lights up.
+	 */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
-		builder -> builder.persistent(Codec.INT).copyOnDeath());
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/** What the server keeps on each Z Fighter between ticks. */
 	static final class Live {
