@@ -235,7 +235,7 @@ public final class TinkeringJei implements IModPlugin {
 		if (stone.isEmpty()) {
 			return;
 		}
-		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+		for (WeaponParts.Kind kind : WeaponParts.shaped()) {
 			List<ItemStack> needed = stone.stream().map(s -> s.copyWithCount(PartBuilderMenu.itemsNeeded(kind.stoneCost(), s))).toList();
 			recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tinkering.PATTERN)), needed),
 				List.of(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1)), List.of(note("part_builder.cost", kind.stoneCost()))));

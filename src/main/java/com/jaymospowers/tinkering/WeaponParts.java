@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -130,6 +131,12 @@ public final class WeaponParts {
 	}
 
 	private static final int INGOT = Molten.INGOT;
+	public static final String SORAS_DAGGER_BLADE = "soras_dagger_blade";
+	/**
+	 * (0.17.110) Heads the Part Builder doesn't shape: their stone head is found, not made (Sora's Dagger Blade: a
+	 * village child has it, {@code power/wind/SorasBladeChild}). They still cast and assemble like any other.
+	 */
+	public static final Set<String> FOUND = Set.of(SORAS_DAGGER_BLADE);
 	/** Every kind, by its head's id; costs are the ingots their old crafting recipes took. */
 	public static final Map<String, Kind> KINDS = new LinkedHashMap<>();
 	public static final Map<Kind, Item> PARTS = new LinkedHashMap<>();
@@ -158,7 +165,7 @@ public final class WeaponParts {
 		add(new Kind("quarterstaff_caps", "jaymospowers:iron_quarterstaff", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 		// (0.17.110) Andy: "the dagger needs a way to be crafted with tinkers": Wind's Sora's Dagger, iron stage (its
 		// crafting recipe is gone); gilding and the later stages stay as they were (casting table, Tool Station)
-		add(new Kind("soras_dagger_blade", "jaymospowers:soras_dagger", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind(SORAS_DAGGER_BLADE, "jaymospowers:soras_dagger", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 		// vanilla spears
 		add(new Kind("spear_tip", "minecraft:spear", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
 		// Balkon's WeaponMod (the musket bayonet is still a musket and a knife put together)
@@ -199,9 +206,14 @@ public final class WeaponParts {
 		}
 	}
 
-	/** The kinds whose weapons are in the game, in Part Builder order. */
+	/** The kinds whose weapons are in the game. */
 	public static List<Kind> loaded() {
 		return KINDS.values().stream().filter(Kind::loaded).toList();
+	}
+
+	/** The kinds the Part Builder shapes, in its order: loaded, and not {@link #FOUND}. */
+	public static List<Kind> shaped() {
+		return loaded().stream().filter(kind -> !FOUND.contains(kind.part())).toList();
 	}
 
 	// --- casts ---

@@ -3407,6 +3407,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   leaves them alone. Compile-checked, not seen in game; how they sit in the hand may need a tweak.
 - **0.17.110, Sora's Dagger is forged** (Andy: "the dagger needs a way to be crafted with tinkers"): its crafting recipe
   is gone; the iron dagger is put together at the Tool Station from a **Sora's Dagger Blade** (`soras_dagger_blade`, a
-  `WeaponParts` kind: shape a stone one at the Part Builder, pour gold over it for its Weapon Cast, then 2 ingots of
-  molten iron over the cast), a Tool Handle and a Tool Binding, like the Armory's weapons. Gilding and the later stages
-  are unchanged. Blade sprite drawn in `tools/weapon_parts_assets.py` (DRAWN). Compile-checked, not seen in game.
+  `WeaponParts` kind: pour gold over the stone one for its Weapon Cast, then 2 ingots of molten iron over the cast), a
+  Tool Handle and a Tool Binding, like the Armory's weapons. Gilding and the later stages are unchanged.
+  **A child has the stone blade** (Andy: "the stone sora's dagger blade should be carried by a child ... you will have
+  to tell him not to play with things like that, and you take it instead"): the Part Builder doesn't shape it
+  (`WeaponParts.FOUND`, `shaped()`). When a Wind user comes into a village (a new one, 256+ blocks from the last, or a
+  day later) there's a 60% chance a village child nearby is playing with it and runs over (`power/wind/SorasBladeChild`,
+  tagged, drops it if killed). Right-click him (anyone can) to tell him off and take it. Not rolled while you already
+  carry the blade or a Sora's Dagger. Blade sprite drawn in `tools/weapon_parts_assets.py` (DRAWN). Compile-checked, not seen in game.

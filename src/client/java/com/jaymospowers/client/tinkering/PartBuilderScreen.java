@@ -51,12 +51,12 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		if (page < partPages()) {
 			return java.util.stream.IntStream.range(page * CELLS, Math.min(PartType.values().length, (page + 1) * CELLS)).toArray();
 		}
-		int count = WeaponParts.loaded().size(), from = (page - partPages()) * CELLS;
+		int count = WeaponParts.shaped().size(), from = (page - partPages()) * CELLS;
 		return java.util.stream.IntStream.range(from, Math.min(count, from + CELLS)).map(i -> PartBuilderMenu.WEAPON_BUTTONS + i).toArray();
 	}
 
 	private int pages() {
-		return partPages() + (WeaponParts.loaded().size() + CELLS - 1) / CELLS;
+		return partPages() + (WeaponParts.shaped().size() + CELLS - 1) / CELLS;
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 				graphics.fill(x, y + CELL - 1, x + CELL, y + CELL, TinkerUi.ACCENT);
 			}
 			if (buttons[i] >= PartBuilderMenu.WEAPON_BUTTONS) {
-				WeaponParts.Kind kind = WeaponParts.loaded().get(buttons[i] - PartBuilderMenu.WEAPON_BUTTONS);
+				WeaponParts.Kind kind = WeaponParts.shaped().get(buttons[i] - PartBuilderMenu.WEAPON_BUTTONS);
 				graphics.item(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1), x + 1, y + 1);
 				if (material != null && !PartBuilderMenu.shapesWeapons(material)) {
 					graphics.fill(x + 1, y + 1, x + CELL - 1, y + CELL - 1, 0x80000000);
@@ -112,7 +112,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			return part.ordinal();
 		}
 		WeaponParts.Kind kind = menu.selectedWeapon();
-		return kind == null ? -1 : PartBuilderMenu.WEAPON_BUTTONS + WeaponParts.loaded().indexOf(kind);
+		return kind == null ? -1 : PartBuilderMenu.WEAPON_BUTTONS + WeaponParts.shaped().indexOf(kind);
 	}
 
 	private Component pageName() {
@@ -192,7 +192,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		if (index >= 0) {
 			int button = buttons()[index];
 			Component name = button >= PartBuilderMenu.WEAPON_BUTTONS
-				? Component.translatable("item.jaymospowers." + WeaponParts.loaded().get(button - PartBuilderMenu.WEAPON_BUTTONS).part())
+				? Component.translatable("item.jaymospowers." + WeaponParts.shaped().get(button - PartBuilderMenu.WEAPON_BUTTONS).part())
 				: Component.translatable("item.jaymospowers." + PartType.values()[button].id);
 			graphics.setTooltipForNextFrame(font, name, mouseX, mouseY);
 		} else if (pageArrowAt(mouseX, mouseY) != 0) {
