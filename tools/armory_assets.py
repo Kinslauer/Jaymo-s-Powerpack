@@ -130,7 +130,13 @@ def model_of(aow, name):
         return json.load(f)
 
 
+# (0.17.109) modelled in 3D in Blockbench (tools/blockbench/): their model and 32x32 texture aren't AoW's any more
+BLOCKBENCH_MODELS = {"iron_rapier", "iron_dagger"}
+
+
 def copy_texture(aow, src, dest):
+    if dest.rsplit("/", 1)[-1] in BLOCKBENCH_MODELS:
+        return
     path = os.path.join(aow, "assets", "ageofweapons", "textures", src + ".png")
     out = os.path.join(ASSETS, "textures", dest + ".png")
     os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -147,6 +153,8 @@ STAFF_DISPLAY = {
 
 def handheld(aow, item, aow_model, parent="minecraft:item/handheld"):
     """A handheld model using the copied texture, keeping AoW's hand poses (its big two-handers are drawn 2x)."""
+    if item in BLOCKBENCH_MODELS:
+        return
     src = model_of(aow, aow_model) or {}
     model = {"parent": parent, "textures": {"layer0": f"{NS}:item/armory/{item}"}}
     if "display" in src:
