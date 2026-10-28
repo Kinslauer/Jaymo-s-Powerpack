@@ -31,13 +31,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * The horse drop: saddlebags (worn in the horse armor slot, they give a horse a donkey's worth of storage, and the
  * goods stay in the bags when they come off), and horse-drawn vehicles in every wood, after NiftyCarts: the wagon
- * (a chest and a seat), the supply cart, the animal cart and the plow, plus the wheel they're built with.
+ * (a chest and a seat), the coach (six seats), the supply cart, the animal cart and the plow, plus the wheel they're built with.
  */
 public final class Saddlebags {
 	public static Item SADDLEBAG;
 	public static Item WHEEL;
 	public static Item WAGON_ITEM;
 	public static EntityType<CartEntity> WAGON;
+	public static EntityType<CartEntity> COACH;
 	public static EntityType<CartEntity> SUPPLY_CART;
 	public static EntityType<CartEntity> ANIMAL_CART;
 	public static EntityType<CartEntity> PLOW;
@@ -63,6 +64,7 @@ public final class Saddlebags {
 		WHEEL = item("wheel", Item::new, new Item.Properties());
 
 		WAGON = cart("wagon", 1.8F, 1.6F);
+		COACH = cart("coach", 2.2F, 1.8F);
 		SUPPLY_CART = cart("supply_cart", 1.5F, 1.4F);
 		ANIMAL_CART = cart("animal_cart", 1.3F, 1.4F);
 		PLOW = cart("plow", 1.3F, 1.4F);
@@ -98,6 +100,7 @@ public final class Saddlebags {
 	public static EntityType<CartEntity> type(CartKind kind) {
 		return switch (kind) {
 			case WAGON -> WAGON;
+			case COACH -> COACH;
 			case SUPPLY_CART -> SUPPLY_CART;
 			case ANIMAL_CART -> ANIMAL_CART;
 			case PLOW -> PLOW;

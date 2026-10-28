@@ -12,10 +12,12 @@ public final class CartClient {
 
 	public static void register() {
 		EntityRendererRegistry.register(Saddlebags.WAGON, CartRenderer::new);
+		EntityRendererRegistry.register(Saddlebags.COACH, CartRenderer::new);
 		EntityRendererRegistry.register(Saddlebags.SUPPLY_CART, CartRenderer::new);
 		EntityRendererRegistry.register(Saddlebags.ANIMAL_CART, CartRenderer::new);
 		EntityRendererRegistry.register(Saddlebags.PLOW, CartRenderer::new);
 		ModelLayerRegistry.registerModelLayer(NiftyCartModels.WAGON, NiftyCartModels::wagon);
+		ModelLayerRegistry.registerModelLayer(NiftyCartModels.COACH, NiftyCartModels::coach);
 		ModelLayerRegistry.registerModelLayer(NiftyCartModels.SUPPLY_CART, NiftyCartModels::supplyCart);
 		ModelLayerRegistry.registerModelLayer(NiftyCartModels.ANIMAL_CART, NiftyCartModels::animalCart);
 		ModelLayerRegistry.registerModelLayer(NiftyCartModels.PLOW, NiftyCartModels::plow);
