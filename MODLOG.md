@@ -3380,3 +3380,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
 - **0.17.107, Kingdoms 0.7.296:** harbour shipwrights and pirate captains ashore are MCA villagers; coves no longer
   pile up bombardiers (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.108, the dead stay in the Other World:** Andy: "you respawn in the afterlife, you can only leave with one of
+  those ways." A Z Fighter who dies among the dead wakes there again with the same stay (its clock, its way home and what
+  they won are kept through death). Falling more than 24 blocks (`FALL_LIMIT`) below the island, or getting out by a
+  pearl, a power or a command, takes them back to the hall (`ZFighterAfterlife.hold`). Only the fortune teller, the 13th
+  wish or the 30-minute wait let them go home. Compile-checked, not seen in game. (With Kingdoms 0.7.297: Rubber-folk take
+  on the stats and gifts of what they swallow.)
+- **0.17.108, swallowed powers** (`core/SwallowedPower`, for Kingdoms' Rubber-folk; Andy: "maybe they just get the
+  power's R ability, and keep their power if they have one", then chose to run the whole power behind it): swallowing a
+  downed player or a gifted villager keeps your own power, and theirs runs in you beside it (`SWALLOWED`, saved, lost on
+  death; the next swallow replaces it). Its tick runs every tick, so its passives come with it, but of its keys only R
+  is yours, on the new Swallowed Power key (comma by default; `SwallowedPowerClient`), or on R itself with no power of
+  your own. While it runs it sees only that key held (`PowerInput` bits swapped round its calls), so your own G/V/B
+  don't reach it; its flight and dashes count for the server's floating and moving checks. Gained with `onGained`,
+  dropped with `onLost`. Its client side (HUD, client-run visuals) doesn't run, and anything it gates on
+  `Powers.has` stays off. The swallowed player keeps their power. Compile-checked, not seen in game.

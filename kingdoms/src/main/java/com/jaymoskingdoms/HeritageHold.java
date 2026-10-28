@@ -184,7 +184,7 @@ public final class HeritageHold {
 		return foe;
 	}
 
-	private static void shrink(LivingEntity foe, double share) {
+	static void shrink(LivingEntity foe, double share) {
 		AttributeInstance scale = foe.getAttribute(Attributes.SCALE);
 		if (scale == null) {
 			return;

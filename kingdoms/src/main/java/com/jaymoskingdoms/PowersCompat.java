@@ -947,4 +947,35 @@ public final class PowersCompat {
 		} catch (Throwable ignored) {
 		}
 	}
+
+	/** (0.7.297) Powers' {@code SwallowedPower.take(ServerPlayer, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle takePower;
+	private static boolean lookedForTake;
+
+	/**
+	 * (0.7.297) A Rubber-folk swallowed {@code body} (a player, or a gifted villager): {@code taker} takes on its power, in
+	 * place of the last one they took. Its name, or null if it had none (or without Powers).
+	 */
+	public static net.minecraft.network.chat.@Nullable Component takePower(net.minecraft.server.level.ServerPlayer taker, LivingEntity body) {
+		if (!lookedForTake) {
+			lookedForTake = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					takePower = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SwallowedPower"), "take",
+						java.lang.invoke.MethodType.methodType(net.minecraft.network.chat.Component.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' swallowed powers (older Powers?)", e);
+				}
+			}
+		}
+		if (takePower == null) {
+			return null;
+		}
+		try {
+			return (net.minecraft.network.chat.Component)takePower.invoke(taker, body);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't hand a swallowed power on", e);
+			return null;
+		}
+	}
 }

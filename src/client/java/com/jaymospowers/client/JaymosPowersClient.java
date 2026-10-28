@@ -141,6 +141,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.wounds.MedicineHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
+		SwallowedPowerClient.init();
 		HiddenArmorClient.init();
 		com.jaymospowers.client.costume.CostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();

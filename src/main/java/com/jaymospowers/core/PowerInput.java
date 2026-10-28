@@ -23,6 +23,19 @@ public final class PowerInput {
 		HELD.put(player.getUUID(), bits);
 	}
 
+	/** (0.17.108) Every key's held bit at once ({@link SwallowedPower} swaps them for its own while it runs). */
+	static int bits(Player player) {
+		return HELD.getOrDefault(player.getUUID(), 0);
+	}
+
+	static void setBits(Player player, int bits) {
+		if (bits == 0) {
+			HELD.remove(player.getUUID());
+		} else {
+			HELD.put(player.getUUID(), bits);
+		}
+	}
+
 	static void clear(Player player) {
 		HELD.remove(player.getUUID());
 	}

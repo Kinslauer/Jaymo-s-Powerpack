@@ -82,13 +82,17 @@ import net.minecraft.world.phys.Vec3;
  * tournament, for {@link #PRICE_EMERALDS} emeralds in your hand or {@link #PRICE_TP} TP (sneak and right-click), or by the
  * Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}). Nobody is stuck: after {@link #STAY_TICKS} the Other World lets go.</li>
  * </ul>
- * A death at the site itself is a plain death (he wakes at his bed, the halo gone). Falling off the island takes him home as it takes
- * anyone out of the Aether ({@link WindAether}), the halo gone.
+ * (0.17.108, Andy: "you respawn in the afterlife, you can only leave with one of those ways") The dead are held: a death at the
+ * site wakes him there again (the same stay, the same way home), and leaving any other way (falling off the island, a pearl,
+ * a power, a command) brings him straight back to the hall ({@link #hold}). Only the fortune teller, the wish and the
+ * {@link #STAY_TICKS} wait let him go. A living visitor is free to come and go as before.
  */
 public final class ZFighterAfterlife {
 	// ---- tuning ----
 	/** A death's move is dropped if the respawn comes later than this (ticks), so a revived player is not carried off by an old death. */
 	static final long PENDING_TICKS = 24000L;
+	/** (0.17.108) One of the dead this far below the floor (blocks) has fallen off, and is taken back to the hall. */
+	static final int FALL_LIMIT = 24;
 	/** How long he stays at most (ticks) before the Other World lets him go. */
 	static final long STAY_TICKS = 36000L;
 	/**
@@ -149,17 +153,20 @@ public final class ZFighterAfterlife {
 		).apply(i, Home::new));
 	}
 
-	/** The game time he arrived, while he is among the dead. Synced to everyone (the halo) and saved. */
+	/**
+	 * The game time he arrived, while he is among the dead. Synced to everyone (the halo) and saved; (0.17.108) kept through a
+	 * death there, as are the three below, so dying again among the dead doesn't free him.
+	 */
 	public static final AttachmentType<Long> STAY = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_stay"),
-		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+		builder -> builder.persistent(Codec.LONG).copyOnDeath().syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	/** Where he is sent back to. Saved. */
 	public static final AttachmentType<Home> HOME = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_home"),
-		builder -> builder.persistent(Home.CODEC));
+		builder -> builder.persistent(Home.CODEC).copyOnDeath());
 	/** Whether the road's master has taught him this stay, and whether the tournament was won this stay. Saved. */
 	public static final AttachmentType<Boolean> TAUGHT = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_taught"),
-		builder -> builder.persistent(Codec.BOOL));
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	public static final AttachmentType<Boolean> CHAMPION = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_champion"),
-		builder -> builder.persistent(Codec.BOOL));
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** On the Aether's level: the Other World's site has been built. Saved. */
 	public static final AttachmentType<Boolean> BUILT = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_built"),
 		builder -> builder.persistent(Codec.BOOL));
@@ -183,8 +190,9 @@ public final class ZFighterAfterlife {
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
-				if (ZFighterRealism.afterlife() && !player.isSpectator() && !inOtherWorld(player)
-					&& Powers.has(player, ZFighterPower.INSTANCE)) {
+				// (0.17.108) and one of the dead dying again wakes among the dead again
+				if (ZFighterRealism.afterlife() && !player.isSpectator() && (among(player) || !inOtherWorld(player)
+					&& Powers.has(player, ZFighterPower.INSTANCE))) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
 				}
 				endGauntlet(player);
@@ -293,13 +301,8 @@ public final class ZFighterAfterlife {
 			if (now - since >= STAY_TICKS) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_let_go").withStyle(ChatFormatting.AQUA));
 				returnHome(player);
-			} else if (player.level().dimension() != WindAether.AETHER) {
-				// fell off the island and was taken out of the Aether: the halo goes with him
-				endGauntlet(player);
-				player.removeAttached(STAY);
-				player.removeAttached(TAUGHT);
-				player.removeAttached(CHAMPION);
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
+			} else if (player.isAlive() && !ARRIVALS.containsKey(player.getUUID()) && (!inOtherWorld(player) || player.getY() < FLOOR - FALL_LIMIT)) {
+				hold(server, player);
 			}
 		}
 		ServerLevel world = server.getLevel(WindAether.AETHER);
@@ -321,6 +324,25 @@ public final class ZFighterAfterlife {
 		}
 	}
 
+	/**
+	 * (0.17.108) One of the dead got away some other way than the three (fell off the island, a pearl, a power, a command): the
+	 * Other World takes him straight back to the hall.
+	 */
+	private static void hold(MinecraftServer server, ServerPlayer player) {
+		ServerLevel world = server.getLevel(WindAether.AETHER);
+		if (world == null) {
+			return;
+		}
+		endGauntlet(player);
+		double ax = SITE_X + 0.5;
+		double az = SITE_Z + 5.5;
+		player.teleportTo(world, ax, FLOOR, az, Set.of(), 180.0F, 0.0F, true);
+		player.resetFallDistance();
+		player.setDeltaMovement(Vec3.ZERO);
+		world.sendParticles(ParticleTypes.END_ROD, ax, FLOOR + 1.0, az, 20, 0.4, 0.8, 0.4, 0.05);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_held").withStyle(ChatFormatting.AQUA));
+	}
+
 	/** He wakes among the dead: the site is built if it has not been, he is moved there with his halo. */
 	private static void arrive(MinecraftServer server, ServerPlayer player) {
 		ServerLevel world = server.getLevel(WindAether.AETHER);
@@ -331,10 +353,13 @@ public final class ZFighterAfterlife {
 			build(world);
 			world.setAttached(BUILT, true);
 		}
-		player.setAttached(HOME, new Home(player.level().dimension(), player.blockPosition()));
-		player.setAttached(STAY, player.level().getGameTime());
-		player.removeAttached(TAUGHT);
-		player.removeAttached(CHAMPION);
+		// (0.17.108) dying again among the dead keeps the stay he had (its clock, his way home, what he won)
+		if (!among(player)) {
+			player.setAttached(HOME, new Home(player.level().dimension(), player.blockPosition()));
+			player.setAttached(STAY, player.level().getGameTime());
+			player.removeAttached(TAUGHT);
+			player.removeAttached(CHAMPION);
+		}
 		double ax = SITE_X + 0.5;
 		double az = SITE_Z + 5.5;
 		player.teleportTo(world, ax, FLOOR, az, Set.of(), 180.0F, 0.0F, true);
