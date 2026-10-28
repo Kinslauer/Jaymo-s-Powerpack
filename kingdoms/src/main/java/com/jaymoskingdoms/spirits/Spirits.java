@@ -176,6 +176,7 @@ public final class Spirits {
 		Ambrose.register();
 		Thessaly.register();
 		QuietOne.register();
+		SpiritExecutions.register();
 		SpiritClash.register();
 		FolkSpirits.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

@@ -33,7 +33,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Blade forms</b> ({@link GrimsbyBlades}): sword, greatsword, spear, axe, hammer, each a three-tap combo.</li>
  * <li><b>Flurry</b> (level 3): six fast blows from both hands over twelve ticks. <b>Riposte</b> (5): for a moment the next
  * melee blow is turned aside and answered. <b>Guard break</b> (7): a heavy slam that knocks a shield aside and stuns.
- * <b>Finisher</b> (9): one cut for a helpless foe.</li>
+ * <b>Last Lesson</b> ({@value SpiritExecutions#LEVEL}): the execution of a helpless foe, sword, spear, axe and greatsword
+ * ({@link SpiritExecutions}).</li>
  * <li>On its own (bond 20 and up): when a blow would land from behind, a parry the keeper never saw, and a complaint about
  * it ({@link #hurt}). Advice in battle comes from the core ({@link Spirits#advice}).</li>
  * </ul>
@@ -51,9 +52,6 @@ public final class Grimsby extends Spirit {
 	static final float BREAK_DAMAGE = 10.0F;
 	static final double BREAK_REACH = 4.0;
 	static final int STUN_TICKS = 30;
-	/** Finisher: damage, and how near the helpless foe must be. */
-	static final float FINISH_DAMAGE = 30.0F;
-	static final double FINISH_REACH = 4.0;
 	/** The unseen parry: ticks between two, mana it costs, and how far to the side of the keeper's look a blow must come (dot below this). */
 	static final int PARRY_EVERY = 400;
 	static final float PARRY_COST = 8.0F;
@@ -97,7 +95,7 @@ public final class Grimsby extends Spirit {
 		MOVES.add(new FlurryMove());
 		MOVES.add(new RiposteMove());
 		MOVES.add(new GuardBreakMove());
-		MOVES.add(new FinishMove());
+		MOVES.add(SpiritExecutions.move("finish", Spirits.GRIMSBY));
 	}
 
 	public Grimsby() {
@@ -415,51 +413,6 @@ public final class Grimsby extends Spirit {
 			Mana.sendSeen(level, GrimsbyBlades.EDGE, at.x, at.y + 1.0, at.z, 20, 0.5, 0.6, 0.5, 0.05);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 0.7F);
 			PowersCompat.shake(player, 0.5F);
-			said(player);
-			return true;
-		}
-	}
-
-	/** Finisher: one cut for a helpless foe. */
-	private static final class FinishMove implements Move {
-		@Override
-		public String id() {
-			return "finish";
-		}
-
-		@Override
-		public float cost() {
-			return 20.0F;
-		}
-
-		@Override
-		public int cooldown() {
-			return 300;
-		}
-
-		@Override
-		public int level() {
-			return 9;
-		}
-
-		@Override
-		public int pose() {
-			return Poses.FINISH;
-		}
-
-		@Override
-		public boolean cast(ServerPlayer player, SpiritState state, int charge) {
-			LivingEntity foe = Arcana.sighted(player);
-			if (foe == null || foe.distanceTo(player) - foe.getBbWidth() * 0.5 > FINISH_REACH || !SpiritFoes.foe(player, foe, true) || !PowersCompat.helpless(foe)) {
-				return false;
-			}
-			ServerLevel level = (ServerLevel)player.level();
-			foe.setInvulnerableTime(0);
-			SpiritFoes.strike(level, player, foe, FINISH_DAMAGE * Spirits.damageScale(state));
-			Vec3 at = foe.getBoundingBox().getCenter();
-			SpiritFoes.line(level, ParticleTypes.CRIT, at.add(-0.8, 0.8, 0.0), at.add(0.8, -0.8, 0.0), 8);
-			level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.7F);
 			said(player);
 			return true;
 		}

@@ -171,6 +171,7 @@ public final class Ambrose extends Spirit {
 		MOVES.add(new Def("steady", STEADY_COST_PER_SECOND, 20, 2, Poses.HOLD, Mana.WARD, Ambrose::steadyHands));
 		MOVES.add(new Def("bless", 16.0F, 400, 3, Poses.BLESS, Mana.WILL, Ambrose::bless));
 		MOVES.add(new Def("mend", MEND_COST_PER_SECOND, 20, 4, Poses.MEND, Mana.WARD, Ambrose::mendingTouch));
+		MOVES.add(SpiritExecutions.move("execute_ambrose", Spirits.AMBROSE));
 	}
 
 	Ambrose() {

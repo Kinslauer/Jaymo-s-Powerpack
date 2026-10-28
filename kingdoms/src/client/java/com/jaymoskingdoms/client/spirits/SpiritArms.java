@@ -69,15 +69,37 @@ public final class SpiritArms {
 	static final int MANIFEST_TICKS = 10;
 	/** A pose is lerped in over {@code POSE_IN} ticks, held until {@code POSE_TICKS} after it was stamped, and lerped out over {@code POSE_OUT}. */
 	static final int POSE_IN = 4, POSE_TICKS = 16, POSE_OUT = 6;
-	/** Model pixels the arm is pushed behind the shoulder, per unit of size (the spirits that sit on your arm: Grimsby, Thessaly). */
-	static final float BEHIND = 2.0F;
+	/** The size the figure's place is counted to at most, so the biggest don't float off. */
+	static final float FLOAT_SIZE_CAP = 1.6F;
+
 	/**
-	 * The spirits that float free of your arm (Varro, Ambrose, the Quiet One) hover above and ahead of the shoulder, as a stand
-	 * does (Andy, 2026-10-27): model pixels up, ahead and out, per unit of size (the size counted to at most {@code FLOAT_SIZE_CAP},
-	 * so the biggest don't float off), and their idle angle (raised forward, a little out).
+	 * (0.7.280) Where a spirit's arms come from. Andy (2026-10-28): "imagine the arms as emitting from the large ki figure that
+	 * emanates from the character behind the player. simulate all the arms like this." Every spirit's arms grow from the
+	 * shoulders of an unseen figure standing over your back, not from your own arm: model pixels {@code up}, {@code back} and
+	 * {@code out} (each arm to its own side) per unit of size (counted at least 1 and at most {@link #FLOAT_SIZE_CAP}), the
+	 * whole figure {@code right} of you, the arm's resting angle ({@code idle}, as the {@link #TABLE}'s), and whether the
+	 * resting hand is held open, ready to grab.
 	 */
-	static final float FLOAT_UP = 5.0F, FLOAT_AHEAD = 5.0F, FLOAT_OUT = 1.5F, FLOAT_SIZE_CAP = 1.6F;
-	private static final float[] FLOAT_IDLE = {-1.05F, 0.0F, 0.30F};
+	record Anchor(float up, float back, float out, float right, float[] idle, boolean open) {
+	}
+
+	/** Each spirit's figure, by kind (the Quiet One takes one of the four each time it is called: {@link #style}). */
+	private static final Anchor[] ANCHORS = new Anchor[Spirits.QUIET + 1];
+
+	static {
+		// Grimsby: his blade held up over your shoulder, edge forward, always in sight (Andy: "Grimsby's blade ... should always be visible")
+		ANCHORS[Spirits.GRIMSBY] = new Anchor(3.0F, 3.5F, 1.0F, 0.0F, new float[] {-1.35F, -0.15F, 0.30F}, false);
+		// Varro: "imposing and above and behind and out to the right at an angle, as if it were ready to grab"
+		ANCHORS[Spirits.VARRO] = new Anchor(6.5F, 5.0F, 2.5F, 2.5F, new float[] {-1.15F, 0.35F, 0.55F}, true);
+		// Ambrose: "float above and behind you", the great hands hovering over your shoulders
+		ANCHORS[Spirits.AMBROSE] = new Anchor(6.0F, 4.5F, 2.0F, 0.0F, new float[] {-1.0F, 0.0F, 0.35F}, false);
+		// Thessaly: the glove at your shoulder, a little out, where you can always see it
+		ANCHORS[Spirits.THESSALY] = new Anchor(2.5F, 3.0F, 1.5F, 0.0F, new float[] {-1.2F, -0.2F, 0.30F}, false);
+		ANCHORS[Spirits.QUIET] = ANCHORS[Spirits.AMBROSE];
+	}
+
+	/** The open hand at rest (Varro's, ready to grab): fist, spread, wrist bent back. */
+	static final float OPEN_CURL = 0.12F, OPEN_SPREAD = 0.9F, OPEN_WRIST = -0.45F;
 	/** The size the projection forms from, as a share of its own. */
 	static final float FORM_FROM = 0.8F;
 	/** How much the kind colour shows against mana's blue (0 all blue, 1 all kind). */
@@ -109,7 +131,24 @@ public final class SpiritArms {
 	 * What one being's spirit looks like this frame: its {@code kind}, how far manifest it is (0-1), the {@code pose} it holds
 	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}).
 	 */
-	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach) {
+	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach, int style, long shown) {
+	}
+
+	/**
+	 * Whose figure a spirit's arms take ({@link #ANCHORS}): its own, but the Quiet One's changes each time it is called (Andy:
+	 * "Quiet should be similar to each of them, as it animates differently each time"), picked by the size it was called at.
+	 */
+	static int style(int kind, int scale) {
+		return kind == Spirits.QUIET ? Math.floorMod(scale * 7 + scale / 13, Spirits.QUIET) : Math.clamp(kind, 0, Spirits.QUIET);
+	}
+
+	static Anchor anchor(int style) {
+		return ANCHORS[Math.clamp(style, 0, Spirits.QUIET)];
+	}
+
+	/** Whether {@code style}'s arms are always up while the spirit is out (Andy: "Grimsby's blade, and Thessaly should always be visible"). */
+	static boolean alwaysUp(int style) {
+		return style == Spirits.GRIMSBY || style == Spirits.THESSALY;
 	}
 
 	/** Arm angle offsets (x, y, z in radians, for the right arm; the left mirrors y and z) added to the wearer's own arm for each pose. */
@@ -240,7 +279,7 @@ public final class SpiritArms {
 		if (spirit == null) {
 			TRACKS.remove(entity.getId());
 			if (flickerLeft > 0 && entity == minecraft.player) {
-				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0);
+				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0, style(flickerKind, 100), 0L);
 			}
 			return null;
 		}
@@ -271,7 +310,8 @@ public final class SpiritArms {
 			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
-		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit), spirit.reach());
+		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit), spirit.reach(),
+			style(spirit.kind(), spirit.scale()), spirit.shownAt());
 	}
 
 	/** How far beyond its keeper's box a being's spirit hand reaches now (blocks), for the culling box; 0 for none. */
@@ -285,7 +325,7 @@ public final class SpiritArms {
 
 	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
 	static float presence(SpiritState spirit, double now) {
-		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR)) {
+		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR) || alwaysUp(style(spirit.kind(), spirit.scale()))) {
 			return 1.0F;
 		}
 		if (spirit.show() == 0L || spirit.pose() <= Poses.IDLE || spirit.pose() >= Poses.COUNT) {
@@ -383,14 +423,14 @@ public final class SpiritArms {
 			if (entity.getRandom().nextFloat() >= WISP_CHANCE) {
 				continue;
 			}
-			double side = (i == 0 ? 0.45 : -0.45) * Math.max(1.0F, size * 0.6F);
-			boolean floating = floats(kind);
-			float reach = Math.min(size, FLOAT_SIZE_CAP);
-			// the floating ones' hands hang above and ahead; the rest behind and down your arm
-			double back = floating ? -(0.3 + 0.25 * reach) : 0.25 + 0.1 * size;
+			// from the figure's shoulder over your back, a little toward where the hand rests
+			Anchor a = anchor(style(kind, spirit == null ? 100 : spirit.scale()));
+			double lift = Mth.clamp(size, 1.0F, FLOAT_SIZE_CAP) * PX;
+			double side = (i == 0 ? 1.0 : -1.0) * (SHOULDER_OUT + a.out() * lift) + a.right() * lift;
+			double back = a.back() * lift - 0.35 * Math.min(size, FLOAT_SIZE_CAP);
 			double x = entity.getX() - Mth.cos(yaw) * side + behindX * back;
 			double z = entity.getZ() - Mth.sin(yaw) * side + behindZ * back;
-			double y = entity.getY() + (floating ? 1.25 + 0.2 * reach : Math.max(0.2, 1.3 - 0.45 * size));
+			double y = entity.getY() + SHOULDER_Y + a.up() * lift;
 			// smoking off the projection: drifting back and up from it, the way a ghost's edge trails away
 			level.addParticle(mote, x + (entity.getRandom().nextDouble() - 0.5) * 0.3, y + (entity.getRandom().nextDouble() - 0.5) * 0.3,
 				z + (entity.getRandom().nextDouble() - 0.5) * 0.3, behindX * 0.02, 0.025, behindZ * 0.02);
@@ -472,10 +512,8 @@ public final class SpiritArms {
 		return ARGB.color(255, r, g, b);
 	}
 
-	/** Whether {@code kind}'s arms float free of yours (above and ahead) rather than sitting on your own arm. */
-	static boolean floats(int kind) {
-		return kind == Spirits.VARRO || kind == Spirits.AMBROSE || kind == Spirits.QUIET;
-	}
+	/** Blocks a model pixel is, and the shoulder's place on a standing player (blocks out from the middle, up from the feet). */
+	static final double PX = SpiritArms.PLAYER_SCALE / 16.0, SHOULDER_OUT = 0.31, SHOULDER_Y = 1.3;
 
 	// ---- first person ------------------------------------------------------------------------------------------------------
 
@@ -698,11 +736,11 @@ public final class SpiritArms {
 			}
 			// forming: it fades in and swells the last little way, rather than growing from nothing
 			float size = look.size() * (FORM_FROM + (1.0F - FORM_FROM) * look.manifest());
-			boolean floats = floats(look.kind());
-			float reach = Math.min(size, FLOAT_SIZE_CAP);
+			Anchor anchor = anchor(look.style());
+			float lift = Mth.clamp(size, 1.0F, FLOAT_SIZE_CAP);
 			int poseId = Mth.clamp(look.pose(), 0, Poses.COUNT - 1);
-			float[] idle = floats ? FLOAT_IDLE : TABLE[Poses.IDLE];
-			float[] target = poseId == Poses.SPEAK ? idle : TABLE[poseId];
+			float[] idle = anchor.idle();
+			float[] target = poseId == Poses.SPEAK ? idle : poseId == Poses.ECHO ? echoAngle(look.shown()) : TABLE[poseId];
 			float age = Math.max(0.0F, look.poseAge() - this.lag);
 			float w = look.poseWeight();
 			int mode = mode(look);
@@ -717,28 +755,28 @@ public final class SpiritArms {
 				float time = state.ageInTicks - this.lag;
 				// reaching out, only the first hand goes; the other waits at rest
 				boolean waits = mode == REACHING && i == 1;
-				SpiritRig.frame(f, waits ? Poses.IDLE : poseId, age, waits ? 0.0F : w, idle, target, floats, i, time);
+				SpiritRig.frame(f, waits ? Poses.IDLE : poseId, age, waits ? 0.0F : w, idle, target, true, i, time);
 				float drift = SWAY * Mth.sin(time * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
 				f.sx += w * poseAdjust(poseId, age, i) + drift;
-				if (floats) {
-					// floating free: not swung by your walk, but a blow goes where you look (down when you look down)
-					arm.xRot = w * state.xRot * Mth.DEG_TO_RAD;
-					arm.yRot = 0.0F;
-					arm.zRot = 0.0F;
+				if (anchor.open()) {
+					// at rest the hand hangs open, fingers spread and the wrist cocked back: ready to grab
+					float rest = 1.0F - w;
+					f.curl = Mth.lerp(rest, f.curl, OPEN_CURL);
+					f.spread = Mth.lerp(rest, f.spread, OPEN_SPREAD);
+					f.wrist = Mth.lerp(rest, f.wrist, OPEN_WRIST);
 				}
+				// coming from the figure, not your arm: not swung by your walk, but a blow goes where you look (down when you look down)
+				arm.xRot = w * state.xRot * Mth.DEG_TO_RAD;
+				arm.yRot = 0.0F;
+				arm.zRot = 0.0F;
 				arm.xRot += f.sx;
 				arm.yRot += f.sy * side;
 				arm.zRot += f.sz * side;
 				boolean shaped = mode != NORMAL && !waits;
-				if (floats) {
-					// hovering above and ahead of the shoulder (model -y is up, -z ahead; the right arm's outside is -x)
-					arm.y -= FLOAT_UP * reach;
-					arm.z -= FLOAT_AHEAD * reach;
-					arm.x -= side * FLOAT_OUT * reach;
-				} else if (!shaped) {
-					// grown about the shoulder, and pushed behind (the model's +z is the back)
-					arm.z += BEHIND * size;
-				}
+				// at the figure's shoulder, above and behind yours (model -y is up, +z behind; the right arm's outside is -x)
+				arm.y -= anchor.up() * lift;
+				arm.z += anchor.back() * lift;
+				arm.x -= (side * anchor.out() + anchor.right()) * lift;
 				if (shaped) {
 					shape(arm, f, mode, look, state, age, w, size, side, look.arms() >= 2);
 				}
@@ -850,6 +888,23 @@ public final class SpiritArms {
 				f.hand = Mth.lerp(formed, 1.0F, BENEATH_HAND);
 			}
 		}
+	}
+
+	/**
+	 * (0.7.280) Echo strike's angles (Andy: "echo strike should attack from different angles"): each echo comes in from one of
+	 * these, picked by the tick it was struck: overhead, swept in from outside, cut across the body, an uppercut, a straight
+	 * thrust, and down from high and wide.
+	 */
+	private static final float[][] ECHO_ANGLES = {
+		{-2.70F, 0.00F, 0.10F},
+		{-1.50F, 0.95F, 0.70F},
+		{-1.40F, -1.05F, 0.10F},
+		{-0.75F, -0.25F, 0.15F},
+		{-1.60F, 0.00F, 0.00F},
+		{-2.20F, 0.55F, 0.80F}};
+
+	static float[] echoAngle(long shown) {
+		return ECHO_ANGLES[(int)Math.floorMod(shown * 31L + (shown >> 3), (long)ECHO_ANGLES.length)];
 	}
 
 	/** How far the SILENT arm is drawn back before it thrusts (ticks), and by how much (radians added to x at the extreme). */

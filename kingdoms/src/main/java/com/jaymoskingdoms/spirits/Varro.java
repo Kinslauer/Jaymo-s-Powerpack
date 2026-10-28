@@ -80,6 +80,7 @@ public final class Varro extends Spirit {
 		MOVES.add(new VolleyMove());
 		MOVES.add(new BombardMove());
 		MOVES.add(new SpearWallMove());
+		MOVES.add(SpiritExecutions.move("execute_varro", Spirits.VARRO));
 	}
 
 	public Varro() {
