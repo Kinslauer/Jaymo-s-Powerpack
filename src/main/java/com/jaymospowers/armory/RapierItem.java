@@ -1,5 +1,6 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.core.LockOn;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,14 @@ import org.jspecify.annotations.Nullable;
  * and stab.
  */
 public class RapierItem extends Item {
-	/** The lunge: speed (blocks/tick) forward and up, and how long it can still run someone through (ticks). */
-	static final double LUNGE_SPEED = 1.1, LUNGE_UP = 0.12;
+	/**
+	 * The lunge: speed (blocks/tick) forward and up, and how long it can still run someone through (ticks). (0.17.130)
+	 * Andy: shorter across the board, about 2.8 blocks; only a lunge at a foe you're locked onto (or a mob's at its
+	 * target) runs further, just as far as it needs to reach them, up to the old 1.1 (about 4.7 blocks).
+	 */
+	static final double LUNGE_SPEED = 0.65, LUNGE_SPEED_MAX = 1.1, LUNGE_UP = 0.12;
+	/** Roughly how far (blocks) a lunge carries for each block/tick of speed it starts with. */
+	static final double LUNGE_CARRY = 4.3;
 	static final int LUNGE_TICKS = 7;
 	/** How far in front of the lunger the point reaches (blocks). */
 	static final double LUNGE_REACH = 1.4;
@@ -81,11 +88,13 @@ public class RapierItem extends Item {
 		if (hand != InteractionHand.MAIN_HAND || player.getCooldowns().isOnCooldown(stack) || player.isPassenger()) {
 			return InteractionResult.PASS;
 		}
-		// the burst forward on both sides, so the client doesn't wait for the server to move
-		Vec3 look = player.getLookAngle();
+		// the burst forward on both sides, so the client doesn't wait for the server to move; locked on, at the foe
+		LivingEntity locked = LockOn.target(player);
+		Vec3 look = locked != null ? locked.position().subtract(player.position()) : player.getLookAngle();
 		Vec3 flat = new Vec3(look.x, 0.0, look.z);
 		flat = flat.lengthSqr() > 1.0E-4 ? flat.normalize() : Vec3.directionFromRotation(0.0F, player.getYRot());
-		player.setDeltaMovement(flat.x * LUNGE_SPEED, Math.max(player.getDeltaMovement().y, 0.0) + LUNGE_UP, flat.z * LUNGE_SPEED);
+		double speed = locked != null ? speedToReach(player, locked) : LUNGE_SPEED;
+		player.setDeltaMovement(flat.x * speed, Math.max(player.getDeltaMovement().y, 0.0) + LUNGE_UP, flat.z * speed);
 		player.getCooldowns().addCooldown(stack, COOLDOWN);
 		if (level instanceof ServerLevel serverLevel) {
 			player.syncVelocity = true;
@@ -94,6 +103,13 @@ public class RapierItem extends Item {
 			begin(serverLevel, player, null);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** A lunge just fast enough that the point reaches {@code target}: never shorter than the plain one, never past the max. */
+	private static double speedToReach(LivingEntity lunger, LivingEntity target) {
+		double dx = target.getX() - lunger.getX(), dz = target.getZ() - lunger.getZ();
+		double gap = Math.sqrt(dx * dx + dz * dz) - (lunger.getBbWidth() + target.getBbWidth()) / 2.0;
+		return Mth.clamp((gap - LUNGE_REACH * 0.5) / LUNGE_CARRY, LUNGE_SPEED, LUNGE_SPEED_MAX);
 	}
 
 	/** Starts the lunge's window: the point strikes the first foe it meets (or only {@code only}). */
@@ -201,7 +217,7 @@ public class RapierItem extends Item {
 		mob.setYHeadRot(yaw);
 		mob.setYBodyRot(yaw);
 		// a little faster the further off, so the point arrives
-		double speed = LUNGE_SPEED * Math.min(1.0, 0.55 + dist / MOB_MAX_RANGE * 0.5);
+		double speed = speedToReach(mob, target);
 		mob.setDeltaMovement(to.x * speed, LUNGE_UP, to.z * speed);
 		mob.syncVelocity = true;
 		mob.swing(InteractionHand.MAIN_HAND, mob.getMainHandItem().getAttackAnimation(), false);
