@@ -6157,6 +6157,9 @@ SWEM's horses (All Rights Reserved, Forge only, so ideas only, nothing of theirs
   sides to hang below the belly, open beneath and before and behind for the legs, folds and a trimmed hem; crimson on
   iron, royal blue on gold, linen on diamond, green on copper, purple on netherite, russet under mail, quartered
   crimson and linen under plate, dyed with leather); the crinet's sixth lame runs into the peytral; one side plate a
-  side from the peytral to the crupper (stepped in along its top); a full chanfron closed over the face and down to
-  the cheeks with eye holes in raised rims, and a nose plate; the stirrups hang outside the side plates
+  side from the peytral to the crupper (stepped in along its top); a chanfron over the face, and a nose plate; the stirrups hang outside the side plates
   (`STIRRUP_OUT`, from each build's plate). Armour texture 128x128.
+
+Andy then: the eyes were hidden. The chanfron is now a face plate whose side flanges stop above the eyes, the neck
+cloth and crinet start below the head, and necks wider than the head (draft, destrier, steppe pony) start below the
+eyes; they had buried them, armoured or not.

@@ -170,7 +170,10 @@ def rig(build):
     neck = {"destrier": (5, 14, 9), "draft": (6, 14, 9), "steppe_pony": (5, 13, 8), "desert_horse": (4, 15, 6),
             "courser": (4, 15, 7)}.get(b, (4, 14, 8))
     neck = (neck[0], neck[1] + int(NECK), neck[2])
-    add("neck", None, HEAD_POSE, Cube((-neck[0] / 2 - 0.05, -9.8, -2), neck, region="neck"))
+    # (a neck wider than the head starts below the eyes, or it would bury them)
+    neck_top = -9.8 if neck[0] < 5 else -7.6
+    neck = (neck[0], round(neck[1] - (neck_top + 9.8), 2), neck[2])
+    add("neck", None, HEAD_POSE, Cube((-neck[0] / 2 - 0.05, neck_top, -2), neck, region="neck"))
     # the mane: along the crest, and (on the long-maned breeds) falling over the neck's right side
     back = -2 + neck[2]  # the neck's crest line
     if b == "steppe_pony":
@@ -234,11 +237,12 @@ def armour(build, parts):
         c = Cube((x0, y0, z0), (round(x1 - x0, 3), round(y1 - y0, 3), round(z1 - z0, 3)), kind="armor", region=region)
         out.append(Part("armor_" + name, parent, (0, 0, 0, 0, 0, 0), [c]))
 
-    # ---- the chanfron (head space: the face is the head's top, the nose runs to -z, the jaw is +y): closed over the
-    # face and down the sides to the cheeks, open under the jaw and behind for the ears; eye holes in its sides ----
+    # ---- the chanfron (head space: the face is the head's top, the nose runs to -z, the jaw is +y): a plate over the
+    # face with short flanges down its sides that stop above the eyes, so the eyes stay wide open (as a knight's horse
+    # wears it); open under the jaw and behind for the ears ----
     hx0, top, hz0 = head.pos
     hx1 = hx0 + head.size[0]
-    add("chanfron", "head", "chanfron", hx0 - 0.45, hx1 + 0.45, top - 0.6, top + head.size[1] - 1.2, hz0 - 0.4, hz0 + head.size[2] - 1.5)
+    add("chanfron", "head", "chanfron", hx0 - 0.45, hx1 + 0.45, top - 0.6, top + 0.7, hz0 - 0.4, hz0 + head.size[2] - 1.5)
     mx0, my0, mz0 = muzzle.pos
     mx1 = mx0 + muzzle.size[0]
     add("nose", "head", "nose", mx0 - 0.4, mx1 + 0.4, my0 - 0.5, my0 + muzzle.size[1] - 0.6, mz0 + 0.7, hz0 - 0.2)
@@ -249,9 +253,11 @@ def armour(build, parts):
     nx0, ny0, nz0 = neck.pos
     nw, nh, nd = neck.size
     back = nz0 + nd
-    add("neck_cloth", "head", "neck_cloth", nx0 - 0.3, nx0 + nw + 0.3, ny0 + 1.0, ny0 + nh + 1.2, nz0 - 0.3, back + 0.1)
-    lames = 6
-    y_from, y_to = ny0 + 0.6, ny0 + nh + 1.6
+    # (both start below the head, clear of the eyes)
+    below = top + head.size[1] - 0.5
+    add("neck_cloth", "head", "neck_cloth", nx0 - 0.3, nx0 + nw + 0.3, below + 0.4, ny0 + nh + 1.2, nz0 - 0.3, back + 0.1)
+    lames = 5
+    y_from, y_to = below, ny0 + nh + 1.6
     step = (y_to - y_from) / lames
     for k in range(lames):
         g = 0.5 + 0.07 * k  # each lame a touch wider than the one above it, so they overlap like scales

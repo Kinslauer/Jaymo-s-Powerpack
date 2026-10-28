@@ -664,16 +664,6 @@ def armour_base(pxs, mail):
         if r in ("caparison", "neck_cloth"):
             out[(x.X, x.Y)] = cloth(x, fw, fh, u, v)
             continue
-        if r == "chanfron" and f in ("a", "b"):
-            # the eye holes, each in a raised rim
-            ez, ey = c.pos[2] + 0.4 + 1.75, c.pos[1] + 0.6 + 1.6
-            d = math.hypot(x.q[2] - ez, x.q[1] - ey)
-            if d < 1.0:
-                continue
-            if d < 1.6:
-                g = 236 if (x.q[1] < ey) else 120
-                out[(x.X, x.Y)] = (light(x, (g, g, g), 0.7), METAL)
-                continue
         if f == "bottom" or (r in ("crinet", "crest", "chanfron", "nose", "crupper") and f == "front" and r != "chanfron"):
             out[(x.X, x.Y)] = (light(x, (70, 52, 36), 0.6), LINING)  # the padded lining underneath
             continue
