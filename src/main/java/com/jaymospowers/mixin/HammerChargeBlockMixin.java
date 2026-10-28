@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.17.94) A warhammer carries the weapon guard ({@code combat/Guard}) for while its smash cools down; charging the
+ * (0.17.98) A warhammer carries the weapon guard ({@code combat/Guard}) for while its smash cools down; charging the
  * smash isn't a block ({@link HammerSlam#charging}).
  */
 @Mixin(LivingEntity.class)

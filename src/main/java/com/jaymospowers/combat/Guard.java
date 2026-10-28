@@ -73,7 +73,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Mashing doesn't work: a raise within {@link #EAGER_TICKS} of the last one, when that one parried nothing, is only
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
- * (0.17.94) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
+ * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  */
 public final class Guard {

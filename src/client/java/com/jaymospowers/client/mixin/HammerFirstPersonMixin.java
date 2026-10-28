@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemUseAnimation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.17.94) Your own warhammer in first person: the overhead charge, or (cooling down) the guard ({@link HammerSlam#pose}). */
+/** (0.17.98) Your own warhammer in first person: the overhead charge, or (cooling down) the guard ({@link HammerSlam#pose}). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class HammerFirstPersonMixin {
 	@WrapOperation(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.17.94) A warhammer held up is drawn as what it is ({@link HammerSlam#pose}): raised overhead charging the smash, or
+ * (0.17.98) A warhammer held up is drawn as what it is ({@link HammerSlam#pose}): raised overhead charging the smash, or
  * a guard while the smash cools down. The item alone can't tell which, so the arm pose asks about the one holding it.
  */
 @Mixin(AvatarRenderer.class)

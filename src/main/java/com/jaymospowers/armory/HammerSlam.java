@@ -25,7 +25,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.94) Balkon's warhammer smash (hold use to charge, let go) is swung down from overhead. Andy: "warhammer
+ * (0.17.98) Balkon's warhammer smash (hold use to charge, let go) is swung down from overhead. Andy: "warhammer
  * rightclick should animate swinging down from overhead like the better combat swing".
  * <ul>
  * <li>While charging, the hammer is held up over your head (the trident's raised arm, not the bow's draw).</li>
@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Without Better Combat the smash is WeaponMod's own, at once. Players only: a mob's smash is left as it was.
  * Hooked in by mixin/WeaponModWarhammerMixin (the smash), WeaponModMeleeUseMixin (use, pose, release),
- * HammerChargeBlockMixin (no block while charging) and client HammerPoseMixin/GuardFirstPersonMixin (the poses).
+ * HammerChargeBlockMixin (no block while charging) and client HammerPoseMixin/HammerFirstPersonMixin (the poses).
  */
 public final class HammerSlam {
 	/** Better Combat's swing, the one its hammer preset (and so the warhammer's left-click) uses. */

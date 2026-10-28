@@ -86,7 +86,7 @@ public final class Treatment {
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
 	public static final float NEEDLE_HURT = 1.0F, CAUTERY_BURN = 2.0F;
 	/**
-	 * (0.17.94, Andy: androids "use metal parts to repair instead of bandages") An iron or copper ingot worked into an
+	 * (0.17.98, Andy: androids "use metal parts to repair instead of bandages") An iron or copper ingot worked into an
 	 * android's part: its leak stops, a break is set, and it mends this much (health points) at once.
 	 */
 	public static final float METAL_HEAL = 4.0F;
@@ -112,7 +112,7 @@ public final class Treatment {
 	public enum Remedy {
 		BANDAGE(40, true), RAG(40, true), SPLINT(60, true), NEEDLE(60, true), CAUTERY(20, true), SPIRITS(20, true), HONEY(20, true),
 		SALTS(20, false), LEECHES(40, false), POPPY(40, false),
-		/** (0.17.94) Metal parts: an android's only repair (sneak + use, like spirits). */
+		/** (0.17.98) Metal parts: an android's only repair (sneak + use, like spirits). */
 		METAL(40, true);
 
 		public final int ticks;
@@ -339,7 +339,7 @@ public final class Treatment {
 
 	// ---- what a remedy can help ---------------------------------------------------------------------------------------------
 
-	/** (0.17.94) An android's body: mended with metal, and nothing else works on it. */
+	/** (0.17.98) An android's body: mended with metal, and nothing else works on it. */
 	static boolean machine(LivingEntity body) {
 		return body instanceof Player player && ZFighterAndroid.android(player);
 	}
@@ -485,7 +485,7 @@ public final class Treatment {
 			return InteractionResult.PASS;
 		}
 		Remedy remedy = remedy(player.getItemInHand(hand), world);
-		// (0.17.94) an ingot is only medicine to an android (an iron golem's repair, or a trade, goes on as ever)
+		// (0.17.98) an ingot is only medicine to an android (an iron golem's repair, or a trade, goes on as ever)
 		if (remedy == null || remedy == Remedy.METAL && !machine(body)) {
 			return InteractionResult.PASS;
 		}
