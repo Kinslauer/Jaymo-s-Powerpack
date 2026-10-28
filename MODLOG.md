@@ -3319,3 +3319,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.87, MCA villagers swing when they fight (Kingdoms 0.7.283):** guards, crews, rulers and every other MCA
   villager now wind up and swing their weapon's Better Combat moves, with the glint and the blade guard, instead of
   MCA's instant arm flick; barehanded they punch. Compile-checked, not seen in game.
+- **0.17.88, the story figure has a body (Kingdoms 0.7.284):** with MCA the life story's figure showed only its armour
+  and held items (Andy: "the player's character doesnt load. only armor"). The story comes before MCA's creator, so
+  the player has no MCA body yet and MCA hides the plain one. The figure is now a stand-in MCA villager that is never put
+  in the world (`McaStoryFigure`, as MCA's own editor figure is): its gender and hair come from your id, and it wears
+  MCA job clothes that fit the scene (farmer for farmers, guard for soldiers, librarian for books, and so on), none of
+  the banned ones. It shows the heritage and look you're pointing at, with the heritage skin tint, and acts out the
+  scene as before. Without MCA it's still drawn as you. Compile-checked here, not seen in game.

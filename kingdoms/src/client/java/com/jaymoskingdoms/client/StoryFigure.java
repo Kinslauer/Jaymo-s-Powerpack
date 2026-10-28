@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
+import com.jaymoskingdoms.McaCompat;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,9 +22,11 @@ import org.jspecify.annotations.Nullable;
  * (0.7.282) The figure of you on the life story's pages ({@link LifeStoryScreen}). Andy: "make it act out? or at least
  * find different gear". Each answer is a little scene ({@link #SCENES}, by {@code question.answer}): what you wear, what
  * you hold, and what you do (walk, work, swing, raise the thing held, look up or down), all the while looking slowly
- * about. A birthplace walks in plain clothes so the heritage shows. Your own heritage, gear and arm are lent to the
- * figure only while it's drawn (nothing of it reaches the server: client attachments aren't synced, a client swing
- * isn't sent, and equipping on the client makes no sound), then put back.
+ * about. A birthplace walks in plain clothes so the heritage shows. (0.7.284) With MCA the figure is a stand-in MCA
+ * villager in job clothes for the scene ({@link McaStoryFigure}): before MCA's creator the player has no MCA body to draw.
+ * Without MCA it's you: your heritage, gear and arm are lent to the figure only while it's drawn (nothing of it reaches
+ * the server: client attachments aren't synced, a client swing isn't sent, and equipping on the client makes no
+ * sound), then put back.
  */
 final class StoryFigure {
 	/** How long one slow look from side to side takes (ms), and how far it turns (a fraction of the box's width each way). */
@@ -61,8 +65,10 @@ final class StoryFigure {
 	}
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
+	/** (0.7.284) The MCA job whose clothes the stand-in wears, by answer key ({@code "none"}: everyday clothes). */
+	static final Map<String, String> JOBS = new HashMap<>();
 
-	private static long lastSwing, lastStep;
+	private static long lastSwing, lastStep, lastTick;
 
 	private StoryFigure() {
 	}
@@ -141,6 +147,34 @@ final class StoryFigure {
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 	}
 
+	private static void jobs(String job, String... answers) {
+		for (String a : answers) {
+			JOBS.put(a, job);
+		}
+	}
+
+	static {
+		jobs("farmer", "farmers", "village");
+		jobs("armorer", "smiths");
+		jobs("fisherman", "fisherfolk", "swimming", "sea", "shipwreck", "whalers");
+		jobs("archer", "hunters", "hunted");
+		jobs("cartographer", "merchants", "city");
+		jobs("guard", "soldiers", "levy", "pits", "sworn", "weapon", "blades", "fights", "fists");
+		jobs("cleric", "healers", "nobles", "bell", "bells", "temple", "shrine");
+		jobs("librarian", "wizard", "apprentice", "books", "clock", "timelost", "hermit", "scholars");
+		jobs("leatherworker", "outlaws", "cutpurses", "captive", "banished");
+		jobs("miner", "caves", "cave", "monolith", "bite", "mountain", "forge");
+		jobs("shepherd", "winter", "snowed", "blizzard", "snow", "north", "foundling");
+		jobs("toolsmith", "gunsmith");
+		jobs("fletcher", "messenger", "wild");
+		jobs("butcher", "fire", "smoke", "burned");
+	}
+
+	/** The job clothes for {@code scene} ({@code question.answer}). */
+	static String job(String scene) {
+		return JOBS.getOrDefault(scene.substring(scene.indexOf('.') + 1), "none");
+	}
+
 	/** {@code scene}'s scene: a birthplace walks in plain clothes, an answer without its own stands holding its picture. */
 	static Scene of(String scene, ItemStack icon) {
 		Scene found = SCENES.get(scene);
@@ -160,28 +194,37 @@ final class StoryFigure {
 	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
 		int x0, int y0, int x1, int y1) {
 		Scene sc = of(scene, icon);
+		LivingEntity target = McaCompat.LOADED ? McaStoryFigure.figure(player, kind, look, job(scene)) : null;
+		boolean standIn = target != null;
+		if (target == null) {
+			target = player;
+		}
 		EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
 		Item[] gear = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
 		ItemStack[] was = new ItemStack[slots.length];
 		String heritageWas = player.getAttached(Heritage.HERITAGE), variantWas = player.getAttached(HeritageVariants.VARIANT);
-		boolean using = false;
+		boolean using = false, lent = !standIn && kind != null;
 		for (int i = 0; i < slots.length; i++) {
-			was[i] = player.getItemBySlot(slots[i]);
-			player.setItemSlot(slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
+			was[i] = target.getItemBySlot(slots[i]);
+			target.setItemSlot(slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
 		}
-		if (kind != null) {
+		if (lent) {
 			HeritageVariants.Variant v = HeritageVariants.at(kind, look);
 			player.setAttached(Heritage.HERITAGE, kind.key());
 			player.setAttached(HeritageVariants.VARIANT, v == null ? HeritageVariants.BASE : v.key());
 		}
 		try {
 			long now = System.currentTimeMillis();
-			act(player, sc.act(), now);
-			if ((sc.act() == Act.USE || sc.act() == Act.GUARD) && !player.isUsingItem()) {
+			if (standIn && now - lastTick >= STEP_MS) {
+				lastTick = now;
+				McaStoryFigure.tick(target);
+			}
+			act(target, sc.act(), now);
+			if ((sc.act() == Act.USE || sc.act() == Act.GUARD) && !target.isUsingItem()) {
 				InteractionHand hand = sc.act() == Act.GUARD ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-				if (!player.getItemInHand(hand).isEmpty()) {
-					player.startUsingItem(hand);
-					using = player.isUsingItem();
+				if (!target.getItemInHand(hand).isEmpty()) {
+					target.startUsingItem(hand);
+					using = target.isUsingItem();
 				}
 			}
 			// (a slow look from side to side, as if the mouse swept past it, raised or lowered as the scene says)
@@ -194,23 +237,30 @@ final class StoryFigure {
 				case WORK, LOOK_DOWN -> LOOK_DOWN;
 				default -> 0F;
 			};
-			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, Math.max(10, (int)((y1 - y0) * SCALE)), 0.0625F, lookX, lookY, player);
+			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, Math.max(10, (int)((y1 - y0) * SCALE)), 0.0625F, lookX, lookY, target);
 		} finally {
 			if (using) {
-				player.stopUsingItem();
+				target.stopUsingItem();
 			}
 			for (int i = 0; i < slots.length; i++) {
-				player.setItemSlot(slots[i], was[i]);
+				target.setItemSlot(slots[i], was[i]);
 			}
-			if (kind != null) {
+			if (lent) {
 				restore(player, Heritage.HERITAGE, heritageWas);
 				restore(player, HeritageVariants.VARIANT, variantWas);
 			}
 		}
 	}
 
+	/** The story closed: a stand-in figure is let go. */
+	static void closed() {
+		if (McaCompat.LOADED) {
+			McaStoryFigure.release();
+		}
+	}
+
 	/** Moves the figure's limbs for {@code act}: a stride every {@link #STEP_MS} while walking, a swing now and then. */
-	private static void act(LocalPlayer player, Act act, long now) {
+	private static void act(LivingEntity player, Act act, long now) {
 		if (act == Act.WALK) {
 			if (now - lastStep >= STEP_MS) {
 				lastStep = now;

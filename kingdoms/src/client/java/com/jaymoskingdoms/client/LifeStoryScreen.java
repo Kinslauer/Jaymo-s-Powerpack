@@ -134,6 +134,13 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	@Override
+	public void removed() {
+		// (0.7.284) the stand-in figure is no longer MCA's editor figure
+		StoryFigure.closed();
+		super.removed();
+	}
+
+	@Override
 	public boolean isPauseScreen() {
 		return false;
 	}
