@@ -428,7 +428,7 @@ public final class WindPower implements Power {
 
 	/**
 	 * A wind can't keep hold of a shield: its own wind tears it out of the hand, into the pack (or onto the ground),
-	 * every time. (0.17.98) Every weapon blocks now ({@link com.jaymospowers.combat.Guard}), so a weapon guard is no
+	 * every time. (0.17.99) Every weapon blocks now ({@link com.jaymospowers.combat.Guard}), so a weapon guard is no
 	 * shield: other weapons are only torn away now and then ({@link #WEAPON_TEAR_CHANCE_PER_SECOND}), and daggers,
 	 * quarterstaffs and spears never are.
 	 */
