@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 /**
  * (0.17.46, Andy's NOEA picks) Which look a Z Fighter's ki aura has, picked on the training screen: Sparking (the flame
  * aura with electric sparks on it, the default), Smooth (a calm glow round the outline) or Godly (tall thin flickering
- * wisps with rising motes). (0.17.83) All three are wisps now, none a shell. Kept for good and through death, and synced to everyone near, since others see it. The
+ * wisps with rising motes). (0.17.84) All three are wisps now, none a shell. Kept for good and through death, and synced to everyone near, since others see it. The
  * client draws it ({@code ZFighterKiAura}); when it shows is the same for all three.
  */
 public final class ZFighterAura {
