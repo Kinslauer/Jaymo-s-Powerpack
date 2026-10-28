@@ -3299,3 +3299,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   follows the heritage, look and class buttons (holding the class's picture). The heritage and held item are lent to
   your own player only while it's drawn. Compile-checked here (only the usual Loom-only attachment errors), not seen
   in game.
+  The figure acts each answer out (Andy: "make it act out? or at least find different gear"): client `StoryFigure`
+  gives every answer a scene of gear and an act. Farmers hoe in leather legs, soldiers swing a sword behind a shield
+  in mail, hunters draw a bow, healers drink, the sworn stand guard in full iron, cave starts dig by torchlight,
+  storm and sky answers look up, book answers look down at the book, birthplaces walk in plain clothes so the
+  heritage shows, and so on. Gear, arm swings and item use are lent to your player only while the figure is drawn.
