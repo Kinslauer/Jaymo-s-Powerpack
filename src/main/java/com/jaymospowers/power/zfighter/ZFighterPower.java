@@ -285,9 +285,12 @@ public final class ZFighterPower implements Power {
 		0x40F0E0, // cyan
 	};
 
-	/** Hardship lived through (the road to Super). Saved, kept through death. */
+	/**
+	 * Hardship lived through (the road to Super). Saved, kept through death. (0.17.91) Synced to its owner, whose training
+	 * screen checks it before Learn lights up.
+	 */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
-		builder -> builder.persistent(Codec.INT).copyOnDeath());
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/** What the server keeps on each Z Fighter between ticks. */
 	static final class Live {
@@ -994,7 +997,9 @@ public final class ZFighterPower implements Power {
 			}
 		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
 			if (!ZFighterBranchForms.ascend(player, live)) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
+				String blocked = ApeRage.super4Blocked(player);
+				player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
 			}
 		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
 			// (past his highest bought form: Super 4)

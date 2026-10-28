@@ -154,6 +154,24 @@ public final class ApeRage {
 			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
 	}
 
+	/**
+	 * (0.17.91) Why Primal Super, though opened, isn't his to take now (a lang key), or null when it is or was never opened.
+	 * Andy couldn't reach it after his heritage was cleared: the lineage follows the Kingdoms heritage, so a cleared one
+	 * isn't Warrior-born any more, and C just said there was no higher form.
+	 */
+	public static @org.jspecify.annotations.Nullable String super4Blocked(Player player) {
+		if (!Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN)) || super4(player)) {
+			return null;
+		}
+		if (ZFighterLineage.of(player) != ZFighterLineage.WARRIOR) {
+			return "message.jaymospowers.zfighter_super_4_not_warrior";
+		}
+		if (ZFighterTraining.formsOpen(player) < 1) {
+			return "message.jaymospowers.zfighter_super_4_no_super";
+		}
+		return ZFighterLineage.ape(player) ? "message.jaymospowers.zfighter_super_4_ape" : null;
+	}
+
 	/** A fit has him (either side). */
 	public static boolean inFit(Player player) {
 		return player.hasAttached(FIT);

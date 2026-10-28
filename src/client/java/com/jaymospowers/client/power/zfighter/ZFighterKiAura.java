@@ -1,10 +1,13 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ApeRage;
 import com.jaymospowers.power.zfighter.ZFighterAura;
 import com.jaymospowers.power.zfighter.ZFighterBranchForms;
+import com.jaymospowers.power.zfighter.ZFighterForms;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterTraining;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
@@ -49,8 +52,12 @@ public final class ZFighterKiAura {
 
 	/** Strength while charging, and held after a full charge; how fast it grows in and dies out (share a tick). */
 	static final float CHARGING = 1.0F, HOLDING = 0.85F, GROW = 0.35F, FADE = 0.12F;
-	/** Bigger each form, and a flicker of size while charging. */
-	static final float SIZE_PER_FORM = 0.08F, CHARGE_FLICKER = 0.04F;
+	/**
+	 * (0.17.91) Bigger each step up the Super line, to its largest at Super 3 (and no bigger past it: Andy, "it increases
+	 * in size to a maximum with 3"), and a flicker of size while charging.
+	 */
+	static final float SIZE_PER_FORM = 0.12F, CHARGE_FLICKER = 0.04F;
+	static final int SIZE_STEPS = ZFighterTraining.FORMS;
 	/**
 	 * In a form: a pulse every this many ticks (fewer each form, down to the least), rising over this share of it and
 	 * dying back this fast; at its height this strong, and this strong in between (0: only the glow shows).
@@ -106,7 +113,7 @@ public final class ZFighterKiAura {
 		if (strength < 0.01F) {
 			return null;
 		}
-		float size = 1.0F + SIZE_PER_FORM * com.jaymospowers.power.zfighter.ZFighterForms.tier(f) + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
+		float size = 1.0F + SIZE_PER_FORM * Math.min(SIZE_STEPS, com.jaymospowers.power.zfighter.ZFighterForms.tier(f)) + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
 			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F);
 		float trail = 0.0F;
 		Integer flight = player.getAttached(ZFighterPower.FLIGHT);
@@ -116,7 +123,23 @@ public final class ZFighterKiAura {
 			double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
 			trail = (float)Mth.clamp((speed - TRAIL_FROM) / (TRAIL_FULL - TRAIL_FROM), 0.0, 1.0);
 		}
-		return new float[] {ZFighterKiGlow.color(player, f), strength, size, ZFighterAura.style(player), trail};
+		return new float[] {ZFighterKiGlow.color(player, f), strength, size, style(player, form == null ? 0 : form), trail};
+	}
+
+	/**
+	 * (0.17.91) Andy: "base form and supers 1-3 should use the sparking aura ... then primal uses either god or smooth.
+	 * legendary saiyans have sparking". So the form decides: base, Supers 1-3 and the legendary line are always Sparking;
+	 * Primal Super is Godly or Smooth, whichever he picked (Godly if his pick is Sparking); any other form shows his pick.
+	 */
+	static int style(Player player, int form) {
+		int picked = ZFighterAura.style(player);
+		if (form <= ZFighterTraining.FORMS || form >= ZFighterForms.LEGEND_1 && form <= ZFighterForms.LEGEND_3) {
+			return ZFighterAura.SPARKING;
+		}
+		if (form == ApeRage.SUPER_4) {
+			return picked == ZFighterAura.SMOOTH ? ZFighterAura.SMOOTH : ZFighterAura.GODLY;
+		}
+		return picked;
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {

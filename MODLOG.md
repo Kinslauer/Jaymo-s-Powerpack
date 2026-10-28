@@ -3330,3 +3330,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   MCA job clothes that fit the scene (farmer for farmers, guard for soldiers, librarian for books, and so on), none of
   the banned ones. It shows the heritage and look you're pointing at, with the heritage skin tint, and acts out the
   scene as before. Without MCA it's still drawn as you. Compile-checked here, not seen in game.
+- **0.17.91, Primal Super reasons, aura by form, Afterimage fix:** Andy couldn't reach Primal Super after clearing his
+  heritage. Primal Super is the Warrior-born's alone, and Z Fighter lineage follows the Kingdoms heritage, so C only said
+  "No higher form". Now C at the top of the ladder says why (not Warrior-born, no Super yet, or still the ape), and
+  `/powerdebug zfighter ape primalsuper` says whether it's reachable. The aura style now follows the form (Andy):
+  base, Supers 1-3 and the legendary line burn Sparking, growing a step with each Super up to Super 3; Primal Super
+  burns Godly, or Smooth if that's your pick; other forms keep your pick. `/powerdebug zfighter forms mutation on`
+  says whether the legendary line is live (it needs Warrior-born heritage). Afterimage (and the sparring partner)
+  registered its copy only after spawning it, so the leftover sweep on entity load discarded it at once; it is now
+  known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
+  Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
+  Legend) even with enough. Compile-checked, not seen in game.
