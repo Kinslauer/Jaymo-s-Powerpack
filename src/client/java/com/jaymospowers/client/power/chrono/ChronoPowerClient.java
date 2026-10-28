@@ -96,6 +96,7 @@ public final class ChronoPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoStreak.init();
+		MuzzleFlashParticle.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
 	}
 

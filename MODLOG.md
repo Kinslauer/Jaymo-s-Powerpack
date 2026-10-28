@@ -3528,3 +3528,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   heritage key brings the last swallow's body back up under a melting pink mound; downed players are swallowed alive
   and fight their way out by hitting the heart, lungs and stomach, or get digested. `SwallowedPower.drop` is public for
   it. See the Kingdoms MODLOG.
+- **0.17.135, bigger muzzle flash on future guns (Andy: "there should be more muzzle flash on the guns from the
+  future"):** every shot from a future gun (gunners, mech cannons, players' TaCZ guns) throws a full-bright star burst
+  at the muzzle, two smaller ones forward as a plume, and smoke that everyone near sees (`chrono/future/MuzzleFlash`,
+  particle `jaymospowers:muzzle_flash`, our own three 16px sprites under `textures/particle/muzzle/`, client
+  `MuzzleFlashParticle`). Sizes per gun kind (pistol 0.9 up to sniper 1.8) at the top of `MuzzleFlash`. Everyone sees
+  the burst, the shooter too; TaCZ's flash on the gun in your hands is also drawn 2.2x (`TaczMuzzleFlashMixin`,
+  optional config `jaymospowers.tacz.client.mixins.json`). Players' shots come from TaCZ's `GunFireEvent`, hooked by
+  reflection. Silenced guns don't flash. Gunners' muzzles now sit at the gun hand, not straight ahead of the eye.
