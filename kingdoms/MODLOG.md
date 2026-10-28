@@ -6061,7 +6061,7 @@ instead of setting a water block and lifting it again. Vanilla's splash puts out
 Powers' `SplashWaterDouseMixin` widens that to 2 blocks round. A fire still burning 2 s after a throw is answered
 again (`SPLASHES`). Beating it out and golems are unchanged. Compile-checked, not seen in game.
 
-## 0.7.301: the Frostborn ice prison freezes like 26.4's Potion of Freezing (pack 0.17.114)
+## 0.7.301: the Frostborn ice prison freezes like 26.4's Potion of Freezing (pack 0.17.115)
 
 Andy: "I just really want the way the chilling potion works transferred to frostborn's prison". `FrostPrison` no longer
 freezes the prisoner through on the spot or weakens them: it gives Jaymo's Powers' `jaymospowers:freezing` (26.4's

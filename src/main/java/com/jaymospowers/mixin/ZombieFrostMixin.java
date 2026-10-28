@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.17.114) A zombie or husk left in powder snow turns into a Frostbite, a drowned into a zombie first (26.4). */
+/** (0.17.115) A zombie or husk left in powder snow turns into a Frostbite, a drowned into a zombie first (26.4). */
 @Mixin(Zombie.class)
 abstract class ZombieFrostMixin {
 	@Unique

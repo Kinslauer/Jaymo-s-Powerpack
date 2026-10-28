@@ -3448,7 +3448,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   client.
   Kingdoms 0.7.300: firefighters throw splash water bottles at fires instead of leaving water source blocks (see
   Kingdoms' log).
-- **0.17.114, the 26.4 snapshots' ice** (Kingdoms 0.7.301; Andy: "can we get the ice blocks/ items from snapshot 26.4? I
+- **0.17.114, the warhammer's arm pose (crash fix):** the client crashed on start since 0.17.98 ("Critical injection
+  failure: ... HammerPoseMixin ... (0/1) succeeded"): `AvatarRenderer` has two `getArmPose` methods and the bare name picked
+  `(Avatar, HumanoidArm)`, which never calls `getUseAnimation`. The mixin now names the `(Avatar, ItemStack, InteractionHand)`
+  one. Every other mixin added since 0.17.87 was checked against the 26.3 sources (and MCA's jar): their targets exist.
+- **0.17.115, the 26.4 snapshots' ice** (Kingdoms 0.7.301; Andy: "can we get the ice blocks/ items from snapshot 26.4? I
   just really want the way the chilling potion works transferred to frostborn's prison"). The snapshot's potion is the
   Potion of Freezing. Built from the snapshot notes in our own code and art (`frost/`, `tools/gen_frost.py`); nothing
   of Mojang's 26.4 art or code is copied, their template models are only parents. `jaymospowers:freezing`

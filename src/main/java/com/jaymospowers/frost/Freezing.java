@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.alchemy.Potion;
 
 /**
- * (0.17.114) Freezing, from Minecraft's 26.4 snapshots (Andy, 2026-10-28: "I just really want the way the chilling potion
+ * (0.17.115) Freezing, from Minecraft's 26.4 snapshots (Andy, 2026-10-28: "I just really want the way the chilling potion
  * works transferred to frostborn's prison"). Our own copy of the snapshot's rules, for 26.3: whoever has it slowly freezes
  * as if standing in powder snow, so the frost creeps over their screen and they slow to half speed over seven seconds;
  * once frozen through they shake and take a point of freeze damage every two seconds (fire-blooded mobs five times that)

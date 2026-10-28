@@ -36,7 +36,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * (0.17.114) The ice of Minecraft's 26.4 snapshots, built for our 26.3 pack (Andy, 2026-10-28: "can we get the ice
+ * (0.17.115) The ice of Minecraft's 26.4 snapshots, built for our 26.3 pack (Andy, 2026-10-28: "can we get the ice
  * blocks/items from snapshot 26.4?"). Our own code and art, from the snapshot notes; Mojang's isn't copied. What it has:
  * <ul>
  * <li>{@link Freezing}, the Potion of Freezing (and its splash, lingering and arrows), brewed from an {@link #ICE_BALL}.</li>
