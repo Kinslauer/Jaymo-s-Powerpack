@@ -101,6 +101,10 @@ public final class ShutIn {
 		if (path != null && path.canReach()) {
 			return true;
 		}
+		if (Attention.held(v)) {
+			// (0.7.281) a player's dealing with them: put out later
+			return true;
+		}
 		level.sendParticles(ParticleTypes.POOF, v.getX(), v.getY() + 1.0, v.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		v.getNavigation().stop();
 		v.teleportTo(open.getX() + 0.5, open.getY(), open.getZ() + 0.5);

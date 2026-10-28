@@ -711,7 +711,9 @@ public final class Vampires {
 				// (under a roof: wherever the bat is)
 				feet = at;
 			}
-			elder.teleportTo(feet.x, feet.y, feet.z);
+			Vec3 down = feet;
+			// (0.7.281) his own shape where the bat is, whoever spoke to him last
+			Attention.carry(() -> elder.teleportTo(down.x, down.y, down.z));
 			human(elder);
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, feet.x, feet.y + 1.0, feet.z, 24, 0.3, 0.6, 0.3, 0.03);
 			level.playSound(null, elder.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.HOSTILE, 1.0F, 0.5F);

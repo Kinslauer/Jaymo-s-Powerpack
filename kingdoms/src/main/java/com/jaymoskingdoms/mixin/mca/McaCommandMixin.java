@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.109) A gift is remembered ({@link com.jaymoskingdoms.Recollections}): what it was, and whether it was welcome.
  * (0.7.203) Following, staying, being picked up or ridden, their armour and their home are only for folk they're
  * involved with ({@link com.jaymoskingdoms.Strangers}).
+ * (0.7.281) Any button pressed holds them where they are for 30 seconds ({@link com.jaymoskingdoms.Attention}).
  * (0.7.20) A villager whose tongue you don't speak ({@link Languages}) only does what needs no words ({@link Languages#SIMPLE_COMMANDS}).
  */
 @Mixin(VillagerCommandHandler.class)
@@ -29,6 +30,8 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 
 	@Inject(method = "handle", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$job(ServerPlayer player, String command, CallbackInfoReturnable<Boolean> cir) {
+		// (0.7.281) talking to them keeps them from teleporting off for a while
+		com.jaymoskingdoms.Attention.heed(this.entity);
 		if (com.jaymoskingdoms.Strangers.refuses(this.entity, player, command)) {
 			// (0.7.203) they don't take orders from someone they're not involved with
 			cir.setReturnValue(true);

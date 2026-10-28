@@ -193,7 +193,7 @@ public final class Royals {
 			if (this.walk(level, keep.throne(), now, 1.5)) {
 				this.king.getNavigation().stop();
 				this.king.setHomeTo(keep.throne(), 3);
-			} else if (now - this.improvedAt > STUCK_TICKS) {
+			} else if (now - this.improvedAt > STUCK_TICKS && !Attention.held(this.king)) {
 				// (the way in is blocked: his guards see him to his throne)
 				poof(level, this.king);
 				Carriages.alight(this.king);
@@ -283,7 +283,7 @@ public final class Royals {
 				this.stops.removeFirst();
 				Carriages.stop(this.king);
 				this.greeting = GREET_TICKS;
-			} else if (now - this.improvedAt > STUCK_TICKS) {
+			} else if (now - this.improvedAt > STUCK_TICKS && !Attention.held(this.king)) {
 				// (no way there, penned in by a fence or a gate: he turns up there in a puff, as builders do; his escort follows)
 				BlockPos at = Construction.standable(level, stop, 3);
 				poof(level, this.king);
@@ -443,7 +443,7 @@ public final class Royals {
 		if (guard instanceof Folk && guard.tickCount % 20 == 0) {
 			guard.setHomeTo(king.blockPosition(), ROAM_RADIUS);
 		}
-		if (guard.distanceTo(king) > ESCORT_LOST) {
+		if (guard.distanceTo(king) > ESCORT_LOST && !Attention.held(guard)) {
 			BlockPos to = Construction.standable(level, BlockPos.containing(place), 3);
 			poof(level, guard);
 			Cavalry.teleport(guard, to.getX() + 0.5, to.getY(), to.getZ() + 0.5);

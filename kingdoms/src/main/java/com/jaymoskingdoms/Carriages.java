@@ -217,6 +217,10 @@ final class Carriages {
 
 	/** Seated, he and his carriage set down at {@code (x, y, z)} together (penned in, as he would be on foot). */
 	static void teleport(PathfinderMob king, double x, double y, double z) {
+		if (Attention.held(king)) {
+			// (0.7.281) a player's just dealt with him: not now
+			return;
+		}
 		Wagon carriage = seat(king);
 		Entity horse = carriage == null ? null : carriage.horse();
 		if (horse == null) {

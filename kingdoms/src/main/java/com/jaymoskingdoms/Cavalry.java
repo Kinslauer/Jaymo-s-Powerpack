@@ -91,6 +91,10 @@ final class Cavalry {
 
 	/** Moves {@code e} with whatever it rides (a rider is put back in the saddle each tick, so moving him alone does nothing). */
 	static void teleport(Entity e, double x, double y, double z) {
+		if (Attention.held(e)) {
+			// (0.7.281) a player's just dealt with the rider: not now
+			return;
+		}
 		e.getRootVehicle().teleportTo(x, y, z);
 	}
 

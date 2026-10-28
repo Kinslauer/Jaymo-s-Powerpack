@@ -156,8 +156,8 @@ public final class Gatherers {
 			trip.improvedAt = now;
 		}
 		ServerLevel level = (ServerLevel)folk.level();
-		if (now - trip.improvedAt > STUCK_TICKS) {
-			// (no way there, shut in a house or up a hill: he turns up there in a puff, as builders do)
+		if (now - trip.improvedAt > STUCK_TICKS && !Attention.held(folk.mob())) {
+			// (no way there, shut in a house or up a hill: he turns up there in a puff, as builders do; not with a player just dealing with him)
 			BlockPos at = Construction.standable(level, to, 3);
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 			folk.getNavigation().stop();
