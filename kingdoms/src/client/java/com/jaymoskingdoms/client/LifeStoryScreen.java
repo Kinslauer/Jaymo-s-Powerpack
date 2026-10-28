@@ -52,7 +52,7 @@ final class LifeStoryScreen extends Screen {
 	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
 	/** (0.7.275) The skip-the-story ask: its box's size. */
 	static final int ASK_W = 240, ASK_H = 96;
-	/** (0.7.276) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
+	/** (0.7.281) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
@@ -214,7 +214,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * The next heritage open to them after the one shown (wrapping), or (0.7.276, a right click) the one before; back at
+	 * The next heritage open to them after the one shown (wrapping), or (0.7.281, a right click) the one before; back at
 	 * the story's, the override is dropped.
 	 */
 	private static void cycleHeritage(int step) {
@@ -472,7 +472,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		Step s = step();
 		int mx = (int)event.x(), my = (int)event.y();
-		// (0.7.276) Andy: "right clicking should take you back on any of these options": the heritage, class and look
+		// (0.7.281) Andy: "right clicking should take you back on any of these options": the heritage, class and look
 		// buttons step back, and the element or spell chips too
 		if (event.button() == 1) {
 			Runnable back = null;
@@ -635,7 +635,7 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		} else {
-			// (0.7.276) the footer comes back once the ask is answered: without this, Next and Back stayed hidden
+			// (0.7.281) the footer comes back once the ask is answered: without this, Next and Back stayed hidden
 			// after a skip and the story could never be lived
 			for (Button b : new Button[] {this.next, this.back, this.later}) {
 				if (b != null) {
@@ -967,7 +967,7 @@ final class LifeStoryScreen extends Screen {
 		ty += 28;
 		// (on the story page, above the heritage and class buttons)
 		int bottom = y + panelH() - FOOTER - 2 - (s.question == null ? 40 : 0);
-		// (0.7.276) the figure under the text, as much of it as there's room for
+		// (0.7.281) the figure under the text, as much of it as there's room for
 		int figureH = Math.min(FIGURE_H, bottom - ty - 3 * Ui.LINE);
 		if (figureH >= FIGURE_MIN_H) {
 			bottom -= figureH;
@@ -1020,7 +1020,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.276) Andy: "an animated simulation of the character in every story frame, like in bannerlord ... helps the
+	 * (0.7.281) Andy: "an animated simulation of the character in every story frame, like in bannerlord ... helps the
 	 * user see the effect of every race on their character". You, drawn as the page would make you: the heritage and
 	 * look of the birthplace or childhood pointed at (or picked), acting out the answer in its gear ({@link StoryFigure}).
 	 * On the story page it follows the heritage, look and class buttons, in the class's gear.

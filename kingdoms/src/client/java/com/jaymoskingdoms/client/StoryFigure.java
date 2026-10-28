@@ -17,7 +17,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.276) The figure of you on the life story's pages ({@link LifeStoryScreen}). Andy: "make it act out? or at least
+ * (0.7.281) The figure of you on the life story's pages ({@link LifeStoryScreen}). Andy: "make it act out? or at least
  * find different gear". Each answer is a little scene ({@link #SCENES}, by {@code question.answer}): what you wear, what
  * you hold, and what you do (walk, work, swing, raise the thing held, look up or down), all the while looking slowly
  * about. A birthplace walks in plain clothes so the heritage shows. Your own heritage, gear and arm are lent to the
