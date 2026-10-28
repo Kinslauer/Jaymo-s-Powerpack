@@ -23,12 +23,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -70,9 +70,13 @@ public final class BioBuilt {
 		NO_RIGHT_LEG_TAG = "jaymoskitchen.missing.right_leg";
 	/** Lightning and magic hurt them this many times as much (the flaw). */
 	static final float BRITTLE = 1.5F;
-	/** Budding: copies at most, their life (ticks), health and blow, what it costs the maker (health, hunger), and the wait (ticks). */
-	static final int BUDS = 2, BUD_LIFE = 20 * 45, BUD_HUNGER = 4, BUD_COOLDOWN = 20 * 60;
-	static final float BUD_HEALTH = 6.0F, BUD_DAMAGE = 2.0F, BUD_COST = 3.0F;
+	/**
+	 * Budding: copies at most, their life (ticks), health and blow, and the wait (ticks). (0.7.307, Andy: "the buds should
+	 * use a charge of your absorption") Each bud spends one charge, and every foe absorbed stores one, up to
+	 * {@link #CHARGES_MAX}; that is all it costs now (no health, no hunger), so the wait is shorter.
+	 */
+	static final int BUDS = 2, BUD_LIFE = 20 * 45, BUD_COOLDOWN = 20 * 20, CHARGES_MAX = 4;
+	static final float BUD_HEALTH = 6.0F, BUD_DAMAGE = 2.0F;
 	/** An amber mote of the made body, and the bud's. */
 	private static final DustParticleOptions NODE = new DustParticleOptions(0xE8A23C, 0.8F);
 
@@ -83,6 +87,10 @@ public final class BioBuilt {
 	static final AttachmentType<Integer> WORTH = AttachmentRegistry.create(JaymosKingdoms.id("bio_worth"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
+	/** (0.7.307) The absorbed foes stored up to bud with. Saved, lost on death. */
+	static final AttachmentType<Integer> CHARGES = AttachmentRegistry.create(JaymosKingdoms.id("bio_charges"),
+		builder -> builder.persistent(Codec.INT));
+
 	/** When each may bud again (game time). */
 	private static final Map<UUID, Long> BUD_READY = new HashMap<>();
 
@@ -90,6 +98,7 @@ public final class BioBuilt {
 	}
 
 	static void register() {
+		BioBud.register();
 		ServerTickEvents.END_SERVER_TICK.register(BioBuilt::tick);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && entity != player
@@ -197,6 +206,8 @@ public final class BioBuilt {
 		player.heal(heal);
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		player.setAttached(WORTH, worth);
+		int charges = Math.min(CHARGES_MAX, player.getAttachedOrElse(CHARGES, 0) + 1);
+		player.setAttached(CHARGES, charges);
 		int was = form(player);
 		int now = formFor(worth);
 		if (now > was) {
@@ -208,7 +219,8 @@ public final class BioBuilt {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bio.form." + now).withStyle(ChatFormatting.GOLD));
 		} else {
 			int next = now + 1 < FORM_AT.length ? FORM_AT[now + 1] - worth : 0;
-			player.sendOverlayMessage(Component.translatable(next > 0 ? "message.jaymoskingdoms.bio.absorbed" : "message.jaymoskingdoms.bio.absorbed_last", next));
+			player.sendOverlayMessage(next > 0 ? Component.translatable("message.jaymoskingdoms.bio.absorbed", next)
+				: Component.translatable("message.jaymoskingdoms.bio.absorbed_charges", charges, CHARGES_MAX));
 		}
 	}
 
@@ -247,25 +259,28 @@ public final class BioBuilt {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.bud_full").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (!player.isCreative() && (player.getHealth() <= BUD_COST + 2.0F || player.getFoodData().getFoodLevel() < BUD_HUNGER)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.bud_weak").withStyle(ChatFormatting.GRAY));
-			return;
+		int charges = player.getAttachedOrElse(CHARGES, 0);
+		if (!player.isCreative()) {
+			if (charges <= 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.bud_empty").withStyle(ChatFormatting.GRAY));
+				return;
+			}
+			want = Math.min(want, charges);
+			player.setAttached(CHARGES, charges - want);
 		}
 		BUD_READY.put(player.getUUID(), now + BUD_COOLDOWN);
-		if (!player.isCreative()) {
-			player.hurtServer(level, level.damageSources().generic(), BUD_COST);
-			player.getFoodData().setFoodLevel(player.getFoodData().getFoodLevel() - BUD_HUNGER);
-		}
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		for (int i = 0; i < want; i++) {
 			Vec3 at = Sorcery.groundNear(level, player);
-			Mob copy = Thralls.raise(level, EntityTypes.ZOMBIE, at, -1, player.getUUID(), true, BUD_LIFE, player.getLastHurtMob());
+			// (0.7.307) a small copy of its maker, not a zombie: no rag, nothing in its hands
+			Mob copy = Thralls.raise(level, BioBud.TYPE, at, -1, player.getUUID(), true, BUD_LIFE, player.getLastHurtMob());
 			if (copy == null) {
 				continue;
 			}
-			if (copy instanceof Zombie zombie) {
-				zombie.setBaby(true);
-			}
+			copy.setAttached(BioBud.MAKER, player.getUUID());
+			copy.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+			copy.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			copy.getAttribute(Attributes.SCALE).setBaseValue(BioBud.SIZE);
 			copy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUD_HEALTH);
 			copy.setHealth(BUD_HEALTH);
 			copy.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BUD_DAMAGE);

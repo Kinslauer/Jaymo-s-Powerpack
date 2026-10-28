@@ -6133,5 +6133,15 @@ Andy: "bio android should be able to absorb enemies that are crippled and crawli
 (`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'
 `jaymospowers_crippled` tag, splinted or not), has a leg cut off (`jaymoskitchen.missing.left_leg`/`right_leg`), or is
 Crippled by a hidden blade. The rest is as before: up close, a toggle, broken off by any harm; a crippled foe that
-can still swing at you will break it. The Rubber-folk swallow is unchanged. Not compiled (no Gradle in the cloud) and
-not seen in game.
+can still swing at you will break it. The Rubber-folk swallow is unchanged.
+
+Then Andy on the buds: "the buds should use a charge of your absorption and they should look like smaller versions of
+the user, not zombies."
+- **Charges** (`BioBuilt.CHARGES`, saved, lost on death): every foe absorbed stores one, up to 4. Each bud spends one
+  (two buds, two charges; one charge, one bud). Budding no longer costs health or hunger, and the wait is 20 s (was
+  60). With nothing stored the key says so. In the third form the absorb message shows the charges.
+- **Small copies** (`BioBud`, entity `jaymoskingdoms:bio_copy`): a zombie's brain so `Thralls` leads it as before, but
+  drawn by `BioBudRenderer` as its maker: their skin on a player's body (slim or wide arms, as theirs), at 0.6 size,
+  with the third form's plates, glowing nodes and amber eyes. No rag, nothing in its hands. The sun doesn't burn it,
+  water doesn't turn it, it never makes zombie villagers, it doesn't groan, and it drops nothing.
+Compile-checked against 26.3 with javac (changed files), not seen in game.

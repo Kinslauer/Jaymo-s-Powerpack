@@ -48,6 +48,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.279) a spirit's floating hand (far hand, catch)
 		com.jaymoskingdoms.client.spirits.SpiritHandRenderer.register();
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
+		// (0.7.307) a Bio-built's buds, small copies of their maker
+		BioBudRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
