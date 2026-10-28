@@ -281,6 +281,14 @@ public final class LifeStory {
 	 */
 	public static final AttachmentType<String> ROAD = AttachmentRegistry.create(JaymosKingdoms.id("story_road"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * (0.7.304) Andy: "The first screen should be choosing your gender". Who the story's first page says you are
+	 * ({@link #MALE} or {@link #FEMALE}): MCA's creator after the story starts on it. Saved, kept through death, synced
+	 * to its own player.
+	 */
+	public static final AttachmentType<String> GENDER = AttachmentRegistry.create(JaymosKingdoms.id("story_gender"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+	public static final String MALE = "male", FEMALE = "female";
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
 	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
 
@@ -322,7 +330,7 @@ public final class LifeStory {
 	 * {@code heritage} and {@code cls}: (Andy: "allow a player override AFTER the result") a heritage or class ordinal
 	 * picked over the story's on its last page (-1: the story's).
 	 */
-	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls) implements CustomPacketPayload {
+	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls, int gender) implements CustomPacketPayload {
 		public static final Type<Live> TYPE = new Type<>(JaymosKingdoms.id("story_live"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Live> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -336,6 +344,7 @@ public final class LifeStory {
 				buf.writeVarInt(p.option + 1);
 				buf.writeVarInt(p.heritage + 1);
 				buf.writeVarInt(p.cls + 1);
+				buf.writeVarInt(p.gender + 1);
 			}, buf -> {
 				int n = Math.min(buf.readVarInt(), Question.values().length);
 				List<Integer> answers = new ArrayList<>(n);
@@ -343,7 +352,7 @@ public final class LifeStory {
 					answers.add(buf.readVarInt() - 1);
 				}
 				return new Live(List.copyOf(answers), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt() - 1,
-					buf.readVarInt() - 1, buf.readVarInt() - 1);
+					buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt() - 1);
 			});
 
 		@Override
@@ -524,6 +533,9 @@ public final class LifeStory {
 			return;
 		}
 
+		if (live.gender() == 0 || live.gender() == 1) {
+			player.setAttached(GENDER, live.gender() == 1 ? FEMALE : MALE);
+		}
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road.key));
 		Heritage.set(player, heritage);
@@ -1162,6 +1174,7 @@ public final class LifeStory {
 				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
 					p.removeAttached(STORY);
 					p.removeAttached(ROAD);
+					p.removeAttached(GENDER);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);

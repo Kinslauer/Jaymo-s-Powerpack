@@ -3,19 +3,24 @@ package com.jaymoskingdoms.client.mixin.mca;
 import com.jaymoskingdoms.BodySizes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
+import com.jaymoskingdoms.LifeStory;
 import com.jaymoskingdoms.SkinTones;
 import com.jaymoskingdoms.VillagerHeritage;
 import com.jaymoskingdoms.client.EditorFigure;
 import java.util.Objects;
 import java.util.UUID;
+import net.conczin.mca.client.gui.DestinyScreen;
 import net.conczin.mca.client.gui.VillagerEditorScreen;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.ai.Genetics;
+import net.conczin.mca.entity.ai.relationship.Gender;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,6 +44,19 @@ abstract class McaEditorHeritageMixin {
 	@Final
 	UUID playerUUID;
 
+	/** (0.7.304) Your character's data is in from the server, and the story's gender has been put on it since. */
+	@Unique
+	private boolean jaymoskingdoms$loaded, jaymoskingdoms$gendered;
+
+	@Shadow
+	private void updateGender(Gender gender) {
+	}
+
+	@Inject(method = "setVillagerData", at = @At("TAIL"))
+	private void jaymoskingdoms$loaded(CompoundTag data, CallbackInfo ci) {
+		this.jaymoskingdoms$loaded = true;
+	}
+
 	@Inject(method = "removed", at = @At("HEAD"))
 	private void jaymoskingdoms$closed(CallbackInfo ci) {
 		if (EditorFigure.current() == this.villager) {
@@ -58,6 +76,18 @@ abstract class McaEditorHeritageMixin {
 		}
 		if (!Objects.equals(variant, this.villager.getAttached(HeritageVariants.VARIANT))) {
 			this.villager.setAttached(HeritageVariants.VARIANT, variant);
+		}
+		// (0.7.304) Andy: "The first screen should be choosing your gender": MCA's start-up creator begins on the gender the
+		// story's first page picked (once the server's data for you is in, so it isn't written over; MCA's own buttons still change it)
+		String gender = player.getAttached(LifeStory.GENDER);
+		if (!this.jaymoskingdoms$gendered && this.jaymoskingdoms$loaded && gender != null && (Object)this instanceof DestinyScreen) {
+			Gender want = LifeStory.FEMALE.equals(gender) ? Gender.FEMALE : Gender.MALE;
+			if (this.villager.getGenetics().getGender() == want) {
+				this.jaymoskingdoms$gendered = true;
+			} else {
+				// (MCA takes one editor change at a time: tried again next tick if one was still on its way)
+				updateGender(want);
+			}
 		}
 		// (its skin kept to the heritage's range, McaEditorSkinMixin; one already outside it brought in)
 		EditorFigure.set(this.villager);
