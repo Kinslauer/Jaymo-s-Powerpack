@@ -27,6 +27,10 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -40,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * (0.5.11) A settlement's people answer a fire. A fire lit in or near a settlement ({@code BaseFireBlockMixin}) is
  * watched until it's out. Each grown villager near it chooses once how to answer: some fight it (they run to it and
  * put it out, either beating it out, now and then knocking out the burning block under it so it can't spread, or
- * pouring water on it, taken up again a moment later), some run to the nearest child and lead it away, the rest run
+ * (0.7.300) throwing a water bottle on it, which splashes out the fire round it; no more buckets of water left on the
+ * ground), some run to the nearest child and lead it away, the rest run
  * from it. Children always run. The kingdom's folk (guards, builders, farmers...) not already fighting put it out, and
  * (0.5.42) so do its iron golems, beating it out with their fists.
  * <p>
@@ -53,14 +58,15 @@ public final class Firefighting {
 	static final double REACH = 18.0, WATCHED = 96.0;
 	/** How often fires are answered (ticks); the most watched at once, and answered in one go. */
 	static final int EVERY = 10, MOST_WATCHED = 512, MOST_ANSWERED = 48;
-	/** Close enough to put it out (blocks); how far they run; how long poured water stays (ticks). */
+	/** Close enough to put it out (blocks). */
 	static final double PUT_OUT = 3.2;
 	/** Firefighters go to a spot this far short of the fire (they won't walk into it). */
 	static final double STAND_OFF = 2.0;
-	static final int RUN = 12, WATER_TICKS = 30;
+	/** How far they run; how long a thrown bottle has to put its fire out before the fire is answered again (ticks). */
+	static final int RUN = 12, SPLASH_TICKS = 40;
 	/** The share of grown villagers who fight it, and who look after a child (the rest run); a choice is kept this long. */
 	static final float FIGHT = 0.4F, GUARD = 0.3F;
-	/** (0.7.31) With a wildfire bearing down ({@code Calamities}), this share fight it, every one with a bucket. */
+	/** (0.7.31) With a wildfire bearing down ({@code Calamities}), this share fight it, every one with water. */
 	static final float WILDFIRE_FIGHT = 0.8F;
 	static final long CHOICE_TICKS = 600L;
 	/** How fast they go: villagers fighting or fleeing, and folk. */
@@ -68,18 +74,20 @@ public final class Firefighting {
 	static final double FOLK_SPEED = 1.15;
 	/** How fast golems go to a fire. */
 	static final double GOLEM_SPEED = 1.0;
+	/** How hard a water bottle is thrown at a fire. */
+	static final float THROW_POWER = 0.5F;
 
 	enum Answer { FIGHT, GUARD, RUN }
 
 	private record Choice(Answer answer, long until) {
 	}
 
-	private record Water(BlockPos pos, long until) {
+	private record Splash(BlockPos fire, long until) {
 	}
 
 	private static final Set<BlockPos> FIRES = new HashSet<>();
 	private static final Map<UUID, Choice> CHOICES = new HashMap<>();
-	private static final List<Water> WATER = new ArrayList<>();
+	private static final List<Splash> SPLASHES = new ArrayList<>();
 
 	private Firefighting() {
 	}
@@ -89,7 +97,7 @@ public final class Firefighting {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FIRES.clear();
 			CHOICES.clear();
-			WATER.clear();
+			SPLASHES.clear();
 		});
 	}
 
@@ -110,12 +118,12 @@ public final class Firefighting {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
-		// poured water taken up again
-		for (Iterator<Water> it = WATER.iterator(); it.hasNext(); ) {
-			Water w = it.next();
-			if (now >= w.until()) {
-				if (level.getBlockState(w.pos()).is(Blocks.WATER)) {
-					level.setBlock(w.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		// a thrown bottle that missed: the fire is answered again
+		for (Iterator<Splash> it = SPLASHES.iterator(); it.hasNext(); ) {
+			Splash s = it.next();
+			if (now >= s.until()) {
+				if (level.isLoaded(s.fire()) && level.getBlockState(s.fire()).is(BlockTags.FIRE)) {
+					FIRES.add(s.fire());
 				}
 				it.remove();
 			}
@@ -286,15 +294,14 @@ public final class Firefighting {
 		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
 	}
 
-	/** {@code who} puts out {@code fire}: water poured on it, or beaten out (now and then knocking out what burns under it). */
+	/** {@code who} puts out {@code fire}: a water bottle thrown on it, or beaten out (now and then knocking out what burns under it). */
 	private static void putOut(ServerLevel level, Mob who, BlockPos fire, long now) {
 		who.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		who.getLookControl().setLookAt(fire.getX() + 0.5, fire.getY() + 0.5, fire.getZ() + 0.5);
 		if (level.getRandom().nextBoolean() || Calamities.wildfireNear(fire)) {
-			// (0.7.31) against a wildfire, always a bucket: the whole settlement passing water along
-			level.setBlock(fire, Blocks.WATER.defaultBlockState(), Block.UPDATE_ALL);
-			WATER.add(new Water(fire, now + WATER_TICKS));
-			level.playSound(null, fire, SoundEvents.BUCKET_EMPTY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+			// (0.7.31) against a wildfire, always water: the whole settlement passing bottles along
+			throwWater(level, who, fire);
+			SPLASHES.add(new Splash(fire, now + SPLASH_TICKS));
 		} else {
 			level.setBlock(fire, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.7F, 1.4F);
@@ -306,6 +313,20 @@ public final class Firefighting {
 			}
 		}
 		FIRES.remove(fire);
+	}
+
+	/**
+	 * (0.7.300) {@code who} throws a splash water bottle at {@code fire}: vanilla's splash puts out the fire it lands on and
+	 * beside it (Powers widens that to two blocks round) and anyone burning near it.
+	 */
+	private static void throwWater(ServerLevel level, Mob who, BlockPos fire) {
+		ThrownSplashPotion bottle = new ThrownSplashPotion(level, who, PotionContents.createItemStack(Items.SPLASH_POTION, Potions.WATER));
+		double dx = fire.getX() + 0.5 - who.getX(), dz = fire.getZ() + 0.5 - who.getZ();
+		double dy = fire.getY() + 0.3 - bottle.getY();
+		// a lob: up by a fifth of the distance to carry it against the bottle's gravity
+		bottle.shoot(dx, dy + Math.sqrt(dx * dx + dz * dz) * 0.2, dz, THROW_POWER, 1.0F);
+		level.addFreshEntity(bottle);
+		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F);
 	}
 
 	/** Fire is still at {@code pos}'s side (it's burning). */

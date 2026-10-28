@@ -1,0 +1,10 @@
+{
+  "message.jaymospowers.cauldron_brew.not_full": "Fill the cauldron to the brim before you start a brew",
+  "message.jaymospowers.cauldron_brew.stir_first": "Stir the last ingredient in first",
+  "message.jaymospowers.cauldron_brew.refuses": "The brew won't take that",
+  "message.jaymospowers.cauldron_brew.cold": "It needs a fire under it to stir in",
+  "message.jaymospowers.cauldron_brew.stirred": "Stirred in: %s",
+  "message.jaymospowers.cauldron_brew.unstirred": "%s, unstirred (%s fills). Stir it with a stick",
+  "message.jaymospowers.cauldron_brew.holds": "%s, %s fills left",
+  "message.jaymospowers.cauldron_brew.spoil": "That would spoil the brew"
+}

@@ -6054,3 +6054,9 @@ Delight (MIT, but 26.2 only and it needs the real Farmer's Delight); nothing of 
   `/kingdom visitors now` (ops) brings a party.
 - Dev-server checked: a kingdom on a flat world, its townsfolk went for lunch, a cook was taken on, two parties of
   visitors came and left at dusk, food in store went down and back up as the cook baked. Not seen in a client.
+## 0.7.300: firefighters throw water bottles (pack 0.17.113)
+Andy: "villagers now keep and throw water bottles instead of placing buckets". `Firefighting.putOut`'s water answer
+(half the time, and always against a wildfire) now throws a splash water bottle at the fire (`throwWater`, a short lob)
+instead of setting a water block and lifting it again. Vanilla's splash puts out the fire and its neighbours, and
+Powers' `SplashWaterDouseMixin` widens that to 2 blocks round. A fire still burning 2 s after a throw is answered
+again (`SPLASHES`). Beating it out and golems are unchanged. Compile-checked, not seen in game.
