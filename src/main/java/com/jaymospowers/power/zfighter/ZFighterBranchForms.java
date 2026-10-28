@@ -366,14 +366,14 @@ public final class ZFighterBranchForms {
 		ZFighterFrostForms.attributes(player, live);
 	}
 
-	/** Times his ki techniques: the branch form's, Ego's and the android's. */
+	/** Times his ki techniques: the branch form's and Ego's. */
 	static float kiFactor(ServerPlayer player, ZFighterPower.Live live) {
 		int branch = of(player);
 		float factor = branch != 0 && valid(player, live, branch) ? KI[branch - FIRST] : 1.0F;
-		return factor * ZFighterEgo.kiFactor(player) * ZFighterAndroid.kiFactor(player);
+		return factor * ZFighterEgo.kiFactor(player);
 	}
 
-	/** Times the form's ki drain: the branch form's cost, and the android's halved costs. */
+	/** Times the form's ki drain: the branch form's cost, and none at all for an android. */
 	static float drainFactor(ServerPlayer player, ZFighterPower.Live live) {
 		int branch = of(player);
 		float factor = branch != 0 && valid(player, live, branch) ? DRAIN[branch - FIRST] : 1.0F;
