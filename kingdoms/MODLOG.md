@@ -6071,7 +6071,11 @@ other fire-blooded mobs five times that; leather spares the damage), and the chi
 before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
 the old freeze is kept. Compile-checked, not seen in game.
 
-## 0.7.302: graded smith wares and the smith's forge orders (pack 0.17.118)
+- **0.7.302, the life story figure gets an entity id (crash fix):** `McaStoryFigure` makes an MCA villager that's never
+  added to the level, so it had no entity id, and render hooks that ask for one (Jaymo's Powers' Rig scan glow) crashed
+  the game on the life story screen. It's given a fixed negative id (`FIGURE_ID`), which no real entity has.
+
+## 0.7.303: graded smith wares and the smith's forge orders (pack 0.17.119)
 
 Goes with the pack's Overgeared-style smithing. Armourers, weaponsmiths and toolsmiths on a realm's land sell gear graded
 by the buyer's reputation with the realm (`GradedTrades`): the hated get mostly Poorly Forged, strangers Well Forged, the

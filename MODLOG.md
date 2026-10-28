@@ -3483,7 +3483,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   ... axis ... as it does not exist" in `LayerBlock.<init>`): `Properties.ofFullCopy` copied a log's map colour, a function
   of its `AXIS`. Layers now take the base's `defaultMapColor()` as a fixed colour. No other base in `LayerList` has a
   state-dependent property (light or colour).
-- **0.17.118, smithing after Overgeared (MIT; Kingdoms 0.7.302):** Andy picked every item on the Overgeared pick list
+- **0.17.118, Rig scan glow and screen figures (crash fix):** `RigScanClient.color` (via `shouldEntityAppearGlowing`)
+  called `getId()` on every entity drawn, and Kingdoms' life story screen draws an MCA villager that was never added to the
+  level, so it has no id yet (26.3 throws "Tried to access entity ID before ID assignment"): the client crashed on the
+  intro. Entities without an id never glow now; Kingdoms 0.7.302 also gives the figure an id.
+- **0.17.119, smithing after Overgeared (MIT; Kingdoms 0.7.303):** Andy picked every item on the Overgeared pick list
   ("okay all selected"). Rules and code map in `docs/Smithing.md`. Ingots heat in the Forge Hearth and cool after 60 s;
   carrying hot metal without tongs (wooden, iron, steel) burns, Emberborn excepted. Sneak-hammer a vanilla anvil into a
   Smithing Anvil (or stone into a Stone Anvil: caps Well, crumbles after 64 forgings); hot ingots on it, hammer, pick
