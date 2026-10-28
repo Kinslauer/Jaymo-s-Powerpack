@@ -979,6 +979,32 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.306) Powers' {@code SwallowedPower.drop(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle dropPower;
+	private static boolean lookedForDrop;
+
+	/** (0.7.306) A Rubber-folk brought up their last swallow: the power they took from it leaves them (nothing without Powers 0.17.123). */
+	public static void dropPower(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDrop) {
+			lookedForDrop = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dropPower = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SwallowedPower"), "drop",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' SwallowedPower.drop (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (dropPower != null) {
+				dropPower.invoke(player);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't take a swallowed power back", e);
+		}
+	}
+
 	/**
 	 * Tells {@code listener} of every forging finished on one of Powers' Smithing Anvils (the smith and the result), by adding
 	 * it to Powers' {@code Provenance.FORGED_LISTENERS}. Nothing happens without Powers (or an older one).

@@ -195,6 +195,56 @@ final class KitchenCompat {
 		}
 	}
 
+	/** (0.7.306) Any Kitchen corpse. */
+	static boolean isCorpse(Entity entity) {
+		return CORPSE != null && CORPSE.isInstance(entity);
+	}
+
+	/** (0.7.306) Kitchen's {@code Corpses.leavesCorpse(LivingEntity)} and {@code spawnCorpse(LivingEntity, List)}, for a Rubber-folk's swallow. */
+	private static @Nullable Method leavesCorpse, spawnCorpse;
+	private static boolean lookedForSpawn;
+
+	/**
+	 * (0.7.306) Lays down the body {@code mob} would leave if it died now (nothing it carried in it), and returns it; null
+	 * if it would leave none, or without Kitchen.
+	 */
+	static @Nullable Entity corpseOf(net.minecraft.world.entity.LivingEntity mob) {
+		if (!lookedForSpawn) {
+			lookedForSpawn = true;
+			if (CORPSE != null) {
+				try {
+					Class<?> corpses = Class.forName("com.jaymoskitchen.corpse.Corpses");
+					leavesCorpse = corpses.getMethod("leavesCorpse", net.minecraft.world.entity.LivingEntity.class);
+					spawnCorpse = corpses.getMethod("spawnCorpse", net.minecraft.world.entity.LivingEntity.class, java.util.List.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for a Rubber-folk's swallow to leave a body: {}", e.toString());
+				}
+			}
+		}
+		if (leavesCorpse == null || spawnCorpse == null || !(mob.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return null;
+		}
+		try {
+			if (!Boolean.TRUE.equals(leavesCorpse.invoke(null, mob))) {
+				return null;
+			}
+			java.util.Set<java.util.UUID> before = new java.util.HashSet<>();
+			net.minecraft.world.phys.AABB around = mob.getBoundingBox().inflate(1.5);
+			for (Entity e : level.getEntities((Entity)null, around, KitchenCompat::isCorpse)) {
+				before.add(e.getUUID());
+			}
+			spawnCorpse.invoke(null, mob, java.util.List.of());
+			for (Entity e : level.getEntities((Entity)null, around, KitchenCompat::isCorpse)) {
+				if (!before.contains(e.getUUID())) {
+					return e;
+				}
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen couldn't lay down a swallowed body", e);
+		}
+		return null;
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;

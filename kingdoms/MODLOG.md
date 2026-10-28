@@ -6127,3 +6127,29 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
+
+## 0.7.306: Rubber-folk bring their last swallow back up, hold swallowed players alive, and grow with what they eat (pack 0.17.123)
+Andy: "eating a pillager made me smaller for some reason, it should add their mass to the user, not subtract. and the
+mass should increase per pulse as the absorbed gets smaller." And: "rubbers should be able to eject their last
+swallow, leaving a pink mass that slowly reveals the now corpse. If a downed player is absorbed they stay alive, but
+wounded and appear inside the rubber folk. able to fight their way out by disturbing structures representing the
+rubber's internal organs."
+- **Mass, not a shift**: the old swallow moved your MCA height and width toward the foe's, measured after it had shrunk
+  to 5%, so everything made you smaller. Now the foe's shape is taken as the swallow starts (`HeritageHold.Channel`)
+  and 30% of its bulk is added to yours (`BodySizes.withMass`, `ABSORB_MASS`), a step with each pulse (`RubberFolk.grow`).
+  Letting go puts you back as you were.
+- **The last swallow stays in you** (`RubberStomach.STOMACH`): the Kitchen corpse it would leave (and a digested
+  player's things). **Sneak + heritage key** brings it up a step ahead of you under a pink rubber mound that wobbles,
+  sags into a puddle and fades over 30 s (`MASS` on a short cloud that drips pink; drawn by `RubberStomachView`). What you
+  took from it (stats, gifts, swallowed power, bulk) goes with it. A new swallow replaces it; death loses it.
+- **Downed players swallowed alive**: they get up, wounded (8 health at most), inside you. No new world: they hang 24
+  blocks over the build limit above you, following you (like `StoryStasis`), and their screen draws your insides round
+  them: pulsing walls, the heart ahead, a lung each side, the stomach below. Their attack key hits the organ under the
+  crosshair (`Strike`, at most every 5 ticks, scaled by their blow and cooldown): you take half of each blow (more for
+  the heart), a lung blow knocks your breath out and slows you, a stomach blow makes you sick and hungry, and screens
+  shake. Beat 60% of the organs and you retch them up (and take 4 more). The stomach takes 1 health from them every
+  2.5 s; if they go down in there they're digested, and you get their power, stats and body as with any swallow. Your
+  belly stays full and heaves while they're in there. Sneak + heritage key spits them out. Either one logging off, you
+  going down or dying lets them out; a server stop puts them down where they were swallowed.
+- Powers 0.17.123: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
+Compile-checked, not seen in game.
