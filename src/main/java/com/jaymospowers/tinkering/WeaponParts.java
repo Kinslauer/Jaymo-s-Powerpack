@@ -29,7 +29,7 @@ public final class WeaponParts {
 	 * How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only
 	 * (or, {@code SINGLE_COPPER}, copper only).
 	 */
-	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER }
+	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER, SINGLE_STEEL }
 
 	/**
 	 * What else the Tool Station needs besides the head, any material. (0.11.77) Andy: the big weapons take a Tough
@@ -50,7 +50,9 @@ public final class WeaponParts {
 	/** What a head is made of: stone (Part Builder) or a cast metal. */
 	public enum Metal {
 		STONE("stone", "stone", "stone", null), IRON("iron", "iron", "iron", Molten.IRON),
-		GOLD("gold", "golden", "gold", Molten.GOLD), COPPER("copper", "copper", "copper", Molten.COPPER);
+		GOLD("gold", "golden", "gold", Molten.GOLD), COPPER("copper", "copper", "copper", Molten.COPPER),
+		/** (Smithing) Only for the steel smithing tools (tongs, hammer). */
+		STEEL("steel", "steel", "steel", Molten.STEEL);
 
 		public final String id;
 		final String prefixTier, suffixTier;
@@ -111,6 +113,7 @@ public final class WeaponParts {
 				case SUFFIX -> base() + "." + metal.suffixTier;
 				case SINGLE -> metal == Metal.IRON ? base() : null;
 				case SINGLE_COPPER -> metal == Metal.COPPER ? base() : null;
+				case SINGLE_STEEL -> metal == Metal.STEEL ? base() : null;
 			};
 			return path == null ? null : BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath(namespace(), path)).orElse(null);
 		}
@@ -184,6 +187,14 @@ public final class WeaponParts {
 		add(new Kind("kitchen_knife_blade", "pantryforblockheads:knife", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
 		// (0.17.116) the layer blocks' saw (layers/SawItem): Andy: "it is an iron tool", so it's forged, not crafted
 		add(new Kind("saw_blade", "jaymospowers:saw", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		// (Smithing) the smith's own tools are forged too (Andy's rule: iron tools come through Tinkers): tongs' jaws and
+		// hammer heads; the copper hammer's head casts, so there's always a way to make the first hammer
+		add(new Kind("tongs_jaws", "jaymospowers:iron_tongs", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("steel_tongs_jaws", "jaymospowers:steel_tongs", Scheme.SINGLE_STEEL, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind("copper_smithing_hammer_head", "jaymospowers:copper_smithing_hammer", Scheme.SINGLE_COPPER, 3 * INGOT,
+			Assembly.ROD_BINDING, 1));
+		add(new Kind("steel_smithing_hammer_head", "jaymospowers:steel_smithing_hammer", Scheme.SINGLE_STEEL, 3 * INGOT,
+			Assembly.ROD_BINDING, 1));
 	}
 
 	private WeaponParts() {

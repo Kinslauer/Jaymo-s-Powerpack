@@ -45,5 +45,6 @@ public final class TinkeringClient {
 				.withStyle(ChatFormatting.YELLOW));
 		});
 		Tinkering.traitDetails = () -> Minecraft.getInstance().hasShiftDown();
+		com.jaymospowers.client.tinkering.smithing.SmithingClient.init();
 	}
 }

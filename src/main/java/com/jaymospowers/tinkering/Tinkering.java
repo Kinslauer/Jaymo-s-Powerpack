@@ -167,6 +167,7 @@ public final class Tinkering {
 		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
 		com.jaymospowers.tinkering.kiln.Kiln.register();
 		com.jaymospowers.tinkering.forge.Forge.register();
+		com.jaymospowers.tinkering.smithing.Smithing.register();
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("tinkering"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
