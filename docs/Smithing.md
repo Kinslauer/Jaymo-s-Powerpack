@@ -56,3 +56,49 @@ from it at the Tool Station.
 - **Armour.** Iron, gold and copper helmets, chestplates, leggings and boots are hammered for 5/8/7/4 ingots (blows
   scale with ingots). Their grid recipes are switched off (`tools/tinkering_assets.py` `OFF_ARMOUR`); diamond and
   chainmail armour stay loot-only. No steel armour exists in the pack yet.
+
+## Finishing, casting and blueprints
+Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithTiers`, `StoneAnvil`, `Blueprints`,
+`BlueprintItem`, `DraftingTableBlock`. Lang: `lang/parts/smithing_finishing.json`. Tuning numbers are the constants at the top of each.
+
+### Hammer-only heads and casting
+- Claymore, broadsword, longsword, katana, ninjato, war scythe, glaive and halberd heads, and metal Broad Blades and Large Plates,
+  can no longer be cast: no cast is made from them and nothing pours into their casts (`Melting.tableResult` runs through
+  `CastRules.adjust`). Tooltip: "Too long to cast; hammer it on a Smithing Anvil". Stone ones are still shaped at the Part Builder.
+  Every other metal head can be cast or hammered.
+- A head from a casting table is Well Forged. A cast made from a graded head remembers that grade (`CAST_GRADE`); heads poured from
+  it are one grade lower (a cast of a Well head pours Poor heads). Graded heads don't stack with ungraded ones.
+
+### Quenching
+- A freshly hammered head is hot (`HEATED_AT`) and the Tool Station refuses it ("Quench it first").
+- Use a hot item on a water cauldron (loses one level), on a water source block, or aim at a water source and use it: hiss and
+  steam, the heat is gone. A Hot Ingot dipped becomes a plain ingot; a forging blank loses its heat (reheat it to carry on).
+- Our twist: a graded head left to cool in air (60 s, in your pack or on the anvil) comes out one grade lower.
+
+### Polishing and sharpening (sneak-use on a vanilla grindstone)
+- Blade and axe heads (swords, daggers, axes, glaives, scythes, halberds, knives, saws; small blade, small axe, broad blade, broad axe
+  heads) come off the anvil ROUGH. A rough head makes tools of at most Expert. Sneak-use it on a grindstone to polish it. Polishing
+  while it is still hot costs a grade.
+- Sneak-use a worn tool or weapon on a grindstone to restore 25% of its maximum durability. Each honing takes 2% off its
+  maximum durability for good (at most 25 honings). Plain use still opens the grindstone, so it doesn't clash with other
+  grindstone mods.
+
+### Stone Anvil
+- Sneak-hammer a stone block (stone, granite, diorite, andesite, tuff, deepslate) with a smithing hammer. Heads forged on it never
+  beat Well Forged, steel-class metals won't work on it, and after 64 finished forgings it crumbles to cobblestone once the last
+  piece is taken off. It drops itself when mined.
+
+### Tiers
+- Metals with a forging difficulty of 1.25 or more (steel, slimesteel) need an iron Smithing Anvil and a steel Smithing Hammer
+  in the main hand.
+
+### Blueprints and the Drafting Table
+- Without a blueprint for what you are making, heads cap at Expert. A Blueprint names a shape (a forging without its metal:
+  `weapon/claymore_blade`, `part/broad_blade`) and goes in your inventory (anywhere, the highest level counts). Each finished,
+  non-Poor forging of its shape adds 1 xp; 5 xp Expert, 15 Perfect, 40 Master. Its level is your cap, never below Expert. A
+  Masterwork needs a Master blueprint.
+- Drafting Table (paper x2 over planks x4): use it holding a blueprint with paper in your pack; you get a copy one level lower
+  (Well-level copies are as low as it goes and are worth no more than having none).
+- Wandering traders sometimes sell a blueprint (16 emeralds): data in `villager_trade/tinkering/wandering_trader`, added to the
+  trader's uncommon pool. The creative tab has a blueprint for each hammer-only shape.
+- Test: `/give @s jaymospowers:blueprint[jaymospowers:blueprint_data={shape:"weapon/claymore_blade",xp:40}]`.

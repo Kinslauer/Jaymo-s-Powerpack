@@ -60,6 +60,7 @@ public class ToolPartItem extends Item {
 		if (material == null) {
 			return;
 		}
+		com.jaymospowers.tinkering.smithing.Finishing.tooltip(stack, builder);
 		for (Component line : lines(part, material)) {
 			builder.accept(line);
 		}

@@ -1,0 +1,25 @@
+{
+  "gives": {
+    "id": "jaymospowers:blueprint",
+    "components": {
+      "jaymospowers:blueprint_data": {
+        "shape": "weapon/war_scythe_blade",
+        "xp": 0
+      },
+      "minecraft:item_name": {
+        "translate": "item.jaymospowers.blueprint.named",
+        "with": [
+          {
+            "translate": "item.jaymospowers.war_scythe_blade"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 1,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 16
+  }
+}
