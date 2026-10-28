@@ -3448,3 +3448,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   client.
   Kingdoms 0.7.300: firefighters throw splash water bottles at fires instead of leaving water source blocks (see
   Kingdoms' log).
+- **0.17.114, the warhammer's arm pose (crash fix):** the client crashed on start since 0.17.98 ("Critical injection
+  failure: ... HammerPoseMixin ... (0/1) succeeded"): `AvatarRenderer` has two `getArmPose` methods and the bare name picked
+  `(Avatar, HumanoidArm)`, which never calls `getUseAnimation`. The mixin now names the `(Avatar, ItemStack, InteractionHand)`
+  one. Every other mixin added since 0.17.87 was checked against the 26.3 sources (and MCA's jar): their targets exist.
