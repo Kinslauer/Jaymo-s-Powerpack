@@ -3536,3 +3536,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the burst, the shooter too; TaCZ's flash on the gun in your hands is also drawn 2.2x (`TaczMuzzleFlashMixin`,
   optional config `jaymospowers.tacz.client.mixins.json`). Players' shots come from TaCZ's `GunFireEvent`, hooked by
   reflection. Silenced guns don't flash. Gunners' muzzles now sit at the gun hand, not straight ahead of the eye.
+- **0.17.138, Bio-built remade after Cell (Kingdoms 0.7.313):** made by the Mad Tinkerer from every heritage's blood but
+  the Dawnborn's and the Divine's, the Bio-built now absorb anyone downed or crippled who isn't one of those two (monsters,
+  villagers, players), not only downed monsters; a crippled foe (a leg broken or cut off) counts too. Their three forms
+  are three different bodies: Imperfect (hunched, grotesque, a long stinger tail that does the absorbing: it arcs over the
+  head, swallows the foe whole and the bulge runs back down it), Semi-Perfect (bigger, bulked, steel on the fists and tail) and Perfect (as tall, sleek, steel-plated arms and shoulders, the
+  strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
+  `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
+  `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.

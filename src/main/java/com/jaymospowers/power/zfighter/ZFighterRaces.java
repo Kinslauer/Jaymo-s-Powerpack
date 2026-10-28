@@ -11,8 +11,9 @@ import net.minecraft.server.level.ServerPlayer;
  * ({@link ZFighterVerdantMerge#ki}, {@link ZFighterWarriorComeback#bonus}). The extras themselves: Earthling
  * {@link ZFighterEarthlingRace}, Verdant {@link ZFighterVerdantMerge} and {@link ZFighterVerdantWater}, Frost-born
  * {@link ZFighterFrostReserve}, Warrior-born {@link ZFighterWarriorComeback}. A Divine-born (Kingdoms heritage {@code divine})
- * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}); the Bio-built and Rubber-folk heritages need
- * nothing here, since an unknown heritage already counts as an Earthling ({@link ZFighterLineage#fromHeritage}).
+ * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}); the Rubber-folk heritage needs
+ * nothing here, since an unknown heritage already counts as an Earthling ({@link ZFighterLineage#fromHeritage}); nor do the
+ * Bio-built, but (0.17.138) their forms' strengths come on top ({@link ZFighterBioForms}).
  */
 final class ZFighterRaces {
 	/** The merged fists and health are put back on this often (ticks). */
@@ -44,6 +45,7 @@ final class ZFighterRaces {
 		if (player.tickCount % MERGE_EVERY == 0) {
 			ZFighterVerdantMerge.attributes(player);
 		}
+		ZFighterBioForms.tick(player, live, max);
 		switch (ZFighterLineage.of(player)) {
 			case ZFighterLineage.EARTHLING -> ZFighterEarthlingRace.tick(player, live);
 			case ZFighterLineage.VERDANT -> ZFighterVerdantWater.tick(player, live);

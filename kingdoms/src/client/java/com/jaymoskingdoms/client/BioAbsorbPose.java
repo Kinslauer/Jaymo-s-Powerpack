@@ -41,7 +41,8 @@ public final class BioAbsorbPose {
 			return;
 		}
 		Integer id = entity.getAttached(HeritageHold.ABSORBING);
-		Entity foe = id == null ? null : entity.level().getEntity(id);
+		// (0.7.313) a Bio-built takes them in with the tail (BioTailEngulf), not a hand
+		Entity foe = id == null || BioForms.bio(entity) ? null : entity.level().getEntity(id);
 		if (foe == null) {
 			STARTED.remove(entity.getId());
 			state.setData(KEY, null);
