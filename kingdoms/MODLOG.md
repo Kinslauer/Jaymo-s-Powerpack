@@ -5699,7 +5699,7 @@ Grand Capitals, Epic Villages).
   village that suits its biome, from whichever mod. Applied to the world's structure placement in
   `ChunkGeneratorStructureStateMixin` after `AtiCompounds.filter`; the log says how many sets and structures it pooled.
 - Towns and Towers 1.13.12 joins the pack (root `build.gradle`, shipped unchanged).
-
+- Compile-checked only, not seen in game.
 ## 0.7.277: Towns and Towers' villages join the shared pool (pack 0.17.80)
 - Read the Towns and Towers 1.13.12 jar: its villages set (`towns_and_towers:towns`, 27 villages) holds a Nether piglin
   village that isn't tagged as a village, so `SharedPools` (which pools only sets made wholly of villages) left the
@@ -5711,23 +5711,26 @@ Grand Capitals, Epic Villages).
 - Towns and Towers is CC BY-NC-ND 4.0 (not BY-NC-SA as written for 0.7.276): shipped unchanged is still fine.
 - Compile-checked only, not seen in game.
 
-## 0.7.278: Leave a Hand, a spirit hand that stays to tend a chest (pack 0.17.81)
+## 0.7.278: Repurposed Structures in the pack (pack 0.17.81)
+- Repurposed Structures 7.8.4 and MidnightLib 1.10.0 join the pack, so `GrandSeats`' jungle choice,
+  `repurposed_structures:fortress_jungle` (checked in the jar), now goes up for jungle kingdoms.
+- `SharedPools.outpost` takes any structure with "outpost" in its id: Repurposed Structures' are `outpost_badlands`
+  and the like (12 in `outposts_overworld`), which the old "pillager" check missed.
+  Its villages (`villages_overworld`, 11, and the one-village sets) already pool by name.
+- Compile-checked only, not seen in game.
 
-Andy linked Mage Hand (CurseForge, SkylorBeck; GPL-3.0, while we're MIT, so ideas only, our own code and look): "can this
-be implemented with our mana spirits?" Its floating hands bound to a home chest became a seventh shared spirit move.
-- **Leave a Hand** (`leave_hand`, level 6, 15 mana, `HandMoves`): cast at a chest, barrel or any container within reach
-  and one of your spirit's hands stays there (`spirits/TendedHand`, an entity), hovering over it. Cast at it again and
-  the hand comes home. One hand to leave, two from bond 60, three from level 15; leaving one more takes back the oldest.
-  Where they are is kept on the keeper (`TendedHand.LEFT`, saved, kept through death), so a hand called back or whose
-  spirit was released fades when it next looks round.
-- **Gathers**: anything lying within 10 blocks goes into the container. A container that already holds something only
-  gathers those kinds (Mage Hand's sorting hand); an empty one takes everything.
-- **Guards**: strikes monsters within 8 blocks of it (4 damage, scaled by spirit level like every move; never an ally).
-- **Tends** (`FARMS`): harvests ripe crops within 6 blocks (2 up and down), replants them from their own seed or the
-  container's, sows bare farmland from seeds in the container, feeds unripe crops its bone meal; the harvest goes in.
-- It draws 0.1 mana a second, 1 a blow and 0.25 a harvest or sowing from its keeper, and rests, dim and still, while
-  they are offline or would go below 10 mana.
-- Drawn (`client/spirits/TendedHandRenderer`) as the spirit's own forearm and hand from its arms (`SpiritRig`), in the
-  aura's shells and its colour: loose at rest, open and pointing as it reaches, closed round what it carries, a fist that
-  punches. Only the attuned (and those who read magic) see the hand; anyone sees what it carries float.
+## 0.7.279: a floating ki-glow hand for Far Hand and Catch (pack 0.17.82)
+
+Andy linked Mage Hand (CurseForge, SkylorBeck; GPL-3.0, ideas only, our own code and look). After a first try with hands
+left behind at chests: "I dont like any of the functionality, the hands shouldnt stay behind. just make the hand follow
+the wispy ki glow texture, and only use it for the far reach, and catch."
+- **The floating hand** (`spirits/SpiritHand`, short lived, never saved): the spirit's own hand from its arms with no arm,
+  drawn (`client/spirits/SpiritHandRenderer`) as the ki glow is: three hollow shells of scrolling wisps in the spirit's
+  colour, added like light, with no solid core (`textures/entity/spirit_hand_glow.png`, Powers' ki glow texture). Only
+  the attuned (and those who read magic) see it.
+- **Far hand** sends it instead of stretching the arm: it flies out open (2 blocks a tick) to the chest, lever, door,
+  item frame or item in sight; only when it gets there does the chest open or the item come away, and it closes on it,
+  then flies home carrying the item with it and fades at your side.
+- **Catch**: while the catch lasts an open hand hovers ahead of you instead of the arms; each shot snatched (cast or the
+  spirit's own catch), a hand closes on it where it was caught and fades.
 - Compile-checked only, not seen in game.

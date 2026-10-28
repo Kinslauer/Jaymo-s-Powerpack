@@ -3283,6 +3283,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   CC BY-NC-ND 4.0, so it stays shipped unchanged. Epic villages keep their biomes. Compile-checked here, not playtested.
   Also Kitchen 0.5.33.1: the server wouldn't start on 0.5.33 (five pie and cheesecake crafting recipes had a cooking
   category, which 26.3 refuses); fixed, and the pack ships the patched jar.
-- **0.17.81, Leave a Hand (Kingdoms 0.7.278):** mana spirits learn Mage Hand's trick at level 6: leave a hand at a
-  chest and it gathers dropped items into it (only the kinds already inside, if any), guards it from monsters and tends
-  the crops round it. One hand, two at bond 60, three at level 15. Not seen in game.
+- **0.17.81, Repurposed Structures (Kingdoms 0.7.278):** Repurposed Structures 7.8.4 (LGPL-3.0, shipped unchanged)
+  and MidnightLib 1.10.0 (MIT, which it needs) join the pack. Biome versions of vanilla's structures; a kingdom raised
+  in the jungle now gets its jungle fortress for a seat, and its villages and outposts join the shared pools (outposts
+  now pool by any id with "outpost" in it, since Repurposed Structures leaves off "pillager"). Compile-checked here,
+  not playtested.
+- **0.17.82, a floating spirit hand (Kingdoms 0.7.279):** Far Hand and Catch now send out a floating hand made of the
+  ki glow's wisps (after Mage Hand): it flies to the chest or item before it opens or comes to you, and catches shots in
+  front of you. Only the attuned see it. Not seen in game.

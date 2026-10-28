@@ -236,6 +236,13 @@ def packModsNoCf = [
 	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
 	// TODO(home PC): its CurseForge [project id, file id], as above.
 	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
+	// Repurposed Structures (LGPL-3.0, by TelepathicGrunt; shipped unchanged): biome versions of vanilla structures (its
+	// villages and outposts join Jaymo's Kingdoms' shared pools), and its jungle fortress is the grand seat Jaymo's
+	// Kingdoms raises for a kingdom in the jungle (GrandSeats). Server-side worldgen; needs MidnightLib (below).
+	// TODO(home PC): CurseForge [project id, file id] for it and MidnightLib, as above.
+	[dep: "maven.modrinth:repurposed-structures-fabric:9jHXeIeI", cf: null],
+	// MidnightLib (MIT, by Motschen): config library Repurposed Structures needs.
+	[dep: "maven.modrinth:midnightlib:G9RaNHAC", cf: null],
 	// Ji AFK Cinematic (Ji Mods Source License: official jars may go in modpacks with credit, by Jiory_): stand idle and the
 	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
 	// TODO(home PC): CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.

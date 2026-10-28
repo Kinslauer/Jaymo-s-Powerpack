@@ -37,10 +37,13 @@ public final class SharedPools {
 		return Seats.village(s) || s.unwrapKey().map(k -> k.identifier().getPath().toLowerCase(Locale.ROOT).contains("village")).orElse(false);
 	}
 
-	/** A pillager outpost, vanilla's or a structure mod's (by id). */
+	/**
+	 * A pillager outpost, vanilla's or a structure mod's (by id): Repurposed Structures names its own just
+	 * {@code outpost_badlands} and the like.
+	 */
 	static boolean outpost(Holder<Structure> s) {
 		String path = s.unwrapKey().map(k -> k.identifier().getPath().toLowerCase(Locale.ROOT)).orElse("");
-		return path.contains("pillager_outpost") || path.contains("outpost") && path.contains("pillager");
+		return path.contains("outpost");
 	}
 
 	/** {@code sets} with every set made only of structures {@code which} accepts merged into one, at {@code lead}'s spacing (else the first's). */

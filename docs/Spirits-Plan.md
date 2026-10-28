@@ -359,10 +359,9 @@ side only, so add `int scale` (×100) to `SpiritState` is track G's job: it adds
 CODEC and STREAM_CODEC, and `Spirit.size(SpiritState)` reads it; track I uses it). `SpiritHud`: the clash tug bar is H's;
 the steady/armour/echo toggles show "on" after the move name. Lang keys in `spirits_i.json`.
 
-## Leave a Hand (Kingdoms 0.7.278)
+## The floating hand (Kingdoms 0.7.279)
 
-Andy (2026-10-27), linking Mage Hand (GPL-3.0, ideas only): "can this be implemented with our mana spirits?" A seventh
-shared move, `leave_hand` (level 6, cost 15): the hand stays at a container (`spirits/TendedHand`, drawn by
-`client/spirits/TendedHandRenderer`), gathers items (only the kinds inside if it holds any), guards it (monsters within 8),
-and tends crops within 6 (`TendedHand.FARMS`). Hands: 1, 2 from bond 60, 3 from level 15. Tuning at the top of
-`TendedHand`.
+Andy (2026-10-28), after Mage Hand (GPL-3.0, ideas only): "the hands shouldnt stay behind. just make the hand follow the
+wispy ki glow texture, and only use it for the far reach, and catch." `spirits/SpiritHand` (never saved) and
+`client/spirits/SpiritHandRenderer` (the ki glow's texture and shells on `SpiritRig`'s hand): Far hand flies it out and
+acts on arrival; Catch hovers one ahead and closes one on each shot. The arms don't show for these two (pose IDLE).
