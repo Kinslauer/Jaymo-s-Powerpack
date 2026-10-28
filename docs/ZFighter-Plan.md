@@ -102,6 +102,6 @@ shell (two additive layers turning against each other, tongues flickering up pas
 `PULSE_EVERY` ticks (quicker each form) and dies back to the glow; the debris is unchanged. The glow no longer brightens
 on a charge; when a charge fills ki (`KI_FULL`) it flashes and swells for a second. Hidden round your own camera in
 first person. Preview: project files `art-overhaul/ki-aura/ki-aura-preview.png`.
-(0.17.123) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes": the
+(0.17.132) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes": the
 aura swells with ki (`ZFighterPower.KI_SHARE`, synced in 5% steps; `ZFighterKiAura.SWELL` +50% at full, normal at 30%
-and below), and the hold now lasts until ki falls under half (was 90%), so spending ki shrinks it back first.
+and below), and the hold now lasts until ki falls under 80% (was 90%), still 8 s at most, so spending ki shrinks it back first.

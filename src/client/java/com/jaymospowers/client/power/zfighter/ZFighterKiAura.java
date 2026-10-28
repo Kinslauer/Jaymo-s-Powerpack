@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterKiAuraStyles#draw}); this class still decides when it shows, how strong, how big and what colour, and
  * the fifth number is how far it streams back in flight.
  * <p>
- * (0.17.123) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". The
+ * (0.17.132) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". The
  * aura swells with his ki ({@link ZFighterPower#KI_SHARE}): normal size at {@link #SWELL_FROM} of full and below, up to
  * {@link #SWELL} bigger at full, so it grows as he charges and eases back as he spends it.
  */
@@ -71,7 +71,7 @@ public final class ZFighterKiAura {
 	static final float PULSE_RISE = 0.12F, PULSE_DECAY = 5.0F, PULSE_HIGH = 0.75F, PULSE_LOW = 0.0F;
 	/** A pulse swells the aura out by this much at its height. */
 	static final float PULSE_SWELL = 0.1F;
-	/** (0.17.123) Bigger by up to this at full ki, from this share of full up; and how fast its size follows his ki (a tick). */
+	/** (0.17.132) Bigger by up to this at full ki, from this share of full up; and how fast its size follows his ki (a tick). */
 	static final float SWELL = 0.5F, SWELL_FROM = 0.3F, SWELL_EASE = 0.12F;
 	/** Flying: the aura starts to stream back at this speed (blocks a tick) and fully at this one. */
 	static final double TRAIL_FROM = 0.2, TRAIL_FULL = 1.0;

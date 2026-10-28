@@ -86,6 +86,8 @@ public final class Ship extends Entity {
 	 * goes, and how quickly she gathers that way.
 	 */
 	static final double KEDGE = 0.09, KEDGE_GATHER = 0.08;
+	/** (0.7.307) How fast her way comes off her riding at anchor (share a tick). */
+	static final double RIDING_GATHER = 0.25;
 	/** (0.7.285) The least a crew at her sweeps rows her (blocks a tick), however heavy she is. */
 	static final double CREW_SWEEPS = 0.07;
 	/** How far (blocks) it may be nudged to find room to drop anchor. */
@@ -180,6 +182,8 @@ public final class Ship extends Entity {
 	private int adrift;
 	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
 	private int kedging;
+	/** (0.7.307) Server: ticks still to ride at anchor out at sea ({@link #rideAtAnchor}). */
+	private int riding;
 	/**
 	 * (0.7.28) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
 	 * the world from an entity, so each one aboard leaves an invisible light block in the world cell it's passing
@@ -552,6 +556,17 @@ public final class Ship extends Entity {
 				gather = KEDGE_GATHER;
 			}
 		}
+		if (this.riding > 0) {
+			this.riding--;
+			if (pilot == null) {
+				// (0.7.307) at anchor: her sails struck, her way taken off her, and she holds her head
+				this.sail = 0.0;
+				wanted = 0.0;
+				gather = RIDING_GATHER;
+				this.towed = Vec3.ZERO;
+				input = Input.EMPTY;
+			}
+		}
 		this.speed += (wanted - this.speed) * gather;
 		if (Math.abs(this.speed) < 1.0E-4) {
 			this.speed = 0.0;
@@ -741,7 +756,7 @@ public final class Ship extends Entity {
 		AABB around = this.getBoundingBox().inflate(1.0);
 		for (Entity e : level.getEntities(this, around, e -> !(e instanceof Player) && !(e instanceof Ship) && !e.isPassenger() && !e.noPhysics)) {
 			Vec3 local = toLocal(e.getX(), e.getY(), e.getZ(), from, yawFrom);
-			if (!this.aboard(local, 0.3)) {
+			if (!this.aboard(local, 0.3) || !resting(h, local, e instanceof LivingEntity)) {
 				continue;
 			}
 			Vec3 now = toWorld(local.x, local.y, local.z, this.position(), yaw);
@@ -752,6 +767,29 @@ public final class Ship extends Entity {
 				living.yBodyRot += yaw - yawFrom;
 			}
 		}
+	}
+
+	/**
+	 * (0.7.307) Whether something at {@code local} (her frame) is on her or in her: in her dry hold, or on one of her pieces
+	 * (in a part-block, or standing on one just below; a walker a little higher, mid-stride or jumping). Not what floats in
+	 * the sea inside her outline (Andy: "alot of items were following the ship as it sailed instead of floating in the
+	 * water outside"), nor what she's sailed into, inside a full block of hers.
+	 */
+	private static boolean resting(Hull h, Vec3 local, boolean walker) {
+		int x = Mth.floor(local.x + 0.5), y = Mth.floor(local.y + 0.01), z = Mth.floor(local.z + 0.5);
+		if (h.dry(x, y, z)) {
+			return true;
+		}
+		int at = h.at(x, y, z);
+		if (at >= 0) {
+			return !h.solid(at);
+		}
+		for (int down = 1; down <= (walker ? 2 : 1); down++) {
+			if (h.at(x, y - down, z) >= 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---- the helm ----
@@ -1210,6 +1248,40 @@ public final class Ship extends Entity {
 	 */
 	public void kedge(int ticks) {
 		this.kedging = Math.max(this.kedging, ticks);
+	}
+
+	/**
+	 * (0.7.307) She rides at anchor where she lies for {@code ticks} (her anchor let go: no way on her, no turn, nothing
+	 * tows her off), her blocks staying hers. A whaler cutting in a whale lashed alongside (Andy: "the boat should weigh
+	 * anchor when the whale is attached").
+	 */
+	public void rideAtAnchor(int ticks) {
+		this.riding = Math.max(this.riding, ticks);
+	}
+
+	/** (0.7.307) Whether she's riding at anchor at sea ({@link #rideAtAnchor}). */
+	public boolean ridingAtAnchor() {
+		return this.riding > 0;
+	}
+
+	/**
+	 * (0.7.307) Her piece at (x, y, z) in her frame becomes {@code state}, or (none there) she's given a new one. False if
+	 * that would leave her without a hull.
+	 */
+	public boolean setPieceAt(int x, int y, int z, BlockState state) {
+		Hull h = this.hull();
+		if (h == null) {
+			return false;
+		}
+		int i = h.at(x, y, z);
+		if (i >= 0) {
+			this.setPiece(i, state);
+			return true;
+		}
+		List<Piece> pieces = new ArrayList<>(h.pieces);
+		pieces.add(new Piece(Block.getId(state), x, y, z));
+		this.setAttached(PIECES, List.copyOf(pieces));
+		return true;
 	}
 
 	/** Whether she's being warped off ({@link #kedge}). */

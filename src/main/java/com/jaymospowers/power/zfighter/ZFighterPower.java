@@ -201,12 +201,12 @@ public final class ZFighterPower implements Power {
 	/**
 	 * (0.16.20) Andy: "after achieving max it stays for a bit until your ki falls". Let go of a full charge and the charging
 	 * aura holds this long, or until his ki drops under this share of full.
-	 * (0.17.123) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". It
-	 * now holds down to half his ki (was 90%), so spending it visibly shrinks the aura back before it goes.
+	 * (0.17.132) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". It
+	 * now holds down to 80% of his ki (was 90%), still 8 s at most, so spending it shrinks the aura back before it goes.
 	 */
 	static final int AURA_HOLD_TICKS = 160;
-	static final float AURA_HOLD_KI = 0.5F;
-	/** (0.17.123) His ki as a share of full is sent to everyone in this many steps (the aura's size; few, to send little). */
+	static final float AURA_HOLD_KI = 0.8F;
+	/** (0.17.132) His ki as a share of full is sent to everyone in this many steps (the aura's size; few, to send little). */
 	public static final int KI_SHARE_STEPS = 20;
 	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
 	static final double SHOUT_RANGE = 32.0;
@@ -267,7 +267,7 @@ public final class ZFighterPower implements Power {
 	public static final AttachmentType<Long> KI_FULL = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_full"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	/**
-	 * (0.17.123) His ki out of {@link #KI_SHARE_STEPS} of full, for everyone's client: the aura swells with it
+	 * (0.17.132) His ki out of {@link #KI_SHARE_STEPS} of full, for everyone's client: the aura swells with it
 	 * ({@code ZFighterKiAura}). Absent at none; not saved.
 	 */
 	public static final AttachmentType<Integer> KI_SHARE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_share"),
@@ -1218,7 +1218,7 @@ public final class ZFighterPower implements Power {
 	 * then, or when his ki falls under {@link #AURA_HOLD_KI} of full. Synced only once he's let go (charging shows on its own).
 	 */
 	static void auraHold(ServerPlayer player, Live live, long now, int max) {
-		// (0.17.123) the share of ki the aura's size follows, sent only when it moves a step
+		// (0.17.132) the share of ki the aura's size follows, sent only when it moves a step
 		int share = max <= 0 ? 0 : Mth.clamp(Math.round(KI_SHARE_STEPS * live.ki / max), 0, KI_SHARE_STEPS);
 		Integer sent = player.getAttached(KI_SHARE);
 		if ((sent == null ? 0 : sent) != share) {

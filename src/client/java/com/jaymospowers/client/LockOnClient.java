@@ -56,6 +56,7 @@ public final class LockOnClient {
 	}
 
 	public static void init() {
+		LockOn.clientTarget = player -> player == Minecraft.getInstance().player ? locked() : null;
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping(KEY_NAME, InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_MIDDLE,
 			JaymosPowersClient.CATEGORY));
 		ClientTickEvents.START_CLIENT_TICK.register(LockOnClient::input);
