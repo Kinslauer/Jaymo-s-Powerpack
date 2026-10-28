@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.17.96) While an execution is being charged or played, attack is the hold's ({@link FinisherClient#holdsAttack}): the click
+ * (0.17.97) While an execution is being charged or played, attack is the hold's ({@link FinisherClient#holdsAttack}): the click
  * doesn't swing and holding it neither repeats Better Combat's swings (its hold-to-attack runs in {@code continueAttack}) nor
  * digs. Ahead of the default priority so Better Combat doesn't take the click first, as with the bomb glider.
  */
