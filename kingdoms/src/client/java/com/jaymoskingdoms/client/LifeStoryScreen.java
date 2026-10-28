@@ -600,8 +600,14 @@ final class LifeStoryScreen extends Screen {
 					b.visible = false;
 				}
 			}
-		} else if (this.later != null) {
-			this.later.visible = true;
+		} else {
+			// (0.7.276) the footer comes back once the ask is answered: without this, Next and Back stayed hidden
+			// after a skip and the story could never be lived
+			for (Button b : new Button[] {this.next, this.back, this.later}) {
+				if (b != null) {
+					b.visible = true;
+				}
+			}
 		}
 		if (this.skipYes != null && this.skipNo != null) {
 			this.skipYes.visible = this.asking;

@@ -3291,3 +3291,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.82, a floating spirit hand (Kingdoms 0.7.279):** Far Hand and Catch now send out a floating hand made of the
   ki glow's wisps (after Mage Hand): it flies to the chest or item before it opens or comes to you, and catches shots in
   front of you. Only the attuned see it. Not seen in game.
+- **0.17.79, skip the story fix (Kingdoms 0.7.276):** after "Skip the story", the story page's Next ("Live this
+  life") and Back buttons stayed hidden, so the story could never be lived. They come back once the ask is answered.
