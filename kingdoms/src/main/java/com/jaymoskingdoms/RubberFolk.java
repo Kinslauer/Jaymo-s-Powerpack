@@ -110,6 +110,11 @@ public final class RubberFolk {
 	/** The sweet each is eating now, and the ticks it had left when last seen. */
 	private static final Map<UUID, ItemStack> EATING = new HashMap<>();
 	private static final Map<UUID, Integer> LEFT = new HashMap<>();
+	/**
+	 * (0.7.306) A swallow under way → their MCA Size and Width as it began, as it'll end, and how far along it they've
+	 * grown: {@code {fromSize, fromWidth, toSize, toWidth, share}}.
+	 */
+	private static final Map<UUID, float[]> GROWTH = new HashMap<>();
 
 	private RubberFolk() {
 	}
@@ -132,6 +137,7 @@ public final class RubberFolk {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			EATING.remove(handler.player.getUUID());
 			LEFT.remove(handler.player.getUUID());
+			GROWTH.remove(handler.player.getUUID());
 		});
 	}
 
@@ -252,12 +258,46 @@ public final class RubberFolk {
 				}
 			}
 			if (player.level() instanceof ServerLevel level) {
+				HeritageHold.Channel channel = HeritageHold.channel(player);
+				if (channel != null && McaCompat.LOADED && !GROWTH.containsKey(id)) {
+					float[] genes = McaBridge.bodyGenes(player);
+					if (genes != null) {
+						float[] to = BodySizes.withMass(genes[0], genes[1], channel.shape.height(), channel.shape.width());
+						GROWTH.put(id, new float[] {genes[0], genes[1], to[0], to[1], 0.0F});
+					}
+				}
 				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, ABSORB_TICKS, PINK, SoundEvents.SLIME_SQUISH_SMALL,
 					"message.jaymoskingdoms.rubber.absorbing");
 				if (foe != null) {
 					absorb(level, player, foe);
+				} else {
+					grow(player, HeritageHold.channel(player));
 				}
 			}
+		}
+	}
+
+	/**
+	 * (0.7.306) Andy: "the mass should increase per pulse as the absorbed gets smaller". While {@code channel} runs, their
+	 * build is as far from where it was to where it'll end ({@link BodySizes#withMass}) as the swallow was at its last
+	 * pulse; let go (no channel), it goes back to how it was.
+	 */
+	private static void grow(ServerPlayer player, HeritageHold.@org.jspecify.annotations.Nullable Channel channel) {
+		float[] growth = GROWTH.get(player.getUUID());
+		if (growth == null || !McaCompat.LOADED) {
+			return;
+		}
+		if (channel == null) {
+			GROWTH.remove(player.getUUID());
+			if (growth[4] > 0.0F) {
+				McaBridge.setBody(player, growth[0], growth[1]);
+			}
+			return;
+		}
+		float at = (float)channel.pulsed;
+		if (at > growth[4]) {
+			growth[4] = at;
+			McaBridge.setBody(player, Mth.lerp(at, growth[0], growth[2]), Mth.lerp(at, growth[1], growth[3]));
 		}
 	}
 
@@ -295,11 +335,10 @@ public final class RubberFolk {
 			PowersCompat.takePower(player, foe);
 		}
 		player.heal(heal);
-		// (0.7.290) Andy: "they change with what they absorb": their build shifts toward the foe's (BodySizes.ABSORB_SHIFT)
-		if (McaCompat.LOADED) {
-			// (its standing shape, not as it lies downed)
-			net.minecraft.world.entity.EntityDimensions shape = foe.getType().getDimensions().scale(foe.getScale());
-			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
+		// (0.7.306) Andy: "it should add their mass to the user": the last of its bulk goes in (the rest went with each pulse, grow)
+		float[] growth = GROWTH.remove(player.getUUID());
+		if (growth != null && McaCompat.LOADED) {
+			McaBridge.setBody(player, growth[2], growth[3]);
 		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		// (0.7.297) and they take on what it had, in place of the last thing they swallowed

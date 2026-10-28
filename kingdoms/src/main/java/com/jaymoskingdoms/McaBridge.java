@@ -258,21 +258,31 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.290) Andy: rubber-folk "change with what they absorb". Moves {@code player}'s MCA Size and Width
-	 * {@code share} of the way toward {@code size} and {@code width}, kept to their heritage's body, re-saving their look
-	 * and showing it to everyone.
+	 * (0.7.306) {@code player}'s MCA Size and Width genes as {@code {size, width}}, or null if MCA hasn't set them up yet.
 	 */
-	static void shiftBody(ServerPlayer player, float size, float width, float share) {
+	static float @org.jspecify.annotations.Nullable [] bodyGenes(ServerPlayer player) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.isEntityDataSet()) {
+			return null;
+		}
+		CompoundTag mca = NbtHelper.getCompoundOrSelf(save.getEntityData(), "MCAData");
+		return new float[] {mca.getFloat(SIZE_GENE).orElse(0.5F), mca.getFloat(WIDTH_GENE).orElse(0.5F)};
+	}
+
+	/**
+	 * (0.7.306, was shiftBody) Andy: rubber-folk "change with what they absorb". Sets {@code player}'s MCA Size and Width
+	 * to {@code size} and {@code width}, kept to their heritage's body, re-saving their look and showing it to everyone.
+	 */
+	static void setBody(ServerPlayer player, float size, float width) {
 		PlayerSaveData save = PlayerSaveData.get(player);
 		if (!save.isEntityDataSet()) {
 			return;
 		}
 		CompoundTag data = save.getEntityData();
 		CompoundTag mca = NbtHelper.getCompoundOrSelf(data, "MCAData");
-		float was = mca.getFloat(SIZE_GENE).orElse(0.5F), wasWidth = mca.getFloat(WIDTH_GENE).orElse(0.5F);
 		Heritage.Kind kind = Heritage.of(player);
-		mca.putFloat(SIZE_GENE, BodySizes.clampSize(kind, was + (size - was) * share));
-		mca.putFloat(WIDTH_GENE, BodySizes.clampWidth(kind, wasWidth + (width - wasWidth) * share));
+		mca.putFloat(SIZE_GENE, BodySizes.clampSize(kind, size));
+		mca.putFloat(WIDTH_GENE, BodySizes.clampWidth(kind, width));
 		save.setEntityData(data);
 		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
 			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
