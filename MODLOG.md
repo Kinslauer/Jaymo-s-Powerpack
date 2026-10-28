@@ -3281,3 +3281,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.80, Towns and Towers villages pooled (Kingdoms 0.7.277):** Towns and Towers' 27 villages were left out of the
   shared village pool (their set also holds an untagged Nether piglin village); they're in it now. Its licence is
   CC BY-NC-ND 4.0, so it stays shipped unchanged. Epic villages keep their biomes. Compile-checked here, not playtested.
+  Also Kitchen 0.5.33.1: the server wouldn't start on 0.5.33 (five pie and cheesecake crafting recipes had a cooking
+  category, which 26.3 refuses); fixed, and the pack ships the patched jar.

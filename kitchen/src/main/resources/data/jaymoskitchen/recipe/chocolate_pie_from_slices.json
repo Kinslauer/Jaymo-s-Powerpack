@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "food",
+  "category": "misc",
   "group": "jaymoskitchen_chocolate_pie",
   "key": {
     "#": "jaymoskitchen:chocolate_pie_slice"
