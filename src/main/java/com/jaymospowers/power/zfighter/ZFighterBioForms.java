@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.136, Andy: "as a z fighter they gain various buffs per form and are more akin to Cell") A Bio-built Z Fighter
+ * (0.17.138, Andy: "as a z fighter they gain various buffs per form and are more akin to Cell") A Bio-built Z Fighter
  * grows with the form Jaymo's Kingdoms gives them (its tag {@code jaymoskingdoms_bio_form_<n>}; Powers never compiles
  * against Kingdoms): more ki ({@link #KI}), harder fists ({@link #FISTS}), ki coming back faster ({@link #REGEN}), and
  * flight costing more in the bulky second form and less in the Perfect third ({@link #FLIGHT}). The Perfect form, the

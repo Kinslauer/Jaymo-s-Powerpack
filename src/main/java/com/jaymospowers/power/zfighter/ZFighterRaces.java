@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
  * {@link ZFighterFrostReserve}, Warrior-born {@link ZFighterWarriorComeback}. A Divine-born (Kingdoms heritage {@code divine})
  * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}); the Rubber-folk heritage needs
  * nothing here, since an unknown heritage already counts as an Earthling ({@link ZFighterLineage#fromHeritage}); nor do the
- * Bio-built, but (0.17.136) their forms' strengths come on top ({@link ZFighterBioForms}).
+ * Bio-built, but (0.17.138) their forms' strengths come on top ({@link ZFighterBioForms}).
  */
 final class ZFighterRaces {
 	/** The merged fists and health are put back on this often (ticks). */

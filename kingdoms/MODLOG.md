@@ -6189,7 +6189,7 @@ rubber's internal organs."
 - Powers 0.17.134: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
 Compile-checked, not seen in game.
 
-## 0.7.313: the Bio-built remade after Cell: three bodies, a tail that swallows, absorb anyone but the Dawnborn and Divine (pack 0.17.136)
+## 0.7.313: the Bio-built remade after Cell: three bodies, a tail that swallows, absorb anyone but the Dawnborn and Divine (pack 0.17.138)
 Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed". The heritage key
 (`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'
 `jaymospowers_crippled` tag, splinted or not), has a leg cut off (`jaymoskitchen.missing.left_leg`/`right_leg`), or is
@@ -6234,5 +6234,5 @@ down upon the target. stretching over and engulfing them into a bulge that flows
   back. Reach 4.5 blocks; the foe is held 1.8 blocks off (`HeritageHold.step` takes a touch distance now). No more hand
   reach for the Bio-built.
 - **Buds** (`BioBudRenderer`): small copies of the Perfect form in their maker's palette.
-- **Z Fighters** (Powers 0.17.136): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
+- **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
 Compile-checked against 26.3 with javac (changed files), not seen in game.
