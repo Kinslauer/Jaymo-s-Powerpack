@@ -28,6 +28,8 @@ public final class Professions {
 	public static VillagerProfession WIZARD;
 	/** (0.7.291) A court's necromancer, a camp's shaman and blood witch: villagers in the office ({@link Casters}), never a player's pick. */
 	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
+	/** (0.7.299) A town's cook, at its cookhouse or tavern ({@link Meals}): taken on by the town, never a player's pick. Trades meals. */
+	public static VillagerProfession COOK;
 
 	private Professions() {
 	}
@@ -48,6 +50,8 @@ public final class Professions {
 		NECROMANCER = register("necromancer", SoundEvents.VILLAGER_WORK_CLERIC);
 		SHAMAN = register("shaman", SoundEvents.VILLAGER_WORK_LEATHERWORKER);
 		BLOOD_WITCH = register("blood_witch", SoundEvents.VILLAGER_WORK_CLERIC);
+		// (0.7.299)
+		COOK = register("cook", SoundEvents.VILLAGER_WORK_BUTCHER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -107,6 +111,7 @@ public final class Professions {
 			case "jaymoskingdoms:stablehand" -> "minecraft:shepherd";
 			case "jaymoskingdoms:farrier" -> "minecraft:armorer";
 			case "jaymoskingdoms:wizard" -> "minecraft:cleric";
+			case "jaymoskingdoms:cook" -> "minecraft:butcher";
 			default -> null;
 		};
 	}

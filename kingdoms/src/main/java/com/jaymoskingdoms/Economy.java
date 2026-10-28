@@ -166,7 +166,7 @@ public final class Economy {
 		// from the settlement's own people, if it can spare one (0.5.21: with MCA, a worker is one of them promoted where
 		// they stand, so nobody's taken away)
 		List<Villager> villagers = Workers.inPlace(f, role) ? List.of() : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
-			v -> v.isAlive() && !v.isBaby() && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
+			v -> v.isAlive() && !v.isBaby() && !Visitors.is(v) && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
 		BlockPos from = null;
 		if (villagers.size() > MIN_VILLAGERS_KEPT) {
 			Villager recruit = villagers.get(level.getRandom().nextInt(villagers.size()));

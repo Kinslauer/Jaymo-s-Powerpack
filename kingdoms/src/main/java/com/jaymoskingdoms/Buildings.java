@@ -55,6 +55,8 @@ final class Buildings {
 			realm(type, "smithy", Buildings::smithy, 1, 0);
 			realm(type, "road", Buildings::road, 2, 0);
 			realm(type, "well", Buildings::well, 1, 0);
+			// (0.7.299) where townsfolk without a stove at home buy their meals ({@link Meals})
+			realm(type, "cookhouse", Buildings::cookhouse, 1, 12);
 			realm(type, "house", Buildings::house, 4, 16);
 			realm(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
@@ -85,6 +87,7 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 2, 0);
 		realm(FactionType.VILLAGE, "well", Buildings::well, 1, 0);
+		realm(FactionType.VILLAGE, "cookhouse", Buildings::cookhouse, 1, 8);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
 		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 10);
@@ -930,6 +933,52 @@ final class Buildings {
 			s.set(x, y, z, k.p.wall());
 		}
 		s.set(x, y1 + 1, z, Blocks.CAMPFIRE.defaultBlockState());
+	}
+
+	/**
+	 * (0.7.299) A cookhouse (9 x 7), after Chef's Delight's cook houses (remade, nothing copied): an open-fronted kitchen
+	 * under a slab roof, a stone back wall with two smokers and the chimney, barrels of stores, a serving counter, and two
+	 * tables out front where the town eats ({@link Meals}).
+	 */
+	static Blueprint cookhouse(Kit k) {
+		Sketch s = new Sketch("cookhouse", 9, 7, 9);
+		Palette p = k.p;
+		for (int x = 0; x < 9; x++) {
+			for (int z = 0; z < 7; z++) {
+				s.set(x, 0, z, p.floor());
+				s.set(x, 4, z, k.roofSlab);
+			}
+		}
+		for (int[] post : new int[][] {{0, 0}, {8, 0}, {0, 6}, {8, 6}}) {
+			for (int y = 1; y <= 3; y++) {
+				s.set(post[0], y, post[1], p.log());
+			}
+		}
+		for (int y = 1; y <= 3; y++) {
+			for (int x = 1; x <= 7; x++) {
+				s.set(x, y, 6, p.wall());
+			}
+			for (int z = 3; z <= 5; z++) {
+				s.set(0, y, z, p.planks());
+				s.set(8, y, z, p.planks());
+			}
+		}
+		// the kitchen along the back: smokers either side of the chimney, barrels of stores
+		s.set(2, 1, 5, Sketch.facing(Blocks.SMOKER, Direction.NORTH));
+		s.set(6, 1, 5, Sketch.facing(Blocks.SMOKER, Direction.NORTH));
+		s.set(3, 1, 5, Blocks.BARREL.defaultBlockState());
+		s.set(5, 1, 5, Blocks.BARREL.defaultBlockState());
+		s.set(7, 1, 5, Blocks.BARREL.defaultBlockState());
+		chimney(s, k, 4, 6, 4, 7);
+		// the serving counter (a way through at the west end), a lamp, and the tables out front
+		for (int x = 2; x <= 7; x++) {
+			s.set(x, 1, 3, Sketch.top(p.woodSlab()));
+		}
+		s.set(4, 3, 2, Sketch.hanging(Blocks.LANTERN));
+		s.set(4, 3, 4, Sketch.hanging(Blocks.LANTERN));
+		table(s, k, 2, 1, 1, true);
+		table(s, k, 6, 1, 1, true);
+		return s.done();
 	}
 
 	/** A coaching inn (11 x 9): a stone taproom (bar, barrels, tables, a hearth) and a timber floor of rooms above. */

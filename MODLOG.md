@@ -3430,3 +3430,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   "Rose Gold Sora's Dagger Blade Cast"; it breaks with a crack after its one iron blade. JEI shows both.
 - **0.17.111, mana spirits show their figure** (Kingdoms 0.7.298; Andy: "start with a larger figure that pulses behind
   you like now, and build the arms off their frame. they should fade, while the arms stay"): see Kingdoms' MODLOG.
+- **0.17.112, Kingdoms 0.7.299:** visitors for the day, and every villager cooks at home or buys a meal at a new
+  cookhouse or the tavern, from cooks who bake from the storehouse; meal prices follow the larder and realms trade their
+  surplus or buy bread in (see Kingdoms' MODLOG). Dev-server checked, not seen in a client.

@@ -83,7 +83,7 @@ final class Jobs {
 				continue;
 			}
 			List<Works.Built> built = Works.of(server, f.id()).built();
-			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE), v -> v.isAlive() && !v.isBaby())) {
+			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE), v -> v.isAlive() && !v.isBaby() && !Visitors.is(v))) {
 				Holder<VillagerProfession> trade = v.getVillagerData().profession();
 				if (trade.is(VillagerProfession.NONE)) {
 					place(level, v, built);
