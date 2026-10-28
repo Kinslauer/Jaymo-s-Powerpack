@@ -5809,7 +5809,7 @@ the Rubber-folk's swallowing: "yes switch it too".
   modifier) to nothing and is taken in.
 - Any damage you take ends it ("Hurt, you lose your hold on it."), as does the foe getting up (Bio-built), dying, or being
   dragged 1.5 blocks past reach; a foe let go grows back.
-## 0.7.290: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.96)
+## 0.7.290: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.100)
 Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest".
 - **Bodies** (`BodySizes`): each heritage has a range of MCA's Size (height) and Width genes (0 .. 1, drawn 0.75x ..
   1.25x). Stoneborn 0.55-0.9 tall, 0.6-1.0 wide; Sylvan 0-0.4 tall, 0-0.35 wide; plain folk 0.15-0.75 both; the rest

@@ -29,7 +29,8 @@ abstract class GuardFirstPersonMixin {
 	private void jaymospowers$guardPose(CallbackInfo ci, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) InteractionHand hand,
 		@com.llamalad7.mixinextras.sugar.Local(argsOnly = true) ItemStack stack, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) PoseStack pose) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || !player.isUsingItem() || player.getUsedItemHand() != hand || !Guard.weaponGuard(stack)) {
+		if (player == null || !player.isUsingItem() || player.getUsedItemHand() != hand || !Guard.weaponGuard(stack)
+			|| com.jaymospowers.armory.HammerSlam.charging(player)) {
 			return;
 		}
 		boolean right = (hand == InteractionHand.MAIN_HAND) == (player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT);
