@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.LifeStory;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.LifeStory.Answer;
 import com.jaymoskingdoms.LifeStory.Question;
 import com.jaymoskingdoms.Voices;
@@ -46,6 +47,8 @@ final class LifeStoryScreen extends Screen {
 	static final int ACCENT = 0xFFC89A5A;
 	/** After "Live this life", how long the story may take to come back before the screen is put up again (ms). */
 	static final long LIVE_GRACE_MS = 3000L;
+	/** (0.7.304) The first page's rows, by MCA's names (their lang keys): 0 male, 1 female. */
+	static final String[] GENDERS = {LifeStory.MALE, LifeStory.FEMALE};
 	/** Pixels the story page moves for one notch of the wheel. */
 	static final int SCROLL_STEP = 12;
 	/** (0.7.269) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
@@ -56,8 +59,14 @@ final class LifeStoryScreen extends Screen {
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
-	private record Step(@Nullable Question question, boolean realm) {
-		static final Step SUMMARY = new Step(null, false);
+	private record Step(@Nullable Question question, boolean realm, boolean gender) {
+		static final Step SUMMARY = new Step(null, false, false);
+		/** (0.7.304) Andy: "The first screen should be choosing your gender". */
+		static final Step GENDER = new Step(null, false, true);
+
+		boolean summary() {
+			return this.question == null && !this.gender;
+		}
 	}
 
 	/**
@@ -67,6 +76,8 @@ final class LifeStoryScreen extends Screen {
 	private static final class Draft {
 		final int[] answers = new int[Question.values().length];
 		int raisedRealm = -1, roadRealm = -1, look = -1, option = -1, heritage = -1, cls = -1, step;
+		/** (0.7.304) 0 male, 1 female, -1 not picked yet. */
+		int gender = -1;
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -127,6 +138,11 @@ final class LifeStoryScreen extends Screen {
 		return owed;
 	}
 
+	/** (0.7.304) The gender picked on the first page: 0 male, 1 female, -1 none yet (the story figure follows it). */
+	static int gender() {
+		return draft.gender;
+	}
+
 	/** Whether the story is told: it came back from the server. */
 	private static boolean done() {
 		Minecraft minecraft = Minecraft.getInstance();
@@ -155,14 +171,18 @@ final class LifeStoryScreen extends Screen {
 	/** The pages as the answers so far make them: each question asked, a realm page after an answer that names one, then the story. */
 	private static List<Step> steps() {
 		List<Step> out = new ArrayList<>();
+		// (0.7.304) who you are comes first: MCA's body is a man's or a woman's
+		if (McaCompat.LOADED) {
+			out.add(Step.GENDER);
+		}
 		for (Question q : Question.values()) {
 			if (!q.asked()) {
 				continue;
 			}
-			out.add(new Step(q, false));
+			out.add(new Step(q, false, false));
 			Answer a = picked(q);
 			if (a != null && a.realm()) {
-				out.add(new Step(q, true));
+				out.add(new Step(q, true, false));
 			}
 		}
 		out.add(Step.SUMMARY);
@@ -200,6 +220,9 @@ final class LifeStoryScreen extends Screen {
 
 	/** Whether the page is answered, so Next can go on. */
 	private static boolean answered(Step s) {
+		if (s.gender) {
+			return draft.gender >= 0;
+		}
 		if (s.question == null) {
 			Classes.PlayerClass cls = youthClass();
 			return cls == null || cls.options.isEmpty() || draft.option >= 0;
@@ -298,7 +321,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** The rows the page lists: a question's answers, or the realms. */
 	private int rowCount(Step s) {
-		return s.question == null ? 0 : s.realm ? realms.size() : s.question.answers().size();
+		return s.gender ? GENDERS.length : s.question == null ? 0 : s.realm ? realms.size() : s.question.answers().size();
 	}
 
 	private int rowH(Step s) {
@@ -396,7 +419,7 @@ final class LifeStoryScreen extends Screen {
 	private static void narrate(Step s) {
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
-		String page = s.question == null ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
+		String page = s.summary() ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
 		if (!page.equals(narrated)) {
 			narrated = page;
 			if (reading != null) {
@@ -431,6 +454,9 @@ final class LifeStoryScreen extends Screen {
 
 	/** The lines the narrator reads on page {@code s}, as lang keys. */
 	private static List<String> lines(Step s) {
+		if (s.gender) {
+			return List.of("story.jaymoskingdoms.gender.title");
+		}
 		if (s.question == null) {
 			List<String> out = new ArrayList<>();
 			for (Question q : Question.values()) {
@@ -455,7 +481,7 @@ final class LifeStoryScreen extends Screen {
 		if (!answered(s)) {
 			return;
 		}
-		if (s.question != null) {
+		if (!s.summary()) {
 			draft.step++;
 			this.scroll = 0;
 			return;
@@ -466,7 +492,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
-			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls));
+			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
 	}
@@ -489,7 +515,7 @@ final class LifeStoryScreen extends Screen {
 				back = () -> cycleClass(-1);
 			} else if (over(this.look, mx, my)) {
 				back = () -> cycleLook(-1);
-			} else if (s.question == null && chipAt(mx, my) >= 0) {
+			} else if (s.summary() && chipAt(mx, my) >= 0) {
 				Classes.PlayerClass cls = youthClass();
 				int n = cls == null ? 0 : cls.options.size();
 				back = () -> draft.option = n == 0 ? -1 : Math.floorMod((draft.option < 0 ? 0 : draft.option) - 1, n);
@@ -500,7 +526,14 @@ final class LifeStoryScreen extends Screen {
 				return true;
 			}
 		}
-		if (s.question != null) {
+		if (s.gender) {
+			int row = rowAt(s, mx, my);
+			if (row >= 0) {
+				draft.gender = row;
+				click();
+				return true;
+			}
+		} else if (s.question != null) {
 			int row = rowAt(s, mx, my);
 			if (row >= 0) {
 				if (s.realm) {
@@ -590,7 +623,7 @@ final class LifeStoryScreen extends Screen {
 		int viewTop = y + HEADER, viewBottom = y + h - FOOTER;
 		this.viewH = viewBottom - viewTop;
 		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
-		if (s.question != null) {
+		if (!s.summary()) {
 			rows(graphics, s, mouseX, mouseY);
 		} else {
 			summary(graphics, mouseX, mouseY);
@@ -601,7 +634,7 @@ final class LifeStoryScreen extends Screen {
 		tell(graphics, s, mouseX, mouseY);
 
 		if (this.next != null) {
-			this.next.setMessage(Component.translatable(s.question == null ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"));
+			this.next.setMessage(Component.translatable(s.summary() ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"));
 			this.next.active = answered(s);
 		}
 		if (this.back != null) {
@@ -609,7 +642,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		if (this.look != null) {
 			Heritage.Kind kind = heritage();
-			this.look.visible = s.question == null && kind != null;
+			this.look.visible = s.summary() && kind != null;
 			if (kind != null) {
 				this.look.setMessage(Component.translatable("gui.jaymoskingdoms.heritage.variant", HeritageVariants.title(kind, lookIndex()),
 					lookIndex() + 1, HeritageVariants.of(kind).size() + 1));
@@ -618,14 +651,14 @@ final class LifeStoryScreen extends Screen {
 		Heritage.Kind kind = heritage();
 		Classes.PlayerClass cls = youthClass();
 		if (this.heritageButton != null) {
-			this.heritageButton.visible = s.question == null && kind != null;
+			this.heritageButton.visible = s.summary() && kind != null;
 			if (kind != null) {
 				this.heritageButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.heritage", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
 					.withColor(draft.heritage >= 0 ? ACCENT : Ui.TEXT));
 			}
 		}
 		if (this.classButton != null) {
-			this.classButton.visible = s.question == null && cls != null;
+			this.classButton.visible = s.summary() && cls != null;
 			if (cls != null) {
 				this.classButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.class", Component.translatable("class.jaymoskingdoms." + cls.key()))
 					.withColor(draft.cls >= 0 ? ACCENT : Ui.TEXT));
@@ -674,6 +707,9 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private Component heading(Step s) {
+		if (s.gender) {
+			return Component.translatable("story.jaymoskingdoms.gender.title");
+		}
 		if (s.question == null) {
 			return Component.translatable("gui.jaymoskingdoms.story.summary");
 		}
@@ -693,7 +729,10 @@ final class LifeStoryScreen extends Screen {
 			boolean picked, open = true;
 			Component label;
 			ItemStack icon = ItemStack.EMPTY;
-			if (s.realm) {
+			if (s.gender) {
+				picked = draft.gender == i;
+				label = Component.translatable("story.jaymoskingdoms.gender." + GENDERS[i]);
+			} else if (s.realm) {
 				LifeStory.Realm realm = realms.get(i);
 				picked = realm.id() == realmOf(s.question);
 				label = Component.literal(realm.name());
@@ -788,7 +827,7 @@ final class LifeStoryScreen extends Screen {
 
 	private int chipAt(int mouseX, int mouseY) {
 		Classes.PlayerClass cls = youthClass();
-		if (this.chipsTop < 0 || cls == null || cls.options.isEmpty() || step().question != null) {
+		if (this.chipsTop < 0 || cls == null || cls.options.isEmpty() || !step().summary()) {
 			return -1;
 		}
 		if (mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER) {
@@ -924,7 +963,12 @@ final class LifeStoryScreen extends Screen {
 		ItemStack icon = ItemStack.EMPTY;
 		List<Component> lines = new ArrayList<>();
 		List<Component> good = new ArrayList<>();
-		if (s.question == null) {
+		if (s.gender) {
+			int row = rowAt(s, mouseX, mouseY);
+			int g = row >= 0 ? row : draft.gender;
+			name = Component.translatable(g < 0 ? "story.jaymoskingdoms.gender.title" : "story.jaymoskingdoms.gender." + GENDERS[g]);
+			lines.add(Component.translatable("story.jaymoskingdoms.gender.desc").withColor(Ui.DIM));
+		} else if (s.question == null) {
 			Heritage.Kind kind = heritage();
 			if (kind == null) {
 				return;
@@ -973,7 +1017,7 @@ final class LifeStoryScreen extends Screen {
 		Ui.line(graphics, this.font, name, x + (icon.isEmpty() ? 9 : 33), ty + 6, w - 42, ACCENT);
 		ty += 28;
 		// (on the story page, above the heritage and class buttons)
-		int bottom = y + panelH() - FOOTER - 2 - (s.question == null ? 40 : 0);
+		int bottom = y + panelH() - FOOTER - 2 - (s.summary() ? 40 : 0);
 		// (0.7.282) the figure under the text, as much of it as there's room for
 		int figureH = Math.min(FIGURE_H, bottom - ty - 3 * Ui.LINE);
 		if (figureH >= FIGURE_MIN_H) {
@@ -1041,6 +1085,12 @@ final class LifeStoryScreen extends Screen {
 		int look = lookIndex();
 		String scene = "";
 		ItemStack icon = ItemStack.EMPTY;
+		if (s.gender) {
+			// (0.7.304) the one pointed at, before the story gives you any blood
+			int row = rowAt(s, mouseX, mouseY);
+			StoryFigure.draw(graphics, player, null, 0, "", ItemStack.EMPTY, x0, y0, x1, y1, row >= 0 ? row : draft.gender);
+			return;
+		}
 		if (s.question != null) {
 			int row = s.realm ? -1 : rowAt(s, mouseX, mouseY);
 			Answer a = row >= 0 ? s.question.answers().get(row) : picked(s.question);
@@ -1065,7 +1115,7 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
-		StoryFigure.draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1);
+		StoryFigure.draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, draft.gender);
 	}
 
 	private static String keyOf(@Nullable Answer a) {

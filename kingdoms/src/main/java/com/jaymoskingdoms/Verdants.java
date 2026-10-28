@@ -63,6 +63,22 @@ public final class Verdants {
 		return v == null || v.heritage != Heritage.Kind.VERDANT ? green : HeritageVariants.blend(green, v.tint, v.tintAmount);
 	}
 
+	/** (0.7.304) The skin MCA gives the palest and the darkest melanin, by brightness (0..1): the ends of a Verdant player's greens. */
+	static final float PALE_SKIN = 0.85F, DARK_SKIN = 0.25F;
+
+	/**
+	 * (0.7.304) Andy: "the mockup player didnt turn green ... They should only be available in shades of those colors
+	 * like the Rubbers". A Verdant player's (or their creator figure's) green, from the skin MCA would draw them with:
+	 * pale skin a pale green, dark skin a deep one, so MCA's skin slider picks their shade of green.
+	 */
+	public static int fromSkin(Entity entity, int mcaSkin) {
+		float bright = (ARGB.red(mcaSkin) + ARGB.green(mcaSkin) + ARGB.blue(mcaSkin)) / (3.0F * 255.0F);
+		int green = green(Mth.clamp((PALE_SKIN - bright) / (PALE_SKIN - DARK_SKIN), 0.0F, 1.0F));
+		HeritageVariants.Variant v = HeritageVariants.of(entity);
+		green = v == null || v.heritage != Heritage.Kind.VERDANT ? green : HeritageVariants.blend(green, v.tint, v.tintAmount);
+		return ARGB.color(ARGB.alpha(mcaSkin), ARGB.red(green), ARGB.green(green), ARGB.blue(green));
+	}
+
 	/** The green of {@code shade}: pale to deep, some leaning yellow and some blue. */
 	public static int green(float shade) {
 		float s = Mth.clamp(shade, 0.0F, 1.0F);

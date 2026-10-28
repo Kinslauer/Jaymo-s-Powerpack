@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.LifeStory;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -36,7 +37,9 @@ final class StoryCurtain {
 			long now = System.currentTimeMillis();
 			Screen screen = minecraft.gui.screen();
 			if (LifeStoryScreen.owed() || StoryHoldScreen.holding() || screen instanceof LifeStoryScreen
-				|| screen instanceof StoryHoldScreen) {
+				|| screen instanceof StoryHoldScreen
+				// (0.7.304) told, still in stasis till they're set down at their start: black, but for MCA's creator
+				|| minecraft.player.hasAttached(LifeStory.ROAD) && !isCreator(screen)) {
 				up = true;
 				lastHeld = now;
 			} else if (up && (isCreator(screen) || now - lastHeld > LIFT_AFTER_MS)) {

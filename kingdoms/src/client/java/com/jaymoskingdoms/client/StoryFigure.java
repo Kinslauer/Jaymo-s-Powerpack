@@ -189,12 +189,13 @@ final class StoryFigure {
 
 	/**
 	 * You in the box {@code x0,y0}-{@code x1,y1}, as heritage {@code kind}'s look {@code look} (null: as you are),
-	 * playing {@code scene} ({@code question.answer}; {@code icon} the answer's picture).
+	 * playing {@code scene} ({@code question.answer}; {@code icon} the answer's picture); (0.7.304) a man ({@code gender}
+	 * 0) or a woman (1), or guessed from your id (-1).
 	 */
 	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
-		int x0, int y0, int x1, int y1) {
+		int x0, int y0, int x1, int y1, int gender) {
 		Scene sc = of(scene, icon);
-		LivingEntity target = McaCompat.LOADED ? McaStoryFigure.figure(player, kind, look, job(scene)) : null;
+		LivingEntity target = McaCompat.LOADED ? McaStoryFigure.figure(player, kind, look, job(scene), gender) : null;
 		boolean standIn = target != null;
 		if (target == null) {
 			target = player;

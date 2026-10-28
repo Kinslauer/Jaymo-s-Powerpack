@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.286) The life story's figure with MCA loaded ({@link StoryFigure}). Andy: "the player's character doesnt load.
  * only armor": the story comes before MCA's creator, so the player has no MCA body yet, and MCA draws no plain one in its
  * place. So the figure is a stand-in MCA villager that is never put in the world (as MCA's own editor figure is): your
- * body and gender guessed from your id, in clothes from MCA's job wardrobe that fit the scene (none of the banned ones,
+ * body guessed from your id (and, 0.7.304, the gender picked on the story's first page), in clothes from MCA's job wardrobe that fit the scene (none of the banned ones,
  * {@link Wardrobe}), wearing the heritage and look shown. Its skin is tinted for the heritage through {@link EditorFigure}.
  * Only loaded when MCA is.
  */
@@ -47,11 +47,15 @@ final class McaStoryFigure {
 	private McaStoryFigure() {
 	}
 
-	/** The stand-in for {@code player}, dressed for {@code job}, as heritage {@code kind}'s look {@code look}; null if it can't be made. */
-	static @Nullable LivingEntity figure(LocalPlayer player, Heritage.@Nullable Kind kind, int look, String job) {
+	/**
+	 * The stand-in for {@code player}, dressed for {@code job}, as heritage {@code kind}'s look {@code look}, (0.7.304) a
+	 * man ({@code gender} 0) or a woman (1) as the story's first page says (-1: guessed from their id); null if it can't be made.
+	 */
+	static @Nullable LivingEntity figure(LocalPlayer player, Heritage.@Nullable Kind kind, int look, String job, int gender) {
 		ClientLevel level = (ClientLevel)player.level();
-		if (figure == null || figureLevel != level) {
-			figure = make(player, level);
+		boolean female = gender < 0 ? (player.getUUID().getLeastSignificantBits() & 1L) != 0L : gender == 1;
+		if (figure == null || figureLevel != level || (figure.getGenetics().getGender() == Gender.FEMALE) != female) {
+			figure = make(player, level, female);
 			figureLevel = level;
 			dressedFor = "";
 			if (figure == null) {
@@ -70,6 +74,14 @@ final class McaStoryFigure {
 		} else {
 			v.removeAttached(Heritage.HERITAGE);
 			v.removeAttached(HeritageVariants.VARIANT);
+		}
+		// (0.7.304) a Verdant is green with antennae, as the player will be (their skin's green follows MCA's skin: Verdants.fromSkin)
+		if (kind == Heritage.Kind.VERDANT) {
+			if (!v.hasAttached(com.jaymoskingdoms.Verdants.SHADE)) {
+				v.setAttached(com.jaymoskingdoms.Verdants.SHADE, 0.5F);
+			}
+		} else {
+			v.removeAttached(com.jaymoskingdoms.Verdants.SHADE);
 		}
 		Genetics genes = v.getGenetics();
 		float melanin = genes.getGene(Genetics.MELANIN), kept = SkinTones.clampSkin(kind, melanin);
@@ -119,9 +131,8 @@ final class McaStoryFigure {
 	/** The figure's entity id: negative, so it can't be a real entity's. */
 	private static final int FIGURE_ID = -7_770_001;
 
-	private static @Nullable VillagerEntityMCA make(LocalPlayer player, ClientLevel level) {
+	private static @Nullable VillagerEntityMCA make(LocalPlayer player, ClientLevel level, boolean female) {
 		UUID id = player.getUUID();
-		boolean female = (id.getLeastSignificantBits() & 1L) != 0L;
 		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.fromNamespaceAndPath(McaCompat.MOD, female ? "female_villager" : "male_villager"))
 			.orElse(null);
 		if (type == null || !(type.create(level, EntitySpawnReason.LOAD) instanceof VillagerEntityMCA v)) {
