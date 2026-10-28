@@ -50,8 +50,6 @@ final class GravityGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new GravityGift());
-		// (0.17.103) a Rubber-folk who swallowed one: Lift, as a toss
-		com.jaymospowers.core.SwallowedPower.register(GravityPower.ID, 80, GravityGift::swallowed);
 	}
 
 	@Override
@@ -173,20 +171,6 @@ final class GravityGift implements GiftKit {
 			e.hurtServer(level, level.damageSources().mobAttack(caster), METEOR_DAMAGE);
 			push(e, away, METEOR_LIFT);
 		}
-		return true;
-	}
-
-	/** (0.17.103) Gravity's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): the creature looked at is thrown up. */
-	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
-		LivingEntity foe = com.jaymospowers.core.SwallowedPower.sighted(player, LIFT_RANGE);
-		if (foe == null) {
-			return false;
-		}
-		ServerLevel level = player.level();
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, foe.getX(), foe.getY() + 0.2, foe.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
-		level.sendParticles(ParticleTypes.PORTAL, foe.getX(), foe.getY() + 0.2, foe.getZ(), 15, 0.4, 0.1, 0.4, 0.3);
-		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 1.0F, 0.4F);
-		push(foe, Vec3.ZERO, LIFT_SPEED);
 		return true;
 	}
 }

@@ -49,8 +49,6 @@ final class CryoGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new CryoGift());
-		// (0.17.103) a Rubber-folk who swallowed one: the Ice Slide, as one skate forward on a breath of frost
-		com.jaymospowers.core.SwallowedPower.register(CryoPower.ID, 60, CryoGift::swallowed);
 	}
 
 	@Override
@@ -180,29 +178,5 @@ final class CryoGift implements GiftKit {
 			}
 		}
 		level.sendParticles(ParticleTypes.SNOWFLAKE, mob.getX(), mob.getY(0.8), mob.getZ(), 4, 0.4, 0.3, 0.4, 0.01);
-	}
-
-	/** (0.17.103) Cryo's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): a skate forward, chilling what they pass. */
-	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
-		ServerLevel level = player.level();
-		Vec3 ahead = player.getLookAngle().horizontal();
-		if (ahead.lengthSqr() < 1.0E-4) {
-			return false;
-		}
-		ahead = ahead.normalize();
-		for (int i = 0; i < 12; i++) {
-			Vec3 p = player.position().add(ahead.scale(i * 0.6));
-			level.sendParticles(ParticleTypes.SNOWFLAKE, p.x, p.y + 0.1, p.z, 2, 0.2, 0.02, 0.2, 0.01);
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POWDER_SNOW_STEP, SoundSource.PLAYERS, 1.0F, 0.6F);
-		Vec3 v = ahead.scale(1.4);
-		player.setDeltaMovement(v.x, 0.15, v.z);
-		player.syncVelocity = true;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().expandTowards(ahead.scale(6.0)).inflate(1.0),
-			e -> e != player && e.isAlive() && !e.isSpectator())) {
-			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FROST_SLOW_TICKS, FROST_SLOW_LEVEL), player);
-			chill(e, FROST_FREEZE);
-		}
-		return true;
 	}
 }

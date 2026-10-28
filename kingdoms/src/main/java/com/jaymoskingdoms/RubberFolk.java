@@ -263,10 +263,7 @@ public final class RubberFolk {
 
 	/** (0.7.288) The heritage key pressed: starts (or stops) swallowing a weak foe close by. */
 	static void press(ServerPlayer player) {
-		if (!HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing")) {
-			// (0.7.292) nothing to swallow in sight: the R of a power they swallowed, if any
-			PowersCompat.useSwallowed(player);
-		}
+		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
 	}
 
 	/**
@@ -291,7 +288,7 @@ public final class RubberFolk {
 		float heal = Mth.clamp(foe.getMaxHealth() * ABSORB_HEAL_SHARE, ABSORB_HEAL_MIN, ABSORB_HEAL_MAX);
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
-		// (0.7.292) a player or a villager: their power's R theirs now (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
+		// (0.7.292) a player or a villager: their power runs in them now, its R theirs (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
 		// law and their kin know), leaving no body behind; anything else is simply gone
 		boolean person = foe instanceof Player || foe instanceof Villager || foe instanceof Folk;
 		if (person) {

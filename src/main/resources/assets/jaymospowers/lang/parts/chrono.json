@@ -2,7 +2,6 @@
 	"power.jaymospowers.chrono": "Chronokinesis",
 	"power.jaymospowers.chrono.desc": "Bend the flow of time. Rewind your last moments, freeze foes, and fast-forward yourself or the world.",
 	"power.jaymospowers.chrono.key.ability_1": "Rewind 3 seconds",
-	"power.jaymospowers.chrono.swallowed": "time nudged: you quicken, or sneak to slow what you look at",
 	"power.jaymospowers.chrono.key.ability_1.name": "Rewind",
 	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too) and reset all your other cooldowns",
 	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",

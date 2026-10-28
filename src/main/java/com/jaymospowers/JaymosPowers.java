@@ -33,6 +33,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
+		com.jaymospowers.core.SwallowedPower.init();
 		com.jaymospowers.core.FlightRoll.init();
 		com.jaymospowers.core.LockOn.init();
 		// (0.17.67) the guard and the parry, for everyone

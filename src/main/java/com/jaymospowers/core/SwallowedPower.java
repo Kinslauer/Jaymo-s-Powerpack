@@ -2,56 +2,82 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.gifted.Gifted;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
+import com.jaymospowers.core.wounds.Downed;
+import io.netty.buffer.ByteBuf;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.17.103, Andy: "you get a player's power or villager if you absorb them", then "maybe they just get the power's R
- * ability, and keep their power if they have one") A Rubber-folk (Jaymo's Kingdoms' {@code RubberFolk}, by reflection)
- * who swallows a downed player or a gifted villager keeps their own power and takes only the swallowed power's R
- * ability ({@link #SWALLOWED}), used with the heritage key when there's nothing in sight to swallow ({@link #use}). Only
- * one at a time: the next swallow replaces it, and it's gone when they die.
+ * ability, and keep their power if they have one", and of running it whole behind that one key: "do the other option")
+ * A Rubber-folk (Jaymo's Kingdoms' {@code RubberFolk}, by reflection) who swallows a downed player or a gifted villager
+ * keeps their own power, and the swallowed one runs in them too ({@link #SWALLOWED}): its tick every tick (its passives
+ * come with it), but of its keys only R, on a key of its own ({@link Key}; comma by default, or R itself with no power of
+ * their own). Only one at a time: the next swallow replaces it, and it's gone when they die.
  */
 public final class SwallowedPower {
-	/** The power whose R they took. Saved; lost on death. */
+	/** The power they swallowed. Saved; lost on death. */
 	public static final AttachmentType<Identifier> SWALLOWED = AttachmentRegistry.create(JaymosPowers.id("swallowed_power"),
 		builder -> builder.persistent(Identifier.CODEC));
 
-	/** Power → its R as a one-shot a swallower can use (true: used, start the cooldown). Each power adds its own. */
-	private static final Map<Identifier, Predicate<ServerPlayer>> MOVES = new HashMap<>();
-	/** Power → the cooldown (ticks) after its R. */
-	private static final Map<Identifier, Integer> COOLDOWNS = new HashMap<>();
-	/** Player → the game time their swallowed R is ready again. Not saved. */
-	private static final Map<java.util.UUID, Long> READY = new HashMap<>();
+	/** Client → server: the swallowed power's key went down or up. */
+	public record Key(boolean down) implements CustomPacketPayload {
+		public static final Type<Key> TYPE = new Type<>(JaymosPowers.id("swallowed_key"));
+		public static final StreamCodec<ByteBuf, Key> CODEC = ByteBufCodecs.BOOL.map(Key::new, Key::down);
+
+		@Override
+		public Type<Key> type() {
+			return TYPE;
+		}
+	}
+
+	/** Players holding the swallowed power's key. */
+	private static final Set<UUID> HELD = new HashSet<>();
 
 	private SwallowedPower() {
 	}
 
-	/** A power's R, for swallowers: {@code use} it, and wait {@code cooldown} ticks before the next. */
-	public static void register(Identifier power, int cooldown, Predicate<ServerPlayer> use) {
-		MOVES.put(power, use);
-		COOLDOWNS.put(power, cooldown);
+	public static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Key.TYPE, Key.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, ctx) -> key(ctx.player(), payload.down()));
+		ServerTickEvents.END_SERVER_TICK.register(SwallowedPower::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player) {
+				drop(player);
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> HELD.remove(handler.player.getUUID()));
+	}
+
+	/** The power {@code player} swallowed and is running beside their own, or null. */
+	public static @Nullable Power of(ServerPlayer player) {
+		Power power = Powers.get(player.getAttached(SWALLOWED));
+		return power == null || power == Powers.of(player) ? null : power;
 	}
 
 	/**
-	 * {@code taker} swallowed {@code body}: they take on its power's R, in place of whatever they took before. The power's
+	 * {@code taker} swallowed {@code body}: its power runs in them now, in place of whatever they took before. The power's
 	 * name, or null if it had none. Called by Jaymo's Kingdoms (by reflection) before the body dies.
 	 */
 	public static @Nullable Component take(ServerPlayer taker, LivingEntity body) {
@@ -65,51 +91,85 @@ public final class SwallowedPower {
 		if (power == null) {
 			return null;
 		}
-		taker.setAttached(SWALLOWED, power.id());
-		READY.remove(taker.getUUID());
 		Component name = power.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withBold(true));
-		Component move = Component.translatable("power." + power.id().getNamespace() + "." + power.id().getPath() + ".swallowed");
-		taker.sendSystemMessage(Component.translatable("message.jaymospowers.swallowed_power", body.getDisplayName(), name, move)
+		if (power == Powers.of(taker)) {
+			taker.sendSystemMessage(Component.translatable("message.jaymospowers.swallowed_power_same", body.getDisplayName(), name)
+				.withStyle(ChatFormatting.LIGHT_PURPLE));
+			return name;
+		}
+		drop(taker);
+		taker.setAttached(SWALLOWED, power.id());
+		power.onGained(taker);
+		taker.sendSystemMessage(Component.translatable("message.jaymospowers.swallowed_power", body.getDisplayName(), name)
 			.withStyle(ChatFormatting.LIGHT_PURPLE));
 		return name;
 	}
 
+	/** Whatever they swallowed leaves them (death, or a new swallow). */
+	private static void drop(ServerPlayer player) {
+		Power power = of(player);
+		HELD.remove(player.getUUID());
+		if (player.hasAttached(SWALLOWED)) {
+			player.removeAttached(SWALLOWED);
+		}
+		if (power != null) {
+			power.onLost(player);
+		}
+	}
+
 	/**
-	 * The heritage key, with nothing to swallow in sight: the swallowed power's R, if they hold one. False if they don't
-	 * (for Kingdoms to do whatever else the key does).
+	 * The swallowed power's key went down or up (also R, for one with no power of their own: {@link Powers}). False if they
+	 * hold no swallowed power.
 	 */
-	public static boolean use(ServerPlayer player) {
-		Identifier id = player.getAttached(SWALLOWED);
-		if (id == null) {
+	static boolean key(ServerPlayer player, boolean down) {
+		Power power = of(player);
+		if (power == null) {
+			HELD.remove(player.getUUID());
 			return false;
 		}
-		Predicate<ServerPlayer> move = MOVES.get(id);
-		if (move == null) {
-			return false;
-		}
-		long now = player.level().getGameTime();
-		long ready = READY.getOrDefault(player.getUUID(), 0L);
-		if (now < ready) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.swallowed_power_wait", (ready - now + 19) / 20)
-				.withStyle(ChatFormatting.GRAY));
+		if (down && (!player.isAlive() || player.isSpectator() || Downed.isDowned(player) || Powers.silenced(player))) {
 			return true;
 		}
-		if (move.test(player)) {
-			READY.put(player.getUUID(), now + COOLDOWNS.getOrDefault(id, 100));
+		if (down) {
+			HELD.add(player.getUUID());
+		} else {
+			HELD.remove(player.getUUID());
 		}
+		as(player, () -> power.onKey(player, PowerKey.ABILITY_1, down));
 		return true;
 	}
 
-	/** The living thing {@code player} looks at within {@code range} (not through walls), or null. */
-	public static @Nullable LivingEntity sighted(ServerPlayer player, double range) {
-		Vec3 eye = player.getEyePosition();
-		Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
-		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-		if (block.getType() != HitResult.Type.MISS) {
-			end = block.getLocation();
+	private static void tick(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			Power power = player.hasAttached(SWALLOWED) ? of(player) : null;
+			if (power != null) {
+				as(player, () -> power.tick(player));
+			}
 		}
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.0),
-			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && e != player, 0.3F);
-		return hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
+	}
+
+	/**
+	 * Runs {@code run} as the swallowed power sees things: its R held while their key is, and none of their own power's
+	 * keys (which are its G, V and B).
+	 */
+	private static void as(ServerPlayer player, Runnable run) {
+		int own = PowerInput.bits(player);
+		PowerInput.setBits(player, HELD.contains(player.getUUID()) ? 1 << PowerKey.ABILITY_1.ordinal() : 0);
+		try {
+			run.run();
+		} finally {
+			PowerInput.setBits(player, own);
+		}
+	}
+
+	/** Whether the swallowed power is keeping them up right now (for the server's flying and moving checks). */
+	public static boolean allowsFloating(ServerPlayer player) {
+		Power power = player.hasAttached(SWALLOWED) ? of(player) : null;
+		return power != null && power.allowsFloating(player);
+	}
+
+	public static boolean skipsMovementCheck(ServerPlayer player) {
+		Power power = player.hasAttached(SWALLOWED) ? of(player) : null;
+		return power != null && power.skipsMovementCheck(player);
 	}
 }

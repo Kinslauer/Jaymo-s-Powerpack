@@ -48,8 +48,6 @@ final class WebGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new WebGift());
-		// (0.17.103) a Rubber-folk who swallowed one: a swing, as a zip along the look
-		com.jaymospowers.core.SwallowedPower.register(WebPower.ID, 40, WebGift::swallowed);
 	}
 
 	@Override
@@ -170,20 +168,6 @@ final class WebGift implements GiftKit {
 			bind(e, caster, COCOON_TICKS, COCOON_SLOW_LEVEL);
 			e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, COCOON_TICKS, 1), caster);
 		}
-		return true;
-	}
-
-	/** (0.17.103) Web's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): a strand flung ahead and a zip along it. */
-	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
-		ServerLevel level = player.level();
-		Vec3 ahead = player.getLookAngle().horizontal();
-		ahead = ahead.lengthSqr() < 1.0E-4 ? Vec3.ZERO : ahead.normalize();
-		strand(level, player.getEyePosition(), player.position().add(ahead.scale(5.0)).add(0.0, 5.0, 0.0));
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.6F);
-		Vec3 v = ahead.scale(ZIP_SPEED * 1.4);
-		player.setDeltaMovement(v.x, ZIP_LIFT, v.z);
-		player.syncVelocity = true;
-		player.resetFallDistance();
 		return true;
 	}
 }

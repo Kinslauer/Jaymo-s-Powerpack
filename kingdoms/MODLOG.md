@@ -5664,11 +5664,10 @@ her harbour.
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
 - **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them", then "maybe
   they just get the power's R ability, and keep their power if they have one"): a downed player or villager (a
-  kingdom's folk too) can be swallowed. You keep your own power and take a one-shot of theirs, the R (Powers'
-  `SwallowedPower`, through `PowersCompat.takePower`), used with the heritage key when nothing is in sight to swallow
-  (`PowersCompat.useSwallowed`); the next swallow replaces it, death takes it. They die of it (`Downed.execute`,
-  credited to you, so the law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as
-  usual with their power. One who survives it grows back.
+  kingdom's folk too) can be swallowed. You keep your own power and theirs runs in you beside it, its R on Powers'
+  Swallowed Power key (Powers' `SwallowedPower`, through `PowersCompat.takePower`); the next swallow replaces it, death
+  takes it. They die of it (`Downed.execute`, credited to you, so the law and their kin know) and leave no body
+  (`jaymoskitchen.no_corpse`); a player respawns as usual with their power. One who survives it grows back.
 - Compile-checked only, not seen in game.
 ## 0.7.276: grand seats, real castles for kingdoms built from nothing (pack 0.17.79)
 Andy: "the default hold you generate for a kingdom needs to switch, its way to blocky and novice looking. swap it for

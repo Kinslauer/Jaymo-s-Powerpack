@@ -3375,12 +3375,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wish or the 30-minute wait let them go home. Compile-checked, not seen in game. (With Kingdoms 0.7.292: Rubber-folk take
   on the stats and gifts of what they swallow.)
 - **0.17.103, swallowed powers** (`core/SwallowedPower`, for Kingdoms' Rubber-folk; Andy: "maybe they just get the
-  power's R ability, and keep their power if they have one", then picked a one-shot R for each power): swallowing a
-  downed player or a gifted villager keeps your own power and gives you one move from theirs (`SWALLOWED`, saved, lost
-  on death; the next swallow replaces it), on the heritage key when nothing is in sight to swallow. Each power's R
-  stands on its own, since most need the rest of their kit running: Gravity tosses what you look at up, Web zips you
-  ahead, Z Fighter fires a ki blast, Darktide lashes ink, Arsenal throws a blade from a rift, Smoke darts you ahead as
-  smoke, Cryo skates you forward and chills what you pass, Resonance fires the real Pulse, Wind lifts you on an
-  updraft, Chrono nudges time (quickens you, or slows what you look at while sneaking), Xenoform gives a flicker of
-  speed and jump. Each lives in its power's `*Gift` (or `ChronoPower`/`XenoformPower`) beside the villager kit, with its
-  own cooldown. The swallowed player keeps their power. Compile-checked, not seen in game.
+  power's R ability, and keep their power if they have one", then chose to run the whole power behind it): swallowing a
+  downed player or a gifted villager keeps your own power, and theirs runs in you beside it (`SWALLOWED`, saved, lost on
+  death; the next swallow replaces it). Its tick runs every tick, so its passives come with it, but of its keys only R
+  is yours, on the new Swallowed Power key (comma by default; `SwallowedPowerClient`), or on R itself with no power of
+  your own. While it runs it sees only that key held (`PowerInput` bits swapped round its calls), so your own G/V/B
+  don't reach it; its flight and dashes count for the server's floating and moving checks. Gained with `onGained`,
+  dropped with `onLost`. Its client side (HUD, client-run visuals) doesn't run, and anything it gates on
+  `Powers.has` stays off. The swallowed player keeps their power. Compile-checked, not seen in game.

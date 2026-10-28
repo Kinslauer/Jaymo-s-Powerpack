@@ -50,8 +50,6 @@ final class ArsenalGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new ArsenalGift());
-		// (0.17.103) a Rubber-folk who swallowed one: Reach Through, a blade pulled from a rift and thrown
-		com.jaymospowers.core.SwallowedPower.register(ArsenalPower.ID, 50, ArsenalGift::swallowed);
 	}
 
 	@Override
@@ -199,22 +197,6 @@ final class ArsenalGift implements GiftKit {
 			e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy || e.getLastHurtByMob() == caster || caster.getLastHurtByMob() == e))) {
 			e.hurtServer(level, level.damageSources().mobAttack(caster), HUNDRED_DAMAGE);
 		}
-		return true;
-	}
-
-	/** (0.17.103) Arsenal's R for a Rubber-folk who swallowed it ({@link com.jaymospowers.core.SwallowedPower}): a blade out of a rift, at what they look at. */
-	static boolean swallowed(net.minecraft.server.level.ServerPlayer player) {
-		LivingEntity foe = com.jaymospowers.core.SwallowedPower.sighted(player, THROW_RANGE);
-		if (foe == null) {
-			return false;
-		}
-		ServerLevel level = player.level();
-		Vec3 from = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0), to = foe.getBoundingBox().getCenter();
-		rift(level, from);
-		streak(level, from, to);
-		level.sendParticles(ParticleTypes.CRIT, to.x, to.y, to.z, 10, 0.2, 0.2, 0.2, 0.3);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.8F, 1.4F);
-		foe.hurtServer(level, level.damageSources().playerAttack(player), THROW_DAMAGE * 1.5F);
 		return true;
 	}
 }
