@@ -11,6 +11,7 @@
 		"WeaponModFlailHandMixin",
 		"BackpackAvatarRendererMixin",
 		"BombGliderAttackMixin",
+		"FinisherAttackMixin",
 		"BombGliderAvatarRendererMixin",
 		"BombGliderInputMixin",
 		"BodyCoverAvatarRendererMixin",

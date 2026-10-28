@@ -3341,3 +3341,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
   Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
   Legend) even with enough. Compile-checked, not seen in game.
+- **0.17.96, no swings while charging an execution:** Andy: "stop attacking while charging an execution". While you held
+  sneak + attack on someone downed, Better Combat kept swinging at them (its hold-to-attack), and the click that began the
+  hold was a blow of its own. Now, sneaking with the crosshair on someone you could finish (bare hands, a weapon or a tool),
+  the click and the hold are the execution's alone: no swing, no hit, no digging (`FinisherClient.holdsAttack`,
+  `FinisherAttackMixin`). The same goes while a finisher or a symbiote execution plays. A torch or a loaf still swings,
+  since it finishes nobody; stand up to hit a downed body normally. Compile-checked, not seen in game.

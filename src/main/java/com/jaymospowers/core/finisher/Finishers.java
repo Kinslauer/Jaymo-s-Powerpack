@@ -113,7 +113,8 @@ import org.jspecify.annotations.Nullable;
  * (0.17.7) Andy: "maybe execution should be on left click hold for 1.5s to confirm?", then "change it to shift + m1 hold. This
  * is so it doesnt interfere with z fighters". It is: <b>sneak + hold attack</b> on someone
  * downed or crippled for {@link #HOLD_TICKS}, any weapon and bare hands alike (the neck snap still only at the head; the
- * three taps are gone, the hold is the confirmation). The click that starts it is an ordinary blow. Right-click held on
+ * three taps are gone, the hold is the confirmation). (0.17.96: the click that starts it no longer
+ * lands a blow, and no swing repeats while it charges: {@code FinisherClient.holdsAttack}.) Right-click held on
  * the downed is the revive now, and sneak + right-click held the lift, so none of the three is taken for another. Holding
  * attack on an entity repeats nothing in vanilla (only digging a block does), so the hold is free; the client says when it
  * starts and stops ({@link Execute}, from {@code FinisherClient}), and Z Fighter's held-attack combos stand aside while
