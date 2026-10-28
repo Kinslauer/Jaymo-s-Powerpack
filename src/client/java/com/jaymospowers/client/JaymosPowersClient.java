@@ -86,6 +86,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.BombGliderClient.init();
 		// (0.15.148) the flail's chain and ball, the whip's lash
 		com.jaymospowers.client.armory.LashRenderer.init();
+		// (0.17.93) the warhammer smash swings down from overhead
+		com.jaymospowers.client.armory.HammerSlamClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the

@@ -3341,3 +3341,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
   Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
   Legend) even with enough. Compile-checked, not seen in game.
+- **0.17.93, the warhammer smash swings down from overhead:** Andy: "warhammer rightclick should animate swinging down
+  from overhead like the better combat swing". Balkon's warhammer charges its smash while you hold use (it used to be
+  drawn like a bow); it now charges with the hammer held up over your head, and letting go with a full charge plays
+  Better Combat's two-handed slam, the same swing as its left-click, in first and third person and for everyone who
+  can see you. The smash (WeaponMod's blast, knockback and cooldown) lands as the hammer comes down, 7 ticks after the
+  release, not on it; it is skipped if you've put the hammer away by then. Without Better Combat, and for mobs, the
+  smash is as before. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin. Compile-checked, not
+  seen in game.

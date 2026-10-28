@@ -35,6 +35,7 @@
 		"WorldGenReadMixin",
 		"WeaponModFlailMixin",
 		"WeaponModMeleeUseMixin",
+		"WeaponModWarhammerMixin",
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
 		"WoundsRegenMixin"
