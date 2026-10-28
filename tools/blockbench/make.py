@@ -102,17 +102,18 @@ def build(name, cubes, display):
             fh.write("\n")
     print(name, t.validate_quality()["data"]["verdict"], t.validate_quality()["data"]["counts"])
 
-# Model stands upright along Y, grip around y=8 so held transforms pivot on the hand.
+# Model stands upright along Y. (0.17.122) Andy: the rapier's blade was too short, so its hilt sits 12 lower and the
+# blade runs from just over it to the top; display() puts each grip in the fist where a vanilla sword's would be.
 RAPIER = [
-    ("pommel",       [7, 4, 7],       [9, 6, 9],          "pommel"),
-    ("grip",         [7.5, 6, 7.5],   [8.5, 10.5, 8.5],   "wire"),
-    ("quillons",     [3, 10.5, 7.5],  [13, 11.5, 8.5],    "guard"),
-    ("cup",          [5.5, 11, 6],    [10.5, 12, 10],     "cup"),
-    ("knuckle_bow",  [11.5, 5, 7.6],  [12.5, 10.5, 8.4],  "guard"),
-    ("bow_foot",     [9, 5, 7.6],     [11.5, 6, 8.4],     "guard"),
-    ("ricasso",      [7.5, 12, 7.7],  [8.5, 13.5, 8.3],   "guard"),
-    ("blade",        [7.6, 13.5, 7.85], [8.4, 31, 8.15],  "blade"),
-    ("blade_edge",   [7.75, 13.5, 7.8], [8.25, 31, 8.2],  "edge"),
+    ("pommel",       [7, -8, 7],      [9, -6, 9],         "pommel"),
+    ("grip",         [7.5, -6, 7.5],  [8.5, -1.5, 8.5],   "wire"),
+    ("quillons",     [3, -1.5, 7.5],  [13, -0.5, 8.5],    "guard"),
+    ("cup",          [5.5, -1, 6],    [10.5, 0, 10],      "cup"),
+    ("knuckle_bow",  [11.5, -7, 7.6], [12.5, -1.5, 8.4],  "guard"),
+    ("bow_foot",     [9, -7, 7.6],    [11.5, -6, 8.4],    "guard"),
+    ("ricasso",      [7.5, 0, 7.7],   [8.5, 1.5, 8.3],    "guard"),
+    ("blade",        [7.6, 1.5, 7.85], [8.4, 31, 8.15],   "blade"),
+    ("blade_edge",   [7.75, 1.5, 7.8], [8.25, 31, 8.2],   "edge"),
     ("tip",          [7.8, 31, 7.9],  [8.2, 32, 8.1],     "tip"),
 ]
 DAGGER = [
@@ -125,5 +126,6 @@ DAGGER = [
     ("tip",          [7.75, 19, 7.85], [8.25, 20.5, 8.15], "tip"),
 ]
 
-build("iron_rapier", RAPIER, display(tp=0.55, fp=0.5, gui=0.47, center_y=18))
-build("iron_dagger", DAGGER, display(tp=0.7, fp=0.6, gui=0.62, center_y=11.75))
+# the rapier is turned half round in the hand so its knuckle bow guards the fingers (Andy: it faced up)
+build("iron_rapier", RAPIER, display(tp=0.55, fp=0.5, gui=0.4, center_y=12, grip_y=-3.75, flip=True))
+build("iron_dagger", DAGGER, display(tp=0.7, fp=0.6, gui=0.62, center_y=11.75, grip_y=6.5))

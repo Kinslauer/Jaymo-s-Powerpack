@@ -3510,3 +3510,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
+
+- **0.17.122, rapier and dagger fixes (Andy):** the iron rapier's blade is 12 pixels longer (its hilt moved down to
+  make room), and it's turned half round in the hand so the knuckle bow guards the fingers instead of facing up. The
+  rapier's lunge is shorter everywhere (about 2.8 blocks instead of 4.7); locked onto a foe, or a mob lunging at its
+  target, it runs just as far as it needs to reach them, up to the old distance (`RapierItem.speedToReach`;
+  `LockOn.target(Player)` now answers on either side). Thrown daggers fly and stick tip first: the 3D iron dagger was
+  rolled for a sprite, and every point-first weapon is drawn back along its flight so only the tip sinks in. The 3D
+  iron dagger and rapier sit deeper in the hand: `tools/blockbench/display.py` puts the middle of each grip where a
+  vanilla sword's grip sits. Compile-checked, not seen in game.
