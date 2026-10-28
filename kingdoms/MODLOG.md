@@ -5795,3 +5795,16 @@ needs a way to back up and manuever better", and "maybe the captain's AI isnt na
   steers for the turn two ahead, works it out again every 10 s, when her goal moves, or when she's stuck. Not while
   she lays her guns on a foe close by.
 - Compile-checked only, not seen in game.
+## 0.7.288: every heritage's body, Stoneborn the biggest and Sylvan the smallest (pack 0.17.94)
+Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest".
+- **Bodies** (`BodySizes`): each heritage has a range of MCA's Size (height) and Width genes (0 .. 1, drawn 0.75x ..
+  1.25x). Stoneborn 0.55-0.9 tall, 0.6-1.0 wide; Sylvan 0-0.4 tall, 0-0.35 wide; plain folk 0.15-0.75 both; the rest
+  in between (Endborn tall and thin, Deepborn squat, Frostborn big-boned, Nightborn lean). Verdant keep the top of the
+  Size slider to themselves (0.3-1.0), as in 0.7.87. A heritage with no line of its own gets the plain one.
+- **Villagers**: one MCA has just rolled (`McaGeneticsMixin` tags it `BodySizes.FRESH`) is spread across its blood's
+  ranges when it's born to it, so they vary as much as before; children and villagers already in the world are brought
+  in from the nearer edge (`McaBridge.keepBody`, from `VillagerHeritage.born` and on load).
+- **Players**: the old Verdant-only size cap (`Heritage.MCA_SIZE_CAP`) is now the heritage's ranges for both genes, held
+  when a look is saved, when a heritage is chosen and every 10 s. MCA's editor sliders are kept to them on your own
+  figure (`McaEditorSkinMixin`, `McaEditorHeritageMixin`), and the life story's figure stands at the middle of them.
+- Compile-checked only, not seen in game.

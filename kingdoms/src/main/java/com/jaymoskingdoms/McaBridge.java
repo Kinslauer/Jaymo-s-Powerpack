@@ -222,35 +222,58 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
 	}
 
-	// ---- player size (0.7.87) ------------------------------------------------------------------------------------------
+	// ---- player size (0.7.87; 0.7.288 every heritage's body, BodySizes) ---------------------------------------------------
 
-	/** MCA's Size gene, as a player's look stores it (under {@code MCAData}, or at the top). */
-	private static final String SIZE_GENE = "GeneSize";
+	/** MCA's Size and Width genes, as a player's look stores them (under {@code MCAData}, or at the top). */
+	private static final String SIZE_GENE = "GeneSize", WIDTH_GENE = "GeneWidth";
 
-	/** Holds the Size gene in a player's MCA look at {@code cap} or under; whether it changed. */
-	static boolean capSize(CompoundTag data, float cap) {
+	/** Keeps the Size and Width genes in a player's MCA look within {@code kind}'s body ({@link BodySizes}); whether it changed. */
+	static boolean keepBody(CompoundTag data, Heritage.@Nullable Kind kind) {
 		CompoundTag mca = NbtHelper.getCompoundOrSelf(data, "MCAData");
-		float size = mca.getFloat(SIZE_GENE).orElse(0.5F);
-		if (size <= cap) {
+		float size = mca.getFloat(SIZE_GENE).orElse(0.5F), width = mca.getFloat(WIDTH_GENE).orElse(0.5F);
+		float keptSize = BodySizes.clampSize(kind, size), keptWidth = BodySizes.clampWidth(kind, width);
+		if (keptSize == size && keptWidth == width) {
 			return false;
 		}
-		mca.putFloat(SIZE_GENE, cap);
+		mca.putFloat(SIZE_GENE, keptSize);
+		mca.putFloat(WIDTH_GENE, keptWidth);
 		return true;
 	}
 
-	/** Holds {@code player}'s MCA Size at {@code cap} or under, re-saving their look and showing it to everyone. */
-	static void capSize(ServerPlayer player, float cap) {
+	/** Keeps {@code player}'s MCA Size and Width within their heritage's body, re-saving their look and showing it to everyone. */
+	static void keepBody(ServerPlayer player) {
 		PlayerSaveData save = PlayerSaveData.get(player);
 		if (!save.isEntityDataSet()) {
 			return;
 		}
 		CompoundTag data = save.getEntityData();
-		if (!capSize(data, cap)) {
+		if (!keepBody(data, Heritage.of(player))) {
 			return;
 		}
 		save.setEntityData(data);
 		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
 			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
+		}
+	}
+
+	/**
+	 * (0.7.288) An MCA villager's height and width brought into {@code kind}'s body: freshly rolled ones
+	 * ({@link BodySizes#FRESH}) spread across it, anyone else kept in it ({@link BodySizes#keep}). Anyone not MCA's: nothing.
+	 */
+	static void keepBody(net.minecraft.world.entity.Entity entity, Heritage.Kind kind) {
+		if (entity instanceof VillagerEntityMCA v) {
+			Genetics genes = v.getGenetics();
+			BodySizes.Body body = BodySizes.of(kind);
+			float size = genes.getGene(Genetics.SIZE), width = genes.getGene(Genetics.WIDTH);
+			boolean fresh = v.removeTag(BodySizes.FRESH);
+			float keptSize = fresh ? BodySizes.spread(size, body.minSize(), body.maxSize()) : BodySizes.keep(size, body.minSize(), body.maxSize(), v.getRandom());
+			float keptWidth = fresh ? BodySizes.spread(width, body.minWidth(), body.maxWidth()) : BodySizes.keep(width, body.minWidth(), body.maxWidth(), v.getRandom());
+			if (keptSize != size) {
+				genes.setGene(Genetics.SIZE, keptSize);
+			}
+			if (keptWidth != width) {
+				genes.setGene(Genetics.WIDTH, keptWidth);
+			}
 		}
 	}
 

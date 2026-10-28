@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
+import com.jaymoskingdoms.BodySizes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.SkinTones;
@@ -64,6 +65,14 @@ abstract class McaEditorHeritageMixin {
 		float melanin = genes.getGene(Genetics.MELANIN);
 		if (SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin) != melanin) {
 			genes.setGene(Genetics.MELANIN, SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin));
+		}
+		// (0.7.288) and its height and width to the heritage's body (BodySizes)
+		float size = genes.getGene(Genetics.SIZE), width = genes.getGene(Genetics.WIDTH);
+		if (BodySizes.clampSize(VillagerHeritage.of(this.villager), size) != size) {
+			genes.setGene(Genetics.SIZE, BodySizes.clampSize(VillagerHeritage.of(this.villager), size));
+		}
+		if (BodySizes.clampWidth(VillagerHeritage.of(this.villager), width) != width) {
+			genes.setGene(Genetics.WIDTH, BodySizes.clampWidth(VillagerHeritage.of(this.villager), width));
 		}
 	}
 }

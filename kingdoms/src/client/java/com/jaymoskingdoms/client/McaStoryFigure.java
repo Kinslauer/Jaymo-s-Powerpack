@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.BodySizes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.McaCompat;
@@ -74,6 +75,13 @@ final class McaStoryFigure {
 		float melanin = genes.getGene(Genetics.MELANIN), kept = SkinTones.clampSkin(kind, melanin);
 		if (kept != melanin) {
 			genes.setGene(Genetics.MELANIN, kept);
+		}
+		// (0.7.288) the middle of the heritage's body: a Stoneborn stands tall and broad, a Sylvan small (BodySizes)
+		if (genes.getGene(Genetics.SIZE) != BodySizes.middleSize(kind)) {
+			genes.setGene(Genetics.SIZE, BodySizes.middleSize(kind));
+		}
+		if (genes.getGene(Genetics.WIDTH) != BodySizes.middleWidth(kind)) {
+			genes.setGene(Genetics.WIDTH, BodySizes.middleWidth(kind));
 		}
 		EditorFigure.set(v);
 		return v;
