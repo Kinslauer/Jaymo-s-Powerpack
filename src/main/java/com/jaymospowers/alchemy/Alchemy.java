@@ -59,6 +59,7 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.flux.FluxEffects.init();
 		com.jaymospowers.alchemy.infusion.Infusion.init();
 		com.jaymospowers.alchemy.gear.AlchemyGear.init();
+		com.jaymospowers.alchemy.cauldron.CauldronBrewing.init();
 	}
 
 	/** Registers an item and adds it to the Alchemy tab. */
