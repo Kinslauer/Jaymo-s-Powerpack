@@ -6070,3 +6070,12 @@ frost creeps over them and they're frozen through in about 3.5 s, then shake and
 other fire-blooded mobs five times that; leather spares the damage), and the chill keeps biting after the ice falls
 before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
 the old freeze is kept. Compile-checked, not seen in game.
+
+## 0.7.302: graded smith wares and the smith's forge orders (pack 0.17.118)
+
+Goes with the pack's Overgeared-style smithing. Armourers, weaponsmiths and toolsmiths on a realm's land sell gear graded
+by the buyer's reputation with the realm (`GradedTrades`): the hated get mostly Poorly Forged, strangers Well Forged, the
+revered up to 5% Masterwork; the same buyer sees the same grade again, and rising reputation only raises it. `Careers`
+tags Journeyman and Master smiths (`jaymoskingdoms.smith_rank_1`/`_2`) so Powers widens their perfect zone, and each
+finished forging at a Smithing Anvil counts toward a smith's "forge" order (`PowersCompat.onForged`). Compile-checked,
+not seen in game.
