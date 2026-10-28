@@ -86,6 +86,8 @@ public final class Ship extends Entity {
 	 * goes, and how quickly she gathers that way.
 	 */
 	static final double KEDGE = 0.09, KEDGE_GATHER = 0.08;
+	/** (0.7.285) The least a crew at her sweeps rows her (blocks a tick), however heavy she is. */
+	static final double CREW_SWEEPS = 0.07;
 	/** How far (blocks) it may be nudged to find room to drop anchor. */
 	static final int NUDGE = 2;
 	/** Slower than this (blocks/tick) it lies still enough to drop anchor. */
@@ -514,6 +516,10 @@ public final class Ship extends Entity {
 		this.entityData.set(SET, (float)this.sail);
 		this.entityData.set(ROWING, (byte)row);
 		double top = this.topSpeed(h), rowTop = this.rowSpeed(h);
+		if (steered != null && oars) {
+			// (0.7.285) a whole crew at her sweeps moves even a big ship
+			rowTop = Math.max(rowTop, CREW_SWEEPS);
+		}
 		double wanted = this.sail * top;
 		if (row > 0) {
 			wanted = Math.max(wanted, rowTop);
@@ -551,8 +557,9 @@ public final class Ship extends Entity {
 			this.speed = 0.0;
 		}
 		float steer = input.left() == input.right() ? 0.0F : input.left() ? -1.0F : 1.0F;
+		// (0.7.285) under oars (or warped off) she's pulled round as hard as she'd turn under way, slow as she's going
 		float best = TURN * Math.min(1.0F, NIMBLE_LENGTH / Math.max(NIMBLE_LENGTH, h.waterline))
-			* (0.3F + 0.7F * (float)Math.min(1.0, Math.abs(this.speed) / 0.15));
+			* (row != 0 || this.kedging > 0 && pilot == null ? 1.0F : 0.3F + 0.7F * (float)Math.min(1.0, Math.abs(this.speed) / 0.15));
 		this.turn += (steer * best - this.turn) * 0.2F;
 		float yaw = yawFrom + this.turn;
 		double y = this.settle(level, h, from);

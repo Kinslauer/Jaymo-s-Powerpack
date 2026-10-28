@@ -171,7 +171,7 @@ final class ZFighterSparring {
 			health.setBaseValue(Math.max(20.0, player.getMaxHealth() * HEALTH_SHARE));
 		}
 		partner.setHealth(partner.getMaxHealth());
-		// (0.17.90) known before it is added: the load sweep would otherwise take it for a leftover
+		// (0.17.91) known before it is added: the load sweep would otherwise take it for a leftover
 		BOUTS.put(partner.getUUID(), new Bout(player.getUUID(), partner.getUUID(), level, level.getGameTime() + BOUT_TICKS));
 		if (!level.addFreshEntity(partner)) {
 			BOUTS.remove(partner.getUUID());

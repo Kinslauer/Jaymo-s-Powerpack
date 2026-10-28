@@ -150,7 +150,7 @@ final class ZFighterAfterimage {
 			copy.snapTo(start.x, start.y, start.z, player.getYRot(), player.getXRot());
 			copy.setYHeadRot(player.getYHeadRot());
 			copy.setYBodyRot(player.yBodyRot);
-			// (0.17.90) known before it is added: the load sweep below would otherwise take it for a leftover
+			// (0.17.91) known before it is added: the load sweep below would otherwise take it for a leftover
 			COPIES.put(player.getUUID(), new Copy(level, copy.getUUID(), level.getGameTime() + LIFE_TICKS));
 			if (level.addFreshEntity(copy)) {
 				lure(player, level, copy);

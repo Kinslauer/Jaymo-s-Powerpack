@@ -53,7 +53,7 @@ public final class ZFighterKiAura {
 	/** Strength while charging, and held after a full charge; how fast it grows in and dies out (share a tick). */
 	static final float CHARGING = 1.0F, HOLDING = 0.85F, GROW = 0.35F, FADE = 0.12F;
 	/**
-	 * (0.17.90) Bigger each step up the Super line, to its largest at Super 3 (and no bigger past it: Andy, "it increases
+	 * (0.17.91) Bigger each step up the Super line, to its largest at Super 3 (and no bigger past it: Andy, "it increases
 	 * in size to a maximum with 3"), and a flicker of size while charging.
 	 */
 	static final float SIZE_PER_FORM = 0.12F, CHARGE_FLICKER = 0.04F;
@@ -127,7 +127,7 @@ public final class ZFighterKiAura {
 	}
 
 	/**
-	 * (0.17.90) Andy: "base form and supers 1-3 should use the sparking aura ... then primal uses either god or smooth.
+	 * (0.17.91) Andy: "base form and supers 1-3 should use the sparking aura ... then primal uses either god or smooth.
 	 * legendary saiyans have sparking". So the form decides: base, Supers 1-3 and the legendary line are always Sparking;
 	 * Primal Super is Godly or Smooth, whichever he picked (Godly if his pick is Sparking); any other form shows his pick.
 	 */

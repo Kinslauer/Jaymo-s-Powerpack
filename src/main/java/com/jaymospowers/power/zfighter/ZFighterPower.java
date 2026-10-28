@@ -286,7 +286,7 @@ public final class ZFighterPower implements Power {
 	};
 
 	/**
-	 * Hardship lived through (the road to Super). Saved, kept through death. (0.17.90) Synced to its owner, whose training
+	 * Hardship lived through (the road to Super). Saved, kept through death. (0.17.91) Synced to its owner, whose training
 	 * screen checks it before Learn lights up.
 	 */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
@@ -997,7 +997,7 @@ public final class ZFighterPower implements Power {
 			}
 		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
 			if (!ZFighterBranchForms.ascend(player, live)) {
-				// (0.17.90) Primal Super opened but out of reach: say why, not just "no higher form"
+				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
 				player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
 			}

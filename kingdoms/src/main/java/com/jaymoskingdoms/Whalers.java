@@ -521,7 +521,9 @@ public final class Whalers {
 		return new float[] {ship.getYRot(), 0.0F};
 	}
 
-	private static float[] toward(Ship ship, BlockPos to, double sail) {
+	private static float[] toward(Crew crew, Ship ship, BlockPos to, double sail) {
+		// (0.7.285) where she's making for, so her captain can work out a course round the land (SeaRoutes)
+		crew.goal = to;
 		return new float[] {Fleet.bearing(ship, to.getX() + 0.5, to.getZ() + 0.5), (float) sail};
 	}
 
@@ -548,7 +550,7 @@ public final class Whalers {
 		if (captain != null) {
 			Speech.say(level, captain, Component.translatable("message.jaymoskingdoms.whaler.sails"), Speech.YELLOW, 32.0);
 		}
-		return toward(ship, v.ground, 1.0);
+		return toward(crew, ship, v.ground, 1.0);
 	}
 
 	private static float[] outward(ServerLevel level, Ship ship, Crew crew, Voyage v, long now) {
@@ -564,7 +566,7 @@ public final class Whalers {
 			crew.bound = null;
 			v.huntFrom = now;
 		}
-		return toward(ship, v.ground, 1.0);
+		return toward(crew, ship, v.ground, 1.0);
 	}
 
 	/** Cruising the ground for whales; sighting one, her boats lowered after it (or she chases it herself), her harpooners throwing in range; her boats towing their catch back. */
@@ -596,7 +598,7 @@ public final class Whalers {
 			if (now - v.huntFrom > GIVE_UP) {
 				crew.mode = "homeward";
 				crew.bound = crew.home;
-				return toward(ship, crew.home, 1.0);
+				return toward(crew, ship, crew.home, 1.0);
 			}
 			if ((now - v.huntFrom) % POD_AFTER < Corsairs.THINK && now - v.huntFrom >= POD_AFTER) {
 				pod(level, ship);
@@ -605,7 +607,7 @@ public final class Whalers {
 				BlockPos next = Fleet.openSea(level, v.ground, GROUND_CRUISE, 6, level.getRandom());
 				crew.waypoint = next != null ? next : v.ground;
 			}
-			return toward(ship, crew.waypoint, 0.6);
+			return toward(crew, ship, crew.waypoint, 0.6);
 		}
 		v.huntFrom = now;
 		double d = ship.distanceTo(whale);
@@ -668,7 +670,7 @@ public final class Whalers {
 			home(level, ship, crew, v, f);
 			return null;
 		}
-		return toward(ship, crew.home, 1.0);
+		return toward(crew, ship, crew.home, 1.0);
 	}
 
 	/** Home: her hold into the stores, her catch's worth into the purse, her hands paid their lay; she's laid up (gone). */

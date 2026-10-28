@@ -142,7 +142,7 @@ final class ZFighterDebugCommand {
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							ApeRage.openSuper4(player);
-							// (0.17.90) and say plainly when it still can't be reached
+							// (0.17.91) and say plainly when it still can't be reached
 							String blocked = ApeRage.super4Blocked(player);
 							c.getSource().sendSuccess(() -> blocked == null ? Component.literal("Primal Super unlocked: C from your highest form.")
 								: Component.literal("Primal Super unlocked, but not reachable yet: ").append(Component.translatable(blocked)), false);

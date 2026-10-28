@@ -155,7 +155,7 @@ public final class ApeRage {
 	}
 
 	/**
-	 * (0.17.90) Why Primal Super, though opened, isn't his to take now (a lang key), or null when it is or was never opened.
+	 * (0.17.91) Why Primal Super, though opened, isn't his to take now (a lang key), or null when it is or was never opened.
 	 * Andy couldn't reach it after his heritage was cleared: the lineage follows the Kingdoms heritage, so a cleared one
 	 * isn't Warrior-born any more, and C just said there was no higher form.
 	 */

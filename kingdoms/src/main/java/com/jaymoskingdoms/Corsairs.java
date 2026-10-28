@@ -5,6 +5,7 @@ import com.jaymoskingdoms.sailing.Deck;
 import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Sailing;
+import com.jaymoskingdoms.sailing.SeaRoutes;
 import com.jaymoskingdoms.sailing.Ship;
 import com.jaymoskingdoms.sailing.Ships;
 import java.util.ArrayList;
@@ -69,6 +70,10 @@ final class Corsairs implements Ship.Captaincy {
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
 	/** How often (ticks) her captain looks about; how many looks she may lie stuck before she backs off; how long she backs. */
 	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 10;
+	/** (0.7.285) She takes to her sweeps to come round more than this (degrees) off her heading. */
+	static final float TURN_UNDER_OARS = 35.0F;
+	/** (0.7.285) Making for nowhere in particular, she works out a course to a point this far (blocks) along her heading. */
+	static final double ROUTE_AIM = 160.0;
 	/**
 	 * (0.7.243) Embayed, she makes for open water this far off (blocks; farther each try, up to the most), for at most
 	 * this long (ticks), and her tries start over once she's this far from where she last lay stuck. How far ahead on her
@@ -219,6 +224,7 @@ final class Corsairs implements Ship.Captaincy {
 			foe = null;
 		}
 		crew.target = foe == null ? -1 : foe.getId();
+		crew.goal = null;
 		float want;
 		double sail;
 		if (foe != null && (crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER)) {
@@ -233,6 +239,7 @@ final class Corsairs implements Ship.Captaincy {
 			float to = Fleet.bearing(ship, foe.getX() + foe.drift().x * 20.0, foe.getZ() + foe.drift().z * 20.0);
 			if (d > ENGAGE) {
 				crew.mode = "chase";
+				crew.goal = foe.blockPosition();
 				want = to;
 				sail = CHASE_SAIL;
 			} else {
@@ -261,6 +268,7 @@ final class Corsairs implements Ship.Captaincy {
 				return;
 			}
 			crew.mode = crew.side == Crew.Side.MERCHANT ? "voyage" : "raid";
+			crew.goal = crew.bound;
 			want = Fleet.bearing(ship, crew.bound.getX() + 0.5, crew.bound.getZ() + 0.5);
 			sail = d < WAYPOINT_REACH ? 0.0 : d < 40.0 ? PATROL_SAIL : CHASE_SAIL;
 			if (crew.side == Crew.Side.PIRATE && !PirateCoves.raiding(level, crew)) {
@@ -273,6 +281,7 @@ final class Corsairs implements Ship.Captaincy {
 				|| Math.sqrt(Raids.horizontal(crew.waypoint, crew.home)) > range * 1.2) {
 				crew.waypoint = this.waypoint(level, crew, range, random);
 			}
+			crew.goal = crew.waypoint;
 			want = Fleet.bearing(ship, crew.waypoint.getX() + 0.5, crew.waypoint.getZ() + 0.5);
 			sail = PATROL_SAIL;
 		}
@@ -285,6 +294,15 @@ final class Corsairs implements Ship.Captaincy {
 			} else if (sail > 0.0) {
 				want = Fleet.bearing(ship, crew.detour.getX() + 0.5, crew.detour.getZ() + 0.5);
 				sail = Math.max(sail, PATROL_SAIL);
+			}
+		}
+		// (0.7.285) her course round the land to where she's making for (not laying her guns on a foe close by)
+		if (sail > 0.0 && crew.detour == null && !"engage".equals(crew.mode)) {
+			BlockPos goal = crew.goal != null ? crew.goal : BlockPos.containing(ship.getX() - Mth.sin(want * Mth.DEG_TO_RAD) * ROUTE_AIM,
+				ship.getY(), ship.getZ() + Mth.cos(want * Mth.DEG_TO_RAD) * ROUTE_AIM);
+			Float course = SeaRoutes.steer(level, ship, crew, goal);
+			if (course != null) {
+				want = course;
 			}
 		}
 		// open water ahead, or the nearest heading that has it; embayed, she backs off a while and tries another way
@@ -313,6 +331,7 @@ final class Corsairs implements Ship.Captaincy {
 			crew.stuck = 0;
 			crew.backing = BACK_LOOKS;
 			ship.kedge(BACK_LOOKS * THINK);
+			SeaRoutes.forget(crew);
 			crew.waypoint = null;
 			if (crew.stuckAt == null || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.stuckAt)) > DETOUR_FORGIVE) {
 				crew.detours = 0;
@@ -325,7 +344,11 @@ final class Corsairs implements Ship.Captaincy {
 		}
 		crew.wantYaw = clear != null ? clear : want;
 		crew.wantSail = clear != null ? sail : 0.2;
-		crew.row = ship.oarSpeed() > 0.0 && ship.sailSpeed() < ROW_BELOW && sail > 0.0;
+		// (0.7.285) her sweeps out to work her head round in close water, as well as head to wind (Andy: "it needs a way
+		// to back up and manuever better. it was so close to open water this time")
+		boolean close = clear == null || crew.detour != null || crew.stuck > 0 || !moving
+			|| Math.abs(Mth.wrapDegrees(crew.wantYaw - ship.getYRot())) > TURN_UNDER_OARS;
+		crew.row = ship.oarSpeed() > 0.0 && sail > 0.0 && (ship.sailSpeed() < ROW_BELOW || close);
 	}
 
 	/** A new waypoint at sea round her home (her home itself if none is found). */
