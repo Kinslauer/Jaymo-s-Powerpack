@@ -193,14 +193,14 @@ def rig(build):
     add("saddle", None, (0, 2 - LIFT, 2, 0, 0, 0), Cube((-5, 0, -3), (10, 1, 8), kind="saddle"))
     add("saddle_b", None, (0, 2 - LIFT, 2, 0, 0, 0), Cube((-1.5, -1, -3), (3, 1, 2), kind="saddle", region="pommel"))
     add("saddle_c", None, (0, 2 - LIFT, 2, 0, 0, 0), Cube((-4, -1, 3), (8, 1, 2), kind="saddle", region="cantle"))
-    add("stirrup_left", None, (5, 3 - LIFT, 2, 0, 0, 0), Cube((-0.5, 0, -0.5), (1, 6, 1), kind="strap"))
-    add("stirrup_left_iron", None, (5, 3 - LIFT, 2, 0, 0, 0), Cube((-0.5, 6, -1), (1, 2, 2), kind="iron"))
-    add("stirrup_right", None, (-5, 3 - LIFT, 2, 0, 0, 0), Cube((-0.5, 0, -0.5), (1, 6, 1), kind="strap"))
-    add("stirrup_right_iron", None, (-5, 3 - LIFT, 2, 0, 0, 0), Cube((-0.5, 6, -1), (1, 2, 2), kind="iron"))
+    add("stirrup_left", None, (5, 2 - LIFT, 2, 0, 0, 0), Cube((-0.5, 0, -0.5), (1, 6, 1), kind="strap"))
+    add("stirrup_left_iron", None, (5, 2 - LIFT, 2, 0, 0, 0), Cube((-0.5, 6, -1), (1, 2, 2), kind="iron"))
+    add("stirrup_right", None, (-5, 2 - LIFT, 2, 0, 0, 0), Cube((-0.5, 0, -0.5), (1, 6, 1), kind="strap"))
+    add("stirrup_right_iron", None, (-5, 2 - LIFT, 2, 0, 0, 0), Cube((-0.5, 6, -1), (1, 2, 2), kind="iron"))
     add("bit_left", None, HEAD_POSE, Cube((1.5, -8, -4), (1, 2, 2), kind="iron"))
     add("bit_right", None, HEAD_POSE, Cube((-2.5, -8, -4), (1, 2, 2), kind="iron"))
-    add("rein_left", None, (0, *head_pivot(0.0), 0, 0, 0), Cube((2.6, -6, -6), (0, 3, 16), kind="rein"))
-    add("rein_right", None, (0, *head_pivot(0.0), 0, 0, 0), Cube((-2.6, -6, -6), (0, 3, 16), kind="rein"))
+    add("rein_left", None, (0, *head_pivot(30.0), 0, 0, 0), Cube((2.6, -6, -6), (0, 3, 16), kind="rein"))
+    add("rein_right", None, (0, *head_pivot(30.0), 0, 0, 0), Cube((-2.6, -6, -6), (0, 3, 16), kind="rein"))
 
     # ---- the bat horse's wings (the old horse's pegasus wings) ----
     if b == "bat_horse":

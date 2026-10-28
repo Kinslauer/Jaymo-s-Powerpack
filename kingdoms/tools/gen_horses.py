@@ -29,6 +29,7 @@ sys.path.insert(0, HERE)
 import gen_equestrian as ge  # noqa: E402  (the coat specs)
 import horse_preview as hp  # noqa: E402
 import horse_rig as hr  # noqa: E402
+import bbmodel as bbm  # noqa: E402
 
 ASSETS = os.path.normpath(os.path.join(HERE, "..", "src/main/resources/assets/jaymoskingdoms"))
 OUT = os.path.join(ASSETS, "textures/entity/breed_horse")
@@ -887,8 +888,10 @@ def preview_armour(rigs, armour_rigs, written):
 
 
 def main():
-    rigs = {b: hr.rig(b) for b in hr.BUILDS}
-    armour_rigs = {b: hr.armour(b, parts) for b, parts in rigs.items()}
+    # (each build from its Blockbench model in tools/horse_models if it has one, else horse_rig's)
+    loaded = {b: bbm.load(b) for b in hr.BUILDS}
+    rigs = {b: horse for b, (horse, _) in loaded.items()}
+    armour_rigs = {b: armour for b, (_, armour) in loaded.items()}
     builds_json(rigs, armour_rigs)
     pxs = {b: pixels(parts) for b, parts in rigs.items()}
     written = {}

@@ -6163,3 +6163,14 @@ SWEM's horses (All Rights Reserved, Forge only, so ideas only, nothing of theirs
 Andy then: the eyes were hidden. The chanfron is now a face plate whose side flanges stop above the eyes, the neck
 cloth and crinet start below the head, and necks wider than the head (draft, destrier, steppe pony) start below the
 eyes; they had buried them, armoured or not.
+
+Then Andy asked whether we use Blockbench (we hadn't: the boxes were placed by hand in horse_rig.py) and picked loading
+Blockbench models plus a hunt for openly licensed ones. None good enough turned up (Overhauled Livestock, Beyond
+Horses, SWEM, Icy's and Mo' Creatures are All Rights Reserved; Realistic Horse Genetics' art is CC-BY but its horse
+is vanilla-shaped). So: `tools/bbmodel.py` reads a Blockbench "Modded Entity" project (groups named after our bones,
+armor_* groups for barding, cube names saying how each is painted) with the same conversion Blockbench's Java export
+does, and gen_horses.py takes tools/horse_models/<build>.bbmodel instead of horse_rig's shapes when there is one;
+`python3 tools/bbmodel.py export` writes every build as a starter project (in the project files,
+art-overhaul/horses/blockbench-starters). BreedHorseModel now poses every bone as a change from that build's own rest
+pose (head, reins, tail, forelegs, saddle, stirrups, wings, and each leg's thigh length from its own pivots), so a
+model with other proportions animates the same way.

@@ -42,16 +42,15 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static final float DEG = Mth.DEG_TO_RAD;
 	/** The head's pitch at rest, reared and grazing. */
 	private static final float HEAD_TILT = 30.0F * DEG, HEAD_TILT_REARED = 15.0F * DEG, HEAD_TILT_GRAZING = 2.18166F;
-	/** The open mouth: the upper jaw lifts, the lower drops. */
-	private static final float UPPER_JAW_OPEN = -5.0F * DEG, LOWER_JAW_OPEN = 15.0F * DEG;
-	/** How long each upper leg is, to where the cannon hangs from it. */
-	private static final float THIGH = 10.0F;
 	/**
 	 * (0.7.309, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
 	 * much higher) and the neck this much longer (the head set out along it); as {@code LIFT} and {@code NECK} in
-	 * tools/horse_rig.py.
+	 * tools/horse_rig.py. Everything is posed as a change from each build's own rest pose (builds.json), so a build
+	 * brought in from Blockbench with other proportions moves the same way.
 	 */
 	static final float LIFT = 3.0F, NECK = 3.0F;
+	/** Where the head's pivot is at rest, looking level (the head is posed as a change from there). */
+	private static final float HEAD_REST_Y = 4.0F - LIFT - NECK * Mth.cos(HEAD_TILT), HEAD_REST_Z = -10.0F - NECK * Mth.sin(HEAD_TILT);
 	/** The mouth opens past this much of vanilla's feeding animation. */
 	private static final float MOUTH_OPEN = 0.3F;
 	/** How far a mane that falls over the neck swings out at a gallop (radians), and how fast it ripples. */
@@ -75,7 +74,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static int armorWidth = 128, armorHeight = 128;
 	/** (0.7.309) How far out each build's stirrups hang under barding: clear of its side plates. */
 	private static final Map<String, Float> STIRRUP_OUT = new HashMap<>();
-	private static final float STIRRUP_CLEAR = 0.6F, STIRRUP_X = 5.0F;
+	private static final float STIRRUP_CLEAR = 0.6F;
 
 	private final Map<String, Rig> rigs = new HashMap<>();
 	private final @Nullable Rig fallback;
@@ -324,16 +323,19 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze - NECK * Mth.sin(headX);
 			float headYaw = yaw * (rest + stand);
 			headY += HEAD_DIP_DROP * state.headDip * rest;
+			// (as changes from where the head rests: at rest and level it's where builds.json puts it)
+			float dY = headY - HEAD_REST_Y, dZ = headZ - HEAD_REST_Z, dX = headX - HEAD_TILT;
 			boolean open = state.feedingAnimation > MOUTH_OPEN;
 			for (ModelPart part : this.headParts) {
-				pose(part, headY, headZ, headX, headYaw);
+				PartPose o = part.getInitialPose();
+				pose(part, o.y() + dY, o.z() + dZ, o.xRot() + dX, o.yRot() + headYaw);
 			}
-			this.upperMouthOpen.xRot = headX + UPPER_JAW_OPEN;
-			this.lowerMouthOpen.xRot = headX + LOWER_JAW_OPEN;
 			this.upperMouth.visible = this.lowerMouth.visible = !open;
 			this.upperMouthOpen.visible = this.lowerMouthOpen.visible = open;
-			pose(this.reinLeft, headY, headZ, pitch, headYaw);
-			pose(this.reinRight, headY, headZ, pitch, headYaw);
+			for (ModelPart rein : new ModelPart[] {this.reinLeft, this.reinRight}) {
+				PartPose o = rein.getInitialPose();
+				pose(rein, o.y() + dY, o.z() + dZ, o.xRot() + pitch, o.yRot() + headYaw);
+			}
 			if (this.maneFlow != null) {
 				// the fallen mane lifts off the neck with speed, rippling
 				this.maneFlow.zRot = -MANE_SWAY * Math.min(1.0F, speed) * (0.6F + 0.4F * Mth.sin(ticks * MANE_RIPPLE));
@@ -341,7 +343,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 
 			// rearing: up on the hind legs
 			this.body.xRot = -45.0F * DEG * stand;
-			this.tailA.y = 3.0F - LIFT + 6.0F * stand;
+			float tailUp = 6.0F * stand;
+			this.tailA.y = this.tailA.getInitialPose().y() + tailUp;
 
 			// the legs: walking, and reared (the forelegs paw the air, the hind legs fold under)
 			float rB = rLeg, lB = lLeg, rC = rLeg, lC = lLeg;
@@ -362,19 +365,22 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float rPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F + Mth.PI);
 			float lPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F);
 			float pawBend = 45.0F * DEG, hindUpper = -15.0F * DEG, hindLower = 15.0F * DEG;
-			float frontY = Mth.lerp(stand, 9.0F, -2.0F) - LIFT, frontZ = Mth.lerp(stand, -8.0F, -2.0F);
-			this.leg3A.y = this.leg4A.y = frontY;
-			this.leg3A.z = this.leg4A.z = frontZ;
+			// reared, the forelegs come up and back under the chest
+			float frontY = -11.0F * stand, frontZ = 6.0F * stand;
+			for (ModelPart leg : new ModelPart[] {this.leg3A, this.leg4A}) {
+				leg.y = leg.getInitialPose().y() + frontY;
+				leg.z = leg.getInitialPose().z() + frontZ;
+			}
 			leg(this.leg1A, this.leg1B, this.leg1C, Mth.lerp(stand, lLeg, hindUpper), Mth.lerp(stand, lC, hindLower), lLeg, hindUpper, stand);
 			leg(this.leg2A, this.leg2B, this.leg2C, Mth.lerp(stand, rLeg, hindUpper), Mth.lerp(stand, rC, hindLower), rLeg, hindUpper, stand);
 			leg(this.leg3A, this.leg3B, this.leg3C, Mth.lerp(stand, rLeg, rPaw), Mth.lerp(stand, rB, pawBend), rLeg, rPaw, stand);
 			leg(this.leg4A, this.leg4B, this.leg4C, Mth.lerp(stand, lLeg, lPaw), Mth.lerp(stand, lB, pawBend), lLeg, lPaw, stand);
 
 			// the saddle sits back along the reared body; the stirrups swing unless someone's feet are in them
-			float saddleY = Mth.lerp(stand, 2.0F, 0.5F) - LIFT, saddleZ = Mth.lerp(stand, 2.0F, 11.0F);
+			float saddleY = -1.5F * stand, saddleZ = 9.0F * stand;
 			for (ModelPart part : this.saddleParts) {
-				part.y = saddleY;
-				part.z = saddleZ;
+				part.y = part.getInitialPose().y() + saddleY;
+				part.z = part.getInitialPose().z() + saddleZ;
 			}
 			this.saddle.xRot = this.saddleB.xRot = this.saddleC.xRot = this.body.xRot;
 			boolean ridden = state.isRidden;
@@ -384,9 +390,11 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.stirrupLeft.zRot = this.stirrupLeftIron.zRot = swingZ;
 			this.stirrupRight.zRot = this.stirrupRightIron.zRot = -swingZ;
 			// (0.7.309) under barding they hang outside the side plates
-			float out = state.armor != null ? STIRRUP_OUT.getOrDefault(state.build, STIRRUP_X) : STIRRUP_X;
-			this.stirrupLeft.x = this.stirrupLeftIron.x = out;
-			this.stirrupRight.x = this.stirrupRightIron.x = -out;
+			Float out = state.armor != null ? STIRRUP_OUT.get(state.build) : null;
+			for (ModelPart part : new ModelPart[] {this.stirrupLeft, this.stirrupLeftIron, this.stirrupRight, this.stirrupRightIron}) {
+				float x = part.getInitialPose().x();
+				part.x = out == null ? x : Math.copySign(Math.max(Math.abs(x), out), x);
+			}
 
 			// the tail: hangs at rest, lifts as it goes faster, swishes now and then
 			float tailLift = Math.min(0.0F, -1.3089F + speed * 1.5F);
@@ -395,7 +403,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				tailYaw = Mth.cos(ticks * 0.7F);
 				tailLift = 0.0F;
 			}
-			this.tailB.y = this.tailC.y = this.tailA.y;
+			this.tailB.y = this.tailB.getInitialPose().y() + tailUp;
+			this.tailC.y = this.tailC.getInitialPose().y() + tailUp;
 			this.tailA.yRot = this.tailB.yRot = this.tailC.yRot = tailYaw;
 			this.tailA.xRot = this.tailB.xRot = tailLift;
 			this.tailC.xRot = -0.2618F + tailLift;
@@ -430,8 +439,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			if (!state.wings) {
 				return;
 			}
-			this.innerWing.y = (stand > 0.5F ? -5.0F : 3.0F) - LIFT;
-			this.innerWing.z = stand > 0.5F ? 4.0F : -6.0F;
+			this.innerWing.y = this.innerWing.getInitialPose().y() + (stand > 0.5F ? -8.0F : 0.0F);
+			this.innerWing.z = this.innerWing.getInitialPose().z() + (stand > 0.5F ? 10.0F : 0.0F);
 			float wingRot = state.flapping ? Mth.cos(ticks * 0.3F + Mth.PI) * 1.2F : Mth.cos(walked * 0.5F) * 0.1F;
 			if (state.airborne) {
 				this.outerWing.yRot = -0.3228859F + wingRot / 2.0F;
@@ -468,8 +477,13 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		private static void leg(ModelPart a, ModelPart b, ModelPart c, float upper, float lower, float walkAngle, float standAngle, float stand) {
 			a.xRot = upper;
 			float hang = Mth.lerp(stand, walkAngle, standAngle);
-			b.y = c.y = a.y + Mth.sin(90.0F * DEG + hang) * THIGH;
-			b.z = c.z = a.z + Mth.cos(270.0F * DEG + hang) * THIGH;
+			// the upper leg's length: from its pivot down to the cannon's, at rest
+			PartPose a0 = a.getInitialPose(), b0 = b.getInitialPose(), c0 = c.getInitialPose();
+			float thigh = b0.y() - a0.y();
+			b.y = a.y + Mth.sin(90.0F * DEG + hang) * thigh;
+			b.z = a.z + Mth.cos(270.0F * DEG + hang) * thigh + (b0.z() - a0.z());
+			c.y = b.y + (c0.y() - b0.y());
+			c.z = b.z + (c0.z() - b0.z());
 			b.xRot = c.xRot = lower;
 		}
 	}
