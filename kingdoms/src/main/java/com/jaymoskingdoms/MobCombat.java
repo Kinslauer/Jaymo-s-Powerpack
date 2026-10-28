@@ -105,6 +105,14 @@ public final class MobCombat {
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
 	/** (0.7.267) A gun's red glint comes this long (ticks) before the shot; an aim not fired this long after goes stale. */
 	static final int GUN_WINDUP = 10, AIM_STALE = 20;
+	/**
+	 * (0.7.283) A plain blow (fists, or a weapon Better Combat doesn't know) from an MCA villager: it lands this share into
+	 * the swing, at least {@link #MIN_UPSWING_TICKS} after its glint; a blow this hard (attack damage) glints red.
+	 */
+	static final double PLAIN_UPSWING = 0.45, PLAIN_HEAVY_DAMAGE = 10.0;
+	/** (0.7.283) The plain blow's animations (Better Combat's own): fists punch, anything else is swung across. */
+	static final String PUNCH = "bettercombat:one_handed_punch", UPPERCUT = "bettercombat:one_handed_uppercut_right",
+		CUT = "bettercombat:one_handed_slash_horizontal_right";
 
 	private static final Identifier COMBO_DAMAGE = JaymosKingdoms.id("combo_damage");
 	private static final Identifier SWING_SLOW = JaymosKingdoms.id("swing_slow");
@@ -129,6 +137,8 @@ public final class MobCombat {
 		@Nullable Move move;
 		long hitAt = -1, endsAt = -1, lastSwing = -1000;
 		int combo;
+		/** (0.7.283) A plain blow ({@link #plainBlow}): one target, no Better Combat move. */
+		boolean plain;
 	}
 
 	private static final Map<Mob, Swing> SWINGS = new WeakHashMap<>();
@@ -179,10 +189,14 @@ public final class MobCombat {
 		return BetterCombatBridge.moves(mob.getMainHandItem()) != null;
 	}
 
-	/** Humanoid melee mobs that can carry a weapon: our folk, zombies (and their kin), illagers, skeletons, piglins. */
+	/**
+	 * Humanoid melee mobs that can carry a weapon: our folk, zombies (and their kin), illagers, skeletons, piglins, and
+	 * (0.7.283) MCA's villagers (guards, crews, rulers, the gifted, brawlers), whose own melee task hands its blows over in
+	 * {@code McaMeleeSwingMixin}.
+	 */
 	static boolean humanoid(Mob mob) {
 		return mob instanceof Folk || mob instanceof Zombie || mob instanceof AbstractIllager || mob instanceof AbstractSkeleton
-			|| mob instanceof AbstractPiglin;
+			|| mob instanceof AbstractPiglin || McaCompat.isMca(mob);
 	}
 
 	/**
@@ -215,6 +229,7 @@ public final class MobCombat {
 		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
+		swing.plain = false;
 		swing.hitAt = now + Math.min(upswing, length - 1);
 		swing.endsAt = now + length;
 		swing.lastSwing = now;
@@ -236,6 +251,75 @@ public final class MobCombat {
 			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
+	}
+
+	/**
+	 * (0.7.283) Andy: "it doesnt seem like MCA villagers have animations when attacking". An MCA villager's blow that
+	 * isn't a Better Combat move (fists, or a weapon it doesn't know) still winds up like one: the glint, an animation
+	 * watchers see (a punch or uppercut barehanded, a cut with anything else), and the blow a moment later if the target
+	 * is still in reach and sight. Called every tick its melee task would strike; does nothing mid-swing.
+	 */
+	public static void plainBlow(Mob mob, LivingEntity target) {
+		if (!(mob.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long now = level.getGameTime();
+		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+			return;
+		}
+		if (now - swing.endsAt > COMBO_RESET_TICKS) {
+			swing.combo = 0;
+		}
+		int length = swingTicks(mob);
+		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
+		tell(level, mob, plainHeavy(mob));
+		swing.target = target;
+		swing.move = null;
+		swing.plain = true;
+		swing.hitAt = now + Math.min(upswing, length - 1);
+		swing.endsAt = now + length;
+		swing.lastSwing = now;
+		String animation = mob.getMainHandItem().isEmpty() ? (swing.combo % 3 == 2 ? UPPERCUT : PUNCH) : CUT;
+		swing.combo++;
+		MobSwing packet = new MobSwing(mob.getId(), animation, length, (float) PLAIN_UPSWING);
+		boolean animated = false;
+		for (ServerPlayer player : PlayerLookup.tracking(mob)) {
+			if (ServerPlayNetworking.canSend(player, MobSwing.TYPE)) {
+				ServerPlayNetworking.send(player, packet);
+				animated = true;
+			}
+		}
+		if (!animated) {
+			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
+		}
+		mob.setAggressive(true);
+	}
+
+	/** (0.7.283) A plain blow too heavy to parry. */
+	static boolean plainHeavy(Mob mob) {
+		AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
+		return damage != null && damage.getValue() >= PLAIN_HEAVY_DAMAGE;
+	}
+
+	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
+	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target) {
+		if (target == null || !target.isAlive() || target.level() != level
+			|| gap(mob, target) > BASE_REACH + 0.25 && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
+			return;
+		}
+		boolean heavy = plainHeavy(mob);
+		if (heavy) {
+			mob.addTag(UNPARRYABLE_TAG);
+		}
+		try {
+			mob.doHurtTarget(level, target);
+		} finally {
+			if (heavy) {
+				mob.removeTag(UNPARRYABLE_TAG);
+			}
+		}
 	}
 
 	/** (0.7.267) A blow too heavy to parry. */
@@ -366,7 +450,9 @@ public final class MobCombat {
 			}
 			if (swing.hitAt >= 0 && now >= swing.hitAt) {
 				swing.hitAt = -1;
-				if (swing.move != null && !mob.getMainHandItem().isEmpty()) {
+				if (swing.plain) {
+					plainStrike(level, mob, swing.target);
+				} else if (swing.move != null && !mob.getMainHandItem().isEmpty()) {
 					strike(level, mob, swing.move, swing.target);
 				}
 			}

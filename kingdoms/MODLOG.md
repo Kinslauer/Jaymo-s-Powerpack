@@ -5755,4 +5755,19 @@ Andy: "villagers shouldnt teleport if they were interacted with by a player with
   landing, a werewolf turning back, the rope lift, a ship broken up, someone pushed out of a block being built.
   Rides (`Journeys`, `Milestones`, `Cabs`) move the horse, not the villager, so they're untouched.
 - A villager told to follow you won't teleport after you for the first 30 seconds either; they walk.
+## 0.7.283: MCA villagers' attack animations
+Andy (2026-10-28): "it doesnt seem like MCA villagers have animations when attacking".
+- **Why:** `MobCombat` (Better Combat moves, the glint, `MobShields`' blade guard, `MobParry`) only took humanoids
+  driven by vanilla's `MeleeAttackGoal`, and its `humanoid` list left out MCA's villagers. They fight through MCA's
+  own brain task (`ExtendedMeleeAttackTask`), which struck at once with vanilla's six-tick arm flick: no wind-up, no
+  animation worth the name, no glint (Powers' `AttackTells` only wraps vanilla's `MeleeAttack` behaviour).
+- **MCA's melee task** (`mixin/mca/McaMeleeSwingMixin`, only with Better Combat): its blow goes to `MobShields.guard`,
+  then `MobCombat.attackTick` for a weapon Better Combat knows (its combo, animation and sound; parries and the blade
+  guard come with it), else `MobCombat.plainBlow`.
+- **Plain blows** (`MobCombat.plainBlow`): the glint (red at 10+ attack damage), Better Combat's punch (every third an
+  uppercut) barehanded or its horizontal cut with anything else, played through the same `MobSwing` animation; the blow
+  lands 45% into the swing on its one target if still in reach and sight, else a whiff.
+- **Ship crews** (`Crewmen.fight`) swing the same way at arm's length (a plain blow when the move's reach falls short,
+  since they keep to their deck paths); their old glint-then-flick stays for packs without Better Combat.
+- MCA villagers count as `MobCombat.humanoid`, so the blade guard and parry window reach them too.
 - Compile-checked only, not seen in game.

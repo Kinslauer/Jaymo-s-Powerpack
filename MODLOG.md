@@ -3316,3 +3316,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   heritage shows, and so on. Gear, arm swings and item use are lent to your player only while the figure is drawn.
   Right-clicking the story page's Heritage, Class and Look buttons (and the spell or element chips) steps back to
   the one before (Andy: "right clicking should take you back on any of these options").
+- **0.17.87, MCA villagers swing when they fight (Kingdoms 0.7.283):** guards, crews, rulers and every other MCA
+  villager now wind up and swing their weapon's Better Combat moves, with the glint and the blade guard, instead of
+  MCA's instant arm flick; barehanded they punch. Compile-checked, not seen in game.
