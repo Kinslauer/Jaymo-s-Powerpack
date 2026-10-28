@@ -57,8 +57,9 @@ import org.jspecify.annotations.Nullable;
  * thrown in, in the brewing stand's order (its recipes, data ones included: nether wart, then the effect, then
  * redstone or glowstone...).
  * <ul>
- * <li>Each ingredient has to be stirred in ({@link #STIR_TURNS} turns with a stick or a shovel, holding use) before the
- * next goes in; one thrown in while the last is still unstirred, or one the brew can't take, is spat back out.</li>
+ * <li>Each ingredient floats in the pot (the thrown item itself, held there with {@link #FLOATING}) until it's stirred in
+ * ({@link #STIR_TURNS} turns with a stick or a shovel, holding use), swirling round with each turn; one thrown in while
+ * the last is still unstirred, or one the brew can't take, is spat back out.</li>
  * <li>A stirred brew fills three bottles (one per cauldron level). Gunpowder thrown into it makes it splash, dragon's
  * breath lingering (the brewing stand's own recipes).</li>
  * <li>Buckets and more water would spoil it, so they're refused; a brew whose level changes some other way (rain, a
@@ -73,6 +74,10 @@ public final class CauldronBrewing {
 	public static final int BUBBLE_TICKS = 8;
 	/** How hard a refused ingredient is spat out. */
 	public static final double SPIT = 0.35;
+	/** Tag on an ingredient floating in a cauldron until it's stirred in. */
+	public static final String FLOATING = "jaymospowers_brewing";
+	/** How far round the pot's middle a floating ingredient swirls (blocks), and how high it floats over the pot's base. */
+	public static final double SWIRL = 0.2, FLOAT_HEIGHT = 0.8;
 	/** Kitchen's hot blocks (stove, furnaces...); empty when Kitchen isn't loaded. */
 	public static final TagKey<Block> KITCHEN_HEAT = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("jaymoskitchen", "heat_sources"));
 
@@ -148,6 +153,7 @@ public final class CauldronBrewing {
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, entity) -> {
 			if (state.getBlock() instanceof LayeredCauldronBlock) {
 				set(level, pos, null);
+				release(level, pos);
 			}
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(CauldronBrewing::bubble);
@@ -155,7 +161,7 @@ public final class CauldronBrewing {
 
 	/** An item in a water cauldron ({@code LayeredCauldronBlockMixin}): over heat, a brewing ingredient goes in or is spat out. */
 	public static void itemInside(ServerLevel level, BlockPos pos, BlockState state, ItemEntity item) {
-		if (!item.isAlive() || item.getItem().isEmpty() || !heated(level, pos)) {
+		if (!item.isAlive() || item.getItem().isEmpty() || item.entityTags().contains(FLOATING) || !heated(level, pos)) {
 			return;
 		}
 		Brew brew = get(level, pos);
@@ -180,10 +186,18 @@ public final class CauldronBrewing {
 			return;
 		}
 		ItemStack result = recipe.get().value().assemble(input);
-		item.getItem().shrink(1);
-		if (item.getItem().isEmpty()) {
-			item.discard();
+		// the ingredient floats in the pot until it's stirred in; any more of it in the same stack is spat out next tick
+		ItemEntity floating = item;
+		if (item.getItem().getCount() > 1) {
+			item.getItem().shrink(1);
+			floating = new ItemEntity(level, item.getX(), item.getY(), item.getZ(), reagent);
+			level.addFreshEntity(floating);
 		}
+		floating.addTag(FLOATING);
+		floating.setNoGravity(true);
+		floating.setNeverPickUp();
+		floating.setUnlimitedLifetime();
+		swirl(floating, pos, STIR_TURNS);
 		set(level, pos, new Brew(result, STIR_TURNS, state.getValue(LayeredCauldronBlock.LEVEL)));
 		level.playSound(null, pos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.5F, 1.2F);
 		level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.6F, 1.1F);
@@ -203,6 +217,13 @@ public final class CauldronBrewing {
 		ServerLevel server = (ServerLevel) level;
 		server.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5, 4, 0.2, 0.0, 0.2, 0.0);
 		level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, SoundSource.BLOCKS, 0.4F, 1.4F);
+		for (ItemEntity floating : floating(level, pos)) {
+			if (stirs == 0) {
+				floating.discard();
+			} else {
+				swirl(floating, pos, stirs);
+			}
+		}
 		if (stirs == 0) {
 			level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8F, 1.0F);
 			puff(server, pos, brew.potion(), 16);
@@ -223,6 +244,28 @@ public final class CauldronBrewing {
 		set(level, pos, fills > 0 ? new Brew(brew.potion(), 0, fills) : null);
 		LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Sets a floating ingredient on its spot round the pot for this many stir turns still to go. */
+	private static void swirl(ItemEntity item, BlockPos pos, int stirs) {
+		double angle = stirs * (Math.PI * 2.0 / STIR_TURNS);
+		item.setPos(pos.getX() + 0.5 + Math.cos(angle) * SWIRL, pos.getY() + FLOAT_HEIGHT, pos.getZ() + 0.5 + Math.sin(angle) * SWIRL);
+		item.setDeltaMovement(0.0, 0.0, 0.0);
+	}
+
+	/** The ingredients floating in the cauldron at {@code pos}. */
+	private static java.util.List<ItemEntity> floating(Level level, BlockPos pos) {
+		return level.getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(pos), e -> e.entityTags().contains(FLOATING));
+	}
+
+	/** A brew gone (the pot emptied or broken): whatever floated in it is an ordinary item again. */
+	private static void release(Level level, BlockPos pos) {
+		for (ItemEntity item : floating(level, pos)) {
+			item.removeTag(FLOATING);
+			item.setNoGravity(false);
+			item.setDefaultPickUpDelay();
+			item.setExtendedLifetime();
+		}
 	}
 
 	/** Spits a refused item back out of the pot, and tells whoever threw it why. */
@@ -293,6 +336,7 @@ public final class CauldronBrewing {
 		BlockState state = level.getBlockState(pos);
 		if (!state.is(Blocks.WATER_CAULDRON) || state.getValue(LayeredCauldronBlock.LEVEL) != brew.fills()) {
 			set(level, pos, null);
+			release(level, pos);
 			return null;
 		}
 		if (level instanceof ServerLevel server) {
