@@ -94,6 +94,14 @@ public final class Grades {
 			stats.attack() + grade.attack, stats.attackSpeed() + grade.attackSpeed, stats.tier(), stats.traits());
 	}
 
+	/** {@link #scale(ToolStats.Stats, Grade)} for a tool, then the maximum durability it has lost to honing. */
+	public static ToolStats.Stats scale(ToolStats.Stats stats, @Nullable Grade grade, ItemStack stack) {
+		ToolStats.Stats scaled = scale(stats, grade);
+		float honed = Finishing.honeFactor(stack);
+		return honed >= 1.0F ? scaled : new ToolStats.Stats(Math.max(1, Math.round(scaled.durability() * honed)), scaled.miningSpeed(),
+			scaled.attack(), scaled.attackSpeed(), scaled.tier(), scaled.traits());
+	}
+
 	/** Puts the grade into a forged item's durability, damage, swing speed, mining speed and armour. */
 	public static void bake(ItemStack stack) {
 		if (stack.getItem() instanceof TinkerTool) {
@@ -105,6 +113,7 @@ public final class Grades {
 		Integer maxDamage = proto.get(DataComponents.MAX_DAMAGE);
 		if (maxDamage != null) {
 			int max = grade == null ? maxDamage : Math.max(1, Math.round(maxDamage * grade.durability));
+			max = Math.max(1, Math.round(max * Finishing.honeFactor(stack)));
 			stack.set(DataComponents.MAX_DAMAGE, max);
 			stack.set(DataComponents.DAMAGE, Mth.clamp(stack.getDamageValue(), 0, max - 1));
 		}

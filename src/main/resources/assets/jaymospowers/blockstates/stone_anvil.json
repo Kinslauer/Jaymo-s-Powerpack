@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "jaymospowers:block/tinkering/stone_anvil"
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/tinkering/stone_anvil"
+    },
+    "facing=north": {
+      "model": "jaymospowers:block/tinkering/stone_anvil",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/tinkering/stone_anvil",
+      "y": 90
+    }
+  }
+}

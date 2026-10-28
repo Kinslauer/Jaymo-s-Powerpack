@@ -88,12 +88,13 @@ public final class Smithing {
 			.mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL)
 			.pushReaction(PushReaction.IMMOVEABLE));
 		SMITHING_ANVIL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("smithing_anvil"),
-			new BlockEntityType<>(SmithingAnvilEntity::new, Set.of(SMITHING_ANVIL)));
+			new BlockEntityType<>(SmithingAnvilEntity::new, Set.of(SMITHING_ANVIL, StoneAnvil.create())));
 		HEARTH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("forge_hearth"),
 			new BlockEntityType<>(HearthEntity::new, Set.of(Forge.FORGE_HEARTH)));
 
 		SmithingNet.register();
 		Grades.register();
+		Finishing.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				HotMetal.tick(player);

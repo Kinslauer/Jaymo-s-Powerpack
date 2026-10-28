@@ -45,6 +45,8 @@ public class SmithingAnvilEntity extends BlockEntity {
 	private ItemStack result = ItemStack.EMPTY;
 	private @Nullable UUID smith;
 	private long lastBlow;
+	/** Finished forgings so far (a Stone Anvil crumbles after {@link StoneAnvil#MAX_USES}). */
+	private int uses;
 
 	public SmithingAnvilEntity(BlockPos pos, BlockState state) {
 		super(Smithing.SMITHING_ANVIL_ENTITY, pos, state);
@@ -61,6 +63,17 @@ public class SmithingAnvilEntity extends BlockEntity {
 	/** Whether this anvil's block is a stone anvil and the like (see {@link SmithingAnvilBlock#tier}). */
 	public int tier() {
 		return getBlockState().getBlock() instanceof SmithingAnvilBlock block ? block.tier : SmithingAnvilBlock.IRON_TIER;
+	}
+
+	public int uses() {
+		return uses;
+	}
+
+	/** Counts a finished forging; returns the total. */
+	public int addUse() {
+		uses++;
+		setChanged();
+		return uses;
 	}
 
 	private long now() {
@@ -369,6 +382,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 		super.loadAdditional(input);
 		work = input.read("work", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 		result = input.read("result", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+		uses = input.getIntOr("uses", 0);
 		if (level != null && level.isClientSide()) {
 			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
 		}
@@ -379,6 +393,7 @@ public class SmithingAnvilEntity extends BlockEntity {
 		super.saveAdditional(output);
 		output.store("work", ItemStack.OPTIONAL_CODEC, work);
 		output.store("result", ItemStack.OPTIONAL_CODEC, result);
+		output.putInt("uses", uses);
 	}
 
 	@Override

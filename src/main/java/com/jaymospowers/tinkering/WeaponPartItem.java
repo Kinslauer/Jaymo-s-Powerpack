@@ -73,6 +73,7 @@ public class WeaponPartItem extends Item {
 	@SuppressWarnings("deprecation")
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
+		com.jaymospowers.tinkering.smithing.Finishing.tooltip(stack, builder);
 		ItemStack weapon = weapon(stack);
 		if (weapon == null) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.cast_only").withStyle(ChatFormatting.GRAY));
