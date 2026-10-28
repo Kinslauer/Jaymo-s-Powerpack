@@ -66,7 +66,7 @@ import net.minecraft.world.phys.Vec3;
  * the player to hold out their hand and the villager chooses to shake or wave. you only get the cutscene for villagers
  * that are special like eurus or a master". The first time you use an MCA villager you don't know ({@link #greet}), your
  * hand goes out to them in place of their menu; they think it over and take it ({@link Introductions#takesHand}: the
- * shake, and their name learned) or give you a wave instead. Either way their menu opens after, and from then on it
+ * shake, and their name learned) or give you a wave instead ("women usually wave": {@link #WOMAN_SHAKES}). Either way their menu opens after, and from then on it
  * opens straight away ({@link #GREETED}). Every villager handshake is on film only with someone {@linkplain #special
  * special} (a dragon walking as a villager, a master of a gift); with anyone else it's the shake alone. Not a ruler, a
  * child, one with a grudge against you, or behind a full mask: those go straight to the menu as before.
@@ -88,6 +88,8 @@ public final class Handshakes {
 	static final float CHIME_VOLUME = 0.7F, CHIME_PITCH = 1.4F;
 	/** (0.7.289) A villager's wave at a first meeting (ticks); their menu opens after it. */
 	public static final int WAVE_TICKS = 30;
+	/** (0.7.289) Andy: "women usually wave": the chance a woman shakes your hand at a first meeting, when she'd take it at all. */
+	static final float WOMAN_SHAKES = 0.2F;
 
 	/** (0.7.289) On a player: the villagers who've greeted them, whose menu opens straight away from then (saved, kept through death). */
 	static final AttachmentType<Set<UUID>> GREETED = AttachmentRegistry.create(JaymosKingdoms.id("greeted"),
@@ -631,7 +633,8 @@ public final class Handshakes {
 			greeted(player, villager);
 			return false;
 		}
-		GREETINGS.put(player.getUUID(), new Greeting(villager, player.level().getGameTime() + VILLAGER_THINK, Introductions.takesHand(player, villager)));
+		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
+		GREETINGS.put(player.getUUID(), new Greeting(villager, player.level().getGameTime() + VILLAGER_THINK, takes));
 		villager.getNavigation().stop();
 		villager.getLookControl().setLookAt(player);
 		send(player, villager.getId(), Hand.OFFERED);
