@@ -3350,3 +3350,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   stays full, and medicine does nothing for it. A new Metal remedy (`Treatment.Remedy.METAL`, iron or copper ingot,
   sneak + use like spirits) stops a part's leak, sets a break and mends 4 health; an ingot is medicine only to an
   android, so golem repair and trades are untouched. Compile-checked, not seen in game.
+- **0.17.97, no swings while charging an execution:** Andy: "stop attacking while charging an execution". While you held
+  sneak + attack on someone downed, Better Combat kept swinging at them (its hold-to-attack), and the click that began the
+  hold was a blow of its own. Now, sneaking with the crosshair on someone you could finish (bare hands, a weapon or a tool),
+  the click and the hold are the execution's alone: no swing, no hit, no digging (`FinisherClient.holdsAttack`,
+  `FinisherAttackMixin`). The same goes while a finisher or a symbiote execution plays. A torch or a loaf still swings,
+  since it finishes nobody; stand up to hit a downed body normally. Compile-checked, not seen in game.
