@@ -5710,3 +5710,11 @@ Grand Capitals, Epic Villages).
   snowy plains and taiga. Vanilla outposts are plains-only now; Towns and Towers' biome outposts cover the rest.
 - Towns and Towers is CC BY-NC-ND 4.0 (not BY-NC-SA as written for 0.7.276): shipped unchanged is still fine.
 - Compile-checked only, not seen in game.
+
+## 0.7.278: Repurposed Structures in the pack (pack 0.17.81)
+- Repurposed Structures 7.8.4 and MidnightLib 1.10.0 join the pack, so `GrandSeats`' jungle choice,
+  `repurposed_structures:fortress_jungle` (checked in the jar), now goes up for jungle kingdoms.
+- `SharedPools.outpost` takes any structure with "outpost" in its id: Repurposed Structures' are `outpost_badlands`
+  and the like (12 in `outposts_overworld`), which the old "pillager" check missed.
+  Its villages (`villages_overworld`, 11, and the one-village sets) already pool by name.
+- Compile-checked only, not seen in game.
