@@ -3510,5 +3510,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
-- **0.17.126, camp armour (Kingdoms 0.7.308):** barbarians, chiefs, goblins, orcs and pirates ashore keep their armour on
-  (MCA took it off whenever they weren't fighting), and camp shamans and raiders no longer attack captives in chains.
+- **0.17.126, captives left alone (Kingdoms 0.7.308):** camp shamans and raiders no longer attack captives in chains.
