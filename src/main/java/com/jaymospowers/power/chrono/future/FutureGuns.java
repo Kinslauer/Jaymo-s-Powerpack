@@ -28,7 +28,8 @@ import org.jspecify.annotations.Nullable;
  * Guns in the future: the dead and the echoes there carry TaCZ's own modern guns (its default gunpack, which is for the
  * future only: {@code armory/TaczGuns}) and fire them at what they're fighting. A mob can't
  * pull a TaCZ trigger, so the shots are ours: bullets (a shotgun's spread of pellets) traced from the muzzle, stopped by
- * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun. Then a
+ * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun and a
+ * {@link MuzzleFlash} at the muzzle. Then a
  * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. Nothing here
  * without TaCZ. (0.15.118) The TaCZ flintlocks gunners carried before 0.10.111 are gone from the pack, so they're no
  * longer fired.
@@ -127,6 +128,7 @@ public final class FutureGuns {
 	}
 
 	static void init() {
+		MuzzleFlash.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Mob mob && mob.entityTags().contains(TAG) && mob.level() instanceof ServerLevel level) {
 				dropAmmo(level, mob);
@@ -258,7 +260,6 @@ public final class FutureGuns {
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		Vec3 eye = mob.getEyePosition();
 		Vec3 aim = foe.getBoundingBox().getCenter().subtract(eye).normalize();
-		Vec3 muzzle = eye.add(aim.scale(0.9));
 		float spread = mob instanceof net.minecraft.world.entity.monster.zombie.Zombie ? kind.spread * ZOMBIE_STRAY_SCALE + ZOMBIE_STRAY_ADD : kind.spread;
 		for (int i = 0; i < kind.balls; i++) {
 			Vec3 dir = stray(aim, spread, random);
@@ -281,7 +282,8 @@ public final class FutureGuns {
 				level.sendParticles(ParticleTypes.CRIT, end.x, end.y, end.z, 3, 0.05, 0.05, 0.05, 0.1);
 			}
 		}
-		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
+		// (0.17.135) a bright burst at the muzzle, not just a wisp of smoke
+		MuzzleFlash.mobShot(level, mob, aim, kind);
 		if (!report(mob, gun)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE,
 				kind == SHOTGUN ? 1.2F : 0.9F, (kind == PISTOL ? 1.9F : 1.6F) + random.nextFloat() * 0.2F);

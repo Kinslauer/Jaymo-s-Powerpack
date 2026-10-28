@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.tacz",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"TaczMuzzleFlashMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
