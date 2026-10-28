@@ -3483,6 +3483,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   ... axis ... as it does not exist" in `LayerBlock.<init>`): `Properties.ofFullCopy` copied a log's map colour, a function
   of its `AXIS`. Layers now take the base's `defaultMapColor()` as a fixed colour. No other base in `LayerList` has a
   state-dependent property (light or colour).
-- **0.17.118, new horses (Kingdoms 0.7.302):** every horse, skeleton horse and zombie horse is drawn in our own model,
+- **0.17.119, new horses (Kingdoms 0.7.303):** every horse, skeleton horse and zombie horse is drawn in our own model,
   a build per breed (feathered drafts, slim coursers, crested destriers, stocky ponies, dished desert horses, the bat
   horse's wings), with every coat and armour repainted for it. See the Kingdoms MODLOG.

@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.34) How an upgraded horse is drawn: its breed's coat, or a skeleton's or zombie's own, and its breed's build
- * (wider, taller, longer) on top of its size. Carried on the render state. (0.7.302) Each breed is drawn in its own
+ * (wider, taller, longer) on top of its size. Carried on the render state. (0.7.303) Each breed is drawn in its own
  * build of {@link BreedHorseModel} (the nightmare as a courser, the undead as palfreys), in a coat painted for it:
  * {@code textures/entity/breed_horse/<breed>/<coat>.png} ({@code tools/gen_horses.py}), one texture for foals and grown
  * horses alike.
@@ -32,7 +32,7 @@ public final class HorseLooks {
 	static final Identifier FALLBACK_ZOMBIE = texture("textures/entity/breed_horse/zombie/rotten.png");
 	public static final RenderStateDataKey<Identifier> TEXTURE = RenderStateDataKey.create(() -> "jaymoskingdoms:equine_texture");
 	public static final RenderStateDataKey<float[]> BUILD = RenderStateDataKey.create(() -> "jaymoskingdoms:equine_build");
-	/** (0.7.302) Which build of {@link BreedHorseModel} it's drawn in. */
+	/** (0.7.303) Which build of {@link BreedHorseModel} it's drawn in. */
 	static final RenderStateDataKey<String> MODEL = RenderStateDataKey.create(() -> "jaymoskingdoms:equine_model");
 	static final String FALLBACK_BUILD = "courser", UNDEAD_BUILD = "palfrey";
 	private static final Map<Breed, float[]> BUILDS = new HashMap<>();

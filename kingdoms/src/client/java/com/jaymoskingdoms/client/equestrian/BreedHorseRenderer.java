@@ -27,11 +27,11 @@ import net.minecraft.world.item.equipment.Equippable;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.302) Draws horses, skeleton horses and zombie horses as {@link BreedHorseModel}, in their breed's build and coat
+ * (0.7.303) Draws horses, skeleton horses and zombie horses as {@link BreedHorseModel}, in their breed's build and coat
  * ({@link HorseLooks}), with horse armour as an overlay on a slightly larger copy of the model (iron, gold, diamond,
  * copper, netherite, leather and our chain and plate barding, drawn for each build:
  * {@code textures/entity/breed_horse/armor/<namespace>/<asset>/<build>.png}, by the armour's equipment asset; iron for
- * any we haven't drawn), and the tack ({@link TackLayer}). A foal is the same horse, smaller. (Until 0.7.302 this drew
+ * any we haven't drawn), and the tack ({@link TackLayer}). A foal is the same horse, smaller. (Until 0.7.303 this drew
  * Mo' Creatures' horse, 0.5.44.)
  */
 public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHorse, BreedHorseRenderer.State, BreedHorseModel> {

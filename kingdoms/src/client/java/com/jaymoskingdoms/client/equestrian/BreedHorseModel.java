@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.302) Our horses, skeleton horses and zombie horses: one rig, a build per breed (the destrier's crested neck and
+ * (0.7.303) Our horses, skeleton horses and zombie horses: one rig, a build per breed (the destrier's crested neck and
  * deep chest, the courser's fine legs, the draft's feathered hooves and Roman nose, the steppe pony's standing mane, the
  * desert horse's dished face, the long manes falling over the neck, and the bat horse with its wings), read from
  * {@code assets/jaymoskingdoms/horse/builds.json} ({@code tools/gen_horses.py}). Each build is a group under the root

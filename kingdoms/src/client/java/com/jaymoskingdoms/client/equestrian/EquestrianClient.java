@@ -75,7 +75,7 @@ public final class EquestrianClient {
 
 	public static void register() {
 		EntityRenderers.register(Equestrian.WAR_ELEPHANT, WarElephantRenderer::new);
-		// 0.7.302: our own horse, a build per breed, for every horse, skeleton horse and zombie horse (0.5.44: Mo' Creatures')
+		// 0.7.303: our own horse, a build per breed, for every horse, skeleton horse and zombie horse (0.5.44: Mo' Creatures')
 		BreedHorseModel.register();
 		TackLayer.register();
 		EntityRenderers.register(EntityTypes.HORSE, BreedHorseRenderer::new);

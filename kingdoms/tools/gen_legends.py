@@ -1,6 +1,6 @@
 """Textures for the monsters of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters):
 - the Mo' Creatures ones (GPL-3, originals in tools/mocreatures/) copied under our names (the nightmare's and the bat
-  horse's coats are tools/gen_horses.py's since 0.7.302), and the cave ogre: the green
+  horse's coats are tools/gen_horses.py's since 0.7.303), and the cave ogre: the green
   ogre's skin turned slate grey (its loincloth, teeth, horns and rings as they are);
 - our own: the chest mimic, the mud golem (plain and mossy) and the silver sword's icon, drawn here.
 Run from kingdoms/: python3 tools/gen_legends.py"""

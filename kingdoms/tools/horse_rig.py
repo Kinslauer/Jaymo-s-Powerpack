@@ -1,4 +1,4 @@
-"""The shapes of our horses (0.7.302): one rig, a build per breed. Shared by tools/gen_horses.py (which writes them to
+"""The shapes of our horses (0.7.303): one rig, a build per breed. Shared by tools/gen_horses.py (which writes them to
 assets/jaymoskingdoms/horse/builds.json for BreedHorseModel and paints the coats on them) and its preview renderer.
 
 Every build keeps the bones of the horse we had (the Mo' Creatures port, 0.5.44) with the same names and the same

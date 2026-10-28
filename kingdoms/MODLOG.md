@@ -6071,7 +6071,7 @@ other fire-blooded mobs five times that; leather spares the damage), and the chi
 before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
 the old freeze is kept. Compile-checked, not seen in game.
 
-## 0.7.302: our own horse model, a build per breed (pack 0.17.118)
+## 0.7.303: our own horse model, a build per breed (pack 0.17.119)
 
 Andy: "new horse models that combine our old horse mod's features" (Icy's Better Horses came up; its licence keeps
 its models and textures inside that mod, so ideas only). Horses, skeleton horses and zombie horses are now drawn as
