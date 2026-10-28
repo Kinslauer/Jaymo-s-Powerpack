@@ -46,5 +46,6 @@ public final class TinkeringClient {
 		});
 		Tinkering.traitDetails = () -> Minecraft.getInstance().hasShiftDown();
 		com.jaymospowers.client.tinkering.smithing.SmithingClient.init();
+		HandcraftClient.init();
 	}
 }
