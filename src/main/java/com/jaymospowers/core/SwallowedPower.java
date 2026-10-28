@@ -106,7 +106,7 @@ public final class SwallowedPower {
 	}
 
 	/**
-	 * Whatever they swallowed leaves them (death, or a new swallow; (0.17.123) or Jaymo's Kingdoms, by reflection, when a
+	 * Whatever they swallowed leaves them (death, or a new swallow; (0.17.124) or Jaymo's Kingdoms, by reflection, when a
 	 * Rubber-folk brings it back up).
 	 */
 	public static void drop(ServerPlayer player) {

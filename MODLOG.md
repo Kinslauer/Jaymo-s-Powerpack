@@ -3510,7 +3510,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
-- **0.17.123, Rubber-folk stomachs (Kingdoms 0.7.306):** swallows add the foe's bulk instead of shrinking you; sneak +
+- **0.17.124, Rubber-folk stomachs (Kingdoms 0.7.306):** swallows add the foe's bulk instead of shrinking you; sneak +
   heritage key brings the last swallow's body back up under a melting pink mound; downed players are swallowed alive
   and fight their way out by hitting the heart, lungs and stomach, or get digested. `SwallowedPower.drop` is public for
   it. See the Kingdoms MODLOG.

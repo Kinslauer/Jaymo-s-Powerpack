@@ -6128,7 +6128,7 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
-## 0.7.306: Rubber-folk bring their last swallow back up, hold swallowed players alive, and grow with what they eat (pack 0.17.123)
+## 0.7.306: Rubber-folk bring their last swallow back up, hold swallowed players alive, and grow with what they eat (pack 0.17.124)
 Andy: "eating a pillager made me smaller for some reason, it should add their mass to the user, not subtract. and the
 mass should increase per pulse as the absorbed gets smaller." And: "rubbers should be able to eject their last
 swallow, leaving a pink mass that slowly reveals the now corpse. If a downed player is absorbed they stay alive, but
@@ -6151,5 +6151,5 @@ rubber's internal organs."
   2.5 s; if they go down in there they're digested, and you get their power, stats and body as with any swallow. Your
   belly stays full and heaves while they're in there. Sneak + heritage key spits them out. Either one logging off, you
   going down or dying lets them out; a server stop puts them down where they were swallowed.
-- Powers 0.17.123: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
+- Powers 0.17.124: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
 Compile-checked, not seen in game.
