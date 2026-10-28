@@ -311,6 +311,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.equestrian.MythicMounts.register();
 		// 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
+		// 0.7.305: Jaymo's Equestrian, stage 3 (the herd: mares and stallions, orders, defending, the roster; riding extras; breed gifts)
+		com.jaymoskingdoms.equestrian.Herding.register();
+		com.jaymoskingdoms.equestrian.Mounted.register();
+		com.jaymoskingdoms.equestrian.BreedGifts.register();
 		// (0.5.47) stables at work: boarding, the horse market, the farrier
 		Stables.register();
 		Carriages.register();

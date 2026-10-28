@@ -803,6 +803,9 @@ public final class Stables {
 		if (!t.blanket().isEmpty()) {
 			give(player, t.blanket().copy());
 		}
+		if (!t.banner().isEmpty()) {
+			give(player, t.banner().copy());
+		}
 		horse.setAttached(Bonding.TACK, Tack.NONE);
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.SADDLE, EquipmentSlot.BODY}) {
 			ItemStack worn = horse.getItemBySlot(slot);

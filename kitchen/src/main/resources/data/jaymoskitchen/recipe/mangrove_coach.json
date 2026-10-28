@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "wlw",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:mangrove_planks",
+    "l": "minecraft:mangrove_log",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:mangrove_coach"
+  }
+}

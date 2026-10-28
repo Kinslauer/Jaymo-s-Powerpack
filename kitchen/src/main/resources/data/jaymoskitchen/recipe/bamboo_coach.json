@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "wlw",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:bamboo_planks",
+    "l": "minecraft:bamboo_block",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:bamboo_coach"
+  }
+}

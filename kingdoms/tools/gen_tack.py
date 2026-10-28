@@ -1,12 +1,12 @@
 """Draws Jaymo's Equestrian's tack (stage 2, 0.5.44), all original and procedural:
 
-- the 3D tack's pieces (assets/jaymoskingdoms/tack/tack.json: boxes on the bones of MocHorseModel, Mo' Creatures' horse,
+- the 3D tack's pieces (assets/jaymoskingdoms/tack/tack.json: boxes on the bones of BreedHorseModel (the same on every build),
   read by the client's TackLayer) and their textures: textures/entity/tack/tack.png (leather, iron, brass) and
   tack_blanket.png (greyscale, tinted by the blanket's dye). Groups: war_saddle (deep seat, high cantle, long flaps,
   heavy stirrups), racing_saddle (small and flat, short stirrups), bridle (black leather, brass, a browband),
   bridle_reins (shown while ridden), shoes (iron rings at the hooves), blanket. (The plain headstall and reins any
   saddle comes with are Mo' Creatures'.)
-- chain and plate barding for vanilla's horse armour model (our horses wear tools/gen_moc_horses.py's overlays instead) (textures/entity/equipment/horse_body/*.png, the horse's 64x64
+- chain and plate barding for vanilla's horse armour model (our horses wear tools/gen_horses.py's overlays instead) (textures/entity/equipment/horse_body/*.png, the horse's 64x64
   box layout: body, neck, head, muzzle and the tops of the legs).
 - the items' 16x16 sprites.
 
@@ -41,7 +41,7 @@ def shade(c, f):
 
 
 # ---- the 3D tack -------------------------------------------------------------------------------------------------------
-# (group, bone, pos, size, material, grow, rot) -- positions in the bone's own space (MocHorseModel's, 1/16 block): the
+# (group, bone, pos, size, material, grow, rot) -- positions in the bone's own space (BreedHorseModel's, 1/16 block): the
 # saddles sit on its saddle bone (they move back with it when the horse rears), their stirrups hang from its stirrup
 # bones (and swing with them), the bridle is on its head, the bridle's reins on its rein bones, the shoes on its hooves
 L_HOOF, R_HOOF, LF_HOOF, RF_HOOF = "leg1_c", "leg2_c", "leg3_c", "leg4_c"

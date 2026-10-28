@@ -17,6 +17,7 @@ final class NiftyCartModels {
 	static final ModelLayerLocation ANIMAL_CART = new ModelLayerLocation(JaymosKitchen.id("animal_cart"), "main");
 	static final ModelLayerLocation PLOW = new ModelLayerLocation(JaymosKitchen.id("plow"), "main");
 	static final ModelLayerLocation WAGON = new ModelLayerLocation(JaymosKitchen.id("wagon"), "main");
+	static final ModelLayerLocation COACH = new ModelLayerLocation(JaymosKitchen.id("coach"), "main");
 
 	private NiftyCartModels() {
 	}
@@ -24,16 +25,21 @@ final class NiftyCartModels {
 	/** The two wheels on their axle: rimLength is a side of the octagon, axleLength the gap between the wheels. */
 	private static MeshDefinition wheels(float rimLength, float axleLength) {
 		MeshDefinition mesh = new MeshDefinition();
-		float xOffset = axleLength / 2.0F + 2.0F;
-		wheel("leftWheel_0", xOffset, rimLength, -2.0F).build(mesh.getRoot());
-		wheel("rightWheel_0", -xOffset, rimLength, 0.0F).build(mesh.getRoot());
+		addWheels(mesh, 0, rimLength, axleLength, 1.0F);
 		return mesh;
 	}
 
-	private static NiftyMesh wheel(String name, float xOffset, float rimLength, float boxOffset) {
+	/** One pair of wheels (named with {@code index}) on an axle {@code z} px along from the middle. */
+	private static void addWheels(MeshDefinition mesh, int index, float rimLength, float axleLength, float z) {
+		float xOffset = axleLength / 2.0F + 2.0F;
+		wheel("leftWheel_" + index, xOffset, rimLength, -2.0F, z).build(mesh.getRoot());
+		wheel("rightWheel_" + index, -xOffset, rimLength, 0.0F, z).build(mesh.getRoot());
+	}
+
+	private static NiftyMesh wheel(String name, float xOffset, float rimLength, float boxOffset, float z) {
 		float radius = (rimLength / 2.0F) / (Mth.sin(Mth.PI / 8.0F) / Mth.cos(Mth.PI / 8.0F));
 		NiftyMesh wheel = new NiftyMesh(name, 46, 60);
-		wheel.setPivot(xOffset, -radius, 1.0F);
+		wheel.setPivot(xOffset, -radius, z);
 		wheel.addBox(boxOffset, -1.0F, -1.0F, 2, 2, 2);
 		for (int i = 0; i < 8; i++) {
 			NiftyMesh rim = new NiftyMesh(name + "_rim_" + i, 58, 64 - ((int) rimLength + 1));
@@ -143,6 +149,75 @@ final class NiftyCartModels {
 		body.addChild(sides[0]);
 		body.addChild(sides[1]);
 		body.addChild(bench);
+		body.build(mesh.getRoot());
+		return LayerDefinition.create(mesh, 64, 64);
+	}
+
+	/**
+	 * The coach: the wagon's frame stretched to 44 px of bed (1.5 times the wagon's 29), on four wheels, with three
+	 * plank benches facing forward, each for two. The bed's middle is the model's middle, so the shafts reach further
+	 * ahead (CartKind.COACH spaces its puller to suit). The bed, side boards and the one texture patch they share
+	 * are the wagon's, laid end to end from two boxes where the wagon has one, so the same per-wood texture serves.
+	 * Seats match CartEntity.COACH_BENCH_AHEAD.
+	 */
+	static LayerDefinition coach() {
+		final float front = -22.0F, rear = 22.0F, axleAt = 12.0F;
+		MeshDefinition mesh = new MeshDefinition();
+		// four wheels, on axles a body-length's third either side of the middle (the body pivots 1 px behind the middle)
+		addWheels(mesh, 0, 9, 25, 1.0F - axleAt);
+		addWheels(mesh, 1, 9, 25, 1.0F + axleAt);
+		NiftyMesh boardBottom = new NiftyMesh("boardBottom", 0, 0);
+		boardBottom.addBox(front, -11.0F, -2.0F, 29, 22, 1);
+		boardBottom.addBox(front + 29.0F, -11.0F, -2.0F, rear - front - 29.0F, 22, 1);
+		boardBottom.yRot = -Mth.PI / 2.0F;
+		boardBottom.xRot = -Mth.PI / 2.0F;
+		NiftyMesh frontAxle = new NiftyMesh("axis_front", 0, 23);
+		frontAxle.setPivot(0.0F, 0.0F, -axleAt);
+		frontAxle.addBox(-12.5F, -1.0F, -1.0F, 25, 2, 2);
+		NiftyMesh rearAxle = new NiftyMesh("axis_rear", 0, 23);
+		rearAxle.setPivot(0.0F, 0.0F, axleAt);
+		rearAxle.addBox(-12.5F, -1.0F, -1.0F, 25, 2, 2);
+		NiftyMesh shaft = new NiftyMesh("shaft", 0, 28);
+		shaft.setPivot(0.0F, -5.0F, front);
+		shaft.yRot = Mth.PI / 2.0F;
+		shaft.addBox(0.0F, -2.5F, -8.0F, 20, 2, 1);
+		shaft.addBox(0.0F, -2.5F, 7.0F, 20, 2, 1);
+		NiftyMesh boardFront = new NiftyMesh("boardFront", 0, 31);
+		boardFront.addBox(-12.0F, -12.0F, front, 24, 10, 1);
+		// side boards, each in two lengths (28 + 14 px), end to end
+		NiftyMesh[] sides = new NiftyMesh[2];
+		for (int i = 0; i < 2; i++) {
+			boolean left = i == 0;
+			sides[i] = new NiftyMesh("boards_side_" + i, 0, 27);
+			sides[i].addBox(front + 1.0F, -7.0F, 0.0F, 28, 3, 1);
+			sides[i].addBox(front + 29.0F, -7.0F, 0.0F, rear - front - 30.0F, 3, 1);
+			sides[i].setPivot(left ? -11.0F : 11.0F, -5.0F, 0.0F);
+			sides[i].yRot = left ? -Mth.PI / 2.0F : Mth.PI / 2.0F;
+		}
+		NiftyMesh rear0 = new NiftyMesh("boards_rear_0", 42, 0);
+		rear0.addBox(10.0F, -12.0F, rear, 2, 11, 1);
+		NiftyMesh rear1 = new NiftyMesh("boards_rear_1", 42, 0);
+		rear1.addBox(-12.0F, -12.0F, rear, 2, 11, 1);
+		NiftyMesh body = body();
+		body.addChild(frontAxle);
+		body.addChild(rearAxle);
+		body.addChild(shaft);
+		body.addChild(boardBottom);
+		body.addChild(boardFront);
+		body.addChild(rear0);
+		body.addChild(rear1);
+		body.addChild(sides[0]);
+		body.addChild(sides[1]);
+		// three benches (seat, two legs, backrest) like the wagon's, facing forward; a seat starts at -18, -4 and 10
+		for (int i = 0; i < 3; i++) {
+			float s = -18.0F + 14.0F * i;
+			NiftyMesh bench = new NiftyMesh("bench_" + i, 0, 0);
+			bench.addBox(-10.0F, -8.0F, s, 20, 2, 5);
+			bench.addBox(-9.0F, -6.0F, s + 1.0F, 2, 4, 2);
+			bench.addBox(7.0F, -6.0F, s + 1.0F, 2, 4, 2);
+			bench.addBox(-10.0F, -14.0F, s + 4.5F, 20, 6, 1);
+			body.addChild(bench);
+		}
 		body.build(mesh.getRoot());
 		return LayerDefinition.create(mesh, 64, 64);
 	}

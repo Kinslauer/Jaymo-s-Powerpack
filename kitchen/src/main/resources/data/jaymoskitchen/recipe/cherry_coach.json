@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "wlw",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:cherry_planks",
+    "l": "minecraft:cherry_log",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:cherry_coach"
+  }
+}

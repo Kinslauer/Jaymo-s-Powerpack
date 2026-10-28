@@ -1,5 +1,5 @@
-The horses, skeleton horses and zombie horses, the war elephant and the woolly mammoth in Jaymo's Kingdoms wear the
-horse and the elephant of DrZhark's Mo' Creatures
+The war elephant and the woolly mammoth in Jaymo's Kingdoms wear the elephant of DrZhark's Mo' Creatures, and our
+horses, skeleton horses and zombie horses still move as its horse does
 (https://github.com/DrZhark/mocreaturesdev, https://www.curseforge.com/minecraft/mc-mods/mo-creatures), by DrZhark
 (code, animation) and BlockDaddy and DrZhark (models, textures), licensed under the GNU General Public License v3
 (LICENSE, beside this file).
@@ -11,18 +11,12 @@ Taken from it, under that licence:
   indian, african, royal and woolly as they are, russet and frost tinted from the mammoth; every hide also carries the
   mammoth's war platform and a banner of ours (kingdoms/tools/gen_elephant_hides.py)
 
-- the horse model and its animation (MoCModelNewHorse, 1.10.2 branch), without its wings, horn, mule ears and bags,
-  ported to 26.3 as MocHorseModel
-- the horse textures horsewhite, horseskeleton and horseundead, and the armoured horsewhitemetal, horsewhitegold and
-  horsewhitediamond (the originals are in kingdoms/tools/mocreatures/), which became the textures in
-  assets/jaymoskingdoms/textures/entity/moc_horse/: our breed coats painted onto horsewhite and shaded with it; the
-  skeleton and undead horse as they are (bone, rotten) and recoloured (sooty, mossy, pale, mottled); the armour lifted
-  off the armoured horses as overlays (iron, gold, diamond) and recoloured from the metal one (copper, netherite,
-  leather, chain and plate barding) (kingdoms/tools/gen_moc_horses.py)
-
-- (0.5.56) the horse's wings (MoCModelNewHorse's pegasus wings and their animation), added to MocHorseModel for the
-  bat horse; the horse textures horsebat, horsenightmare and horsenightmare1, as they are, as the bat horse's and the
-  nightmare's coats in assets/jaymoskingdoms/textures/entity/moc_horse/bat_horse/ and nightmare/
+- the horse's animation (MoCModelNewHorse, 1.10.2 branch: the jointed legs, the head, neck and mane moving together,
+  the mouth, the tail, the saddle's stirrups and reins, and the pegasus wings, for the bat horse), which moved its
+  model as MocHorseModel from 0.5.44 and moves our own horse model, BreedHorseModel, since 0.7.305, on bones of the
+  same names and pivots. (From 0.5.44 to 0.7.304 we also drew its horse model and coats painted over its textures
+  horsewhite, horseskeleton, horseundead, horsebat, horsenightmare and the armoured horses; since 0.7.305 the model's
+  boxes and every coat and armour are our own, kingdoms/tools/gen_horses.py, and those textures are no longer used.)
 
 - (0.5.56) the monsters of legend: the werewolf (MoCModelWere, and MoCEntityWerewolf's change by night, its hide that
   only gold or silver cuts, its four faces and four coats), the ogre (MoCModelOgre: one head or two and a club), the
@@ -33,7 +27,7 @@ Taken from it, under that licence:
   assets/jaymoskingdoms/textures/entity/legend/, and ogre_cave there: ogregreen's skin turned slate grey
   (kingdoms/tools/gen_legends.py)
 
-WarElephantModel, MocHorseModel and MocHorseRenderer are likewise licensed under the GNU GPL v3. Their source is in
+WarElephantModel and BreedHorseModel are likewise licensed under the GNU GPL v3. Their source is in
 the Jaymo's Powerpack repository (kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/). So are the monsters
 of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters/ and kingdoms/src/client/java/com/jaymoskingdoms/client/
 monsters/).

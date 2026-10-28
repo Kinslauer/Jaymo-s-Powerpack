@@ -30,7 +30,8 @@ import net.minecraft.world.level.block.Blocks;
 /**
  * (0.5.44) Tack and care, the items of {@link Bonding}: the war and racing saddles (the vanilla saddle is the riding
  * saddle), the bridle, the blanket (dyeable), chain and plate barding, horseshoes, the hoof pick, and oats (from tall
- * grass). The brush and the water bucket are vanilla's. Tuning numbers live at the top.
+ * grass). The brush and the water bucket are vanilla's. (0.7.305) And the Horsekeeper's Handbook. Tuning numbers live
+ * at the top.
  */
 public final class Tackroom {
 	/** The barding: durability, armour, toughness, knockback resistance (iron horse armour is 5, diamond 11). */
@@ -42,7 +43,10 @@ public final class Tackroom {
 	/** A blanket's colour before it's dyed (a deep red). */
 	public static final int BLANKET_COLOR = 0x8E2A2A;
 
-	public static Item WAR_SADDLE, RACING_SADDLE, BRIDLE, HORSE_BLANKET, CHAIN_BARDING, PLATE_BARDING, HORSESHOES, HOOF_PICK, OATS;
+	public static Item WAR_SADDLE, RACING_SADDLE, BRIDLE, HORSE_BLANKET, CHAIN_BARDING, PLATE_BARDING, HORSESHOES, HOOF_PICK, OATS, HANDBOOK;
+	/** (0.7.305) Opens the Horsekeeper's Handbook (set by the client). */
+	public static Runnable openHandbook = () -> {
+	};
 
 	private Tackroom() {
 	}
@@ -64,6 +68,8 @@ public final class Tackroom {
 		HORSESHOES = item("horseshoes", Item::new, new Item.Properties().stacksTo(16), all);
 		HOOF_PICK = item("hoof_pick", Item::new, new Item.Properties().durability(HOOF_PICK_USES), all);
 		OATS = item("oats", Item::new, new Item.Properties(), all);
+		// (0.7.305) the Horsekeeper's Handbook: everything about horses, read in hand
+		HANDBOOK = item("horse_handbook", Handbook::new, new Item.Properties().stacksTo(1), all);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			Item after = Items.SADDLE;
 			for (Item item : all) {
@@ -96,6 +102,22 @@ public final class Tackroom {
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, make.apply(properties.setId(key)));
 		all.add(item);
 		return item;
+	}
+
+	/** The Horsekeeper's Handbook: opens its pages in hand. */
+	static final class Handbook extends Item {
+		Handbook(Item.Properties properties) {
+			super(properties);
+		}
+
+		@Override
+		public net.minecraft.world.InteractionResult use(net.minecraft.world.level.Level level, net.minecraft.world.entity.player.Player player,
+			net.minecraft.world.InteractionHand hand) {
+			if (level.isClientSide()) {
+				openHandbook.run();
+			}
+			return net.minecraft.world.InteractionResult.SUCCESS;
+		}
 	}
 
 	/** One of the saddles a rider can steer with (vanilla's, the war saddle, the racing saddle). */

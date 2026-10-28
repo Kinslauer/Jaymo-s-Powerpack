@@ -8,6 +8,11 @@ import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.equestrian.Equine;
 import com.jaymoskingdoms.equestrian.Gait;
+import com.jaymoskingdoms.equestrian.Herd;
+import com.jaymoskingdoms.equestrian.Herding;
+import com.jaymoskingdoms.equestrian.Mounted;
+import com.jaymoskingdoms.equestrian.Tackroom;
+import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.equestrian.Stride;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -35,6 +40,8 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -44,6 +51,9 @@ import org.jspecify.annotations.Nullable;
  * (0.5.44) Bond and tack: the whistle (N) and trick (J; hold back for the kick) keys, hunger and thirst bars over the
  * stamina bar (and under the crosshair when you look at your horse), the tack screen and its button on the horse's own
  * screen, and the stats only for a horse that trusts you enough.
+ * (0.7.305, ideas from Icy's Better Horses) Hold the whistle key for the command wheel ({@link HorseWheelScreen}); double-tap
+ * forward in the saddle to ride on without holding it (back stops); the HUD shows riding on and the charge; a Rider
+ * holding a saddle sees a wild horse's breed, sex and stats under the crosshair; the handbook.
  */
 public final class EquestrianClient {
 	private static final int BAR_WIDTH = 64;
@@ -62,6 +72,16 @@ public final class EquestrianClient {
 	private static boolean sentSprint;
 
 	private static final int TAG_RANGE = 8;
+	/** (0.7.305) Hold the whistle this many ticks for the wheel (shorter: a whistle); two taps of forward this close together ride on. */
+	private static final int WHEEL_HOLD = 6, DOUBLE_TAP = 7;
+	private static final int CHARGE_COLOR = 0xFF9A4A, CRUISE_COLOR = 0xBFF4EA;
+	private static final int MARE_COLOR = 0xFF9AC8, STALLION_COLOR = 0x8AC8FF;
+	/** How long the whistle's been held (-1: it opened the wheel; wait for it to come up). */
+	private static int whistleHeld;
+	/** Riding on without holding forward; the tick forward was last pressed; whether it was down last tick. */
+	private static boolean cruising;
+	private static int lastForward = -100;
+	private static boolean forwardWas;
 	private static KeyMapping whistleKey;
 	private static KeyMapping trickKey;
 
@@ -75,11 +95,12 @@ public final class EquestrianClient {
 
 	public static void register() {
 		EntityRenderers.register(Equestrian.WAR_ELEPHANT, WarElephantRenderer::new);
-		// 0.5.44: Mo' Creatures' horse for every horse, skeleton horse and zombie horse
+		// 0.7.305: our own horse, a build per breed, for every horse, skeleton horse and zombie horse (0.5.44: Mo' Creatures')
+		BreedHorseModel.register();
 		TackLayer.register();
-		EntityRenderers.register(EntityTypes.HORSE, MocHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.SKELETON_HORSE, MocHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, MocHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.HORSE, BreedHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.SKELETON_HORSE, BreedHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, BreedHorseRenderer::new);
 		Equestrian.localRider = new Equestrian.LocalRider() {
 			@Override
 			public boolean controls(Player controller) {
@@ -97,6 +118,10 @@ public final class EquestrianClient {
 			}
 		};
 		ClientTickEvents.END_CLIENT_TICK.register(EquestrianClient::tick);
+		// (0.7.305) riding on, the roster's answer, the handbook
+		Mounted.cruise = player -> cruising && player == Minecraft.getInstance().player;
+		ClientPlayNetworking.registerGlobalReceiver(Herding.Roster.TYPE, (payload, context) -> RosterScreen.receive(payload));
+		Tackroom.openHandbook = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		MythicMountsClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(Equestrian.Shied.TYPE, (payload, context) -> {
 			if (payload.horse() == riding) {
@@ -135,10 +160,23 @@ public final class EquestrianClient {
 	}
 
 	private static void tick(Minecraft minecraft) {
+		// (0.7.305) a tap whistles; held, the command wheel opens
+		boolean whistling = whistleKey.isDown();
 		while (whistleKey.consumeClick()) {
-			if (minecraft.player != null) {
+			if (whistleHeld == 0) {
+				whistleHeld = 1;
+			}
+		}
+		if (whistling && whistleHeld > 0) {
+			if (++whistleHeld > WHEEL_HOLD && minecraft.player != null && minecraft.gui.screen() == null) {
+				whistleHeld = -1;
+				minecraft.gui.setScreen(new HorseWheelScreen(whistleKey, commanded(minecraft.player)));
+			}
+		} else if (!whistling) {
+			if (whistleHeld > 0 && minecraft.player != null) {
 				ClientPlayNetworking.send(new Bonding.Whistle());
 			}
+			whistleHeld = 0;
 		}
 		while (trickKey.consumeClick()) {
 			if (ridden(minecraft.player) != null) {
@@ -149,8 +187,10 @@ public final class EquestrianClient {
 		if (horse == null) {
 			riding = -1;
 			sprint = false;
+			cruising = false;
 			return;
 		}
+		cruise(minecraft);
 		if (horse.getId() != riding) {
 			riding = horse.getId();
 			gait = Equestrian.stride(horse).gaitOf();
@@ -166,6 +206,47 @@ public final class EquestrianClient {
 			sentSprint = sprint;
 			ClientPlayNetworking.send(new Equestrian.SetGait(gait.ordinal(), sprint));
 		}
+	}
+
+	/** (0.7.305) Double-tap forward to ride on; back (or rearing to a stop) ends it. */
+	private static void cruise(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		boolean forward = minecraft.options.keyUp.isDown() && minecraft.gui.screen() == null;
+		if (forward && !forwardWas) {
+			if (player.tickCount - lastForward <= DOUBLE_TAP) {
+				toggleCruise();
+				lastForward = -100;
+			} else {
+				lastForward = player.tickCount;
+			}
+		}
+		forwardWas = forward;
+		if (cruising && minecraft.options.keyDown.isDown()) {
+			toggleCruise();
+		}
+	}
+
+	/** Riding on, or not (from the double tap, the back key and the wheel). */
+	static void toggleCruise() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		cruising = !cruising && ridden(player) != null;
+		if (player != null && ridden(player) != null) {
+			player.sendOverlayMessage(Component.translatable(cruising ? "message.jaymoskingdoms.ride_on" : "message.jaymoskingdoms.ride_off"));
+		}
+	}
+
+	static boolean cruising() {
+		return cruising;
+	}
+
+	/** The horse the command wheel orders: the tamed one under the crosshair, close enough, else the one you ride. */
+	static @Nullable AbstractHorse commanded(Player player) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.crosshairPickEntity instanceof AbstractHorse horse && Equestrian.covered(horse) && horse.isTamed()
+			&& horse.distanceTo(player) <= Herding.ORDER_RANGE) {
+			return horse;
+		}
+		return player.getVehicle() instanceof AbstractHorse horse && Equestrian.covered(horse) && horse.isTamed() ? horse : null;
 	}
 
 	/** (From {@code MouseHandlerMixin}) the wheel turned: in the saddle it shifts gait (up: faster). True if it did. */
@@ -221,7 +302,17 @@ public final class EquestrianClient {
 		} else {
 			label.append(Component.translatable(shown.key()).withColor(GAIT_COLORS[shown.ordinal()]));
 		}
+		if (cruising) {
+			label.append(Component.literal("  ")).append(Component.translatable("hud.jaymoskingdoms.riding_on").withColor(CRUISE_COLOR));
+		}
 		graphics.text(font, label, x0 + BAR_WIDTH - font.width(label), y - 11, 0xE0FFFFFF);
+		// (0.7.305) the charge, a thin bar under the stamina; it glows once it's enough to run things down
+		float charge = Mounted.charge(horse);
+		if (charge > 0.0F) {
+			int cc = charge >= Mounted.CHARGE_READY ? pulse(CHARGE_COLOR, 0xFFFFFF, time * 0.6F) : 0x806040;
+			graphics.fill(x0 - 1, y + 4, x0 + BAR_WIDTH + 1, y + 6, 0x90000000);
+			graphics.fill(x0, y + 4, x0 + Mth.ceil(BAR_WIDTH * charge), y + 5, 0xFF000000 | cc);
+		}
 		// the gait ladder: five pips, lit to the current one
 		for (Gait g : Gait.values()) {
 			int px = x0 + g.ordinal() * 4;
@@ -254,8 +345,11 @@ public final class EquestrianClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (player == null || player.isPassenger() || minecraft.gui.screen() != null
-			|| !(minecraft.crosshairPickEntity instanceof AbstractHorse horse) || !Equestrian.covered(horse) || !horse.isTamed()
-			|| horse.distanceTo(player) > TAG_RANGE) {
+			|| !(minecraft.crosshairPickEntity instanceof AbstractHorse horse) || !Equestrian.covered(horse) || horse.distanceTo(player) > TAG_RANGE) {
+			return;
+		}
+		if (!horse.isTamed()) {
+			wild(graphics, player, horse);
 			return;
 		}
 		Bond b = horse.getAttached(Bonding.BOND);
@@ -269,12 +363,49 @@ public final class EquestrianClient {
 		float trust = b.trustOf(player.getUUID());
 		Component name = horse.hasCustomName() ? horse.getCustomName() : Component.translatable(
 			horse.getAttached(Equestrian.EQUINE) == null ? "entity.minecraft.horse" : horse.getAttached(Equestrian.EQUINE).breed().key());
-		MutableComponent label = name.copy().withColor(0xE0E0E0).append(Component.literal("  "))
+		MutableComponent label = name.copy().withColor(0xE0E0E0).append(sex(horse)).append(Component.literal("  "))
 			.append(Component.translatable("tack.jaymoskingdoms.trust", Math.round(trust)).withColor(TackScreen.trustColor(trust)));
 		graphics.text(font, label, cx - font.width(label) / 2, y, 0xFFFFFFFF);
 		if (!Equestrian.undead(horse)) {
 			needs(graphics, b, cx - BAR_WIDTH / 2, y + 11, BAR_WIDTH, time);
 		}
+	}
+
+	/** (0.7.305) A Rider with a saddle in hand reads a wild horse at a glance: its breed and sex over its five stats. */
+	private static void wild(GuiGraphicsExtractor graphics, Player player, AbstractHorse horse) {
+		Equine e = horse.getAttached(Equestrian.EQUINE);
+		if (e == null || !Classes.is(player, Classes.PlayerClass.RIDER) || !(saddle(player.getMainHandItem()) || saddle(player.getOffhandItem()))) {
+			return;
+		}
+		Font font = Minecraft.getInstance().font;
+		int cx = graphics.guiWidth() / 2;
+		int y = graphics.guiHeight() / 2 + 10;
+		MutableComponent label = Component.translatable(e.breed().key()).withColor(0xE0E0E0).append(sex(horse));
+		graphics.text(font, label, cx - font.width(label) / 2, y, 0xFFFFFFFF);
+		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
+		int x = cx - 45;
+		graphics.fill(x - 2, y + 10, x + 92, y + 11 + STATS.length * 9 + 1, 0x90000000);
+		for (int i = 0; i < STATS.length; i++) {
+			int row = y + 12 + i * 9;
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
+			int bx = x + 46;
+			int bw = 40;
+			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);
+			graphics.fill(bx, row + 3, bx + Mth.ceil(bw * values[i]), row + 6, 0xFF000000 | STAT_COLORS[i]);
+		}
+	}
+
+	private static boolean saddle(ItemStack stack) {
+		return stack.is(Items.SADDLE) || stack.is(Tackroom.WAR_SADDLE) || stack.is(Tackroom.RACING_SADDLE);
+	}
+
+	/** Its sex as a coloured symbol after its name (nothing until it's known). */
+	static Component sex(AbstractHorse horse) {
+		Herd h = horse.getAttached(Herding.HERD);
+		if (h == null || h.sex() == Herd.UNKNOWN) {
+			return Component.empty();
+		}
+		return Component.literal(" " + Herding.symbol(h.sex())).withColor(h.mare() ? MARE_COLOR : STALLION_COLOR);
 	}
 
 	// ---- the inventory screen -----------------------------------------------------------------------------------------
@@ -297,7 +428,7 @@ public final class EquestrianClient {
 			return;
 		}
 		Font font = Minecraft.getInstance().font;
-		graphics.text(font, Component.translatable(e.breed().key()), x + 2, y + 1, com.jaymoskingdoms.client.Ui.GOLD, false);
+		graphics.text(font, Component.translatable(e.breed().key()).copy().append(sex(horse)), x + 2, y + 1, com.jaymoskingdoms.client.Ui.GOLD, false);
 		// (0.5.44) a horse shows you what it's made of only once it trusts you
 		Player viewer = Minecraft.getInstance().player;
 		Bond b = horse.getAttached(Bonding.BOND);

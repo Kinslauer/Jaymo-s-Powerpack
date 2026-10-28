@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "wlw",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:pale_oak_planks",
+    "l": "minecraft:pale_oak_log",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:pale_oak_coach"
+  }
+}

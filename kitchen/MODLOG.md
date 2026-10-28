@@ -1202,3 +1202,35 @@ three tracks. Not taken: the other knives and Backstabbing (Andy wanted only the
 - The pack's `libs/jaymos-kitchen-0.5.33.1.jar` is the 0.5.33 jar with only those five files and the version changed
   (cloud builds can't reach Fabric's Maven). 0.5.34's UI text scrolling is in the source but not in that jar yet:
   the next Kitchen build on the home PC (0.5.34) carries both.
+
+## 0.5.35: the coach, and carts that take mobs aboard
+- **The coach** (`CartKind.COACH`, entity `coach`, items `<wood>_coach` in all twelve woods): a long bed with three benches
+  facing forward, six passengers, four wheels, in the wagon's NiftyCarts style at the wagon's 1.2 scale.
+  - **Model** (`NiftyCartModels.coach`): the wagon's frame stretched from 29 to 44 px of bed (1.5x), laid end to end from two
+    boxes (and two lengths of side board) where the wagon has one, so the same per-wood runtime texture (`CartTextures`,
+    the supply cart's layout) serves. Four wheels (`leftWheel_0/1`, `rightWheel_0/1`; `NiftyCartModel` turns both pairs);
+    the shafts pivot at the bed's front, so `CartKind.COACH` spaces its puller 2.5 from the middle. It never tilts:
+    new `CartKind.tilts` (true for the two-wheelers) controls the resting tip on the shafts and pitching toward the puller.
+  - **Seats:** right-click climbs in; the passenger's index in `getPassengers()` is the seat, two to a bench from the front
+    (`COACH_BENCH_AHEAD`, `COACH_SEAT_SIDE` in model px; the benches in the model match). So someone getting out moves the
+    ones behind them up a seat. Players can look about up to 105 degrees off forward; mobs face forward.
+  - **No inventory** (0 slots, no menu). **Never pulled by hand**: `tooHeavyByHand()` is true for it, with its own message
+    (`message.jaymoskitchen.cart.too_heavy_coach`).
+  - **Draft horses only:** `mayPull(horse)` in `tryHitch`: if `FabricLoader.isModLoaded("jaymoskingdoms")`, the horse must have
+    the entity tag `jaymoskingdoms.draft` (`Entity.entityTags()`; Kingdoms sets it with `addTag`), else the player gets the
+    overlay `message.jaymoskitchen.cart.draft_only` ("Only a draft horse can pull a coach."). Without Kingdoms, any tamed
+    adult horse may. Kitchen has no dependency on Kingdoms: only the mod id and the tag string.
+  - **Recipe:** four planks, a log and four wheels (`ppp / wlw / wpw`). Item sprites, item definitions, models and recipes
+    come from `kitchen/tools/gen_coach.py` (run from the repository root; it takes each wood's colours from its animal cart
+    sprite). The `vanilla_style` resource pack (under the root `src/`) has no coach sprites yet.
+- **Carts that take mobs aboard, like boats** (`CartEntity.loadMobs`, run for the wagon and the coach): a living `Mob` that
+  bumps into the wagon's bench or one of the coach's free seats climbs on. Not players, `Enemy` monsters, water creatures,
+  horses, anything with a target, on a lead, already riding or carrying a rider, nor anything over the animal cart's size
+  limit (narrower than the cart, width times height under 1.5). Villagers, MCA villagers, animals and tamed pets (sat down
+  while aboard) qualify. They stay until a player sneak-right-clicks the cart, which tips it (the existing `tip`/`spillLoad`)
+  and lets every non-player passenger out beside it; pets get up again, and for 100 ticks (`RELOAD_DELAY`) the cart takes
+  none in, so they can walk off. On the wagon, sneak-clicking without mobs aboard still opens the chest; a plain click on a
+  wagon whose bench has a mob on it opens the chest too.
+  - The animal cart's behaviour is unchanged (`loadAnimals`); the supply cart and plow take no mobs.
+- 26.3 notes: `Entity.entityTags()` is the read side of `addTag`; `Leashable.isLeashed()` is a default method on `Mob`.
+- Not run in game (cloud session, no Gradle): the compile check shows no errors in the changed files.

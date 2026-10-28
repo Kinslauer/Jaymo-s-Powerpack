@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 /**
  * Draws the carts in their wood, their wheels turning as they roll: the wagon with a vanilla chest whose lid opens,
+ * the coach with its three benches,
  * the plow with its hoes on its arms and the supply cart with its cargo piled in the bed (both after
  * NiftyCarts' renderers: Copyright (c) 2019 MennoMax, (c) 2023 jmb19905; MIT licensed, see LICENSE_niftycarts).
  */
@@ -70,6 +71,7 @@ public class CartRenderer extends EntityRenderer<CartEntity, CartRenderer.State>
 	public CartRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		nifty.put(CartKind.WAGON, new NiftyCartModel(context.bakeLayer(NiftyCartModels.WAGON)));
+		nifty.put(CartKind.COACH, new NiftyCartModel(context.bakeLayer(NiftyCartModels.COACH)));
 		nifty.put(CartKind.SUPPLY_CART, new NiftyCartModel(context.bakeLayer(NiftyCartModels.SUPPLY_CART)));
 		nifty.put(CartKind.ANIMAL_CART, new NiftyCartModel(context.bakeLayer(NiftyCartModels.ANIMAL_CART)));
 		nifty.put(CartKind.PLOW, new NiftyCartModel(context.bakeLayer(NiftyCartModels.PLOW)));
@@ -122,12 +124,13 @@ public class CartRenderer extends EntityRenderer<CartEntity, CartRenderer.State>
 		}
 		if (state.tip > 0.0F) {
 			// rolled over onto its right side (local +x), pivoting on that wheel
-			poseStack.translate(0.7F, 0.0F, 0.0F);
+			float side = state.kind == CartKind.COACH ? 1.0F : 0.7F;
+			poseStack.translate(side, 0.0F, 0.0F);
 			poseStack.rotateDegrees(Axis.ZP, -state.tip);
-			poseStack.translate(-0.7F, 0.0F, 0.0F);
+			poseStack.translate(-side, 0.0F, 0.0F);
 		}
-		if (state.kind == CartKind.WAGON) {
-			// the wagon is the supply cart's frame a size up
+		if (state.kind == CartKind.WAGON || state.kind == CartKind.COACH) {
+			// the wagon is the supply cart's frame a size up, and the coach is drawn at the same size
 			poseStack.scale(NiftyCarts.WAGON_SCALE, NiftyCarts.WAGON_SCALE, NiftyCarts.WAGON_SCALE);
 		}
 		poseStack.scale(-1.0F, -1.0F, 1.0F);

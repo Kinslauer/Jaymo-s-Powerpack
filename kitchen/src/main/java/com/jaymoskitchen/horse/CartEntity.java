@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PositionPath;
@@ -44,6 +46,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -62,8 +65,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A horse-drawn vehicle (see {@link CartKind}): the wagon, supply cart, animal cart and plow, after NiftyCarts, in
- * every wood. Ride a (tamed) horse up to one and right-click it to hitch up, or bring a horse on a lead and
+ * A horse-drawn vehicle (see {@link CartKind}): the wagon, coach, supply cart, animal cart and plow, after NiftyCarts,
+ * in every wood. Ride a (tamed) horse up to one and right-click it to hitch up, or bring a horse on a lead and
  * right-click it; right-click again from the saddle to unhitch. Hitched, it trails behind the horse on a fixed pole,
  * climbing blocks as it goes, and keeps the horse from wandering off while nobody's riding it. NiftyCarts' carts pitch
  * toward their puller, and rest tipped forward on their shafts when unhitched.
@@ -75,6 +78,11 @@ import org.jspecify.annotations.Nullable;
  * the 3x3 patch behind it as it goes, wearing down the hoes; one wooden hoe leaves it patchy, three netherite ones
  * nearly solid. The animal cart: animals climb in when they bump into it (two at most); sneak + right-click lets them
  * out.
+ *
+ * <p>The coach: six seats on three benches, filled in the order people climb in (right-click). It can't be pulled by
+ * hand, and when Jaymo's Kingdoms is installed only a draft horse (one tagged {@value #DRAFT_TAG}) will take the
+ * traces. Like a boat, the wagon's bench and the coach's free seats also take in any peaceful living mob that bumps
+ * into them (see {@link #loadMobs}); sneak + right-click lets them all out.
  */
 public class CartEntity extends Entity implements Container, MenuProvider {
 	/** Entity id of the horse (or player) pulling it, or -1. */
@@ -120,12 +128,32 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	private static final double SNAP_DISTANCE = 6.0;
 	/** The plow tills a 3x3 patch centred this far behind it (under the hoes on its arms). */
 	private static final double TILL_BEHIND = 1.5;
+	/** Jaymo's Kingdoms (not a dependency: only looked for by id) tags every draft-breed horse with this. */
+	public static final String DRAFT_TAG = "jaymoskingdoms.draft";
+	private static final String KINGDOMS_MOD = "jaymoskingdoms";
+	/** The coach's seats: three benches of two. */
+	public static final int COACH_SEATS = 6;
+	/**
+	 * Mobs that bump into the wagon's bench or the coach's seats must fit on a seat: narrower than the cart and no more
+	 * than this much footprint (width times height; the animal cart's limit).
+	 */
+	private static final float MAX_SEAT_FOOTPRINT = 1.5F;
+	/** After letting the mobs out, a wagon or coach takes in no more for this long (ticks), so they can wander off. */
+	private static final int RELOAD_DELAY = 100;
+	/**
+	 * Coach seats, in model pixels: how far ahead of the entity's middle each bench's seat is (first bench at the front),
+	 * and how far each of its two sitters is from the middle line. The model's benches (NiftyCartModels.coach) match.
+	 */
+	private static final double[] COACH_BENCH_AHEAD = {14.5, 0.5, -13.5};
+	private static final double COACH_SEAT_SIDE = 5.0;
 
 	private final NonNullList<ItemStack> items;
 	/** Server: the horse it's hitched to, kept across saves and found again once it's loaded. */
 	private @Nullable UUID hitchUuid;
 	private int hitchSearch;
 	private int hits;
+	/** Server: the game time before which a wagon or coach takes in no more mobs (they were just let out). */
+	private long noLoadUntil;
 	/** Server: the inventory changed, so what's shown on board needs working out again. */
 	private boolean shownDirty = true;
 	/** Client: wheel spin, and the plow's arms, for drawing. */
@@ -138,13 +166,16 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	public CartEntity(EntityType<? extends CartEntity> type, Level level) {
 		super(type, level);
 		this.items = NonNullList.withSize(kind().slots, ItemStack.EMPTY);
-		if (kind().nifty) {
+		if (kind().tilts) {
 			setXRot(RESTING_PITCH);
 		}
 	}
 
 	public CartKind kind() {
 		EntityType<?> type = getType();
+		if (type == Saddlebags.COACH) {
+			return CartKind.COACH;
+		}
 		if (type == Saddlebags.SUPPLY_CART) {
 			return CartKind.SUPPLY_CART;
 		}
@@ -181,9 +212,18 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		return puller instanceof Player ? kind().handDrag : 0.0;
 	}
 
-	/** Too heavy to pull by hand: a loaded supply cart. */
+	/** Too heavy to pull by hand: a loaded supply cart, or a coach (always). */
 	private boolean tooHeavyByHand() {
-		return kind() == CartKind.SUPPLY_CART && !isEmpty();
+		return kind() == CartKind.COACH || kind() == CartKind.SUPPLY_CART && !isEmpty();
+	}
+
+	/**
+	 * Whether this horse may pull this cart. Only the coach is picky: with Jaymo's Kingdoms installed it takes a draft
+	 * horse (tagged {@value #DRAFT_TAG}) and nothing else; without Kingdoms any horse will do.
+	 */
+	private boolean mayPull(AbstractHorse horse) {
+		return kind() != CartKind.COACH || !FabricLoader.getInstance().isModLoaded(KINGDOMS_MOD)
+			|| horse.entityTags().contains(DRAFT_TAG);
 	}
 
 	@Override
@@ -272,13 +312,15 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			Vec3 motion = getDeltaMovement();
 			setDeltaMovement(motion.x * 0.5, onGround() ? 0.0 : motion.y - 0.08, motion.z * 0.5);
 			move(MoverType.SELF, getDeltaMovement());
-			if (kind().nifty) {
+			if (kind().tilts) {
 				// resting on its shafts
 				setXRot(RESTING_PITCH);
 			}
 		}
 		if (kind() == CartKind.ANIMAL_CART && !level().isClientSide()) {
 			loadAnimals();
+		} else if ((kind() == CartKind.WAGON || kind() == CartKind.COACH) && !level().isClientSide()) {
+			loadMobs();
 		}
 		if (level().isClientSide()) {
 			// roll the wheels by how far it went forward
@@ -356,6 +398,53 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 	}
 
 	/**
+	 * The wagon's bench and the coach's free seats: a living mob that bumps into the cart climbs aboard, as into a boat.
+	 * Villagers, animals, tamed pets and other folk are welcome; not players, hostile monsters ({@link Enemy}), water
+	 * creatures or horses, nor anything angry at someone, on a lead or already carrying a rider, nor anything bigger than
+	 * a seat ({@link #MAX_SEAT_FOOTPRINT}). Once aboard they stay until a player sneak-right-clicks the cart (see
+	 * {@link #tip}). Nothing is taken in while the cart is tipping them out.
+	 */
+	private void loadMobs() {
+		if (this.entityData.get(TIP) > 0 || level().getGameTime() < noLoadUntil || getPassengers().size() >= seats()) {
+			return;
+		}
+		for (Entity entity : level().getEntities(this, getBoundingBox().inflate(0.2, -0.01, 0.2), EntitySelector.pushableBy(this))) {
+			if (!(entity instanceof Mob mob) || !mob.isAlive() || mob instanceof Enemy || mob instanceof AbstractHorse
+				|| mob.isPassenger() || mob.isVehicle() || mob.isLeashed() || mob.getTarget() != null) {
+				continue;
+			}
+			MobCategory category = mob.getType().getCategory();
+			boolean water = category == MobCategory.WATER_CREATURE || category == MobCategory.WATER_AMBIENT
+				|| category == MobCategory.UNDERGROUND_WATER_CREATURE || category == MobCategory.AXOLOTLS;
+			if (!water && canAddPassenger(mob) && mob.getBbWidth() < getBbWidth()
+				&& mob.getBbWidth() * mob.getBbHeight() < MAX_SEAT_FOOTPRINT) {
+				if (mob instanceof TamableAnimal tamable) {
+					tamable.setInSittingPose(true);
+				}
+				mob.startRiding(this);
+				if (getPassengers().size() >= seats()) {
+					return;
+				}
+			}
+		}
+	}
+
+	/** How many riders it seats: the coach six, the wagon's bench one, the animal cart two. */
+	private int seats() {
+		return switch (kind()) {
+			case COACH -> COACH_SEATS;
+			case WAGON -> 1;
+			case ANIMAL_CART -> 2;
+			default -> 0;
+		};
+	}
+
+	/** Whether any mob (not a player, not a body) is aboard. */
+	private boolean carriesMobs() {
+		return getPassengers().stream().anyMatch(p -> !(p instanceof Player) && !(p instanceof CorpseEntity));
+	}
+
+	/**
 	 * Server: finds its horse after a reload; lets go if the puller's gone, too far, or (a player) can't pull it
 	 * any more; keeps the puller slowed, and a riderless horse standing still.
 	 */
@@ -376,7 +465,8 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			|| distanceToSqr(puller.position()) > Math.pow(poleLength(puller) + SNAP_DISTANCE - 2.0, 2);
 		if (puller instanceof Player player) {
 			if (!gone && tooHeavyByHand()) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cart.too_heavy"));
+				player.sendOverlayMessage(Component.translatable(kind() == CartKind.COACH
+					? "message.jaymoskitchen.cart.too_heavy_coach" : "message.jaymoskitchen.cart.too_heavy"));
 				gone = true;
 			}
 			gone |= player.isSpectator() || player.isPassenger() || hasPassenger(player);
@@ -490,7 +580,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		move(MoverType.SELF, new Vec3(targetX - getX(), fall, targetZ - getZ()));
 		setDeltaMovement(0.0, onGround() ? 0.0 : Math.max(fall, -2.0), 0.0);
 		setYRot((float) (Mth.atan2(-nx, nz) * Mth.RAD_TO_DEG));
-		if (kind().nifty) {
+		if (kind().tilts) {
 			setXRot((float) (-Mth.atan2(hitch.y - getY(), poleLength(puller)) * Mth.RAD_TO_DEG));
 		}
 	}
@@ -543,7 +633,8 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		// the front end: take it by the shafts
 		if (current == null && clickedFront(location)) {
 			if (tooHeavyByHand()) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cart.too_heavy"));
+				player.sendOverlayMessage(Component.translatable(kind() == CartKind.COACH
+					? "message.jaymoskitchen.cart.too_heavy_coach" : "message.jaymoskitchen.cart.too_heavy"));
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			this.entityData.set(HITCH, player.getId());
@@ -553,6 +644,17 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		switch (kind()) {
+			case COACH -> {
+				if (player.isSecondaryUseActive()) {
+					// let the mobs out (it has nothing to open)
+					if (carriesMobs()) {
+						tip(level);
+					}
+				} else if (canAddPassenger(player)) {
+					player.startRiding(this);
+				}
+				return InteractionResult.SUCCESS_SERVER;
+			}
 			case PLOW -> {
 				// lower or raise it (sneak to get at the hoes)
 				if (!player.isSecondaryUseActive()) {
@@ -569,6 +671,11 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			case WAGON -> {
+				if (player.isSecondaryUseActive() && carriesMobs()) {
+					// mobs on the bench: let them out (without any, sneaking opens the chest)
+					tip(level);
+					return InteractionResult.SUCCESS_SERVER;
+				}
 				// the bench
 				if (!player.isSecondaryUseActive() && getPassengers().isEmpty()) {
 					player.startRiding(this);
@@ -602,7 +709,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		play(level, SoundEvents.WOOD_FALL, 0.8F);
 	}
 
-	/** Bodies and animals out onto the ground on the cart's right, the way it tips: clear of it, not under it. */
+	/** Bodies and animals (and the wagon's and coach's mobs) out onto the ground on the cart's right, the way it tips: clear of it, not under it. */
 	private void spillLoad() {
 		float yaw = getYRot() * Mth.DEG_TO_RAD;
 		Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
@@ -613,6 +720,13 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 				passenger.stopRiding();
 				passenger.setPos(getX() + right.x * (getBbWidth() * 0.5 + 0.7), getY() + 0.5, getZ() + right.z * (getBbWidth() * 0.5 + 0.7));
 				passenger.setDeltaMovement(right.scale(0.2).add(0.0, 0.2, 0.0));
+				if (kind() == CartKind.WAGON || kind() == CartKind.COACH) {
+					// (a pet that was sat down to ride gets up again; the wagon and coach wait a while before taking more in)
+					if (passenger instanceof TamableAnimal tamable) {
+						tamable.setInSittingPose(false);
+					}
+					noLoadUntil = level().getGameTime() + RELOAD_DELAY;
+				}
 			}
 		}
 		if (level() instanceof ServerLevel level) {
@@ -652,6 +766,8 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		String problem = null;
 		if (puller() != null) {
 			problem = "already_hitched";
+		} else if (!mayPull(horse)) {
+			problem = "draft_only";
 		} else if (!horse.isTamed() || horse.isBaby()) {
 			problem = "need_tame";
 		} else if (!level.getEntitiesOfClass(CartEntity.class, horse.getBoundingBox().inflate(SNAP_DISTANCE),
@@ -730,6 +846,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 		}
 		return switch (kind()) {
 			case WAGON -> getPassengers().isEmpty();
+			case COACH -> getPassengers().size() < COACH_SEATS;
 			// live animals take a cow's room each, beside any bodies
 			case ANIMAL_CART -> getPassengers().size() < 2 && roomUsed() + 3 <= corpseRoom();
 			default -> false;
@@ -836,6 +953,14 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			Vec3 forward = getLookAngle().scale(along + Mth.sin(getXRot() * Mth.DEG_TO_RAD) * 0.7);
 			return new Vec3(forward.x, (dimensions.height() - 0.5) * scale + forward.y, forward.z);
 		}
+		if (kind() == CartKind.COACH) {
+			// bench by bench from the front, two to a bench: the model's seats are 8 px above the axle
+			int seat = Math.max(0, getPassengers().indexOf(passenger));
+			float size = NiftyCarts.WAGON_SCALE / 16.0F;
+			double side = (seat % 2 == 0 ? -1.0 : 1.0) * COACH_SEAT_SIDE * size;
+			Vec3 spot = new Vec3(side, NiftyCarts.WHEEL_RADIUS * size + 8.0 * size, COACH_BENCH_AHEAD[Math.min(seat / 2, 2)] * size);
+			return spot.yRot(-getYRot() * Mth.DEG_TO_RAD);
+		}
 		// the bench at the front of the wagon: 8 px above the axle and 10.5 ahead of it (a size up), tipping with it
 		float size = NiftyCarts.WAGON_SCALE / 16.0F;
 		double up = 8.0 * size, ahead = 10.5 * size, axle = NiftyCarts.WHEEL_RADIUS * size;
@@ -852,6 +977,23 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			float yaw = getYRot() + (float) corpseSlot(corpse)[3];
 			passenger.setYRot(yaw);
 			passenger.yRotO = yaw;
+			return;
+		}
+		if ((kind() == CartKind.WAGON || kind() == CartKind.COACH) && hasPassenger(passenger)
+			&& passenger instanceof LivingEntity living && !(passenger instanceof Player)) {
+			// mobs sit facing forward
+			living.setYBodyRot(getYRot());
+			passenger.setYRot(getYRot());
+			passenger.setYHeadRot(getYRot());
+			return;
+		}
+		if (kind() == CartKind.COACH && hasPassenger(passenger) && passenger instanceof Player) {
+			// passengers look about, but not much further than over their shoulders
+			float turn = Mth.wrapDegrees(passenger.getYRot() - getYRot());
+			float clamped = Mth.clamp(turn, -105.0F, 105.0F);
+			passenger.yRotO += clamped - turn;
+			passenger.setYRot(passenger.getYRot() + clamped - turn);
+			passenger.setYHeadRot(passenger.getYRot());
 			return;
 		}
 		if (kind() == CartKind.ANIMAL_CART && hasPassenger(passenger) && passenger instanceof LivingEntity living) {
@@ -959,7 +1101,7 @@ public class CartEntity extends Entity implements Container, MenuProvider {
 			case WAGON -> ChestMenu.threeRows(containerId, inventory, this);
 			case SUPPLY_CART -> ChestMenu.sixRows(containerId, inventory, this);
 			case PLOW -> new PlowMenu(containerId, inventory, this);
-			case ANIMAL_CART -> null;
+			case ANIMAL_CART, COACH -> null;
 		};
 	}
 

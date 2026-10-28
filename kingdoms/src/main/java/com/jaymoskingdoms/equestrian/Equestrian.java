@@ -288,12 +288,24 @@ public final class Equestrian {
 	/** {@code horse} becomes {@code e}: its size, health, jump and wandering pace follow (healed to full if {@code heal}). */
 	public static void apply(AbstractHorse horse, Equine e, boolean heal) {
 		horse.setAttached(EQUINE, e);
+		draftTag(horse, e);
 		set(horse, Attributes.SCALE, e.breed().scale);
 		set(horse, Attributes.MAX_HEALTH, e.maxHealth());
 		set(horse, Attributes.JUMP_STRENGTH, Bonding.jump(horse, e));
 		set(horse, Attributes.MOVEMENT_SPEED, e.topSpeed() * 0.75);
 		horse.setHealth(heal ? horse.getMaxHealth() : Math.min(horse.getHealth(), horse.getMaxHealth()));
 		horse.refreshDimensions();
+	}
+
+	/** (0.7.305) The entity tag Jaymo's Kitchen reads (it can't see our breeds): only a draft horse pulls its coach. */
+	public static final String DRAFT_TAG = "jaymoskingdoms.draft";
+
+	static void draftTag(AbstractHorse horse, Equine e) {
+		if (e.breed() == Breed.DRAFT) {
+			horse.addTag(DRAFT_TAG);
+		} else {
+			horse.removeTag(DRAFT_TAG);
+		}
 	}
 
 	private static void set(LivingEntity e, Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute, double value) {
@@ -346,6 +358,8 @@ public final class Equestrian {
 			return;
 		}
 		apply(baby, Equine.foal(equine(parent), equine(other), baby.getRandom()), true);
+		// (0.7.305) a filly or a colt
+		Herding.born(baby, baby.getRandom());
 	}
 
 	// ---- riding ----------------------------------------------------------------------------------------------------
@@ -380,6 +394,8 @@ public final class Equestrian {
 		if (sprint) {
 			speed *= SPRINT_SPEED;
 		}
+		// (0.7.305) a Rider's gift from its breed
+		speed *= BreedGifts.speed(horse, e, controller, sprint, speed);
 		speed *= terrain(horse, e);
 		// a speed effect (or slowness) still tells
 		double base = horse.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);

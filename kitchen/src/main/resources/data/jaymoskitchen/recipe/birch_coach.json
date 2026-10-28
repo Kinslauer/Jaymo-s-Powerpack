@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "wlw",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:birch_planks",
+    "l": "minecraft:birch_log",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:birch_coach"
+  }
+}

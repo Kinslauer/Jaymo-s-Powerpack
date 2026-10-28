@@ -76,7 +76,8 @@ public class WarElephant extends AbstractHorse {
 
 	@Override
 	public boolean canMate(Animal partner) {
-		return partner != this && partner instanceof WarElephant other && this.canParent() && other.canParent();
+		// (0.7.305) a cow and a bull
+		return partner != this && partner instanceof WarElephant other && this.canParent() && other.canParent() && Herding.pair(this, other);
 	}
 
 	@Override

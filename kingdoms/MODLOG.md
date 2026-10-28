@@ -6083,3 +6083,47 @@ revered up to 5% Masterwork; the same buyer sees the same grade again, and risin
 tags Journeyman and Master smiths (`jaymoskingdoms.smith_rank_1`/`_2`) so Powers widens their perfect zone, and each
 finished forging at a Smithing Anvil counts toward a smith's "forge" order (`PowersCompat.onForged`). Compile-checked,
 not seen in game.
+
+## 0.7.305: our own horse model, a build per breed (pack 0.17.121)
+
+Andy: "new horse models that combine our old horse mod's features" (Icy's Better Horses came up; its licence keeps
+its models and textures inside that mod, so ideas only). Horses, skeleton horses and zombie horses are now drawn as
+`BreedHorseModel` (`BreedHorseRenderer`, replacing `MocHorseModel`/`MocHorseRenderer`), with a build per breed read
+from `assets/jaymoskingdoms/horse/builds.json`: the destrier's deep chest, crested neck and long mane, the courser's
+fine legs, slim neck and short mane, the palfrey's flowing mane and tail, the draft's big feathered hooves, Roman nose
+and broad chest, the steppe pony's standing mane and stocky legs, the desert horse's dished face and fine head, and the
+bat horse (a palfrey with its wings). Every build has a forelock, haunches, withers, croup and belly, and a long mane
+that falls over the neck lifts and ripples at speed. The bones keep the old horse's names and pivots and move as it
+did (jointed legs, head and neck, mouth, tail, rear, graze, stirrups, reins, wings), so the war and racing saddles,
+bridle, blanket, shoes, kneel and breed builds (`HorseLooks.BUILD`) carry over. The nightmare is drawn as a courser,
+the undead as palfreys. All 36 coats, the nightmare (fire mane and tail, ember eyes and hooves, two flickering skins),
+the bat horse, the skeleton horse (open ribs, bare skull, no mane) and the zombie horse (torn flank, wounds, milky
+eyes) and their two variants each, and every horse armour (iron, gold, diamond, copper, netherite, leather, chain and
+plate barding: chanfron, crinet, peytral and flank plates, for each build) are ours, painted by `tools/gen_horses.py`
+(`tools/horse_rig.py` holds the shapes, `tools/horse_preview.py` draws previews) into
+`textures/entity/breed_horse/`. The Mo' Creatures horse textures and `tools/gen_moc_horses.py` are gone; its
+animation is still what moves them (credited in `licenses/mocreatures/NOTICE.txt`). Compile-checked, not seen in game.
+
+Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own code):
+- **Mares and stallions** (`Herd`, `Herding`): every horse rolls its sex when first loaded, foals are fillies or colts,
+  and breeding (`HorseMixin`, `WarElephant.canMate`) needs one of each. A symbol by the name in the tag and stats.
+- **Command wheel** (`HorseWheelScreen`): tap N whistles, hold N opens it. Let be, follow, stay, wander here, make this
+  home, go home (`Herding.OrderGoal`, from trust 40), ride on, your horses, handbook. Orders go to the horse under the
+  crosshair or the one you ride.
+- **Roster** (`RosterScreen`, `Herding.ROSTER` on the overworld): every horse you own, nearest first; Call fetches one
+  from anywhere (a PORTAL ticket loads its chunk, then it's brought behind you), Home sends it off.
+- **Horses defend you**: something that hurts you is set on by your horses within 16 blocks that trust you 50+
+  (timid ones shy away); kicks for 5 plus 1 per war level.
+- **Riding** (`Mounted`): ridden horses step 1.5 (elephants 2), swim instead of throwing you
+  (`EntityMountMixin`), take a second rider behind a saddle, ride on with a double-tap of forward (back stops), and
+  build a charge at the canter and gallop that runs down monsters, scaled by speed and barding. Leaves were already
+  soft in Jaymo's Powers. In first person in the saddle the head dips and the horse fades as you look down.
+- **Banner and carpet** (`Tack` has a third slot): a banner flies from a pole behind the saddle (`TackLayer`); a wool or
+  moss carpet can take the blanket's place as a coloured saddle cloth (not warm).
+- **Rider class only**: a saddle in hand shows a wild horse's breed, sex and stats; each breed gives a gift that grows
+  at trust 40 and 100 (`BreedGifts`: destrier shield, courser burst, palfrey road pace, desert quick start, draft
+  herder, steppe snort, nightmare dark sight, bat soft landing, elephant gentle giant, mammoth snow strider), shown
+  in the tack screen.
+- **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
+- Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
+Compile-checked, not seen in game.

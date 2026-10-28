@@ -15,6 +15,9 @@ class NiftyCartModel extends EntityModel<CartRenderer.State> {
 	private final ModelPart body;
 	private final ModelPart leftWheel;
 	private final ModelPart rightWheel;
+	/** The coach's second pair of wheels (the rear axle), or null. */
+	private final @Nullable ModelPart rearLeftWheel;
+	private final @Nullable ModelPart rearRightWheel;
 	private final @Nullable ModelPart parts;
 	private final ModelPart[] upperArms = new ModelPart[3];
 	private final ModelPart[] lowerArms = new ModelPart[3];
@@ -24,6 +27,8 @@ class NiftyCartModel extends EntityModel<CartRenderer.State> {
 		this.body = root.getChild("body");
 		this.leftWheel = root.getChild("leftWheel_0");
 		this.rightWheel = root.getChild("rightWheel_0");
+		this.rearLeftWheel = root.hasChild("leftWheel_1") ? root.getChild("leftWheel_1") : null;
+		this.rearRightWheel = root.hasChild("rightWheel_1") ? root.getChild("rightWheel_1") : null;
 		this.parts = body.hasChild("parts") ? body.getChild("parts") : null;
 		if (parts != null) {
 			for (int i = 0; i < upperArms.length; i++) {
@@ -40,6 +45,10 @@ class NiftyCartModel extends EntityModel<CartRenderer.State> {
 		body.xRot = pitch;
 		leftWheel.xRot = state.wheelRot;
 		rightWheel.xRot = state.wheelRot;
+		if (rearLeftWheel != null && rearRightWheel != null) {
+			rearLeftWheel.xRot = state.wheelRot;
+			rearRightWheel.xRot = state.wheelRot;
+		}
 		if (parts != null) {
 			float down = (CartEntity.ARMS_RAISED - state.armAngle) / (CartEntity.ARMS_RAISED - CartEntity.ARMS_LOWERED);
 			for (ModelPart arm : upperArms) {
