@@ -3533,7 +3533,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the Dawnborn's and the Divine's, the Bio-built now absorb anyone downed or crippled who isn't one of those two (monsters,
   villagers, players), not only downed monsters; a crippled foe (a leg broken or cut off) counts too. Their three forms
   are three different bodies: Imperfect (hunched, grotesque, a long stinger tail that does the absorbing: it arcs over the
-  head, swallows the foe whole and the bulge runs back down it), Semi-Perfect (bigger, bulked) and Perfect (sleek, the
+  head, swallows the foe whole and the bulge runs back down it), Semi-Perfect (bigger, bulked, steel on the fists and tail) and Perfect (as tall, sleek, steel-plated arms and shoulders, the
   strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
   `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
   `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.

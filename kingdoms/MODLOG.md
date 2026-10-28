@@ -6219,10 +6219,13 @@ down upon the target. stretching over and engulfing them into a bulge that flows
 - **The forms** (client `BioForms`, textures and parts table from `tools/gen_bio_forms.py`, in three palettes: the
   seamed green, the Brassbound's bronze, the Opaline's pearl): Imperfect, hunched (head thrust low and forward, arms
   hanging forward), spotted carapace, black chest plates, orange segmented belly, insect face with a beak and pink slit
-  eyes, V horns, wing cases, claws, spine ridge, a shoulder growth, a long swaying segmented tail with a stinger;
-  Semi-Perfect, a size up (`BioBuilt.SIZE`, +15%) and bulked (wider body and arms), black forearms and shins, heavy lips
-  and no nose, a crown of horns, pauldrons, a short thick tail; Perfect, +5%, sleek, pale face with purple cheek stripes,
-  black chest and shoulders, slim crown horns, long wings, the tail folded to a stinger nub. Twelve beads in the
+  eyes, V horns, wing cases, claws, spine ridge, a shoulder growth, steel bracers, a long swaying segmented tail with a
+  stinger; Semi-Perfect, a size up (`BioBuilt.SIZE`, +15%) and bulked (wider body and arms), black forearms and shins,
+  heavy lips and no nose, a crown of horns, pauldrons, steel gauntlets over the fists and steel plates down a short thick
+  tail; Perfect, as tall as the second but sleek, pale face with purple cheek stripes, black chest, the old steel
+  plating from shoulder to wrist and on the cheekbones, slim steel plates over the shoulders and shoulder blades (no
+  wings: Andy, "no wings, and instead the armor plates"), slim crown horns, the tail folded to a steel stinger nub. The
+  steel is the old forms' plating ("I do want the steel plating to reintegrate like it did before"). Twelve beads in the
   heritages' colours glow down every form's spine. The form is the whole body: MCA's face, clothes and hair are left off
   (`McaBioFormLayerMixin`), and a skin's hat and sleeves. Villagers of the heritage keep their old marks.
 - **The tail swallow** (`BioTailEngulf`, all three forms; the Perfect form unfurls it from its stinger): the tail rises

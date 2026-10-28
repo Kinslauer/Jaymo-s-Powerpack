@@ -43,13 +43,15 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Imperfect</b> (the first): hunched ({@link #apply}: the head thrust forward and low, the arms hanging forward),
  * a spotted carapace with black chest plates and an orange segmented belly, an insect face with a beak and pink slit
- * eyes, V horns, stubby wing cases, claws, a spine ridge and a growth on one shoulder, and a long segmented tail with a
- * stinger, swaying.</li>
+ * eyes, V horns, stubby wing cases, claws, a spine ridge and a growth on one shoulder, a steel bracer on each forearm, and a
+ * long segmented tail with a stinger, swaying.</li>
  * <li><b>Semi-Perfect</b> (the second): big and bulked (wider body and arms, and a size up, {@link BioBuilt#SIZE}),
- * black forearms and shins, heavy lips and no nose, a crown of horns, pauldrons; a short thick tail.</li>
- * <li><b>Perfect</b> (the third): sleek, a pale face with purple cheek stripes, the spotted skin under a black chest
- * and shoulders, slim crown horns, long wings down the back, and the tail folded away to a stinger nub (it unfurls to
- * absorb, {@link BioTailEngulf}).</li>
+ * black forearms and shins, heavy lips and no nose, a crown of horns, pauldrons; (Andy: "the steel plating ... mostly
+ * around the fists and tail") steel gauntlets over the fists and steel plates down a short thick tail.</li>
+ * <li><b>Perfect</b> (the third): as tall as the second but sleek, a pale face with purple cheek stripes, the spotted
+ * skin under a black chest; (Andy: "no wings, and instead the armor plates") the old steel plating from shoulder to
+ * wrist and over the cheekbones, slim steel over the shoulders and the shoulder blades, slim crown horns, and the tail
+ * folded away to a steel stinger nub (it unfurls to absorb, {@link BioTailEngulf}).</li>
  * </ul>
  * Down the spine of every form run twelve beads, one in each heritage's colour (their blood in them), lit. Drawn instead
  * of their marks in {@link HeritageLooks}; MCA's face, clothes and hair are left off (the form is all of them), and so are
@@ -71,7 +73,7 @@ public final class BioForms {
 	static final Tail[] TAILS = {
 		new Tail(2.8F, 2.6F, 0.93F, 0.12F, new float[] {-0.72F, -0.12F, -0.08F, 0.0F, 0.08F, 0.14F, 0.22F, 0.3F, 0.38F, 0.42F}, 46, 24,
 			new int[][] {{0, 35}, {10, 35}}),
-		new Tail(2.8F, 3.0F, 0.9F, 0.16F, new float[] {-1.0F, 0.1F, 0.25F, 0.35F, 0.45F, 0.5F, 0.5F}, 32, 8, new int[][] {{46, 8}, {56, 8}}),
+		new Tail(2.8F, 3.0F, 0.9F, 0.16F, new float[] {-1.0F, 0.1F, 0.25F, 0.35F, 0.45F, 0.5F, 0.5F}, 42, 16, new int[][] {{0, 24}, {10, 24}}),
 		null};
 	/** A tail segment's box (pixels, scaled to each tail), where it starts on the body, and the stinger's two boxes. */
 	static final float[] SEGMENT = {4.0F, 4.0F, 3.0F}, TAIL_ROOT = {0.0F, 10.5F, 1.8F};
@@ -125,22 +127,26 @@ public final class BioForms {
 			part(1, Attach.HEAD, "crown_tip_r", "crown_r", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, 0.42F, box(8, 0, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
 			part(1, Attach.HEAD, "crown_back_r", null, -2.0F, -7.6F, 2.4F, -0.35F, 0.0F, -0.18F, box(12, 0, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
 			part(1, Attach.RIGHT_ARM, "pauldron_r", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, box(16, 0, -3.5F, -2.7F, -2.5F, 5.0F, 3.0F, 5.0F)),
-			part(1, Attach.HEAD, "crown_l", null, 3.2F, -7.4F, -0.6F, -0.12F, 0.0F, 0.3F, box(36, 0, -1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F)),
-			part(1, Attach.HEAD, "crown_tip_l", "crown_l", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, -0.42F, box(44, 0, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
-			part(1, Attach.HEAD, "crown_back_l", null, 2.0F, -7.6F, 2.4F, -0.35F, 0.0F, 0.18F, box(48, 0, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
-			part(1, Attach.LEFT_ARM, "pauldron_l", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, box(0, 8, -1.5F, -2.7F, -2.5F, 5.0F, 3.0F, 5.0F)),
-			part(1, Attach.HEAD, "ball", null, 0.0F, -7.6F, -4.0F, 0.0F, 0.0F, 0.0F, box(20, 8, -1.0F, -0.4F, -0.7F, 2.0F, 2.0F, 1.0F)),
-			part(1, Attach.BODY, "ridge", null, 0.0F, 0.0F, 2.0F, 0.0F, 0.0F, 0.0F, box(26, 8, -1.0F, 0.5F, 0.0F, 2.0F, 6.0F, 1.0F)),
+			part(1, Attach.RIGHT_ARM, "gauntlet_r", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, box(36, 0, -3.5F, 7.5F, -2.5F, 5.0F, 3.0F, 5.0F), box(0, 8, -3.0F, 9.6F, -2.9F, 4.0F, 2.0F, 1.0F)),
+			part(1, Attach.HEAD, "crown_l", null, 3.2F, -7.4F, -0.6F, -0.12F, 0.0F, 0.3F, box(10, 8, -1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F)),
+			part(1, Attach.HEAD, "crown_tip_l", "crown_l", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, -0.42F, box(18, 8, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
+			part(1, Attach.HEAD, "crown_back_l", null, 2.0F, -7.6F, 2.4F, -0.35F, 0.0F, 0.18F, box(22, 8, -0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F)),
+			part(1, Attach.LEFT_ARM, "pauldron_l", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, box(26, 8, -1.5F, -2.7F, -2.5F, 5.0F, 3.0F, 5.0F)),
+			part(1, Attach.LEFT_ARM, "gauntlet_l", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, box(0, 16, -1.5F, 7.5F, -2.5F, 5.0F, 3.0F, 5.0F), box(20, 16, -1.0F, 9.6F, -2.9F, 4.0F, 2.0F, 1.0F)),
+			part(1, Attach.HEAD, "ball", null, 0.0F, -7.6F, -4.0F, 0.0F, 0.0F, 0.0F, box(30, 16, -1.0F, -0.4F, -0.7F, 2.0F, 2.0F, 1.0F)),
+			part(1, Attach.BODY, "ridge", null, 0.0F, 0.0F, 2.0F, 0.0F, 0.0F, 0.0F, box(36, 16, -1.0F, 0.5F, 0.0F, 2.0F, 6.0F, 1.0F)),
 			part(2, Attach.HEAD, "crown_r", null, -3.3F, -7.4F, -0.4F, -0.1F, 0.0F, -0.22F, box(0, 0, -0.5F, -6.0F, -0.5F, 1.0F, 6.0F, 1.0F)),
 			part(2, Attach.HEAD, "crown_tip_r", "crown_r", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, 0.38F, box(4, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
 			part(2, Attach.HEAD, "crown_back_r", null, -1.8F, -7.6F, 2.6F, -0.3F, 0.0F, -0.15F, box(8, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
-			part(2, Attach.BODY, "wing_r", null, -0.5F, 0.2F, 2.05F, 0.07F, 0.0F, 0.11F, box(12, 0, -5.0F, 0.0F, 0.0F, 5.0F, 17.0F, 1.0F)),
-			part(2, Attach.HEAD, "crown_l", null, 3.3F, -7.4F, -0.4F, -0.1F, 0.0F, 0.22F, box(24, 0, -0.5F, -6.0F, -0.5F, 1.0F, 6.0F, 1.0F)),
-			part(2, Attach.HEAD, "crown_tip_l", "crown_l", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, -0.38F, box(28, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
-			part(2, Attach.HEAD, "crown_back_l", null, 1.8F, -7.6F, 2.6F, -0.3F, 0.0F, 0.15F, box(32, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
-			part(2, Attach.BODY, "wing_l", null, 0.5F, 0.2F, 2.05F, 0.07F, 0.0F, -0.11F, box(36, 0, 0.0F, 0.0F, 0.0F, 5.0F, 17.0F, 1.0F)),
-			part(2, Attach.HEAD, "ball", null, 0.0F, -7.6F, -4.0F, 0.0F, 0.0F, 0.0F, box(48, 0, -1.0F, -0.4F, -0.7F, 2.0F, 2.0F, 1.0F)),
-			part(2, Attach.BODY, "stinger", null, 0.0F, 9.5F, 2.0F, 0.5F, 0.0F, 0.0F, box(54, 0, -1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 2.0F), box(0, 18, -0.5F, -0.5F, 1.8F, 1.0F, 1.0F, 2.0F))
+			part(2, Attach.RIGHT_ARM, "shoulder_r", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -0.12F, box(12, 0, -3.5F, -2.4F, -2.5F, 5.0F, 2.0F, 5.0F)),
+			part(2, Attach.BODY, "blade_r", null, -2.5F, 1.0F, 2.0F, 0.06F, 0.0F, 0.0F, box(32, 0, -1.5F, 0.0F, 0.0F, 3.0F, 7.0F, 1.0F)),
+			part(2, Attach.HEAD, "crown_l", null, 3.3F, -7.4F, -0.4F, -0.1F, 0.0F, 0.22F, box(40, 0, -0.5F, -6.0F, -0.5F, 1.0F, 6.0F, 1.0F)),
+			part(2, Attach.HEAD, "crown_tip_l", "crown_l", 0.0F, -5.6F, 0.0F, 0.05F, 0.0F, -0.38F, box(44, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
+			part(2, Attach.HEAD, "crown_back_l", null, 1.8F, -7.6F, 2.6F, -0.3F, 0.0F, 0.15F, box(48, 0, -0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F)),
+			part(2, Attach.LEFT_ARM, "shoulder_l", null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.12F, box(0, 8, -1.5F, -2.4F, -2.5F, 5.0F, 2.0F, 5.0F)),
+			part(2, Attach.BODY, "blade_l", null, 2.5F, 1.0F, 2.0F, 0.06F, 0.0F, 0.0F, box(20, 8, -1.5F, 0.0F, 0.0F, 3.0F, 7.0F, 1.0F)),
+			part(2, Attach.HEAD, "ball", null, 0.0F, -7.6F, -4.0F, 0.0F, 0.0F, 0.0F, box(28, 8, -1.0F, -0.4F, -0.7F, 2.0F, 2.0F, 1.0F)),
+			part(2, Attach.BODY, "stinger", null, 0.0F, 9.5F, 2.0F, 0.5F, 0.0F, 0.0F, box(34, 8, -1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 2.0F), box(42, 8, -0.5F, -0.5F, 1.8F, 1.0F, 1.0F, 2.0F))
 	};
 
 	/** Per form, per bone: its parts, baked (null: none on that bone). */

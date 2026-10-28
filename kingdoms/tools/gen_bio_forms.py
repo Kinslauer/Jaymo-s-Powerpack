@@ -66,6 +66,24 @@ PALETTES = {
 DNA = [0xC8B8A0, 0x8E8E92, 0x3FB8C8, 0x6FC04A, 0x4E9A3A, 0xF06A2A, 0xBFE6FF, 0x8A2A3A, 0xFFD84A, 0x7FD0FF, 0xB070E0, 0xC8402A]
 
 
+# (0.7.313) the Tinkerer's steel plating, as on the old forms (biobuilt_1/2_skin): the same steel on every palette
+STEEL = dict(hi=0x849A94, mid=0x68807C, lo=0x4E6462, edge=0x2C3E40)
+
+
+def steel(i, j, w, h, face, k=0, band=3):
+    """A texel of steel plate: banded every {band} rows, its lower edge dark, a rivet now and then, lit from the top."""
+    c = hexc(STEEL["mid"] if hsh(i, j, k) > 0.3 else STEEL["hi"])
+    if j % band == band - 1:
+        c = hexc(STEEL["lo"])
+    if j % band == 0 and i % 3 == 1:
+        c = hexc(STEEL["hi"])
+    if face == "top":
+        c = hexc(STEEL["hi"])
+    if face in ("bottom",):
+        c = hexc(STEEL["edge"])
+    return c
+
+
 def pal(name):
     return {k: hexc(v) for k, v in PALETTES[name].items()}
 
@@ -217,6 +235,20 @@ def body_fn(pname, form):
                 c = shade(p["black"], 1.0 + 0.2 * (hsh(i, j) > 0.7))
             if form == 2 and j < 2 and face in ("front", "back", "right", "left"):
                 c = shade(p["black"], 1.1)
+            sides = face in ("front", "back", "right", "left")
+            if form == 0 and sides and j in (6, 7):
+                # a steel bracer riveted round the forearm
+                c = steel(around(face, i, w), j - 6, w, 2, face, 5, 2)
+            if form == 1 and sides and j >= 8:
+                # steel gauntlets over the fists
+                c = steel(around(face, i, w), j - 8, w, 4, face, 6)
+            if form == 2 and sides and j >= 2:
+                # (Andy) the steel plating back: shoulder to wrist, sleek, the hands darker
+                c = steel(around(face, i, w), j - 2, w, 10, face, 7)
+                if j >= 10:
+                    c = shade(c, 0.8)
+            if face == "bottom" and form >= 1:
+                c = hexc(STEEL["edge"])
             if face == "top" and form >= 1:
                 c = shade(p["black"], 1.1)
             return c
@@ -304,6 +336,9 @@ def head(p, face, i, j, form, c, seed):
             # a thin stripe down each cheek from under the eye
             if i in (1, 6) and 4 <= j <= 6:
                 c = p["stripe"]
+            # steel plates over the cheekbones and the jaw's corners
+            if i in (0, 7) and j >= 3:
+                c = steel(i, j - 3, 1, 5, face, 8)
             # a nose, a small mouth
             if j == 4 and i in (3, 4):
                 c = shade(p["face"], 0.88)
@@ -322,8 +357,8 @@ def head(p, face, i, j, form, c, seed):
             return mix(p["accent"], p["accent_dark"], 0.5) if j >= 5 and 2 <= i <= 5 else c
         return c
     if face in ("right", "left"):
-        if form == 2 and j >= 5 and ((face == "right" and i == 7) or (face == "left" and i == 0)):
-            return p["stripe"]
+        if form == 2 and j >= 3 and ((face == "right" and i >= 5) or (face == "left" and i <= 2)):
+            return steel(i, j - 3, 3, 5, face, 9) if not ((face == "right" and i == 7) or (face == "left" and i == 0)) or j < 5 else p["stripe"]
         if form >= 1 and j >= 6:
             return mix(p["face"], p["light"], 0.6) if form == 1 else p["face"]
         return c
@@ -362,6 +397,9 @@ def parts_for(form):
             arm = "rarm" if s < 0 else "larm"
             P.append((arm, "pauldron_" + n, (0.0, 0.0, 0.0), (0.0, 0.0, 0.0),
                       [((5, 3, 5, -3.5, -2.7, -2.5, "plate") if s < 0 else (5, 3, 5, -1.5, -2.7, -2.5, "plate"))], None))
+            # steel round the fists: a cuff and a knuckle plate
+            P.append((arm, "gauntlet_" + n, (0.0, 0.0, 0.0), (0.0, 0.0, 0.0),
+                      [(5, 3, 5, (-3.5 if s < 0 else -1.5), 7.5, -2.5, "steel"), (4, 2, 1, (-3 if s < 0 else -1), 9.6, -2.9, "steel")], None))
         P.append(("head", "ball", (0.0, -7.6, -4.0), (0.0, 0.0, 0.0), [(2, 2, 1, -1, -0.4, -0.7, "black")], None))
         P.append(("body", "ridge", (0.0, 0.0, 2.0), (0.0, 0.0, 0.0), [(2, 6, 1, -1, 0.5, 0, "plate")], None))
     else:
@@ -370,9 +408,13 @@ def parts_for(form):
             P.append(("head", "crown_" + n, (s * 3.3, -7.4, -0.4), (-0.1, 0.0, s * 0.22), [(1, 6, 1, -0.5, -6, -0.5, "horn")], None))
             P.append(("head", "crown_tip_" + n, (0.0, -5.6, 0.0), (0.05, 0.0, -s * 0.38), [(1, 3, 1, -0.5, -3, -0.5, "horn")], "crown_" + n))
             P.append(("head", "crown_back_" + n, (s * 1.8, -7.6, 2.6), (-0.3, 0.0, s * 0.15), [(1, 3, 1, -0.5, -3, -0.5, "horn")], None))
-            P.append(("body", "wing_" + n, (s * 0.5, 0.2, 2.05), (0.07, 0.0, -s * 0.11), [(5, 17, 1, -5 if s < 0 else 0, 0, 0, "wing")], None))
+            # (Andy: "no wings, and instead the armor plates") slim steel over the shoulders and down the shoulder blades
+            arm = "rarm" if s < 0 else "larm"
+            P.append((arm, "shoulder_" + n, (0.0, 0.0, 0.0), (0.0, 0.0, s * 0.12),
+                      [((5, 2, 5, -3.5, -2.4, -2.5, "steel") if s < 0 else (5, 2, 5, -1.5, -2.4, -2.5, "steel"))], None))
+            P.append(("body", "blade_" + n, (s * 2.5, 1.0, 2.0), (0.06, 0.0, 0.0), [(3, 7, 1, -1.5, 0, 0, "steel")], None))
         P.append(("head", "ball", (0.0, -7.6, -4.0), (0.0, 0.0, 0.0), [(2, 2, 1, -1, -0.4, -0.7, "black")], None))
-        P.append(("body", "stinger", (0.0, 9.5, 2.0), (0.5, 0.0, 0.0), [(2, 2, 2, -1, -1, 0, "tail"), (1, 1, 2, -0.5, -0.5, 1.8, "sting")], None))
+        P.append(("body", "stinger", (0.0, 9.5, 2.0), (0.5, 0.0, 0.0), [(2, 2, 2, -1, -1, 0, "steel"), (1, 1, 2, -0.5, -0.5, 1.8, "sting")], None))
     return P
 
 
@@ -426,11 +468,14 @@ def part_color(p, paint, form, face, i, j, w, h, k):
         if j == h - 1 and face not in ("top", "bottom"):
             base = shade(p["black"], 1.1)
         return shade(base, 1.1 if face == "top" else 0.95)
+    if paint == "steel":
+        return steel(i, j, w, h, face, k, 2 if h <= 3 else 3)
     if paint == "black":
         return shade(p["black"], 1.25 if face in ("top", "front") else 1.0)
     if paint == "tail":
         if form == 1:
-            band = mix(p["accent"], p["accent_dark"], 0.3) if (j // 2) % 2 == 0 else shade(p["black"], 1.15)
+            # (Andy) steel plates over the second form's tail, black between
+            band = steel(i, j, w, h, face, k, 2) if (j // 2) % 2 == 0 or face == "top" else shade(p["black"], 1.15)
         else:
             band = mix(p["mid"], p["light"], 0.3 + 0.3 * hsh(i, j, k))
             if j % 3 == 2:
@@ -440,6 +485,8 @@ def part_color(p, paint, form, face, i, j, w, h, k):
             if hsh(i, j, k + 3) > 0.84:
                 band = mix(p["spot"], p["dark"], 0.3)
         return band
+    if paint == "sting" and form == 1:
+        return steel(i, j, w, h, face, k, 2)
     if paint == "sting":
         return shade(mix(p["sclera"], p["accent_dark"], 0.25 + 0.5 * (j / max(1, h))), 1.0)
     return (255, 0, 255, 255)
@@ -538,6 +585,9 @@ def tail_strip(pname):
                     band = mix(p["accent"], p["accent_dark"], 0.35 + 0.3 * (j % 4 == 3))
                 if hsh(i, j // 2, 78) > 0.86:
                     band = mix(p["spot"], p["dark"], 0.3)
+                if i <= 2 or i >= 13:
+                    # steel plates down its back
+                    band = steel(i, j, 16, 48, "front", 80, 4)
             else:
                 # the sheath that opens over the foe: wet, ridged, darker inside
                 band = mix(p["accent_dark"], p["dark"], 0.3 + 0.3 * hsh(i, j, 79))

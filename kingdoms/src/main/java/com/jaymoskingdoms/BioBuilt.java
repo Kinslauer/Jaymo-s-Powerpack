@@ -68,8 +68,8 @@ public final class BioBuilt {
 	static final double ABSORB_REACH = 4.5;
 	/** (0.7.313) The tail holds the foe this far off as it swallows it (blocks). */
 	static final double ABSORB_TOUCH = 1.8;
-	/** (0.7.313) Each form's size, a share added to their scale: the second towers, the third is a little over a man. */
-	static final double[] SIZE = {0.0, 0.15, 0.05};
+	/** (0.7.313) Each form's size, a share added to their scale: (Andy) the third keeps the second's height. */
+	static final double[] SIZE = {0.0, 0.15, 0.15};
 	/** (0.7.313) The tag a Bio-built player carries for their form ({@code _0} to {@code _2}), read by Jaymo's Powers. */
 	public static final String FORM_TAG = "jaymoskingdoms_bio_form_";
 	public static final int ABSORB_TICKS = 100;
