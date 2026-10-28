@@ -362,6 +362,16 @@ public final class McaCompat {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;
 	}
 
+	/** (0.7.291) {@code f}'s new court or camp caster ({@link Casters}): {@code chosen}, else a villager; null without MCA. */
+	static @Nullable Worker enlistCaster(ServerLevel level, Faction f, int role, @Nullable PathfinderMob chosen) {
+		return LOADED ? McaBridge.enlistCaster(level, f, role, chosen) : null;
+	}
+
+	/** (0.7.291) With MCA, a court's necromancer or a camp's caster at peace becomes one of MCA's villagers. True if so (the folk is gone). */
+	static boolean becomeCaster(ServerLevel level, Folk folk) {
+		return LOADED && Casters.mayConvert(level, folk) && McaBridge.convertCaster(level, folk);
+	}
+
 	/** (0.5.53) The grown MCA villager nearest {@code player} (a few blocks), or null. */
 	static @Nullable PathfinderMob nearestGrown(ServerLevel level, ServerPlayer player) {
 		return LOADED ? McaBridge.nearestGrown(level, player) : null;
@@ -398,6 +408,65 @@ public final class McaCompat {
 	/** (0.7.148) With MCA, a camp's raider (or a cove's deckhand) at home becomes one of MCA's villagers ({@link Barbarians}). True if so (the folk is gone). */
 	static boolean becomeRaider(ServerLevel level, Folk folk) {
 		return LOADED && Barbarians.mayBecomeVillager(level, folk) && McaBridge.convertRaider(level, folk);
+	}
+
+	/**
+	 * (0.7.294) {@code e} leaves the world for good (a caravan's man gone home, a coachman whose trip is over): an MCA
+	 * villager is taken out of MCA's family tree too, so the comings and goings don't fill it.
+	 */
+	static void vanish(net.minecraft.world.entity.Entity e) {
+		if (LOADED) {
+			McaBridge.forgetVillager(e);
+		}
+		e.discard();
+	}
+
+	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */
+	static @Nullable Worker escort(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
+		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
+	}
+
+	/** (0.7.295) With MCA, a stranger of no settlement in {@code role} (a looter), kept to {@code radius} of {@code home}; or null. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob stranger(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, int role,
+		net.minecraft.core.BlockPos home, int radius) {
+		if (!LOADED) {
+			return null;
+		}
+		return McaBridge.stranger(level, at, yaw, role, home, radius);
+	}
+
+	/** (0.7.295) With MCA, an assassin ({@link Assassins}): a villager stranger at {@code at}, on his way to {@code mark}; or null. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob assassin(ServerLevel level, net.minecraft.core.BlockPos at, float yaw, net.minecraft.core.BlockPos mark) {
+		return LOADED ? McaBridge.stranger(level, at, yaw, Assassins.ASSASSIN, mark, 64) : null;
+	}
+
+	/**
+	 * (0.7.296) With MCA, {@code f}'s harbour shipwright ({@link Navies}) as an MCA villager by its pier at {@code shore}:
+	 * in {@code folk}'s place (his blood and spot; the folk is left for the caller), or new to the realm; or null.
+	 */
+	static net.minecraft.world.entity.@Nullable PathfinderMob shipwright(ServerLevel level, Faction f, @Nullable Folk folk, net.minecraft.core.BlockPos shore) {
+		return LOADED ? McaBridge.shipwright(level, f, folk, shore) : null;
+	}
+
+	/** (0.7.294) With MCA, one of {@code f}'s villagers to drive its horses ({@link Drivers}), or null. */
+	static @Nullable Worker driver(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
+		return LOADED ? McaBridge.driver(level, f, at, yaw, task, radius) : null;
+	}
+
+	/**
+	 * (0.7.295) With MCA, a raider just mustered ({@link Raids}) as an MCA villager in his place (a barbarian, a pirate,
+	 * an orc of the war band), or null (he stays folk).
+	 */
+	static net.minecraft.world.entity.@Nullable PathfinderMob raider(ServerLevel level, Folk folk) {
+		if (!LOADED) {
+			return null;
+		}
+		return Greenskins.brood(folk.role()) != null ? McaBridge.greenskinOf(level, folk) : McaBridge.raiderOf(level, folk);
+	}
+
+	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
+	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
+		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);
 	}
 
 	/**
@@ -449,7 +518,8 @@ public final class McaCompat {
 	/** (0.7.148) A fallen camp's MCA villagers scatter (gone, as its folk are). */
 	static void scatterRaiders(ServerLevel level, int camp, AABB box) {
 		if (LOADED) {
-			for (Worker w : McaBridge.workers(level, box, w -> Barbarians.villagerRole(w.role()) && w.factionId() == camp)) {
+			// ((0.7.292) its casters too)
+			for (Worker w : McaBridge.workers(level, box, w -> (Barbarians.villagerRole(w.role()) || Casters.isOffice(w.role())) && w.factionId() == camp)) {
 				level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, w.mob().getX(), w.mob().getY() + 1.0, w.mob().getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 				w.mob().discard();
 			}
@@ -486,7 +556,11 @@ public final class McaCompat {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
 			return Barbarians.villagerPrey(w.role(), w.factionId(), target);
 		}
-		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD || guard.level().getServer() == null) {
+		if (Assassins.revealed(target)) {
+			// (0.7.295) an assassin with his cloak off
+			return guard instanceof Worker g && (g.role() == Folk.GUARD || g.role() == Folk.ARCHER);
+		}
+		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD && w.role() != Folk.ARCHER || guard.level().getServer() == null) {
 			return false;
 		}
 		MinecraftServer server = guard.level().getServer();
@@ -497,6 +571,11 @@ public final class McaCompat {
 		}
 		if (target instanceof Folk folk) {
 			return folk.factionId() != faction && (folk.style() == FactionType.BARBARIAN || Relations.between(server, faction, folk.factionId()) == Relation.WAR);
+		}
+		if (target instanceof Worker other && (other.role() == Folk.GUARD || other.role() == Folk.ARCHER) && other.factionId() >= 0 && other.factionId() != faction
+			&& Relations.between(server, faction, other.factionId()) == Relation.WAR) {
+			// (0.7.295) a realm's at war: its guards, archers and soldiers, villagers now as its own are
+			return true;
 		}
 		// (0.7.148) a barbarian camp's MCA villager
 		return Barbarians.isCampVillager(target);

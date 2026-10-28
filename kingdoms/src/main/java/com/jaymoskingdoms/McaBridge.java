@@ -169,7 +169,8 @@ final class McaBridge {
 		EntityRelationship rx = x.getRelationships(), ry = y.getRelationships();
 		Gender gx = rx.getGender(), gy = ry.getGender();
 		boolean pair = gx == Gender.MALE && gy == Gender.FEMALE || gx == Gender.FEMALE && gy == Gender.MALE;
-		return pair && unattached(rx) && unattached(ry) && !rx.getFamilyEntry().isRelative(y.getUUID());
+		// (0.7.292) goblins and orcs only ever court their own
+		return pair && Greenskins.of(x) == Greenskins.of(y) && unattached(rx) && unattached(ry) && !rx.getFamilyEntry().isRelative(y.getUUID());
 	}
 
 	private static boolean unattached(EntityRelationship r) {
@@ -304,7 +305,7 @@ final class McaBridge {
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {
 		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER,
-			Professions.STABLEHAND, Professions.FARRIER, Professions.WIZARD)) {
+			Professions.STABLEHAND, Professions.FARRIER, Professions.WIZARD, Professions.NECROMANCER, Professions.SHAMAN, Professions.BLOOD_WITCH)) {
 			ResourceKey<VillagerProfession> key = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(profession).orElseThrow();
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
@@ -316,7 +317,8 @@ final class McaBridge {
 	}
 
 	static @Nullable Worker enlist(ServerLevel level, Faction f, int role, BlockPos at, BlockPos home, int radius) {
-		VillagerProfession job = role == Folk.GUARD ? (level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD) : Professions.of(role);
+		VillagerProfession job = role == Folk.GUARD ? (level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD)
+			: role == Folk.ARCHER ? ProfessionsMCA.ARCHER : Professions.of(role);
 		if (job == null) {
 			return null;
 		}
@@ -426,13 +428,96 @@ final class McaBridge {
 		return gifted != null ? gifted : pick.get(level.getRandom().nextInt(pick.size()));
 	}
 
+	/**
+	 * (0.7.294) {@link McaCompat#driver}: a man to drive {@code f}'s horses ({@link Drivers}), new to its people (so
+	 * nobody's taken from their work), at {@code at} on {@code task}, kept to {@code radius} of it.
+	 */
+	static @Nullable Worker driver(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(Vec3.atBottomCenterOf(at)).withAge(0)
+			.spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		Enlisted w = worker(villager);
+		w.enlist(Caravans.CARTER, f.id());
+		w.setTask(task);
+		villager.setHomeTo(at, radius);
+		return w;
+	}
+
+	/** (0.7.296) {@link McaCompat#shipwright}: a man of the harbour, a fisherman by MCA's reckoning, with an axe in hand and a shipwright's clothes. */
+	static @Nullable PathfinderMob shipwright(ServerLevel level, Faction f, @Nullable Folk folk, BlockPos shore) {
+		Vec3 at = folk != null ? folk.position() : Vec3.atBottomCenterOf(shore);
+		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(at).withAge(0).withProfession(job)
+			.spawn(folk != null ? EntitySpawnReason.CONVERSION : EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.x, at.y, at.z, folk != null ? folk.getYRot() : 0.0F, 0.0F);
+		if (folk != null) {
+			Heritage.Kind kind = VillagerHeritage.of(folk);
+			if (kind != null) {
+				VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+					: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+			}
+			level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		}
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_AXE));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(Pirates.SHIPWRIGHT, f.id());
+		villager.setHomeTo(shore, Navies.WRIGHT_RADIUS);
+		Uniforms.fit(villager);
+		return villager;
+	}
+
+	/** (0.7.294) {@link McaCompat#escort}: an MCA guard new to {@code f}'s people, on {@code task} at {@code at}. */
+	static @Nullable Worker escort(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0)
+			.withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		Enlisted w = worker(villager);
+		w.enlist(Folk.GUARD, f.id());
+		w.setTask(task);
+		villager.setHomeTo(at, radius);
+		return w;
+	}
+
+	/** (0.7.295) {@link McaCompat#assassin}, {@link McaCompat#stranger}: a grown villager of no settlement, enlisted to none in {@code role}. */
+	static @Nullable PathfinderMob stranger(ServerLevel level, BlockPos at, float yaw, int role, BlockPos home, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(role, -1);
+		villager.setHomeTo(home, radius);
+		return villager;
+	}
+
+	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */
+	static void forgetVillager(net.minecraft.world.entity.Entity e) {
+		if (e instanceof VillagerEntityMCA v && e.level() instanceof ServerLevel level) {
+			FamilyTree.get(level).remove(v.getUUID());
+		}
+	}
+
 	/** {@link McaCompat#becomeGuard}: an MCA guard (or archer) of the same blood takes {@code folk}'s post. */
 	static boolean convertGuard(ServerLevel level, Folk folk) {
 		Faction f = Factions.get(level.getServer(), folk.factionId());
 		if (f == null || !Workers.inPlace(f, Folk.GUARD)) {
 			return false;
 		}
-		VillagerProfession job = level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD;
+		// ((0.7.293) a wall archer an MCA archer, at his post: WallArchers)
+		boolean archer = folk.role() == Folk.ARCHER;
+		VillagerProfession job = archer || level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD;
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
@@ -443,8 +528,18 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
-		worker(villager).enlist(Folk.GUARD, f.id());
+		// ((0.7.295) a rider's horse is the villager's now: Cavalry)
+		net.minecraft.world.entity.Entity horse = Cavalry.horse(folk);
+		if (horse != null) {
+			folk.stopRiding();
+			villager.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), 0.0F);
+			villager.startRiding(horse);
+		}
+		worker(villager).enlist(archer ? Folk.ARCHER : Folk.GUARD, f.id());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		if (archer && horse == null) {
+			villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
 		return true;
@@ -455,10 +550,23 @@ final class McaBridge {
 	 * axe, a deckhand's cutlass), takes {@code folk}'s place in its camp, enlisted to it in the same role (on its roster as before).
 	 */
 	static boolean convertRaider(ServerLevel level, Folk folk) {
-		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD)
-			.spawn(EntitySpawnReason.CONVERSION);
+		return raiderOf(level, folk) != null;
+	}
+
+	/** (0.7.295) {@link #convertRaider}'s villager, or null. */
+	static @Nullable VillagerEntityMCA raiderOf(ServerLevel level, Folk folk) {
+		// (0.7.293) a chief: a man, with his own name; (0.7.296) so too a cove's captain ashore
+		boolean chief = folk.role() == Folk.CHIEF || folk.role() == Pirates.CAPTAIN;
+		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD);
+		if (chief) {
+			make = make.withGender(Gender.MALE);
+			if (folk.getCustomName() != null) {
+				make = make.withName(folk.getCustomName().getString());
+			}
+		}
+		VillagerEntityMCA villager = make.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
-			return false;
+			return null;
 		}
 		Heritage.Kind kind = VillagerHeritage.of(folk);
 		if (kind != null) {
@@ -482,12 +590,109 @@ final class McaBridge {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
-		Barbarians.harden(villager);
+		if (chief) {
+			// (0.7.293) his health, blows and toughness, on his throne's spot as the camp's leader
+			keepBuild(folk, villager);
+			villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+			villager.setPersistenceRequired();
+		} else {
+			Barbarians.harden(villager);
+		}
 		worker(villager).enlist(folk.role(), folk.factionId());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		if (chief) {
+			Uniforms.fit(villager);
+			takeLead(level, folk, villager);
+		}
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
-		return true;
+		return villager;
+	}
+
+	/**
+	 * (0.7.292) {@link McaCompat#becomeGreenskin}: an MCA villager of {@code folk}'s brood ({@link Greenskins}) takes its place
+	 * in its goblin village or orc camp: a guard (a slinger or ranger an archer), male, with a goblin's or an orc's name (a
+	 * king or warchief keeps his), its gear, toughness and size, enlisted to the camp in the same role (on its roster as
+	 * before). A king or warchief is the camp's leader in his folk's stead.
+	 */
+	static boolean convertGreenskin(ServerLevel level, Folk folk) {
+		return greenskinOf(level, folk) != null;
+	}
+
+	/** (0.7.295) {@link #convertGreenskin}'s villager, or null. */
+	static @Nullable VillagerEntityMCA greenskinOf(ServerLevel level, Folk folk) {
+		Heritage.Kind kind = Greenskins.brood(folk.role());
+		if (kind == null) {
+			return null;
+		}
+		boolean chief = Greenskins.chief(folk.role());
+		String name = chief && folk.getCustomName() != null ? folk.getCustomName().getString()
+			: Greenskins.name(kind, folk.getUUID().getLeastSignificantBits());
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withName(name).withPosition(folk.position()).withAge(0)
+			.withProfession(Greenskins.ranged(folk.role()) ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD).spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		broodBorn(villager, kind, chief);
+		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
+			EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				// worn, and kept in their pack too: MCA's guards dress from what they carry
+				villager.setItemSlot(slot, worn.copy());
+				if (slot != EquipmentSlot.OFFHAND) {
+					villager.getInventory().addItem(worn.copy());
+				}
+			}
+			villager.setDropChance(slot, 0.0F);
+		}
+		// their folk's toughness and size: a king's health, a warchief's blows and bulk, a goblin's smallness
+		keepBuild(folk, villager);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(folk.role(), folk.factionId());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		Uniforms.fit(villager);
+		takeLead(level, folk, villager);
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return villager;
+	}
+
+	/** (0.7.293) {@code villager} takes {@code folk}'s health, blows, toughness, steadiness, sight (where they're more) and size. */
+	static void keepBuild(PathfinderMob folk, PathfinderMob villager) {
+		for (var attribute : List.of(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+			net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS, net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
+			net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE, net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
+			var from = folk.getAttribute(attribute);
+			var to = villager.getAttribute(attribute);
+			if (from != null && to != null && (from.getBaseValue() > to.getBaseValue() || attribute == net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
+				to.setBaseValue(from.getBaseValue());
+			}
+		}
+		villager.setHealth(villager.getMaxHealth());
+	}
+
+	/** (0.7.293) If {@code folk} led its faction, {@code villager} leads it now. */
+	static void takeLead(ServerLevel level, PathfinderMob folk, PathfinderMob villager) {
+		MinecraftServer server = level.getServer();
+		Faction f = folk instanceof Worker w ? Factions.get(server, w.factionId()) : null;
+		if (f != null && f.leader().map(folk.getUUID()::equals).orElse(false)) {
+			Factions.update(server, f.id(), x -> x.withLeader(java.util.Optional.of(villager.getUUID())));
+		}
+	}
+
+	/**
+	 * (0.7.292) {@code villager} born a goblin or an orc ({@code kind}): their brood's body, a look of theirs; a king or
+	 * warchief ({@code chief}) the biggest and broadest of them.
+	 */
+	static void broodBorn(VillagerEntityMCA villager, Heritage.Kind kind, boolean chief) {
+		VillagerHeritage.born(villager, kind, null);
+		if (chief) {
+			BodySizes.Body body = BodySizes.of(kind);
+			villager.getGenetics().setGene(Genetics.SIZE, body.maxSize());
+			villager.getGenetics().setGene(Genetics.WIDTH, body.maxWidth());
+		}
 	}
 
 	/**
@@ -663,6 +868,25 @@ final class McaBridge {
 			Rulers.unfit(villager);
 			return false;
 		}
+		if (e.role() == Pirates.SHIPWRIGHT) {
+			// (0.7.296) a harbour's shipwright, while his realm stands and its harbour knows him
+			Faction f = Factions.get(level.getServer(), e.factionId());
+			if (f != null && !f.fallen() && Navies.isWright(level.getServer(), f.id(), villager)) {
+				return true;
+			}
+			e.discharge();
+			Uniforms.fit(villager);
+			return false;
+		}
+		if (e.role() == Caravans.CARTER) {
+			// (0.7.294) a realm's driver (Drivers), while it stands and he has a horse to drive
+			Faction f = Factions.get(level.getServer(), e.factionId());
+			if (f != null && !f.fallen() && !e.task().isEmpty()) {
+				return true;
+			}
+			e.discharge();
+			return false;
+		}
 		if (Barbarians.villagerRole(e.role())) {
 			// (0.7.148) a camp's (or cove's) villager, while it stands and they're its guard; a fallen camp's are scattered
 			Faction camp = Factions.get(level.getServer(), e.factionId());
@@ -679,7 +903,10 @@ final class McaBridge {
 		MinecraftServer server = level.getServer();
 		if (e.role() >= 0) {
 			Faction f = Factions.get(server, e.factionId());
-			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role());
+			// ((0.7.292) an orc camp's shaman wears a shaman's profession under a role of his own)
+			// ((0.7.293) a wall archer is an MCA archer, whom MCA counts a guard)
+			boolean fits = job >= 0 && (Folk.isBuilder(e.role()) ? Folk.isBuilder(job) : job == e.role() || Professions.of(e.role()) == villager.getProfession()
+				|| e.role() == Folk.ARCHER && villager.getProfession() == ProfessionsMCA.ARCHER);
 			if (fits && f != null && !f.fallen() && !villager.isBaby()) {
 				return true;
 			}
@@ -693,8 +920,9 @@ final class McaBridge {
 			}
 			return false;
 		}
-		if (job == Sorcery.WIZARD) {
+		if (Sorcery.isCaster(job)) {
 			// (0.5.53) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
+			// ((0.7.291) and only a court or a camp a necromancer, shaman or blood witch)
 			noTrade(villager);
 			return false;
 		}
@@ -794,10 +1022,106 @@ final class McaBridge {
 		Castle.Keep keep = Factions.keep(server, f.id());
 		villager.setHomeTo(keep != null ? keep.hall() : f.seat(), Folk.HOME_RADIUS);
 		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(Sorcery.WIZARD, 1)));
+		// (0.7.291) in our robes in their realm's colour
+		Uniforms.fit(villager);
 		level.sendParticles(ParticleTypes.ENCHANT, villager.getX(), villager.getY() + 1.2, villager.getZ(), 40, 0.4, 0.8, 0.4, 0.6);
 		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
 		return w;
+	}
+
+	// ---- court and camp casters (0.7.291) ------------------------------------------------------------------------------
+
+	/**
+	 * {@link McaCompat#enlistCaster}: {@code f}'s new {@code role} ({@link Casters}): {@code chosen}, else one of a
+	 * realm's villagers with no work, else (and always for a camp) someone who moves in, by its hall or its fire.
+	 */
+	static @Nullable Worker enlistCaster(ServerLevel level, Faction f, int role, @Nullable PathfinderMob chosen) {
+		VillagerProfession job = Professions.of(role);
+		if (job == null) {
+			return null;
+		}
+		MinecraftServer server = level.getServer();
+		Castle.Keep keep = Factions.keep(server, f.id());
+		BlockPos home = keep != null && f.type().isRealm() ? keep.hall() : f.seat();
+		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : f.type().isRealm() ? candidate(level, f, role) : null;
+		if (villager == null) {
+			BlockPos open = ShutIn.openGround(level, home);
+			Heritage.Kind brood = Greenskins.brood(role);
+			VillagerFactory make = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(open != null ? open : home)).withAge(0).withProfession(job);
+			if (brood != null) {
+				// (0.7.292) an orc camp's new shaman is an orc
+				make = make.withGender(Gender.MALE).withName(Greenskins.name(brood, level.getRandom().nextLong()));
+			}
+			villager = make.spawn(EntitySpawnReason.MOB_SUMMONED);
+			if (villager == null) {
+				return null;
+			}
+			if (brood != null) {
+				broodBorn(villager, brood, false);
+			}
+		}
+		Enlisted w = worker(villager);
+		if (w.role() >= 0) {
+			// (an old hand leaves their work for the office: that place is to be filled)
+			Economy.lost(server, w.factionId(), w.role());
+			w.discharge();
+		}
+		takeOffice(villager, role, f.id(), home, keep != null && f.type().isRealm() ? 8 : Folk.HOME_RADIUS);
+		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(role, 1)));
+		level.sendParticles(role == Sorcery.SHAMAN ? ParticleTypes.FLAME : ParticleTypes.SOUL, villager.getX(), villager.getY() + 1.2, villager.getZ(),
+			24, 0.4, 0.8, 0.4, 0.03);
+		level.playSound(null, villager.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.NEUTRAL, 0.7F, 1.1F);
+		JaymosKingdoms.LOGGER.debug("{} made {} its {}", f.name(), villager.getName().getString(), Folk.roleName(role));
+		return w;
+	}
+
+	/** {@link McaCompat#becomeCaster}: an MCA villager of the same blood takes {@code folk}'s office (and its roster place) where it stands. */
+	static boolean convertCaster(ServerLevel level, Folk folk) {
+		VillagerProfession job = Professions.of(folk.role());
+		if (job == null) {
+			return false;
+		}
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
+			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		Heritage.Kind brood = Greenskins.brood(folk.role());
+		if (brood != null) {
+			// (0.7.292) an orc camp's shaman is an orc
+			broodBorn(villager, brood, false);
+		} else if (kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		takeOffice(villager, folk.role(), folk.factionId(), folk.getHomePosition(), folk.getHomeRadius());
+		// his thralls go with the folk that raised them
+		Thralls.release(level, folk.getUUID());
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
+	}
+
+	/** {@code villager} takes {@code role} for {@code faction}: the profession, the staff, a caster's toughness, their robe. */
+	private static void takeOffice(VillagerEntityMCA villager, int role, int faction, BlockPos home, int radius) {
+		VillagerProfession job = Professions.of(role);
+		if (job != null && villager.getProfession() != job) {
+			villager.setProfession(job);
+		}
+		worker(villager).enlist(role, faction);
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Casters.staff(role)));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		var health = villager.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+		if (health != null && health.getBaseValue() < Casters.health(role)) {
+			health.setBaseValue(Casters.health(role));
+			villager.setHealth(villager.getMaxHealth());
+		}
+		villager.setPersistenceRequired();
+		villager.setHomeTo(home, radius);
+		Uniforms.fit(villager);
 	}
 
 	/** (0.5.62) {@code villager}, found on a floating island, made its hermit wizard ({@link Hermits}): no kingdom's. */

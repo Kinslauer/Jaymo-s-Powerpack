@@ -29,7 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.103, Andy: "you get a player's power or villager if you absorb them", then "maybe they just get the power's R
+ * (0.17.108, Andy: "you get a player's power or villager if you absorb them", then "maybe they just get the power's R
  * ability, and keep their power if they have one", and of running it whole behind that one key: "do the other option")
  * A Rubber-folk (Jaymo's Kingdoms' {@code RubberFolk}, by reflection) who swallows a downed player or a gifted villager
  * keeps their own power, and the swallowed one runs in them too ({@link #SWALLOWED}): its tick every tick (its passives

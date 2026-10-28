@@ -213,6 +213,8 @@ public final class VillagerHeritage {
 				case RUBBERFOLK -> W_RUBBERFOLK * (biome.is(BiomeTags.IS_JUNGLE) || biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) ? LEAN : 1);
 				case DIVINE -> W_DIVINE * (pos.getY() >= HIGH_Y ? LEAN : 1);
 				case BIOBUILT -> 0;
+				// (0.7.292) goblins and orcs are only ever born to their own (Greenskins)
+				case GOBLIN, ORC -> 0;
 			};
 			weights[i] = w;
 			total += w;

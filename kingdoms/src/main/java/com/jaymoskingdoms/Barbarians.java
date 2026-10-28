@@ -53,8 +53,9 @@ import net.minecraft.world.level.Level;
  * <li>With Minecraft Comes Alive, a camp's raiders at home (and a pirate cove's deckhands ashore) are MCA villagers ({@link #mayBecomeVillager},
  * {@code McaBridge.convertRaider}): MCA guards in the camp's hides and axes, with their own names, faces, heritage
  * and talk, enlisted to the camp as {@link Folk#BARBARIAN}s. They fight through MCA's guard brain
- * ({@code McaGuardFoesMixin}, {@link McaCompat#foe}) with the same {@link #prey}. The chief, and the war bands sent
- * on raids, stay folk.</li>
+ * ({@code McaGuardFoesMixin}, {@link McaCompat#foe}) with the same {@link #prey}. (0.7.293) The chief too, on his
+ * throne: a man with his own name, health and blows, his boss bar and rally ({@link CampChiefs}). The war bands sent
+ * on raids stay folk.</li>
  * </ul>
  */
 public final class Barbarians {
@@ -144,9 +145,9 @@ public final class Barbarians {
 		return folk.style() == FactionType.BARBARIAN || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF;
 	}
 
-	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand. */
+	/** (0.7.148) An MCA villager of a camp (not a folk): a barbarian camp's raider, a pirate cove's deckhand; (0.7.291) its casters. */
 	public static boolean isCampVillager(Entity e) {
-		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role());
+		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role()) || Casters.campCaster(e);
 	}
 
 	/**
@@ -155,12 +156,14 @@ public final class Barbarians {
 	 * and bombardiers ashore too (their pistols and dynamite now run on a villager's body: {@code Pirates.villagerStep}).
 	 */
 	static boolean villagerRole(int role) {
-		return role == Folk.BARBARIAN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER;
+		// ((0.7.292) and a goblin village's and an orc camp's own, Greenskins; (0.7.293) and the chief, CampChiefs)
+		// ((0.7.296) and a cove's captain ashore, waiting for his ship)
+		return role == Folk.BARBARIAN || role == Folk.CHIEF || role == Pirates.CAPTAIN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER || Greenskins.isRole(role);
 	}
 
 	/** (0.7.148) What a camp's villager of {@code role} goes for: a raider's prey, or a pirate's. */
 	static boolean villagerPrey(int role, int camp, LivingEntity target) {
-		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : prey(camp, target);
+		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : Greenskins.brood(role) != null ? Greenskins.prey(role, camp, target) : prey(camp, target);
 	}
 
 	/** It fights for a camp (a raider or the chief). */

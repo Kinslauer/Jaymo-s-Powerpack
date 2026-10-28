@@ -564,8 +564,20 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.7.148) with MCA, a camp's raiders (and a cove's deckhands) at home are villagers: an MCA guard of its blood takes this one's place
 			return;
 		}
+		if (this.tickCount % 20 == 0 && Greenskins.isRole(this.role()) && McaCompat.becomeGreenskin(level, this)) {
+			// (0.7.292) with MCA, a goblin village's and an orc camp's own at home are villagers of their brood
+			return;
+		}
 		if (this.tickCount % 20 == 0 && Rulers.guardMayConvert(level, this) && McaCompat.becomeGuard(level, this)) {
 			// (0.7.138) with MCA, a realm's posted guards are its villagers: an MCA guard of its blood takes this post
+			return;
+		}
+		if (this.tickCount % 20 == 0 && this.role() == Pirates.SHIPWRIGHT && Navies.becomeVillager(level, this)) {
+			// (0.7.296) with MCA, a harbour's shipwright is a villager: a man of its blood takes his pier
+			return;
+		}
+		if (this.tickCount % 20 == 0 && Casters.isOffice(this.role()) && McaCompat.becomeCaster(level, this)) {
+			// (0.7.291) with MCA, a court's necromancer and a camp's casters are villagers: one of its blood takes this office
 			return;
 		}
 		if (this.tickCount % 20 == 0 && this.role() == Sorcery.WIZARD && CourtWizards.retire(level, this)) {

@@ -84,7 +84,8 @@ final class Javelins {
 
 	/** (0.7.184) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */
 	static boolean thrower(Worker w) {
-		return w.role() == Folk.BARBARIAN;
+		// ((0.7.292) and an orc camp's grunts; (0.7.293) and a chief)
+		return w.role() == Folk.BARBARIAN || w.role() == Folk.CHIEF || w.role() == Orcs.GRUNT;
 	}
 
 	/** (0.5.64) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
@@ -107,7 +108,8 @@ final class Javelins {
 	}
 
 	private static void tick(ServerLevel level, PathfinderMob folk, int faction) {
-		LivingEntity foe = folk.getTarget();
+		// ((0.7.292) a villager's foe is its brain's)
+		LivingEntity foe = Rulers.target(folk);
 		if (foe == null || !foe.isAlive() || folk.isPassenger() || Downed.isDowned(folk)) {
 			return;
 		}
@@ -194,6 +196,17 @@ final class Javelins {
 	static boolean harms(LivingEntity thrower, LivingEntity victim) {
 		if (thrower instanceof Folk folk) {
 			return harms(folk, victim);
+		}
+		if (thrower instanceof Worker w && !Barbarians.isCampVillager(thrower)) {
+			// (0.7.295) a realm's MCA villager (a gunner at his cannon): never his own side, nor the villagers and golems
+			// he guards; others only if they're his foes
+			if (victim == thrower || victim instanceof Worker o && o.factionId() == w.factionId() || victim instanceof Villager || victim instanceof IronGolem) {
+				return false;
+			}
+			if (victim instanceof Player p) {
+				return !p.isCreative();
+			}
+			return victim instanceof net.minecraft.world.entity.monster.Enemy || McaCompat.foe(thrower, victim);
 		}
 		if (victim == thrower || Barbarians.isCampVillager(victim)) {
 			return false;

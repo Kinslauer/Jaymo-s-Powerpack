@@ -435,7 +435,7 @@ public final class Royals {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, king.getYRot());
 		Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 		// (0.5.14) wider apart on horseback, and further back behind a carriage
-		double spread = guard instanceof Folk f && Cavalry.mounted(f) ? 1.7 : 1.0;
+		double spread = Cavalry.mounted(guard) ? 1.7 : 1.0;
 		double back = (Carriages.riding(king) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
 		double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;
 		Vec3 place = king.position().subtract(facing.scale(back)).add(right.scale(side));

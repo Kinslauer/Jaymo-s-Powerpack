@@ -82,7 +82,7 @@ import net.minecraft.world.phys.Vec3;
  * tournament, for {@link #PRICE_EMERALDS} emeralds in your hand or {@link #PRICE_TP} TP (sneak and right-click), or by the
  * Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}). Nobody is stuck: after {@link #STAY_TICKS} the Other World lets go.</li>
  * </ul>
- * (0.17.103, Andy: "you respawn in the afterlife, you can only leave with one of those ways") The dead are held: a death at the
+ * (0.17.108, Andy: "you respawn in the afterlife, you can only leave with one of those ways") The dead are held: a death at the
  * site wakes him there again (the same stay, the same way home), and leaving any other way (falling off the island, a pearl,
  * a power, a command) brings him straight back to the hall ({@link #hold}). Only the fortune teller, the wish and the
  * {@link #STAY_TICKS} wait let him go. A living visitor is free to come and go as before.
@@ -91,7 +91,7 @@ public final class ZFighterAfterlife {
 	// ---- tuning ----
 	/** A death's move is dropped if the respawn comes later than this (ticks), so a revived player is not carried off by an old death. */
 	static final long PENDING_TICKS = 24000L;
-	/** (0.17.103) One of the dead this far below the floor (blocks) has fallen off, and is taken back to the hall. */
+	/** (0.17.108) One of the dead this far below the floor (blocks) has fallen off, and is taken back to the hall. */
 	static final int FALL_LIMIT = 24;
 	/** How long he stays at most (ticks) before the Other World lets him go. */
 	static final long STAY_TICKS = 36000L;
@@ -154,7 +154,7 @@ public final class ZFighterAfterlife {
 	}
 
 	/**
-	 * The game time he arrived, while he is among the dead. Synced to everyone (the halo) and saved; (0.17.103) kept through a
+	 * The game time he arrived, while he is among the dead. Synced to everyone (the halo) and saved; (0.17.108) kept through a
 	 * death there, as are the three below, so dying again among the dead doesn't free him.
 	 */
 	public static final AttachmentType<Long> STAY = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_stay"),
@@ -190,7 +190,7 @@ public final class ZFighterAfterlife {
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
-				// (0.17.103) and one of the dead dying again wakes among the dead again
+				// (0.17.108) and one of the dead dying again wakes among the dead again
 				if (ZFighterRealism.afterlife() && !player.isSpectator() && (among(player) || !inOtherWorld(player)
 					&& Powers.has(player, ZFighterPower.INSTANCE))) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
@@ -325,7 +325,7 @@ public final class ZFighterAfterlife {
 	}
 
 	/**
-	 * (0.17.103) One of the dead got away some other way than the three (fell off the island, a pearl, a power, a command): the
+	 * (0.17.108) One of the dead got away some other way than the three (fell off the island, a pearl, a power, a command): the
 	 * Other World takes him straight back to the hall.
 	 */
 	private static void hold(MinecraftServer server, ServerPlayer player) {
@@ -353,7 +353,7 @@ public final class ZFighterAfterlife {
 			build(world);
 			world.setAttached(BUILT, true);
 		}
-		// (0.17.103) dying again among the dead keeps the stay he had (its clock, his way home, what he won)
+		// (0.17.108) dying again among the dead keeps the stay he had (its clock, his way home, what he won)
 		if (!among(player)) {
 			player.setAttached(HOME, new Home(player.level().dimension(), player.blockPosition()));
 			player.setAttached(STAY, player.level().getGameTime());

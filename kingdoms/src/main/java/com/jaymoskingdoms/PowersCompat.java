@@ -948,12 +948,12 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.292) Powers' {@code SwallowedPower.take(ServerPlayer, LivingEntity)}. */
+	/** (0.7.297) Powers' {@code SwallowedPower.take(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle takePower;
 	private static boolean lookedForTake;
 
 	/**
-	 * (0.7.292) A Rubber-folk swallowed {@code body} (a player, or a gifted villager): {@code taker} takes on its power, in
+	 * (0.7.297) A Rubber-folk swallowed {@code body} (a player, or a gifted villager): {@code taker} takes on its power, in
 	 * place of the last one they took. Its name, or null if it had none (or without Powers).
 	 */
 	public static net.minecraft.network.chat.@Nullable Component takePower(net.minecraft.server.level.ServerPlayer taker, LivingEntity body) {

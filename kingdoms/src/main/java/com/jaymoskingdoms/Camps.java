@@ -220,6 +220,9 @@ public final class Camps {
 				} else if (Raids.isRaider(folk)) {
 					Raids.raiderDied(level, folk, folk.factionId(), source, true);
 				}
+			} else if (entity instanceof Worker w && entity.level() instanceof ServerLevel level && Raids.isRaider(entity)) {
+				// (0.7.295) a raider who's an MCA villager
+				Raids.raiderDied(level, entity, w.factionId(), source, true);
 			} else if (entity.level() instanceof ServerLevel level && Illagers.isCampIllager(entity)) {
 				Illagers.died(level, entity, source);
 			}

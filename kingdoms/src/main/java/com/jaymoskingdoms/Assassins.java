@@ -229,6 +229,11 @@ final class Assassins {
 		// (0.7.175) a ruler crowned from the townsfolk is cured and warned as a folk ruler was (a cure takes the click;
 		// a warning leaves MCA's menu to open)
 		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer p && !(entity instanceof Folk) && is(entity)) {
+				// (0.7.295) a villager stranger is spoken to, not MCA's menu
+				stranger(p, (PathfinderMob)entity);
+				return net.minecraft.world.InteractionResult.SUCCESS;
+			}
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer p) || entity instanceof Folk
 				|| !(entity instanceof PathfinderMob ruler) || !Rulers.is(ruler)) {
 				return net.minecraft.world.InteractionResult.PASS;
@@ -238,7 +243,8 @@ final class Assassins {
 	}
 
 	static boolean is(Entity e) {
-		return e instanceof Folk f && f.role() == ASSASSIN;
+		// ((0.7.295) a folk or a villager)
+		return e instanceof Worker w && w.role() == ASSASSIN;
 	}
 
 	private static List<Contract> contracts(MinecraftServer server) {
@@ -486,19 +492,26 @@ final class Assassins {
 		if (spot == null) {
 			return;
 		}
-		Folk a = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		// (0.7.295) with MCA, a villager stranger (Andy, retiring the folk: "all mca please")
+		PathfinderMob a = McaCompat.assassin(level, spot, random.nextFloat() * 360.0F, victim.blockPosition());
 		if (a == null) {
-			return;
+			Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+			if (folk == null) {
+				return;
+			}
+			folk.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+			folk.setup(ASSASSIN, dress, victim.blockPosition(), 64);
+			folk.setFactionId(-1);
+			a = folk;
 		}
-		a.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-		a.setup(ASSASSIN, dress, victim.blockPosition(), 64);
-		a.setFactionId(-1);
 		a.getAttribute(Attributes.MAX_HEALTH).setBaseValue(HEALTH);
 		a.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(DAMAGE);
 		a.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(SPEED);
 		a.setHealth((float)HEALTH);
 		disguise(a);
-		level.addFreshEntity(a);
+		if (a instanceof Folk) {
+			level.addFreshEntity(a);
+		}
 		PLOTS.put(a.getUUID(), new Plot(c, a.getUUID(), victim.getUUID(), level.getGameTime()));
 		remove(server, c.target());
 		JaymosKingdoms.LOGGER.info("An assassin comes for {} at {}", victim.getName().getString(), victim.blockPosition());
@@ -526,7 +539,7 @@ final class Assassins {
 	}
 
 	/** Plain clothes: nothing in his hands, nothing on, a stranger's name. */
-	static void disguise(Folk a) {
+	static void disguise(PathfinderMob a) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			a.setItemSlot(slot, ItemStack.EMPTY);
 			a.setDropChance(slot, 0.0F);
@@ -535,7 +548,7 @@ final class Assassins {
 	}
 
 	/** The cloak off: black leathers, a blade (0.7.101: a hidden blade, sprung from his bracer). */
-	private static void reveal(ServerLevel level, Folk a) {
+	private static void reveal(ServerLevel level, PathfinderMob a) {
 		a.setItemSlot(EquipmentSlot.HEAD, leathers(Items.LEATHER_HELMET));
 		a.setItemSlot(EquipmentSlot.CHEST, leathers(Items.LEATHER_CHESTPLATE));
 		a.setItemSlot(EquipmentSlot.LEGS, leathers(Items.LEATHER_LEGGINGS));
@@ -568,18 +581,18 @@ final class Assassins {
 	}
 
 	/** The assassin's own doings, each tick (from {@link Folk#customServerAiStep}). */
-	static void act(ServerLevel level, Folk a) {
+	static void act(ServerLevel level, PathfinderMob a) {
 		Plot p = PLOTS.get(a.getUUID());
 		if (p == null) {
 			// (from before a restart: he slips away)
-			a.discard();
+			McaCompat.vanish(a);
 			return;
 		}
 		long now = level.getGameTime();
 		LivingEntity victim = victim(level, p);
 		switch (p.stage) {
 			case STALK -> {
-				a.setTarget(null);
+				aim(a, null);
 				if (victim == null || now - p.stageAt > STALK_TICKS) {
 					// lost his mark: he melts back into the crowd
 					p.stage = Stage.FLEE;
@@ -613,17 +626,22 @@ final class Assassins {
 					flee(level, a, p, now);
 					return;
 				}
-				if (a.getTarget() != victim) {
-					a.setTarget(victim);
+				if (a instanceof Folk folk) {
+					if (folk.getTarget() != victim) {
+						folk.setTarget(victim);
+					}
+				} else {
+					// (0.7.295) a villager's blade, his own doing (his brain is set aside)
+					fight(level, a, victim);
 				}
 			}
 			case FLEE -> {
-				a.setTarget(null);
+				aim(a, null);
 				if (now - p.stageAt > FLEE_TICKS || a.position().distanceTo(p.struckAt) > FLEE_AWAY) {
 					level.sendParticles(ParticleTypes.LARGE_SMOKE, a.getX(), a.getY() + 1.0, a.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 					p.gone = true;
 					PLOTS.remove(a.getUUID());
-					a.discard();
+					McaCompat.vanish(a);
 					settle(level, p);
 					return;
 				}
@@ -639,7 +657,7 @@ final class Assassins {
 		}
 	}
 
-	private static void strike(ServerLevel level, Folk a, Plot p, LivingEntity victim, long now) {
+	private static void strike(ServerLevel level, PathfinderMob a, Plot p, LivingEntity victim, long now) {
 		reveal(level, a);
 		a.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		a.getLookControl().setLookAt(victim, 30.0F, 30.0F);
@@ -676,17 +694,17 @@ final class Assassins {
 		}
 		p.stage = Stage.FIGHT;
 		p.stageAt = now;
-		a.setTarget(victim);
+		aim(a, victim);
 	}
 
 	/** Smoke, and he runs. */
-	private static void flee(ServerLevel level, Folk a, Plot p, long now) {
+	private static void flee(ServerLevel level, PathfinderMob a, Plot p, long now) {
 		p.stage = Stage.FLEE;
 		p.stageAt = now;
 		if (p.struckAt == Vec3.ZERO) {
 			p.struckAt = a.position();
 		}
-		a.setTarget(null);
+		aim(a, null);
 		a.getNavigation().stop();
 		a.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, SMOKE_TICKS, 0, false, false));
 		a.addEffect(new MobEffectInstance(MobEffects.SPEED, FLEE_TICKS, 1, false, false));
@@ -696,19 +714,48 @@ final class Assassins {
 	}
 
 	/** A folk ruler fights back; (0.7.175) a villager crowned runs, as villagers do ({@link Rulers#step}). */
-	private static void defend(PathfinderMob ruler, Folk a) {
+	private static void defend(PathfinderMob ruler, PathfinderMob a) {
 		if (ruler instanceof Folk) {
 			ruler.setTarget(a);
 		}
 	}
 
 	/** The ruler's guards come running (folk, and (0.7.175) MCA guards). */
-	private static void callGuards(ServerLevel level, PathfinderMob ruler, Folk a) {
+	private static void callGuards(ServerLevel level, PathfinderMob ruler, PathfinderMob a) {
 		int faction = Rulers.faction(ruler);
 		for (Worker g : Workers.near(level, ruler.getBoundingBox().inflate(GUARD_CALL),
 			g -> g.isAlive() && g.mob() != ruler && g.factionId() == faction && (g instanceof Folk folk ? folk.combatant() : g.role() == Folk.GUARD))) {
 			Rulers.charge(g.mob(), a);
 		}
+	}
+
+	/** (0.7.295) A folk assassin's foe set (a villager's is his own doing: {@link #fight}). */
+	private static void aim(PathfinderMob a, @Nullable LivingEntity foe) {
+		if (a instanceof Folk folk) {
+			folk.setTarget(foe);
+		}
+	}
+
+	/** (0.7.295) A villager assassin closes with {@code victim} and cuts at him, once a second. */
+	private static void fight(ServerLevel level, PathfinderMob a, LivingEntity victim) {
+		a.getLookControl().setLookAt(victim, 30.0F, 30.0F);
+		if (a.distanceTo(victim) > STAB_REACH) {
+			if (a.tickCount % 10 == 0 || a.getNavigation().isDone()) {
+				a.getNavigation().moveTo(victim, 1.2);
+			}
+			return;
+		}
+		a.getNavigation().stop();
+		if (a.tickCount % 20 == 0) {
+			a.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			a.doHurtTarget(level, victim);
+		}
+	}
+
+	/** (0.7.295) {@code e} is an assassin with his cloak off (one the guards may know for what he is). */
+	static boolean revealed(Entity e) {
+		Plot p = is(e) ? PLOTS.get(e.getUUID()) : null;
+		return p != null && p.stage != Stage.STALK;
 	}
 
 	private static void witnesses(ServerLevel level, Entity at, Component message) {
@@ -804,19 +851,25 @@ final class Assassins {
 		ServerLevel level = (ServerLevel)player.level();
 		MinecraftServer server = level.getServer();
 		if (is(folk)) {
-			Plot p = PLOTS.get(folk.getUUID());
-			if (p != null && p.stage == Stage.STALK) {
-				Speech.say(level, folk, Component.translatable("assassin.jaymoskingdoms.stranger." + level.getRandom().nextInt(3)), Speech.WHITE, 8.0);
-				if (Skills.of(player).level(Skills.Pillar.STEALTH) >= ROGUE_SENSE_LEVEL) {
-					player.sendOverlayMessage(Component.translatable("assassin.jaymoskingdoms.stranger.known").withStyle(ChatFormatting.DARK_RED));
-				}
-			}
+			stranger(player, folk);
 			return true;
 		}
 		if (!folk.leader()) {
 			return false;
 		}
 		return ruler(player, folk, held);
+	}
+
+	/** {@code player} speaks to a stranger (an assassin still in his cloak): small talk, or a rogue knows him. */
+	private static void stranger(ServerPlayer player, PathfinderMob folk) {
+		ServerLevel level = (ServerLevel)player.level();
+		Plot p = PLOTS.get(folk.getUUID());
+		if (p != null && p.stage == Stage.STALK) {
+			Speech.say(level, folk, Component.translatable("assassin.jaymoskingdoms.stranger." + level.getRandom().nextInt(3)), Speech.WHITE, 8.0);
+			if (Skills.of(player).level(Skills.Pillar.STEALTH) >= ROGUE_SENSE_LEVEL) {
+				player.sendOverlayMessage(Component.translatable("assassin.jaymoskingdoms.stranger.known").withStyle(ChatFormatting.DARK_RED));
+			}
+		}
 	}
 
 	/** {@code player} right-clicks ruler {@code folk} (folk, or (0.7.175) a villager crowned): cured of a poison, or warned. */
@@ -879,7 +932,7 @@ final class Assassins {
 	}
 
 	/** The assassin falls (from {@link Folk#die}): his purse and his contract drop, and whoever cut him down is thanked. */
-	static void died(ServerLevel level, Folk a, DamageSource source) {
+	static void died(ServerLevel level, PathfinderMob a, DamageSource source) {
 		if (!is(a)) {
 			return;
 		}
@@ -978,7 +1031,7 @@ final class Assassins {
 	/** A marked player died: if the blade was at them, he's done; he slips off, and they're told the price was paid. */
 	private static void playerDied(ServerLevel level, ServerPlayer player) {
 		for (Plot p : PLOTS.values()) {
-			if (p.victim.equals(player.getUUID()) && p.stage == Stage.FIGHT && level.getEntity(p.assassin) instanceof Folk a) {
+			if (p.victim.equals(player.getUUID()) && p.stage == Stage.FIGHT && level.getEntity(p.assassin) instanceof PathfinderMob a) {
 				flee(level, a, p, level.getGameTime());
 				Faction hirer = p.contract.hirer() >= 0 ? Factions.get(level.getServer(), p.contract.hirer()) : null;
 				player.sendSystemMessage(Component.translatable(hirer != null ? "assassin.jaymoskingdoms.player.killed.hirer" : "assassin.jaymoskingdoms.player.killed",

@@ -46,7 +46,7 @@ import net.minecraft.world.level.block.Blocks;
  * longer arm and not a drawn one), a lost limb grows back on its own ({@link #REGROW_EVERY}, as a Verdant's does, through
  * Jaymo's Powers' dismemberment), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
  * that lies downed, and press the heritage key close by ((0.7.288) a toggle, {@link HeritageHold}: the hand on it, pulses
- * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}). (0.7.292, Andy: "rubber absorb should take
+ * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}). (0.7.297, Andy: "rubber absorb should take
  * the absorbed's powers/ or abilities. they basically adopt their stats into themselves. but only one at a time") They
  * take on the last thing they swallowed ({@link #ADOPTED}): a share of its health, blow, armour and pace, and what it
  * could do (fire, water, flight, night eyes, a spring), until the next swallow replaces it or they die.
@@ -71,19 +71,19 @@ public final class RubberFolk {
 	public static final int ABSORB_TICKS = 60;
 	static final int ABSORB_FOOD = 2;
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
-	/** (0.7.292) Jaymo's Kitchen lays no body down for one tagged this (a swallowed player or villager). */
+	/** (0.7.297) Jaymo's Kitchen lays no body down for one tagged this (a swallowed player or villager). */
 	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;
 	/**
-	 * (0.7.292) Adopting: the share of the swallowed's health, blow and armour they take on, the most of each (health
+	 * (0.7.297) Adopting: the share of the swallowed's health, blow and armour they take on, the most of each (health
 	 * points, damage, armour points), and its pace against a usual mob's ({@link #PACE_USUAL}) as a share, at most this far
 	 * either way. A gift lasts this long and is put back this often (ticks), so it never runs out while adopted.
 	 */
 	static final float ADOPT_SHARE = 0.5F, ADOPT_HEALTH_MAX = 10.0F, ADOPT_DAMAGE_MAX = 4.0F, ADOPT_ARMOR_MAX = 4.0F;
 	static final double PACE_USUAL = 0.25, ADOPT_PACE_MAX = 0.2;
 	static final int GIFT_TICKS = 220, GIFT_EVERY = 100;
-	/** (0.7.292) What a swallowed thing could do, as bits of {@link Adopted#gifts}. */
+	/** (0.7.297) What a swallowed thing could do, as bits of {@link Adopted#gifts}. */
 	static final int FIRE = 1, WATER = 2, FLIGHT = 4, NIGHT = 8, SPRING = 16;
 	/** A sweet thing mends this much; a baked one from Kitchen, and a slice of cake. */
 	static final float SWEET_HEAL = 4.0F, KITCHEN_HEAL = 6.0F, CAKE_HEAL = 4.0F;
@@ -91,7 +91,7 @@ public final class RubberFolk {
 	private static final DustParticleOptions PINK = new DustParticleOptions(0xF08CB8, 0.8F);
 
 	/**
-	 * (0.7.292) The last thing swallowed and what was taken from it: its type (for the name), the health, blow, armour and
+	 * (0.7.297) The last thing swallowed and what was taken from it: its type (for the name), the health, blow, armour and
 	 * pace added, and its gifts ({@link #FIRE}...). Saved; lost on death.
 	 */
 	record Adopted(String type, float health, float damage, float armor, float pace, int gifts) {
@@ -116,7 +116,7 @@ public final class RubberFolk {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(RubberFolk::tick);
-		// (0.7.292) a swallowed player wakes whole, and their next death leaves a body as usual
+		// (0.7.297) a swallowed player wakes whole, and their next death leaves a body as usual
 		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> newPlayer.removeTag(NO_CORPSE_TAG));
 		// a slice of cake, eaten (it can only be eaten hungry, as in vanilla)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -136,7 +136,7 @@ public final class RubberFolk {
 	}
 
 	/**
-	 * The stretch and the burn, and (0.7.292) what they've adopted, on {@code player} as they stand (taken off anyone who
+	 * The stretch and the burn, and (0.7.297) what they've adopted, on {@code player} as they stand (taken off anyone who
 	 * isn't Rubber-folk).
 	 */
 	static void attributes(ServerPlayer player, Heritage.Kind kind) {
@@ -154,7 +154,7 @@ public final class RubberFolk {
 		}
 	}
 
-	/** (0.7.292) What swallowing {@code foe} gives: a share of its stats, and what it could do. */
+	/** (0.7.297) What swallowing {@code foe} gives: a share of its stats, and what it could do. */
 	static Adopted adopt(LivingEntity foe) {
 		float health = Math.min(ADOPT_HEALTH_MAX, (float)base(foe, Attributes.MAX_HEALTH) * ADOPT_SHARE);
 		float damage = Math.min(ADOPT_DAMAGE_MAX, (float)base(foe, Attributes.ATTACK_DAMAGE) * ADOPT_SHARE);
@@ -189,7 +189,7 @@ public final class RubberFolk {
 		return instance == null ? 0.0 : instance.getBaseValue();
 	}
 
-	/** (0.7.292) Keeps what they adopted could do going: fire, water, flight (a slow fall), night eyes, a spring. */
+	/** (0.7.297) Keeps what they adopted could do going: fire, water, flight (a slow fall), night eyes, a spring. */
 	private static void gifts(ServerPlayer player, Adopted adopted) {
 		int gifts = adopted.gifts();
 		if ((gifts & FIRE) != 0) {
@@ -229,7 +229,7 @@ public final class RubberFolk {
 				}
 				continue;
 			}
-			// (0.7.292) what they adopted keeps working
+			// (0.7.297) what they adopted keeps working
 			Adopted adopted = player.getAttached(ADOPTED);
 			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && player.isAlive()) {
 				gifts(player, adopted);
@@ -267,7 +267,7 @@ public final class RubberFolk {
 	}
 
 	/**
-	 * (0.7.292, Andy: "you get a player's power or villager if you absorb them") Another player or a villager (one of a
+	 * (0.7.297, Andy: "you get a player's power or villager if you absorb them") Another player or a villager (one of a
 	 * kingdom's folk too), downed: theirs to swallow, power and all.
 	 */
 	static boolean person(ServerPlayer player, LivingEntity e) {
@@ -288,7 +288,7 @@ public final class RubberFolk {
 		float heal = Mth.clamp(foe.getMaxHealth() * ABSORB_HEAL_SHARE, ABSORB_HEAL_MIN, ABSORB_HEAL_MAX);
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
-		// (0.7.292) a player or a villager: their power runs in them now, its R theirs (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
+		// (0.7.297) a player or a villager: their power runs in them now, its R theirs (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
 		// law and their kin know), leaving no body behind; anything else is simply gone
 		boolean person = foe instanceof Player || foe instanceof Villager || foe instanceof Folk;
 		if (person) {
@@ -302,7 +302,7 @@ public final class RubberFolk {
 			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
 		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
-		// (0.7.292) and they take on what it had, in place of the last thing they swallowed
+		// (0.7.297) and they take on what it had, in place of the last thing they swallowed
 		Adopted adopted = adopt(foe);
 		player.setAttached(ADOPTED, adopted);
 		attributes(player, Heritage.Kind.RUBBERFOLK);
@@ -325,7 +325,7 @@ public final class RubberFolk {
 		}
 	}
 
-	/** (0.7.292) What they took on, for the chat line: "+5 health, +1.5 blow, fire" and so on. */
+	/** (0.7.297) What they took on, for the chat line: "+5 health, +1.5 blow, fire" and so on. */
 	static Component describe(Adopted adopted) {
 		java.util.List<Component> parts = new java.util.ArrayList<>();
 		if (adopted.health() > 0.0F) {

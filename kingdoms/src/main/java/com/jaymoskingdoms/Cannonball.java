@@ -13,6 +13,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.ItemSupplier;
@@ -68,7 +69,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	}
 
 	/** A ball fired by {@code gunner} from {@code muzzle} along {@code dir}. */
-	static void fire(ServerLevel level, Folk gunner, Vec3 muzzle, Vec3 dir) {
+	static void fire(ServerLevel level, PathfinderMob gunner, Vec3 muzzle, Vec3 dir) {
 		Cannonball ball = new Cannonball(TYPE, level);
 		ball.setOwner(gunner);
 		ball.setPos(muzzle);
@@ -99,7 +100,8 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			return;
 		}
 		Entity owner = this.getOwner();
-		if (!(owner instanceof Folk gunner) || ++this.life > MAX_LIFE) {
+		// ((0.7.295) a folk gunner or an MCA archer)
+		if (!(owner instanceof PathfinderMob gunner) || !(owner instanceof Worker) || ++this.life > MAX_LIFE) {
 			this.discard();
 			return;
 		}
@@ -124,7 +126,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 		level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 	}
 
-	private void burst(ServerLevel level, Folk gunner, Vec3 at, @Nullable Entity direct) {
+	private void burst(ServerLevel level, PathfinderMob gunner, Vec3 at, @Nullable Entity direct) {
 		DamageSource source = this.damageSources().explosion(this, gunner);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e != gunner && e.isAlive() && !e.isSpectator())) {

@@ -27,7 +27,7 @@ abstract class ServerGamePacketListenerImplMixin {
 		if (entity == this.player && power != null && power.allowsFloating(this.player)) {
 			cir.setReturnValue(Integer.MAX_VALUE);
 		} else if (entity == this.player && com.jaymospowers.core.SwallowedPower.allowsFloating(this.player)) {
-			// (0.17.103) a swallowed power's flight
+			// (0.17.108) a swallowed power's flight
 			cir.setReturnValue(Integer.MAX_VALUE);
 		} else if (entity == this.player && com.jaymospowers.power.web.WebSymbiote.allowsFloating(this.player)) {
 			// (0.15.52) a symbiote's Wall Crawl, in a host who isn't a web slinger

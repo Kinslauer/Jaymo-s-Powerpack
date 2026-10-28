@@ -141,6 +141,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.ClashCinematic.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		// (0.7.292) goblins and orcs as MCA villagers
+		GreenskinLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
 		// 0.7.137: the wind dragons (Notus: its model, flight, breath key, trust and stamina HUD)

@@ -23,7 +23,7 @@ public final class PowerInput {
 		HELD.put(player.getUUID(), bits);
 	}
 
-	/** (0.17.103) Every key's held bit at once ({@link SwallowedPower} swaps them for its own while it runs). */
+	/** (0.17.108) Every key's held bit at once ({@link SwallowedPower} swaps them for its own while it runs). */
 	static int bits(Player player) {
 		return HELD.getOrDefault(player.getUUID(), 0);
 	}

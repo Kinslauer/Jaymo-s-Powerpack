@@ -54,7 +54,9 @@ public final class SkinTones {
 		NIGHTBORN_SKIN = {0.0F, 0.35F}, WARRIORBORN_SKIN = {0.2F, 0.9F}, EARTHLING_SKIN = {0.0F, 1.0F}, STORMBORN_SKIN = {0.15F, 0.6F},
 		DAWNBORN_SKIN = {0.55F, 1.0F}, ENDBORN_SKIN = {0.0F, 0.3F}, DRAGONBLOOD_SKIN = {0.3F, 0.9F}, DEEPBORN_SKIN = {0.0F, 0.25F},
 		// (0.7.262) the divine are pale, the made are anyone's shade (the plating takes over), rubber starts pale to take its pink
-		DIVINE_SKIN = {0.0F, 0.35F}, BIOBUILT_SKIN = {0.0F, 1.0F}, RUBBERFOLK_SKIN = {0.0F, 0.4F};
+		DIVINE_SKIN = {0.0F, 0.35F}, BIOBUILT_SKIN = {0.0F, 1.0F}, RUBBERFOLK_SKIN = {0.0F, 0.4F},
+		// (0.7.292) a goblin's or an orc's green is its own (Greenskins.skin): MCA's melanin isn't drawn on them
+		BROOD_SKIN = {0.0F, 1.0F};
 
 	/** (0.7.236) {@code kind}'s melanin range, least and most. */
 	public static float[] skinRange(Heritage.Kind kind) {
@@ -77,6 +79,7 @@ public final class SkinTones {
 			case DIVINE -> DIVINE_SKIN;
 			case BIOBUILT -> BIOBUILT_SKIN;
 			case RUBBERFOLK -> RUBBERFOLK_SKIN;
+			case GOBLIN, ORC -> BROOD_SKIN;
 		};
 	}
 

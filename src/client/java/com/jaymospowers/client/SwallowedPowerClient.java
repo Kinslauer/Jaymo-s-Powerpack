@@ -9,7 +9,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
 /**
- * (0.17.103) The Swallowed Power key (comma by default): the R of a power a Rubber-folk swallowed ({@link SwallowedPower}),
+ * (0.17.108) The Swallowed Power key (comma by default): the R of a power a Rubber-folk swallowed ({@link SwallowedPower}),
  * held and let go like R. Sent only on a change; the server ignores it for anyone who swallowed nothing.
  */
 final class SwallowedPowerClient {

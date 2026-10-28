@@ -28,6 +28,10 @@ abstract class McaVerdantSkinMixin {
 		}
 		if (entity != null) {
 			int green = Verdants.skin(entity);
+			if (green == 0) {
+				// (0.7.292) a goblin's or an orc's own green
+				green = com.jaymoskingdoms.Greenskins.skin(entity);
+			}
 			if (green != 0) {
 				cir.setReturnValue(green);
 			}

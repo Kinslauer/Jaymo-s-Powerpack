@@ -58,6 +58,12 @@ public final class BodySizes {
 	/** Squat from the deep. */
 	static final Body DEEPBORN = new Body(0.15F, 0.7F, 0.3F, 0.8F);
 	static final Body BIOBUILT = new Body(0.2F, 0.8F, 0.3F, 0.85F);
+	/**
+	 * (0.7.292) Andy: "Orcs are bigger, goblins smaller" ({@link Greenskins}). A goblin is short and stringy on top of its
+	 * {@link Goblins#SCALE} (its king the broadest of them); an orc is drawn the tallest and broadest there is (MCA keeps
+	 * anyone's box a man's size at most, so an orc still fits a door; a warchief's own scale makes him huge).
+	 */
+	static final Body GOBLIN = new Body(0.15F, 0.5F, 0.2F, 0.75F), ORC = new Body(0.75F, 1.0F, 0.85F, 1.0F);
 
 	/**
 	 * The tag on an MCA villager whose height and width MCA has just rolled ({@code McaGeneticsMixin}), till it's born to
@@ -92,6 +98,8 @@ public final class BodySizes {
 			case DIVINE -> DIVINE;
 			case BIOBUILT -> BIOBUILT;
 			case RUBBERFOLK -> RUBBERFOLK;
+			case GOBLIN -> GOBLIN;
+			case ORC -> ORC;
 			default -> ORDINARY;
 		};
 	}

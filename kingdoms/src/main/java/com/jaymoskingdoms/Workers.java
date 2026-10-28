@@ -37,7 +37,8 @@ public final class Workers {
 	 * worker's job, or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
 	 */
 	static boolean inPlace(Faction f, int role) {
-		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || role == Folk.GUARD && f.type().isRealm());
+		// ((0.7.293) and its wall archers, WallArchers)
+		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
 	}
 
 	/** A worker's day's work (a {@link Folk}'s from its own tick; an MCA villager's from {@link #step}). */
@@ -93,9 +94,26 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (w.role() == Looters.LOOTER && !(mob instanceof Folk)) {
+			// (0.7.295) a looter: his creeping and robbing are Looters' doing
+			return true;
+		}
+		if (w.role() == Assassins.ASSASSIN) {
+			// (0.7.295) an assassin, his own doings in place of his brain
+			Assassins.act(level, mob);
+			return true;
+		}
 		if (Crewmen.tagged(mob)) {
 			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
 			return Crewmen.step(level, w);
+		}
+		if (Caravans.isCaravanFolk(w)) {
+			// (0.7.294) one of a caravan's carters or guards: along with it
+			return Caravans.villagerStep(level, w);
+		}
+		if (w.role() == Caravans.CARTER && Drivers.step(level, w)) {
+			// (0.7.294) a realm's driver in the saddle: the drive is his
+			return true;
 		}
 		if (RangedTactics.brainStep(mob)) {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
@@ -124,6 +142,14 @@ public final class Workers {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);
 		}
+		if (WarParties.isSoldier(w)) {
+			// (0.7.295) a soldier of a war party: on the march as it sends him
+			return WarParties.villagerStep(level, w);
+		}
+		if (w.role() == Folk.ARCHER && w instanceof Enlisted) {
+			// (0.7.293) a wall archer, held to his post
+			return WallArchers.step(level, w);
+		}
 		if (w.role() == Folk.GUARD && w instanceof Enlisted e) {
 			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
 			return Rulers.guardStep(level, e);
@@ -135,6 +161,29 @@ public final class Workers {
 				Hermits.step(level, e);
 			}
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
+		}
+		if (Casters.isOffice(w.role()) && w instanceof Enlisted e) {
+			// (0.7.291) a court's necromancer, a camp's necromancer, shaman or blood witch: a villager until a foe comes near
+			return !mob.isSleeping() && !McaCompat.busy(mob) && Casters.step(level, e);
+		}
+		if (CampChiefs.isRole(w.role()) || w.role() == Pirates.CAPTAIN && !Crewmen.tagged(mob) && Pirates.isCoveCaptain(mob)) {
+			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally; (0.7.296) a cove's captain ashore too
+			CampChiefs.step(level, w);
+		}
+		if (!(mob instanceof Folk) && Raids.isRaider(mob)) {
+			// (0.7.295) a camp's villager out on a raid: its march and plunder; its ways in a fight as at home
+			if (Greenskins.isRole(w.role())) {
+				Greenskins.step(level, w);
+			}
+			Javelins.tick(level, w);
+			return Pirates.villagerStep(level, w) || Raids.villagerStep(level, w);
+		}
+		if (Greenskins.isRole(w.role())) {
+			// (0.7.292) a goblin village's or an orc camp's villager: an orc's rage and slam, a grunt's javelins; MCA's guard
+			// brain does the rest
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return false;
 		}
 		if (Barbarians.villagerRole(w.role())) {
 			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
@@ -160,6 +209,12 @@ public final class Workers {
 			w.mob().spawnAtLocation(level, w.takeCarried());
 		}
 		CourtWizards.died(level, w, source);
+		Greenskins.died(level, w, source);
+		CampChiefs.died(level, w, source);
+		if (!(w.mob() instanceof Folk)) {
+			// (0.7.295) a villager assassin
+			Assassins.died(level, w.mob(), source);
+		}
 		KingdomEvents.workerDied(level, w, source);
 	}
 }

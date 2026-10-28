@@ -234,7 +234,7 @@ public final class Powers {
 
 	static void key(ServerPlayer player, PowerKey key, boolean down) {
 		Power power = of(player);
-		// (0.17.103) no power of their own: R is a swallowed one's
+		// (0.17.108) no power of their own: R is a swallowed one's
 		if (power == null && key == PowerKey.ABILITY_1 && SwallowedPower.key(player, down)) {
 			return;
 		}

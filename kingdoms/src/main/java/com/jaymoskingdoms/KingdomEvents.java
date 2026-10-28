@@ -455,7 +455,7 @@ public final class KingdomEvents {
 	}
 
 	/** An archer on one of the faction's posts (walls, towers, watchtowers) that has none, counted in its roster. */
-	public static @Nullable Folk spawnArcher(ServerLevel level, @Nullable Faction faction) {
+	public static @Nullable Worker spawnArcher(ServerLevel level, @Nullable Faction faction) {
 		if (faction == null) {
 			return null;
 		}
@@ -463,16 +463,14 @@ public final class KingdomEvents {
 		if (keep == null || keep.posts().isEmpty()) {
 			return spawn(level, faction, Folk.GUARD);
 		}
-		BlockPos post = null;
-		for (BlockPos candidate : keep.posts()) {
-			if (level.getEntitiesOfClass(Folk.class, new AABB(candidate).inflate(2.0), f -> f.role() == Folk.ARCHER).isEmpty()) {
-				post = candidate;
-				break;
+		if (Workers.inPlace(faction, Folk.ARCHER)) {
+			// (0.7.293) with MCA, one of its villagers takes the post (WallArchers)
+			Worker w = WallArchers.enlist(level, faction, keep);
+			if (w != null) {
+				return w;
 			}
 		}
-		if (post == null) {
-			post = keep.posts().get(level.getRandom().nextInt(keep.posts().size()));
-		}
+		BlockPos post = WallArchers.freePost(level, keep);
 		Folk archer = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
 		if (archer == null) {
 			return null;
@@ -508,9 +506,10 @@ public final class KingdomEvents {
 		MinecraftServer server = level.getServer();
 		Faction faction = Factions.get(server, w.factionId());
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		if (faction != null && Crewmen.tagged(w.mob())) {
+		if (faction != null && (Crewmen.tagged(w.mob()) || Pirates.offRoster(w.role()))) {
 			// (0.7.242) one of a ship's crew, an MCA villager: never on a roster, as the folk crews; a cove's captain is
-			// its leader, and his death clears it
+			// its leader, and his death clears it ((0.7.296) and the same ashore: a captain waiting for his ship, a
+			// harbour's shipwright, a cove's gunners and bombardiers)
 			if (faction.leader().map(w.getUUID()::equals).orElse(false)) {
 				if (Pirates.isCoveCaptain(w.mob())) {
 					Camps.chiefSlain(level, w.mob(), faction.id(), source);
@@ -527,7 +526,9 @@ public final class KingdomEvents {
 			}
 			rulerDied(level, faction, w.mob(), w.role() == Folk.LORD, killer, source);
 		} else if (faction != null && w.role() >= 0 && !Rulers.leaderRole(w.role())) {
-			lostHand(server, faction, w.role(), killer, true);
+			// ((0.7.294) a caravan's villagers were never on its roster; (0.7.295) a war party's loss is undone, as its folk's)
+			WarParties.soldierDied(w);
+			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w));
 		}
 	}
 

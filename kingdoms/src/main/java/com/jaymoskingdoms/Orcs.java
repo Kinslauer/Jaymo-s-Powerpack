@@ -15,6 +15,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -140,6 +141,12 @@ public final class Orcs {
 		return name + " " + CHIEF_BYNAMES[random.nextInt(CHIEF_BYNAMES.length)];
 	}
 
+	/** (0.7.292) An orc by name alone, the same every time for the same seed (one of a camp's MCA villagers). */
+	static String commonName(long seed) {
+		RandomSource random = RandomSource.create(seed ^ 0x0BC6L);
+		return CHIEF_FIRST[random.nextInt(CHIEF_FIRST.length)] + CHIEF_SECOND[random.nextInt(CHIEF_SECOND.length)];
+	}
+
 	public static boolean isOrc(int role) {
 		return role == GRUNT || role == RANGER || role == SHAMAN || role == WARCHIEF;
 	}
@@ -148,8 +155,9 @@ public final class Orcs {
 		return isOrc(folk.role());
 	}
 
+	/** One of a camp's orcs, folk or ((0.7.292) {@link Greenskins}) MCA villager. */
 	public static boolean isOrc(LivingEntity entity) {
-		return entity instanceof Folk folk && isOrc(folk);
+		return entity instanceof Worker w && isOrc(w.role());
 	}
 
 	/** It shoots rather than closing in. */
@@ -184,12 +192,17 @@ public final class Orcs {
 
 	/** An orc's own tick (from {@link Folk#customServerAiStep}): blood rage, war cries, the warchief's slam. */
 	static void tick(ServerLevel level, Folk folk) {
-		if (!isOrc(folk) || folk.tickCount % 10 != 0) {
+		tick(level, folk, folk.role(), folk.factionId());
+	}
+
+	/** (0.7.292) The same on any orc's body ({@code role} of camp {@code camp}): a folk's, or an MCA villager's ({@link Greenskins}). */
+	static void tick(ServerLevel level, PathfinderMob folk, int role, int camp) {
+		if (!isOrc(role) || folk.tickCount % 10 != 0) {
 			return;
 		}
-		LivingEntity target = folk.getTarget();
+		// (a villager's foe is its brain's)
+		LivingEntity target = Rulers.target(folk);
 		boolean fighting = target != null && target.isAlive();
-		int role = folk.role();
 		if ((role == GRUNT || role == RANGER) && fighting && folk.getHealth() < folk.getMaxHealth() * RAGE_BELOW && !folk.hasEffect(MobEffects.STRENGTH)) {
 			folk.addEffect(new MobEffectInstance(MobEffects.STRENGTH, RAGE_TICKS, 0));
 			folk.addEffect(new MobEffectInstance(MobEffects.SPEED, RAGE_TICKS, 0));
@@ -203,19 +216,19 @@ public final class Orcs {
 		}
 		if (role == WARCHIEF && fighting && folk.distanceTo(target) <= SLAM_TRIGGER
 			&& level.getGameTime() >= SLAM_READY.getOrDefault(folk.getUUID(), 0L)) {
-			slam(level, folk);
+			slam(level, folk, camp);
 		}
 	}
 
 	/** The warchief brings his axe down on the ground: everyone near (not his own) is hurt and thrown back. */
-	private static void slam(ServerLevel level, Folk chief) {
+	private static void slam(ServerLevel level, PathfinderMob chief, int camp) {
 		SLAM_READY.put(chief.getUUID(), level.getGameTime() + SLAM_COOLDOWN);
 		chief.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		DamageSource source = level.damageSources().mobAttack(chief);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, chief.getBoundingBox().inflate(SLAM_RADIUS, 1.5, SLAM_RADIUS),
-			e -> e != chief && e.isAlive() && !(e instanceof Folk f && chief.sameSide(f))
+			e -> e != chief && e.isAlive() && !(e instanceof Worker w && w.factionId() == camp) && !(e instanceof Folk f && chief instanceof Folk c && c.sameSide(f))
 				&& !(e instanceof ServerPlayer p && (p.isCreative() || p.isSpectator())))) {
-			if (!(e instanceof ServerPlayer) && !(e instanceof Folk) && !(e instanceof Villager) && !(e instanceof IronGolem) && e != chief.getTarget()) {
+			if (!(e instanceof ServerPlayer) && !(e instanceof Folk) && !(e instanceof Villager) && !(e instanceof IronGolem) && e != Rulers.target(chief)) {
 				continue;
 			}
 			e.hurtServer(level, source, SLAM_DAMAGE);
