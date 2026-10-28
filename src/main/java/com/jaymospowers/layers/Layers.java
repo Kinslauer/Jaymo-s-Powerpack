@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
- * (0.17.114) Layer blocks ({@link LayerBlock}) for every wooden and stone block in {@link LayerList}, each {@code <path>_layer}
+ * (0.17.116) Layer blocks ({@link LayerBlock}) for every wooden and stone block in {@link LayerList}, each {@code <path>_layer}
  * and built like its block (hardness, sound, tool, burning). Wood is cut with the {@link SawItem saw} in a crafting grid,
  * stone at the stonecutter, both 8 layers a block; 8 layers craft back into the block. Assets and data come from
  * tools/gen_layers.py.

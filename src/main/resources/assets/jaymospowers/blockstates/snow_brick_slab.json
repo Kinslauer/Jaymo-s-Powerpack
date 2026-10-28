@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/frost/snow_brick_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/frost/snow_bricks"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/frost/snow_brick_slab_top"
+    }
+  }
+}

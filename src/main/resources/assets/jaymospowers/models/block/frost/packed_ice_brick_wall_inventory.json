@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "jaymospowers:block/frost/packed_ice_bricks"
+  }
+}

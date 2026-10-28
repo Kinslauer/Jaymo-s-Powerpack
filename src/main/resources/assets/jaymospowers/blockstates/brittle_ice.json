@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "cracks=0": {
+      "model": "jaymospowers:block/frost/brittle_ice_0"
+    },
+    "cracks=1": {
+      "model": "jaymospowers:block/frost/brittle_ice_1"
+    },
+    "cracks=2": {
+      "model": "jaymospowers:block/frost/brittle_ice_2"
+    },
+    "cracks=3": {
+      "model": "jaymospowers:block/frost/brittle_ice_3"
+    }
+  }
+}

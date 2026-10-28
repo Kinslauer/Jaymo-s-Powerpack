@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.17.114) Andy: "a layer block, that works like snow layers ... built from any wooden or stone block, using a saw or a
+ * (0.17.116) Andy: "a layer block, that works like snow layers ... built from any wooden or stone block, using a saw or a
  * stone cutter. you can place these anywhere, and they stack up to 8, making a full block incrementally." Each layer is
  * {@link #PIXELS_PER_LAYER} px; placing the same layer on top of a stack adds one, and at {@link #MAX_LAYERS} it is the
  * full block. Unlike snow, what it holds up stands on its true height (snow lets you sink one layer), and it needs

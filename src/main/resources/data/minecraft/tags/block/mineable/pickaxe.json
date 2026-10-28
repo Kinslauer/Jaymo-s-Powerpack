@@ -125,6 +125,14 @@
     "jaymospowers:pedestal",
     "jaymospowers:infusion_matrix",
     "jaymospowers:gravity_machine",
+    "jaymospowers:packed_ice_bricks",
+    "jaymospowers:packed_ice_brick_stairs",
+    "jaymospowers:packed_ice_brick_slab",
+    "jaymospowers:packed_ice_brick_wall",
+    "jaymospowers:chiseled_packed_ice_bricks",
+    "jaymospowers:icicle",
+    "jaymospowers:ice_crystal",
+    "jaymospowers:brittle_ice",
     "#jaymospowers:stone_layers"
   ]
 }
