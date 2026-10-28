@@ -21,7 +21,8 @@ import org.jspecify.annotations.Nullable;
  * waiting), then taken: the two right hands meet, a few slow pumps, and let go. Eased on a spring like
  * {@link PickpocketPose}, and laid over the model right after it's posed. Between two who've shaken hands before, a
  * quick dap: the hand up high, one clasp and a tug in. (0.7.204) A villager taking your hand shakes the same way.
- * (0.7.289) A wave at a first meeting: the right hand raised out to the side, swung to and fro a few times.
+ * (0.7.289) A villager's wave at a first meeting: the right hand raised out to the side, swung to and fro a few times;
+ * and a shake off film ({@code Hand.PLAIN}) looks the same as one on it.
  */
 public final class HandshakePose {
 	/** The arm held out: forward and a little down, turned in toward the middle (radians). */
@@ -96,7 +97,7 @@ public final class HandshakePose {
 		if (wave) {
 			t = into(hand, partialTicks);
 			on = t < Handshakes.WAVE_TICKS;
-		} else if (hand != null && (hand.state == Handshakes.Hand.SHAKING || dap)) {
+		} else if (hand != null && (hand.state == Handshakes.Hand.SHAKING || hand.state == Handshakes.Hand.PLAIN || dap)) {
 			t = into(hand, partialTicks);
 			on = t < (dap ? Handshakes.DAP_RELEASE : Handshakes.RELEASE_TICK);
 			if (!dap && t < REACH_DELAY && (ease == null || ease[0] < 0.5F)) {

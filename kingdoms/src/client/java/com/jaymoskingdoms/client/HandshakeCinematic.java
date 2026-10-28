@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * You're turned to face them throughout. (0.7.205) Andy: "One of the frames the cutscene puts front and center NEEDS to
  * be the hands actually coming together": the hands' shot opens the film, so the hands meet in it ({@link
  * Handshakes#GRIP_TICK}), framed on where they meet. Like Jaymo's Powers' beam battle film (our own code, no one else's).
- * (0.7.289) A wave at a first meeting is filmed too, all in the wide shot, so you see yourself wave and them wave back.
+ * (0.7.289) Andy: "you only get the cutscene for villagers that are special": a plain shake ({@code Hand.PLAIN}) isn't filmed.
  */
 public final class HandshakeCinematic {
 	/** The shots' cuts (ticks into the shake): the hands until {@link #WIDE_CUT}, wide until {@link #FACE_CUT}, then over the shoulder. */
@@ -52,7 +52,7 @@ public final class HandshakeCinematic {
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
 		VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS};
 
-	private static boolean running, waving;
+	private static boolean running;
 	private static @Nullable CameraType viewBefore;
 	private static int linger, partner = -1;
 	private static float side = 1.0F, bars, barsO;
@@ -84,8 +84,7 @@ public final class HandshakeCinematic {
 		barsO = bars;
 		LocalPlayer self = minecraft.player;
 		HandshakePose.Hand hand = self == null ? null : HandshakePose.hand(self.getId());
-		if (hand != null && (hand.state() == Handshakes.Hand.SHAKING || hand.state() == Handshakes.Hand.WAVE)) {
-			waving = hand.state() == Handshakes.Hand.WAVE;
+		if (hand != null && hand.state() == Handshakes.Hand.SHAKING) {
 			if (!running) {
 				running = true;
 				viewBefore = minecraft.options.getCameraType();
@@ -144,12 +143,7 @@ public final class HandshakeCinematic {
 		float t = minecraft.level.getGameTime() - since + partialTicks;
 		Vec3 pos;
 		Vec3 look;
-		if (waving) {
-			// (0.7.289) wide, drawing back a little while you wave and they wave back
-			float k = smooth(t / (Handshakes.WAVE_BACK + Handshakes.WAVE_TICKS));
-			pos = hands.add(across.scale(Mth.lerp(k, WIDE_FROM, WIDE_TO))).add(0.0, WIDE_UP, 0.0);
-			look = hands.add(0.0, 0.25, 0.0);
-		} else if (t < WIDE_CUT) {
+		if (t < WIDE_CUT) {
 			// side on and a touch low, the hands dead centre: one reaching in to the other, meeting, the first pumps
 			float k = smooth(t / WIDE_CUT);
 			double angle = Math.toRadians((k - 0.5) * HANDS_TURN);
