@@ -6127,3 +6127,14 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
+
+## 0.7.308: camp folk keep their armour; shamans leave captives alone (pack 0.17.126)
+Andy: "barbarian's armor disappeared", then "shaman is repeatedly attacking the prisoner."
+- MCA's own equipment routine (`EquipmentTask`) takes a guard's armour off whenever they aren't fighting, unless
+  "wear armour" is set in MCA's menu. A camp's villagers (barbarians, their chief, goblins, orcs, pirates ashore) now skip
+  it like rulers do (`McaEquipmentMixin`), and anyone already stripped is dressed again from their pack once a second
+  (their hides, mail and caps were kept there when they were converted), along with an axe or sword in an empty hand.
+- A captive in chains is never prey: `Barbarians.prey`/`villagerPrey` (raiders, greenskins, pirates) and
+  `Casters.foe` (a camp's shaman, necromancer or blood witch) skip them. They were invulnerable, so the blows did
+  nothing, but the shaman kept casting at them.
+Compile-checked, not seen in game.

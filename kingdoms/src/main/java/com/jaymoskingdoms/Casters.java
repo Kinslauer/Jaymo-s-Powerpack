@@ -275,11 +275,11 @@ public final class Casters {
 	/**
 	 * {@code e} is a foe of the caster's: for a court's, as for its wizard ({@link CourtWizards#foe}); for a camp's,
 	 * whoever its raiders go for ({@link Barbarians#villagerPrey}), whoever struck them, a monster, or anything going for
-	 * their side. Never their own side, their own thralls, or a creative player.
+	 * their side. Never their own side, their own thralls, a creative player or (0.7.308) a captive in chains.
 	 */
 	static boolean foe(Enlisted w, LivingEntity e) {
 		PathfinderMob mob = w.mob();
-		if (e == mob || !e.isAlive() || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)) {
+		if (e == mob || !e.isAlive() || Captives.bound(e) || e instanceof Player p && (p.isCreative() || p.isSpectator()) || ally(w, e) || Thralls.refuses(mob, e)) {
 			return false;
 		}
 		if (realm(w)) {
