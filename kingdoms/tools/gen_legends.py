@@ -1,6 +1,6 @@
 """Textures for the monsters of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters):
-- the Mo' Creatures ones (GPL-3, originals in tools/mocreatures/) copied under our names (and the nightmare's and the bat
-  horse's coats among the horses'), and the cave ogre: the green
+- the Mo' Creatures ones (GPL-3, originals in tools/mocreatures/) copied under our names (the nightmare's and the bat
+  horse's coats are tools/gen_horses.py's since 0.7.302), and the cave ogre: the green
   ogre's skin turned slate grey (its loincloth, teeth, horns and rings as they are);
 - our own: the chest mimic, the mud golem (plain and mossy) and the silver sword's icon, drawn here.
 Run from kingdoms/: python3 tools/gen_legends.py"""
@@ -18,12 +18,6 @@ COPIES = {'wolfblack': 'werewolf_black', 'wolfbrown': 'werewolf_brown', 'wolftim
           'flamewraith': 'flame_wraith', 'silverskeleton': 'silver_skeleton'}
 for src, dst in COPIES.items():
     shutil.copyfile(MOC + src + '.png', OUT + dst + '.png')
-
-# the mounts of legend, as horse breeds' coats (textures/entity/moc_horse/<breed>/<coat>.png)
-HORSES = 'src/main/resources/assets/jaymoskingdoms/textures/entity/moc_horse/'
-for src, dst in {'horsenightmare': 'nightmare/nightmare', 'horsenightmare1': 'nightmare/nightmare_1', 'horsebat': 'bat_horse/bat'}.items():
-    os.makedirs(os.path.dirname(HORSES + dst), exist_ok=True)
-    shutil.copyfile(MOC + src + '.png', HORSES + dst + '.png')
 
 # the cave ogre: green skin to slate
 ogre = Image.open(MOC + 'ogregreen.png').convert('RGBA')

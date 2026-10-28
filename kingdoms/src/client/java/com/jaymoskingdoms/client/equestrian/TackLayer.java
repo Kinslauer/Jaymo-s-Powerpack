@@ -41,14 +41,14 @@ import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.44) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (a vanilla saddle is the Mo'
- * Creatures saddle, drawn by {@link MocHorseModel}, which also draws the headstall and reins any saddle comes with), the
- * bridle and its reins, the blanket (in its dye) and horseshoes. The pieces are boxes on {@link MocHorseModel}'s bones,
- * read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py}); the models follow the horse's own
- * animation (they're horse models themselves). Also carries the kneel onto the render state, for
+ * (0.5.44) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (a vanilla saddle is drawn by
+ * {@link BreedHorseModel}, which also draws the headstall and reins any saddle comes with), the bridle and its reins,
+ * the blanket (in its dye) and horseshoes. The pieces are boxes on {@link BreedHorseModel}'s bones (every build has them
+ * in the same places), read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py}); the models
+ * follow the horse's own animation (they're horse models themselves). Also carries the kneel onto the render state, for
  * {@code LivingEntityRendererMixin}.
  */
-public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHorseModel> {
+public final class TackLayer extends RenderLayer<BreedHorseRenderer.State, BreedHorseModel> {
 	/** What it wears: its saddle (0 none or vanilla's, 1 war, 2 racing), bridle, blanket colour (0 none), shoes; ridden; how far it kneels (0-1). */
 	public record Look(int saddle, boolean bridle, int blanket, boolean shod, boolean ridden, float kneel) {
 	}
@@ -68,7 +68,7 @@ public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHors
 	private final @Nullable TackModel main;
 	private final @Nullable TackModel blanket;
 
-	TackLayer(RenderLayerParent<MocHorseRenderer.State, MocHorseModel> parent) {
+	TackLayer(RenderLayerParent<BreedHorseRenderer.State, BreedHorseModel> parent) {
 		super(parent);
 		this.main = mainLayer == null ? null : new TackModel(mainLayer.bakeRoot());
 		this.blanket = blanketLayer == null ? null : new TackModel(blanketLayer.bakeRoot());
@@ -106,8 +106,8 @@ public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHors
 
 	/** The horse's bones, without its own boxes, carrying the tack's pieces (each group's pieces under one child, to show or hide). */
 	private static LayerDefinition layer(List<JsonObject> pieces, JsonArray size) {
-		MeshDefinition mesh = MocHorseModel.bones();
-		PartDefinition root = mesh.getRoot();
+		MeshDefinition mesh = BreedHorseModel.bones();
+		PartDefinition root = mesh.getRoot().getChild(BreedHorseModel.TACK_BUILD);
 		Map<String, PartDefinition> groups = new HashMap<>();
 		int n = 0;
 		for (JsonObject p : pieces) {
@@ -165,7 +165,7 @@ public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHors
 	}
 
 	@Override
-	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, MocHorseRenderer.State state, float yRot, float xRot) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, BreedHorseRenderer.State state, float yRot, float xRot) {
 		Look look = state.getData(LOOK);
 		if (look == null || state.isInvisible) {
 			return;
@@ -179,14 +179,15 @@ public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHors
 	}
 
 	/** The tack's pieces on the horse's bones; each group shown as the render state says. */
-	private static final class TackModel extends MocHorseModel {
+	private static final class TackModel extends BreedHorseModel {
 		private final Map<String, List<ModelPart>> groups = new HashMap<>();
 		private final List<ModelPart> bones = new ArrayList<>();
 
 		TackModel(ModelPart root) {
 			super(root);
+			ModelPart bones = root.getChild(BreedHorseModel.TACK_BUILD);
 			for (String bone : BONES) {
-				ModelPart part = root.getChild(bone);
+				ModelPart part = bones.getChild(bone);
 				this.bones.add(part);
 				for (String group : GROUPS) {
 					if (part.hasChild("tack_" + group)) {
@@ -197,7 +198,7 @@ public final class TackLayer extends RenderLayer<MocHorseRenderer.State, MocHors
 		}
 
 		@Override
-		public void setupAnim(MocHorseRenderer.State state) {
+		public void setupAnim(BreedHorseRenderer.State state) {
 			super.setupAnim(state);
 			Look look = state.getData(LOOK);
 			if (look == null) {

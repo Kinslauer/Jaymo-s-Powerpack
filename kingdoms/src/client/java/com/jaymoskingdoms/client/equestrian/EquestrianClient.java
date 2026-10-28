@@ -75,11 +75,12 @@ public final class EquestrianClient {
 
 	public static void register() {
 		EntityRenderers.register(Equestrian.WAR_ELEPHANT, WarElephantRenderer::new);
-		// 0.5.44: Mo' Creatures' horse for every horse, skeleton horse and zombie horse
+		// 0.7.302: our own horse, a build per breed, for every horse, skeleton horse and zombie horse (0.5.44: Mo' Creatures')
+		BreedHorseModel.register();
 		TackLayer.register();
-		EntityRenderers.register(EntityTypes.HORSE, MocHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.SKELETON_HORSE, MocHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, MocHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.HORSE, BreedHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.SKELETON_HORSE, BreedHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, BreedHorseRenderer::new);
 		Equestrian.localRider = new Equestrian.LocalRider() {
 			@Override
 			public boolean controls(Player controller) {

@@ -6070,3 +6070,23 @@ frost creeps over them and they're frozen through in about 3.5 s, then shake and
 other fire-blooded mobs five times that; leather spares the damage), and the chill keeps biting after the ice falls
 before they thaw. The ice still holds them still with numb hands (slowness, mining fatigue). Without Jaymo's Powers
 the old freeze is kept. Compile-checked, not seen in game.
+
+## 0.7.302: our own horse model, a build per breed (pack 0.17.118)
+
+Andy: "new horse models that combine our old horse mod's features" (Icy's Better Horses came up; its licence keeps
+its models and textures inside that mod, so ideas only). Horses, skeleton horses and zombie horses are now drawn as
+`BreedHorseModel` (`BreedHorseRenderer`, replacing `MocHorseModel`/`MocHorseRenderer`), with a build per breed read
+from `assets/jaymoskingdoms/horse/builds.json`: the destrier's deep chest, crested neck and long mane, the courser's
+fine legs, slim neck and short mane, the palfrey's flowing mane and tail, the draft's big feathered hooves, Roman nose
+and broad chest, the steppe pony's standing mane and stocky legs, the desert horse's dished face and fine head, and the
+bat horse (a palfrey with its wings). Every build has a forelock, haunches, withers, croup and belly, and a long mane
+that falls over the neck lifts and ripples at speed. The bones keep the old horse's names and pivots and move as it
+did (jointed legs, head and neck, mouth, tail, rear, graze, stirrups, reins, wings), so the war and racing saddles,
+bridle, blanket, shoes, kneel and breed builds (`HorseLooks.BUILD`) carry over. The nightmare is drawn as a courser,
+the undead as palfreys. All 36 coats, the nightmare (fire mane and tail, ember eyes and hooves, two flickering skins),
+the bat horse, the skeleton horse (open ribs, bare skull, no mane) and the zombie horse (torn flank, wounds, milky
+eyes) and their two variants each, and every horse armour (iron, gold, diamond, copper, netherite, leather, chain and
+plate barding: chanfron, crinet, peytral and flank plates, for each build) are ours, painted by `tools/gen_horses.py`
+(`tools/horse_rig.py` holds the shapes, `tools/horse_preview.py` draws previews) into
+`textures/entity/breed_horse/`. The Mo' Creatures horse textures and `tools/gen_moc_horses.py` are gone; its
+animation is still what moves them (credited in `licenses/mocreatures/NOTICE.txt`). Compile-checked, not seen in game.
