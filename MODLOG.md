@@ -3278,3 +3278,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   new villages per biome (Kingdoms founds capitals in them too), biome pillager outposts and ships; it has no castles.
   Every mod's villages now share one spawn pool (and outposts another), so any of them can turn up at a village spot.
   Compile-checked here, not playtested.
+- **0.17.80, Towns and Towers villages pooled (Kingdoms 0.7.277):** Towns and Towers' 27 villages were left out of the
+  shared village pool (their set also holds an untagged Nether piglin village); they're in it now. Its licence is
+  CC BY-NC-ND 4.0, so it stays shipped unchanged. Epic villages keep their biomes. Compile-checked here, not playtested.

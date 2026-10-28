@@ -25,8 +25,16 @@ public final class SharedPools {
 	}
 
 	public static List<Holder<StructureSet>> merge(List<Holder<StructureSet>> sets) {
-		List<Holder<StructureSet>> out = pool(sets, VILLAGES, Seats::village);
+		List<Holder<StructureSet>> out = pool(sets, VILLAGES, SharedPools::village);
 		return pool(out, OUTPOSTS, SharedPools::outpost);
+	}
+
+	/**
+	 * A village for pooling: tagged as one, or named one. Towns and Towers' set holds a Nether piglin village that isn't in
+	 * the village tag, which would keep its whole set out (it never spawns in the overworld, so pooling it is harmless).
+	 */
+	static boolean village(Holder<Structure> s) {
+		return Seats.village(s) || s.unwrapKey().map(k -> k.identifier().getPath().toLowerCase(Locale.ROOT).contains("village")).orElse(false);
 	}
 
 	/** A pillager outpost, vanilla's or a structure mod's (by id). */

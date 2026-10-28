@@ -5700,3 +5700,13 @@ Grand Capitals, Epic Villages).
   `ChunkGeneratorStructureStateMixin` after `AtiCompounds.filter`; the log says how many sets and structures it pooled.
 - Towns and Towers 1.13.12 joins the pack (root `build.gradle`, shipped unchanged).
 - Compile-checked only, not seen in game.
+## 0.7.277: Towns and Towers' villages join the shared pool (pack 0.17.80)
+- Read the Towns and Towers 1.13.12 jar: its villages set (`towns_and_towers:towns`, 27 villages) holds a Nether piglin
+  village that isn't tagged as a village, so `SharedPools` (which pools only sets made wholly of villages) left the
+  whole set out. Pooling now takes anything tagged or named a village (`SharedPools.village`); the piglin village never
+  spawns in the overworld. Its outposts set was already pooled. Kingdom founding still goes by `Seats.village`.
+- Checked against Epic villages: Towns and Towers narrows vanilla's village biome tags (plains village: plains only,
+  meadow gets its own), and Epic Structures redraws vanilla's villages, so Epic villages keep plains, desert, savanna,
+  snowy plains and taiga. Vanilla outposts are plains-only now; Towns and Towers' biome outposts cover the rest.
+- Towns and Towers is CC BY-NC-ND 4.0 (not BY-NC-SA as written for 0.7.276): shipped unchanged is still fine.
+- Compile-checked only, not seen in game.

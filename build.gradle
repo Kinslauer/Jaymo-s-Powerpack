@@ -103,7 +103,8 @@ def packMods = [
 	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
-	// Towns and Towers (CC BY-NC-SA 4.0, by Pek; shipped unchanged, with credit and a link: modrinth.com/mod/towns-and-towers):
+	// Towns and Towers (CC BY-NC-ND 4.0, by Kubek, Biban_Auriu and Cristelknight999; shipped unchanged, never edited,
+	// with credit and a link: modrinth.com/mod/towns-and-towers):
 	// new villages per biome (tagged as villages, so Jaymo's Kingdoms founds capitals in them too), biome pillager outposts
 	// and ships. No castles of its own, so none of its structures is a grand seat. Needs Cristel Lib (above). Pinned by its
 	// Modrinth version number (1.13.12, the 26.3 build of 2026-09-16; CurseForge file t_and_t-fabric-neoforge-1.13.12.jar).
