@@ -53,7 +53,7 @@ public final class BodySizes {
 	 * How far a Rubber-folk's height and width move toward a swallowed foe's (a share of the gap), and the player shape
 	 * a foe is measured against (vanilla's 0.6 x 1.8 at MCA's 1x).
 	 */
-	public static final float ABSORB_SHIFT = 0.25F;
+	public static final float ABSORB_SHIFT = 0.75F;
 	static final float PLAYER_WIDTH = 0.6F, PLAYER_HEIGHT = 1.8F;
 	/** Squat from the deep. */
 	static final Body DEEPBORN = new Body(0.15F, 0.7F, 0.3F, 0.8F);
