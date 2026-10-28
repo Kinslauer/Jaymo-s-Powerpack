@@ -26,7 +26,7 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 
 /**
- * (0.7.307, Andy: "they should look like smaller versions of the user, not zombies") A Bio-built's bud drawn as its maker:
+ * (0.7.310, Andy: "they should look like smaller versions of the user, not zombies") A Bio-built's bud drawn as its maker:
  * their own skin on a player's body (wide or slim arms, as theirs are), small (its SCALE), with the third form's seams,
  * plates and amber nodes over it, and the heritage's amber eyes. A maker this client doesn't know wears the default skin
  * for their id.

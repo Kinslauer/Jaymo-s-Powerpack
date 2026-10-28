@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
- * first form), and each downed foe ((0.7.307) or crippled one: a leg broken or cut off) they take into themselves
+ * first form), and each downed foe ((0.7.310) or crippled one: a leg broken or cut off) they take into themselves
  * ({@link #absorb}: look at it close by and press the heritage key; (0.7.288) a hand goes to it, pulses run through you
  * both and it shrinks away to nothing, unless you're hurt or press the key again) adds to their worth until the body folds into the next of three forms: the second (Andy's
  * "changed look": plated forearms, a duller skin) and the third (plating to the shoulders and the cheeks, nodes alight).
@@ -63,7 +63,7 @@ public final class BioBuilt {
 	static final float WORTH_PER_HEALTH = 20.0F;
 	static final int WORTH_MAX = 4;
 	/**
-	 * (0.7.307) Jaymo's Powers' tags on a foe that can't stand and fight: a broken leg (any, splinted or not), and each
+	 * (0.7.310) Jaymo's Powers' tags on a foe that can't stand and fight: a broken leg (any, splinted or not), and each
 	 * severed leg. Kingdoms never compiles against Powers, so it reads them off the scoreboard tags.
 	 */
 	static final String CRIPPLED_TAG = "jaymospowers_crippled", NO_LEFT_LEG_TAG = "jaymoskitchen.missing.left_leg",
@@ -71,7 +71,7 @@ public final class BioBuilt {
 	/** Lightning and magic hurt them this many times as much (the flaw). */
 	static final float BRITTLE = 1.5F;
 	/**
-	 * Budding: copies at most, their life (ticks), health and blow, and the wait (ticks). (0.7.307, Andy: "the buds should
+	 * Budding: copies at most, their life (ticks), health and blow, and the wait (ticks). (0.7.310, Andy: "the buds should
 	 * use a charge of your absorption") Each bud spends one charge, and every foe absorbed stores one, up to
 	 * {@link #CHARGES_MAX}; that is all it costs now (no health, no hunger), so the wait is shorter.
 	 */
@@ -87,7 +87,7 @@ public final class BioBuilt {
 	static final AttachmentType<Integer> WORTH = AttachmentRegistry.create(JaymosKingdoms.id("bio_worth"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
-	/** (0.7.307) The absorbed foes stored up to bud with. Saved, lost on death. */
+	/** (0.7.310) The absorbed foes stored up to bud with. Saved, lost on death. */
 	static final AttachmentType<Integer> CHARGES = AttachmentRegistry.create(JaymosKingdoms.id("bio_charges"),
 		builder -> builder.persistent(Codec.INT));
 
@@ -170,7 +170,7 @@ public final class BioBuilt {
 	}
 
 	/**
-	 * (0.7.307, Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed")
+	 * (0.7.310, Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed")
 	 * Whether {@code e} is in no state to get away: downed (lying or crawling), a leg broken or severed, or Crippled by a
 	 * hidden blade.
 	 */
@@ -272,7 +272,7 @@ public final class BioBuilt {
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		for (int i = 0; i < want; i++) {
 			Vec3 at = Sorcery.groundNear(level, player);
-			// (0.7.307) a small copy of its maker, not a zombie: no rag, nothing in its hands
+			// (0.7.310) a small copy of its maker, not a zombie: no rag, nothing in its hands
 			Mob copy = Thralls.raise(level, BioBud.TYPE, at, -1, player.getUUID(), true, BUD_LIFE, player.getLastHurtMob());
 			if (copy == null) {
 				continue;

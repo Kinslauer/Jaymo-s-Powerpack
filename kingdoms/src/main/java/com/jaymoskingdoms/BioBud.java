@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.307, Andy: "they should look like smaller versions of the user, not zombies") A Bio-built's bud: a zombie's
+ * (0.7.310, Andy: "they should look like smaller versions of the user, not zombies") A Bio-built's bud: a zombie's
  * brain (so {@link Thralls} leads it as before) in a small copy of its maker, drawn by the client's
  * {@code BioBudRenderer} in the maker's own skin ({@link #MAKER}) with the third form's plates. The sun doesn't burn it,
  * water doesn't turn it, it never makes zombie villagers, it groans like nobody and it drops nothing.
