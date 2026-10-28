@@ -29,6 +29,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.rabbit.Rabbit;
 import net.minecraft.world.entity.monster.cubemob.Slime;
@@ -69,6 +71,8 @@ public final class RubberFolk {
 	public static final int ABSORB_TICKS = 60;
 	static final int ABSORB_FOOD = 2;
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
+	/** (0.7.292) Jaymo's Kitchen lays no body down for one tagged this (a swallowed player or villager). */
+	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;
 	/**
@@ -112,6 +116,8 @@ public final class RubberFolk {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(RubberFolk::tick);
+		// (0.7.292) a swallowed player wakes whole, and their next death leaves a body as usual
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> newPlayer.removeTag(NO_CORPSE_TAG));
 		// a slice of cake, eaten (it can only be eaten hungry, as in vanilla)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (!level.isClientSide() && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && Heritage.is(sp, Heritage.Kind.RUBBERFOLK)
@@ -257,7 +263,16 @@ public final class RubberFolk {
 
 	/** (0.7.288) The heritage key pressed: starts (or stops) swallowing a weak foe close by. */
 	static void press(ServerPlayer player) {
-		HeritageHold.press(player, e -> HeritageHold.foe(player, e) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
+		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
+	}
+
+	/**
+	 * (0.7.292, Andy: "you get a player's power or villager if you absorb them") Another player or a villager (one of a
+	 * kingdom's folk too), downed: theirs to swallow, power and all.
+	 */
+	static boolean person(ServerPlayer player, LivingEntity e) {
+		return e != player && e.isAlive() && Downed.isDowned(e)
+			&& (e instanceof ServerPlayer other && !other.isCreative() && !other.isSpectator() || e instanceof Villager || e instanceof Folk);
 	}
 
 	/** Small and low in health, or downed and not too big: weak enough to swallow. */
@@ -273,7 +288,12 @@ public final class RubberFolk {
 		float heal = Mth.clamp(foe.getMaxHealth() * ABSORB_HEAL_SHARE, ABSORB_HEAL_MIN, ABSORB_HEAL_MAX);
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
-		foe.discard();
+		// (0.7.292) a player or a villager: their power theirs now, and they die of it (credited to the swallower, so the
+		// law and their kin know), leaving no body behind; anything else is simply gone
+		boolean person = foe instanceof Player || foe instanceof Villager || foe instanceof Folk;
+		if (person) {
+			PowersCompat.takePower(player, foe);
+		}
 		player.heal(heal);
 		// (0.7.290) Andy: "they change with what they absorb": their build shifts toward the foe's (BodySizes.ABSORB_SHIFT)
 		if (McaCompat.LOADED) {
@@ -287,8 +307,22 @@ public final class RubberFolk {
 		player.setAttached(ADOPTED, adopted);
 		attributes(player, Heritage.Kind.RUBBERFOLK);
 		gifts(player, adopted);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rubber.adopted", foe.getType().getDescription(),
+		player.sendSystemMessage(Component.translatable(person ? "message.jaymoskingdoms.rubber.adopted_person" : "message.jaymoskingdoms.rubber.adopted", person ? foe.getDisplayName() : foe.getType().getDescription(),
 			describe(adopted)).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+		if (!person) {
+			foe.discard();
+			return;
+		}
+		foe.addTag(NO_CORPSE_TAG);
+		if (!Necromancy.execute(level, foe, player)) {
+			foe.setInvulnerableTime(0);
+			foe.hurtServer(level, level.damageSources().playerAttack(player), Float.MAX_VALUE);
+		}
+		if (foe.isAlive()) {
+			// (something saved them after all (a totem): back to their size, and no body-less death waiting for them later)
+			HeritageHold.shrink(foe, 0.0);
+			foe.removeTag(NO_CORPSE_TAG);
+		}
 	}
 
 	/** (0.7.292) What they took on, for the chat line: "+5 health, +1.5 blow, fire" and so on. */

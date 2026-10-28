@@ -219,7 +219,7 @@ public final class Necromancy {
 	private static boolean lookedForExecute;
 
 	/** Jaymo's Powers' {@code Downed.execute}: the downed die as a finisher kills them. False without Powers. */
-	private static boolean execute(ServerLevel level, LivingEntity target, Player by) {
+	static boolean execute(ServerLevel level, LivingEntity target, Player by) {
 		if (!lookedForExecute) {
 			lookedForExecute = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {

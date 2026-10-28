@@ -5662,6 +5662,11 @@ her harbour.
 - **Wedged ships come off.** A ship with some of her hull already in the ground (run up a beach, or land built up round
   her) could make no move at all, since every move still struck. Now any move that drives her no further in is allowed
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 ## 0.7.276: grand seats, real castles for kingdoms built from nothing (pack 0.17.79)
 Andy: "the default hold you generate for a kingdom needs to switch, its way to blocky and novice looking. swap it for
@@ -5699,6 +5704,11 @@ Grand Capitals, Epic Villages).
   village that suits its biome, from whichever mod. Applied to the world's structure placement in
   `ChunkGeneratorStructureStateMixin` after `AtiCompounds.filter`; the log says how many sets and structures it pooled.
 - Towns and Towers 1.13.12 joins the pack (root `build.gradle`, shipped unchanged).
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 ## 0.7.277: Towns and Towers' villages join the shared pool (pack 0.17.80)
 - Read the Towns and Towers 1.13.12 jar: its villages set (`towns_and_towers:towns`, 27 villages) holds a Nether piglin
@@ -5709,6 +5719,11 @@ Grand Capitals, Epic Villages).
   meadow gets its own), and Epic Structures redraws vanilla's villages, so Epic villages keep plains, desert, savanna,
   snowy plains and taiga. Vanilla outposts are plains-only now; Towns and Towers' biome outposts cover the rest.
 - Towns and Towers is CC BY-NC-ND 4.0 (not BY-NC-SA as written for 0.7.276): shipped unchanged is still fine.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 
 ## 0.7.278: Repurposed Structures in the pack (pack 0.17.81)
@@ -5717,6 +5732,11 @@ Grand Capitals, Epic Villages).
 - `SharedPools.outpost` takes any structure with "outpost" in its id: Repurposed Structures' are `outpost_badlands`
   and the like (12 in `outposts_overworld`), which the old "pillager" check missed.
   Its villages (`villages_overworld`, 11, and the one-village sets) already pool by name.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 
 ## 0.7.279: a floating ki-glow hand for Far Hand and Catch (pack 0.17.82)
@@ -5733,6 +5753,11 @@ the wispy ki glow texture, and only use it for the far reach, and catch."
   then flies home carrying the item with it and fades at your side.
 - **Catch**: while the catch lasts an open hand hovers ahead of you instead of the arms; each shot snatched (cast or the
   spirit's own catch), a hand closes on it where it was caught and fades.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 
 ## 0.7.281: villagers stay put while a player deals with them (pack 0.17.84)
@@ -5770,6 +5795,11 @@ Andy (2026-10-28): "it doesnt seem like MCA villagers have animations when attac
 - **Ship crews** (`Crewmen.fight`) swing the same way at arm's length (a plain blow when the move's reach falls short,
   since they keep to their deck paths); their old glint-then-flick stays for packs without Better Combat.
 - MCA villagers count as `MobCombat.humanoid`, so the blade guard and parry window reach them too.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 ## 0.7.285: boarding ladders, sweeps, stairs you can climb, and a captain who finds the sea (pack 0.17.89)
 Andy: "the ship should have a ladder somewhere along the side so you can get back in if you fall over", "characters
@@ -5794,6 +5824,11 @@ needs a way to back up and manuever better", and "maybe the captain's AI isnt na
   waypoint, a foe she chases; otherwise a point 160 blocks along her heading), or as near it as the water goes. She
   steers for the turn two ahead, works it out again every 10 s, when her goal moves, or when she's stuck. Not while
   she lays her guns on a foe close by.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 
 ## 0.7.288: absorbing is a toggle, with a hand on the foe (Bio-built and Rubber-folk; pack 0.17.93)
@@ -5823,6 +5858,11 @@ Andy: "stone borns should be able to be naturally wider and taller, where sylvan
 - **Players**: the old Verdant-only size cap (`Heritage.MCA_SIZE_CAP`) is now the heritage's ranges for both genes, held
   when a look is saved, when a heritage is chosen and every 10 s. MCA's editor sliders are kept to them on your own
   figure (`McaEditorSkinMixin`, `McaEditorHeritageMixin`), and the life story's figure stands at the middle of them.
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.
 - **Rubber-folk swallowing, drawn** (client `RubberEngulf`; Andy: "the absorb should animate the user's body leeching onto
   and over the enemy, like rubber, then it engulfs the body and adds the mass to the user"): over the 3 s swallow a pink
@@ -5842,4 +5882,9 @@ but only one at a time".
   night vision (spiders, bats), and jump boost II (slimes, frogs, rabbits).
 - Only one at a time: the next swallow replaces it. A chat line says what you took on ("You take on the Blaze: +3
   health, +3 blow, fireproof. (Your next swallow replaces it.)").
+- **People too** (Andy: "I meant what i said, you get a player's power or villager if you absorb them"): a downed player
+  or villager (a kingdom's folk too) can be swallowed. Their power is yours (Powers' `SwallowedPower`, through
+  `PowersCompat.takePower`): a player's as far as they had mastered it, a gifted villager's whole. Your own is set aside
+  and comes back when you die; the next swallow replaces it. They die of it (`Downed.execute`, credited to you, so the
+  law and their kin know) and leave no body (`jaymoskitchen.no_corpse`); a player respawns as usual, keeping their power.
 - Compile-checked only, not seen in game.

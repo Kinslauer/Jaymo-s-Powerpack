@@ -3374,3 +3374,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   pearl, a power or a command, takes them back to the hall (`ZFighterAfterlife.hold`). Only the fortune teller, the 13th
   wish or the 30-minute wait let them go home. Compile-checked, not seen in game. (With Kingdoms 0.7.292: Rubber-folk take
   on the stats and gifts of what they swallow.)
+- **0.17.103, swallowed powers** (`core/SwallowedPower`, for Kingdoms' Rubber-folk): swallowing a downed player or a
+  gifted villager hands you their power (a player's with their mastery, a villager's whole). Your own power, mastery
+  and fate are kept aside (`OWN`, persistent) and given back when you respawn; the next swallow replaces the held one,
+  and swallowing your own power back returns it as you had it. The swallowed player keeps their power. Compile-checked,
+  not seen in game.

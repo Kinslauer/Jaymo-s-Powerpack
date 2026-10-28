@@ -7196,6 +7196,7 @@
 	"message.jaymoskingdoms.rubber.absorbing": "Swallowing... %s%%",
 	"message.jaymoskingdoms.rubber.absorbed": "Gulp. You feel better.",
 	"message.jaymoskingdoms.rubber.adopted": "You take on the %s: %s. (Your next swallow replaces it.)",
+	"message.jaymoskingdoms.rubber.adopted_person": "You swallow %s whole and take on their build: %s. (Your next swallow replaces it.)",
 	"message.jaymoskingdoms.rubber.adopted.health": "+%s health",
 	"message.jaymoskingdoms.rubber.adopted.damage": "+%s blow",
 	"message.jaymoskingdoms.rubber.adopted.armor": "+%s armour",
