@@ -132,6 +132,7 @@
     "jaymospowers:chiseled_packed_ice_bricks",
     "jaymospowers:icicle",
     "jaymospowers:ice_crystal",
-    "jaymospowers:brittle_ice"
+    "jaymospowers:brittle_ice",
+    "#jaymospowers:stone_layers"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer",
+    "jaymospowers:dripstone_block_layer"
+  ],
+  "result": {
+    "id": "minecraft:dripstone_block"
+  }
+}

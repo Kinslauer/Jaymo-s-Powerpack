@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:holystone_bricks",
+  "result": {
+    "id": "jaymospowers:holystone_bricks_layer",
+    "count": 8
+  }
+}

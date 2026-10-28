@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer",
+    "jaymospowers:pale_oak_planks_layer"
+  ],
+  "result": {
+    "id": "minecraft:pale_oak_planks"
+  }
+}

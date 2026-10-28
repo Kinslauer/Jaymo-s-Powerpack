@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer",
+    "jaymospowers:stripped_jungle_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:stripped_jungle_log"
+  }
+}

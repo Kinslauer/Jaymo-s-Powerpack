@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:stripped_jungle_log"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_jungle_log_layer",
+    "count": 8
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:diorite",
+  "result": {
+    "id": "jaymospowers:diorite_layer",
+    "count": 8
+  }
+}

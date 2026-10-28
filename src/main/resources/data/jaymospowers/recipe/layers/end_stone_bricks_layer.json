@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:end_stone_bricks",
+  "result": {
+    "id": "jaymospowers:end_stone_bricks_layer",
+    "count": 8
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:stripped_skyroot_log"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_skyroot_log_layer",
+    "count": 8
+  }
+}

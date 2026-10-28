@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer",
+    "jaymospowers:bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:bricks"
+  }
+}

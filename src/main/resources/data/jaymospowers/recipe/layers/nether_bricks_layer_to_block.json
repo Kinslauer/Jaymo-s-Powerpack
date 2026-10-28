@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer",
+    "jaymospowers:nether_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:nether_bricks"
+  }
+}

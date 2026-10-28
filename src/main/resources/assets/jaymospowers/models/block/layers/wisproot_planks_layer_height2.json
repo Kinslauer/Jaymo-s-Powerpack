@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/layers/template_height2",
+  "textures": {
+    "top": "jaymospowers:block/aether/wisproot_planks",
+    "bottom": "jaymospowers:block/aether/wisproot_planks",
+    "side": "jaymospowers:block/aether/wisproot_planks"
+  }
+}

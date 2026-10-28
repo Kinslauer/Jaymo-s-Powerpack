@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:polished_tuff",
+  "result": {
+    "id": "jaymospowers:polished_tuff_layer",
+    "count": 8
+  }
+}

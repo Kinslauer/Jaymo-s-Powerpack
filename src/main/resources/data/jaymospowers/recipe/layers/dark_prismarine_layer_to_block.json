@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer",
+    "jaymospowers:dark_prismarine_layer"
+  ],
+  "result": {
+    "id": "minecraft:dark_prismarine"
+  }
+}

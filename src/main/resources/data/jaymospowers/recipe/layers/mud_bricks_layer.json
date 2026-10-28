@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:mud_bricks",
+  "result": {
+    "id": "jaymospowers:mud_bricks_layer",
+    "count": 8
+  }
+}

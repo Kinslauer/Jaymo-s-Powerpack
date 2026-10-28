@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:mossy_cobblestone",
+  "result": {
+    "id": "jaymospowers:mossy_cobblestone_layer",
+    "count": 8
+  }
+}

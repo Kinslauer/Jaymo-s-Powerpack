@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer",
+    "jaymospowers:blackstone_layer"
+  ],
+  "result": {
+    "id": "minecraft:blackstone"
+  }
+}

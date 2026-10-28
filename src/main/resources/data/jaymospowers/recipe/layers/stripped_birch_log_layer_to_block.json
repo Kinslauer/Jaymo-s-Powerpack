@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer",
+    "jaymospowers:stripped_birch_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:stripped_birch_log"
+  }
+}

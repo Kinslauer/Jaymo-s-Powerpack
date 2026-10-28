@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:stripped_crimson_stem"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_crimson_stem_layer",
+    "count": 8
+  }
+}

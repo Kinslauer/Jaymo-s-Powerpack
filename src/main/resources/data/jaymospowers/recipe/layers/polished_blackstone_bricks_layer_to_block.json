@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer",
+    "jaymospowers:polished_blackstone_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:polished_blackstone_bricks"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/layers/template_height12",
+  "textures": {
+    "top": "jaymospowers:block/aether/undershale",
+    "bottom": "jaymospowers:block/aether/undershale",
+    "side": "jaymospowers:block/aether/undershale"
+  }
+}

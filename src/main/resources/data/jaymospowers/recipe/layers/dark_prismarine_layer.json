@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:dark_prismarine",
+  "result": {
+    "id": "jaymospowers:dark_prismarine_layer",
+    "count": 8
+  }
+}

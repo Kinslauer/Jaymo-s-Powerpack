@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer",
+    "jaymospowers:golden_oak_log_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:golden_oak_log"
+  }
+}

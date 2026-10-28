@@ -60,6 +60,8 @@ PARTS = [
     ("kitchen_knife_blade", "Kitchen Knife Blade", "drawn:kitchen_knife_blade", ["iron"]),
     # (0.17.110) Sora's Dagger's iron stage
     ("soras_dagger_blade", "Sora's Dagger Blade", "drawn:soras_dagger_blade", ["iron"]),
+    # (0.17.116) the layer blocks' saw (layers/SawItem)
+    ("saw_blade", "Saw Blade", "drawn:saw_blade", ["iron"]),
 ]
 # our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
 DRAWN = {
@@ -130,6 +132,23 @@ DRAWN["soras_dagger_blade"] = [
     "....#oxxx#......",
     "...#oxxx#.......",
     "....####........",
+    "................",
+    "................"]
+DRAWN["saw_blade"] = [
+    "................",
+    "............###.",
+    "...........#oxx#",
+    "..........#oxxx#",
+    ".........#oxxx##",
+    "........#oxxxx#.",
+    ".......#oxxx###.",
+    "......#oxxxx#...",
+    ".....#oxxx###...",
+    "....#oxxxx#.....",
+    "...#oxxx###.....",
+    "...#oxxx#.......",
+    "...#ox###.......",
+    "....##..........",
     "................",
     "................"]
 # outline, metal, shine

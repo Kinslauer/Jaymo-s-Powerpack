@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer",
+    "jaymospowers:smooth_quartz_layer"
+  ],
+  "result": {
+    "id": "minecraft:smooth_quartz"
+  }
+}

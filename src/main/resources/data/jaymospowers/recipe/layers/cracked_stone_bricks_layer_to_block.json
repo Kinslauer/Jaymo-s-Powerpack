@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer",
+    "jaymospowers:cracked_stone_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:cracked_stone_bricks"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:polished_blackstone",
+  "result": {
+    "id": "jaymospowers:polished_blackstone_layer",
+    "count": 8
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer",
+    "jaymospowers:quartz_block_layer"
+  ],
+  "result": {
+    "id": "minecraft:quartz_block"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer",
+    "jaymospowers:birch_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:birch_log"
+  }
+}

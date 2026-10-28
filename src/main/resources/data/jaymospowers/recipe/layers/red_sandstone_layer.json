@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:red_sandstone",
+  "result": {
+    "id": "jaymospowers:red_sandstone_layer",
+    "count": 8
+  }
+}

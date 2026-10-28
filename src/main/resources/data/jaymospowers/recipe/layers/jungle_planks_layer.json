@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:jungle_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:jungle_planks_layer",
+    "count": 8
+  }
+}

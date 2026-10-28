@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:deepslate_bricks",
+  "result": {
+    "id": "jaymospowers:deepslate_bricks_layer",
+    "count": 8
+  }
+}

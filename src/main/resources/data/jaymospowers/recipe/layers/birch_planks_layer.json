@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:birch_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:birch_planks_layer",
+    "count": 8
+  }
+}

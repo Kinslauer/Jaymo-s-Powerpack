@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer",
+    "jaymospowers:spruce_planks_layer"
+  ],
+  "result": {
+    "id": "minecraft:spruce_planks"
+  }
+}

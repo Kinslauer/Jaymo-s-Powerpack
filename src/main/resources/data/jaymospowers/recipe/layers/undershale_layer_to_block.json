@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer",
+    "jaymospowers:undershale_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:undershale"
+  }
+}

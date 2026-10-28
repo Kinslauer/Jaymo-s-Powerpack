@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer",
+    "jaymospowers:agiosite_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:agiosite"
+  }
+}

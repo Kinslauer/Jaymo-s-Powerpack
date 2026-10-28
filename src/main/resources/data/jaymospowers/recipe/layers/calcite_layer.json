@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:calcite",
+  "result": {
+    "id": "jaymospowers:calcite_layer",
+    "count": 8
+  }
+}

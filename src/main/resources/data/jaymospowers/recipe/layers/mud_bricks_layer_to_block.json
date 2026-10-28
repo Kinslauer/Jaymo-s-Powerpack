@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer",
+    "jaymospowers:mud_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:mud_bricks"
+  }
+}

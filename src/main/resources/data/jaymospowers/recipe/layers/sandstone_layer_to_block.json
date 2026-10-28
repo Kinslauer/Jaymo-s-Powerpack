@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer",
+    "jaymospowers:sandstone_layer"
+  ],
+  "result": {
+    "id": "minecraft:sandstone"
+  }
+}

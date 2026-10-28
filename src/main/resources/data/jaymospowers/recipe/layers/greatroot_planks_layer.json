@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:greatroot_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:greatroot_planks_layer",
+    "count": 8
+  }
+}

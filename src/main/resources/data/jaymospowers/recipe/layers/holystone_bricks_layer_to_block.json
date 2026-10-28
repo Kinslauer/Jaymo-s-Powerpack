@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer",
+    "jaymospowers:holystone_bricks_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:holystone_bricks"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer",
+    "jaymospowers:end_stone_layer"
+  ],
+  "result": {
+    "id": "minecraft:end_stone"
+  }
+}
