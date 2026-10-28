@@ -5896,3 +5896,17 @@ Andy, retiring the folk: "all of em, no more folk im retiring the folk. all mca 
   a wall, so each is held to his post: strayed more than 3 blocks, he walks back unless a foe is right on him. They
   fight the realm's foes as its guards do (`McaCompat.foe`). Cavalry and cannon archers stay folk for now.
 - Compile-checked, not seen in game.
+
+## 0.7.294: the realms' drivers and caravan men are MCA villagers (pack 0.17.105)
+Andy, retiring the folk: "all mca please." The fourth part: the road.
+- **Drivers** (`Drivers`): a cab's driver, a king's coachman and a milestone coach's coachman are, with MCA, men new to the
+  realm's people (`McaBridge.driver`), in the saddle of the same horses (`Cavalry.mount` and `Stables.equip` take any
+  worker now). While he drives, his brain is set aside (`Workers.step`); out of the saddle he's put back on his horse as
+  before. A cab's or carriage's folk driver from before hands his seat to a villager (`Drivers.recast`).
+- **Caravans**: a fiefdom's caravan comes into the world with villager carters and MCA guards (`Caravans.guard`,
+  `McaBridge.escort`), steered along the road as its folk were (`Caravans.villagerStep` in place of the `Drive` goal); a
+  guard's brain has him when there's a fight. A player striking a cart sets them on him (`Rulers.charge`). They're
+  still off the roster. A roaming merchant's realm escort is the same.
+- These come and go (a caravan out of sight, a coach's trip over), so a villager who leaves for good is taken out of
+  MCA's family tree too (`McaCompat.vanish`), and the tree doesn't fill with them.
+- Compile-checked, not seen in game.

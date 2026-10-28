@@ -98,6 +98,14 @@ public final class Workers {
 			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
 			return Crewmen.step(level, w);
 		}
+		if (Caravans.isCaravanFolk(w)) {
+			// (0.7.294) one of a caravan's carters or guards: along with it
+			return Caravans.villagerStep(level, w);
+		}
+		if (w.role() == Caravans.CARTER && Drivers.step(level, w)) {
+			// (0.7.294) a realm's driver in the saddle: the drive is his
+			return true;
+		}
 		if (RangedTactics.brainStep(mob)) {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
 			return true;

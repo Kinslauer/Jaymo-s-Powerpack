@@ -428,6 +428,47 @@ final class McaBridge {
 		return gifted != null ? gifted : pick.get(level.getRandom().nextInt(pick.size()));
 	}
 
+	/**
+	 * (0.7.294) {@link McaCompat#driver}: a man to drive {@code f}'s horses ({@link Drivers}), new to its people (so
+	 * nobody's taken from their work), at {@code at} on {@code task}, kept to {@code radius} of it.
+	 */
+	static @Nullable Worker driver(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(Vec3.atBottomCenterOf(at)).withAge(0)
+			.spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		Enlisted w = worker(villager);
+		w.enlist(Caravans.CARTER, f.id());
+		w.setTask(task);
+		villager.setHomeTo(at, radius);
+		return w;
+	}
+
+	/** (0.7.294) {@link McaCompat#escort}: an MCA guard new to {@code f}'s people, on {@code task} at {@code at}. */
+	static @Nullable Worker escort(ServerLevel level, Faction f, BlockPos at, float yaw, String task, int radius) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0)
+			.withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.MOB_SUMMONED);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		Enlisted w = worker(villager);
+		w.enlist(Folk.GUARD, f.id());
+		w.setTask(task);
+		villager.setHomeTo(at, radius);
+		return w;
+	}
+
+	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */
+	static void forgetVillager(net.minecraft.world.entity.Entity e) {
+		if (e instanceof VillagerEntityMCA v && e.level() instanceof ServerLevel level) {
+			FamilyTree.get(level).remove(v.getUUID());
+		}
+	}
+
 	/** {@link McaCompat#becomeGuard}: an MCA guard (or archer) of the same blood takes {@code folk}'s post. */
 	static boolean convertGuard(ServerLevel level, Folk folk) {
 		Faction f = Factions.get(level.getServer(), folk.factionId());
@@ -768,6 +809,15 @@ final class McaBridge {
 			}
 			e.discharge();
 			Rulers.unfit(villager);
+			return false;
+		}
+		if (e.role() == Caravans.CARTER) {
+			// (0.7.294) a realm's driver (Drivers), while it stands and he has a horse to drive
+			Faction f = Factions.get(level.getServer(), e.factionId());
+			if (f != null && !f.fallen() && !e.task().isEmpty()) {
+				return true;
+			}
+			e.discharge();
 			return false;
 		}
 		if (Barbarians.villagerRole(e.role())) {

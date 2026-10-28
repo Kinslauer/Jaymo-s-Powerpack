@@ -21,7 +21,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
@@ -149,8 +148,8 @@ final class Carriages {
 		if (carriage.kind() == Wagon.RICKSHAW) {
 			return Rickshaws.puller(carriage);
 		}
-		Entity horse = carriage.horse();
-		return horse != null && horse.getFirstPassenger() instanceof Folk f ? f : null;
+		Worker w = Drivers.of(carriage.horse());
+		return w == null ? null : w.mob();
 	}
 
 	/** Out on his round: he gets in, if his carriage is at hand and waiting (or, without one, a rickshaw come for him). */
@@ -276,18 +275,14 @@ final class Carriages {
 	/** A coachman, his horse and the carriage, at the gate. */
 	static @Nullable Wagon build(ServerLevel level, Faction f, Castle.Keep keep) {
 		BlockPos at = Construction.standable(level, keep.gate(), 6);
-		Folk coachman = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		// ((0.7.294) with MCA, one of the realm's people)
+		Worker coachman = Drivers.hire(level, f, at, level.getRandom().nextFloat() * 360.0F, TASK, PARKED_RADIUS, "entity.jaymoskingdoms.coachman_of");
 		if (coachman == null) {
 			return null;
 		}
-		coachman.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		coachman.setup(Caravans.CARTER, f, at, PARKED_RADIUS);
-		coachman.setTask(TASK);
-		coachman.setCustomName(Component.translatable("entity.jaymoskingdoms.coachman_of", f.name()));
-		level.addFreshEntity(coachman);
 		AbstractHorse horse = Cavalry.mount(level, coachman, f, false);
 		if (horse == null) {
-			coachman.discard();
+			coachman.mob().discard();
 			return null;
 		}
 		return Wagon.hitch(level, Wagon.CARRIAGE, f, horse, -1, 0);
@@ -298,11 +293,13 @@ final class Carriages {
 	 * he goes home, gone from the world.
 	 */
 	private static void unhorsed(ServerLevel level, Faction f, @Nullable Wagon carriage) {
-		for (Folk coachman : level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(RANGE),
-			x -> x.isAlive() && x.factionId() == f.id() && TASK.equals(x.task()) && !x.isPassenger())) {
+		// ((0.7.294) a folk or a villager)
+		for (Worker w : Workers.near(level, new AABB(f.seat()).inflate(RANGE),
+			x -> x.isAlive() && x.factionId() == f.id() && Drivers.on(x, TASK) && !x.mob().isPassenger())) {
+			PathfinderMob coachman = w.mob();
 			Entity horse = carriage == null ? null : carriage.horse();
 			if (horse == null || horse.isVehicle()) {
-				coachman.discard();
+				McaCompat.vanish(coachman);
 			} else if (!coachman.isInWater()) {
 				coachman.teleportTo(horse.getX(), horse.getY(), horse.getZ());
 				coachman.startRiding(horse);
@@ -330,5 +327,9 @@ final class Carriages {
 			return;
 		}
 		coachman.setHomeTo(Construction.standable(level, keep.gate(), 6), PARKED_RADIUS);
+		if (coachman instanceof Worker w && Drivers.recast(level, f, w, TASK, PARKED_RADIUS)) {
+			// (0.7.294) with MCA, its coachman is one of the realm's people
+			return;
+		}
 	}
 }

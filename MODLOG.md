@@ -3374,3 +3374,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   greens with ears, noses, tusks, warts and scars in several shapes (see Kingdoms' MODLOG). Compile-checked, not seen in game.
 - **0.17.104, Kingdoms 0.7.293:** barbarian chiefs and the realms' wall archers are MCA villagers, chiefs keeping their
   boss bars and rallies, archers held to their posts (see Kingdoms' MODLOG). Compile-checked, not seen in game.
+- **0.17.105, Kingdoms 0.7.294:** cab drivers, coachmen, milestone coaches' drivers and the caravans' carters and guards
+  are MCA villagers (see Kingdoms' MODLOG). Compile-checked, not seen in game.

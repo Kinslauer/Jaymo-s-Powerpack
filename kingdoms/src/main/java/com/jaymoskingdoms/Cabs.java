@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -100,16 +99,21 @@ public final class Cabs {
 				continue;
 			}
 			Entity horse = cab.horse();
-			Folk driver = driver(cab);
+			Worker driver = driver(cab);
 			if (!rich(f) && !cab.isVehicle() && cab.ride() < 0) {
 				dismiss(level, cab);
 				continue;
 			}
+			if (driver != null && free(cab) && Drivers.recast(level, f, driver, TASK, 4)) {
+				// (0.7.294) with MCA, its driver is one of the realm's people
+				continue;
+			}
 			if (horse != null && driver == null) {
-				for (Folk lost : level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(RANGE),
-					x -> x.isAlive() && x.factionId() == f.id() && TASK.equals(x.task()) && !x.isPassenger())) {
-					lost.teleportTo(horse.getX(), horse.getY(), horse.getZ());
-					lost.startRiding(horse);
+				// ((0.7.294) a folk or a villager)
+				for (Worker lost : Workers.near(level, new AABB(f.seat()).inflate(RANGE),
+					x -> x.isAlive() && x.factionId() == f.id() && Drivers.on(x, TASK) && !x.mob().isPassenger())) {
+					lost.mob().teleportTo(horse.getX(), horse.getY(), horse.getZ());
+					lost.mob().startRiding(horse);
 					break;
 				}
 			}
@@ -119,18 +123,14 @@ public final class Cabs {
 	/** A driver, his horse and the cab, at its stand. */
 	static @Nullable Wagon build(ServerLevel level, Faction f) {
 		BlockPos at = stand(level, f);
-		Folk driver = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		// ((0.7.294) with MCA, one of the realm's people)
+		Worker driver = Drivers.hire(level, f, at, level.getRandom().nextFloat() * 360.0F, TASK, 4, "entity.jaymoskingdoms.cab_driver_of");
 		if (driver == null) {
 			return null;
 		}
-		driver.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		driver.setup(Caravans.CARTER, f, at, 4);
-		driver.setTask(TASK);
-		driver.setCustomName(Component.translatable("entity.jaymoskingdoms.cab_driver_of", f.name()));
-		level.addFreshEntity(driver);
 		AbstractHorse horse = Cavalry.mount(level, driver, f, false);
 		if (horse == null) {
-			driver.discard();
+			driver.mob().discard();
 			return null;
 		}
 		return Wagon.hitch(level, Wagon.CAB, f, horse, -1, 0);
@@ -139,20 +139,19 @@ public final class Cabs {
 	/** The cab, its horse and driver go home: gone in a puff. */
 	private static void dismiss(ServerLevel level, Wagon cab) {
 		Entity horse = cab.horse();
-		Folk driver = driver(cab);
-		for (Entity e : new Entity[] {driver, horse, cab}) {
+		Worker driver = driver(cab);
+		for (Entity e : new Entity[] {driver == null ? null : driver.mob(), horse, cab}) {
 			if (e != null) {
 				level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 1.0, e.getZ(), 10, 0.4, 0.5, 0.4, 0.02);
-				e.discard();
+				McaCompat.vanish(e);
 			}
 		}
 		JOBS.remove(cab.getUUID());
 	}
 
 	/** Its driver (in its horse's saddle), or null. */
-	static @Nullable Folk driver(Wagon cab) {
-		Entity horse = cab.horse();
-		return horse != null && horse.getFirstPassenger() instanceof Folk f ? f : null;
+	static @Nullable Worker driver(Wagon cab) {
+		return Drivers.of(cab.horse());
 	}
 
 	// ---- its day ----------------------------------------------------------------------------------------------------
@@ -171,7 +170,7 @@ public final class Cabs {
 			}
 			return;
 		}
-		Folk driver = driver(cab);
+		Worker driver = driver(cab);
 		if (driver == null) {
 			return;
 		}
@@ -243,7 +242,7 @@ public final class Cabs {
 	}
 
 	/** Drives toward {@code to} a leg at a time; true once within {@code reach}. Stuck, the cab hops ahead {@link #HOP} blocks. */
-	private static boolean drive(ServerLevel level, Folk driver, Entity horse, Wagon cab, Job job, BlockPos to, double reach, double speed, long now) {
+	private static boolean drive(ServerLevel level, Worker driver, Entity horse, Wagon cab, Job job, BlockPos to, double reach, double speed, long now) {
 		Vec3 goal = Vec3.atBottomCenterOf(to);
 		double dx = horse.getX() - goal.x, dz = horse.getZ() - goal.z;
 		double across = Math.sqrt(dx * dx + dz * dz);
@@ -285,20 +284,20 @@ public final class Cabs {
 	/** A player right-clicked the cab: where it goes and the fares, or why not. */
 	static void hail(ServerLevel level, Wagon cab, ServerPlayer player) {
 		Faction f = Factions.get(level.getServer(), cab.faction());
-		Folk driver = driver(cab);
+		Worker driver = driver(cab);
 		if (f == null || f.fallen() || driver == null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.no_driver").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.refused", driver.getName()).withStyle(ChatFormatting.RED));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.refused", driver.mob().getName()).withStyle(ChatFormatting.RED));
 			return;
 		}
 		if (!free(cab)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.busy", driver.getName()).withStyle(ChatFormatting.GRAY));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.busy", driver.mob().getName()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		Rickshaws.offer(level, f, cab, player, driver);
+		Rickshaws.offer(level, f, cab, player, driver.mob());
 	}
 
 	/** {@code /kingdom ride} on a cab: the fare paid, the player aboard and away. */
@@ -306,14 +305,14 @@ public final class Cabs {
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, cab.faction());
 		Faction to = Factions.get(server, destination);
-		Folk driver = driver(cab);
+		Worker driver = driver(cab);
 		if (f == null || to == null || driver == null
 			|| Rickshaws.destinations(level, f, player, cab.position()).stream().noneMatch(d -> d.id() == destination)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.no_driver").withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		if (!free(cab) || player.isPassenger()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.busy", driver.getName()).withStyle(ChatFormatting.RED));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.busy", driver.mob().getName()).withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		int fare = Rickshaws.fare(cab.position(), to);
@@ -329,7 +328,7 @@ public final class Cabs {
 		Job job = JOBS.computeIfAbsent(cab.getUUID(), u -> new Job());
 		start(job, HIRED, Construction.standable(level, to.seat(), 6), level.getGameTime());
 		level.playSound(null, cab.blockPosition(), SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.NEUTRAL, 0.8F, 1.1F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.off", driver.getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.off", driver.mob().getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
 		Journeys.begin(level, player, cab, Component.literal(to.name()), job.goal, Journeys.blocks(cab.position(), job.goal), fare, f.id(), RIDE);
 		return 1;
 	}

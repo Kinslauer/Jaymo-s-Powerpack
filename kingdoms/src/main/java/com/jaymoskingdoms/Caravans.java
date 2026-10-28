@@ -30,6 +30,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.item.Item;
@@ -580,13 +581,14 @@ final class Caravans {
 			return;
 		}
 		put(server, c.at(lead.blockPosition()));
-		List<Folk> guards = new ArrayList<>();
+		// ((0.7.294) folk, or MCA guards)
+		List<PathfinderMob> guards = new ArrayList<>();
 		for (UUID id : live.guards) {
-			if (level.getEntity(id) instanceof Folk g && g.isAlive()) {
+			if (level.getEntity(id) instanceof PathfinderMob g && g instanceof Worker && g.isAlive()) {
 				guards.add(g);
 			}
 		}
-		for (Folk g : guards) {
+		for (PathfinderMob g : guards) {
 			if (c.mounted() && !g.isPassenger()) {
 				AbstractHorse spare = level.getEntitiesOfClass(AbstractHorse.class, g.getBoundingBox().inflate(12.0),
 					h -> h.isAlive() && !h.isVehicle() && h.entityTags().contains(live.stamp)).stream().findFirst().orElse(null);
@@ -602,7 +604,7 @@ final class Caravans {
 			for (Entity[] cart : carts) {
 				HEADING.remove(cart[0].getUUID());
 			}
-			for (Folk g : guards) {
+			for (PathfinderMob g : guards) {
 				HEADING.remove(g.getUUID());
 			}
 			if (now % 40 == 0) {
@@ -648,14 +650,14 @@ final class Caravans {
 		Vec3 facing = len > 1.0E-3 ? flat.scale(1.0 / len) : Vec3.ZERO;
 		Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 		for (int i = 0; i < guards.size(); i++) {
-			Folk g = guards.get(i);
+			PathfinderMob g = guards.get(i);
 			Entity by = carts.get(Math.min(carts.size() - 1, i / 2))[1];
 			HEADING.put(g.getUUID(), by.position().add(right.scale(i % 2 == 0 ? 3.0 : -3.0)).add(facing.scale(i == 0 ? 4.0 : 0.0)));
 		}
 		for (Entity[] cart : carts) {
-			((Folk)cart[0]).setHomeTo(cart[0].blockPosition(), 64);
+			((PathfinderMob)cart[0]).setHomeTo(cart[0].blockPosition(), 64);
 		}
-		for (Folk g : guards) {
+		for (PathfinderMob g : guards) {
 			g.setHomeTo(g.blockPosition(), 64);
 		}
 	}
@@ -681,11 +683,11 @@ final class Caravans {
 	}
 
 	/** The column set down further along its road. */
-	private static void hop(ServerLevel level, List<Entity[]> carts, List<Folk> guards, Vec3 to) {
+	private static void hop(ServerLevel level, List<Entity[]> carts, List<PathfinderMob> guards, Vec3 to) {
 		for (Entity[] cart : carts) {
 			hop(level, cart[0], cart[1], cart[2], to);
 		}
-		for (Folk g : guards) {
+		for (PathfinderMob g : guards) {
 			Vec3 here = g.position();
 			Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
 			double len = flat.length();
@@ -730,19 +732,17 @@ final class Caravans {
 		float yaw = (float)(Math.atan2(facing.z, facing.x) * (180.0 / Math.PI)) - 90.0F;
 		for (int i = 0; i < c.carts().size(); i++) {
 			BlockPos spot = ground(level, at.subtract(facing.scale(i * SPACING)));
-			Folk carter = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-			if (carter == null) {
+			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
+			Worker w = Drivers.hire(level, home, spot, yaw, TASK, 64, null);
+			if (w == null) {
 				continue;
 			}
-			carter.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0.0F);
-			carter.setup(CARTER, home, spot, 64);
-			carter.setTask(TASK);
+			PathfinderMob carter = w.mob();
 			carter.addTag(TAG);
 			carter.addTag(live.stamp);
-			level.addFreshEntity(carter);
-			AbstractHorse horse = Cavalry.mount(level, carter, home, true);
+			AbstractHorse horse = Cavalry.mount(level, w, home, true);
 			if (horse == null) {
-				carter.discard();
+				McaCompat.vanish(carter);
 				continue;
 			}
 			horse.addTag(TAG);
@@ -758,18 +758,15 @@ final class Caravans {
 		for (int i = 0; i < c.guards(); i++) {
 			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 			BlockPos spot = ground(level, at.add(right.scale(i % 2 == 0 ? 3.0 : -3.0)).subtract(facing.scale(i / 2 * SPACING)));
-			Folk guard = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-			if (guard == null) {
+			Worker w = guard(level, home, spot, yaw);
+			if (w == null) {
 				continue;
 			}
-			guard.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0.0F);
-			guard.setup(Folk.GUARD, home, spot, 64);
-			guard.setTask(TASK);
+			PathfinderMob guard = w.mob();
 			guard.addTag(TAG);
 			guard.addTag(live.stamp);
-			level.addFreshEntity(guard);
 			if (c.mounted()) {
-				AbstractHorse horse = Cavalry.mount(level, guard, home, true);
+				AbstractHorse horse = Cavalry.mount(level, w, home, true);
 				if (horse != null) {
 					horse.addTag(TAG);
 					horse.addTag(live.stamp);
@@ -777,6 +774,25 @@ final class Caravans {
 			}
 			live.guards.add(guard.getUUID());
 		}
+	}
+
+	/** (0.7.294) One of a caravan's guards for {@code f} at {@code at}: with MCA an MCA guard of its people, else a folk. */
+	static @Nullable Worker guard(ServerLevel level, Faction f, BlockPos at, float yaw) {
+		if (f.type().isRealm()) {
+			Worker w = McaCompat.escort(level, f, at, yaw, TASK, 64);
+			if (w != null) {
+				return w;
+			}
+		}
+		Folk guard = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		if (guard == null) {
+			return null;
+		}
+		guard.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		guard.setup(Folk.GUARD, f, at, 64);
+		guard.setTask(TASK);
+		level.addFreshEntity(guard);
+		return guard;
 	}
 
 	static BlockPos ground(ServerLevel level, Vec3 at) {
@@ -825,18 +841,16 @@ final class Caravans {
 				Entity e = level.getEntity(id);
 				if (e != null) {
 					HEADING.remove(id);
-					e.discard();
+					McaCompat.vanish(e);
 				}
 			}
 		}
 		for (UUID id : live.guards) {
 			Entity e = level.getEntity(id);
 			HEADING.remove(id);
-			if (e instanceof Folk g) {
-				Cavalry.dismiss(g);
-			}
 			if (e != null) {
-				e.discard();
+				Cavalry.dismiss(e);
+				McaCompat.vanish(e);
 			}
 		}
 	}
@@ -863,9 +877,11 @@ final class Caravans {
 			return;
 		}
 		Economy.noteAttack(level.getServer(), f, player);
-		for (Folk g : level.getEntitiesOfClass(Folk.class, wagon.getBoundingBox().inflate(24.0), x -> x.factionId() == f.id() && x.combatant())) {
-			if (g.getTarget() == null) {
-				g.setTarget(player);
+		// ((0.7.294) folk or MCA guards)
+		for (Worker g : Workers.near(level, wagon.getBoundingBox().inflate(24.0), x -> x.factionId() == f.id()
+			&& (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD || x.role() == Folk.ARCHER))) {
+			if (Rulers.target(g.mob()) == null) {
+				Rulers.charge(g.mob(), player);
 			}
 		}
 	}
@@ -913,7 +929,7 @@ final class Caravans {
 			for (Entity rider : horse.getPassengers()) {
 				HEADING.remove(rider.getUUID());
 				poof(level, rider);
-				rider.discard();
+				McaCompat.vanish(rider);
 			}
 			horse.discard();
 		}
@@ -943,8 +959,8 @@ final class Caravans {
 
 	// ---- its folk ---------------------------------------------------------------------------------------------------
 
-	/** One of a caravan's carters or guards (no one on its fiefdom's roster). */
-	static boolean isCaravanFolk(Folk folk) {
+	/** One of a caravan's carters or guards (no one on its fiefdom's roster): (0.7.294) a folk or a villager. */
+	static boolean isCaravanFolk(Worker folk) {
 		return TASK.equals(folk.task());
 	}
 
@@ -969,11 +985,30 @@ final class Caravans {
 				}
 			}
 		}
-		entity.discard();
+		McaCompat.vanish(entity);
+	}
+
+	/**
+	 * (0.7.294) A caravan's villager ({@code Workers.step}, before its brain): steered where the caravan sends it, true
+	 * (in place of its brain); false to let its brain have it (a guard's fight, nothing to steer for).
+	 */
+	static boolean villagerStep(ServerLevel level, Worker w) {
+		PathfinderMob mob = w.mob();
+		Vec3 to = HEADING.get(mob.getUUID());
+		if (mob instanceof Folk || to == null || w.role() != CARTER && Rulers.target(mob) != null || McaCompat.busy(mob)) {
+			return w.role() == CARTER && mob.isPassenger();
+		}
+		double d = mob.position().distanceTo(to);
+		if (d < 2.0) {
+			mob.getNavigation().stop();
+		} else if (mob.getNavigation().isDone() || mob.tickCount % 10 == 0) {
+			mob.getNavigation().moveTo(to.x, to.y, to.z, w.role() == CARTER || d < 6.0 ? DRIVE_SPEED : 1.0);
+		}
+		return true;
 	}
 
 	/** (0.5.28) Steers a caravan folk (a war party's carter too) toward {@code to}, or (null) lets it be. */
-	static void steer(Folk folk, @Nullable Vec3 to) {
+	static void steer(Entity folk, @Nullable Vec3 to) {
 		if (to == null) {
 			HEADING.remove(folk.getUUID());
 		} else {

@@ -1123,7 +1123,7 @@ public final class Stables {
 	 * in the realm's colour; for each stable (up to {@link #MAX_LEVEL}) a better horse, a little faster, more war
 	 * training; and with two or more, chain barding (plate in a wealthy realm).
 	 */
-	static void equip(ServerLevel level, AbstractHorse horse, Faction f, Folk rider) {
+	static void equip(ServerLevel level, AbstractHorse horse, Faction f, Worker rider) {
 		MinecraftServer server = level.getServer();
 		int lvl = f.type().isRealm() ? level(server, f) : 0;
 		if (lvl == 0 || horse instanceof WarElephant || rider.role() != Folk.GUARD && rider.role() != Folk.ARCHER) {

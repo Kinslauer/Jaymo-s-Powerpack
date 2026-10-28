@@ -413,17 +413,16 @@ final class RoamingCaravans {
 		boolean mounted = Wealth.atLeast(level.getServer(), realm, Wealth.Tier.PROSPEROUS);
 		for (int i = 0; i < ESCORT_GUARDS; i++) {
 			BlockPos at = Caravans.ground(level, Vec3.atBottomCenterOf(spot).add(right(facing).scale(side(i + 1))).subtract(facing.scale(back(i + 1))));
-			Folk guard = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-			if (guard == null) {
+			// ((0.7.294) with MCA, an MCA guard of the realm's)
+			Worker w = Caravans.guard(level, realm, at, 0.0F);
+			if (w == null) {
 				continue;
 			}
+			net.minecraft.world.entity.PathfinderMob guard = w.mob();
 			place(guard, at, facing);
-			guard.setup(Folk.GUARD, realm, at, 64);
-			guard.setTask(Caravans.TASK);
 			tag(guard, g);
-			level.addFreshEntity(guard);
 			if (mounted) {
-				AbstractHorse horse = Cavalry.mount(level, guard, realm, true);
+				AbstractHorse horse = Cavalry.mount(level, w, realm, true);
 				if (horse != null) {
 					tag(horse, g);
 				}
@@ -685,7 +684,7 @@ final class RoamingCaravans {
 			Vec3 dir = new Vec3(next.getX() + 0.5 - here.x, 0.0, next.getZ() + 0.5 - here.z);
 			Vec3 facing = dir.length() < 1.0E-3 ? Vec3.ZERO : dir.normalize();
 			for (int i = 0; i < fighters.size(); i++) {
-				if (fighters.get(i) instanceof Folk guard) {
+				if (fighters.get(i) instanceof net.minecraft.world.entity.PathfinderMob guard && guard instanceof Worker) {
 					Caravans.steer(guard, here.add(right(facing).scale(side(i + 1) * 1.4)).add(facing.scale(i == 0 ? 3.0 : -3.0)));
 					guard.setHomeTo(guard.blockPosition(), 64);
 				}
@@ -770,13 +769,18 @@ final class RoamingCaravans {
 			g.hitters.add(player.getUUID());
 			return;
 		}
-		if (victim instanceof Folk) {
+		if (victim instanceof Worker) {
 			// (its own guards see to that, as any realm's do)
 			return;
 		}
 		for (UUID id : g.fighters) {
 			if (level.getEntity(id) instanceof Mob m && m.isAlive() && (m.getTarget() == null || !m.getTarget().isAlive())) {
-				m.setTarget(player);
+				if (m instanceof net.minecraft.world.entity.PathfinderMob v && m instanceof Worker && !(m instanceof Folk)) {
+					// ((0.7.294) an MCA guard)
+					Rulers.charge(v, player);
+				} else {
+					m.setTarget(player);
+				}
 			}
 		}
 		if (g.offenders.add(player.getUUID()) && g.realm != null) {
@@ -885,16 +889,16 @@ final class RoamingCaravans {
 		all.addAll(g.animals.keySet());
 		for (UUID id : all) {
 			Entity e = level.getEntity(id);
-			if (e instanceof Folk f) {
-				Caravans.steer(f, null);
-				Cavalry.dismiss(f);
+			if (e instanceof Worker) {
+				Caravans.steer(e, null);
+				Cavalry.dismiss(e);
 			}
 			if (e != null && e.entityTags().contains(g.stamp)) {
 				Entity vehicle = e.getVehicle();
 				if (vehicle != null && vehicle.entityTags().contains(g.stamp)) {
 					vehicle.discard();
 				}
-				e.discard();
+				McaCompat.vanish(e);
 			}
 		}
 	}
@@ -902,15 +906,15 @@ final class RoamingCaravans {
 	/** A merchant's escort, done: back to their realm. */
 	private static void dismiss(ServerLevel level, Mob m) {
 		level.sendParticles(ParticleTypes.POOF, m.getX(), m.getY() + 1.0, m.getZ(), 10, 0.4, 0.5, 0.4, 0.02);
-		if (m instanceof Folk f) {
-			Caravans.steer(f, null);
-			Cavalry.dismiss(f);
+		if (m instanceof Worker) {
+			Caravans.steer(m, null);
+			Cavalry.dismiss(m);
 		}
 		Entity vehicle = m.getVehicle();
 		if (vehicle != null && vehicle.entityTags().contains(TAG)) {
 			vehicle.discard();
 		}
-		m.discard();
+		McaCompat.vanish(m);
 	}
 
 	/** One of a roaming caravan's left in a chunk that unloaded (or saved when the server stopped): gone. */
@@ -918,7 +922,7 @@ final class RoamingCaravans {
 		if (!entity.entityTags().contains(TAG) || of(entity) != null) {
 			return;
 		}
-		entity.discard();
+		McaCompat.vanish(entity);
 	}
 
 	// ---- for operators ------------------------------------------------------------------------------------------------

@@ -410,6 +410,27 @@ public final class McaCompat {
 		return LOADED && Barbarians.mayBecomeVillager(level, folk) && McaBridge.convertRaider(level, folk);
 	}
 
+	/**
+	 * (0.7.294) {@code e} leaves the world for good (a caravan's man gone home, a coachman whose trip is over): an MCA
+	 * villager is taken out of MCA's family tree too, so the comings and goings don't fill it.
+	 */
+	static void vanish(net.minecraft.world.entity.Entity e) {
+		if (LOADED) {
+			McaBridge.forgetVillager(e);
+		}
+		e.discard();
+	}
+
+	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */
+	static @Nullable Worker escort(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
+		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
+	}
+
+	/** (0.7.294) With MCA, one of {@code f}'s villagers to drive its horses ({@link Drivers}), or null. */
+	static @Nullable Worker driver(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
+		return LOADED ? McaBridge.driver(level, f, at, yaw, task, radius) : null;
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);

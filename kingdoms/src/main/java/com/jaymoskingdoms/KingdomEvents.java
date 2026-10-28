@@ -525,7 +525,8 @@ public final class KingdomEvents {
 			}
 			rulerDied(level, faction, w.mob(), w.role() == Folk.LORD, killer, source);
 		} else if (faction != null && w.role() >= 0 && !Rulers.leaderRole(w.role())) {
-			lostHand(server, faction, w.role(), killer, true);
+			// ((0.7.294) a caravan's villagers were never on its roster)
+			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w));
 		}
 	}
 

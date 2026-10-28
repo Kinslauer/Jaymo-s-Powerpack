@@ -99,12 +99,12 @@ final class Cavalry {
 	}
 
 	/** A horse for {@code rider} of {@code f} (saddled, in its colours), and him on it. {@code lent}: gone when he is. */
-	static @Nullable AbstractHorse mount(ServerLevel level, Folk rider, Faction f, boolean lent) {
+	static @Nullable AbstractHorse mount(ServerLevel level, Worker rider, Faction f, boolean lent) {
 		return mount(level, rider, f, lent, breedFor(level, rider, f));
 	}
 
 	/** (0.5.34) The breed {@code rider} of {@code f} rides: a carter or coachman a draft, an archer a courser, a guard a destrier; in a desert realm, desert horses. */
-	static Breed breedFor(ServerLevel level, Folk rider, Faction f) {
+	static Breed breedFor(ServerLevel level, Worker rider, Faction f) {
 		if (rider.role() == Caravans.CARTER) {
 			return Breed.DRAFT;
 		}
@@ -115,12 +115,13 @@ final class Cavalry {
 	}
 
 	/** (0.5.34) A mount of {@code breed} for {@code rider} of {@code f} (a horse, or a war elephant), and him on it. */
-	static @Nullable AbstractHorse mount(ServerLevel level, Folk rider, Faction f, boolean lent, Breed breed) {
+	static @Nullable AbstractHorse mount(ServerLevel level, Worker rider, Faction f, boolean lent, Breed breed) {
+		// ((0.7.294) a folk's or an MCA villager's: a coachman, a carter)
 		AbstractHorse horse = Equestrian.create(level, breed, rider.blockPosition(), EntitySpawnReason.MOB_SUMMONED);
 		if (horse == null) {
 			return null;
 		}
-		horse.snapTo(rider.getX(), rider.getY(), rider.getZ(), rider.getYRot(), 0.0F);
+		horse.snapTo(rider.getX(), rider.getY(), rider.getZ(), rider.mob().getYRot(), 0.0F);
 		dress(level.getServer(), horse, f);
 		// (0.5.47) better for the realm's stables
 		Stables.equip(level, horse, f, rider);
@@ -130,7 +131,7 @@ final class Cavalry {
 			horse.addTag(LENT);
 		}
 		level.addFreshEntity(horse);
-		rider.startRiding(horse);
+		rider.mob().startRiding(horse);
 		return horse;
 	}
 
@@ -163,7 +164,7 @@ final class Cavalry {
 	}
 
 	/** {@code folk} leaves the world: a lent horse goes with him. */
-	static void dismiss(Folk folk) {
+	static void dismiss(Entity folk) {
 		AbstractHorse horse = horse(folk);
 		if (horse != null && horse.entityTags().contains(LENT)) {
 			horse.discard();

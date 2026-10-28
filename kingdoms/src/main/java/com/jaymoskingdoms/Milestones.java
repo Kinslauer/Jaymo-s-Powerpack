@@ -41,7 +41,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -499,20 +498,16 @@ public final class Milestones {
 			return 0;
 		}
 		BlockPos at = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(line.at(4.0))), 4);
-		Folk driver = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Vec3 ahead = line.at(12.0);
+		float yaw = (float)(Math.atan2(-(ahead.x - at.getX() - 0.5), ahead.z - at.getZ() - 0.5) * (180.0 / Math.PI));
+		// ((0.7.294) with MCA, one of the realm's people)
+		Worker driver = Drivers.hire(level, realm, at, yaw, TASK, 4, "entity.jaymoskingdoms.coachman_of");
 		if (driver == null) {
 			return 0;
 		}
-		Vec3 ahead = line.at(12.0);
-		float yaw = (float)(Math.atan2(-(ahead.x - at.getX() - 0.5), ahead.z - at.getZ() - 0.5) * (180.0 / Math.PI));
-		driver.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
-		driver.setup(Caravans.CARTER, realm, at, 4);
-		driver.setTask(TASK);
-		driver.setCustomName(Component.translatable("entity.jaymoskingdoms.coachman_of", realm.name()));
-		level.addFreshEntity(driver);
 		AbstractHorse horse = Cavalry.mount(level, driver, realm, true);
 		if (horse == null) {
-			driver.discard();
+			driver.mob().discard();
 			return 0;
 		}
 		horse.setYRot(yaw);
@@ -557,7 +552,8 @@ public final class Milestones {
 	/** One coach's tick (from {@link Wagon#tick}): along the road at a gallop; at the end, its fare set down and away it goes. */
 	static void tick(ServerLevel level, Wagon coach, @Nullable Entity horse) {
 		Trip trip = TRIPS.get(coach.getUUID());
-		Folk driver = horse != null && horse.getFirstPassenger() instanceof Folk f ? f : null;
+		Worker w = Drivers.of(horse);
+		net.minecraft.world.entity.PathfinderMob driver = w == null ? null : w.mob();
 		long now = level.getGameTime();
 		if (trip == null || horse == null || !horse.isAlive() || driver == null || now - trip.started > TRIP_MOST) {
 			// (after a restart, or its horse or driver lost: it's gone)
@@ -622,7 +618,8 @@ public final class Milestones {
 		for (Entity e : new Entity[] {driver, horse, coach}) {
 			if (e != null && !e.isRemoved()) {
 				level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 1.0, e.getZ(), 10, 0.4, 0.5, 0.4, 0.02);
-				e.discard();
+				// ((0.7.294) a villager coachman out of MCA's family tree too)
+				McaCompat.vanish(e);
 			}
 		}
 		TRIPS.remove(coach.getUUID());
