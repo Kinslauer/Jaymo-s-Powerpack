@@ -210,7 +210,7 @@ public final class Classes {
 		});
 		// (0.7.45) until both are done the player can't be hurt and nothing hunts them
 		// (0.7.229: and while MCA's creator is still up after the story put them somewhere, a cave or a camp's woods)
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && (unmade(sp) || McaCompat.destinyPending(sp))
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && (unmade(sp) || McaCompat.destinyPending(sp) || StoryStasis.holding(sp))
 			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
 		// (what's held and worn changes what a class is good with)
@@ -295,7 +295,9 @@ public final class Classes {
 
 	/** (0.7.45) MCA's destiny screen was just finished: (0.7.57) the heritage screen is next, then the class screen; neither can be shut without picking. */
 	public static void afterDestiny(ServerPlayer player) {
-		// (0.7.229) the story came first and put them somewhere already: a few safe seconds now they're really there
+		// (0.7.304) the story told first sets out now, from stasis (StoryStasis)
+		LifeStory.depart(player);
+		// (0.7.229) a few safe seconds now they're really there
 		LifeStory.arrived(player);
 		next(player);
 	}

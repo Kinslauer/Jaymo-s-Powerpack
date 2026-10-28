@@ -493,6 +493,12 @@ public final class StoryGround {
 		return false;
 	}
 
+	/** (0.7.304) Whether {@code player} waits on a capital or a harbour being made for their start. */
+	static boolean waiting(ServerPlayer player) {
+		UUID id = player.getUUID();
+		return capital != null && capital.waiting.contains(id) || HARBOURS.containsKey(id);
+	}
+
 	/** What {@code player} is held for (the loading screen's line), or null: free to go. */
 	private static @Nullable String held(ServerPlayer player, int now) {
 		UUID id = player.getUUID();

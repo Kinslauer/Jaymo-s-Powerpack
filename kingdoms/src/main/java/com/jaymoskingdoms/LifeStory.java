@@ -275,6 +275,15 @@ public final class LifeStory {
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath()
 			.syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
+	/**
+	 * (0.7.304) The road a told story still owes its player: "START|realm id|calling", till they're put at that start.
+	 * Saved, kept through death, synced to its own player (their screen stays black till they're there).
+	 */
+	public static final AttachmentType<String> ROAD = AttachmentRegistry.create(JaymosKingdoms.id("story_road"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
+	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
+
 	/** A realm a player can name in their story: its id and name. */
 	public record Realm(int id, String name) {
 	}
@@ -348,7 +357,18 @@ public final class LifeStory {
 
 	static void register() {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::hunt);
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> HUNTS.clear());
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			HUNTS.clear();
+			DEPARTED.clear();
+		});
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> DEPARTED.remove(handler.player.getUUID()));
+		// (0.7.304) a death before the story was told shut its screen: it opens again on the new body
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (owed(newPlayer)) {
+				ask(newPlayer, true);
+			}
+		});
+		StoryStasis.register();
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
@@ -524,38 +544,71 @@ public final class LifeStory {
 			atLeast(player, nobleRealm, NOBLE_REPUTATION);
 		}
 
-		Start road0 = road.start == Start.FATE ? fated(server, random) : road.start;
-		String calling = power;
-		Heritage.Kind bornAs = heritage;
+		// (0.7.304) set out once MCA's creator is done: till then they're held in stasis over the world (StoryStasis)
+		player.setAttached(ROAD, road.start.name() + "|" + (roadRealm == null ? -1 : roadRealm.id()) + "|" + power);
+		if (!McaCompat.destinyPending(player)) {
+			depart(player);
+		}
+	}
+
+	/** (0.7.304) Whether {@code player} has told their story and not yet been put where it starts. */
+	static boolean departing(ServerPlayer player) {
+		return player.hasAttached(ROAD);
+	}
+
+	/**
+	 * (0.7.304) Sets {@code player} on the road their story ends with: what the start needs is made first (they wait in
+	 * stasis), then they're put there. Done once; the road stays owed till they're really there, so a death, a
+	 * disconnect or a lost start-up on the way can't cost them the start they chose.
+	 */
+	static void depart(ServerPlayer player) {
+		String road = player.getAttached(ROAD);
+		if (road == null || !DEPARTED.add(player.getUUID())) {
+			return;
+		}
+		MinecraftServer server = player.level().getServer();
+		String[] parts = road.split("\\|", -1);
+		Start chosen;
+		try {
+			chosen = Start.valueOf(parts[0]);
+		} catch (IllegalArgumentException e) {
+			chosen = Start.WILD;
+		}
+		int realmId = -1;
+		if (parts.length > 1) {
+			try {
+				realmId = Integer.parseInt(parts[1]);
+			} catch (NumberFormatException ignored) {
+				// the wild, then
+			}
+		}
+		String calling = parts.length > 2 ? parts[2] : "";
+		Faction roadRealm = realmId >= 0 ? realm(server, realmId) : null;
+		Answer raised = answer(player, Question.RAISED);
+		Classes.PlayerClass cls = Classes.classOf(player);
+		String option = Classes.of(player).option();
+		Heritage.Kind bornAs = Heritage.of(player);
+		java.util.UUID id = player.getUUID();
+		if (raised == null || cls == null || bornAs == null) {
+			// unmade since (/kingdom story reset): nothing to set out on
+			player.removeAttached(ROAD);
+			DEPARTED.remove(id);
+			return;
+		}
+		RandomSource random = player.getRandom();
+		Start road0 = chosen == Start.FATE ? fated(server, random) : chosen;
+		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
 		java.util.function.Consumer<Start> go = start -> {
-			if (player.isRemoved()) {
+			ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p == null || !departing(p)) {
+				// gone meanwhile: the road is still owed, and set out on again when they're back
+				DEPARTED.remove(id);
 				return;
 			}
-			Start landed = begin(player, start, roadRealm, bornAs, random);
-			if (landed == Start.UNARMED) {
-				// an old loss, long healed over: one arm or one leg
-				int limb = LIMBS[random.nextInt(LIMBS.length)];
-				if (PowersCompat.bornWithout(player, limb)) {
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.limb",
-						Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
-				}
-			}
-			kit(player, start, landed, raised, cls, option, random);
-			// (0.7.246) where it set them down, for the folk about it to talk of (StoryTalk)
-			Hunt hunt = HUNTS.get(player.getUUID());
-			StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
-				: (landed == Start.BANISHED || landed == Start.SWORN) && roadRealm != null ? roadRealm.id() : -1);
-			// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
-			StoryGround.settle(player);
-			if (start == Start.TIMELOST) {
-				// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
-				PowersCompat.awaken(player, "chrono");
-			} else if (!calling.isEmpty() && calling.equals(echo(landed))) {
-				PowersCompat.call(player, calling, ECHO_TICKS);
-			}
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
-				Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
+			p.removeAttached(ROAD);
+			DEPARTED.remove(id);
+			StoryStasis.release(p);
+			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling);
 		};
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
@@ -566,6 +619,37 @@ public final class LifeStory {
 		} else {
 			go.accept(road0);
 		}
+	}
+
+	/** Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. */
+	private static void arrive(ServerPlayer player, Start start, @Nullable Faction roadRealm, Heritage.Kind bornAs, Answer raised,
+		Classes.PlayerClass cls, String option, String calling) {
+		RandomSource random = player.getRandom();
+		Start landed = begin(player, start, roadRealm, bornAs, random);
+		if (landed == Start.UNARMED) {
+			// an old loss, long healed over: one arm or one leg
+			int limb = LIMBS[random.nextInt(LIMBS.length)];
+			if (PowersCompat.bornWithout(player, limb)) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.limb",
+					Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
+			}
+		}
+		kit(player, start, landed, raised, cls, option, random);
+		// (0.7.246) where it set them down, for the folk about it to talk of (StoryTalk)
+		Hunt hunt = HUNTS.get(player.getUUID());
+		StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
+			: (landed == Start.BANISHED || landed == Start.SWORN) && roadRealm != null ? roadRealm.id() : -1);
+		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
+		StoryGround.settle(player);
+		if (start == Start.TIMELOST) {
+			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
+			PowersCompat.awaken(player, "chrono");
+		} else if (!calling.isEmpty() && calling.equals(echo(landed))) {
+			PowersCompat.call(player, calling, ECHO_TICKS);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
+			Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
 	}
 
 	/** "Let fate decide" on the start: any start that needs no realm named (a capital only if there's one). */
@@ -1077,6 +1161,8 @@ public final class LifeStory {
 				int n = 0;
 				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
 					p.removeAttached(STORY);
+					p.removeAttached(ROAD);
+					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);
 					ask(p, true);
