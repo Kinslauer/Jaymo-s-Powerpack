@@ -82,7 +82,7 @@ public final class ZFighterKiAura {
 
 	private static float @Nullable [] aura(Player player, float age) {
 		if (!Powers.has(player, ZFighterPower.INSTANCE) || player.isInvisible() || player.isSpectator() || ZFighterLineage.ape(player)
-			// (0.17.92) an android has no aura: its ki doesn't burn off it
+			// (0.17.93) an android has no aura: its ki doesn't burn off it
 			|| ZFighterAndroid.android(player)) {
 			EASED.remove(player);
 			return null;

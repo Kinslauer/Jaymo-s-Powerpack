@@ -3341,7 +3341,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it.
   Hardship now syncs to its owner: the training screen read 0 and kept Learn greyed for Supers 2-3 (and Great/Colossal
   Legend) even with enough. Compile-checked, not seen in game.
-- **0.17.92, androids: endless ki, no aura, revived after the operation:** Andy: "the mad tinkerer should revive you
+- **0.17.93, androids: endless ki, no aura, revived after the operation:** Andy: "the mad tinkerer should revive you
   after making you an android. androids need to have infinite ki and no aura, no other debuff." Nothing kills you on the
   tinkerer's table (a killing blow leaves you at half a heart), and when the operation ends he brings you round: up if
   you went down (no Battered), full health, the hold lifted. An android's ki bar stays full and nothing costs ki; it

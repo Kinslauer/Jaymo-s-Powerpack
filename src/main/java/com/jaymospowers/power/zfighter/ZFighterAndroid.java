@@ -60,7 +60,7 @@ import net.minecraft.world.phys.Vec3;
  * not be left;</li>
  * <li>you are rebuilt.</li>
  * </ol>
- * After it, for good (0.17.92, Andy: "infinite ki and no aura, no other debuff"): his ki never runs out (every cost is
+ * After it, for good (0.17.93, Andy: "infinite ki and no aura, no other debuff"): his ki never runs out (every cost is
  * free and the bar stays full: techniques, flight, guarding, forms), he shows no aura, and two android forms open past
  * the top of his ladder ({@link ZFighterBranchForms#OVERDRIVE} at once, {@link ZFighterBranchForms#REACTOR}
  * after time in it). Saved, kept through death. {@link #undo} takes it all back (a wish, later).
@@ -146,7 +146,7 @@ public final class ZFighterAndroid {
 				passed(level.getServer().getPlayerList().getPlayer(owner), entity.getUUID());
 			}
 		});
-		// (0.17.92) he doesn't let you die on his table: whatever would kill you mid-operation leaves you at the edge, and he
+		// (0.17.93) he doesn't let you die on his table: whatever would kill you mid-operation leaves you at the edge, and he
 		// brings you round when he's done (rebuilt)
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player && OPERATIONS.containsKey(player.getUUID())) {
@@ -216,7 +216,7 @@ public final class ZFighterAndroid {
 		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, android(player) ? 0.02 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
-	/** Every tick of the power: an android's ki is always full, and (0.17.92) it never needs to eat. */
+	/** Every tick of the power: an android's ki is always full, and (0.17.93) it never needs to eat. */
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
 		if (android(player)) {
 			live.ki = ZFighterPower.maxKi(player);
@@ -555,7 +555,7 @@ public final class ZFighterAndroid {
 		ServerLevel level = player.level();
 		player.setAttached(STAGE, DONE);
 		ZFighterPower.Live live = ZFighterPower.live(player);
-		// (0.17.92) he brings you round: up off the table if you went down, whole, and none of the operation's weight left on you
+		// (0.17.93) he brings you round: up off the table if you went down, whole, and none of the operation's weight left on you
 		if (Downed.isDowned(player)) {
 			Downed.undo(level, player);
 		}
