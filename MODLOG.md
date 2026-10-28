@@ -3319,3 +3319,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.87, MCA villagers swing when they fight (Kingdoms 0.7.283):** guards, crews, rulers and every other MCA
   villager now wind up and swing their weapon's Better Combat moves, with the glint and the blade guard, instead of
   MCA's instant arm flick; barehanded they punch. Compile-checked, not seen in game.
+- **0.17.89, ladders, sweeps and sea routes for crewed ships (Kingdoms 0.7.285):** every crewed ship gets a boarding
+  ladder down each side (climbable as she sails), and sweeps if she has no oars; her captain rows in close water and
+  works out a course round the land to where he's going; open hatches, doors and fences on a ship no longer collide
+  as full blocks, which trapped characters on the cargo ship's stair below decks. Not seen in game.

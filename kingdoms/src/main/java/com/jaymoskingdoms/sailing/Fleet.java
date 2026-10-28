@@ -212,7 +212,8 @@ public final class Fleet {
 	 * in the world (where they went added to {@code where}): her helm, or null if there's no room or water deep enough there.
 	 */
 	public static @Nullable BlockPos lay(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, List<BlockPos> where) {
-		List<Part> parts = parts(level, rig, look);
+		// (0.7.285) her boarding ladders, and sweeps if she was drawn with no oars
+		List<Part> parts = ShipFittings.fit(parts(level, rig, look));
 		if (parts.isEmpty()) {
 			return null;
 		}
@@ -352,7 +353,8 @@ public final class Fleet {
 		int lowest = Mth.ceil(h.minY + h.draft) + 1;
 		for (int i = 0; i < h.pieces.size(); i++) {
 			Ship.Piece p = h.pieces.get(i);
-			if (h.hi[i] < 0.9F || h.hi[i] > 1.0F || h.at(p.x(), p.y() + 1, p.z()) >= 0 || h.at(p.x(), p.y() + 2, p.z()) >= 0) {
+			if (h.hi[i] < 0.9F || h.hi[i] > 1.0F || h.at(p.x(), p.y() + 1, p.z()) >= 0 || h.at(p.x(), p.y() + 2, p.z()) >= 0
+				|| p.blockState().is(BlockTags.CLIMBABLE)) {
 				continue;
 			}
 			if (p.y() + 1 != deckY && !(p.y() + 1 < deckY && p.y() + 1 >= lowest && sky(h, p) && !p.blockState().is(BlockTags.WOOL))) {
