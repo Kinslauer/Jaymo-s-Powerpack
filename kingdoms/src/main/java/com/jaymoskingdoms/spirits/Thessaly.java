@@ -97,6 +97,7 @@ public final class Thessaly extends Spirit {
 			}
 		});
 		MOVES.add(new JuggleMove());
+		MOVES.add(SpiritExecutions.move("execute_thessaly", Spirits.THESSALY));
 	}
 
 	Thessaly() {
