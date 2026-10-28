@@ -163,6 +163,10 @@ public final class Barbarians {
 
 	/** (0.7.148) What a camp's villager of {@code role} goes for: a raider's prey, or a pirate's. */
 	static boolean villagerPrey(int role, int camp, LivingEntity target) {
+		if (Captives.bound(target)) {
+			// (0.7.311) a captive in chains is theirs already, not a foe (Andy saw a shaman strike one over and over)
+			return false;
+		}
 		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : Greenskins.brood(role) != null ? Greenskins.prey(role, camp, target) : prey(camp, target);
 	}
 
@@ -185,6 +189,10 @@ public final class Barbarians {
 
 	/** What {@code camp}'s raiders attack on sight: (0.7.148) not an outlaw it spares ({@link #spares}). */
 	static boolean prey(int camp, LivingEntity target) {
+		if (Captives.bound(target)) {
+			// (0.7.311) a captive in chains
+			return false;
+		}
 		if (target instanceof ServerPlayer player) {
 			return !player.isCreative() && !player.isSpectator() && !spares(player, camp);
 		}
