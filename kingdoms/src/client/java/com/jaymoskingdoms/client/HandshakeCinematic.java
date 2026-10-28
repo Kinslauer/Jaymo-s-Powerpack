@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
  * You're turned to face them throughout. (0.7.205) Andy: "One of the frames the cutscene puts front and center NEEDS to
  * be the hands actually coming together": the hands' shot opens the film, so the hands meet in it ({@link
  * Handshakes#GRIP_TICK}), framed on where they meet. Like Jaymo's Powers' beam battle film (our own code, no one else's).
+ * (0.7.289) Andy: "you only get the cutscene for villagers that are special": a plain shake ({@code Hand.PLAIN}) isn't filmed.
  */
 public final class HandshakeCinematic {
 	/** The shots' cuts (ticks into the shake): the hands until {@link #WIDE_CUT}, wide until {@link #FACE_CUT}, then over the shoulder. */

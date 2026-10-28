@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.dragons.Disguises;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,15 @@ import net.minecraft.world.phys.Vec3;
  * help if you dont speak the language to get started". "Offer a handshake" in MCA's menu ({@link #offerTo}): your hand
  * goes out, they think it over ({@link #VILLAGER_THINK}), and either take it ({@link Introductions#takesHand}), the
  * full shake on film and their name learned, or leave you hanging, and won't be asked again that day. A ruler never.
+ * <p>
+ * (0.7.289) Andy: "your first interaction with a villager instead of opening the menu prompts a handshake", "I want
+ * the player to hold out their hand and the villager chooses to shake or wave. you only get the cutscene for villagers
+ * that are special like eurus or a master". The first time you use an MCA villager you don't know ({@link #greet}), your
+ * hand goes out to them in place of their menu; they think it over and take it ({@link Introductions#takesHand}: the
+ * shake, and their name learned) or give you a wave instead ("women usually wave": {@link #WOMAN_SHAKES}). Either way their menu opens after, and from then on it
+ * opens straight away ({@link #GREETED}). Every villager handshake is on film only with someone {@linkplain #special
+ * special} (a dragon walking as a villager, a master of a gift); with anyone else it's the shake alone. Not a ruler, a
+ * child, one with a grudge against you, or behind a full mask: those go straight to the menu as before.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -76,6 +86,14 @@ public final class Handshakes {
 	static final int VILLAGER_THINK = 20;
 	/** The success sound's volume and pitch. */
 	static final float CHIME_VOLUME = 0.7F, CHIME_PITCH = 1.4F;
+	/** (0.7.289) A villager's wave at a first meeting (ticks); their menu opens after it. */
+	public static final int WAVE_TICKS = 30;
+	/** (0.7.289) Andy: "women usually wave": the chance a woman shakes your hand at a first meeting, when she'd take it at all. */
+	static final float WOMAN_SHAKES = 0.2F;
+
+	/** (0.7.289) On a player: the villagers who've greeted them, whose menu opens straight away from then (saved, kept through death). */
+	static final AttachmentType<Set<UUID>> GREETED = AttachmentRegistry.create(JaymosKingdoms.id("greeted"),
+		builder -> builder.persistent(UUIDUtil.CODEC_SET).copyOnDeath());
 
 	/** On a player: everyone they've shaken hands with (saved, kept through death; the server's alone). */
 	static final AttachmentType<Set<UUID>> SHOOK = AttachmentRegistry.create(JaymosKingdoms.id("shook_hands"),
@@ -93,13 +111,28 @@ public final class Handshakes {
 	private static final List<VillagerShake> VILLAGER_SHAKES = new ArrayList<>();
 	/** (0.7.204) "villager/player" → the day that villager last turned that player's hand down. */
 	private static final Map<String, Long> TURNED_DOWN = new HashMap<>();
+	/** (0.7.289) Player → the villager they're holding a hand out to at a first meeting. */
+	private static final Map<UUID, Greeting> GREETINGS = new HashMap<>();
+	/** (0.7.289) Waves at a first meeting going on. */
+	private static final List<Wave> WAVES = new ArrayList<>();
+
+	/** (0.7.289) Your hand is out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it, or waves. */
+	private record Greeting(Villager villager, long decide, boolean takes) {
+	}
+
+	/** (0.7.289) {@code villager} waves to {@code player} from {@code start} (game time); the menu opens after. */
+	private record Wave(UUID player, Villager villager, long start) {
+	}
 
 	/** (0.7.204) {@code player} holds a hand out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it or not. */
 	private record Asked(UUID player, Villager villager, long decide, boolean takes) {
 	}
 
-	/** (0.7.204) {@code player} and {@code villager} shake hands from {@code start} (game time); the villager stands facing {@code yaw}. */
-	private record VillagerShake(UUID player, Villager villager, long start, float yaw) {
+	/**
+	 * (0.7.204) {@code player} and {@code villager} shake hands from {@code start} (game time); the villager stands facing
+	 * {@code yaw}. (0.7.289) A first meeting's ({@code greeting}) opens their menu once it's done.
+	 */
+	private record VillagerShake(UUID player, Villager villager, long start, float yaw, boolean greeting) {
 	}
 
 	private record Offer(UUID to, long until) {
@@ -122,10 +155,11 @@ public final class Handshakes {
 
 	/**
 	 * Server → everyone who can see {@code playerId}: their hand toward {@code partnerId}: {@link #DOWN}, {@link #OFFERED}
-	 * (held out), {@link #SHAKING} (the handshake starts now), or {@link #DAP} (the quick one starts now).
+	 * (held out), {@link #SHAKING} (the handshake starts now), {@link #DAP} (the quick one starts now), or (0.7.289)
+	 * {@link #WAVE} (a wave starts now), or {@link #PLAIN} (the handshake starts now, not on film).
 	 */
 	public record Hand(int playerId, int partnerId, int state) implements CustomPacketPayload {
-		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2, DAP = 3;
+		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2, DAP = 3, WAVE = 4, PLAIN = 5;
 		public static final Type<Hand> TYPE = new Type<>(JaymosKingdoms.id("handshake"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Hand> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -145,7 +179,7 @@ public final class Handshakes {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("handshake attachment: {}", SHOOK);
+		JaymosKingdoms.LOGGER.debug("handshake attachments: {} {}", SHOOK, GREETED);
 		PayloadTypeRegistry.clientboundPlay().register(Hand.TYPE, Hand.CODEC);
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player other) || !can(player) || !can(other)
@@ -175,6 +209,21 @@ public final class Handshakes {
 			ASKED.clear();
 			VILLAGER_SHAKES.clear();
 			TURNED_DOWN.clear();
+			GREETINGS.clear();
+			WAVES.clear();
+		});
+	}
+
+	/**
+	 * (0.7.289) A first meeting's handshake ({@link #greet}). Registered last of all, so every other use of a villager
+	 * (a quest, a bounty, a pickpocket, someone come over to talk) goes first.
+	 */
+	static void registerGreetings() {
+		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(entity instanceof Villager villager)) {
+				return InteractionResult.PASS;
+			}
+			return greet(sp, villager) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 		});
 	}
 
@@ -258,6 +307,16 @@ public final class Handshakes {
 				return true;
 			}
 		}
+		for (Greeting g : GREETINGS.values()) {
+			if (g.villager == villager) {
+				return true;
+			}
+		}
+		for (Wave w : WAVES) {
+			if (w.villager == villager) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -273,15 +332,25 @@ public final class Handshakes {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.refused").withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
-		// you're set at arm's length in front of them, they turn to you
+		shake(player, villager, now, false);
+	}
+
+	/** (0.7.289) Andy: "you only get the cutscene for villagers that are special like eurus or a master". */
+	static boolean special(Villager villager) {
+		return villager.hasAttached(Disguises.DISGUISE) || PowersCompat.giftMaster(villager);
+	}
+
+	/** (0.7.204) {@code player} and {@code villager} start shaking hands: you're set at arm's length in front of them, they turn to you. */
+	private static void shake(ServerPlayer player, Villager villager, long now, boolean greeting) {
 		Vec3 axis = new Vec3(player.getX() - villager.getX(), 0.0, player.getZ() - villager.getZ());
 		axis = axis.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, villager.getYRot()) : axis.normalize();
 		place(player, villager.position().add(axis.scale(APART)), axis.reverse());
 		float yaw = (float)(Mth.atan2(axis.z, axis.x) * Mth.RAD_TO_DEG) - 90.0F;
 		face(villager, yaw);
 		hold(player, true);
-		VILLAGER_SHAKES.add(new VillagerShake(player.getUUID(), villager, now, yaw));
-		send(player, villager.getId(), Hand.SHAKING);
+		VILLAGER_SHAKES.add(new VillagerShake(player.getUUID(), villager, now, yaw, greeting));
+		// (0.7.289) on film only with someone special
+		send(player, villager.getId(), special(villager) ? Hand.SHAKING : Hand.PLAIN);
 		send(villager, player.getId(), Hand.SHAKING);
 	}
 
@@ -314,9 +383,26 @@ public final class Handshakes {
 		send(s.villager, -1, Hand.DOWN);
 	}
 
-	/** (0.7.204) Whatever handshake {@code villager} is in is broken off. */
+	/** (0.7.204) Whatever handshake {@code villager} is in is broken off (0.7.289: or greeting). */
 	private static void breakOff(Villager villager) {
 		MinecraftServer server = villager.level().getServer();
+		for (Iterator<Map.Entry<UUID, Greeting>> it = GREETINGS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Greeting> e = it.next();
+			if (e.getValue().villager == villager) {
+				it.remove();
+				ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+				if (p != null) {
+					send(p, -1, Hand.DOWN);
+				}
+			}
+		}
+		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
+			Wave w = it.next();
+			if (w.villager == villager) {
+				it.remove();
+				endWave(server, w);
+			}
+		}
 		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
 			VillagerShake s = it.next();
 			if (s.villager == villager) {
@@ -402,6 +488,16 @@ public final class Handshakes {
 	private static void breakOff(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
 		ASKED.removeIf(a -> a.player.equals(player.getUUID()));
+		if (GREETINGS.remove(player.getUUID()) != null) {
+			send(player, -1, Hand.DOWN);
+		}
+		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
+			Wave w = it.next();
+			if (w.player.equals(player.getUUID())) {
+				it.remove();
+				endWave(server, w);
+			}
+		}
 		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
 			VillagerShake s = it.next();
 			if (s.player.equals(player.getUUID())) {
@@ -430,7 +526,7 @@ public final class Handshakes {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty()) {
+		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty() && GREETINGS.isEmpty() && WAVES.isEmpty()) {
 			return;
 		}
 		long now = server.overworld().getGameTime();
@@ -508,7 +604,130 @@ public final class Handshakes {
 				it.remove();
 				end(server, s);
 				done(p, v, mid);
+				if (s.greeting) {
+					menu(p, v);
+				}
 			}
+		}
+		tickGreetings(server, now);
+	}
+
+	// ---- (0.7.289) a first meeting ----------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.289) {@code player} used {@code villager}: if it's their first time and the villager is one to greet, your
+	 * hand goes out to them in place of opening their menu (true). A villager you already know (introduced, family,
+	 * your group), or a ruler, counts as greeted.
+	 */
+	private static boolean greet(ServerPlayer player, Villager villager) {
+		if (GREETINGS.containsKey(player.getUUID())) {
+			// (your hand's already out to someone)
+			return true;
+		}
+		if (!McaCompat.isMca(villager) || player.isShiftKeyDown() || !can(player) || greetedBy(player, villager) || !villager.isAlive()
+			|| villager.isBaby() || villager.isSleeping() || villager.isTrading() || villager.getTarget() != null || McaCompat.panicking(villager)
+			|| shaking(player.getUUID()) || busy(villager) || Identities.masked(player) || Recollections.refuses(villager, player)) {
+			return false;
+		}
+		if (Introductions.knows(player, villager) || Rulers.is(villager)) {
+			greeted(player, villager);
+			return false;
+		}
+		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
+		GREETINGS.put(player.getUUID(), new Greeting(villager, player.level().getGameTime() + VILLAGER_THINK, takes));
+		villager.getNavigation().stop();
+		villager.getLookControl().setLookAt(player);
+		send(player, villager.getId(), Hand.OFFERED);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.4F, 1.3F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.offered", villager.getType().getDescription())
+			.withStyle(ChatFormatting.GRAY), true);
+		return true;
+	}
+
+	/** (0.7.289) {@code villager} has greeted {@code player} already. */
+	private static boolean greetedBy(ServerPlayer player, Villager villager) {
+		Set<UUID> greeted = player.getAttached(GREETED);
+		return greeted != null && greeted.contains(villager.getUUID());
+	}
+
+	private static void greeted(ServerPlayer player, Villager villager) {
+		Set<UUID> greeted = player.getAttached(GREETED);
+		if (greeted == null || !greeted.contains(villager.getUUID())) {
+			Set<UUID> next = greeted == null ? new HashSet<>() : new HashSet<>(greeted);
+			next.add(villager.getUUID());
+			player.setAttached(GREETED, next);
+		}
+	}
+
+	/** (0.7.289) {@code villager} answers your hand at a first meeting: takes it, or waves to you instead. */
+	private static void answerGreeting(ServerPlayer player, Villager villager, boolean takes, long now) {
+		greeted(player, villager);
+		if (takes) {
+			shake(player, villager, now, true);
+			return;
+		}
+		send(player, -1, Hand.DOWN);
+		send(villager, player.getId(), Hand.WAVE);
+		WAVES.add(new Wave(player.getUUID(), villager, now));
+		player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.greet.waved").withStyle(ChatFormatting.GRAY), true);
+	}
+
+	/** (0.7.289) {@code villager} is out of reach of {@code player}'s greeting. */
+	private static boolean gone(ServerPlayer player, Villager villager) {
+		return !villager.isAlive() || villager.isRemoved() || player.level() != villager.level() || player.distanceTo(villager) > REACH * 2.0;
+	}
+
+	/** (0.7.289) Hands held out at first meetings answered (or let drop), and waves kept going, then the menu opened. */
+	private static void tickGreetings(MinecraftServer server, long now) {
+		for (Iterator<Map.Entry<UUID, Greeting>> it = GREETINGS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Greeting> e = it.next();
+			Greeting g = e.getValue();
+			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+			if (p == null || !can(p) || gone(p, g.villager)) {
+				it.remove();
+				if (p != null) {
+					send(p, -1, Hand.DOWN);
+				}
+			} else if (now >= g.decide) {
+				it.remove();
+				answerGreeting(p, g.villager, g.takes, now);
+			} else {
+				g.villager.getNavigation().stop();
+				g.villager.getLookControl().setLookAt(p);
+			}
+		}
+		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
+			Wave w = it.next();
+			ServerPlayer p = server.getPlayerList().getPlayer(w.player);
+			if (p == null || !can(p) || gone(p, w.villager)) {
+				it.remove();
+				endWave(server, w);
+				continue;
+			}
+			w.villager.getNavigation().stop();
+			w.villager.getLookControl().setLookAt(p);
+			if (now - w.start >= WAVE_TICKS) {
+				it.remove();
+				endWave(server, w);
+				menu(p, w.villager);
+			}
+		}
+	}
+
+	/** (0.7.289) Both arms lowered after a wave. */
+	private static void endWave(MinecraftServer server, Wave w) {
+		ServerPlayer p = server.getPlayerList().getPlayer(w.player);
+		if (p != null) {
+			send(p, -1, Hand.DOWN);
+		}
+		send(w.villager, -1, Hand.DOWN);
+	}
+
+	/** (0.7.289) The greeting's over: {@code villager}'s menu opens, as the use would have opened it. */
+	private static void menu(ServerPlayer player, Villager villager) {
+		if (villager.isAlive() && !gone(player, villager) && player.containerMenu == player.inventoryMenu) {
+			villager.interact(player, InteractionHand.MAIN_HAND, Vec3.ZERO);
 		}
 	}
 
