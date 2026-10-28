@@ -6127,3 +6127,11 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
+
+## 0.7.307: the Bio-built absorb the crippled too (pack 0.17.125)
+Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed". The heritage key
+(`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'
+`jaymospowers_crippled` tag, splinted or not), has a leg cut off (`jaymoskitchen.missing.left_leg`/`right_leg`), or is
+Crippled by a hidden blade. The rest is as before: up close, a toggle, broken off by any harm; a crippled foe that
+can still swing at you will break it. The Rubber-folk swallow is unchanged. Not compiled (no Gradle in the cloud) and
+not seen in game.

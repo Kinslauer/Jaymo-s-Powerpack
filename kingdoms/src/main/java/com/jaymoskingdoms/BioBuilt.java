@@ -3,6 +3,7 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -32,16 +33,16 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
- * first form), and each downed foe they take into themselves ({@link #absorb}: look at it close by and press the heritage
- * key; (0.7.288) a hand goes to it, pulses run through you both and it shrinks away to nothing, unless you're hurt or
- * press the key again) adds to their worth until the body folds into the next of three forms: the second (Andy's
+ * first form), and each downed foe ((0.7.307) or crippled one: a leg broken or cut off) they take into themselves
+ * ({@link #absorb}: look at it close by and press the heritage key; (0.7.288) a hand goes to it, pulses run through you
+ * both and it shrinks away to nothing, unless you're hurt or press the key again) adds to their worth until the body folds into the next of three forms: the second (Andy's
  * "changed look": plated forearms, a duller skin) and the third (plating to the shoulders and the cheeks, nodes alight).
  * Each form is stronger and tougher ({@link #HEALTH}, {@link #DAMAGE}, {@link #ARMOR}), and every blow they land drains a
  * little life back into them ({@link #DRAIN}). In the third form the heritage key, pressed on no foe, buds up to
  * {@link #BUDS} small copies ({@link #bud}): weak, short-lived allies (risen through {@link Thralls}, so they follow
  * and fight for their maker and crumble when their time is up). Not the Symbiote: nothing grabs, no tendrils, no goo;
- * they take only what is already downed and only by standing over it. Flaw: frail at first, and lightning and magic
- * hurt them half again ({@link Heritage#dealt}).
+ * they take only what is already downed or crippled and only by standing over it. Flaw: frail at first, and lightning
+ * and magic hurt them half again ({@link Heritage#dealt}).
  */
 public final class BioBuilt {
 	/** The worth (absorbed) that each form begins at: the first at 0. */
@@ -61,6 +62,12 @@ public final class BioBuilt {
 	/** A foe's worth: 1, and one more for every this much max health, at most {@link #WORTH_MAX}. */
 	static final float WORTH_PER_HEALTH = 20.0F;
 	static final int WORTH_MAX = 4;
+	/**
+	 * (0.7.307) Jaymo's Powers' tags on a foe that can't stand and fight: a broken leg (any, splinted or not), and each
+	 * severed leg. Kingdoms never compiles against Powers, so it reads them off the scoreboard tags.
+	 */
+	static final String CRIPPLED_TAG = "jaymospowers_crippled", NO_LEFT_LEG_TAG = "jaymoskitchen.missing.left_leg",
+		NO_RIGHT_LEG_TAG = "jaymoskitchen.missing.right_leg";
 	/** Lightning and magic hurt them this many times as much (the flaw). */
 	static final float BRITTLE = 1.5F;
 	/** Budding: copies at most, their life (ticks), health and blow, what it costs the maker (health, hunger), and the wait (ticks). */
@@ -139,7 +146,7 @@ public final class BioBuilt {
 				continue;
 			}
 			if (player.level() instanceof ServerLevel level) {
-				LivingEntity foe = HeritageHold.step(level, player, e -> Downed.isDowned(e), ABSORB_REACH, ABSORB_TICKS, NODE,
+				LivingEntity foe = HeritageHold.step(level, player, BioBuilt::helpless, ABSORB_REACH, ABSORB_TICKS, NODE,
 					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing");
 				if (foe != null) {
 					absorb(level, player, foe);
@@ -148,14 +155,25 @@ public final class BioBuilt {
 		}
 	}
 
-	/** Whether {@code player} may take {@code foe} in: a foe, downed, and not too big. */
+	/** Whether {@code player} may take {@code foe} in: a foe, down or crippled ({@link #helpless}), and not too big. */
 	static boolean absorbable(ServerPlayer player, LivingEntity foe) {
-		return HeritageHold.foe(player, foe) && Downed.isDowned(foe) && foe.getMaxHealth() <= ABSORB_MAX_HEALTH;
+		return HeritageHold.foe(player, foe) && helpless(foe) && foe.getMaxHealth() <= ABSORB_MAX_HEALTH;
+	}
+
+	/**
+	 * (0.7.307, Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed")
+	 * Whether {@code e} is in no state to get away: downed (lying or crawling), a leg broken or severed, or Crippled by a
+	 * hidden blade.
+	 */
+	static boolean helpless(LivingEntity e) {
+		Set<String> tags = e.entityTags();
+		return Downed.isDowned(e) || tags.contains(CRIPPLED_TAG) || tags.contains(NO_LEFT_LEG_TAG) || tags.contains(NO_RIGHT_LEG_TAG)
+			|| HiddenBlade.crippled(e);
 	}
 
 	/**
 	 * (0.7.288) The heritage key pressed (a toggle, Andy: "instead of a hold this is a toggle"): absorbing, it lets go; on
-	 * a downed foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
+	 * a downed or crippled foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
 	 */
 	static void press(ServerPlayer player) {
 		if (!HeritageHold.press(player, e -> absorbable(player, e), ABSORB_REACH, "message.jaymoskingdoms.bio.absorbing")) {
@@ -168,7 +186,7 @@ public final class BioBuilt {
 		return Mth.clamp(1 + (int)(foe.getMaxHealth() / WORTH_PER_HEALTH), 1, WORTH_MAX);
 	}
 
-	/** {@code foe}, downed, is taken into {@code player}: consumed, a share of its health theirs, its worth added; maybe a new form. */
+	/** {@code foe}, downed or crippled, is taken into {@code player}: consumed, a share of its health theirs, its worth added; maybe a new form. */
 	private static void absorb(ServerLevel level, ServerPlayer player, LivingEntity foe) {
 		float heal = Math.min(ABSORB_HEAL_MAX, foe.getMaxHealth() * ABSORB_HEAL_SHARE);
 		int worth = player.getAttachedOrElse(WORTH, 0) + worth(foe);
@@ -204,13 +222,13 @@ public final class BioBuilt {
 		HeritageHold.pull(level, target, player, NODE, 0.0);
 	}
 
-	/** The heritage key pressed on no downed foe: in the third form, bud copies. */
+	/** The heritage key pressed on no downed or crippled foe: in the third form, bud copies. */
 	static void bud(ServerPlayer player) {
 		if (!(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
 		LivingEntity sighted = Arcana.sighted(player);
-		if (sighted != null && HeritageHold.foe(player, sighted) && Downed.isDowned(sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
+		if (sighted != null && HeritageHold.foe(player, sighted) && helpless(sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
 			// (the key is taking that foe in, not budding)
 			return;
 		}

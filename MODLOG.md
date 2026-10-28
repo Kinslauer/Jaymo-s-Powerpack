@@ -3510,3 +3510,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
+- **0.17.125, Bio-built absorb the crippled (Kingdoms 0.7.307):** the Bio-built heritage key now takes in a foe
+  with a broken or severed leg (or Crippled by a hidden blade), not only a downed one. See the Kingdoms MODLOG.
