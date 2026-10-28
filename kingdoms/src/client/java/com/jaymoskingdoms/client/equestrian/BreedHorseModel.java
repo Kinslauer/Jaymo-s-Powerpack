@@ -45,7 +45,13 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	/** The open mouth: the upper jaw lifts, the lower drops. */
 	private static final float UPPER_JAW_OPEN = -5.0F * DEG, LOWER_JAW_OPEN = 15.0F * DEG;
 	/** How long each upper leg is, to where the cannon hangs from it. */
-	private static final float THIGH = 7.0F;
+	private static final float THIGH = 10.0F;
+	/**
+	 * (0.7.309, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
+	 * much higher) and the neck this much longer (the head set out along it); as {@code LIFT} and {@code NECK} in
+	 * tools/horse_rig.py.
+	 */
+	static final float LIFT = 3.0F, NECK = 3.0F;
 	/** The mouth opens past this much of vanilla's feeding animation. */
 	private static final float MOUTH_OPEN = 0.3F;
 	/** How far a mane that falls over the neck swings out at a gallop (radians), and how fast it ripples. */
@@ -66,7 +72,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static int textureWidth = 128, textureHeight = 192;
 	/** (0.7.309) The barding's pieces on each build's bones, and their texture's size. */
 	private static final Map<String, List<Piece>> ARMOR = new LinkedHashMap<>();
-	private static int armorWidth = 128, armorHeight = 64;
+	private static int armorWidth = 128, armorHeight = 128;
+	/** (0.7.309) How far out each build's stirrups hang under barding: clear of its side plates. */
+	private static final Map<String, Float> STIRRUP_OUT = new HashMap<>();
+	private static final float STIRRUP_CLEAR = 0.6F, STIRRUP_X = 5.0F;
 
 	private final Map<String, Rig> rigs = new HashMap<>();
 	private final @Nullable Rig fallback;
@@ -105,11 +114,19 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			}
 			BUILDS.clear();
 			ARMOR.clear();
+			STIRRUP_OUT.clear();
 			for (Map.Entry<String, JsonElement> build : json.getAsJsonObject("builds").entrySet()) {
 				JsonObject b = build.getValue().getAsJsonObject();
 				BUILDS.put(build.getKey(), pieces(b.getAsJsonArray("parts")));
 				if (b.has("armor")) {
-					ARMOR.put(build.getKey(), pieces(b.getAsJsonArray("armor")));
+					List<Piece> armor = pieces(b.getAsJsonArray("armor"));
+					ARMOR.put(build.getKey(), armor);
+					for (Piece p : armor) {
+						if (p.name().equals("armor_flank_left") && !p.boxes().isEmpty()) {
+							Box box = p.boxes().get(0);
+							STIRRUP_OUT.put(build.getKey(), box.pos()[0] + box.size()[0] + STIRRUP_CLEAR);
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -299,11 +316,13 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			}
 
 			// the head, neck, mane and ears: up when reared, down to the grass when grazing
-			float headY = 4.0F * rest + -6.0F * stand + 11.0F * graze;
-			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze;
+			// (where the neck meets the chest: the head's pivot is set out NECK along the neck from there; grazing, the
+			// taller horse reaches down as far as the old one did)
 			float headX = (HEAD_TILT + pitch) * rest + (HEAD_TILT_REARED + pitch) * stand + HEAD_TILT_GRAZING * graze;
-			float headYaw = yaw * (rest + stand);
 			headX += HEAD_DIP * state.headDip * rest;
+			float headY = (4.0F - LIFT) * rest + (-6.0F - LIFT) * stand + 11.0F * graze - NECK * Mth.cos(headX);
+			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze - NECK * Mth.sin(headX);
+			float headYaw = yaw * (rest + stand);
 			headY += HEAD_DIP_DROP * state.headDip * rest;
 			boolean open = state.feedingAnimation > MOUTH_OPEN;
 			for (ModelPart part : this.headParts) {
@@ -322,7 +341,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 
 			// rearing: up on the hind legs
 			this.body.xRot = -45.0F * DEG * stand;
-			this.tailA.y = 3.0F + 6.0F * stand;
+			this.tailA.y = 3.0F - LIFT + 6.0F * stand;
 
 			// the legs: walking, and reared (the forelegs paw the air, the hind legs fold under)
 			float rB = rLeg, lB = lLeg, rC = rLeg, lC = lLeg;
@@ -343,7 +362,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float rPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F + Mth.PI);
 			float lPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F);
 			float pawBend = 45.0F * DEG, hindUpper = -15.0F * DEG, hindLower = 15.0F * DEG;
-			float frontY = Mth.lerp(stand, 9.0F, -2.0F), frontZ = Mth.lerp(stand, -8.0F, -2.0F);
+			float frontY = Mth.lerp(stand, 9.0F, -2.0F) - LIFT, frontZ = Mth.lerp(stand, -8.0F, -2.0F);
 			this.leg3A.y = this.leg4A.y = frontY;
 			this.leg3A.z = this.leg4A.z = frontZ;
 			leg(this.leg1A, this.leg1B, this.leg1C, Mth.lerp(stand, lLeg, hindUpper), Mth.lerp(stand, lC, hindLower), lLeg, hindUpper, stand);
@@ -352,7 +371,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			leg(this.leg4A, this.leg4B, this.leg4C, Mth.lerp(stand, lLeg, lPaw), Mth.lerp(stand, lB, pawBend), lLeg, lPaw, stand);
 
 			// the saddle sits back along the reared body; the stirrups swing unless someone's feet are in them
-			float saddleY = Mth.lerp(stand, 2.0F, 0.5F), saddleZ = Mth.lerp(stand, 2.0F, 11.0F);
+			float saddleY = Mth.lerp(stand, 2.0F, 0.5F) - LIFT, saddleZ = Mth.lerp(stand, 2.0F, 11.0F);
 			for (ModelPart part : this.saddleParts) {
 				part.y = saddleY;
 				part.z = saddleZ;
@@ -364,6 +383,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.stirrupLeft.xRot = this.stirrupLeftIron.xRot = this.stirrupRight.xRot = this.stirrupRightIron.xRot = swingX;
 			this.stirrupLeft.zRot = this.stirrupLeftIron.zRot = swingZ;
 			this.stirrupRight.zRot = this.stirrupRightIron.zRot = -swingZ;
+			// (0.7.309) under barding they hang outside the side plates
+			float out = state.armor != null ? STIRRUP_OUT.getOrDefault(state.build, STIRRUP_X) : STIRRUP_X;
+			this.stirrupLeft.x = this.stirrupLeftIron.x = out;
+			this.stirrupRight.x = this.stirrupRightIron.x = -out;
 
 			// the tail: hangs at rest, lifts as it goes faster, swishes now and then
 			float tailLift = Math.min(0.0F, -1.3089F + speed * 1.5F);
@@ -407,7 +430,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			if (!state.wings) {
 				return;
 			}
-			this.innerWing.y = stand > 0.5F ? -5.0F : 3.0F;
+			this.innerWing.y = (stand > 0.5F ? -5.0F : 3.0F) - LIFT;
 			this.innerWing.z = stand > 0.5F ? 4.0F : -6.0F;
 			float wingRot = state.flapping ? Mth.cos(ticks * 0.3F + Mth.PI) * 1.2F : Mth.cos(walked * 0.5F) * 0.1F;
 			if (state.airborne) {

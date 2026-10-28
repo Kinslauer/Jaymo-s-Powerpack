@@ -43,6 +43,8 @@ public final class Mounted {
 	public static final double FLOAT_DEPTH = 0.55, FLOAT_LIFT = 0.06, FLOAT_RISE = 0.12;
 	/** The second rider sits this far behind the saddle (blocks, at scale 1). */
 	public static final double PILLION_BACK = 0.6, PILLION_DROP = 0.05;
+	/** (0.7.309) How much higher a rider sits on our taller horses (3 model px). */
+	public static final double SEAT_LIFT = 3.0 / 16.0;
 	/** The charge: seconds of galloping to fill it (a sprint fills it twice as fast), how fast it drains at a trot or slower (a second). */
 	public static final float CHARGE_SECONDS = 3.0F, CHARGE_DRAIN = 0.5F;
 	/** It runs things down from this much charge; each one it hits costs this much of it. */
@@ -95,12 +97,14 @@ public final class Mounted {
 			&& horse.getFirstPassenger() instanceof Player;
 	}
 
-	/** (From {@code AbstractHorseMixin}) where the second rider sits: behind the first. */
+	/** (From {@code AbstractHorseMixin}) where riders sit: up on our taller horses, and the second behind the first. */
 	public static Vec3 seat(AbstractHorse horse, Entity passenger, Vec3 vanilla, float scale) {
+		// (0.7.309) our horses stand taller than vanilla's (BreedHorseModel.LIFT, 3 px), so every seat is that much higher
+		Vec3 seat = horse instanceof WarElephant ? vanilla : vanilla.add(0.0, SEAT_LIFT * scale, 0.0);
 		if (horse.getPassengers().indexOf(passenger) != 1) {
-			return vanilla;
+			return seat;
 		}
-		return vanilla.add(new Vec3(0.0, -PILLION_DROP * scale, -PILLION_BACK * scale).yRot(-horse.getYRot() * Mth.DEG_TO_RAD));
+		return seat.add(new Vec3(0.0, -PILLION_DROP * scale, -PILLION_BACK * scale).yRot(-horse.getYRot() * Mth.DEG_TO_RAD));
 	}
 
 	/** (From {@code AbstractHorseMixin}, on whichever side moves it) a ridden horse in deep water swims up to keep its rider's head out. */

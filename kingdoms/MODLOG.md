@@ -6128,7 +6128,7 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
-## 0.7.309: barding of its own, and more detailed horses (pack 0.17.127)
+## 0.7.309: barding of its own, taller horses, and more detailed horses (pack 0.17.127)
 
 Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
 anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or
@@ -6147,3 +6147,16 @@ an etched chanfron, lapped lames, a padded leather lining underneath; chain bard
 at the head. Horses got more pieces too: shoulders and a rounded barrel, knees, hocks and gaskins, cheeks, flared
 nostrils, coronet bands and ergot tufts, and muscle light and shadow painted in (`FORM`). Horse texture now 128x192.
 Compile-checked, not seen in game; previews in the project files (art-overhaul/horses/armour-detail.png).
+
+Then Andy: "the armor looks far too disjointed. the plates are fine but they need to be connected somehow", pointing at
+SWEM's horses (All Rights Reserved, Forge only, so ideas only, nothing of theirs used). In its style, our own:
+- the horse stands taller: legs 3 px longer (`LIFT`: body, saddle, tail and wings that much higher; THIGH 10) and the
+  neck 3 px longer (`NECK`: the head set out along it, `BreedHorseModel` working its pivot out from the head's pitch so
+  the neck still meets the chest); tails longer; riders sit `Mounted.SEAT_LIFT` higher (not on war elephants);
+- the barding is joined up: a cloth caparison under it all (round the neck under the crinet, over the back and down the
+  sides to hang below the belly, open beneath and before and behind for the legs, folds and a trimmed hem; crimson on
+  iron, royal blue on gold, linen on diamond, green on copper, purple on netherite, russet under mail, quartered
+  crimson and linen under plate, dyed with leather); the crinet's sixth lame runs into the peytral; one side plate a
+  side from the peytral to the crupper (stepped in along its top); a full chanfron closed over the face and down to
+  the cheeks with eye holes in raised rims, and a nose plate; the stirrups hang outside the side plates
+  (`STIRRUP_OUT`, from each build's plate). Armour texture 128x128.

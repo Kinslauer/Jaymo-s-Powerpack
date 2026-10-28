@@ -3513,4 +3513,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 
 - **0.17.127, horse barding (Kingdoms 0.7.309):** armour is its own model now (chanfron with eye guards, lapped crinet
   that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
-  (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. See the Kingdoms MODLOG.
+  (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
+  (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.
+  See the Kingdoms MODLOG.

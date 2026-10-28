@@ -216,7 +216,7 @@ def tack(x):
 
 
 # ---- the breed coats ------------------------------------------------------------------------------------------------------
-LEG_TOP, GROUND = 9.0, 24.1
+LEG_TOP, GROUND = 9.0 - hr.LIFT, 24.1
 HEAD_REGIONS = ("head", "jowl", "muzzle", "lip", "ear")
 BODY_REGIONS = ("body", "chest", "withers", "croup", "belly", "neck")
 
@@ -262,11 +262,11 @@ def mouth(x, col, tint):
 # neck), shadow in the hollows (behind the elbow, the flank, under the belly and the jaw). World space, model pixels.
 FORM = [
     # (centre (|x| or None for the midline), y, z), radius, how much lighter (+) or darker (-)
-    ((5.5, 7.0, -6.5), 3.6, 12),   # the shoulder
-    ((5.5, 6.5, 10.5), 4.2, 12),   # the hip
-    ((5.6, 12.5, -2.5), 2.4, -14),  # behind the elbow, the girth line
-    ((5.6, 8.0, 6.0), 2.6, -10),   # the flank's hollow
-    ((5.8, 12.0, 11.0), 2.5, 8),   # the gaskin's swell
+    ((5.5, 4.0, -6.5), 3.6, 12),   # the shoulder
+    ((5.5, 3.5, 10.5), 4.2, 12),   # the hip
+    ((5.6, 9.5, -2.5), 2.4, -14),  # behind the elbow, the girth line
+    ((5.6, 5.0, 6.0), 2.6, -10),   # the flank's hollow
+    ((5.8, 9.0, 11.0), 2.5, 8),    # the gaskin's swell
 ]
 
 
@@ -281,8 +281,8 @@ def form(x):
         d = math.sqrt((abs(w[0]) - cx) ** 2 + (w[1] - cy) ** 2 + (w[2] - cz) ** 2)
         if d < rad:
             by += k * (1 - d / rad) ** 1.5
-    if w[1] > 11.0 and r in ("body", "belly", "chest"):
-        by -= (w[1] - 11.0) * 5  # the belly in its own shadow
+    if w[1] > 8.0 and r in ("body", "belly", "chest"):
+        by -= (w[1] - 8.0) * 5  # the belly in its own shadow
     if r == "leg_a" and x.face in ("a", "b"):
         by += 6 * (1 - x.t) - 4  # the forearm rounds into the knee
     return int(by)
@@ -316,7 +316,7 @@ def coat(build, breed, name, spec, pxs, seed):
             dense = 0.25 + 0.75 * max(0.0, min(1.0, (w[2] + 4) / 16))  # spottier toward the hindquarters
             if d < 0.55 + 0.45 * tag and tag < dense:
                 col = spec["spot"]
-        if "dorsal" in marks and x.cube.region in ("body", "withers", "croup") and abs(w[0]) < 0.8 and w[1] < 4.0:
+        if "dorsal" in marks and x.cube.region in ("body", "withers", "croup") and abs(w[0]) < 0.8 and w[1] < 4.0 - hr.LIFT:
             col = mix(col, stripe, 0.8)
         return col
 
@@ -493,7 +493,7 @@ def skeleton(pxs, seed):
         col = shade(BONE, int((h3(x.X, x.Y, 14, seed) - 0.5) * 14))
         if r == "body":
             ribs = -9.5 <= w[2] <= 5.0
-            if f in ("a", "b") and ribs and w[1] > 4.2:
+            if f in ("a", "b") and ribs and w[1] > 4.2 - hr.LIFT:
                 band = (w[2] + 9.5) % 2.5
                 if band > 1.25:
                     continue
@@ -508,7 +508,7 @@ def skeleton(pxs, seed):
             elif f == "bottom":
                 if not (abs(w[0]) < 1.1 and w[2] < -2):
                     continue
-            elif f == "front" and abs(w[0]) > 2.5 and w[1] > 6:
+            elif f == "front" and abs(w[0]) > 2.5 and w[1] > 6 - hr.LIFT:
                 continue
         elif r == "neck":
             back = c.pos[2] + c.size[2]
@@ -566,7 +566,7 @@ def zombie(pxs, seed):
         if r in ("muzzle", "lip"):
             col = mouth(x, mix(col, (120, 118, 104), 0.3), (78, 70, 64))
         # the ribs show through a torn flank
-        if r == "body" and f == "a" and ((w[2] + 2) / 4.0) ** 2 + ((w[1] - 7.5) / 2.2) ** 2 < 0.6 + 0.6 * vnoise3(w, 1.5, seed + 3):
+        if r == "body" and f == "a" and ((w[2] + 2) / 4.0) ** 2 + ((w[1] - 7.5 + hr.LIFT) / 2.2) ** 2 < 0.6 + 0.6 * vnoise3(w, 1.5, seed + 3):
             col = BONE if (w[2] % 1.6) < 0.8 else (92, 22, 22)
         elif r in BODY_REGIONS + ("leg_a", "head") and nearest(w, 4.5, seed + 9)[0] < 0.55:
             col = (128, 30, 28) if nearest(w, 4.5, seed + 9)[0] < 0.35 else (70, 34, 28)  # wounds
@@ -640,7 +640,11 @@ def undead(pxs):
 
 
 # ---- horse armour (0.7.309: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
-METAL, TRIM, LINING, HOLE = 0, 1, 2, 3
+METAL, TRIM, LINING, HOLE, CLOTH, CLOTH_ALT = 0, 1, 2, 3, 4, 5
+# the faces left open (nothing drawn): the caparison beneath, before and behind; the neck cloth at its ends; the
+# chanfron under the jaw, behind for the ears and where the nose plate runs on
+OPEN = {"caparison": ("bottom", "front", "back"), "neck_cloth": ("top", "bottom"), "chanfron": ("bottom", "back", "front"),
+        "nose": ("bottom", "back")}
 
 
 def armour_base(pxs, mail):
@@ -655,6 +659,21 @@ def armour_base(pxs, mail):
         edge = min(u, fw - u, v, fh - v)
         if r == "crupper" and f == "back" and math.hypot(x.q[0], x.q[1] + 8.0) < 1.5:
             continue  # the tail comes out through here
+        if f in OPEN.get(r, ()):
+            continue
+        if r in ("caparison", "neck_cloth"):
+            out[(x.X, x.Y)] = cloth(x, fw, fh, u, v)
+            continue
+        if r == "chanfron" and f in ("a", "b"):
+            # the eye holes, each in a raised rim
+            ez, ey = c.pos[2] + 0.4 + 1.75, c.pos[1] + 0.6 + 1.6
+            d = math.hypot(x.q[2] - ez, x.q[1] - ey)
+            if d < 1.0:
+                continue
+            if d < 1.6:
+                g = 236 if (x.q[1] < ey) else 120
+                out[(x.X, x.Y)] = (light(x, (g, g, g), 0.7), METAL)
+                continue
         if f == "bottom" or (r in ("crinet", "crest", "chanfron", "nose", "crupper") and f == "front" and r != "chanfron"):
             out[(x.X, x.Y)] = (light(x, (70, 52, 36), 0.6), LINING)  # the padded lining underneath
             continue
@@ -721,6 +740,31 @@ def armour_base(pxs, mail):
     return out
 
 
+def cloth(x, fw, fh, u, v):
+    """(0.7.309) The caparison's cloth as (grey, kind): woven, falling in folds below the belly, a band of trim at the
+    hem and a stitched border above it; quartered (CLOTH_ALT) for the heraldic bardings."""
+    f, w = x.face, x.w
+    g = 176 + 10 * (h3(x.X, x.Y, 23, 2) - 0.5) + (6 if (x.X + x.Y) % 2 == 0 else 0)
+    if f in ("a", "b", "front", "back"):
+        hang = max(0.0, min(1.0, (w[1] - 8.9) / 5.7))  # how far below the side plates it hangs (world y)
+        along = w[2] if f in ("a", "b") else w[0]
+        g += (10 + 18 * hang) * math.sin(along * 1.25)  # the folds, deeper as it hangs free
+        g -= 22 * x.t
+    # quartered: fore and aft, left and right, alternate (the plate barding's arms)
+    alt = (w[2] < 0.5) != (w[0] < 0)
+    kind = CLOTH_ALT if alt else CLOTH
+    e = (fh - v) * S
+    if x.cube.region == "caparison" and f in ("a", "b") and e < 3:
+        kind = TRIM  # the hem
+        g = 220 if 0.5 < e < 2 else 140
+    elif x.cube.region == "caparison" and f in ("a", "b") and 4 <= e < 5 and x.I % 3 != 0:
+        g += 40  # a stitched line above it
+    elif x.cube.region == "neck_cloth" and f != "back" and v * S < 2:
+        kind = TRIM
+        g = 200
+    return (light(x, (g, g, g), 0.7), kind)
+
+
 def ramp_stops(stops, t):
     for (t0, c0), (t1, c1) in zip(stops, stops[1:]):
         if t <= t1 or (t1, c1) == stops[-1]:
@@ -729,13 +773,14 @@ def ramp_stops(stops, t):
     return stops[-1][1]
 
 
-def ramp(base, metal, trim):
+def ramp(base, metal, trim, cloth, cloth_alt=None):
     res = {}
     for k, (col, kind) in base.items():
         if kind == LINING:
             res[k] = col + (255,)
             continue
-        res[k] = ramp_stops(trim if kind == TRIM else metal, lum(col) / 255) + (255,)
+        stops = {TRIM: trim, CLOTH: cloth, CLOTH_ALT: cloth_alt or cloth}.get(kind, metal)
+        res[k] = ramp_stops(stops, lum(col) / 255) + (255,)
     return res
 
 
@@ -749,6 +794,13 @@ COPPER = [(0.0, (60, 30, 18)), (0.35, (150, 78, 46)), (0.7, (214, 128, 84)), (1.
 VERDIGRIS = [(0.0, (20, 56, 48)), (0.45, (52, 128, 106)), (0.8, (104, 190, 160)), (1.0, (190, 240, 220))]
 NETHERITE = [(0.0, (20, 16, 18)), (0.4, (58, 50, 54)), (0.75, (98, 88, 92)), (1.0, (150, 138, 140))]
 GREY = [(0.0, (90, 90, 90)), (0.5, (200, 200, 200)), (1.0, (255, 255, 255))]
+# (0.7.309) the caparisons' cloths
+CRIMSON = [(0.0, (40, 6, 10)), (0.45, (120, 18, 26)), (0.8, (178, 40, 44)), (1.0, (226, 96, 90))]
+ROYAL_BLUE = [(0.0, (8, 14, 46)), (0.45, (30, 52, 130)), (0.8, (60, 96, 190)), (1.0, (140, 170, 236))]
+LINEN = [(0.0, (88, 84, 76)), (0.45, (190, 184, 170)), (0.8, (232, 228, 216)), (1.0, (252, 250, 244))]
+FOREST = [(0.0, (10, 30, 14)), (0.45, (34, 86, 40)), (0.8, (66, 132, 66)), (1.0, (140, 196, 126))]
+SABLE_PURPLE = [(0.0, (12, 6, 16)), (0.45, (40, 20, 52)), (0.8, (74, 40, 92)), (1.0, (130, 90, 150))]
+RUSSET = [(0.0, (36, 20, 10)), (0.45, (104, 62, 32)), (0.8, (150, 98, 56)), (1.0, (204, 160, 110))]
 
 
 def armours(pxs):
@@ -756,14 +808,14 @@ def armours(pxs):
     # leather is dyed over the lot: its lining greyed too
     leather = {k: ((v[0], METAL) if v[1] != LINING else (mix(v[0], (150, 150, 150), 0.6), METAL)) for k, v in plate.items()}
     return {
-        "minecraft/iron": ramp(plate, STEEL, BRASS_RAMP),
-        "minecraft/gold": ramp(plate, GOLD, RED_GOLD),
-        "minecraft/diamond": ramp(plate, DIAMOND, GOLD),
-        "minecraft/copper": ramp(plate, COPPER, VERDIGRIS),
-        "minecraft/netherite": ramp(plate, NETHERITE, GOLD),
-        "minecraft/leather": ramp(leather, GREY, GREY),
-        "jaymoskingdoms/chain_barding": ramp(mail, STEEL, STEEL),
-        "jaymoskingdoms/plate_barding": ramp(plate, BRIGHT_STEEL, BRASS_RAMP),
+        "minecraft/iron": ramp(plate, STEEL, BRASS_RAMP, CRIMSON),
+        "minecraft/gold": ramp(plate, GOLD, RED_GOLD, ROYAL_BLUE),
+        "minecraft/diamond": ramp(plate, DIAMOND, GOLD, LINEN),
+        "minecraft/copper": ramp(plate, COPPER, VERDIGRIS, FOREST),
+        "minecraft/netherite": ramp(plate, NETHERITE, GOLD, SABLE_PURPLE),
+        "minecraft/leather": ramp(leather, GREY, GREY, GREY),
+        "jaymoskingdoms/chain_barding": ramp(mail, STEEL, STEEL, RUSSET),
+        "jaymoskingdoms/plate_barding": ramp(plate, BRIGHT_STEEL, BRASS_RAMP, CRIMSON, LINEN),
     }
 
 
