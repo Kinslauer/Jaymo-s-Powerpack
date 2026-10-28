@@ -59,13 +59,19 @@ public final class HeritageHold {
 	/** The foe shrinking away as it's taken in. */
 	private static final Identifier SHRINK_ID = JaymosKingdoms.id("heritage_absorb_shrink");
 
-	/** One absorbing under way: the foe, and how many ticks it has run. */
+	/**
+	 * One absorbing under way: the foe, its shape as it was taken (before it shrank), how many ticks it has run, and how
+	 * far along it was at the last pulse (0 .. 1).
+	 */
 	static final class Channel {
 		final LivingEntity target;
+		final net.minecraft.world.entity.EntityDimensions shape;
 		int ticks;
+		double pulsed;
 
 		Channel(LivingEntity target) {
 			this.target = target;
+			this.shape = target.getType().getDimensions().scale(target.getScale());
 		}
 	}
 
@@ -171,6 +177,7 @@ public final class HeritageHold {
 		shrink(foe, SHRINK * progress * progress * (3.0 - 2.0 * progress));
 		int every = Math.max(PULSE_LAST, Math.round(Mth.lerp((float)progress, PULSE_FIRST, PULSE_LAST)));
 		if (channel.ticks % every == 0) {
+			channel.pulsed = progress;
 			pulse(level, player, foe, fx, throb, progress);
 		}
 		if (channel.ticks % PROGRESS_EVERY == 0) {

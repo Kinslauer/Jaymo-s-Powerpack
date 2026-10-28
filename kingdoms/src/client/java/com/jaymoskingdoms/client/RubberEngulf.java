@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Engulf</b>: the sealed skin wobbles and the rope gulps, lumps running down it to the body, while the foe
  * shrinks inside (the server's shrink, {@link HeritageHold}).</li>
  * <li><b>Mass</b>: swallowed, their body swells ({@link #SWELL}) and settles into its new build (their MCA height and
- * width shift toward the foe's, {@code McaBridge.shiftBody}).</li>
+ * width grow by the foe's bulk, a little with each pulse, {@code BodySizes.withMass}).</li>
  * </ol>
  * The rubber is drawn in the world ({@link #render}); the swell goes on the model as it's posed ({@link #apply}).
  */
@@ -243,6 +243,12 @@ public final class RubberEngulf {
 	/** Render-state extraction: how swollen a Rubber-folk who just swallowed is this frame. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		if (!(entity instanceof Avatar)) {
+			return;
+		}
+		if (entity.hasAttached(com.jaymoskingdoms.RubberStomach.HOLDING)) {
+			// (0.7.312) someone alive inside: the belly stays full, and heaves as they fight
+			float clock = entity.tickCount + partialTicks;
+			state.setData(KEY, 0.55F + 0.12F * Mth.sin(clock * 0.35F) + 0.08F * Mth.sin(clock * 0.9F));
 			return;
 		}
 		Float when = SWALLOWED.get(entity.getId());

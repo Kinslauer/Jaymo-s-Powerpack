@@ -105,8 +105,11 @@ public final class SwallowedPower {
 		return name;
 	}
 
-	/** Whatever they swallowed leaves them (death, or a new swallow). */
-	private static void drop(ServerPlayer player) {
+	/**
+	 * Whatever they swallowed leaves them (death, or a new swallow; (0.17.134) or Jaymo's Kingdoms, by reflection, when a
+	 * Rubber-folk brings it back up).
+	 */
+	public static void drop(ServerPlayer player) {
 		Power power = of(player);
 		HELD.remove(player.getUUID());
 		if (player.hasAttached(SWALLOWED)) {

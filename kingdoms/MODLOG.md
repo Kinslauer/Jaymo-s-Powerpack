@@ -6128,6 +6128,67 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
+## 0.7.307: whalers cut in alongside, their tryworks burn; harpoon boats keep their crew at the oars (pack 0.17.125)
+
+From Andy's clip of a whaling voyage:
+- **Loose things stay in the sea** ("alot of items were following the ship as it sailed instead of floating in the
+  water outside"): `Ship.carry` took along everything inside her outline, so dropped items floating in the sea by
+  her narrow bow and stern sailed with her and looked like water inside her. Now only what rests on her or in her is
+  carried: in her dry hold, in one of her part-blocks, or on a piece just below (a walker two below, mid-stride).
+  Anything she sails into inside a full block of hers is left behind (`Hull.dry`, `Hull.solid`).
+- **The whale is lashed alongside and she anchors** ("the whale just didnt attach to the boat"): cutting in now lets
+  go her anchor (`Ship.rideAtAnchor`: no way on her, no turn, no tow on her lines) and lashes the carcass amidships on
+  the side it lies (`WhaleCarcass.lash`, hauled in at most 0.25 a tick and laid along her). A lashed carcass counts as
+  alongside, so players can flense it with her crew. Her captain calls it out.
+- **Her gang fills the tryworks** ("the crew should start filling the tryworks"): every whaler has a tryworks on her
+  centreline forward of her middle (set on a whaler already at sea too). Three hands turn to: the cutter at the rail
+  over the carcass with a spade, a stroke every 24 ticks (meat, bone and ambergris below to her hold), and carriers
+  who take the blubber from the rail to the tryworks in their arms, four at a time, and pitch it in (a lone hand does
+  both). The tryworks light and fill (their BLUBBER state, up to 8; the rest to the blubber room).
+- **The tryworks burn on** ("they burn as we either return home or search for another"): fire and smoke now go up
+  from the tryworks themselves, 2 blubber to a bottle of oil every 160 ticks, fed again from her hold by a hand until
+  all of it is rendered, whether she's hunting or homeward. At home, what's left in the pots is rendered ashore.
+- **Harpoon boats keep their crew at the oars** ("When you join on a harpoon boat the ai should retain control"): the
+  game gives a boat to any player in its first seat and seats players first, so a player in a whaleboat took its
+  steering and the boat never towed the carcass home. Whaleboats now carry a synced `Whalers.CREWED` mark and
+  `BoatCrewedMixin` gives them no controlling passenger: her oarsmen row as her captain orders and the player only
+  throws irons. A boat cast adrift (no hand left) loses the mark, so a player can row it.
+- A player in a boat when it's hoisted in is set on her deck, not dropped in the sea beside her.
+Compile-checked against the 26.3 jars, not seen in game.
+
+## 0.7.311: shamans and raiders leave captives alone (pack 0.17.131)
+Andy: "shaman is repeatedly attacking the prisoner."
+- A captive in chains is never prey: `Barbarians.prey`/`villagerPrey` (raiders, greenskins, pirates) and
+  `Casters.foe` (a camp's shaman, necromancer or blood witch) skip them. They were invulnerable, so the blows did
+  nothing, but the shaman kept casting at them.
+- Andy also asked why barbarians had lost their armour: MCA's own equipment routine (`EquipmentTask`) puts a guard's
+  armour on only while they fight. He likes that, so it stays as MCA has it.
+## 0.7.312: Rubber-folk bring their last swallow back up, hold swallowed players alive, and grow with what they eat (pack 0.17.134)
+Andy: "eating a pillager made me smaller for some reason, it should add their mass to the user, not subtract. and the
+mass should increase per pulse as the absorbed gets smaller." And: "rubbers should be able to eject their last
+swallow, leaving a pink mass that slowly reveals the now corpse. If a downed player is absorbed they stay alive, but
+wounded and appear inside the rubber folk. able to fight their way out by disturbing structures representing the
+rubber's internal organs."
+- **Mass, not a shift**: the old swallow moved your MCA height and width toward the foe's, measured after it had shrunk
+  to 5%, so everything made you smaller. Now the foe's shape is taken as the swallow starts (`HeritageHold.Channel`)
+  and 30% of its bulk is added to yours (`BodySizes.withMass`, `ABSORB_MASS`), a step with each pulse (`RubberFolk.grow`).
+  Letting go puts you back as you were.
+- **The last swallow stays in you** (`RubberStomach.STOMACH`): the Kitchen corpse it would leave (and a digested
+  player's things). **Sneak + heritage key** pukes it up a step ahead of you under a pink rubber mound that wobbles,
+  sags into a puddle and fades over 30 s (`MASS` on a short cloud that drips pink; drawn by `RubberStomachView`). What you
+  took from it (stats, gifts, swallowed power, bulk) goes with it. A new swallow replaces it; death loses it.
+- **Downed players swallowed alive**: they get up, wounded (8 health at most), inside you. No new world: they hang 24
+  blocks over the build limit above you, following you (like `StoryStasis`), and their screen draws your insides round
+  them: pulsing walls, the heart ahead, a lung each side, the stomach below. Their attack key hits the organ under the
+  crosshair (`Strike`, at most every 5 ticks, scaled by their blow and cooldown): you take half of each blow (more for
+  the heart), a lung blow knocks your breath out and slows you, a stomach blow makes you sick and hungry, and screens
+  shake. Beat 60% of the organs and you retch them up (and take 4 more). The stomach takes 1 health from them every
+  2.5 s; if they go down in there they're digested, and you get their power, stats and body as with any swallow. Your
+  belly stays full and heaves while they're in there. Sneak + heritage key pukes them back up. Either one logging off, you
+  going down or dying lets them out; a server stop puts them down where they were swallowed.
+- Powers 0.17.134: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
+Compile-checked, not seen in game.
+
 ## 0.7.310: the Bio-built absorb the crippled too, buds look like you (pack 0.17.128)
 Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed". The heritage key
 (`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'

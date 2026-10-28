@@ -68,12 +68,19 @@ public final class WhaleCarcass extends Entity {
 	/** Strokes that can be cut with it loose in the water, the blocks a ship needs to cut in the rest, and how near her side it must lie. */
 	static final int LOOSE = 16, BIG_SHIP = 600;
 	static final double ALONGSIDE = 6.0;
+	/** (0.7.307) Lashed alongside: hauled to her side this fast at most (blocks a tick), the share of the gap a tick, and how long a lashing holds unrenewed (ticks). */
+	static final double LASH_HAUL = 0.25, LASH_EASE = 0.15;
+	static final int LASH_HOLDS = 10;
 
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(WhaleCarcass.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> LEFT = SynchedEntityData.defineId(WhaleCarcass.class, EntityDataSerializers.INT);
 
 	private int age, sinking, amber = -1;
 	private Vec3 towed = Vec3.ZERO;
+	/** (0.7.307) Server: where she's lashed alongside, her head that way, and the ticks the lashing holds. */
+	private @Nullable Vec3 lashedAt;
+	private float lashedYaw;
+	private int lashed;
 
 	public WhaleCarcass(EntityType<? extends WhaleCarcass> type, Level level) {
 		super(type, level);
@@ -104,6 +111,21 @@ public final class WhaleCarcass extends Entity {
 		return this.entityData.get(LEFT) / (float)FLESH;
 	}
 
+	/**
+	 * (0.7.307) A whaling crew have it lashed alongside their ship (Andy: "the whale just didnt attach to the boat"): it's
+	 * hauled to {@code at} and lies along her, {@code yaw}, while they keep renewing it (each tick they're cutting in).
+	 */
+	public void lash(Vec3 at, float yaw) {
+		this.lashedAt = at;
+		this.lashedYaw = yaw;
+		this.lashed = LASH_HOLDS;
+	}
+
+	/** (0.7.307) Whether it's lashed alongside a ship ({@link #lash}). */
+	public boolean lashed() {
+		return this.lashed > 0;
+	}
+
 	/** Pulls it (a harpoon line, taut), taken up at its next move. */
 	void tow(Vec3 pull) {
 		this.towed = this.towed.add(pull.scale(1.0 / HEFT));
@@ -128,6 +150,17 @@ public final class WhaleCarcass extends Entity {
 			v = new Vec3(v.x * 0.9, v.y * 0.6 + rise, v.z * 0.9);
 		} else {
 			v = new Vec3(v.x * 0.8, v.y - 0.08, v.z * 0.8);
+		}
+		if (this.lashed > 0 && this.lashedAt != null && this.sinking == 0) {
+			// (0.7.307) lashed alongside: hauled in to her side, lying along her (the lines' pull is hers now)
+			this.lashed--;
+			Vec3 gap = new Vec3(this.lashedAt.x - this.getX(), 0.0, this.lashedAt.z - this.getZ()).scale(LASH_EASE);
+			if (gap.length() > LASH_HAUL) {
+				gap = gap.normalize().scale(LASH_HAUL);
+			}
+			v = new Vec3(gap.x, v.y, gap.z);
+			this.setYRot(Mth.approachDegrees(this.getYRot(), this.lashedYaw, 1.5F));
+			this.towed = Vec3.ZERO;
 		}
 		v = v.add(this.towed);
 		if (this.towed.horizontalDistanceSqr() > 1.0E-5) {
@@ -196,6 +229,9 @@ public final class WhaleCarcass extends Entity {
 
 	/** Lashed alongside a big ship: a harpoon in it made fast to a ship of {@link #BIG_SHIP} blocks or more, and it lying by her side. */
 	boolean alongside(ServerLevel level) {
+		if (this.lashed > 0) {
+			return true;
+		}
 		for (Harpoon h : Harpoon.in(level, this)) {
 			if (h.anchor() instanceof Ship ship) {
 				Hull hull = ship.hull();

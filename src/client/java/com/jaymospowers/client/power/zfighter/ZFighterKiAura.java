@@ -45,6 +45,10 @@ import org.jspecify.annotations.Nullable;
  * the shells are gone. Every style is now wisps of light that touch the body, lick off it and fade
  * ({@link ZFighterKiAuraStyles#draw}); this class still decides when it shows, how strong, how big and what colour, and
  * the fifth number is how far it streams back in flight.
+ * <p>
+ * (0.17.133) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". The
+ * aura swells with his ki ({@link ZFighterPower#KI_SHARE}): normal size at {@link #SWELL_FROM} of full and below, up to
+ * {@link #SWELL} bigger at full, so it grows as he charges and eases back as he spends it.
  */
 public final class ZFighterKiAura {
 	/** On his render state: the aura's colour (RGB), strength (0-1), size, style and trail (0-1), or null for none. */
@@ -67,10 +71,12 @@ public final class ZFighterKiAura {
 	static final float PULSE_RISE = 0.12F, PULSE_DECAY = 5.0F, PULSE_HIGH = 0.75F, PULSE_LOW = 0.0F;
 	/** A pulse swells the aura out by this much at its height. */
 	static final float PULSE_SWELL = 0.1F;
+	/** (0.17.133) Bigger by up to this at full ki, from this share of full up; and how fast its size follows his ki (a tick). */
+	static final float SWELL = 0.5F, SWELL_FROM = 0.3F, SWELL_EASE = 0.12F;
 	/** Flying: the aura starts to stream back at this speed (blocks a tick) and fully at this one. */
 	static final double TRAIL_FROM = 0.2, TRAIL_FULL = 1.0;
 
-	/** How strong each one's charge/hold aura is now (eased in and out), and the age it was last eased at. */
+	/** How strong each one's charge/hold aura is now (eased in and out), the age it was last eased at, and its swell (0-1). */
 	private static final Map<Player, float[]> EASED = new WeakHashMap<>();
 
 	private ZFighterKiAura() {
@@ -99,11 +105,15 @@ public final class ZFighterKiAura {
 		boolean holding = hold != null && player.level().getGameTime() < hold;
 		float target = charging ? CHARGING : holding ? HOLDING : 0.0F;
 
-		float[] eased = EASED.computeIfAbsent(player, p -> new float[] {0.0F, age});
+		float[] eased = EASED.computeIfAbsent(player, p -> new float[] {0.0F, age, 0.0F});
 		float dt = Mth.clamp(age - eased[1], 0.0F, 10.0F);
 		eased[1] = age;
 		float rate = target > eased[0] ? GROW : FADE;
 		eased[0] += (target - eased[0]) * Math.min(1.0F, dt * rate);
+		Integer share = player.getAttached(ZFighterPower.KI_SHARE);
+		float ki = share == null ? 0.0F : (float)share / ZFighterPower.KI_SHARE_STEPS;
+		float swell = Mth.clamp((ki - SWELL_FROM) / (1.0F - SWELL_FROM), 0.0F, 1.0F);
+		eased[2] += (swell - eased[2]) * Math.min(1.0F, dt * SWELL_EASE);
 
 		float pulse = 0.0F;
 		if (f > 0) {
@@ -117,7 +127,7 @@ public final class ZFighterKiAura {
 			return null;
 		}
 		float size = 1.0F + SIZE_PER_FORM * Math.min(SIZE_STEPS, com.jaymospowers.power.zfighter.ZFighterForms.tier(f)) + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
-			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F);
+			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F) + SWELL * eased[2];
 		float trail = 0.0F;
 		Integer flight = player.getAttached(ZFighterPower.FLIGHT);
 		if (flight != null && flight > 0) {

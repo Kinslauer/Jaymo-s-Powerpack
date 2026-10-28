@@ -110,6 +110,11 @@ public final class RubberFolk {
 	/** The sweet each is eating now, and the ticks it had left when last seen. */
 	private static final Map<UUID, ItemStack> EATING = new HashMap<>();
 	private static final Map<UUID, Integer> LEFT = new HashMap<>();
+	/**
+	 * (0.7.312) A swallow under way → their MCA Size and Width as it began, as it'll end, and how far along it they've
+	 * grown: {@code {fromSize, fromWidth, toSize, toWidth, share}}.
+	 */
+	private static final Map<UUID, float[]> GROWTH = new HashMap<>();
 
 	private RubberFolk() {
 	}
@@ -132,6 +137,7 @@ public final class RubberFolk {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			EATING.remove(handler.player.getUUID());
 			LEFT.remove(handler.player.getUUID());
+			GROWTH.remove(handler.player.getUUID());
 		});
 	}
 
@@ -252,17 +258,55 @@ public final class RubberFolk {
 				}
 			}
 			if (player.level() instanceof ServerLevel level) {
+				HeritageHold.Channel channel = HeritageHold.channel(player);
+				if (channel != null && McaCompat.LOADED && !GROWTH.containsKey(id)) {
+					float[] genes = McaBridge.bodyGenes(player);
+					if (genes != null) {
+						float[] to = BodySizes.withMass(genes[0], genes[1], channel.shape.height(), channel.shape.width());
+						GROWTH.put(id, new float[] {genes[0], genes[1], to[0], to[1], 0.0F});
+					}
+				}
 				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, ABSORB_TICKS, PINK, SoundEvents.SLIME_SQUISH_SMALL,
 					"message.jaymoskingdoms.rubber.absorbing");
 				if (foe != null) {
 					absorb(level, player, foe);
+				} else {
+					grow(player, HeritageHold.channel(player));
 				}
 			}
 		}
 	}
 
+	/**
+	 * (0.7.312) Andy: "the mass should increase per pulse as the absorbed gets smaller". While {@code channel} runs, their
+	 * build is as far from where it was to where it'll end ({@link BodySizes#withMass}) as the swallow was at its last
+	 * pulse; let go (no channel), it goes back to how it was.
+	 */
+	private static void grow(ServerPlayer player, HeritageHold.@org.jspecify.annotations.Nullable Channel channel) {
+		float[] growth = GROWTH.get(player.getUUID());
+		if (growth == null || !McaCompat.LOADED) {
+			return;
+		}
+		if (channel == null) {
+			GROWTH.remove(player.getUUID());
+			if (growth[4] > 0.0F) {
+				McaBridge.setBody(player, growth[0], growth[1]);
+			}
+			return;
+		}
+		float at = (float)channel.pulsed;
+		if (at > growth[4]) {
+			growth[4] = at;
+			McaBridge.setBody(player, Mth.lerp(at, growth[0], growth[2]), Mth.lerp(at, growth[1], growth[3]));
+		}
+	}
+
 	/** (0.7.288) The heritage key pressed: starts (or stops) swallowing a weak foe close by. */
 	static void press(ServerPlayer player) {
+		// (0.7.312) sneaking, they bring their last swallow back up (or spit out one still alive in them)
+		if (player.isShiftKeyDown() && HeritageHold.channel(player) == null && RubberStomach.bringUp(player)) {
+			return;
+		}
 		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");
 	}
 
@@ -283,36 +327,47 @@ public final class RubberFolk {
 		return e.getMaxHealth() <= WEAK_HEALTH && e.getBbWidth() <= WEAK_WIDTH && e.getBbHeight() <= WEAK_HEIGHT;
 	}
 
-	/** {@code foe} is swallowed whole: gone, and a share of its health theirs. */
+	/**
+	 * {@code foe} is swallowed whole: gone, and a share of its health theirs. (0.7.312) Its body stays in them, to be
+	 * brought up ({@link RubberStomach#bringUp}); a downed player isn't dead yet, but held inside ({@link RubberStomach#swallowLive}).
+	 */
 	private static void absorb(ServerLevel level, ServerPlayer player, LivingEntity foe) {
 		float heal = Mth.clamp(foe.getMaxHealth() * ABSORB_HEAL_SHARE, ABSORB_HEAL_MIN, ABSORB_HEAL_MAX);
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
-		// (0.7.297) a player or a villager: their power runs in them now, its R theirs (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
-		// law and their kin know), leaving no body behind; anything else is simply gone
-		boolean person = foe instanceof Player || foe instanceof Villager || foe instanceof Folk;
+		player.heal(heal);
+		// (0.7.312) Andy: "it should add their mass to the user": the last of its bulk goes in (the rest went with each pulse, grow)
+		float[] growth = GROWTH.remove(player.getUUID());
+		float[] gained = {0.0F, 0.0F};
+		if (growth != null && McaCompat.LOADED) {
+			float[] was = McaBridge.bodyGenes(player);
+			McaBridge.setBody(player, growth[2], growth[3]);
+			float[] now = McaBridge.bodyGenes(player);
+			if (was != null && now != null) {
+				gained = new float[] {now[0] - growth[0], now[1] - growth[1]};
+			}
+		}
+		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
+		if (foe instanceof ServerPlayer victim) {
+			// (0.7.312) Andy: "If a downed player is absorbed they stay alive, but wounded and appear inside the rubber folk"
+			RubberStomach.swallowLive(level, player, victim, gained);
+			return;
+		}
+		// (0.7.297) a villager: their power runs in them now, its R theirs (Powers' SwallowedPower), and they die of it (credited to the swallower, so the
+		// law and their kin know); anything else is simply gone
+		boolean person = foe instanceof Villager || foe instanceof Folk;
 		if (person) {
 			PowersCompat.takePower(player, foe);
 		}
-		player.heal(heal);
-		// (0.7.290) Andy: "they change with what they absorb": their build shifts toward the foe's (BodySizes.ABSORB_SHIFT)
-		if (McaCompat.LOADED) {
-			// (its standing shape, not as it lies downed)
-			net.minecraft.world.entity.EntityDimensions shape = foe.getType().getDimensions().scale(foe.getScale());
-			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
-		}
-		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
-		// (0.7.297) and they take on what it had, in place of the last thing they swallowed
-		Adopted adopted = adopt(foe);
-		player.setAttached(ADOPTED, adopted);
-		attributes(player, Heritage.Kind.RUBBERFOLK);
-		gifts(player, adopted);
-		player.sendSystemMessage(Component.translatable(person ? "message.jaymoskingdoms.rubber.adopted_person" : "message.jaymoskingdoms.rubber.adopted", person ? foe.getDisplayName() : foe.getType().getDescription(),
-			describe(adopted)).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+		takeOn(player, foe, person);
+		// (0.7.312) the body it leaves goes into them (at its own size, not shrunk to nothing), to be brought up later
+		HeritageHold.shrink(foe, 0.0);
+		RubberStomach.fill(player, KitchenCompat.corpseOf(foe), java.util.List.of(), gained);
 		if (!person) {
 			foe.discard();
 			return;
 		}
+		HeritageHold.shrink(foe, HeritageHold.SHRINK);
 		foe.addTag(NO_CORPSE_TAG);
 		if (!Necromancy.execute(level, foe, player)) {
 			foe.setInvulnerableTime(0);
@@ -322,6 +377,24 @@ public final class RubberFolk {
 			// (something saved them after all (a totem): back to their size, and no body-less death waiting for them later)
 			HeritageHold.shrink(foe, 0.0);
 			foe.removeTag(NO_CORPSE_TAG);
+		}
+	}
+
+	/** (0.7.297) {@code player} takes on what {@code foe} had, in place of the last thing they swallowed, and is told so. */
+	static void takeOn(ServerPlayer player, LivingEntity foe, boolean person) {
+		Adopted adopted = adopt(foe);
+		player.setAttached(ADOPTED, adopted);
+		attributes(player, Heritage.Kind.RUBBERFOLK);
+		gifts(player, adopted);
+		player.sendSystemMessage(Component.translatable(person ? "message.jaymoskingdoms.rubber.adopted_person" : "message.jaymoskingdoms.rubber.adopted", person ? foe.getDisplayName() : foe.getType().getDescription(),
+			describe(adopted)).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+	}
+
+	/** (0.7.312) What they took on leaves them (they brought it back up). */
+	static void giveUp(ServerPlayer player) {
+		if (player.hasAttached(ADOPTED)) {
+			player.removeAttached(ADOPTED);
+			attributes(player, Heritage.of(player));
 		}
 	}
 

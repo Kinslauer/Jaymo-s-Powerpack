@@ -46,14 +46,15 @@ public final class BodySizes {
 	static final Body DRAGONBLOOD = new Body(0.35F, 0.85F, 0.35F, 0.85F);
 	/**
 	 * Andy: "divine born should vary from the most extreme ends of the spectrum, so should rubber, but they change with
-	 * what they absorb". Both span the whole slider; a Rubber-folk's shifts toward each foe they swallow ({@link #ABSORB_SHIFT}).
+	 * what they absorb". Both span the whole slider; a Rubber-folk's grows with each foe they swallow ({@link #ABSORB_MASS}).
 	 */
 	static final Body DIVINE = ANY, RUBBERFOLK = ANY;
 	/**
-	 * How far a Rubber-folk's height and width move toward a swallowed foe's (a share of the gap), and the player shape
-	 * a foe is measured against (vanilla's 0.6 x 1.8 at MCA's 1x).
+	 * (0.7.312, was a shift toward the foe's build) Andy: "it should add their mass to the user, not subtract". The share
+	 * of a swallowed foe's bulk that becomes a Rubber-folk's, and the player shape a foe is measured against (vanilla's
+	 * 0.6 x 1.8 at MCA's 1x).
 	 */
-	public static final float ABSORB_SHIFT = 0.75F;
+	public static final float ABSORB_MASS = 0.3F;
 	static final float PLAYER_WIDTH = 0.6F, PLAYER_HEIGHT = 1.8F;
 	/** Squat from the deep. */
 	static final Body DEEPBORN = new Body(0.15F, 0.7F, 0.3F, 0.8F);
@@ -131,6 +132,22 @@ public final class BodySizes {
 	/** The MCA gene (0 .. 1) that draws a body {@code length} long, against a player's {@code base} (0.75x .. 1.25x). */
 	public static float geneFor(float length, float base) {
 		return Mth.clamp((length / base - 0.75F) * 2.0F, 0.0F, 1.0F);
+	}
+
+	/** How long (blocks) a body with {@code gene} draws, against a player's {@code base}: {@link #geneFor} undone. */
+	public static float lengthFor(float gene, float base) {
+		return base * (0.75F + Mth.clamp(gene, 0.0F, 1.0F) * 0.5F);
+	}
+
+	/**
+	 * (0.7.312) The Size and Width genes ({@code {size, width}}) of a body with {@code size} and {@code width} that has taken
+	 * in {@link #ABSORB_MASS} of a foe {@code foeHeight} tall and {@code foeWidth} wide: as much bigger every way as the
+	 * bulk added. Bigger only, never smaller (MCA's slider caps it).
+	 */
+	public static float[] withMass(float size, float width, float foeHeight, float foeWidth) {
+		float h = lengthFor(size, PLAYER_HEIGHT), w = lengthFor(width, PLAYER_WIDTH);
+		double grow = Math.cbrt(1.0 + ABSORB_MASS * foeWidth * foeWidth * foeHeight / (w * w * h));
+		return new float[] {Math.max(size, sizeFor((float)(h * grow))), Math.max(width, widthFor((float)(w * grow)))};
 	}
 
 	/** The Size gene a body {@code height} tall would have. */
