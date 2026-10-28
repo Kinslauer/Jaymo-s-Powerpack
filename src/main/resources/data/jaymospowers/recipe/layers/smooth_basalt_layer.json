@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:smooth_basalt",
+  "result": {
+    "id": "jaymospowers:smooth_basalt_layer",
+    "count": 8
+  }
+}

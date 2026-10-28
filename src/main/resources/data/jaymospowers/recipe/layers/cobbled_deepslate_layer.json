@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:cobbled_deepslate",
+  "result": {
+    "id": "jaymospowers:cobbled_deepslate_layer",
+    "count": 8
+  }
+}

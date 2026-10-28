@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:dark_oak_log"
+  ],
+  "result": {
+    "id": "jaymospowers:dark_oak_log_layer",
+    "count": 8
+  }
+}

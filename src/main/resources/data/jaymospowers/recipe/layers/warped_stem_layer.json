@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:warped_stem"
+  ],
+  "result": {
+    "id": "jaymospowers:warped_stem_layer",
+    "count": 8
+  }
+}

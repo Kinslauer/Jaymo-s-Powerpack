@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer",
+    "jaymospowers:jungle_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:jungle_log"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer",
+    "jaymospowers:stripped_warped_stem_layer"
+  ],
+  "result": {
+    "id": "minecraft:stripped_warped_stem"
+  }
+}

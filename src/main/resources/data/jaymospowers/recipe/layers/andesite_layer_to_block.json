@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer",
+    "jaymospowers:andesite_layer"
+  ],
+  "result": {
+    "id": "minecraft:andesite"
+  }
+}

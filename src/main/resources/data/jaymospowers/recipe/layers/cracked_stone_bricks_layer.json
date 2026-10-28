@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:cracked_stone_bricks",
+  "result": {
+    "id": "jaymospowers:cracked_stone_bricks_layer",
+    "count": 8
+  }
+}

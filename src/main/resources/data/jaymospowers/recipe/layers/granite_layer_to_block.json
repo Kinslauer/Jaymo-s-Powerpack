@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer",
+    "jaymospowers:granite_layer"
+  ],
+  "result": {
+    "id": "minecraft:granite"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer",
+    "jaymospowers:bamboo_mosaic_layer"
+  ],
+  "result": {
+    "id": "minecraft:bamboo_mosaic"
+  }
+}

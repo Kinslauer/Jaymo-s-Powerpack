@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:prismarine_bricks",
+  "result": {
+    "id": "jaymospowers:prismarine_bricks_layer",
+    "count": 8
+  }
+}

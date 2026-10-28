@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/layers/template_height6",
+  "textures": {
+    "top": "jaymospowers:block/aether/greatroot_planks",
+    "bottom": "jaymospowers:block/aether/greatroot_planks",
+    "side": "jaymospowers:block/aether/greatroot_planks"
+  }
+}

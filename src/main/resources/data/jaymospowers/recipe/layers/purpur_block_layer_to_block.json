@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer",
+    "jaymospowers:purpur_block_layer"
+  ],
+  "result": {
+    "id": "minecraft:purpur_block"
+  }
+}

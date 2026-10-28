@@ -124,6 +124,7 @@
     "jaymospowers:alembic",
     "jaymospowers:pedestal",
     "jaymospowers:infusion_matrix",
-    "jaymospowers:gravity_machine"
+    "jaymospowers:gravity_machine",
+    "#jaymospowers:stone_layers"
   ]
 }

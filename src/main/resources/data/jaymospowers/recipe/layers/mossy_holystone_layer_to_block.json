@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer",
+    "jaymospowers:mossy_holystone_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:mossy_holystone"
+  }
+}

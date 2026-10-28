@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer",
+    "jaymospowers:mossy_stone_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:mossy_stone_bricks"
+  }
+}

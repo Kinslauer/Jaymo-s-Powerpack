@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer",
+    "jaymospowers:stripped_crimson_stem_layer"
+  ],
+  "result": {
+    "id": "minecraft:stripped_crimson_stem"
+  }
+}

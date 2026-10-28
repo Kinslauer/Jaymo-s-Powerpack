@@ -3448,3 +3448,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   client.
   Kingdoms 0.7.300: firefighters throw splash water bottles at fires instead of leaving water source blocks (see
   Kingdoms' log).
+- **0.17.114, layer blocks:** Andy: "a layer block, that works like snow layers ... built from any wooden or stone
+  block, using a saw or a stone cutter. you can place these anywhere, and they stack up to 8, making a full block
+  incrementally." `layers/LayerBlock`: 1-8 layers of 2 px; the same layer placed on a stack adds one, 8 is the full
+  block (drawn with the block's own model). Things on it stand on its true height (snow sinks you one layer); it
+  needs nothing under it and waterlogs until full. Each copies its block (hardness, sound, tool, wood burns) and drops
+  one item a layer. 99 of them (`<block>_layer`): every vanilla plank, log, stripped log and stem, bamboo, the Aether's
+  planks and logs, and ~55 stones and bricks (vanilla and Aether). Wood: the new Saw (stick + 2 iron ingots in a row,
+  250 cuts) with the block in a crafting grid gives 8 and stays in the grid; stone: the stonecutter, 8 a block. 8
+  layers craft back into the block. Everything comes from `tools/gen_layers.py <26.3.jar>` (reads each block's own
+  model for its textures, writes `LayerList.java` too); add a block to its lists and rerun.

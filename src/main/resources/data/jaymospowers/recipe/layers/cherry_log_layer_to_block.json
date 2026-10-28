@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer",
+    "jaymospowers:cherry_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:cherry_log"
+  }
+}

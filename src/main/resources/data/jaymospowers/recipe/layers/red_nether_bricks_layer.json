@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:red_nether_bricks",
+  "result": {
+    "id": "jaymospowers:red_nether_bricks_layer",
+    "count": 8
+  }
+}

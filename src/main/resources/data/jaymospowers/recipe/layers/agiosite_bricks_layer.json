@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:agiosite_bricks",
+  "result": {
+    "id": "jaymospowers:agiosite_bricks_layer",
+    "count": 8
+  }
+}

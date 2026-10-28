@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:bamboo_block"
+  ],
+  "result": {
+    "id": "jaymospowers:bamboo_block_layer",
+    "count": 8
+  }
+}

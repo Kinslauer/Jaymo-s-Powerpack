@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer",
+    "jaymospowers:cobbled_deepslate_layer"
+  ],
+  "result": {
+    "id": "minecraft:cobbled_deepslate"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer",
+    "jaymospowers:skyroot_planks_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:skyroot_planks"
+  }
+}

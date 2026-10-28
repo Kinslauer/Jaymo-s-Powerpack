@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer",
+    "jaymospowers:polished_tuff_layer"
+  ],
+  "result": {
+    "id": "minecraft:polished_tuff"
+  }
+}

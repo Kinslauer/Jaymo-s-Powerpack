@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:dark_oak_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:dark_oak_planks_layer",
+    "count": 8
+  }
+}

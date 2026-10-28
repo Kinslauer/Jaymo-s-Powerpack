@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:ichorite",
+  "result": {
+    "id": "jaymospowers:ichorite_layer",
+    "count": 8
+  }
+}

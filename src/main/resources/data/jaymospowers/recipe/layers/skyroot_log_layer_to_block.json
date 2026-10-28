@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer",
+    "jaymospowers:skyroot_log_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:skyroot_log"
+  }
+}

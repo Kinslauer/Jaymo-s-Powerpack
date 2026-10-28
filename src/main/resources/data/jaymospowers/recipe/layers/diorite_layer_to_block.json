@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer",
+    "jaymospowers:diorite_layer"
+  ],
+  "result": {
+    "id": "minecraft:diorite"
+  }
+}

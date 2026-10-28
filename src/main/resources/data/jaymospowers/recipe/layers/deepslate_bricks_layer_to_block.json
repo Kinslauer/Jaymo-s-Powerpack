@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer",
+    "jaymospowers:deepslate_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:deepslate_bricks"
+  }
+}

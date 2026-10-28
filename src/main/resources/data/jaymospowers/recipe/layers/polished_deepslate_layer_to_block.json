@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer",
+    "jaymospowers:polished_deepslate_layer"
+  ],
+  "result": {
+    "id": "minecraft:polished_deepslate"
+  }
+}

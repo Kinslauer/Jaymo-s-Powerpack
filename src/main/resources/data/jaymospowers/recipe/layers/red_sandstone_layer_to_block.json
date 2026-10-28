@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer",
+    "jaymospowers:red_sandstone_layer"
+  ],
+  "result": {
+    "id": "minecraft:red_sandstone"
+  }
+}

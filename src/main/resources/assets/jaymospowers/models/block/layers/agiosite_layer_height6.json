@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/layers/template_height6",
+  "textures": {
+    "top": "jaymospowers:block/aether/agiosite",
+    "bottom": "jaymospowers:block/aether/agiosite",
+    "side": "jaymospowers:block/aether/agiosite"
+  }
+}

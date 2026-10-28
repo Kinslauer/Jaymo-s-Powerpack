@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:smooth_stone",
+  "result": {
+    "id": "jaymospowers:smooth_stone_layer",
+    "count": 8
+  }
+}

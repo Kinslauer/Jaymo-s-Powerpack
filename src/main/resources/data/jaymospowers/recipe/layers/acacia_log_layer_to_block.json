@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer",
+    "jaymospowers:acacia_log_layer"
+  ],
+  "result": {
+    "id": "minecraft:acacia_log"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer",
+    "jaymospowers:red_nether_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:red_nether_bricks"
+  }
+}

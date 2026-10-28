@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/layers/template_height8",
+  "textures": {
+    "top": "jaymospowers:block/aether/mossy_holystone",
+    "bottom": "jaymospowers:block/aether/mossy_holystone",
+    "side": "jaymospowers:block/aether/mossy_holystone"
+  }
+}

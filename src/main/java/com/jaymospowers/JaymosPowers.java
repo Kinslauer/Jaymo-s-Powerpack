@@ -90,6 +90,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.backpack.Backpack.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
+		// (0.17.114) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
+		com.jaymospowers.layers.Layers.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();

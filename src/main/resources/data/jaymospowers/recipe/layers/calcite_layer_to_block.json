@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer",
+    "jaymospowers:calcite_layer"
+  ],
+  "result": {
+    "id": "minecraft:calcite"
+  }
+}

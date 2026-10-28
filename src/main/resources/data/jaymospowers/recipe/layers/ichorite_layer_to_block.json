@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer",
+    "jaymospowers:ichorite_layer"
+  ],
+  "result": {
+    "id": "jaymospowers:ichorite"
+  }
+}

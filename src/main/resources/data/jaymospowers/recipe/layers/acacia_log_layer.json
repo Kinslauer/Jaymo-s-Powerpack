@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:acacia_log"
+  ],
+  "result": {
+    "id": "jaymospowers:acacia_log_layer",
+    "count": 8
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer",
+    "jaymospowers:prismarine_bricks_layer"
+  ],
+  "result": {
+    "id": "minecraft:prismarine_bricks"
+  }
+}
