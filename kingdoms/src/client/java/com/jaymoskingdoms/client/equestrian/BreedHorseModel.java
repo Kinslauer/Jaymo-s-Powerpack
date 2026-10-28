@@ -34,7 +34,9 @@ import org.jspecify.annotations.Nullable;
  * hoof comes forward), the head, neck and mane together, the mouth opening to eat, the tail lifting with speed and
  * swishing, vanilla's rear and graze as blends, the saddle, stirrups, headstall and reins of a vanilla saddle; so the
  * tack ({@link TackLayer}) hangs on any build's bones. The pieces hung from the bones (forelock, mane, feathering...)
- * follow them. Texture 128x160 (coats drawn at twice that).
+ * follow them. Texture 128x192 (coats drawn at twice that). (0.7.306) Its barding is a model of its own on the same
+ * bones ({@link #createArmorLayer}): chanfron, crinet and crest, peytral, flanchards and crupper, shaped to each build
+ * (texture 128x64); while it's worn the mane and forelock lie hidden under it.
  */
 class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static final float DEG = Mth.DEG_TO_RAD;
@@ -61,7 +63,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 
 	/** The builds, by name, as read from builds.json; and its texture size. */
 	private static final Map<String, List<Piece>> BUILDS = new LinkedHashMap<>();
-	private static int textureWidth = 128, textureHeight = 160;
+	private static int textureWidth = 128, textureHeight = 192;
+	/** (0.7.306) The barding's pieces on each build's bones, and their texture's size. */
+	private static final Map<String, List<Piece>> ARMOR = new LinkedHashMap<>();
+	private static int armorWidth = 128, armorHeight = 64;
 
 	private final Map<String, Rig> rigs = new HashMap<>();
 	private final @Nullable Rig fallback;
@@ -93,25 +98,39 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			JsonArray size = json.getAsJsonArray("texture_size");
 			textureWidth = size.get(0).getAsInt();
 			textureHeight = size.get(1).getAsInt();
+			if (json.has("armor_texture_size")) {
+				JsonArray armor = json.getAsJsonArray("armor_texture_size");
+				armorWidth = armor.get(0).getAsInt();
+				armorHeight = armor.get(1).getAsInt();
+			}
 			BUILDS.clear();
+			ARMOR.clear();
 			for (Map.Entry<String, JsonElement> build : json.getAsJsonObject("builds").entrySet()) {
-				List<Piece> pieces = new ArrayList<>();
-				for (JsonElement e : build.getValue().getAsJsonObject().getAsJsonArray("parts")) {
-					JsonObject p = e.getAsJsonObject();
-					List<Box> boxes = new ArrayList<>();
-					for (JsonElement b : p.getAsJsonArray("cubes")) {
-						JsonObject c = b.getAsJsonObject();
-						JsonArray uv = c.getAsJsonArray("uv");
-						boxes.add(new Box(uv.get(0).getAsInt(), uv.get(1).getAsInt(), floats(c.getAsJsonArray("pos")), floats(c.getAsJsonArray("size")),
-							c.has("grow") ? c.get("grow").getAsFloat() : 0.0F));
-					}
-					pieces.add(new Piece(p.get("name").getAsString(), p.get("parent").getAsString(), floats(p.getAsJsonArray("pose")), boxes));
+				JsonObject b = build.getValue().getAsJsonObject();
+				BUILDS.put(build.getKey(), pieces(b.getAsJsonArray("parts")));
+				if (b.has("armor")) {
+					ARMOR.put(build.getKey(), pieces(b.getAsJsonArray("armor")));
 				}
-				BUILDS.put(build.getKey(), pieces);
 			}
 		} catch (Exception e) {
 			JaymosKingdoms.LOGGER.error("Equestrian: couldn't read {}", path, e);
 		}
+	}
+
+	private static List<Piece> pieces(JsonArray parts) {
+		List<Piece> pieces = new ArrayList<>();
+		for (JsonElement e : parts) {
+			JsonObject p = e.getAsJsonObject();
+			List<Box> boxes = new ArrayList<>();
+			for (JsonElement b : p.getAsJsonArray("cubes")) {
+				JsonObject c = b.getAsJsonObject();
+				JsonArray uv = c.getAsJsonArray("uv");
+				boxes.add(new Box(uv.get(0).getAsInt(), uv.get(1).getAsInt(), floats(c.getAsJsonArray("pos")), floats(c.getAsJsonArray("size")),
+					c.has("grow") ? c.get("grow").getAsFloat() : 0.0F));
+			}
+			pieces.add(new Piece(p.get("name").getAsString(), p.get("parent").getAsString(), floats(p.getAsJsonArray("pose")), boxes));
+		}
+		return pieces;
 	}
 
 	private static float[] floats(JsonArray array) {
@@ -127,17 +146,22 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.0F), textureWidth, textureHeight);
 	}
 
-	/** Its armour: the same boxes, a little larger, for an overlay texture drawn over the coat. */
+	/** (0.7.306) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
 	static LayerDefinition createArmorLayer() {
-		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.1F), textureWidth, textureHeight);
+		return LayerDefinition.create(mesh(BUILDS.keySet(), false, 0.0F, true), armorWidth, armorHeight);
 	}
 
 	/** One build's bones alone (no boxes), for {@link TackLayer} to hang its pieces on. */
 	static MeshDefinition bones() {
-		return mesh(List.of(TACK_BUILD), false, 0.0F);
+		return mesh(List.of(TACK_BUILD), false, 0.0F, false);
 	}
 
 	private static MeshDefinition mesh(Iterable<String> builds, boolean boxes, float grow) {
+		return mesh(builds, boxes, grow, false);
+	}
+
+	/** The builds' parts (with their boxes or bare), and with {@code armor} the barding's pieces hung on them. */
+	private static MeshDefinition mesh(Iterable<String> builds, boolean boxes, float grow, boolean armor) {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		for (String build : builds) {
@@ -147,21 +171,31 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			}
 			PartDefinition group = root.addOrReplaceChild(build, CubeListBuilder.create(), PartPose.ZERO);
 			Map<String, PartDefinition> parts = new HashMap<>();
-			for (Piece p : pieces) {
-				CubeListBuilder cubes = CubeListBuilder.create();
-				if (boxes) {
-					for (Box b : p.boxes()) {
-						cubes.texOffs(b.u(), b.v()).addBox(b.pos()[0], b.pos()[1], b.pos()[2], b.size()[0], b.size()[1], b.size()[2],
-							new CubeDeformation(b.grow() + grow));
-					}
-				}
-				float[] o = p.pose();
+			List<Piece> all = new ArrayList<>(pieces);
+			if (armor) {
+				all.addAll(ARMOR.getOrDefault(build, List.of()));
+			}
+			for (Piece p : all) {
+				boolean own = boxes || armor && p.name().startsWith("armor_");
 				PartDefinition parent = p.parent().isEmpty() ? group : parts.getOrDefault(p.parent(), group);
-				parts.put(p.name(), parent.addOrReplaceChild(p.name(), cubes,
-					PartPose.offsetAndRotation(o[0], o[1], o[2], o[3] * DEG, o[4] * DEG, o[5] * DEG)));
+				parts.put(p.name(), parent.addOrReplaceChild(p.name(), own ? cubes(p, grow) : CubeListBuilder.create(), pose(p)));
 			}
 		}
 		return mesh;
+	}
+
+	private static CubeListBuilder cubes(Piece p, float grow) {
+		CubeListBuilder cubes = CubeListBuilder.create();
+		for (Box b : p.boxes()) {
+			cubes.texOffs(b.u(), b.v()).addBox(b.pos()[0], b.pos()[1], b.pos()[2], b.size()[0], b.size()[1], b.size()[2],
+				new CubeDeformation(b.grow() + grow));
+		}
+		return cubes;
+	}
+
+	private static PartPose pose(Piece p) {
+		float[] o = p.pose();
+		return PartPose.offsetAndRotation(o[0], o[1], o[2], o[3] * DEG, o[4] * DEG, o[5] * DEG);
 	}
 
 	@Override
@@ -184,6 +218,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		final ModelPart headSaddle, saddle, saddleB, saddleC, stirrupLeft, stirrupLeftIron, stirrupRight, stirrupRightIron;
 		final ModelPart bitLeft, bitRight, reinLeft, reinRight;
 		final ModelPart[] headParts, saddleParts;
+		/** (0.7.306) The forelock's pieces (hidden under a chanfron). */
+		final List<ModelPart> forelock = new ArrayList<>();
 		/** The mane that falls over the neck, on the long-maned builds. */
 		final @Nullable ModelPart maneFlow;
 		/** The bat horse's wings. */
@@ -229,6 +265,11 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.reinLeft = g.getChild("rein_left");
 			this.reinRight = g.getChild("rein_right");
 			this.maneFlow = this.mane.hasChild("mane_flow") ? this.mane.getChild("mane_flow") : null;
+			for (String name : new String[] {"forelock", "forelock_tip"}) {
+				if (this.head.hasChild(name)) {
+					this.forelock.add(this.head.getChild(name));
+				}
+			}
 			boolean wings = g.hasChild("inner_wing");
 			this.innerWing = wings ? g.getChild("inner_wing") : null;
 			this.midWing = wings ? g.getChild("mid_wing") : null;
@@ -342,6 +383,12 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				part.visible = saddled;
 			}
 			this.headSaddle.visible = this.bitLeft.visible = this.bitRight.visible = state.headstall;
+			// (0.7.306) under barding the mane and forelock lie hidden beneath the crinet and chanfron
+			boolean barded = state.armor != null;
+			this.mane.visible = !barded;
+			for (ModelPart part : this.forelock) {
+				part.visible = !barded;
+			}
 			this.reinLeft.visible = this.reinRight.visible = state.headstall && ridden;
 			this.wings(state, walked, ticks, stand);
 		}

@@ -6127,3 +6127,23 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
+
+## 0.7.306: barding of its own, and more detailed horses (pack 0.17.122)
+
+Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
+anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or
+equestrian, there just needs to be more detail". Horse armour is no longer a slightly larger copy of the horse painted
+over the coat: `horse_rig.armour()` builds it from its own boxes hung on each build's bones, written to builds.json
+(`armor`, texture 128x64) and baked by `BreedHorseModel.createArmorLayer()`:
+- a chanfron over the face with a nose plate, a ridge, brow guards over the eyes and rims behind them (the eyes
+  stay clear), and cheek plates;
+- a crinet of five lames, each a little wider than the one above so they lap, with a raised crest; while barding is
+  worn the model hides the mane and forelock under it (no more clipping);
+- a peytral with a boss and wings over the shoulders, flanchards before and behind the stirrups, and a crupper over
+  the croup and haunches with a ridged spine and a hole for the tail.
+Painted by `gen_horses.armour_base()`: rolled and dark-lined edges, rivet rows, a trim band along the hems (brass on
+iron and plate, red gold on gold, gold on diamond and netherite, verdigris on copper), fluted plates with a sheen,
+an etched chanfron, lapped lames, a padded leather lining underneath; chain barding is mail bound in leather with plate
+at the head. Horses got more pieces too: shoulders and a rounded barrel, knees, hocks and gaskins, cheeks, flared
+nostrils, coronet bands and ergot tufts, and muscle light and shadow painted in (`FORM`). Horse texture now 128x192.
+Compile-checked, not seen in game; previews in the project files (art-overhaul/horses/armour-detail.png).

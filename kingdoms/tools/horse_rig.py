@@ -9,7 +9,7 @@ left, y down, the horse facing -z; sizes in model pixels."""
 import math
 
 DEG = math.pi / 180.0
-TEXTURE = (128, 160)  # the model's texture space (every build's); the coats are painted at twice that
+TEXTURE = (128, 192)  # the model's texture space (every build's); the coats are painted at twice that
 
 BUILDS = ("destrier", "courser", "palfrey", "draft", "steppe_pony", "desert_horse", "bat_horse")
 # the breeds and undead that are drawn on another breed's build (the textures are laid out for it)
@@ -60,6 +60,10 @@ def rig(build):
         add("croup_split", "body", (0, 0, 0, 0, 0, 0), Cube((-3.5, -9.6, 1.5), (7, 1, 2), region="croup"))
     add("belly", "body", (0, 0, 0, 0, 0, 0), Cube((-4, 2, -15), (8, 1, 15 if not slim else 13), region="belly"))
 
+    # (0.7.306) the shoulders, a little proud of the barrel in front, and the barrel's rounded underside
+    add("shoulder", "body", (0, 0, 0, 0, 0, 0), Cube((-5.4, -7, -19), (10.8, 7, 5), region="body"))
+    add("barrel", "body", (0, 0, 0, 0, 0, 0), Cube((-5.2, -4, -12), (10.4, 5, 10), region="body"))
+
     # the haunches, over the tops of the hind legs
     hw = 3.5 + hind[0] / 2 + 0.5  # the hind legs' outer sides, and a little over
     add("haunch", "body", (0, 0, 0, 0, 0, 0), Cube((-hw, -6, 0), (2 * hw, 7 if not slim else 6, 5), region="body"))  # (behind the blanket)
@@ -82,8 +86,16 @@ def rig(build):
         upper = fore if front else hind
         top = -1 if front else -2
         zc = -0.1 if front else 0.0
-        add(f"leg{k}_a", None, (x, 9, z, 0, 0, 0),
-            Cube((cx - upper[0] / 2, top, zc - upper[2] / 2), upper, region="leg_a"))
+        leg_a = add(f"leg{k}_a", None, (x, 9, z, 0, 0, 0),
+                    Cube((cx - upper[0] / 2, top, zc - upper[2] / 2), upper, region="leg_a"))
+        # (0.7.306) the knee in front, the hock behind (its point sticks out at the back)
+        if front:
+            leg_a.cubes.append(Cube((cx - upper[0] / 2 - 0.3, 4.6, zc - upper[2] / 2 - 0.3), (upper[0] + 0.6, 2.2, upper[2] + 0.6),
+                                    region="leg_a"))
+        else:
+            leg_a.cubes.append(Cube((cx - (upper[0] - 1) / 2, 4.2, zc + upper[2] / 2 - 0.2), (upper[0] - 1, 2.6, 1.0), region="leg_a"))
+            leg_a.cubes.append(Cube((cx - upper[0] / 2 - 0.3, -2, zc - upper[2] / 2 - 0.3), (upper[0] + 0.6, 4, upper[2] + 0.6),
+                                    region="leg_a"))  # the gaskin
         leg_b = add(f"leg{k}_b", None, (x, 16, z, 0, 0, 0),
                     Cube((cx - cannon[0] / 2, 0, zc - cannon[2] / 2), cannon, region="leg_b"))
         if heavy:
@@ -93,7 +105,11 @@ def rig(build):
         else:
             leg_b.cubes.append(Cube((cx - (cannon[0] + 1) / 2, 4, zc - (cannon[2] + 1) / 2), (cannon[0] + 1, 1, cannon[2] + 1),
                                     region="fetlock"))
-        add(f"leg{k}_c", None, (x, 16, z, 0, 0, 0), Cube((cx - 2, 5.1, zc - 2), (4, 3, 4), kind="hoof", region="hoof"))
+        leg_c = add(f"leg{k}_c", None, (x, 16, z, 0, 0, 0), Cube((cx - 2, 5.1, zc - 2), (4, 3, 4), kind="hoof", region="hoof"))
+        if not heavy and b != "destrier":
+            # (0.7.306) the coronet band round the top of the hoof, and the ergot's tuft behind the fetlock
+            leg_c.cubes.append(Cube((cx - 2.2, 4.8, zc - 2.2), (4.4, 0.8, 4.4), region="fetlock"))
+            leg_c.cubes.append(Cube((cx - 0.75, 4.0, zc + 1.6), (1.5, 1.5, 1), kind="hair", region="feather", axis="y", tip=1))
 
     # ---- the head and neck (all posed together); the mouth comes shut and open ----
     # (heads stay 5 wide and muzzles 4 at most, for the bridle and headstall, which are made for that)
@@ -102,6 +118,8 @@ def rig(build):
     add("head", None, HEAD_POSE, Cube((hx, -10, -1.5), head, region="head"))
     if b != "desert_horse":
         add("jowl", "head", (0, 0, 0, 0, 0, 0), Cube((hx + 0.5, -10 + head[1], 1.5), (head[0] - 1, 1, 3), region="jowl"))
+    # (0.7.306) the cheeks, round behind the eyes
+    add("cheek", "head", (0, 0, 0, 0, 0, 0), Cube((hx - 0.3, -8.8, 1.6), (head[0] + 0.6, 3.2, 3), region="jowl"))
     # the forelock over the brow
     fl = {"destrier": (3, 1, 5), "draft": (3, 1, 5), "palfrey": (3, 1, 5), "steppe_pony": (2, 1, 3)}.get(b, (2, 1, 4))
     add("forelock", "head", (0, 0, 0, 0, 0, 0),
@@ -119,6 +137,12 @@ def rig(build):
         upper, lower = Cube((-2, -10, -6), (4, 3, 5), region="muzzle"), Cube((-2, -7, -5.5), (4, 2, 4), region="lip")
     else:
         upper, lower = Cube((-2, -10, -7), (4, 3, 6), region="muzzle"), Cube((-2, -7, -6.5), (4, 2, 5), region="lip")
+    # (0.7.306) the nostrils flare at the nose's corners
+    nw = upper.size[0]
+    for side, nx in (("left", upper.pos[0] + nw - 1.1), ("right", upper.pos[0] + 0.1)):
+        upper_n = Cube((nx - 0.1, upper.pos[1] + 0.3, upper.pos[2] - 0.2), (1.2, 1.4, 1.4), region="muzzle")
+        upper_n.nostril = True
+        add(f"nostril_{side}", "head", (0, 0, 0, 0, 0, 0), upper_n)
     add("upper_mouth", None, HEAD_POSE, upper)
     add("lower_mouth", None, HEAD_POSE, lower)
     add("upper_mouth_open", None, (0, 4, -10, 25.0, 0, 0),
@@ -175,19 +199,94 @@ def rig(build):
     return parts
 
 
+ARMOR_TEXTURE = (128, 64)  # (0.7.306) the barding's own texture space (every build's); painted at twice that
+
+
+def armour(build, parts):
+    """(0.7.306) The barding, its own pieces hung on the horse's bones (as Blockbench would lay them out): a chanfron
+    over the face and nose with a ridge and guards over and behind the eyes and cheek plates, a crinet of overlapping
+    lames down the neck with a crest that closes over the mane, a peytral over the chest with a boss and wings over the
+    shoulders, flanchards on the flanks (clear of the stirrups) and a crupper over the croup and haunches. Shaped from
+    the build's own boxes, so it fits each; packed into ARMOR_TEXTURE."""
+    by = {p.name: p for p in parts}
+    head = by["head"].cubes[0]
+    muzzle = by["upper_mouth"].cubes[0]
+    neck = by["neck"].cubes[0]
+    mane = by["mane"].cubes[0]
+    chest = by["chest"].cubes[0]
+    haunch = by["haunch"].cubes[0]
+    heavy = build == "draft"
+    out = []
+
+    def add(name, parent, region, x0, x1, y0, y1, z0, z1):
+        c = Cube((x0, y0, z0), (round(x1 - x0, 3), round(y1 - y0, 3), round(z1 - z0, 3)), kind="armor", region=region)
+        out.append(Part("armor_" + name, parent, (0, 0, 0, 0, 0, 0), [c]))
+
+    # ---- the chanfron (head space: the face is the head's top, the nose runs to -z) ----
+    hx0, top, hz0 = head.pos
+    hx1 = hx0 + head.size[0]
+    add("chanfron", "head", "chanfron", hx0 - 0.45, hx1 + 0.45, top - 0.7, top + 0.9, -1.9, 3.4)
+    mx0, my0, mz0 = muzzle.pos
+    mx1 = mx0 + muzzle.size[0]
+    add("nose", "head", "nose", mx0 - 0.4, mx1 + 0.4, my0 - 0.6, my0 + 1.2, mz0 + 0.7, -1.6)
+    add("ridge", "head", "ridge", -0.5, 0.5, min(top, my0) - 1.2, min(top, my0) - 0.55, mz0 + 1.2, 3.0)
+    for side, sx in (("left", 1), ("right", -1)):
+        edge = hx1 if sx > 0 else hx0
+        def span(a, b):
+            return (edge + sx * a, edge + sx * b) if sx > 0 else (edge + sx * b, edge + sx * a)
+        # the brow guard over the eye, and the rim behind it (the eye itself stays clear)
+        add("brow_" + side, "head", "guard", *span(0.2, 1.1), top + 0.5, top + 1.1, -1.3, 1.9)
+        add("rim_" + side, "head", "guard", *span(0.2, 1.0), top + 0.9, top + 2.6, 1.35, 1.9)
+        add("cheek_" + side, "head", "cheek", *span(0.35, 0.85), top + 1.4, top + 4.1, 2.0, 4.4)
+
+    # ---- the crinet (head space too: the neck runs +y down to the withers, its crest on +z) ----
+    nx0, ny0, nz0 = neck.pos
+    nw, nh, nd = neck.size
+    back = nz0 + nd
+    lames = 5
+    y_from, y_to = ny0 + 0.6, ny0 + nh + 0.5
+    step = (y_to - y_from) / lames
+    for k in range(lames):
+        g = 0.45 + 0.07 * k  # each lame a touch wider than the one above it, so they overlap like scales
+        add(f"crinet_{k}", "head", "crinet", nx0 - g, nx0 + nw + g, y_from + k * step - 0.15, y_from + (k + 1) * step + 0.15,
+            nz0 + nd * 0.32, back + 0.35 + 0.05 * k)
+    # the mane lies under the crinet (the model hides it), and a raised crest runs down the lames over it
+    add("crest", "head", "crest", -1.0, 1.0, y_from + 0.3, y_to - 0.2, back - 0.5, back + 0.95)
+
+    # ---- the peytral (body space: the body's pivot) ----
+    cx0, cy0, cz0 = chest.pos
+    cw, ch, cd = chest.size
+    add("peytral", "body", "peytral", cx0 - 0.5, cx0 + cw + 0.5, cy0 - 0.6, cy0 + ch - 0.2, cz0 - 0.7, cz0 + 1.3)
+    add("boss", "body", "boss", -1.0, 1.0, cy0 + 1.6, cy0 + 3.6, cz0 - 1.3, cz0 - 0.6)
+    for side, sx in (("left", 1), ("right", -1)):
+        lo, hi = (5.45, 6.0) if sx > 0 else (-6.0, -5.45)
+        add("wing_" + side, "body", "plate", lo, hi, -6.4, 0.6, -19.8, -14.7)
+        # the flanchards: ahead of the stirrups and behind them
+        add("flank_" + side, "body", "plate", lo - 0.05, hi - 0.05, -6.2, 0.6, -14.9, -8.7)
+        add("rear_flank_" + side, "body", "plate", lo - 0.05, hi - 0.05, -6.2, 0.6, -5.6, -1.2)
+
+    # ---- the crupper over the croup and haunches, its spine ridged, the tail through a hole at the back ----
+    hw = -haunch.pos[0]
+    croup_top = -10.3 if heavy else -9.7
+    add("crupper", "body", "crupper", -hw - 0.5, hw + 0.5, croup_top, haunch.pos[1] + haunch.size[1] + 0.4, -1.3, 5.4)
+    add("spine", "body", "ridge", -0.5, 0.5, croup_top - 0.55, croup_top + 0.05, -1.0, 5.1)
+    pack(out, ARMOR_TEXTURE)
+    return out
+
+
 def footprint(c):
     w, h, d = (math.ceil(v) for v in c.size)
     return 2 * (w + d), d + h
 
 
-def pack(parts):
+def pack(parts, size=TEXTURE):
     """Lays every box out in the texture (shelves, tallest first); a shared box takes its twin's place."""
     cubes = [c for p in parts for c in p.cubes if c.share is None]
     order = sorted(cubes, key=lambda c: (-footprint(c)[1], -footprint(c)[0]))
     x = y = shelf = 0
     for c in order:
         w, h = footprint(c)
-        if x + w > TEXTURE[0]:
+        if x + w > size[0]:
             x, y, shelf = 0, y + shelf, 0
         c.uv = (x, y)
         x += w
@@ -199,12 +298,12 @@ def pack(parts):
 
 
 # ---- box faces in the texture, and where each texel of them lies on the box ----------------------------------------------
-def texture_size(parts):
+def texture_size(parts, size=TEXTURE):
     """Every build's texture is the same size (the model is baked with one): 128 wide, as tall as the tallest needs."""
     rows = max(c.uv[1] + footprint(c)[1] for p in parts for c in p.cubes)
-    if rows > TEXTURE[1]:
-        raise SystemExit(f"the boxes need {rows} rows of texture, more than {TEXTURE[1]}")
-    return TEXTURE
+    if rows > size[1]:
+        raise SystemExit(f"the boxes need {rows} rows of texture, more than {size[1]}")
+    return size
 
 
 def faces(c):
