@@ -28,10 +28,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
+ * (0.7.313, Andy: "bio-built's lore involves it being created by the mad tinkerer, and they contain DNA from all other
+ * heritages except dawn and divine. This allows them to absorb anyone who isnt that race.") Made by the Mad Tinkerer
+ * from the blood of every heritage but the Dawnborn and the Divine, they can take in anyone not of those two
+ * ({@link #absorbable}: a monster, or a downed or crippled villager, kingdom's folk or player), and the three forms are
+ * three different bodies, after Cell (the client's {@code BioForms}): the first hunched, grotesque and tailed, its tail
+ * what absorbs (it arcs over the head and down on the foe, swallows it whole, and the bulge flows back down the tail:
+ * the client's {@code BioTailEngulf}; so the reach is a tail's, {@link #ABSORB_REACH}); the second big and bulked; the
+ * third, Perfect, sleek, the strongest and the steadiest. Each form's size is {@link #SIZE}, and its tag
+ * ({@link #FORM_TAG}) tells Jaymo's Powers which Z Fighter strengths it gives.
+ * <p>
  * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
  * first form), and each downed foe ((0.7.310) or crippled one: a leg broken or cut off) they take into themselves
  * ({@link #absorb}: look at it close by and press the heritage key; (0.7.288) a hand goes to it, pulses run through you
@@ -40,8 +51,8 @@ import net.minecraft.world.phys.Vec3;
  * Each form is stronger and tougher ({@link #HEALTH}, {@link #DAMAGE}, {@link #ARMOR}), and every blow they land drains a
  * little life back into them ({@link #DRAIN}). In the third form the heritage key, pressed on no foe, buds up to
  * {@link #BUDS} small copies ({@link #bud}): weak, short-lived allies (risen through {@link Thralls}, so they follow
- * and fight for their maker and crumble when their time is up). Not the Symbiote: nothing grabs, no tendrils, no goo;
- * they take only what is already downed or crippled and only by standing over it. Flaw: frail at first, and lightning
+ * and fight for their maker and crumble when their time is up). Not the Symbiote: no tendrils, no goo; they
+ * take only what is already downed or crippled. Flaw: frail at first, and lightning
  * and magic hurt them half again ({@link Heritage#dealt}).
  */
 public final class BioBuilt {
@@ -54,8 +65,15 @@ public final class BioBuilt {
 	/** The most one blow drains. */
 	static final float DRAIN_MAX = 3.0F;
 	/** Absorbing: how far the foe may be, how long the hold takes (ticks), the share of its health they take back (at most), and food. */
-	static final double ABSORB_REACH = 3.0;
-	static final int ABSORB_TICKS = 100, ABSORB_FOOD = 3;
+	static final double ABSORB_REACH = 4.5;
+	/** (0.7.313) The tail holds the foe this far off as it swallows it (blocks). */
+	static final double ABSORB_TOUCH = 1.8;
+	/** (0.7.313) Each form's size, a share added to their scale: the second towers, the third is a little over a man. */
+	static final double[] SIZE = {0.0, 0.15, 0.05};
+	/** (0.7.313) The tag a Bio-built player carries for their form ({@code _0} to {@code _2}), read by Jaymo's Powers. */
+	public static final String FORM_TAG = "jaymoskingdoms_bio_form_";
+	public static final int ABSORB_TICKS = 100;
+	static final int ABSORB_FOOD = 3;
 	static final float ABSORB_HEAL_SHARE = 0.5F, ABSORB_HEAL_MAX = 12.0F;
 	/** A foe with more max health than this can't be taken in (no dragons). */
 	static final float ABSORB_MAX_HEALTH = 150.0F;
@@ -140,6 +158,14 @@ public final class BioBuilt {
 		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_bio_damage", bio ? DAMAGE[form] : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		Skills.modifier(player, Attributes.ARMOR, "heritage_bio_armor", bio ? ARMOR[form] : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_bio_knock", bio ? KNOCK[form] : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.SCALE, "heritage_bio_scale", bio ? SIZE[form] : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		for (int i = 0; i < FORM_AT.length; i++) {
+			if (bio && i == form) {
+				player.addTag(FORM_TAG + i);
+			} else {
+				player.removeTag(FORM_TAG + i);
+			}
+		}
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
 		}
@@ -156,7 +182,7 @@ public final class BioBuilt {
 			}
 			if (player.level() instanceof ServerLevel level) {
 				LivingEntity foe = HeritageHold.step(level, player, BioBuilt::helpless, ABSORB_REACH, ABSORB_TICKS, NODE,
-					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing");
+					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing", ABSORB_TOUCH);
 				if (foe != null) {
 					absorb(level, player, foe);
 				}
@@ -164,9 +190,25 @@ public final class BioBuilt {
 		}
 	}
 
-	/** Whether {@code player} may take {@code foe} in: a foe, down or crippled ({@link #helpless}), and not too big. */
+	/**
+	 * Whether {@code player} may take {@code foe} in: a foe, or (0.7.313) a person ({@link RubberFolk#person}: a villager,
+	 * a kingdom's folk or another player, downed) or one crippled; down or crippled ({@link #helpless}), not too big, and
+	 * not of the two bloods they lack ({@link #alien}).
+	 */
 	static boolean absorbable(ServerPlayer player, LivingEntity foe) {
-		return HeritageHold.foe(player, foe) && helpless(foe) && foe.getMaxHealth() <= ABSORB_MAX_HEALTH;
+		return (HeritageHold.foe(player, foe) || person(player, foe)) && helpless(foe) && !alien(foe) && foe.getMaxHealth() <= ABSORB_MAX_HEALTH;
+	}
+
+	/** (0.7.313) A villager, a kingdom's folk or another player (not in creative), alive: someone, not something. */
+	static boolean person(ServerPlayer player, LivingEntity e) {
+		return e != player && e.isAlive()
+			&& (e instanceof ServerPlayer other && !other.isCreative() && !other.isSpectator() || e instanceof Villager || e instanceof Folk);
+	}
+
+	/** (0.7.313) Dawnborn or Divine: no blood of theirs went into the Bio-built, so they can't be taken in. */
+	static boolean alien(LivingEntity e) {
+		Heritage.Kind kind = VillagerHeritage.of(e);
+		return kind == Heritage.Kind.DAWNBORN || kind == Heritage.Kind.DIVINE;
 	}
 
 	/**
@@ -190,8 +232,11 @@ public final class BioBuilt {
 		}
 	}
 
-	/** What a foe adds to their worth. */
+	/** What a foe adds to their worth: (0.7.313) a person, the most. */
 	static int worth(LivingEntity foe) {
+		if (foe instanceof net.minecraft.world.entity.player.Player || foe instanceof Villager || foe instanceof Folk) {
+			return WORTH_MAX;
+		}
 		return Mth.clamp(1 + (int)(foe.getMaxHealth() / WORTH_PER_HEALTH), 1, WORTH_MAX);
 	}
 
@@ -202,12 +247,12 @@ public final class BioBuilt {
 		level.sendParticles(NODE, foe.getX(), foe.getY(0.5), foe.getZ(), 24, 0.35, 0.5, 0.35, 0.04);
 		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY(0.6), player.getZ(), 10, 0.3, 0.5, 0.3, 0.05);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.5F);
-		foe.discard();
 		player.heal(heal);
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		player.setAttached(WORTH, worth);
 		int charges = Math.min(CHARGES_MAX, player.getAttachedOrElse(CHARGES, 0) + 1);
 		player.setAttached(CHARGES, charges);
+		take(level, player, foe);
 		int was = form(player);
 		int now = formFor(worth);
 		if (now > was) {
@@ -221,6 +266,27 @@ public final class BioBuilt {
 			int next = now + 1 < FORM_AT.length ? FORM_AT[now + 1] - worth : 0;
 			player.sendOverlayMessage(next > 0 ? Component.translatable("message.jaymoskingdoms.bio.absorbed", next)
 				: Component.translatable("message.jaymoskingdoms.bio.absorbed_charges", charges, CHARGES_MAX));
+		}
+	}
+
+	/**
+	 * (0.7.313) The foe is gone into them: anything else simply vanishes; a person dies of it (credited to the Bio-built,
+	 * so the law and their kin know), leaving no body, as with the Rubber-folk.
+	 */
+	private static void take(ServerLevel level, ServerPlayer player, LivingEntity foe) {
+		if (!person(player, foe)) {
+			foe.discard();
+			return;
+		}
+		foe.addTag(RubberFolk.NO_CORPSE_TAG);
+		if (!Necromancy.execute(level, foe, player)) {
+			foe.setInvulnerableTime(0);
+			foe.hurtServer(level, level.damageSources().playerAttack(player), Float.MAX_VALUE);
+		}
+		if (foe.isAlive()) {
+			// (something saved them after all (a totem): back to their size, and no body-less death waiting for them later)
+			HeritageHold.shrink(foe, 0.0);
+			foe.removeTag(RubberFolk.NO_CORPSE_TAG);
 		}
 	}
 
@@ -240,7 +306,7 @@ public final class BioBuilt {
 			return;
 		}
 		LivingEntity sighted = Arcana.sighted(player);
-		if (sighted != null && HeritageHold.foe(player, sighted) && helpless(sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
+		if (sighted != null && absorbable(player, sighted) && player.distanceTo(sighted) <= ABSORB_REACH) {
 			// (the key is taking that foe in, not budding)
 			return;
 		}

@@ -3529,6 +3529,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and fight their way out by hitting the heart, lungs and stomach, or get digested. `SwallowedPower.drop` is public for
   it. See the Kingdoms MODLOG.
 
-- **0.17.128, Bio-built absorb the crippled, buds look like you (Kingdoms 0.7.310):** the Bio-built heritage key now takes in a foe
-  with a broken or severed leg (or Crippled by a hidden blade), not only a downed one. Buds now spend a stored
-  absorb charge and look like small copies of their maker. See the Kingdoms MODLOG.
+- **0.17.135, Bio-built remade after Cell (Kingdoms 0.7.313):** made by the Mad Tinkerer from every heritage's blood but
+  the Dawnborn's and the Divine's, the Bio-built now absorb anyone downed or crippled who isn't one of those two (monsters,
+  villagers, players), not only downed monsters; a crippled foe (a leg broken or cut off) counts too. Their three forms
+  are three different bodies: Imperfect (hunched, grotesque, a long stinger tail that does the absorbing: it arcs over the
+  head, swallows the foe whole and the bulge runs back down it), Semi-Perfect (bigger, bulked) and Perfect (sleek, the
+  strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
+  `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
+  `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.
