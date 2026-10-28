@@ -937,7 +937,9 @@ public final class Ship extends Entity {
 		this.discard();
 		for (int i = 0; i < aboard.size(); i++) {
 			Vec3 s = spots.get(i);
-			aboard.get(i).teleportTo(s.x, s.y + 0.02, s.z);
+			Entity on = aboard.get(i);
+			// (0.7.281) set down where they stood on deck, held or not
+			com.jaymoskingdoms.Attention.carry(() -> on.teleportTo(s.x, s.y + 0.02, s.z));
 		}
 		level.playSound(null, origin, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.4F, 0.6F);
 		level.playSound(null, origin, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.7F);

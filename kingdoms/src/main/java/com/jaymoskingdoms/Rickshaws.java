@@ -810,7 +810,7 @@ public final class Rickshaws {
 	/** A puller far from home with nobody to see: back at the rank, rickshaw and all. */
 	private static boolean homeUnseen(ServerLevel level, Faction f, Worker puller, Job job, Wagon rickshaw) {
 		BlockPos rank = rank(level, f, job);
-		if (puller.blockPosition().closerThan(rank, 96.0) || !level.getEntitiesOfClass(ServerPlayer.class, puller.mob().getBoundingBox().inflate(64.0),
+		if (puller.blockPosition().closerThan(rank, 96.0) || Attention.held(puller.mob()) || !level.getEntitiesOfClass(ServerPlayer.class, puller.mob().getBoundingBox().inflate(64.0),
 			p -> !p.isSpectator()).isEmpty()) {
 			return false;
 		}
@@ -861,14 +861,16 @@ public final class Rickshaws {
 			trip.best = d;
 			trip.improvedAt = now;
 		}
-		if (now - trip.improvedAt > STUCK_TICKS) {
+		// (0.7.281) with a fare aboard he hops ahead regardless; on his own, not while a player's just dealt with him
+		boolean fare = job.rickshaw != null && !job.rickshaw.isRemoved() && job.rickshaw.isVehicle();
+		if (now - trip.improvedAt > STUCK_TICKS && (fare || !Attention.held(puller.mob()))) {
 			double step = Math.min(HOP, across);
 			BlockPos ahead = BlockPos.containing(puller.getX() - dx / across * step, puller.getY(), puller.getZ() - dz / across * step);
 			BlockPos at = Construction.standable(level, level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
 				ahead), 3);
 			level.sendParticles(ParticleTypes.POOF, puller.getX(), puller.getY() + 1.0, puller.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 			puller.getNavigation().stop();
-			puller.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+			Attention.carry(() -> puller.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5));
 			if (job.rickshaw != null && !job.rickshaw.isRemoved()) {
 				job.rickshaw.trail(puller.mob());
 			}

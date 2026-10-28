@@ -5734,3 +5734,25 @@ the wispy ki glow texture, and only use it for the far reach, and catch."
 - **Catch**: while the catch lasts an open hand hovers ahead of you instead of the arms; each shot snatched (cast or the
   spirit's own catch), a hand closes on it where it was caught and fades.
 - Compile-checked only, not seen in game.
+
+## 0.7.281: villagers stay put while a player deals with them (pack 0.17.84)
+
+Andy: "villagers shouldnt teleport if they were interacted with by a player within the last 30s."
+- **`Attention`** keeps the game time a player last dealt with a villager (any `AbstractVillager`, so MCA's, and our
+  `Folk`): using them (`UseEntityCallback`, which also opens MCA's menu), hitting them (`AttackEntityCallback`), any
+  hurt a player is behind (`AFTER_DAMAGE`: arrows, rocks, spells) and every MCA menu button (`McaCommandMixin.handle`).
+  `held(e)` is true for `HOLD_TICKS` (600, 30 s) after that, and while they're trading or a player has their MCA menu open.
+  It's registered first in `onInitialize` so another listener answering a use doesn't hide it.
+- **Every teleport waits:** `EntityTeleportMixin` cancels `Entity.teleportTo(double, double, double)` on a held villager,
+  and `McaTeleportMixin` does the same on `VillagerEntityMCA.teleportTo`, which is what MCA's
+  `WanderOrTeleportToTargetTask.tryTeleport` calls (and which moves a mounted villager's mount).
+- **Our stuck puffs skip the poof too:** `Unstick.puff`, `Farmers`, `Gatherers`, `ShutIn`, `Royals` (way in blocked,
+  penned in, escort lost), `Cavalry.teleport`, `Carriages.teleport` and the rickshaw's home-unseen check test `held` first,
+  so no puff of smoke goes off with nobody moving. The road walkers' small stuck hops (`Elders`, `Emigrants`, `Couriers`)
+  are simply cancelled by the mixin and tried again later.
+- **Not held (`Attention.carry`):** moves that carry a villager along or set them down after something else still happen:
+  a rickshaw puller's stuck hop with a fare aboard, couriers and emigrants put back from the road, a vampire elder
+  landing, a werewolf turning back, the rope lift, a ship broken up, someone pushed out of a block being built.
+  Rides (`Journeys`, `Milestones`, `Cabs`) move the horse, not the villager, so they're untouched.
+- A villager told to follow you won't teleport after you for the first 30 seconds either; they walk.
+- Compile-checked only, not seen in game.

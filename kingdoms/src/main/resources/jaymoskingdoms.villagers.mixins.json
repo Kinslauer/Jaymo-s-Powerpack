@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["VillagerWorkMixin", "VillagerTradeMixin", "VillagerPriceMixin", "MobAccessor", "BrushableBlockEntityAccessor", "BlockItemMixin", "ChestedHorseInvoker", "EntityVoiceMixin"],
+	"mixins": ["VillagerWorkMixin", "VillagerTradeMixin", "VillagerPriceMixin", "MobAccessor", "BrushableBlockEntityAccessor", "BlockItemMixin", "ChestedHorseInvoker", "EntityVoiceMixin", "EntityTeleportMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

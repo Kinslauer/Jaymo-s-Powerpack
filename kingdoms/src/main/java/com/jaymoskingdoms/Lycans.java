@@ -482,7 +482,8 @@ public final class Lycans {
 		if (host == null || !(host.level() instanceof ServerLevel level)) {
 			return;
 		}
-		host.teleportTo(at.x, at.y, at.z);
+		// (0.7.281) the person back where the beast was, whoever spoke to them last
+		Attention.carry(() -> host.teleportTo(at.x, at.y, at.z));
 		show(host);
 		if (sick) {
 			host.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, AFTER_TICKS, 1));
@@ -515,7 +516,7 @@ public final class Lycans {
 			BEASTS.remove(id);
 			PathfinderMob host = LOADED.get(id);
 			if (host != null && host.isAlive() && host.level() instanceof ServerLevel level) {
-				host.teleportTo(w.getX(), w.getY(), w.getZ());
+				Attention.carry(() -> host.teleportTo(w.getX(), w.getY(), w.getZ()));
 				show(host);
 				host.getCombatTracker().recordDamage(source, host.getHealth());
 				host.setHealth(0.0F);

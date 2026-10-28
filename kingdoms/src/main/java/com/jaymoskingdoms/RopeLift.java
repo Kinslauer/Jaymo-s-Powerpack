@@ -488,7 +488,8 @@ public final class RopeLift {
 			level.updateNeighborsAt(p, Blocks.AIR);
 		}
 		for (Entity e : riders) {
-			e.teleportTo(e.getX(), e.getY() + dy, e.getZ());
+			// (0.7.281) carried up or down with the platform, held or not
+			Attention.carry(() -> e.teleportTo(e.getX(), e.getY() + dy, e.getZ()));
 		}
 	}
 
