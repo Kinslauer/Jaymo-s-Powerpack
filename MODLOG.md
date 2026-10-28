@@ -3425,3 +3425,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   appear until a marked piece is destroyed (a dropped one despawns, burns or falls into the void, or the dagger wears
   out, `mixin/SorasBreakMixin`). Marked pieces never melt. Every stage of the dagger now slips out of a non-Wind user's
   hand (was only the Tempest dagger).
+  **Rose gold cast** (Andy: "it also needs to be cast from rose gold, and the rose gold cast breaks after forging the
+  iron blade"): the stone blade's cast takes an ingot of molten rose gold, not gold (`Melting.castMetal`), and is named
+  "Rose Gold Sora's Dagger Blade Cast"; it breaks with a crack after its one iron blade. JEI shows both.

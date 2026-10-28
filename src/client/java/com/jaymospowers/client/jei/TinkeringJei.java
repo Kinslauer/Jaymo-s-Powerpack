@@ -212,15 +212,19 @@ public final class TinkeringJei implements IModPlugin {
 	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
 		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
 			ItemStack castStack = WeaponParts.cast(kind);
+			// (0.17.110) Sora's Dagger Blade: a rose gold cast that breaks after its one iron blade
+			boolean soras = kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE);
 			for (Molten molten : Molten.values()) {
 				ItemStack result = WeaponParts.castResult(kind, molten);
 				if (result != null) {
 					recipes.add(new SimpleCategory.Recipe(List.of(List.of(castStack)), List.of(result),
-						List.of(pour(kind.mb(), molten), note("casting.kept"))));
+						List.of(pour(kind.mb(), molten), note(soras ? "casting.breaks" : "casting.kept"))));
 				}
 			}
-			recipes.add(new SimpleCategory.Recipe(List.of(WeaponParts.heads(kind)), List.of(castStack),
-				List.of(pour(Molten.INGOT, Molten.GOLD), note("casting.used_up"))));
+			List<ItemStack> heads = WeaponParts.heads(kind);
+			Molten castMetal = heads.isEmpty() ? Molten.GOLD : Melting.castMetal(heads.getFirst());
+			recipes.add(new SimpleCategory.Recipe(List.of(heads), List.of(castStack),
+				List.of(pour(Molten.INGOT, castMetal), note("casting.used_up"))));
 		}
 	}
 

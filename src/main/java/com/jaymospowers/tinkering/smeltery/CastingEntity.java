@@ -112,6 +112,10 @@ public class CastingEntity extends BlockEntity {
 			} else {
 				result = Melting.tableResult(cast, molten);
 				if (result != null && Melting.usesUpCast(cast)) {
+					if (cast.getItem() instanceof CastItem) {
+						// (0.17.110) Sora's rose gold cast breaks after its one iron blade
+						level.playSound(null, worldPosition, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.8F, 0.9F);
+					}
 					cast = ItemStack.EMPTY;
 				}
 			}

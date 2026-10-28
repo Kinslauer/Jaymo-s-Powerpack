@@ -16,6 +16,8 @@ import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -324,11 +326,18 @@ public final class Melting {
 		}
 		// gold over an ingot, nugget, part or weapon head makes a cast of its shape
 		CastItem.Shape shape = CastItem.Shape.of(cast);
-		if (molten != Molten.GOLD || shape == null) {
+		if (shape == null || molten != castMetal(cast)) {
 			return null;
 		}
-		return shape == CastItem.Shape.WEAPON ? SorasLineage.carry(cast, WeaponParts.cast(((WeaponPartItem) cast.getItem()).kind))
-			: new ItemStack(Tinkering.CASTS.get(shape));
+		if (shape != CastItem.Shape.WEAPON) {
+			return new ItemStack(Tinkering.CASTS.get(shape));
+		}
+		WeaponParts.Kind kind = ((WeaponPartItem) cast.getItem()).kind;
+		ItemStack made = WeaponParts.cast(kind);
+		if (kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE)) {
+			made.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymospowers.soras_blade_cast"));
+		}
+		return SorasLineage.carry(cast, made);
 	}
 
 	/** How much liquid the table needs for this cast and liquid (0: it can't cast it). */
@@ -354,6 +363,12 @@ public final class Melting {
 	/** (0.8.115) An iron Sora's Dagger, which a block's worth of molten gold gilds. */
 	public static boolean gilds(ItemStack stack) {
 		return stack.getItem() instanceof SorasDagger dagger && dagger.stage == SorasDagger.IRON;
+	}
+
+	/** (0.17.110) The liquid that makes a cast from this item: gold, but rose gold for Sora's Dagger Blade (Andy). */
+	public static Molten castMetal(ItemStack shape) {
+		return shape.getItem() instanceof WeaponPartItem part && part.kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE)
+			? Molten.ROSE_GOLD : Molten.GOLD;
 	}
 
 	/** Whether pouring onto this item uses it up (making a cast does; casting on a cast doesn't). */
