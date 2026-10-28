@@ -994,7 +994,9 @@ public final class ZFighterPower implements Power {
 			}
 		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
 			if (!ZFighterBranchForms.ascend(player, live)) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				// (0.17.90) Primal Super opened but out of reach: say why, not just "no higher form"
+				String blocked = ApeRage.super4Blocked(player);
+				player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
 			}
 		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
 			// (past his highest bought form: Super 4)

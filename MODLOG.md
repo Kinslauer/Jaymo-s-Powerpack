@@ -3319,3 +3319,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.87, MCA villagers swing when they fight (Kingdoms 0.7.283):** guards, crews, rulers and every other MCA
   villager now wind up and swing their weapon's Better Combat moves, with the glint and the blade guard, instead of
   MCA's instant arm flick; barehanded they punch. Compile-checked, not seen in game.
+- **0.17.90, Primal Super reasons, aura by form, Afterimage fix:** Andy couldn't reach Primal Super after clearing his
+  heritage. Primal Super is the Warrior-born's alone, and Z Fighter lineage follows the Kingdoms heritage, so C only said
+  "No higher form". Now C at the top of the ladder says why (not Warrior-born, no Super yet, or still the ape), and
+  `/powerdebug zfighter ape primalsuper` says whether it's reachable. The aura style now follows the form (Andy):
+  base, Supers 1-3 and the legendary line burn Sparking, growing a step with each Super up to Super 3; Primal Super
+  burns Godly, or Smooth if that's your pick; other forms keep your pick. `/powerdebug zfighter forms mutation on`
+  says whether the legendary line is live (it needs Warrior-born heritage). Afterimage (and the sparring partner)
+  registered its copy only after spawning it, so the leftover sweep on entity load discarded it at once; it is now
+  known before it spawns. Andy reported Afterimage kicking players; this was the one fault found in it. Compile-checked, not seen in game.

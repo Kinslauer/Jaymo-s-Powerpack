@@ -211,7 +211,10 @@ public final class ZFighterForms {
 						.then(Commands.literal("on").executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							ZFighterLegendary.set(player, true);
-							c.getSource().sendSuccess(() -> Component.literal("Legendary mutation on (Warrior-born only)."), false);
+							// (0.17.90) and whether it shows yet: it lives only in Warrior-born blood
+							c.getSource().sendSuccess(() -> Component.literal(ZFighterLegendary.mutant(player)
+								? "Legendary mutation on: C from base climbs Legendary 1-3 instead of Super 1-3."
+								: "Legendary mutation on, but it sleeps until your heritage is Warrior-born (/kingdom heritage set @s warriorborn)."), false);
 							return 1;
 						}))
 						.then(Commands.literal("off").executes(c -> {

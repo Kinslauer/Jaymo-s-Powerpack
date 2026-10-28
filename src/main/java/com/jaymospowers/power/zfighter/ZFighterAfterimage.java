@@ -150,9 +150,13 @@ final class ZFighterAfterimage {
 			copy.snapTo(start.x, start.y, start.z, player.getYRot(), player.getXRot());
 			copy.setYHeadRot(player.getYHeadRot());
 			copy.setYBodyRot(player.yBodyRot);
-			level.addFreshEntity(copy);
+			// (0.17.90) known before it is added: the load sweep below would otherwise take it for a leftover
 			COPIES.put(player.getUUID(), new Copy(level, copy.getUUID(), level.getGameTime() + LIFE_TICKS));
-			lure(player, level, copy);
+			if (level.addFreshEntity(copy)) {
+				lure(player, level, copy);
+			} else {
+				COPIES.remove(player.getUUID());
+			}
 		}
 		DustParticleOptions image = new DustParticleOptions(ZFighterArts.color(live), 1.2F);
 		for (double h = 0.1; h < player.getBbHeight(); h += 0.3) {

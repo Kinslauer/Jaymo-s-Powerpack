@@ -171,8 +171,12 @@ final class ZFighterSparring {
 			health.setBaseValue(Math.max(20.0, player.getMaxHealth() * HEALTH_SHARE));
 		}
 		partner.setHealth(partner.getMaxHealth());
-		level.addFreshEntity(partner);
+		// (0.17.90) known before it is added: the load sweep would otherwise take it for a leftover
 		BOUTS.put(partner.getUUID(), new Bout(player.getUUID(), partner.getUUID(), level, level.getGameTime() + BOUT_TICKS));
+		if (!level.addFreshEntity(partner)) {
+			BOUTS.remove(partner.getUUID());
+			return InteractionResult.FAIL;
+		}
 		level.sendParticles(ParticleTypes.POOF, partner.getX(), partner.getY() + 1.0, partner.getZ(), 20, 0.3, 0.6, 0.3, 0.02);
 		level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spar_start").withStyle(ChatFormatting.GOLD));
