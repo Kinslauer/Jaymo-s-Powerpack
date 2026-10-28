@@ -29,7 +29,7 @@ public class PartBuilderMenu extends AbstractContainerMenu implements TinkerTabl
 	public static final int PATTERN = 0, MATERIAL = 1, RESULT = 2;
 	/** One past the player's inventory slots; the side inventory's come after. */
 	private static final int PLAYER_END = 3 + 36;
-	/** Button ids of the weapon heads: this plus the head's place in {@link WeaponParts#loaded()}. */
+	/** Button ids of the weapon heads: this plus the head's place in {@link WeaponParts#shaped()}. */
 	public static final int WEAPON_BUTTONS = 100;
 	private final ContainerLevelAccess access;
 	private final TableExtras extras;
@@ -102,7 +102,7 @@ public class PartBuilderMenu extends AbstractContainerMenu implements TinkerTabl
 	/** The weapon head picked, or null. */
 	public WeaponParts.@Nullable Kind selectedWeapon() {
 		int index = selected.get() - WEAPON_BUTTONS;
-		List<WeaponParts.Kind> kinds = WeaponParts.loaded();
+		List<WeaponParts.Kind> kinds = WeaponParts.shaped();
 		return index >= 0 && index < kinds.size() ? kinds.get(index) : null;
 	}
 
@@ -141,7 +141,7 @@ public class PartBuilderMenu extends AbstractContainerMenu implements TinkerTabl
 		if (button >= TableExtras.TAB_BUTTONS) {
 			return extras.clickTab(player, button);
 		}
-		boolean weapon = button >= WEAPON_BUTTONS && button - WEAPON_BUTTONS < WeaponParts.loaded().size();
+		boolean weapon = button >= WEAPON_BUTTONS && button - WEAPON_BUTTONS < WeaponParts.shaped().size();
 		if (!weapon && (button < 0 || button >= PartType.values().length)) {
 			return false;
 		}

@@ -3405,3 +3405,26 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   The Armory's iron rapier (cup hilt, knuckle bow, wire grip) and iron dagger are 3D Blockbench models with 32x32
   textures now too (`tools/blockbench/make.py`, built with WaitMyDawn/blockbench-mcp, MIT); `tools/armory_assets.py`
   leaves them alone. Compile-checked, not seen in game; how they sit in the hand may need a tweak.
+- **0.17.110, Sora's Dagger is forged** (Andy: "the dagger needs a way to be crafted with tinkers"): its crafting recipe
+  is gone; the iron dagger is put together at the Tool Station from a **Sora's Dagger Blade** (`soras_dagger_blade`, a
+  `WeaponParts` kind: pour gold over the stone one for its Weapon Cast, then 2 ingots of molten iron over the cast), a
+  Tool Handle and a Tool Binding, like the Armory's weapons. Gilding and the later stages are unchanged.
+  **A child has the stone blade** (Andy: "the stone sora's dagger blade should be carried by a child ... you will have
+  to tell him not to play with things like that, and you take it instead"): the Part Builder doesn't shape it
+  (`WeaponParts.FOUND`, `shaped()`). When a Wind user comes into a village (a new one, 256+ blocks from the last, or a
+  day later) there's a 60% chance a village child nearby is playing with it and runs over (`power/wind/SorasBladeChild`,
+  tagged, drops it if killed). Right-click him (anyone can) to tell him off and take it. Not rolled while you already
+  carry the blade or a Sora's Dagger. Blade sprite drawn in `tools/weapon_parts_assets.py` (DRAWN). Compile-checked, not seen in game.
+  **Found two ways, one dagger at a time** (Andy: "anyone can take the blade, anyone can forge it, but only wind users
+  can use it. another way to find it is to stumble across it on display at a blacksmith ... only one discovery method
+  per dagger. if one is used the other dissappears until the dagger is gone"): anyone walking into a new village may
+  also find the blade in an item frame by a smith's work block (35%, `SorasBladeDisplay`); right-click it and the smith
+  says he forged it but it never answered his hand. One line is out at a time (`SorasLineage`, an Overworld
+  attachment): the found blade, its gold cast (used up by its one iron blade), the iron blade and every dagger stage
+  carry the line's mark; the first time the blade reaches a player the other find is taken away, and no new finds
+  appear until a marked piece is destroyed (a dropped one despawns, burns or falls into the void, or the dagger wears
+  out, `mixin/SorasBreakMixin`). Marked pieces never melt. Every stage of the dagger now slips out of a non-Wind user's
+  hand (was only the Tempest dagger).
+  **Rose gold cast** (Andy: "it also needs to be cast from rose gold, and the rose gold cast breaks after forging the
+  iron blade"): the stone blade's cast takes an ingot of molten rose gold, not gold (`Melting.castMetal`), and is named
+  "Rose Gold Sora's Dagger Blade Cast"; it breaks with a crack after its one iron blade. JEI shows both.

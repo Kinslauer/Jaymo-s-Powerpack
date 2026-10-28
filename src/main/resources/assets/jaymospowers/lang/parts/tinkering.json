@@ -223,6 +223,7 @@
   "jei.jaymospowers.casting.pour": "Pour %s of %s",
   "jei.jaymospowers.casting.kept": "The cast is kept",
   "jei.jaymospowers.casting.used_up": "The item is used up",
+  "jei.jaymospowers.casting.breaks": "The cast breaks after one",
   "jei.jaymospowers.melting.into": "Melts into %s of %s",
   "jei.jaymospowers.alloying.in": "%s of %s",
   "jei.jaymospowers.alloying.out": "makes %s of %s",

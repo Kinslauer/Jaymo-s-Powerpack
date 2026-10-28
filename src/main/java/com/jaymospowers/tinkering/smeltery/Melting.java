@@ -1,6 +1,7 @@
 package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.power.wind.SorasDagger;
+import com.jaymospowers.power.wind.SorasLineage;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
 import com.jaymospowers.tinkering.TinkerTool;
@@ -15,6 +16,8 @@ import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -198,6 +201,10 @@ public final class Melting {
 
 	/** What one of this item melts into, or null. (0.15.36) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
+		if (SorasLineage.marked(stack)) {
+			// (0.17.110) the one Sora's Dagger line (found blade, its cast, the dagger) never melts
+			return null;
+		}
 		Result result = builtIn(stack);
 		if (result == null) {
 			result = extra.get(stack.getItem());
@@ -307,7 +314,8 @@ public final class Melting {
 				case NUGGET -> nugget(molten);
 				case WEAPON -> {
 					WeaponParts.Kind kind = WeaponParts.ofCast(cast);
-					yield kind == null ? null : WeaponParts.castResult(kind, molten);
+					ItemStack head = kind == null ? null : WeaponParts.castResult(kind, molten);
+					yield head == null ? null : SorasLineage.carry(cast, head);
 				}
 				default -> {
 					PartType part = castItem.shape.part;
@@ -318,10 +326,18 @@ public final class Melting {
 		}
 		// gold over an ingot, nugget, part or weapon head makes a cast of its shape
 		CastItem.Shape shape = CastItem.Shape.of(cast);
-		if (molten != Molten.GOLD || shape == null) {
+		if (shape == null || molten != castMetal(cast)) {
 			return null;
 		}
-		return shape == CastItem.Shape.WEAPON ? WeaponParts.cast(((WeaponPartItem) cast.getItem()).kind) : new ItemStack(Tinkering.CASTS.get(shape));
+		if (shape != CastItem.Shape.WEAPON) {
+			return new ItemStack(Tinkering.CASTS.get(shape));
+		}
+		WeaponParts.Kind kind = ((WeaponPartItem) cast.getItem()).kind;
+		ItemStack made = WeaponParts.cast(kind);
+		if (kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE)) {
+			made.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymospowers.soras_blade_cast"));
+		}
+		return SorasLineage.carry(cast, made);
 	}
 
 	/** How much liquid the table needs for this cast and liquid (0: it can't cast it). */
@@ -349,9 +365,16 @@ public final class Melting {
 		return stack.getItem() instanceof SorasDagger dagger && dagger.stage == SorasDagger.IRON;
 	}
 
+	/** (0.17.110) The liquid that makes a cast from this item: gold, but rose gold for Sora's Dagger Blade (Andy). */
+	public static Molten castMetal(ItemStack shape) {
+		return shape.getItem() instanceof WeaponPartItem part && part.kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE)
+			? Molten.ROSE_GOLD : Molten.GOLD;
+	}
+
 	/** Whether pouring onto this item uses it up (making a cast does; casting on a cast doesn't). */
 	public static boolean usesUpCast(ItemStack cast) {
-		return !(cast.getItem() instanceof CastItem);
+		// (0.17.110) the cast poured over a found Sora's Dagger Blade makes one iron blade only
+		return !(cast.getItem() instanceof CastItem) || SorasLineage.marked(cast);
 	}
 
 	private static @Nullable ItemStack ingot(Molten molten) {
