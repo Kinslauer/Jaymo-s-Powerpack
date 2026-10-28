@@ -749,6 +749,20 @@ public final class Crewmen {
 		int role = w.role();
 		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1), -1L});
 		double d = mob.distanceTo(foe);
+		// (0.7.283) with Better Combat, a blade (or fists) at arm's length swings as every fighter's does (MobCombat): its
+		// move's animation and glint; a punch or cut for anything it doesn't know, or a foe just past the move's reach
+		// (crews keep to their deck paths and don't always step in)
+		if (MobCombat.ENABLED && d <= REACH + foe.getBbWidth() * 0.5) {
+			if (MobCombat.handles(mob)) {
+				MobCombat.attackTick(mob, foe);
+			}
+			if (!MobCombat.swinging(mob)) {
+				MobCombat.plainBlow(mob, foe);
+			}
+			if (MobCombat.swinging(mob)) {
+				return;
+			}
+		}
 		// (0.7.267) the blade glints first and lands MELEE_WINDUP later (a parry's chance, as every mob's blow gives)
 		if (ready[2] >= 0 && now >= ready[2]) {
 			ready[2] = -1L;
@@ -761,7 +775,7 @@ public final class Crewmen {
 		if (ready[2] >= 0) {
 			return;
 		}
-		if (d <= REACH + foe.getBbWidth() * 0.5 && now >= ready[0]) {
+		if (!MobCombat.ENABLED && d <= REACH + foe.getBbWidth() * 0.5 && now >= ready[0]) {
 			ready[0] = now + SWING_GAP;
 			ready[2] = now + MELEE_WINDUP;
 			MobCombat.tell(level, mob, false);
