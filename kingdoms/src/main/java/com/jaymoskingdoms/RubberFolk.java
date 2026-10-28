@@ -111,7 +111,7 @@ public final class RubberFolk {
 	private static final Map<UUID, ItemStack> EATING = new HashMap<>();
 	private static final Map<UUID, Integer> LEFT = new HashMap<>();
 	/**
-	 * (0.7.306) A swallow under way → their MCA Size and Width as it began, as it'll end, and how far along it they've
+	 * (0.7.312) A swallow under way → their MCA Size and Width as it began, as it'll end, and how far along it they've
 	 * grown: {@code {fromSize, fromWidth, toSize, toWidth, share}}.
 	 */
 	private static final Map<UUID, float[]> GROWTH = new HashMap<>();
@@ -278,7 +278,7 @@ public final class RubberFolk {
 	}
 
 	/**
-	 * (0.7.306) Andy: "the mass should increase per pulse as the absorbed gets smaller". While {@code channel} runs, their
+	 * (0.7.312) Andy: "the mass should increase per pulse as the absorbed gets smaller". While {@code channel} runs, their
 	 * build is as far from where it was to where it'll end ({@link BodySizes#withMass}) as the swallow was at its last
 	 * pulse; let go (no channel), it goes back to how it was.
 	 */
@@ -303,7 +303,7 @@ public final class RubberFolk {
 
 	/** (0.7.288) The heritage key pressed: starts (or stops) swallowing a weak foe close by. */
 	static void press(ServerPlayer player) {
-		// (0.7.306) sneaking, they bring their last swallow back up (or spit out one still alive in them)
+		// (0.7.312) sneaking, they bring their last swallow back up (or spit out one still alive in them)
 		if (player.isShiftKeyDown() && HeritageHold.channel(player) == null && RubberStomach.bringUp(player)) {
 			return;
 		}
@@ -328,7 +328,7 @@ public final class RubberFolk {
 	}
 
 	/**
-	 * {@code foe} is swallowed whole: gone, and a share of its health theirs. (0.7.306) Its body stays in them, to be
+	 * {@code foe} is swallowed whole: gone, and a share of its health theirs. (0.7.312) Its body stays in them, to be
 	 * brought up ({@link RubberStomach#bringUp}); a downed player isn't dead yet, but held inside ({@link RubberStomach#swallowLive}).
 	 */
 	private static void absorb(ServerLevel level, ServerPlayer player, LivingEntity foe) {
@@ -336,7 +336,7 @@ public final class RubberFolk {
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.heal(heal);
-		// (0.7.306) Andy: "it should add their mass to the user": the last of its bulk goes in (the rest went with each pulse, grow)
+		// (0.7.312) Andy: "it should add their mass to the user": the last of its bulk goes in (the rest went with each pulse, grow)
 		float[] growth = GROWTH.remove(player.getUUID());
 		float[] gained = {0.0F, 0.0F};
 		if (growth != null && McaCompat.LOADED) {
@@ -349,7 +349,7 @@ public final class RubberFolk {
 		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		if (foe instanceof ServerPlayer victim) {
-			// (0.7.306) Andy: "If a downed player is absorbed they stay alive, but wounded and appear inside the rubber folk"
+			// (0.7.312) Andy: "If a downed player is absorbed they stay alive, but wounded and appear inside the rubber folk"
 			RubberStomach.swallowLive(level, player, victim, gained);
 			return;
 		}
@@ -360,7 +360,7 @@ public final class RubberFolk {
 			PowersCompat.takePower(player, foe);
 		}
 		takeOn(player, foe, person);
-		// (0.7.306) the body it leaves goes into them (at its own size, not shrunk to nothing), to be brought up later
+		// (0.7.312) the body it leaves goes into them (at its own size, not shrunk to nothing), to be brought up later
 		HeritageHold.shrink(foe, 0.0);
 		RubberStomach.fill(player, KitchenCompat.corpseOf(foe), java.util.List.of(), gained);
 		if (!person) {
@@ -390,7 +390,7 @@ public final class RubberFolk {
 			describe(adopted)).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
 	}
 
-	/** (0.7.306) What they took on leaves them (they brought it back up). */
+	/** (0.7.312) What they took on leaves them (they brought it back up). */
 	static void giveUp(ServerPlayer player) {
 		if (player.hasAttached(ADOPTED)) {
 			player.removeAttached(ADOPTED);

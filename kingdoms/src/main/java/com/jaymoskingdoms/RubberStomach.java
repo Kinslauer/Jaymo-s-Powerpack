@@ -57,11 +57,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.306) What a Rubber-folk has inside them.
+ * (0.7.312) What a Rubber-folk has inside them.
  * <p>
  * Andy: "rubbers should be able to eject their last swallow, leaving a pink mass that slowly reveals the now corpse."
  * Whatever they swallow leaves its body in them ({@link #STOMACH}: the Kitchen corpse it would have left, saved, and for a
- * player, what they carried). Sneak and press the heritage key and they bring it back up ({@link #bringUp}): the body lies
+ * player, what they carried). Sneak and press the heritage key and they puke it back up ({@link #bringUp}): the body lies
  * in front of them under a mound of their pink rubber ({@link #MASS}, on a short-lived cloud that drips pink), which sags
  * and melts away over {@link #MELT_TICKS} until only the body is left (the client's {@code RubberMassView}). What they
  * took on from it (its stats, its power, its bulk) goes with it.
@@ -98,6 +98,8 @@ public final class RubberStomach {
 	static final int BAR_EVERY = 10;
 	/** How far in front of them a body comes up (blocks). */
 	static final double BRING_UP_AHEAD = 1.3;
+	/** The gush from the mouth to the body: this many puffs along it. */
+	static final int PUKE_STEPS = 12;
 	private static final DustParticleOptions PINK = new DustParticleOptions(0xF08CB8, 1.2F);
 
 	/**
@@ -297,7 +299,7 @@ public final class RubberStomach {
 	}
 
 	/**
-	 * Sneak and the heritage key: someone alive inside, spat out; else the last swallow's body brought back up under a pink
+	 * Sneak and the heritage key: someone alive inside, spat out; else the last swallow's body puked back up under a pink
 	 * mound, and what they took from it gone with it. False if there's nothing in them.
 	 */
 	static boolean bringUp(ServerPlayer player) {
@@ -348,6 +350,7 @@ public final class RubberStomach {
 			}
 		}
 		mound(level, spot, width, height, MELT_TICKS);
+		puke(level, player, spot);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		// what they took from it goes with it: its stats, its power, its bulk
@@ -360,6 +363,18 @@ public final class RubberStomach {
 		player.sendOverlayMessage(Component.translatable(body != null ? "message.jaymoskingdoms.rubber.brought_up" : "message.jaymoskingdoms.rubber.brought_up_nothing")
 			.withStyle(ChatFormatting.LIGHT_PURPLE));
 		return true;
+	}
+
+	/** Andy: "puked up". A gush of pink from {@code player}'s mouth, arcing down to {@code spot}. */
+	static void puke(ServerLevel level, ServerPlayer player, Vec3 spot) {
+		Vec3 mouth = player.getEyePosition().add(player.getLookAngle().scale(0.3)).add(0.0, -0.15, 0.0);
+		for (int i = 0; i <= PUKE_STEPS; i++) {
+			double t = i / (double)PUKE_STEPS;
+			Vec3 at = mouth.lerp(spot.add(0.0, 0.2, 0.0), t).add(0.0, Math.sin(t * Math.PI) * 0.35, 0.0);
+			level.sendParticles(PINK, at.x, at.y, at.z, 3, 0.06, 0.06, 0.06, 0.0);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.02);
+		}
+		level.sendParticles(PINK, spot.x, spot.y + 0.2, spot.z, 30, 0.5, 0.15, 0.5, 0.05);
 	}
 
 	/** A pink mound over a body {@code width} by {@code height} at {@code spot}, melting over {@code length} ticks. */
@@ -577,6 +592,7 @@ public final class RubberStomach {
 			Vec3 spot = ahead(level, holder);
 			victim.teleportTo(level, spot.x, spot.y, spot.z, Set.<Relative>of(), holder.getYRot() + 180.0F, 0.0F, false);
 			mound(level, spot, victim.getBbWidth(), victim.getBbHeight(), SPIT_MELT_TICKS);
+			puke(level, holder, spot);
 			level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
 			level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1.0F, 0.6F);
 			shrinkBack(holder, held.size, held.width);

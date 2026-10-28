@@ -195,17 +195,17 @@ final class KitchenCompat {
 		}
 	}
 
-	/** (0.7.306) Any Kitchen corpse. */
+	/** (0.7.312) Any Kitchen corpse. */
 	static boolean isCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity);
 	}
 
-	/** (0.7.306) Kitchen's {@code Corpses.leavesCorpse(LivingEntity)} and {@code spawnCorpse(LivingEntity, List)}, for a Rubber-folk's swallow. */
+	/** (0.7.312) Kitchen's {@code Corpses.leavesCorpse(LivingEntity)} and {@code spawnCorpse(LivingEntity, List)}, for a Rubber-folk's swallow. */
 	private static @Nullable Method leavesCorpse, spawnCorpse;
 	private static boolean lookedForSpawn;
 
 	/**
-	 * (0.7.306) Lays down the body {@code mob} would leave if it died now (nothing it carried in it), and returns it; null
+	 * (0.7.312) Lays down the body {@code mob} would leave if it died now (nothing it carried in it), and returns it; null
 	 * if it would leave none, or without Kitchen.
 	 */
 	static @Nullable Entity corpseOf(net.minecraft.world.entity.LivingEntity mob) {

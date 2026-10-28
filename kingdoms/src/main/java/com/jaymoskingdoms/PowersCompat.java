@@ -979,11 +979,11 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.306) Powers' {@code SwallowedPower.drop(ServerPlayer)}. */
+	/** (0.7.312) Powers' {@code SwallowedPower.drop(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle dropPower;
 	private static boolean lookedForDrop;
 
-	/** (0.7.306) A Rubber-folk brought up their last swallow: the power they took from it leaves them (nothing without Powers 0.17.124). */
+	/** (0.7.312) A Rubber-folk brought up their last swallow: the power they took from it leaves them (nothing without Powers 0.17.132). */
 	public static void dropPower(net.minecraft.server.level.ServerPlayer player) {
 		if (!lookedForDrop) {
 			lookedForDrop = true;

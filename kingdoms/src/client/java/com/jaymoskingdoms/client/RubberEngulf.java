@@ -246,7 +246,7 @@ public final class RubberEngulf {
 			return;
 		}
 		if (entity.hasAttached(com.jaymoskingdoms.RubberStomach.HOLDING)) {
-			// (0.7.306) someone alive inside: the belly stays full, and heaves as they fight
+			// (0.7.312) someone alive inside: the belly stays full, and heaves as they fight
 			float clock = entity.tickCount + partialTicks;
 			state.setData(KEY, 0.55F + 0.12F * Mth.sin(clock * 0.35F) + 0.08F * Mth.sin(clock * 0.9F));
 			return;

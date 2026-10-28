@@ -258,7 +258,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.306) {@code player}'s MCA Size and Width genes as {@code {size, width}}, or null if MCA hasn't set them up yet.
+	 * (0.7.312) {@code player}'s MCA Size and Width genes as {@code {size, width}}, or null if MCA hasn't set them up yet.
 	 */
 	static float @org.jspecify.annotations.Nullable [] bodyGenes(ServerPlayer player) {
 		PlayerSaveData save = PlayerSaveData.get(player);
@@ -270,7 +270,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.306, was shiftBody) Andy: rubber-folk "change with what they absorb". Sets {@code player}'s MCA Size and Width
+	 * (0.7.312, was shiftBody) Andy: rubber-folk "change with what they absorb". Sets {@code player}'s MCA Size and Width
 	 * to {@code size} and {@code width}, kept to their heritage's body, re-saving their look and showing it to everyone.
 	 */
 	static void setBody(ServerPlayer player, float size, float width) {

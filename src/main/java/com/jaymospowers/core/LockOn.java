@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -14,6 +15,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -54,6 +56,8 @@ public final class LockOn {
 	}
 
 	private static final Map<UUID, Lock> LOCKS = new HashMap<>();
+	/** (0.17.130) The client's own lock (LockOnClient fills it in), so code run on both sides can ask either. */
+	public static Function<Player, @Nullable LivingEntity> clientTarget = player -> null;
 
 	private LockOn() {
 	}
@@ -112,6 +116,12 @@ public final class LockOn {
 			return null;
 		}
 		return player.level().getEntity(lock.target) instanceof LivingEntity living && usable(player, living) ? living : null;
+	}
+
+	/** (0.17.130) Who {@code player} is locked onto on whichever side this runs, or null. */
+	public static @Nullable LivingEntity target(Player player) {
+		return player instanceof ServerPlayer serverPlayer ? target(serverPlayer)
+			: player.level().isClientSide() ? clientTarget.apply(player) : null;
 	}
 
 	/** The way his shot goes: at the locked foe, else wherever he looks. */

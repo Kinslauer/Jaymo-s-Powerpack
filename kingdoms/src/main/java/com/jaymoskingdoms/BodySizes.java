@@ -50,7 +50,7 @@ public final class BodySizes {
 	 */
 	static final Body DIVINE = ANY, RUBBERFOLK = ANY;
 	/**
-	 * (0.7.306, was a shift toward the foe's build) Andy: "it should add their mass to the user, not subtract". The share
+	 * (0.7.312, was a shift toward the foe's build) Andy: "it should add their mass to the user, not subtract". The share
 	 * of a swallowed foe's bulk that becomes a Rubber-folk's, and the player shape a foe is measured against (vanilla's
 	 * 0.6 x 1.8 at MCA's 1x).
 	 */
@@ -140,7 +140,7 @@ public final class BodySizes {
 	}
 
 	/**
-	 * (0.7.306) The Size and Width genes ({@code {size, width}}) of a body with {@code size} and {@code width} that has taken
+	 * (0.7.312) The Size and Width genes ({@code {size, width}}) of a body with {@code size} and {@code width} that has taken
 	 * in {@link #ABSORB_MASS} of a foe {@code foeHeight} tall and {@code foeWidth} wide: as much bigger every way as the
 	 * bulk added. Bigger only, never smaller (MCA's slider caps it).
 	 */

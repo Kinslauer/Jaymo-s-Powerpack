@@ -16,7 +16,7 @@ import net.minecraft.world.phys.EntityHitResult;
  * <p>
  * (0.17.97) Andy: "stop attacking while charging an execution". Better Combat swings again and again while attack is held,
  * and the click that started the hold was a blow of its own, so the charge took swings at the body it was meant to finish.
- * Now the hands are the hold's ({@link #holdsAttack}, from {@code FinisherAttackMixin}): no click, held swing or digging
+ * Now the hands are the hold's ({@link #holdsAttack}, from {@code HeldInputMixin} by way of {@link com.jaymospowers.client.HeldInput}): no click, held swing or digging
  * while you're sneaking with the crosshair on someone you could finish, nor while the finisher or execution plays.
  */
 public final class FinisherClient {

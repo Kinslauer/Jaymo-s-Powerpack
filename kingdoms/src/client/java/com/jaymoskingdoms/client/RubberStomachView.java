@@ -23,7 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.306) What a Rubber-folk's stomach looks like, from outside and in ({@link RubberStomach}).
+ * (0.7.312) What a Rubber-folk's stomach looks like, from outside and in ({@link RubberStomach}).
  * <ul>
  * <li><b>The mound</b> ({@link #mound}): a body brought back up lies under a dome of their pink rubber that wobbles,
  * then sags flat, spreads into a puddle and fades, until only the body is left ({@link RubberStomach#MASS}).</li>
