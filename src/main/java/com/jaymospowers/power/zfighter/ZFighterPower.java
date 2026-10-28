@@ -201,9 +201,13 @@ public final class ZFighterPower implements Power {
 	/**
 	 * (0.16.20) Andy: "after achieving max it stays for a bit until your ki falls". Let go of a full charge and the charging
 	 * aura holds this long, or until his ki drops under this share of full.
+	 * (0.17.123) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". It
+	 * now holds down to half his ki (was 90%), so spending it visibly shrinks the aura back before it goes.
 	 */
 	static final int AURA_HOLD_TICKS = 160;
-	static final float AURA_HOLD_KI = 0.9F;
+	static final float AURA_HOLD_KI = 0.5F;
+	/** (0.17.123) His ki as a share of full is sent to everyone in this many steps (the aura's size; few, to send little). */
+	public static final int KI_SHARE_STEPS = 20;
 	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
 	static final double SHOUT_RANGE = 32.0;
 	static final int SHOUT_LINES = 3;
@@ -262,6 +266,12 @@ public final class ZFighterPower implements Power {
 	/** (0.16.20) The game time his ki last hit full on a charge (the ki glow's pulse), for everyone's client; not saved. */
 	public static final AttachmentType<Long> KI_FULL = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_full"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.17.123) His ki out of {@link #KI_SHARE_STEPS} of full, for everyone's client: the aura swells with it
+	 * ({@code ZFighterKiAura}). Absent at none; not saved.
+	 */
+	public static final AttachmentType<Integer> KI_SHARE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_share"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/**
 	 * (0.13.27) Andy: "every zfighter should spawn with a random ki color". The ki colour each Z Fighter is born with,
 	 * drawn from {@link #KI_PALETTE} when the power comes (or the first time it's missing): his blasts, disc, waves, bomb,
@@ -595,6 +605,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(CHARGE);
 		player.removeAttached(AURA_HOLD);
 		player.removeAttached(KI_FULL);
+		player.removeAttached(KI_SHARE);
 		ZFighterDisc.forget(player);
 		ZFighterCorruption.clear(player);
 		ZFighterBranchForms.clear(player);
@@ -1207,6 +1218,16 @@ public final class ZFighterPower implements Power {
 	 * then, or when his ki falls under {@link #AURA_HOLD_KI} of full. Synced only once he's let go (charging shows on its own).
 	 */
 	static void auraHold(ServerPlayer player, Live live, long now, int max) {
+		// (0.17.123) the share of ki the aura's size follows, sent only when it moves a step
+		int share = max <= 0 ? 0 : Mth.clamp(Math.round(KI_SHARE_STEPS * live.ki / max), 0, KI_SHARE_STEPS);
+		Integer sent = player.getAttached(KI_SHARE);
+		if ((sent == null ? 0 : sent) != share) {
+			if (share == 0) {
+				player.removeAttached(KI_SHARE);
+			} else {
+				player.setAttached(KI_SHARE, share);
+			}
+		}
 		boolean full = live.ki >= max * AURA_HOLD_KI;
 		if (live.charging) {
 			live.auraHold = live.ki >= max ? now + AURA_HOLD_TICKS : -1L;
