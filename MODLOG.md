@@ -3510,4 +3510,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   wheel (hold N), a roster to call horses from anywhere, horses that defend you, riding extras (step-up, swimming,
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
-- **0.17.126, captives left alone (Kingdoms 0.7.308):** camp shamans and raiders no longer attack captives in chains.
+
+- **0.17.125, whaling voyages (Kingdoms 0.7.307):** a whaler lashes her whale alongside and anchors, her crew cut it in
+  and carry the blubber to her tryworks, which burn on while she hunts or sails home; harpoon boats stay under their
+  crew's oars when you get in; loose items no longer sail along inside her outline. See the Kingdoms MODLOG.
+- **0.17.130, captives left alone (Kingdoms 0.7.311):** camp shamans and raiders no longer attack captives in chains.

@@ -279,6 +279,16 @@ public final class Hull {
 		return this.index.get(cell) >= 0 || this.dry.contains(cell);
 	}
 
+	/** (0.7.307) Whether a local cell is in the dry space its walls close in (not one of its blocks). */
+	public boolean dry(int x, int y, int z) {
+		return this.dry.contains(BlockPos.asLong(x, y, z));
+	}
+
+	/** (0.7.307) Whether piece {@code i} fills its whole cell (a plank, a log: nothing rests inside one). */
+	public boolean solid(int i) {
+		return this.steps[i] == null && this.lo[i] <= 0.01F && this.hi[i] >= 0.99F;
+	}
+
 	/** The piece at a local cell (-1: none). */
 	public int at(int x, int y, int z) {
 		return this.index.get(BlockPos.asLong(x, y, z));

@@ -6128,7 +6128,35 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
-## 0.7.308: shamans and raiders leave captives alone (pack 0.17.126)
+## 0.7.307: whalers cut in alongside, their tryworks burn; harpoon boats keep their crew at the oars (pack 0.17.125)
+
+From Andy's clip of a whaling voyage:
+- **Loose things stay in the sea** ("alot of items were following the ship as it sailed instead of floating in the
+  water outside"): `Ship.carry` took along everything inside her outline, so dropped items floating in the sea by
+  her narrow bow and stern sailed with her and looked like water inside her. Now only what rests on her or in her is
+  carried: in her dry hold, in one of her part-blocks, or on a piece just below (a walker two below, mid-stride).
+  Anything she sails into inside a full block of hers is left behind (`Hull.dry`, `Hull.solid`).
+- **The whale is lashed alongside and she anchors** ("the whale just didnt attach to the boat"): cutting in now lets
+  go her anchor (`Ship.rideAtAnchor`: no way on her, no turn, no tow on her lines) and lashes the carcass amidships on
+  the side it lies (`WhaleCarcass.lash`, hauled in at most 0.25 a tick and laid along her). A lashed carcass counts as
+  alongside, so players can flense it with her crew. Her captain calls it out.
+- **Her gang fills the tryworks** ("the crew should start filling the tryworks"): every whaler has a tryworks on her
+  centreline forward of her middle (set on a whaler already at sea too). Three hands turn to: the cutter at the rail
+  over the carcass with a spade, a stroke every 24 ticks (meat, bone and ambergris below to her hold), and carriers
+  who take the blubber from the rail to the tryworks in their arms, four at a time, and pitch it in (a lone hand does
+  both). The tryworks light and fill (their BLUBBER state, up to 8; the rest to the blubber room).
+- **The tryworks burn on** ("they burn as we either return home or search for another"): fire and smoke now go up
+  from the tryworks themselves, 2 blubber to a bottle of oil every 160 ticks, fed again from her hold by a hand until
+  all of it is rendered, whether she's hunting or homeward. At home, what's left in the pots is rendered ashore.
+- **Harpoon boats keep their crew at the oars** ("When you join on a harpoon boat the ai should retain control"): the
+  game gives a boat to any player in its first seat and seats players first, so a player in a whaleboat took its
+  steering and the boat never towed the carcass home. Whaleboats now carry a synced `Whalers.CREWED` mark and
+  `BoatCrewedMixin` gives them no controlling passenger: her oarsmen row as her captain orders and the player only
+  throws irons. A boat cast adrift (no hand left) loses the mark, so a player can row it.
+- A player in a boat when it's hoisted in is set on her deck, not dropped in the sea beside her.
+Compile-checked against the 26.3 jars, not seen in game.
+
+## 0.7.311: shamans and raiders leave captives alone (pack 0.17.130)
 Andy: "shaman is repeatedly attacking the prisoner."
 - A captive in chains is never prey: `Barbarians.prey`/`villagerPrey` (raiders, greenskins, pirates) and
   `Casters.foe` (a camp's shaman, necromancer or blood witch) skip them. They were invulnerable, so the blows did
