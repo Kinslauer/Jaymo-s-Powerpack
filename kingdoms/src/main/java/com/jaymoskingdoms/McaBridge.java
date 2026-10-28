@@ -257,6 +257,28 @@ final class McaBridge {
 	}
 
 	/**
+	 * (0.7.290) Andy: rubber-folk "change with what they absorb". Moves {@code player}'s MCA Size and Width
+	 * {@code share} of the way toward {@code size} and {@code width}, kept to their heritage's body, re-saving their look
+	 * and showing it to everyone.
+	 */
+	static void shiftBody(ServerPlayer player, float size, float width, float share) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.isEntityDataSet()) {
+			return;
+		}
+		CompoundTag data = save.getEntityData();
+		CompoundTag mca = NbtHelper.getCompoundOrSelf(data, "MCAData");
+		float was = mca.getFloat(SIZE_GENE).orElse(0.5F), wasWidth = mca.getFloat(WIDTH_GENE).orElse(0.5F);
+		Heritage.Kind kind = Heritage.of(player);
+		mca.putFloat(SIZE_GENE, BodySizes.clampSize(kind, was + (size - was) * share));
+		mca.putFloat(WIDTH_GENE, BodySizes.clampWidth(kind, wasWidth + (width - wasWidth) * share));
+		save.setEntityData(data);
+		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
+		}
+	}
+
+	/**
 	 * (0.7.290) An MCA villager's height and width brought into {@code kind}'s body: freshly rolled ones
 	 * ({@link BodySizes#FRESH}) spread across it, anyone else kept in it ({@link BodySizes#keep}). Anyone not MCA's: nothing.
 	 */

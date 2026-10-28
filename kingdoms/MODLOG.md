@@ -5813,7 +5813,9 @@ the Rubber-folk's swallowing: "yes switch it too".
 Andy: "stone borns should be able to be naturally wider and taller, where sylvans are the smallest".
 - **Bodies** (`BodySizes`): each heritage has a range of MCA's Size (height) and Width genes (0 .. 1, drawn 0.75x ..
   1.25x). Stoneborn 0.55-0.9 tall, 0.6-1.0 wide; Sylvan 0-0.4 tall, 0-0.35 wide; plain folk 0.15-0.75 both; the rest
-  in between (Endborn tall and thin, Deepborn squat, Frostborn big-boned, Nightborn lean). Verdant are naturally the
+  in between (Endborn tall and thin, Deepborn squat, Frostborn big-boned, Nightborn lean). Divine-born and Rubber-folk span the whole slider (Andy: "divine born should vary from the most extreme ends of
+  the spectrum, so should rubber, but they change with what they absorb"): each foe a Rubber-folk player swallows moves
+  their height and width `ABSORB_SHIFT` 0.25 of the way toward its own (`McaBridge.shiftBody`). Verdant are naturally the
   tallest (0.6-1.0; Andy: "verdants are naturally taller"), the top of the Size slider still theirs alone as in 0.7.87. A heritage with no line of its own gets the plain one.
 - **Villagers**: one MCA has just rolled (`McaGeneticsMixin` tags it `BodySizes.FRESH`) is spread across its blood's
   ranges when it's born to it, so they vary as much as before; children and villagers already in the world are brought

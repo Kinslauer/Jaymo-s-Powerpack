@@ -44,9 +44,19 @@ public final class BodySizes {
 	/** Tall and thin, like the Endermen. */
 	static final Body ENDBORN = new Body(0.35F, 0.85F, 0.05F, 0.5F);
 	static final Body DRAGONBLOOD = new Body(0.35F, 0.85F, 0.35F, 0.85F);
+	/**
+	 * Andy: "divine born should vary from the most extreme ends of the spectrum, so should rubber, but they change with
+	 * what they absorb". Both span the whole slider; a Rubber-folk's shifts toward each foe they swallow ({@link #ABSORB_SHIFT}).
+	 */
+	static final Body DIVINE = ANY, RUBBERFOLK = ANY;
+	/**
+	 * How far a Rubber-folk's height and width move toward a swallowed foe's (a share of the gap), and the player shape
+	 * a foe is measured against (vanilla's 0.6 x 1.8 at MCA's 1x).
+	 */
+	public static final float ABSORB_SHIFT = 0.25F;
+	static final float PLAYER_WIDTH = 0.6F, PLAYER_HEIGHT = 1.8F;
 	/** Squat from the deep. */
 	static final Body DEEPBORN = new Body(0.15F, 0.7F, 0.3F, 0.8F);
-	static final Body DIVINE = new Body(0.3F, 0.8F, 0.2F, 0.7F);
 	static final Body BIOBUILT = new Body(0.2F, 0.8F, 0.3F, 0.85F);
 
 	/**
@@ -81,6 +91,7 @@ public final class BodySizes {
 			case DEEPBORN -> DEEPBORN;
 			case DIVINE -> DIVINE;
 			case BIOBUILT -> BIOBUILT;
+			case RUBBERFOLK -> RUBBERFOLK;
 			default -> ORDINARY;
 		};
 	}
@@ -107,6 +118,21 @@ public final class BodySizes {
 	public static float middleWidth(Heritage.@Nullable Kind kind) {
 		Body body = of(kind);
 		return (body.minWidth + body.maxWidth) / 2.0F;
+	}
+
+	/** The MCA gene (0 .. 1) that draws a body {@code length} long, against a player's {@code base} (0.75x .. 1.25x). */
+	public static float geneFor(float length, float base) {
+		return Mth.clamp((length / base - 0.75F) * 2.0F, 0.0F, 1.0F);
+	}
+
+	/** The Size gene a body {@code height} tall would have. */
+	public static float sizeFor(float height) {
+		return geneFor(height, PLAYER_HEIGHT);
+	}
+
+	/** The Width gene a body {@code width} wide would have. */
+	public static float widthFor(float width) {
+		return geneFor(width, PLAYER_WIDTH);
 	}
 
 	/** A freshly rolled gene (0 .. 1) spread across {@code min} .. {@code max}, so a blood's folk vary as much as MCA's. */

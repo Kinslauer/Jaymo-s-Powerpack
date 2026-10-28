@@ -155,6 +155,12 @@ public final class RubberFolk {
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 		foe.discard();
 		player.heal(heal);
+		// (0.7.290) Andy: "they change with what they absorb": their build shifts toward the foe's (BodySizes.ABSORB_SHIFT)
+		if (McaCompat.LOADED) {
+			// (its standing shape, not as it lies downed)
+			net.minecraft.world.entity.EntityDimensions shape = foe.getType().getDimensions().scale(foe.getScale());
+			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
+		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.absorbed"));
 	}
