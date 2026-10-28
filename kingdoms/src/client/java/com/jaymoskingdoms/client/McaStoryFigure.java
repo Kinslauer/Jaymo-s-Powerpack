@@ -75,6 +75,14 @@ final class McaStoryFigure {
 			v.removeAttached(Heritage.HERITAGE);
 			v.removeAttached(HeritageVariants.VARIANT);
 		}
+		// (0.7.304) a Verdant is green with antennae, as the player will be (their skin's green follows MCA's skin: Verdants.fromSkin)
+		if (kind == Heritage.Kind.VERDANT) {
+			if (!v.hasAttached(com.jaymoskingdoms.Verdants.SHADE)) {
+				v.setAttached(com.jaymoskingdoms.Verdants.SHADE, 0.5F);
+			}
+		} else {
+			v.removeAttached(com.jaymoskingdoms.Verdants.SHADE);
+		}
 		Genetics genes = v.getGenetics();
 		float melanin = genes.getGene(Genetics.MELANIN), kept = SkinTones.clampSkin(kind, melanin);
 		if (kept != melanin) {
