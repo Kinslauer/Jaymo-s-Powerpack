@@ -216,10 +216,11 @@ public final class ZFighterAndroid {
 		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, android(player) ? 0.02 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
-	/** Every tick of the power: an android's ki is always full. */
+	/** Every tick of the power: an android's ki is always full, and (0.17.92) it never needs to eat. */
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
 		if (android(player)) {
 			live.ki = ZFighterPower.maxKi(player);
+			player.getFoodData().setFoodLevel(20);
 		}
 	}
 

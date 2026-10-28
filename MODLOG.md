@@ -3345,4 +3345,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   after making you an android. androids need to have infinite ki and no aura, no other debuff." Nothing kills you on the
   tinkerer's table (a killing blow leaves you at half a heart), and when the operation ends he brings you round: up if
   you went down (no Battered), full health, the hold lifted. An android's ki bar stays full and nothing costs ki; it
-  draws no aura (Overdrive and Reactor too); the 15% weaker ki attacks are gone. Compile-checked, not seen in game.
+  draws no aura (Overdrive and Reactor too); the 15% weaker ki attacks are gone.
+  Andy: "they also dont have to eat, but they use metal parts to repair instead of bandages": an android's food bar
+  stays full, and medicine does nothing for it. A new Metal remedy (`Treatment.Remedy.METAL`, iron or copper ingot,
+  sneak + use like spirits) stops a part's leak, sets a break and mends 4 health; an ingot is medicine only to an
+  android, so golem repair and trades are untouched. Compile-checked, not seen in game.
