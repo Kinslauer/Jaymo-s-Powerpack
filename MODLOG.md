@@ -3523,3 +3523,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   rolled for a sprite, and every point-first weapon is drawn back along its flight so only the tip sinks in. The 3D
   iron dagger and rapier sit deeper in the hand: `tools/blockbench/display.py` puts the middle of each grip where a
   vanilla sword's grip sits. Compile-checked, not seen in game.
+- **0.17.131, captives left alone (Kingdoms 0.7.311):** camp shamans and raiders no longer attack captives in chains.
