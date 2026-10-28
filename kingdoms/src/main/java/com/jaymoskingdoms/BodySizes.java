@@ -30,8 +30,8 @@ public final class BodySizes {
 	static final Body STONEBORN = new Body(0.55F, 0.9F, 0.6F, 1.0F);
 	/** The smallest: short and slight. */
 	static final Body SYLVAN = new Body(0.0F, 0.4F, 0.0F, 0.35F);
-	/** The tallest (the top of the slider stays theirs), and slender. */
-	static final Body VERDANT = new Body(0.3F, 1.0F, 0.15F, 0.7F);
+	/** Andy: "verdants are naturally taller". The tallest (the top of the slider stays theirs), and slender. */
+	static final Body VERDANT = new Body(0.6F, 1.0F, 0.15F, 0.7F);
 	static final Body TIDEBORN = new Body(0.2F, 0.75F, 0.25F, 0.8F);
 	static final Body EMBERBORN = new Body(0.2F, 0.75F, 0.2F, 0.75F);
 	/** Hardy northerners: big-boned. */
