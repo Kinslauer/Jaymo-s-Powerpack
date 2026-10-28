@@ -14,6 +14,7 @@
   "entity.jaymospowers.demon_captain": "Demon Captain",
   "message.jaymospowers.zfighter_afterlife_wake": "You wake in a pale hall on an island of holystone, high in the sky. A halo hangs over your head. You have died.",
   "message.jaymospowers.zfighter_afterlife_halo": "Walk the road south. A fortune teller waits at its end.",
+  "message.jaymospowers.zfighter_afterlife_held": "The Other World doesn't let go of its dead so easily.",
   "message.jaymospowers.zfighter_afterlife_let_go": "The Other World has no more use for you, and lets go.",
   "message.jaymospowers.zfighter_afterlife_back": "You wake again among the living. The halo is gone.",
   "message.jaymospowers.zfighter_afterlife_called": "%s called you back from the Other World.",

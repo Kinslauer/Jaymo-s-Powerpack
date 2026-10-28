@@ -1,13 +1,18 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +24,15 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
+import net.minecraft.world.entity.monster.cubemob.Slime;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +44,10 @@ import net.minecraft.world.level.block.Blocks;
  * longer arm and not a drawn one), a lost limb grows back on its own ({@link #REGROW_EVERY}, as a Verdant's does, through
  * Jaymo's Powers' dismemberment), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
  * that lies downed, and press the heritage key close by ((0.7.288) a toggle, {@link HeritageHold}: the hand on it, pulses
- * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}).
+ * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}). (0.7.292, Andy: "rubber absorb should take
+ * the absorbed's powers/ or abilities. they basically adopt their stats into themselves. but only one at a time") They
+ * take on the last thing they swallowed ({@link #ADOPTED}): a share of its health, blow, armour and pace, and what it
+ * could do (fire, water, flight, night eyes, a spring), until the next swallow replaces it or they die.
  * They have a sweet tooth: cookies, pie, honey, berries, melon, cake, and Jaymo's Kitchen's tarts, pies, cobbler and
  * brownies mend them ({@link #sweet}). Flaw: rubber burns, and pops: fire burns them longer, and arrows hurt more
  * ({@link Heritage#dealt}).
@@ -55,10 +71,37 @@ public final class RubberFolk {
 	static final float ABSORB_HEAL_SHARE = 0.4F, ABSORB_HEAL_MIN = 2.0F, ABSORB_HEAL_MAX = 8.0F;
 	static final float WEAK_HEALTH = 12.0F, WEAK_WIDTH = 1.0F, WEAK_HEIGHT = 1.4F;
 	static final float DOWNED_HEALTH = 40.0F, DOWNED_WIDTH = 1.6F, DOWNED_HEIGHT = 2.4F;
+	/**
+	 * (0.7.292) Adopting: the share of the swallowed's health, blow and armour they take on, the most of each (health
+	 * points, damage, armour points), and its pace against a usual mob's ({@link #PACE_USUAL}) as a share, at most this far
+	 * either way. A gift lasts this long and is put back this often (ticks), so it never runs out while adopted.
+	 */
+	static final float ADOPT_SHARE = 0.5F, ADOPT_HEALTH_MAX = 10.0F, ADOPT_DAMAGE_MAX = 4.0F, ADOPT_ARMOR_MAX = 4.0F;
+	static final double PACE_USUAL = 0.25, ADOPT_PACE_MAX = 0.2;
+	static final int GIFT_TICKS = 220, GIFT_EVERY = 100;
+	/** (0.7.292) What a swallowed thing could do, as bits of {@link Adopted#gifts}. */
+	static final int FIRE = 1, WATER = 2, FLIGHT = 4, NIGHT = 8, SPRING = 16;
 	/** A sweet thing mends this much; a baked one from Kitchen, and a slice of cake. */
 	static final float SWEET_HEAL = 4.0F, KITCHEN_HEAL = 6.0F, CAKE_HEAL = 4.0F;
 	/** Pink motes. */
 	private static final DustParticleOptions PINK = new DustParticleOptions(0xF08CB8, 0.8F);
+
+	/**
+	 * (0.7.292) The last thing swallowed and what was taken from it: its type (for the name), the health, blow, armour and
+	 * pace added, and its gifts ({@link #FIRE}...). Saved; lost on death.
+	 */
+	record Adopted(String type, float health, float damage, float armor, float pace, int gifts) {
+		static final Codec<Adopted> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.STRING.fieldOf("type").forGetter(Adopted::type),
+			Codec.FLOAT.fieldOf("health").forGetter(Adopted::health),
+			Codec.FLOAT.fieldOf("damage").forGetter(Adopted::damage),
+			Codec.FLOAT.fieldOf("armor").forGetter(Adopted::armor),
+			Codec.FLOAT.fieldOf("pace").forGetter(Adopted::pace),
+			Codec.INT.fieldOf("gifts").forGetter(Adopted::gifts)).apply(i, Adopted::new));
+	}
+
+	static final AttachmentType<Adopted> ADOPTED = AttachmentRegistry.create(JaymosKingdoms.id("rubber_adopted"),
+		builder -> builder.persistent(Adopted.CODEC));
 
 	/** The sweet each is eating now, and the ticks it had left when last seen. */
 	private static final Map<UUID, ItemStack> EATING = new HashMap<>();
@@ -86,11 +129,82 @@ public final class RubberFolk {
 		});
 	}
 
-	/** The stretch and the burn, on {@code player} as they stand (taken off anyone who isn't Rubber-folk). */
+	/**
+	 * The stretch and the burn, and (0.7.292) what they've adopted, on {@code player} as they stand (taken off anyone who
+	 * isn't Rubber-folk).
+	 */
 	static void attributes(ServerPlayer player, Heritage.Kind kind) {
 		boolean rubber = kind == Heritage.Kind.RUBBERFOLK;
 		Skills.modifier(player, Attributes.ENTITY_INTERACTION_RANGE, "heritage_rubber_reach", rubber ? REACH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.BURNING_TIME, "heritage_rubber_burn", rubber ? BURN : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		Adopted adopted = rubber ? player.getAttached(ADOPTED) : null;
+		Skills.modifier(player, Attributes.MAX_HEALTH, "heritage_rubber_adopted_health", adopted == null ? 0.0 : adopted.health(), AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_rubber_adopted_damage", adopted == null ? 0.0 : adopted.damage(), AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.ARMOR, "heritage_rubber_adopted_armor", adopted == null ? 0.0 : adopted.armor(), AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_rubber_adopted_pace", adopted == null ? 0.0 : adopted.pace(),
+			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		if (player.getHealth() > player.getMaxHealth()) {
+			player.setHealth(player.getMaxHealth());
+		}
+	}
+
+	/** (0.7.292) What swallowing {@code foe} gives: a share of its stats, and what it could do. */
+	static Adopted adopt(LivingEntity foe) {
+		float health = Math.min(ADOPT_HEALTH_MAX, (float)base(foe, Attributes.MAX_HEALTH) * ADOPT_SHARE);
+		float damage = Math.min(ADOPT_DAMAGE_MAX, (float)base(foe, Attributes.ATTACK_DAMAGE) * ADOPT_SHARE);
+		float armor = Math.min(ADOPT_ARMOR_MAX, (float)base(foe, Attributes.ARMOR) * ADOPT_SHARE);
+		double speed = base(foe, Attributes.MOVEMENT_SPEED);
+		float pace = speed <= 0.0 || foe.canBreatheUnderwater() && foe.isInWater() ? 0.0F
+			: (float)Mth.clamp((speed / PACE_USUAL - 1.0) * ADOPT_SHARE, -ADOPT_PACE_MAX, ADOPT_PACE_MAX);
+		EntityType<?> type = foe.getType();
+		int gifts = 0;
+		if (foe.fireImmune()) {
+			gifts |= FIRE;
+		}
+		if (foe.canBreatheUnderwater()) {
+			gifts |= WATER;
+		}
+		if (type == EntityTypes.BAT || type == EntityTypes.CHICKEN || type == EntityTypes.PHANTOM || type == EntityTypes.BEE || type == EntityTypes.PARROT
+			|| type == EntityTypes.ALLAY || type == EntityTypes.VEX) {
+			gifts |= FLIGHT;
+		}
+		if (foe instanceof Spider || type == EntityTypes.BAT) {
+			gifts |= NIGHT;
+		}
+		if (foe instanceof Slime || foe instanceof Rabbit || foe instanceof Frog) {
+			gifts |= SPRING;
+		}
+		return new Adopted(BuiltInRegistries.ENTITY_TYPE.getKey(type).toString(), health, damage, armor, pace, gifts);
+	}
+
+	/** {@code foe}'s own value of {@code attribute}, before anything was added (0 if it has none). */
+	private static double base(LivingEntity foe, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute) {
+		var instance = foe.getAttribute(attribute);
+		return instance == null ? 0.0 : instance.getBaseValue();
+	}
+
+	/** (0.7.292) Keeps what they adopted could do going: fire, water, flight (a slow fall), night eyes, a spring. */
+	private static void gifts(ServerPlayer player, Adopted adopted) {
+		int gifts = adopted.gifts();
+		if ((gifts & FIRE) != 0) {
+			gift(player, MobEffects.FIRE_RESISTANCE, 0);
+		}
+		if ((gifts & WATER) != 0) {
+			gift(player, MobEffects.WATER_BREATHING, 0);
+		}
+		if ((gifts & FLIGHT) != 0) {
+			gift(player, MobEffects.SLOW_FALLING, 0);
+		}
+		if ((gifts & NIGHT) != 0) {
+			gift(player, MobEffects.NIGHT_VISION, 0);
+		}
+		if ((gifts & SPRING) != 0) {
+			gift(player, MobEffects.JUMP_BOOST, 1);
+		}
+	}
+
+	private static void gift(ServerPlayer player, net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect, int amplifier) {
+		player.addEffect(new MobEffectInstance(effect, GIFT_TICKS, amplifier, true, false, true));
 	}
 
 	/** A sweet thing: a cookie, a pie, honey, berries, a slice of melon, a cake, or one of Kitchen's. */
@@ -108,6 +222,11 @@ public final class RubberFolk {
 					LEFT.remove(id);
 				}
 				continue;
+			}
+			// (0.7.292) what they adopted keeps working
+			Adopted adopted = player.getAttached(ADOPTED);
+			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && player.isAlive()) {
+				gifts(player, adopted);
 			}
 			// a lost limb grows back, one at a time
 			if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
@@ -163,7 +282,45 @@ public final class RubberFolk {
 			McaBridge.shiftBody(player, BodySizes.sizeFor(shape.height()), BodySizes.widthFor(shape.width()), BodySizes.ABSORB_SHIFT);
 		}
 		player.getFoodData().setFoodLevel(Math.min(20, player.getFoodData().getFoodLevel() + ABSORB_FOOD));
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.absorbed"));
+		// (0.7.292) and they take on what it had, in place of the last thing they swallowed
+		Adopted adopted = adopt(foe);
+		player.setAttached(ADOPTED, adopted);
+		attributes(player, Heritage.Kind.RUBBERFOLK);
+		gifts(player, adopted);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rubber.adopted", foe.getType().getDescription(),
+			describe(adopted)).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+	}
+
+	/** (0.7.292) What they took on, for the chat line: "+5 health, +1.5 blow, fire" and so on. */
+	static Component describe(Adopted adopted) {
+		java.util.List<Component> parts = new java.util.ArrayList<>();
+		if (adopted.health() > 0.0F) {
+			parts.add(Component.translatable("message.jaymoskingdoms.rubber.adopted.health", fmt(adopted.health())));
+		}
+		if (adopted.damage() > 0.0F) {
+			parts.add(Component.translatable("message.jaymoskingdoms.rubber.adopted.damage", fmt(adopted.damage())));
+		}
+		if (adopted.armor() > 0.0F) {
+			parts.add(Component.translatable("message.jaymoskingdoms.rubber.adopted.armor", fmt(adopted.armor())));
+		}
+		if (adopted.pace() != 0.0F) {
+			parts.add(Component.translatable(adopted.pace() > 0.0F ? "message.jaymoskingdoms.rubber.adopted.faster" : "message.jaymoskingdoms.rubber.adopted.slower",
+				Math.round(Math.abs(adopted.pace()) * 100.0F)));
+		}
+		String[] gifts = {"fire", "water", "flight", "night", "spring"};
+		for (int i = 0; i < gifts.length; i++) {
+			if ((adopted.gifts() & 1 << i) != 0) {
+				parts.add(Component.translatable("message.jaymoskingdoms.rubber.adopted." + gifts[i]));
+			}
+		}
+		if (parts.isEmpty()) {
+			return Component.translatable("message.jaymoskingdoms.rubber.adopted.nothing");
+		}
+		return net.minecraft.network.chat.ComponentUtils.formatList(parts, Component.literal(", "));
+	}
+
+	private static String fmt(float value) {
+		return value == Math.round(value) ? Integer.toString(Math.round(value)) : String.format(java.util.Locale.ROOT, "%.1f", value);
 	}
 
 	/** A sweet mends {@code player} by {@code amount}, with a little pink pop. */

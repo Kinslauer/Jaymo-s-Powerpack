@@ -5831,3 +5831,15 @@ Andy: "stone borns should be able to be naturally wider and taller, where sylvan
   the rope to the body as the foe shrinks inside. Swallowed, their body and arms swell round (`SWELL` 0.28) and settle
   back with a wobble over 16 ticks, into the build the foe shifted them to. Everyone sees it. Texture from
   `tools/gen_rubber_skin.py`.
+## 0.7.292: Rubber-folk take on what they swallow (pack 0.17.103)
+Andy: "rubber absorb should take the absorbed's powers/ or abilities. they basically adopt their stats into themselves.
+but only one at a time".
+- A finished swallow (`RubberFolk.absorb`) saves what was taken (`RubberFolk.ADOPTED`, persistent, lost on death) and
+  lays it on as attribute modifiers: half (`ADOPT_SHARE`) of the foe's base max health (up to +10), attack damage (up to
+  +4) and armour (up to +4), and its pace against the usual 0.25 (up to +-20% speed).
+- Gifts by what it was, kept up every 5 s as ambient effects: fire resistance (fireproof things: blazes, magma cubes,
+  striders...), water breathing (anything that breathes water), slow falling (fliers: phantoms, bats, bees, parrots, vexes, chickens...),
+  night vision (spiders, bats), and jump boost II (slimes, frogs, rabbits).
+- Only one at a time: the next swallow replaces it. A chat line says what you took on ("You take on the Blaze: +3
+  health, +3 blow, fireproof. (Your next swallow replaces it.)").
+- Compile-checked only, not seen in game.

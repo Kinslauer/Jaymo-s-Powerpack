@@ -3368,3 +3368,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   up (attachment `HammerSlam.GUARD`, synced), so the cooldown ending mid-guard never fires a smash; charging the smash
   isn't a block. `armory/HammerSlam` (tuning at the top), mixin/WeaponModWarhammerMixin, HammerChargeBlockMixin,
   client HammerPoseMixin/HammerFirstPersonMixin. Compile-checked, not seen in game.
+- **0.17.103, the dead stay in the Other World:** Andy: "you respawn in the afterlife, you can only leave with one of
+  those ways." A Z Fighter who dies among the dead wakes there again with the same stay (its clock, its way home and what
+  they won are kept through death). Falling more than 24 blocks (`FALL_LIMIT`) below the island, or getting out by a
+  pearl, a power or a command, takes them back to the hall (`ZFighterAfterlife.hold`). Only the fortune teller, the 13th
+  wish or the 30-minute wait let them go home. Compile-checked, not seen in game. (With Kingdoms 0.7.292: Rubber-folk take
+  on the stats and gifts of what they swallow.)
