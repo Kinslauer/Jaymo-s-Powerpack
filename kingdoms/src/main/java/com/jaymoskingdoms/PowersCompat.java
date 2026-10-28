@@ -978,4 +978,21 @@ public final class PowersCompat {
 			return null;
 		}
 	}
+
+	/**
+	 * Tells {@code listener} of every forging finished on one of Powers' Smithing Anvils (the smith and the result), by adding
+	 * it to Powers' {@code Provenance.FORGED_LISTENERS}. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void onForged(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> listener) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.tinkering.smithing.Provenance").getField("FORGED_LISTENERS").get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack>>)list).add(listener);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' forging (older Powers?)", e);
+		}
+	}
 }

@@ -1,4 +1,4 @@
-"""Our horses (0.7.303): the shapes of every build (tools/horse_rig.py) written out for BreedHorseModel, and every coat
+"""Our horses (0.7.305): the shapes of every build (tools/horse_rig.py) written out for BreedHorseModel, and every coat
 painted for them, all original and procedural. It replaces tools/gen_moc_horses.py, which painted our coats over Mo'
 Creatures' horse.
 

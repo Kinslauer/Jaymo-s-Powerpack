@@ -1,48 +1,135 @@
 {
   "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:custom_model_data",
-    "index": 0,
-    "cases": [
-      {
-        "when": "wood",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_crimson",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_warped",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "blaze_rod",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_blaze_rod",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
-      },
-      {
-        "when": "wood_crimson",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_crimson"
-        }
-      },
-      {
-        "when": "wood_warped",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_warped"
-        }
-      },
-      {
-        "when": "bone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/arrow_shaft_bone"
-        }
-      },
-      {
-        "when": "blaze_rod",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/arrow_shaft_blaze_rod"
-        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
       }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood"
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood"
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_crimson"
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood_warped"
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_bone"
+          }
+        },
+        {
+          "when": "blaze_rod",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/arrow_shaft_blaze_rod"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/arrow_shaft_wood"
+      }
     }
   }
 }

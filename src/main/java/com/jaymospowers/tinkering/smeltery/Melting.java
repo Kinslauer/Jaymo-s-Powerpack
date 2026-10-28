@@ -304,6 +304,11 @@ public final class Melting {
 
 	/** What the casting table makes from this liquid on this cast (or an item to make a cast from), or null. */
 	public static @Nullable ItemStack tableResult(ItemStack cast, Molten molten) {
+		// (Smithing) the longest blades can't be cast; cast heads come out Well Forged
+		return com.jaymospowers.tinkering.smithing.CastRules.adjust(cast, molten, plainTableResult(cast, molten));
+	}
+
+	private static @Nullable ItemStack plainTableResult(ItemStack cast, Molten molten) {
 		if (gilds(cast)) {
 			// (0.8.115) Andy: Sora's Dagger is gilded in the smeltery, not with a gold block
 			return molten == Molten.GOLD ? cast.transmuteCopy(SorasDagger.STAGES[SorasDagger.GILDED], 1) : null;

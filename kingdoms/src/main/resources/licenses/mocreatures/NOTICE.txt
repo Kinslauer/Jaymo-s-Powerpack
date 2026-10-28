@@ -13,9 +13,9 @@ Taken from it, under that licence:
 
 - the horse's animation (MoCModelNewHorse, 1.10.2 branch: the jointed legs, the head, neck and mane moving together,
   the mouth, the tail, the saddle's stirrups and reins, and the pegasus wings, for the bat horse), which moved its
-  model as MocHorseModel from 0.5.44 and moves our own horse model, BreedHorseModel, since 0.7.303, on bones of the
-  same names and pivots. (From 0.5.44 to 0.7.301 we also drew its horse model and coats painted over its textures
-  horsewhite, horseskeleton, horseundead, horsebat, horsenightmare and the armoured horses; since 0.7.303 the model's
+  model as MocHorseModel from 0.5.44 and moves our own horse model, BreedHorseModel, since 0.7.305, on bones of the
+  same names and pivots. (From 0.5.44 to 0.7.304 we also drew its horse model and coats painted over its textures
+  horsewhite, horseskeleton, horseundead, horsebat, horsenightmare and the armoured horses; since 0.7.305 the model's
   boxes and every coat and armour are our own, kingdoms/tools/gen_horses.py, and those textures are no longer used.)
 
 - (0.5.56) the monsters of legend: the werewolf (MoCModelWere, and MoCEntityWerewolf's change by night, its hide that

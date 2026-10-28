@@ -3483,6 +3483,27 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   ... axis ... as it does not exist" in `LayerBlock.<init>`): `Properties.ofFullCopy` copied a log's map colour, a function
   of its `AXIS`. Layers now take the base's `defaultMapColor()` as a fixed colour. No other base in `LayerList` has a
   state-dependent property (light or colour).
-- **0.17.119, new horses (Kingdoms 0.7.303):** every horse, skeleton horse and zombie horse is drawn in our own model,
+- **0.17.118, Rig scan glow and screen figures (crash fix):** `RigScanClient.color` (via `shouldEntityAppearGlowing`)
+  called `getId()` on every entity drawn, and Kingdoms' life story screen draws an MCA villager that was never added to the
+  level, so it has no id yet (26.3 throws "Tried to access entity ID before ID assignment"): the client crashed on the
+  intro. Entities without an id never glow now; Kingdoms 0.7.302 also gives the figure an id.
+- **0.17.119, smithing after Overgeared (MIT; Kingdoms 0.7.303):** Andy picked every item on the Overgeared pick list
+  ("okay all selected"). Rules and code map in `docs/Smithing.md`. Ingots heat in the Forge Hearth and cool after 60 s;
+  carrying hot metal without tongs (wooden, iron, steel) burns, Emberborn excepted. Sneak-hammer a vanilla anvil into a
+  Smithing Anvil (or stone into a Stone Anvil: caps Well, crumbles after 64 forgings); hot ingots on it, hammer, pick
+  what to forge, then a timing bar per blow. Five grades (Poorly/Well/Expert/Perfect/Masterwork, 15% Masterwork on an
+  all-perfect forging) scale durability, damage, speed, mining and armour, and carry from head to tool. Claymore,
+  broadsword, longsword, katana, ninjato, war scythe, glaive and halberd blades, the Broad Blade and the Large Plate are
+  hammer-only; cast heads come out Well, copies of a graded head a grade lower. Fresh heads glow and must be quenched
+  (water cauldron or source) before the Tool Station; air-cooled ones lose a grade. Blades and axe heads come out rough
+  (cap Expert) until polished at a grindstone (sneak); sneak-use a worn tool there to hone it. Blueprints (Drafting
+  Table copies, wandering traders sell them) lift the Expert cap; steel and slimesteel need an iron anvil and a steel
+  hammer. Graded gear breaks to Broken instead of vanishing; loot and trades are graded; maker's mark "Forged by";
+  Journeyman/Master smiths get a wider perfect zone and forgings count as smith orders; iron, gold and copper armour
+  are hammered (grid recipes off). Knapping: sneak-use a loose rock for a 3x3 grid of stone heads. The fletching table
+  is now a Fletching Station: iron and steel arrows, lingering arrows, Tinkers arrows. Art from `tools/smithing_assets.py`
+  (all drawn here). Compile-checked, not seen in game.
+
+- **0.17.121, new horses (Kingdoms 0.7.305):** every horse, skeleton horse and zombie horse is drawn in our own model,
   a build per breed (feathered drafts, slim coursers, crested destriers, stocky ponies, dished desert horses, the bat
   horse's wings), with every coat and armour repainted for it. See the Kingdoms MODLOG.

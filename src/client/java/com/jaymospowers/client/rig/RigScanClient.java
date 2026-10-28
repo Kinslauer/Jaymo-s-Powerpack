@@ -74,10 +74,17 @@ public final class RigScanClient {
 		if (minecraft.player == null) {
 			return 0;
 		}
-		if (RigClient.status.lock() >= 0 && entity.getId() == RigClient.status.lock()) {
+		// (0.17.118) entities drawn outside the world (another mod's screen figures) have no id yet: never glow
+		int id;
+		try {
+			id = entity.getId();
+		} catch (IllegalStateException e) {
+			return 0;
+		}
+		if (RigClient.status.lock() >= 0 && id == RigClient.status.lock()) {
 			return LOCK_COLOR;
 		}
-		Integer kind = ENTITIES.get(entity.getId());
+		Integer kind = ENTITIES.get(id);
 		return kind == null || kind < 0 || kind >= COLORS.length ? 0 : COLORS[kind];
 	}
 }

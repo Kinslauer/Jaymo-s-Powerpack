@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/template_anvil",
+  "textures": {
+    "particle": "jaymospowers:block/tinkering/anvil_base",
+    "body": "jaymospowers:block/tinkering/anvil_base",
+    "top": "jaymospowers:block/tinkering/smithing_anvil_top"
+  }
+}
