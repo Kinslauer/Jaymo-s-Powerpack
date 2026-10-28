@@ -182,6 +182,8 @@ public final class WeaponParts {
 		add(new Kind("brush_ferrule", "minecraft:brush", Scheme.SINGLE_COPPER, INGOT, Assembly.ROD_BINDING, 1));
 		// Pantry for Blockheads' kitchen knife (its own recipe is dropped by id, tinkering/Uncraftable)
 		add(new Kind("kitchen_knife_blade", "pantryforblockheads:knife", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
+		// (0.17.116) the layer blocks' saw (layers/SawItem): Andy: "it is an iron tool", so it's forged, not crafted
+		add(new Kind("saw_blade", "jaymospowers:saw", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 	}
 
 	private WeaponParts() {

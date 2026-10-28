@@ -5,7 +5,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
 /**
- * (0.17.116) The saw: set in a crafting grid with a wooden block, it cuts the block into {@link LayerBlock#MAX_LAYERS}
+ * (0.17.116) The saw (forged at the Tool Station from a Saw Blade, a Tool Handle and a Tool Binding,
+ * {@code tinkering/WeaponParts}): set in a crafting grid with a wooden block, it cuts the block into {@link LayerBlock#MAX_LAYERS}
  * layers and stays in the grid, worn by one cut, until it wears out.
  */
 public class SawItem extends Item {

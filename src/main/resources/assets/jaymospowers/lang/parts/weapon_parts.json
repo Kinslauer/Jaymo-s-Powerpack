@@ -45,5 +45,6 @@
   "tooltip.jaymospowers.tinkering.weapon_part.makes": "Makes: %s",
   "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it).",
   "item.jaymospowers.soras_dagger_blade": "Sora's Dagger Blade",
-  "item.jaymospowers.soras_blade_cast": "Rose Gold Sora's Dagger Blade Cast"
+  "item.jaymospowers.soras_blade_cast": "Rose Gold Sora's Dagger Blade Cast",
+  "item.jaymospowers.saw_blade": "Saw Blade"
 }

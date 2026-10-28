@@ -6,7 +6,7 @@ Reads each base block's own model (vanilla ones from the game jar, ours from the
 blockstates, models (block/layers/<id>_height<2..14>; 8 layers use the base block's own model), item models, loot
 tables (one item per layer), recipes (wood: the saw and the block in a crafting grid; stone: the stonecutter; 8
 layers craft back into the block), the two block tags, lang/parts/layers.json, the Java list LayerList.java, and the
-saw (texture, model, recipe).
+saw (texture, model; it is forged, see tinkering/WeaponParts).
 """
 import json
 import os
@@ -88,8 +88,7 @@ def saw():
 	write(os.path.join(ASSETS, "models", "item", "saw.json"),
 		{"parent": "minecraft:item/handheld", "textures": {"layer0": f"{NS}:item/saw"}})
 	write(os.path.join(ASSETS, "items", "saw.json"), {"model": {"type": "minecraft:model", "model": f"{NS}:item/saw"}})
-	write(os.path.join(DATA, "recipe", "saw.json"), {"type": "minecraft:crafting_shaped", "category": "equipment",
-		"key": {"S": "minecraft:stick", "I": "minecraft:iron_ingot"}, "pattern": ["SII"], "result": {"id": f"{NS}:saw"}})
+	# no crafting recipe: forged at the Tool Station from a Saw Blade (tinkering/WeaponParts)
 
 
 class Models:
