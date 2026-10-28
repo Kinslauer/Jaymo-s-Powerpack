@@ -180,7 +180,7 @@ public final class Careers {
 		FARMER("farmer", 12, List.of("minecraft:wheat", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot"), List.of("harvest"), null),
 		MINER("miner", 6, List.of("minecraft:coal", "minecraft:raw_iron", "minecraft:raw_copper", "minecraft:cobblestone"), List.of("ore"), null),
 		FISHER("fisher", 4, List.of("minecraft:cod", "minecraft:salmon", "minecraft:cooked_cod"), List.of(), "fishery"),
-		SMITH("smith", 2, List.of("minecraft:iron_ingot", "minecraft:copper_ingot", "minecraft:gold_ingot"), List.of("smelt"), "smithy"),
+		SMITH("smith", 2, List.of("minecraft:iron_ingot", "minecraft:copper_ingot", "minecraft:gold_ingot"), List.of("smelt", "forge"), "smithy"),
 		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay"), "hunting_lodge"),
 		COURIER("courier", 0, List.of(), List.of("carry"), "stable"),
 		WATCH("watch", 0, List.of(), List.of("night", "slay"), null);
@@ -463,6 +463,8 @@ public final class Careers {
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refreshTitles(newPlayer.level().getServer()));
 		PlayerBlockBreakEvents.AFTER.register(Careers::broke);
+		// hammering on Jaymo's Powers' Smithing Anvil is smith work (a finished forging counts one)
+		PowersCompat.onForged((smith, result) -> work(smith.level(), smith, "forge", 1, smith.blockPosition()));
 		ServerLivingEntityEvents.AFTER_DEATH.register(Careers::died);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> hurt(entity, source));
 		UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
@@ -486,6 +488,24 @@ public final class Careers {
 		Career after = change.apply(before);
 		if (!after.equals(before)) {
 			player.setAttached(CAREER, after);
+		}
+	}
+
+	/** Tags Jaymo's Powers reads for a smith's rank (its perfect zone on the hammering bar widens): Journeyman, Master. */
+	static final String[] SMITH_TAGS = {"jaymoskingdoms.smith_rank_1", "jaymoskingdoms.smith_rank_2"};
+
+	/** (Powers' Smithing Anvil) Keeps {@code player}'s smith-rank tag true to the rank they hold. */
+	private static void smithTags(ServerPlayer player) {
+		int rank = heldRank(player, Job.SMITH);
+		for (int i = 0; i < SMITH_TAGS.length; i++) {
+			boolean want = rank == i + 1;
+			if (want != player.entityTags().contains(SMITH_TAGS[i])) {
+				if (want) {
+					player.addTag(SMITH_TAGS[i]);
+				} else {
+					player.removeTag(SMITH_TAGS[i]);
+				}
+			}
 		}
 	}
 
@@ -564,6 +584,9 @@ public final class Careers {
 		int t = server.getTickCount();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			eating(player);
+			if (t % CHECK_TICKS == 0) {
+				smithTags(player);
+			}
 			if (t % CHECK_TICKS != 0 || player.isSpectator()) {
 				continue;
 			}
@@ -707,6 +730,7 @@ public final class Careers {
 			case "harvest" -> Mth.nextInt(random, 24, 48);
 			case "ore" -> Mth.nextInt(random, 10, 20);
 			case "smelt" -> Mth.nextInt(random, 16, 32);
+			case "forge" -> Mth.nextInt(random, 3, 6);
 			case "slay" -> job == Job.WATCH ? Mth.nextInt(random, 4, 8) : Mth.nextInt(random, 6, 12);
 			case "night" -> 1;
 			default -> {

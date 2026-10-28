@@ -6202,6 +6202,7 @@
 	"order.jaymoskingdoms.harvest": "Harvest %s ripe crops in town",
 	"order.jaymoskingdoms.ore": "Mine %s ore near town",
 	"order.jaymoskingdoms.smelt": "Smelt %s ingots",
+	"order.jaymoskingdoms.forge": "Hammer out %s pieces at a smithing anvil",
 	"order.jaymoskingdoms.slay": "Slay %s monsters near town",
 	"order.jaymoskingdoms.night": "Keep watch in town for a night",
 	"order.jaymoskingdoms.carry": "Carry a parcel to %s",

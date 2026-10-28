@@ -94,6 +94,7 @@ public final class Smithing {
 
 		SmithingNet.register();
 		Grades.register();
+		SmithingWider.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				HotMetal.tick(player);
