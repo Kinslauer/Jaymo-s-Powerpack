@@ -32,9 +32,9 @@ final class FrostPrisonKey {
 					ClientPlayNetworking.send(new FrostPrison.Cast());
 				}
 			}
-			// (0.7.262) held: the Bio-built and the Rubber-folk absorb
+			// (0.7.262) held: the Rubber-folk absorb ((0.7.288) the Bio-built toggle it with a press instead)
 			if (key.isDown() && minecraft.player != null && minecraft.gui.screen() == null && minecraft.player.tickCount % 2 == 0
-				&& (Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT) || Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK))
+				&& Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK)
 				&& ClientPlayNetworking.canSend(HeritageHold.Held.TYPE)) {
 				ClientPlayNetworking.send(new HeritageHold.Held());
 			}

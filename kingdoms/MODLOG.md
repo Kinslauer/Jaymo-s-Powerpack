@@ -5795,3 +5795,16 @@ needs a way to back up and manuever better", and "maybe the captain's AI isnt na
   steers for the turn two ahead, works it out again every 10 s, when her goal moves, or when she's stuck. Not while
   she lays her guns on a foe close by.
 - Compile-checked only, not seen in game.
+
+## 0.7.288: Bio-built absorbing is a toggle, with a hand on the foe (pack 0.17.93)
+Andy: "it should animate with some part of the body touching the enemy, and pulsing through both entities, until it
+gradually shrinks to nothing. instead of a hold this is a toggle. that gets interrupted if you are damaged."
+- The heritage key is now pressed once (`BioBuilt.press`, from `Heritage.gift`): on a downed foe within 3 blocks it
+  starts absorbing; pressed again, it lets go; on no foe, the third form buds as before. The Rubber-folk still hold.
+- While it runs (5 s, `ABSORB_TICKS`): the foe is drawn in to 0.9 blocks, under your main hand, which reaches out and
+  down onto it (`ABSORBING` synced, client `BioAbsorbPose`, the body leaning in, the hand trembling); amber rings pulse
+  round both bodies and run along the arm, quicker as it goes; the foe shrinks (a SCALE modifier) to nothing and is
+  taken in.
+- Any damage you take ends it ("Hurt, you lose your hold on it."), as does the foe getting up, dying or being dragged
+  past 4.5 blocks; a foe let go grows back.
+- Compile-checked only, not seen in game.

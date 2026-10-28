@@ -797,8 +797,8 @@ public final class Heritage {
 		if (kind == Kind.WARRIORBORN) {
 			player.addTag(TAIL_TOGGLE_TAG);
 		} else if (kind == Kind.BIOBUILT) {
-			// (0.7.262) in the last form, bud copies (held on a downed foe it absorbs instead: HeritageHold)
-			BioBuilt.bud(player);
+			// (0.7.288) on a downed foe it starts (or stops) absorbing it; else, in the last form, it buds copies
+			BioBuilt.press(player);
 		}
 	}
 
