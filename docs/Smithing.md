@@ -35,3 +35,24 @@ Code: `tinkering/smithing/` (server) and `client/tinkering/smithing/`. Tuning nu
 Average score per blow (perfect 1, good 0.6, miss 0): 0.9 Perfect, 0.72 Expert, 0.45 Well, below that Poor. An
 all-perfect forging rolls Masterwork 15% of the time (gold name, glint). The head's grade carries onto the tool made
 from it at the Tool Station.
+
+## Wider smithing (code: `Wear`, `GradedLoot`, `Provenance`, `ArmourForging`, `SmithingWider`)
+- **Broken, not gone.** A graded weapon, tool or armour piece that would break stays at its last point of durability
+  as Broken ("Broken: repair it"): no attack bonus, no mining speed, no armour, and it can't be used or swung. Any
+  repair (anvil, mending, grindstone merge) frees it. Tinkering tools already broke this way. (Mixin
+  `GradedWearMixin` on `ItemStack.hurtAndBreak`; `Wear`.)
+- **Graded loot and trades.** Gear in loot chests and in villager and wandering trader trades is graded at random
+  (`GradedLoot.LOOT_WEIGHTS` / `TRADE_WEIGHTS`: poor 20, well 60, expert 14, perfect 5, master 1 for loot). In
+  Kingdoms, an armourer's, weaponsmith's or toolsmith's wares on a realm's land are graded by the buyer's reputation
+  with the realm (`GradedTrades`): the hated get mostly Poorly Forged, strangers Well Forged, the revered up to 5%
+  Masterwork; the same buyer sees the same grade on reopening, and rising reputation only raises it. Kingdoms sets
+  only the grade id; Powers bakes it the first time the stack is in a pack (`Wear.BAKED`).
+- **Maker's mark.** Hammered results carry "Forged by <name>" (`Provenance.FORGED_BY`, the smith's display name, so
+  their MCA character name; a costume or mask names them as it does everywhere). It carries onto the tool made from
+  the head (`Grades.CARRIERS`).
+- **Blacksmith rank.** Kingdoms tags a Journeyman Smith `jaymoskingdoms.smith_rank_1` and a Master `_2`; Powers widens
+  the perfect zone by `Provenance.JOURNEYMAN_BONUS` (1.0) / `MASTER_BONUS` (2.0). Each finished forging counts as one
+  "forge" order for a smith's job in a town (Kingdoms: `Careers`, "Hammer out N pieces at a smithing anvil").
+- **Armour.** Iron, gold and copper helmets, chestplates, leggings and boots are hammered for 5/8/7/4 ingots (blows
+  scale with ingots). Their grid recipes are switched off (`tools/tinkering_assets.py` `OFF_ARMOUR`); diamond and
+  chainmail armour stay loot-only. No steel armour exists in the pack yet.

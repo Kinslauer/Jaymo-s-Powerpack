@@ -33,6 +33,8 @@ public final class Grades {
 	public static final List<Function<ItemStack, @Nullable Component>> STATION_REFUSALS = new ArrayList<>();
 	/** The best grade a tool assembled from this head can have (a rough head), or null for no cap. */
 	public static final List<Function<ItemStack, @Nullable Grade>> ASSEMBLY_CAPS = new ArrayList<>();
+	/** Something else that moves from a head onto the tool made from it (the maker's mark): (head, made). */
+	public static final List<java.util.function.BiConsumer<ItemStack, ItemStack>> CARRIERS = new ArrayList<>();
 
 	private Grades() {
 	}
@@ -72,6 +74,11 @@ public final class Grades {
 
 	/** The head's grade passed on to what the Tool Station made from it (capped by the head's state). */
 	public static void carry(ItemStack head, ItemStack made) {
+		if (!made.isEmpty()) {
+			for (java.util.function.BiConsumer<ItemStack, ItemStack> carrier : CARRIERS) {
+				carrier.accept(head, made);
+			}
+		}
 		Grade grade = of(head);
 		if (grade == null || made.isEmpty()) {
 			return;
@@ -143,5 +150,6 @@ public final class Grades {
 				stack.set(DataComponents.TOOL, new Tool(rules, tool.defaultMiningSpeed(), tool.damagePerBlock(), tool.canDestroyBlocksInCreative()));
 			}
 		}
+		Wear.restrict(stack);
 	}
 }

@@ -840,7 +840,8 @@ def trades_data():
 OFF_TIERS = ("wooden", "stone", "copper", "iron", "golden", "diamond")
 OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 # Andy: gold and diamond armour go too (diamond tools come from Tinkering's Diamond modifier)
-OFF_ARMOUR = ("golden", "diamond")
+# (Smithing) iron, copper and gold armour is hammered at the Smithing Anvil instead (tinkering/smithing/ArmourForging)
+OFF_ARMOUR = ("iron", "copper", "golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
 # dropped by tinkering/Uncraftable). (0.11.77) Andy: all weapons are forged, so stone and metal spears are put together

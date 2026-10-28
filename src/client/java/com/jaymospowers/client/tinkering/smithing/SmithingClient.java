@@ -73,6 +73,7 @@ public final class SmithingClient {
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> tooltip(stack, lines));
 		BlockEntityRenderers.register(Smithing.SMITHING_ANVIL_ENTITY, SmithingAnvilRenderer::new);
 		BlockEntityRenderers.register(Smithing.HEARTH_ENTITY, HearthRenderer::new);
+		WiderSmithingClient.init();
 	}
 
 	private static void tick(Minecraft minecraft) {
