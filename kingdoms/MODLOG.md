@@ -6156,7 +6156,7 @@ From Andy's clip of a whaling voyage:
 - A player in a boat when it's hoisted in is set on her deck, not dropped in the sea beside her.
 Compile-checked against the 26.3 jars, not seen in game.
 
-## 0.7.311: shamans and raiders leave captives alone (pack 0.17.130)
+## 0.7.311: shamans and raiders leave captives alone (pack 0.17.131)
 Andy: "shaman is repeatedly attacking the prisoner."
 - A captive in chains is never prey: `Barbarians.prey`/`villagerPrey` (raiders, greenskins, pirates) and
   `Casters.foe` (a camp's shaman, necromancer or blood witch) skip them. They were invulnerable, so the blows did
