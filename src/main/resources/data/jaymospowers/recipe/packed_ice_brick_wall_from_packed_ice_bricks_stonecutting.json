@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:packed_ice_bricks",
+  "result": {
+    "id": "jaymospowers:packed_ice_brick_wall"
+  }
+}

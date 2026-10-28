@@ -1,0 +1,23 @@
+{
+	"block.jaymospowers.icicle": "Icicle",
+	"block.jaymospowers.ice_crystal": "Ice Crystal",
+	"block.jaymospowers.brittle_ice": "Brittle Ice",
+	"block.jaymospowers.packed_ice_bricks": "Packed Ice Bricks",
+	"block.jaymospowers.packed_ice_brick_stairs": "Packed Ice Brick Stairs",
+	"block.jaymospowers.packed_ice_brick_slab": "Packed Ice Brick Slab",
+	"block.jaymospowers.packed_ice_brick_wall": "Packed Ice Brick Wall",
+	"block.jaymospowers.chiseled_packed_ice_bricks": "Chiseled Packed Ice Bricks",
+	"block.jaymospowers.snow_bricks": "Snow Bricks",
+	"block.jaymospowers.snow_brick_stairs": "Snow Brick Stairs",
+	"block.jaymospowers.snow_brick_slab": "Snow Brick Slab",
+	"block.jaymospowers.snow_brick_wall": "Snow Brick Wall",
+	"item.jaymospowers.ice_ball": "Ice Ball",
+	"item.jaymospowers.frostbite_spawn_egg": "Frostbite Spawn Egg",
+	"entity.jaymospowers.frostbite": "Frostbite",
+	"entity.jaymospowers.ice_ball": "Ice Ball",
+	"effect.jaymospowers.freezing": "Freezing",
+	"item.minecraft.potion.effect.freezing": "Potion of Freezing",
+	"item.minecraft.splash_potion.effect.freezing": "Splash Potion of Freezing",
+	"item.minecraft.lingering_potion.effect.freezing": "Lingering Potion of Freezing",
+	"item.minecraft.tipped_arrow.effect.freezing": "Arrow of Freezing"
+}

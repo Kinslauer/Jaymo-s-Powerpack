@@ -14,6 +14,10 @@
     "jaymospowers:ferrosite_mud",
     "jaymospowers:arctic_snow_block",
     "jaymospowers:arctic_snow",
-    "jaymospowers:blighted_soil"
+    "jaymospowers:blighted_soil",
+    "jaymospowers:snow_bricks",
+    "jaymospowers:snow_brick_stairs",
+    "jaymospowers:snow_brick_slab",
+    "jaymospowers:snow_brick_wall"
   ]
 }

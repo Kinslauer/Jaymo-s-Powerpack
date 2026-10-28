@@ -76,6 +76,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();
+		com.jaymospowers.client.frost.FrostClient.init();
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
 		// (BWM port) enchanted books say what gear each enchantment goes on

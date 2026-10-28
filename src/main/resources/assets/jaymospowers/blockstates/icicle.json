@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "part=base,vertical_direction=down": {
+      "model": "jaymospowers:block/frost/icicle_down_base"
+    },
+    "part=middle,vertical_direction=down": {
+      "model": "jaymospowers:block/frost/icicle_down_middle"
+    },
+    "part=tip,vertical_direction=down": {
+      "model": "jaymospowers:block/frost/icicle_down_tip"
+    },
+    "part=base,vertical_direction=up": {
+      "model": "jaymospowers:block/frost/icicle_up_base"
+    },
+    "part=middle,vertical_direction=up": {
+      "model": "jaymospowers:block/frost/icicle_up_middle"
+    },
+    "part=tip,vertical_direction=up": {
+      "model": "jaymospowers:block/frost/icicle_up_tip"
+    }
+  }
+}

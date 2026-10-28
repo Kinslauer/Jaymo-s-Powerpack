@@ -3448,3 +3448,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   client.
   Kingdoms 0.7.300: firefighters throw splash water bottles at fires instead of leaving water source blocks (see
   Kingdoms' log).
+- **0.17.114, the 26.4 snapshots' ice** (Kingdoms 0.7.301; Andy: "can we get the ice blocks/ items from snapshot 26.4? I
+  just really want the way the chilling potion works transferred to frostborn's prison"). The snapshot's potion is the
+  Potion of Freezing. Built from the snapshot notes in our own code and art (`frost/`, `tools/gen_frost.py`); nothing
+  of Mojang's 26.4 art or code is copied, their template models are only parents. `jaymospowers:freezing`
+  (`Freezing`): you freeze as in powder snow (frost overlay, half speed over 7 s), then shake and take 1 freeze damage
+  every 2 s (5x for fire-blooded mobs) until it ends; leather spares the damage, fire and lava keep it off, freeze-immune
+  mobs ignore it. It only adds frozen ticks over the game's thaw, so the game does the overlay, slowing and damage.
+  Potion of Freezing (45 s / 90 s) from an awkward potion + ice ball, splash, lingering, Arrows of Freezing. Ice balls
+  are thrown (4 damage at full speed). The Frostbite (`Frostbite`, a Zombie) walks on powder snow, can't freeze, bites
+  with Freezing, throws its 2-5 ice balls from 4-12 blocks, drowns into a zombie; zombies and husks 15 s in powder snow
+  become one (`ZombieFrostMixin`); spawns in snowy/icy biomes. Blocks: icicles (grow under ice in the dark, fall when
+  their ceiling goes, melt in bright light or the Nether), ice crystals (light 4), brittle ice (cracks under anything
+  living but Frostbites and strays, gives way into the water below), packed ice bricks (+ stairs, slab, wall, chiseled
+  snowflake), snow bricks (+ stairs, slab, wall). Snow settles on packed ice. No ice caves: frozen cave patches with
+  icicles and crystals under snowy biomes, and brittle ice crusts on frozen lakes (`FrostFeatures`). Kingdoms' Frostborn
+  ice prison now gives Freezing II for its stay and 5 s after. Compile-checked, not seen in game.

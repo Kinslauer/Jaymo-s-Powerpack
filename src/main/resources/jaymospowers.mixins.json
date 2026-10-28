@@ -15,6 +15,7 @@
 		"CostumeTabListMixin",
 		"IchorclothMagicMixin",
 		"CrawlJumpMixin",
+		"ZombieFrostMixin",
 		"CrawlPlayerMixin",
 		"DismemberMobMixin",
 		"ExplosionLogMixin",
