@@ -1,139 +1,395 @@
 {
   "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:custom_model_data",
-    "index": 0,
-    "cases": [
-      {
-        "when": "wood",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_wood"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:heated_at",
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood_crimson",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood_warped",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_stone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_granite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_granite",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_diorite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_diorite",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rock_blackstone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_blackstone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "flint",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_flint",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "seared_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_seared_stone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_copper",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_silver",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rose_gold",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_amethyst_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_pig_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_slimesteel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_steel",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
-      },
-      {
-        "when": "wood_crimson",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_wood_crimson"
-        }
-      },
-      {
-        "when": "wood_warped",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_wood_warped"
-        }
-      },
-      {
-        "when": "rock_stone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_rock_stone"
-        }
-      },
-      {
-        "when": "rock_granite",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_rock_granite"
-        }
-      },
-      {
-        "when": "rock_diorite",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_rock_diorite"
-        }
-      },
-      {
-        "when": "rock_blackstone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_rock_blackstone"
-        }
-      },
-      {
-        "when": "flint",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_flint"
-        }
-      },
-      {
-        "when": "bone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_bone"
-        }
-      },
-      {
-        "when": "seared_stone",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_seared_stone"
-        }
-      },
-      {
-        "when": "copper",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_copper"
-        }
-      },
-      {
-        "when": "iron",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_iron"
-        }
-      },
-      {
-        "when": "silver",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_silver"
-        }
-      },
-      {
-        "when": "rose_gold",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_rose_gold"
-        }
-      },
-      {
-        "when": "amethyst_bronze",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_amethyst_bronze"
-        }
-      },
-      {
-        "when": "pig_iron",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_pig_iron"
-        }
-      },
-      {
-        "when": "slimesteel",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_slimesteel"
-        }
-      },
-      {
-        "when": "steel",
-        "model": {
-          "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/part/large_plate_steel"
-        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/large_plate_wood",
+        "tints": [
+          {
+            "type": "minecraft:constant",
+            "value": -26040
+          }
+        ]
       }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "jaymospowers:item/tinkering/part/large_plate_wood"
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "cases": [
+        {
+          "when": "wood",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood"
+          }
+        },
+        {
+          "when": "wood_crimson",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood_crimson"
+          }
+        },
+        {
+          "when": "wood_warped",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_wood_warped"
+          }
+        },
+        {
+          "when": "rock_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_stone"
+          }
+        },
+        {
+          "when": "rock_granite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_granite"
+          }
+        },
+        {
+          "when": "rock_diorite",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_diorite"
+          }
+        },
+        {
+          "when": "rock_blackstone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rock_blackstone"
+          }
+        },
+        {
+          "when": "flint",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_flint"
+          }
+        },
+        {
+          "when": "bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_bone"
+          }
+        },
+        {
+          "when": "seared_stone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_seared_stone"
+          }
+        },
+        {
+          "when": "copper",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_copper"
+          }
+        },
+        {
+          "when": "iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_iron"
+          }
+        },
+        {
+          "when": "silver",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_silver"
+          }
+        },
+        {
+          "when": "rose_gold",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_rose_gold"
+          }
+        },
+        {
+          "when": "amethyst_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_amethyst_bronze"
+          }
+        },
+        {
+          "when": "pig_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_pig_iron"
+          }
+        },
+        {
+          "when": "slimesteel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_slimesteel"
+          }
+        },
+        {
+          "when": "steel",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/large_plate_steel"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/tinkering/part/large_plate_wood"
+      }
     }
   }
 }
