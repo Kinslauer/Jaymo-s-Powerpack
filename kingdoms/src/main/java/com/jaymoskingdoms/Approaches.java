@@ -1116,7 +1116,7 @@ public final class Approaches {
 			return;
 		}
 		if (Handshakes.answerGreeting(player, answer)) {
-			// (0.7.288) a first meeting: shake their hand, or wave
+			// (0.7.289) a first meeting: shake their hand, or wave
 			return;
 		}
 		if (Careers.answer(player, answer)) {

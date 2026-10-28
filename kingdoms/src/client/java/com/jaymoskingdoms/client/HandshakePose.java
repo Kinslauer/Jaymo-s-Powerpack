@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  * waiting), then taken: the two right hands meet, a few slow pumps, and let go. Eased on a spring like
  * {@link PickpocketPose}, and laid over the model right after it's posed. Between two who've shaken hands before, a
  * quick dap: the hand up high, one clasp and a tug in. (0.7.204) A villager taking your hand shakes the same way.
- * (0.7.288) A wave at a first meeting: the right hand raised out to the side, swung to and fro a few times.
+ * (0.7.289) A wave at a first meeting: the right hand raised out to the side, swung to and fro a few times.
  */
 public final class HandshakePose {
 	/** The arm held out: forward and a little down, turned in toward the middle (radians). */
@@ -32,14 +32,14 @@ public final class HandshakePose {
 	static final float DAP_REACH = -1.65F, DAP_IN = -0.55F, DAP_TUG = 0.35F, DAP_LEAN = 0.08F, DAP_QUICKER = 2.5F;
 	/** (0.7.205) How long (ticks) the one taking the hand waits before reaching, so it meets the other in the film's hand shot. */
 	static final float REACH_DELAY = 3.0F;
-	/** (0.7.288) The wave: the arm raised out to the side and a little forward, and its swing (radians), and how fast (radians per tick). */
+	/** (0.7.289) The wave: the arm raised out to the side and a little forward, and its swing (radians), and how fast (radians per tick). */
 	static final float WAVE_UP = 2.5F, WAVE_FORWARD = -0.25F, WAVE_SWING = 0.35F, WAVE_SPEED = 0.7F;
 	/** Head bowed a touch while shaking (radians). */
 	static final float NOD = 0.12F;
 	/** The ease: stiffness (per second squared), damping ratio, the longest step (seconds). */
 	static final float STIFFNESS = 60.0F, DAMPING = 0.85F, MAX_DT = 0.1F, SUBSTEP = 0.008F;
 
-	/** This frame's {weight, ticks into the shake (or -1 while just held out), 1 for a dap (0.7.288: 2 for a wave)} on a render state. */
+	/** This frame's {weight, ticks into the shake (or -1 while just held out), 1 for a dap (0.7.289: 2 for a wave)} on a render state. */
 	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:handshake");
 
 	/** A player's hand: held out or shaking, toward whom, and since when (client game time, for a shake). */
@@ -144,7 +144,7 @@ public final class HandshakePose {
 		float pump = 0.0F, nod = 0.0F;
 		ModelPart arm = m.rightArm;
 		if (pose[2] > 1.5F) {
-			// (0.7.288) a wave: up and out to the side, to and fro
+			// (0.7.289) a wave: up and out to the side, to and fro
 			arm.xRot = Mth.lerp(w, arm.xRot, WAVE_FORWARD);
 			arm.yRot = Mth.lerp(w, arm.yRot, 0.0F);
 			arm.zRot = Mth.lerp(w, arm.zRot, WAVE_UP + Mth.sin(Math.max(0.0F, t) * WAVE_SPEED) * WAVE_SWING);

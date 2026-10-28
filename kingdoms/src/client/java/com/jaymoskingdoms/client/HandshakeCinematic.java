@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * You're turned to face them throughout. (0.7.205) Andy: "One of the frames the cutscene puts front and center NEEDS to
  * be the hands actually coming together": the hands' shot opens the film, so the hands meet in it ({@link
  * Handshakes#GRIP_TICK}), framed on where they meet. Like Jaymo's Powers' beam battle film (our own code, no one else's).
- * (0.7.288) A wave at a first meeting is filmed too, all in the wide shot, so you see yourself wave and them wave back.
+ * (0.7.289) A wave at a first meeting is filmed too, all in the wide shot, so you see yourself wave and them wave back.
  */
 public final class HandshakeCinematic {
 	/** The shots' cuts (ticks into the shake): the hands until {@link #WIDE_CUT}, wide until {@link #FACE_CUT}, then over the shoulder. */
@@ -145,7 +145,7 @@ public final class HandshakeCinematic {
 		Vec3 pos;
 		Vec3 look;
 		if (waving) {
-			// (0.7.288) wide, drawing back a little while you wave and they wave back
+			// (0.7.289) wide, drawing back a little while you wave and they wave back
 			float k = smooth(t / (Handshakes.WAVE_BACK + Handshakes.WAVE_TICKS));
 			pos = hands.add(across.scale(Mth.lerp(k, WIDE_FROM, WIDE_TO))).add(0.0, WIDE_UP, 0.0);
 			look = hands.add(0.0, 0.25, 0.0);
