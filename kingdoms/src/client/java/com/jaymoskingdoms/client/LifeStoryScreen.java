@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -19,13 +20,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -51,6 +55,13 @@ final class LifeStoryScreen extends Screen {
 	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
 	/** (0.7.275) The skip-the-story ask: its box's size. */
 	static final int ASK_W = 240, ASK_H = 96;
+	/**
+	 * (0.7.276) The figure of you at the foot of the left side: its most height, the least room it's drawn in, how
+	 * long one slow turn takes (ms) and how far it turns (a fraction of the side's width each way).
+	 */
+	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
+	static final long FIGURE_TURN_MS = 9000L;
+	static final float FIGURE_TURN = 0.9F;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
 	private record Step(@Nullable Question question, boolean realm) {
@@ -933,6 +944,12 @@ final class LifeStoryScreen extends Screen {
 		ty += 28;
 		// (on the story page, above the heritage and class buttons)
 		int bottom = y + panelH() - FOOTER - 2 - (s.question == null ? 40 : 0);
+		// (0.7.276) the figure under the text, as much of it as there's room for
+		int figureH = Math.min(FIGURE_H, bottom - ty - 3 * Ui.LINE);
+		if (figureH >= FIGURE_MIN_H) {
+			bottom -= figureH;
+			figure(graphics, s, mouseX, mouseY, x + 8, bottom + 2, x + w - 8, bottom + figureH);
+		}
 		// (UI text pass) laid out first; a tale longer than the room scrolls slowly through it and back
 		List<FormattedCharSequence> seqs = new ArrayList<>();
 		List<Integer> at = new ArrayList<>(), colors = new ArrayList<>();
@@ -976,6 +993,74 @@ final class LifeStoryScreen extends Screen {
 		if (over > 0) {
 			graphics.disableScissor();
 			Ui.scrollbar(graphics, x + w - 6, ty, view - 1, view, oy, shift);
+		}
+	}
+
+	/**
+	 * (0.7.276) Andy: "an animated simulation of the character in every story frame, like in bannerlord ... helps the
+	 * user see the effect of every race on their character". You, drawn as the page would make you: the heritage and
+	 * look of the birthplace or childhood pointed at (or picked), holding the answer's picture, slowly looking about. On
+	 * the story page it follows the heritage, look and class buttons. Your own heritage and held item are lent to the
+	 * figure only while it's drawn, then put back.
+	 */
+	private void figure(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY, int x0, int y0, int x1, int y1) {
+		LocalPlayer player = this.minecraft.player;
+		if (player == null) {
+			return;
+		}
+		Heritage.Kind kind = heritage();
+		int look = lookIndex();
+		ItemStack held = ItemStack.EMPTY;
+		if (s.question != null && !s.realm) {
+			int row = rowAt(s, mouseX, mouseY);
+			Answer a = row >= 0 ? s.question.answers().get(row) : picked(s.question);
+			if (a != null) {
+				held = new ItemStack(a.icon());
+				if (s.question == Question.BORN && a.heritage() != null) {
+					kind = a.heritage();
+					look = LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
+				} else if (s.question == Question.CHILDHOOD && kind != null && draft.look < 0) {
+					look = LifeStory.lookFor(kind, a);
+				}
+			}
+		} else if (s.question == null) {
+			// (the class's picture, the one picked over the story's too)
+			Classes.PlayerClass cls = youthClass();
+			for (Answer a : Question.YOUTH.answers()) {
+				if (a.cls() == cls) {
+					held = new ItemStack(a.icon());
+					break;
+				}
+			}
+		}
+		String heritageWas = player.getAttached(Heritage.HERITAGE), variantWas = player.getAttached(HeritageVariants.VARIANT);
+		ItemStack heldWas = player.getItemBySlot(EquipmentSlot.MAINHAND);
+		if (kind != null) {
+			HeritageVariants.Variant v = HeritageVariants.at(kind, look);
+			player.setAttached(Heritage.HERITAGE, kind.key());
+			player.setAttached(HeritageVariants.VARIANT, v == null ? HeritageVariants.BASE : v.key());
+		}
+		player.setItemSlot(EquipmentSlot.MAINHAND, held);
+		try {
+			// (a slow look from side to side, as if the mouse swept past it)
+			double t = (System.currentTimeMillis() % FIGURE_TURN_MS) / (double)FIGURE_TURN_MS * Math.PI * 2;
+			float cx = (x0 + x1) / 2F, cy = y0 + (y1 - y0) * 0.35F;
+			float lookX = cx + (float)Math.sin(t) * (x1 - x0) * FIGURE_TURN, lookY = cy + (float)Math.sin(t * 2) * 6F;
+			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, Math.max(10, (int)((y1 - y0) * 0.42F)), 0.0625F, lookX, lookY, player);
+		} finally {
+			player.setItemSlot(EquipmentSlot.MAINHAND, heldWas);
+			if (kind != null) {
+				restore(player, Heritage.HERITAGE, heritageWas);
+				restore(player, HeritageVariants.VARIANT, variantWas);
+			}
+		}
+	}
+
+	private static void restore(LocalPlayer player, AttachmentType<String> type, @Nullable String was) {
+		if (was == null) {
+			player.removeAttached(type);
+		} else {
+			player.setAttached(type, was);
 		}
 	}
 

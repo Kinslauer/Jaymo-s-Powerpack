@@ -3293,3 +3293,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   front of you. Only the attuned see it. Not seen in game.
 - **0.17.79, skip the story fix (Kingdoms 0.7.276):** after "Skip the story", the story page's Next ("Live this
   life") and Back buttons stayed hidden, so the story could never be lived. They come back once the ask is answered.
+  Same release: every life-story page shows a figure of you at the foot of the left side, slowly looking about
+  (Andy: "an animated simulation of the character in every story frame, like in bannerlord"). It wears the heritage
+  and look of the birthplace or childhood you point at or picked, holds that answer's picture, and on the story page
+  follows the heritage, look and class buttons (holding the class's picture). The heritage and held item are lent to
+  your own player only while it's drawn. Compile-checked here (only the usual Loom-only attachment errors), not seen
+  in game.
