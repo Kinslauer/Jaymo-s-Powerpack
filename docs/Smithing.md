@@ -100,7 +100,8 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
 - Drafting Table (paper x2 over planks x4): use it holding a blueprint with paper in your pack; you get a copy one level lower
   (Well-level copies are as low as it goes and are worth no more than having none).
 - Wandering traders sometimes sell a blueprint (16 emeralds): data in `villager_trade/tinkering/wandering_trader`, added to the
-  trader's uncommon pool. The creative tab has a blueprint for each hammer-only shape.
+  trader's uncommon pool. The creative tab has a blueprint for each hammer-only shape. Armour blueprints name the piece
+  (`armour/helmet`, any metal), and traders sell those too.
 - Test: `/give @s jaymospowers:blueprint[jaymospowers:blueprint_data={shape:"weapon/claymore_blade",xp:40}]`.
 ## Knapping (code: `ground/knapping/`, screen `client/tinkering/KnappingScreen`)
 - **Sneak + use a loose rock** (in hand, aimed at air or at a hard block such as stone, ore or bricks) opens a 3x3 grid of
@@ -127,3 +128,8 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
   bursts into a small cloud of its potion where it lands (`LingeringArrow`: radius 1.75, 10 s); the arrow is spent.
 - The three arrows are in the `minecraft:arrows` tag, so every bow, crossbow and dispenser takes them. Textures:
   `tools/gen_fletching.py`.
+
+## Known limits
+- The hammer game is judged by the smith's own client (the server can't see the bouncing arrow); the server checks reach,
+  the blow rate, the hammer and the anvil and tier rules on every blow, but a tampered client could claim perfect blows.
+- A lingering arrow still in flight when its chunk unloads comes back as a plain tipped arrow.

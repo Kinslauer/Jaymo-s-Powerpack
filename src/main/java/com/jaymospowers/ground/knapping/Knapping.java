@@ -209,9 +209,13 @@ public final class Knapping {
 		return main.is(Items.FLINT) && isRock(off) || isRock(main) && off.is(Items.FLINT);
 	}
 
-	/** Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft (as {@code FirstTools}). */
+	/**
+	 * Stone, bricks, ore and the like: anything that wants a pickaxe and isn't soft (as {@code FirstTools}), and isn't a
+	 * workstation (furnaces, hoppers, anvils and enchanting tables keep their own use).
+	 */
 	private static boolean hard(Level level, BlockPos pos, BlockState state) {
-		return !(state.getBlock() instanceof LooseStonesBlock) && state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F
+		return !(state.getBlock() instanceof LooseStonesBlock) && !state.hasBlockEntity() && !state.is(BlockTags.ANVIL)
+			&& state.requiresCorrectToolForDrops() && state.getDestroySpeed(level, pos) >= 1.0F
 			&& state.is(BlockTags.MINEABLE_WITH_PICKAXE);
 	}
 

@@ -39,7 +39,7 @@ public final class GradedTrades {
 	/** The chance of a Masterwork, of at least Perfect, of at least Expert, at the very top reputation. */
 	static final float MASTER_MAX = 0.05F, PERFECT_MAX = 0.22F, EXPERT_MAX = 0.60F;
 	/** The chance of Poorly Forged gear at the bottom of reputation, and the reputation above which there is none. */
-	static final float POOR_MAX = 0.40F;
+	static final float POOR_MAX = 0.70F;
 	static final int POOR_UNTIL = 300, BOTTOM = -1000;
 
 	private static boolean looked;

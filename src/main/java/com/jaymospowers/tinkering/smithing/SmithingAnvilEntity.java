@@ -240,8 +240,19 @@ public class SmithingAnvilEntity extends BlockEntity {
 		Smithing.Work progress = work.get(Smithing.FORGE_WORK);
 		Forging.Option option = progress == null ? null : Forging.byId(progress.option());
 		ItemStack hammer = player.getMainHandItem();
-		if (option == null || !player.getUUID().equals(smith) || !(hammer.getItem() instanceof SmithingHammerItem)
-			|| now - lastBlow < Forging.BLOW_TICKS - 2 || blow < Forging.MISS || blow > Forging.PERFECT) {
+		if (option == null || !player.getUUID().equals(smith) || blow < Forging.MISS || blow > Forging.PERFECT) {
+			return;
+		}
+		// a blow the anvil won't take still puts the smith's bar back to the anvil's count
+		if (!(hammer.getItem() instanceof SmithingHammerItem) || now - lastBlow < Forging.BLOW_TICKS - 2) {
+			sendSession(player, progress, option);
+			return;
+		}
+		// the rules hold for every blow, not just the first (a steel forging can't be finished with a copper hammer)
+		Component why = refuse(player, option);
+		if (why != null) {
+			player.sendOverlayMessage(why);
+			sendSession(player, progress, option);
 			return;
 		}
 		if (!HotMetal.hot(work, now)) {
@@ -354,6 +365,9 @@ public class SmithingAnvilEntity extends BlockEntity {
 		}
 		if (anvil.smith != null && !anvil.smithNear()) {
 			anvil.endSession();
+		}
+		if (anvil.tier() == SmithingAnvilBlock.STONE_TIER && anvil.uses >= StoneAnvil.MAX_USES) {
+			StoneAnvil.crumbleSoon(anvil);
 		}
 		if (changed) {
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.4F);

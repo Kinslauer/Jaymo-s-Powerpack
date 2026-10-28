@@ -24,5 +24,9 @@
   "message.jaymospowers.smithing.blueprint_level": "%s is now %s.",
   "message.jaymospowers.smithing.drafting_no_paper": "You need paper in your inventory to copy a blueprint.",
   "message.jaymospowers.smithing.drafting_done": "Copied: %s",
-  "message.jaymospowers.smithing.drafting_hint": "Hold a blueprint (with paper in your pack) to copy it."
+  "message.jaymospowers.smithing.drafting_hint": "Hold a blueprint (with paper in your pack) to copy it.",
+  "blueprint.jaymospowers.armour.helmet": "Helmet",
+  "blueprint.jaymospowers.armour.chestplate": "Chestplate",
+  "blueprint.jaymospowers.armour.leggings": "Leggings",
+  "blueprint.jaymospowers.armour.boots": "Boots"
 }

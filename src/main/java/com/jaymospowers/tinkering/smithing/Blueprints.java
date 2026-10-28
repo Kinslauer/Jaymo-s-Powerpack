@@ -54,7 +54,7 @@ public final class Blueprints {
 	/** Shapes the creative tab offers a blueprint for (the wandering trader's few are in data). */
 	public static final List<String> CREATIVE_SHAPES = List.of("weapon/claymore_blade", "weapon/broadsword_blade", "weapon/longsword_blade",
 		"weapon/katana_blade", "weapon/ninjato_blade", "weapon/war_scythe_blade", "weapon/glaive_blade", "weapon/halberd_head",
-		"part/broad_blade", "part/large_plate");
+		"part/broad_blade", "part/large_plate", "armour/helmet", "armour/chestplate", "armour/leggings", "armour/boots");
 
 	private Blueprints() {
 	}
@@ -114,6 +114,11 @@ public final class Blueprints {
 	/** The shape of a forging: its id without the metal on the end. */
 	public static String shape(Forging.Option option) {
 		String id = option.id();
+		if (id.startsWith("armour/")) {
+			// armour/<metal>/<piece>: the metal is in the middle
+			String[] parts = id.split("/");
+			return parts.length == 3 ? "armour/" + parts[2] : id;
+		}
 		int slash = id.lastIndexOf('/');
 		return slash < 0 ? id : id.substring(0, slash);
 	}
@@ -121,6 +126,9 @@ public final class Blueprints {
 	/** "Claymore Blade" for "weapon/claymore_blade". */
 	public static Component shapeName(String shape) {
 		String[] parts = shape.split("/");
+		if (parts.length == 2 && parts[0].equals("armour")) {
+			return Component.translatable("blueprint.jaymospowers.armour." + parts[1]);
+		}
 		return parts.length >= 2 ? Component.translatable("item.jaymospowers." + parts[1]) : Component.literal(shape);
 	}
 

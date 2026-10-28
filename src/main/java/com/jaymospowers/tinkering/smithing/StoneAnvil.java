@@ -4,6 +4,7 @@ import com.jaymospowers.tinkering.kiln.Kiln;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -68,6 +69,7 @@ public final class StoneAnvil {
 				crumbleSoon(anvil);
 			}
 		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> CRUMBLING.clear());
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (!CRUMBLING.isEmpty() && server.getTickCount() % CRUMBLE_CHECK_TICKS == 0) {
 				CRUMBLING.removeIf(StoneAnvil::crumble);
@@ -76,7 +78,8 @@ public final class StoneAnvil {
 		CreativeModeTabEvents.modifyOutputEvent(Kiln.tab()).register(output -> output.accept(STONE_ANVIL));
 	}
 
-	private static void crumbleSoon(SmithingAnvilEntity anvil) {
+	/** Queues a spent stone anvil to crumble (also from its own tick, so a restart doesn't strand one). */
+	static void crumbleSoon(SmithingAnvilEntity anvil) {
 		if (anvil.getLevel() instanceof ServerLevel level) {
 			Spot spot = new Spot(level, anvil.getBlockPos());
 			if (!CRUMBLING.contains(spot)) {
