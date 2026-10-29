@@ -11,6 +11,8 @@ Four of each, all original:
 - road_master: the master at the road's end, a travelling gi (a wrapped top, a wide belt, loose trousers, shin wraps);
 - teller: the fortune teller, a long robe under a fringed shawl, beads, a headscarf;
 - demon_master: a demon master, a dark gi with a sash and spiked pauldrons.
+- patrolman: (0.7.358) a galactic patrolman, a dark fitted bodysuit under a hard chest plate with shoulder guards, white
+  gloves and boots, the patrol's gold badge on the chest.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""
 import os
@@ -333,6 +335,55 @@ def demon_masters():
             demon_master((52, 28, 70), (24, 20, 24), (200, 120, 230), 9703), demon_master((110, 20, 24), (30, 26, 28), (230, 220, 200), 9704)]
 
 
+# ---- a galactic patrolman ------------------------------------------------------------------------------------------
+
+def patrolman(suit, plate, trim, seed):
+    def draw(img, rnd, tone):
+        # the bodysuit, neck to ankle
+        sea.box(img, BODY, suit, 4, rnd)
+        for arm in ARMS:
+            sea.box(img, arm, suit, 4, rnd)
+        for leg in LEGS:
+            sea.box(img, leg, suit, 4, rnd)
+        sea.hands(img, rnd, tone)
+        # white gloves to the forearm, white boots to the shin
+        white = (232, 234, 238)
+        for arm in ARMS:
+            for side in SIDES:
+                x, y, w, h = arm[side]
+                sea.paint(img, (x, y + h - 4, w, 4), white, 3, rnd)
+            sea.paint(img, arm["bottom"], white, 3, rnd)
+        for leg in LEGS:
+            for side in SIDES:
+                x, y, w, h = leg[side]
+                sea.paint(img, (x, y + h - 5, w, 5), white, 3, rnd)
+            sea.paint(img, leg["bottom"], white, 3, rnd)
+        # the hard chest plate (the jacket layer, chest down to the ribs), a trim line at its edge, a belt under it
+        for side in SIDES:
+            x, y, w, h = JACKET[side]
+            sea.paint(img, (x, y, w, 7), plate, 3, rnd)
+            sea.paint(img, (x, y + 7, w, 1), trim, 3, rnd)
+        sea.paint(img, JACKET["top"], plate, 3, rnd)
+        sea.rows(img, BODY, 9, 1, sea.shade(suit, -20), 3, rnd)
+        # shoulder guards: the sleeves' tops and first rows
+        for sleeve in SLEEVES:
+            for side in SIDES:
+                x, y, w, h = sleeve[side]
+                sea.paint(img, (x, y, w, 3), plate, 3, rnd)
+                sea.paint(img, (x, y + 3, w, 1), trim, 3, rnd)
+            sea.paint(img, sleeve["top"], plate, 3, rnd)
+        # the badge: a small gold star on the left breast
+        fx, fy, fw, fh = JACKET["front"]
+        for dx, dy in ((5, 2), (4, 3), (5, 3), (6, 3), (5, 4)):
+            sea.px(img, fx + dx, fy + dy, GOLD)
+    return drawn(draw, seed)
+
+
+def patrolmen():
+    return [patrolman((30, 34, 60), (236, 236, 232), (210, 170, 60), 9801), patrolman((24, 60, 64), (224, 232, 230), (60, 190, 200), 9802),
+            patrolman((56, 22, 28), (232, 226, 220), (200, 60, 50), 9803), patrolman((36, 26, 54), (226, 226, 236), (150, 100, 220), 9804)]
+
+
 def all_outfits():
     out = {}
     uni.numbered(out, "zfighter/keeper", keepers())
@@ -342,6 +393,7 @@ def all_outfits():
     uni.numbered(out, "zfighter/road_master", road_masters())
     uni.numbered(out, "zfighter/teller", tellers())
     uni.numbered(out, "zfighter/demon_master", demon_masters())
+    uni.numbered(out, "zfighter/patrolman", patrolmen())
     return out
 
 

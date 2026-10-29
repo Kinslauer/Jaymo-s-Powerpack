@@ -46,6 +46,8 @@ public final class ZFighterFolk {
 
 	/** Powers' Omen pilots (the future's mech pilots): their tag and kind. They roam and watch on Powers' own say, in MCA's own clothes. */
 	static final String PILOT_TAG = "jaymospowers.omen_pilot", PILOT_KIND = "omen_pilot";
+	/** (0.7.359) Powers' galactic patrolmen: they come and go in their pods, roam and fight on Powers' say, in the patrol's uniform. */
+	static final String PATROL_TAG = "jaymospowers.patrolman";
 
 	/** Powers' tags for its characters, and the outfits each wears ({@code skins/clothing/zfighter/<kind>_<n>}). */
 	static final Map<String, String> KINDS = Map.of(
@@ -57,7 +59,8 @@ public final class ZFighterFolk {
 		"jaymospowers_fortune_teller", "teller",
 		"jaymospowers_demon_master", "demon_master",
 		// (0.7.348) Andy: an Omen's pilot, out of its mech in Powers' future, a curious villager (Powers moves and talks for them)
-		PILOT_TAG, PILOT_KIND);
+		PILOT_TAG, PILOT_KIND,
+		PATROL_TAG, "patrolman");
 	/** A town's (or a camp's) Z Fighter masters: their own villagers, picked by Powers. */
 	static final Set<String> MASTERS = Set.of("jaymospowers_master", "jaymospowers_dark_master");
 
@@ -121,8 +124,9 @@ public final class ZFighterFolk {
 	 */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
-		if (mob.entityTags().contains(PILOT_TAG)) {
+		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG)) {
 			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
+			// ((0.7.359) a galactic patrolman: Powers walks them round the town and into fights)
 			return true;
 		}
 		mob.getNavigation().stop();

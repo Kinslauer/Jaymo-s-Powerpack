@@ -1,7 +1,9 @@
 {
-  "variants": {
-    "": {
-      "model": "jaymospowers:block/space_pod"
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/space_pod"
+      }
     }
-  }
+  ]
 }

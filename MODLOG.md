@@ -3842,3 +3842,45 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Kingdoms 0.7.358's Will node **Unflinching** (2 ranks): each rank, one more hit before those held actions break off
     (`WillSkill.holdHits`).
   - Built, not seen in game.
+- **0.18.6, space travel rework:** Andy: take "The Future" and the bottom line off the star map, and "space travel needs a
+  TON of improvement", with a menu or simulation where you see the pod moving through space (pointing at Ad Astra, whose
+  code is MIT but art All Rights Reserved and which stops at 1.21.1: ideas only). He picked all five pitched changes.
+  - **The future:** off the star map; `go` refuses it. A pod in the future flies nowhere (every world it knows is dust a
+    lifetime on; only going back in time leads home): its map is dark. `Future.podGo/podBack/podReady` are gone.
+  - **Star map** (`ZFighterStarMapScreen`, art in `ZFighterSpaceArt`): a solar system drawn in pixel cells, lit from the
+    sun: Cinder, Home (the Pale Moon round it), Rustfall, Glacia, the Verdant World turning slowly on dotted orbits, the
+    Maw burning in the corner. Click a world for its card: a big view of it, gravity, the whole `.about` text (wrapped,
+    never cut), mission state, fuel burned against fuel held, Launch, and Begin/Give up on the world you stand on. The
+    panel shrinks to fit small screens. The `.blurb` lines are replaced by `.about` and `.gravity`.
+  - **Fuel:** the pod block has `fuel` 0-12 (`ZFighterSpace.FUEL`); coal/charcoal 1, blaze powder 2, blaze rod 3, coal block
+    9, used on the pod. Trips burn `COSTS` by world (moon 1, Verdant 2, Rustfall 3, Glacia 3, Cinder 4, Maw 6; Home burns
+    what the world you are on costs, 1 from the overworld). Creative flies free. A mended moon wreck holds 2.
+  - **Riding the pod** (`ZFighterPodTrip`): the block becomes a block display of the pod drawn 2x that you sit in
+    (`ZFighterPodRideMixin` keeps you in; no damage mid-trip). 3 s countdown (smoke, pings, shaking), then it lifts off
+    with you inside, speeding up over 3.5 s, and keeps climbing while the flight shows, so others watch it go.
+  - **Flight screen** (`ZFighterFlightScreen`): space, streaming starfield in 3 layers (up to speed, cruise, slowing), the
+    world you left sliding away, the pod item drawn 3x on its flame trail, the target growing on the right, a bar and
+    seconds left. 5 s + 1.5 s per fuel unit (6.5 s to the moon, 14 s to the Maw). Space or a click skips it after your
+    first trip (`FLIGHTS` attachment). Closes when the pod you ride changes (the landing) or the world changes.
+  - **Landing anywhere:** no pad. The pod drops from 56 blocks over a random flat dry spot within 360 blocks of a world's
+    middle (a cave floor on Cinder, a wreck deck in the Maw), slowing on its fire, and sets down as a block holding the
+    fuel left; you climb out beside it. Home lands where you left from (or the world spawn). The old pads stay only for
+    the life-story starts (Rustfall's mine, the Maw start). Leaving the game mid-trip ends it: before lift-off the pod
+    stands again with its fuel; after, it is set down where it was going and you wake beside it (`PENDING`).
+  - Previews: project files `art-overhaul/space-travel/` (a PIL port of the drawing; the pod there is a stand-in).
+  - **Pods are rare:** Andy: the pod is the Tinkerer's lost technology, gone with his time machine, and not for sale. The
+    grid recipe is gone; a mined pod drops itself with its fuel (`loot_table/blocks/space_pod`). Ask the Tinkerer about
+    pods and he says as much, in his own muddled way (`talk.jaymospowers.tinkerer.pod.*`).
+  - **Warrior-born raiders** (`ZFighterRaiders`, Andy picked a new raider band): every 5 days or so, at nightfall, 3-5
+    pods come down 30-45 blocks from a settlement with a player near (world tier 1+). A chief (a weakened Tyrant, one
+    of 8 names) and Champion-grade raiders step out and go for villagers, golems and players within 32 blocks. Beat them
+    all and one pod stays as a block with 3 fuel; the rest burn out. Left alone 10 minutes, they fly off.
+  - **Galactic Patrol** (`ZFighterPatrol`): every 3 days a patrolman (an MCA villager Z Fighter in the Patrol suit,
+    Kingdoms' `patrolman` kind) lands by a town in his pod, fights monsters near it, and flies off after 25 minutes.
+    Once introduced he tells his travels (8 stories). At power level 1500+ he offers to swear you in: you get a pod
+    (12 fuel) and a Patrol Licence. Members get 4 blaze powder once a visit and a rank report. Landing on another
+    world with the licence posts a warrant there (one per world per day): a glowing, weakened Tyrant hides 40-70
+    blocks off, tougher with each rank; the arrest pays 12 emeralds and 300 TP, +50% per rank. Ranks at 0/3/8/15/25
+    arrests (Rookie to Commander). Leave the world and the criminal escapes. Using the licence shows rank and warrant.
+  - Not built with Gradle (the cloud can't reach Fabric's Maven); every changed file compiles against the staged 26.3
+    jars. Not seen in game.

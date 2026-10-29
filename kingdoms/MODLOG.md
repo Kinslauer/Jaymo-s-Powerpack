@@ -6720,3 +6720,9 @@ find one living there."
   yourself up while downed, bringing someone round, Second Wind's eating (2 hits without it). The counting is Jaymo's
   Powers' (`WillSkill.holdHits`, pack 0.18.5).
 - Built, not seen in game.
+## 0.7.359: Galactic Patrolmen (pack 0.18.6)
+- New Z Fighter folk kind `patrolman` (`ZFighterFolk.PATROL_TAG`, `jaymospowers.patrolman`): Powers' `ZFighterPatrol`
+  lands them in pods by towns. Like Omen pilots, `step` leaves them alone so Powers moves them and they never stand post.
+- Four Patrol suits from `tools/gen_zfighter_outfits.py` (`patrolman()`): dark bodysuit, white chest plate and shoulder
+  guards, white gloves and boots, gold badge (`skins/clothing/zfighter/patrolman_0-3.png`).
+- Compile-checked. Not seen in game.
