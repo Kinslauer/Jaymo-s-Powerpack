@@ -3,12 +3,12 @@
 Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
 cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
 `Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
-page, every answer's tale and the closing line, plus (Kingdoms 0.7.349) the who-are-you page, the skip-the-story ask and
+page, every answer's tale and the closing line, plus (Kingdoms 0.7.352) the who-are-you page, the skip-the-story ask and
 the hold screen; the spirits read their summon lines; (Kingdoms 0.7.348) each tongue's
 greeting, farewell, cheer and scream (`tongue.jaymoskingdoms.<tongue>.<line>`), by a man and a woman of that land, made
 up words heard by those who don't speak it (`Voices.TONGUE_LINES`). Clips go straight into
 kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/<voice>/<name>.ogg (mono Vorbis); a clip already there is
-skipped, so a stopped run picks up where it left off. (Powers 0.17.183) The symbiote's combat calls (every say.* line;
+skipped, so a stopped run picks up where it left off. (Powers 0.17.202) The symbiote's combat calls (every say.* line;
 its mood variants, mood.say.*, can follow) goes into Powers' assets/jaymospowers/sounds/voice/symbiote, roughened afterwards
 (`grit`, then a growl into every word: `snarl`), and Powers plays whichever lines its sounds.json lists (`WebSymbioteVoice`). Delete a clip to remake it; delete a ref wav (or change its seed) to
 redesign a voice (then delete its clips too).
@@ -47,7 +47,7 @@ VOICES = {
     "ambrose": dict(seed=41, desc="A kind, gentle elderly grandfather wizard, soft warm voice, patient and fond"),
     "thessaly": dict(seed=51, desc="A prim, fussy elderly female scholar witch, crisp precise voice, scolding but fond"),
     "quiet": dict(seed=61, desc="An ancient, hollow, breathy whisper, very slow, neither male nor female, distant and echoing"),
-    # (Powers 0.17.183) Andy: "a snarling visceral voice". Lowered again in game for the black strain (WebSymbioteVoice).
+    # (Powers 0.17.202) Andy: "a snarling visceral voice". Lowered again in game for the black strain (WebSymbioteVoice).
     # Andy (2026-10-29): "The symbiote should hang on every word longer", then "it should be a long snarl and growl into
     # each word instead of the current meek whimper into silence". So no written pauses: each word is drawn out and a
     # growl swells into it (`snarl`).
@@ -99,7 +99,7 @@ QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road"]
 SPIRIT_LINES = [f"spirit.jaymoskingdoms.{s}.summon.{n}" for s in ("grimsby", "varro", "ambrose", "thessaly") for n in (1, 2, 3)] \
     + ["spirit.jaymoskingdoms.quiet.word.1"]
 STORY_END = "story.jaymoskingdoms.summary.end"
-# (Kingdoms 0.7.342) Voices.INTRO_LINES
+# (Kingdoms 0.7.352) Voices.INTRO_LINES
 INTRO_LINES = ["story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc",
                "gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc"] \
     + ["gui.jaymoskingdoms.story.hold." + k for k in ("title", "realm", "harbour", "future", "arriving")]

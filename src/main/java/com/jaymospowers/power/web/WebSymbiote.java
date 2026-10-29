@@ -1425,7 +1425,7 @@ public final class WebSymbiote {
 		String line = WebSymbioteMind.voice(player, key);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + line, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
-		// (0.17.183) its narration is spoken aloud too, where the line has a clip
+		// (0.17.202) its narration is spoken aloud too, where the line has a clip
 		WebSymbioteVoice.speak(player, line);
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);

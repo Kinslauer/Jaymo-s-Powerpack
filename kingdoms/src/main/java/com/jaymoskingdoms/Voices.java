@@ -39,7 +39,7 @@ public final class Voices {
 	/** (0.7.269) The story's closing line, read after the whole tale (its text is gui.jaymoskingdoms.story.summary_sub). */
 	public static final String STORY_END = "story.jaymoskingdoms.summary.end";
 	/**
-	 * (0.7.342) Andy: "redo the intro lines that dont already have lines". The pages the narrator was still silent on: who
+	 * (0.7.352) Andy: "redo the intro lines that dont already have lines". The pages the narrator was still silent on: who
 	 * you are (the ask and its grey line, now only heard), the skip-the-story ask, and the hold screen's lines.
 	 */
 	public static final List<String> INTRO_LINES = List.of(

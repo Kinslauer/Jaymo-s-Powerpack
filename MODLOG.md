@@ -3749,7 +3749,58 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Compile-checked only; not seen in game.
 - **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
   players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
-- **0.17.198, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
+- **0.17.198, other-world starts (Kingdoms 0.7.349, `ZFighterStarts`):** Andy: "new starts, involving the other
+  worlds". The life story's last question can now wake you on one of them (`ZFighterStarts.land`, called by Kingdoms):
+  - **Pale Moon:** a crashed pod (`space_pod_wreck`, unbreakable) in a scorched crater 600-900 blocks out. Andy: "Fix it
+    first": use 6 iron, 4 copper, 8 redstone and 4 coal (or charcoal) on it in turn and it becomes a working pod. An
+    empty hand says what it needs next. Kit: stone pickaxe, torches, the pilot's log (oblique hints only).
+  - **Verdant World:** next to a village there, with a gate ring 150-300 blocks off and a compass to it. Going through
+    builds the Tower and Lookout first if no one has (`ZFighterSites.ensureTower`), so you never land on empty sky.
+  - **Rustfall:** a mine mouth 160-260 blocks from the Iron-Master's pad (built, with its pod). For a day, bare-handed
+    overseers (`jaymospowers_overseer`, vindicators) come after you, at most 2 near; leaving Rustfall ends it.
+  - **Maw:** on the salvagers' pad with blackstone bricks and a lantern.
+  - **Demon master:** in a Gloam village (any demon biome if none), its master at his post, with a ruined but lit
+    Nether portal nearby. The demon army leaves you alone until you first leave the Nether (`ZFighterStarts.WARD`).
+  - **Afterlife:** held in the Aether afterlife (`ZFighterAfterlife.strand`) with the usual ways out; home is the
+    overworld spot the story would have used.
+  - `ZFighterDemonRealm.raiseHome` builds or reuses the demon village nearest a spot; `ZFighterSpace.surface` is
+    package-private for the moon.
+- **0.17.199, faster loading (Kingdoms 0.7.350):** Andy asked whether FastNoiseLite would speed up load times. It
+  wouldn't: our dimensions are vanilla density-function JSON, so vanilla's noise code does that work, and swapping it
+  would change every world's terrain. His log showed where a new world's time goes instead: 60 s picking the spawn,
+  34 s of spawn chunks, then 20 s stuck between "logged in" and "joined" on Kingdoms' capital search. So:
+  - Kingdoms 0.7.350 looks for the first capital's village a few places a tick instead of all at once on the join.
+  - The pack now ships Lithium 0.26.3, FerriteCore 9.0.0 and C2ME 0.4.2-alpha.0.106 (26.3 builds, unchanged; not in
+    the CurseForge zip until their CurseForge ids are looked up). ModernFix has no 26.3 build.
+  - `core/StreamsPreset` sets Streams Reflowing's terrain accuracy from MEDIUM to LOW once per install (lighter stream
+    planning per new chunk). Its fast terrain mode is on by default already; Streams turns it off where it doesn't fit.
+  - Compile-checked only; not seen in game.
+- **0.17.200, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
+  - Crater-ring blasts go off `CRATER_BLASTS_PER_TICK` (3) a tick, in a scattered order, instead of a whole ring (up
+    to 22 TNT-strength blasts) in one tick.
+  - The sweep of what's left hanging brings down `GravityMeteorSweep.BREAK_PER_TICK` (1200) blocks a tick, highest
+    first, instead of up to 12000 in one tick. Its "already floating" scan runs when the meteor is called (before the
+    rock has cut anything loose) instead of on the impact tick, and its flood fill no longer makes a BlockPos for every
+    ground block.
+  - Blocks the rock or sweep break with nothing but air or other breaking blocks round them go without neighbour or
+    shape updates; only the hole's edge gets full updates.
+  - Fewer drops: 3% of carved and swept blocks drop items (was 10%).
+  - Low-end mode halves the burst's debris, smoke and hanging dust on that client (`GravityMeteorFx.LOW_END_SHARE`).
+  - Jolt physics (the Velthoric mod) was looked at: LGPL, 1.20.1/1.21.1 only, and a physics engine adds work rather than
+    removing block-update cost, so it isn't used.
+  - Compile-checked only; not seen in game.
+- **0.17.201, new Blockbench models (Kingdoms 0.7.351):** Andy sent six Blockbench Workshop models (all CC BY 4.0) and
+  asked where they'd fit.
+  - Arsenal's Void Flintlock is the "Dueling Pistol" in the hand and in the inventory (`models/item/flintlock_3d`,
+    `tools/blockbench/dueling_pistol.py`), laid on the old held sprite's diagonal so the old hand placements fit. The spent
+    gun uses the same model.
+  - The Echo Cleaver relic is the "Mandrake" sword, a mandrake root wound round its hilt (`tools/blockbench/mandrake.py`).
+  - `tools/blockbench/freeform.py`: converts a model to item-model elements with its turns kept exactly (26.3 reads
+    free x/y/z element rotations), group turns and inflate folded in.
+  - Kingdoms: the Kintsugi Armour and Primal Visage sets, whaleboats drawn as a launch, and the Skeleton Lord boss (see
+    the Kingdoms MODLOG, 0.7.351).
+  - Compile-checked only; not seen in game, and no dev server was booted for the new Kingdoms registries.
+- **0.17.202, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
   symbiotes?" and picked its combat calls first. Every `say.*` line (201: what it says as it strikes, kills, grabs,
   feeds, digs, climbs, slings and so on, for all three strains) is spoken aloud as well as shown, only to the host, at
   their head. The voice is designed with VoxCPM2 (Apache-2.0, from a description: deep, guttural, wet, snarling; no real

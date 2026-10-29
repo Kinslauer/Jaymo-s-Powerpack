@@ -29,7 +29,7 @@ final class StoryHoldScreen extends Screen {
 	/** What the server holds this client for (a lang key), or "" for nothing. */
 	private static String holding = "";
 	/**
-	 * (0.7.342) The narrator reads the screen ({@link Voices}): its title once, then each line as the hold moves on. What it
+	 * (0.7.352) The narrator reads the screen ({@link Voices}): its title once, then each line as the hold moves on. What it
 	 * last began reading, the line being read, those still to read, and when the line began (ms).
 	 */
 	private static String read = "";

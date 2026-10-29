@@ -83,9 +83,28 @@ heavenly_mantle.png (bbmodels/heavenly_mantle.json), and textures/item/heavenly_
   Changes: baked to our loader's format (it was made for GeckoLib); the item icons are its pieces drawn small with an
   outline (kingdoms/tools/gen_heavenly.py).
 
+kintsugi_armour.png (bbmodels/kintsugi_armour.json), and textures/item/kintsugi_*.png: the Kintsugi Armour
+  "Kintsugi Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi-armor
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer; the item icons are its
+  pieces drawn small with an outline (kingdoms/tools/gen_kintsugi_primal.py).
+
+primal_visage.png (bbmodels/primal_visage.json), and textures/item/primal_*.png: the Primal Visage armour
+  "Primal Visage Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/primal-visage-armor
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer; the item icons are its
+  pieces drawn small with an outline (kingdoms/tools/gen_kintsugi_primal.py).
+
 textures/item/*_tome.png (models/item/*_tome): the nine elemental spell tomes
   "Weapon - Starter Tome", Blockbench Workshop (maker's name not in the file; fill in from the model page)
   Changes: turned into item models, cover and gem recoloured per element, our own display (tools/blockbench/elemental_tomes.py).
 textures/item/harpoon_3d.png (models/item/harpoon): the whalers' harpoon
   "Harpoon", Blockbench Workshop (maker's name not in the file)
   Changes: turned into an item model (tools/blockbench/harpoon.py), its iron texture only, rotations snapped to legal steps.
+
+whaleboat.png (bbmodels/whaleboat.json): the whalers' boats
+  "Launch", Blockbench Workshop (tools/bbmodels/launch.bbmodel; maker's name not in the file)
+  Changes: baked to our loader's format; drawn at 1.2 size over the spruce boat a whaleboat is.
+
+skeleton_lord.png (bbmodels/skeleton_lord.json): the Skeleton Lord
+  "Skeleton Lord", Blockbench Workshop (tools/bbmodels/skeleton-lord.bbmodel; maker's name not in the file)
+  Changes: baked to our loader's format, its five textures stacked on one sheet; drawn at 0.55 size; its crystals shown
+  only while he sleeps; its laugh pose given a working jaw by our own code.

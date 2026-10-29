@@ -16,7 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.183) Andy: "Can you add a snarling visceral voice to the symbiotes?" Its combat calls are spoken aloud: every
+ * (0.17.202) Andy: "Can you add a snarling visceral voice to the symbiotes?" Its combat calls are spoken aloud: every
  * {@code say.*} line (Andy picked these first; its moods' {@code mood.say.*} variants are still text only), made with
  * VoxCPM2 (a voice designed from a description, no real person cloned) by {@code tools/voices/make_voices.py} and
  * roughened there. A line is voiced when Powers' {@code sounds.json} lists

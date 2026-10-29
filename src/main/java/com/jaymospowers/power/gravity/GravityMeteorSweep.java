@@ -1,13 +1,20 @@
 package com.jaymospowers.power.gravity;
 
+import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
@@ -30,8 +37,16 @@ final class GravityMeteorSweep {
 	/** The biggest clump taken as wreckage, and the most blocks one sweep breaks. */
 	static final int CLUMP_MAX = 4000, BREAK_MAX = 12000;
 	/** This share of what comes down drops as items; one block in {@code SHOW_ONE_IN} shows its break. */
-	static final float DROP_CHANCE = 0.1F;
+	static final float DROP_CHANCE = 0.03F;
 	static final int SHOW_ONE_IN = 4;
+	/** (0.17.200) At most this many blocks come down a tick (all at once was a lag spike), the highest first. */
+	static final int BREAK_PER_TICK = 1200;
+
+	/** A sweep's blocks still to come down. */
+	private record Pending(ResourceKey<Level> dimension, ArrayDeque<BlockPos> left, LongOpenHashSet going) {
+	}
+
+	private static final List<Pending> PENDING = new ArrayList<>();
 
 	private GravityMeteorSweep() {
 	}
@@ -47,29 +62,85 @@ final class GravityMeteorSweep {
 		return out;
 	}
 
-	/** Brings down every clump hanging round {@code at} that wasn't there before ({@code before}, from {@link #floating}). */
+	/**
+	 * Brings down every clump hanging round {@code at} that wasn't there before ({@code before}, from {@link #floating}):
+	 * {@code BREAK_PER_TICK} blocks a tick from here on (see {@link #tick}).
+	 */
 	static void sweep(ServerLevel level, Vec3 at, double reach, Set<Long> before) {
-		var random = level.getRandom();
-		int broken = 0;
+		List<BlockPos> all = new ArrayList<>();
 		for (List<BlockPos> clump : clumps(level, at, reach)) {
 			if (clump.stream().anyMatch(pos -> before.contains(pos.asLong()))) {
 				continue;
 			}
 			for (BlockPos pos : clump) {
-				if (broken++ >= BREAK_MAX) {
-					return;
+				if (all.size() >= BREAK_MAX) {
+					break;
+				}
+				all.add(pos);
+			}
+		}
+		if (all.isEmpty()) {
+			return;
+		}
+		// the highest first, so nothing loose in it (sand, gravel) is left unpropped to fall
+		all.sort((a, b) -> Integer.compare(b.getY(), a.getY()));
+		LongOpenHashSet going = new LongOpenHashSet(all.size());
+		for (BlockPos pos : all) {
+			going.add(pos.asLong());
+		}
+		PENDING.add(new Pending(level.dimension(), new ArrayDeque<>(all), going));
+	}
+
+	static void tick(MinecraftServer server) {
+		for (Iterator<Pending> it = PENDING.iterator(); it.hasNext(); ) {
+			Pending pending = it.next();
+			ServerLevel level = server.getLevel(pending.dimension());
+			if (level == null) {
+				it.remove();
+				continue;
+			}
+			var random = level.getRandom();
+			for (int i = 0; i < BREAK_PER_TICK && !pending.left().isEmpty(); i++) {
+				BlockPos pos = pending.left().poll();
+				pending.going().remove(pos.asLong());
+				if (!level.isLoaded(pos)) {
+					continue;
 				}
 				BlockState state = level.getBlockState(pos);
+				if (state.isAir()) {
+					continue;
+				}
 				if (random.nextFloat() < DROP_CHANCE || state.hasBlockEntity()) {
 					level.destroyBlock(pos, true);
 				} else {
 					if (random.nextInt(SHOW_ONE_IN) == 0) {
 						level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, pos, Block.getId(state));
 					}
-					level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+					// with only air or more of the wreckage round it, it goes quietly; the clump's outside gets full updates
+					level.setBlock(pos, Blocks.AIR.defaultBlockState(), inside(level, pos, pending.going()) ? Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE
+						: Block.UPDATE_ALL);
 				}
 			}
+			if (pending.left().isEmpty()) {
+				it.remove();
+			}
 		}
+	}
+
+	static void clear() {
+		PENDING.clear();
+	}
+
+	/** True if every block beside {@code pos} is air or one of {@code going} (so no neighbour needs telling it went). */
+	static boolean inside(ServerLevel level, BlockPos pos, LongOpenHashSet going) {
+		BlockPos.MutableBlockPos side = new BlockPos.MutableBlockPos();
+		for (Direction direction : Direction.values()) {
+			side.setWithOffset(pos, direction);
+			if (!going.contains(side.asLong()) && !level.getBlockState(side).isAir()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** The clumps of blocks in the box round {@code at} that touch nothing holding them up (see the class comment). */
@@ -105,7 +176,7 @@ final class GravityMeteorSweep {
 			}
 		}
 		int[][] sides = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
-		ArrayDeque<int[]> queue = new ArrayDeque<>();
+		IntArrayFIFOQueue queue = new IntArrayFIFOQueue();
 		for (int dx = 0; dx < sx; dx++) {
 			for (int dz = 0; dz < sz; dz++) {
 				for (int dy = 0; dy < sy; dy++) {
@@ -113,19 +184,25 @@ final class GravityMeteorSweep {
 					if (cells[start] != 1) {
 						continue;
 					}
+					// (cell indexes, not positions: the ground itself is one huge held clump, never worth a BlockPos a block)
 					List<BlockPos> clump = new ArrayList<>();
 					boolean held = false;
 					cells[start] = 3;
-					queue.add(new int[] {dx, dy, dz});
+					queue.enqueue(start);
 					while (!queue.isEmpty()) {
-						int[] c = queue.poll();
-						clump.add(new BlockPos(x0 + c[0], y0 + c[1], z0 + c[2]));
+						int cell = queue.dequeueInt();
+						int cy = cell % sy, cz = cell / sy % sz, cx = cell / sy / sz;
 						// at the box's edge it may go on outside it, held up there
-						if (c[0] == 0 || c[0] == sx - 1 || c[2] == 0 || c[2] == sz - 1 || c[1] == 0 || c[1] == sy - 1) {
+						if (cx == 0 || cx == sx - 1 || cz == 0 || cz == sz - 1 || cy == 0 || cy == sy - 1) {
 							held = true;
 						}
+						if (held) {
+							clump.clear();
+						} else {
+							clump.add(new BlockPos(x0 + cx, y0 + cy, z0 + cz));
+						}
 						for (int[] side : sides) {
-							int nx = c[0] + side[0], ny = c[1] + side[1], nz = c[2] + side[2];
+							int nx = cx + side[0], ny = cy + side[1], nz = cz + side[2];
 							if (nx < 0 || nx >= sx || ny < 0 || ny >= sy || nz < 0 || nz >= sz) {
 								continue;
 							}
@@ -134,7 +211,7 @@ final class GravityMeteorSweep {
 								held = true;
 							} else if (cells[n] == 1) {
 								cells[n] = 3;
-								queue.add(new int[] {nx, ny, nz});
+								queue.enqueue(n);
 							}
 						}
 					}

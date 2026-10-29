@@ -639,6 +639,54 @@
 			}
 		]
 	},
+	"voice.narrator.road.moon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_moon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.verdant.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_verdant_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.rustfall.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_rustfall_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.maw.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_maw_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.demon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_demon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.afterlife.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_afterlife_tale",
+				"stream": true
+			}
+		]
+	},
 	"voice.narrator.summary.end": {
 		"sounds": [
 			{

@@ -85,6 +85,8 @@ final class GravityMeteor {
 	static final int CRATER_RINGS = 3;
 	static final double CRATER_RING_STEP = 8.0, CRATER_RING_SPACING = 7.0;
 	static final float CRATER_RING_POWER = 5.0F;
+	/** (0.17.200) At most this many crater-ring blasts go off a tick (a full charge's outer ring is 22; all at once was a lag spike). */
+	static final int CRATER_BLASTS_PER_TICK = 3;
 	/** Its burning trail sets alight whatever it passes within this reach (blocks) of its surface, for this long (seconds). */
 	static final double TRAIL_FIRE_RADIUS = 2.5;
 	static final int TRAIL_FIRE_SECONDS = 5;
@@ -96,7 +98,7 @@ final class GravityMeteor {
 	static final int CARVE_MAX_PER_TICK = 6000;
 	/** One broken block in this many shows its break (dust and sound); the rest just go (thousands a tick would flood clients). */
 	static final int CARVE_SHOW_ONE_IN = 6;
-	static final float CARVE_DROP_CHANCE = 0.1F;
+	static final float CARVE_DROP_CHANCE = 0.03F;
 	/** The impact sets alight everything within this reach (blocks) of where it lands (a tap's), for this long (seconds). */
 	static final double IMPACT_FIRE_RADIUS = 4.0;
 	/** The wreck: how many lumps the rock bursts into (a tap's, a full charge's), how long they lie (ticks), how hard they fly out. */
@@ -138,6 +140,8 @@ final class GravityMeteor {
 		final Set<Integer> hit = new HashSet<>();
 		/** Where it was last tick, while it grinds in. */
 		Vec3 sunkTo;
+		/** (0.17.200) What already hung in the air round where it lands, looked at when it was called (see GravityMeteorSweep). */
+		Set<Long> floatingBefore = Set.of();
 
 		Meteor(ResourceKey<Level> dimension, UUID owner, int rock, Vec3 from, Vec3 to, long start, float charge, int fall) {
 			this.dimension = dimension;
@@ -167,6 +171,8 @@ final class GravityMeteor {
 		/** What already hung in the air round the strike before it (left be when the wave is done, see GravityMeteorSweep). */
 		final Set<Long> floatingBefore;
 		int rings;
+		/** Crater-ring blasts the wave has reached but that haven't gone off yet ({@code CRATER_BLASTS_PER_TICK} a tick). */
+		final java.util.ArrayDeque<Vec3> blasts = new java.util.ArrayDeque<>();
 
 		Wave(ResourceKey<Level> dimension, UUID owner, Vec3 at, long start, float charge) {
 			this.dimension = dimension;
@@ -237,7 +243,11 @@ final class GravityMeteor {
 		// always scaled (even a tap's), so it's drawn from far off: it starts a long way up
 		rock.setAttached(BlockCluster.SCALE, size);
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.TRACK, fall + FILM_AFTER, to, rock, FILM_WITNESSES);
-		METEORS.add(new Meteor(level.dimension(), player.getUUID(), rock.getId(), from, to, level.getGameTime(), charge, fall));
+		Meteor meteor = new Meteor(level.dimension(), player.getUUID(), rock.getId(), from, to, level.getGameTime(), charge, fall);
+		// what already hangs in the air there (an Aether islet, a cloud) is left be by the sweep after; looked at now, before
+		// the rock has cut anything loose, and not on the impact tick, which has enough to do
+		meteor.floatingBefore = GravityMeteorSweep.floating(level, to, sweepRadius(charge));
+		METEORS.add(meteor);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 2.0F + 4.0F * charge, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.5F, 0.4F);
 		return true;
@@ -297,7 +307,7 @@ final class GravityMeteor {
 				}
 				it.remove();
 				List<Integer> debris = debrisStates();
-				impact(level, owner, ground, meteor.charge);
+				impact(level, owner, ground, meteor.charge, meteor.floatingBefore);
 				// after the blast, so the wreck isn't caught in it
 				wreck(level, ground, meteor.charge);
 				burst(level, ground, meteor.charge, debris);
@@ -360,6 +370,7 @@ final class GravityMeteor {
 				GravityMeteorSweep.sweep(level, wave.at, sweepRadius(wave.charge), wave.floatingBefore);
 			}
 		}
+		GravityMeteorSweep.tick(server);
 	}
 
 	private static void move(Entity rock, Vec3 at) {
@@ -452,6 +463,10 @@ final class GravityMeteor {
 		java.util.Set<net.minecraft.core.BlockPos> done = new HashSet<>();
 		var random = level.getRandom();
 		int broken = 0;
+		// what goes this tick, gathered first so that blocks with nothing but air or other going blocks round them can go
+		// quietly (no neighbour or shape updates); only the hole's edge gets full updates
+		List<net.minecraft.core.BlockPos> going = new ArrayList<>();
+		it.unimi.dsi.fastutil.longs.LongOpenHashSet goingAt = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 		for (int i = 1; i <= steps && broken < CARVE_MAX_PER_TICK; i++) {
 			Vec3 c = from.lerp(to, i / (double)steps);
 			if (c.y < level.getMinY() || c.y > level.getMaxY() || !level.isLoaded(net.minecraft.core.BlockPos.containing(c))) {
@@ -473,16 +488,24 @@ final class GravityMeteor {
 				if (state.getDestroySpeed(level, pos) < 0.0F) {
 					continue;
 				}
-				if (random.nextFloat() < CARVE_DROP_CHANCE || state.hasBlockEntity()) {
-					level.destroyBlock(pos, true, owner);
-				} else {
-					if (random.nextInt(CARVE_SHOW_ONE_IN) == 0) {
-						level.levelEvent(net.minecraft.world.level.block.LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, pos, net.minecraft.world.level.block.Block.getId(state));
-					}
-					level.setBlock(pos, Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
-				}
+				net.minecraft.core.BlockPos at = pos.immutable();
+				going.add(at);
+				goingAt.add(at.asLong());
 				broken++;
 			}
+		}
+		for (net.minecraft.core.BlockPos pos : going) {
+			BlockState state = level.getBlockState(pos);
+			if (random.nextFloat() < CARVE_DROP_CHANCE || state.hasBlockEntity()) {
+				level.destroyBlock(pos, true, owner);
+				continue;
+			}
+			if (random.nextInt(CARVE_SHOW_ONE_IN) == 0) {
+				level.levelEvent(net.minecraft.world.level.block.LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, pos, net.minecraft.world.level.block.Block.getId(state));
+			}
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), GravityMeteorSweep.inside(level, pos, goingAt)
+				? net.minecraft.world.level.block.Block.UPDATE_CLIENTS | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE
+				: net.minecraft.world.level.block.Block.UPDATE_ALL);
 		}
 		if (broken > 0) {
 			level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.5F, 0.7F + random.nextFloat() * 0.3F);
@@ -529,12 +552,11 @@ final class GravityMeteor {
 	}
 
 	/** It lands: the blast and the hurt; the shockwave sets off from here (see {@link #wave}). */
-	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge) {
+	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge, Set<Long> floatingBefore) {
 		double radius = radius(charge);
 		float damageMax = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
-		// what already hangs in the air here (an Aether islet, a cloud) is left be by the sweep after
 		Wave wave = new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge);
-		wave.floatingBefore.addAll(GravityMeteorSweep.floating(level, at, sweepRadius(charge)));
+		wave.floatingBefore.addAll(floatingBefore);
 		level.explode(owner, at.x, at.y, at.z, POWER, false, Level.ExplosionInteraction.TNT);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
 			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
@@ -646,22 +668,31 @@ final class GravityMeteor {
 		if (t % 5 == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F + 4.0F * wave.charge, 0.5F + (float)(r / wave.radius) * 0.4F);
 		}
-		// the crater widens as it passes: each ring of lighter blasts goes off when the wave reaches it
+		// the crater widens as it passes: each ring of lighter blasts is set off when the wave reaches it, a few a tick
+		// (in a scattered order, so the whole ring erupts together rather than one side first)
 		int rings = craterRings(wave.charge);
 		while (wave.rings < rings && (wave.rings + 1) * CRATER_RING_STEP <= r) {
 			wave.rings++;
 			double ringR = wave.rings * CRATER_RING_STEP;
 			int blasts = Math.max(4, (int)Math.round(ringR * Math.PI * 2.0 / CRATER_RING_SPACING));
+			List<Vec3> ring = new ArrayList<>();
 			for (int i = 0; i < blasts; i++) {
 				double a = (i + 0.5 * wave.rings) / blasts * Math.PI * 2.0;
-				level.explode(owner, at.x + Math.cos(a) * ringR, at.y, at.z + Math.sin(a) * ringR, CRATER_RING_POWER, false, Level.ExplosionInteraction.TNT);
+				ring.add(new Vec3(at.x + Math.cos(a) * ringR, at.y, at.z + Math.sin(a) * ringR));
 			}
+			net.minecraft.util.Util.shuffle(ring, level.getRandom());
+			wave.blasts.addAll(ring);
 		}
-		return r >= wave.radius && wave.rings >= rings;
+		for (int i = 0; i < CRATER_BLASTS_PER_TICK && !wave.blasts.isEmpty(); i++) {
+			Vec3 blast = wave.blasts.poll();
+			level.explode(owner, blast.x, blast.y, blast.z, CRATER_RING_POWER, false, Level.ExplosionInteraction.TNT);
+		}
+		return r >= wave.radius && wave.rings >= rings && wave.blasts.isEmpty();
 	}
 
 	static void clear() {
 		METEORS.clear();
 		WAVES.clear();
+		GravityMeteorSweep.clear();
 	}
 }

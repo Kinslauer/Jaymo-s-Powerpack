@@ -6613,7 +6613,52 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   - All 40 clips generated on Andy's PC (2.2 MB); plumbing checked by eye against MCA's bytecode only, no game jars in
     the cloud session; not seen in game.
 
-## 0.7.349: the narrator reads the rest of the intro (`Voices.INTRO_LINES`)
+## 0.7.349: life-story starts on the other worlds (pack 0.17.198)
+- Andy: "new starts, involving the other worlds". Six new roads on the story's last question, when Jaymo's Powers is
+  loaded (`LifeStory.OTHER_WORLDS`, put down by Powers' `ZFighterStarts` through `PowersCompat.otherWorld`): stranded on
+  the Pale Moon, raised under the Verdant World's sky, escaped Rustfall's mines, a Maw salvager, raised by a Nether demon
+  master, back from the afterlife. If Powers can't place you, you start in the wild.
+- **Respawn:** Andy: "you respawn on the world, or where you spawned for the start initially". You respawn at the landing
+  spot until you first leave that world (`LifeStory.STRANDED`, cleared on the level change, and the respawn point with
+  it if it's still there). The afterlife start's home is the overworld spot.
+- **Heritage:** Andy: "Verdant only": the Verdant World road is only offered to the Verdant-born (`Answer.onlyFor`). Andy:
+  "you can start as divine born again, but only if you pick that start": the afterlife road makes you Divine-born
+  (`Answer.makes`, unlocked like an earned one). The story screen shows why a road is shut, locks the heritage a road
+  sets, and drops a road the birthplace no longer allows.
+- Rustfall's escapee gets +1 Might. Each start echoes its power (moon and Maw: gravity; the rest: Z Fighter).
+- `StoryTalk` landings remember their dimension, so only villagers on the same world talk about how you arrived; new
+  first-meeting lines for the Verdant, demon and afterlife starts.
+  - Compile-checked only; not seen in game.
+
+## 0.7.350: no stall on a new player's join (pack 0.17.199)
+- The first capital's village (`StoryGround`, started when a newcomer joins a realmless world) is looked for over
+  ticks: every village's possible start within `CAPITAL_VILLAGE_SEARCH` chunks of spawn, nearest first, for
+  `VILLAGE_SEARCH_MS` (15 ms) a tick. Before, one `findNearestMapStructure` call ran on the join and held it up for
+  20 s in Andy's log; it counted its radius in village spacings, not chunks, so it searched thousands of blocks out.
+  The radius is now really chunks: 40 (640 blocks), which still reaches the village his last world used (30 chunks out). The capital's
+  90 s give-up time starts once the search is over. The log line gives the places looked at and the time it took.
+  - Compile-checked only; not seen in game.
+- **0.7.351, new Blockbench models (pack 0.17.201):** from six Blockbench Workshop models Andy sent (CC BY 4.0;
+  credits in `textures/entity/bb/CREDITS.txt`).
+  - **Kintsugi Armour** (`Armory.KINTSUGI_PIECES`, eanncrod's model, drawn by `ReverentLayer`): never crafted. Andy: "found
+    on mca zombies in the nether that were possessed and doomed to walk the fortress halls". `nether.FortressHaunts`:
+    every 30 s, 35% of the time, a player inside a Nether fortress sees a haunt rise on the hall bricks 12-28 blocks off
+    (at most 3 within 48 blocks). It's an MCA zombie villager (plain zombie villager without MCA), marked `POSSESSED`,
+    34 health, fireproof, trailing souls, wearing 1-2 random Kintsugi pieces it always drops. A golden apple can't cure
+    one (the soul screams instead). A little better than iron, quick to enchant, mended with gold. The Ronin set is
+    unchanged (Andy: "should not replace anything existing").
+  - **Primal Visage** (`Armory.PRIMAL_PIECES`, eanncrod's): netherite-strength hide and bone under a skull mask, fireproof.
+    Never made: a fallen Nether war fort warlord drops one random piece (`NetherForts.PRIMAL_PIECES_DROPPED`).
+    `ReverentLayer` now skips bones a model lacks and hangs a skirt by `armorWaist` when there's no `bipedWaist`.
+  - **Whaleboats** are drawn as the "Launch" (a long open rowing boat) instead of a spruce boat: `Whalers.LAUNCH` (saved,
+    synced, kept when cast adrift), client `WhaleboatLookMixin` on `AbstractBoatRenderer`, drawn at 1.2 size.
+  - **Skeleton Lord** (`SkeletonLord`, `SkeletonLordRenderer`): a 260-health boss, undead. 35% of the Overworld's rogue golem
+    lairs (`GolemLairs`) hold him instead, asleep as a statue under amethyst (75% of a blow kept off) until a player
+    comes within 8 blocks in sight or hits him. He laughs for 2 s, the crystals burst, then fights with staff blows and,
+    every 6 s at a foe within 7 blocks, a spell that throws everything within 6 blocks back for 6 harm. Purple boss bar
+    once blows are traded. Drops 6-10 bones, 4-8 amethyst shards, 3-6 emeralds. Spawn egg in the spawn eggs tab.
+  - Compile-checked only; not seen in game, and no dev server was booted for the new registries.
+## 0.7.352: the narrator reads the rest of the intro (`Voices.INTRO_LINES`)
 - Andy: "redo the intro lines that dont already have lines". The narrator now reads the pages it was still silent on:
   "Who are you?" and the grey line under it (now only heard, like the questions' lines), the skip-the-story ask and what
   skipping does (saying no goes back to the page without reading it again), and the hold screen: its title once, then

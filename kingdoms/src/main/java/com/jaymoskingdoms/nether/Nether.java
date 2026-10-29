@@ -80,6 +80,8 @@ public final class Nether {
 		PortalRaids.register();
 		// (0.7.187) the third side: the Flame Avatars' camps
 		AvatarCamps.register();
+		// (0.7.351) the possessed who walk the fortress halls, in Kintsugi
+		FortressHaunts.register();
 	}
 
 	private static EntityType<Hornkin> hornkin(String name, Hornkin.Kind kind, float width, float height) {

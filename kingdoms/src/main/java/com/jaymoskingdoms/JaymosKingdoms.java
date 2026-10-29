@@ -298,6 +298,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		ClockworkGolem.register();
+		// (0.7.351) the Skeleton Lord, asleep in some of the rogue golems' lairs
+		SkeletonLord.register();
 		// (0.7.339) friendly war barrels, built through Golemancy (the goblin villages' own are hired by WarBarrel.hire)
 		WarBarrel.register();
 		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)

@@ -1315,6 +1315,11 @@ final class McaBridge {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
 	}
 
+	/** (0.7.351) A new MCA zombie villager at {@code at}, in the world ({@code nether.FortressHaunts}); null if it failed. */
+	static net.minecraft.world.entity.monster.zombie.@Nullable ZombieVillager spawnZombie(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return net.conczin.mca.entity.ZombieVillagerFactory.newVillager(level).withPosition(at).spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.61) A new grown MCA villager at {@code at}, not yet added to the world ({@link Captives}). */
 	static Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).build(EntitySpawnReason.EVENT);
