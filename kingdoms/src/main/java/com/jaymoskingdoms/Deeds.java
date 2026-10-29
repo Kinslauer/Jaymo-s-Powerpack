@@ -92,8 +92,6 @@ public final class Deeds {
 	static final int SPREAD_LEAST = 2;
 	/** The chance a gossip who knows what you did talks of that rather than something else. */
 	static final float GOSSIP_CHANCE = 0.5F;
-	/** (0.7.335) The chance talk of a rescue, in the town you brought them home to, is of the favour it owes you instead. */
-	static final float FAVOUR_TALK = 0.5F;
 	/** How much more a rescue, and a save, weighs than a fire when folk choose which to bring up. */
 	static final int RESCUE_WEIGHT = 4, SAVE_WEIGHT = 2;
 
@@ -444,11 +442,6 @@ public final class Deeds {
 		}
 		Kind kind = pick(d, level.getRandom());
 		Faction from = d.heardFrom() >= 0 ? Factions.get(level.getServer(), d.heardFrom()) : null;
-		// (0.7.335) where you brought one of their own home, folk let on what the town owes you (once chat told you)
-		if (kind == Kind.RESCUE && from == null && Captives.owed(player, f.id()) > 0 && level.getRandom().nextFloat() < FAVOUR_TALK) {
-			return Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.favour", level.getRandom()), Identities.shownName(player),
-				f.name());
-		}
 		String family = what.equals("gossip") ? "talk.jaymoskingdoms.gossip.deed." + kind.key() : "talk.jaymoskingdoms.deed." + kind.key() + ".greet";
 		if (from != null) {
 			return Component.translatable(Oddities.line(family + ".heard", level.getRandom()), Identities.shownName(player), from.name());

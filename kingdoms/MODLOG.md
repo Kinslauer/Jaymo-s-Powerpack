@@ -6519,9 +6519,8 @@ and overworld dungeons".
   bringing them home no longer prints anything in chat. The rewards, favours and pardons themselves are unchanged.
 - **Freed:** a captive taken from a settlement names it as they thank you, in their speech bubble (12 `rescue.lead`
   lines), so you still learn where to take them. A homeless one thanks you as before.
-- **Home:** what the family and treasury paid, and the favour the town now owes (with the count), go into your next
-  Tidings letter (`tidings.jaymoskingdoms.captive.*`). The losing or death of a captive you were leading goes there too.
-- **Gossip:** in a town that owes you a favour, half of the rescue greetings and gossip are about it instead
-  ("Captain's orders: no toll for you", 12 `rescue.favour` lines; `Deeds.FAVOUR_TALK`).
-- **Pardon:** when an arrest is let go, the town's nearest guard (24 blocks) says so aloud (12 `rescue.pardon` lines);
-  the favours left go in your Tidings.
+- **Home:** what the family and treasury paid goes into your next Tidings letter (`tidings.jaymoskingdoms.captive.*`).
+  The losing or death of a captive you were leading goes there too.
+- **Favours:** Andy: "favors are not listed or tracked in a way the player can see. you will know when you know."
+  Nothing mentions a favour or counts them: the guards simply don't toll or search you, and when an arrest is let go,
+  the town's nearest guard (24 blocks) says so aloud (12 `rescue.pardon` lines).

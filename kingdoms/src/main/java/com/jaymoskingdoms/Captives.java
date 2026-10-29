@@ -491,13 +491,13 @@ public final class Captives {
 				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
 			}
 		}
-		// (0.7.335) no chat: the reward and the favour come in your next Tidings, and the town's folk talk of it (Deeds)
+		// (0.7.335) no chat: the reward comes in your next Tidings
 		Post.tidings(player.getUUID(), bounty > 0
 			? Component.translatable("tidings.jaymoskingdoms.captive.home", v.getDisplayName(), home.name(), purse, bounty)
 			: Component.translatable("tidings.jaymoskingdoms.captive.home.purse", v.getDisplayName(), home.name(), purse));
-		if (known && owe(player, home, FAVOURS_GIVEN[standing])) {
-			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.favour", home.name(), v.getDisplayName(),
-				owed(player, home.id())));
+		if (known) {
+			// (0.7.335) owed quietly: nothing says so, you find out when the guards wave you through
+			owe(player, home, FAVOURS_GIVEN[standing]);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.8F);
 	}
@@ -553,7 +553,7 @@ public final class Captives {
 			all.put(id, had - 1);
 		}
 		player.setAttached(FAVOURS, Map.copyOf(all));
-		// (0.7.335) a guard of theirs nearby says so, and the count left comes in your Tidings
+		// (0.7.335) a guard of theirs nearby says so; nothing tells you how many are left
 		if (player.level() instanceof ServerLevel level) {
 			LivingEntity guard = nearestGuard(level, player, f);
 			if (guard != null) {
@@ -561,7 +561,6 @@ public final class Captives {
 					Identities.shownName(player), f.name()), Speech.GOLD);
 			}
 		}
-		Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.pardon", f.name(), had - 1));
 		return true;
 	}
 
