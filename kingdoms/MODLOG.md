@@ -6629,3 +6629,12 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
 - `StoryTalk` landings remember their dimension, so only villagers on the same world talk about how you arrived; new
   first-meeting lines for the Verdant, demon and afterlife starts.
   - Compile-checked only; not seen in game.
+
+## 0.7.350: no stall on a new player's join (pack 0.17.199)
+- The first capital's village (`StoryGround`, started when a newcomer joins a realmless world) is looked for over
+  ticks: every village's possible start within `CAPITAL_VILLAGE_SEARCH` chunks of spawn, nearest first, for
+  `VILLAGE_SEARCH_MS` (15 ms) a tick. Before, one `findNearestMapStructure` call ran on the join and held it up for
+  20 s in Andy's log; it counted its radius in village spacings, not chunks, so it searched thousands of blocks out.
+  The radius is now really chunks: 40 (640 blocks), which still reaches the village his last world used (30 chunks out). The capital's
+  90 s give-up time starts once the search is over. The log line gives the places looked at and the time it took.
+  - Compile-checked only; not seen in game.
