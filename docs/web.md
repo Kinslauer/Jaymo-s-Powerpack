@@ -1674,3 +1674,6 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
   drop, block, misc), then at 3.5 s (`HINT_AT`) a hint about what it's good for (`hint.<kind>.N`, with the hunger it
   fills, how many uses it lasts, or how many stack). Use (right click) takes it at once (`WebNet.InspectGrab`), with a
   grumble (`inspect.skip.N`) and no hint.
+- (0.17.149) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
+  unlock at 30." Putting Living Armor on leaves the tendrils as they are (only the big suit forming still brings them
+  out); the Tendrils slot works from `WebSymbiote.TENDRILS_BOND` 30 (was Living Armor's 60).

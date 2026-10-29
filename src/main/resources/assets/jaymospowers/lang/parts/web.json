@@ -209,7 +209,7 @@
 	"gui.jaymospowers.web_symbiote.mask_no_suit": "Only while the suit is on (not the big suit)",
 	"gui.jaymospowers.web_symbiote.tendrils_out": "Tendrils out: pick to draw them back in",
 	"gui.jaymospowers.web_symbiote.tendrils_in": "Tendrils in: pick to bring them out (over whatever you wear)",
-	"gui.jaymospowers.web_symbiote.tendrils_locked": "Locked until it trusts you more (they come with Living Armor)",
+	"gui.jaymospowers.web_symbiote.tendrils_locked": "Locked until bond 30",
 	"gui.jaymospowers.web_symbiote.suit_off": "Hidden",
 	"gui.jaymospowers.web_symbiote.suit_wait": "Comes once it has given you %s of %s abilities",
 	"message.jaymospowers.web_symbiote.neglect.1": "You forget us. Fine. We do it our way now.",

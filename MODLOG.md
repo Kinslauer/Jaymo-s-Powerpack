@@ -3571,4 +3571,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   out. The first time it holds a kind of item it studies it in front of you with a comment and, given time, a hint
   (Use takes it early); one look per kind, ever. Swinging in the suit, tendrils pour out of the body and wrap the whole
   arm before the cord shoots, and on release the cord reels back in and the wrap withdraws, leaving no line. See
-  docs/web.md. Compile-checked; not playtested.
+  docs/web.md. Living Armor no longer brings the tendrils out (they have their own slot), and the Tendrils slot
+  works from bond 30. Compile-checked; not playtested.

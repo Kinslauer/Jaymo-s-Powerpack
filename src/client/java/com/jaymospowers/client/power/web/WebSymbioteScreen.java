@@ -237,7 +237,7 @@ final class WebSymbioteScreen extends Screen {
 			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
 			boolean picked = selected == WebSymbiote.TENDRILS_TOGGLE;
-			boolean usable = WebSymbiote.unlocked(player, WebSymbiote.ARMOR);
+			boolean usable = WebSymbiote.tendrilsUnlocked(player);
 			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
 			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW);
 			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
@@ -341,7 +341,7 @@ final class WebSymbioteScreen extends Screen {
 				: "gui.jaymospowers.web_symbiote.collect_off");
 		}
 		if (selected == WebSymbiote.TENDRILS_TOGGLE) {
-			if (!WebSymbiote.unlocked(player, WebSymbiote.ARMOR)) {
+			if (!WebSymbiote.tendrilsUnlocked(player)) {
 				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_locked");
 			}
 			return Component.translatable(WebSymbiote.armored(player) ? "gui.jaymospowers.web_symbiote.tendrils_out" : "gui.jaymospowers.web_symbiote.tendrils_in");

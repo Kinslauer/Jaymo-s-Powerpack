@@ -87,6 +87,8 @@ public final class WebSymbiote {
 	 */
 	public static final int TENDRILS_TOGGLE = 8;
 	public static final int TENDRILS_TOGGLE_GAP = 10;
+	/** (0.17.149) Andy: "tendrils should unlock at 30": the Tendrils slot works from this bond (was Living Armor's 60). */
+	public static final int TENDRILS_BOND = 30;
 	/**
 	 * (0.17.149) Not an ability either: the menu's Collect slot, its tendrils fetching items in Living Armor
 	 * ({@link WebSymbioteState#COLLECT}, {@link WebSymbioteCollect}); it works from {@link WebSymbioteCollect#COLLECT_BOND},
@@ -844,8 +846,8 @@ public final class WebSymbiote {
 			return;
 		}
 		LAST_TENDRILS.put(player.getUUID(), now);
-		if (!unlocked(player, ARMOR)) {
-			// the tendrils come with Living Armor's trust (UNLOCK_BOND[ARMOR]); creative and empowered have them
+		if (!tendrilsUnlocked(player)) {
+			// (0.17.149) the tendrils open at TENDRILS_BOND; creative and empowered have them
 			whisper(player, "tendrils_locked");
 			return;
 		}
@@ -884,6 +886,11 @@ public final class WebSymbiote {
 	}
 
 	private static final java.util.Map<java.util.UUID, Long> LAST_COLLECT = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** The Tendrils slot works: {@link #TENDRILS_BOND}, or everything lent to you; creative has it. */
+	public static boolean tendrilsUnlocked(Player player) {
+		return player.isCreative() || empowered(player) || state(player).bond() >= TENDRILS_BOND;
+	}
 
 	/** The tendrils are out on their own (not the armour's): until when, else -1. */
 	public static long tendrilsOut(Player player) {
@@ -1352,9 +1359,10 @@ public final class WebSymbiote {
 		// (0.16.6) Living Armor or the big suit forming, by any path (the press, its gift, the hunt's armour, bond 100's
 		// big suit, a takeover), brings the tendrils out with it (Andy: "the big suit still forms with the tendrils for
 		// ... initial activation"); coming off, it leaves them as they are (they're their own toggle)
-		boolean armorOn = state.has(WebSymbioteState.ARMOR) && (was == null || !was.has(WebSymbioteState.ARMOR));
+		// (0.17.149) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now": only the
+		// big suit forming still brings them out
 		boolean bulkOn = state.has(WebSymbioteState.BULK) && (was == null || !was.has(WebSymbioteState.BULK));
-		if (armorOn || bulkOn) {
+		if (bulkOn) {
 			state = state.withFlag(WebSymbioteState.TENDRILS, true);
 		}
 		// in the armour or the big suit with the tendrils in, nothing walks you up a wall (without the armour Wall Crawl
@@ -3889,10 +3897,8 @@ public final class WebSymbiote {
 		// (0.15.153) Living Armor always starts with its tendrils out (set brings them out as the armour forms; the
 		// Tendrils slot draws them in). (0.16.7) Said here too, so it holds whatever set() comes to do: the armour going
 		// on over tendrils already out keeps them out, and coming off leaves them as they were.
+		// (0.17.149) not any more: the armour leaves the tendrils as they are (their own slot, from TENDRILS_BOND)
 		WebSymbioteState next = state.withFlag(flag, on);
-		if (flag == WebSymbioteState.ARMOR && on) {
-			next = next.withFlag(WebSymbioteState.TENDRILS, true);
-		}
 		set(player, next);
 		ServerLevel level = player.level();
 		if (flag == WebSymbioteState.ARMOR) {
