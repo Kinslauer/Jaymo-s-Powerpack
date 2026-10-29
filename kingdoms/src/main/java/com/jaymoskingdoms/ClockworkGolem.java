@@ -2,7 +2,6 @@ package com.jaymoskingdoms;
 
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -71,8 +70,6 @@ public class ClockworkGolem extends IronGolem {
 	/** What a rogue golem drops besides its copper: gold ingots (min, max) and the chance of a diamond. */
 	static final int ROGUE_GOLD_MIN = 3, ROGUE_GOLD_MAX = 6;
 	static final float ROGUE_DIAMOND_CHANCE = 0.35F;
-	/** Players this near a rogue golem when it wakes are warned (blocks). */
-	static final double WAKE_WARNING = 24.0;
 
 	private static final EntityDataAccessor<Boolean> FOLDED = SynchedEntityData.defineId(ClockworkGolem.class, EntityDataSerializers.BOOLEAN);
 	/** (0.7.330) Synced so its eyes burn red. */
@@ -180,12 +177,6 @@ public class ClockworkGolem extends IronGolem {
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), fold ? SoundEvents.PISTON_CONTRACT : SoundEvents.PISTON_EXTEND, SoundSource.NEUTRAL,
 			0.8F, 0.6F + this.random.nextFloat() * 0.2F);
 		level.broadcastEntityEvent(this, fold ? FOLD : UNFOLD);
-		if (!fold && this.rogue()) {
-			// a remnant of the Aether, like the monoliths, set to keep everyone out
-			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(WAKE_WARNING))) {
-				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.clockwork_golem.wakes").withStyle(ChatFormatting.RED));
-			}
-		}
 	}
 
 	/** Folded or still unfolding, it stands where it is. */

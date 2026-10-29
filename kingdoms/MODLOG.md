@@ -6444,6 +6444,6 @@ and overworld dungeons".
   (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), half of every other
   dungeon, any mod's (a structure, not a village, with a monster or trial spawner: rolled once when a player first comes
   within 48 blocks of a spawner), and 15% of monster rooms. Overworld and Aether only.
-- **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Waking, a
-  rogue warns the players near it; its lights burn red and glow in the dark (`clockwork_golem_rogue.png` and its
-  `_glow`, from `tools/gen_clockwork_golem.py`).
+- **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Never told
+  outright: only a hermit's passing word with the Golemancy hint. Their lights burn red and glow in the dark
+  (`clockwork_golem_rogue.png` and its `_glow`, from `tools/gen_clockwork_golem.py`).
