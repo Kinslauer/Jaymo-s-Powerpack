@@ -244,6 +244,11 @@ public final class Mana {
 
 	/** (0.7.244) Pays for {@code what} (a spell or a Sorcerer's key) and ripples the aura with its intent; false if they can't. */
 	static boolean cast(ServerPlayer player, String what) {
+		// (0.7.342) hushed by a Spellbreaker Blow (Will)
+		if (Will.hushed(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.hushed").withStyle(ChatFormatting.DARK_AQUA));
+			return false;
+		}
 		// (0.7.262) healing magic is cheaper for the Divine-born
 		if (!spend(player, cost(what) * DivineBorn.spellCost(player, what))) {
 			return false;

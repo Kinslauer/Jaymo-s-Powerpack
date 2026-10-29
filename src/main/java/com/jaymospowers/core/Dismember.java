@@ -332,6 +332,8 @@ public final class Dismember {
 			attacker = striker;
 			scale = scale(target, BLADE_CHANCE);
 		}
+		// (0.17.183) Will's Grim Hand: likelier (Kingdoms)
+		scale *= com.jaymospowers.core.wounds.WillSkill.severScale(attacker, target);
 		if (target.getRandom().nextFloat() >= Math.min(1.0F, SEVER_BASE * scale)) {
 			return false;
 		}
@@ -454,6 +456,8 @@ public final class Dismember {
 					drop(level, target, helmet);
 				}
 				beheaded(level, target, by);
+				// (0.17.183) Will's Last Look: the weaker who saw it run (Kingdoms)
+				com.jaymospowers.core.wounds.WillSkill.beheaded(by, target);
 			}
 			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
 			default -> legs(target, mask);

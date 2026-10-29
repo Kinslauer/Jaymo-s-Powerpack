@@ -29,6 +29,7 @@
 	"message.jaymospowers.downed.no_food": "You've nothing to eat to bring %s round with.",
 	"message.jaymospowers.downed.no_treat": "You've nothing %s would take to bring them round.",
 	"message.jaymospowers.downed.revive_stopped": "You leave %s where they lie.",
+	"message.jaymospowers.downed.held_down": "%s won't get up while someone's Will holds them down.",
 	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them).",
 	"message.jaymospowers.wounds.broken": "%s broken: it won't heal right until it's set",
 	"message.jaymospowers.wounds.sprained": "%s sprained: it'll mend as you heal",
