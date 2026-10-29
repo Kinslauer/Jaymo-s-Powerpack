@@ -3653,3 +3653,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
   hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
 - **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.
+- **0.17.173, Sora's Dagger, the friend's next version:** Andy's friend sent a new Blockbench file (34 cubes, a new
+  texture, his own hand positions with a slight tilt in third person). It goes in through `tools/blockbench/sora.py` as
+  before, all four stages. Previews of each slot, rendered from the model: `/mnt/project-files/soras-dagger-previews/`.
