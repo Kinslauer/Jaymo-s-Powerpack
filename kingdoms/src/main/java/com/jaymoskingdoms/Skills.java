@@ -222,7 +222,10 @@ public final class Skills {
 		LAST_LOOK(Pillar.STRENGTH, 1, 1, 14, 13, 0, GRIM_HAND),
 		REFUSE_TO_FALL(Pillar.STRENGTH, 1, 2, 14, 13, 2, NO_MERCY),
 		SECOND_BREATH(Pillar.STRENGTH, 1, 2, 18, 14, 1, LAST_LOOK, REFUSE_TO_FALL),
-		UNBROKEN_ROAR(Pillar.STRENGTH, 1, 3, 22, 15, 1, SECOND_BREATH);
+		UNBROKEN_ROAR(Pillar.STRENGTH, 1, 3, 22, 15, 1, SECOND_BREATH),
+		// (0.7.358) Andy: "lets you withstand more hits during charged interactions": rising by yourself, a revive, Second
+		// Wind's eating each take one more hit a rank before they're broken off (Jaymo's Powers' WillSkill.holdHits); last, so no ordinal moves
+		UNFLINCHING(Pillar.STRENGTH, 2, 1, 10, 12, 1, NO_GETTING_UP);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

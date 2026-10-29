@@ -3824,3 +3824,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 
 - **0.18.4, the Bio-built are shunned by every human kingdom (Kingdoms 0.7.357):** no mask hides one, even the
   tolerant mind them, and Bio-built villagers are driven out of human towns within days. See the Kingdoms MODLOG.
+- **0.18.5, the downed rise on their own, and die to a real blow:** Andy: "while downed, any attack that would deal 3
+  hearts or more of damage kills instantly, crippled mobs and players still work like before and if anyone goes down
+  without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too wounded to get
+  up shift will give up. the animation takes longer but animates them rising to their feet, and is interrupted after 2
+  hits. Add a node to the Will tree that lets you withstand more hits during charged interactions".
+  - `Downed.KILL_BLOW` (6): any attack (a swing, an arrow, a bite, a blast; not fire, falls or hunger) of 6 or more on
+    anyone downed, player or mob, is their death, credited to the attacker. Smaller blows work as before (a downed
+    player's 10 hearts, a downed mob's ten wounds). The crippled (off their feet, not downed) are untouched.
+  - Self rise: a downed player whose arms, legs and feet were all above red on the wounds screen (more than 25%, none
+    broken or gone) as they fell, and still are, holds sneak for 8 s (`RISE_TICKS`, give-up was 5 s) to get up by
+    themselves, at 30% health (`RISE_HEALTH`) and battered as usual. The 2nd hit meanwhile knocks them back down (let go
+    of sneak to try again). Too wounded, or passed out, sneak gives up as before. Carried or in water, no rising.
+  - The rise is drawn (`CrawlPose`, synced `Downed.RISING`): pushed up on shaking arms, knees drawn under with a hand on
+    one knee, then up onto their feet; vanilla's leftover swimming tilt is cancelled as they stand.
+  - The same 2-hit rule now breaks off a revive (hold use on a downed one) and Second Wind's eating.
+  - Kingdoms 0.7.358's Will node **Unflinching** (2 ranks): each rank, one more hit before those held actions break off
+    (`WillSkill.holdHits`).
+  - Built, not seen in game.
