@@ -1,0 +1,19 @@
+{
+	"container.jaymospowers.baubles": "Baubles",
+	"key.jaymospowers.baubles": "Open baubles",
+	"message.jaymospowers.baubles.full": "No free bauble slot takes that",
+	"item.jaymospowers.bauble.slot": "Bauble: %s",
+	"bauble.jaymospowers.slot.amulet": "Amulet",
+	"bauble.jaymospowers.slot.ring": "Ring",
+	"bauble.jaymospowers.slot.belt": "Belt",
+	"bauble.jaymospowers.slot.head": "Head",
+	"bauble.jaymospowers.slot.body": "Body",
+	"bauble.jaymospowers.slot.charm": "Charm",
+	"item.jaymospowers.heartstone_amulet": "Heartstone Amulet",
+	"item.jaymospowers.swiftfoot_ring": "Swiftfoot Ring",
+	"item.jaymospowers.delvers_ring": "Delver's Ring",
+	"item.jaymospowers.brawlers_belt": "Brawler's Belt",
+	"item.jaymospowers.divers_circlet": "Diver's Circlet",
+	"item.jaymospowers.featherfall_cloak": "Featherfall Cloak",
+	"item.jaymospowers.rabbit_foot_charm": "Rabbit's Foot Charm"
+}

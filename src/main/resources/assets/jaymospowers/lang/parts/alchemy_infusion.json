@@ -4,7 +4,7 @@
   "block.jaymospowers.salt_candle": "Salt Candle",
   "item.jaymospowers.ichor": "Ichor",
   "item.jaymospowers.runic_amulet": "Runic Amulet",
-  "tooltip.jaymospowers.runic_amulet": "Carried, it slowly draws the fleeting taint from you.",
+  "tooltip.jaymospowers.runic_amulet": "Carried, or worn as an amulet bauble, it slowly draws the fleeting taint from you.",
   "message.jaymospowers.infusion.busy": "The working has begun already.",
   "message.jaymospowers.infusion.no_pedestal": "The stone hangs over nothing that can bear it.",
   "message.jaymospowers.infusion.empty_centre": "The pedestal beneath is bare.",

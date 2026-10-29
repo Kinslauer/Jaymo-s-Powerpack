@@ -311,8 +311,6 @@
 	"gui.jaymoskingdoms.lock.picks": "Picks: %s",
 	"gui.jaymoskingdoms.lock.strain": "Strain",
 	"gui.jaymoskingdoms.lock.forgive": "One slip forgiven",
-	"gui.jaymoskingdoms.lock.pin.help": "A/D or the mouse: pick a pin. Hold W or the mouse button to push it up, let go to set it. Pins must be set in their binding order: the binding pin pushes stiff and trembles. Push it past the line and the pick strains.",
-	"gui.jaymoskingdoms.lock.rotary.help": "A/D, the arrow keys or the scroll wheel: turn the dial the way the arrow points (hold Shift to go slowly). The pick trembles near a gate; press W, Space or click to set it. Turning back undoes the last gate, and a miss strains the pick.",
 	"gui.jaymoskingdoms.lock.turn.right": "turn right >>",
 	"gui.jaymoskingdoms.lock.turn.left": "<< turn left",
 	"skill.jaymoskingdoms.perk.ghost": "Ghost",

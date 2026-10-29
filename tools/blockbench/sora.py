@@ -78,7 +78,15 @@ model_dir = f"{REPO}/src/main/resources/assets/jaymospowers/models/item"
 # straight out of the fist); the second model is <stage>_reverse, picked by the stack's first custom_model_data flag
 HOLD = dict(tp=0.45, fp=0.38, gui=0.5, center_y=16, grip_y=5.5)
 DISPLAY = display(tilt=40, **HOLD)
-GRIPS = {"": DISPLAY, "_reverse": display(tilt=-130, fp_tilt=-60, **HOLD)}
+# (0.17.186) the friend's own reverse grip (soras_dagger_reverse_original.bbmodel, same cubes, only its hand slots
+# turned) when it's beside the file: his held transforms, our slot/ground/frame
+REVERSE = display(tilt=-130, fp_tilt=-60, **HOLD)
+try:
+    HIS = json.load(open(f"{sys.argv[1]}/soras_dagger_reverse_original.bbmodel")).get("display", {})
+    REVERSE = {**REVERSE, **{k: v for k, v in HIS.items() if k.startswith(("thirdperson", "firstperson"))}}
+except FileNotFoundError:
+    pass
+GRIPS = {"": DISPLAY, "_reverse": REVERSE}
 def write_model(name, grip, shown):
     model = {
         "credit": "Sora's dagger model by Andy's friend, made with Blockbench",
