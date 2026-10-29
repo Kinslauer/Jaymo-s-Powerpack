@@ -3765,7 +3765,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     overworld spot the story would have used.
   - `ZFighterDemonRealm.raiseHome` builds or reuses the demon village nearest a spot; `ZFighterSpace.surface` is
     package-private for the moon.
-  - Compile-checked only; not seen in game.
 - **0.17.199, faster loading (Kingdoms 0.7.350):** Andy asked whether FastNoiseLite would speed up load times. It
   wouldn't: our dimensions are vanilla density-function JSON, so vanilla's noise code does that work, and swapping it
   would change every world's terrain. His log showed where a new world's time goes instead: 60 s picking the spawn,
@@ -3775,4 +3774,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the CurseForge zip until their CurseForge ids are looked up). ModernFix has no 26.3 build.
   - `core/StreamsPreset` sets Streams Reflowing's terrain accuracy from MEDIUM to LOW once per install (lighter stream
     planning per new chunk). Its fast terrain mode is on by default already; Streams turns it off where it doesn't fit.
+  - Compile-checked only; not seen in game.
+- **0.17.200, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
+  - Crater-ring blasts go off `CRATER_BLASTS_PER_TICK` (3) a tick, in a scattered order, instead of a whole ring (up
+    to 22 TNT-strength blasts) in one tick.
+  - The sweep of what's left hanging brings down `GravityMeteorSweep.BREAK_PER_TICK` (1200) blocks a tick, highest
+    first, instead of up to 12000 in one tick. Its "already floating" scan runs when the meteor is called (before the
+    rock has cut anything loose) instead of on the impact tick, and its flood fill no longer makes a BlockPos for every
+    ground block.
+  - Blocks the rock or sweep break with nothing but air or other breaking blocks round them go without neighbour or
+    shape updates; only the hole's edge gets full updates.
+  - Fewer drops: 3% of carved and swept blocks drop items (was 10%).
+  - Low-end mode halves the burst's debris, smoke and hanging dust on that client (`GravityMeteorFx.LOW_END_SHARE`).
+  - Jolt physics (the Velthoric mod) was looked at: LGPL, 1.20.1/1.21.1 only, and a physics engine adds work rather than
+    removing block-update cost, so it isn't used.
   - Compile-checked only; not seen in game.

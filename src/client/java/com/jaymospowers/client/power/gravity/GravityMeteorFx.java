@@ -49,6 +49,8 @@ public final class GravityMeteorFx {
 	static final double CLOUD_WIDTH = 0.45, CLOUD_HIGH_MIN = 4.0, CLOUD_HIGH_MAX = 16.0;
 	/** Dust (pale brown-grey) and smoke (dark grey) tints for the smoke sprites. */
 	static final float[] DUST = {0.62F, 0.56F, 0.49F}, SMOKE = {0.22F, 0.21F, 0.21F};
+	/** In low-end mode, this share of the debris, smoke and hanging dust (on top of the particle setting). */
+	static final float LOW_END_SHARE = 0.5F;
 	private static final DustParticleOptions HAZE = new DustParticleOptions(0x8C8273, 4.0F);
 
 	private static final class Cloud {
@@ -80,10 +82,11 @@ public final class GravityMeteorFx {
 		ClientTickEvents.END_CLIENT_TICK.register(GravityMeteorFx::tick);
 	}
 
-	/** Fewer of everything on decreased particles, far fewer on minimal. */
+	/** Fewer of everything on decreased particles, far fewer on minimal; (0.17.200) and half again in low-end mode. */
 	private static float share(Minecraft minecraft) {
 		ParticleStatus status = minecraft.options.particles().get();
-		return status == ParticleStatus.MINIMAL ? 0.25F : status == ParticleStatus.DECREASED ? 0.5F : 1.0F;
+		float share = status == ParticleStatus.MINIMAL ? 0.25F : status == ParticleStatus.DECREASED ? 0.5F : 1.0F;
+		return com.jaymospowers.client.LowEndMode.on() ? share * LOW_END_SHARE : share;
 	}
 
 	private static void burst(Minecraft minecraft, GravityMeteorBurst burst) {
