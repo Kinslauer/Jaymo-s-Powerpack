@@ -74,6 +74,7 @@ final class WebDebugCommand {
 							c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
 							return 1;
 						}))
+						.then(WebSymbioteLife.debug())
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);

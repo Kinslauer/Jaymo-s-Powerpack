@@ -1677,3 +1677,40 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
 - (0.17.149) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
   unlock at 30." Putting Living Armor on leaves the tendrils as they are (only the big suit forming still brings them
   out); the Tendrils slot works from `WebSymbiote.TENDRILS_BOND` 30 (was Living Armor's 60).
+
+## Life and death with the symbiote (0.17.150)
+
+New class `WebSymbioteLife`, with small hooks in `WebSymbiote` (after-death, tick, `showSuit`), `WebSymbioteBond`
+(dormancy tick), `WebSymbioteBlob` and `WebDebugCommand`; lang in `lang/parts/web_life.json`. No attachments (the blob's
+entity data holds what it keeps; scene state is per session).
+
+- **At zero bond it consumes you.** Starving, the bond sinks a point per `BOND_GAIN_TICKS`. It speaks up at bond
+  `WARN_AT` 12, 8, 5 and 2 (`life.warn.N`: heartbeat, shake, darkness, the screen-edge tendrils at rising urgency) and
+  gnaws at you every `GNAW_EVERY` 900 ticks near the end (`life.gnaw.N`). Fed again (or bond back above 12) it forgives.
+  At bond 0 and still starving, `GRACE_TICKS` 1200 after the first warning it stops waiting: `SEIZE_TICKS` 90 of
+  slowness, weakness, darkness and nausea with tendrils spiralling up you and the screen at full dread
+  (`life.seize.N`), `CLOSE_TICKS` 70 of blindness as it closes over you (`life.consume.N`), then the kill. It's a real
+  death: `genericKill` ignores invulnerability, so `Downed.spared` lets it through the downed state (like the void or
+  `/kill`); if a power's save holds it off it tries again (`KILL_TRIES` 3) and then tears away (`reject`). It kills
+  before it feeds: after the death the blob stays on the body `FEAST_TICKS` 240 (no AI, biting, ink), then roams and
+  won't take that host again. Nothing is kept for you.
+- **Rebond at the death spot.** Any other death: just before the drops (`ALLOW_DEATH`, after `Downed`'s phase) your
+  inventory (all slots) goes into `WebSymbioteLife.Remains` on the blob that pours out, saved in its entity data (so
+  it survives chunk unloads and restarts), along with the state you died with. The blob stays within `HOLD_RADIUS` 3 of
+  the spot, never settles into goo, and only its owner is wanted: walking up to it (or hitting it) bonds you again
+  with the same bond, strain, stress, hints and Collect setting, no new dormancy, and the things go back to their
+  slots. Anyone else who kills or burns it spills the things on the ground. Void deaths and deaths it caused leave
+  nothing; with keepInventory or Jaymo's Kitchen's corpse (which hold the belongings) the blob keeps only the bond.
+  If you already wear another symbiote, standing at the blob just gives the things back.
+- **Misfires while it settles.** Dormant, every 2-6 minutes (`MISFIRE_MIN`/`MAX`): a tendril lashes at the nearest
+  creature (2 damage and a shove, or at nothing), the suit flares on for 25 ticks and tears away, the next jump is
+  boosted too far (up to 60 s to jump), or a tendril lets go of what you hold (it drops at your feet). Each has a line
+  (`life.misfire.<kind>.N`), a jolt and the dread at struggle urgency.
+- **Meteor blobs rampage.** The blob that crawls out of a Gravity meteor (`fromMeteor`) no longer waits: it rampages
+  within `RAMPAGE_RADIUS` 26 of the impact, going for anything living within 14 (mobs, animals, players not wearing a
+  symbiote; web slingers and the like it bonds as usual), wrecking soft blocks round it (hardness up to 1, three per
+  pulse, only if mobGriefing), never settling or taking a mob. Past 34 blocks it drops the chase and heads home. It goes
+  on until it's killed or someone bonds with it.
+- Andy: "I want to make the blob roam the meteor site now, it will reap havoc until it is killed or bonds." Natural
+  craters only hold goo, so only meteor blobs rampage.
+- **Debug:** `/powerdebug web symbiote life consume | warn <1-4> | misfire <0-3> | rampage`.

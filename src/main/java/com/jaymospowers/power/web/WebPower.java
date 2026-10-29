@@ -326,6 +326,7 @@ public final class WebPower implements Power {
 		WebBridges.register();
 		WebTendrils.register();
 		WebSymbioteCollect.register();
+		WebSymbioteLife.register();
 		WebStrength.register();
 		WebShooters.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
