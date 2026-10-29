@@ -1,0 +1,9 @@
+Blockbench models used under Creative Commons Attribution 4.0 (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/).
+They're baked from their .bbmodel files (tools/bbmodels/) to our own loader's format by tools/bbmodel_bake.py; the
+loader itself (client/bb/BbModel.java, Molang.java) is our own code, shared with Jaymo's Kingdoms.
+
+visage_of_war.png (bbmodels/visage_of_war.json), and textures/item/aether/visage_of_war_spawn_egg.png: the Visage of War,
+the infected guardian tree's boss
+  "Visage of War" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/visage-of-war
+  Changes: baked to our loader's format (it was made for GeckoLib); drawn at 1.5 size; its animations played by our
+  own boss's moves. The spawn egg is the Slider's egg recoloured gold, not part of the model.

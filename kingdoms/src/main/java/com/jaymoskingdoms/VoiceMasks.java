@@ -15,7 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.7.322) What a player's voice turns into, for Simple Voice Voice Changer (shipped in the pack with Simple Voice Chat;
+ * (0.7.330) What a player's voice turns into, for Simple Voice Voice Changer (shipped in the pack with Simple Voice Chat;
  * the client applies it, {@code client/VoiceChangerCompat}, only with that mod loaded). Andy (2026-10-29) asked for
  * proximity chat with the voice changer; its own studio stays the player's, and these sit on top while they last:
  * <ul>

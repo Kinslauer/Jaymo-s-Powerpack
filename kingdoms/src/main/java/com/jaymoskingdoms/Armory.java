@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -18,6 +19,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -43,6 +45,12 @@ import org.jspecify.annotations.Nullable;
  * (Smithing) And plain <b>steel plate</b>, flat vanilla-style layers with no raised pieces: the toughest of them, made
  * from {@code #c:ingots/steel} (Jaymo's Powers' smeltery or kiln) buckled with {@code #c:leather_straps} (Jaymo's
  * Kitchen's), or with plain leather for more steel. Not one of {@link #SETS} (it has no 3D shape).
+ * <p>
+ * (0.7.326) And the <b>Reverent Warplate</b>, the Aether's paladins' harness: white enamelled plate edged in gold, a
+ * winged helm, a red tabard and cape. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn whole over the wearer by
+ * the client's {@code ReverentLayer} (no flat layer under it). Extraordinary: better than netherite, fireproof, and
+ * never made. The only set in the world is the Visage of War's, the Aether guardian tree's boss in Jaymo's Powers,
+ * which drops all four pieces when it falls. Mended with gold. Not one of {@link #SETS} either.
  */
 public final class Armory {
 	/** Each set's numbers: durability multiplier, defence (boots, leggings, chest, helmet), enchantability, toughness, knockback resistance. */
@@ -54,6 +62,10 @@ public final class Armory {
 	static final TagKey<Item> STEEL_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
 	static final ArmorMaterial STEEL_PLATE = material("steel_plate", 30, 3, 6, 7, 3, 10, SoundEvents.ARMOR_EQUIP_IRON, 2.5F, 0.05F, STEEL_INGOTS);
 
+	/** (0.7.326) The Reverent Warplate: a point over netherite in every piece, tougher, longer-lasting, quick to take enchantments. */
+	static final ArmorMaterial REVERENT = material("reverent", 45, 4, 7, 9, 4, 22, SoundEvents.ARMOR_EQUIP_NETHERITE, 4.0F, 0.15F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** The Reverent Warplate's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> REVERENT_PIECES = new LinkedHashMap<>();
 	/** (Smithing) The steel plate pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> STEEL_PLATE_PIECES = new LinkedHashMap<>();
 	/** The sets by name, each its pieces by {@link ArmorType} (helmet, chestplate, leggings, boots). */
@@ -78,6 +90,7 @@ public final class Armory {
 		register("ronin", RONIN, all);
 		register("warlord", WARLORD, all);
 		STEEL_PLATE_PIECES.putAll(pieces("steel_plate", STEEL_PLATE, all));
+		REVERENT_PIECES.putAll(pieces("reverent", REVERENT, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
 			for (Item item : all) {
@@ -92,10 +105,15 @@ public final class Armory {
 	}
 
 	private static Map<ArmorType, Item> pieces(String name, ArmorMaterial material, List<Item> all) {
+		return pieces(name, material, all, properties -> properties);
+	}
+
+	/** {@code extra} adds to each piece's properties (the Reverent Warplate's rarity and fireproofing). */
+	private static Map<ArmorType, Item> pieces(String name, ArmorMaterial material, List<Item> all, UnaryOperator<Item.Properties> extra) {
 		Map<ArmorType, Item> set = new LinkedHashMap<>();
 		for (ArmorType type : PIECES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name + "_" + type.getName()));
-			Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).humanoidArmor(material, type)));
+			Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(extra.apply(new Item.Properties().setId(key).humanoidArmor(material, type))));
 			set.put(type, item);
 			all.add(item);
 		}

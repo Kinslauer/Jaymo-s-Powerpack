@@ -16,7 +16,7 @@ import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.322) Proximity chat. Andy (2026-10-29): "I also want to add proximity chat", pointing at Proximity Text Chat (all
+ * (0.7.330) Proximity chat. Andy (2026-10-29): "I also want to add proximity chat", pointing at Proximity Text Chat (all
  * rights reserved: the idea only, none of its code), with Simple Voice Chat, Voice Physics and Simple Voice Voice Changer
  * shipped in the pack for voice ({@link VoiceMasks}). Typed chat is words said aloud: only players near enough hear them.
  * <ul>

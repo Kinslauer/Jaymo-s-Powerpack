@@ -18,7 +18,7 @@ Everything runs from one folder in Desktop Mode; nothing is installed system-wid
 Keep the Deck plugged in (and on Ethernet through a dock if you can). `start.sh` keeps it from sleeping while the
 server runs. The server may use up to 6 GB of the Deck's 16 GB.
 
-**Voice chat (pack 0.17.149+):** Simple Voice Chat's server listens on **UDP port 24454**, which the playit tunnel
+**Voice chat (pack 0.17.157+):** Simple Voice Chat's server listens on **UDP port 24454**, which the playit tunnel
 for the game (TCP) doesn't carry. Once: on playit.gg add a second tunnel, type **UDP**, local port **24454**. Then, with
 the server stopped, open `~/jaymos-server/config/voicechat/voicechat-server.properties` (made on the first start with
 the mod) and set `voice_host=` to that tunnel's address with its port (for example `voice_host=something.ply.gg:12345`).

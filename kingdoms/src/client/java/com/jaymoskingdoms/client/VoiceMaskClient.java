@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 
-/** (0.7.322) {@link VoiceMasks} arriving: handed to {@link VoiceChangerCompat} when Simple Voice Voice Changer is loaded. */
+/** (0.7.330) {@link VoiceMasks} arriving: handed to {@link VoiceChangerCompat} when Simple Voice Voice Changer is loaded. */
 public final class VoiceMaskClient {
 	private VoiceMaskClient() {
 	}

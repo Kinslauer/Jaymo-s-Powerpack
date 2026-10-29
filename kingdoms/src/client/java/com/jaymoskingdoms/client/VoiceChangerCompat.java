@@ -8,7 +8,7 @@ import org.sawiq.svvoicechanger.client.model.VoiceParameter;
 import org.sawiq.svvoicechanger.client.model.VoiceProfile;
 
 /**
- * (0.7.322) {@link VoiceMasks} on this client: the voice the server says ours is to be turned into, pushed on Simple Voice
+ * (0.7.330) {@link VoiceMasks} on this client: the voice the server says ours is to be turned into, pushed on Simple Voice
  * Voice Changer as an override (its API; the player's own voice comes back the moment it's released). Only called with
  * that mod loaded ({@link VoiceMaskClient}), so its classes are never touched without it.
  */

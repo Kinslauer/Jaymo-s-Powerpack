@@ -134,11 +134,11 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.322) Powers' {@code ZFighterLineage.ape(Player)}. */
+	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle ape;
 	private static boolean lookedForApe;
 
-	/** (0.7.322) Whether {@code player} is a Great Ape now; false without Powers. */
+	/** (0.7.330) Whether {@code player} is a Great Ape now; false without Powers. */
 	public static boolean greatApe(Player player) {
 		if (!lookedForApe) {
 			lookedForApe = true;

@@ -267,7 +267,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
-		// 0.7.322: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
+		// 0.7.330: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
 		ProximityChat.register();
 		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
@@ -296,6 +296,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wagon.register();
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
+		ClockworkGolem.register();
 		Cannonball.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
@@ -394,6 +395,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
+		// (0.7.329) the second batch of Blockbench Workshop creatures
+		com.jaymoskingdoms.beasts.Beasts.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
 		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
@@ -468,6 +471,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
 		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
+		// 0.7.326: villagers drawn as a Blockbench body of their own (the warchief)
+		LOGGER.debug("body attachment: {}", Bodies.BODY);
 		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
 		BeaconWatch.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)

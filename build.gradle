@@ -214,7 +214,7 @@ def packMods = [
 	// unless someone picks a Lost Cities profile when making a world. Needs Forge Config API Port (above). McJty's own
 	// 26.3 Fabric build, 26.3-12.0.0-fabric (Modrinth version xuEuPjKk).
 	[dep: "maven.modrinth:the-lost-cities:xuEuPjKk", cf: [269024, 9277225]],
-	// Voice (0.17.149; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
+	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
 	[dep: "maven.modrinth:simple-voice-chat:x9jLR94Q", cf: [416089, 9350669]],
