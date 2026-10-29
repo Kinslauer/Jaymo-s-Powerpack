@@ -32,6 +32,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -52,6 +53,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -77,6 +79,9 @@ public final class Classes {
 	static final int WRIT_EMERALDS = 30;
 	/** The chance a rare chest (stronghold library, ancient city, woodland mansion) holds a writ. */
 	static final float WRIT_LOOT_CHANCE = 0.08F;
+	/** Enderscape's stronghold library (optional; matched by id, never linked): its strongholds replace the vanilla ones. */
+	private static final ResourceKey<LootTable> ENDERSCAPE_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.fromNamespaceAndPath("enderscape", "stronghold/chest/library"));
 	/** The chance a rare chest holds a wizard's staff (a Mage's "find one"); a slain court wizard drops his this often. */
 	static final float STAFF_LOOT_CHANCE = 0.1F, STAFF_DROP_CHANCE = 0.5F;
 
@@ -232,7 +237,7 @@ public final class Classes {
 		});
 		// a writ, or a wizard's staff, in the rarest chests
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
-			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
+			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(ENDERSCAPE_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
 				|| k.equals(BuiltInLootTables.WOODLAND_MANSION)).isPresent()) {
 				if (context.getRandom().nextFloat() < WRIT_LOOT_CHANCE) {
 					drops.add(new ItemStack(WRIT));

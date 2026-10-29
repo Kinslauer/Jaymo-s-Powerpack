@@ -6303,3 +6303,9 @@ redrawn". Goblin villagers now have its shape: a big head, a short body bent for
 - Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
   `tools/blockbench/kokosikk_goblin.bbmodel`.
 Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+
+## 0.7.322: Enderscape's strongholds count (pack 0.17.149)
+- The pack adds Enderscape, whose built-in data pack swaps vanilla strongholds for its own (`enderscape:stronghold`) with
+  their own chest tables. Writs and wizards' staffs now turn up in its library chests too (`Classes`), and quest lairs and
+  lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
+  also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
