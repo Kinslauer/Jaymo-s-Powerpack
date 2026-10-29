@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * never made. The only set in the world is the Visage of War's, the Aether guardian tree's boss in Jaymo's Powers,
  * which drops all four pieces when it falls. Mended with gold. Not one of {@link #SETS} either.
  * <p>
- * (0.7.335) And the <b>Heavenly Mantle</b>, the Reverent Warplate's pair: white and gold plate under a crown of horns,
+ * (0.7.336) And the <b>Heavenly Mantle</b>, the Reverent Warplate's pair: white and gold plate under a crown of horns,
  * feathered wings folded down the back. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}
  * the same way. Never made: one piece is given to each champion of the tournament of the dead in the afterlife (Jaymo's
  * Powers' Other World), the crown first, then the mantle, the greaves and the sabatons. A little lighter than the
@@ -72,7 +72,7 @@ public final class Armory {
 	static final ArmorMaterial REVERENT = material("reverent", 45, 4, 7, 9, 4, 22, SoundEvents.ARMOR_EQUIP_NETHERITE, 4.0F, 0.15F, ItemTags.REPAIRS_GOLD_ARMOR);
 	/** The Reverent Warplate's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> REVERENT_PIECES = new LinkedHashMap<>();
-	/** (0.7.335) The Heavenly Mantle: netherite's defence, tougher, longer-lasting, the quickest to take enchantments. */
+	/** (0.7.336) The Heavenly Mantle: netherite's defence, tougher, longer-lasting, the quickest to take enchantments. */
 	static final ArmorMaterial HEAVENLY = material("heavenly", 42, 3, 6, 8, 3, 25, SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.1F, ItemTags.REPAIRS_GOLD_ARMOR);
 	/** The Heavenly Mantle's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> HEAVENLY_PIECES = new LinkedHashMap<>();

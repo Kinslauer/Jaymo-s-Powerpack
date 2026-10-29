@@ -129,7 +129,7 @@ public final class ZFighterAfterlife {
 	public static final float TRAINING_BONUS = 1.5F;
 	/** The tournament: bouts, the TP of each (times the round), the spirit fighters' health and the damage each round adds. */
 	static final int ROUNDS = 3;
-	/** (0.17.165) The Heavenly Mantle's pieces (Jaymo's Kingdoms' items), one to each champion in this order. */
+	/** (0.17.166) The Heavenly Mantle's pieces (Jaymo's Kingdoms' items), one to each champion in this order. */
 	static final String[] HEAVENLY = {"heavenly_helmet", "heavenly_chestplate", "heavenly_leggings", "heavenly_boots"};
 	static final int ROUND_TP = 60;
 	static final double SPIRIT_HEALTH = 60.0;
@@ -661,7 +661,7 @@ public final class ZFighterAfterlife {
 	}
 
 	/**
-	 * (0.17.165, with Jaymo's Kingdoms) A champion's prize: the next piece of the Heavenly Mantle he hasn't been given yet
+	 * (0.17.166, with Jaymo's Kingdoms) A champion's prize: the next piece of the Heavenly Mantle he hasn't been given yet
 	 * ({@link #HEAVENLY}, in that order, each marked on him by a tag), until he has all four.
 	 */
 	private static void heavenlyPiece(ServerPlayer player) {

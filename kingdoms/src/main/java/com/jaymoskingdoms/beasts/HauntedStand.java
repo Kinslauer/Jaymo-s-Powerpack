@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.335) The haunted armour stand, drawn as polyjo's Armor Stand (Blockbench Workshop, CC BY 4.0, "this one feels
+ * (0.7.336) The haunted armour stand, drawn as polyjo's Armor Stand (Blockbench Workshop, CC BY 4.0, "this one feels
  * haunted"): it stands in the dark deep under the world among the ruins and caves, and moves only while nobody looks at
  * it. Look away and it glides closer; look back and it's still, unless it's near enough to hide its face (its "shy"
  * pose). Caught moving, it spins round. Close enough and unwatched, it strikes.

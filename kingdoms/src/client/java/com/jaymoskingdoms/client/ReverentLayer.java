@@ -31,7 +31,7 @@ import net.minecraft.world.item.equipment.ArmorType;
  * breastplate, pauldrons and cape on the body and arms; the cuisses and the skirt on the legs and waist; the sabatons on
  * the feet.
  * <p>
- * (0.7.335) The Heavenly Mantle ({@link Armory#HEAVENLY_PIECES}) the same way: eanncrod's model of the same make, its
+ * (0.7.336) The Heavenly Mantle ({@link Armory#HEAVENLY_PIECES}) the same way: eanncrod's model of the same make, its
  * bones named alike. Each set is its own layer ({@link Set}).
  */
 public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {

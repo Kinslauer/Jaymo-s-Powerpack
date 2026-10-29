@@ -6513,7 +6513,7 @@ and overworld dungeons".
   outright: only a hermit's passing word with the Golemancy hint. Their lights burn red and glow in the dark
   (`clockwork_golem_rogue.png` and its `_glow`, from `tools/gen_clockwork_golem.py`).
 
-## 0.7.335: a third batch of Blockbench models (pack 0.17.165)
+## 0.7.336: a third batch of Blockbench models (pack 0.17.166)
 All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
 - **Gorgon** (eanncrod's Hydra Guardian, `beasts/Gorgon`): a rare snake-haired archer in jungles and swamps (biome tag
   `has_gorgon`, one in 8 spawn checks, never two within 64 blocks), 80 health. Its arrows bring Slowness II; it strafes
