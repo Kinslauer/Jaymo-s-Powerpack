@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:phantom_membrane",
+    "minecraft:phantom_membrane",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "air": 14,
+    "motion": 8,
+    "arcana": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:air_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}
