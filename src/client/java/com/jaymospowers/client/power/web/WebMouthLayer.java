@@ -18,9 +18,12 @@ import net.minecraft.util.Mth;
 /**
  * The symbiote's maw, while it eats (Consume): the whole head morphs into it. Since Andy's "fix the old large head
  * eating animation to be more like the new style" it's the big body's head grown huge ({@link WebMawMesh} and its
- * texture, from {@code tools/gen_web_hulk.py}): the same wet black hide with its veins and teal rims, the big white
- * eyes, a heavy snout over a red palate, rows of fangs; a skull and a jaw bigger than the head and closing right over
- * it, hinged at the back of the head. It swells out as the tendril brings the meal up, breathing with its jaws a
+ * texture, from {@code tools/gen_web_hulk.py}); (0.17.172) rebuilt the way the big body is built now, rounded masses
+ * of congealed goo shaded round, the old flat plates scrapped (Andy: "use the new living armor suit design for the big
+ * head that consumes, and scrap the old one. it doesnt fit the new aesthetic"): a swollen cranium with a crown lobe
+ * and heavy brows, the big white eyes on the face, goo cheeks either side of a lumpy muzzle over a red palate, jowls
+ * under the chin, rows of fangs; a skull and a jaw bigger than the head and closing right over it, hinged at the back
+ * of the head. It swells out as the tendril brings the meal up, breathing with its jaws a
  * little open, then gapes as wide as it goes over the meal (quivering), lashes its tongue out at it, and snaps shut on
  * each bite in {@code SNAP_TICKS} (one, or two for something cow-sized), the skull jolting down on it; chews a while,
  * and sinks back (timings in {@link WebSymbiote#EAT_REACH} and on). Everyone sees it. The maw keeps its tongue on the

@@ -26,7 +26,7 @@ import org.joml.Vector3f;
  * the mass sunk under the surface so only a shallow dome bulges it, blending into the skin at its edges, not a blob
  * sitting on top: Andy, "part of the suit, moving underneath the skin, bulging it"), drawn out along the way it creeps.
  * They swell and shrink, and each keeps pushing a smaller swelling out ahead of itself and drawing it back (a ridge of
- * skin between them that thins out, then flows back together). Never over the face, the pecs (the front of the
+ * skin between them that thins out, then flows back together). Never on the head (0.17.172, Andy), the pecs (the front of the
  * chest's upper half) or the soles of the feet.
  *
  * <p>The first twelve each carry a tendril ({@link WebTendrilLayer}, tendril {@code i} out of glob {@code i}): it grows
@@ -283,7 +283,9 @@ final class WebGooGlobs {
 					goo.side[i] = s == 0 ? -1.0F : 1.0F;
 				}
 			}
-			goo.region[12] = HEAD;
+			// (0.17.172) never on the head (Andy: "the tendril blobs should now never come out of the head"): the
+			// spare that crept over the skull is a second torso one
+			goo.region[12] = TORSO;
 			goo.side[12] = hash(seed + 91L) < 0.5 ? -1.0F : 1.0F;
 			goo.region[13] = TORSO;
 			goo.side[13] = hash(seed + 92L) < 0.5 ? -1.0F : 1.0F;
