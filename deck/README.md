@@ -18,6 +18,12 @@ Everything runs from one folder in Desktop Mode; nothing is installed system-wid
 Keep the Deck plugged in (and on Ethernet through a dock if you can). `start.sh` keeps it from sleeping while the
 server runs. The server may use up to 6 GB of the Deck's 16 GB.
 
+**Voice chat (pack 0.17.157+):** Simple Voice Chat's server listens on **UDP port 24454**, which the playit tunnel
+for the game (TCP) doesn't carry. Once: on playit.gg add a second tunnel, type **UDP**, local port **24454**. Then, with
+the server stopped, open `~/jaymos-server/config/voicechat/voicechat-server.properties` (made on the first start with
+the mod) and set `voice_host=` to that tunnel's address with its port (for example `voice_host=something.ply.gg:12345`).
+Start the server again. Without this, everyone still plays, but voice says it can't connect.
+
 **Only run one copy of the world.** Don't start the PC's server again: its world is now older than the Deck's.
 
 **Updates:** on each release, Claude sends `Deck-mods-<version>.tar.gz` in parts (`.part00`, `.part01`, ...).
@@ -31,3 +37,7 @@ players can stay on, and it pauses when the server stops and carries on with `ch
 shows how far along it is. It takes a few hours on the Deck and the world folder grows by about a GB, so start it before
 bed. In `server.properties`, `view-distance=12` and `simulation-distance=8` are a good balance on the Deck: more chunks
 are sent ahead of flyers, fewer are ticked.
+
+**Claude Code on the Deck:** start Claude Code inside the repository's checkout on the Deck (the folder with
+`CLAUDE.md`, not `~/jaymos-server`) and it knows "pbdr" / "pbdr new world" from `.claude/skills/pbdr/SKILL.md`: it
+pulls master, builds with the server's own JDK, swaps the mods folder, restarts and sets the voice chat host.

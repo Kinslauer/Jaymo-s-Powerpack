@@ -593,6 +593,8 @@ final class QuestBoard {
 		List<Holder<Structure>> wanted = new ArrayList<>();
 		for (String name : names) {
 			registry.get(Identifier.withDefaultNamespace(name)).ifPresent(wanted::add);
+			// Enderscape's stronghold and End city stand in for the vanilla ones (optional; by id)
+			registry.get(Identifier.fromNamespaceAndPath("enderscape", name)).ifPresent(wanted::add);
 		}
 		if (mods) {
 			registry.listElements().forEach(h -> {

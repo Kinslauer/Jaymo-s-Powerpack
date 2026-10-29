@@ -103,6 +103,10 @@ public final class Workers {
 			Assassins.act(level, mob);
 			return true;
 		}
+		if (ZFighterFolk.is(mob)) {
+			// (0.7.319) one of Powers' Z Fighter characters: held at their post
+			return ZFighterFolk.step(level, w);
+		}
 		if (Crewmen.tagged(mob)) {
 			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
 			return Crewmen.step(level, w);
@@ -189,6 +193,10 @@ public final class Workers {
 			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
 			Javelins.tick(level, w);
 			return Pirates.villagerStep(level, w);
+		}
+		if (BloodHunters.step(level, w)) {
+			// (0.7.341) a town's hunter out on a wounded beast's blood trail
+			return true;
 		}
 		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
 			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob) || Downed.helping(mob)) {

@@ -1,0 +1,9 @@
+flintlock_rifle.png and the held musket models (models/item/gun/musket.json, musket_reload.json)
+
+"Flintlock/Musket Rifle" by 9greenworks
+https://blockbenchworkshop.com/model/9greenworks/flintlock-musket-rifle-commission
+Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+
+Changes: the cubes were turned into item-model JSON, laid along the diagonal of WeaponMod's musket sprite and drawn at
+half size; the muzzle flash, cartridge and ball pieces were left out; the texture was padded onto a 256x256 sheet
+(tools/gen_flintlock_rifle.py).

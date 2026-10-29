@@ -11,9 +11,10 @@ import net.minecraft.server.level.ServerPlayer;
  * ({@link ZFighterVerdantMerge#ki}, {@link ZFighterWarriorComeback#bonus}). The extras themselves: Earthling
  * {@link ZFighterEarthlingRace}, Verdant {@link ZFighterVerdantMerge} and {@link ZFighterVerdantWater}, Frost-born
  * {@link ZFighterFrostReserve}, Warrior-born {@link ZFighterWarriorComeback}. A Divine-born (Kingdoms heritage {@code divine})
- * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}); the Rubber-folk heritage needs
- * nothing here, since an unknown heritage already counts as an Earthling ({@link ZFighterLineage#fromHeritage}); nor do the
- * Bio-built, but (0.17.138) their forms' strengths come on top ({@link ZFighterBioForms}).
+ * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}) and (0.17.147) its ki flows easier
+ * ({@link ZFighterDivineGrace}); a Rubber-folk's blows and falls bounce off ({@link ZFighterRubberBody}). Both, like the
+ * Bio-built, count as Earthlings ({@link ZFighterLineage#fromHeritage}), with (0.17.138) the Bio-built's forms' strengths on
+ * top ({@link ZFighterBioForms}).
  */
 final class ZFighterRaces {
 	/** The merged fists and health are put back on this often (ticks). */

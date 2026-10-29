@@ -14,6 +14,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -49,7 +50,9 @@ import net.minecraft.world.phys.Vec3;
  * {@link #COMPANION_RADIUS} blocks, leap to the future. Sneak+B there brings you (and those near you) back to where
  * you left.</li>
  * <li>There's no other way home: only a Chrono's leap back, or dying (you wake at your own spawn as usual). Anyone
- * who goes forward without a Chrono stays until they die.</li>
+ * who goes forward without a Chrono stays until they die. A life story's "lost in time" newcomer ({@link #strand}) is
+ * the exception: they stay until they leave by their own leap, and dying only wakes them in the future again
+ * ({@link #STRANDED}).</li>
  * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says the
  * future is forming ({@code /future status} shows how far along it is).</li>
  * <li>A Chrono in the future is stalked by up to {@link #ECHOES} of their echoes at once, each armed with a modern gun;
@@ -103,6 +106,13 @@ public final class Future {
 	 */
 	public static final AttachmentType<net.minecraft.core.BlockPos> WAITING = AttachmentRegistry.create(JaymosPowers.id("future_waiting"),
 		builder -> builder.persistent(net.minecraft.core.BlockPos.CODEC).copyOnDeath());
+	/**
+	 * (0.17.192) Andy: "The chrono start should also respawn in the future until they escape, no more death to leave." A
+	 * "lost in time" newcomer ({@link #strand}) is stranded until they leave by their own leap ({@link #goBack}): until then
+	 * dying wakes them in the future again ({@link #respawned}), never at their overworld spawn. Kept through death.
+	 */
+	public static final AttachmentType<Boolean> STRANDED = AttachmentRegistry.create(JaymosPowers.id("future_stranded"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** How often a waiting newcomer is checked on and told how far along the future is (ticks). */
 	static final int WAIT_CHECK = 20;
 
@@ -124,12 +134,15 @@ public final class Future {
 		});
 		ServerChunkEvents.CHUNK_LOAD.register(FutureRuins::onLoad);
 		ServerEntityEvents.ENTITY_LOAD.register(Future::onEntityLoad);
+		ServerPlayerEvents.AFTER_RESPAWN.register(Future::respawned);
 		ServerTickEvents.END_SERVER_TICK.register(FutureRuins::tick);
 		ServerTickEvents.END_SERVER_TICK.register(FutureFerals::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
 		ServerTickEvents.END_SERVER_TICK.register(Future::waiting);
 		FutureGuns.init();
 		FutureMachines.init();
+		FutureOmens.init();
+		FutureOmenPilots.init();
 		FutureCities.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
@@ -169,11 +182,12 @@ public final class Future {
 
 	/**
 	 * (0.17.8) Jaymo's Kingdoms (a life story's "lost in time" start, by reflection): {@code player} wakes alone in the
-	 * future's arrival square, with no leap home (a Chrono's leap back, or dying, as for anyone else who goes forward
-	 * without one). If the future isn't in place yet, its download is started and they wait for it where they stand,
+	 * future's arrival square, with no way home but a Chrono's leap back. Dying doesn't take them out: they wake in the
+	 * future again ({@link #STRANDED}, {@link #respawned}) until they leave by their own leap. If the future isn't in place yet, its download is started and they wait for it where they stand,
 	 * unhurt and held still ({@link #WAITING}), and go the moment it's ready. Always true: they're sent, or on their way.
 	 */
 	public static boolean strand(ServerPlayer player) {
+		player.setAttached(STRANDED, true);
 		if (sendable(player.level().getServer())) {
 			goForward(player, 0, 1);
 			return true;
@@ -181,6 +195,43 @@ public final class Future {
 		player.setAttached(WAITING, player.blockPosition());
 		player.setPermanentlyInvulnerable(true);
 		return true;
+	}
+
+	/**
+	 * A stranded player's death ({@link #STRANDED}): they wake in the future again, at the arrival square, unless a bed or
+	 * anchor they set there already put them back in it. If the future isn't in place (a world that lost it), they wait for it
+	 * as a newcomer does. Anyone else's death is as usual.
+	 */
+	private static void respawned(ServerPlayer oldPlayer, ServerPlayer player, boolean alive) {
+		if (alive || !Boolean.TRUE.equals(player.getAttached(STRANDED)) || player.level().dimension() == FUTURE) {
+			return;
+		}
+		MinecraftServer server = player.level().getServer();
+		if (!sendable(server)) {
+			player.setAttached(WAITING, player.blockPosition());
+			player.setPermanentlyInvulnerable(true);
+			return;
+		}
+		ServerLevel future = server.getLevel(FUTURE);
+		if (future.players().isEmpty()) {
+			FutureStart.restore(future);
+		}
+		Vec3 at = arrival(future, 0, 1);
+		burst(player.level(), player.position());
+		player.teleportTo(future, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
+		burst(future, player.position());
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.woke_again").withStyle(ChatFormatting.GOLD));
+	}
+
+	/** Where the {@code index}th of {@code of} newcomers stands in the arrival square. */
+	private static Vec3 arrival(ServerLevel future, int index, int of) {
+		double angle = of <= 1 ? 0.0 : Math.PI * 2.0 * index / of;
+		double radius = of <= 1 ? 0.0 : 1.5;
+		int x = LosPerrito.SPAWN_X + (int) Math.round(Math.cos(angle) * radius);
+		int z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * radius);
+		future.getChunk(x >> 4, z >> 4);
+		int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+		return new Vec3(x + 0.5, y, z + 0.5);
 	}
 
 	/** Whether the future is in place to be sent to (if not and nothing's fetching it, the fetch is started). */
@@ -310,13 +361,8 @@ public final class Future {
 			FutureStart.restore(future);
 		}
 		burst(from, player.position());
-		double angle = of <= 1 ? 0.0 : Math.PI * 2.0 * index / of;
-		double radius = of <= 1 ? 0.0 : 1.5;
-		int x = LosPerrito.SPAWN_X + (int) Math.round(Math.cos(angle) * radius);
-		int z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * radius);
-		future.getChunk(x >> 4, z >> 4);
-		int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-		player.teleportTo(future, x + 0.5, y, z + 0.5, Set.of(), 180.0F, 0.0F, true);
+		Vec3 at = arrival(future, index, of);
+		player.teleportTo(future, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
 		burst(future, player.position());
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.arrived").withStyle(ChatFormatting.GOLD));
 		if (!Boolean.TRUE.equals(player.getAttached(CREDITED))) {
@@ -367,6 +413,7 @@ public final class Future {
 		burst(player.level(), player.position());
 		player.teleportTo(to, at.x, at.y, at.z, Set.of(), yaw, pitch, true);
 		player.removeAttached(RETURN);
+		player.removeAttached(STRANDED);
 		burst(to, at);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.returned").withStyle(ChatFormatting.GOLD));
 	}

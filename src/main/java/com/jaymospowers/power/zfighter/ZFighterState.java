@@ -25,6 +25,8 @@ public record ZFighterState(int ki, int maxKi, long[] ready, int[] length, long 
 	public static final int SUPER = 4;
 	public static final int RAGE = 8;
 	public static final int BARRIER = 16;
+	/** (0.17.196) The Spirit Bomb is picked on the hold-C menu: C raises it, not a form. */
+	public static final int BOMB_PICKED = 32;
 
 	public static final ZFighterState NONE = new ZFighterState(0, ZFighterPower.BASE_MAX_KI, new long[SLOTS], new int[] {1, 1, 1, 1, 1}, -1L, 0, 0, 0, 0, -1, 0);
 

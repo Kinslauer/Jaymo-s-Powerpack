@@ -3544,3 +3544,280 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
   `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
   `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.
+- **0.17.142, clearing parties and fewer ATi structures (Kingdoms 0.7.316):** settlements send their guards into any
+  monster-held structure near them before their people go near it, and keep women, children and workers out until
+  it's clear; ATi's compounds are rarer and smaller, none near spawn, and its dojo (the pagoda) only rises in cherry
+  groves. See the Kingdoms MODLOG.
+- **0.17.143, sailors no longer offer "Seek an audience" (Kingdoms 0.7.317):** only rulers and a realm's posted guards
+  do; ship crews, caravan escorts and soldiers at war don't. See the Kingdoms MODLOG.
+- **0.17.146, Z Fighter characters as MCA villagers (Kingdoms 0.7.319):** Andy: "Mad tinkerer, Hermit, all z fighter npcs
+  need MCA villager equivalents ... they should have context sensitive talk interactions that handle the quest objectives
+  instead of them appearing in chat like now." With Kingdoms and MCA, the Keeper, the Tower Hermit, the Mad Tinkerer, the
+  Judge, the Master of the Road, the Fortune Teller and the demon masters spawn as MCA villagers held at their post
+  (`ZFighterNpcs.villager` → Kingdoms' `ZFighterFolk.spawn`), and the old frozen wandering traders near players are
+  swapped for one, tags kept (`ZFighterNpcs.convert`). Right-click opens MCA's menu; "Talk about work" opens their talk
+  screen (`ZFighterNpcs.talk`): the Keeper's blessing and the sagas, the Hermit's wares for emeralds (no trader stall
+  any more), the Tinkerer's next step by stage (parts list, test, the table), the Judge on the place and the tournament,
+  the road's lesson, the teller's way back (emeralds from the pack or TP), a demon master's lesson in blood. A town's
+  masters get "Talk about training" (lesson, sagas, side jobs, errands) in place of the sneak right-clicks. Whatever an
+  answer used to put in chat is caught (`ZFighterTranscriptMixin` on `ServerPlayer.sendSystemMessage`) and shown as their
+  reply on the screen, with "Ask something else". Without Kingdoms or MCA everything is as before. Lang:
+  `lang/parts/zfighter_talk.json`.
+- **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
+  kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
+  clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
+- **0.17.149, horse barding (Kingdoms 0.7.322):** armour is its own model now (chanfron with eye guards, lapped crinet
+  that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
+  (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
+  (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.
+  In the end Andy asked for vanilla-shaped horses until better models turn up: every breed is the classic horse
+  shape with Realistic Horse Genetics' coat patterns and segmented armour (plates over the vitals, joined by mail or cloth), plus a rare (1 in 100) moonlit
+  horse made from jsellier23's CC-BY Mystical Deer. See the Kingdoms MODLOG.
+- **0.17.156, Blockbench models from the workshop (Kingdoms 0.7.329):** Andy downloaded eleven Blockbench Workshop
+  models (CC BY 4.0) and wanted them all in. Powers' part:
+  - **Flintlock musket:** the future musket is drawn as 9greenworks' Flintlock Musket Rifle (`tools/gen_flintlock_rifle.py`
+    writes the item models; texture and credit under `textures/item/gun/`).
+  - **Visage of War:** the infected guardian tree finally has its boss, eanncrod's winged lance knight
+    (`aether/guardian/VisageOfWar`, 300 HP, flies, boss bar). It sleeps in the tree's top chamber under the vault, wakes
+    when a player comes near, circles above its foe and thrusts, wide-cleaves, comes down in a cut or shoves; under half
+    health it charges too and attacks faster. With nobody near for 10 s it goes home and heals. It drops all four
+    pieces of Kingdoms' Reverent Warplate (the only way to get it; nothing without Kingdoms). Its model plays its own
+    16 animations through a Powers copy of Kingdoms' Blockbench loader (`client/bb/BbModel`). Gold spawn egg in the
+    Aether tab. Credits: `textures/entity/bb/CREDITS.txt`.
+  - **Kingdoms' side** (a second batch Andy added): Eurus and Aeolus as eanncrod's Kintsugi wyvern; a minotaur in the
+    mountains, the Piglin King as a Nether boss, a redstone golem deep below, the skulk golem in the deep dark, a wild
+    boar in place of Naturalist's, and scalebane sellswords in barbarian camps and goblin villages. See the Kingdoms
+    MODLOG.
+- **0.17.158, symbiote Collect, swing engulf and the checklist picks:** the symbiote's wheel has a Collect slot (bond 70): in Living Armor
+  its tendrils fetch items within 12 blocks to your feet; below bond 70 it fetches on its own whenever its tendrils are
+  out. The first time it holds a kind of item it studies it in front of you with a comment and, given time, a hint
+  (Use takes it early); one look per kind, ever. Swinging in the suit, tendrils pour out of the body and wrap the whole
+  arm before the cord shoots, and on release the cord reels back in and the wrap withdraws, leaving no line. See
+  docs/web.md. Living Armor no longer brings the tendrils out (they have their own slot), and the Tendrils slot
+  works from bond 30.
+  From Andy's checklist: Protect / Hunt / Hide orders, Trust and Mood (a Status page off the wheel's Mind chip, mood
+  tints the screen edge and its voice), named stages, its own requests (ignore the deep-underground one and it digs you
+  down), arm slots (K / U), a mantle (N), strain traits (Black hunts at night, Red hears heartbeats, White refuses
+  rotten flesh), C to feed or consume a held foe, misfires while settling, starving it to zero bond consumes you, any
+  other death leaves it waiting at the spot with your things to rebond, and the meteor blob rampages round its crater
+  until killed or bonded. Compile-checked; not playtested.
+- **0.17.159, Enderscape and Last World Panorama (Kingdoms 0.7.331):** two outside mods join the pack unchanged, downloaded by id.
+  Enderscape (code MIT, art all rights reserved) reworks the End: new biomes, plants, mobs, blocks, items, music and sky;
+  it needs Lithostitched (MIT) and the pack's YACL. Its built-in data packs (on by default) swap vanilla End cities and
+  overworld strongholds for its own, which fill chests from their own loot tables, so the Grand Shield also lives in
+  its stronghold armouries and the Voidreaver in its End city chests (`compat/EnderscapeLoot`; Kingdoms 0.7.331 does
+  the same for writs and quest lairs). Only End chunks generated after this get the new terrain. Last World Panorama (client-only) makes the title screen's panorama a shot of where you last left a world.
+  Both are in `packMods` with their CurseForge ids, so the CurseForge import downloads them; Enderscape is kept out
+  of the dev game.
+- **0.17.160, vampires and werewolves hide among friends (Kingdoms 0.7.332):** a vampire within 150 blocks of a mortal
+  player or villager grows hungry and feverish; with a player in sight the screen pulses red and a heartbeat pounds
+  (up to 80% volume). Plus all 24 deception ideas Andy picked: a favourite victim, blood whispers, wounded friends,
+  sleeping prey, thralls, the Mask, tells (animals flee, food gives nothing), pallor, garlic and silver tests, hunter's
+  torch sense, head turns, sneaking away, the blood's and the curse's requests, mood on screen; for werewolves the
+  moon's pull, scent trails, hidden-change tells, locking yourself in, the morning after, torn cloth evidence; and for
+  everyone rumours with names, accusing at the priest (a talk option), victim memory, and monsters hearing each other.
+  See the Kingdoms MODLOG.
+- **0.17.162, the server starts again (Kingdoms 0.7.333):** Simple Voice Chat 2.6.27 refuses to load beside Sound Physics
+  Remastered older than 1.5.2, so the pack's Sound Physics Remastered moves from 1.5.1 to 1.5.2+26.3 (Modrinth
+  `gA7nKz5g`, CurseForge file 9280065). Nothing else changes.
+- **0.17.163, Sora's Dagger in the friend's own hand positions:** Andy's friend updated the dagger's Blockbench file
+  (`tools/blockbench/soras_dagger_original.bbmodel`) with his own display settings for every slot: both hands in first
+  and third person, the ground, the inventory, item frames and shelves. The shapes and texture are unchanged; all four
+  stages now take his transforms in place of ours (`tools/blockbench/sora.py` uses the file's display when it sets
+  every slot). Not seen in game.
+- **0.17.164, no more lying in the suit on broken legs:** Andy (2026-10-29) was stuck on the ground in the symbiote suit
+  after a town's brawlers beat him down: the symbiote got him up, but two broken legs hold you to a crawl till a priest
+  sets them, and Jump did nothing, so he lay there (Creative didn't help either). Now the symbiote knits your bones as it
+  rescues you, and a bonded symbiote never leaves you crawling on broken legs: it binds them whole for 10 of its hunger
+  with a line (`WebSymbioteRescue.knit`, `Wounds.knitBones`; not when it's too weak to rescue you). And Jump stands you
+  up from any crawl the server holds that nothing keeps you in any more (`CrawlTaps`), as it does from a crawl of your
+  own. Built, not playtested.
+- **0.17.169, a third batch of Blockbench models (Kingdoms 0.7.339):** all CC BY 4.0, credited in
+  `textures/entity/bb/CREDITS.txt` (both mods).
+  - **Traveler Dagger** (polyjo) is the Armory's iron dagger's new 3D look (`tools/blockbench/traveler_dagger.py`).
+  - **Dreaded Blade** (capellastudio): Andy, "replace the arsenal's relic weapons with one of these". It is the Nether
+    relic once called the Soul Saber (same id `soul_saber`, same life steal and soul-fire slash), now named the Dreaded
+    Blade and drawn as the black sword with its green runes animated at full light (`tools/blockbench/dreaded_blade.py`).
+    The flat Soul Saber icon is gone (`gen_relics.py` and `vanilla_style/powers.py` skip it).
+  - **Thief Armor** (eanncrod): Andy, "add it to the costumes no bonus, useful for hiding as a thief or assassin same as
+    the cowl". The Costume Table's **Thief's Leathers** cut (`Cut.THIEF`, its own cubes in `CostumeModels.thief` on a
+    128-square sheet) and **Thief's Hood** (`Mask.THIEF_HOOD`, a hood like the peaked hood: `isHood`, face showing, no
+    bonus). Both dyeable; `tools/blockbench/thief_costume.py` splits the texture into the two dye masks.
+  - **Heavenly Mantle** (eanncrod): each champion of the tournament of the dead (the afterlife's ring) is given the
+    next piece he lacks, crown first (`ZFighterAfterlife.heavenlyPiece`, tags `jaymospowers.heavenly.*`). The armour is
+    Kingdoms'.
+  - Not seen in game.
+- **0.17.169, Sora's Dagger parries:** Andy, "sora's dagger should be able to parry". Every stage takes the weapon guard
+  (`Guard`): right click raises it, with the perfect parry and parry windows. From the diamond stage a wind's right
+  click is still the Flurry while it's ready, and the guard while it cools down, as the warhammer's smash does. The
+  Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
+  hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
+- **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.
+- **0.17.173, Sora's Dagger, the friend's next version:** Andy's friend sent a new Blockbench file (34 cubes, a new
+  texture, his own hand positions with a slight tilt in third person). It goes in through `tools/blockbench/sora.py` as
+  before, all four stages. Previews of each slot, rendered from the model: `/mnt/project-files/soras-dagger-previews/`.
+- **0.17.174, Sora's Dagger grips:** Andy: "both on shift m2". It's held angled up out of the fist like a sword now (our
+  transforms in `tools/blockbench/sora.py`, no longer the file's, which held it straight out). Sneak and right click
+  turns it to a reverse grip, blade down past the little finger, and back again. The flip is the stack's first
+  custom_model_data flag, which picks `<stage>_reverse`, and the grip stays through the Tempest forging. The diamond
+  stage's sneak and right click forges only for an ascended wind carrying a spoil; for everyone else it turns the grip.
+  `display.py`'s `display()` takes `tilt`/`fp_tilt`.
+- **0.17.175, pebble piles on grass (`ground/PebblePilesFeature`):** Andy: "you should be able to rarely find the rocks
+  on grass as well, mostly in pebble piles. changing dependent on biome". About one chunk in six has a pebble pile on
+  grass: 3-7 small rock piles (mostly 1-2 rocks) within 2 blocks. Most are the biome's rock: granite on savannas,
+  diorite in birch woods, cherry groves, meadows and flower lands, andesite in taigas, snowy plains and the hills,
+  mossy in jungles, swamps and dark or old-growth woods, red sandstone in the badlands, sandstone on beaches, plain
+  stone elsewhere; the rest are plain stone (andesite where the biome's is stone). A telling stone up to 4 blocks under
+  the turf still decides. The scattered rocks now keep to grass only 1 time in 5 (`GroundRocksFeature.ON_GRASS`), so
+  rocks on grass mostly come in piles. Rarity in `worldgen/placed_feature/pebble_piles.json`.
+  - Not seen in game.
+- **0.17.182, blood stays where it falls (`core/blood/BloodTrail`, `BloodTracking`):** Andy: "the blood that falls
+  continues to emit, it needs to stay on the ground where it falls, allowing for players and mobs to track it". Ground
+  blood was only ever client particles that faded in 20-30 s. Now the server keeps every stain (where, whose, when) for
+  10 minutes (`BloodTrail.LIFE`, the last minute fading) and sends each player the stains within 64 blocks once, so
+  anyone coming by later sees them too. A cut's drip no longer leaves its own splash: its stain lands under the body a
+  moment after the drop, and a body that keeps bleeding on one spot grows that stain into a pool (up to 1.8x) instead
+  of stacking new ones. Blows leave 1-3 stains around the target, and the heavy-blow, crushing, corpse and blast pools
+  are lasting stains too. Stains darken to a dried brown over the first 5 minutes, so a trail reads fresh to old. The
+  passing splashes a spray's drops leave last 60-90 s now (were 17-25 s). Nothing stains in water or lava.
+  Mobs in `jaymospowers:blood_trackers` (wolves, foxes, polar bears, cats, ocelots, Naturalist bears/big cats/gators/
+  snakes; zombies, spiders, illagers, piglin brutes, hoglins, ravagers, witches) with nothing to fight smell a living
+  bleeder's stains within 16 blocks and walk them stain by stain toward fresher blood, until they see the bleeder
+  (12 blocks) and go for it. Monsters follow players' and villagers' blood; wild beasts follow smaller animals', and a
+  player's only when the player is down or under 40% health; tamed animals never track. Stains are kept in memory, so a
+  server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
+  `BloodTrail.follow` (plain types, for reflection).
+  - Not seen in game.
+- **0.17.184, Baubles:** Andy asked for the Baubles mod. Baubles is 1.12 Forge only, and no accessory-slot mod
+  (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own (`baubles/`), laid out as Baubles was:
+  seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm. A tab on the survival inventory's
+  left edge (under the powers tab) opens them: the player in the middle, the slots either side, the inventory below;
+  a chest tab there goes back. There's an unbound Open baubles key too (the only way in from creative). Right-clicking
+  a bauble puts it straight into a free slot that takes it. What fits each slot is an item tag
+  (`jaymospowers:baubles/<slot>`), so a data pack can make any item wearable; only our own baubles give bonuses, and
+  only while worn there. Any worn item ticks as if carried, so Alchemy's Runic Amulet (the only alchemy trinket; the
+  Scrying Lens is a held tool) is tagged an amulet and draws off fleeting taint from that slot. Worn baubles drop where you die unless keepInventory holds.
+  Seven baubles to start (own art, `tools/gen_baubles.py`; crafted, in Tools & Utilities):
+  Heartstone Amulet (+4 max health: string, gold, a glistering melon slice), Swiftfoot Ring (+8% speed: gold and a
+  diamond), Delver's Ring (+20% mining speed: copper and an amethyst shard), Brawler's Belt (+25% knockback
+  resistance: leather and an iron nugget), Diver's Circlet (breath lasts about twice as long, +50% mining underwater:
+  gold nuggets and prismarine crystals), Featherfall Cloak (+2 blocks before a fall hurts: feathers, a phantom
+  membrane, white wool) and Rabbit's Foot Charm (+1 luck: string, a gold nugget, a rabbit's foot). The bonuses are set
+  in `Baubles.init`.
+  - Compile-checked; not seen in game.
+- **0.17.186, Sora's Dagger reverse grip, again:** Andy: "the reverse grip didnt seem to be working, he modeled it
+  differently". The friend's "Reverse grip sora dagger" file (same cubes, his hand slots turned over, kept as
+  `tools/blockbench/soras_dagger_reverse_original.bbmodel`) now gives the `_reverse` models their held transforms.
+  The weapon guard no longer refuses sneak + use on Sora's Dagger when something is in the off hand, which had stopped
+  the turn before the dagger saw it.
+- **0.17.188, Friends & Foes:** Andy asked whether its baubles fit our slots, then for it in the pack. Friends & Foes
+  (CC BY-NC-ND 4.0, Faboslav) and the Resourceful Lib it needs (MIT) join `packMods` unchanged, downloaded by id. They
+  bring the mob-vote losers (copper golem, glare, moobloom, mauler, rascal, tuff golem, wildfire, iceologer,
+  illusioner...). Its Totems of Freezing and Illusion fire from the hand or from the slot mods on its compat list;
+  `compat/FriendsAndFoesCompat` puts our bauble slots on that list by reflection, and the charm tag takes both totems,
+  so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
+  objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
+  - Compile-checked; not seen in game.
+- **0.17.189, Sora's Dagger's Flurry probe (crash fix):** since 0.17.169 the game and server crashed on start
+  ("Components not bound yet" from `SorasDagger.<clinit>`): `FLURRY_PROBE`, a static `ItemStack`, was built when
+  `SorasDagger.register()` first loaded the class during mod init, before item components are bound. It's made on first
+  use now (`flurryProbe()`). No other static stack in the three mods is built that early.
+- **0.17.195, Blockbench batch 4 (Kingdoms 0.7.347):** Andy's eight new models.
+  - The future's Omen mechs: manned mechs, red and blue (`chrono/future/FutureOmen`, `FutureOmens`). Andy: "manned mechs
+    who fight against the androids and zombies overtaking los perrito before it fell".
+    - They spawn only in the future: a squad of one to three (same colour) about once every 12 minutes per player,
+      30-50 blocks out, never within 160 blocks of another.
+    - They attack androids, war and android mechs and ferals on sight. To players they're neutral unless hurt (or
+      their drone is).
+    - Heavy smash plus an arm cannon (FutureGuns heavy MG). 320 health, 22 damage, 22 armour.
+    - Destroyed, a pilot (a villager) climbs out 85% of the time, and a Cockpit Log book drops 35% of the time (the only
+      lore, in the pilot's voice).
+  - Worky drones (`FutureWorky`): one or two with every Omen, future only. They orbit their mech, repair it (2 health
+    every 2.5 s), spot foes (Glowing, and they hand a target over), flee danger, and wave at friendly players.
+  - New item looks: the harpoon (Armory and Kingdoms), the iron rapier (the swept rapier), the Voidreaver relic, and
+    the Tidebreaker relic (the lightning spear). `tools/blockbench/bake.py` snaps rotations Java models can't draw.
+  - Omen pilots are MCA villagers from the future (`FutureOmenPilots`; Andy: "very curious MCA villagers who are from
+    the future so they are surprised you are there"). The first time one sees you it stops and stares, says so, then
+    walks up and watches you a while. Talk: "Tell them where you came from" (they answer your life story's start or
+    heritage) and "Ask what happened here" (six pieces of how the world fell, one per talk, a minute apart, kept on the
+    pilot). Without Kingdoms/MCA a plain villager speaks the same lines on right click.
+  - Lost in time (Andy: "respawn in the future until they escape, no more death to leave"): a stranded starter
+    (`Future.STRANDED`) who dies wakes in the future's arrival square again; only their own leap home (sneak+B after
+    an echo, the pod, `/future back`) ends it.
+  - Tomecraft research (Enchanting, after Spellbinding) unlocks the spell tomes' infusion recipes.
+  - The spell tomes are Kingdoms 0.7.347's.
+  - Compile-checked only; not seen in game.
+- **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
+  players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
+- **0.17.198, other-world starts (Kingdoms 0.7.349, `ZFighterStarts`):** Andy: "new starts, involving the other
+  worlds". The life story's last question can now wake you on one of them (`ZFighterStarts.land`, called by Kingdoms):
+  - **Pale Moon:** a crashed pod (`space_pod_wreck`, unbreakable) in a scorched crater 600-900 blocks out. Andy: "Fix it
+    first": use 6 iron, 4 copper, 8 redstone and 4 coal (or charcoal) on it in turn and it becomes a working pod. An
+    empty hand says what it needs next. Kit: stone pickaxe, torches, the pilot's log (oblique hints only).
+  - **Verdant World:** next to a village there, with a gate ring 150-300 blocks off and a compass to it. Going through
+    builds the Tower and Lookout first if no one has (`ZFighterSites.ensureTower`), so you never land on empty sky.
+  - **Rustfall:** a mine mouth 160-260 blocks from the Iron-Master's pad (built, with its pod). For a day, bare-handed
+    overseers (`jaymospowers_overseer`, vindicators) come after you, at most 2 near; leaving Rustfall ends it.
+  - **Maw:** on the salvagers' pad with blackstone bricks and a lantern.
+  - **Demon master:** in a Gloam village (any demon biome if none), its master at his post, with a ruined but lit
+    Nether portal nearby. The demon army leaves you alone until you first leave the Nether (`ZFighterStarts.WARD`).
+  - **Afterlife:** held in the Aether afterlife (`ZFighterAfterlife.strand`) with the usual ways out; home is the
+    overworld spot the story would have used.
+  - `ZFighterDemonRealm.raiseHome` builds or reuses the demon village nearest a spot; `ZFighterSpace.surface` is
+    package-private for the moon.
+- **0.17.199, faster loading (Kingdoms 0.7.350):** Andy asked whether FastNoiseLite would speed up load times. It
+  wouldn't: our dimensions are vanilla density-function JSON, so vanilla's noise code does that work, and swapping it
+  would change every world's terrain. His log showed where a new world's time goes instead: 60 s picking the spawn,
+  34 s of spawn chunks, then 20 s stuck between "logged in" and "joined" on Kingdoms' capital search. So:
+  - Kingdoms 0.7.350 looks for the first capital's village a few places a tick instead of all at once on the join.
+  - The pack now ships Lithium 0.26.3, FerriteCore 9.0.0 and C2ME 0.4.2-alpha.0.106 (26.3 builds, unchanged; not in
+    the CurseForge zip until their CurseForge ids are looked up). ModernFix has no 26.3 build.
+  - `core/StreamsPreset` sets Streams Reflowing's terrain accuracy from MEDIUM to LOW once per install (lighter stream
+    planning per new chunk). Its fast terrain mode is on by default already; Streams turns it off where it doesn't fit.
+  - Compile-checked only; not seen in game.
+- **0.17.200, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
+  - Crater-ring blasts go off `CRATER_BLASTS_PER_TICK` (3) a tick, in a scattered order, instead of a whole ring (up
+    to 22 TNT-strength blasts) in one tick.
+  - The sweep of what's left hanging brings down `GravityMeteorSweep.BREAK_PER_TICK` (1200) blocks a tick, highest
+    first, instead of up to 12000 in one tick. Its "already floating" scan runs when the meteor is called (before the
+    rock has cut anything loose) instead of on the impact tick, and its flood fill no longer makes a BlockPos for every
+    ground block.
+  - Blocks the rock or sweep break with nothing but air or other breaking blocks round them go without neighbour or
+    shape updates; only the hole's edge gets full updates.
+  - Fewer drops: 3% of carved and swept blocks drop items (was 10%).
+  - Low-end mode halves the burst's debris, smoke and hanging dust on that client (`GravityMeteorFx.LOW_END_SHARE`).
+  - Jolt physics (the Velthoric mod) was looked at: LGPL, 1.20.1/1.21.1 only, and a physics engine adds work rather than
+    removing block-update cost, so it isn't used.
+  - Compile-checked only; not seen in game.
+- **0.17.201, new Blockbench models (Kingdoms 0.7.351):** Andy sent six Blockbench Workshop models (all CC BY 4.0) and
+  asked where they'd fit.
+  - Arsenal's Void Flintlock is the "Dueling Pistol" in the hand and in the inventory (`models/item/flintlock_3d`,
+    `tools/blockbench/dueling_pistol.py`), laid on the old held sprite's diagonal so the old hand placements fit. The spent
+    gun uses the same model.
+  - The Echo Cleaver relic is the "Mandrake" sword, a mandrake root wound round its hilt (`tools/blockbench/mandrake.py`).
+  - `tools/blockbench/freeform.py`: converts a model to item-model elements with its turns kept exactly (26.3 reads
+    free x/y/z element rotations), group turns and inflate folded in.
+  - Kingdoms: the Kintsugi Armour and Primal Visage sets, whaleboats drawn as a launch, and the Skeleton Lord boss (see
+    the Kingdoms MODLOG, 0.7.351).
+  - Compile-checked only; not seen in game, and no dev server was booted for the new Kingdoms registries.
+- **0.17.202, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
+  symbiotes?" and picked its combat calls first. Every `say.*` line (201: what it says as it strikes, kills, grabs,
+  feeds, digs, climbs, slings and so on, for all three strains) is spoken aloud as well as shown, only to the host, at
+  their head. The voice is designed with VoxCPM2 (Apache-2.0, from a description: deep, guttural, wet, snarling; no real
+  person cloned) by `tools/voices/make_voices.py`, which then roughens each clip with a throat-rattle flutter and soft
+  clipping (`grit`). Andy then asked for it to "hang on every word longer" and be "a long snarl and growl into each word":
+  `snarl` cuts each line into words, draws each out (the end of each word longer still: "The wallll is ourssss"), leads
+  into it with a growl made from its own first moment an octave down, and lays heavy grunge under the clear words (a
+  rattling low rumble, a raspy hiss and an octave-lower double). Each strain has its own voice, picked by Andy from an
+  audition (`--audition`): black a venomous snarl, red a choking ghoul, white a dry, cold lich; black plays a touch lower
+  (0.92), each line's pitch wandering a little. A line is voiced when Powers' `sounds.json` lists it, which the script writes
+  from the clips it has made; its moods' `mood.say.*` variants are text only for now.
+  - Not seen in game.
+- **0.18.0, Mouse Tweaks and ClientSort:** Andy asked for both. Each has a Fabric build for 26.3 and joins `packMods`
+  unchanged, downloaded by id with its CurseForge ids: Mouse Tweaks 26.3-2.31 (BSD-3-Clause, YaLTeR; CurseForge 60089,
+  file 8887995), client-only, for drag-spreading, shift-dragging and scrolling items between slots; ClientSort
+  3.104.1+26.3 (Apache-2.0, TerminalMC; CurseForge 1049891, file 8978806), which sorts an inventory on a middle click
+  or its button and adds fill-stacks, restock and transfer. ClientSort needs Cloth Config and Mod Menu, both already
+  in the pack. No clash with our own screens: our container mixins are accessors and the horse labels, our inventory
+  tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
+  - Not built (the cloud can't reach Fabric's Maven); not seen in game.

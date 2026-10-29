@@ -33,6 +33,14 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 		ByteBufCodecs.FLOAT, Equine::temper,
 		Equine::new);
 
+	/**
+	 * (0.7.322) The moonlit horse: rarer than any breed's rare coat, a horse of any breed (but the elephants and the
+	 * mythic mounts) is now and then born pale and silver-maned, drawn in a shape of its own (jsellier23's Mystical Deer
+	 * made into a horse, CC BY 4.0). Its coat index, past every breed's coats; foals take it from a parent as any coat.
+	 */
+	public static final int MOONLIT = 100;
+	public static final float MOONLIT_CHANCE = 0.01F;
+
 	/** A new one of {@code breed}: stats rolled as three dice (most horses middling, a few fine), a coat (now and then the rare one). */
 	public static Equine roll(Breed breed, RandomSource random) {
 		return new Equine(breed, coat(breed, random), stat(random), stat(random), stat(random), stat(random), stat(random));
@@ -43,6 +51,9 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 	}
 
 	static int coat(Breed breed, RandomSource random) {
+		if (random.nextFloat() < MOONLIT_CHANCE && java.util.Arrays.asList(Breed.HORSES).contains(breed)) {
+			return MOONLIT;
+		}
 		int rare = breed.coats.length - 1;
 		return random.nextFloat() < Equestrian.RARE_COAT_CHANCE ? rare : random.nextInt(rare);
 	}
@@ -95,11 +106,15 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 	}
 
 	/** Vanilla's taming threshold: a hot-tempered horse takes longer to break in. */
+	public boolean moonlit() {
+		return this.coat == MOONLIT;
+	}
+
 	public int maxTemper() {
 		return Math.round(40 + 100 * this.temper);
 	}
 
 	public String coatName() {
-		return this.breed.coat(this.coat);
+		return this.coat == MOONLIT ? "moonlit" : this.breed.coat(this.coat);
 	}
 }

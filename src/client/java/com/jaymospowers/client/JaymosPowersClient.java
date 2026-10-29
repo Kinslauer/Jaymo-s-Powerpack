@@ -148,6 +148,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
+		com.jaymospowers.client.baubles.BaublesClient.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
@@ -300,8 +301,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 					() -> client.onMode(player, pressed));
 			}
 		}
+		// (0.17.194) a Z Fighter's C is held back a moment: a tap goes through, held it opens the form menu
+		boolean ultimateHeld = com.jaymospowers.client.power.zfighter.ZFighterFormMenu.filter(minecraft, player, ultimateKey.isDown(),
+			seized || minecraft.gui.screen() != null);
 		boolean ultimate = power != null && power.ultimateAnswers(player)
-			&& !seized && minecraft.gui.screen() == null && (ultimateKey.isDown() || tapped[TAP_ULTIMATE] > 0);
+			&& !seized && minecraft.gui.screen() == null && (ultimateHeld || tapped[TAP_ULTIMATE] > 0);
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;
 			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));

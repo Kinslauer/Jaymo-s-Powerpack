@@ -42,6 +42,14 @@ import net.minecraft.world.entity.player.Player;
  * <p>Andy: "If you are able to fight it off successfully multiple times give access to a new form hidden until you do, a
  * super 4". Win {@link #SUPER_4_FITS} fits and the ape and the man make their peace: {@link #SUPER_4} opens, the
  * primal ape's look on his own body (red fur, a long red mane, fire and sparks), taken with C from his highest form.
+ *
+ * <p>(0.17.190) Andy: "I want a prerequisite form to our current primal super". The fits now open {@link #PRIMAL_SUPER}
+ * (Primal Super: the ape's fur and tail, Super 2's hair in his own villager's colour, a smooth aura, a little fire that
+ * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super.
+ * <p>(0.17.192) Andy: "Super primal super can only be achieved now when a primal super user fuses with another z fighter
+ * warrior born. It deactivates regardless of remaining ki after the fusion ends." So it is C from Primal Super only while
+ * he steers a fused body whose other half is Warrior-born ({@link #fusedWithWarrior}), and the fusion ending drops him
+ * back to Primal Super ({@link #fusionEnded}). (0.17.194) The halfway swap hands the form on with the body.
  */
 public final class ApeRage {
 	/** Rage a second as the ape (times 1 + primal / {@code PRIMAL_RAGE_SCALE}), per point of damage taken, per kill, when crippled. */
@@ -59,8 +67,15 @@ public final class ApeRage {
 	/** Primal: gained each change, each minute as the ape, each fit lost, each person killed in a fit; lost each fit won. */
 	static final int PRIMAL_CHANGE = 5, PRIMAL_MINUTE = 1, PRIMAL_LOST_FIT = 3, PRIMAL_KILL = 1, PRIMAL_WON_FIT = 4;
 	public static final int PRIMAL_MAX = 100;
-	/** Fits won (ever) before Super 4 opens; Super 4's form number (past the three bought ones). */
+	/** Fits won (ever) before Primal Super opens; Super Primal Super's form number (past the three bought ones; was Super 4). */
 	public static final int SUPER_4_FITS = 5, SUPER_4 = 4;
+	/**
+	 * (0.17.190) Primal Super's form number: the step between his highest bought form and Super Primal Super. 10 is free in
+	 * {@code live.form} (the branch forms' 10-14 are kept in their own attachment, never as a form).
+	 */
+	public static final int PRIMAL_SUPER = 10;
+	/** Primal Super's aura: an ember orange, between Super 3's gold and Super Primal Super's red. */
+	public static final int PRIMAL_SUPER_COLOR = 0xF06A30;
 	/** A fit shakes his screen: as it starts, and every this many ticks while it has him. */
 	static final float FIT_SHAKE = 2.2F, FIT_PULSE_SHAKE = 0.8F;
 	static final int FIT_PULSE_EVERY = 30;
@@ -78,7 +93,7 @@ public final class ApeRage {
 	/** Fits he's won, ever (saved, kept through death). */
 	public static final AttachmentType<Integer> TAMED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_tamed"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
-	/** Super 4 is open to him (saved, kept through death, synced to him). */
+	/** Primal Super is open to him (the fits; saved, kept through death, synced to him). Kept under Super 4's old id. */
 	public static final AttachmentType<Boolean> SUPER_4_OPEN = AttachmentRegistry.create(JaymosPowers.id("zfighter_super_4"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
@@ -148,11 +163,76 @@ public final class ApeRage {
 		return r == null ? 0.0F : r;
 	}
 
-	/** Super 4 is his to take now: opened, a Warrior-born past the breakthrough, not the ape. */
+	/** Primal Super is his to take now: opened, a Warrior-born past the breakthrough, not the ape. */
 	public static boolean super4(Player player) {
 		return Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN)) && ZFighterLineage.of(player) == ZFighterLineage.WARRIOR
 			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
 	}
+
+	/** (0.17.192) Super Primal Super is his to take now: Primal Super is, and he steers a fusion with another Warrior-born. */
+	public static boolean superPrimal(Player player) {
+		return super4(player) && fusedWithWarrior(player);
+	}
+
+	/** He steers a fused body and the one inside it (the first, in a five-way) is Warrior-born. */
+	public static boolean fusedWithWarrior(Player player) {
+		ZFighterFusion.Look look = player.getAttached(ZFighterFusion.LOOK);
+		return look != null && look.innerLineage() == ZFighterLineage.WARRIOR;
+	}
+
+	/**
+	 * (0.17.192) His fusion ended: Super Primal Super goes out whatever ki is left, back to Primal Super (or his highest
+	 * Super). (0.17.194) So does any other form the body took over at the halfway swap that he hasn't opened himself: back
+	 * to the highest he has. Called before the caller's {@link ZFighterPower#refresh}.
+	 */
+	static void fusionEnded(ServerPlayer player, ZFighterPower.Live live) {
+		java.util.List<Integer> own = ZFighterForms.choices(player);
+		if (live.form == 0 || live.form == ZFighterForms.FALSE_SUPER || own.contains(live.form)) {
+			return;
+		}
+		int to = 0;
+		if (live.form == SUPER_4 && super4(player)) {
+			to = PRIMAL_SUPER;
+		} else {
+			for (int form : own) {
+				if (form != ZFighterForms.GOD) {
+					to = form;
+				}
+			}
+		}
+		if (to <= 0) {
+			ZFighterPower.endSuper(player, live);
+			return;
+		}
+		live.form = to;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 0.7F);
+	}
+
+	/** The top of his regular line: Super Primal Super, Primal Super or his highest bought Super (at most Super 3). */
+	public static int top(Player player) {
+		return superPrimal(player) ? SUPER_4 : super4(player) ? PRIMAL_SUPER : Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+	}
+
+	/** The form C climbs to from {@code form} on the regular line (0: none, he's at the top). */
+	public static int nextUp(Player player, int form) {
+		int open = ZFighterTraining.formsOpen(player);
+		if (form < open) {
+			return form + 1;
+		}
+		if (form == open && super4(player)) {
+			return PRIMAL_SUPER;
+		}
+		return form == PRIMAL_SUPER && superPrimal(player) ? SUPER_4 : 0;
+	}
+
+	/** The form sneak+C steps down to from Super Primal Super or Primal Super (the other forms just go one down). */
+	public static int below(Player player, int form) {
+		if (form == SUPER_4 && super4(player)) {
+			return PRIMAL_SUPER;
+		}
+		return Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+	}
+
 
 	/**
 	 * (0.17.91) Why Primal Super, though opened, isn't his to take now (a lang key), or null when it is or was never opened.

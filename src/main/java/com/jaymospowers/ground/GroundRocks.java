@@ -29,7 +29,8 @@ import net.minecraft.world.level.material.PushReaction;
  * in the stone of the ground under them (sandstone in deserts, deepslate down deep, mossy in jungles and swamps...), up
  * to 4 in a block like candles; loose flint lies about too, most on gravel and by water. A punch or a right click picks
  * them up; 4 rocks craft into their block (stone rocks into cobblestone). Rocks that lie in water are salt crystals
- * (0.16.24). Assets: tools/gen_ground_rocks.py.
+ * (0.16.24). On grass they lie mostly in rare pebble piles of the biome's rock (0.17.175, PebblePilesFeature).
+ * Assets: tools/gen_ground_rocks.py.
  */
 public final class GroundRocks {
 	/** The rock kinds. Keep in step with VARIANTS in tools/gen_ground_rocks.py. */
@@ -69,11 +70,13 @@ public final class GroundRocks {
 
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("loose_rocks"), GroundRocksFeature.ROCKS_CODEC);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("loose_flint"), GroundRocksFeature.FLINT_CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("pebble_piles"), PebblePilesFeature.CODEC);
 		var land = BiomeSelectors.foundInOverworld()
 			.and(BiomeSelectors.tag(BiomeTags.IS_OCEAN).negate())
 			.and(BiomeSelectors.tag(BiomeTags.IS_DEEP_OCEAN).negate());
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("loose_rocks"));
 		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("loose_flint"));
+		BiomeModifications.addFeature(land, GenerationStep.Decoration.VEGETAL_DECORATION, placed("pebble_piles"));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_DECORATION, placed("loose_rocks_cave"));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> {

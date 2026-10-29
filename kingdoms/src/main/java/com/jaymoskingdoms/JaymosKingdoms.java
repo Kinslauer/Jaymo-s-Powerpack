@@ -144,6 +144,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		CampChiefs.register();
 		StoryTalk.register();
 		ShipTalk.register();
+		ZFighterFolk.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Prejudice.register();
@@ -158,6 +159,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		Clearing.register();
 		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
@@ -219,7 +221,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		FightPit.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
+		// (0.7.353) Might and Packhorse ease hauling bodies in Kitchen
+		KitchenCompat.registerBrawn();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
+		LOGGER.debug("will attachments: {} {}", Will.ROAR_READY, Will.REFUSE_READY);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
@@ -265,6 +270,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
+		ProximityChat.register();
+		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
@@ -291,6 +299,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wagon.register();
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
+		ClockworkGolem.register();
+		// (0.7.351) the Skeleton Lord, asleep in some of the rogue golems' lairs
+		SkeletonLord.register();
+		// (0.7.339) friendly war barrels, built through Golemancy (the goblin villages' own are hired by WarBarrel.hire)
+		WarBarrel.register();
+		// (0.7.333) rogue clockwork golems as dungeon mini-bosses (and their attachment)
+		GolemLairs.register();
 		Cannonball.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
@@ -380,6 +395,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
+		// the elemental spell tomes: left-click bolts, a loaded page on right click
+		Tomes.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
@@ -389,6 +406,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
+		// (0.7.329) the second batch of Blockbench Workshop creatures
+		com.jaymoskingdoms.beasts.Beasts.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
 		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
@@ -422,12 +441,39 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.332: deception and temptation: favourite scent, whispers, thralls, sleeping prey, the Mask, tells, garlic and silver,
+		// the blood's requests (their attachments)
+		LOGGER.debug("vampire deception attachments: {} {} {} {} {} {} {} {} {} {}", Favourites.TIME, Favourites.FAVOURITE, Favourites.SEEN,
+			BloodThralls.NIGHTS, BloodThralls.MASTER, BloodThralls.BEAT, SleepingPrey.BITE_MARKS, VampireMask.MASK, BloodRequests.STATE, Garlic.class);
+		BloodTemptation.register();
+		BloodThralls.register();
+		SleepingPrey.register();
+		VampireMask.register();
+		VampireTells.register();
+		Garlic.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
 		// drive you (their attachments)
-		LOGGER.debug("takeover attachments: {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, FeralCurse.FERAL);
+		LOGGER.debug("takeover attachments: {} {} {} {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL,
+			MoonPull.HEARTBEAT, HiddenChange.TELLS, CurseRequests.ASK);
 		Seizures.register();
 		BloodFever.register();
 		FeralCurse.register();
+		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
+		// room, the morning after, torn cloth as evidence, and what the curse asks for
+		MoonPull.register();
+		ScentTrails.register();
+		HiddenChange.register();
+		Caging.register();
+		MorningAfter.register();
+		TornCloth.register();
+		ClothesColour.register();
+		CurseRequests.register();
+		// 0.7.332: paranoia and deception: rumours with names, accusing at the priest, victim memory, monster kinship (their attachments)
+		LOGGER.debug("paranoia attachments: {} {} {} {}", Suspicion.MARKS, Accusations.DEAF_UNTIL, VictimMemory.BITER, Kinship.HEARD);
+		Suspicion.register();
+		Accusations.register();
+		VictimMemory.register();
+		Kinship.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();
@@ -463,6 +509,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
 		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
+		// 0.7.326: villagers drawn as a Blockbench body of their own (the warchief)
+		LOGGER.debug("body attachment: {}", Bodies.BODY);
 		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
 		BeaconWatch.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)

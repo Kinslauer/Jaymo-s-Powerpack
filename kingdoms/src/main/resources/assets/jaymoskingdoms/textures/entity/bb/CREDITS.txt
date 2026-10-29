@@ -1,0 +1,110 @@
+Blockbench Workshop models drawn by Kingdoms (baked by tools/bbmodel_bake.py into assets/jaymoskingdoms/bbmodels/,
+their textures here). All are licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+The makers claim them as their own work; we've changed them only as noted.
+
+chieftain.png, chieftain_1.png (bbmodels/chieftain.json): the orc warchief's body
+  "Chieftain" by nyxaris, https://blockbenchworkshop.com/model/nyxaris/chieftain
+  Changes: baked to our loader's format; drawn at 0.69 size; its animations played by the warchief's pace, blows,
+  slam and roar.
+
+canon.png (bbmodels/canon.json): the field cannon
+  "Canon" by iexogen, https://blockbenchworkshop.com/model/iexogen/canon
+  Changes: baked to our loader's format, the barrel's pivot moved onto its trunnions so it can aim; drawn at 0.93 size.
+
+dead_traveler.png (bbmodels/dead_traveler.json): the silver skeleton
+  "Dead Traveler (Skeleton)" by polyjo, https://blockbenchworkshop.com/model/polyjo/dead-traveler-skeleton
+  Changes: baked to our loader's format, its three textures (body, sword, buckler) stacked on one sheet.
+
+fire_dragon.png (bbmodels/fire_dragon.json), and dragon/notus/ and dragon/boreas/ hide_*.png, marks_*.png: Notus and Boreas
+  "Fire Dragon" by nyxaris, https://blockbenchworkshop.com/model/nyxaris/fire-dragon-minecraft
+  Changes: baked to our loader's format without the small floating piece over its head; posed on the ground, walking,
+  sitting and landing by our own code (it came with a flying pose and wingbeat only); drawn at 0.53 (Notus) and 0.45
+  (Boreas) size. Notus's hides are its texture and three re-shadings of it; Boreas's are it recoloured to ice; both
+  species' glowing markings are its glow half (kingdoms/tools/gen_fire_dragons.py).
+
+clockwork_golem.png, clockwork_golem_1.png (bbmodels/clockwork_golem.json), and textures/item/clockwork_golem.png:
+the clockwork golem
+  "Mech Golem" by octopusstudio, https://blockbenchworkshop.com/model/octopusstudio/mech-golem
+  Changes: baked to our loader's format; drawn at 0.94 size; its lit texture while it's awake, its unlit one folded;
+  the item icon is the model drawn small (kingdoms/tools/gen_clockwork_golem.py).
+
+reverent_warplate.png (bbmodels/reverent_warplate.json), and textures/item/reverent_*.png: the Reverent Warplate armour
+  "Reverent Warplate" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/reverent-warplate
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer (it was made for
+  GeckoLib); the item icons are its pieces drawn small with an outline (kingdoms/tools/gen_reverent.py).
+
+kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/ and dragon/aeolus/ hide_*.png, marks_*.png: Eurus and Aeolus
+  "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
+  Changes: baked to our loader's format; walking, sitting and gliding posed by our own code over its own animations;
+  drawn at 0.28 (Eurus) and 0.75 (Aeolus) size. Aeolus's hides are its texture lifted grey-white in four shades, his
+  markings its gold seams glowing (gold, the four winds' colours, white-gold, silver); Eurus's hides are it turned
+  storm-blue and violet, his markings its seams in electric cyan (kingdoms/tools/gen_kintsugi_dragons.py).
+
+minotaur.png (bbmodels/minotaur.json): the minotaur
+  "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur
+  Changes: baked to our loader's format; drawn at 0.85 size; walks with its run (it came without a walk).
+
+piglin_king.png (bbmodels/piglin_king.json): the Piglin King
+  "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
+  Changes: baked to our loader's format; drawn at 0.96 size; its ice-themed moves play as fire attacks.
+
+redstone_golem.png, redstone_golem_1.png (bbmodels/redstone_golem.json): the redstone golem
+  "Redstone Golem (Minecraft Dungeons)" by polyjo, https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons
+  Changes: baked to our loader's format; drawn at 0.94 size; its glow texture drawn bright in the dark; its pound and
+  eruption posed by our own code (it came with an idle and a walk). The design is Mojang's Minecraft Dungeons mob.
+
+scalebane_archer.png (bbmodels/scalebane_archer.json): the scalebane sellswords
+  "Scalebane Archer" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/scalebane-archer
+  Changes: baked to our loader's format; drawn at 0.96 size.
+
+skulk_golem.png (bbmodels/skulk_golem.json): the skulk golem
+  "Skulk golem" by elma_taburlas, https://blockbenchworkshop.com/model/elma_taburlas/skulk-golem
+  Changes: baked to our loader's format; drawn at full size.
+
+wild_boar.png (bbmodels/wild_boar.json): the wild boar
+  "Wild Boar" by lukygive, https://blockbenchworkshop.com/model/lukygive/wild-boar
+  Changes: baked to our loader's format without its hitbox and shadow guide cubes; drawn at 0.9 size.
+
+gorgon.png (bbmodels/gorgon.json): the gorgon, the jungles' and swamps' serpent-haired archer
+  "Hydra Guardian" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/hydra-guardian
+  Changes: baked to our loader's format; drawn at 0.8 size; its animations played by our own archer's moves.
+
+war_barrel.png (bbmodels/war_barrel.json), and textures/item/war_barrel.png: the goblin villages' war barrel, and the
+friendly one built through Golemancy
+  "The Cogwork Golem (2025 Version)" by polyjo, https://blockbenchworkshop.com/model/polyjo/the-cogwork-golem-2025-version
+  Changes: baked to our loader's format; drawn at 0.9 size. The item icon is the model drawn small.
+
+haunted_stand.png (bbmodels/haunted_stand.json): the haunted armour stand deep underground
+  "Armor Stand" by polyjo, https://blockbenchworkshop.com/model/polyjo/armor-stand-polyjo
+  Changes: baked to our loader's format; drawn at full size.
+
+heavenly_mantle.png (bbmodels/heavenly_mantle.json), and textures/item/heavenly_*.png: the Heavenly Mantle armour
+  "Heavenly Mantle" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/heavenly-mantle
+  Changes: baked to our loader's format (it was made for GeckoLib); the item icons are its pieces drawn small with an
+  outline (kingdoms/tools/gen_heavenly.py).
+
+kintsugi_armour.png (bbmodels/kintsugi_armour.json), and textures/item/kintsugi_*.png: the Kintsugi Armour
+  "Kintsugi Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi-armor
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer; the item icons are its
+  pieces drawn small with an outline (kingdoms/tools/gen_kintsugi_primal.py).
+
+primal_visage.png (bbmodels/primal_visage.json), and textures/item/primal_*.png: the Primal Visage armour
+  "Primal Visage Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/primal-visage-armor
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer; the item icons are its
+  pieces drawn small with an outline (kingdoms/tools/gen_kintsugi_primal.py).
+
+textures/item/*_tome.png (models/item/*_tome): the nine elemental spell tomes
+  "Weapon - Starter Tome", Blockbench Workshop (maker's name not in the file; fill in from the model page)
+  Changes: turned into item models, cover and gem recoloured per element, our own display (tools/blockbench/elemental_tomes.py).
+textures/item/harpoon_3d.png (models/item/harpoon): the whalers' harpoon
+  "Harpoon", Blockbench Workshop (maker's name not in the file)
+  Changes: turned into an item model (tools/blockbench/harpoon.py), its iron texture only, rotations snapped to legal steps.
+
+whaleboat.png (bbmodels/whaleboat.json): the whalers' boats
+  "Launch", Blockbench Workshop (tools/bbmodels/launch.bbmodel; maker's name not in the file)
+  Changes: baked to our loader's format; drawn at 1.2 size over the spruce boat a whaleboat is.
+
+skeleton_lord.png (bbmodels/skeleton_lord.json): the Skeleton Lord
+  "Skeleton Lord", Blockbench Workshop (tools/bbmodels/skeleton-lord.bbmodel; maker's name not in the file)
+  Changes: baked to our loader's format, its five textures stacked on one sheet; drawn at 0.55 size; its crystals shown
+  only while he sleeps; its laugh pose given a working jaw by our own code.

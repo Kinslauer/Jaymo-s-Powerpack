@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "jaymospowers:rabbit_foot_charm",
+    {
+      "id": "friendsandfoes:totem_of_freezing",
+      "required": false
+    },
+    {
+      "id": "friendsandfoes:totem_of_illusion",
+      "required": false
+    }
+  ]
+}

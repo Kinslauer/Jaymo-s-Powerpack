@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -18,6 +19,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +28,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,8 +46,10 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwingAnimationType;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -99,6 +104,19 @@ public final class SorasDagger extends Item {
 	}
 
 	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
+	/** (0.17.169) The Flurry's cooldown group (not the dagger's own, so the guard stays up), and a stack that reads it. */
+	static final Identifier FLURRY_GROUP = JaymosPowers.id("soras_flurry");
+	// (0.17.189) made on first use: a stack built while this class loads (in register(), during mod init) comes before
+	// item components are bound, and the game and server crashed on start ("Components not bound yet")
+	private static ItemStack flurryProbe;
+
+	private static ItemStack flurryProbe() {
+		if (flurryProbe == null) {
+			flurryProbe = Util.make(new ItemStack(Items.STICK),
+				probe -> probe.set(DataComponents.USE_COOLDOWN, new UseCooldown(1.0F, Optional.of(FLURRY_GROUP))));
+		}
+		return flurryProbe;
+	}
 
 	public final int stage;
 
@@ -169,33 +187,64 @@ public final class SorasDagger extends Item {
 		}
 	}
 
+	/**
+	 * (0.17.169) Andy: "sora's dagger should be able to parry." Every stage takes the weapon guard ({@link Guard}): right
+	 * click raises it. From the diamond stage, a wind's right click is the Flurry while it's ready, and the guard while
+	 * it cools down (as the warhammer's smash), so the cooldown is kept on its own group ({@link #FLURRY_GROUP}): an item
+	 * cooldown on the dagger would stop it being raised at all.
+	 */
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
+		boolean forging = this.stage == DIAMOND && hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && canForge(player);
+		if (player.isShiftKeyDown() && !forging) {
+			if (!level.isClientSide()) {
+				turnGrip(player, stack);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (this.stage < DIAMOND || hand != InteractionHand.MAIN_HAND) {
-			return InteractionResult.PASS;
+			return super.use(level, player, hand);
+		}
+		boolean flurry = !forging && wind(player) && !player.getCooldowns().isOnCooldown(flurryProbe()) && !FLURRIES.containsKey(player.getUUID());
+		if (!forging && !flurry) {
+			// the guard (only a wind can call up the Flurry, and not while it cools down)
+			return super.use(level, player, hand);
 		}
 		if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) {
 			return InteractionResult.SUCCESS;
 		}
-		if (this.stage == DIAMOND && player.isShiftKeyDown()) {
+		if (forging) {
 			forge(serverPlayer, serverLevel, stack);
 			return InteractionResult.SUCCESS;
-		}
-		if (!wind(serverPlayer)) {
-			// only a wind can call up the Flurry
-			return InteractionResult.PASS;
-		}
-		if (player.getCooldowns().isOnCooldown(stack) || FLURRIES.containsKey(player.getUUID())) {
-			return InteractionResult.FAIL;
 		}
 		boolean wind = this.stage == TEMPEST;
 		int slashes = wind ? FLURRY_SLASHES_WIND : this.stage == TEMPEST ? FLURRY_SLASHES_TEMPEST : FLURRY_SLASHES;
 		FLURRIES.put(player.getUUID(), new Flurry(serverLevel, player.getUUID(), this.stage, wind, slashes, 0));
-		player.getCooldowns().addCooldown(stack, WindCold.cooldown(player, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN));
+		player.getCooldowns().addCooldown(FLURRY_GROUP, WindCold.cooldown(player, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN));
 		serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), wind ? SoundEvents.BREEZE_CHARGE : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, 0.9F, 1.3F);
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * (0.17.174) Andy: "both on shift m2": sneak + use turns the dagger in the hand, from the sword grip (angled up out of
+	 * the fist) to the reverse grip (blade down past the little finger) and back. Only the look changes: the item models'
+	 * first custom_model_data flag ({@code items/soras_dagger*.json}), so it carries through the Tempest forging.
+	 */
+	static boolean reversed(ItemStack stack) {
+		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
+		return look != null && Boolean.TRUE.equals(look.getBoolean(0));
+	}
+
+	private static void turnGrip(Player player, ItemStack stack) {
+		if (reversed(stack)) {
+			stack.remove(DataComponents.CUSTOM_MODEL_DATA);
+		} else {
+			stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(true), List.of(), List.of()));
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.PLAYERS,
+			0.5F, 1.6F);
 	}
 
 	/**
@@ -330,14 +379,23 @@ public final class SorasDagger extends Item {
 	/** The three spoils the forging takes. */
 	private static final Item[] SPOILS = {Items.NETHER_STAR, Items.DRAGON_BREATH, Items.HEAVY_CORE};
 
-	private static void forge(ServerPlayer player, ServerLevel level, ItemStack stack) {
+	/**
+	 * (0.17.174) Sneak + use forges the diamond dagger only for an ascended wind carrying any of the three spoils (or in
+	 * creative), who is told what's still missing; for anyone else it turns the grip ({@link #turnGrip}).
+	 */
+	private static boolean canForge(Player player) {
 		if (!Powers.has(player, WindPower.INSTANCE) || !Fate.isAscended(player)) {
-			// the winds don't answer: only the Tempest can wake it
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.soras_dagger.unanswered").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.7F, 0.5F);
-			player.getCooldowns().addCooldown(stack, 20);
-			return;
+			return false;
 		}
+		for (Item spoil : SPOILS) {
+			if (player.isCreative() || player.getInventory().contains(new ItemStack(spoil))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void forge(ServerPlayer player, ServerLevel level, ItemStack stack) {
 		List<Component> missing = new ArrayList<>();
 		for (Item spoil : SPOILS) {
 			if (!player.getInventory().contains(new ItemStack(spoil)) && !player.isCreative()) {

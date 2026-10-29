@@ -33,6 +33,8 @@ public final class CrawlTaps {
 	private static boolean jumpReleased;
 	/** (0.15.108) Prone from a held slide: letting go of Sneak gets you up. */
 	private static boolean whileSneaking;
+	/** (0.17.164) Jump was down last tick (a fresh press stands you up from a crawl the server holds). */
+	private static boolean jumpWasDown;
 
 	private static boolean leftWasDown;
 	private static boolean rightWasDown;
@@ -95,12 +97,18 @@ public final class CrawlTaps {
 				// (0.15.108) the key takes over a held-slide prone: it stays down till pressed again
 				whileSneaking = false;
 			}
+		} else if (free && jump && !jumpWasDown && player.hasAttached(Crawl.CRAWLING) && !Downed.isDowned(player)
+			&& !com.jaymospowers.core.wounds.Breaks.crawlOnly(player) && roomToStand(player)) {
+			// (0.17.164) flat by the server's say (the downed state's crawl, broken legs), not the key, and nothing holds
+			// you there any more: Jump gets you up, as it does from a crawl of your own (Andy, stuck in the suit)
+			ClientPlayNetworking.send(new Crawl.Key(false));
 		} else if (keyPressed && LedgeClient.hanging()) {
 			// (0.15.108) on a ledge: in onto your belly if there's room, never a drop
 			LedgeClient.proneClimb(player);
 		} else if (keyPressed && Crawl.canCrawl(player)) {
 			goProne(player, false);
 		}
+		jumpWasDown = jump;
 		tickRoll(minecraft, player);
 		tickAdrift(player);
 	}

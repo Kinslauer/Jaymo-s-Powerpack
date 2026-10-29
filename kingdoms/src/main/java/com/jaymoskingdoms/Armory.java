@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -18,6 +19,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -43,6 +45,27 @@ import org.jspecify.annotations.Nullable;
  * (Smithing) And plain <b>steel plate</b>, flat vanilla-style layers with no raised pieces: the toughest of them, made
  * from {@code #c:ingots/steel} (Jaymo's Powers' smeltery or kiln) buckled with {@code #c:leather_straps} (Jaymo's
  * Kitchen's), or with plain leather for more steel. Not one of {@link #SETS} (it has no 3D shape).
+ * <p>
+ * (0.7.326) And the <b>Reverent Warplate</b>, the Aether's paladins' harness: white enamelled plate edged in gold, a
+ * winged helm, a red tabard and cape. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn whole over the wearer by
+ * the client's {@code ReverentLayer} (no flat layer under it). Extraordinary: better than netherite, fireproof, and
+ * never made. The only set in the world is the Visage of War's, the Aether guardian tree's boss in Jaymo's Powers,
+ * which drops all four pieces when it falls. Mended with gold. Not one of {@link #SETS} either.
+ * <p>
+ * (0.7.339) And the <b>Heavenly Mantle</b>, the Reverent Warplate's pair: white and gold plate under a crown of horns,
+ * feathered wings folded down the back. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}
+ * the same way. Never made: one piece is given to each champion of the tournament of the dead in the afterlife (Jaymo's
+ * Powers' Other World), the crown first, then the mantle, the greaves and the sabatons. A little lighter than the
+ * warplate, quicker to take enchantments. Mended with gold.
+ * <p>
+ * (0.7.351) And the <b>Kintsugi Armour</b>: dark lacquered plate whose cracks are mended in gold seams. eanncrod's model
+ * (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}. Never made: it is only found on the possessed MCA
+ * zombies who walk the Nether fortresses' halls ({@code nether.FortressHaunts}), and falls with them. A step past the
+ * Ronin's lamellar, quick to take enchantments. Mended with gold. Not one of {@link #SETS} (the Ronin stays as it is).
+ * <p>
+ * (0.7.351) And the <b>Primal Visage</b>: a skull mask under horns, hide and bone over netherite. eanncrod's model, drawn
+ * by {@code ReverentLayer}. Never made: each Nether war fort's warlord carries a piece of it ({@code NetherForts}), and
+ * it falls with him. Netherite's toughness, fireproof, hard to knock back. Mended with netherite.
  */
 public final class Armory {
 	/** Each set's numbers: durability multiplier, defence (boots, leggings, chest, helmet), enchantability, toughness, knockback resistance. */
@@ -54,6 +77,22 @@ public final class Armory {
 	static final TagKey<Item> STEEL_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
 	static final ArmorMaterial STEEL_PLATE = material("steel_plate", 30, 3, 6, 7, 3, 10, SoundEvents.ARMOR_EQUIP_IRON, 2.5F, 0.05F, STEEL_INGOTS);
 
+	/** (0.7.326) The Reverent Warplate: a point over netherite in every piece, tougher, longer-lasting, quick to take enchantments. */
+	static final ArmorMaterial REVERENT = material("reverent", 45, 4, 7, 9, 4, 22, SoundEvents.ARMOR_EQUIP_NETHERITE, 4.0F, 0.15F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** The Reverent Warplate's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> REVERENT_PIECES = new LinkedHashMap<>();
+	/** (0.7.339) The Heavenly Mantle: netherite's defence, tougher, longer-lasting, the quickest to take enchantments. */
+	static final ArmorMaterial HEAVENLY = material("heavenly", 42, 3, 6, 8, 3, 25, SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.1F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** The Heavenly Mantle's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> HEAVENLY_PIECES = new LinkedHashMap<>();
+	/** (0.7.351) The Kintsugi Armour: plate mended with gold (worn by the fortress haunts), a little better than iron, quick to take enchantments. */
+	static final ArmorMaterial KINTSUGI = material("kintsugi", 26, 2, 5, 7, 3, 20, SoundEvents.ARMOR_EQUIP_GOLD, 1.5F, 0.05F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** The Kintsugi Armour's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> KINTSUGI_PIECES = new LinkedHashMap<>();
+	/** (0.7.351) The Primal Visage: netherite's defence and toughness, hard to knock back. */
+	static final ArmorMaterial PRIMAL = material("primal", 37, 3, 6, 8, 3, 15, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.0F, 0.15F, ItemTags.REPAIRS_NETHERITE_ARMOR);
+	/** The Primal Visage's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> PRIMAL_PIECES = new LinkedHashMap<>();
 	/** (Smithing) The steel plate pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> STEEL_PLATE_PIECES = new LinkedHashMap<>();
 	/** The sets by name, each its pieces by {@link ArmorType} (helmet, chestplate, leggings, boots). */
@@ -78,6 +117,10 @@ public final class Armory {
 		register("ronin", RONIN, all);
 		register("warlord", WARLORD, all);
 		STEEL_PLATE_PIECES.putAll(pieces("steel_plate", STEEL_PLATE, all));
+		REVERENT_PIECES.putAll(pieces("reverent", REVERENT, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
+		HEAVENLY_PIECES.putAll(pieces("heavenly", HEAVENLY, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
+		KINTSUGI_PIECES.putAll(pieces("kintsugi", KINTSUGI, all, properties -> properties.rarity(Rarity.RARE)));
+		PRIMAL_PIECES.putAll(pieces("primal", PRIMAL, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
 			for (Item item : all) {
@@ -92,10 +135,15 @@ public final class Armory {
 	}
 
 	private static Map<ArmorType, Item> pieces(String name, ArmorMaterial material, List<Item> all) {
+		return pieces(name, material, all, properties -> properties);
+	}
+
+	/** {@code extra} adds to each piece's properties (the Reverent Warplate's rarity and fireproofing). */
+	private static Map<ArmorType, Item> pieces(String name, ArmorMaterial material, List<Item> all, UnaryOperator<Item.Properties> extra) {
 		Map<ArmorType, Item> set = new LinkedHashMap<>();
 		for (ArmorType type : PIECES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name + "_" + type.getName()));
-			Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).humanoidArmor(material, type)));
+			Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(extra.apply(new Item.Properties().setId(key).humanoidArmor(material, type))));
 			set.put(type, item);
 			all.add(item);
 		}

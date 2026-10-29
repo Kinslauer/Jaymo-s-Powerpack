@@ -224,6 +224,8 @@ final class WebSymbioteDread {
 			}
 			strength = Math.max(strength, ambient);
 		}
+		// (0.17.150) its mood keeps the edge faintly lit in its own colour
+		strength = Math.max(strength, WebSymbioteMindUi.edge());
 		// its voice: tendrils along the edges (held up while it runs for its life, or fights you for the suit)
 		float urgency = 0.0F, life = 0.0F;
 		if (tendrilUntil >= 0L && clock < tendrilUntil + TENDRIL_OUT) {
@@ -256,12 +258,13 @@ final class WebSymbioteDread {
 		int alpha = (int)(VIGNETTE_ALPHA * strength * pulse);
 		int depth = Math.max(8, (int)(Math.min(width, height) * VIGNETTE_DEPTH * (0.9F + 0.1F * pulse)));
 		int step = Math.max(1, depth / VIGNETTE_STEPS);
+		int vignette = WebSymbioteMindUi.vignette(VIGNETTE_COLOR);
 		for (int i = 0; i < VIGNETTE_STEPS; i++) {
 			int a = alpha * (VIGNETTE_STEPS - i) * (VIGNETTE_STEPS - i) / (VIGNETTE_STEPS * VIGNETTE_STEPS);
 			if (a <= 0) {
 				break;
 			}
-			int c = a << 24 | VIGNETTE_COLOR;
+			int c = a << 24 | vignette;
 			int o = i * step;
 			graphics.fill(o, o, width - o, o + step, c);
 			graphics.fill(o, height - o - step, width - o, height - o, c);
@@ -283,7 +286,7 @@ final class WebSymbioteDread {
 		float reachMax = Math.min(width, height) * Mth.lerp(urgency, REACH_MIN, REACH_MAX) * life;
 		float speed = Mth.lerp(urgency, TENDRIL_PULSE_MIN, TENDRIL_PULSE_MAX);
 		float rootWidth = Mth.lerp(urgency, WIDTH_MIN, WIDTH_MAX);
-		int glowColor = lerpColor(GLOW_FAINT, GLOW_URGENT, urgency);
+		int glowColor = lerpColor(WebSymbioteMindUi.glow(GLOW_FAINT, false), WebSymbioteMindUi.glow(GLOW_URGENT, true), urgency);
 		float glowAlpha = Mth.lerp(urgency, GLOW_ALPHA_MIN, GLOW_ALPHA_MAX) * life;
 		int coreAlpha = (int)(CORE_ALPHA * life);
 		float perimeter = 2.0F * (width + height);

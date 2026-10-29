@@ -186,6 +186,13 @@ public final class FeralCurse {
 		add(player, prey instanceof Player || Vampires.person(prey) || prey instanceof Folk ? KILL_PERSON : KILL_BEAST);
 	}
 
+	/** (0.7.332) The wildness moves by {@code by} from somewhere else ({@link MoonPull}, {@link CurseRequests}): stages announce themselves as usual. */
+	static void drift(ServerPlayer player, float by) {
+		if (stillCursed(player)) {
+			add(player, by);
+		}
+	}
+
 	/** Asked to change back at will: whether the wolf won't let go. */
 	static boolean refuses(ServerPlayer player) {
 		float chance = REFUSE_CHANCE[stage(player)] * (night(player) ? 1.0F : 0.5F);
@@ -313,7 +320,9 @@ public final class FeralCurse {
 
 	/** Who the wolf goes for, by stage: beasts and monsters, then people, then players; never pets, never a beast like it. */
 	private static boolean prey(ServerPlayer player, LivingEntity e, int stage) {
-		if (e == player || !e.isAlive() || e.isInvisible() || e instanceof ArmorStand || Seizures.ownBeast(e) || Lycans.changed(e)) {
+		if (e == player || !e.isAlive() || e.isInvisible() || e instanceof ArmorStand || Seizures.ownBeast(e) || Lycans.changed(e)
+			|| !Caging.allows(player, e)) {
+			// (0.7.332) a beast locked in a room only goes for what's in the room with it
 			return false;
 		}
 		if (e instanceof Player) {

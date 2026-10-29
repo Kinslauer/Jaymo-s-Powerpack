@@ -59,9 +59,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.230) The stranger page's Introduce ({@link Introductions#INTRODUCE}): asks their name, or offers a handshake without a shared tongue.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
+ * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
+ * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
+ * (0.7.319) Asked of one of Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}): their talk screen; "Talk
+ * about training" with a town's Z Fighter master, too.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -164,7 +168,10 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
 			// (0.7.220) a talk about work: what their town has for you; (0.7.270) aboard ship, your berth and her voyage
 			villager.getInteractions().stopInteracting();
-			if (ShipTalk.offersWork(villager)) {
+			if (com.jaymoskingdoms.ZFighterFolk.is(villager)) {
+				// (0.7.319) one of Powers' Z Fighter characters: what they have for you, on the talk screen
+				com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
+			} else if (ShipTalk.offersWork(villager)) {
 				ShipTalk.talk(player, villager);
 			} else {
 				Careers.talk(player, villager);
@@ -172,10 +179,24 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.ZFighterFolk.TRAINING.equals(answer)) {
+			// (0.7.319) a town's Z Fighter master: lessons, the sagas and their jobs, on the talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && GiftTales.ANSWER.equals(answer)) {
 			// (0.7.227) asked about the power you saw: what they say of it
 			villager.sendChatMessage(GiftTales.ask(player, villager), player);
 			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Accusations.ANSWER.equals(answer)) {
+			// (0.7.332) the nearest other player named to the priest, who tests them with holy water
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Accusations.accuse(player, villager);
 			ci.cancel();
 			return;
 		}
@@ -203,6 +224,13 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
 			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Captives.ANSWER.equals(answer)) {
+			// (0.7.340) a guard of a town that owes you for one you brought home: what that buys you there
+			villager.sendChatMessage(com.jaymoskingdoms.Captives.speakOf(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;

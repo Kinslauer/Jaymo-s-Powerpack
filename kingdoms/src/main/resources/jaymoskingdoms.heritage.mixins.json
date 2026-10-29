@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin.heritage",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["EndermanStareMixin", "EntityVibrationMixin"],
+	"mixins": ["EndermanStareMixin", "EntityVibrationMixin", "PlayerDivineEatMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

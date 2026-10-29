@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebSymbiote;
+import com.jaymospowers.power.web.WebSymbioteCollect;
 import com.jaymospowers.power.web.WebSymbioteState;
 import com.jaymospowers.client.UiStyle;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -23,39 +24,47 @@ import net.minecraft.world.item.Items;
 
 /**
  * The symbiote's radial menu: hold X, point the mouse toward an ability, let go to use it (or click). Doesn't pause
- * the game. Six segments clockwise from the top, each with its icon and cooldown; the middle shows the pick's name and
- * how fed the symbiote is. (0.11.0) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
- * its bar, and a small panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim)
- * where a tooltip would be. (0.13.23) A seventh slot, the Mask, takes the suit's head off and puts it back. (0.15.153)
- * An eighth, Tendrils, draws Living Armor's tendrils into the suit (the thin armour or the big suit) and lets them out.
+ * the game. (0.11.0) Styled like the H screen: its dark panel colours for the disc and tiles, its bar, and a small
+ * panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim) where a tooltip
+ * would be. (0.17.172) Reworked, Andy: "It's a bit cluttered, and the living armour can be condensed to a suit button
+ * that activates your large suit once you hit max bond." The ring holds six tiles again, 60 degrees apart: the
+ * <b>Suit</b> at the top (one button for every form: a pick climbs a form, a sneak-pick comes down one; the little
+ * mask that used to sit in the middle and the Living Armor tile are both folded into it), then Tendril Grab, Wall
+ * Crawl, Consume, Spike Burst and Shroud clockwise. The three switches that were ring tiles (Mask, Tendrils, Collect)
+ * are a row of small chips inside the ring under the bond line, with the Mind chip under them.
  */
 final class WebSymbioteScreen extends Screen {
-	/** Ring radius, segment tile size, and the dead zone in the middle (no pick). */
-	private static final int RADIUS = 58;
+	/** Ring radius and segment tile size; the inner ring, and the dead zone inside it (no pick but the chips). */
+	private static final int RADIUS = 66;
 	private static final int TILE = 26;
-	private static final int DEAD_ZONE = 24;
-	/** The suit toggle: a little mask under the bond line (offset from the centre, and size). */
-	private static final int MASK_Y = 22;
-	private static final int MASK_W = 14;
-	private static final int MASK_H = 10;
+	private static final int INNER = RADIUS - TILE / 2 - 6;
+	private static final int DEAD_ZONE = INNER - 3;
+	/** The switch chips in the middle: size, gap, and their row's top (offset from the centre). */
+	private static final int CHIP = 18;
+	private static final int CHIP_GAP = 6;
+	private static final int CHIP_Y = 8;
+	/** The middle's text: the pick's name above, the hunger bar and the bond under it (offsets from the centre). */
+	private static final int NAME_Y = -25;
+	private static final int BAR_Y = -11;
+	private static final int BOND_Y = -6;
 	private static final int ACCENT = 0xFF8A5AB0;
-	private static final int DIM = 0xFF505050;
 	/** The panel under the ring that names the pick and says what's stopping it. */
 	private static final int INFO_W = 190;
 	private static final int INFO_H = 30;
-	/** The abilities' icons, in menu order. */
+	/**
+	 * The ring's tiles clockwise from the top, each an ability index ({@link WebSymbiote#ARMOR} is the Suit: see
+	 * {@link WebSymbiote#suitPress}), and the abilities' icons and names by ability index.
+	 */
+	private static final int[] RING = {WebSymbiote.ARMOR, WebSymbiote.TENDRIL, WebSymbiote.CRAWL, WebSymbiote.CONSUME, WebSymbiote.SPIKES, WebSymbiote.SHROUD};
+	private static final double SLOT_DEGREES = 360.0 / RING.length;
 	private static final Item[] ICONS = {Items.TRIPWIRE_HOOK, Items.NETHERITE_CHESTPLATE, Items.SPIDER_EYE, Items.ROTTEN_FLESH,
 		Items.POINTED_DRIPSTONE, Items.INK_SAC};
-	private static final String[] NAMES = {"tendril", "armor", "crawl", "consume", "spikes", "shroud"};
-	/**
-	 * (0.13.23) The ring's slots: the six abilities, then the Mask (the suit's head off or on, {@link WebSymbiote#MASK_TOGGLE}),
-	 * then (0.15.153) the Tendrils (the tendrils out or in, {@link WebSymbiote#TENDRILS_TOGGLE}),
-	 * {@code SLOT_DEGREES} apart clockwise from the top.
-	 */
-	private static final int SLOTS = WebSymbiote.ABILITIES + 2, MASK_SLOT = WebSymbiote.ABILITIES, TENDRILS_SLOT = WebSymbiote.ABILITIES + 1;
-	private static final double SLOT_DEGREES = 360.0 / SLOTS;
-	private static final Item MASK_ICON = Items.PLAYER_HEAD;
-	private static final Item TENDRILS_ICON = Items.WEEPING_VINES;
+	private static final String[] NAMES = {"tendril", "suit", "crawl", "consume", "spikes", "shroud"};
+	/** The switch chips left to right: the Mask, the Tendrils, Collect (their pick values, icons and names). */
+	private static final int[] CHIPS = {WebSymbiote.MASK_TOGGLE, WebSymbiote.TENDRILS_TOGGLE, WebSymbiote.COLLECT_TOGGLE};
+	private static final Item[] CHIP_ICONS = {Items.PLAYER_HEAD, Items.WEEPING_VINES, Items.BUNDLE};
+	private static final String[] CHIP_NAMES = {"mask", "tendrils", "collect"};
+	private static final String[] FORMS = {"skin", "suit", "armor", "bulk"};
 
 	private int selected = -1;
 	private boolean chosen;
@@ -107,10 +116,24 @@ final class WebSymbioteScreen extends Screen {
 			return;
 		}
 		chosen = true;
+		if (selected == WebSymbioteMindUi.PICK) {
+			// (0.17.150) the Mind chip: its status page and your standing orders
+			WebSymbioteMindUi.open();
+			return;
+		}
 		if (selected >= 0) {
-			ClientPlayNetworking.send(new WebNet.SymbioteUse(selected));
+			LocalPlayer player = minecraft.player;
+			// (0.17.172) the Suit picked while sneaking: one form down
+			int use = selected == WebSymbiote.ARMOR && player != null && player.isShiftKeyDown() ? WebSymbiote.SUIT_TOGGLE : selected;
+			ClientPlayNetworking.send(new WebNet.SymbioteUse(use));
 		}
 		onClose();
+	}
+
+	/** The left edge of switch chip {@code i} (0-2), centred as a row on {@code cx}. */
+	private static int chipX(final int cx, final int i) {
+		int row = CHIPS.length * CHIP + (CHIPS.length - 1) * CHIP_GAP;
+		return cx - row / 2 + i * (CHIP + CHIP_GAP);
 	}
 
 	@Override
@@ -124,18 +147,24 @@ final class WebSymbioteScreen extends Screen {
 		int dx = mouseX - cx;
 		int dy = mouseY - cy;
 		int before = selected;
-		int maskX = cx - MASK_W / 2;
-		int maskY = cy + MASK_Y;
-		if (mouseX >= maskX - 1 && mouseX <= maskX + MASK_W && mouseY >= maskY - 1 && mouseY <= maskY + MASK_H) {
-			selected = WebSymbiote.SUIT_TOGGLE;
+		int chipY = cy + CHIP_Y;
+		int overChip = -1;
+		for (int i = 0; i < CHIPS.length; i++) {
+			if (UiStyle.over(mouseX, mouseY, chipX(cx, i) - 1, chipY - 1, CHIP + 2, CHIP + 2)) {
+				overChip = i;
+			}
+		}
+		if (overChip >= 0) {
+			selected = CHIPS[overChip];
+		} else if (WebSymbioteMindUi.overChip(mouseX, mouseY, cx, cy)) {
+			selected = WebSymbioteMindUi.PICK;
 		} else if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
 			selected = -1;
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
-			int slot = Math.floorMod((int)Math.round(angle / SLOT_DEGREES), SLOTS);
-			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot == TENDRILS_SLOT ? WebSymbiote.TENDRILS_TOGGLE : slot;
+			selected = RING[Math.floorMod((int)Math.round(angle / SLOT_DEGREES), RING.length)];
 		}
-		if (selected != before && selected >= 0) {
+		if (selected != before && (selected >= 0 || selected == WebSymbioteMindUi.PICK)) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
 				0.3F, 1.4F + selected * 0.05F, false);
 		}
@@ -147,16 +176,16 @@ final class WebSymbioteScreen extends Screen {
 			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0101018);
 		}
 		// a thin ring
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
+		for (int k = 0; k < 120; k++) {
+			double t = k * Math.PI * 2.0 / 120.0;
+			int x = cx + (int)Math.round(Math.cos(t) * INNER);
+			int y = cy + (int)Math.round(Math.sin(t) * INNER);
 			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
 		}
-		// pointer: dots from the middle toward the mouse
-		if (selected >= 0 && selected != WebSymbiote.SUIT_TOGGLE) {
+		// pointer: dots from the inner ring toward the picked tile
+		if (selected >= 0 && selected < WebSymbiote.ABILITIES) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
+			for (int r = INNER + 4; r < RADIUS - TILE / 2 - 2; r += 4) {
 				int x = cx + (int)Math.round(Math.cos(t) * r);
 				int y = cy + (int)Math.round(Math.sin(t) * r);
 				graphics.fill(x, y, x + 2, y + 2, ACCENT);
@@ -169,17 +198,23 @@ final class WebSymbioteScreen extends Screen {
 			cooldowns = WebSymbioteState.Cooldowns.NONE;
 		}
 		long now = player.level().getGameTime();
-		for (int i = 0; i < WebSymbiote.ABILITIES; i++) {
-			double t = Math.toRadians(i * SLOT_DEGREES - 90.0);
+		boolean dormant = com.jaymospowers.power.web.WebSymbioteBond.dormant(player);
+		int form = WebSymbiote.form(player);
+		int top = WebSymbiote.topForm(player);
+		for (int slot = 0; slot < RING.length; slot++) {
+			int i = RING[slot];
+			double t = Math.toRadians(slot * SLOT_DEGREES - 90.0);
 			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
+			boolean suit = i == WebSymbiote.ARMOR;
 			long left = cooldowns.end(i) - now;
-			boolean ready = left <= 0;
+			// (the Suit only cools while its next pick is Living Armor going on)
+			boolean ready = left <= 0 || suit && !(form == WebSymbiote.FORM_SUIT && top >= WebSymbiote.FORM_ARMOR);
 			boolean affordable = state.satiety() >= WebSymbiote.COST[i] || player.isCreative();
-			boolean on = i == WebSymbiote.ARMOR && state.has(WebSymbioteState.ARMOR) || i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
+			boolean on = suit ? form > WebSymbiote.FORM_SKIN : i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
 			boolean picked = i == selected;
 			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
+			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : slot % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
 			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : ready && affordable ? 0x60FFFFFF : UiStyle.ROW_ALT);
 			graphics.item(new ItemStack(ICONS[i]), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!ready) {
@@ -190,13 +225,28 @@ final class WebSymbioteScreen extends Screen {
 			} else if (!affordable) {
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
 			}
-			if (!WebSymbiote.unlocked(player, i)) {
+			if (suit) {
+				if (form == WebSymbiote.FORM_SKIN && top == WebSymbiote.FORM_SKIN) {
+					// it won't come yet: shaded, with how many abilities it has given you of the ones it takes
+					graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xD8000000);
+					String need = WebSymbiote.unlockedCount(player) + "/" + WebSymbiote.SUIT_ABILITIES;
+					graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF8070A0);
+				} else {
+					// the forms as pips up the right edge: lit up to the one worn, dim up to the one it will give you now,
+					// dark for the ones the bond hasn't earned
+					for (int f = WebSymbiote.FORM_SUIT; f <= WebSymbiote.FORM_BULK; f++) {
+						int py = y + TILE - 4 - (f - WebSymbiote.FORM_SUIT) * 4;
+						int color = f <= form ? ACCENT : f <= top ? 0x80FFFFFF : 0x40000000;
+						graphics.fill(x + TILE - 4, py, x + TILE - 2, py + 2, color);
+					}
+				}
+			} else if (!WebSymbiote.unlocked(player, i)) {
 				// not given to you yet: nearly black, with the bond it takes
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xD8000000);
 				String need = Integer.toString(WebSymbiote.UNLOCK_BOND[i]);
 				graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF8070A0);
 			}
-			if (com.jaymospowers.power.web.WebSymbioteBond.dormant(player)) {
+			if (dormant) {
 				// still settling in after the first bond: nothing answers yet
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xB0000000);
 			}
@@ -206,90 +256,79 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 
-		{
-			// (0.13.23) the Mask: the suit's head off (your face shows) or back on; lit while it's off
-			double t = Math.toRadians(MASK_SLOT * SLOT_DEGREES - 90.0);
-			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
-			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
-			boolean picked = selected == WebSymbiote.MASK_TOGGLE;
-			boolean usable = WebSymbiote.suitShown(player) && !WebSymbiote.bulked(player);
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
-			graphics.item(new ItemStack(MASK_ICON), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+		// the switch chips: the Mask (lit while off), the Tendrils (lit while out), Collect (lit while on); dim until usable
+		for (int c = 0; c < CHIPS.length; c++) {
+			int x = chipX(cx, c);
+			int y = chipY;
+			boolean picked = selected == CHIPS[c];
+			boolean usable = switch (c) {
+				case 0 -> WebSymbiote.suitShown(player) && !WebSymbiote.bulked(player);
+				case 1 -> WebSymbiote.tendrilsUnlocked(player);
+				default -> WebSymbioteCollect.unlocked(player);
+			};
+			boolean lit = switch (c) {
+				case 0 -> WebSymbiote.unmasked(player);
+				case 1 -> WebSymbiote.armored(player);
+				default -> usable && state.has(WebSymbioteState.COLLECT);
+			};
+			graphics.fill(x, y, x + CHIP, y + CHIP, UiStyle.CHIP);
+			graphics.fill(x, y, x + CHIP, y + CHIP, picked ? UiStyle.ROW_HOVER : UiStyle.ROW_ALT);
+			graphics.outline(x, y, CHIP, CHIP, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(CHIP_ICONS[c]), x + (CHIP - 16) / 2, y + (CHIP - 16) / 2);
 			if (!usable) {
-				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
+				graphics.fill(x + 1, y + 1, x + CHIP - 1, y + CHIP - 1, 0x90000000);
 			}
-			if (WebSymbiote.unmasked(player)) {
-				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
+			if (lit) {
+				graphics.fill(x + 2, y + CHIP - 3, x + CHIP - 2, y + CHIP - 1, ACCENT);
 			}
 		}
-
-		{
-			// (0.15.153) the Tendrils: out or in, their own toggle; lit while they're out; (0.16.6) dim until Living
-			// Armor's unlock gives them (armour on or not)
-			double t = Math.toRadians(TENDRILS_SLOT * SLOT_DEGREES - 90.0);
-			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
-			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
-			boolean picked = selected == WebSymbiote.TENDRILS_TOGGLE;
-			boolean usable = WebSymbiote.unlocked(player, WebSymbiote.ARMOR);
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
-			graphics.item(new ItemStack(TENDRILS_ICON), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
-			if (!usable) {
-				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
-			}
-			if (WebSymbiote.armored(player)) {
-				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
-			}
-		}
+		WebSymbioteMindUi.drawChip(graphics, font, cx, cy, selected == WebSymbioteMindUi.PICK);
 
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
-		if (selected >= 0) {
+		if (selected == WebSymbioteMindUi.PICK) {
+			name = Component.translatable("screen.jaymospowers.web_symbiote_status");
+		} else if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
-			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected == WebSymbiote.TENDRILS_TOGGLE ? "tendrils"
-				: selected >= NAMES.length ? "suit"
+			String key = selected >= WebSymbiote.ABILITIES ? chipName(selected)
 				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
 			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
-			UiStyle.lineCentred(graphics, font, name, cx, cy - 10, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
-		}
-		// the suit toggle: a little black mask, lit while the suit shows
-		boolean suit = state.has(WebSymbioteState.SUIT);
-		boolean maskPicked = selected == WebSymbiote.SUIT_TOGGLE;
-		graphics.fill(maskX, maskY, maskX + MASK_W, maskY + MASK_H, suit ? 0xFF100C16 : 0xFF3A3640);
-		graphics.outline(maskX - 1, maskY - 1, MASK_W + 2, MASK_H + 2, maskPicked ? ACCENT : suit ? 0xA0A080C0 : DIM);
-		int eye = suit ? 0xFFEEEEF4 : 0xFF808088;
-		graphics.fill(maskX + 2, maskY + 3, maskX + 5, maskY + 5, eye);
-		graphics.fill(maskX + 3, maskY + 5, maskX + 5, maskY + 6, eye);
-		graphics.fill(maskX + MASK_W - 5, maskY + 3, maskX + MASK_W - 2, maskY + 5, eye);
-		graphics.fill(maskX + MASK_W - 5, maskY + 5, maskX + MASK_W - 3, maskY + 6, eye);
-		if (!suit && !WebSymbiote.suitAllowed(player)) {
-			// it won't come yet: shaded, with how many abilities it has given you of the ones it takes
-			graphics.fill(maskX, maskY, maskX + MASK_W, maskY + MASK_H, 0xD8000000);
-			String need = WebSymbiote.unlockedCount(player) + "/" + WebSymbiote.SUIT_ABILITIES;
-			graphics.text(font, need, maskX + MASK_W / 2 - font.width(need) / 2, maskY + MASK_H + 2, 0xFF8070A0);
+			UiStyle.lineCentred(graphics, font, name, cx, cy + NAME_Y, 2 * INNER - 24, UiStyle.TEXT);
 		}
 		int barWidth = 34;
 		float fed = Mth.clamp(state.satiety() / (float)WebSymbiote.SATIETY_MAX, 0.0F, 1.0F);
 		boolean starving = state.satiety() <= WebSymbiote.STARVING;
 		int barColor = starving && (now / 6) % 2 == 0 ? 0xFFB02030 : ACCENT;
-		UiStyle.bar(graphics, cx - barWidth / 2, cy + 5, barWidth, 2, fed, barColor);
+		UiStyle.bar(graphics, cx - barWidth / 2, cy + BAR_Y, barWidth, 2, fed, barColor);
 		// the bond, under the hunger
 		Component bond = Component.translatable("gui.jaymospowers.web_symbiote.bond", state.bond(), WebSymbiote.BOND_MAX);
-		graphics.centeredText(font, bond, cx, cy + 11, UiStyle.DIM);
+		graphics.centeredText(font, bond, cx, cy + BOND_Y, UiStyle.DIM);
 
 		// under the ring: the pick's name and what's stopping it (or what this is)
 		int ix = cx - INFO_W / 2;
 		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
 		UiStyle.panel(graphics, ix, iy, INFO_W, INFO_H, ACCENT);
-		UiStyle.line(graphics, font, name != null ? name : title, ix + 8, iy + 6, INFO_W - 16, ACCENT);
-		UiStyle.line(graphics, font, status(player, state, cooldowns, now), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
+		UiStyle.line(graphics, font, name != null ? name : WebSymbioteMindUi.heading(player, title), ix + 8, iy + 6, INFO_W - 16, ACCENT);
+		UiStyle.line(graphics, font, status(player, state, cooldowns, now, form, top), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
+	}
+
+	/** The lang key of a switch chip's name, by its pick value. */
+	private static String chipName(final int pick) {
+		for (int c = 0; c < CHIPS.length; c++) {
+			if (CHIPS[c] == pick) {
+				return CHIP_NAMES[c];
+			}
+		}
+		return "suit";
+	}
+
+	private static Component form(final int form) {
+		return Component.translatable("gui.jaymospowers.web_symbiote.form." + FORMS[Mth.clamp(form, 0, FORMS.length - 1)]);
 	}
 
 	/** One dim line on the pick: ready, on, cooling, too hungry, or the bond it takes; with nothing picked, how to pick. */
-	private Component status(final LocalPlayer player, final WebSymbioteState state, final WebSymbioteState.Cooldowns cooldowns, final long now) {
+	private Component status(final LocalPlayer player, final WebSymbioteState state, final WebSymbioteState.Cooldowns cooldowns, final long now,
+		final int form, final int top) {
 		if (com.jaymospowers.power.web.WebSymbioteStrains.asleep(player)) {
 			// the white one, spent from mending: asleep until it's fed (WebSymbioteStrains.sleep)
 			return Component.translatable("gui.jaymospowers.web_symbiote.asleep");
@@ -298,6 +337,9 @@ final class WebSymbioteScreen extends Screen {
 			// dormant after the first bond: how long it has left settling in (minutes, rounded up)
 			int ticks = com.jaymospowers.power.web.WebSymbioteBond.dormantTicks(player);
 			return Component.translatable("gui.jaymospowers.web_symbiote.dormant", (ticks + 1199) / 1200);
+		}
+		if (selected == WebSymbioteMindUi.PICK) {
+			return Component.translatable("gui.jaymospowers.web_symbiote.status_hint");
 		}
 		if (selected < 0) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.hint");
@@ -308,25 +350,45 @@ final class WebSymbioteScreen extends Screen {
 			}
 			return Component.translatable(WebSymbiote.unmasked(player) ? "gui.jaymospowers.web_symbiote.mask_off" : "gui.jaymospowers.web_symbiote.mask_on");
 		}
+		if (selected == WebSymbiote.COLLECT_TOGGLE) {
+			if (!WebSymbioteCollect.unlocked(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.collect_locked", WebSymbioteCollect.COLLECT_BOND);
+			}
+			return Component.translatable(WebSymbiote.state(player).has(WebSymbioteState.COLLECT) ? "gui.jaymospowers.web_symbiote.collect_on"
+				: "gui.jaymospowers.web_symbiote.collect_off");
+		}
 		if (selected == WebSymbiote.TENDRILS_TOGGLE) {
-			if (!WebSymbiote.unlocked(player, WebSymbiote.ARMOR)) {
+			if (!WebSymbiote.tendrilsUnlocked(player)) {
 				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_locked");
 			}
 			return Component.translatable(WebSymbiote.armored(player) ? "gui.jaymospowers.web_symbiote.tendrils_out" : "gui.jaymospowers.web_symbiote.tendrils_in");
 		}
-		if (selected == WebSymbiote.SUIT_TOGGLE) {
-			if (state.has(WebSymbioteState.SUIT)) {
-				return Component.translatable("gui.jaymospowers.web_symbiote.suit_on");
+		if (selected == WebSymbiote.ARMOR) {
+			// (0.17.172) the Suit: what a pick gives (a form up, or down from the top), what a sneak-pick takes off
+			if (form == WebSymbiote.FORM_SKIN) {
+				if (top == WebSymbiote.FORM_SKIN) {
+					return Component.translatable("gui.jaymospowers.web_symbiote.suit_wait", WebSymbiote.unlockedCount(player), WebSymbiote.SUIT_ABILITIES);
+				}
+				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(WebSymbiote.FORM_SUIT));
 			}
-			return WebSymbiote.suitAllowed(player) ? Component.translatable("gui.jaymospowers.web_symbiote.suit_off")
-				: Component.translatable("gui.jaymospowers.web_symbiote.suit_wait", WebSymbiote.unlockedCount(player), WebSymbiote.SUIT_ABILITIES);
+			if (form >= top) {
+				int next = top == WebSymbiote.FORM_SUIT ? WebSymbiote.FORM_ARMOR : top == WebSymbiote.FORM_ARMOR ? WebSymbiote.FORM_BULK : -1;
+				return next < 0 ? Component.translatable("gui.jaymospowers.web_symbiote.suit_top", form(form - 1))
+					: Component.translatable("gui.jaymospowers.web_symbiote.suit_top_bond", form(form - 1), form(next),
+						next == WebSymbiote.FORM_BULK ? WebSymbiote.BOND_MAX : WebSymbiote.UNLOCK_BOND[WebSymbiote.ARMOR]);
+			}
+			long left = cooldowns.end(WebSymbiote.ARMOR) - now;
+			if (form == WebSymbiote.FORM_SUIT && left > 0) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+			}
+			return Component.translatable("gui.jaymospowers.web_symbiote.suit_climb", form(form + 1), form(form - 1));
 		}
 		int i = selected;
 		if (!WebSymbiote.unlocked(player, i)) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.unlock", WebSymbiote.UNLOCK_BOND[i]);
 		}
 		long left = cooldowns.end(i) - now;
-		boolean on = i == WebSymbiote.ARMOR && state.has(WebSymbioteState.ARMOR) || i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
+		boolean on = i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
 		Component status;
 		if (left > 0) {
 			status = Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));

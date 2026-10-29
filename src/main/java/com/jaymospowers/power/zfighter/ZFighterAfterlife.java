@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -25,8 +26,10 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +49,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.illager.Vindicator;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -125,6 +129,8 @@ public final class ZFighterAfterlife {
 	public static final float TRAINING_BONUS = 1.5F;
 	/** The tournament: bouts, the TP of each (times the round), the spirit fighters' health and the damage each round adds. */
 	static final int ROUNDS = 3;
+	/** (0.17.169) The Heavenly Mantle's pieces (Jaymo's Kingdoms' items), one to each champion in this order. */
+	static final String[] HEAVENLY = {"heavenly_helmet", "heavenly_chestplate", "heavenly_leggings", "heavenly_boots"};
 	static final int ROUND_TP = 60;
 	static final double SPIRIT_HEALTH = 60.0;
 	static final double SPIRIT_HEALTH_PER_ROUND = 30.0;
@@ -223,7 +229,8 @@ public final class ZFighterAfterlife {
 			boolean judge = entity.entityTags().contains(JUDGE_TAG);
 			boolean master = entity.entityTags().contains(MASTER_TAG);
 			boolean teller = entity.entityTags().contains(TELLER_TAG);
-			if (!judge && !master && !teller) {
+			if (!judge && !master && !teller || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.146) as MCA villagers, their menus lead to their talk: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -371,6 +378,24 @@ public final class ZFighterAfterlife {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_halo").withStyle(ChatFormatting.AQUA));
 	}
 
+	/**
+	 * (0.17.198) A life story's "back from the afterlife" start (Jaymo's Kingdoms, through {@link ZFighterStarts}): the newcomer
+	 * wakes among the dead with a halo, as one who died does, and is let go by the same ways (the fortune teller, the wish, the
+	 * long wait); {@code home} is where they come back to among the living. False if the Aether isn't there.
+	 */
+	static boolean strand(ServerPlayer player, ServerLevel homeLevel, BlockPos home) {
+		MinecraftServer server = player.level().getServer();
+		if (server.getLevel(WindAether.AETHER) == null) {
+			return false;
+		}
+		player.setAttached(HOME, new Home(homeLevel.dimension(), home));
+		player.setAttached(STAY, player.level().getGameTime());
+		player.removeAttached(TAUGHT);
+		player.removeAttached(CHAMPION);
+		arrive(server, player);
+		return inOtherWorld(player);
+	}
+
 	/** Back among the living: to where he woke in the world, whole, the halo gone. */
 	static void returnHome(ServerPlayer player) {
 		endGauntlet(player);
@@ -425,12 +450,17 @@ public final class ZFighterAfterlife {
 
 	/** The road's master: one lesson a stay (a good master's), and a bonus of TP. */
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master) {
+		teach(player, master, false);
+	}
+
+	/** (0.17.146) {@code asked}: asked for on his talk screen (no sneaking up to him). */
+	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master, boolean asked) {
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_no_spark", master.getDisplayName())
 				.withStyle(ChatFormatting.AQUA));
 			return;
 		}
-		if (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty()) {
+		if (!asked && (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty())) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_hint", master.getDisplayName())
 				.withStyle(ChatFormatting.AQUA));
 			return;
@@ -483,6 +513,80 @@ public final class ZFighterAfterlife {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
 			.withStyle(ChatFormatting.LIGHT_PURPLE));
 		returnHome(player);
+	}
+
+	// ---------------------------------------------------------------- talking (0.17.146)
+
+	/** A character of the Other World's talk (MCA's "Talk about work"): the Judge, the road's master, the fortune teller. */
+	static void talk(ServerPlayer player, LivingEntity npc, String tag) {
+		Runnable back = () -> talk(player, npc, tag);
+		switch (tag) {
+			case JUDGE_TAG -> ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.greet"), List.of(
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ask", true, () -> ZFighterNpcs.reply(player, npc, () -> judge(player, npc), back)),
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
+					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
+			case MASTER_TAG -> {
+				boolean taught = Boolean.TRUE.equals(player.getAttached(TAUGHT)) && !player.isCreative();
+				ZFighterNpcs.ask(player, npc, Component.translatable(taught ? "talk.jaymospowers.road_master.greet_taught" : "talk.jaymospowers.road_master.greet"),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.lesson", !taught && Powers.has(player, ZFighterPower.INSTANCE),
+						() -> ZFighterNpcs.reply(player, npc, () -> teach(player, npc, true), back))));
+			}
+			default -> {
+				if (!among(player) || Boolean.TRUE.equals(player.getAttached(CHAMPION))) {
+					ZFighterNpcs.ask(player, npc, Component.translatable(among(player) ? "talk.jaymospowers.teller.champion" : "talk.jaymospowers.teller.alive"),
+						among(player) ? List.of(ZFighterNpcs.Option.of("talk.jaymospowers.teller.go", true, () -> ZFighterNpcs.reply(player, npc, () -> tell(player, npc), back)))
+							: List.of());
+					return;
+				}
+				boolean emeralds = count(player, Items.EMERALD) >= PRICE_EMERALDS;
+				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", PRICE_EMERALDS, PRICE_TP), List.of(
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, true), back), PRICE_EMERALDS),
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> ZFighterNpcs.reply(player, npc, () -> pay(player, npc, false), back), PRICE_TP)));
+			}
+		}
+	}
+
+	/** (0.17.146) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
+	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
+		if (!among(player)) {
+			return;
+		}
+		if (emeralds) {
+			if (count(player, Items.EMERALD) < PRICE_EMERALDS) {
+				return;
+			}
+			int left = PRICE_EMERALDS;
+			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
+				ItemStack stack = player.getInventory().getItem(i);
+				if (stack.is(Items.EMERALD)) {
+					int take = Math.min(left, stack.getCount());
+					stack.shrink(take);
+					left -= take;
+				}
+			}
+		} else {
+			ZFighterTraining.Data data = ZFighterTraining.of(player);
+			if (data.tp() < PRICE_TP) {
+				return;
+			}
+			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName())
+			.withStyle(ChatFormatting.LIGHT_PURPLE));
+		returnHome(player);
+	}
+
+	private static int count(ServerPlayer player, net.minecraft.world.item.Item item) {
+		int n = 0;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack stack = player.getInventory().getItem(i);
+			if (stack.is(item)) {
+				n += stack.getCount();
+			}
+		}
+		return n;
 	}
 
 	// ---------------------------------------------------------------- the tournament of the dead
@@ -564,12 +668,38 @@ public final class ZFighterAfterlife {
 			if (gauntlet.round >= ROUNDS) {
 				player.setAttached(CHAMPION, true);
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_ring_champion").withStyle(ChatFormatting.GOLD));
+				heavenlyPiece(player);
 				world.playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
 				it.remove();
 				continue;
 			}
 			gauntlet.round++;
 			spawnSpirit(world, player, gauntlet);
+		}
+	}
+
+	/**
+	 * (0.17.169, with Jaymo's Kingdoms) A champion's prize: the next piece of the Heavenly Mantle he hasn't been given yet
+	 * ({@link #HEAVENLY}, in that order, each marked on him by a tag), until he has all four.
+	 */
+	private static void heavenlyPiece(ServerPlayer player) {
+		for (String piece : HEAVENLY) {
+			String tag = "jaymospowers.heavenly." + piece;
+			if (player.entityTags().contains(tag)) {
+				continue;
+			}
+			Optional<Item> item = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymoskingdoms", piece));
+			if (item.isEmpty()) {
+				return;
+			}
+			player.addTag(tag);
+			ItemStack stack = new ItemStack(item.get());
+			if (!player.getInventory().add(stack)) {
+				player.spawnAtLocation(player.level(), stack);
+			}
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_heavenly", stack.getHoverName())
+				.withStyle(ChatFormatting.GOLD));
+			return;
 		}
 	}
 

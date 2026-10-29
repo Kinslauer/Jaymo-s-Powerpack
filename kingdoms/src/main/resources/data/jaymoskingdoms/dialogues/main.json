@@ -42,6 +42,14 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_training",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_work",
       "results": [
         {
@@ -98,7 +106,23 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_accuse",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_ask_after",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_rescue",
       "results": [
         {
           "actions": {}

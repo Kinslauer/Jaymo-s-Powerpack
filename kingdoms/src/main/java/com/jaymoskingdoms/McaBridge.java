@@ -516,6 +516,35 @@ final class McaBridge {
 		return villager;
 	}
 
+	/**
+	 * (0.7.319) {@link ZFighterFolk#spawn}: one of Powers' Z Fighter characters, a grown villager of no settlement named
+	 * {@code name}, tagged {@code tag}, held at {@code at}, dressed for their part, never hurt, out of MCA's family tree;
+	 * grey-haired if {@code old}.
+	 */
+	static @Nullable PathfinderMob zfighter(ServerLevel level, Vec3 at, float yaw, String tag, String name, boolean female, boolean old) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(female ? Gender.FEMALE : Gender.MALE)
+			.withName(name).build(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		villager.setYHeadRot(yaw);
+		villager.addTag(tag);
+		villager.setPersistenceRequired();
+		villager.setPermanentlyInvulnerable(true);
+		worker(villager).enlist(ZFighterFolk.ROLE, -1);
+		villager.setHomeTo(BlockPos.containing(at), 1);
+		if (!level.addFreshEntity(villager)) {
+			return null;
+		}
+		FamilyTree.get(level).remove(villager.getUUID());
+		if (old) {
+			greyHair(villager, false);
+		}
+		Uniforms.fit(villager);
+		return villager;
+	}
+
 	/** (0.7.299) {@link McaCompat#visitor}: a grown villager (or a child) in {@code job}, or none, spawned at {@code at}. */
 	static @Nullable Villager visitor(ServerLevel level, Vec3 at, @Nullable VillagerProfession job, boolean child) {
 		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(at).withAge(child ? AgeState.CHILD.toAge() : 0);
@@ -855,7 +884,8 @@ final class McaBridge {
 	static List<Worker> workers(ServerLevel level, AABB box, Predicate<Worker> test) {
 		List<Worker> found = new ArrayList<>();
 		// (0.7.242) a ship's crew serve her, not any town: never called on for its work, guard calls or escorts
-		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && test.test(worker(v)))) {
+		// ((0.7.319) nor are Powers' Z Fighter characters, ZFighterFolk)
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && !ZFighterFolk.is(v) && test.test(worker(v)))) {
 			found.add(worker(v));
 		}
 		return found;
@@ -1283,6 +1313,11 @@ final class McaBridge {
 	/** (0.7.187) A new grown MCA guard at {@code at}, in the world, for no settlement ({@code nether.AvatarCamps}); null if it failed. */
 	static @Nullable Villager spawnGuard(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
+	}
+
+	/** (0.7.351) A new MCA zombie villager at {@code at}, in the world ({@code nether.FortressHaunts}); null if it failed. */
+	static net.minecraft.world.entity.monster.zombie.@Nullable ZombieVillager spawnZombie(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return net.conczin.mca.entity.ZombieVillagerFactory.newVillager(level).withPosition(at).spawn(EntitySpawnReason.EVENT);
 	}
 
 	/** (0.7.61) A new grown MCA villager at {@code at}, not yet added to the world ({@link Captives}). */

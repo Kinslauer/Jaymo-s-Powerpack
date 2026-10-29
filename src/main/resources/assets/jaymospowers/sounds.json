@@ -1,0 +1,1409 @@
+{
+	"voice.symbiote.say.climb.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_climb_1"
+			}
+		]
+	},
+	"voice.symbiote.say.climb.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_climb_2"
+			}
+		]
+	},
+	"voice.symbiote.say.climb.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_climb_3"
+			}
+		]
+	},
+	"voice.symbiote.say.dig.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_dig_1"
+			}
+		]
+	},
+	"voice.symbiote.say.dig.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_dig_2"
+			}
+		]
+	},
+	"voice.symbiote.say.dig.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_dig_3"
+			}
+		]
+	},
+	"voice.symbiote.say.escape.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_escape_1"
+			}
+		]
+	},
+	"voice.symbiote.say.escape.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_escape_2"
+			}
+		]
+	},
+	"voice.symbiote.say.escape.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_escape_3"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_heavy.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_heavy_1"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_heavy.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_heavy_2"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_heavy.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_heavy_3"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_tendril.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_tendril_1"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_tendril.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_tendril_2"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_tendril.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_tendril_3"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_thin.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_thin_1"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_thin.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_thin_2"
+			}
+		]
+	},
+	"voice.symbiote.say.execute_thin.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_execute_thin_3"
+			}
+		]
+	},
+	"voice.symbiote.say.feed.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_feed_1"
+			}
+		]
+	},
+	"voice.symbiote.say.feed.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_feed_2"
+			}
+		]
+	},
+	"voice.symbiote.say.feed.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_feed_3"
+			}
+		]
+	},
+	"voice.symbiote.say.grab.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_grab_1"
+			}
+		]
+	},
+	"voice.symbiote.say.grab.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_grab_2"
+			}
+		]
+	},
+	"voice.symbiote.say.grab.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_grab_3"
+			}
+		]
+	},
+	"voice.symbiote.say.instinct.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_instinct_1"
+			}
+		]
+	},
+	"voice.symbiote.say.instinct.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_instinct_2"
+			}
+		]
+	},
+	"voice.symbiote.say.instinct.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_instinct_3"
+			}
+		]
+	},
+	"voice.symbiote.say.kill.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_kill_1"
+			}
+		]
+	},
+	"voice.symbiote.say.kill.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_kill_2"
+			}
+		]
+	},
+	"voice.symbiote.say.kill.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_kill_3"
+			}
+		]
+	},
+	"voice.symbiote.say.maul.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_maul_1"
+			}
+		]
+	},
+	"voice.symbiote.say.maul.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_maul_2"
+			}
+		]
+	},
+	"voice.symbiote.say.maul.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_maul_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.climb.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_climb_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.climb.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_climb_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.climb.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_climb_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.dig.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_dig_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.dig.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_dig_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.dig.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_dig_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.escape.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_escape_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.escape.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_escape_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.escape.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_escape_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_heavy.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_heavy_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_heavy.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_heavy_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_heavy.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_heavy_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_tendril.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_tendril_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_tendril.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_tendril_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_tendril.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_tendril_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_thin.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_thin_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_thin.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_thin_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.execute_thin.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_execute_thin_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.feed.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_feed_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.feed.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_feed_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.feed.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_feed_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.grab.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_grab_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.grab.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_grab_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.grab.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_grab_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.instinct.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_instinct_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.instinct.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_instinct_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.instinct.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_instinct_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.kill.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_kill_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.kill.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_kill_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.kill.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_kill_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.maul.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_maul_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.maul.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_maul_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.maul.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_maul_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.roar.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_roar_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.roar.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_roar_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.roar.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_roar_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.seize.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_seize_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.seize.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_seize_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.seize.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_seize_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.shroud.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_shroud_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.shroud.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_shroud_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.shroud.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_shroud_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.sling.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_sling_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.sling.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_sling_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.sling.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_sling_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.smash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_smash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.smash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_smash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.smash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_smash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.snatch.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_snatch_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.snatch.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_snatch_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.snatch.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_snatch_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.spikes.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_spikes_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.spikes.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_spikes_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.spikes.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_spikes_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.stare.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_stare_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.stare.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_stare_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.stare.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_stare_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.strike.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_strike_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.strike.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_strike_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.strike.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_strike_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.thrash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_thrash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.thrash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_thrash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.thrash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_thrash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.red.tug.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_tug_1"
+			}
+		]
+	},
+	"voice.symbiote.say.red.tug.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_tug_2"
+			}
+		]
+	},
+	"voice.symbiote.say.red.tug.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_red_tug_3"
+			}
+		]
+	},
+	"voice.symbiote.say.roar.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_roar_1"
+			}
+		]
+	},
+	"voice.symbiote.say.roar.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_roar_2"
+			}
+		]
+	},
+	"voice.symbiote.say.roar.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_roar_3"
+			}
+		]
+	},
+	"voice.symbiote.say.seize.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_seize_1"
+			}
+		]
+	},
+	"voice.symbiote.say.seize.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_seize_2"
+			}
+		]
+	},
+	"voice.symbiote.say.seize.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_seize_3"
+			}
+		]
+	},
+	"voice.symbiote.say.shroud.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_shroud_1"
+			}
+		]
+	},
+	"voice.symbiote.say.shroud.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_shroud_2"
+			}
+		]
+	},
+	"voice.symbiote.say.shroud.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_shroud_3"
+			}
+		]
+	},
+	"voice.symbiote.say.sling.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_sling_1"
+			}
+		]
+	},
+	"voice.symbiote.say.sling.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_sling_2"
+			}
+		]
+	},
+	"voice.symbiote.say.sling.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_sling_3"
+			}
+		]
+	},
+	"voice.symbiote.say.smash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_smash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.smash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_smash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.smash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_smash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.snatch.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_snatch_1"
+			}
+		]
+	},
+	"voice.symbiote.say.snatch.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_snatch_2"
+			}
+		]
+	},
+	"voice.symbiote.say.snatch.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_snatch_3"
+			}
+		]
+	},
+	"voice.symbiote.say.spikes.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_spikes_1"
+			}
+		]
+	},
+	"voice.symbiote.say.spikes.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_spikes_2"
+			}
+		]
+	},
+	"voice.symbiote.say.spikes.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_spikes_3"
+			}
+		]
+	},
+	"voice.symbiote.say.stare.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_stare_1"
+			}
+		]
+	},
+	"voice.symbiote.say.stare.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_stare_2"
+			}
+		]
+	},
+	"voice.symbiote.say.stare.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_stare_3"
+			}
+		]
+	},
+	"voice.symbiote.say.strike.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_strike_1"
+			}
+		]
+	},
+	"voice.symbiote.say.strike.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_strike_2"
+			}
+		]
+	},
+	"voice.symbiote.say.strike.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_strike_3"
+			}
+		]
+	},
+	"voice.symbiote.say.thrash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_thrash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.thrash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_thrash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.thrash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_thrash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.tug.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_tug_1"
+			}
+		]
+	},
+	"voice.symbiote.say.tug.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_tug_2"
+			}
+		]
+	},
+	"voice.symbiote.say.tug.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_tug_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.climb.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_climb_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.climb.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_climb_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.climb.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_climb_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.dig.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_dig_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.dig.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_dig_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.dig.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_dig_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.escape.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_escape_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.escape.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_escape_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.escape.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_escape_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_heavy.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_heavy_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_heavy.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_heavy_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_heavy.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_heavy_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_tendril.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_tendril_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_tendril.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_tendril_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_tendril.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_tendril_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_thin.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_thin_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_thin.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_thin_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.execute_thin.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_execute_thin_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.feed.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_feed_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.feed.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_feed_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.feed.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_feed_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.grab.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_grab_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.grab.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_grab_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.grab.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_grab_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.instinct.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_instinct_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.instinct.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_instinct_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.instinct.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_instinct_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.kill.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_kill_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.kill.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_kill_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.kill.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_kill_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.maul.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_maul_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.maul.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_maul_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.maul.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_maul_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.mend.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_mend_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.mend.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_mend_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.mend.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_mend_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.roar.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_roar_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.roar.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_roar_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.roar.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_roar_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.seize.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_seize_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.seize.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_seize_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.seize.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_seize_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.shroud.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_shroud_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.shroud.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_shroud_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.shroud.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_shroud_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.sling.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_sling_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.sling.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_sling_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.sling.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_sling_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.smash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_smash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.smash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_smash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.smash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_smash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.snatch.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_snatch_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.snatch.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_snatch_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.snatch.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_snatch_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.spikes.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_spikes_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.spikes.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_spikes_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.spikes.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_spikes_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.stare.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_stare_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.stare.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_stare_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.stare.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_stare_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.strike.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_strike_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.strike.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_strike_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.strike.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_strike_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.thrash.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_thrash_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.thrash.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_thrash_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.thrash.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_thrash_3"
+			}
+		]
+	},
+	"voice.symbiote.say.white.tug.1": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_tug_1"
+			}
+		]
+	},
+	"voice.symbiote.say.white.tug.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_tug_2"
+			}
+		]
+	},
+	"voice.symbiote.say.white.tug.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/symbiote/say_white_tug_3"
+			}
+		]
+	}
+}

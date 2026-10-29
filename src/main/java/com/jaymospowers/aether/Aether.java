@@ -48,6 +48,8 @@ public final class Aether {
 		com.jaymospowers.aether.monster.AetherMonsters.init();
 		// the Sentry Ruins: sentry blocks, the Slider and its sentries, the buried dungeon
 		com.jaymospowers.aether.dungeon.Dungeon.init();
+		// the guardian tree's boss, the Visage of War (before the structures, which place it)
+		com.jaymospowers.aether.guardian.GuardianMobs.init();
 		// the other Aether II structures: outposts, camps, towers, dens, Veradexian works, Brexallen, the mineshaft, remnants, the guardian tree
 		com.jaymospowers.aether.structure.Structures.init();
 		// Aether II gear: tools, hammers, armour sets, gliders, the altar

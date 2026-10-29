@@ -2,6 +2,7 @@ package com.jaymospowers.client.blood;
 
 import com.jaymospowers.core.blood.BloodParticles;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.15.93) The blood's client side (Iron's Simple Blood's {@code ClientEvents}, ported): each drop kind's sprites, the
@@ -24,11 +26,14 @@ public final class BloodClient {
 	/** One drop kind, made in a spray's colour and size. */
 	@FunctionalInterface
 	interface Kind {
-		Particle create(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, int color, float scale);
+		Particle create(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, int color, float scale, boolean stains);
 	}
 
 	/** The drop kinds a spray picks from, by type (filled as the particle sprites load). */
 	private static final Map<SimpleParticleType, Kind> KINDS = new LinkedHashMap<>();
+	/** (0.17.182) The server's lasting stains lying in {@link #stainsIn}, by their mark id. */
+	private static final Map<Long, BloodPuddle> STAINS = new HashMap<>();
+	private static @Nullable ClientLevel stainsIn;
 
 	private BloodClient() {
 	}
@@ -45,28 +50,50 @@ public final class BloodClient {
 		registry.register(BloodParticles.SPRAY, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
 			List<Kind> kinds = new ArrayList<>(KINDS.values());
 			return kinds.isEmpty() ? null : kinds.get(random.nextInt(kinds.size())).create(level, x, y, z, xd, yd, zd, options.color(),
-				options.scale());
+				options.scale(), options.stains());
 		});
 		registry.register(BloodParticles.FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodFleck(level, x, y, z, xd, yd,
 			zd, sprites, options.color(), options.scale()));
 		registry.register(BloodParticles.RED_FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodFleck(level, x, y, z, xd,
 			yd, zd, sprites, RED, 1.0F));
-		registry.register(BloodParticles.PUDDLE,
-			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale()));
+		registry.register(BloodParticles.PUDDLE, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options));
+	}
+
+	/**
+	 * (0.17.182) A pool, or one of the server's lasting stains ({@code BloodTrail}): a stain already lying here is grown
+	 * and kept instead of laid twice.
+	 */
+	private static @Nullable Particle puddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, BloodParticles.Puddle options) {
+		if (options.mark() == 0L) {
+			return new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), 0, 0);
+		}
+		if (level != stainsIn) {
+			STAINS.clear();
+			stainsIn = level;
+		}
+		STAINS.values().removeIf(stain -> !stain.isAlive());
+		BloodPuddle known = STAINS.get(options.mark());
+		if (known != null) {
+			known.restain(options.scale(), options.age(), options.life());
+			return null;
+		}
+		BloodPuddle stain = new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), options.age(), options.life());
+		STAINS.put(options.mark(), stain);
+		return stain;
 	}
 
 	/** A drop kind: a sheet of {@code frames} frames, each {@code size} pixels, that turns to its flight if {@code directional}. */
 	private static void kind(ParticleProviderRegistry registry, SimpleParticleType type, int frames, int size, boolean directional) {
 		registry.register(type, sprites -> {
-			Kind kind = (level, x, y, z, xd, yd, zd, color, scale) -> make(level, x, y, z, xd, yd, zd, sprites, frames, size, directional,
-				color, scale);
+			Kind kind = (level, x, y, z, xd, yd, zd, color, scale, stains) -> make(level, x, y, z, xd, yd, zd, sprites, frames, size,
+				directional, color, scale, stains);
 			KINDS.put(type, kind);
-			return (options, level, x, y, z, xd, yd, zd, random) -> kind.create(level, x, y, z, xd, yd, zd, RED, 1.0F);
+			return (options, level, x, y, z, xd, yd, zd, random) -> kind.create(level, x, y, z, xd, yd, zd, RED, 1.0F, true);
 		});
 	}
 
 	private static Particle make(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites,
-		int frames, int size, boolean directional, int color, float scale) {
-		return new BloodDrop(level, x, y, z, xd, yd, zd, sprites, frames, size, directional, color, scale);
+		int frames, int size, boolean directional, int color, float scale, boolean stains) {
+		return new BloodDrop(level, x, y, z, xd, yd, zd, sprites, frames, size, directional, color, scale, stains);
 	}
 }

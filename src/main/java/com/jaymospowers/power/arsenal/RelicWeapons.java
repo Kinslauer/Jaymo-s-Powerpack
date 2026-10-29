@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.EnderscapeLoot;
 import com.jaymospowers.core.Flames;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,8 @@ import org.jspecify.annotations.Nullable;
  * belongs ({@link #THEMES}). They're relics like any other ({@link ArsenalRelics#RELIC}): an Arsenal user who picks one
  * up claims it into the Rift Hoard (the old Pocket Stash), and Reach brings it out first. Anyone can swing one.
  * <ul>
- * <li><b>Soul Saber</b> (the Nether): drinks {@link #LIFE_STEAL} of the harm it does; right click looses a slash of
+ * <li><b>Dreaded Blade</b> (the Nether; id {@code soul_saber}, the old Soul Saber, drawn since 0.17.169 as capellastudio's
+ * Weapon - Dreaded Blade (Animated), Blockbench Workshop, CC BY 4.0, its green runes alive and lit): drinks {@link #LIFE_STEAL} of the harm it does; right click looses a slash of
  * soul fire down your sight line.</li>
  * <li><b>Grand Shield</b> (mansions, outposts, strongholds): raised, it sends projectiles back where they came from.</li>
  * <li><b>Voidreaver</b> (End cities): blinds what it cuts; right click steps you through the void to behind your target.</li>
@@ -104,8 +106,8 @@ public final class RelicWeapons {
 		Map.entry(BuiltInLootTables.BASTION_BRIDGE, Kind.SOUL_SABER), Map.entry(BuiltInLootTables.BASTION_HOGLIN_STABLE, Kind.SOUL_SABER),
 		Map.entry(BuiltInLootTables.NETHER_BRIDGE, Kind.SOUL_SABER), Map.entry(BuiltInLootTables.RUINED_PORTAL, Kind.SOUL_SABER),
 		Map.entry(BuiltInLootTables.WOODLAND_MANSION, Kind.GRAND_SHIELD), Map.entry(BuiltInLootTables.PILLAGER_OUTPOST, Kind.GRAND_SHIELD),
-		Map.entry(BuiltInLootTables.STRONGHOLD_CORRIDOR, Kind.GRAND_SHIELD),
-		Map.entry(BuiltInLootTables.END_CITY_TREASURE, Kind.VOIDREAVER),
+		Map.entry(BuiltInLootTables.STRONGHOLD_CORRIDOR, Kind.GRAND_SHIELD), Map.entry(EnderscapeLoot.STRONGHOLD_ARMORY, Kind.GRAND_SHIELD),
+		Map.entry(BuiltInLootTables.END_CITY_TREASURE, Kind.VOIDREAVER), Map.entry(EnderscapeLoot.END_CITY_CHEST, Kind.VOIDREAVER),
 		Map.entry(BuiltInLootTables.ANCIENT_CITY, Kind.ECHO_CLEAVER),
 		Map.entry(BuiltInLootTables.SHIPWRECK_TREASURE, Kind.TIDEBREAKER), Map.entry(BuiltInLootTables.BURIED_TREASURE, Kind.TIDEBREAKER),
 		Map.entry(BuiltInLootTables.UNDERWATER_RUIN_BIG, Kind.TIDEBREAKER),

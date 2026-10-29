@@ -53,8 +53,9 @@ import net.minecraft.world.phys.Vec3;
  * comes in fast while charging, from landing punches, and from eating. The techniques spend it.</li>
  * <li>R (hold), Charge Ki: stand your ground, the aura flares, ki pours in (hungry work).</li>
  * <li>G, Ki Blast; V (hold), Ki Wave; B, Flash Step ({@link ZFighterKi}).</li>
- * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up takes off and
- * steps through five poses of the arms, down steps back and lands. Charging works in the air.</li>
+ * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up lifts him
+ * gently off the ground and steps through five poses of the arms (all the way up at once: a burst of ki throws him
+ * into the sky), down steps back and lands. Charging works in the air.</li>
  * <li>C (ascended): up a form; sneak+C: down one. Super is reached through hardship ({@link ZFighterBattle}); Super 2
  * and 3 are bought with training ({@link ZFighterTraining}). Each hits harder and burns more ki and food; mastery
  * lifts its power and eases its drain.</li>
@@ -117,20 +118,24 @@ public final class ZFighterPower implements Power {
 
 	// ---- forms (index: 0 base, 1 Super, 2 Super 2, 3 Super 3, 4 Super 4: the Warrior-born's hidden form, ApeRage) ----
 	// (0.17.50) 5 False Super, 6 the god form, 7-9 the legendary line ({@link ZFighterForms}); the other track's forms start at 10
+	// (0.17.190) 4 is now Super Primal Super, and 10 Primal Super, the step before it (ApeRage.PRIMAL_SUPER): the branch forms' ids
+	// live in their own attachment, so 10 is free here
 	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). A third of their bonus before the training slowdown. */
-	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1};
-	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F};
-	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07};
+	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1, 0.64};
+	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F, 1.47F};
+	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07, 0.16};
 	/** Top cruise speed in flight (blocks a tick; Wind's is 2.5 in a plain rainy sky). */
-	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9};
+	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9, 2.3};
 	/** Ki per tick to hold the form (1.5, 3, 6 a second; Super 4, at peace with the ape, 4.4), and times the base appetite. */
-	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F};
-	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F};
+	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F, 0.18F};
+	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F, 4.0F};
 	/** Ki to go into the form (free from half mastery; Super 4 has no mastery: always). */
-	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130};
-	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C};
+	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130, 85};
+	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C, ApeRage.PRIMAL_SUPER_COLOR};
 	/** Super 4's fire: flames a tick each of two kinds, and one in this many ticks an ember spits off him. */
 	static final int SUPER_4_FLAMES = 2, SUPER_4_EMBER_ODDS = 12;
+	/** (0.17.190) Primal Super's fire: one small flame every this many ticks powering up; settled, this many times rarer than Super Primal Super's. */
+	static final int PRIMAL_FLAME_EVERY = 4, PRIMAL_SETTLED_SLOWER = 4;
 	/**
 	 * Andy: the full storm of aura, sparks and fire only for the power-up blast, this many ticks after going into a form.
 	 * After that it settles to the aura and the rising debris, both stronger each form, so the body (Super 4's fur) shows.
@@ -341,6 +346,8 @@ public final class ZFighterPower implements Power {
 		/** Since when the Spirit Bomb has been gathering (-1: it isn't), and what it holds. */
 		long spiritFrom = -1L;
 		float spiritEnergy;
+		/** (0.17.196) The Spirit Bomb is picked on the hold-C menu: the next tap of C raises it. */
+		boolean bombPicked;
 		/** Rage (before he has ever gone Super): the meter (0-1), ticks left in it, ticks before it can fill again. */
 		float rage;
 		int rageTicks;
@@ -444,6 +451,9 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
+		ZFighterStarts.init();
+		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
+		ZFighterNpcs.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
@@ -684,7 +694,7 @@ public final class ZFighterPower implements Power {
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
-			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player);
+			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
 
 		ZFighterKi.tickWave(player, live);
@@ -698,7 +708,8 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player);
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player)
+					* ZFighterDivineGrace.flight(player);
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
@@ -718,7 +729,7 @@ public final class ZFighterPower implements Power {
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form)
-				* ZFighterBranchForms.drainFactor(player, live);
+				* ZFighterBranchForms.drainFactor(player, live) * ZFighterDivineGrace.drain(player);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
 			// (0.15.59) and a little harder the stronger he's grown
@@ -900,9 +911,10 @@ public final class ZFighterPower implements Power {
 
 	/**
 	 * From the client (hold Z and scroll): take off into pose {@code pose} (1-{@link #FLIGHT_POSES}), change pose, or come
-	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms.
+	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms. A plain take-off
+	 * lifts him gently (a puff of dust); {@code boost} (scrolled all the way up right after) is the burst of ki.
 	 */
-	static void fly(ServerPlayer player, int pose) {
+	static void fly(ServerPlayer player, int pose, boolean boost) {
 		Live live = live(player);
 		pose = Mth.clamp(pose, 0, FLIGHT_POSES);
 		if (pose == 0) {
@@ -922,6 +934,9 @@ public final class ZFighterPower implements Power {
 				live.flying = true;
 				live.lastFlyPos = player.position();
 				player.resetFallDistance();
+				liftOff(player, live);
+			}
+			if (boost) {
 				takeOffBurst(player, live);
 			}
 			player.setAttached(FLIGHT, pose);
@@ -942,7 +957,20 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
-	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
+	/** A gentle take-off (scrolled up partway): a soft puff of dust and a wisp of his aura as he lifts. */
+	private static void liftOff(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		double x = player.getX(), y = player.getY(), z = player.getZ();
+		for (int i = 0; i < 10; i++) {
+			double a = i * Math.PI * 2.0 / 10.0;
+			level.sendParticles(ParticleTypes.CLOUD, true, false, x + Math.cos(a) * 0.5, y + 0.05, z + Math.sin(a) * 0.5, 0, Math.cos(a), 0.0,
+				Math.sin(a), 0.12);
+		}
+		level.sendParticles(dust(live), true, false, x, y + 0.5, z, 10, 0.3, 0.5, 0.3, 0.05);
+		level.playSound(null, x, y, z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.4F, 1.2F);
+	}
+
+	/** The boost (scrolled all the way up): a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();
 		double x = player.getX(), y = player.getY(), z = player.getZ();
@@ -966,7 +994,10 @@ public final class ZFighterPower implements Power {
 		return pose == null ? 0 : pose;
 	}
 
-	/** C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C (held) raises it instead. */
+	/**
+	 * C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C raises it instead. (0.17.194) Holding C
+	 * is the form menu now (client), so C comes as a tap: one raises the Spirit Bomb, the next throws it.
+	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		Live live = live(player);
@@ -979,7 +1010,23 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		if (!down) {
+			return;
+		}
+		if (live.spiritFrom >= 0) {
+			// (0.17.194) the second tap throws the raised Spirit Bomb; (0.17.196) and C is the forms' again
 			ZFighterTechniques.release(player, live);
+			live.bombPicked = false;
+			sync(player, live, maxKi(player));
+			return;
+		}
+		if (live.bombPicked && !player.isShiftKeyDown()) {
+			// (0.17.196) Andy: the Spirit Bomb is on the hold-C menu, "only activated by the tap when selected"
+			if (ZFighterTechniques.canRaise(player, live)) {
+				ZFighterTechniques.raise(player, live);
+				refresh(player, live);
+			} else {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_wait").withStyle(ChatFormatting.GRAY));
+			}
 			sync(player, live, maxKi(player));
 			return;
 		}
@@ -988,33 +1035,28 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
-		// (0.15.148) with Super 4 open, C in Super 3 is Super 4 and the Spirit Bomb is raised from there
-		boolean super4 = ApeRage.super4(player);
-		// (0.17.50) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
-		if (!player.isShiftKeyDown() && (live.form == ApeRage.SUPER_4 || live.form == ZFighterForms.GOD || live.form == ZFighterTraining.FORMS && !super4)
-			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !ZFighterBranchForms.canAscend(player, live)) {
-			if (ZFighterTechniques.canRaise(player, live)) {
-				ZFighterTechniques.raise(player, live);
-				refresh(player, live);
-			} else {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_wait").withStyle(ChatFormatting.GRAY));
-			}
-		} else if (player.isShiftKeyDown()) {
+		int up = ApeRage.nextUp(player, live.form);
+		// (0.17.196) the Spirit Bomb is no longer raised from the top of the line: it's picked on the hold-C menu
+		if (player.isShiftKeyDown()) {
 			if (live.superOn()) {
 				descend(player, live);
 			} else {
 				// in base form, a corrupted fighter's sneak+C is Corrupted mode
 				ZFighterCorruption.toggle(player, live);
 			}
-		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
+		} else if (up == 0) {
 			if (!ZFighterBranchForms.ascend(player, live)) {
 				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
-				player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				if (live.form == ApeRage.PRIMAL_SUPER && blocked == null) {
+					// (0.17.192) Super Primal Super needs a fusion with another Warrior-born; only a hint, nothing spelled out
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait").withStyle(ChatFormatting.GRAY));
+				} else {
+					player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				}
 			}
 		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
-			// (past his highest bought form: Super 4)
-			int next = live.form >= ZFighterTraining.formsOpen(player) ? ApeRage.SUPER_4 : live.form + 1;
+			int next = up;
 			boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(next) >= ZFighterTraining.FREE_ENTRY_MASTERY;
 			if (!free && live.ki < FORM_ENTER_KI[next]) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
@@ -1102,13 +1144,69 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		// (0.15.148) from Super 4 back to the highest form he bought
-		live.form = live.form == ApeRage.SUPER_4 ? Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS) : live.form - 1;
+		// (0.17.190) Super Primal Super steps down to Primal Super, Primal Super to the highest form he bought
+		live.form = live.form == ApeRage.SUPER_4 || live.form == ApeRage.PRIMAL_SUPER ? ApeRage.below(player, live.form) : live.form - 1;
 		if (live.form <= 0) {
 			endSuper(player, live);
 			return;
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
 		refresh(player, live);
+	}
+
+	/**
+	 * (0.17.194) The hold-C menu's pick: straight to {@code form}, if it's one he has ({@link ZFighterForms#choices}). Up
+	 * is a transformation (its ki, as C would ask); down is quiet, as sneak+C is; base ends the Super.
+	 */
+	static void pickForm(ServerPlayer player, int form) {
+		Live live = live(player);
+		List<Integer> choices = ZFighterForms.choices(player);
+		if (!player.isAlive() || Powers.silenced(player) || live.spiritFrom >= 0) {
+			return;
+		}
+		if (form == ZFighterForms.SPIRIT_BOMB_PICK) {
+			// (0.17.196) the Spirit Bomb's tile: C now raises it (ZFighterForms.menu only offers it once he knows it)
+			if (ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !live.bombPicked) {
+				live.bombPicked = true;
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.4F);
+				sync(player, live, maxKi(player));
+			}
+			return;
+		}
+		// any form's tile gives C back to the forms
+		boolean was = live.bombPicked;
+		live.bombPicked = false;
+		if (form == live.form || !choices.contains(form)) {
+			if (was) {
+				sync(player, live, maxKi(player));
+			}
+			return;
+		}
+		if (live.form == ZFighterForms.GOD) {
+			ZFighterInstinct.end(player, live, false);
+		}
+		if (form == 0) {
+			endSuper(player, live);
+		} else if (live.superOn() && choices.indexOf(form) < choices.indexOf(live.form)) {
+			live.form = form;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
+			refresh(player, live);
+		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
+			if (form == ZFighterForms.GOD) {
+				ZFighterGod.enter(player, live);
+			} else {
+				boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(ZFighterLegendary.chain(form)) >= ZFighterTraining.FREE_ENTRY_MASTERY;
+				if (!free && live.ki < FORM_ENTER_KI[form]) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
+				} else {
+					if (!free) {
+						live.ki -= FORM_ENTER_KI[form];
+					}
+					transform(player, live, form);
+				}
+			}
+		}
+		sync(player, live, maxKi(player));
 	}
 
 	/** All the way back to base (out of ki, or by choice); Limit Break goes with it. */
@@ -1368,6 +1466,9 @@ public final class ZFighterPower implements Power {
 				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.6F, 0.9F);
 			}
+		} else if (live.form == ApeRage.PRIMAL_SUPER && now % PRIMAL_FLAME_EVERY == 0) {
+			// (0.17.190) Andy: Primal Super's particles "far less and dissipate faster": a small flame now and then, no embers
+			level.sendParticles(ParticleTypes.SMALL_FLAME, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.01);
 		}
 	}
 
@@ -1394,6 +1495,10 @@ public final class ZFighterPower implements Power {
 				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.5F, 0.9F);
 			}
+		} else if (live.form == ApeRage.PRIMAL_SUPER && now % (SETTLED_FLAME_EVERY * PRIMAL_SETTLED_SLOWER) == 0) {
+			double a = random.nextDouble() * Math.PI * 2.0, r = 0.8 + random.nextDouble() * 0.2;
+			level.sendParticles(ParticleTypes.SMALL_FLAME, true, false, player.getX() + Math.cos(a) * r, player.getY() + 0.2 + random.nextDouble() * 1.4,
+				player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.01);
 		}
 	}
 
@@ -1550,7 +1655,7 @@ public final class ZFighterPower implements Power {
 		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
 			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH)
-			+ ZFighterBioForms.fists(player);
+			+ ZFighterBioForms.fists(player) + ZFighterRubberBody.fists(player);
 	}
 
 	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
@@ -1620,7 +1725,8 @@ public final class ZFighterPower implements Power {
 
 	private static void sync(ServerPlayer player, Live live, int max) {
 		int flags = (live.charging ? ZFighterState.CHARGING : 0) | (live.flying ? ZFighterState.FLYING : 0)
-			| (live.superOn() ? ZFighterState.SUPER : 0) | (live.raging() ? ZFighterState.RAGE : 0) | (live.barrierTicks > 0 ? ZFighterState.BARRIER : 0);
+			| (live.superOn() ? ZFighterState.SUPER : 0) | (live.raging() ? ZFighterState.RAGE : 0) | (live.barrierTicks > 0 ? ZFighterState.BARRIER : 0)
+			| (live.bombPicked ? ZFighterState.BOMB_PICKED : 0);
 		int bomb = live.spiritFrom < 0 ? -1 : Math.round(100.0F * live.spiritEnergy / ZFighterTechniques.SPIRIT_MAX);
 		int rage = live.raging() ? 100 : Math.round(100.0F * live.rage);
 		int combo = player.level().getGameTime() - live.lastHit <= ZFighterBattle.COMBO_WINDOW ? live.combo : 0;

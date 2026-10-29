@@ -50,6 +50,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -68,6 +69,9 @@ import org.jspecify.annotations.Nullable;
  * minutes while a player is near, and they fight wherever they meet; both turn on any player close by. Each fort
  * recruits slowly. Kill a warlord and his side breaks: every one of them flees from players and is gone, the walls and
  * the hoard left standing. Ops: {@code /kingdom netherfort found | host | info}.
+ * <p>
+ * (0.7.351) A fallen warlord drops a piece of the Primal Visage ({@link com.jaymoskingdoms.Armory#PRIMAL_PIECES}) beside
+ * his war horn, so a whole set takes several forts.
  */
 public final class NetherForts {
 	/** The two sides. */
@@ -109,6 +113,8 @@ public final class NetherForts {
 	/** A routed piglin runs this long, then is gone once no player is this near. */
 	static final int ROUT_TICKS = 20 * 60;
 	static final double ROUT_GONE_RANGE = 24.0;
+	/** (0.7.351) Pieces of the Primal Visage a fallen warlord drops, each picked at random. */
+	static final int PRIMAL_PIECES_DROPPED = 1;
 	/** Who hears that a warlord fell, or a host marched out. */
 	static final double NEWS_RANGE = 96.0;
 
@@ -489,6 +495,11 @@ public final class NetherForts {
 		put(level, fort.fall());
 		// (0.7.147) the warlord's war horn, a trophy; and a king's bounty on him, paid
 		entity.spawnAtLocation(level, new ItemStack(NetherTrophies.WAR_HORN));
+		// (0.7.351) and his war gear: a piece of the Primal Visage, never made anywhere else
+		List<Item> primal = List.copyOf(com.jaymoskingdoms.Armory.PRIMAL_PIECES.values());
+		for (int i = 0; i < PRIMAL_PIECES_DROPPED; i++) {
+			entity.spawnAtLocation(level, new ItemStack(primal.get(level.getRandom().nextInt(primal.size()))));
+		}
 		com.jaymoskingdoms.Quests.netherWarlordSlain(level, entity, source, fort.id());
 		long now = level.getGameTime();
 		for (Mob mob : List.copyOf(LOADED)) {

@@ -67,7 +67,8 @@ final class ZFighterMasters {
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			boolean dark = entity.entityTags().contains(DARK_TAG);
 			if (!dark && !entity.entityTags().contains(TAG) || hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty()
-				|| !player.isShiftKeyDown()) {
+				|| !player.isShiftKeyDown() || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.146) with MCA, "Talk about training" in his menu: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -143,6 +144,22 @@ final class ZFighterMasters {
 					master.getY() + master.getBbHeight() + 0.3, master.getZ(), 2, 0.25, 0.1, 0.25, 0.01);
 			}
 		}
+	}
+
+	/**
+	 * (0.17.146) A master's talk (MCA's "Talk about training"): his lesson for the day, and the old story and its jobs
+	 * (the sagas, side jobs and the town's errands, {@link ZFighterSagas#speak}).
+	 */
+	static void talk(ServerPlayer player, LivingEntity master) {
+		boolean dark = master.entityTags().contains(DARK_TAG);
+		Long last = player.getAttached(LESSON);
+		boolean today = last != null && last >= player.level().getGameTime() / DAY && !player.isCreative();
+		Runnable back = () -> talk(player, master);
+		boolean fighter = Powers.has(player, ZFighterPower.INSTANCE);
+		ZFighterNpcs.ask(player, master, Component.translatable((dark ? "talk.jaymospowers.dark_master." : "talk.jaymospowers.master.")
+			+ (!fighter ? "no_spark" : today ? "greet_today" : "greet")), java.util.List.of(
+			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.lesson", fighter && !today, () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, dark), back)),
+			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", fighter, () -> ZFighterNpcs.reply(player, master, () -> ZFighterSagas.speak(player, master, false), back))));
 	}
 
 	private static void teach(ServerPlayer player, Entity master, boolean dark) {

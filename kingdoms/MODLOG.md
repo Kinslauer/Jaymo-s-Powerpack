@@ -6236,3 +6236,444 @@ down upon the target. stretching over and engulfing them into a bulge that flows
 - **Buds** (`BioBudRenderer`): small copies of the Perfect form in their maker's palette.
 - **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
 Compile-checked against 26.3 with javac (changed files), not seen in game.
+
+## 0.7.316: clearing parties go in first; ATi compounds spaced out; the dojo only in cherry groves (pack 0.17.142)
+Andy (with a screenshot of ATi's dojo by the water near spawn): "If villagers are to take any of these overworld
+structures they need to send a party in for clearing the enemies first ... way too many of these spawned in close
+proximity, this specific one should only spawn near the blossom villages and biomes ... dead women and children should
+always be avoided by the inhabitants."
+- **`Clearing`** (new): every 60 ticks each standing settlement looks over the surface structures (not villages) within
+  112 blocks of its seat. While monsters (`Enemy`, not anyone's folk, thrall, captive, pet or a camp's illagers) are in
+  one, a party of its fighters (guards and armed folk, never the ruler or posted archers; 2 per monster, 8 at most,
+  fetched from 96 blocks) is sent after them (`Rulers.charge`), and everyone else near it (MCA villagers of any kind,
+  children, builders and other workers) is walked out 10 blocks past its edge toward the seat and held there
+  (`Frights.shelter`). Once it's empty and the party has been in, its spawners are smashed so it stays clear. A
+  structure in another settlement's land is left to them; a monster inside the settlement's own seat structure only
+  gets the party (Frights already sends people running there). Grim holds and camps taken by `GrimSites` are cleared
+  the same way: the fighters arrive first and the builders wait outside until it's clear.
+- **ATi compounds** (`ati_compounds`): spacing 64/32 -> 100/50 chunks, 2-3 members (was 3-4) on a 4-chunk ring (was 3),
+  and none within 32 chunks (512 blocks) of the world's middle (`spawn_clearance`). The old compounds put 3-4 ATi
+  buildings within ~50 blocks of each other, denser than ATi's own sets.
+- **The dojo** (`ati_structures:dojo`, the black-and-red pagoda) only goes in a compound in `minecraft:cherry_grove`,
+  where Blossom villages rise: `CompoundStructure` reads a new `only_in` map (structure id to biomes) that replaces a
+  member's own biome tag (ATi's put it in plains, forests and jungles). It was already the cherry Grand Seat.
+Compile-checked (Clearing, CompoundStructure), not seen in game. Existing chunks keep what they generated.
+
+## 0.7.317: sailors don't offer "Seek an audience" (pack 0.17.143)
+Andy: "the sailors shouldnt have this audience option". A ship's hands are enlisted in the guard role, so MCA's talk
+menu offered every navy, merchant and whaler crewman "Seek an audience". `Audiences.canAsk` now turns down ship crew
+(`Crewmen.tagged`, or anyone seated aboard a `Ship`), caravan escorts (task `caravan`) and soldiers out with a war party
+(`WarParties.isSoldier`). Rulers and a realm's posted guards keep the option; the folk-guard chat line and
+`/kingdom audience` follow the same check.
+Not compile-checked (no game jars staged), not seen in game.
+## 0.7.319: Jaymo's Powers' Z Fighter characters are MCA villagers with talk screens (pack 0.17.146)
+Andy: "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys immersion seeing one of those
+things instead of a humanoid. ... they should have context sensitive talk interactions that handle the quest objectives
+instead of them appearing in chat like now."
+- `ZFighterFolk.spawn` (called by Powers): a grown MCA villager named for the part, tagged with Powers' tag, enlisted to
+  no settlement in role 95, out of the family tree, permanently invulnerable, home set at the spot. `Workers.step` hands
+  them to `ZFighterFolk.step` first: navigation stopped, stepped back if pushed 1.5+ blocks off their post, facing the
+  nearest player; the brain never runs (no wandering, beds, homes, old age). Kept out of `McaBridge.workers`, and they
+  speak to anyone (`Languages.look` gives them no tongue).
+- Outfits (`Uniforms.zfighter`, `tools/gen_zfighter_outfits.py`, four each, registered neutral): the Keeper's temple
+  robe and mantle, the Hermit's beach shirt, shorts and straw hat, the Tinkerer's lab coat, gloves and brass goggles, the
+  Judge's black robe with bands and stole, the road master's travelling gi, the teller's robe, shawl and headscarf, a
+  demon master's dark gi with spiked pauldrons. Hermit and Tinkerer go grey.
+- MCA's "Talk about work" on them goes to Powers' talk (`PowersCompat.zfighterTalk`), and a Z Fighter master (a town's
+  villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
+  `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).
+
+## 0.7.321: goblins have the workshop goblin's body (pack 0.17.148)
+Andy: "can this replace our goblins?" (kokosikk's Blockbench Workshop goblin, CC BY 4.0), then "Whole body, clothes
+redrawn". Goblin villagers now have its shape: a big head, a short body bent forward in a hunch, thin arms, short legs.
+- `GoblinBody.apply` (last in both pose hooks, `MobSwingLivingEntityRendererMixin` and
+  `MobSwingModelFeatureRendererMixin`): every humanoid body drawn for a goblin, MCA's skin, face, clothes and hair, the
+  marks, any armour, is reshaped bone by bone: each bone moved to the goblin's pivot and scaled so a man's box fills the
+  goblin's (head 1.125 wide; body 0.75 tall, 1.25 deep; arms 0.65 x 0.75; legs 0.75 x 0.67), the body, head and arms
+  leant 12 degrees into the hunch at the hip. So whatever MCA dresses a goblin in is drawn on the goblin's body. MCA's
+  skin layer hands its pose on to the other layers (without the scale), so the move is made once (a goblin's right
+  leg sits 1.4 further out than a man's) and the scale every time. A woman's breasts go onto the goblin's chest
+  (`McaLookModels.goblinChest`).
+- `GoblinBody.submit` (from `GreenskinLooks`, which still draws the marks): the model's own parts, painted in the pack's
+  style by `tools/gen_goblin_body.py` (flesh in greys tinted by the goblin's green): ears out and up, a drooping nose,
+  two small tusks, fists, wide feet with toenails, a belt with buckle and pouch, a loincloth, shin wraps; half of them
+  a red cap, one in four an earring. Feet and wraps go under boots, the loincloth under leggings, the cap under a helmet.
+  The two old goblin head shapes (`goblin_features.png`) are gone; orcs are unchanged.
+- `GoblinHandMixin` (`HumanoidModel.translateToHand`): a held item isn't squashed by the thin arm and sits in the fist.
+- Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
+  `tools/blockbench/kokosikk_goblin.bbmodel`.
+Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+## 0.7.322: barding of its own, taller horses, and more detailed horses (pack 0.17.149)
+
+Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
+anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or
+equestrian, there just needs to be more detail". Horse armour is no longer a slightly larger copy of the horse painted
+over the coat: `horse_rig.armour()` builds it from its own boxes hung on each build's bones, written to builds.json
+(`armor`, texture 128x64) and baked by `BreedHorseModel.createArmorLayer()`:
+- a chanfron over the face with a nose plate, a ridge, brow guards over the eyes and rims behind them (the eyes
+  stay clear), and cheek plates;
+- a crinet of five lames, each a little wider than the one above so they lap, with a raised crest; while barding is
+  worn the model hides the mane and forelock under it (no more clipping);
+- a peytral with a boss and wings over the shoulders, flanchards before and behind the stirrups, and a crupper over
+  the croup and haunches with a ridged spine and a hole for the tail.
+Painted by `gen_horses.armour_base()`: rolled and dark-lined edges, rivet rows, a trim band along the hems (brass on
+iron and plate, red gold on gold, gold on diamond and netherite, verdigris on copper), fluted plates with a sheen,
+an etched chanfron, lapped lames, a padded leather lining underneath; chain barding is mail bound in leather with plate
+at the head. Horses got more pieces too: shoulders and a rounded barrel, knees, hocks and gaskins, cheeks, flared
+nostrils, coronet bands and ergot tufts, and muscle light and shadow painted in (`FORM`). Horse texture now 128x192.
+Compile-checked, not seen in game; previews in the project files (art-overhaul/horses/armour-detail.png).
+
+Then Andy: "the armor looks far too disjointed. the plates are fine but they need to be connected somehow", pointing at
+SWEM's horses (All Rights Reserved, Forge only, so ideas only, nothing of theirs used). In its style, our own:
+- the horse stands taller: legs 3 px longer (`LIFT`: body, saddle, tail and wings that much higher; THIGH 10) and the
+  neck 3 px longer (`NECK`: the head set out along it, `BreedHorseModel` working its pivot out from the head's pitch so
+  the neck still meets the chest); tails longer; riders sit `Mounted.SEAT_LIFT` higher (not on war elephants);
+- the barding is joined up: a cloth caparison under it all (round the neck under the crinet, over the back and down the
+  sides to hang below the belly, open beneath and before and behind for the legs, folds and a trimmed hem; crimson on
+  iron, royal blue on gold, linen on diamond, green on copper, purple on netherite, russet under mail, quartered
+  crimson and linen under plate, dyed with leather); the crinet's sixth lame runs into the peytral; one side plate a
+  side from the peytral to the crupper (stepped in along its top); a chanfron over the face, and a nose plate; the stirrups hang outside the side plates
+  (`STIRRUP_OUT`, from each build's plate). Armour texture 128x128.
+
+Andy then: the eyes were hidden. The chanfron is now a face plate whose side flanges stop above the eyes, the neck
+cloth and crinet start below the head, and necks wider than the head (draft, destrier, steppe pony) start below the
+eyes; they had buried them, armoured or not.
+
+Then Andy asked whether we use Blockbench (we hadn't: the boxes were placed by hand in horse_rig.py) and picked loading
+Blockbench models plus a hunt for openly licensed ones. None good enough turned up (Overhauled Livestock, Beyond
+Horses, SWEM, Icy's and Mo' Creatures are All Rights Reserved; Realistic Horse Genetics' art is CC-BY but its horse
+is vanilla-shaped). So: `tools/bbmodel.py` reads a Blockbench "Modded Entity" project (groups named after our bones,
+armor_* groups for barding, cube names saying how each is painted) with the same conversion Blockbench's Java export
+does, and gen_horses.py takes tools/horse_models/<build>.bbmodel instead of horse_rig's shapes when there is one;
+`python3 tools/bbmodel.py export` writes every build as a starter project (in the project files,
+art-overhaul/horses/blockbench-starters). BreedHorseModel now poses every bone as a change from that build's own rest
+pose (head, reins, tail, forelegs, saddle, stirrups, wings, and each leg's thigh length from its own pivots), so a
+model with other proportions animates the same way.
+
+Andy said yes to Realistic Horse Genetics' coats (sekelsta, art CC BY 4.0; credited in
+textures/entity/breed_horse/CREDITS.txt and tools/rhg/CREDITS.md): `tools/rhg.py` matches each of our hide pixels to the
+same place on that mod's vanilla-shaped horse (scaled from each bone's main box to theirs, same-facing face) and reads
+its masks there: dapples, flecked roan, tobiano pinto, leopard spots, blaze, star, socks and stockings, the dun stripe,
+and its painted coat shading over every coat. The masks are copied unchanged into tools/rhg; the colours are ours.
+
+Then Andy, after renders of the Mystical Deer (jsellier23, CC BY 4.0) made into a horse: "it's not looking right at
+all"; keep that one as a rare horse and simplify the rest to vanilla "until i find horse models that fit what i
+desire". So:
+- `horse_rig.SIMPLE`: every build is the classic horse's shape again (vanilla's before 1.14, whose bones these are and
+  whose shape Realistic Horse Genetics paints for), the breeds differing only a little in leg and tail sizes; the extra
+  pieces, the taller legs and longer neck are off (`LIFT`/`NECK` 0 here and in BreedHorseModel, `Mounted.SEAT_LIFT` 0).
+  Turning SIMPLE off brings the detailed horse back; a Blockbench model still overrides either.
+- Segmented armour (Andy: one continuous sheet looked wrong; "large plates connected by chainmail or fabric, and the
+  plates only cover the vitals"): `horse_rig.segmented_armour()` puts a mail coat (quilted cloth on gold, copper and
+  leather: royal blue, green, dyed) over the body and neck, and plates on it over the vitals only, with gaps where the
+  mail shows: a face plate over the brow (eyes, ears and jaw clear), a nose plate, three lames down the neck's crest
+  with a raised crest, a peytral with a boss, a plate over each side's ribs ahead of the stirrups, and a crupper over the
+  rump with a ridged spine; nothing on the legs. The knight's barding stays in `knights_armour()` for the detailed horse.
+  The stirrups hang outside the rib plates.
+- The moonlit horse: 1 horse in 100 of any horse breed (`Equine.MOONLIT`, a coat past every breed's; foals inherit it
+  like any coat) is born pale and silver-maned in a shape of its own, "Moonlit" on its papers. `tools/horseify.py`
+  makes the deer a horse in Blockbench space (antlers and wisteria off; bulked, longer body, shorter leaned neck,
+  shorter cannons, longer snout, ears up; silver mane, forelock and tail), and `tools/moonlit_horse.py` lays it on our
+  bones (the head's pieces all at the neck's base so they turn as one, thigh and hock on legN_a, cannon on legN_b, the
+  tail turned back against BreedHorseModel's lift), scales it to the classic horse's back height so the tack fits,
+  and bakes its own painting into our box-UV texture (`breed_horse/moonlit/moonlit.png`). Its armour covers each of
+  its body and neck in mail, its plates sized from its own body and neck. Source kept unchanged in tools/horse_models/source with its credit; credit
+  also in textures/entity/breed_horse/CREDITS.txt.
+
+## 0.7.329: Blockbench Workshop models (pack 0.17.156)
+Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
+(Zephyrus and the rest unchanged); then a second batch of seven, eanncrod's Kintsugi for Eurus and Aeolus among them. Every model is CC BY 4.0, credited
+with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.
+- **Loader** (`client/bb/BbModel`, `Molang`): reads a Blockbench model baked by `tools/bbmodel_bake.py` (bones, cubes,
+  per-face UVs, animations with their Molang) into ModelParts and plays its animations by time and weight.
+- **Warchief:** drawn as nyxaris' Chieftain at 0.69 size (`Bodies`, `BbBodies`, `BbBodyLivingEntityRendererMixin`).
+- **Cannon:** iexogen's Canon (`CannonRenderer`), barrel pivot on its trunnions, recoil along the barrel;
+  `Cannon.PIVOT` 0.75.
+- **Silver skeleton:** polyjo's Dead Traveler (`DeadTravelerModel`). It now cuts with its sword arm and blocks on its
+  buckler: 30% of blows from the front within 70 degrees, an axe breaks its guard for 5 s.
+- **Notus and Boreas:** the Fire Dragon (`FireDragonModel`), Notus in its own hide and three re-shadings, Boreas
+  recoloured to ice, glowing markings from its glow half (`tools/gen_fire_dragons.py`). Ground, walk, sit, land and crash
+  poses are our own; flight plays its wingbeat in time with the stroke. Drawn at 0.53 and 0.45 to match the riders'
+  seats. They lose the old models' saddles and horn variety.
+- **Clockwork golem** (`ClockworkGolem`): octopusstudio's Mech Golem. Crafted from a clock, a redstone block and copper,
+  set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
+  into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
+- **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
+  sabatons), each piece hung on the wearer's own bones. Andy: "the warplate should be extraordinary and a drop from the
+  visage boss". A point over netherite in every piece (4/7/9/4), toughness 4, knockback resistance 0.15, durability 45x,
+  enchantability 22, fireproof, epic; mended with gold. Never crafted or forged: Powers' Visage of War drops all four.
+- **Eurus and Aeolus:** eanncrod's Kintsugi wyvern (`KintsugiDragonModel`, replacing `EurusDragonModel` and
+  `AeolusDragonModel`). Aeolus is grey-white with its gold seams glowing (gold, the four winds' colours, white-gold,
+  silver); Eurus is storm-blue and violet with seams in electric cyan (`tools/gen_kintsugi_dragons.py`). Its own idle,
+  knockdown, hover and flight animations; walking, sitting and gliding posed over them. Drawn at 0.28 and 0.75; seats
+  and breath mouths moved to fit (`EurusDragon`, `AeolusDragon`).
+- **Second batch of creatures** (`beasts/`, each with a spawn egg, loot and `tools/gen_beasts.py`). They play their
+  models' own animations through `BbMobRenderer`; a move is a synced animation name (`Acting`, `ActingMonster`).
+  - **Minotaur** (eanncrod): a monster of legend of the mountains (`has_minotaur`, wilderness encounter and gossip).
+    140 HP; hammer swing, a slam that throws everyone round it, and a charge from 6-16 blocks that gores whoever it
+    meets (a wall stops it dazed).
+  - **Piglin King** (eanncrod's Musclebound Piglin King): a rare boss of the Nether wastes and crimson woods
+    (`has_piglin_king`, one in 12 spawn checks, none within 160 blocks of another). It sleeps on its feet until someone
+    comes within 14 blocks or hits it, then wakes with a boss bar. 300 HP, fireproof: claw rake, a volley of four
+    embers, a fire burst that sets everyone close alight, and below half health a roar that brings two piglin brutes
+    (four at most). Its model's ice moves play as fire. Piglins can't hurt it and it never hits them. Drops gold, a gold
+    block, a piglin head and maybe netherite scrap.
+  - **Redstone golem** (polyjo; the design is Mojang's Minecraft Dungeons mob): a great foe below y 0, rare and alone.
+    220 HP, unmoved by knockback; pounds with both fists and sets four spots under its foes glowing, which burst a
+    moment later. Its core glows in the dark. Its pound and eruption are posed in code (the model has idle and walk).
+  - **Skulk golem** (elma_taburlas): the deep dark's guardian, rare and alone. A statue (25% damage) until someone
+    comes within 10 blocks (3 sneaking) or hits it; its blows bring Darkness; still again after 20 s with no foe.
+  - **Wild boar** (lukygive): replaces Naturalist's boar, in natural spawns (forests, taiga, savanna, `has_wild_boar`)
+    and as the boar encounter. Grazes, and gores whoever comes too close or hits it.
+  - **Scalebane sellswords** (eanncrod's Scalebane Archer; Andy: "common sellswords among barbarians and goblin
+    encampments"): `ScalebaneArcher`. New barbarian camps and goblin villages take on two, and a camp short of them
+    hires one now and then as it grows (three at most about its fire). Bowmen who shoot what their camp would (outlaws
+    it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
+    turn rogue and shoot any player.
+
+## 0.7.330: proximity chat, and voices that change with the body (pack 0.17.157)
+Andy: "I also want to add proximity chat", linking Voice Physics, Proximity Text Chat and Simple Voice Voice Changer.
+Proximity Text Chat is all rights reserved, so only its idea is used; the voice mods ship in the pack (Powers'
+`build.gradle`): Simple Voice Chat (ARR, downloaded by id), Voice Physics (MIT) and Simple Voice Voice Changer
+(CC BY-NC-SA 4.0), all unchanged.
+- `ProximityChat` (Fabric `ServerMessageEvents.ALLOW_CHAT_MESSAGE`, which cancels the vanilla broadcast): typed chat is
+  heard only nearby. Talk is whole within 24 blocks, then words drop out ("...") and the line greys toward 40. Sneak
+  while sending to whisper (4, fading to 8); start with `!` to shout (64 / 96); start with `*` to act ("* Aldric
+  waves"). No line of sight counts as 1.6 times as far. The downed only whisper. Names as the hearer knows them
+  ("Stranger" until introduced). A werewolf in full beast form only growls, a Great Ape roars (`PowersCompat.greatApe`),
+  except to their own kind. Each hearer also gets their version as a speech bubble (`Speech.Said`). With nobody in
+  earshot the speaker is told so on the action bar. `/ooc <words>` is out of character, to everyone. The server log
+  keeps every line whole with the username. MCA's villager chat AI still hears typed lines (its mixin sits before
+  the broadcast).
+- `VoiceMasks` (server, every 10 ticks, sent on change) and `client/VoiceMaskClient` + `client/VoiceChangerCompat`
+  (only with `sv-voice-changer` loaded): the voice changer's API override turns the player's voice: a werewolf beast
+  (demon-based growl) and a Great Ape (titan-based, deeper, some room) are forced on; a goblin disguise (kid-based,
+  high) and a full mask (a bit lower, muffled) follow the player's own on/off switch (J). A hood leaves it alone.
+- Server: Simple Voice Chat listens on UDP 24454; the Deck's playit tunnel needs a UDP tunnel for it (deck/README.md).
+Compile-checked, not seen in game.
+
+## 0.7.331: Enderscape's strongholds count (pack 0.17.159)
+- The pack adds Enderscape, whose built-in data pack swaps vanilla strongholds for its own (`enderscape:stronghold`) with
+  their own chest tables. Writs and wizards' staffs now turn up in its library chests too (`Classes`), and quest lairs and
+  lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
+  also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
+
+## 0.7.332: vampires and werewolves hide among friends (pack 0.17.160)
+- **Hunger among players** (`BloodFever.amongPlayers`, Andy: "vampires should hunger when within 150 blocks of other
+  players"; villagers count too, Andy: "yes"): the nearest mortal player (not a vampire, not a changed werewolf, not
+  creative/spectator/invisible) or grown villager/folk within 150 blocks drains a vampire's food (0.02-0.08 exhaustion a second) and climbs the blood fever 0.04-0.12 a second more,
+  edge to face. One in sight (within 40 degrees of where they look, a clear line to eyes or chest) adds up to 0.15 more.
+  Dhampirs feel none of it.
+- **Heartbeat** (`BloodFever.HEARTBEAT`, synced to the vampire only; `BloodVision`): with a player in sight the red
+  edges pulse day or night (players only, not villagers) and the warden's heartbeat plays in their ears with each beat, 0.25-0.8 volume (Andy: "grows to an 80% maximum") and a beat
+  every 24 down to 11 ticks as the player gets closer. Nobody else sees or hears it.
+- **Vampires** (Andy ticked every item on the deception pick list, https://claude.ai/artifact/4k22memmMbtEq7rQnobfbD):
+  `Favourites` (the player you've spent 120 s near is your favourite: fever x2, louder beat), `BloodTemptation`
+  (whispers on the action bar with a player in sight; past the urge line the blood turns your head toward them,
+  client `BloodTurn`), wounded players spike the fever and glow red for you, `SleepingPrey` (sneak-drink a sleeping
+  player; the first bite doesn't wake them; bite marks for a day, Weakness, "You slept badly"; sleeper bites never
+  infect), `BloodThralls` (3 nights on the same player makes them your thrall: they hear your beat, their blood heals
+  double; cure or turning frees them), `VampireMask` (stand still 3 s by day to look human, costs fever), `VampireTells`
+  (animals flee, tamed wolves growl; `VampireFoodMixin`: food feeds you nothing, cake excepted), pallor scales with time
+  since feeding, `Garlic` (new item, 3% from grass; garlic or any silver item makes a vampire flinch unless they hold
+  out), `HunterSense` (a torch holder sees dark smoke trailing a vampire at night), `BloodFever.loner` (among players
+  the urge prefers a person away from the group), `BloodRequests` (the blood asks for something each day; kept eases
+  fever and surrender, broken raises fever), mood (surrender darkens the red and drops the beat's pitch).
+- **Werewolves:** `MoonPull` (the full moon and two nights before: an amber heartbeat for mortals in sight, feral creeps
+  up near them), `ScentTrails` (sneak 2 s to take a scent and see the trail for 60 s), `HiddenChange` + client `WolfTells`
+  (from feral stage 2 or the hour before a change: furred hands, yellow eye flashes, growl when hit), `Caging` (change in
+  a closed room and the beast stays in, clawing the walls), `MorningAfter` (bloody hands and a count of the night's
+  kills, "someone you knew"; look at the Kitchen corpse to learn who), `TornCloth` (a scrap in your rag colour drops at
+  every change; use it on its owner to match), `ClothesColour` (Andy: rags, cloth and clothes "should all be one and the
+  same": each client reads its player's MCA clothes as drawn, in the inventory or third person, and tells the server;
+  a player's beast rags and torn cloth take that colour), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
+  from stage 3; replaces SeizureClient's night-only feral edge).
+- **Everyone:** `Suspicion` (villagers who see a monster feed, hunt, change or show tells gossip naming them by MCA
+  name, fades over ~3 days; wary guards watch them), `Accusations` ("Accuse someone here", a priest's MCA talk option shown while another
+  player is within 10 blocks: holy water on the nearest one; guilty ones are exposed till dawn and guards hunt them, the accuser gains realm reputation; a
+  false accusation costs reputation and the priests' ear for a day), `VictimMemory` + client `VictimClient` (a bitten
+  player wakes to a blurred red silhouette of who bit them, no name), `Kinship` + client `KinshipClient` (monsters in
+  sight of each other hear a cold slow beat or a growl instead of the mortal heartbeat).
+Compile-checked (`./gradlew build` in kingdoms/), not seen in game.
+
+## 0.7.333: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.161)
+Andy: the golem is "accessed through thaumaturgy", and "clockwork golems should also spawn as mini bosses in the aether
+and overworld dungeons".
+- **Golemancy:** no grid recipe any more. Powers' Codex has a Golemancy entry (Artifice tab, after Artifice and Ichor,
+  only with Kingdoms loaded); the golem is made on the infusion altar from a clock on the centre pedestal with 4 copper
+  blocks, 2 redstone blocks and 2 ichor round it (`data/jaymoskingdoms/alchemy/infusion/clockwork_golem.json`).
+  Hermits hint at it after Artifice.
+- **Rogue golems** (`ClockworkGolem.makeRogue`, `GolemLairs`): 220 HP, 16 damage, armour 10, a boss bar; asleep folded
+  until a player comes near; fight players (and whatever hurts them), not the dungeon's monsters; can't be mended; drop
+  3-6 gold and a diamond 35% of the time. In 75% of Sentry Ruins (a side room, never the Slider's), 60% of strongholds
+  (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), half of every other
+  dungeon, any mod's (a structure, not a village, with a monster or trial spawner: rolled once when a player first comes
+  within 48 blocks of a spawner), and 15% of monster rooms. Overworld and Aether only.
+- **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Never told
+  outright: only a hermit's passing word with the Golemancy hint. Their lights burn red and glow in the dark
+  (`clockwork_golem_rogue.png` and its `_glow`, from `tools/gen_clockwork_golem.py`).
+
+## 0.7.334: a rogue golem's bar waits for the fight (pack 0.17.164)
+Andy: "the new healthbar is appearing before being interacted with". A rogue clockwork golem's boss bar now shows only
+once it and a player have traded blows (a player hits it, or it hits a player), and goes away again when it folds up.
+## 0.7.338: a mounted archer no longer crashes the server (pack 0.17.168)
+The Deck server went down at 00:16 on 2026-10-29: "Ticking entity", a horse near spawn with the MCA archer Mirjam on
+it. MCA's `ArcherMovementTask` casts `villager.getMoveControl()` to its `MCAMoveControl` to strafe, but vanilla's
+`Mob.getMoveControl()` returns the vehicle's control while a mob rides another mob, and a horse's is a plain
+`MoveControl`. MCA never put its archers on horses; `Cavalry` has since 0.7.295, so the first mounted archer to
+strafe in a fight crashed the server.
+- `mca.McaMountedArcherMixin`: the task's three `getMoveControl()` calls (`continueStrafe`, `finishStrafe`,
+  `clearCombatState`) get the villager's own control (`MobAccessor.jaymoskingdoms$moveControl`, the field) whenever
+  the one vanilla returns isn't MCA's. A mounted archer's strafe then steers nothing, the horse carrying him, instead
+  of crashing.
+Compile-checked, and deployed to the Deck; not yet seen in a fight.
+
+## 0.7.339: a third batch of Blockbench models (pack 0.17.169)
+All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
+- **Gorgon** (eanncrod's Hydra Guardian, `beasts/Gorgon`): a rare snake-haired archer in jungles and swamps (biome tag
+  `has_gorgon`, one in 8 spawn checks, never two within 64 blocks), 80 health. Its arrows bring Slowness II; it strafes
+  as it shoots; every 10 s or so it looses a volley into the sky that rains ten arrows round its foe.
+- **Goblin war barrel** (polyjo's The Cogwork Golem, `WarBarrel`): every goblin village keeps one inside its gate
+  (`hire` when it is founded, rebuilt as it grows). It stands asleep until a foe of the village comes within 14 blocks,
+  clanks awake, and rams (120 health, armour 12). Never turns on goblins.
+  - Andy: "you can also acquire friendly ones through golem mancy". A **War Barrel** item, made on Powers' infusion
+    altar with the Golemancy research (`alchemy/infusion/war_barrel.json`: barrel, iron blocks, spruce logs, lantern,
+    redstone block, ichor; `tools/gen_war_barrel.py`). Set down, it keeps that place for its maker: fights monsters
+    (creepers left be), never its maker or other friendly barrels, doesn't despawn or stop you sleeping, mended with
+    iron ingots.
+- **Haunted armour stand** (polyjo's Armor Stand, `beasts/HauntedStand`): deep underground (below y 40, rare, alone).
+  It moves only while no player looks at it; caught moving it spins, watched up close it hides its face; unwatched and
+  close it strikes for 7.
+- **Heavenly Mantle** (eanncrod, `Armory.HEAVENLY_PIECES`): the Reverent Warplate's pair, drawn by `ReverentLayer` (now
+  one layer per set). Never made: Powers' afterlife gives one piece to each champion of the tournament of the dead.
+  Netherite's defence, toughness 3.5, enchantability 25, fireproof, mended with gold (`tools/gen_heavenly.py`).
+
+## 0.7.340: rescue rewards come by Tidings and talk, not chat
+
+- Andy: "this text should not appear, you will find out in game through tidings or gossip". Freeing a captive and
+  bringing them home no longer prints anything in chat. The rewards, favours and pardons themselves are unchanged.
+- **Freed:** a captive taken from a settlement names it as they thank you, in their speech bubble (12 `rescue.lead`
+  lines), so you still learn where to take them. A homeless one thanks you as before.
+- **Home:** what the family and treasury paid goes into your next Tidings letter (`tidings.jaymoskingdoms.captive.*`).
+  The losing or death of a captive you were leading goes there too.
+- **Favours:** Andy: "favors are not listed or tracked in a way the player can see. you will know when you know."
+  Nothing mentions a favour or counts them: the guards simply don't toll or search you, and when an arrest is let go,
+  the town's nearest guard (24 blocks) says so aloud (12 `rescue.pardon` lines).
+- **Speak of the rescue:** Andy: "you can talk to them about it for a context chat option as well". A new MCA menu
+  option on a guard of a town that owes you: they say what it buys you there (no toll, no search, a blind eye), never how
+  many favours are left (12 `rescue.owed` lines; `Captives.ANSWER`, shown by `McaAnswersMixin`, answered in `McaDialogueMixin`).
+
+## 0.7.341: hunters follow blood trails (`BloodHunters`)
+- Andy: "MCA hunter villagers follow trails, can you". A town's hunters (fletchers, who take the hunting lodge's
+  fletching table, and leatherworkers) notice a wounded wild animal's blood within 20 blocks (Jaymo's Powers 0.17.182's
+  lasting stains, `BloodTrail.follow` by reflection, nothing without Powers), walk it stain by stain toward fresher
+  blood, and once they see the animal (14 blocks) run it down and finish it with knife blows (4 a second). They keep
+  within 48 blocks of where they set out, give up after 90 s, and leave off for bedtime, a fright, a blow, someone
+  talking to them, or helping someone up. Only game: grown wild animals, never pets or people. Runs from
+  `Workers.step`, so their brain waits and `Doorways` opens gates for them.
+  - Not seen in game.
+- **0.7.347, elemental spell tomes (`Tomes`):** Andy: "different tomes that each have a primary element, all attuned can
+  use them and you can load a spell page with shift right click. It stays with that book. It can be cast with right click
+  on a varying cooldown dependent on the skill's power".
+  - There are nine tomes, one per Sorcerer element. They are made by thaumaturgy (Andy: "craft the tomes through
+    thaumaturgy"): an infusion on a book with amethyst, ichor and the element's reagent, after Powers' Tomecraft
+    research. Casters drop them 6% of the time, and the rarest chests hold one 4% of the time.
+  - Only the attuned can use them.
+  - Left click: tap for a quick bolt; hold to charge a stronger one (3-9 damage, 3-10 mana). Each element's bolt
+    carries Spellcraft's own effect. The restoration bolt heals allies and burns the undead.
+  - Sneak + right click loads a spell scroll (off hand, else the first in the pack) into that tome, where it stays.
+  - Right click casts the loaded scroll through `Arcana.cast`. Mana and cooldown go by tier, from 4 s up to 75 s for
+    Restoration and Death's Door. A page of the tome's own element casts 25% harder. Blood spells cost health.
+  - Death and blood tomes are forbidden arts.
+  - Model: Andy's starter tome, recoloured per element (`tools/blockbench/elemental_tomes.py`). It opens and turns its
+    pages as you shoot, charge, store and cast (Andy: "animate opening and the pages flipping"): half, open and five
+    leaf frames picked client-side by the `jaymoskingdoms:tome_pose` model property (`TomePose`, `TomeClient`); other
+    players' books open and turn a leaf as they swing. Closed in the inventory.
+  - Glyphs (enchanting-table letters) and the element's particles stream off the pages: a different amount per tome
+    (`Tomes.GLYPHS`), growing as you charge, a burst per shot, a big one when a page is stored, more for higher-tier casts.
+  - Bolt tails mix the element's particles with the mana glow.
+  - Omen pilots (Powers 0.17.195) are listed in `ZFighterFolk` so MCA gives them a talk option. Two time-lost story lines
+    no longer say dying takes you home.
+  - Compile-checked only; not seen in game.
+
+## 0.7.348: every tongue greets, waves off, cheers and screams in its own words (pack 0.17.197)
+- Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you dont speak
+  it". Each of the five tongues (Common, Northern, Southern, Wildwood, Blossom) has four made-up lines in the lang file
+  (`tongue.jaymoskingdoms.<tongue>.<greet|farewell|celebrate|scream>`), spoken by a man and a woman of that land
+  (`tools/voices/make_voices.py`: VoxCPM2 voices `<tongue>_male`/`_female`, designed on the tongue's own greeting and
+  farewell so the words keep its sound; 40 clips, each said in its mood).
+- **Heard:** an MCA villager's hello, cheer and death scream reach players who don't speak their tongue as that tongue's
+  line in the speaker's sex's voice (`Languages.voice`, where the grunts were; the grunt stays for yes/no/angry and for a
+  line not recorded yet). Those who understand them hear MCA's words as before.
+- **Farewell:** shutting a foreign villager's talk menu (`McaCloseMixin` on MCA's `InteractionCloseRequest`), they bid
+  you goodbye in their tongue, at their own voice pitch, to you alone, at most once every 30 s (`Languages.farewell`); not
+  when the menu shuts to open a trade.
+- `Voices` registers a tongue's sound only if its clip is in the jar, and the script lists only made clips in
+  sounds.json, so the feature grows as clips are generated and nothing is missing before then.
+  - All 40 clips generated on Andy's PC (2.2 MB); plumbing checked by eye against MCA's bytecode only, no game jars in
+    the cloud session; not seen in game.
+
+## 0.7.349: life-story starts on the other worlds (pack 0.17.198)
+- Andy: "new starts, involving the other worlds". Six new roads on the story's last question, when Jaymo's Powers is
+  loaded (`LifeStory.OTHER_WORLDS`, put down by Powers' `ZFighterStarts` through `PowersCompat.otherWorld`): stranded on
+  the Pale Moon, raised under the Verdant World's sky, escaped Rustfall's mines, a Maw salvager, raised by a Nether demon
+  master, back from the afterlife. If Powers can't place you, you start in the wild.
+- **Respawn:** Andy: "you respawn on the world, or where you spawned for the start initially". You respawn at the landing
+  spot until you first leave that world (`LifeStory.STRANDED`, cleared on the level change, and the respawn point with
+  it if it's still there). The afterlife start's home is the overworld spot.
+- **Heritage:** Andy: "Verdant only": the Verdant World road is only offered to the Verdant-born (`Answer.onlyFor`). Andy:
+  "you can start as divine born again, but only if you pick that start": the afterlife road makes you Divine-born
+  (`Answer.makes`, unlocked like an earned one). The story screen shows why a road is shut, locks the heritage a road
+  sets, and drops a road the birthplace no longer allows.
+- Rustfall's escapee gets +1 Might. Each start echoes its power (moon and Maw: gravity; the rest: Z Fighter).
+- `StoryTalk` landings remember their dimension, so only villagers on the same world talk about how you arrived; new
+  first-meeting lines for the Verdant, demon and afterlife starts.
+  - Compile-checked only; not seen in game.
+
+## 0.7.350: no stall on a new player's join (pack 0.17.199)
+- The first capital's village (`StoryGround`, started when a newcomer joins a realmless world) is looked for over
+  ticks: every village's possible start within `CAPITAL_VILLAGE_SEARCH` chunks of spawn, nearest first, for
+  `VILLAGE_SEARCH_MS` (15 ms) a tick. Before, one `findNearestMapStructure` call ran on the join and held it up for
+  20 s in Andy's log; it counted its radius in village spacings, not chunks, so it searched thousands of blocks out.
+  The radius is now really chunks: 40 (640 blocks), which still reaches the village his last world used (30 chunks out). The capital's
+  90 s give-up time starts once the search is over. The log line gives the places looked at and the time it took.
+  - Compile-checked only; not seen in game.
+- **0.7.351, new Blockbench models (pack 0.17.201):** from six Blockbench Workshop models Andy sent (CC BY 4.0;
+  credits in `textures/entity/bb/CREDITS.txt`).
+  - **Kintsugi Armour** (`Armory.KINTSUGI_PIECES`, eanncrod's model, drawn by `ReverentLayer`): never crafted. Andy: "found
+    on mca zombies in the nether that were possessed and doomed to walk the fortress halls". `nether.FortressHaunts`:
+    every 30 s, 35% of the time, a player inside a Nether fortress sees a haunt rise on the hall bricks 12-28 blocks off
+    (at most 3 within 48 blocks). It's an MCA zombie villager (plain zombie villager without MCA), marked `POSSESSED`,
+    34 health, fireproof, trailing souls, wearing 1-2 random Kintsugi pieces it always drops. A golden apple can't cure
+    one (the soul screams instead). A little better than iron, quick to enchant, mended with gold. The Ronin set is
+    unchanged (Andy: "should not replace anything existing").
+  - **Primal Visage** (`Armory.PRIMAL_PIECES`, eanncrod's): netherite-strength hide and bone under a skull mask, fireproof.
+    Never made: a fallen Nether war fort warlord drops one random piece (`NetherForts.PRIMAL_PIECES_DROPPED`).
+    `ReverentLayer` now skips bones a model lacks and hangs a skirt by `armorWaist` when there's no `bipedWaist`.
+  - **Whaleboats** are drawn as the "Launch" (a long open rowing boat) instead of a spruce boat: `Whalers.LAUNCH` (saved,
+    synced, kept when cast adrift), client `WhaleboatLookMixin` on `AbstractBoatRenderer`, drawn at 1.2 size.
+  - **Skeleton Lord** (`SkeletonLord`, `SkeletonLordRenderer`): a 260-health boss, undead. 35% of the Overworld's rogue golem
+    lairs (`GolemLairs`) hold him instead, asleep as a statue under amethyst (75% of a blow kept off) until a player
+    comes within 8 blocks in sight or hits him. He laughs for 2 s, the crystals burst, then fights with staff blows and,
+    every 6 s at a foe within 7 blocks, a spell that throws everything within 6 blocks back for 6 harm. Purple boss bar
+    once blows are traded. Drops 6-10 bones, 4-8 amethyst shards, 3-6 emeralds. Spawn egg in the spawn eggs tab.
+  - Compile-checked only; not seen in game, and no dev server was booted for the new registries.
+## 0.7.352: the narrator reads the rest of the intro (`Voices.INTRO_LINES`)
+- Andy: "redo the intro lines that dont already have lines". The narrator now reads the pages it was still silent on:
+  "Who are you?" and the grey line under it (now only heard, like the questions' lines), the skip-the-story ask and what
+  skipping does (saying no goes back to the page without reading it again), and the hold screen: its title once, then
+  each line as the hold moves on, stopped when the hold ends so the story isn't talked over (`StoryHoldScreen.narrate`).
+  9 new narrator clips from `tools/voices/make_voices.py`; `gui.jaymoskingdoms.story.*` keys sound as `voice.narrator.*`.
+  - Not seen in game.
+
+## 0.7.354: the life story opens again (pack 0.18.1)
+Andy crashed on the new world's first screen ("Rendering screen", `LifeStory$Answer.offered`). Since 0.7.349
+`offered()` asked `OTHER_WORLDS.contains(this.start)` for every answer, but only road answers have a start, and
+`Set.of` throws on `contains(null)`: every page of the life story crashed the client. A null start is offered.
+Compile-checked; deployed to the Deck.
+
+## 0.7.355: a demon master raises only the Emberborn (pack 0.18.2)
+Andy: "should only be for emberborn". The "Raised by a demon master" start is now the Emberborn's alone, like the
+green sky is the Verdant-born's (`Answer.onlyFor`): others see it greyed with "Only for the Emberborn.", and the
+server refuses it for any other heritage. `onlyFor` keeps answering null for answers with no start.
+- Not seen in game.

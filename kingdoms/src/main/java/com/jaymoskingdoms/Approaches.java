@@ -359,6 +359,11 @@ public final class Approaches {
 		return false;
 	}
 
+	/** (0.7.337) Someone's on their way to {@code player}, or talking with them. */
+	static boolean engaged(UUID player) {
+		return ACTIVE.containsKey(player);
+	}
+
 	// ---- the tick ------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
@@ -427,7 +432,7 @@ public final class Approaches {
 		return true;
 	}
 
-	private static boolean fighting(ServerPlayer player) {
+	static boolean fighting(ServerPlayer player) {
 		return player.getLastHurtByMob() != null && player.tickCount - player.getLastHurtByMobTimestamp() < FIGHT_TICKS;
 	}
 
@@ -468,7 +473,8 @@ public final class Approaches {
 	 */
 	private static boolean consider(ServerLevel level, ServerPlayer player, long now, int topic, boolean forced) {
 		UUID id = player.getUUID();
-		if (ACTIVE.containsKey(id) || !player.isAlive() || player.isSpectator() || player.isSleeping() || fighting(player)
+		// (0.7.337) not while a villager's coming over to introduce themselves (Handshakes)
+		if (ACTIVE.containsKey(id) || Handshakes.awaited(player) || !player.isAlive() || player.isSpectator() || player.isSleeping() || fighting(player)
 			|| (!forced && player.containerMenu != player.inventoryMenu)) {
 			return false;
 		}
@@ -542,9 +548,9 @@ public final class Approaches {
 	}
 
 	/** Whether {@code mob} is free to come over: awake, not working, fighting, riding, or already talking to someone. */
-	private static boolean free(Mob mob) {
+	static boolean free(Mob mob) {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
-			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)
+			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
 			// (0.7.141) a wind dragon in disguise keeps its own counsel
 			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;
@@ -565,7 +571,7 @@ public final class Approaches {
 	}
 
 	/** The settlement {@code mob} belongs to (a guard's own; a villager's, children too), or null. */
-	private static @Nullable Faction home(ServerLevel level, Mob mob) {
+	static @Nullable Faction home(ServerLevel level, Mob mob) {
 		MinecraftServer server = level.getServer();
 		Faction f;
 		if (mob instanceof Folk folk) {
@@ -590,7 +596,7 @@ public final class Approaches {
 	}
 
 	/** Night (the dead walk): only guards come over, to send you in. */
-	private static boolean night(ServerLevel level) {
+	static boolean night(ServerLevel level) {
 		long t = Math.floorMod(level.getOverworldClockTime(), 24000L);
 		return t >= 12500L && t < 23500L;
 	}
@@ -909,6 +915,10 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
+					// (0.7.332) a suspicion against another player, by name (Suspicion)
+					said = Suspicion.gossip(a.mob, player, level.getRandom());
+				}
+				if (said == null) {
 					// (0.7.130) a purist realm's pride in its blood (or a grumble from one not of it)
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
@@ -1117,6 +1127,10 @@ public final class Approaches {
 		}
 		if (Careers.answer(player, answer)) {
 			// (0.7.220) a talk about work
+			return;
+		}
+		if (ZFighterFolk.answer(player, answer)) {
+			// (0.7.319) a talk with one of Powers' Z Fighter characters
 			return;
 		}
 		if (ShipTalk.answer(player, answer)) {

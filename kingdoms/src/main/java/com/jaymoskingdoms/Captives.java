@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -40,6 +39,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -89,7 +89,6 @@ public final class Captives {
 	static final int THINK = 20, LOOK = 200;
 	/** (0.7.100) Who a captive is at home: one of its folk, one of its guards, or kin of its ruler (rolled when they're taken). */
 	static final int FOLK = 0, GUARD = 1, KIN = 2;
-	static final String[] STANDINGS = {"folk", "guard", "kin"};
 	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
 	static final float GUARD_CHANCE = 0.2F, KIN_CHANCE = 0.1F;
 	/** Emeralds the family give from their own purse for their return, by standing. */
@@ -115,6 +114,10 @@ public final class Captives {
 	 */
 	static final int[] FAVOURS_GIVEN = {1, 1, 2};
 	static final int FAVOURS_MOST = 3;
+	/** (0.7.340) How near (blocks) a guard of theirs must be to tell you they're letting an arrest go. */
+	static final double PARDON_RANGE = 24.0;
+	/** (0.7.340) The MCA {@code main} menu answer (our dialogue data): "Speak of the rescue". */
+	public static final String ANSWER = "jaymoskingdoms_rescue";
 
 	/**
 	 * A captive: the settlement they were taken from (-1: none), who freed them (empty while bound), since when (game time),
@@ -189,7 +192,7 @@ public final class Captives {
 			Captive c = entity.getAttached(CAPTIVE);
 			if (c != null && c.rescuer().isPresent() && entity.level() instanceof ServerLevel level
 				&& level.getServer().getPlayerList().getPlayer(c.rescuer().get()) instanceof ServerPlayer p) {
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.died", entity.getDisplayName()).withStyle(ChatFormatting.RED));
+				Post.tidings(p.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.died", entity.getDisplayName()));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Captives::tick);
@@ -374,11 +377,8 @@ public final class Captives {
 		if (f != null && f.fallen()) {
 			f = null;
 		}
+		// (0.7.340) they tell you themselves where home is: no chat line
 		Deeds.freed(level, player, captive, f);
-		player.sendSystemMessage(f != null
-			? Component.translatable("message.jaymoskingdoms.captive.freed" + (standing == FOLK ? "" : "." + STANDINGS[standing]), captive.getDisplayName(), f.name())
-				.withStyle(ChatFormatting.GREEN)
-			: Component.translatable("message.jaymoskingdoms.captive.freed.nowhere", captive.getDisplayName()).withStyle(ChatFormatting.GREEN));
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -493,14 +493,13 @@ public final class Captives {
 				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
 			}
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.home" + (standing == FOLK ? "" : "." + STANDINGS[standing]),
-			v.getDisplayName(), home.name()).withStyle(ChatFormatting.GOLD));
-		player.sendSystemMessage(bounty > 0
-			? Component.translatable("message.jaymoskingdoms.captive.reward", purse, home.name(), bounty).withStyle(ChatFormatting.GOLD)
-			: Component.translatable("message.jaymoskingdoms.captive.reward.purse", purse).withStyle(ChatFormatting.GOLD));
-		if (known && owe(player, home, FAVOURS_GIVEN[standing])) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.favour", home.name(), owed(player, home.id()))
-				.withStyle(ChatFormatting.YELLOW));
+		// (0.7.340) no chat: the reward comes in your next Tidings
+		Post.tidings(player.getUUID(), bounty > 0
+			? Component.translatable("tidings.jaymoskingdoms.captive.home", v.getDisplayName(), home.name(), purse, bounty)
+			: Component.translatable("tidings.jaymoskingdoms.captive.home.purse", v.getDisplayName(), home.name(), purse));
+		if (known) {
+			// (0.7.340) owed quietly: nothing says so, you find out when the guards wave you through
+			owe(player, home, FAVOURS_GIVEN[standing]);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.8F);
 	}
@@ -556,8 +555,49 @@ public final class Captives {
 			all.put(id, had - 1);
 		}
 		player.setAttached(FAVOURS, Map.copyOf(all));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.pardon", f.name(), had - 1).withStyle(ChatFormatting.YELLOW));
+		// (0.7.340) a guard of theirs nearby says so; nothing tells you how many are left
+		if (player.level() instanceof ServerLevel level) {
+			LivingEntity guard = nearestGuard(level, player, f);
+			if (guard != null) {
+				Speech.tell(level, guard, player, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.pardon", level.getRandom()),
+					Identities.shownName(player), f.name()), Speech.GOLD);
+			}
+		}
 		return true;
+	}
+
+	/**
+	 * (0.7.340) "Speak of the rescue" ({@link #ANSWER}, MCA's main menu): one of the watch of a town that owes you for one
+	 * you brought home. Andy: "you can talk to them about it". They say what it means, never how many are owed.
+	 */
+	public static boolean canSpeakOf(ServerPlayer player, LivingEntity who) {
+		Faction f = Downed.isGuard(who) && who.level() instanceof ServerLevel level ? watchOf(level, who) : null;
+		return f != null && owed(player, f.id()) > 0;
+	}
+
+	/** What the guard says, asked about the rescue. */
+	public static Component speakOf(ServerPlayer player, LivingEntity who) {
+		Faction f = who.level() instanceof ServerLevel level ? watchOf(level, who) : null;
+		return Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.owed", who.getRandom()), Recollections.nameTo(player, who),
+			f == null ? Component.empty() : f.name());
+	}
+
+	/** The settlement {@code guard} keeps watch for: a folk guard's own, else where they stand. */
+	private static @Nullable Faction watchOf(ServerLevel level, LivingEntity guard) {
+		return guard instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : Theft.lawAt(level, guard.blockPosition());
+	}
+
+	/** {@code f}'s guard nearest {@code player}, within {@link #PARDON_RANGE}, or null. */
+	private static @Nullable LivingEntity nearestGuard(ServerLevel level, ServerPlayer player, Faction f) {
+		LivingEntity best = null;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(PARDON_RANGE),
+			x -> x.isAlive() && Downed.isGuard(x))) {
+			Faction theirs = watchOf(level, e);
+			if (theirs != null && theirs.id() == f.id() && (best == null || e.distanceToSqr(player) < best.distanceToSqr(player))) {
+				best = e;
+			}
+		}
+		return best;
 	}
 
 	/** Left behind (or too long on the road): they go their own way, still grateful. */
@@ -566,7 +606,7 @@ public final class Captives {
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		if (rescuer != null) {
-			rescuer.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.lost", v.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			Post.tidings(rescuer.getUUID(), Component.translatable("tidings.jaymoskingdoms.captive.lost", v.getDisplayName()));
 		}
 	}
 

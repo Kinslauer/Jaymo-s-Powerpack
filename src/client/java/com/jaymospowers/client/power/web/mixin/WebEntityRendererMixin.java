@@ -20,6 +20,12 @@ abstract class WebEntityRendererMixin {
 		int color = WebSymbioteClient.senseColor(entity);
 		if (color != 0) {
 			state.outlineColor = color;
+		} else {
+			// (0.17.150) the red strain feels heartbeats and movement
+			color = com.jaymospowers.client.power.web.WebRedSense.outline(entity);
+			if (color != 0) {
+				state.outlineColor = color;
+			}
 		}
 	}
 }

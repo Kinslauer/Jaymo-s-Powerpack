@@ -65,7 +65,7 @@ def packMods = [
 	[dep: "maven.modrinth:weaponmaster:M0qt6sse", cf: [608235, 8905060]],
 	[dep: "maven.modrinth:lambdynamiclights:rylKnJ4M", cf: [393442, 8890400]],
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
-	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
+	[dep: "maven.modrinth:sound-physics-remastered:gA7nKz5g", cf: [535489, 9280065]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
 	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
 	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
@@ -214,6 +214,45 @@ def packMods = [
 	// unless someone picks a Lost Cities profile when making a world. Needs Forge Config API Port (above). McJty's own
 	// 26.3 Fabric build, 26.3-12.0.0-fabric (Modrinth version xuEuPjKk).
 	[dep: "maven.modrinth:the-lost-cities:xuEuPjKk", cf: [269024, 9277225]],
+	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
+	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
+	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
+	[dep: "maven.modrinth:simple-voice-chat:x9jLR94Q", cf: [416089, 9350669]],
+	// Voice Physics (MIT, Shamanalle; shipped unchanged): voices muffled by walls by material, echo in caves and stone
+	// rooms, weather and water, quieter sneaking; needs Simple Voice Chat. CurseForge only.
+	[dep: "curse.maven:voice-physics-1712556:9251110", cf: [1712556, 9251110], dev: false],
+	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; shipped unchanged in a free pack): your own voice changed
+	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
+	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
+	[dep: "maven.modrinth:simple-voice-voice-changer:acFxvUQp", cf: [1658503, 9030770], dev: false],
+	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): the End
+	// reworked with new biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs,
+	// blocks, items, music and sky. Its built-in data packs, on by default, swap the vanilla End cities and overworld
+	// strongholds for its own (our relics, writs and quests look in those too: EnderscapeLoot, Kingdoms' Classes and
+	// QuestBoard). Only End chunks generated after it's added get the new terrain. Client and server; needs
+	// Lithostitched (MIT, by Apollo; worldgen library) and YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
+	[dep: "maven.modrinth:enderscape:1VZBnRYm", cf: [536638, 9177560], dev: false],
+	[dep: "maven.modrinth:lithostitched:pZgI6b2t", cf: [936015, 9154966], dev: false],
+	// Last World Panorama (by slovuka; Modrinth says all rights reserved, the jar carries CC0; downloaded by id): the
+	// title screen's panorama is shot from where you last stood, retaken each time you leave a world or server.
+	// Client-only (Fabric skips it on the server).
+	[dep: "maven.modrinth:last-world-panorama:XkXkj2N1", cf: [1643044, 9283694]],
+	// Friends & Foes (CC BY-NC-ND 4.0, Faboslav; shipped unchanged in a free pack, never copied or edited): the mob vote
+	// losers (copper golem, glare, moobloom, mauler, rascal, tuff golem, wildfire, iceologer, illusioner...) and the
+	// Totems of Freezing and Illusion, which also work worn in our charm bauble slot (compat/FriendsAndFoesCompat).
+	// 5.0.4, Fabric 26.3; needs Resourceful Lib (MIT, Team Resourceful). Client and server.
+	[dep: "maven.modrinth:friends-and-foes:RT5VU8LW", cf: [551364, 9331872], dev: false],
+	[dep: "maven.modrinth:resourceful-lib:P6Jq77km", cf: [570073, 8991147], dev: false],
+	// Inventory handling (0.18.0), both shipped unchanged. Mouse Tweaks (BSD-3-Clause, YaLTeR): drag with the right or
+	// left button to spread or gather items, shift-drag to move many stacks, scroll over a slot to move items one at a
+	// time. Client-only (Fabric skips it on the server); works on any screen built on AbstractContainerScreen, ours too.
+	// 26.3-2.31-fabric (Modrinth version LeMuMhLv).
+	[dep: "maven.modrinth:mouse-tweaks:LeMuMhLv", cf: [60089, 8887995]],
+	// ClientSort (Apache-2.0, TerminalMC): middle-click over an inventory (or its little button) sorts it; Shift, Ctrl
+	// and Alt sort by count, name or id; buttons to fill stacks, restock and transfer. Works client-only; the server copy
+	// sorts faster. Middle mouse is also lock-on, but that key only acts with no screen open and ClientSort's only inside
+	// one, so they never clash. Needs Cloth Config and Mod Menu (above). 3.104.1+26.3 (Modrinth version UWMryUad).
+	[dep: "maven.modrinth:clientsort:UWMryUad", cf: [1049891, 8978806]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -247,6 +286,15 @@ def packModsNoCf = [
 	// camera goes into slow cinematic shots of you and the world; any key or damage brings you back. Client-only.
 	// TODO(home PC): CurseForge project 1697412 has no 26.3 file yet; add [1697412, <file id>] once it does.
 	[dep: "maven.modrinth:ji-afk-cinematic:7BvkctiX", cf: null],
+	// Load and chunk speed (0.17.199, Andy's load-time ask; all shipped unchanged, none change what generates):
+	// Lithium (LGPL-3.0, CaffeineMC; Sodium's team): faster game logic, mob AI, chunk ticking and worldgen. 0.26.3.
+	// FerriteCore (MIT, malte0811): less memory for block states and models, so startup and the game use less RAM. 9.0.0.
+	// C2ME (MIT, ishland): generates and loads chunks on every processor core, the big one for new worlds and travel.
+	// Alpha for 26.3 (0.4.2-alpha.0.106); drop it if a worldgen mod misbehaves with it.
+	// TODO(home PC): their CurseForge [project id, file id], as above.
+	[dep: "maven.modrinth:lithium:fWv5bnZk", cf: null],
+	[dep: "maven.modrinth:ferrite-core:d5ddUdiB", cf: null],
+	[dep: "maven.modrinth:c2me-fabric:gKKkuSYc", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).

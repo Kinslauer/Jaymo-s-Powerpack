@@ -381,6 +381,8 @@ public final class WebSymbioteBond {
 
 	private static void tickDormant(ServerPlayer player, Live live, long now, int left) {
 		ServerLevel level = player.level();
+		// (0.17.150) settling in, it helps at the wrong moment now and then
+		WebSymbioteLife.misfire(player, now);
 		if (player.tickCount % DORMANT_STEP == 0) {
 			left -= DORMANT_STEP;
 			if (left <= 0) {

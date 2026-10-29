@@ -5,6 +5,7 @@ import com.jaymoskingdoms.monsters.LegendMonster;
 import com.jaymoskingdoms.monsters.Mimic;
 import com.jaymoskingdoms.monsters.Monsters;
 import com.jaymoskingdoms.monsters.Ogre;
+import com.jaymoskingdoms.monsters.SilverSkeleton;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.function.Function;
@@ -22,7 +23,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Draws the monsters of legend ({@link Monsters}): the Mo' Creatures ones with their models and skins (the wraiths see
- * through, like ghosts), the mud golem and the mimic with ours. The werewolf has its own ({@link WerewolfRenderer}).
+ * through, like ghosts), the mud golem and the mimic with ours, the silver skeleton as polyjo's Dead Traveler
+ * ({@link DeadTravelerModel}). The werewolf has its own ({@link WerewolfRenderer}).
  */
 public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, LegendState, EntityModel<LegendState>> {
 	/** A wraith's tint: grey, and 60% there. */
@@ -60,6 +62,10 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		state.aggressive = monster.isAggressive();
 		state.twoHeads = monster instanceof Ogre ogre && ogre.twoHeads();
 		state.shut = monster instanceof Mimic mimic && mimic.shut();
+		if (monster instanceof SilverSkeleton skeleton) {
+			state.sinceBlocked = skeleton.sinceBlocked() + partialTicks;
+			state.sinceGuardBroken = skeleton.sinceGuardBroken() + partialTicks;
+		}
 	}
 
 	@Override
@@ -118,7 +124,8 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		register(Monsters.FIRE_OGRE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, one("ogre_fire"), false);
 		register(Monsters.WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("wraith"), true);
 		register(Monsters.FLAME_WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("flame_wraith"), false);
-		register(Monsters.SILVER_SKELETON, SilverSkeletonModel::new, SilverSkeletonModel.createBodyLayer(), 0.6F, 1.0F, one("silver_skeleton"), false);
+		EntityRenderers.register(Monsters.SILVER_SKELETON, context -> new LegendRenderer<>(context, new DeadTravelerModel(), 0.6F, 1.0F,
+			state -> DeadTravelerModel.TEXTURE, false));
 		Identifier[] mud = {texture("mud_golem"), texture("mud_golem_mossy")};
 		register(Monsters.MUD_GOLEM, MudGolemModel::new, MudGolemModel.createBodyLayer(), 0.9F, 1.2F, state -> mud[Math.floorMod(state.variant, mud.length)],
 			false);

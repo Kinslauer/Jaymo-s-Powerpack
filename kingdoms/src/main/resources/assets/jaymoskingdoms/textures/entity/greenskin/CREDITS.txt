@@ -1,0 +1,8 @@
+The goblin's body (Kingdoms 0.7.321: GoblinBody, goblin_body.png) is adapted from "Goblin" by kokosikk
+(https://blockbenchworkshop.com/model/kokosikk/goblin), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+The original model is kept unchanged in kingdoms/tools/blockbench/kokosikk_goblin.bbmodel.
+Changes: the skull, tunic, arms and shins are drawn as Minecraft's (MCA's) body reshaped to their sizes, so the goblin
+wears MCA's skin, face, clothes, hair and armour; the dagger and coin are left off; the bones are flattened onto six
+(head, body, arms, legs), keeping only the nose's droop and the cap tip's lean; every box is snapped to a whole-pixel
+texture size; everything is repainted (tools/gen_goblin_body.py), the flesh in greys tinted by each goblin's green.
+The rest of this folder (orc features, marks and scars) is original.

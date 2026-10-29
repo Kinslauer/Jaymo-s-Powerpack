@@ -64,7 +64,12 @@ public abstract class LegendMonster extends Monster {
 	/** Swings {@code arm} ({@link #LEFT}, {@link #RIGHT}, {@link #BOTH}). */
 	protected void swingArm(int arm) {
 		this.entityData.set(SWING, (byte) arm);
-		this.swingTicks = SWING_TICKS;
+		this.swingTicks = this.swingTicks();
+	}
+
+	/** How long its swing shows (ticks). */
+	protected int swingTicks() {
+		return SWING_TICKS;
 	}
 
 	/** Which arm is swinging, 0 for none. */

@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "jaymoskingdoms:bat_wing",
+    "jaymoskingdoms:bat_wing",
+    "minecraft:fermented_spider_eye",
+    "minecraft:fermented_spider_eye",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "life": 12,
+    "beast": 8,
+    "war": 4,
+    "arcana": 8
+  },
+  "instability": 9,
+  "result": {
+    "item": "jaymoskingdoms:blood_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

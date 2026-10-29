@@ -21,22 +21,27 @@ def _held(context, rotation, scale, grip_y):
     return [round(ax - gx, 2), round(ay - gy, 2), round(az - gz, 2)]
 
 
-def display(tp, fp, gui, center_y, grip_y, flip=False):
+def display(tp, fp, gui, center_y, grip_y, flip=False, tilt=0, fp_tilt=0, roll=0):
     """Held/GUI transforms for an upright blade model: the middle of its grip at grip_y, its length centred on center_y.
-    flip turns it half round the blade in the hand (the rapier's knuckle bow goes under the fingers, not over them)."""
+    flip turns it half round the blade in the hand (the rapier's knuckle bow goes under the fingers, not over them).
+    tilt and fp_tilt pitch the blade about the fist in third and first person (Sora's Dagger: angled up, or reversed).
+    roll: for a model drawn on the diagonal like a sprite (tip up and to the right, the harpoon's) instead of upright: the
+    degrees (+45) that turn it upright; grip_y and center_y are then measured along its length, as if it stood upright."""
     off = (center_y - 8) * gui
     d = round(off * math.sin(math.radians(45)), 2)
     g = round(gui, 3)
     yaw = 90 if flip else -90
-    tp_rot, fp_rot = [0, yaw, 0], [0, yaw, -25 if flip else 25]
+    tp_rot, fp_rot = [tilt, yaw, 0], [fp_tilt, yaw, -25 if flip else 25]
     tp_at, fp_at = _held("thirdperson", tp_rot, tp, grip_y), _held("firstperson", fp_rot, fp, grip_y)
-    mirror = lambda r: [r[0], -r[1], -r[2]]
+    # the roll comes first in the turn (the same way in both hands, since the model is not mirrored), the rest as ever
+    right = lambda r: [r[0], r[1], r[2] + roll]
+    left = lambda r: [r[0], -r[1], -r[2] + roll]
     return {
-        "thirdperson_righthand": {"rotation": tp_rot, "translation": tp_at, "scale": [tp] * 3},
-        "thirdperson_lefthand": {"rotation": mirror(tp_rot), "translation": tp_at, "scale": [tp] * 3},
-        "firstperson_righthand": {"rotation": fp_rot, "translation": fp_at, "scale": [fp] * 3},
-        "firstperson_lefthand": {"rotation": mirror(fp_rot), "translation": fp_at, "scale": [fp] * 3},
-        "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [round(tp * 0.6, 3)] * 3},
-        "gui": {"rotation": [0, 0, -45], "translation": [-d, -d, 0], "scale": [g] * 3},
-        "fixed": {"rotation": [0, 0, -45], "translation": [-d, -d, 0], "scale": [g] * 3},
+        "thirdperson_righthand": {"rotation": right(tp_rot), "translation": tp_at, "scale": [tp] * 3},
+        "thirdperson_lefthand": {"rotation": left(tp_rot), "translation": tp_at, "scale": [tp] * 3},
+        "firstperson_righthand": {"rotation": right(fp_rot), "translation": fp_at, "scale": [fp] * 3},
+        "firstperson_lefthand": {"rotation": left(fp_rot), "translation": fp_at, "scale": [fp] * 3},
+        "ground": {"rotation": [0, 0, roll], "translation": [0, 2, 0], "scale": [round(tp * 0.6, 3)] * 3},
+        "gui": {"rotation": [0, 0, -45 + roll], "translation": [-d, -d, 0], "scale": [g] * 3},
+        "fixed": {"rotation": [0, 0, -45 + roll], "translation": [-d, -d, 0], "scale": [g] * 3},
     }

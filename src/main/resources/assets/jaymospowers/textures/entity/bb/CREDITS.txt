@@ -1,0 +1,52 @@
+Blockbench models used under Creative Commons Attribution 4.0 (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/).
+They're baked from their .bbmodel files (tools/bbmodels/) to our own loader's format by tools/bbmodel_bake.py; the
+loader itself (client/bb/BbModel.java, Molang.java) is our own code, shared with Jaymo's Kingdoms.
+
+visage_of_war.png (bbmodels/visage_of_war.json), and textures/item/aether/visage_of_war_spawn_egg.png: the Visage of War,
+the infected guardian tree's boss
+  "Visage of War" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/visage-of-war
+  Changes: baked to our loader's format (it was made for GeckoLib); drawn at 1.5 size; its animations played by our
+  own boss's moves. The spawn egg is the Slider's egg recoloured gold, not part of the model.
+
+Item and costume models (also CC BY 4.0, https://creativecommons.org/licenses/by/4.0/):
+
+models/item/armory/iron_dagger.json and textures/item/armory/iron_dagger.png: the Armory's iron dagger
+  "Traveler Dagger" by polyjo, https://blockbenchworkshop.com/model/polyjo/traveler-dagger-polyjo
+  Changes: turned into an item model (tools/blockbench/traveler_dagger.py); held like our other 3D blades.
+
+models/item/soul_saber.json and textures/item/dreaded_blade(_fx).png: the Dreaded Blade (the relic once called the Soul Saber)
+  "Weapon - Dreaded Blade (Animated)" by capellastudio, https://blockbenchworkshop.com/model/capellastudio/weapon-dreaded-blade-animated
+  Changes: turned into an item model (tools/blockbench/dreaded_blade.py), its runes drawn at full light; held like our
+  other 3D blades. Its maker asks that it not be resold on its own.
+
+textures/entity/costume/suit/thief*.png and mask/thief_hood*.png: the costume table's Thief's Leathers and Thief's Hood
+  "Thief Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/thief-armor
+  Changes: its cubes built into our costume models (client/costume/CostumeModels.thief); its texture split into the two
+  dye masks and turned grey for tinting (tools/blockbench/thief_costume.py).
+
+Batch 4 (2026-10-29). Andy downloaded these from the Blockbench Workshop. The makers' names aren't in the files; fill
+them in from the model pages.
+omen_red.png, omen_blue.png (bbmodels/omen_red.json, omen_blue.json): the future's Omen mechs
+  "The Omen Red" and "The Omen Blue", Blockbench Workshop
+  Changes: baked to our loader's format; walking, aiming and smashing posed in code (client/power/chrono/OmenRenderer).
+worky_drone.png (bbmodels/worky_drone.json): the Omens' Worky drones
+  "bb-worky", Blockbench Workshop
+  Changes: baked to our loader's format, first frame of its texture strip only, drawn at 0.45 scale.
+textures/item/armory/harpoon_3d.png (models/item/armory/harpoon): the harpoon
+  "Harpoon", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/harpoon.py), its iron texture only, rotations snapped to legal steps.
+textures/item/armory/iron_rapier.png (models/item/armory/iron_rapier): the iron rapier
+  "Swept Rapier", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/swept_rapier.py), its mesh guard rebuilt from cubes, scaled down.
+textures/item/voidreaver_3d.png (models/item/voidreaver): the Voidreaver relic
+  a Blockbench Workshop sword model (tools/bbmodels/voidreaver-sword.bbmodel)
+  Changes: turned into an item model (tools/blockbench/voidreaver.py), rotations snapped; our name, not the model's.
+textures/item/tidebreaker_3d.png (models/item/tidebreaker): the Tidebreaker relic
+  "Lighting Spear", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/tidebreaker.py), rotations snapped.
+textures/item/flintlock_3d.png (models/item/flintlock_3d): Arsenal's Void Flintlock
+  "Dueling Pistol", Blockbench Workshop (tools/bbmodels/dueling-pistol.bbmodel; maker's name not in the file)
+  Changes: turned into an item model (tools/blockbench/dueling_pistol.py), laid on the old sprite's diagonal and scaled.
+textures/item/echo_cleaver_3d.png (models/item/echo_cleaver): the Echo Cleaver relic
+  "Mandrake", Blockbench Workshop (tools/bbmodels/mandrake-sword.bbmodel; maker's name not in the file)
+  Changes: turned into an item model (tools/blockbench/mandrake.py); our name, not the model's.

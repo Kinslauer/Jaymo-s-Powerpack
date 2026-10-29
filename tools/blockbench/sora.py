@@ -73,15 +73,27 @@ def r(v):
 
 tex_dir = f"{REPO}/src/main/resources/assets/jaymospowers/textures/item"
 model_dir = f"{REPO}/src/main/resources/assets/jaymospowers/models/item"
-DISPLAY = display(tp=0.5, fp=0.45, gui=0.55, center_y=16)
-for name, spec in STAGES.items():
-    recolour(atlas, spec).save(f"{tex_dir}/{name}.png")
+# (0.17.174) Andy: "both on shift m2": held angled up like a sword, and sneak + use turns it to a reverse grip (blade
+# down past the little finger). Our transforms now, not the file's (0.17.163 took the friend's, which held the blade
+# straight out of the fist); the second model is <stage>_reverse, picked by the stack's first custom_model_data flag
+HOLD = dict(tp=0.45, fp=0.38, gui=0.5, center_y=16, grip_y=5.5)
+DISPLAY = display(tilt=40, **HOLD)
+# (0.17.186) the friend's own reverse grip (soras_dagger_reverse_original.bbmodel, same cubes, only its hand slots
+# turned) when it's beside the file: his held transforms, our slot/ground/frame
+REVERSE = display(tilt=-130, fp_tilt=-60, **HOLD)
+try:
+    HIS = json.load(open(f"{sys.argv[1]}/soras_dagger_reverse_original.bbmodel")).get("display", {})
+    REVERSE = {**REVERSE, **{k: v for k, v in HIS.items() if k.startswith(("thirdperson", "firstperson"))}}
+except FileNotFoundError:
+    pass
+GRIPS = {"": DISPLAY, "_reverse": REVERSE}
+def write_model(name, grip, shown):
     model = {
         "credit": "Sora's dagger model by Andy's friend, made with Blockbench",
         "texture_size": [64, 64],
         "textures": {"0": f"jaymospowers:item/{name}", "particle": f"jaymospowers:item/{name}"},
         "elements": [],
-        "display": DISPLAY,
+        "display": shown,
     }
     for el in elements:
         faces = {}
@@ -89,9 +101,15 @@ for name, spec in STAGES.items():
             if k in el["faces"]:
                 faces[k] = {"uv": [r(v * 16 / 64) for v in el["faces"][k]["uv"]], "texture": "#0"}
         model["elements"].append({"from": [r(v) for v in el["from"]], "to": [r(v) for v in el["to"]], "faces": faces})
-    with open(f"{model_dir}/{name}.json", "w") as fh:
+    with open(f"{model_dir}/{name}{grip}.json", "w") as fh:
         json.dump(model, fh, indent="\t")
         fh.write("\n")
+
+
+for name, spec in STAGES.items():
+    recolour(atlas, spec).save(f"{tex_dir}/{name}.png")
+    for grip, shown in GRIPS.items():
+        write_model(name, grip, shown)
 
 # a cleaned .bbmodel (one texture, no rotated cube, our display) for Andy and his friend to keep editing
 clean = copy.deepcopy(bb)

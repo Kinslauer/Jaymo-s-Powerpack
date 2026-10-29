@@ -878,5 +878,145 @@
     "id": "jaymoskingdoms:skins/clothing/greenskin/orc_warchief_3.png",
     "profession": "jaymoskingdoms:uniform",
     "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/demon_master_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/demon_master_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/demon_master_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/demon_master_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/hermit_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/hermit_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/hermit_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/hermit_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/judge_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/judge_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/judge_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/judge_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/keeper_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/keeper_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/keeper_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/keeper_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/road_master_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/road_master_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/road_master_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/road_master_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/teller_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/teller_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/teller_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/teller_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/tinkerer_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/tinkerer_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/tinkerer_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/zfighter/tinkerer_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
   }
 ]

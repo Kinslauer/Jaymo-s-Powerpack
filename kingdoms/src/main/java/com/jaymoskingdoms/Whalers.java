@@ -239,6 +239,13 @@ public final class Whalers {
 	public static final AttachmentType<Boolean> CREWED = AttachmentRegistry.create(JaymosKingdoms.id("whaleboat_crewed"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.7.351) A whaleboat, sent to every game and kept for good, so the client draws her as a launch (Blockbench
+	 * Workshop "Launch", CC BY 4.0: the client's {@code WhaleboatLookMixin}) instead of a spruce boat, even once cast adrift.
+	 */
+	public static final AttachmentType<Boolean> LAUNCH = AttachmentRegistry.create(JaymosKingdoms.id("whaleboat_launch"),
+		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
 	/** What a boat is about, from her captain's last look (its rowing is done every tick by {@link #helm}): after a whale, towing, or coming back. */
 	private enum Pull { CHASE, TOW, RETURN }
 
@@ -1325,6 +1332,7 @@ public final class Whalers {
 			}
 			boat.setAttached(WHALEBOAT, new Whaleboat(ship.getUUID(), List.copyOf(in)));
 			boat.setAttached(CREWED, true);
+			boat.setAttached(LAUNCH, true);
 			level.sendParticles(ParticleTypes.SPLASH, at.x, at.y + 0.5, at.z, 24, 1.0, 0.2, 1.0, 0.2);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1.0F, 0.9F);
 			lowered.add(boat);

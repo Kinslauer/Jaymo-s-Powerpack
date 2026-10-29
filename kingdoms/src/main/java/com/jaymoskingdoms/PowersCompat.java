@@ -107,6 +107,60 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
+	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle among;
+	private static boolean lookedForAmong;
+
+	/** (0.7.320) Whether {@code player} is one of the dead in Jaymo's Powers' Other World (the afterlife); false without Powers. */
+	public static boolean amongTheDead(Player player) {
+		if (!lookedForAmong) {
+			lookedForAmong = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					among = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterAfterlife"),
+						"among", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' afterlife (older Powers?)", e);
+				}
+			}
+		}
+		if (among == null) {
+			return false;
+		}
+		try {
+			return (boolean)among.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle ape;
+	private static boolean lookedForApe;
+
+	/** (0.7.330) Whether {@code player} is a Great Ape now; false without Powers. */
+	public static boolean greatApe(Player player) {
+		if (!lookedForApe) {
+			lookedForApe = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					ape = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterLineage"),
+						"ape", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Great Ape (older Powers?)", e);
+				}
+			}
+		}
+		if (ape == null) {
+			return false;
+		}
+		try {
+			return (boolean)ape.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
@@ -304,6 +358,39 @@ public final class PowersCompat {
 			return (boolean)strand.invoke(player);
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the future", player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
+	/** (0.7.349) Powers' {@code ZFighterStarts.land(ServerPlayer, String, BlockPos)}. */
+	private static java.lang.invoke.@Nullable MethodHandle land;
+	private static boolean lookedForLand;
+
+	/**
+	 * (0.7.349) A life story's start on one of Powers' other worlds ({@code moon}, {@code verdant}, {@code rustfall},
+	 * {@code maw}, {@code demon}, {@code afterlife}): {@code player} is put there, and what it needs is made. {@code back}:
+	 * a spot in the overworld for one who'll come back to it (the afterlife's way home). False without Powers, or if the
+	 * place couldn't be made.
+	 */
+	public static boolean otherWorld(net.minecraft.server.level.ServerPlayer player, String start, net.minecraft.core.BlockPos back) {
+		if (!lookedForLand) {
+			lookedForLand = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					land = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterStarts"), "land",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, String.class, net.minecraft.core.BlockPos.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' other-world starts (older Powers?)", e);
+				}
+			}
+		}
+		if (land == null) {
+			return false;
+		}
+		try {
+			return (boolean)land.invoke(player, start, back);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the {} start", player.getGameProfile().name(), start, e);
 			return false;
 		}
 	}
@@ -1019,6 +1106,86 @@ public final class PowersCompat {
 			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack>>)list).add(listener);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' forging (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
+	private static boolean lookedForZFighterTalk;
+
+	/**
+	 * (0.7.319) "Talk about work" (or "Talk about training") with one of Powers' Z Fighter characters ({@link ZFighterFolk}):
+	 * their talk screen. False without Powers, or when they had nothing to say.
+	 */
+	public static boolean zfighterTalk(net.minecraft.server.level.ServerPlayer player, LivingEntity speaker) {
+		if (!lookedForZFighterTalk) {
+			lookedForZFighterTalk = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					zfighterTalk = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterNpcs"), "talk",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Z Fighter talk (older Powers?)", e);
+				}
+			}
+		}
+		if (zfighterTalk == null) {
+			return false;
+		}
+		try {
+			return (boolean)zfighterTalk.invoke(player, speaker);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't talk with {}", speaker.getName().getString(), e);
+			return false;
+		}
+	}
+
+	// ---- (0.7.342) Will (Will) --------------------------------------------------------------------------------------
+
+	/** Powers' {@code Downed.knockOut} and {@code ZFighterScouter.powerLevel}. */
+	private static java.lang.invoke.@Nullable MethodHandle knockOut, powerLevel;
+	private static boolean lookedForWill;
+
+	private static void lookForWill() {
+		if (lookedForWill) {
+			return;
+		}
+		lookedForWill = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			knockOut = lookup.findStatic(Class.forName("com.jaymospowers.core.wounds.Downed"), "knockOut", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.server.level.ServerLevel.class, LivingEntity.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' knock-out (older Powers?)", e);
+		}
+		try {
+			powerLevel = lookup.findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterScouter"), "powerLevel",
+				java.lang.invoke.MethodType.methodType(int.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' power levels (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.342) Knocks {@code entity} out where it stands for {@code ticks}, by Powers' downing; false without Powers or if it can't be. */
+	public static boolean knockOut(net.minecraft.server.level.ServerLevel level, LivingEntity entity, int ticks) {
+		lookForWill();
+		try {
+			return knockOut != null && (boolean)knockOut.invoke(level, entity, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
+	public static int powerLevel(LivingEntity entity) {
+		lookForWill();
+		try {
+			return powerLevel == null ? 0 : (int)powerLevel.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
 		}
 	}
 }

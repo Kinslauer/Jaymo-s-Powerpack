@@ -144,6 +144,8 @@ public final class Wounds {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
 		// (0.14.1) phase 2: the downed
 		Downed.register();
+		// (0.17.183) Kingdoms' Will pages: No Getting Up, No Mercy, Grim Hand, hushes, Will Over Flesh
+		WillSkill.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
@@ -320,6 +322,11 @@ public final class Wounds {
 	/** (0.14.2) Sets every break (a priest, a respawn, a Hermit Bean, Verdant's healing, Bloom, Zephyr's Breath). True if any needed setting. */
 	public static boolean mendAll(LivingEntity entity) {
 		return Breaks.mendAll(entity);
+	}
+
+	/** (0.17.164) Every break gone at once, the parts left to heal as they are (the symbiote knitting you whole). */
+	public static void knitBones(LivingEntity entity) {
+		Breaks.clearAll(entity);
 	}
 
 	/** (0.14.2) The broken parts, a bit per {@link BodyPart#ordinal()} (both sides). */

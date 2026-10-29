@@ -456,7 +456,8 @@ public final class Sorcery {
 	/** (0.7.291) {@code caster}'s spell at {@code target}: a folk's, or a villager's in the office ({@link Casters}). */
 	static void cast(Caster caster, LivingEntity target) {
 		PathfinderMob mob = caster.mob();
-		if (!(mob.level() instanceof ServerLevel level)) {
+		// ((0.7.342) not while a Spellbreaker Blow has them hushed: Will)
+		if (!(mob.level() instanceof ServerLevel level) || Will.hushed(mob)) {
 			return;
 		}
 		int[] timers = caster.timers();
@@ -501,6 +502,9 @@ public final class Sorcery {
 	 * witch drinks from the bleeding round her.
 	 */
 	static void support(ServerLevel level, Caster caster) {
+		if (Will.hushed(caster.mob())) {
+			return;
+		}
 		int[] timers = caster.timers();
 		switch (caster.role()) {
 			case BLOOD_WITCH -> Hemomancy.witchTick(level, caster);

@@ -203,7 +203,26 @@ public final class Skills {
 		// shown as "Second Wind" (the first page's old Second Wind is shown as Rally now; its key stays, so nobody's ranks move)
 		SELF_REVIVE(Pillar.SURVIVAL, 1, 2, 15, 7, 1, LIFESAVER),
 		// (0.7.162) any crossbow takes anything from the off hand (OmniCrossbow's Omni, as a Survival skill for every class)
-		MAKE_DO(Pillar.SURVIVAL, 1, 2, 5, 1, 1, FORAGER);
+		MAKE_DO(Pillar.SURVIVAL, 1, 2, 5, 1, 1, FORAGER),
+		// (0.7.342) Strength's third and fourth pages, Will: presence that cows the weak, and a mind magic can't bend (Will); last, so no ordinal moves
+		DREAD_PRESENCE(Pillar.STRENGTH, 3, 1, 5, 8, 0),
+		GROUNDED(Pillar.STRENGTH, 3, 1, 5, 8, 2),
+		STARE_DOWN(Pillar.STRENGTH, 1, 1, 8, 9, 0, DREAD_PRESENCE),
+		NO_GETTING_UP(Pillar.STRENGTH, 1, 1, 8, 9, 1, DREAD_PRESENCE),
+		SPELLBREAKER(Pillar.STRENGTH, 1, 2, 8, 9, 2, GROUNDED),
+		BROKEN_MORALE(Pillar.STRENGTH, 1, 1, 12, 10, 0, STARE_DOWN),
+		SNAP_THE_THREAD(Pillar.STRENGTH, 1, 1, 12, 10, 1, SPELLBREAKER),
+		SHRUG_IT_OFF(Pillar.STRENGTH, 1, 1, 12, 10, 2, SPELLBREAKER),
+		NAME_THAT_CARRIES(Pillar.STRENGTH, 1, 2, 16, 11, 0, BROKEN_MORALE),
+		WITCH_HUNTER(Pillar.STRENGTH, 2, 1, 16, 11, 1, SNAP_THE_THREAD),
+		WILL_OVER_FLESH(Pillar.STRENGTH, 2, 1, 16, 11, 2, SHRUG_IT_OFF),
+		// (0.7.342) Will's second page, Killing Intent: crits, no mercy for the weak, and the last stand
+		GRIM_HAND(Pillar.STRENGTH, 3, 1, 10, 12, 0, DREAD_PRESENCE),
+		NO_MERCY(Pillar.STRENGTH, 1, 2, 10, 12, 2, NO_GETTING_UP),
+		LAST_LOOK(Pillar.STRENGTH, 1, 1, 14, 13, 0, GRIM_HAND),
+		REFUSE_TO_FALL(Pillar.STRENGTH, 1, 2, 14, 13, 2, NO_MERCY),
+		SECOND_BREATH(Pillar.STRENGTH, 1, 2, 18, 14, 1, LAST_LOOK, REFUSE_TO_FALL),
+		UNBROKEN_ROAR(Pillar.STRENGTH, 1, 3, 22, 15, 1, SECOND_BREATH);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -403,6 +422,8 @@ public final class Skills {
 		StrengthSkill.register();
 		Stats.register();
 		CombatArts.register();
+		// (0.7.342) Strength's Will pages
+		Will.register();
 		ShieldThrow.register();
 		Renown.register();
 		KitchenCompat.skills();

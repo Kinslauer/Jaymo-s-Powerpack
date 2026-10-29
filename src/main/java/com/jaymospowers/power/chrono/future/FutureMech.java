@@ -118,6 +118,8 @@ public class FutureMech extends Monster {
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, FutureAndroid.class));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
+		// the Omens (manned mechs) are at war with the machines
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureOmen.class, true));
 	}
 
 	/** Are its arm cannons up? */

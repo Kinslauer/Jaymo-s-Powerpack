@@ -7,6 +7,7 @@ import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.darktide.DarktidePower;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import com.jaymospowers.power.darktide.DarktideWeapons;
+import com.jaymospowers.power.wind.SorasDagger;
 import com.jaymospowers.stamina.Feathers;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
@@ -74,6 +75,7 @@ import org.jspecify.annotations.Nullable;
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
  * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
+ * (0.17.169) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  */
 public final class Guard {
@@ -136,7 +138,7 @@ public final class Guard {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
-		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item), (builder, lookup, item) ->
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || item instanceof SorasDagger, (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
 				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, GUARD_SHARE)),
 				new BlocksAttacks.ItemDamageFunction(3.0F, 0.0F, 0.5F),
@@ -196,6 +198,10 @@ public final class Guard {
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
 		if (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
 			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem())) {
+			return InteractionResult.PASS;
+		}
+		if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof SorasDagger) {
+			// (0.17.186) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
 			return InteractionResult.PASS;
 		}
 		ItemStack off = player.getOffhandItem();

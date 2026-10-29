@@ -97,6 +97,8 @@ final class LifeStoryScreen extends Screen {
 	private static Draft draft = new Draft();
 	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
+	/** (0.7.352) The page under the skip-the-story ask, so shutting the ask doesn't read that page again. */
+	private static @Nullable String underAsk;
 	private static @Nullable SimpleSoundInstance reading;
 	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
 	/** (0.7.269) When the line being read began, and when the next may (ms). */
@@ -213,9 +215,18 @@ final class LifeStoryScreen extends Screen {
 		}
 	}
 
-	/** Whether an answer can be picked: one that names a realm only while there's a realm to name; one offered here. */
+	/**
+	 * Whether an answer can be picked: one that names a realm only while there's a realm to name; one offered here;
+	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
+	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty());
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && (a.onlyFor() == null || bornAs() == a.onlyFor());
+	}
+
+	/** (0.7.349) The road's hold on the heritage: the start that makes you one (the afterlife's), or is only for one (the Verdant World's). */
+	private static boolean roadFixesHeritage() {
+		Answer road = picked(Question.ROAD);
+		return road != null && (road.makes() != null || road.onlyFor() != null);
 	}
 
 	/** Whether the page is answered, so Next can go on. */
@@ -224,6 +235,11 @@ final class LifeStoryScreen extends Screen {
 			return draft.gender >= 0;
 		}
 		if (s.question == null) {
+			// (0.7.349) a road that's no longer open (the birthplace changed under it) has to be picked again
+			Answer road = picked(Question.ROAD);
+			if (road != null && !open(road)) {
+				return false;
+			}
 			Classes.PlayerClass cls = youthClass();
 			return cls == null || cls.options.isEmpty() || draft.option >= 0;
 		}
@@ -232,6 +248,10 @@ final class LifeStoryScreen extends Screen {
 
 	/** The heritage the story makes (or the one picked over it), and its look (the childhood's leaning until one is picked). */
 	private static Heritage.@Nullable Kind heritage() {
+		Answer road = picked(Question.ROAD);
+		if (road != null && road.makes() != null) {
+			return road.makes();
+		}
 		if (draft.heritage >= 0 && draft.heritage < Heritage.Kind.values().length) {
 			return Heritage.Kind.values()[draft.heritage];
 		}
@@ -239,6 +259,12 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private static Heritage.@Nullable Kind storyHeritage() {
+		Answer road = picked(Question.ROAD);
+		return road != null && road.makes() != null ? road.makes() : bornAs();
+	}
+
+	/** (0.7.349) The heritage the birthplace gives, whatever the road makes of it. */
+	private static Heritage.@Nullable Kind bornAs() {
 		Answer born = picked(Question.BORN);
 		return born == null ? null : born.heritage();
 	}
@@ -250,7 +276,8 @@ final class LifeStoryScreen extends Screen {
 	private static void cycleHeritage(int step) {
 		Heritage.Kind story = storyHeritage(), now = heritage();
 		Minecraft minecraft = Minecraft.getInstance();
-		if (story == null || now == null || minecraft.player == null) {
+		// (0.7.349) the afterlife's road makes you Divine-born, and the Verdant World's is the Verdant-born's alone
+		if (story == null || now == null || minecraft.player == null || roadFixesHeritage()) {
 			return;
 		}
 		Heritage.Kind[] kinds = Heritage.Kind.values();
@@ -414,12 +441,26 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.251) The narrator reads a page when it first shows ({@link Voices}): a question's title and the line under it,
 	 * a realm page's ask, and (0.7.269) on the story page the whole tale, line by line with {@link #READ_GAP_MS} between,
 	 * then the closing line. Turning the page cuts the reading short. The realm a tale names isn't read: the clip says
-	 * "the realm".
+	 * "the realm". (0.7.352) While {@code asking}, it reads the skip-the-story ask instead; saying no goes back to the page
+	 * quietly.
 	 */
-	private static void narrate(Step s) {
+	private static void narrate(Step s, boolean asking) {
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
 		String page = s.summary() ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
+		if (asking) {
+			if (!"skip".equals(narrated)) {
+				underAsk = narrated;
+			}
+			page = "skip";
+		} else if ("skip".equals(narrated) && page.equals(underAsk)) {
+			if (reading != null) {
+				minecraft.getSoundManager().stop(reading);
+				reading = null;
+			}
+			toRead.clear();
+			narrated = page;
+		}
 		if (!page.equals(narrated)) {
 			narrated = page;
 			if (reading != null) {
@@ -427,7 +468,7 @@ final class LifeStoryScreen extends Screen {
 				reading = null;
 			}
 			toRead.clear();
-			toRead.addAll(lines(s));
+			toRead.addAll(asking ? List.of("gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc") : lines(s));
 			readNext = 0L;
 		}
 		if (reading != null) {
@@ -455,7 +496,7 @@ final class LifeStoryScreen extends Screen {
 	/** The lines the narrator reads on page {@code s}, as lang keys. */
 	private static List<String> lines(Step s) {
 		if (s.gender) {
-			return List.of("story.jaymoskingdoms.gender.title");
+			return List.of("story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc");
 		}
 		if (s.question == null) {
 			List<String> out = new ArrayList<>();
@@ -552,6 +593,15 @@ final class LifeStoryScreen extends Screen {
 						if (s.question == Question.YOUTH) {
 							draft.cls = -1;
 						}
+						// (0.7.349) a road that fixes the heritage drops one picked over the story's; a new birthplace drops a road it shuts
+						if (s.question == Question.ROAD && (a.makes() != null || a.onlyFor() != null)) {
+							draft.heritage = -1;
+							draft.look = -1;
+						}
+						Answer road = picked(Question.ROAD);
+						if (s.question == Question.BORN && road != null && !open(road)) {
+							draft.answers[Question.ROAD.ordinal()] = -1;
+						}
 						// a new birthplace starts its look over; a new youth its option
 						if (s.question == Question.BORN || s.question == Question.CHILDHOOD) {
 							draft.look = -1;
@@ -610,7 +660,7 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		Step s = step();
-		narrate(s);
+		narrate(s, this.asking);
 		int x = left(), y = top(), w = panelW(), h = panelH();
 		Ui.panel(graphics, x, y, w, h, ACCENT);
 		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
@@ -935,6 +985,12 @@ final class LifeStoryScreen extends Screen {
 			}
 			// (0.7.249) Andy: "this screen should not show the class you will get": what wakes is a surprise
 		}
+		if (a.start() != null && a.makes() != null && !story) {
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.heritage", Component.translatable("heritage.jaymoskingdoms." + a.makes().key())));
+		}
+		if (a.start() == LifeStory.Start.RUSTFALL) {
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + com.jaymoskingdoms.Stats.Stat.MIGHT.key())));
+		}
 		if (a.start() != null) {
 			out.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".wake"));
 			Answer turn = picked(Question.TURN);
@@ -967,7 +1023,7 @@ final class LifeStoryScreen extends Screen {
 			int row = rowAt(s, mouseX, mouseY);
 			int g = row >= 0 ? row : draft.gender;
 			name = Component.translatable(g < 0 ? "story.jaymoskingdoms.gender.title" : "story.jaymoskingdoms.gender." + GENDERS[g]);
-			lines.add(Component.translatable("story.jaymoskingdoms.gender.desc").withColor(Ui.DIM));
+			// (0.7.352) its grey line is only heard now, like the questions'
 		} else if (s.question == null) {
 			Heritage.Kind kind = heritage();
 			if (kind == null) {
@@ -1003,7 +1059,10 @@ final class LifeStoryScreen extends Screen {
 				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tale", realmName(s.question)));
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {
-					lines.add(Component.translatable(a.offered() ? "gui.jaymoskingdoms.story.no_realms" : "gui.jaymoskingdoms.story.needs_powers").withColor(Ui.BAD));
+					lines.add((!a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
+						: a.onlyFor() != null && bornAs() != a.onlyFor()
+							? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
+							: Component.translatable("gui.jaymoskingdoms.story.no_realms")).withColor(Ui.BAD));
 				}
 			}
 		}

@@ -34,6 +34,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -136,7 +137,8 @@ public final class ZFighterSites {
 		VERDANT_GATE = door("verdant_gate", MapColor.EMERALD);
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterSites::tick);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (level.isClientSide() || !entity.entityTags().contains(KEEPER_TAG)) {
+			if (level.isClientSide() || !entity.entityTags().contains(KEEPER_TAG) || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.146) as an MCA villager, the Keeper's menu leads to his talk: keeperTalk)
 				return InteractionResult.PASS;
 			}
 			// (0.17.61) sneak and right-click holding anything: talk about the story and jobs, not the blessing
@@ -396,8 +398,14 @@ public final class ZFighterSites {
 		return Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, facing);
 	}
 
-	/** A trader who never leaves, never moves and can't be hurt: the Hermit (who sells) or the Keeper (who blesses). */
+	/**
+	 * A trader who never leaves, never moves and can't be hurt: the Hermit (who sells) or the Keeper (who blesses).
+	 * (0.17.146) With Kingdoms and MCA, an MCA villager held at the spot instead ({@link ZFighterNpcs#villager}).
+	 */
 	static void spawnNpc(ServerLevel level, Vec3 at, String tag, String name, MerchantOffers offers) {
+		if (ZFighterNpcs.villager(level, at, 180.0F, tag, name, ZFighterNpcs.female(tag)) != null) {
+			return;
+		}
 		WanderingTrader npc = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.STRUCTURE);
 		if (npc == null) {
 			return;
@@ -422,6 +430,69 @@ public final class ZFighterSites {
 		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 6), new ItemStack(ZFighterItems.HERMIT_BEAN_SEEDS, 2), 999, 0, 0.0F));
 		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 24), new ItemStack(ZFighterWishes.RADAR), 999, 0, 0.0F));
 		return offers;
+	}
+
+	// ---------------------------------------------------------------- talking (0.17.146)
+
+	/** The Keeper's talk (MCA's "Talk about work"): his blessing, and the old story and its jobs. */
+	static void keeperTalk(ServerPlayer player, LivingEntity keeper) {
+		Long last = player.getAttached(BLESSED);
+		boolean blessed = last != null && player.level().getGameTime() - last < DAY;
+		Runnable back = () -> keeperTalk(player, keeper);
+		ZFighterNpcs.ask(player, keeper, Component.translatable(blessed ? "talk.jaymospowers.keeper.greet_blessed" : "talk.jaymospowers.keeper.greet"), List.of(
+			ZFighterNpcs.Option.of("talk.jaymospowers.keeper.bless", !blessed, () -> ZFighterNpcs.reply(player, keeper, () -> bless(player), back)),
+			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", true,
+				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterSagas.speak(player, keeper, true), back))));
+	}
+
+	/** The Hermit's talk: his wares for emeralds (he no longer keeps a trader's stall). */
+	static void hermitTalk(ServerPlayer player, LivingEntity hermit) {
+		List<ZFighterNpcs.Option> options = new ArrayList<>();
+		for (MerchantOffer offer : hermitOffers()) {
+			ItemStack ware = offer.getResult();
+			int price = offer.getCostA().getCount();
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.hermit.buy", emeralds(player) >= price || player.isCreative(),
+				() -> buy(player, hermit, ware.copy(), price), ware.getCount(), ware.getHoverName(), price));
+		}
+		ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.greet"), options);
+	}
+
+	private static void buy(ServerPlayer player, LivingEntity hermit, ItemStack ware, int price) {
+		if (!player.isCreative()) {
+			if (emeralds(player) < price) {
+				ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.poor", price),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));
+				return;
+			}
+			int left = price;
+			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
+				ItemStack stack = player.getInventory().getItem(i);
+				if (stack.is(Items.EMERALD)) {
+					int take = Math.min(left, stack.getCount());
+					stack.shrink(take);
+					left -= take;
+				}
+			}
+		}
+		Component name = ware.getHoverName();
+		int count = ware.getCount();
+		if (!player.addItem(ware)) {
+			player.drop(ware, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		player.level().playSound(null, hermit.getX(), hermit.getY(), hermit.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
+		ZFighterNpcs.ask(player, hermit, Component.translatable("talk.jaymospowers.hermit.sold", count, name),
+			List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, () -> hermitTalk(player, hermit))));
+	}
+
+	private static int emeralds(ServerPlayer player) {
+		int n = 0;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack stack = player.getInventory().getItem(i);
+			if (stack.is(Items.EMERALD)) {
+				n += stack.getCount();
+			}
+		}
+		return n;
 	}
 
 	// ---------------------------------------------------------------- the Keeper
@@ -472,6 +543,8 @@ public final class ZFighterSites {
 		if (player.level().dimension() == far) {
 			to = server.overworld();
 			BlockPos tower = data(server).tower().orElseThrow();
+			// (0.17.198) one who was raised in the Verdant World may come through before anyone has walked up to the Tower
+			ensureTower(server);
 			at = new Vec3(tower.getX() + 0.5, LOOKOUT_Y + 2, tower.getZ() - 1.5);
 		} else {
 			to = server.getLevel(far);
@@ -505,10 +578,25 @@ public final class ZFighterSites {
 		return new Vec3(0.5, CHAMBER_FLOOR, 2.5);
 	}
 
+	/** (0.17.198) The Tower and its Lookout, built now if no one has come near them yet (the way back from the Verdant World lands on it). */
+	static void ensureTower(MinecraftServer server) {
+		Data data = data(server);
+		if (!data.towerBuilt()) {
+			buildTower(server.overworld(), data.tower().orElseThrow());
+			save(server, new Data(data.shrines(), data.built(), data.restUntil(), data.tower(), true));
+		}
+	}
+
 	/** Out in the Verdant World where the Lookout floats over the other world: a little ring of stone with the gate back. */
 	private static Vec3 arriveVerdant(ServerLevel verdant, ServerPlayer player) {
-		int x = Mth.floor(player.getX());
-		int z = Mth.floor(player.getZ());
+		return verdantGate(verdant, Mth.floor(player.getX()), Mth.floor(player.getZ()));
+	}
+
+	/**
+	 * (0.17.198) A ring of mossy stone at (x, z) in the Verdant World with the gate back to the Lookout on its north side
+	 * (built if it isn't there); returns where to stand in it.
+	 */
+	public static Vec3 verdantGate(ServerLevel verdant, int x, int z) {
 		verdant.getChunk(x >> 4, z >> 4);
 		int y = surface(verdant, x, z);
 		BlockPos gate = new BlockPos(x, y, z - 2);

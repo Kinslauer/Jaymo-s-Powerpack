@@ -30,9 +30,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement, (0.7.270) or one of a
  * ship's crew ({@link ShipTalk}).
+ * (0.7.319) "Talk about work" also shows on Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}); "Talk
+ * about training" only on a Z Fighter master.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up.
+ * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}) shows only on a guard of a town that owes you a favour.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -56,9 +59,13 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(Introductions.ANSWER);
 			cir.getReturnValue().remove(Introductions.HANDSHAKE);
 		}
-		if ("main".equals(name) && !Careers.offersWork(villager) && !ShipTalk.offersWork(villager)) {
+		if ("main".equals(name) && !Careers.offersWork(villager) && !ShipTalk.offersWork(villager) && !com.jaymoskingdoms.ZFighterFolk.is(villager)) {
 			// (0.7.220) only a grown villager of a settlement talks work; (0.7.270) or one of a ship's crew
 			cir.getReturnValue().remove(Careers.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ZFighterFolk.trains(villager)) {
+			// (0.7.319) only a Z Fighter master talks training
+			cir.getReturnValue().remove(com.jaymoskingdoms.ZFighterFolk.TRAINING);
 		}
 		if ("main".equals(name) && !Hermits.is(villager)) {
 			// (0.7.215) only the floating islands' hermits talk alchemy
@@ -71,6 +78,10 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
+			// (0.7.332) only a priest, with someone here to accuse
+			cir.getReturnValue().remove(com.jaymoskingdoms.Accusations.ANSWER);
 		}
 		if ("main".equals(name)) {
 			// (0.7.254) only what your history with them calls for
@@ -86,6 +97,10 @@ abstract class McaAnswersMixin {
 			if (!SharedHistory.canAskAfter(player, villager)) {
 				cir.getReturnValue().remove(SharedHistory.ASK_AFTER);
 			}
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Captives.canSpeakOf(player, villager)) {
+			// (0.7.340) only a guard of a town that owes you for one you brought home
+			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
