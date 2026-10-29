@@ -106,6 +106,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();
+		com.jaymospowers.power.web.KitchenCompat.registerBrawn();
 		registerAttachments();
 	}
 

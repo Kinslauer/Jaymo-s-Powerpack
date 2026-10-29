@@ -243,7 +243,7 @@ def packMods = [
 	// 5.0.4, Fabric 26.3; needs Resourceful Lib (MIT, Team Resourceful). Client and server.
 	[dep: "maven.modrinth:friends-and-foes:RT5VU8LW", cf: [551364, 9331872], dev: false],
 	[dep: "maven.modrinth:resourceful-lib:P6Jq77km", cf: [570073, 8991147], dev: false],
-	// Inventory handling (0.17.204), both shipped unchanged. Mouse Tweaks (BSD-3-Clause, YaLTeR): drag with the right or
+	// Inventory handling (0.18.0), both shipped unchanged. Mouse Tweaks (BSD-3-Clause, YaLTeR): drag with the right or
 	// left button to spread or gather items, shift-drag to move many stacks, scroll over a slot to move items one at a
 	// time. Client-only (Fabric skips it on the server); works on any screen built on AbstractContainerScreen, ours too.
 	// 26.3-2.31-fabric (Modrinth version LeMuMhLv).
