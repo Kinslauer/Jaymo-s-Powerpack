@@ -132,6 +132,10 @@ public final class SmokeVapour {
 			if (!(entity instanceof ServerPlayer player) || !active(player) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				return true;
 			}
+			if (com.jaymospowers.core.wounds.ValorSkill.pierces(source)) {
+				// (0.18.7) a Valor-coated blow or shot finds the body in the smoke
+				return true;
+			}
 			if (wholly(player)) {
 				return false;
 			}

@@ -6726,3 +6726,50 @@ find one living there."
 - Four Patrol suits from `tools/gen_zfighter_outfits.py` (`patrolman()`): dark bodysuit, white chest plate and shoulder
   guards, white gloves and boots, gold badge (`skins/clothing/zfighter/patrolman_0-3.png`).
 - Compile-checked. Not seen in game.
+## 0.7.360: Valor (pack 0.18.7)
+- Jungxvv's idea and name, merged with Andy's (2026-10-29): a Will-born way to fight magic users, unique to everyone who
+  has it, grown by feats; villagers who have it tell how they earned it. Andy ticked the whole design list (Claude Doc
+  "Valor design list") with every suggested answer, plus: Senses reveal a disguised vampire at Unbroken, and Valor is
+  common and honoured ("villagers who know no better will treat you like royalty if you can prove you have it").
+- **Waking** (`Valor`): Strength level 5 (3 for the child of a Valor parent, by Lineage) and any Will perk; never a Mage
+  or Sorcerer. Then beating a stronger foe (a boss, a kind from a tier above yours, more health or power level),
+  rising from downed and winning within a minute, Refuse to Fall holding you up, or killing something that had someone
+  else under half health. Heartbeat, a pulse of colour at the screen's edges, no chat. The waking feat is its origin
+  (`Valor.Origin`: Ember, Rooted, Bulwark, Hollow, Undying, Hunter, Duelist, each a quirk for life); look, soul colour
+  and name ("the Unbowed Hide") rolled with it. `/valor name <name>` renames it once.
+- **Growth:** `Valor.Feat`s (stronger foes, beasts, great foes, casters, spells broken, protecting, rising, refusing,
+  sparring), each worth less again against the same kind; 1 a day; half for anyone with a power. Ranks Spark 0,
+  Kindled 40, Tempered 120 (a second quirk, `Valor.Bent`, from the feats done most), Steeled 300, Unbroken 700.
+  Ops: `/valor wake <player>`, `/valor grant <player> <exp>`.
+- **Arts:** the Valor key (mouse side button 2; N, the plan's key, is taken by the horse whistle and Web's mantle) toggles the coatings (Reinforcement from Spark; Armament joins from Kindled); they drain a pool (40 + 30 a
+  rank; a third less for the proficient class) that refills out of combat, faster fed or asleep. Running dry: Spent for a
+  minute. Reinforcement: 15-40% less harm, 10% more off magic (cap 70% with Grounded); sneaking empty-handed, a blow from in
+  front is blocked on the forearms. Armament: +15-40% harm, stagger, stun; shatters a ward's absorption; a full-strength
+  coated blow hushes a caster (Spellbreaker), unmakes a thrall, makes a necromancer's thralls reel. Senses (always on):
+  the hidden living near you outlined pale through walls (Valor holders gold), auto-dodges from Kindled, a shot coming
+  at you red from Steeled, a vampire cold blue at Unbroken. Not proficient: tops out at Steeled.
+- **Classes:** Brutes/Warlords proficient in Reinforcement, those and Thieves in Armament, Archers/Marksmen/Survivalists
+  in Senses. Brute's coated fist +4; a coated Warlord's groupmates within 8 shrug off Dread Presence and the roar; a
+  Thief's quick stabs break casts too; an Archer's shots (from Steeled) and a Marksman's go out coated; Survivalists
+  sense beasts half again as far; a Rider's Reinforcement covers their horse.
+- **Against magic:** `Valor.pierces` (Powers asks it); spirits' parries and wards let a coated blow through
+  (`spirits/Spirits`).
+- **Valor folk** (`ValorFolk`): grown MCA villagers weighed once (1 in 20, guards 1 in 4, elders 1 in 8; twice as likely
+  with a Valor parent). They coat up when they fight; seen, "Ask about their Valor" in MCA's menu tells their tale (age
+  at waking, winters to call it, greatest feat, King's Valor, its name) in their temper's way; an elder or a Steeled one
+  marks the nearest other realm's seat on a map, once. Their foes felled are feats. Two holders within 6 blocks feel a
+  heartbeat once a day. "Ask them to spar" (once told, with Valor of your own): a minute, or put them to a third; no one
+  goes below a third, no assault; once per teacher it's a feat. Coat up where townsfolk without Valor see you: +6 MCA
+  hearts and +3 realm regard each, and they say so, once each.
+- **King's Valor** (`ValorKings`): the first great foe (boss bar) felled at Tempered or past wakes it (soul colour
+  shown), the 3rd the King's coating; a King's Valor holder counts 3. Holding the key: the weaker within 8 + 2 a great foe (24
+  most) pass out 10 s, the rest are shaken, casters hushed; holding the Valor key; the whole pool (needs half), 5 minutes' wait. King's coating:
+  the weaker struck die outright (sneak, fists, clubs only down; Will's `noMercy` asks `ValorKings.killed`); two King's
+  coatings clash in thunder and the weaker near faint or freeze, trembling. Rulers: 7 in 10 have Valor, 1 in 10 King's
+  Valor; a King's Valor ruler doesn't run (`Rulers` asks `standsAndFights`), and releases it once when the throne room is
+  attacked.
+- Lineage: Valor stays with the elder left behind.
+- Client: `ValorClient` (key, pool bar over the hotbar, Senses, edge pulse), `ValorScreen` (the Valor page, a button on
+  Strength in the K screen), `mixin/vampires/ValorGlowColorMixin`.
+- Built (Powers 0.18.7 and Kingdoms 0.7.360 compile and jar). Not seen in game.
+

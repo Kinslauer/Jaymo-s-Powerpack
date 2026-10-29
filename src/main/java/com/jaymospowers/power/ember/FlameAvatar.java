@@ -409,8 +409,9 @@ public final class FlameAvatar {
 				return false;
 			}
 		}
+		// (0.18.7) a Valor-coated blow goes through the flame to the body
 		if (passing || !(entity instanceof ServerPlayer player) || amount <= 0.0F || !is(player) || !hit(source)
-			|| player.isCreative() || player.isSpectator()) {
+			|| player.isCreative() || player.isSpectator() || com.jaymospowers.core.wounds.ValorSkill.pierces(source)) {
 			return false;
 		}
 		Live live = live(player);

@@ -461,6 +461,11 @@ public final class Rulers {
 			// (0.7.175) crowned before the day was written down
 			reign(s, f.id(), mob);
 		}
+		if (ValorKings.standsAndFights(level, mob, f)) {
+			// (0.7.360) one with King's Valor doesn't run: they fight
+			round.stop();
+			return true;
+		}
 		if (mob.isSleeping() || McaCompat.busy(mob) || Quests.listening(mob) || mob instanceof net.minecraft.world.entity.npc.villager.Villager v
 			&& Neighbours.meeting(v) || threatened(level, mob, f)) {
 			round.stop();

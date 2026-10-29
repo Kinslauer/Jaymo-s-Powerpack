@@ -133,6 +133,8 @@ public final class Workers {
 				CourtWizards.age(level, e);
 				// (0.7.218) a gifted Wind the storm has taken
 				GiftedFolk.step(level, e.mob());
+				// (0.7.360) weighed once for Valor (a ruler for theirs)
+				ValorFolk.step(level, e);
 				if (OldAge.step(level, e)) {
 					// (0.5.54) they died of old age
 					return false;

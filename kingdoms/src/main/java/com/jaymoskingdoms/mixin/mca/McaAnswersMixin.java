@@ -75,6 +75,14 @@ abstract class McaAnswersMixin {
 			// (0.7.244) only one who works magic talks of it
 			cir.getReturnValue().remove(com.jaymoskingdoms.ManaFolk.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ValorFolk.canAsk(player, villager)) {
+			// (0.7.360) only a Valor you've seen
+			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.TALE);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ValorFolk.canSpar(player, villager)) {
+			// (0.7.360) only one who's told you their tale, once you have Valor of your own
+			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.SPAR);
+		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
