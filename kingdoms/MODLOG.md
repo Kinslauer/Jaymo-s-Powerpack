@@ -6430,3 +6430,24 @@ with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the s
     hires one now and then as it grows (three at most about its fire). Bowmen who shoot what their camp would (outlaws
     it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
     turn rogue and shoot any player.
+
+## 0.7.330: proximity chat, and voices that change with the body (pack 0.17.157)
+Andy: "I also want to add proximity chat", linking Voice Physics, Proximity Text Chat and Simple Voice Voice Changer.
+Proximity Text Chat is all rights reserved, so only its idea is used; the voice mods ship in the pack (Powers'
+`build.gradle`): Simple Voice Chat (ARR, downloaded by id), Voice Physics (MIT) and Simple Voice Voice Changer
+(CC BY-NC-SA 4.0), all unchanged.
+- `ProximityChat` (Fabric `ServerMessageEvents.ALLOW_CHAT_MESSAGE`, which cancels the vanilla broadcast): typed chat is
+  heard only nearby. Talk is whole within 24 blocks, then words drop out ("...") and the line greys toward 40. Sneak
+  while sending to whisper (4, fading to 8); start with `!` to shout (64 / 96); start with `*` to act ("* Aldric
+  waves"). No line of sight counts as 1.6 times as far. The downed only whisper. Names as the hearer knows them
+  ("Stranger" until introduced). A werewolf in full beast form only growls, a Great Ape roars (`PowersCompat.greatApe`),
+  except to their own kind. Each hearer also gets their version as a speech bubble (`Speech.Said`). With nobody in
+  earshot the speaker is told so on the action bar. `/ooc <words>` is out of character, to everyone. The server log
+  keeps every line whole with the username. MCA's villager chat AI still hears typed lines (its mixin sits before
+  the broadcast).
+- `VoiceMasks` (server, every 10 ticks, sent on change) and `client/VoiceMaskClient` + `client/VoiceChangerCompat`
+  (only with `sv-voice-changer` loaded): the voice changer's API override turns the player's voice: a werewolf beast
+  (demon-based growl) and a Great Ape (titan-based, deeper, some room) are forced on; a goblin disguise (kid-based,
+  high) and a full mask (a bit lower, muffled) follow the player's own on/off switch (J). A hood leaves it alone.
+- Server: Simple Voice Chat listens on UDP 24454; the Deck's playit tunnel needs a UDP tunnel for it (deck/README.md).
+Compile-checked, not seen in game.
