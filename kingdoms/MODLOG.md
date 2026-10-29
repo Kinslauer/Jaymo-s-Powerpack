@@ -6671,3 +6671,12 @@ Andy crashed on the new world's first screen ("Rendering screen", `LifeStory$Ans
 `offered()` asked `OTHER_WORLDS.contains(this.start)` for every answer, but only road answers have a start, and
 `Set.of` throws on `contains(null)`: every page of the life story crashed the client. A null start is offered.
 Compile-checked; deployed to the Deck.
+
+## 0.7.355: hints on the hold screen (pack 0.18.2)
+- Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white text should
+  cycle, with a series of a minimum 40 lines hinting at how different game mechanics work. The narrator can continue
+  saying what it does now". `StoryHoldScreen` keeps "Your story is being written" (its dots moved onto it) and under it
+  shows one of 44 hints (`gui.jaymoskingdoms.story.hint.1-44`: climbing, parries, finishers, smithing, lockpicking,
+  boards, careers, horses, alchemy, mana and more), a new one every 7 s from a random one on, wrapped to two lines if
+  long. The narrator still reads the title and what the hold is for (the capital rising, the whaler, the future).
+  - Not seen in game.
