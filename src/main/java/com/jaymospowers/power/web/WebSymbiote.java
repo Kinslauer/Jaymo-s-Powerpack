@@ -1565,6 +1565,12 @@ public final class WebSymbiote {
 		if (WebSymbioteRescue.tick(player, state, now)) {
 			return;
 		}
+		// (0.17.164) and it doesn't leave you crawling on broken legs
+		WebSymbioteState knit = WebSymbioteRescue.knit(player, state, now);
+		if (knit != state) {
+			set(player, knit);
+			state = knit;
+		}
 		// and it has something to say about what you're fighting
 		WebSymbioteFoes.tick(player, now);
 		// (0.17.150) starved to nothing, it takes you: the warnings and the scene (WebSymbioteLife)
