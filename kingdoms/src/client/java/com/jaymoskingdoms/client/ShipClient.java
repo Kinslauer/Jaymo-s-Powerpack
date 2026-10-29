@@ -5,10 +5,15 @@ import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Ship;
 import com.jaymoskingdoms.sailing.ShipNet;
 import com.jaymoskingdoms.sailing.Ships;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.EntityBlock;
@@ -37,6 +42,9 @@ public final class ShipClient {
 			if (useCooldown > 0) {
 				useCooldown--;
 			}
+			if (client.level != null) {
+				remeshGone(client.level);
+			}
 		});
 	}
 
@@ -44,6 +52,7 @@ public final class ShipClient {
 		float turned = Mth.wrapDegrees(ship.getYRot() - ship.yRotO);
 		ship.heelO = ship.heel;
 		ship.heel += (Mth.clamp(turned * HEEL_PER_TURN, -MOST_HEEL, MOST_HEEL) - ship.heel) * HEEL_EASE;
+		remesh(ship);
 		LocalPlayer you = Minecraft.getInstance().player;
 		if (you == null || you.level() != ship.level()) {
 			return;
@@ -65,6 +74,74 @@ public final class ShipClient {
 		you.setPos(now);
 		you.setYRot(you.getYRot() + turned);
 		you.setYHeadRot(you.getYHeadRot() + turned);
+	}
+
+	// ---- (0.7.306) the sea kept out of her hold ----
+
+	/** Each ship's hold as it was last meshed: where she lay, her hull, whether she was foundering, and the tick. */
+	private static final Map<Ship, Meshed> MESHED = new HashMap<>();
+	/** How far a ship moves (blocks) or turns (degrees) before the sections she lies in are meshed again, and at most how often (ticks). */
+	static final double REMESH_MOVE = 1.0, REMESH_TURN = 6.0;
+	static final int REMESH_TICKS = 10;
+
+	private record Meshed(Vec3 at, float yaw, Hull hull, boolean foundering, int tick, AABB box) {
+	}
+
+	/**
+	 * The sea isn't drawn in her dry hold (FluidRendererDryHoldMixin), so as she moves the sections she lay in and lies
+	 * in are meshed again: the sea back where she was, none where she is now. Only the waterline's band of sections, where
+	 * her hold meets the sea; and not every tick, which would be a lot of meshing for a big ship under way.
+	 */
+	private static void remesh(Ship ship) {
+		if (!(ship.level() instanceof ClientLevel level)) {
+			return;
+		}
+		Hull h = ship.hull();
+		if (h == null || h.masked.length == 0) {
+			return;
+		}
+		Meshed last = MESHED.get(ship);
+		Vec3 at = ship.position();
+		float yaw = ship.getYRot();
+		boolean foundering = ship.foundering();
+		if (last != null && (ship.tickCount - last.tick() < REMESH_TICKS
+			|| last.hull() == h && last.foundering() == foundering && at.distanceToSqr(last.at()) < REMESH_MOVE * REMESH_MOVE
+				&& Math.abs(Mth.wrapDegrees(yaw - last.yaw())) < REMESH_TURN)) {
+			return;
+		}
+		AABB box = waterlineBox(ship, h);
+		if (last != null) {
+			box = box.minmax(last.box());
+		}
+		MESHED.put(ship, new Meshed(at, yaw, h, foundering, ship.tickCount, waterlineBox(ship, h)));
+		dirty(level, box);
+	}
+
+	/** The sea back in the holds of ships that are gone (laid up, sunk, out of sight). */
+	private static void remeshGone(ClientLevel level) {
+		if (MESHED.isEmpty()) {
+			return;
+		}
+		Iterator<Map.Entry<Ship, Meshed>> it = MESHED.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Ship, Meshed> e = it.next();
+			if (e.getKey().isRemoved() || e.getKey().level() != level) {
+				dirty(level, e.getValue().box());
+				it.remove();
+			}
+		}
+	}
+
+	/** Where her hold meets the sea: her footprint, from her keel up to a block over the waterline. */
+	private static AABB waterlineBox(Ship ship, Hull h) {
+		AABB b = ship.getBoundingBox();
+		return new AABB(b.minX, ship.getY() - 1.0, b.minZ, b.maxX, ship.getY() + h.draft + 2.0, b.maxZ);
+	}
+
+	private static void dirty(ClientLevel level, AABB box) {
+		level.setSectionRangeDirty(SectionPos.blockToSectionCoord(Mth.floor(box.minX)), SectionPos.blockToSectionCoord(Mth.floor(box.minY)),
+			SectionPos.blockToSectionCoord(Mth.floor(box.minZ)), SectionPos.blockToSectionCoord(Mth.floor(box.maxX)),
+			SectionPos.blockToSectionCoord(Mth.floor(box.maxY)), SectionPos.blockToSectionCoord(Mth.floor(box.maxZ)));
 	}
 
 	/** (0.7.18) At the helm, a left click fires a broadside to the side you look. True if it did (the click's used). */

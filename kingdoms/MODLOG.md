@@ -6127,3 +6127,14 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - **Horse Handbook** item (book + wheat + leather), nine pages, also on the wheel.
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
+
+## 0.7.306: no sea in the hold, no nether wood in villages (pack 0.17.122)
+- **The sea isn't drawn inside a dry hull** (`FluidRendererDryHoldMixin`): the sea's faces are skipped at every block
+  `Ships.dry` puts inside a ship's hold. The hold's water mask (0.7.259) stays for the view from above, but a depth mask
+  can't hide what lies between you and it: down in a hold below the waterline (a cargo ship's starts 1.7 blocks under
+  it) the sea showed round your feet (Andy: "still water in the hold"). `ShipClient.remesh` meshes the waterline band
+  of sections a ship lies in again as she moves (a block or 6°, at most every 10 ticks), founders, or is gone.
+- **Settlements never build in nether wood**: a village's look is read from the blocks round its seat
+  (`Townscape`), so warped or crimson planks nearby became its wood, and fields went up fenced in it. The nether's
+  woods are skipped now (buildings already up keep theirs).
+Compile-checked (javac against the 26.3 jars), not seen in game.
