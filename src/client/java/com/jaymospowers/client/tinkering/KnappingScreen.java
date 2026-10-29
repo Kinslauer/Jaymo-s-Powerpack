@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -15,8 +16,9 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The knapping grid: the rock's chips as a 3x3 of buttons (a click knocks one out; the server decides), the rock on the
  * left, the head it has become on the right. A panel of the shapes beside it; hover one to see where its chips lie.
+ * (0.17.176) The shapes panel is handed to JEI, so its item list starts right of it instead of under it.
  */
-public class KnappingScreen extends AbstractContainerScreen<KnappingMenu> {
+public class KnappingScreen extends AbstractContainerScreen<KnappingMenu> implements TableAreas {
 	private static final int GRID_X = 61, GRID_Y = 14, CELL = 18;
 	/** The start-over button, under the rock slot. */
 	private static final int RESET_X = 8, RESET_Y = 56, RESET_W = 44, RESET_H = 12;
@@ -42,6 +44,11 @@ public class KnappingScreen extends AbstractContainerScreen<KnappingMenu> {
 
 	private int sideHeight() {
 		return SIDE_TOP + (shapes().size() + TILE_COLUMNS - 1) / TILE_COLUMNS * TILE + SIDE_PAD;
+	}
+
+	@Override
+	public List<Rect2i> extraAreas() {
+		return List.of(new Rect2i(sideX(), topPos, sideWidth(), sideHeight()));
 	}
 
 	/** The shape tile under the mouse, or -1. */
