@@ -19,7 +19,7 @@ import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) Tells: the small things that give a vampire away to the living.
+ * (0.7.332) Tells: the small things that give a vampire away to the living.
  *
  * <ul>
  * <li>Animals (any {@link Animal}: cows, horses, cats, wolves) within {@link #RANGE} blocks of a vampire player shy away

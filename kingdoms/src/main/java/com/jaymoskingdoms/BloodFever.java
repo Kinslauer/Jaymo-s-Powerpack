@@ -77,20 +77,20 @@ public final class BloodFever {
 	static final int FRENZY_TICKS = 1200, FRENZY_STRENGTH = 0, FRENZY_SPEED = 0;
 	/** Surrender stages: bloodbound, ravenous, lost. */
 	static final int BLOODBOUND = 50, RAVENOUS = 75, LOST = 100;
-	/** (0.7.323) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
+	/** (0.7.332) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
 	 * blocks of other players", and asked whether villagers count too, "yes"). */
 	static final double PLAYER_RANGE = 150.0;
 	/** A player that near: the fever's extra climb a second, and the hunger it costs (food exhaustion a second), at the range's edge and up close. */
 	static final float NEAR_RISE = 0.04F, NEAR_RISE_CLOSE = 0.12F, NEAR_HUNGER = 0.02F, NEAR_HUNGER_CLOSE = 0.08F;
 	/** One in their sight (within this half-angle of where they look, degrees, nothing in between): this much more again, scaled by closeness. */
 	static final float SEEN_ANGLE = 40.0F, SEEN_RISE = 0.15F;
-	/** (0.7.323) A hurt mortal player within this (blocks) spikes the fever like a hurt villager ({@link #SCENT}); one under half health but not bleeding now, this much a second. */
+	/** (0.7.332) A hurt mortal player within this (blocks) spikes the fever like a hurt villager ({@link #SCENT}); one under half health but not bleeding now, this much a second. */
 	static final double WOUNDED_RANGE = 30.0;
 	static final float WOUNDED_RISE = 0.6F;
-	/** (0.7.323) Sneaking away: among this many mortal players (within {@link #GROUP_RANGE}), the urge prefers a person this far (blocks) from every player. */
+	/** (0.7.332) Sneaking away: among this many mortal players (within {@link #GROUP_RANGE}), the urge prefers a person this far (blocks) from every player. */
 	static final int GROUP_SIZE = 2;
 	static final double GROUP_RANGE = 48.0, LONE_FROM_PLAYERS = 12.0;
-	/** (0.7.323) A bite on their thrall eases the fever this much more ({@link BloodThralls}). */
+	/** (0.7.332) A bite on their thrall eases the fever this much more ({@link BloodThralls}). */
 	static final float THRALL_EASE = 12.0F;
 	/** The fever's warnings: once it climbs past each. */
 	static final float[] WARN_AT = {40.0F, 60.0F, 80.0F};
@@ -105,7 +105,7 @@ public final class BloodFever {
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/**
-	 * (0.7.323) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
+	 * (0.7.332) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
 	 * vampire alone, whose screen pulses and ears pound with it ({@code BloodVision}). Not kept.
 	 */
 	public static final AttachmentType<Float> HEARTBEAT = AttachmentRegistry.create(JaymosKingdoms.id("blood_heartbeat"),
@@ -260,14 +260,14 @@ public final class BloodFever {
 	}
 
 	/**
-	 * (0.7.323) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
+	 * (0.7.332) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
 	 * fever climb, more the closer they are; the nearest one in their sight sets their {@link #HEARTBEAT}. Returns the
 	 * fever's extra climb this second.
 	 */
 	private static float amongPlayers(ServerPlayer player) {
 		double nearest = Double.MAX_VALUE;
 		float seen = 0.0F;
-		// (0.7.323) their favourite ({@link Favourites}): its own climb counts twice, and its heartbeat reads closer
+		// (0.7.332) their favourite ({@link Favourites}): its own climb counts twice, and its heartbeat reads closer
 		float favouriteClose = 0.0F, favouriteSeen = 0.0F, wounded = 0.0F;
 		ServerPlayer seenPlayer = null;
 		java.util.List<ServerPlayer> near = new java.util.ArrayList<>();
@@ -286,7 +286,7 @@ public final class BloodFever {
 			if (favourite) {
 				favouriteClose = close;
 			}
-			// (0.7.323) a hurt friend nearby: the smell of it (a fresh blow like a hurt villager, a standing wound a little)
+			// (0.7.332) a hurt friend nearby: the smell of it (a fresh blow like a hurt villager, a standing wound a little)
 			if (d <= WOUNDED_RANGE) {
 				if (other.hurtTime > 0) {
 					wounded = Math.max(wounded, SCENT);
@@ -295,7 +295,7 @@ public final class BloodFever {
 				}
 			}
 			if (close <= seen && !favourite || Kinship.monster(other) && !favourite) {
-				// (0.7.323) kin are heard another way ({@link Kinship}): no red pulse
+				// (0.7.332) kin are heard another way ({@link Kinship}): no red pulse
 				continue;
 			}
 			if (inSight(player, other)) {
@@ -345,7 +345,7 @@ public final class BloodFever {
 		return climb;
 	}
 
-	/** (0.7.323) Whether {@code other} is in {@code viewer}'s sight: within {@link #SEEN_ANGLE} of where they look, nothing in between. */
+	/** (0.7.332) Whether {@code other} is in {@code viewer}'s sight: within {@link #SEEN_ANGLE} of where they look, nothing in between. */
 	static boolean inSight(ServerPlayer viewer, ServerPlayer other) {
 		net.minecraft.world.phys.Vec3 eye = viewer.getEyePosition();
 		net.minecraft.world.phys.Vec3 look = viewer.getViewVector(1.0F);
@@ -397,7 +397,7 @@ public final class BloodFever {
 	}
 
 	/**
-	 * (0.7.323) Sneak away: among {@link #GROUP_SIZE} or more mortal players, the blood prefers a person (a villager or one
+	 * (0.7.332) Sneak away: among {@link #GROUP_SIZE} or more mortal players, the blood prefers a person (a villager or one
 	 * of the folk) at least {@link #LONE_FROM_PLAYERS} blocks from every player, so the hold walks them away from the group.
 	 * Null if there's no such person or they aren't in a group.
 	 */
@@ -465,7 +465,7 @@ public final class BloodFever {
 		bit(player, false);
 	}
 
-	/** (0.7.323) A bite, on their {@code thrall} or not: on a thrall it heals twice over and eases the fever {@link #THRALL_EASE} more. */
+	/** (0.7.332) A bite, on their {@code thrall} or not: on a thrall it heals twice over and eases the fever {@link #THRALL_EASE} more. */
 	static void bit(ServerPlayer player, boolean thrall) {
 		if (!feverish(player)) {
 			return;
@@ -479,7 +479,7 @@ public final class BloodFever {
 		}
 	}
 
-	/** (0.7.323) {@link BloodRequests}: the fever and the surrender move by these (they eased or climbed). */
+	/** (0.7.332) {@link BloodRequests}: the fever and the surrender move by these (they eased or climbed). */
 	static void grant(ServerPlayer player, float feverBy, int surrenderBy) {
 		if (feverish(player)) {
 			setFever(player, fever(player) + feverBy);

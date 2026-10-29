@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) A vampire's favourite scent: the one mortal player they've spent the most time near (within
+ * (0.7.332) A vampire's favourite scent: the one mortal player they've spent the most time near (within
  * {@link BloodFever#PLAYER_RANGE}). Each vampire keeps a count of seconds per player ({@link #TIME}, kept); once one
  * player has {@link #MIN_SECONDS} the blood fixates on them ({@link #FAVOURITE}). That player's heartbeat plays louder
  * for the vampire (a raised floor, still capped by the usual maximum: {@code BloodVision}) and spikes the fever twice as

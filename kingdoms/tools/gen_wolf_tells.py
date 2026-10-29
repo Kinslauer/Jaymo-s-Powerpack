@@ -1,4 +1,4 @@
-"""(0.7.323) The tells of a werewolf's hidden change (HiddenChange / WolfTells), as overlays on the 64x64 player skin layout:
+"""(0.7.332) The tells of a werewolf's hidden change (HiddenChange / WolfTells), as overlays on the 64x64 player skin layout:
 
   werewolf/hairy_hands.png   dark, coarse fur over the hands and forearms (and their sleeve layer), thicker toward the fingers
   werewolf/eyes.png          the stock eye spots in wolf yellow (drawn emissive; each skin gets its own, found like a vampire's)

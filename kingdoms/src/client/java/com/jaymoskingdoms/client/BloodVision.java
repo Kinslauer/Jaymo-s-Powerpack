@@ -26,7 +26,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
  * walls, beating in time. Starving, the beat quickens, the red deepens, and they smell blood from further off. Only
  * the vampire sees any of it. Undead, golems and armour stands have no blood to see.
  *
- * <p>(0.7.323) Another mortal player in their sight, up to 150 blocks off ({@link com.jaymoskingdoms.BloodFever#HEARTBEAT}),
+ * <p>(0.7.332) Another mortal player in their sight, up to 150 blocks off ({@link com.jaymoskingdoms.BloodFever#HEARTBEAT}),
  * beats for them day or night: the edges pulse red and a heartbeat pounds in their ears, louder and quicker the
  * closer the player is.
  */
@@ -47,20 +47,20 @@ public final class BloodVision {
 	static final float HEART_QUIET = 0.25F, HEART_LOUD = 0.8F, HEART_PITCH = 1.0F;
 
 	/**
-	 * (0.7.323) Their favourite's heartbeat ({@link com.jaymoskingdoms.Favourites}): the volume at the range's edge is raised to this (the
+	 * (0.7.332) Their favourite's heartbeat ({@link com.jaymoskingdoms.Favourites}): the volume at the range's edge is raised to this (the
 	 * maximum, {@link #HEART_LOUD}, stays the cap).
 	 */
 	static final float FAVOURITE_QUIET = 0.55F;
 	/**
-	 * (0.7.323) Mood: as surrender rises the red edges darken (this much more red taken from them at a whole surrender) and the
+	 * (0.7.332) Mood: as surrender rises the red edges darken (this much more red taken from them at a whole surrender) and the
 	 * beat's pitch falls to {@link #CURDLED_PITCH}; a restrained vampire (under {@link #RESTRAINED} surrender) gets a warmer,
 	 * softer beat ({@link #SOFT_VOLUME} of the volume, edges {@link #SOFT_EDGE} as strong, less green and blue taken off).
 	 */
 	static final float EDGE_DARKEN = 0.55F, CURDLED_PITCH = 0.6F, RESTRAINED = 25.0F, SOFT_VOLUME = 0.75F, SOFT_EDGE = 0.85F, WARMTH = 0.25F;
-	/** (0.7.323) A hurt mortal player within this (blocks) glows red for the vampire, day or night; the pulse's period (ticks). */
+	/** (0.7.332) A hurt mortal player within this (blocks) glows red for the vampire, day or night; the pulse's period (ticks). */
 	static final double WOUNDED_RANGE = 30.0;
 	static final float WOUNDED_PULSE = 14.0F;
-	/** (0.7.323) A thrall hears their master: the beat's period (ticks), pitch, and volume at the range's edge and face to face. */
+	/** (0.7.332) A thrall hears their master: the beat's period (ticks), pitch, and volume at the range's edge and face to face. */
 	static final float MASTER_BEAT = 30.0F, MASTER_PITCH = 0.55F, MASTER_QUIET = 0.12F, MASTER_LOUD = 0.45F;
 
 	private static final Identifier VIGNETTE =Identifier.withDefaultNamespace("textures/misc/vignette.png");
@@ -76,9 +76,9 @@ public final class BloodVision {
 	/** A player in sight (0-1), eased; and the beat's phase (0-1) and period (ticks) now. */
 	private static float seen, lastSeen, phase, period = BEAT;
 	private static boolean vampire, on, starving;
-	/** (0.7.323) Surrender (0-1), and how restrained they are (1 at none, 0 from {@link #RESTRAINED}). */
+	/** (0.7.332) Surrender (0-1), and how restrained they are (1 at none, 0 from {@link #RESTRAINED}). */
 	private static float surrender, warm;
-	/** (0.7.323) A thrall's master's beat: the phase (0-1). */
+	/** (0.7.332) A thrall's master's beat: the phase (0-1). */
 	private static float masterPhase;
 
 	private BloodVision() {
@@ -114,7 +114,7 @@ public final class BloodVision {
 		if (phase >= 1.0F) {
 			phase -= 1.0F;
 			if (seen > 0.05F) {
-				// (0.7.323) their favourite's floor is higher; surrender curdles the pitch; a restrained one beats softer
+				// (0.7.332) their favourite's floor is higher; surrender curdles the pitch; a restrained one beats softer
 				float quiet = com.jaymoskingdoms.Favourites.seen(player) ? FAVOURITE_QUIET : HEART_QUIET;
 				float volume = Mth.lerp(seen, quiet, HEART_LOUD) * Mth.lerp(warm, 1.0F, SOFT_VOLUME);
 				minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
@@ -123,7 +123,7 @@ public final class BloodVision {
 		}
 	}
 
-	/** (0.7.323) A thrall (not a vampire) hears their master's heartbeat while the master is in sight: lower and slower than the vampire's own. */
+	/** (0.7.332) A thrall (not a vampire) hears their master's heartbeat while the master is in sight: lower and slower than the vampire's own. */
 	private static void thrall(Minecraft minecraft, LocalPlayer player) {
 		float beat = Vampires.isVampire(player) ? 0.0F : com.jaymoskingdoms.BloodThralls.beat(player);
 		if (beat <= 0.0F) {
@@ -163,7 +163,7 @@ public final class BloodVision {
 			return true; // (0.7.66) shown by a groundpound or howl, for anyone with the gift
 		}
 		if (wounded(entity)) {
-			return true; // (0.7.323) a hurt friend glows for them, day or night
+			return true; // (0.7.332) a hurt friend glows for them, day or night
 		}
 		if (strength <= 0.0F || !(entity instanceof LivingEntity living) || !living.isAlive() || living instanceof ArmorStand
 			|| living instanceof AbstractGolem || living.is(EntityTypeTags.UNDEAD) || living.isSpectator()) {
@@ -177,7 +177,7 @@ public final class BloodVision {
 		return entity.distanceToSqr(player) < range * range;
 	}
 
-	/** (0.7.323) {@code entity} is another mortal player, hurt (a blow just now, or under half health), near enough for a vampire to smell it. */
+	/** (0.7.332) {@code entity} is another mortal player, hurt (a blow just now, or under half health), near enough for a vampire to smell it. */
 	private static boolean wounded(Entity entity) {
 		if (!vampire || !(entity instanceof net.minecraft.world.entity.player.Player other) || !other.isAlive() || other.isSpectator()
 			|| Vampires.isVampire(other)) {
@@ -215,7 +215,7 @@ public final class BloodVision {
 		}
 		float b = beat(partialTicks);
 		float k = Math.max(s * ((starving ? STARVING_EDGE : EDGE) + EDGE_BEAT * b), p * (SEEN_EDGE + SEEN_EDGE_BEAT * b));
-		// (0.7.323) mood: surrender takes more red off the edges (darker, then blacker), and a restrained vampire's are softer and warmer
+		// (0.7.332) mood: surrender takes more red off the edges (darker, then blacker), and a restrained vampire's are softer and warmer
 		k *= Mth.lerp(warm, 1.0F, SOFT_EDGE);
 		float red = Math.min(1.0F, (0.15F + EDGE_DARKEN * surrender) * k);
 		float green = Math.min(1.0F, k) * Mth.lerp(warm, 1.0F, 1.0F - WARMTH);

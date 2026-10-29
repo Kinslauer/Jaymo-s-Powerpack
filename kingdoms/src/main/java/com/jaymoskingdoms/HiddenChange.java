@@ -22,7 +22,7 @@ import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.level.MoonPhase;
 
 /**
- * (0.7.323) The hidden change: the tells a werewolf player gives off as themselves, for others to spot. From the wild
+ * (0.7.332) The hidden change: the tells a werewolf player gives off as themselves, for others to spot. From the wild
  * stage of the curse ({@link FeralCurse}, stage {@link #FROM_STAGE}), and in the hour before a forced change
  * ({@link #HOUR_BEFORE}), their hands go hairy and dark, their eyes flash yellow now and then, and when they're hit they
  * growl ({@link #GROWL_COOLDOWN} apart). The first two are {@link #TELLS}, synced to everyone and drawn by

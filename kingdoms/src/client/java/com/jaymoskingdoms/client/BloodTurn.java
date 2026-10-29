@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) Turn your head: when the blood says so ({@link BloodTemptation.Turn}), a vampire's view is drawn slowly round to
+ * (0.7.332) Turn your head: when the blood says so ({@link BloodTemptation.Turn}), a vampire's view is drawn slowly round to
  * a mortal player in sight over about a second, eased in so it starts gently and finishes firmly. It lets go the moment
  * something else has the wheel ({@link SeizureClient}) or a screen opens.
  */

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.7.323) Normal food gives a vampire nothing ({@link VampireTells#noNutrition}): the eating (its sound, its animation,
+ * (0.7.332) Normal food gives a vampire nothing ({@link VampireTells#noNutrition}): the eating (its sound, its animation,
  * its potion effects) goes on, but the nutrition and saturation don't reach them. A dhampir eats as anyone does.
  */
 @Mixin(FoodProperties.class)

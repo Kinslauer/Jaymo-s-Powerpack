@@ -24,7 +24,7 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.7.323) Accuse at the priest. Sneak and use a cleric while holding a sheet of paper (the written accusation; an empty
+ * (0.7.332) Accuse at the priest. Sneak and use a cleric while holding a sheet of paper (the written accusation; an empty
  * hand would be a vampire's bite): the nearest other player within {@link #RANGE} blocks is the accused. The priest
  * throws holy water at them (splash, sound), and the paper is spent.
  *

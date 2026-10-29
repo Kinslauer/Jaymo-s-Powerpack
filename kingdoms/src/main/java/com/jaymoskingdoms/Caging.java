@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) Lock yourself in. When a forced change hits a werewolf player shut in a room, the beast is caged: the room is
+ * (0.7.332) Lock yourself in. When a forced change hits a werewolf player shut in a room, the beast is caged: the room is
  * the cells of air a flood-fill reaches from where they stand without finding the sky, a closed door or any other wall
  * stopping it ({@link #enclosure}: at most {@link #MAX_CELLS} cells and {@link #RADIUS} blocks out, or it counts as open).
  * While it holds, the wolf's whim-hunts only go for what is in the room with it ({@link #allows}, asked by

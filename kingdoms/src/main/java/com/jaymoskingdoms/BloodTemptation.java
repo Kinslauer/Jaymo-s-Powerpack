@@ -18,7 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.323) What the blood does when a mortal player is in a vampire's sight, short of seizing them:
+ * (0.7.332) What the blood does when a mortal player is in a vampire's sight, short of seizing them:
  *
  * <ul>
  * <li><b>Whispers.</b> Short, dark-red, italic lines on the action bar ("so close", "no one would know"), a little more

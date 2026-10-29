@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) The Mask. A vampire by day who stands still (no movement key for {@link #STILL_TICKS}) raises a mask: to
+ * (0.7.332) The Mask. A vampire by day who stands still (no movement key for {@link #STILL_TICKS}) raises a mask: to
  * everyone else they look like anyone, without the ashen face ({@link #MASK}, synced to all; {@code VampireLooks}
  * checks it). It costs fever, {@link #COST} a second ({@link BloodFever#stoke}; a dhampir pays nothing). It drops when
  * they move on (faster than {@link #MOVING} blocks a tick), take damage, or night falls; feeding drops it and blocks it

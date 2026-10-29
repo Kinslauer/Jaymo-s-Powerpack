@@ -21,7 +21,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.323) Victim memory, seen ({@link VictimMemory.Flash}): on waking, a blurred dark-red silhouette of whoever bit
+ * (0.7.332) Victim memory, seen ({@link VictimMemory.Flash}): on waking, a blurred dark-red silhouette of whoever bit
  * them stands at the centre of the screen for {@link #TICKS} ticks, fading in and out. It is the biter's skin (found in the
  * tab list by UUID, or the default skin of that UUID if they're not online) drawn as a flat figure (head, body, arms and legs)
  * tinted {@link #RED}, three times over with small offsets for the blur. No name.

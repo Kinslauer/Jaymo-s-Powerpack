@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.EnderscapeLoot;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -56,7 +57,8 @@ public final class ArsenalRelics {
 		BuiltInLootTables.RUINED_PORTAL, BuiltInLootTables.WOODLAND_MANSION, BuiltInLootTables.NETHER_BRIDGE, BuiltInLootTables.BURIED_TREASURE,
 		BuiltInLootTables.UNDERWATER_RUIN_BIG, BuiltInLootTables.BASTION_BRIDGE, BuiltInLootTables.BASTION_HOGLIN_STABLE);
 	private static final Set<ResourceKey<LootTable>> RARE = Set.of(BuiltInLootTables.BASTION_OTHER, BuiltInLootTables.END_CITY_TREASURE,
-		BuiltInLootTables.ANCIENT_CITY, BuiltInLootTables.STRONGHOLD_CORRIDOR, BuiltInLootTables.BASTION_TREASURE);
+		BuiltInLootTables.ANCIENT_CITY, BuiltInLootTables.STRONGHOLD_CORRIDOR, BuiltInLootTables.BASTION_TREASURE,
+		EnderscapeLoot.STRONGHOLD_ARMORY, EnderscapeLoot.END_CITY_CHEST);
 	/** Where a relic weapon ({@link RelicWeapons}) has a home, a relic found there is that one this often. */
 	static final float THEMED_CHANCE = 0.75F;
 	/** Elsewhere, a relic is one of the relic weapons this often (else a plain weapon from the pool, shimmering). */

@@ -17,7 +17,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) The moon's pull among friends (the werewolf's side of the vampire's heartbeat, {@link BloodFever#HEARTBEAT}).
+ * (0.7.332) The moon's pull among friends (the werewolf's side of the vampire's heartbeat, {@link BloodFever#HEARTBEAT}).
  * On the full moon's night and the two nights before it, a cursed werewolf player hears every mortal player near them
  * (within {@link #RANGE} blocks) as a pulse: the nearest one in their sight (inside {@link #SEEN_ANGLE} degrees of where
  * they look, nothing in between) sets their {@link #HEARTBEAT}, which the client turns into a slow, deep beat and a golden
@@ -106,7 +106,7 @@ public final class MoonPull {
 			nearest = Math.min(nearest, d);
 			float close = (float)(1.0 - d / RANGE);
 			if (close <= seen || Kinship.monster(other)) {
-				// (0.7.323) kin are heard another way ({@link Kinship}): no golden pulse
+				// (0.7.332) kin are heard another way ({@link Kinship}): no golden pulse
 				continue;
 			}
 			Vec3 to = other.getEyePosition().subtract(eye);

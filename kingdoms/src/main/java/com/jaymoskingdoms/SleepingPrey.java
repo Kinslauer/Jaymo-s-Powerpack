@@ -19,7 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import com.mojang.serialization.Codec;
 
 /**
- * (0.7.323) Sleeping prey. A vampire can sneak and use a mortal player asleep in a bed to drink from them. The first bite
+ * (0.7.332) Sleeping prey. A vampire can sneak and use a mortal player asleep in a bed to drink from them. The first bite
  * doesn't wake them (it takes {@link VampirePlayers#DRINK_DAMAGE} without a blow, never to the last heart); a second
  * does. However they wake, they wake with Weakness ({@link #WEAK_TICKS}), two small marks on the neck that everyone
  * sees for a day ({@link #BITE_MARKS}) and a line on their action bar. Such a bite never turns them (that's what the

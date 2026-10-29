@@ -22,6 +22,7 @@ public final class AetherClient {
 		com.jaymospowers.client.aether.mob.AetherMobsClient.init();
 		com.jaymospowers.client.aether.monster.AetherMonstersClient.init();
 		com.jaymospowers.client.aether.dungeon.DungeonClient.init();
+		com.jaymospowers.client.aether.guardian.VisageOfWarRenderer.init();
 		AetherFloraClient.init();
 		com.jaymospowers.client.aether.gear.AetherGearClient.init();
 	}

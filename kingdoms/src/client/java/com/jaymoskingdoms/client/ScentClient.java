@@ -14,7 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) The client's half of {@link ScentTrails}: the trail a werewolf has taken the scent of is drawn as faint specks
+ * (0.7.332) The client's half of {@link ScentTrails}: the trail a werewolf has taken the scent of is drawn as faint specks
  * hanging in the air along the footsteps, only on their own screen (client-side particles). The older a footstep, the
  * fainter and sparser; the whole scent fades out over the time it was given.
  */

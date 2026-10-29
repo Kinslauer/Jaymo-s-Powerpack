@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) Garlic and silver. The pack had no garlic, so there's a plain {@code garlic} item (it turns up now and then
+ * (0.7.332) Garlic and silver. The pack had no garlic, so there's a plain {@code garlic} item (it turns up now and then
  * when grass is cut: {@link #GRASS_DROP}). Using garlic, or anything whose id has "silver" in it, on a vampire (right
  * click) makes it flinch: a short shove back, a hiss, a line on the action bar. A vampire player can hold out (a quick
  * struggle, rolled for them): {@link #HOLD_OUT} at no surrender, nothing at a whole surrender, so the more they've given

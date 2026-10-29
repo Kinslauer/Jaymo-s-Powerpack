@@ -29,7 +29,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) The morning after. A werewolf player keeps a tally of what the beast kills ({@link #kill}). When a forced night
+ * (0.7.332) The morning after. A werewolf player keeps a tally of what the beast kills ({@link #kill}). When a forced night
  * ends and they come back to themselves, their hands are bloody for {@link #BLOODY_TICKS} ({@link Morning}, drawn by
  * {@code WolfScreen}) and an overlay tells them what they did: how many things they killed, and (if any victim was a
  * named villager or a player they knew) that it included someone they knew, without saying who. The names stay hidden

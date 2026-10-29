@@ -20,7 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.7.323) What everyone sees of a werewolf player's hidden change ({@link HiddenChange}): coarse dark fur over the hands
+ * (0.7.332) What everyone sees of a werewolf player's hidden change ({@link HiddenChange}): coarse dark fur over the hands
  * and forearms, and the eyes flashing wolf yellow for a few ticks now and then, glowing in the dark. The eyes go where the
  * player's own skin has its eyes, found the way a vampire's red ones are ({@link VampireLooks#glowingEyes}). Textures from
  * {@code tools/gen_wolf_tells.py}.

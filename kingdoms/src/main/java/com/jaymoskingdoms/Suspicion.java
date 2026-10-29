@@ -22,7 +22,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) Rumours with names. A villager (or a realm's folk) who sees a vampire player feed, show themselves hunting
+ * (0.7.332) Rumours with names. A villager (or a realm's folk) who sees a vampire player feed, show themselves hunting
  * ({@link Vampires#exposed}), or a werewolf player change or show the tells of the change ({@link HiddenChange#TELLS})
  * remembers a suspicion against that player, by the name they know them by ({@link Recollections#nameTo}: their MCA
  * name, or the costume's). It is kept with the villager and fades if the player lies low: each {@link #DECAY_TICKS}

@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) The scent trail. The server notes where every mortal player has walked in the last {@link #KEEP_TICKS} (a
+ * (0.7.332) The scent trail. The server notes where every mortal player has walked in the last {@link #KEEP_TICKS} (a
  * point every {@link #STEP_EVERY} ticks while they're on the ground, in a ring buffer of {@link #MAX_POINTS}). A werewolf
  * player (themselves at night, or the beast at any hour) who sneaks for {@link #SNEAK_TICKS} takes a scent: the nearest
  * mortal player within {@link #SNIFF_RANGE} blocks, or failing that, whoever left the freshest footstep that near. For

@@ -15,7 +15,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.7.323) Victim memory. A player bitten by a vampire player, asleep ({@link SleepingPrey}) or awake, keeps who bit
+ * (0.7.332) Victim memory. A player bitten by a vampire player, asleep ({@link SleepingPrey}) or awake, keeps who bit
  * them ({@link #BITER}, kept, forgotten after {@link #FORGET_TICKS}). The next time they wake from sleep, the server sends
  * {@link Flash} and their screen shows a blurred dark-red silhouette of the biter for a few seconds
  * ({@code VictimClient}), drawn from the biter's skin, with no name. A newer bite replaces the older.

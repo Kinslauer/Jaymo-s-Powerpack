@@ -6380,7 +6380,85 @@ desire". So:
   its body and neck in mail, its plates sized from its own body and neck. Source kept unchanged in tools/horse_models/source with its credit; credit
   also in textures/entity/breed_horse/CREDITS.txt.
 
-## 0.7.323: vampires hunger among players (pack 0.17.150)
+## 0.7.329: Blockbench Workshop models (pack 0.17.156)
+Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
+(Zephyrus and the rest unchanged); then a second batch of seven, eanncrod's Kintsugi for Eurus and Aeolus among them. Every model is CC BY 4.0, credited
+with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.
+- **Loader** (`client/bb/BbModel`, `Molang`): reads a Blockbench model baked by `tools/bbmodel_bake.py` (bones, cubes,
+  per-face UVs, animations with their Molang) into ModelParts and plays its animations by time and weight.
+- **Warchief:** drawn as nyxaris' Chieftain at 0.69 size (`Bodies`, `BbBodies`, `BbBodyLivingEntityRendererMixin`).
+- **Cannon:** iexogen's Canon (`CannonRenderer`), barrel pivot on its trunnions, recoil along the barrel;
+  `Cannon.PIVOT` 0.75.
+- **Silver skeleton:** polyjo's Dead Traveler (`DeadTravelerModel`). It now cuts with its sword arm and blocks on its
+  buckler: 30% of blows from the front within 70 degrees, an axe breaks its guard for 5 s.
+- **Notus and Boreas:** the Fire Dragon (`FireDragonModel`), Notus in its own hide and three re-shadings, Boreas
+  recoloured to ice, glowing markings from its glow half (`tools/gen_fire_dragons.py`). Ground, walk, sit, land and crash
+  poses are our own; flight plays its wingbeat in time with the stroke. Drawn at 0.53 and 0.45 to match the riders'
+  seats. They lose the old models' saddles and horn variety.
+- **Clockwork golem** (`ClockworkGolem`): octopusstudio's Mech Golem. Crafted from a clock, a redstone block and copper,
+  set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
+  into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
+- **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
+  sabatons), each piece hung on the wearer's own bones. Andy: "the warplate should be extraordinary and a drop from the
+  visage boss". A point over netherite in every piece (4/7/9/4), toughness 4, knockback resistance 0.15, durability 45x,
+  enchantability 22, fireproof, epic; mended with gold. Never crafted or forged: Powers' Visage of War drops all four.
+- **Eurus and Aeolus:** eanncrod's Kintsugi wyvern (`KintsugiDragonModel`, replacing `EurusDragonModel` and
+  `AeolusDragonModel`). Aeolus is grey-white with its gold seams glowing (gold, the four winds' colours, white-gold,
+  silver); Eurus is storm-blue and violet with seams in electric cyan (`tools/gen_kintsugi_dragons.py`). Its own idle,
+  knockdown, hover and flight animations; walking, sitting and gliding posed over them. Drawn at 0.28 and 0.75; seats
+  and breath mouths moved to fit (`EurusDragon`, `AeolusDragon`).
+- **Second batch of creatures** (`beasts/`, each with a spawn egg, loot and `tools/gen_beasts.py`). They play their
+  models' own animations through `BbMobRenderer`; a move is a synced animation name (`Acting`, `ActingMonster`).
+  - **Minotaur** (eanncrod): a monster of legend of the mountains (`has_minotaur`, wilderness encounter and gossip).
+    140 HP; hammer swing, a slam that throws everyone round it, and a charge from 6-16 blocks that gores whoever it
+    meets (a wall stops it dazed).
+  - **Piglin King** (eanncrod's Musclebound Piglin King): a rare boss of the Nether wastes and crimson woods
+    (`has_piglin_king`, one in 12 spawn checks, none within 160 blocks of another). It sleeps on its feet until someone
+    comes within 14 blocks or hits it, then wakes with a boss bar. 300 HP, fireproof: claw rake, a volley of four
+    embers, a fire burst that sets everyone close alight, and below half health a roar that brings two piglin brutes
+    (four at most). Its model's ice moves play as fire. Piglins can't hurt it and it never hits them. Drops gold, a gold
+    block, a piglin head and maybe netherite scrap.
+  - **Redstone golem** (polyjo; the design is Mojang's Minecraft Dungeons mob): a great foe below y 0, rare and alone.
+    220 HP, unmoved by knockback; pounds with both fists and sets four spots under its foes glowing, which burst a
+    moment later. Its core glows in the dark. Its pound and eruption are posed in code (the model has idle and walk).
+  - **Skulk golem** (elma_taburlas): the deep dark's guardian, rare and alone. A statue (25% damage) until someone
+    comes within 10 blocks (3 sneaking) or hits it; its blows bring Darkness; still again after 20 s with no foe.
+  - **Wild boar** (lukygive): replaces Naturalist's boar, in natural spawns (forests, taiga, savanna, `has_wild_boar`)
+    and as the boar encounter. Grazes, and gores whoever comes too close or hits it.
+  - **Scalebane sellswords** (eanncrod's Scalebane Archer; Andy: "common sellswords among barbarians and goblin
+    encampments"): `ScalebaneArcher`. New barbarian camps and goblin villages take on two, and a camp short of them
+    hires one now and then as it grows (three at most about its fire). Bowmen who shoot what their camp would (outlaws
+    it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
+    turn rogue and shoot any player.
+
+## 0.7.330: proximity chat, and voices that change with the body (pack 0.17.157)
+Andy: "I also want to add proximity chat", linking Voice Physics, Proximity Text Chat and Simple Voice Voice Changer.
+Proximity Text Chat is all rights reserved, so only its idea is used; the voice mods ship in the pack (Powers'
+`build.gradle`): Simple Voice Chat (ARR, downloaded by id), Voice Physics (MIT) and Simple Voice Voice Changer
+(CC BY-NC-SA 4.0), all unchanged.
+- `ProximityChat` (Fabric `ServerMessageEvents.ALLOW_CHAT_MESSAGE`, which cancels the vanilla broadcast): typed chat is
+  heard only nearby. Talk is whole within 24 blocks, then words drop out ("...") and the line greys toward 40. Sneak
+  while sending to whisper (4, fading to 8); start with `!` to shout (64 / 96); start with `*` to act ("* Aldric
+  waves"). No line of sight counts as 1.6 times as far. The downed only whisper. Names as the hearer knows them
+  ("Stranger" until introduced). A werewolf in full beast form only growls, a Great Ape roars (`PowersCompat.greatApe`),
+  except to their own kind. Each hearer also gets their version as a speech bubble (`Speech.Said`). With nobody in
+  earshot the speaker is told so on the action bar. `/ooc <words>` is out of character, to everyone. The server log
+  keeps every line whole with the username. MCA's villager chat AI still hears typed lines (its mixin sits before
+  the broadcast).
+- `VoiceMasks` (server, every 10 ticks, sent on change) and `client/VoiceMaskClient` + `client/VoiceChangerCompat`
+  (only with `sv-voice-changer` loaded): the voice changer's API override turns the player's voice: a werewolf beast
+  (demon-based growl) and a Great Ape (titan-based, deeper, some room) are forced on; a goblin disguise (kid-based,
+  high) and a full mask (a bit lower, muffled) follow the player's own on/off switch (J). A hood leaves it alone.
+- Server: Simple Voice Chat listens on UDP 24454; the Deck's playit tunnel needs a UDP tunnel for it (deck/README.md).
+Compile-checked, not seen in game.
+
+## 0.7.331: Enderscape's strongholds count (pack 0.17.159)
+- The pack adds Enderscape, whose built-in data pack swaps vanilla strongholds for its own (`enderscape:stronghold`) with
+  their own chest tables. Writs and wizards' staffs now turn up in its library chests too (`Classes`), and quest lairs and
+  lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
+  also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
+
+## 0.7.332: vampires and werewolves hide among friends (pack 0.17.160)
 - **Hunger among players** (`BloodFever.amongPlayers`, Andy: "vampires should hunger when within 150 blocks of other
   players"; villagers count too, Andy: "yes"): the nearest mortal player (not a vampire, not a changed werewolf, not
   creative/spectator/invisible) or grown villager/folk within 150 blocks drains a vampire's food (0.02-0.08 exhaustion a second) and climbs the blood fever 0.04-0.12 a second more,
@@ -6389,3 +6467,29 @@ desire". So:
 - **Heartbeat** (`BloodFever.HEARTBEAT`, synced to the vampire only; `BloodVision`): with a player in sight the red
   edges pulse day or night (players only, not villagers) and the warden's heartbeat plays in their ears with each beat, 0.25-0.8 volume (Andy: "grows to an 80% maximum") and a beat
   every 24 down to 11 ticks as the player gets closer. Nobody else sees or hears it.
+- **Vampires** (Andy ticked every item on the deception pick list, https://claude.ai/artifact/4k22memmMbtEq7rQnobfbD):
+  `Favourites` (the player you've spent 120 s near is your favourite: fever x2, louder beat), `BloodTemptation`
+  (whispers on the action bar with a player in sight; past the urge line the blood turns your head toward them,
+  client `BloodTurn`), wounded players spike the fever and glow red for you, `SleepingPrey` (sneak-drink a sleeping
+  player; the first bite doesn't wake them; bite marks for a day, Weakness, "You slept badly"; sleeper bites never
+  infect), `BloodThralls` (3 nights on the same player makes them your thrall: they hear your beat, their blood heals
+  double; cure or turning frees them), `VampireMask` (stand still 3 s by day to look human, costs fever), `VampireTells`
+  (animals flee, tamed wolves growl; `VampireFoodMixin`: food feeds you nothing, cake excepted), pallor scales with time
+  since feeding, `Garlic` (new item, 3% from grass; garlic or any silver item makes a vampire flinch unless they hold
+  out), `HunterSense` (a torch holder sees dark smoke trailing a vampire at night), `BloodFever.loner` (among players
+  the urge prefers a person away from the group), `BloodRequests` (the blood asks for something each day; kept eases
+  fever and surrender, broken raises fever), mood (surrender darkens the red and drops the beat's pitch).
+- **Werewolves:** `MoonPull` (the full moon and two nights before: an amber heartbeat for mortals in sight, feral creeps
+  up near them), `ScentTrails` (sneak 2 s to take a scent and see the trail for 60 s), `HiddenChange` + client `WolfTells`
+  (from feral stage 2 or the hour before a change: furred hands, yellow eye flashes, growl when hit), `Caging` (change in
+  a closed room and the beast stays in, clawing the walls), `MorningAfter` (bloody hands and a count of the night's
+  kills, "someone you knew"; look at the Kitchen corpse to learn who), `TornCloth` (a scrap in your rag colour drops at
+  every change; use it on its owner to match), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
+  from stage 3; replaces SeizureClient's night-only feral edge).
+- **Everyone:** `Suspicion` (villagers who see a monster feed, hunt, change or show tells gossip naming them by MCA
+  name, fades over ~3 days; wary guards watch them), `Accusations` (sneak-use a cleric holding paper: holy water on the
+  nearest other player; guilty ones are exposed till dawn and guards hunt them, the accuser gains realm reputation; a
+  false accusation costs reputation and the priests' ear for a day), `VictimMemory` + client `VictimClient` (a bitten
+  player wakes to a blurred red silhouette of who bit them, no name), `Kinship` + client `KinshipClient` (monsters in
+  sight of each other hear a cold slow beat or a growl instead of the mortal heartbeat).
+Compile-checked (`./gradlew build` in kingdoms/), not seen in game.

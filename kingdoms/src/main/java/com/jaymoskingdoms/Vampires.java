@@ -291,11 +291,11 @@ public final class Vampires {
 		return v == null ? null : v.type();
 	}
 
-	/** (0.7.323) How long (ticks) since the last bite the pallor starts to show, and the time without one at which it's full. */
+	/** (0.7.332) How long (ticks) since the last bite the pallor starts to show, and the time without one at which it's full. */
 	static final long PALLOR_FROM = 6000L, PALLOR_FULL = 48000L;
 
 	/**
-	 * (0.7.323) How ashen a vampire player's skin shows (0-1): barely when they fed within the day, fully when starving. Read
+	 * (0.7.332) How ashen a vampire player's skin shows (0-1): barely when they fed within the day, fully when starving. Read
 	 * from the synced {@link Vampire#fedAt()}, so it works on either side; 0 for anyone who isn't one.
 	 */
 	public static float pallor(Entity e) {
@@ -310,7 +310,7 @@ public final class Vampires {
 	/** A vampire that has shown itself tonight: guards go for it, villagers run. */
 	public static boolean exposed(Entity e) {
 		Long night = EXPOSED.get(e.getUUID());
-		// (0.7.323) or named to the realm by a priest ({@link Accusations})
+		// (0.7.332) or named to the realm by a priest ({@link Accusations})
 		return night != null && e.isAlive() && isVampire(e) && night == nightIndex(e.level().getOverworldClockTime()) && night(e.level().getOverworldClockTime())
 			|| isVampire(e) && Accusations.exposed(e);
 	}

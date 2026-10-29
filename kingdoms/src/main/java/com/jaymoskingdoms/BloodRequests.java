@@ -15,7 +15,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 
 /**
- * (0.7.323) Requests, the vampire's side: about once a day the blood asks one thing of its host, in a line on the action
+ * (0.7.332) Requests, the vampire's side: about once a day the blood asks one thing of its host, in a line on the action
  * bar. By night: {@link #DAWN} (drink before dawn) or {@link #FRIEND} (feed on someone you know: a player). By day:
  * {@link #SUN} (stay out of the sun today) or {@link #PRIEST} (stay away from the priest: no cleric within
  * {@link #PRIEST_RANGE} blocks). Keeping to it before the deadline eases the fever and the surrender a little

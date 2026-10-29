@@ -325,6 +325,10 @@ public final class WebPower implements Power {
 		WebHitches.register();
 		WebBridges.register();
 		WebTendrils.register();
+		WebSymbioteCollect.register();
+		WebSymbioteMind.register();
+		WebSymbioteBody.register();
+		WebSymbioteLife.register();
 		WebStrength.register();
 		WebShooters.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -332,6 +336,7 @@ public final class WebPower implements Power {
 			WebTendrils.forget(handler.player);
 			WebWhip.forget(handler.player);
 			WebSlam.forget(handler.player);
+			WebSymbioteCollect.forget(handler.player);
 		});
 		WebSymbiote.register();
 		WebSymbioteInfection.register();
@@ -478,10 +483,24 @@ public final class WebPower implements Power {
 		zip(player);
 	}
 
-	/** The ascended ability (C): Web Strike. */
+	/**
+	 * The ascended ability (C): Web Strike. (0.17.150) With a symbiote, C answers before that: it feeds the meat in your
+	 * hands or Consumes what you hold ({@link WebSymbioteBody#onUltimate}); the ascended strike is what's left.
+	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		WebAscension.ultimate(player, down);
+		if (WebSymbioteBody.onUltimate(player, down)) {
+			return;
+		}
+		if (Power.super.ultimateAnswers(player)) {
+			WebAscension.ultimate(player, down);
+		}
+	}
+
+	/** C answers once ascended, and (0.17.150) for anyone bonded to a symbiote: it feeds it ({@link WebSymbioteBody#onUltimate}). */
+	@Override
+	public boolean ultimateAnswers(Player player) {
+		return Power.super.ultimateAnswers(player) || WebSymbiote.isBonded(player);
 	}
 
 	private static boolean swinging(State state) {

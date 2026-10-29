@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.323) Monster kinship. Vampires and werewolves hear each other. A vampire player or a cursed werewolf player with
+ * (0.7.332) Monster kinship. Vampires and werewolves hear each other. A vampire player or a cursed werewolf player with
  * another of the two in sight (the same {@link BloodFever#inSight} test as the vampire's heartbeat, up to
  * {@link #RANGE} blocks) hears a cold, slow beat: a low heartbeat for a vampire, a soft growl for a werewolf, nearer
  * louder ({@code KinshipClient}), and sees no red pulse (the mortal heartbeats of {@link BloodFever} and {@link MoonPull}

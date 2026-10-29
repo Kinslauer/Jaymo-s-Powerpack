@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.7.185) The client half of {@link Seizures}: while the blood or the wolf has you, it walks you at its prey (no key
  * does what it would: each new press is a heave against it, filling the bar), your view is dragged round and jolted,
- * and the screen's edges close in (blood red for the fever, dark amber for the wolf). (0.7.323) A werewolf's edges as themselves
+ * and the screen's edges close in (blood red for the fever, dark amber for the wolf). (0.7.332) A werewolf's edges as themselves
  * ({@code WolfScreen}) darken with how far the curse has them, day or night.
  */
 public final class SeizureClient {
@@ -153,7 +153,7 @@ public final class SeizureClient {
 			red = kind == Seizures.Kind.FEVER;
 			want = EDGE;
 		}
-		// (0.7.323) a werewolf's mood on the screen, at night or not, is WolfScreen's
+		// (0.7.332) a werewolf's mood on the screen, at night or not, is WolfScreen's
 		edge = want > edge ? Math.min(want, edge + FADE) : Math.max(want, edge - FADE);
 		if (!locked() || minecraft.isPaused()) {
 			return;

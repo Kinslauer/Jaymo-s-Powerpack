@@ -492,7 +492,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE && !Careers.passes(player, this.factionId()) || Aliens.feared(player, this.factionId())
 					// (0.7.0) a vampire player seen hunting tonight
 					|| Vampires.exposed(player)
-					// (0.7.323) and a werewolf player a priest has named, till dawn (Accusations)
+					// (0.7.332) and a werewolf player a priest has named, till dawn (Accusations)
 					|| Accusations.wolfExposed(player))));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,

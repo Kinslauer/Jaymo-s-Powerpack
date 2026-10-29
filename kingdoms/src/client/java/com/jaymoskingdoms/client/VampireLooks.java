@@ -41,9 +41,9 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 	/** On a player's render state: 1 = a vampire by day, 2 = by night; absent for anyone else. */
 	public static final RenderStateDataKey<Integer> LOOK = RenderStateDataKey.create(() -> "jaymoskingdoms:vampire_look");
 
-	/** (0.7.323) How ashen the skin shows (0-1, from how long since they fed: {@link Vampires#pallor}); absent for anyone who isn't a vampire. */
+	/** (0.7.332) How ashen the skin shows (0-1, from how long since they fed: {@link Vampires#pallor}); absent for anyone who isn't a vampire. */
 	public static final RenderStateDataKey<Float> PALLOR = RenderStateDataKey.create(() -> "jaymoskingdoms:vampire_pallor");
-	/** (0.7.323) On a player's render state: their neck shows two bite marks ({@link SleepingPrey}). */
+	/** (0.7.332) On a player's render state: their neck shows two bite marks ({@link SleepingPrey}). */
 	public static final RenderStateDataKey<Boolean> MARKS = RenderStateDataKey.create(() -> "jaymoskingdoms:bite_marks");
 	/** The ashen layer's see-through-ness at a pallor of 0 (fed within the day) and 1 (starving). */
 	static final float PALE_FED = 0.15F, PALE_STARVING = 1.0F;
@@ -74,23 +74,23 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 	/** Called from the render-state mixin: what {@code entity} shows this frame. */
 	public static Integer look(LivingEntity entity) {
 		if (!(entity instanceof Player) || !Vampires.isVampire(entity) || VampireMask.up(entity)) {
-			// (0.7.323) under the Mask they look like anyone
+			// (0.7.332) under the Mask they look like anyone
 			return null;
 		}
 		return Vampires.night(entity.level().getOverworldClockTime()) ? 2 : 1;
 	}
 
-	/** (0.7.323) Called from the render-state mixin: how ashen {@code entity} looks, or null. */
+	/** (0.7.332) Called from the render-state mixin: how ashen {@code entity} looks, or null. */
 	public static Float pallor(LivingEntity entity) {
 		return entity instanceof Player && Vampires.isVampire(entity) ? Vampires.pallor(entity) : null;
 	}
 
-	/** (0.7.323) Called from the render-state mixin: whether {@code entity} shows bite marks. */
+	/** (0.7.332) Called from the render-state mixin: whether {@code entity} shows bite marks. */
 	public static Boolean marks(LivingEntity entity) {
 		return entity instanceof Player && SleepingPrey.marked(entity) ? Boolean.TRUE : null;
 	}
 
-	/** (0.7.323) Two small red marks on the neck, for a day after a sleeping bite ({@link SleepingPrey}). */
+	/** (0.7.332) Two small red marks on the neck, for a day after a sleeping bite ({@link SleepingPrey}). */
 	private static final class BiteMarks extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/vampire/bite_marks.png");
 
@@ -116,7 +116,7 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 			return;
 		}
 		PlayerModel model = this.getParentModel();
-		// (0.7.323) the pallor: barely there when fed within the day, the whole ashen skin when starving
+		// (0.7.332) the pallor: barely there when fed within the day, the whole ashen skin when starving
 		Float pallor = state.getData(PALLOR);
 		int tint = ARGB.white(Mth.lerp(pallor == null ? 1.0F : pallor, PALE_FED, PALE_STARVING));
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucent(PALE), lightCoords, OverlayTexture.NO_OVERLAY, tint, null,

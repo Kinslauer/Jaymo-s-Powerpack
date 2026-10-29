@@ -199,10 +199,11 @@ def main():
     folder = ASSETS + 'textures/entity/dragon/aeolus/'
     os.makedirs(folder, exist_ok=True)
     # (villager.png in this folder is the disguise's skin, from Andy's friend: never written here)
-    for i in range(len(HIDES)):
-        hide_texture(i).save(folder + 'hide_%d.png' % i)
-    for i in range(len(MARKS)):
-        marks_texture(i).save(folder + 'marks_%d.png' % i)
+    # (0.7.329) Aeolus is drawn as eanncrod's Kintsugi wyvern now: tools/gen_kintsugi_dragons.py paints his hides
+    # for i in range(len(HIDES)):
+    #     hide_texture(i).save(folder + 'hide_%d.png' % i)
+    # for i in range(len(MARKS)):
+    #     marks_texture(i).save(folder + 'marks_%d.png' % i)
     spawn_egg('aeolus_dragon_spawn_egg')
     write(ASSETS + 'items/aeolus_dragon_spawn_egg.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/aeolus_dragon_spawn_egg'}})
     write(ASSETS + 'models/item/aeolus_dragon_spawn_egg.json',

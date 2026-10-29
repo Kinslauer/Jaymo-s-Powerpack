@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 
 /**
- * (0.7.323) What a werewolf player's own screen shows of the curse (nobody else's):
+ * (0.7.332) What a werewolf player's own screen shows of the curse (nobody else's):
  *
  * <ul>
  * <li><b>Mood:</b> amber edges that darken with the stage of the curse ({@link FeralCurse}): none at 0, faint at 1, strong

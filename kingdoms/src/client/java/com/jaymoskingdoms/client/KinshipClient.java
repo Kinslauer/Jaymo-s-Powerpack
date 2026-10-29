@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 
 /**
- * (0.7.323) Monster kinship, heard: a vampire or werewolf with another of their kind in sight ({@link Kinship#HEARD}) hears
+ * (0.7.332) Monster kinship, heard: a vampire or werewolf with another of their kind in sight ({@link Kinship#HEARD}) hears
  * a cold, slow beat: a low heartbeat for a vampire, a soft growl for a werewolf. Nearer is louder and a little quicker.
  * Nothing is drawn: no red pulse.
  */

@@ -22,7 +22,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) Torn clothes as evidence. When a werewolf player's change tears out of them, a scrap of what they wore lands at
+ * (0.7.332) Torn clothes as evidence. When a werewolf player's change tears out of them, a scrap of what they wore lands at
  * their feet: a {@link #ITEM torn cloth}, dyed the colour of the rags their beast wears ({@link Lycans#clothes}) and
  * marked with whose it is. The cloth gives nothing away on its own; hold it and use it on a player and, if it is theirs,
  * you are told "This cloth matches X's" (the one place the name is given).

@@ -909,7 +909,7 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
-					// (0.7.323) a suspicion against another player, by name (Suspicion)
+					// (0.7.332) a suspicion against another player, by name (Suspicion)
 					said = Suspicion.gossip(a.mob, player, level.getRandom());
 				}
 				if (said == null) {

@@ -1,4 +1,4 @@
-"""Draws the art for the vampire deception patch (0.7.323), all original. Run from kingdoms/: python -I tools/gen_vampire_deception.py
+"""Draws the art for the vampire deception patch (0.7.332), all original. Run from kingdoms/: python -I tools/gen_vampire_deception.py
 
 garlic: a 16x16 head of garlic, vanilla style (no black outline, light from the top-left): a papery cream bulb with a
 few pale violet streaks, a short dry stalk on top and a tuft of roots below.

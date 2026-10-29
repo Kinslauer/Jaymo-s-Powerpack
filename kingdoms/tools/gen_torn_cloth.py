@@ -1,4 +1,4 @@
-"""(0.7.323) The torn cloth item's icon (TornCloth): a ragged scrap of woven cloth, drawn in light greys so the item's dye tint
+"""(0.7.332) The torn cloth item's icon (TornCloth): a ragged scrap of woven cloth, drawn in light greys so the item's dye tint
 (the colour of the rags the wearer's beast wears) colours it. Our own: plain ramps and a seeded scatter.
 Run from the kingdoms folder:  python -I tools/gen_torn_cloth.py"""
 import os

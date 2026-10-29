@@ -16,7 +16,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.323) Hunter's sense. A mortal player holding a torch (either hand) within {@link #RANGE} blocks of a vampire at
+ * (0.7.332) Hunter's sense. A mortal player holding a torch (either hand) within {@link #RANGE} blocks of a vampire at
  * night sees that vampire's shadow lag: wisps of dark smoke trail where it stood {@link #LAG} ticks (half a second)
  * ago. It's drawn on this client alone, so only the torch-holder sees it: a clue, never a name tag. (The lighter of the
  * two ways to do it; a ghost of the whole model could replace the smoke.)

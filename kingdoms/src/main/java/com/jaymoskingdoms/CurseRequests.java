@@ -16,7 +16,7 @@ import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.7.323) What the curse asks for. Each night a werewolf player (the full curse) is asked, with a line in the overlay, for
+ * (0.7.332) What the curse asks for. Each night a werewolf player (the full curse) is asked, with a line in the overlay, for
  * one thing before dawn: to run under the open sky ({@link #RUN_SECONDS} sprinting), to hunt something as the beast, to
  * stay out of towns, or to let the beast out. Doing it lowers the wildness ({@link FeralCurse}) by {@link #KEPT} at once;
  * breaking the ban, or ignoring the request till dawn, raises it by {@link #IGNORED}. The ask is kept with the player

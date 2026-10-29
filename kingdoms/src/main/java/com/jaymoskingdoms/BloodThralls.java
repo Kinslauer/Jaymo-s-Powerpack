@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.323) Thrall a friend. Each night a vampire drinks from the same mortal player counts ({@link #NIGHTS}, kept on the
+ * (0.7.332) Thrall a friend. Each night a vampire drinks from the same mortal player counts ({@link #NIGHTS}, kept on the
  * vampire); after {@link #NIGHTS_TO_BIND} separate nights that player is the vampire's thrall ({@link #MASTER}, kept on
  * the thrall, who is told only by an overlay line).
  *
