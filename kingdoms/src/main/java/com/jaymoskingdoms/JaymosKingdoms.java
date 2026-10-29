@@ -392,7 +392,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
-		// (0.7.327) the second batch of Blockbench Workshop creatures
+		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.beasts.Beasts.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();

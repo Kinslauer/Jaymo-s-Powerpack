@@ -38,7 +38,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.327) The Piglin King, a boss of the Nether's demon country, drawn as eanncrod's Musclebound Piglin King
+ * (0.7.329) The Piglin King, a boss of the Nether's demon country, drawn as eanncrod's Musclebound Piglin King
  * (Blockbench Workshop, CC BY 4.0). Rare: it sleeps on its feet in the Nether wastes and crimson woods until someone
  * comes near, then wakes with a roar and a boss bar. It rakes with its clawed gauntlet, hurls a volley of embers, lets
  * the fire in it out in a burst that sets everyone close alight, and when hurt badly roars for its brutes. The model's

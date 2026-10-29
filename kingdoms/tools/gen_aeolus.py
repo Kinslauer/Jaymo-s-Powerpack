@@ -199,7 +199,7 @@ def main():
     folder = ASSETS + 'textures/entity/dragon/aeolus/'
     os.makedirs(folder, exist_ok=True)
     # (villager.png in this folder is the disguise's skin, from Andy's friend: never written here)
-    # (0.7.327) Aeolus is drawn as eanncrod's Kintsugi wyvern now: tools/gen_kintsugi_dragons.py paints his hides
+    # (0.7.329) Aeolus is drawn as eanncrod's Kintsugi wyvern now: tools/gen_kintsugi_dragons.py paints his hides
     # for i in range(len(HIDES)):
     #     hide_texture(i).save(folder + 'hide_%d.png' % i)
     # for i in range(len(MARKS)):

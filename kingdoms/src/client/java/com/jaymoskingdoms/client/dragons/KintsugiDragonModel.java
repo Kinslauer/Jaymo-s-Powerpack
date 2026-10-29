@@ -7,7 +7,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.327) Eurus and Aeolus: eanncrod's Kintsugi wyvern (Blockbench Workshop, CC BY 4.0, credits in
+ * (0.7.329) Eurus and Aeolus: eanncrod's Kintsugi wyvern (Blockbench Workshop, CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt), Aeolus grey-white with his gold seams, Eurus storm-dark with his glowing cyan
  * ({@code tools/gen_kintsugi_dragons.py}). A wyvern: it stands on its hind legs with its wings for forelegs.
  * <p>

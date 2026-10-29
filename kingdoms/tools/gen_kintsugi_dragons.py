@@ -1,5 +1,5 @@
 """
-(0.7.327) Eurus's and Aeolus's hides and glowing markings, from eanncrod's Kintsugi wyvern (Blockbench Workshop,
+(0.7.329) Eurus's and Aeolus's hides and glowing markings, from eanncrod's Kintsugi wyvern (Blockbench Workshop,
 CC BY 4.0; credits in textures/entity/bb/CREDITS.txt), whose texture tools/bbmodel_bake.py put at
 textures/entity/bb/kintsugi.png: a near-black hide broken by gold seams, as a pot mended with gold.
 

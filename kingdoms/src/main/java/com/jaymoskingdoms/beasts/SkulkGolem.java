@@ -27,7 +27,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * (0.7.327) The skulk golem, drawn as elma_taburlas' Skulk golem (Blockbench Workshop, CC BY 4.0): the deep dark's
+ * (0.7.329) The skulk golem, drawn as elma_taburlas' Skulk golem (Blockbench Workshop, CC BY 4.0): the deep dark's
  * guardian, a figure of deepslate overgrown with sculk. It stands as still as a statue (and is as hard to hurt) until
  * someone comes near without creeping or strikes it; then it wakes and hunts them, its blows bringing the darkness
  * down on them. With nobody about for a while it stands still again.

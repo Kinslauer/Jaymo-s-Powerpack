@@ -47,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
 public class AeolusDragon extends WindDragon {
 	// ---- body ----
 	static final double HEALTH = 1600.0, ARMOR = 24.0, TOUGHNESS = 14.0, SPEED = 0.25, BITE = 26.0;
-	/** Where his mouth is ((0.7.327) the Kintsugi wyvern drawn at 0.75), and how far his breath reaches. */
+	/** Where his mouth is ((0.7.329) the Kintsugi wyvern drawn at 0.75), and how far his breath reaches. */
 	static final double MOUTH_AHEAD_GROUND = 4.5, MOUTH_UP_GROUND = 4.1, MOUTH_AHEAD_AIR = 4.8, MOUTH_UP_AIR = 2.5;
 	static final double BREATH_RANGE = 18.0;
 	/** Slower to circle than the lesser ones, but a harder dive. */

@@ -41,7 +41,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.327) A scalebane sellsword, drawn as eanncrod's Scalebane Archer (Blockbench Workshop, CC BY 4.0): lizardfolk
+ * (0.7.329) A scalebane sellsword, drawn as eanncrod's Scalebane Archer (Blockbench Workshop, CC BY 4.0): lizardfolk
  * bowmen who sell their aim to barbarian camps and goblin villages (Andy: "common sellswords among barbarians and goblin
  * encampments"). A camp or village takes on {@link #START} when it rises and keeps up to {@link #MAX} about its fire
  * ({@link #hire}, from its daily growth). They shoot what their paymasters would ({@link Barbarians#prey},

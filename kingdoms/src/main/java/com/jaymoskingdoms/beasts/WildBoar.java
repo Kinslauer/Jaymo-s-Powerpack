@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.327) The wild boar, drawn as lukygive's Wild Boar (Blockbench Workshop, CC BY 4.0): a bristling tusker of the
+ * (0.7.329) The wild boar, drawn as lukygive's Wild Boar (Blockbench Workshop, CC BY 4.0): a bristling tusker of the
  * forests, taiga and savanna that roots about in small sounders, and lowers its tusks and charges anyone who comes
  * within {@link #TEMPER_RANGE}. It takes Naturalist's boar's place (out of natural spawning and the encounters). Hunted
  * for pork and hide; Jaymo's Kitchen butchers it as any animal.

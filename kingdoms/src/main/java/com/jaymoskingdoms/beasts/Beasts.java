@@ -31,7 +31,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.327) Creatures drawn from Andy's second batch of Blockbench Workshop models (all CC BY 4.0, credits in
+ * (0.7.329) Creatures drawn from Andy's second batch of Blockbench Workshop models (all CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt): the minotaur (a monster of legend), the Piglin King (a Nether boss), the redstone
  * golem (deep in the mines), the skulk golem (the deep dark's guardian) and the wild boar. The scalebane sellswords
  * are {@code ScalebaneArcher} (they serve barbarian and goblin camps). Each with its spawn egg.

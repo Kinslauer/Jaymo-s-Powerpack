@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.327) How the second batch of Blockbench Workshop creatures ({@link Beasts}) are drawn: each by its own model and
+ * (0.7.329) How the second batch of Blockbench Workshop creatures ({@link Beasts}) are drawn: each by its own model and
  * animations ({@link BbMobRenderer}), scaled to its box. The skulk golem has no idle: awake it stands in its rest pose,
  * and as a statue it holds its "estatue" move. The redstone golem's model has only an idle and a walk, so its pound
  * and eruption are posed here.

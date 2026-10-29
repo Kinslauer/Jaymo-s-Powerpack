@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Mob;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.327) Draws a creature from a Blockbench model with its own animations ({@link BbModel}): between moves its
+ * (0.7.329) Draws a creature from a Blockbench model with its own animations ({@link BbModel}): between moves its
  * idle, its walk (and run, going fast) in step with its feet; a move ({@link Acting}) played from when it began, eased
  * in over the rest; its head turned to where it looks; its death animation when it has one. A glow texture, if given,
  * is drawn over it bright in the dark.

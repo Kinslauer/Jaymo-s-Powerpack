@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.327) A monster that makes its moves as named animations ({@link Acting}): {@link #act} starts one, shown to every
+ * (0.7.329) A monster that makes its moves as named animations ({@link Acting}): {@link #act} starts one, shown to every
  * client for {@code ticks}, and {@link #acting} says whether one is still running and for how long. Its moves are listed
  * by {@link #actions} (synced by their place in that list).
  */

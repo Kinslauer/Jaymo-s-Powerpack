@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.327) The minotaur, a monster of legend ({@code monsters/Monsters}): a bull-headed giant in gold-banded plate with
+ * (0.7.329) The minotaur, a monster of legend ({@code monsters/Monsters}): a bull-headed giant in gold-banded plate with
  * a great hammer, drawn as eanncrod's Minotaur (Blockbench Workshop, CC BY 4.0). It roams the mountains and comes as a
  * wilderness encounter there. It swings its hammer at anyone close, brings it down in a slam that throws everyone about
  * it off their feet, and from farther off lowers its horns and charges, goring whoever it runs into.

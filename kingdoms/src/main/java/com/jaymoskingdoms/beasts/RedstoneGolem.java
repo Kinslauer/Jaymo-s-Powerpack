@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.327) The redstone golem, drawn as polyjo's Redstone Golem (Minecraft Dungeons) (Blockbench Workshop, CC BY 4.0):
+ * (0.7.329) The redstone golem, drawn as polyjo's Redstone Golem (Minecraft Dungeons) (Blockbench Workshop, CC BY 4.0):
  * a great foe of the deep mines, a hulk of stone and live redstone that walks the caves below the world's zero. It
  * pounds the ground with both fists, and sets the rock under its foes alight with redstone that bursts a moment later.
  * Its core glows in the dark. It shrugs off knockback and falls, and leaves redstone and, now and then, a diamond.

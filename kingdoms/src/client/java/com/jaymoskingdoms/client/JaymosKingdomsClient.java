@@ -31,7 +31,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
-		// (0.7.327) the second batch of Blockbench Workshop creatures
+		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
 		// 0.7.7: ships under sail, and the client's part in sailing

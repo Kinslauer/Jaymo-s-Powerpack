@@ -47,7 +47,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		this(context, species, model, shadow, scale, (float) REACH);
 	}
 
-	/** (0.7.327) {@code reach}: how far it reaches past its box when drawn at full size (blocks; the Kintsugi's wings). */
+	/** (0.7.329) {@code reach}: how far it reaches past its box when drawn at full size (blocks; the Kintsugi's wings). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow, float scale, float reach) {
 		super(context, model, shadow);
 		this.species = species;
