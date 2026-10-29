@@ -3653,6 +3653,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
   hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
 - **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.
+- **0.17.173, Sora's Dagger, the friend's next version:** Andy's friend sent a new Blockbench file (34 cubes, a new
+  texture, his own hand positions with a slight tilt in third person). It goes in through `tools/blockbench/sora.py` as
+  before, all four stages. Previews of each slot, rendered from the model: `/mnt/project-files/soras-dagger-previews/`.
+- **0.17.174, Sora's Dagger grips:** Andy: "both on shift m2". It's held angled up out of the fist like a sword now (our
+  transforms in `tools/blockbench/sora.py`, no longer the file's, which held it straight out). Sneak and right click
+  turns it to a reverse grip, blade down past the little finger, and back again. The flip is the stack's first
+  custom_model_data flag, which picks `<stage>_reverse`, and the grip stays through the Tempest forging. The diamond
+  stage's sneak and right click forges only for an ascended wind carrying a spoil; for everyone else it turns the grip.
+  `display.py`'s `display()` takes `tilt`/`fp_tilt`.
 - **0.17.175, pebble piles on grass (`ground/PebblePilesFeature`):** Andy: "you should be able to rarely find the rocks
   on grass as well, mostly in pebble piles. changing dependent on biome". About one chunk in six has a pebble pile on
   grass: 3-7 small rock piles (mostly 1-2 rocks) within 2 blocks. Most are the biome's rock: granite on savannas,
