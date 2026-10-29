@@ -38,6 +38,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);
 		com.jaymoskingdoms.client.VillagerLooks.extract(entity, state);
+		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}
 
 	@Inject(

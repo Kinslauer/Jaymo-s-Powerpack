@@ -198,6 +198,17 @@ public final class WebNet {
 		}
 	}
 
+	/** (0.17.149) Client → server: Use pressed while the symbiote studies an item ({@link WebSymbioteCollect}): take it. */
+	public record InspectGrab() implements CustomPacketPayload {
+		public static final Type<InspectGrab> TYPE = new Type<>(JaymosPowers.id("web_symbiote_inspect_grab"));
+		public static final StreamCodec<ByteBuf, InspectGrab> CODEC = StreamCodec.unit(new InspectGrab());
+
+		@Override
+		public Type<InspectGrab> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
 	public record Takeover(int entityId, int ticks, boolean flee) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
@@ -345,6 +356,7 @@ public final class WebNet {
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(InspectGrab.TYPE, InspectGrab.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HeldSeize.TYPE, HeldSeize.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HeldAttack.TYPE, HeldAttack.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Struggle.TYPE, Struggle.CODEC);

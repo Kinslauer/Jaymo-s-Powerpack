@@ -131,10 +131,26 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** (0.15.52) The share of the times it could take a player that it does, rather than attack them (white always does). */
 	static final float RED_BOND_CHANCE = 0.3F, BLACK_BOND_CHANCE = 0.8F;
 
+	/**
+	 * (0.17.150) A meteor's blob rampages round the site it fell at: it goes for anything living within {@code RAMPAGE_AGGRO}
+	 * (like the red one), wrecks soft blocks in its way ({@code WRECK_*}, only where mobGriefing allows), never takes a mob and
+	 * never settles; it stays within {@code RAMPAGE_RADIUS} of the site ({@code RAMPAGE_SLACK} past that it gives up the chase
+	 * and heads back) until it's killed or someone bonds with it.
+	 */
+	static final int RAMPAGE_RADIUS = 26;
+	static final double RAMPAGE_AGGRO = 14.0, RAMPAGE_SLACK = 8.0;
+	static final int WRECK_EVERY = 8, WRECK_MAX = 3;
+	static final float WRECK_HARDNESS = 1.0F;
+
 	public static EntityType<WebSymbioteBlob> TYPE;
 
 	/** Ticks left that fire can't hurt it (it came down in a meteor). */
 	private int fireGrace;
+
+	/** (0.17.150) What it keeps of a host who died here (see {@link WebSymbioteLife}); where it rampages (a meteor's); ticks it still has to feed. */
+	WebSymbioteLife.@Nullable Remains remains;
+	@Nullable BlockPos rampageSite;
+	int feast;
 
 	/** With no host this long (ticks; 5 minutes) it gives up and settles where it is as goo, a block, still and waiting. */
 	static final int SETTLE_TICKS = 6000;
@@ -201,7 +217,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/** (0.15.52) It makes for {@code target} (see {@link #pursuing}). */
 	WebSymbioteBlob pursue(Player target) {
-		this.pursuing = target.getUUID();
+		if (this.rampageSite == null && this.remains == null) {
+			this.pursuing = target.getUUID();
+		}
 		return this;
 	}
 
@@ -294,6 +312,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 			return gooAt(level, at);
 		}
 		WebSymbioteBlob blob = release(level, at.add(0.0, 0.5, 0.0));
+		// (0.17.150) it doesn't wait in the crater: it rampages round it
+		blob.rampage(BlockPos.containing(at));
 		blob.fireGrace = FIRE_GRACE;
 		blob.clearFire();
 		return true;
@@ -334,6 +354,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// (0.17.150) feeding on what it killed; the things it keeps; rampaging round its crater
+		if (WebSymbioteLife.blobTick(this, level)) {
+			return;
+		}
+		this.rampageTick(level);
 		if (this.mobRest > 0) {
 			this.mobRest--;
 		}
@@ -373,14 +398,14 @@ public class WebSymbioteBlob extends PathfinderMob {
 				return;
 			}
 		}
-		if (this.tickCount >= SETTLE_TICKS && this.pursuing == null && this.quarry == null && this.fleeFrom == null && this.onGround() && this.settle(level)) {
+		if (this.tickCount >= SETTLE_TICKS && this.rampageSite == null && this.remains == null && this.pursuing == null && this.quarry == null && this.fleeFrom == null && this.onGround() && this.settle(level)) {
 			return;
 		}
 		if (this.fireGrace > 0) {
 			this.fireGrace--;
 			this.clearFire();
 		}
-		if (this.tickCount % HOME_EVERY == 0) {
+		if (this.tickCount % HOME_EVERY == 0 && this.rampageSite == null && this.remains == null) {
 			// it keeps close to its old host's body, wherever that's carried
 			Vec3 home = Vec3.atCenterOf(this.getHomePosition());
 			level.getEntities(this, this.getBoundingBox().inflate(CORPSE_RANGE), KitchenCompat::isPlayerCorpse).stream()
@@ -424,17 +449,23 @@ public class WebSymbioteBlob extends PathfinderMob {
 		LivingEntity rival = level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(range),
 				e -> e != this && WebSymbioteStrains.rivals(this, e) && e.distanceTo(this) <= range && this.hunts(e)).stream()
 			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
-		if (rival != null || this.strain() != WebSymbioteStrain.RED) {
+		boolean rampaging = this.rampageSite != null;
+		if (rival != null || this.strain() != WebSymbioteStrain.RED && !rampaging) {
 			return rival;
 		}
-		return level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(RED_AGGRO_RANGE),
-				e -> e != this && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand) && e.distanceTo(this) <= RED_AGGRO_RANGE
-					&& this.hunts(e)).stream()
+		double aggro = rampaging ? RAMPAGE_AGGRO : RED_AGGRO_RANGE;
+		return level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(aggro),
+				e -> e != this && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand) && e.distanceTo(this) <= aggro
+					&& this.inSite(e) && this.hunts(e)).stream()
 			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
 	}
 
 	/** A risen body first (its old host's or anyone's), then the nearest web slinger without a symbiote, then any mob. */
 	private @Nullable Entity findHost(ServerLevel level) {
+		if (this.remains != null) {
+			// (0.17.150) it holds someone's things: only they can have it
+			return WebSymbioteLife.ownerQuarry(this, level);
+		}
 		Vec3 home = Vec3.atCenterOf(this.getHomePosition());
 		Entity zombie = level.getEntities(this, this.getBoundingBox().inflate(SEEK_RANGE),
 				e -> e.isAlive() && KitchenCompat.isZombiePlayer(e) && !WebBehemoth.isHost(e)).stream()
@@ -446,7 +477,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		Entity player = level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SEEK_RANGE), p -> this.wants(p, home)).stream()
 			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this) + (Powers.has(p, WebPower.INSTANCE) ? 0.0 : SEEK_RANGE * SEEK_RANGE * 4.0)))
 			.orElse(null);
-		if (player != null || this.mobRest > 0) {
+		if (player != null || this.mobRest > 0 || this.rampageSite != null) {
 			return player;
 		}
 		return level.getEntities(this, this.getBoundingBox().inflate(SEEK_RANGE), e -> WebInhabit.takeable(e) && !this.spurned.contains(e.getUUID())
@@ -456,6 +487,12 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/** (0.15.52) Anyone without a symbiote (not only a web slinger: {@link WebSymbioteInfection}), but never the one it just left. */
 	private boolean wants(Player player, Vec3 home) {
+		if (this.remains != null && !player.getUUID().equals(this.remains.owner())) {
+			return false;
+		}
+		if (this.rampageSite != null && player.position().distanceTo(Vec3.atCenterOf(this.rampageSite)) > RAMPAGE_RADIUS) {
+			return false;
+		}
 		return player.isAlive() && !player.isSpectator() && !WebSymbiote.state(player).bonded() && !this.spurned.contains(player.getUUID())
 			&& player.position().distanceTo(home) <= LEASH;
 	}
@@ -471,11 +508,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 				this.marks(player);
 				return;
 			}
-			WebSymbiote.bond(player, this.position(), this.strain());
+			this.bondWith(player, this.position());
 		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
 			WebBehemoth.possess(level, mob);
 			WebSymbioteStrains.mark(mob, this.strain());
-		} else if (host instanceof Mob mob && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
+		} else if (host instanceof Mob mob && this.rampageSite == null && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
 			WebInhabit.inhabit(level, mob, this.strain());
 		} else {
 			return;
@@ -527,6 +564,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 	 * is exempt, they should always bond like they used to."
 	 */
 	private boolean takes(Player player) {
+		if (this.remains != null && player.getUUID().equals(this.remains.owner())) {
+			return true;
+		}
 		if (Powers.has(player, WebPower.INSTANCE)) {
 			return true;
 		}
@@ -562,12 +602,12 @@ public class WebSymbioteBlob extends PathfinderMob {
 			// it goes for the one it was always after: up the tendril and in
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
 			Shakes.send(player, 8.0F, from);
-			WebSymbiote.bond(player, from, this.strain());
+			this.bondWith(player, from);
 			level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 30, 0.3, 0.2, 0.3, 0.1);
 			this.discard();
 			return;
 		}
-		if (this.strain() == WebSymbioteStrain.RED && foe instanceof Mob mob && this.random.nextFloat() < RED_TAKE_CHANCE
+		if (this.strain() == WebSymbioteStrain.RED && this.rampageSite == null && foe instanceof Mob mob && this.random.nextFloat() < RED_TAKE_CHANCE
 			&& (KitchenCompat.isZombiePlayer(mob) && !WebBehemoth.isHost(mob) || WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID()))) {
 			// the red one: up the tendril and into it, hostile or not
 			this.join(level, mob);
@@ -686,6 +726,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (this.level() instanceof ServerLevel level) {
+			// (0.17.150) killed: what it kept spills
+			WebSymbioteLife.spill(this, level);
 			level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 60, 0.4, 0.3, 0.4, 0.12);
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.3, this.getZ(), 20, 0.4, 0.3, 0.4, 0.03);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_DEATH, SoundSource.HOSTILE, 0.8F, 1.6F);
@@ -695,6 +737,98 @@ public class WebSymbioteBlob extends PathfinderMob {
 	@Override
 	public boolean removeWhenFarAway(double distSqr) {
 		return false;
+	}
+
+	@Override
+	public void remove(Entity.RemovalReason reason) {
+		// (0.17.150) gone for good (not just unloaded): what it kept spills
+		if (reason.shouldDestroy() && this.remains != null && this.level() instanceof ServerLevel level) {
+			WebSymbioteLife.spill(this, level);
+		}
+		super.remove(reason);
+	}
+
+	@Override
+	protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		WebSymbioteLife.save(this, output);
+	}
+
+	@Override
+	protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		WebSymbioteLife.load(this, input);
+	}
+
+	// ---- (0.17.150) remains, feasting, rampaging: see WebSymbioteLife ----
+
+	/** It holds a dead host's things where they fell, waiting for them. */
+	void hold(WebSymbioteLife.Remains kept) {
+		this.remains = kept;
+		this.setHomeTo(this.blockPosition(), WebSymbioteLife.HOLD_RADIUS);
+	}
+
+	/** It feeds on {@code host}, whom it just killed, where they lie, then roams (and won't take them again). */
+	void feast(Entity host) {
+		this.spurn(host);
+		this.feast = WebSymbioteLife.FEAST_TICKS;
+		this.setNoAi(true);
+	}
+
+	/** It rampages round {@code site} (see {@link #RAMPAGE_RADIUS}). */
+	void rampage(BlockPos site) {
+		this.rampageSite = site;
+		this.setHomeTo(site, RAMPAGE_RADIUS);
+	}
+
+	/** Bonds {@code player}: back to what they were if it kept their things, else a new bond. */
+	private void bondWith(ServerPlayer player, Vec3 from) {
+		if (!WebSymbioteLife.rebond(this, player, from)) {
+			WebSymbiote.bond(player, from, this.strain());
+		}
+	}
+
+	/** Within the site it rampages round (always, when it doesn't). */
+	private boolean inSite(Entity e) {
+		return this.rampageSite == null || e.position().distanceTo(Vec3.atCenterOf(this.rampageSite)) <= RAMPAGE_RADIUS + RAMPAGE_SLACK;
+	}
+
+	/** Rampaging: it keeps to its site, and tears up soft blocks on its way to what it's after. */
+	private void rampageTick(ServerLevel level) {
+		if (this.rampageSite == null) {
+			return;
+		}
+		Vec3 site = Vec3.atCenterOf(this.rampageSite);
+		if (this.position().distanceTo(site) > RAMPAGE_RADIUS + RAMPAGE_SLACK) {
+			// strayed too far: it drops what it was after and heads back
+			this.quarry = null;
+			this.grudge = null;
+			this.pursuing = null;
+			this.fleeFrom = null;
+			this.fleeTicks = 0;
+			if (this.tickCount % 20 == 0) {
+				this.getNavigation().moveTo(site.x, site.y, site.z, SEEK_SPEED);
+			}
+			return;
+		}
+		if (this.tickCount % WRECK_EVERY == 0 && (this.quarry != null || this.grudge != null)
+			&& level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+			int broken = 0;
+			for (BlockPos pos : BlockPos.betweenClosed(this.blockPosition().offset(-1, 0, -1), this.blockPosition().offset(1, 1, 1))) {
+				BlockState state = level.getBlockState(pos);
+				if (state.isAir() || state.hasBlockEntity() || !state.getFluidState().isEmpty() || state.is(WebPower.GOO) || state.is(WebPower.RED_GOO)) {
+					continue;
+				}
+				float hardness = state.getDestroySpeed(level, pos);
+				if (hardness < 0.0F || hardness > WRECK_HARDNESS) {
+					continue;
+				}
+				level.destroyBlock(pos, true, this);
+				if (++broken >= WRECK_MAX) {
+					break;
+				}
+			}
+		}
 	}
 
 	/** Runs flat out from {@link #fleeFrom} until it's far enough away, then settles there as its new home. */
@@ -729,7 +863,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		public void stop() {
 			WebSymbioteBlob blob = WebSymbioteBlob.this;
 			blob.getNavigation().stop();
-			if (blob.fleeFrom != null && blob.position().distanceTo(blob.fleeFrom) >= FLEE_DISTANCE * 0.5) {
+			if (blob.fleeFrom != null && blob.rampageSite == null && blob.remains == null && blob.position().distanceTo(blob.fleeFrom) >= FLEE_DISTANCE * 0.5) {
 				// far from the fire: it stays out here now
 				blob.setHomeTo(blob.blockPosition(), ROAM_RADIUS);
 			}
