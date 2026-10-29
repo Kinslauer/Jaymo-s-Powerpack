@@ -28,6 +28,8 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		float xRot;
 		boolean spins;
 		boolean upright;
+		/** How far its tip reaches past the middle (model pixels). */
+		float tip;
 	}
 
 	/** Tumbling weapons turn this many degrees a tick. */
@@ -37,6 +39,11 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 	private static final Set<Identifier> UPRIGHT = Set.of(JaymosPowers.id("iron_dagger"));
 	/** How far the tip reaches past the middle (model pixels): an upright model's, a sprite's corner. */
 	private static final float UPRIGHT_TIP = 12.5F, SPRITE_TIP = 11.3F;
+	/**
+	 * (Andy's batch 4) Models with a tip of their own: the harpoon is the Blockbench Workshop model drawn on the sprite diagonal
+	 * (tools/blockbench/harpoon.py), so it rolls 45 like a sprite but reaches 12.5 pixels past the middle, not 11.3.
+	 */
+	private static final java.util.Map<Identifier, Float> TIPS = java.util.Map.of(JaymosPowers.id("harpoon"), 12.5F);
 	/** How deep the tip sinks in (blocks). */
 	private static final float TIP_SINK = 0.2F;
 
@@ -58,7 +65,9 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		state.yRot = entity.getYRot(partialTicks);
 		state.xRot = entity.getXRot(partialTicks);
 		state.spins = entity.spins();
-		state.upright = UPRIGHT.contains(BuiltInRegistries.ITEM.getKey(entity.getItem().getItem()));
+		Identifier id = BuiltInRegistries.ITEM.getKey(entity.getItem().getItem());
+		state.upright = UPRIGHT.contains(id);
+		state.tip = TIPS.getOrDefault(id, state.upright ? UPRIGHT_TIP : SPRITE_TIP);
 		this.itemModelResolver.updateForNonLiving(state.item, entity.getItem(), ItemDisplayContext.NONE, entity);
 	}
 
@@ -68,7 +77,7 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		poseStack.rotateDegrees(Axis.YP, state.yRot - 90.0F);
 		poseStack.rotateDegrees(Axis.ZP, state.xRot);
 		if (!state.spins) {
-			float tip = (state.upright ? UPRIGHT_TIP : SPRITE_TIP) * SCALE / 16.0F;
+			float tip = state.tip * SCALE / 16.0F;
 			poseStack.translate(TIP_SINK - tip, 0.0F, 0.0F);
 		}
 		poseStack.rotateDegrees(Axis.ZN, state.upright ? 90.0F : 45.0F);
