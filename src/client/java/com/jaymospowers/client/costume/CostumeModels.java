@@ -54,6 +54,8 @@ public final class CostumeModels {
 	static final int TAIL_TOP = 9, TAIL_LENGTH = 11;
 	static final float TAIL_GAP = 0.05F, TAIL_SWAY = 0.6F;
 	static final float BRACER_GROW = 0.15F, MANTLE_GROW = 0.2F, HOOD_BRIM_GROW = 0.4F, COWL_GROW = 0.6F;
+	/** (0.17.164) The thief's hood stands off the head as its model has it. */
+	static final float THIEF_HOOD_GROW = 1.0F;
 	/** The emblem patch on the chest: its size (pixels) and the gap in front of the suit's chest. */
 	static final float EMBLEM_SIZE = 6.0F, EMBLEM_TOP = 1.5F, EMBLEM_GAP = 0.05F;
 	/**
@@ -348,6 +350,9 @@ public final class CostumeModels {
 		if (cut == CostumeDesign.Cut.ASSASSIN) {
 			assassin(mesh.getRoot(), slim);
 		}
+		if (cut == CostumeDesign.Cut.THIEF) {
+			return thief(slim);
+		}
 		// (0.11.78) a bust over MCA's, shown and placed only when the body has one (Worn.bust); textured from the chest
 		mesh.getRoot().getChild("body").addOrReplaceChild(CostumeBody.BUST, CubeListBuilder.create().texOffs(BUST_U, BUST_V)
 			.addBox(BUST_X, BUST_Y, BUST_Z, BUST_W, BUST_H, BUST_D, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
@@ -380,6 +385,58 @@ public final class CostumeModels {
 			.addBox(-4.0F, 0.0F, 0.0F, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, back));
 	}
 
+	/**
+	 * (0.17.164) The thief cut: eanncrod's Thief Armor (Blockbench Workshop, CC BY 4.0) in place of the suit, its own
+	 * cubes on its own 128-square sheet ({@code tools/blockbench/thief_costume.py}): a padded tunic and belt, sloped
+	 * leather straps over the shoulders, a short cloak at the back, pauldrons and bracers, wrapped legs and boots. Slim
+	 * arms hang half a pixel lower, so their pieces do too.
+	 */
+	private static LayerDefinition thief(boolean slim) {
+		MeshDefinition mesh = PlayerModel.createMesh(CubeDeformation.NONE, slim);
+		PartDefinition root = mesh.getRoot();
+		root.clearRecursively();
+		int i = 0;
+		for (ThiefCube c : THIEF_CUBES) {
+			PartDefinition part = root.getChild(c.part);
+			float lower = slim && c.part.endsWith("_arm") ? -0.5F : 0.0F;
+			CubeListBuilder cube = CubeListBuilder.create().texOffs(c.u, c.v).mirror(c.mirror);
+			if (c.xRot == 0.0F && c.yRot == 0.0F && c.zRot == 0.0F) {
+				part.addOrReplaceChild("thief_" + i++, cube.addBox(c.x, c.y + lower, c.z, c.w, c.h, c.d, new CubeDeformation(c.grow)), PartPose.ZERO);
+			} else {
+				// turned about its own pivot
+				part.addOrReplaceChild("thief_" + i++, cube.addBox(c.x - c.px, c.y - c.py, c.z - c.pz, c.w, c.h, c.d, new CubeDeformation(c.grow)),
+					PartPose.offsetAndRotation(c.px, c.py + lower, c.pz, c.xRot * DEG, c.yRot * DEG, c.zRot * DEG));
+			}
+		}
+		return LayerDefinition.create(mesh, 128, 128);
+	}
+
+	private static final float DEG = (float)(Math.PI / 180.0);
+
+	/** One of the Thief Armor's cubes, in our player model's space: on which part, its texture corner, box and grow, the
+	 * pivot it's turned about and how far (degrees). */
+	private record ThiefCube(String part, int u, int v, float x, float y, float z, float w, float h, float d, float grow,
+		float px, float py, float pz, float xRot, float yRot, float zRot, boolean mirror) {
+	}
+
+	private static final ThiefCube[] THIEF_CUBES = {
+		new ThiefCube("body", 32, 17, -4F, 1F, -2F, 8F, 9F, 4F, 0.6F, 0F, 24F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("body", 52, 13, -4F, 9F, -2F, 8F, 3F, 4F, 0.7F, 0F, 24F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("body", 14, 58, -7F, -2F, -2F, 3F, 9F, 4F, 0.65F, 0F, 0F, 0F, 0F, 0F, -42.5F, false),
+		new ThiefCube("body", 14, 58, 4F, -2F, -2F, 3F, 9F, 4F, 0.68F, 0F, 0F, 0F, 0F, 0F, 45F, false),
+		new ThiefCube("body", 32, 0, -5F, 1F, 2F, 10F, 16F, 1F, 0.5F, 0F, 0F, 0F, 5F, 0F, 0F, false),
+		new ThiefCube("right_arm", 60, 37, -4F, -1F, -2F, 4F, 5F, 4F, 0.7F, 1F, 0F, 0F, 0F, 0F, 27.5F, false),
+		new ThiefCube("right_arm", 16, 34, -3F, 5F, -2F, 2F, 3F, 4F, 0.7F, 5F, 22F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("right_arm", 32, 46, -3F, -2F, -2F, 4F, 12F, 4F, 0.51F, 5F, 22F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("left_arm", 44, 58, 0F, -1F, -2F, 4F, 5F, 4F, 0.7F, -1F, 0F, 0F, 0F, 0F, -27.5F, false),
+		new ThiefCube("left_arm", 60, 54, 1F, 5F, -2F, 2F, 3F, 4F, 0.7F, -5F, 22F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("left_arm", 48, 42, -1F, -2F, -2F, 4F, 12F, 4F, 0.51F, -5F, 22F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("right_leg", 16, 49, -2.1F, 8F, -2F, 4F, 4F, 4F, 0.51F, 1.9F, 12F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("right_leg", 54, 0, -2.1F, 1F, -2F, 4F, 7F, 4F, 0.8F, 1.9F, 12F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("left_leg", 0, 42, -1.9F, 8F, -2F, 4F, 4F, 4F, 0.51F, -1.9F, 12F, 0F, 0F, 0F, 0F, false),
+		new ThiefCube("left_leg", 52, 26, -1.9F, 1F, -2F, 4F, 7F, 4F, 0.8F, -1.9F, 12F, 0F, 0F, 0F, 0F, false)
+	};
+
 	/** The bones only, for pieces that hang off one of them. */
 	private static MeshDefinition bones() {
 		MeshDefinition mesh = PlayerModel.createMesh(CubeDeformation.NONE, false);
@@ -400,6 +457,13 @@ public final class CostumeModels {
 			PartPose.ZERO);
 		if (mask == CostumeDesign.Mask.HELMET) {
 			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(32, 0).addBox(-0.5F, -11.0F, -4.5F, 1.0F, 2.0F, 9.0F), PartPose.ZERO);
+		}
+		if (mask == CostumeDesign.Mask.THIEF_HOOD) {
+			// (0.17.164) the Thief Armor's hood: deeper than the head, falling past the jaw to the neck
+			MeshDefinition hood = bones();
+			hood.getRoot().getChild("head").addOrReplaceChild("mask", CubeListBuilder.create().texOffs(0, 0)
+				.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(THIEF_HOOD_GROW)), PartPose.ZERO);
+			return LayerDefinition.create(hood, 64, 32);
 		}
 		if (mask == CostumeDesign.Mask.PEAKED_HOOD) {
 			// (0.14.3) the peak: a brim standing out over the brow, shading the upper face; and a cowl falling onto the shoulders
