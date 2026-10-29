@@ -237,6 +237,12 @@ def packMods = [
 	// title screen's panorama is shot from where you last stood, retaken each time you leave a world or server.
 	// Client-only (Fabric skips it on the server).
 	[dep: "maven.modrinth:last-world-panorama:XkXkj2N1", cf: [1643044, 9283694]],
+	// Friends & Foes (CC BY-NC-ND 4.0, Faboslav; shipped unchanged in a free pack, never copied or edited): the mob vote
+	// losers (copper golem, glare, moobloom, mauler, rascal, tuff golem, wildfire, iceologer, illusioner...) and the
+	// Totems of Freezing and Illusion, which also work worn in our charm bauble slot (compat/FriendsAndFoesCompat).
+	// 5.0.4, Fabric 26.3; needs Resourceful Lib (MIT, Team Resourceful). Client and server.
+	[dep: "maven.modrinth:friends-and-foes:RT5VU8LW", cf: [551364, 9331872], dev: false],
+	[dep: "maven.modrinth:resourceful-lib:P6Jq77km", cf: [570073, 8991147], dev: false],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge

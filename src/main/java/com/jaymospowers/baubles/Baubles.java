@@ -135,11 +135,15 @@ public final class Baubles {
 		return out;
 	}
 
-	/** Saves what this player wears and puts its bonuses on (server). */
+	/**
+	 * Saves what this player wears and puts its bonuses on (server). The stacks themselves are kept, not copies, so the
+	 * open bauble screen and the saved slots stay the same objects: a worn totem used up while the screen is open
+	 * (FriendsAndFoesCompat) can't come back when it closes.
+	 */
 	static void setWorn(ServerPlayer player, List<ItemStack> stacks) {
 		List<ItemStack> copy = new ArrayList<>(SIZE);
 		for (int i = 0; i < SIZE; i++) {
-			copy.add(i < stacks.size() ? stacks.get(i).copy() : ItemStack.EMPTY);
+			copy.add(i < stacks.size() ? stacks.get(i) : ItemStack.EMPTY);
 		}
 		if (copy.stream().allMatch(ItemStack::isEmpty)) {
 			player.removeAttached(WORN);
