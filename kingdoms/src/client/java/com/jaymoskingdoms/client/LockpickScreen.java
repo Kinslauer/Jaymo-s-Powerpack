@@ -453,7 +453,7 @@ final class LockpickScreen extends Screen {
 		} else {
 			drawPins(graphics, x, y);
 		}
-		// strain, picks, help
+		// strain and picks (no help text: the controls are learned by trying)
 		int by = y + H - 50;
 		graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.lock.strain"), x + PAD, by, Ui.DIM);
 		int color = this.strain > 0.7F ? Ui.BAD : this.strain > 0.4F ? 0xFFE0A040 : ACCENT;
@@ -462,8 +462,6 @@ final class LockpickScreen extends Screen {
 		if (this.forgive > 0) {
 			graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.lock.forgive"), x + PAD, by + 10, Ui.GOOD);
 		}
-		graphics.textWithWordWrap(this.font, Component.translatable(this.rotary ? "gui.jaymoskingdoms.lock.rotary.help" : "gui.jaymoskingdoms.lock.pin.help"),
-			x + PAD, by + 20, W - 2 * PAD, Ui.HINT);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
