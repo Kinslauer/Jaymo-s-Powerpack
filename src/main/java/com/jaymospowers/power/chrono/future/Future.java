@@ -130,6 +130,7 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(Future::waiting);
 		FutureGuns.init();
 		FutureMachines.init();
+		FutureOmens.init();
 		FutureCities.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
