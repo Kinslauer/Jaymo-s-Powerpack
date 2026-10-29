@@ -543,6 +543,8 @@ public final class ZFighterSites {
 		if (player.level().dimension() == far) {
 			to = server.overworld();
 			BlockPos tower = data(server).tower().orElseThrow();
+			// (0.17.198) one who was raised in the Verdant World may come through before anyone has walked up to the Tower
+			ensureTower(server);
 			at = new Vec3(tower.getX() + 0.5, LOOKOUT_Y + 2, tower.getZ() - 1.5);
 		} else {
 			to = server.getLevel(far);
@@ -576,10 +578,25 @@ public final class ZFighterSites {
 		return new Vec3(0.5, CHAMBER_FLOOR, 2.5);
 	}
 
+	/** (0.17.198) The Tower and its Lookout, built now if no one has come near them yet (the way back from the Verdant World lands on it). */
+	static void ensureTower(MinecraftServer server) {
+		Data data = data(server);
+		if (!data.towerBuilt()) {
+			buildTower(server.overworld(), data.tower().orElseThrow());
+			save(server, new Data(data.shrines(), data.built(), data.restUntil(), data.tower(), true));
+		}
+	}
+
 	/** Out in the Verdant World where the Lookout floats over the other world: a little ring of stone with the gate back. */
 	private static Vec3 arriveVerdant(ServerLevel verdant, ServerPlayer player) {
-		int x = Mth.floor(player.getX());
-		int z = Mth.floor(player.getZ());
+		return verdantGate(verdant, Mth.floor(player.getX()), Mth.floor(player.getZ()));
+	}
+
+	/**
+	 * (0.17.198) A ring of mossy stone at (x, z) in the Verdant World with the gate back to the Lookout on its north side
+	 * (built if it isn't there); returns where to stand in it.
+	 */
+	public static Vec3 verdantGate(ServerLevel verdant, int x, int z) {
 		verdant.getChunk(x >> 4, z >> 4);
 		int y = surface(verdant, x, z);
 		BlockPos gate = new BlockPos(x, y, z - 2);

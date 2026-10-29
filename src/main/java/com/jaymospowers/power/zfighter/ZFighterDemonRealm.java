@@ -54,6 +54,7 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.17.62, Andy's NOEA picks) The demon realm: the dark masters' home, three dark biomes in the vanilla Nether ({@code demon_gloam},
@@ -232,7 +233,8 @@ public final class ZFighterDemonRealm {
 		if (now % ARMY_EVERY == 0) {
 			for (ServerPlayer player : level.players()) {
 				int layer = layerAt(level, player.blockPosition());
-				if (layer >= 0 && player.isAlive() && !player.isCreative() && !player.isSpectator()) {
+				// ((0.17.198) never the ward a master raised, till they first leave the Nether: ZFighterStarts.WARD)
+				if (layer >= 0 && player.isAlive() && !player.isCreative() && !player.isSpectator() && !ZFighterStarts.ward(player)) {
 					army(level, layer, player);
 				}
 			}
@@ -310,6 +312,65 @@ public final class ZFighterDemonRealm {
 				ensureMaster(level, village);
 			}
 		}
+	}
+
+	/**
+	 * (0.17.198) A life story's "raised by a demon master" start: the demon village nearest {@code near} (the cells round it,
+	 * out to {@code cells} away), built now if it isn't yet, with its master at his post. Returns its middle (y is the yard's
+	 * floor), or null if no cell that near holds one that can stand.
+	 */
+	static @Nullable BlockPos raiseHome(ServerLevel level, BlockPos near, int cells) {
+		int cx = Math.floorDiv(near.getX(), CELL), cz = Math.floorDiv(near.getZ(), CELL);
+		List<int[]> spots = new ArrayList<>();
+		for (int dx = -cells; dx <= cells; dx++) {
+			for (int dz = -cells; dz <= cells; dz++) {
+				villageAt(cx + dx, cz + dz).ifPresent(spots::add);
+			}
+		}
+		spots.sort(java.util.Comparator.comparingDouble(s -> Math.hypot(s[0] - near.getX(), s[1] - near.getZ())));
+		List<BlockPos> known = level.getAttachedOrElse(VILLAGES, List.of());
+		for (int[] spot : spots) {
+			int x = spot[0], z = spot[1];
+			for (BlockPos village : known) {
+				if (village.getX() == x && village.getZ() == z && village.getY() > 0) {
+					return village;
+				}
+			}
+			if (has(known, x, z)) {
+				// tried before and had no floor
+				continue;
+			}
+			int layer = villageLayer(level, x, z);
+			if (layer < 0) {
+				continue;
+			}
+			int y = floor(level, x, z);
+			if (y < 0) {
+				continue;
+			}
+			build(level, x, y, z, layer);
+			BlockPos village = new BlockPos(x, y, z);
+			List<BlockPos> villages = new ArrayList<>(known);
+			villages.add(village);
+			level.setAttached(VILLAGES, villages);
+			return village;
+		}
+		return null;
+	}
+
+	/** (0.17.198) Where a village's master stands. */
+	static Vec3 masterSpot(BlockPos village) {
+		return masterAt(village);
+	}
+
+	/** (0.17.198) Puts a village's master back at his post now, if he's gone (a player must be near). */
+	static void master(ServerLevel level, BlockPos village) {
+		ensureMaster(level, village);
+	}
+
+	/** The lowest floor above the lava sea at (x, z) with room to stand over it, or -1 (for a start's portal). */
+	static int floorAt(ServerLevel level, int x, int z) {
+		return floor(level, x, z);
 	}
 
 	private static boolean has(List<BlockPos> villages, int x, int z) {

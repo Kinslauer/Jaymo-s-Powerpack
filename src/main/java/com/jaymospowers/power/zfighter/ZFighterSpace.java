@@ -715,7 +715,8 @@ public final class ZFighterSpace {
 		return new BlockPos(0, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0), 0);
 	}
 
-	private static @Nullable BlockPos surface(ServerLevel level, int x, int z) {
+	/** A flat spot of open ground at column (x, z) for a pad (no water under it, no steep slope across it), or null. */
+	static @Nullable BlockPos surface(ServerLevel level, int x, int z) {
 		int low = Integer.MAX_VALUE;
 		int high = Integer.MIN_VALUE;
 		int y = 0;

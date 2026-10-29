@@ -451,6 +451,7 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
+		ZFighterStarts.init();
 		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
 		ZFighterCorruption.init();

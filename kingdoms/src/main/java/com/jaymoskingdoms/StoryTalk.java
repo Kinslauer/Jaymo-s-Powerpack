@@ -41,12 +41,14 @@ public final class StoryTalk {
 	static final float SMALL = 0.85F;
 
 	/** Where a story set a player down. */
-	record Landing(String start, BlockPos at, int realm, long time) {
+	record Landing(String start, BlockPos at, int realm, long time, String dimension) {
 		static final Codec<Landing> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.STRING.fieldOf("start").forGetter(Landing::start),
 			BlockPos.CODEC.fieldOf("at").forGetter(Landing::at),
 			Codec.INT.optionalFieldOf("realm", -1).forGetter(Landing::realm),
-			Codec.LONG.fieldOf("time").forGetter(Landing::time)).apply(i, Landing::new));
+			Codec.LONG.fieldOf("time").forGetter(Landing::time),
+			// (0.7.349) the world it was in, now that a start can set them down off the overworld
+			Codec.STRING.optionalFieldOf("dimension", "minecraft:overworld").forGetter(Landing::dimension)).apply(i, Landing::new));
 	}
 
 	public static final AttachmentType<Landing> LANDING = AttachmentRegistry.create(JaymosKingdoms.id("story_landing"),
@@ -66,11 +68,12 @@ public final class StoryTalk {
 	static void landed(ServerPlayer player, LifeStory.Start start, int realm) {
 		ServerLevel level = (ServerLevel) player.level();
 		BlockPos at = player.blockPosition();
-		if (realm < 0) {
+		if (realm < 0 && level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
 			Faction holds = Banners.owner(level.getServer(), ChunkPos.containing(at));
 			realm = holds == null ? -1 : holds.id();
 		}
-		player.setAttached(LANDING, new Landing(start.name().toLowerCase(Locale.ROOT), at, realm, level.getGameTime()));
+		player.setAttached(LANDING, new Landing(start.name().toLowerCase(Locale.ROOT), at, realm, level.getGameTime(),
+			level.dimension().identifier().toString()));
 	}
 
 	/**
@@ -111,6 +114,9 @@ public final class StoryTalk {
 
 	/** {@code villager} was about where {@code l} set its player down: near it, or in the land of the realm it was about. */
 	private static boolean about(ServerLevel level, Landing l, LivingEntity villager) {
+		if (!level.dimension().identifier().toString().equals(l.dimension())) {
+			return false;
+		}
 		if (villager.blockPosition().closerThan(l.at(), NEAR)) {
 			return true;
 		}
