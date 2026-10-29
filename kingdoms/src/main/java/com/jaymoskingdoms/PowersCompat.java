@@ -362,6 +362,39 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.349) Powers' {@code ZFighterStarts.land(ServerPlayer, String, BlockPos)}. */
+	private static java.lang.invoke.@Nullable MethodHandle land;
+	private static boolean lookedForLand;
+
+	/**
+	 * (0.7.349) A life story's start on one of Powers' other worlds ({@code moon}, {@code verdant}, {@code rustfall},
+	 * {@code maw}, {@code demon}, {@code afterlife}): {@code player} is put there, and what it needs is made. {@code back}:
+	 * a spot in the overworld for one who'll come back to it (the afterlife's way home). False without Powers, or if the
+	 * place couldn't be made.
+	 */
+	public static boolean otherWorld(net.minecraft.server.level.ServerPlayer player, String start, net.minecraft.core.BlockPos back) {
+		if (!lookedForLand) {
+			lookedForLand = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					land = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterStarts"), "land",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, String.class, net.minecraft.core.BlockPos.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' other-world starts (older Powers?)", e);
+				}
+			}
+		}
+		if (land == null) {
+			return false;
+		}
+		try {
+			return (boolean)land.invoke(player, start, back);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the {} start", player.getGameProfile().name(), start, e);
+			return false;
+		}
+	}
+
 	/** (0.7.236) Powers' {@code Future.WAITING}: on a lost-in-time player still waiting for the future to be made. */
 	private static net.fabricmc.fabric.api.attachment.v1.@Nullable AttachmentType<?> futureWaiting;
 	private static boolean lookedForFutureWaiting;

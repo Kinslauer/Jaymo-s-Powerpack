@@ -3749,7 +3749,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Compile-checked only; not seen in game.
 - **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
   players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
-- **0.17.198, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
+- **0.17.198, other-world starts (Kingdoms 0.7.349, `ZFighterStarts`):** Andy: "new starts, involving the other
+  worlds". The life story's last question can now wake you on one of them (`ZFighterStarts.land`, called by Kingdoms):
+  - **Pale Moon:** a crashed pod (`space_pod_wreck`, unbreakable) in a scorched crater 600-900 blocks out. Andy: "Fix it
+    first": use 6 iron, 4 copper, 8 redstone and 4 coal (or charcoal) on it in turn and it becomes a working pod. An
+    empty hand says what it needs next. Kit: stone pickaxe, torches, the pilot's log (oblique hints only).
+  - **Verdant World:** next to a village there, with a gate ring 150-300 blocks off and a compass to it. Going through
+    builds the Tower and Lookout first if no one has (`ZFighterSites.ensureTower`), so you never land on empty sky.
+  - **Rustfall:** a mine mouth 160-260 blocks from the Iron-Master's pad (built, with its pod). For a day, bare-handed
+    overseers (`jaymospowers_overseer`, vindicators) come after you, at most 2 near; leaving Rustfall ends it.
+  - **Maw:** on the salvagers' pad with blackstone bricks and a lantern.
+  - **Demon master:** in a Gloam village (any demon biome if none), its master at his post, with a ruined but lit
+    Nether portal nearby. The demon army leaves you alone until you first leave the Nether (`ZFighterStarts.WARD`).
+  - **Afterlife:** held in the Aether afterlife (`ZFighterAfterlife.strand`) with the usual ways out; home is the
+    overworld spot the story would have used.
+  - `ZFighterDemonRealm.raiseHome` builds or reuses the demon village nearest a spot; `ZFighterSpace.surface` is
+    package-private for the moon.
+- **0.17.199, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
   - Crater-ring blasts go off `CRATER_BLASTS_PER_TICK` (3) a tick, in a scattered order, instead of a whole ring (up
     to 22 TNT-strength blasts) in one tick.
   - The sweep of what's left hanging brings down `GravityMeteorSweep.BREAK_PER_TICK` (1200) blocks a tick, highest

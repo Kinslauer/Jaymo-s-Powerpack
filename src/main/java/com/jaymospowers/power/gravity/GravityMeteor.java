@@ -85,7 +85,7 @@ final class GravityMeteor {
 	static final int CRATER_RINGS = 3;
 	static final double CRATER_RING_STEP = 8.0, CRATER_RING_SPACING = 7.0;
 	static final float CRATER_RING_POWER = 5.0F;
-	/** (0.17.198) At most this many crater-ring blasts go off a tick (a full charge's outer ring is 22; all at once was a lag spike). */
+	/** (0.17.199) At most this many crater-ring blasts go off a tick (a full charge's outer ring is 22; all at once was a lag spike). */
 	static final int CRATER_BLASTS_PER_TICK = 3;
 	/** Its burning trail sets alight whatever it passes within this reach (blocks) of its surface, for this long (seconds). */
 	static final double TRAIL_FIRE_RADIUS = 2.5;
@@ -140,7 +140,7 @@ final class GravityMeteor {
 		final Set<Integer> hit = new HashSet<>();
 		/** Where it was last tick, while it grinds in. */
 		Vec3 sunkTo;
-		/** (0.17.198) What already hung in the air round where it lands, looked at when it was called (see GravityMeteorSweep). */
+		/** (0.17.199) What already hung in the air round where it lands, looked at when it was called (see GravityMeteorSweep). */
 		Set<Long> floatingBefore = Set.of();
 
 		Meteor(ResourceKey<Level> dimension, UUID owner, int rock, Vec3 from, Vec3 to, long start, float charge, int fall) {

@@ -69,6 +69,11 @@ import org.jspecify.annotations.Nullable;
  * captive's escape and Z Fighter) counts as that power's calling: it wakes a day sooner. Lost in time wakes Chrono at once. The heritage and class screens still
  * open for a Writ of Rebirth and for old players who never had a story. MCA's own "where do you start" page is skipped
  * ({@code client/mixin/mca/McaDestinySkipMixin}): the last question is where you start.
+ *
+ * <p>(0.7.349) Six starts wake you on Jaymo's Powers' other worlds ({@link #OTHER_WORLDS}, made by its {@code ZFighterStarts}):
+ * stranded on the Pale Moon, raised under the Verdant World's green sky (the Verdant-born's alone), escaped from Rustfall's
+ * mines (+1 Might), a salvager at the Maw, raised by a demon master in the Nether, and back from the afterlife (which makes
+ * you Divine-born). Till they first leave that world they respawn where they landed ({@link #STRANDED}).
  */
 public final class LifeStory {
 	/** A capital start: how far from the realm's seat (blocks). */
@@ -110,6 +115,10 @@ public final class LifeStory {
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
 	static final int WHALER_HARPOONS = 8;
+	/** (0.7.349) The starts on Jaymo's Powers' other worlds: the Pale Moon, the Verdant World, Rustfall, the Maw, the Nether's demon biomes, the afterlife. */
+	static final Set<Start> OTHER_WORLDS = Set.of(Start.MOON, Start.VERDANT, Start.RUSTFALL, Start.MAW, Start.DEMON, Start.AFTERLIFE);
+	/** (0.7.349) Rustfall's escapee grew up under its weight: a point in this. */
+	static final Stats.Stat RUSTFALL_STAT = Stats.Stat.MIGHT;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -118,7 +127,9 @@ public final class LifeStory {
 	/** Where a story can start. {@code realm}: you name a realm for it. */
 	public enum Start {
 		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), SKYFALL(false),
-		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), WHALERS(false), UNARMED(false), FATE(false);
+		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), WHALERS(false), UNARMED(false),
+		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
+		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false);
 
 		public final boolean realm;
 
@@ -160,9 +171,22 @@ public final class LifeStory {
 			return new Answer(start.name().toLowerCase(Locale.ROOT), icon, null, null, false, null, "", List.of(), start, start.realm);
 		}
 
-		/** Whether it can be picked here: the unarmed and lost-in-time starts need Jaymo's Powers (its lost limbs, its future). */
+		/**
+		 * Whether it can be picked here: the unarmed and lost-in-time starts need Jaymo's Powers (its lost limbs, its
+		 * future), and (0.7.349) so do the other worlds' starts.
+		 */
 		public boolean offered() {
-			return this.start != Start.UNARMED && this.start != Start.TIMELOST || powers();
+			return this.start != Start.UNARMED && this.start != Start.TIMELOST && !OTHER_WORLDS.contains(this.start) || powers();
+		}
+
+		/** (0.7.349, Andy: "Verdant only") The heritage a start is only for: the Verdant World's, the Verdant-born's; null for any. */
+		public Heritage.@Nullable Kind onlyFor() {
+			return this.start == Start.VERDANT ? Heritage.Kind.VERDANT : null;
+		}
+
+		/** (0.7.349, Andy: "you can start as divine born again, but only if you pick that start") The heritage a start makes you, over your birth's; null for none. */
+		public Heritage.@Nullable Kind makes() {
+			return this.start == Start.AFTERLIFE ? Heritage.Kind.DIVINE : null;
 		}
 	}
 
@@ -263,6 +287,12 @@ public final class LifeStory {
 				Answer.road(Start.CAPTIVE, Items.LEAD),
 				Answer.road(Start.WHALERS, Items.TRIDENT),
 				Answer.road(Start.UNARMED, Items.BONE),
+				Answer.road(Start.MOON, Items.END_STONE),
+				Answer.road(Start.VERDANT, Items.VINE),
+				Answer.road(Start.RUSTFALL, Items.RAW_IRON),
+				Answer.road(Start.MAW, Items.CRYING_OBSIDIAN),
+				Answer.road(Start.DEMON, Items.SOUL_LANTERN),
+				Answer.road(Start.AFTERLIFE, Items.TOTEM_OF_UNDYING),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
 		}
 	}
@@ -289,6 +319,13 @@ public final class LifeStory {
 	public static final AttachmentType<String> GENDER = AttachmentRegistry.create(JaymosKingdoms.id("story_gender"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
 	public static final String MALE = "male", FEMALE = "female";
+	/**
+	 * (0.7.349, Andy: "you respawn on the world, or where you spawned for the start initially") The other world a start set
+	 * them down on (its dimension id), till they first leave it: their respawn stays where they landed till then. Saved,
+	 * kept through death.
+	 */
+	public static final AttachmentType<String> STRANDED = AttachmentRegistry.create(JaymosKingdoms.id("story_stranded"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath());
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
 	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
 
@@ -378,6 +415,7 @@ public final class LifeStory {
 			}
 		});
 		StoryStasis.register();
+		net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(LifeStory::leftWorld);
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
@@ -416,7 +454,17 @@ public final class LifeStory {
 				n++;
 			}
 		}
+		// (0.7.349) years under Rustfall's weight
+		if (stat == RUSTFALL_STAT && startedAs(player, Start.RUSTFALL)) {
+			n++;
+		}
 		return n;
+	}
+
+	/** (0.7.349) Whether {@code player}'s story started as {@code start}. */
+	static boolean startedAs(Player player, Start start) {
+		Answer road = answer(player, Question.ROAD);
+		return road != null && road.start == start;
 	}
 
 	/** Points to spend as they like that {@code player}'s story gave (a foundling's). */
@@ -497,6 +545,10 @@ public final class LifeStory {
 			case SNOWED -> "cryo";
 			case CAPTIVE -> "zfighter";
 			case WHALERS -> "darktide";
+			// (0.7.349) the other worlds: a fall under the moon's light weight, the Verdant World's warriors, years in Rustfall's
+			// mines, the black hole's pull, a demon master's hall, the dead's own master
+			case MOON, MAW -> "gravity";
+			case VERDANT, RUSTFALL, DEMON, AFTERLIFE -> "zfighter";
 			default -> "";
 		};
 	}
@@ -520,6 +572,14 @@ public final class LifeStory {
 				return;
 			}
 			heritage = kinds[live.heritage()];
+		}
+		// (0.7.349) the Verdant World's start is the Verdant-born's alone; the afterlife's makes you Divine-born
+		if (road.onlyFor() != null && heritage != road.onlyFor()) {
+			return;
+		}
+		if (road.makes() != null) {
+			heritage = road.makes();
+			Heritage.unlock(player, heritage);
 		}
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
 		Faction roadRealm = road.realm ? realm(server, live.roadRealm()) : null;
@@ -807,6 +867,25 @@ public final class LifeStory {
 					return Start.WHALERS;
 				}
 			}
+			case MOON, VERDANT, RUSTFALL, MAW, DEMON, AFTERLIFE -> {
+				// (0.7.349) Powers puts them there and makes what the start needs; the wild if it can't
+				BlockPos back = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				if (back == null) {
+					back = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spawn);
+				}
+				if (PowersCompat.otherWorld(player, start.name().toLowerCase(Locale.ROOT), back)) {
+					landSafely(player);
+					if (start == Start.AFTERLIFE) {
+						// among the dead, the afterlife keeps them till it lets them go; then they wake at {@code back}
+						home(player, level, back);
+					} else {
+						ServerLevel there = player.level();
+						home(player, there, player.blockPosition());
+						player.setAttached(STRANDED, there.dimension().identifier().toString());
+					}
+					return start;
+				}
+			}
 			case WILD, UNARMED, FATE -> {
 				// the unarmed start sets out from the wild too
 				if (start == Start.UNARMED) {
@@ -860,6 +939,22 @@ public final class LifeStory {
 	static void home(ServerPlayer player, ServerLevel level, BlockPos at) {
 		player.setRespawnPosition(new ServerPlayer.RespawnConfig(
 			net.minecraft.world.level.storage.LevelData.RespawnData.of(level.dimension(), at, player.getYRot(), 0.0F), true), false);
+	}
+
+	/**
+	 * (0.7.349) {@code player} went from {@code from} to another world: if a start had set them down on {@code from}, they've
+	 * left it now, and their respawn there (if it's still that) goes back to the world's spawn (or a bed they sleep in).
+	 */
+	private static void leftWorld(ServerPlayer player, ServerLevel from, ServerLevel to) {
+		String stranded = player.getAttached(STRANDED);
+		if (stranded == null || from == to || !stranded.equals(from.dimension().identifier().toString())) {
+			return;
+		}
+		player.removeAttached(STRANDED);
+		ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
+		if (respawn != null && respawn.respawnData().dimension() == from.dimension()) {
+			player.setRespawnPosition(null, false);
+		}
 	}
 
 	/** (0.7.228) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
@@ -1175,6 +1270,7 @@ public final class LifeStory {
 					p.removeAttached(STORY);
 					p.removeAttached(ROAD);
 					p.removeAttached(GENDER);
+					p.removeAttached(STRANDED);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);

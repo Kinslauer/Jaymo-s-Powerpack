@@ -39,7 +39,7 @@ final class GravityMeteorSweep {
 	/** This share of what comes down drops as items; one block in {@code SHOW_ONE_IN} shows its break. */
 	static final float DROP_CHANCE = 0.03F;
 	static final int SHOW_ONE_IN = 4;
-	/** (0.17.198) At most this many blocks come down a tick (all at once was a lag spike), the highest first. */
+	/** (0.17.199) At most this many blocks come down a tick (all at once was a lag spike), the highest first. */
 	static final int BREAK_PER_TICK = 1200;
 
 	/** A sweep's blocks still to come down. */

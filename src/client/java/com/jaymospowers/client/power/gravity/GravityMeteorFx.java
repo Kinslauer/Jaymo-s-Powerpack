@@ -82,7 +82,7 @@ public final class GravityMeteorFx {
 		ClientTickEvents.END_CLIENT_TICK.register(GravityMeteorFx::tick);
 	}
 
-	/** Fewer of everything on decreased particles, far fewer on minimal; (0.17.198) and half again in low-end mode. */
+	/** Fewer of everything on decreased particles, far fewer on minimal; (0.17.199) and half again in low-end mode. */
 	private static float share(Minecraft minecraft) {
 		ParticleStatus status = minecraft.options.particles().get();
 		float share = status == ParticleStatus.MINIMAL ? 0.25F : status == ParticleStatus.DECREASED ? 0.5F : 1.0F;
