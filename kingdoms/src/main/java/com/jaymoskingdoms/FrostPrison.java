@@ -38,7 +38,7 @@ import net.minecraft.world.phys.AABB;
  * the ice falls away. Once a day (a Minecraft day of game time); the ice can be broken out early. (0.7.153) A hold while
  * the day's ice is spent is handed back to Jaymo's Powers as {@link #BEAM_TAG}: a thin white beam instead.
  * <p>
- * (0.7.322) The cold works like 26.4's Potion of Freezing now (Andy, 2026-10-28: "I just really want the way the chilling
+ * (0.7.301) The cold works like 26.4's Potion of Freezing now (Andy, 2026-10-28: "I just really want the way the chilling
  * potion works transferred to frostborn's prison"): the prisoner gets Jaymo's Powers' {@code jaymospowers:freezing} at
  * level {@link #FREEZING_LEVEL} for the whole stay and {@link #LINGER_TICKS} after, instead of being frozen through on the
  * spot. The frost creeps over their screen and they're frozen through in a few seconds, then shake and take a point of
@@ -50,7 +50,7 @@ public final class FrostPrison {
 	/** How long the ice holds (ticks), how far the Frostborn can freeze (blocks, via {@link Arcana#sighted}), and the wait between (ticks: a day). */
 	static final int HOLD_TICKS = 200;
 	static final long COOLDOWN_TICKS = 24000L;
-	/** (0.7.322) The Freezing level the prison gives (0 = I; II freezes through in 3.5 s), and how long it bites after the ice falls (ticks). */
+	/** (0.7.301) The Freezing level the prison gives (0 = I; II freezes through in 3.5 s), and how long it bites after the ice falls (ticks). */
 	static final int FREEZING_LEVEL = 1, LINGER_TICKS = 100;
 	/** Jaymo's Powers' Freezing (26.4's potion effect). */
 	static final Identifier FREEZING = Identifier.fromNamespaceAndPath("jaymospowers", "freezing");
@@ -154,7 +154,7 @@ public final class FrostPrison {
 	}
 
 	/**
-	 * Held still with numb hands (the cold itself is the Freezing effect). (0.7.322) Without Jaymo's Powers there's no
+	 * Held still with numb hands (the cold itself is the Freezing effect). (0.7.301) Without Jaymo's Powers there's no
 	 * Freezing, so they're frozen through on the spot, as before.
 	 */
 	private static void hold(LivingEntity target) {
