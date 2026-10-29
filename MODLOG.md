@@ -3688,3 +3688,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
   `BloodTrail.follow` (plain types, for reflection).
   - Not seen in game.
+- **0.17.184, Sora's Dagger reverse grip, again:** Andy: "the reverse grip didnt seem to be working, he modeled it
+  differently". The friend's "Reverse grip sora dagger" file (same cubes, his hand slots turned over, kept as
+  `tools/blockbench/soras_dagger_reverse_original.bbmodel`) now gives the `_reverse` models their held transforms.
+  The weapon guard no longer refuses sneak + use on Sora's Dagger when something is in the off hand, which had stopped
+  the turn before the dagger saw it.

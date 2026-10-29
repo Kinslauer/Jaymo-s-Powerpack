@@ -200,6 +200,10 @@ public final class Guard {
 			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem())) {
 			return InteractionResult.PASS;
 		}
+		if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof SorasDagger) {
+			// (0.17.184) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
+			return InteractionResult.PASS;
+		}
 		ItemStack off = player.getOffhandItem();
 		if (!off.isEmpty() && !off.has(DataComponents.WEAPON)) {
 			return InteractionResult.FAIL;
