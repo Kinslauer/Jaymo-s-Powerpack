@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.mixin.mca",
 	"plugin": "com.jaymoskingdoms.mixin.mca.McaMixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["McaTasksMixin", "McaWorkerMixin", "McaCommandMixin", "McaSkinMixin", "McaGuardFoesMixin", "McaGeneticsMixin", "McaDialogueMixin", "McaAnswersMixin", "McaTraitsMixin", "McaConfigMixin", "McaMessageMixin", "McaDestinyMixin", "McaDestinyDoneMixin", "McaVillagerBodyMixin", "McaMemoriesMixin", "McaPlayerSizeMixin", "McaGeneticsAccessor", "McaHeritageMixin", "McaBabyMixin", "McaChatAIMixin", "McaChatAITalkMixin", "McaPlayerNameMixin", "McaTabListNameMixin", "McaClothingPoolMixin", "McaEquipmentMixin", "McaMailMixin", "McaShelterMixin", "McaMeleeSwingMixin", "McaTeleportMixin", "McaVisitorResidencyMixin"],
+	"mixins": ["McaTasksMixin", "McaWorkerMixin", "McaCommandMixin", "McaSkinMixin", "McaGuardFoesMixin", "McaGeneticsMixin", "McaDialogueMixin", "McaAnswersMixin", "McaTraitsMixin", "McaConfigMixin", "McaMessageMixin", "McaDestinyMixin", "McaDestinyDoneMixin", "McaVillagerBodyMixin", "McaMemoriesMixin", "McaPlayerSizeMixin", "McaGeneticsAccessor", "McaHeritageMixin", "McaBabyMixin", "McaChatAIMixin", "McaChatAITalkMixin", "McaPlayerNameMixin", "McaTabListNameMixin", "McaClothingPoolMixin", "McaEquipmentMixin", "McaMailMixin", "McaShelterMixin", "McaMeleeSwingMixin", "McaTeleportMixin", "McaVisitorResidencyMixin", "McaMountedArcherMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

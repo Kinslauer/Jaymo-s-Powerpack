@@ -535,6 +535,7 @@ public final class Camps {
 			CampData goblins = data(server, camp.id());
 			if (goblins != null) {
 				ScalebaneArcher.grow(level, camp.id(), goblins.center(), days);
+				WarBarrel.grow(level, camp.id(), days);
 			}
 			return;
 		}

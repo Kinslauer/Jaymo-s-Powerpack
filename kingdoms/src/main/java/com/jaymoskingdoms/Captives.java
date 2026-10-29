@@ -114,9 +114,9 @@ public final class Captives {
 	 */
 	static final int[] FAVOURS_GIVEN = {1, 1, 2};
 	static final int FAVOURS_MOST = 3;
-	/** (0.7.335) How near (blocks) a guard of theirs must be to tell you they're letting an arrest go. */
+	/** (0.7.340) How near (blocks) a guard of theirs must be to tell you they're letting an arrest go. */
 	static final double PARDON_RANGE = 24.0;
-	/** (0.7.335) The MCA {@code main} menu answer (our dialogue data): "Speak of the rescue". */
+	/** (0.7.340) The MCA {@code main} menu answer (our dialogue data): "Speak of the rescue". */
 	public static final String ANSWER = "jaymoskingdoms_rescue";
 
 	/**
@@ -377,7 +377,7 @@ public final class Captives {
 		if (f != null && f.fallen()) {
 			f = null;
 		}
-		// (0.7.335) they tell you themselves where home is: no chat line
+		// (0.7.340) they tell you themselves where home is: no chat line
 		Deeds.freed(level, player, captive, f);
 	}
 
@@ -493,12 +493,12 @@ public final class Captives {
 				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
 			}
 		}
-		// (0.7.335) no chat: the reward comes in your next Tidings
+		// (0.7.340) no chat: the reward comes in your next Tidings
 		Post.tidings(player.getUUID(), bounty > 0
 			? Component.translatable("tidings.jaymoskingdoms.captive.home", v.getDisplayName(), home.name(), purse, bounty)
 			: Component.translatable("tidings.jaymoskingdoms.captive.home.purse", v.getDisplayName(), home.name(), purse));
 		if (known) {
-			// (0.7.335) owed quietly: nothing says so, you find out when the guards wave you through
+			// (0.7.340) owed quietly: nothing says so, you find out when the guards wave you through
 			owe(player, home, FAVOURS_GIVEN[standing]);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -555,7 +555,7 @@ public final class Captives {
 			all.put(id, had - 1);
 		}
 		player.setAttached(FAVOURS, Map.copyOf(all));
-		// (0.7.335) a guard of theirs nearby says so; nothing tells you how many are left
+		// (0.7.340) a guard of theirs nearby says so; nothing tells you how many are left
 		if (player.level() instanceof ServerLevel level) {
 			LivingEntity guard = nearestGuard(level, player, f);
 			if (guard != null) {
@@ -567,7 +567,7 @@ public final class Captives {
 	}
 
 	/**
-	 * (0.7.335) "Speak of the rescue" ({@link #ANSWER}, MCA's main menu): one of the watch of a town that owes you for one
+	 * (0.7.340) "Speak of the rescue" ({@link #ANSWER}, MCA's main menu): one of the watch of a town that owes you for one
 	 * you brought home. Andy: "you can talk to them about it". They say what it means, never how many are owed.
 	 */
 	public static boolean canSpeakOf(ServerPlayer player, LivingEntity who) {

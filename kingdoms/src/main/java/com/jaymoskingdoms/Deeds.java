@@ -271,7 +271,7 @@ public final class Deeds {
 
 	/** {@code player} cut {@code captive} loose; {@code home} is where they were taken from, if anywhere. */
 	static void freed(ServerLevel level, ServerPlayer player, Villager captive, @Nullable Faction home) {
-		// (0.7.335) one taken from somewhere names it as they thank you: that's how you learn where to bring them
+		// (0.7.340) one taken from somewhere names it as they thank you: that's how you learn where to bring them
 		if (home != null) {
 			thank(level, captive, player, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.lead", level.getRandom()),
 				Identities.shownName(player), home.name()), FREED_HEARTS);

@@ -49,9 +49,10 @@ import net.minecraft.world.level.storage.ValueOutput;
  * a while it winds down and folds itself into its shell, its lights out, hard to hurt but standing still; anything
  * hostile nearby or a blow wakes it, and it unfolds and gets to work. It's mended with copper ingots.
  * <p>
- * (0.7.333) A <i>rogue</i> one ({@link #makeRogue}), a remnant of the Aether like the monoliths, is a dungeon's mini-boss, set down by {@link GolemLairs}: tougher, with
- * a boss bar, it sleeps folded until a player comes near, fights only players, can't be mended, and drops gold and maybe a
- * diamond.
+ * (0.7.333) A <i>rogue</i> one ({@link #makeRogue}), a remnant of the Aether like the monoliths, is a dungeon's
+ * mini-boss, set down by {@link GolemLairs}: tougher, with a boss bar (0.7.334: shown only once it and a player have
+ * traded blows), it sleeps folded until a player comes near, fights only players, can't be mended, and drops gold and
+ * maybe a diamond.
  */
 public class ClockworkGolem extends IronGolem {
 	public static EntityType<ClockworkGolem> TYPE;
@@ -78,12 +79,15 @@ public class ClockworkGolem extends IronGolem {
 	private int idle;
 	private final ServerBossEvent bar = new ServerBossEvent(this.getUUID(), Component.translatable("entity.jaymoskingdoms.clockwork_golem.rogue"),
 		BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
+	/** (0.7.334) A rogue has traded blows with a player since it last woke: only then is its boss bar shown. */
+	private boolean engaged;
 	private int unfolding;
 	/** (Client) the tick it last folded or unfolded. */
 	private int changedAt = -1000;
 
 	public ClockworkGolem(EntityType<? extends ClockworkGolem> type, Level level) {
 		super(type, level);
+		this.bar.setVisible(false);
 	}
 
 	static void register() {
@@ -159,7 +163,7 @@ public class ClockworkGolem extends IronGolem {
 			this.fold(level, true);
 		}
 		if (this.rogue()) {
-			this.bar.setVisible(!this.folded());
+			this.bar.setVisible(this.engaged && !this.folded());
 			this.bar.setProgress(this.getHealth() / this.getMaxHealth());
 		}
 	}
@@ -170,6 +174,9 @@ public class ClockworkGolem extends IronGolem {
 		}
 		this.entityData.set(FOLDED, fold);
 		this.idle = 0;
+		if (fold) {
+			this.engaged = false;
+		}
 		this.getNavigation().stop();
 		if (!fold) {
 			this.unfolding = UNFOLD_TICKS;
@@ -192,12 +199,19 @@ public class ClockworkGolem extends IronGolem {
 		if (wasFolded) {
 			this.fold(level, false);
 		}
+		if (hurt && source.getEntity() instanceof Player) {
+			this.engaged = true;
+		}
 		return hurt;
 	}
 
 	@Override
 	public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
-		return !this.folded() && this.unfolding == 0 && super.doHurtTarget(level, target);
+		boolean hit = !this.folded() && this.unfolding == 0 && super.doHurtTarget(level, target);
+		if (hit && target instanceof Player) {
+			this.engaged = true;
+		}
+		return hit;
 	}
 
 	@Override
@@ -285,7 +299,7 @@ public class ClockworkGolem extends IronGolem {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(FOLDED, input.getBooleanOr("folded", false));
 		this.entityData.set(ROGUE, input.getBooleanOr("rogue", false));
-		this.bar.setVisible(this.rogue() && !this.folded());
+		this.bar.setVisible(false);
 	}
 
 	/** The golem, built: set it down on a block and it stands up, its maker's. */

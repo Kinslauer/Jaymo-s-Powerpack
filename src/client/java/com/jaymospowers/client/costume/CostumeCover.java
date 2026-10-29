@@ -159,6 +159,10 @@ public final class CostumeCover {
 				if (a == null || b == null) {
 					return 0;
 				}
+				if (a.getWidth() != 64) {
+					// (0.17.169) the thief cut's sheet is its own model's (CostumeModels.thief), whose boxes cover every part
+					return BODY | RIGHT_ARM | LEFT_ARM | RIGHT_LEG | LEFT_LEG;
+				}
 				boolean slim = primary.getPath().contains("_slim_");
 				int arm = slim ? 3 : 4;
 				int parts = 0;

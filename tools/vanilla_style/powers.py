@@ -464,6 +464,8 @@ if __name__ == '__main__':
     out = sys.argv[2] if len(sys.argv) > 2 else OUT
     items['arsenal_frost_lance'] = frost_lance(van)
     os.makedirs(out, exist_ok=True)
+    # (0.17.169) the Soul Saber is drawn by the Dreaded Blade's 3D model now (tools/blockbench/dreaded_blade.py)
+    items.pop('soul_saber', None)
     for n, im in items.items(): im.save(os.path.join(out, n + '.png'))
     print(len(items), 'icons ->', out)
     for gout in GUI_OUTS:

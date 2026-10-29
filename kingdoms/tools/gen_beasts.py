@@ -10,7 +10,10 @@ from gen_nether import ASSETS, entry, egg, rgb, table, write  # noqa: E402
 
 EGGS = {'minotaur_spawn_egg': (0x5A3B28, 0xD4A640), 'piglin_king_spawn_egg': (0xC9877A, 0xE8B840),
         'redstone_golem_spawn_egg': (0x8A8A8A, 0xE0201A), 'skulk_golem_spawn_egg': (0x1F2A33, 0x2FB5B5),
-        'wild_boar_spawn_egg': (0x4A3326, 0xD8C8A8), 'scalebane_spawn_egg': (0x3E6B3A, 0xC8A050)}
+        'wild_boar_spawn_egg': (0x4A3326, 0xD8C8A8), 'scalebane_spawn_egg': (0x3E6B3A, 0xC8A050),
+        # (0.7.339) the third batch
+        'gorgon_spawn_egg': (0x4E5A24, 0x2E8A6A), 'war_barrel_spawn_egg': (0x7A5230, 0x6E7686),
+        'haunted_stand_spawn_egg': (0x9A7448, 0x3A2A1A)}
 
 
 def rare(item, chance):
@@ -26,6 +29,11 @@ def loot():
     table('redstone_golem', [entry('minecraft:redstone', 6, 14), entry('minecraft:redstone_block', 0, 2), rare('minecraft:diamond', 0.25)])
     table('skulk_golem', [entry('minecraft:sculk', 2, 5), entry('minecraft:cobbled_deepslate', 1, 3), rare('minecraft:echo_shard', 0.3)])
     table('wild_boar', [entry('minecraft:porkchop', 1, 3), entry('minecraft:leather', 0, 1)])
+    table('gorgon', [entry('minecraft:arrow', 2, 6), entry('minecraft:string', 1, 3), rare('minecraft:emerald', 0.5),
+                     rare('minecraft:bow', 0.2)])
+    table('war_barrel', [entry('minecraft:oak_planks', 4, 10), entry('minecraft:iron_nugget', 6, 14), rare('minecraft:lantern', 0.5),
+                         entry('minecraft:gold_nugget', 2, 6)])
+    table('haunted_stand', [entry('minecraft:stick', 2, 5), rare('minecraft:armor_stand', 0.3), rare('minecraft:soul_lantern', 0.1)])
     table('scalebane', [entry('minecraft:arrow', 0, 3), entry('minecraft:bone', 0, 2), rare('minecraft:turtle_scute', 0.15)])
 
 
