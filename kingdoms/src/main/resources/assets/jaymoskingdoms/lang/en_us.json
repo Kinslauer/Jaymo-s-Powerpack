@@ -842,6 +842,8 @@
 	"entity.jaymoskingdoms.coachman_of": "Coachman of %s",
 	"entity.jaymoskingdoms.wagon": "Wagon",
 	"entity.jaymoskingdoms.cannon": "Cannon",
+	"entity.jaymoskingdoms.clockwork_golem": "Clockwork Golem",
+	"item.jaymoskingdoms.clockwork_golem": "Clockwork Golem",
 	"entity.jaymoskingdoms.cannonball": "Cannonball",
 	"entity.jaymoskingdoms.dynamite": "Dynamite",
 	"item.jaymoskingdoms.dynamite": "Dynamite",

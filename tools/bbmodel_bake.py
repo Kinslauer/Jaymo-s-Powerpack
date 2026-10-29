@@ -7,7 +7,7 @@ because every face is baked as its own quad (vanilla's ModelPart only knows box 
 Space: Blockbench works y-up with the model's front at -z; the game's models are y-down with the feet at y=24. A point
 (x, y, z) in Blockbench is (-x, 24 - y, z) in the model (a half turn about z, so nothing is mirrored), and a rotation
 (rx, ry, rz) becomes (-rx, -ry, rz). Animation keyframes are stored the way Blockbench shows them, which is already
-the game's way for rotations; positions flip y.
+the game's way for rotations; positions flip x and y.
 
 Run from the project root:
   python -I tools/bbmodel_bake.py <model.bbmodel> <assets dir> <name> [--keep a,b] [--drop a,b] [--anims a,b]
@@ -243,8 +243,10 @@ def bake(data, keep=None, drop=None, anim_names=None):
 								v = s
 						vals.append(v)
 					if ch == "position":
-						y = vals[1]
-						vals[1] = -y if not isinstance(y, str) else "-(" + y + ")"
+						# x and y both turn round (the model's half turn about z)
+						for j in (0, 1):
+							v = vals[j]
+							vals[j] = -v if not isinstance(v, str) else "-(" + v + ")"
 					interp = {"catmullrom": 1, "step": 2}.get(k.get("interpolation"), 0)
 					keys.append([r4(k["time"])] + [r4(v) if not isinstance(v, str) else v for v in vals] + [interp])
 				tracks.append({"bone": an["name"], "ch": {"rotation": "rot", "position": "pos", "scale": "scale"}[ch], "keys": keys})

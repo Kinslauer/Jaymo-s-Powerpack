@@ -42,6 +42,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
+		// (0.7.321) the clockwork golem
+		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);

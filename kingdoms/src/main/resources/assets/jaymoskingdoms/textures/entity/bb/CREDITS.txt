@@ -21,3 +21,9 @@ fire_dragon.png (bbmodels/fire_dragon.json), and dragon/notus/ and dragon/boreas
   sitting and landing by our own code (it came with a flying pose and wingbeat only); drawn at 0.53 (Notus) and 0.45
   (Boreas) size. Notus's hides are its texture and three re-shadings of it; Boreas's are it recoloured to ice; both
   species' glowing markings are its glow half (kingdoms/tools/gen_fire_dragons.py).
+
+clockwork_golem.png, clockwork_golem_1.png (bbmodels/clockwork_golem.json), and textures/item/clockwork_golem.png:
+the clockwork golem
+  "Mech Golem" by octopusstudio, https://blockbenchworkshop.com/model/octopusstudio/mech-golem
+  Changes: baked to our loader's format; drawn at 0.94 size; its lit texture while it's awake, its unlit one folded;
+  the item icon is the model drawn small (kingdoms/tools/gen_clockwork_golem.py).
