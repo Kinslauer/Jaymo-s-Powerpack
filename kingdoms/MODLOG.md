@@ -6726,3 +6726,24 @@ find one living there."
 - Four Patrol suits from `tools/gen_zfighter_outfits.py` (`patrolman()`): dark bodysuit, white chest plate and shoulder
   guards, white gloves and boots, gold badge (`skins/clothing/zfighter/patrolman_0-3.png`).
 - Compile-checked. Not seen in game.
+
+## 0.7.360: hints on the hold screen, a quieter narrator (pack 0.18.7)
+- Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white text should
+  cycle, with a series of a minimum 40 lines hinting at how different game mechanics work. The narrator can continue
+  saying what it does now". `StoryHoldScreen` keeps "Your story is being written" (its dots moved onto it) and under it
+  shows one of 44 hints (`gui.jaymoskingdoms.story.hint.1-44`: climbing, parries, finishers, smithing, lockpicking,
+  boards, careers, horses, alchemy, mana and more), a new one every 7 s from a random one on, wrapped to two lines if
+  long. The narrator still reads the title and what the hold is for (the capital rising, the whaler, the future).
+  - Not seen in game.
+- Andy, on the life story's narration: "should just say, 'Who are you' no other voice line, on this screen. 'as a child
+  you were....' should be all it says. If players spend more than 10s on this screen then it plays, 'what kind of child
+  were you?' ... It can simply say, 'what sets you on the road now?'". Each question is now read by its title alone; its
+  line underneath is read only once the page has stood 10 s unanswered (`LifeStoryScreen.SUB_DELAY_MS`), never on the
+  road's page. The who-are-you page reads only "Who are you?". 11 narrator clips remade (titles alone, lines apart).
+- Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off anytime the
+  player advances." Next, a new page, and leaving the story (`removed`) all cut the narrator off at once
+  (`LifeStoryScreen.hush`), and the loading screen's narrator and the story's never talk over each other.
+- Andy: "The ending story should keep the extent of the flavor text included in every option. For every option it
+  self, shorten the white text to a sentence or two at most." Every answer has a short line (`<q>.<a>.short`, 9 words at
+  most) shown when you point at it and on the road carousel; the story on the last page still tells every whole tale.
+  - Not seen in game.

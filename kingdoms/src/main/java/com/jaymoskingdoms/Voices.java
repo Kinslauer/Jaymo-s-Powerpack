@@ -43,7 +43,7 @@ public final class Voices {
 	 * you are (the ask and its grey line, now only heard), the skip-the-story ask, and the hold screen's lines.
 	 */
 	public static final List<String> INTRO_LINES = List.of(
-		"story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc",
+		"story.jaymoskingdoms.gender.title",
 		"gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc",
 		"gui.jaymoskingdoms.story.hold.title", "gui.jaymoskingdoms.story.hold.realm", "gui.jaymoskingdoms.story.hold.harbour",
 		"gui.jaymoskingdoms.story.hold.future", "gui.jaymoskingdoms.story.hold.arriving");
@@ -95,6 +95,10 @@ public final class Voices {
 		List<String> out = new ArrayList<>(SPIRIT_LINES);
 		for (LifeStory.Question q : LifeStory.Question.values()) {
 			out.add("story.jaymoskingdoms." + q.key() + ".title");
+			// (0.7.360) a question's title and the line under it are read apart (the line only if the page waits)
+			if (q != LifeStory.Question.ROAD) {
+				out.add("story.jaymoskingdoms." + q.key() + ".sub");
+			}
 			for (LifeStory.Answer a : q.answers()) {
 				out.add("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale");
 				if (a.realm()) {
