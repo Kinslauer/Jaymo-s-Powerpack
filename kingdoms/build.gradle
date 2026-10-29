@@ -68,6 +68,9 @@ dependencies {
 	// Jade (CC BY-NC-SA 4.0, Snownee; in Powers' pack): client/compat/JadeIntroductions keeps strangers' names, trades and
 	// health off its panel. Compiled against (the same version as Powers' pack), never required.
 	compileOnly "maven.modrinth:jade:71CTWqdE"
+	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; in Powers' pack): client/VoiceChangerCompat turns a player's
+	// voice for a werewolf, a Great Ape or a disguise (VoiceMasks) through its API. Compiled against, never required.
+	compileOnly "maven.modrinth:simple-voice-voice-changer:acFxvUQp"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin;
 
 import com.jaymoskingdoms.Foundations;
+import com.jaymoskingdoms.GolemLairs;
 import com.jaymoskingdoms.Hearths;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -16,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * After a structure's pieces are placed in a chunk, the gaps under any that float are filled ({@link Foundations}), and a
- * village's fires get stone hearths and chimneys ({@link Hearths}).
+ * village's fires get stone hearths and chimneys ({@link Hearths}), and (0.7.332) dungeons may get a rogue clockwork golem
+ * ({@link GolemLairs}).
  */
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin {
@@ -26,5 +28,6 @@ abstract class StructureStartMixin {
 		StructureStart self = (StructureStart)(Object)this;
 		Foundations.fill(level, self.getStructure(), self.getPieces(), chunkBB);
 		Hearths.build(level, self.getStructure(), self.getPieces(), chunkBB);
+		GolemLairs.place(level, self, chunkBB);
 	}
 }

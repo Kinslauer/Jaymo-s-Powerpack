@@ -206,6 +206,10 @@ final class WebSpentLines {
 	}
 
 	private static void spend(Seen seen) {
+		if (seen.dark()) {
+			// (0.17.149) a symbiote's cord retracts into the hand (WebEngulf): it never falls
+			return;
+		}
 		Spent line = new Spent(seen.anchor(), seen.hand(), seen.dark());
 		if (seen.loose()) {
 			// it was stuck to something moving: it falls free at once
