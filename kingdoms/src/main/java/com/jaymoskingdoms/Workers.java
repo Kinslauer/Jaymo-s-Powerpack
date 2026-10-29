@@ -194,6 +194,10 @@ public final class Workers {
 			Javelins.tick(level, w);
 			return Pirates.villagerStep(level, w);
 		}
+		if (BloodHunters.step(level, w)) {
+			// (0.7.341) a town's hunter out on a wounded beast's blood trail
+			return true;
+		}
 		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
 			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob) || Downed.helping(mob)) {
 			return false;

@@ -1,0 +1,43 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:wolf",
+		"minecraft:fox",
+		"minecraft:polar_bear",
+		"minecraft:ocelot",
+		"minecraft:cat",
+		"minecraft:zombie",
+		"minecraft:husk",
+		"minecraft:zombie_villager",
+		"minecraft:drowned",
+		"minecraft:spider",
+		"minecraft:cave_spider",
+		"minecraft:vindicator",
+		"minecraft:pillager",
+		"minecraft:piglin_brute",
+		"minecraft:hoglin",
+		"minecraft:zoglin",
+		"minecraft:ravager",
+		"minecraft:witch",
+		{
+			"id": "naturalist:bear",
+			"required": false
+		},
+		{
+			"id": "naturalist:lion",
+			"required": false
+		},
+		{
+			"id": "naturalist:tiger",
+			"required": false
+		},
+		{
+			"id": "naturalist:alligator",
+			"required": false
+		},
+		{
+			"id": "naturalist:snake",
+			"required": false
+		}
+	]
+}

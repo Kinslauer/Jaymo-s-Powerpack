@@ -2,6 +2,7 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.blood.BloodParticles;
+import com.jaymospowers.core.blood.BloodTrail;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -58,6 +59,12 @@ public final class BladeBlood {
 	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
+	/**
+	 * (0.17.182) The lasting stains ({@link BloodTrail}): a drip's (grows where a body keeps bleeding), a blow's (one for
+	 * every this many drops, at most this many), and how long a drop takes to reach the ground before its stain shows (ticks).
+	 */
+	static final float DRIP_STAIN = 0.2F, HIT_STAIN = 0.35F;
+	static final int DROPS_PER_STAIN = 5, HIT_STAINS_MAX = 3, FALL_TICKS = 8;
 	/**
 	 * (0.15.111) A blow on a corpse (Jaymo's Kitchen's, see {@link #corpse}): a blade's sprays this many times a living
 	 * body's drops and throws this many flecks per point of damage (at most this many); any other blow only spatters,
@@ -176,6 +183,8 @@ public final class BladeBlood {
 		double w = Math.max(target.getBbWidth() * 0.5 - 0.5, 0.0) + 0.05;
 		level.sendParticles(new BloodParticles.Spray(color(target), size(target)), true, true, at.x, at.y + target.getBbHeight() * 0.25, at.z,
 			drops, w, 0.1, w, SPRAY_SPEED + drops * SPEED_PER_DROP);
+		BloodTrail.bleed(level, target, color(target), Math.min(HIT_STAINS_MAX, 1 + drops / DROPS_PER_STAIN), w + 0.4,
+			HIT_STAIN * size(target), FALL_TICKS);
 		return true;
 	}
 
@@ -200,9 +209,7 @@ public final class BladeBlood {
 
 	/** Lays {@code count} pools of {@code target}'s blood, this big, on the ground around its feet. */
 	private static void pool(ServerLevel level, LivingEntity target, int count, float scale) {
-		double spread = target.getBbWidth() * 0.4;
-		level.sendParticles(new BloodParticles.Puddle(color(target), scale), true, true, target.getX(), target.getY() + 0.1, target.getZ(),
-			count, spread, 0.0, spread, 0.0);
+		BloodTrail.bleed(level, target, color(target), count, target.getBbWidth() * 0.4, scale, 0);
 	}
 
 	/** (0.15.93) Wounds' open cut on {@code body} drips, from this far up it (a fraction of its height); a stump drips more. */
@@ -211,8 +218,11 @@ public final class BladeBlood {
 			return;
 		}
 		double w = body.getBbWidth() * 0.3;
-		level.sendParticles(new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE), true, false, body.getX(),
-			body.getY() + body.getBbHeight() * up, body.getZ(), stump ? STUMP_DRIP_DROPS : DRIP_DROPS, w, 0.05, w, 0.01);
+		int drops = stump ? STUMP_DRIP_DROPS : DRIP_DROPS;
+		// (0.17.182) the drops fly as before but leave no passing splash: each lands as a lasting stain (BloodTrail)
+		level.sendParticles(new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE, false), true, false, body.getX(),
+			body.getY() + body.getBbHeight() * up, body.getZ(), drops, w, 0.05, w, 0.01);
+		BloodTrail.bleed(level, body, color(body), drops, w, DRIP_STAIN * size(body), FALL_TICKS);
 	}
 
 	/**
@@ -239,8 +249,8 @@ public final class BladeBlood {
 		}
 		if (heavy) {
 			float over = Math.max(damage - HEAVY_BLUNT, 0.0F);
-			level.sendParticles(new BloodParticles.Puddle(color, Math.min(POOL_MAX, POOL_SCALE + over * POOL_GROWTH) * size), true, true,
-				corpse.getX(), corpse.getY() + 0.1, corpse.getZ(), Math.min(POOLS_MAX, 1 + Mth.floor(over / POOL_PER_DAMAGE)), w, 0.0, w, 0.0);
+			BloodTrail.bleed(level, corpse, color, Math.min(POOLS_MAX, 1 + Mth.floor(over / POOL_PER_DAMAGE)), w,
+				Math.min(POOL_MAX, POOL_SCALE + over * POOL_GROWTH) * size, 0);
 		}
 		int flecks = Math.min(CORPSE_FLECKS_MAX, Math.max(1, Mth.floor(damage * (blade ? CORPSE_BLADE_FLECKS : CORPSE_FLECKS))));
 		level.sendParticles(BloodParticles.fleck(color, CORPSE_FLECK_SIZE), at.x, at.y + 0.1, at.z, flecks, w, 0.05, w, CORPSE_FLECK_SPEED);
@@ -281,8 +291,7 @@ public final class BladeBlood {
 		double w = type.getWidth() * 0.6 + 0.2, h = type.getHeight() * 0.3 + 0.1;
 		double x = body.getX(), y = body.getY() + type.getHeight() * 0.4, z = body.getZ();
 		level.sendParticles(new BloodParticles.Spray(color, size), true, true, x, y, z, BLAST_DROPS, w, h, w, BLAST_SPEED);
-		level.sendParticles(new BloodParticles.Puddle(color, BURST_POOL * size), true, true, body.getX(), body.getY() + 0.1, body.getZ(),
-			BLAST_POOLS, w * 1.5, 0.0, w * 1.5, 0.0);
+		BloodTrail.bleed(level, body, color, BLAST_POOLS, w * 1.5, BURST_POOL * size, 0);
 		level.sendParticles(BloodParticles.fleck(color, 2.0F), x, y, z, BLAST_GORE, w, h, w, BLAST_GORE_SPEED);
 	}
 }

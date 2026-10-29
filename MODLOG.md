@@ -3671,3 +3671,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the turf still decides. The scattered rocks now keep to grass only 1 time in 5 (`GroundRocksFeature.ON_GRASS`), so
   rocks on grass mostly come in piles. Rarity in `worldgen/placed_feature/pebble_piles.json`.
   - Not seen in game.
+- **0.17.182, blood stays where it falls (`core/blood/BloodTrail`, `BloodTracking`):** Andy: "the blood that falls
+  continues to emit, it needs to stay on the ground where it falls, allowing for players and mobs to track it". Ground
+  blood was only ever client particles that faded in 20-30 s. Now the server keeps every stain (where, whose, when) for
+  10 minutes (`BloodTrail.LIFE`, the last minute fading) and sends each player the stains within 64 blocks once, so
+  anyone coming by later sees them too. A cut's drip no longer leaves its own splash: its stain lands under the body a
+  moment after the drop, and a body that keeps bleeding on one spot grows that stain into a pool (up to 1.8x) instead
+  of stacking new ones. Blows leave 1-3 stains around the target, and the heavy-blow, crushing, corpse and blast pools
+  are lasting stains too. Stains darken to a dried brown over the first 5 minutes, so a trail reads fresh to old. The
+  passing splashes a spray's drops leave last 60-90 s now (were 17-25 s). Nothing stains in water or lava.
+  Mobs in `jaymospowers:blood_trackers` (wolves, foxes, polar bears, cats, ocelots, Naturalist bears/big cats/gators/
+  snakes; zombies, spiders, illagers, piglin brutes, hoglins, ravagers, witches) with nothing to fight smell a living
+  bleeder's stains within 16 blocks and walk them stain by stain toward fresher blood, until they see the bleeder
+  (12 blocks) and go for it. Monsters follow players' and villagers' blood; wild beasts follow smaller animals', and a
+  player's only when the player is down or under 40% health; tamed animals never track. Stains are kept in memory, so a
+  server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
+  `BloodTrail.follow` (plain types, for reflection).
+  - Not seen in game.

@@ -23,13 +23,22 @@ import net.minecraft.network.codec.StreamCodec;
  * {@code BladeBlood}). Who bleeds, what colour and how much is {@code BladeBlood}'s.
  */
 public final class BloodParticles {
-	/** The blood a creature sprays: one of the drops at random, in its colour, this size (1 = a man's). */
-	public record Spray(int color, float scale) implements ParticleOptions {
+	/**
+	 * The blood a creature sprays: one of the drops at random, in its colour, this size (1 = a man's). (0.17.182) A drop
+	 * leaves its own short-lived splash where it lands unless {@code stains} is false (a cut's drip, whose lasting stain
+	 * the server lays, {@link BloodTrail}).
+	 */
+	public record Spray(int color, float scale, boolean stains) implements ParticleOptions {
 		public static final MapCodec<Spray> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 			Codec.INT.fieldOf("color").forGetter(Spray::color),
-			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Spray::scale)).apply(i, Spray::new));
+			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Spray::scale),
+			Codec.BOOL.optionalFieldOf("stains", true).forGetter(Spray::stains)).apply(i, Spray::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Spray> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT, Spray::color, ByteBufCodecs.FLOAT, Spray::scale, Spray::new);
+			ByteBufCodecs.INT, Spray::color, ByteBufCodecs.FLOAT, Spray::scale, ByteBufCodecs.BOOL, Spray::stains, Spray::new);
+
+		public Spray(int color, float scale) {
+			this(color, scale, true);
+		}
 
 		@Override
 		public ParticleType<?> getType() {
@@ -37,13 +46,24 @@ public final class BloodParticles {
 		}
 	}
 
-	/** A pool of blood on the ground (or whatever's under it), this size. */
-	public record Puddle(int color, float scale) implements ParticleOptions {
+	/**
+	 * A pool of blood on the ground (or whatever's under it), this size. (0.17.182) One of {@link BloodTrail}'s lasting
+	 * stains carries its {@code mark} id (0 for a passing splash), how many ticks old it is and how many it has left.
+	 */
+	public record Puddle(int color, float scale, long mark, int age, int life) implements ParticleOptions {
 		public static final MapCodec<Puddle> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 			Codec.INT.fieldOf("color").forGetter(Puddle::color),
-			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Puddle::scale)).apply(i, Puddle::new));
+			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Puddle::scale),
+			Codec.LONG.optionalFieldOf("mark", 0L).forGetter(Puddle::mark),
+			Codec.INT.optionalFieldOf("age", 0).forGetter(Puddle::age),
+			Codec.INT.optionalFieldOf("life", 0).forGetter(Puddle::life)).apply(i, Puddle::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Puddle> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT, Puddle::color, ByteBufCodecs.FLOAT, Puddle::scale, Puddle::new);
+			ByteBufCodecs.INT, Puddle::color, ByteBufCodecs.FLOAT, Puddle::scale, ByteBufCodecs.VAR_LONG, Puddle::mark, ByteBufCodecs.VAR_INT,
+			Puddle::age, ByteBufCodecs.VAR_INT, Puddle::life, Puddle::new);
+
+		public Puddle(int color, float scale) {
+			this(color, scale, 0L, 0, 0);
+		}
 
 		@Override
 		public ParticleType<?> getType() {
@@ -87,6 +107,7 @@ public final class BloodParticles {
 
 	/** Registers the particles (by loading this class). */
 	public static void init() {
+		BloodTrail.init();
 	}
 
 	/** (0.15.109) A {@link Fleck} of this colour (RGB) and size, where a {@code DustParticleOptions} would go. */
