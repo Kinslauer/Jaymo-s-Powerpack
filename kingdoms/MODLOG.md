@@ -6484,7 +6484,9 @@ Compile-checked, not seen in game.
   (from feral stage 2 or the hour before a change: furred hands, yellow eye flashes, growl when hit), `Caging` (change in
   a closed room and the beast stays in, clawing the walls), `MorningAfter` (bloody hands and a count of the night's
   kills, "someone you knew"; look at the Kitchen corpse to learn who), `TornCloth` (a scrap in your rag colour drops at
-  every change; use it on its owner to match), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
+  every change; use it on its owner to match), `ClothesColour` (Andy: rags, cloth and clothes "should all be one and the
+  same": each client reads its player's MCA clothes as drawn, in the inventory or third person, and tells the server;
+  a player's beast rags and torn cloth take that colour), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
   from stage 3; replaces SeizureClient's night-only feral edge).
 - **Everyone:** `Suspicion` (villagers who see a monster feed, hunt, change or show tells gossip naming them by MCA
   name, fades over ~3 days; wary guards watch them), `Accusations` ("Accuse someone here", a priest's MCA talk option shown while another

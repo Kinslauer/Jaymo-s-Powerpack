@@ -455,6 +455,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Caging.register();
 		MorningAfter.register();
 		TornCloth.register();
+		ClothesColour.register();
 		CurseRequests.register();
 		// 0.7.332: paranoia and deception: rumours with names, accusing at the priest, victim memory, monster kinship (their attachments)
 		LOGGER.debug("paranoia attachments: {} {} {} {}", Suspicion.MARKS, Accusations.DEAF_UNTIL, VictimMemory.BITER, Kinship.HEARD);

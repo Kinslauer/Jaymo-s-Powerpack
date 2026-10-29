@@ -66,6 +66,12 @@ public final class McaSkinCover {
 
 	/** From MCA's clothes layer as it draws {@code texture} on this villager: what of the body that covers. */
 	public static void clothes(EntityRenderState state, Identifier texture) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar && minecraft.player != null
+			&& avatar.id == minecraft.player.getId()) {
+			// (0.7.332) the local player's clothes: their colour dyes their beast's rags and torn cloth (ClothesColourClient)
+			worn(texture);
+		}
 		int parts = coverage(texture);
 		state.setData(KEY, parts == 0 ? null : parts);
 	}
@@ -102,6 +108,28 @@ public final class McaSkinCover {
 		if (part != null && (parts & bit) != 0 && part.visible) {
 			part.visible = false;
 			HIDDEN.add(part);
+		}
+	}
+
+	private static void worn(Identifier texture) {
+		if (!ClothesColourClient.wants(texture)) {
+			return;
+		}
+		AbstractTexture loaded = Minecraft.getInstance().getTextureManager().getTexture(texture);
+		if (loaded instanceof DynamicTexture dynamic) {
+			NativeImage pixels = dynamic.getPixels();
+			if (pixels != null) {
+				ClothesColourClient.worn(texture, pixels);
+			}
+			return;
+		}
+		NativeImage image = read(texture);
+		if (image != null) {
+			try {
+				ClothesColourClient.worn(texture, image);
+			} finally {
+				image.close();
+			}
 		}
 	}
 

@@ -205,6 +205,10 @@ public final class Lycans {
 
 	/** (0.7.1) The colour of the clothes {@code who} wore when they changed. */
 	static int clothes(Entity who) {
+		if (who instanceof net.minecraft.world.entity.player.Player p && ClothesColour.of(p) != null) {
+			// (0.7.332) a player's own MCA clothes, as their client reads them: the rags and the torn cloth match what they wore
+			return ClothesColour.of(p);
+		}
 		if (who instanceof Villager v) {
 			String trade = net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
 			Integer colour = TRADE_CLOTHES.get(trade);
