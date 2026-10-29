@@ -2,7 +2,9 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
+import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.Wounds;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,12 @@ import org.jspecify.annotations.Nullable;
  * ({@code LASH_*}), slowed a moment, and you get up with {@code LASH_HEALTH} and a beat of Resistance.</li>
  * </ul>
  * Downed by hunger with your bar empty, it feeds you {@code RISE_FOOD} first, so you don't drop again at once.
+ * <p>
+ * (0.17.164) Andy (2026-10-29): "I was stuck downed while transformed". Beaten down by a town's brawlers, he was got up
+ * with both legs broken, and two broken legs hold you to a crawl ({@link Breaks#crawlOnly}) till a priest sets them, so
+ * he lay there in the suit. Now it knits your bones as it gets you up, and a bonded symbiote never leaves you crawling on
+ * broken legs ({@link #knit}): every {@code KNIT_TICKS} it binds them whole for {@code KNIT_SATIETY_COST} of its hunger,
+ * and tells you. Not when it's too weak to rescue you either.
  */
 public final class WebSymbioteRescue {
 	static final int BEAT_TICKS = 15;
@@ -80,6 +88,8 @@ public final class WebSymbioteRescue {
 	static final int LASH_SLOW_TICKS = 60, LASH_RESIST_TICKS = 60;
 	/** Felled with your hunger bar under this, it feeds you up to it as you rise. */
 	static final int RISE_FOOD = 8;
+	/** (0.17.164) How often it checks for legs that won't hold you, and what knitting them costs its hunger. */
+	static final int KNIT_TICKS = 20, KNIT_SATIETY_COST = 10;
 
 	private static final int NONE = 0, WAITING = 1, LEAPING = 2, ZIPPING = 3, LANDING = 4, FORMING = 5;
 
@@ -203,9 +213,13 @@ public final class WebSymbioteRescue {
 		return rescue.healthWas >= TIER_HIGH ? "outright" : rescue.healthWas >= TIER_LOW ? "close" : "thread";
 	}
 
-	/** Up with this share of your health, for its hunger; your own hunger bar fed if it ran dry. */
+	/** Up with this share of your health, for its hunger; your own hunger bar fed if it ran dry; your bones knit. */
 	private static void getUp(ServerPlayer player, WebSymbioteState state, float health) {
 		Downed.rouse(player.level(), player, player.getMaxHealth() * health);
+		// (0.17.164) up means up: legs that won't carry you are bound whole
+		if (Breaks.crawlOnly(player)) {
+			Wounds.knitBones(player);
+		}
 		player.setHealth(Math.max(player.getHealth(), player.getMaxHealth() * health));
 		WebSymbiote.set(player, state.withSatiety(Math.max(0, state.satiety() - SATIETY_COST)));
 		int food = player.getFoodData().getFoodLevel();
@@ -373,6 +387,24 @@ public final class WebSymbioteRescue {
 		WebSymbiote.whisper(player, "rescue.release." + (1 + player.getRandom().nextInt(LINES)));
 		ServerPlayNetworking.send(player, new WebNet.Rescue(false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/**
+	 * (0.17.164) From the symbiote's tick (bonded, not rescuing): legs broken past standing on, and you not down, it binds
+	 * them whole. Returns the state, its hunger spent if it did.
+	 */
+	static WebSymbioteState knit(ServerPlayer player, WebSymbioteState state, long now) {
+		if (now % KNIT_TICKS != 0 || player.isCreative() || Downed.isDowned(player) || !Breaks.crawlOnly(player)
+			|| state.satiety() <= WebSymbiote.STARVING && state.bond() < LOW_BOND) {
+			return state;
+		}
+		Wounds.knitBones(player);
+		ServerLevel level = player.level();
+		WebSymbiote.whisper(player, "rescue.knit." + (1 + player.getRandom().nextInt(LINES)));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BONE_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 0.7F);
+		level.sendParticles(WebSymbiote.dust(1.2F), player.getX(), player.getY() + 0.3, player.getZ(), 20, 0.3, 0.2, 0.3, 0.0);
+		return state.withSatiety(Math.max(0, state.satiety() - KNIT_SATIETY_COST));
 	}
 
 	/** Logged out or the bond gone: no rescue carries over. */

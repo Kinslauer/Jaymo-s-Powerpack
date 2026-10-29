@@ -322,6 +322,11 @@ public final class Wounds {
 		return Breaks.mendAll(entity);
 	}
 
+	/** (0.17.164) Every break gone at once, the parts left to heal as they are (the symbiote knitting you whole). */
+	public static void knitBones(LivingEntity entity) {
+		Breaks.clearAll(entity);
+	}
+
 	/** (0.14.2) The broken parts, a bit per {@link BodyPart#ordinal()} (both sides). */
 	public static int broken(Entity entity) {
 		return Breaks.broken(entity);
