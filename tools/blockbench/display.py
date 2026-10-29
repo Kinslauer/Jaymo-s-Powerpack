@@ -21,14 +21,15 @@ def _held(context, rotation, scale, grip_y):
     return [round(ax - gx, 2), round(ay - gy, 2), round(az - gz, 2)]
 
 
-def display(tp, fp, gui, center_y, grip_y, flip=False):
+def display(tp, fp, gui, center_y, grip_y, flip=False, tilt=0, fp_tilt=0):
     """Held/GUI transforms for an upright blade model: the middle of its grip at grip_y, its length centred on center_y.
-    flip turns it half round the blade in the hand (the rapier's knuckle bow goes under the fingers, not over them)."""
+    flip turns it half round the blade in the hand (the rapier's knuckle bow goes under the fingers, not over them).
+    tilt and fp_tilt pitch the blade about the fist in third and first person (Sora's Dagger: angled up, or reversed)."""
     off = (center_y - 8) * gui
     d = round(off * math.sin(math.radians(45)), 2)
     g = round(gui, 3)
     yaw = 90 if flip else -90
-    tp_rot, fp_rot = [0, yaw, 0], [0, yaw, -25 if flip else 25]
+    tp_rot, fp_rot = [tilt, yaw, 0], [fp_tilt, yaw, -25 if flip else 25]
     tp_at, fp_at = _held("thirdperson", tp_rot, tp, grip_y), _held("firstperson", fp_rot, fp, grip_y)
     mirror = lambda r: [r[0], -r[1], -r[2]]
     return {

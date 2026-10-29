@@ -3653,3 +3653,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
   hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
 - **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.
+- **0.17.173, Sora's Dagger, the friend's next version:** Andy's friend sent a new Blockbench file (34 cubes, a new
+  texture, his own hand positions with a slight tilt in third person). It goes in through `tools/blockbench/sora.py` as
+  before, all four stages. Previews of each slot, rendered from the model: `/mnt/project-files/soras-dagger-previews/`.
+- **0.17.174, Sora's Dagger grips:** Andy: "both on shift m2". It's held angled up out of the fist like a sword now (our
+  transforms in `tools/blockbench/sora.py`, no longer the file's, which held it straight out). Sneak and right click
+  turns it to a reverse grip, blade down past the little finger, and back again. The flip is the stack's first
+  custom_model_data flag, which picks `<stage>_reverse`, and the grip stays through the Tempest forging. The diamond
+  stage's sneak and right click forges only for an ascended wind carrying a spoil; for everyone else it turns the grip.
+  `display.py`'s `display()` takes `tilt`/`fp_tilt`.
+- **0.17.175, pebble piles on grass (`ground/PebblePilesFeature`):** Andy: "you should be able to rarely find the rocks
+  on grass as well, mostly in pebble piles. changing dependent on biome". About one chunk in six has a pebble pile on
+  grass: 3-7 small rock piles (mostly 1-2 rocks) within 2 blocks. Most are the biome's rock: granite on savannas,
+  diorite in birch woods, cherry groves, meadows and flower lands, andesite in taigas, snowy plains and the hills,
+  mossy in jungles, swamps and dark or old-growth woods, red sandstone in the badlands, sandstone on beaches, plain
+  stone elsewhere; the rest are plain stone (andesite where the biome's is stone). A telling stone up to 4 blocks under
+  the turf still decides. The scattered rocks now keep to grass only 1 time in 5 (`GroundRocksFeature.ON_GRASS`), so
+  rocks on grass mostly come in piles. Rarity in `worldgen/placed_feature/pebble_piles.json`.
+  - Not seen in game.
