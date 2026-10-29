@@ -133,6 +133,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
+		// (0.7.321) the Reverent Warplate
+		ReverentLayer.register();
 		// 0.7.23: Verdants' antennae
 		VerdantLook.register();
 		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands

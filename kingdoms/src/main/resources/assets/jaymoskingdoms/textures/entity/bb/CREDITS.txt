@@ -27,3 +27,8 @@ the clockwork golem
   "Mech Golem" by octopusstudio, https://blockbenchworkshop.com/model/octopusstudio/mech-golem
   Changes: baked to our loader's format; drawn at 0.94 size; its lit texture while it's awake, its unlit one folded;
   the item icon is the model drawn small (kingdoms/tools/gen_clockwork_golem.py).
+
+reverent_warplate.png (bbmodels/reverent_warplate.json), and textures/item/reverent_*.png: the Reverent Warplate armour
+  "Reverent Warplate" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/reverent-warplate
+  Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer (it was made for
+  GeckoLib); the item icons are its pieces drawn small with an outline (kingdoms/tools/gen_reverent.py).
