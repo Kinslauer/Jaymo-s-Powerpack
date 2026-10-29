@@ -80,6 +80,18 @@ public final class ZFighterForms {
 	 * (the legendary line's for a legendary-born), Primal Super, Super Primal Super (while fused with a Warrior-born) and
 	 * the god form. None as the ape. Both sides read it: the menu draws it, the server checks a pick against it.
 	 */
+	/** (0.17.196) Not a form: the hold-C menu's Spirit Bomb tile ({@link #menu}, {@link ZFighterPower#pickForm}). */
+	public static final int SPIRIT_BOMB_PICK = 99;
+
+	/** (0.17.196) The hold-C menu's tiles: his forms ({@link #choices}), then the Spirit Bomb once he knows it. */
+	public static List<Integer> menu(Player player) {
+		List<Integer> tiles = choices(player);
+		if (!tiles.isEmpty() && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)) {
+			tiles.add(SPIRIT_BOMB_PICK);
+		}
+		return tiles;
+	}
+
 	public static List<Integer> choices(Player player) {
 		List<Integer> forms = new ArrayList<>();
 		if (ZFighterLineage.ape(player)) {

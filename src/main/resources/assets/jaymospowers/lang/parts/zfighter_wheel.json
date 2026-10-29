@@ -12,5 +12,7 @@
   "screen.jaymospowers.zfighter_forms.hint": "Point at a form and let go of C",
   "screen.jaymospowers.zfighter_forms.on": "You're in this form now",
   "screen.jaymospowers.zfighter_forms.take": "Let go to take this form",
+  "screen.jaymospowers.zfighter_forms.on.bomb": "Tap C to raise it, tap again to throw",
+  "screen.jaymospowers.zfighter_forms.take.bomb": "Let go: tapping C raises the Spirit Bomb",
   "message.jaymospowers.zfighter_wheel.full": "Your technique wheel is full (eight). Take one off on the training screen's Techniques page first."
 }

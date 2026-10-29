@@ -8,6 +8,8 @@ import com.jaymospowers.power.zfighter.ZFighterForms;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterState;
+import com.jaymospowers.power.zfighter.ZFighterTraining;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -27,6 +29,8 @@ import net.minecraft.sounds.SoundSource;
  * down, as long as you have it unlocked". Hold C a moment: a ring of the forms he has ({@link ZFighterForms#choices}),
  * laid out like the technique wheel ({@link ZFighterWheelScreen}); point at one and let go (or click) to go straight to
  * it. A quick tap of C still steps up (sneak+C down) as before ({@link #filter}). It doesn't pause.
+ * <p>(0.17.196) Andy: "Spirit bomb should move to the menu too, only activated by the tap when selected". Its tile (last,
+ * once he knows it) hands C to the bomb: tap to raise, tap to throw, then C is the forms' again. Any form's tile takes it back.
  */
 public final class ZFighterFormMenu extends Screen {
 	/** Held this long (ticks), C opens the menu instead of tapping. */
@@ -37,6 +41,8 @@ public final class ZFighterFormMenu extends Screen {
 	private static final int ACCENT = 0xFF000000 | ZFighterPower.COLOR;
 	private static final int INFO_W = 210;
 	private static final int INFO_H = 30;
+	/** The Spirit Bomb tile's band. */
+	private static final int BOMB_COLOR = 0x8FDCFF;
 
 	/** C's state: ticks held so far (-1: not being held), a press let straight through, the menu's key still down. */
 	private static int held = -1;
@@ -81,7 +87,7 @@ public final class ZFighterFormMenu extends Screen {
 			if (++held >= HOLD_TICKS) {
 				held = -1;
 				waitRelease = true;
-				List<Integer> forms = ZFighterForms.choices(player);
+				List<Integer> forms = ZFighterForms.menu(player);
 				if (forms.size() > 1) {
 					minecraft.gui.setScreen(new ZFighterFormMenu(forms));
 				}
@@ -139,7 +145,7 @@ public final class ZFighterFormMenu extends Screen {
 		}
 		chosen = true;
 		LocalPlayer player = minecraft.player;
-		if (selected >= 0 && player != null && forms.get(selected) != current(player)) {
+		if (selected >= 0 && player != null && !on(player, forms.get(selected))) {
 			ClientPlayNetworking.send(new ZFighterNet.Train(ZFighterNet.PICK_FORM, forms.get(selected)));
 		}
 		onClose();
@@ -150,8 +156,17 @@ public final class ZFighterFormMenu extends Screen {
 		return form == null ? 0 : form;
 	}
 
-	/** The form's name: its own, or "Base". */
+	/** Whether this tile is what C does now: the bomb when it's picked, otherwise his form. */
+	private static boolean on(LocalPlayer player, int tile) {
+		boolean bomb = ZFighterPower.state(player).has(ZFighterState.BOMB_PICKED);
+		return tile == ZFighterForms.SPIRIT_BOMB_PICK ? bomb : !bomb && tile == current(player);
+	}
+
+	/** The form's name: its own, or "Base"; the bomb's tile is the technique's name. */
 	private static Component name(LocalPlayer player, int form) {
+		if (form == ZFighterForms.SPIRIT_BOMB_PICK) {
+			return Component.translatable(ZFighterLineage.techniqueKey(player, ZFighterTraining.SPIRIT_BOMB));
+		}
 		return form == 0 ? Component.translatable("screen.jaymospowers.zfighter_forms.base") : Component.translatable(ZFighterLineage.formKey(player, form));
 	}
 
@@ -159,6 +174,9 @@ public final class ZFighterFormMenu extends Screen {
 	private static String tag(int form) {
 		if (form == 0) {
 			return "B";
+		}
+		if (form == ZFighterForms.SPIRIT_BOMB_PICK) {
+			return "SB";
 		}
 		if (form == ApeRage.PRIMAL_SUPER) {
 			return "P";
@@ -183,7 +201,6 @@ public final class ZFighterFormMenu extends Screen {
 		}
 		int n = forms.size();
 		double slice = 360.0 / n;
-		int now = current(player);
 		int cx = width / 2;
 		int cy = height / 2;
 		int dx = mouseX - cx;
@@ -227,8 +244,8 @@ public final class ZFighterFormMenu extends Screen {
 			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
 			boolean picked = i == selected;
-			boolean on = form == now;
-			int color = 0xFF000000 | ZFighterKiGlow.color(player, form);
+			boolean on = on(player, form);
+			int color = 0xFF000000 | (form == ZFighterForms.SPIRIT_BOMB_PICK ? BOMB_COLOR : ZFighterKiGlow.color(player, form));
 			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
 			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
 			// the form's own colour, as a band across the tile
@@ -250,9 +267,10 @@ public final class ZFighterFormMenu extends Screen {
 		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
 		UiStyle.panel(graphics, ix, iy, INFO_W, INFO_H, ACCENT);
 		UiStyle.line(graphics, font, name != null ? name : title, ix + 8, iy + 6, INFO_W - 16, ACCENT);
+		String bomb = selected >= 0 && forms.get(selected) == ZFighterForms.SPIRIT_BOMB_PICK ? ".bomb" : "";
 		Component status = selected < 0 ? Component.translatable("screen.jaymospowers.zfighter_forms.hint")
-			: forms.get(selected) == now ? Component.translatable("screen.jaymospowers.zfighter_forms.on")
-			: Component.translatable("screen.jaymospowers.zfighter_forms.take");
+			: on(player, forms.get(selected)) ? Component.translatable("screen.jaymospowers.zfighter_forms.on" + bomb)
+			: Component.translatable("screen.jaymospowers.zfighter_forms.take" + bomb);
 		UiStyle.line(graphics, font, status, ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
 	}
 }
