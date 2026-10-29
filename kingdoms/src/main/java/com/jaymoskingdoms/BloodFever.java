@@ -77,6 +77,21 @@ public final class BloodFever {
 	static final int FRENZY_TICKS = 1200, FRENZY_STRENGTH = 0, FRENZY_SPEED = 0;
 	/** Surrender stages: bloodbound, ravenous, lost. */
 	static final int BLOODBOUND = 50, RAVENOUS = 75, LOST = 100;
+	/** (0.7.332) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
+	 * blocks of other players", and asked whether villagers count too, "yes"). */
+	static final double PLAYER_RANGE = 150.0;
+	/** A player that near: the fever's extra climb a second, and the hunger it costs (food exhaustion a second), at the range's edge and up close. */
+	static final float NEAR_RISE = 0.04F, NEAR_RISE_CLOSE = 0.12F, NEAR_HUNGER = 0.02F, NEAR_HUNGER_CLOSE = 0.08F;
+	/** One in their sight (within this half-angle of where they look, degrees, nothing in between): this much more again, scaled by closeness. */
+	static final float SEEN_ANGLE = 40.0F, SEEN_RISE = 0.15F;
+	/** (0.7.332) A hurt mortal player within this (blocks) spikes the fever like a hurt villager ({@link #SCENT}); one under half health but not bleeding now, this much a second. */
+	static final double WOUNDED_RANGE = 30.0;
+	static final float WOUNDED_RISE = 0.6F;
+	/** (0.7.332) Sneaking away: among this many mortal players (within {@link #GROUP_RANGE}), the urge prefers a person this far (blocks) from every player. */
+	static final int GROUP_SIZE = 2;
+	static final double GROUP_RANGE = 48.0, LONE_FROM_PLAYERS = 12.0;
+	/** (0.7.332) A bite on their thrall eases the fever this much more ({@link BloodThralls}). */
+	static final float THRALL_EASE = 12.0F;
 	/** The fever's warnings: once it climbs past each. */
 	static final float[] WARN_AT = {40.0F, 60.0F, 80.0F};
 
@@ -88,6 +103,13 @@ public final class BloodFever {
 	/** Surrender (0-100); synced to the vampire. */
 	public static final AttachmentType<Integer> SURRENDER = AttachmentRegistry.create(JaymosKingdoms.id("blood_surrender"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (0.7.332) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
+	 * vampire alone, whose screen pulses and ears pound with it ({@code BloodVision}). Not kept.
+	 */
+	public static final AttachmentType<Float> HEARTBEAT = AttachmentRegistry.create(JaymosKingdoms.id("blood_heartbeat"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
 
 	/** No urge before this game time (not kept). */
 	private static final java.util.Map<java.util.UUID, Long> READY = new java.util.HashMap<>();
@@ -114,6 +136,12 @@ public final class BloodFever {
 
 	public static float fever(Player player) {
 		Float f = player.getAttached(FEVER);
+		return f == null ? 0.0F : f;
+	}
+
+	/** The heartbeat in their sight (0-1), on either side. */
+	public static float heartbeat(Player player) {
+		Float f = player.getAttached(HEARTBEAT);
 		return f == null ? 0.0F : f;
 	}
 
@@ -186,13 +214,18 @@ public final class BloodFever {
 			}
 			if (!feverish(player)) {
 				// (cured, or never one: nothing to keep)
-				if (player.hasAttached(FEVER) || player.hasAttached(SURRENDER)) {
+				if (player.hasAttached(FEVER) || player.hasAttached(SURRENDER) || player.hasAttached(HEARTBEAT)) {
 					player.removeAttached(FEVER);
 					player.removeAttached(SURRENDER);
+					player.removeAttached(HEARTBEAT);
+					Favourites.clear(player);
+					player.removeAttached(BloodRequests.STATE);
 				}
 				continue;
 			}
 			if (!player.isAlive() || player.isSpectator() || player.isCreative()) {
+				setHeartbeat(player, 0.0F);
+				Favourites.setSeen(player, false);
 				continue;
 			}
 			float was = fever(player);
@@ -201,8 +234,10 @@ public final class BloodFever {
 			if (!Seizures.held(player) && bleeding(player)) {
 				rise += SCENT;
 			}
+			rise += amongPlayers(player);
 			float fever = Math.min(100.0F, was + rise);
 			setFever(player, fever);
+			BloodRequests.tick(player, clock);
 			for (int i = 0; i < WARN_AT.length; i++) {
 				if (was < WARN_AT[i] && fever >= WARN_AT[i]) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood_fever.warn." + (i + 1))
@@ -221,6 +256,118 @@ public final class BloodFever {
 			if (player.getRandom().nextFloat() < chance) {
 				urge(player);
 			}
+		}
+	}
+
+	/**
+	 * (0.7.332) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
+	 * fever climb, more the closer they are; the nearest one in their sight sets their {@link #HEARTBEAT}. Returns the
+	 * fever's extra climb this second.
+	 */
+	private static float amongPlayers(ServerPlayer player) {
+		double nearest = Double.MAX_VALUE;
+		float seen = 0.0F;
+		// (0.7.332) their favourite ({@link Favourites}): its own climb counts twice, and its heartbeat reads closer
+		float favouriteClose = 0.0F, favouriteSeen = 0.0F, wounded = 0.0F;
+		ServerPlayer seenPlayer = null;
+		java.util.List<ServerPlayer> near = new java.util.ArrayList<>();
+		for (ServerPlayer other : player.level().players()) {
+			if (other == player || !Vampires.mortal(other) || other.isInvisible()) {
+				continue;
+			}
+			double d = other.distanceTo(player);
+			if (d > PLAYER_RANGE) {
+				continue;
+			}
+			near.add(other);
+			nearest = Math.min(nearest, d);
+			float close = (float)(1.0 - d / PLAYER_RANGE);
+			boolean favourite = Favourites.is(player, other);
+			if (favourite) {
+				favouriteClose = close;
+			}
+			// (0.7.332) a hurt friend nearby: the smell of it (a fresh blow like a hurt villager, a standing wound a little)
+			if (d <= WOUNDED_RANGE) {
+				if (other.hurtTime > 0) {
+					wounded = Math.max(wounded, SCENT);
+				} else if (other.getHealth() < other.getMaxHealth() * 0.5F) {
+					wounded = Math.max(wounded, WOUNDED_RISE);
+				}
+			}
+			if (close <= seen && !favourite || Kinship.monster(other) && !favourite) {
+				// (0.7.332) kin are heard another way ({@link Kinship}): no red pulse
+				continue;
+			}
+			if (inSight(player, other)) {
+				if (close > seen) {
+					seen = close;
+					seenPlayer = other;
+				}
+				if (favourite) {
+					favouriteSeen = close;
+				}
+			}
+		}
+		Favourites.tally(player, near);
+		Favourites.setSeen(player, favouriteSeen > 0.0F);
+		if (favouriteSeen > 0.0F) {
+			seen = Math.max(seen, Math.min(1.0F, favouriteSeen * Favourites.HEARTBEAT_BOOST));
+			for (ServerPlayer other : near) {
+				if (Favourites.is(player, other)) {
+					seenPlayer = other;
+				}
+			}
+		}
+		setHeartbeat(player, seen);
+		if (seenPlayer != null) {
+			BloodTemptation.seen(player, seenPlayer, fever(player));
+		}
+		if (nearest > 0.0) {
+			// villagers and folk count for the hunger too, not for the heartbeat (that's players in sight)
+			for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(Math.min(nearest, PLAYER_RANGE)),
+				Vampires::person)) {
+				nearest = Math.min(nearest, e.distanceTo(player));
+			}
+		}
+		if (nearest > PLAYER_RANGE) {
+			return 0.0F;
+		}
+		float close = (float)(1.0 - nearest / PLAYER_RANGE);
+		player.causeFoodExhaustion(Mth.lerp(close, NEAR_HUNGER, NEAR_HUNGER_CLOSE));
+		float climb = Mth.lerp(close, NEAR_RISE, NEAR_RISE_CLOSE) + SEEN_RISE * seen;
+		if (favouriteClose > 0.0F) {
+			// twice as hard for the one they've fixed on
+			climb += Mth.lerp(favouriteClose, NEAR_RISE, NEAR_RISE_CLOSE) + SEEN_RISE * favouriteSeen;
+		}
+		if (wounded > 0.0F && !Seizures.held(player)) {
+			climb += wounded;
+		}
+		return climb;
+	}
+
+	/** (0.7.332) Whether {@code other} is in {@code viewer}'s sight: within {@link #SEEN_ANGLE} of where they look, nothing in between. */
+	static boolean inSight(ServerPlayer viewer, ServerPlayer other) {
+		net.minecraft.world.phys.Vec3 eye = viewer.getEyePosition();
+		net.minecraft.world.phys.Vec3 look = viewer.getViewVector(1.0F);
+		double cos = Math.cos(Math.toRadians(SEEN_ANGLE));
+		net.minecraft.world.phys.Vec3 to = other.getEyePosition().subtract(eye);
+		net.minecraft.world.phys.Vec3 chest = other.position().add(0.0, other.getBbHeight() * 0.6, 0.0);
+		return to.lengthSqr() > 1.0E-4 && to.normalize().dot(look) >= cos && (sees(viewer, eye, other.getEyePosition()) || sees(viewer, eye, chest));
+	}
+
+	private static boolean sees(ServerPlayer player, net.minecraft.world.phys.Vec3 from, net.minecraft.world.phys.Vec3 to) {
+		return player.level().clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.VISUAL,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, player)).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
+	}
+
+	private static void setHeartbeat(ServerPlayer player, float value) {
+		float was = heartbeat(player);
+		if (value <= 0.0F) {
+			if (player.hasAttached(HEARTBEAT)) {
+				player.removeAttached(HEARTBEAT);
+			}
+		} else if (Math.abs(value - was) > 0.01F) {
+			player.setAttached(HEARTBEAT, value);
 		}
 	}
 
@@ -249,9 +396,50 @@ public final class BloodFever {
 		return best;
 	}
 
+	/**
+	 * (0.7.332) Sneak away: among {@link #GROUP_SIZE} or more mortal players, the blood prefers a person (a villager or one
+	 * of the folk) at least {@link #LONE_FROM_PLAYERS} blocks from every player, so the hold walks them away from the group.
+	 * Null if there's no such person or they aren't in a group.
+	 */
+	private static @Nullable LivingEntity loner(ServerPlayer player, boolean seen) {
+		int group = 0;
+		for (ServerPlayer other : player.level().players()) {
+			if (other != player && Vampires.mortal(other) && other.distanceTo(player) <= GROUP_RANGE) {
+				group++;
+			}
+		}
+		if (group < GROUP_SIZE) {
+			return null;
+		}
+		LivingEntity best = null;
+		double bestD = URGE_RANGE * URGE_RANGE;
+		for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(URGE_RANGE),
+			e -> Vampires.person(e) && !e.isInvisible())) {
+			double d = e.distanceToSqr(player);
+			if (d >= bestD || seen && !player.hasLineOfSight(e)) {
+				continue;
+			}
+			boolean alone = true;
+			for (ServerPlayer other : player.level().players()) {
+				if (other != player && other.distanceTo(e) < LONE_FROM_PLAYERS) {
+					alone = false;
+					break;
+				}
+			}
+			if (alone) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best;
+	}
+
 	/** The urge: the blood takes the wheel. False if there's no one to go for. */
 	static boolean urge(ServerPlayer player) {
-		LivingEntity prey = nearest(player, true);
+		LivingEntity prey = loner(player, true);
+		if (prey == null) {
+			prey = nearest(player, true);
+		}
 		if (prey == null) {
 			return false;
 		}
@@ -265,17 +453,39 @@ public final class BloodFever {
 
 	/** Its prey fell or got away: the next nearest (seen or not), or null. */
 	static @Nullable LivingEntity nextPrey(ServerPlayer player, Seizures.Hold hold) {
-		return sated(player) ? null : nearest(player, false);
+		if (sated(player)) {
+			return null;
+		}
+		LivingEntity lone = loner(player, false);
+		return lone != null ? lone : nearest(player, false);
 	}
 
 	/** A bite (from {@link VampirePlayers#drink}): the fever eases, and a ravenous one heals more. */
 	static void bit(ServerPlayer player) {
+		bit(player, false);
+	}
+
+	/** (0.7.332) A bite, on their {@code thrall} or not: on a thrall it heals twice over and eases the fever {@link #THRALL_EASE} more. */
+	static void bit(ServerPlayer player, boolean thrall) {
 		if (!feverish(player)) {
 			return;
 		}
-		setFever(player, fever(player) - BITE_EASE);
+		setFever(player, fever(player) - BITE_EASE - (thrall ? THRALL_EASE : 0.0F));
 		if (surrender(player) >= RAVENOUS) {
 			player.heal(VampirePlayers.DRINK_HEAL);
+		}
+		if (thrall) {
+			player.heal(VampirePlayers.DRINK_HEAL);
+		}
+	}
+
+	/** (0.7.332) {@link BloodRequests}: the fever and the surrender move by these (they eased or climbed). */
+	static void grant(ServerPlayer player, float feverBy, int surrenderBy) {
+		if (feverish(player)) {
+			setFever(player, fever(player) + feverBy);
+			if (surrenderBy != 0) {
+				addSurrender(player, surrenderBy);
+			}
 		}
 	}
 

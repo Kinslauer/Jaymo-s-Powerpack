@@ -59,6 +59,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.230) The stranger page's Introduce ({@link Introductions#INTRODUCE}): asks their name, or offers a handshake without a shared tongue.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
+ * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
@@ -188,6 +189,13 @@ abstract class McaDialogueMixin {
 			// (0.7.227) asked about the power you saw: what they say of it
 			villager.sendChatMessage(GiftTales.ask(player, villager), player);
 			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Accusations.ANSWER.equals(answer)) {
+			// (0.7.332) the nearest other player named to the priest, who tests them with holy water
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Accusations.accuse(player, villager);
 			ci.cancel();
 			return;
 		}

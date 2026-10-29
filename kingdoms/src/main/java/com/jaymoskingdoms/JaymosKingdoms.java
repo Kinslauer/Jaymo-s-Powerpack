@@ -430,12 +430,39 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.332: deception and temptation: favourite scent, whispers, thralls, sleeping prey, the Mask, tells, garlic and silver,
+		// the blood's requests (their attachments)
+		LOGGER.debug("vampire deception attachments: {} {} {} {} {} {} {} {} {} {}", Favourites.TIME, Favourites.FAVOURITE, Favourites.SEEN,
+			BloodThralls.NIGHTS, BloodThralls.MASTER, BloodThralls.BEAT, SleepingPrey.BITE_MARKS, VampireMask.MASK, BloodRequests.STATE, Garlic.class);
+		BloodTemptation.register();
+		BloodThralls.register();
+		SleepingPrey.register();
+		VampireMask.register();
+		VampireTells.register();
+		Garlic.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
 		// drive you (their attachments)
-		LOGGER.debug("takeover attachments: {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, FeralCurse.FERAL);
+		LOGGER.debug("takeover attachments: {} {} {} {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL,
+			MoonPull.HEARTBEAT, HiddenChange.TELLS, CurseRequests.ASK);
 		Seizures.register();
 		BloodFever.register();
 		FeralCurse.register();
+		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
+		// room, the morning after, torn cloth as evidence, and what the curse asks for
+		MoonPull.register();
+		ScentTrails.register();
+		HiddenChange.register();
+		Caging.register();
+		MorningAfter.register();
+		TornCloth.register();
+		ClothesColour.register();
+		CurseRequests.register();
+		// 0.7.332: paranoia and deception: rumours with names, accusing at the priest, victim memory, monster kinship (their attachments)
+		LOGGER.debug("paranoia attachments: {} {} {} {}", Suspicion.MARKS, Accusations.DEAF_UNTIL, VictimMemory.BITER, Kinship.HEARD);
+		Suspicion.register();
+		Accusations.register();
+		VictimMemory.register();
+		Kinship.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();

@@ -1,6 +1,5 @@
 package com.jaymoskingdoms.client;
 
-import com.jaymoskingdoms.FeralCurse;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Seizures;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,8 +26,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.7.185) The client half of {@link Seizures}: while the blood or the wolf has you, it walks you at its prey (no key
  * does what it would: each new press is a heave against it, filling the bar), your view is dragged round and jolted,
- * and the screen's edges close in (blood red for the fever, dark amber for the wolf). As yourself at night, a werewolf's
- * edges darken with how far the curse has them ({@link FeralCurse}).
+ * and the screen's edges close in (blood red for the fever, dark amber for the wolf). (0.7.332) A werewolf's edges as themselves
+ * ({@code WolfScreen}) darken with how far the curse has them, day or night.
  */
 public final class SeizureClient {
 	/** How fast it turns your view toward its prey (share a tick), how hard it walks you (blocks a tick: the blood, the beast). */
@@ -41,8 +40,6 @@ public final class SeizureClient {
 	static final float JITTER = 1.2F, JOLT = 2.5F;
 	/** The edges while it has you (0-1), and their beat (ticks). */
 	static final float EDGE = 0.55F, EDGE_BEAT = 0.3F, BEAT = 16.0F;
-	/** As themselves at night, a werewolf's edges per stage of the curse. */
-	static final float FERAL_EDGE_PER = 0.07F;
 	/** The edges ease in and out this much a tick. */
 	static final float FADE = 0.05F;
 	/** The struggle bar: width, height, how far above the bottom (pixels). */
@@ -155,10 +152,8 @@ public final class SeizureClient {
 		if (locked()) {
 			red = kind == Seizures.Kind.FEVER;
 			want = EDGE;
-		} else if (player.hasAttached(FeralCurse.FERAL) && com.jaymoskingdoms.Vampires.night(minecraft.level.getOverworldClockTime())) {
-			red = false;
-			want = FERAL_EDGE_PER * FeralCurse.stage(player);
 		}
+		// (0.7.332) a werewolf's mood on the screen, at night or not, is WolfScreen's
 		edge = want > edge ? Math.min(want, edge + FADE) : Math.max(want, edge - FADE);
 		if (!locked() || minecraft.isPaused()) {
 			return;
