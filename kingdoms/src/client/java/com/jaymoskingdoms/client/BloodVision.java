@@ -43,8 +43,8 @@ public final class BloodVision {
 	static final float FADE = 0.02F;
 	/** A player in sight: the beat's period face to face (ticks), how much the edges darken at rest and at the top of a beat, and how fast it fades in and out (per tick). */
 	static final float SEEN_BEAT = 11.0F, SEEN_EDGE = 0.2F, SEEN_EDGE_BEAT = 0.55F, SEEN_FADE = 0.05F;
-	/** The heartbeat's volume at the range's edge and face to face, and its pitch. */
-	static final float HEART_QUIET = 0.25F, HEART_LOUD = 1.0F, HEART_PITCH = 1.0F;
+	/** The heartbeat's volume at the range's edge and face to face (Andy: "grows to an 80% maximum"), and its pitch. */
+	static final float HEART_QUIET = 0.25F, HEART_LOUD = 0.8F, HEART_PITCH = 1.0F;
 
 	private static final Identifier VIGNETTE = Identifier.withDefaultNamespace("textures/misc/vignette.png");
 	/**

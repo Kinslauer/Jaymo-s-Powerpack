@@ -77,7 +77,8 @@ public final class BloodFever {
 	static final int FRENZY_TICKS = 1200, FRENZY_STRENGTH = 0, FRENZY_SPEED = 0;
 	/** Surrender stages: bloodbound, ravenous, lost. */
 	static final int BLOODBOUND = 50, RAVENOUS = 75, LOST = 100;
-	/** (0.7.322) Another mortal player within this (blocks; Andy: "vampires should hunger when within 150 blocks of other players"). */
+	/** (0.7.322) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
+	 * blocks of other players", and asked whether villagers count too, "yes"). */
 	static final double PLAYER_RANGE = 150.0;
 	/** A player that near: the fever's extra climb a second, and the hunger it costs (food exhaustion a second), at the range's edge and up close. */
 	static final float NEAR_RISE = 0.04F, NEAR_RISE_CLOSE = 0.12F, NEAR_HUNGER = 0.02F, NEAR_HUNGER_CLOSE = 0.08F;
@@ -247,7 +248,7 @@ public final class BloodFever {
 	}
 
 	/**
-	 * (0.7.322) Other players near them: the nearest mortal one within {@link #PLAYER_RANGE} makes them hungry and the
+	 * (0.7.322) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
 	 * fever climb, more the closer they are; the nearest one in their sight sets their {@link #HEARTBEAT}. Returns the
 	 * fever's extra climb this second.
 	 */
@@ -277,7 +278,14 @@ public final class BloodFever {
 			}
 		}
 		setHeartbeat(player, seen);
-		if (nearest == Double.MAX_VALUE) {
+		if (nearest > 0.0) {
+			// villagers and folk count for the hunger too, not for the heartbeat (that's players in sight)
+			for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(Math.min(nearest, PLAYER_RANGE)),
+				Vampires::person)) {
+				nearest = Math.min(nearest, e.distanceTo(player));
+			}
+		}
+		if (nearest > PLAYER_RANGE) {
 			return 0.0F;
 		}
 		float close = (float)(1.0 - nearest / PLAYER_RANGE);
