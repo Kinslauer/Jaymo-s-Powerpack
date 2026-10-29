@@ -205,6 +205,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterMark.extract(entity, state);
 		ZFighterHalo.extract(entity, state);
 		ZFighterFusionLook.extract(entity, state);
+		ZFighterPrimalHair.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state, partialTicks);
 		ZFighterKiGlow.extract(entity, state);

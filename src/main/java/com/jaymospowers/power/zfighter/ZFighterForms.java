@@ -15,7 +15,7 @@ import net.minecraft.util.Mth;
 
 /**
  * (0.17.50, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
- * Supers and Primal Super (4, {@link ApeRage#SUPER_4}):
+ * Supers, Super Primal Super (4, {@link ApeRage#SUPER_4}) and Primal Super (10, {@link ApeRage#PRIMAL_SUPER}):
  * <ul>
  * <li>{@link #FALSE_SUPER} (5), a near-death flare before the first Super ({@link ZFighterFalseSuper});</li>
  * <li>{@link #GOD} (6), the god form lifted by five at the Lookout ({@link ZFighterGodRitual}, {@link ZFighterGod}), with
@@ -33,6 +33,8 @@ public final class ZFighterForms {
 	private static final int[] COLORS = {0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C};
 	/** How hard a form's particles, aura and shake play (the number of the Super it matches), by form 5-9. */
 	private static final int[] TIERS = {2, 3, 2, 3, 4};
+	/** (0.17.190) Primal Super's tier: Super 3's, so its burst, shake and aura are a step under Super Primal Super's. */
+	static final int PRIMAL_SUPER_TIER = 3;
 
 	private ZFighterForms() {
 	}
@@ -42,24 +44,31 @@ public final class ZFighterForms {
 		return form >= FIRST && form <= LAST;
 	}
 
-	/** The tier a form's effects play at: its own number up to Primal Super, a set one for the newer forms. */
+	/** The tier a form's effects play at: its own number up to Super Primal Super, a set one for the newer forms. */
 	public static int tier(int form) {
+		if (form == ApeRage.PRIMAL_SUPER) {
+			// (0.17.190) Primal Super plays a step under Super Primal Super
+			return PRIMAL_SUPER_TIER;
+		}
 		return special(form) ? TIERS[form - FIRST] : Math.clamp(form, 0, ApeRage.SUPER_4);
 	}
 
-	/** The aura colour of a form past Primal Super (clamped). */
+	/** The aura colour of a form past Super Primal Super (clamped). */
 	public static int color(int form) {
-		return COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
+		return form == ApeRage.PRIMAL_SUPER ? ApeRage.PRIMAL_SUPER_COLOR : COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
 	}
 
-	/** The hair a form wears, as a Super's number (1-3): False Super the first Super's, the rest Super 3's mane. */
+	/**
+	 * The hair a form wears, as a Super's number (1-3): False Super the first Super's, Primal Super Super 2's (Andy), the rest
+	 * Super 3's mane.
+	 */
 	public static int hairForm(int form) {
-		return form == FALSE_SUPER ? 1 : Math.min(form, 3);
+		return form == FALSE_SUPER ? 1 : form == ApeRage.PRIMAL_SUPER ? 2 : Math.min(form, 3);
 	}
 
-	/** Whether the Spirit Bomb can be raised from this form: Super 3, Primal Super and the god form. */
+	/** Whether the Spirit Bomb can be raised from this form: Super 3, either primal form and the god form. */
 	public static boolean bombForm(int form) {
-		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == GOD;
+		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD;
 	}
 
 	/** Called once from {@link ZFighterPower#init}. */
@@ -92,6 +101,10 @@ public final class ZFighterForms {
 		ZFighterFalseSuper.tick(player, live);
 		ZFighterInstinct.tick(player, live);
 		ZFighterGoldenApe.tick(player, live);
+		if (live.form == ApeRage.PRIMAL_SUPER && player.tickCount % 20 == 0) {
+			// (0.17.190) time held here opens Super Primal Super
+			ApeRage.holdPrimal(player);
+		}
 		if (live.form == GOD && player.tickCount % 40 == 0 && !live.charging) {
 			ZFighterGod.glow(player);
 		}
@@ -130,7 +143,8 @@ public final class ZFighterForms {
 		if (sneak) {
 			return false;
 		}
-		boolean topOfLine = form == ApeRage.SUPER_4 || form == ZFighterTraining.FORMS && !ApeRage.super4(player);
+		// (0.17.190) the top is Super Primal Super, Primal Super or Super 3, whichever he has reached
+		boolean topOfLine = form == ApeRage.top(player) && (form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == ZFighterTraining.FORMS);
 		if (ZFighterGod.unlocked(player) && (topOfLine || form == LEGEND_3) && !ZFighterLineage.ape(player)) {
 			ZFighterGod.enter(player, live);
 			return true;
