@@ -639,10 +639,130 @@
 			}
 		]
 	},
+	"voice.narrator.road.moon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_moon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.verdant.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_verdant_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.rustfall.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_rustfall_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.maw.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_maw_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.demon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_demon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.afterlife.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_afterlife_tale",
+				"stream": true
+			}
+		]
+	},
 	"voice.narrator.summary.end": {
 		"sounds": [
 			{
 				"name": "jaymoskingdoms:voice/narrator/summary_end",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.gender.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/gender_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.gender.desc": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/gender_desc",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.skip.ask": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/skip_ask",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.skip.desc": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/skip_desc",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.realm": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_realm",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.harbour": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_harbour",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.future": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_future",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.arriving": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_arriving",
 				"stream": true
 			}
 		]

@@ -97,6 +97,8 @@ final class LifeStoryScreen extends Screen {
 	private static Draft draft = new Draft();
 	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
+	/** (0.7.352) The page under the skip-the-story ask, so shutting the ask doesn't read that page again. */
+	private static @Nullable String underAsk;
 	private static @Nullable SimpleSoundInstance reading;
 	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
 	/** (0.7.269) When the line being read began, and when the next may (ms). */
@@ -439,12 +441,26 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.251) The narrator reads a page when it first shows ({@link Voices}): a question's title and the line under it,
 	 * a realm page's ask, and (0.7.269) on the story page the whole tale, line by line with {@link #READ_GAP_MS} between,
 	 * then the closing line. Turning the page cuts the reading short. The realm a tale names isn't read: the clip says
-	 * "the realm".
+	 * "the realm". (0.7.352) While {@code asking}, it reads the skip-the-story ask instead; saying no goes back to the page
+	 * quietly.
 	 */
-	private static void narrate(Step s) {
+	private static void narrate(Step s, boolean asking) {
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
 		String page = s.summary() ? "story" + Arrays.toString(draft.answers) : String.join(".", lines(s));
+		if (asking) {
+			if (!"skip".equals(narrated)) {
+				underAsk = narrated;
+			}
+			page = "skip";
+		} else if ("skip".equals(narrated) && page.equals(underAsk)) {
+			if (reading != null) {
+				minecraft.getSoundManager().stop(reading);
+				reading = null;
+			}
+			toRead.clear();
+			narrated = page;
+		}
 		if (!page.equals(narrated)) {
 			narrated = page;
 			if (reading != null) {
@@ -452,7 +468,7 @@ final class LifeStoryScreen extends Screen {
 				reading = null;
 			}
 			toRead.clear();
-			toRead.addAll(lines(s));
+			toRead.addAll(asking ? List.of("gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc") : lines(s));
 			readNext = 0L;
 		}
 		if (reading != null) {
@@ -480,7 +496,7 @@ final class LifeStoryScreen extends Screen {
 	/** The lines the narrator reads on page {@code s}, as lang keys. */
 	private static List<String> lines(Step s) {
 		if (s.gender) {
-			return List.of("story.jaymoskingdoms.gender.title");
+			return List.of("story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc");
 		}
 		if (s.question == null) {
 			List<String> out = new ArrayList<>();
@@ -644,7 +660,7 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		Step s = step();
-		narrate(s);
+		narrate(s, this.asking);
 		int x = left(), y = top(), w = panelW(), h = panelH();
 		Ui.panel(graphics, x, y, w, h, ACCENT);
 		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
@@ -1007,7 +1023,7 @@ final class LifeStoryScreen extends Screen {
 			int row = rowAt(s, mouseX, mouseY);
 			int g = row >= 0 ? row : draft.gender;
 			name = Component.translatable(g < 0 ? "story.jaymoskingdoms.gender.title" : "story.jaymoskingdoms.gender." + GENDERS[g]);
-			lines.add(Component.translatable("story.jaymoskingdoms.gender.desc").withColor(Ui.DIM));
+			// (0.7.352) its grey line is only heard now, like the questions'
 		} else if (s.question == null) {
 			Heritage.Kind kind = heritage();
 			if (kind == null) {

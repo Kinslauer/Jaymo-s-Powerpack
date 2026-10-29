@@ -3800,3 +3800,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Kingdoms: the Kintsugi Armour and Primal Visage sets, whaleboats drawn as a launch, and the Skeleton Lord boss (see
     the Kingdoms MODLOG, 0.7.351).
   - Compile-checked only; not seen in game, and no dev server was booted for the new Kingdoms registries.
+- **0.17.202, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
+  symbiotes?" and picked its combat calls first. Every `say.*` line (201: what it says as it strikes, kills, grabs,
+  feeds, digs, climbs, slings and so on, for all three strains) is spoken aloud as well as shown, only to the host, at
+  their head. The voice is designed with VoxCPM2 (Apache-2.0, from a description: deep, guttural, wet, snarling; no real
+  person cloned) by `tools/voices/make_voices.py`, which then roughens each clip with a throat-rattle flutter and soft
+  clipping (`grit`). Andy then asked for it to "hang on every word longer" and be "a long snarl and growl into each word":
+  `snarl` cuts each line into words, draws each out (the end of each word longer still: "The wallll is ourssss"), leads
+  into it with a growl made from its own first moment an octave down, and lays heavy grunge under the clear words (a
+  rattling low rumble, a raspy hiss and an octave-lower double). Each strain has its own voice, picked by Andy from an
+  audition (`--audition`): black a venomous snarl, red a choking ghoul, white a dry, cold lich; black plays a touch lower
+  (0.92), each line's pitch wandering a little. A line is voiced when Powers' `sounds.json` lists it, which the script writes
+  from the clips it has made; its moods' `mood.say.*` variants are text only for now.
+  - Not seen in game.

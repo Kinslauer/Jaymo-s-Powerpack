@@ -6658,3 +6658,10 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
     every 6 s at a foe within 7 blocks, a spell that throws everything within 6 blocks back for 6 harm. Purple boss bar
     once blows are traded. Drops 6-10 bones, 4-8 amethyst shards, 3-6 emeralds. Spawn egg in the spawn eggs tab.
   - Compile-checked only; not seen in game, and no dev server was booted for the new registries.
+## 0.7.352: the narrator reads the rest of the intro (`Voices.INTRO_LINES`)
+- Andy: "redo the intro lines that dont already have lines". The narrator now reads the pages it was still silent on:
+  "Who are you?" and the grey line under it (now only heard, like the questions' lines), the skip-the-story ask and what
+  skipping does (saying no goes back to the page without reading it again), and the hold screen: its title once, then
+  each line as the hold moves on, stopped when the hold ends so the story isn't talked over (`StoryHoldScreen.narrate`).
+  9 new narrator clips from `tools/voices/make_voices.py`; `gui.jaymoskingdoms.story.*` keys sound as `voice.narrator.*`.
+  - Not seen in game.
