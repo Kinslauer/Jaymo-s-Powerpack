@@ -3544,3 +3544,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
   `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
   `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.
+- **0.17.142, clearing parties and fewer ATi structures (Kingdoms 0.7.316):** settlements send their guards into any
+  monster-held structure near them before their people go near it, and keep women, children and workers out until
+  it's clear; ATi's compounds are rarer and smaller, none near spawn, and its dojo (the pagoda) only rises in cherry
+  groves. See the Kingdoms MODLOG.
+- **0.17.143, sailors no longer offer "Seek an audience" (Kingdoms 0.7.317):** only rulers and a realm's posted guards
+  do; ship crews, caravan escorts and soldiers at war don't. See the Kingdoms MODLOG.

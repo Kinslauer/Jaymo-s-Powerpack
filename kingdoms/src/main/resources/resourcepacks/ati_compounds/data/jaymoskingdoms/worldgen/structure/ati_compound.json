@@ -4,9 +4,13 @@
   "spawn_overrides": {},
   "step": "surface_structures",
   "terrain_adaptation": "none",
-  "min_count": 3,
-  "max_count": 4,
-  "ring": 3,
+  "min_count": 2,
+  "max_count": 3,
+  "ring": 4,
+  "spawn_clearance": 32,
+  "only_in": {
+    "ati_structures:dojo": "minecraft:cherry_grove"
+  },
   "members": [
     "ati_structures:ancient_temple",
     "ati_structures:desert_outpost",
