@@ -11,10 +11,11 @@ its mood variants, mood.say.*, can follow) goes into Powers' assets/jaymospowers
 (`grit`), and Powers plays whichever lines its sounds.json lists (`WebSymbioteVoice`). Delete a clip to remake it; delete a ref wav (or change its seed) to
 redesign a voice (then delete its clips too).
 
-    pip install voxcpm soundfile numpy
+    pip install voxcpm soundfile numpy audiotsm
     python make_voices.py                 # every missing clip
     python make_voices.py narrator        # one voice
     python make_voices.py symbiote
+    python make_voices.py symbiote --limit=3   # only the first few, to hear them
     python make_voices.py --sounds        # only rewrite sounds.json (no model needed)
 """
 import json
@@ -43,9 +44,12 @@ VOICES = {
     "thessaly": dict(seed=51, desc="A prim, fussy elderly female scholar witch, crisp precise voice, scolding but fond"),
     "quiet": dict(seed=61, desc="An ancient, hollow, breathy whisper, very slow, neither male nor female, distant and echoing"),
     # (Powers 0.17.183) Andy: "a snarling visceral voice". Lowered again in game for the black strain (WebSymbioteVoice).
-    "symbiote": dict(seed=71, grit=True,
-                     desc="A deep, guttural, snarling monster voice, wet and raspy, growling and hissing through bared teeth, hungry and menacing, inhuman",
-                     ref="We are hungry. Tear it open. Take what is ours, and feed us."),
+    # Andy (2026-10-29): "The symbiote should hang on every word longer": written with a pause after every word (`hang`),
+    # designed on a slow line, then each word drawn out and the gaps between words held longer (`drawl`).
+    "symbiote": dict(seed=71, grit=True, drawl=True,
+                     desc="A deep, guttural, snarling monster voice, wet and raspy, growling through bared teeth, menacing and inhuman, "
+                          "speaking very slowly, drawing out every single word, with a long heavy pause after each word",
+                     ref="We... are... hungry. Tear... it... open. Take... what... is... ours."),
 }
 # where each voice's clips go
 NAMESPACE = {"symbiote": "jaymospowers"}
@@ -131,6 +135,51 @@ def write_sounds(all_lines):
         print("wrote", path, len(sounds), "sounds")
 
 
+def hang(text):
+    """(the symbiote) A pause after every word: 'Tear it. Throw it.' -> 'Tear... it. Throw... it.'"""
+    words = text.split()
+    return " ".join(w if w[-1] in ".!?,;:" or n == len(words) - 1 else w + "..." for n, w in enumerate(words))
+
+
+# drawl: words drawn out this much (speed kept by WSOLA, so the pitch stays), and a gap between words (silence over
+# 90 ms) held at least this long, or this many times as long
+DRAWL_STRETCH, DRAWL_GAP_MIN, DRAWL_GAP_TO, DRAWL_GAP_X = 1.35, 0.09, 0.38, 2.0
+
+
+def drawl(wav, rate):
+    """(the symbiote) Hangs on every word: each sounded stretch slowed without lowering it, each gap between words held."""
+    import numpy as np
+    from audiotsm import wsola
+    from audiotsm.io.array import ArrayReader, ArrayWriter
+
+    def slowed(seg):
+        if seg.size < rate * 0.05:
+            return seg
+        out = ArrayWriter(1)
+        wsola(1, speed=1.0 / DRAWL_STRETCH).run(ArrayReader(seg[np.newaxis, :]), out)
+        return out.data[0].astype(np.float32)
+
+    hop = int(rate * 0.01)
+    n = wav.size // hop
+    env = np.sqrt(np.mean(wav[:n * hop].reshape(n, hop) ** 2, axis=1))
+    quiet = env < max(0.012, float(env.max()) * 0.06)
+    out, i = [], 0
+    while i < n:
+        j = i
+        while j < n and quiet[j] == quiet[i]:
+            j += 1
+        seg, dur = wav[i * hop:j * hop], (j - i) * 0.01
+        if not quiet[i]:
+            out.append(slowed(seg))
+        elif dur >= DRAWL_GAP_MIN and 0 < i and j < n:
+            out.append(np.zeros(int(rate * max(DRAWL_GAP_TO, dur * DRAWL_GAP_X)), np.float32))
+        else:
+            out.append(seg)
+        i = j
+    out.append(wav[n * hop:])
+    return np.concatenate(out)
+
+
 def grit(wav, rate):
     """(the symbiote) A growl through it: a fast flutter in its loudness (a throat rattling at ~31 Hz, a slower wobble on
     top) and soft clipping for the snarl."""
@@ -141,8 +190,8 @@ def grit(wav, rate):
     return np.tanh(2.6 * wav) / np.tanh(2.6)
 
 
-def tidy(wav, rate, rough=False):
-    """Mono, edge silence trimmed (with 80 ms kept), peak at -1 dBFS; `rough` runs it through grit first."""
+def tidy(wav, rate, rough=False, slow=False):
+    """Mono, edge silence trimmed (with 80 ms kept), peak at -1 dBFS; `slow` runs it through drawl, `rough` through grit."""
     import numpy as np
     wav = np.asarray(wav, dtype=np.float32)
     if wav.ndim > 1:
@@ -151,6 +200,8 @@ def tidy(wav, rate, rough=False):
     if loud.size:
         pad = int(rate * 0.08)
         wav = wav[max(0, loud[0] - pad):loud[-1] + pad]
+    if slow:
+        wav = drawl(wav, rate)
     if rough:
         wav = grit(wav, rate)
     peak = float(np.max(np.abs(wav))) or 1.0
@@ -180,6 +231,9 @@ def main():
     only = {a for a in sys.argv[1:] if not a.startswith("--")}
     todo = [(v, k, t) for v, k, t in all_lines if (not only or v in only)
             and not os.path.exists(clip_path(v, k))]
+    for a in sys.argv[1:]:
+        if a.startswith("--limit="):
+            todo = todo[:int(a[len("--limit="):])]
     print(len(todo), "clips to make")
     if not todo:
         return
@@ -207,11 +261,13 @@ def make(model, rate, sf, voice, key, text):
         sf.write(ref, tidy(wav, rate), rate)
         print("designed", ref)
     seeded(v["seed"])
+    if v.get("drawl"):
+        text = hang(text)
     wav = model.generate(text=text, prompt_wav_path=ref, prompt_text=ref_text, reference_wav_path=ref,
                          cfg_value=2.0, inference_timesteps=10)
     path = clip_path(voice, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    sf.write(path, tidy(wav, rate, v.get("grit", False)), rate, format="OGG", subtype="VORBIS")
+    sf.write(path, tidy(wav, rate, v.get("grit", False), v.get("drawl", False)), rate, format="OGG", subtype="VORBIS")
 
 
 if __name__ == "__main__":
