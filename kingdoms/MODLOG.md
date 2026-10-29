@@ -6180,3 +6180,23 @@ textures/entity/breed_horse/CREDITS.txt and tools/rhg/CREDITS.md): `tools/rhg.py
 same place on that mod's vanilla-shaped horse (scaled from each bone's main box to theirs, same-facing face) and reads
 its masks there: dapples, flecked roan, tobiano pinto, leopard spots, blaze, star, socks and stockings, the dun stripe,
 and its painted coat shading over every coat. The masks are copied unchanged into tools/rhg; the colours are ours.
+
+Then Andy, after renders of the Mystical Deer (jsellier23, CC BY 4.0) made into a horse: "it's not looking right at
+all"; keep that one as a rare horse and simplify the rest to vanilla "until i find horse models that fit what i
+desire". So:
+- `horse_rig.SIMPLE`: every build is the classic horse's shape again (vanilla's before 1.14, whose bones these are and
+  whose shape Realistic Horse Genetics paints for), the breeds differing only a little in leg and tail sizes; the extra
+  pieces, the taller legs and longer neck are off (`LIFT`/`NECK` 0 here and in BreedHorseModel, `Mounted.SEAT_LIFT` 0).
+  Turning SIMPLE off brings the detailed horse back; a Blockbench model still overrides either.
+- Plain armour as vanilla's: `horse_rig.plain_armour()` covers the head (eyes left open), muzzle, neck, body and upper
+  legs with slightly bigger copies of their boxes, plated, riveted and trimmed per material; the knight's barding stays
+  in `knights_armour()` for the detailed horse. The stirrups hang outside the body's armour.
+- The moonlit horse: 1 horse in 100 of any horse breed (`Equine.MOONLIT`, a coat past every breed's; foals inherit it
+  like any coat) is born pale and silver-maned in a shape of its own, "Moonlit" on its papers. `tools/horseify.py`
+  makes the deer a horse in Blockbench space (antlers and wisteria off; bulked, longer body, shorter leaned neck,
+  shorter cannons, longer snout, ears up; silver mane, forelock and tail), and `tools/moonlit_horse.py` lays it on our
+  bones (the head's pieces all at the neck's base so they turn as one, thigh and hock on legN_a, cannon on legN_b, the
+  tail turned back against BreedHorseModel's lift), scales it to the classic horse's back height so the tack fits,
+  and bakes its own painting into our box-UV texture (`breed_horse/moonlit/moonlit.png`). Its armour covers each of
+  its boxes, leaving its painted eyes open. Source kept unchanged in tools/horse_models/source with its credit; credit
+  also in textures/entity/breed_horse/CREDITS.txt.

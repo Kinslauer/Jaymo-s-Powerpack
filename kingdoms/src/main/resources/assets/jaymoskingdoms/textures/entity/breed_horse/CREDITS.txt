@@ -6,3 +6,8 @@ and the coat shading) are drawn from the masks of Realistic Horse Genetics by se
 Changes: the masks were carried from that mod's horse model onto ours (each pixel matched to the same place on the
 horse, scaled to our proportions), firmed up or flecked, and coloured and combined with our own coats by
 kingdoms/tools/gen_horses.py. Nothing else of that mod is used.
+
+moonlit/moonlit.png and the moonlit build in horse/builds.json: made from "Mystical Deer" by jsellier23
+(https://blockbenchworkshop.com/model/jsellier23/mystical-deer), CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/). Changed: made into a horse (antlers and wisteria taken off; body,
+neck, head and legs reshaped; silver mane, forelock and tail added) and its texture relaid for our model.

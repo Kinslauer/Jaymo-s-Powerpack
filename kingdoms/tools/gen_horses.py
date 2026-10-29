@@ -31,6 +31,7 @@ import horse_preview as hp  # noqa: E402
 import horse_rig as hr  # noqa: E402
 import bbmodel as bbm  # noqa: E402
 import rhg  # noqa: E402
+import moonlit_horse as moonlit  # noqa: E402
 
 ASSETS = os.path.normpath(os.path.join(HERE, "..", "src/main/resources/assets/jaymoskingdoms"))
 OUT = os.path.join(ASSETS, "textures/entity/breed_horse")
@@ -266,11 +267,11 @@ def mouth(x, col, tint):
 # neck), shadow in the hollows (behind the elbow, the flank, under the belly and the jaw). World space, model pixels.
 FORM = [
     # (centre (|x| or None for the midline), y, z), radius, how much lighter (+) or darker (-)
-    ((5.5, 4.0, -6.5), 3.6, 12),   # the shoulder
-    ((5.5, 3.5, 10.5), 4.2, 12),   # the hip
-    ((5.6, 9.5, -2.5), 2.4, -14),  # behind the elbow, the girth line
-    ((5.6, 5.0, 6.0), 2.6, -10),   # the flank's hollow
-    ((5.8, 9.0, 11.0), 2.5, 8),    # the gaskin's swell
+    ((5.5, 7.0 - hr.LIFT, -6.5), 3.6, 12),   # the shoulder
+    ((5.5, 6.5 - hr.LIFT, 10.5), 4.2, 12),   # the hip
+    ((5.6, 12.5 - hr.LIFT, -2.5), 2.4, -14),  # behind the elbow, the girth line
+    ((5.6, 8.0 - hr.LIFT, 6.0), 2.6, -10),   # the flank's hollow
+    ((5.8, 12.0 - hr.LIFT, 11.0), 2.5, 8),    # the gaskin's swell
 ]
 
 
@@ -285,8 +286,8 @@ def form(x):
         d = math.sqrt((abs(w[0]) - cx) ** 2 + (w[1] - cy) ** 2 + (w[2] - cz) ** 2)
         if d < rad:
             by += k * (1 - d / rad) ** 1.5
-    if w[1] > 8.0 and r in ("body", "belly", "chest"):
-        by -= (w[1] - 8.0) * 5  # the belly in its own shadow
+    if w[1] > 11.0 - hr.LIFT and r in ("body", "belly", "chest"):
+        by -= (w[1] - 11.0 + hr.LIFT) * 5  # the belly in its own shadow
     if r == "leg_a" and x.face in ("a", "b"):
         by += 6 * (1 - x.t) - 4  # the forearm rounds into the knee
     return int(by)
@@ -711,6 +712,11 @@ def armour_base(pxs, mail):
             continue  # the tail comes out through here
         if f in OPEN.get(r, ()):
             continue
+        if r == "helm" and f in ("a", "b"):
+            # (SIMPLE) the eyes left open, a little wider than the eye (as eye() finds it on the head)
+            ez, ey = getattr(c, "eye", None) or (c.pos[2] + 1.75, c.pos[1] + 1.6)
+            if abs(x.q[2] - ez) < 1.25 and abs(x.q[1] - ey) < 0.95:
+                continue
         if r in ("caparison", "neck_cloth"):
             out[(x.X, x.Y)] = cloth(x, fw, fh, u, v)
             continue
@@ -726,7 +732,7 @@ def armour_base(pxs, mail):
                 # fluting: raised ribs down the plates
                 along = x.w[2] if f in ("a", "b") else x.w[0]
                 g += 12 if (along * 1.5) % 3.0 < 0.75 else -10 if (along * 1.5) % 3.0 < 1.25 else 0
-            if r == "chanfron" and f == "top":
+            if r in ("chanfron", "helm") and f == "top":
                 # an etched border and a cross down the face
                 if 1.0 <= edge < 1.5 or abs(x.q[0]) < 0.25 or abs(x.q[2] - 0.8) < 0.25:
                     g -= 46
@@ -749,7 +755,7 @@ def armour_base(pxs, mail):
         # a narrow trim band with rivets in it
         e = edge * S
         big = min(fw, fh) >= 4
-        trimmed = big and r in ("chanfron", "peytral", "plate", "crupper", "crinet")
+        trimmed = big and r in ("chanfron", "peytral", "plate", "crupper", "crinet", "helm", "neck_plate")
         if plate and f in ("a", "b", "front", "back"):
             # a soft sheen running diagonally across the bigger plates
             sheen = (x.w[1] * 0.7 + (x.w[2] if f in ("a", "b") else x.w[0])) % 9.0
@@ -918,7 +924,7 @@ ARMOURED_HIDDEN = HIDDEN + ("mane", "mane_flow", "forelock", "forelock_tip")
 
 def preview_armour(rigs, armour_rigs, written):
     """(0.7.309) Each build in each barding, larger, from the front quarter and the back quarter."""
-    for build in hr.BUILDS:
+    for build in rigs:
         coat_rel = next(rel for rel, (b, _) in written.items() if b == build and not rel.startswith("armor/"))
         coat_img = written[coat_rel][1]
         tiles = []
@@ -939,9 +945,11 @@ def preview_armour(rigs, armour_rigs, written):
 def main():
     # (each build from its Blockbench model in tools/horse_models if it has one, else horse_rig's)
     loaded = {b: bbm.load(b) for b in hr.BUILDS}
+    # (the moonlit horse: the Mystical Deer made into a horse, its own painting baked in; tools/moonlit_horse.py)
+    loaded[moonlit.BUILD] = moonlit.build()
     rigs = {b: horse for b, (horse, _) in loaded.items()}
     armour_rigs = {b: armour for b, (_, armour) in loaded.items()}
-    MAPPERS.update({b: rhg.Mapper(parts) for b, parts in rigs.items()})
+    MAPPERS.update({b: rhg.Mapper(parts) for b, parts in rigs.items() if b in hr.BUILDS})
     builds_json(rigs, armour_rigs)
     pxs = {b: pixels(parts) for b, parts in rigs.items()}
     written = {}
@@ -962,7 +970,8 @@ def main():
     save(bat(pxs["bat_horse"], 3), "bat_horse", "bat_horse/bat")
     for rel, out in undead(pxs["palfrey"]).items():
         save(out, "palfrey", rel)
-    for build in hr.BUILDS:
+    save(moonlit.bake(pxs[moonlit.BUILD]), moonlit.BUILD, f"{moonlit.BUILD}/{moonlit.BUILD}")
+    for build in rigs:
         apx = pixels(rigs[build] + armour_rigs[build], only={p.name for p in armour_rigs[build]})
         for asset, out in armours(apx).items():
             save(out, build, f"armor/{asset}/{build}")

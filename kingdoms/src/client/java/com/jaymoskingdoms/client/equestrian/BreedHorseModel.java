@@ -46,9 +46,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	 * (0.7.309, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
 	 * much higher) and the neck this much longer (the head set out along it); as {@code LIFT} and {@code NECK} in
 	 * tools/horse_rig.py. Everything is posed as a change from each build's own rest pose (builds.json), so a build
-	 * brought in from Blockbench with other proportions moves the same way.
+	 * brought in from Blockbench with other proportions moves the same way. (0.7.309, later) Both 0 while the horses are
+	 * the classic shape again (tools/horse_rig.py SIMPLE).
 	 */
-	static final float LIFT = 3.0F, NECK = 3.0F;
+	static final float LIFT = 0.0F, NECK = 0.0F;
 	/** Where the head's pivot is at rest, looking level (the head is posed as a change from there). */
 	private static final float HEAD_REST_Y = 4.0F - LIFT - NECK * Mth.cos(HEAD_TILT), HEAD_REST_Z = -10.0F - NECK * Mth.sin(HEAD_TILT);
 	/** The mouth opens past this much of vanilla's feeding animation. */
@@ -121,9 +122,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 					List<Piece> armor = pieces(b.getAsJsonArray("armor"));
 					ARMOR.put(build.getKey(), armor);
 					for (Piece p : armor) {
-						if (p.name().equals("armor_flank_left") && !p.boxes().isEmpty()) {
+						// (the side plate, or a plain armour's body)
+						if ((p.name().equals("armor_flank_left") || p.name().equals("armor_body")) && !p.boxes().isEmpty()) {
 							Box box = p.boxes().get(0);
-							STIRRUP_OUT.put(build.getKey(), box.pos()[0] + box.size()[0] + STIRRUP_CLEAR);
+							STIRRUP_OUT.put(build.getKey(), box.pos()[0] + box.size()[0] + box.grow() + STIRRUP_CLEAR);
 						}
 					}
 				}

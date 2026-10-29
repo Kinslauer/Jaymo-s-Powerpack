@@ -34,7 +34,7 @@ public final class HorseLooks {
 	public static final RenderStateDataKey<float[]> BUILD = RenderStateDataKey.create(() -> "jaymoskingdoms:equine_build");
 	/** (0.7.305) Which build of {@link BreedHorseModel} it's drawn in. */
 	static final RenderStateDataKey<String> MODEL = RenderStateDataKey.create(() -> "jaymoskingdoms:equine_model");
-	static final String FALLBACK_BUILD = "courser", UNDEAD_BUILD = "palfrey";
+	static final String FALLBACK_BUILD = "courser", UNDEAD_BUILD = "palfrey", MOONLIT_BUILD = "moonlit";
 	private static final Map<Breed, float[]> BUILDS = new HashMap<>();
 
 	private HorseLooks() {
@@ -56,6 +56,10 @@ public final class HorseLooks {
 		} else if (horse instanceof ZombieHorse) {
 			path = "zombie/" + ZOMBIE[Math.floorMod(e.coat(), ZOMBIE.length)];
 			state.setData(MODEL, UNDEAD_BUILD);
+		} else if (e.moonlit()) {
+			// (0.7.309) the moonlit horse: its own shape and painting, whatever its breed
+			path = "moonlit/moonlit";
+			state.setData(MODEL, MOONLIT_BUILD);
 		} else {
 			path = e.breed().id() + "/" + e.coatName();
 			state.setData(MODEL, e.breed() == Breed.NIGHTMARE ? "courser" : e.breed().id());

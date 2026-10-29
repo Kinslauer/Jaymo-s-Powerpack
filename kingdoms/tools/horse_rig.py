@@ -32,9 +32,13 @@ class Part:
         self.name, self.parent, self.pose, self.cubes = name, parent, pose, cubes
 
 
-# (0.7.309, after SWEM's look, our own) the horse stands taller: the legs LIFT longer (the body, saddle, tail and wings
-# that much higher) and the neck NECK longer (the head set out along it, so the neck's base stays where it was)
-LIFT, NECK = 3.0, 3.0
+# (0.7.309) SIMPLE: every build is the classic horse's shape (vanilla's before 1.14, which these bones and Realistic Horse
+# Genetics' coats are made for), only its sizes a little different by breed, and its barding a plain armour over it,
+# until better models are found (tools/bbmodel.py takes one in). Without it, the taller horse after SWEM's look (our
+# own): the legs LIFT longer (the body, saddle, tail and wings that much higher) and the neck NECK longer (the head set
+# out along it, so the neck's base stays where it was), extra pieces for its form, and the knight's barding.
+SIMPLE = True
+LIFT, NECK = (0.0, 0.0) if SIMPLE else (3.0, 3.0)
 
 
 def head_pivot(tilt):
@@ -51,10 +55,15 @@ def rig(build):
     slim = b in ("courser", "desert_horse")
     heavy = b == "draft"
     parts = []
+    # the pieces only the detailed horse has (SIMPLE leaves them off)
+    EXTRA = {"chest", "withers", "croup", "croup_split", "belly", "shoulder", "barrel", "haunch", "jowl", "cheek", "forelock",
+             "forelock_tip", "nostril_left", "nostril_right", "mane_flow"}
 
     def add(name, parent, pose, *cubes):
-        parts.append(Part(name, parent, pose, list(cubes)))
-        return parts[-1]
+        part = Part(name, parent, pose, list(cubes))
+        if not (SIMPLE and name in EXTRA):
+            parts.append(part)
+        return part
 
     up = int(LIFT)  # the upper legs are that much longer
     hind = {"draft": (5, 9 + up, 6), "destrier": (5, 9 + up, 5), "steppe_pony": (4, 9 + up, 5)}.get(b, (3, 9 + up, 4) if slim else (4, 9 + up, 5))
@@ -100,7 +109,9 @@ def rig(build):
         leg_a = add(f"leg{k}_a", None, (x, 9 - LIFT, z, 0, 0, 0),
                     Cube((cx - upper[0] / 2, top, zc - upper[2] / 2), upper, region="leg_a"))
         # (0.7.309) the knee in front, the hock behind (its point sticks out at the back)
-        if front:
+        if SIMPLE:
+            pass
+        elif front:
             leg_a.cubes.append(Cube((cx - upper[0] / 2 - 0.3, 4.6 + LIFT, zc - upper[2] / 2 - 0.3), (upper[0] + 0.6, 2.2, upper[2] + 0.6),
                                     region="leg_a"))
         else:
@@ -109,7 +120,9 @@ def rig(build):
                                     region="leg_a"))  # the gaskin
         leg_b = add(f"leg{k}_b", None, (x, 16, z, 0, 0, 0),
                     Cube((cx - cannon[0] / 2, 0, zc - cannon[2] / 2), cannon, region="leg_b"))
-        if heavy:
+        if SIMPLE:
+            pass
+        elif heavy:
             leg_b.cubes.append(Cube((cx - 3, 2, zc - 3), (6, 3, 6), kind="hair", region="feather", axis="y", tip=1))
         elif b == "destrier":
             leg_b.cubes.append(Cube((cx - 2, 3, zc - 2), (4, 2, 4), kind="hair", region="feather", axis="y", tip=1))
@@ -117,7 +130,7 @@ def rig(build):
             leg_b.cubes.append(Cube((cx - (cannon[0] + 1) / 2, 4, zc - (cannon[2] + 1) / 2), (cannon[0] + 1, 1, cannon[2] + 1),
                                     region="fetlock"))
         leg_c = add(f"leg{k}_c", None, (x, 16, z, 0, 0, 0), Cube((cx - 2, 5.1, zc - 2), (4, 3, 4), kind="hoof", region="hoof"))
-        if not heavy and b != "destrier":
+        if not heavy and b != "destrier" and not SIMPLE:
             # (0.7.309) the coronet band round the top of the hoof, and the ergot's tuft behind the fetlock
             leg_c.cubes.append(Cube((cx - 2.2, 4.8, zc - 2.2), (4.4, 0.8, 4.4), region="fetlock"))
             leg_c.cubes.append(Cube((cx - 0.75, 4.0, zc + 1.6), (1.5, 1.5, 1), kind="hair", region="feather", axis="y", tip=1))
@@ -125,6 +138,8 @@ def rig(build):
     # ---- the head and neck (all posed together); the mouth comes shut and open ----
     # (heads stay 5 wide and muzzles 4 at most, for the bridle and headstall, which are made for that)
     head = {"steppe_pony": (5, 6, 7), "desert_horse": (5, 5, 6), "draft": (5, 6, 7), "destrier": (5, 6, 7)}.get(b, (5, 5, 7))
+    if SIMPLE:
+        head = (5, 5, 7)
     hx = -head[0] / 2
     add("head", None, HEAD_POSE, Cube((hx, -10, -1.5), head, region="head"))
     if b != "desert_horse":
@@ -140,7 +155,9 @@ def rig(build):
             Cube((-fl[0] / 2, -10.6, 4.5 - fl[2] - 1), (fl[0], 2, 1), kind="hair", region="forelock", axis="y", tip=1))
 
     # the muzzle: a Roman nose on the draft, a fine dished one on the desert horse
-    if b == "desert_horse":
+    if SIMPLE:
+        upper, lower = Cube((-2, -10, -7), (4, 3, 6), region="muzzle"), Cube((-2, -7, -6.5), (4, 2, 5), region="lip")
+    elif b == "desert_horse":
         upper, lower = Cube((-1.5, -9.5, -6.5), (3, 3, 5), region="muzzle"), Cube((-1.5, -6.5, -6), (3, 2, 4), region="lip")
     elif heavy:
         upper, lower = Cube((-2, -10.5, -7.5), (4, 4, 6), region="muzzle"), Cube((-2, -6.5, -7), (4, 2, 5), region="lip")
@@ -161,7 +178,7 @@ def rig(build):
     add("lower_mouth_open", None, (0, *head_pivot(30.0), 45.0, 0, 0),
         Cube((lower.pos[0], lower.pos[1], lower.pos[2] + 1), lower.size, region="lip", share=lower))
 
-    ear = (2, 2, 1) if b == "steppe_pony" else (2, 3, 1)
+    ear = (2, 2, 1) if b == "steppe_pony" and not SIMPLE else (2, 3, 1)
     ear_y = -10 - ear[1]
     add("left_ear", None, HEAD_POSE, Cube((head[0] / 2 - 2.05, ear_y, 4), ear, region="ear"))
     add("right_ear", None, HEAD_POSE, Cube((-head[0] / 2 + 0.05, ear_y, 4), ear, region="ear"))
@@ -169,6 +186,8 @@ def rig(build):
     # the neck: deep and crested on the war and draft horses, fine on the desert horse
     neck = {"destrier": (5, 14, 9), "draft": (6, 14, 9), "steppe_pony": (5, 13, 8), "desert_horse": (4, 15, 6),
             "courser": (4, 15, 7)}.get(b, (4, 14, 8))
+    if SIMPLE:
+        neck = (4, 14, 8)
     neck = (neck[0], neck[1] + int(NECK), neck[2])
     # (a neck wider than the head starts below the eyes, or it would bury them)
     neck_top = -9.8 if neck[0] < 5 else -7.6
@@ -176,7 +195,9 @@ def rig(build):
     add("neck", None, HEAD_POSE, Cube((-neck[0] / 2 - 0.05, neck_top, -2), neck, region="neck"))
     # the mane: along the crest, and (on the long-maned breeds) falling over the neck's right side
     back = -2 + neck[2]  # the neck's crest line
-    if b == "steppe_pony":
+    if SIMPLE:
+        mane = Cube((-1, -11.5, back - 1), (2, 16, 4), kind="hair", region="mane", axis="z", tip=1)  # (the classic horse's)
+    elif b == "steppe_pony":
         mane = Cube((-1, -12, back - 1), (2, 16 + NECK, 4), kind="hair", region="mane", axis="z", tip=1)  # stands up, cropped
     elif slim:
         mane = Cube((-1, -11.5, back - 1.5), (2, 16 + NECK, 3), kind="hair", region="mane", axis="z", tip=1)
@@ -218,6 +239,41 @@ ARMOR_TEXTURE = (128, 128)  # (0.7.309) the barding's own texture space (every b
 
 
 def armour(build, parts):
+    return plain_armour(build, parts) if SIMPLE else knights_armour(build, parts)
+
+
+def plain_armour(build, parts):
+    """(SIMPLE) Plain horse armour as vanilla's is: the horse's own boxes a little bigger, plated (over the head with the
+    eyes left open, the muzzle, the neck, the body and the upper legs). Each box of those bones (and of the pieces hung
+    from them) gets its cover, on the same part."""
+    by = {p.name: p for p in parts}
+    covers = {"head": ("helm", 0.35), "upper_mouth": ("muzzle_plate", 0.3), "neck": ("neck_plate", 0.4), "body": ("plate", 0.45)}
+    covers.update({f"leg{k}_a": ("leg_plate", 0.3) for k in range(1, 5)})
+    out = []
+
+    def bone(p):
+        while p.parent is not None and p.name not in covers:
+            p = by[p.parent]
+        return p.name
+
+    for p in parts:
+        b = bone(p)
+        if b not in covers or not p.cubes:
+            continue
+        region, grow = covers[b]
+        for k, cube in enumerate(p.cubes):
+            if cube.kind != "hide":
+                continue
+            c = Cube(cube.pos, cube.size, kind="armor", region=region, grow=grow + cube.grow)
+            c.eye = getattr(cube, "eye", None)
+            # the muzzle's cover rides on the head (it stays on when the mouth opens)
+            on = "head" if p.name == "upper_mouth" else p.name
+            out.append(Part(f"armor_{p.name}_{k}" if (p.name, k) != ("body", 0) else "armor_body", on, (0, 0, 0, 0, 0, 0), [c]))
+    pack(out, ARMOR_TEXTURE)
+    return out
+
+
+def knights_armour(build, parts):
     """(0.7.309) The barding, its own pieces hung on the horse's bones (as Blockbench would lay them out), joined up like a
     knight's horse (after SWEM's look, our own): a cloth caparison under it all, round the neck and over the body and
     hanging below the belly; a full chanfron closed over the face with eye holes, and a nose plate; a crinet of
