@@ -91,6 +91,16 @@ import org.jspecify.annotations.Nullable;
  * executions are left-click, {@code Finishers}). Held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
  * takes one of its own treats instead, {@link #TREATS}). Kingdoms' villagers tend the downed too, and ask for the
  * getting up with the tag {@link #REVIVE_TAG}.
+ * <p>
+ * (0.18.4) Andy (2026-10-29): "while downed, any attack that would deal 3 hearts or more of damage kills instantly ... if
+ * anyone goes down without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too
+ * wounded to get up shift will give up. the animation takes longer but animates them rising to their feet, and is
+ * interrupted after 2 hits." A blow of {@link #KILL_BLOW} or more on anyone downed is their death ({@link #attack}). A downed
+ * player whose arms, legs and feet are all above red on the wounds screen ({@link #TOO_HURT_FRACTION}, unbroken, and
+ * none of them that low as they fell: {@link #TOO_HURT}) holds sneak for {@link #RISE_TICKS} to get up by themselves
+ * ({@link #RISING}, drawn by {@code CrawlPose}), at {@link #RISE_HEALTH}; the {@link #HOLD_HITS}th hit meanwhile knocks
+ * them back down (Kingdoms' Unflinching: more, {@link WillSkill#holdHits}), as it breaks off a revive or Second Wind's
+ * eating. Too wounded, or passed out, sneak gives up as before. The crippled (off their feet, not downed) are as they were.
  */
 public final class Downed {
 	/** A downed one's health: what mobs, fire and falls have left to take. */
@@ -118,6 +128,15 @@ public final class Downed {
 	public static final double PLAYER_CRAWL_SLOW = -0.5, PASSED_OUT_SLOW = -1.0;
 	/** How long a downed player holds sneak to give up (ticks). */
 	public static final int GIVE_UP_TICKS = 100;
+	/** (0.18.4) A blow this hard (health points: three hearts) on anyone downed kills them outright. */
+	public static final float KILL_BLOW = 6.0F;
+	/** (0.18.4) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
+	public static final int RISE_TICKS = 160;
+	public static final float RISE_HEALTH = 0.3F;
+	/** (0.18.4) An arm, leg or foot this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
+	public static final float TOO_HURT_FRACTION = 0.25F;
+	/** (0.18.4) The hit that breaks off a held action (rising, a revive, Second Wind's eating), before Unflinching. */
+	public static final int HOLD_HITS = 2;
 	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
 	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
@@ -162,6 +181,16 @@ public final class Downed {
 	static final AttachmentType<Boolean> DIED = AttachmentRegistry.create(JaymosPowers.id("downed_died"),
 		builder -> builder.persistent(Codec.BOOL));
 
+	/**
+	 * (0.18.4) A downed player getting up by themselves: the game time they started (sneak held). Synced to everyone (who
+	 * draw them rising, {@code CrawlPose}); not saved.
+	 */
+	public static final AttachmentType<Long> RISING = AttachmentRegistry.create(JaymosPowers.id("downed_rising"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
+	/** (0.18.4) Downed with an arm, leg or foot at red or worse as they fell: too wounded to rise by themselves. Saved. */
+	static final AttachmentType<Boolean> TOO_HURT = AttachmentRegistry.create(JaymosPowers.id("downed_too_hurt"),
+		builder -> builder.persistent(Codec.BOOL));
+
 	/** A downed player's slow crawl. */
 	static final Identifier SLOW_ID = JaymosPowers.id("downed_slow");
 	/** Revive and the downed's empty hands run before every other mod's right-click on them (trades, quests, pockets, carrying). */
@@ -198,7 +227,7 @@ public final class Downed {
 		final LivingEntity body;
 		final long start;
 		long held;
-		int ticks;
+		int ticks, hits;
 		boolean begun, over;
 
 		Revive(LivingEntity body, long start) {
@@ -210,6 +239,15 @@ public final class Downed {
 
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
+
+	/** (0.18.4) A downed player getting up by themselves: how far along, the hits taken, and knocked back (sneak let go first). */
+	private static final class Rise {
+		int ticks, hits;
+		boolean knocked;
+	}
+
+	/** (0.18.4) Downed player → their rise. Not saved. */
+	private static final Map<UUID, Rise> RISES = new HashMap<>();
 
 	private Downed() {
 	}
@@ -233,6 +271,13 @@ public final class Downed {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source)
+				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
+				// (0.18.4) three hearts or more on the downed: that's the end of them
+				FELLED_BY.put(entity, source);
+				finish(level, entity);
+				return false;
+			}
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
 				|| entity instanceof Player) {
 				// (mobs, fire, falls: real harm, out of what's left; (0.15.33) on a downed player, a player's blow too)
@@ -243,6 +288,12 @@ public final class Downed {
 				wound(level, entity, source);
 			}
 			return false;
+		});
+		// (0.18.4) a hit breaks off a held action: rising, a revive, Second Wind's eating
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (entity instanceof ServerPlayer player && taken > 0.0F && attack(source) && player.isAlive()) {
+				struck(player);
+			}
 		});
 		UseEntityCallback.EVENT.addPhaseOrdering(FIRST, Event.DEFAULT_PHASE);
 		UseEntityCallback.EVENT.register(FIRST, Downed::onUseEntity);
@@ -296,6 +347,7 @@ public final class Downed {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			REVIVING.clear();
 			GIVING_UP.clear();
+			RISES.clear();
 		});
 	}
 
@@ -329,6 +381,31 @@ public final class Downed {
 	public static boolean adrift(Entity entity) {
 		return entity.isInWater() || entity.level().getFluidState(entity.blockPosition().below()).is(net.minecraft.tags.FluidTags.WATER)
 			&& entity.level().getFluidState(entity.blockPosition()).isEmpty() && !entity.onGround();
+	}
+
+	/** (0.18.4) A blow someone or something dealt (a swing, an arrow, a bite, a blast), not fire, a fall, hunger or drowning. */
+	static boolean attack(DamageSource source) {
+		return source.getEntity() != null || source.getDirectEntity() != null || source.is(DamageTypeTags.IS_EXPLOSION);
+	}
+
+	/** (0.18.4) An arm, leg or foot at red or worse on the wounds screen ({@link #TOO_HURT_FRACTION}), broken, or gone. */
+	static boolean limbsTooHurt(LivingEntity entity) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE) {
+			return false;
+		}
+		for (int i = 0; i < plan.size(); i++) {
+			BodyPart part = plan.part(i);
+			if (!part.vital() && (Wounds.isBroken(entity, part) || Wounds.fraction(entity, part) <= TOO_HURT_FRACTION)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** (0.18.4) Whether this downed player is too wounded to get up by themselves: limbs at red or worse as they fell, or now. */
+	public static boolean tooHurt(LivingEntity entity) {
+		return entity.hasAttached(TOO_HURT) || limbsTooHurt(entity);
 	}
 
 	/**
@@ -369,6 +446,13 @@ public final class Downed {
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
 		boolean crawler = !(entity instanceof Player)
 			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
+		// (0.18.4) the limbs as they fell, before the downed health fills them back to the bruise line
+		if (entity instanceof Player && limbsTooHurt(entity)) {
+			entity.setAttached(TOO_HURT, true);
+		} else {
+			entity.removeAttached(TOO_HURT);
+		}
+		entity.removeAttached(RISING);
 		if (!keepHealth) {
 			entity.setHealth(Math.min(entity instanceof Player ? DOWNED_PLAYER_HEALTH : DOWNED_HEALTH, entity.getMaxHealth()));
 		}
@@ -406,6 +490,7 @@ public final class Downed {
 				power.onDowned(player);
 			}
 			GIVING_UP.remove(player.getUUID());
+			RISES.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.down").withStyle(ChatFormatting.RED));
 		}
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.NEUTRAL, 0.9F, 0.8F);
@@ -420,10 +505,13 @@ public final class Downed {
 		entity.removeAttached(WOUNDS);
 		entity.removeAttached(OUT);
 		entity.removeAttached(KNOCKED);
+		entity.removeAttached(RISING);
+		entity.removeAttached(TOO_HURT);
 		entity.removeTag(DOWNED_TAG);
 		entity.removeTag(REVIVE_TAG);
 		if (entity instanceof Player player) {
 			GIVING_UP.remove(player.getUUID());
+			RISES.remove(player.getUUID());
 			AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
 				speed.removeModifier(SLOW_ID);
@@ -730,6 +818,13 @@ public final class Downed {
 			}
 			return;
 		}
+		// (0.18.4) not too wounded: sneak gets them up instead (carried or adrift, they can't)
+		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
+			GIVING_UP.remove(player.getUUID());
+			rise(level, player, now);
+			return;
+		}
+		stopRising(player);
 		// giving up: sneak held (server side, from the player's input)
 		int held = player.isShiftKeyDown() ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : 0;
 		if (held == 0) {
@@ -746,6 +841,85 @@ public final class Downed {
 			player.sendOverlayMessage(Component.translatable(out ? "message.jaymospowers.downed.give_up_out" : "message.jaymospowers.downed.give_up", bar)
 				.withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
+	}
+
+	/** (0.18.4) A downed player able to rise, this tick: sneak held fills the bar and, full, gets them up by themselves. */
+	private static void rise(ServerLevel level, ServerPlayer player, long now) {
+		Rise r = RISES.get(player.getUUID());
+		if (!player.isShiftKeyDown()) {
+			if (r != null && r.ticks > 0 && !r.knocked) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_stopped").withStyle(ChatFormatting.GRAY));
+			}
+			stopRising(player);
+			if (now % HINT_TICKS == 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_hint").withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		if (r == null) {
+			r = new Rise();
+			RISES.put(player.getUUID(), r);
+		}
+		if (r.knocked) {
+			// (knocked back down: let go of sneak and try again)
+			return;
+		}
+		if (r.ticks++ == 0) {
+			player.setAttached(RISING, now);
+		}
+		if (r.ticks % 20 == 10) {
+			// straining with it
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
+				0.7F + level.getRandom().nextFloat() * 0.3F);
+		}
+		if (r.ticks < RISE_TICKS) {
+			if (r.ticks % 2 == 0) {
+				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) RISE_TICKS);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rising", "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
+					.withStyle(ChatFormatting.YELLOW));
+			}
+			return;
+		}
+		RISES.remove(player.getUUID());
+		getUp(level, player);
+		if (!isDowned(player)) {
+			// (on their own legs, not a friend's arm: less in them than a revive leaves)
+			player.setHealth(Math.min(player.getHealth(), Math.max(1.0F, player.getMaxHealth() * RISE_HEALTH)));
+			Wounds.reconcile(player);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.risen").withStyle(ChatFormatting.GREEN));
+		}
+	}
+
+	/** (0.18.4) No longer rising (let go, or can't now): the bar and the drawing gone. */
+	private static void stopRising(ServerPlayer player) {
+		RISES.remove(player.getUUID());
+		if (player.hasAttached(RISING)) {
+			player.removeAttached(RISING);
+		}
+	}
+
+	/**
+	 * (0.18.4) {@code player} took a hit: the {@link #HOLD_HITS}th (Unflinching: more) breaks off whatever they were holding
+	 * at, their rise (back down they go), their revive, or Second Wind's eating.
+	 */
+	private static void struck(ServerPlayer player) {
+		int most = WillSkill.holdHits(player, HOLD_HITS);
+		Rise rise = RISES.get(player.getUUID());
+		if (rise != null && rise.ticks > 0 && !rise.knocked && ++rise.hits >= most) {
+			rise.knocked = true;
+			rise.ticks = 0;
+			rise.hits = 0;
+			player.removeAttached(RISING);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.8F, 0.9F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.rise_knocked").withStyle(ChatFormatting.RED));
+		}
+		Revive revive = REVIVING.get(player.getUUID());
+		if (revive != null && revive.begun && !revive.over && ++revive.hits >= most) {
+			revive.over = true;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_broken", revive.body.getDisplayName())
+				.withStyle(ChatFormatting.RED));
+		}
+		SelfRevive.struck(player, most);
 	}
 
 	/**

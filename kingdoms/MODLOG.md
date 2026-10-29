@@ -6696,3 +6696,11 @@ server refuses it for any other heritage. `onlyFor` keeps answering null for ans
   Banished is the old list. Scenes added for the six other-world starts.
 - Still Verdant-only and Divine-making checks on the road, now against the heritage already set.
 - Compile-checked. Not seen in game.
+
+## 0.7.357: Unflinching, a Will node for held actions (pack 0.18.4)
+- Andy: "Add a node to the Will tree that lets you withstand more hits during charged interactions".
+- `Skills.Perk.UNFLINCHING` (2 ranks, 1 point each, Strength level 10, needs No Getting Up): on the Killing Intent page,
+  tier 12 between Grim Hand and No Mercy. Each rank lets a held action take one more hit before it's broken off: getting
+  yourself up while downed, bringing someone round, Second Wind's eating (2 hits without it). The counting is Jaymo's
+  Powers' (`WillSkill.holdHits`, pack 0.18.4).
+- Built, not seen in game.

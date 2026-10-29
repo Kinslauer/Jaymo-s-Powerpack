@@ -52,7 +52,7 @@ public final class SelfRevive {
 	/** A player eating to rise: when use last came, and how far along. */
 	private static final class Eating {
 		long held;
-		int ticks;
+		int ticks, hits;
 		final InteractionHand hand;
 
 		Eating(InteractionHand hand, long held) {
@@ -105,6 +105,15 @@ public final class SelfRevive {
 			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** (0.18.4) {@code player} took a hit: the {@code most}th breaks off their eating ({@link Downed}'s held actions). */
+	static void struck(ServerPlayer player, int most) {
+		Eating e = EATING.get(player.getUUID());
+		if (e != null && ++e.hits >= most) {
+			EATING.remove(player.getUUID());
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.self_revive_broken").withStyle(ChatFormatting.RED));
+		}
 	}
 
 	private static void tick(MinecraftServer server) {

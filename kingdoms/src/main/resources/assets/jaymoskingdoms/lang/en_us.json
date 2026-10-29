@@ -7718,6 +7718,8 @@
 	"skill.jaymoskingdoms.perk.will_over_flesh.desc": "Above half health, another player's power moves you 30% less per rank: gravity, wind, webs, throws.",
 	"skill.jaymoskingdoms.perk.grim_hand": "Grim Hand",
 	"skill.jaymoskingdoms.perk.grim_hand.desc": "Each rank gives a full-strength blow a 7% chance to be a grim crit (half again as hard), and makes every cut 40% likelier to take off a head or a limb. A grim crit's cut, twice that.",
+	"skill.jaymoskingdoms.perk.unflinching": "Unflinching",
+	"skill.jaymoskingdoms.perk.unflinching.desc": "Each rank lets a held action take one more hit before it's broken off: getting yourself up while downed, bringing someone round, and Second Wind's eating to rise (2 hits without it).",
 	"skill.jaymoskingdoms.perk.no_mercy": "No Mercy",
 	"skill.jaymoskingdoms.perk.no_mercy.desc": "Weaker mobs you fell die outright instead of going down. Sneak, or hit with your fists or a club, to down them as ever.",
 	"skill.jaymoskingdoms.perk.last_look": "Last Look",
