@@ -120,6 +120,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
+		// (0.7.322) a werewolf's, an ape's or a disguise's voice, through Simple Voice Voice Changer when loaded
+		VoiceMaskClient.register();
 		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
 		HiddenBladeClient.register();

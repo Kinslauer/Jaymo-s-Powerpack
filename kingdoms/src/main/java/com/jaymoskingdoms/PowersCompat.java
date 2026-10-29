@@ -134,6 +134,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.322) Powers' {@code ZFighterLineage.ape(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle ape;
+	private static boolean lookedForApe;
+
+	/** (0.7.322) Whether {@code player} is a Great Ape now; false without Powers. */
+	public static boolean greatApe(Player player) {
+		if (!lookedForApe) {
+			lookedForApe = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					ape = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterLineage"),
+						"ape", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Great Ape (older Powers?)", e);
+				}
+			}
+		}
+		if (ape == null) {
+			return false;
+		}
+		try {
+			return (boolean)ape.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();

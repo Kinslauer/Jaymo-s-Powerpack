@@ -267,6 +267,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// 0.7.322: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
+		ProximityChat.register();
+		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
