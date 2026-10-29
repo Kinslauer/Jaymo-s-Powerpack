@@ -6282,3 +6282,24 @@ instead of them appearing in chat like now."
 - MCA's "Talk about work" on them goes to Powers' talk (`PowersCompat.zfighterTalk`), and a Z Fighter master (a town's
   villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
   `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).
+
+## 0.7.320: goblins have the workshop goblin's body (pack 0.17.147)
+Andy: "can this replace our goblins?" (kokosikk's Blockbench Workshop goblin, CC BY 4.0), then "Whole body, clothes
+redrawn". Goblin villagers now have its shape: a big head, a short body bent forward in a hunch, thin arms, short legs.
+- `GoblinBody.apply` (last in both pose hooks, `MobSwingLivingEntityRendererMixin` and
+  `MobSwingModelFeatureRendererMixin`): every humanoid body drawn for a goblin, MCA's skin, face, clothes and hair, the
+  marks, any armour, is reshaped bone by bone: each bone moved to the goblin's pivot and scaled so a man's box fills the
+  goblin's (head 1.125 wide; body 0.75 tall, 1.25 deep; arms 0.65 x 0.75; legs 0.75 x 0.67), the body, head and arms
+  leant 12 degrees into the hunch at the hip. So whatever MCA dresses a goblin in is drawn on the goblin's body. MCA's
+  skin layer hands its pose on to the other layers (without the scale), so the move is made once (a goblin's right
+  leg sits 1.4 further out than a man's) and the scale every time. A woman's breasts go onto the goblin's chest
+  (`McaLookModels.goblinChest`).
+- `GoblinBody.submit` (from `GreenskinLooks`, which still draws the marks): the model's own parts, painted in the pack's
+  style by `tools/gen_goblin_body.py` (flesh in greys tinted by the goblin's green): ears out and up, a drooping nose,
+  two small tusks, fists, wide feet with toenails, a belt with buckle and pouch, a loincloth, shin wraps; half of them
+  a red cap, one in four an earring. Feet and wraps go under boots, the loincloth under leggings, the cap under a helmet.
+  The two old goblin head shapes (`goblin_features.png`) are gone; orcs are unchanged.
+- `GoblinHandMixin` (`HumanoidModel.translateToHand`): a held item isn't squashed by the thin arm and sits in the fist.
+- Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
+  `tools/blockbench/kokosikk_goblin.bbmodel`.
+Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.

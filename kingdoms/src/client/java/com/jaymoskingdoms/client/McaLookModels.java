@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import net.conczin.mca.client.model.CommonVillagerModel;
 import net.conczin.mca.client.model.PlayerEntityExtendedModel;
 import net.conczin.mca.client.model.VillagerEntityModelMCA;
 import net.minecraft.client.model.HumanoidModel;
@@ -100,5 +101,26 @@ final class McaLookModels {
 		parent.copyPropertiesTo(model);
 		model.copyVisibility(parent);
 		return model;
+	}
+
+	/**
+	 * (0.7.320) A goblin's breasts ({@link GoblinBody#apply}): MCA poses them as parts of their own off a man's chest
+	 * (each time, from its own dimensions); they go onto the goblin's, scaled with its body and leant into its hunch.
+	 */
+	static void goblinChest(HumanoidModel<?> model, float[] body, float[] scale, float hunch) {
+		if (!(model instanceof CommonVillagerModel<?> villager)) {
+			return;
+		}
+		float cos = net.minecraft.util.Mth.cos(hunch), sin = net.minecraft.util.Mth.sin(hunch);
+		for (net.minecraft.client.model.geom.ModelPart part : villager.getBreastParts()) {
+			float x = part.x * scale[0], y = part.y * scale[1], z = part.z * scale[2];
+			part.x = body[0] + x;
+			part.y = body[1] + y * cos - z * sin;
+			part.z = body[2] + y * sin + z * cos;
+			part.xRot += hunch;
+			part.xScale *= scale[0];
+			part.yScale *= scale[1];
+			part.zScale *= scale[2];
+		}
 	}
 }
