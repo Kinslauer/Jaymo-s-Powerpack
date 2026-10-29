@@ -73,7 +73,11 @@ def r(v):
 
 tex_dir = f"{REPO}/src/main/resources/assets/jaymospowers/textures/item"
 model_dir = f"{REPO}/src/main/resources/assets/jaymospowers/models/item"
-DISPLAY = display(tp=0.5, fp=0.45, gui=0.55, center_y=16)
+# (0.17.163) the friend's own display transforms when the file has them all (his second pass set every slot, squashing
+# the blade thin in the hand); otherwise ours
+FRIEND = bb.get("display", {})
+SLOTS = ("thirdperson_righthand", "thirdperson_lefthand", "firstperson_righthand", "firstperson_lefthand", "ground", "gui", "fixed")
+DISPLAY = FRIEND if all(k in FRIEND for k in SLOTS) else display(tp=0.5, fp=0.45, gui=0.55, center_y=16, grip_y=4)
 for name, spec in STAGES.items():
     recolour(atlas, spec).save(f"{tex_dir}/{name}.png")
     model = {

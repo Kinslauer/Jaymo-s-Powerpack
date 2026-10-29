@@ -3620,3 +3620,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.162, the server starts again (Kingdoms 0.7.333):** Simple Voice Chat 2.6.27 refuses to load beside Sound Physics
   Remastered older than 1.5.2, so the pack's Sound Physics Remastered moves from 1.5.1 to 1.5.2+26.3 (Modrinth
   `gA7nKz5g`, CurseForge file 9280065). Nothing else changes.
+- **0.17.163, Sora's Dagger in the friend's own hand positions:** Andy's friend updated the dagger's Blockbench file
+  (`tools/blockbench/soras_dagger_original.bbmodel`) with his own display settings for every slot: both hands in first
+  and third person, the ground, the inventory, item frames and shelves. The shapes and texture are unchanged; all four
+  stages now take his transforms in place of ours (`tools/blockbench/sora.py` uses the file's display when it sets
+  every slot). Not seen in game.
