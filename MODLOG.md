@@ -3588,3 +3588,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     mountains, the Piglin King as a Nether boss, a redstone golem deep below, the skulk golem in the deep dark, a wild
     boar in place of Naturalist's, and scalebane sellswords in barbarian camps and goblin villages. See the Kingdoms
     MODLOG.
+- **0.17.158, symbiote Collect, swing engulf and the checklist picks:** the symbiote's wheel has a Collect slot (bond 70): in Living Armor
+  its tendrils fetch items within 12 blocks to your feet; below bond 70 it fetches on its own whenever its tendrils are
+  out. The first time it holds a kind of item it studies it in front of you with a comment and, given time, a hint
+  (Use takes it early); one look per kind, ever. Swinging in the suit, tendrils pour out of the body and wrap the whole
+  arm before the cord shoots, and on release the cord reels back in and the wrap withdraws, leaving no line. See
+  docs/web.md. Living Armor no longer brings the tendrils out (they have their own slot), and the Tendrils slot
+  works from bond 30.
+  From Andy's checklist: Protect / Hunt / Hide orders, Trust and Mood (a Status page off the wheel's Mind chip, mood
+  tints the screen edge and its voice), named stages, its own requests (ignore the deep-underground one and it digs you
+  down), arm slots (K / U), a mantle (N), strain traits (Black hunts at night, Red hears heartbeats, White refuses
+  rotten flesh), C to feed or consume a held foe, misfires while settling, starving it to zero bond consumes you, any
+  other death leaves it waiting at the spot with your things to rebond, and the meteor blob rampages round its crater
+  until killed or bonded. Compile-checked; not playtested.

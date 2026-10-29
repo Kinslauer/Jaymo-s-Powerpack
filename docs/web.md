@@ -1640,3 +1640,167 @@ to 3 removals."
   same twice running; no Executioner perk needed (the suit is the weapon); priority over the bare-hand neck snap.
 - **Check first in game:** engulfed-arm sizes and first-person offsets; the hand grab's skewer aim; execution
   keyframes (hand-authored); grey line darkness at default brightness; the well-fed whisper timing.
+
+## Swing engulf (0.17.158)
+
+Andy: "The tendrils when swinging with R should extend from the body and arm fully engulfing it and retracting as soon as
+the button is released. leaving no remnant line. much like the Symbiote: A Bonding Experience mod."
+
+- **`WebEngulf` (client):** per player and hand, tracks a wrap (0-1) and a reel (0-1) each tick. On R in the suit,
+  `WRAP_TICKS` 3: nine tendrils pour out of the torso, over the shoulder and spiral down the whole arm to the hand; the
+  cord only shoots once the wrap is `CORD_AT` 0.75 of the way. While held the arm stays wrapped (plus the existing
+  `armSheath` braiding into the cord). On release the cord reels from the anchor into the hand (`REEL_TICKS` 3, taut),
+  then the wrap draws back into the body (`UNWRAP_TICKS` 4).
+- **No remnant:** `WebSpentLines.spend` ignores dark (symbiote) lines, so neither a released swing nor a broken hitch
+  leaves a falling line. Plain webs still fall and fade. Own first person draws no wrap (the arm is the camera's); the
+  cord still waits for the wrap and reels in.
+
+## Collect mode and first looks (0.17.158)
+
+- Andy: "Add an option to the wheel for a "Collect" mode. When active (and using living armor) it will use living
+  tendrils to periodically reach out and grab items bringing them to you. This is unlocked at 70 Bond, and before then
+  it will do it on it's own while tendrils are active, grabbing surrounding items within 12 blocks, and upon the first
+  time grabbing an item, the symbiote will hold it in front of you, taking time to inspect and examine it like it does
+  mobs. you can grab the item at any time to skip, but the symbiote will comment on it and give information hints if
+  given time. Only one inspection per item ever."
+- `WebSymbioteCollect`: every 1.5 s (`EVERY` 30) a free tendril grabs the nearest item it can see within 12 blocks that
+  nobody just dropped, and once it has it, drops it at your feet. From bond 70 (`COLLECT_BOND`; empowered and creative
+  too) only with the wheel's new Collect slot on (`WebSymbiote.COLLECT_TOGGLE` 9, `WebSymbioteState.COLLECT` 64, a bundle
+  icon) and Living Armor on, tendrils out; below 70 it fetches on its own whenever its tendrils are out, and the slot
+  only whispers.
+- The first time it ever holds a kind of item (`SEEN`, saved, kept through death) it holds it up in front of you, head
+  swelling as when it stares at a creature (`STARING`), for 6 s (`INSPECT_TICKS` 120): a line on what it makes of it
+  (`inspect.<kind>.N`, 15 kinds: fire, noise, valuable, meat, food, weapon, armor, tool, potion, book, ore, plant,
+  drop, block, misc), then at 3.5 s (`HINT_AT`) a hint about what it's good for (`hint.<kind>.N`, with the hunger it
+  fills, how many uses it lasts, or how many stack). Use (right click) takes it at once (`WebNet.InspectGrab`), with a
+  grumble (`inspect.skip.N`) and no hint.
+- (0.17.158) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
+  unlock at 30." Putting Living Armor on leaves the tendrils as they are (only the big suit forming still brings them
+  out); the Tendrils slot works from `WebSymbiote.TENDRILS_BOND` 30 (was Living Armor's 60).
+
+## Trust, mood, stages, orders and requests (0.17.158)
+
+Ideas from the reference mod's checklist (ideas only, none of its code or art). Everything is in `WebSymbioteMind`
+(server logic, saved + owner-synced `Mind` attachment `web_symbiote_mind`, kept out of death), `WebSymbioteDig`, and on
+the client `WebSymbioteMindUi` + `WebSymbioteStatusScreen`. Tuning numbers are the constants at the top of each class.
+Small hooks in `WebSymbiote` are marked "(0.17.158)"; the takeover/suit helpers it needs sit together under
+"mind (0.17.158)" before `standDown`.
+
+- **Trust** (0-100, saved) is separate from `bond` (which still opens the abilities). Up: a meal it was given
+  (`TRUST_FEED` 2; a satiety jump of `MEAL_JUMP` 4 while it doesn't have the wheel), a kill beside you
+  (`TRUST_FIGHT` 1, once per `FIGHT_GAP`), a request granted (`TRUST_REQUEST` 5), a point every 2 minutes while well fed
+  and calm. Down: an ignored request (`TRUST_IGNORED` 6), being hurt by you (the bond dropping 2 or more at once: fire,
+  noise, wrenching free; `TRUST_HURT` 2 a point), a point a minute while starving. It decides whether it obeys an order
+  (a roll when you give it, sure at `OBEY_FULL` 70, nothing below `ORDER_BREAK` 15 and a held order is dropped), whether it
+  ignores a radial pick (under `LISTEN_TRUST` 50 up to 35% of the time, on top of the low-bond ignoring), and how often it
+  takes the wheel on idle takeovers (neglect, curiosity, tours: none skipped at 30 trust, up to 60% skipped at 100).
+- **Mood**, read every second: `GRIEVING` (a grief timer), else `COILED` (stress 55+, or starving), else `ANXIOUS`
+  (stress 25+, satiety under 30, bond under 25, no meal for 15 minutes, or a request past half its time), else
+  `CONTENT`. A new mood must hold 3 checks before it takes (grief takes and lifts at once); it says so (`mood.<m>.in.N`) at
+  most every two minutes. Grief: you went down (3 min), came within 15% of your health (2 min), a tamed pet of yours died
+  or another player died within 48 blocks (4 min). Grieving it all but falls silent (`GRIEF_QUIET`: 92% of narration and
+  remarks swallowed) and takes the wheel on 30% of its idle takeovers.
+- **Voice**: `whisper` asks `WebSymbioteMind.voice` for a variant of a running-commentary line (the black one's
+  `say.<act>.N` and `see.<topic>.N`): `mood.say.<act>.<mood>.1-2` / `mood.see.<topic>.<mood>.1-2` if the lang file has
+  it (it reads the built `en_us.json` once for the `mood.` keys), else the old line. 18 acts and 15 topics are voiced in
+  each mood (Content warm, Anxious nervous, Coiled short and sour, Grieving hushed); the white and red strains keep their own.
+- **Screen edge**: `WebSymbioteDread` takes its vignette and tendril glow from the mood (Content deep teal, Anxious
+  amber, Coiled crimson, Grieving slate blue) and keeps the edge faintly lit in it between lines (not for Content).
+  Andy: "A mood with its own edge colour and voice".
+- **Stages** (`STAGE_AT`, from the unlocks): Attached 0-29, Integrated 30-59 (Wall Crawl, Consume), Cooperative 60-99
+  (Living Armor, Spikes), Dominant 100 (the big body). Said once when you reach one (`stage.<name>`) and shown in the
+  radial's panel (`<stage> - <mood>`) with nothing picked.
+- **Status page** (Andy: "Strain, stage name, stress, mood and any request, in one place | Add but in another menu within
+  the X radial"): the radial's small Mind chip, left of the mask under the bond line; let go of X on it. Strain, bond and
+  stage, trust, mood, stress, satiety and any request with its time left, bars for the numbers, and the order buttons.
+- **Orders** (`WebSymbioteMind.Order` packet, from the Status page): Protect Me (fights for you up to 70% health instead
+  of 30%, and a shell of 4 absorption when something is on you and you're hurt, every 20 s), Hunt (hunts below satiety
+  75 instead of 45, 25% a check instead of 8%; still kill, carry, then feed), Hide (suit and tendrils drawn in when you
+  give it; 85% of idle takeovers skipped; no gift after a takeover; no hunts but starving; no requests), At ease.
+- **Requests**: first ask 5 minutes after the world loads / it bonds, then every 8-14 minutes (a trusting one a little
+  less often), from bond 15, never when hiding, grieving, dormant, asleep or on the wheel. Meat (5 min; any meal you give
+  it), a kill (5 min; a hostile you or it kill), time deep underground (8 min; 1 minute below sea level - 24 with no
+  sky), a night hunt (4 min; a hostile killed at night under open sky), to be worn (4 min; 30 s in the suit). The white
+  one never asks for the kill ones. Granted: trust +5, bond +2, stress -10. At half the time it nags and starts adding
+  stress; at 85% a louder warning and dread; at the end trust -6, stress +15, and it does it itself for 2 minutes: meat
+  is the normal hunt forced on; a kill/night hunt a takeover on the nearest hostile (`feral`); worn it puts the suit on;
+  deep, the dig below. Done by itself it gains no trust.
+- **The dig** (Andy: "A takeover that digs you down deep on purpose | ADD"): `WebSymbiote.mindDig` takes the wheel as a
+  tour (`DIG_SIGHT`) with a marker, and `WebSymbioteDig` cuts a spiral stair round a one-block pillar (the 3x3 ring, a
+  step down every cell, 3 blocks high, 8 blocks a turn) five steps ahead of your feet, flooring any cell with no floor,
+  clearing sand and gravel overhead, and moving the marker to the newest step for `WebTakeoverPath` to walk you to. It
+  lets go at y 0 (or 6 blocks off the bottom), or stops at water, lava, a block entity, anything unbreakable or harder
+  than 20, or a block you may not break.
+
+
+## Body: arm, mantle, strain traits, feeding (0.17.158)
+
+- Andy's ticks: "Arm slots: about 3 items stored in the symbiote's arm, tendrils carry, show and use them (tool
+  breaking, block placing, food eating)"; "Mantle: a furl/unfurl cape drawn as a suit layer, maybe slowing falls or
+  helping Shroud"; "Strain traits: BLACK night hunter, RED sculk-like sense of heartbeats/movement, WHITE unchanged";
+  "WHITE refuses rotten flesh and similar carrion"; and "A feed key, cooked meat counting, refusing food when full | Add,
+  Feed key should be C, pressing C with a mob or player held should grab and hold for a consume".
+- All of it is `WebSymbioteBody` (server, new class) and `WebSymbioteBodyClient` / `WebBodyLayer` / `WebRedSense`
+  (client); `WebSymbiote` only gained small hooks (`consumeHeld`, the shroud bonus, the refusal checks) and
+  `WebSymbioteState.MANTLE` (flag 128).
+- **Arm** (bond 25, `ARM_BOND`; empowered and creative too): three slots in the `ARM` attachment (saved, synced to all,
+  kept through death, dropped like armour unless keepInventory, handed back when the bond ends). K stows the item in your
+  hand into the picked slot (swaps if full), or draws the picked thing out with an empty hand; Sneak + K picks the next
+  slot; hold U and the tendril uses the picked thing: a tool mines the block you aim at (real destroy progress, wear and
+  drops, crack animation, a cord to the block), a block is placed, food is eaten (it's eaten for you, `eatFromArm`),
+  anything else is used on the block or in the air. Stored things hang on the suit (hips and back) for everyone, and
+  three chips left of the hotbar show the slots. Done by briefly swapping the stack into your selected slot so vanilla's
+  own rules run.
+- **Mantle** (bond 40, `MANTLE_BOND`; N): a cape of symbiote unfurls from the shoulders over `MANTLE_TICKS` 10 and
+  furls back into the suit (drawn by `WebBodyLayer`, strain colours). Unfurled in the air (not on a web, wall, wings,
+  water or flying) it holds a fall to `FALL_CAP` 0.35 b/t once you've dropped `FALL_MIN` 3 blocks (client motion), and
+  the server forgives that fall. It also lengthens Shroud by `MANTLE_SHROUD_BONUS` 50 ticks.
+- **Traits:** BLACK is a night hunter: in light level `DARK_LIGHT` 4 or under it hits `NIGHT_DAMAGE` 30% harder and moves
+  `NIGHT_SPEED` 12% faster; in open sun it is `SUN_DAMAGE` 25% weaker and `SUN_SPEED` 12% slower (transient modifiers,
+  a line the first time each way). RED (bond 20, `SENSE_BOND`) feels heartbeats and movement: living things within 20
+  blocks outline red through walls on your screen only, flashing with a lub-dub (slower for the big) or glowing dim while
+  they move; close beats press a little dread on you. WHITE is unchanged except that it refuses carrion (rotten flesh,
+  `CARRION`) as food, as a meal and as prey; the other strains keep the shared raw meat list.
+- **Feeding on C:** C feeds meat from either hand (cooked meat counts too, `COOKED_FEED_PER_NUTRITION` 3 a point, less
+  than raw), and refuses at `FULL_AT` 90 satiety without eating the item (it says so; you can eat it yourself). With a
+  creature held (a tendril grip, a hand hold, or carried) C makes the symbiote keep hold of it, finish it with a lash
+  and Consume it (`WebSymbiote.consumeHeld`, behind Consume's own bond and cooldown): kill first, then carry, then feed;
+  it never feeds on anything living. `ultimateAnswers` now answers for a bonded player so C works without ascension; Web
+  Strike is still ascended-only.
+
+## Life and death with the symbiote (0.17.158)
+
+New class `WebSymbioteLife`, with small hooks in `WebSymbiote` (after-death, tick, `showSuit`), `WebSymbioteBond`
+(dormancy tick), `WebSymbioteBlob` and `WebDebugCommand`; lang in `lang/parts/web_life.json`. No attachments (the blob's
+entity data holds what it keeps; scene state is per session).
+
+- **At zero bond it consumes you.** Starving, the bond sinks a point per `BOND_GAIN_TICKS`. It speaks up at bond
+  `WARN_AT` 12, 8, 5 and 2 (`life.warn.N`: heartbeat, shake, darkness, the screen-edge tendrils at rising urgency) and
+  gnaws at you every `GNAW_EVERY` 900 ticks near the end (`life.gnaw.N`). Fed again (or bond back above 12) it forgives.
+  At bond 0 and still starving, `GRACE_TICKS` 1200 after the first warning it stops waiting: `SEIZE_TICKS` 90 of
+  slowness, weakness, darkness and nausea with tendrils spiralling up you and the screen at full dread
+  (`life.seize.N`), `CLOSE_TICKS` 70 of blindness as it closes over you (`life.consume.N`), then the kill. It's a real
+  death: `genericKill` ignores invulnerability, so `Downed.spared` lets it through the downed state (like the void or
+  `/kill`); if a power's save holds it off it tries again (`KILL_TRIES` 3) and then tears away (`reject`). It kills
+  before it feeds: after the death the blob stays on the body `FEAST_TICKS` 240 (no AI, biting, ink), then roams and
+  won't take that host again. Nothing is kept for you.
+- **Rebond at the death spot.** Any other death: just before the drops (`ALLOW_DEATH`, after `Downed`'s phase) your
+  inventory (all slots) goes into `WebSymbioteLife.Remains` on the blob that pours out, saved in its entity data (so
+  it survives chunk unloads and restarts), along with the state you died with. The blob stays within `HOLD_RADIUS` 3 of
+  the spot, never settles into goo, and only its owner is wanted: walking up to it (or hitting it) bonds you again
+  with the same bond, strain, stress, hints and Collect setting, no new dormancy, and the things go back to their
+  slots. Anyone else who kills or burns it spills the things on the ground. Void deaths and deaths it caused leave
+  nothing; with keepInventory or Jaymo's Kitchen's corpse (which hold the belongings) the blob keeps only the bond.
+  If you already wear another symbiote, standing at the blob just gives the things back.
+- **Misfires while it settles.** Dormant, every 2-6 minutes (`MISFIRE_MIN`/`MAX`): a tendril lashes at the nearest
+  creature (2 damage and a shove, or at nothing), the suit flares on for 25 ticks and tears away, the next jump is
+  boosted too far (up to 60 s to jump), or a tendril lets go of what you hold (it drops at your feet). Each has a line
+  (`life.misfire.<kind>.N`), a jolt and the dread at struggle urgency.
+- **Meteor blobs rampage.** The blob that crawls out of a Gravity meteor (`fromMeteor`) no longer waits: it rampages
+  within `RAMPAGE_RADIUS` 26 of the impact, going for anything living within 14 (mobs, animals, players not wearing a
+  symbiote; web slingers and the like it bonds as usual), wrecking soft blocks round it (hardness up to 1, three per
+  pulse, only if mobGriefing), never settling or taking a mob. Past 34 blocks it drops the chase and heads home. It goes
+  on until it's killed or someone bonds with it.
+- Andy: "I want to make the blob roam the meteor site now, it will reap havoc until it is killed or bonds." Natural
+  craters only hold goo, so only meteor blobs rampage.
+- **Debug:** `/powerdebug web symbiote life consume | warn <1-4> | misfire <0-3> | rampage`.
