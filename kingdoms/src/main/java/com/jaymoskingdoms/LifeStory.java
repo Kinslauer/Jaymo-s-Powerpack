@@ -334,6 +334,11 @@ public final class LifeStory {
 	 */
 	public static final AttachmentType<String> STRANDED = AttachmentRegistry.create(JaymosKingdoms.id("story_stranded"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+	/** (0.7.356) The calling (the power) a story told before MCA's creator keeps for its road. Saved, kept through death. */
+	public static final AttachmentType<String> CALLING = AttachmentRegistry.create(JaymosKingdoms.id("story_calling"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+	/** (0.7.356) Players asked for their road since they joined. */
+	private static final Set<java.util.UUID> ROAD_ASKED = new java.util.HashSet<>();
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
 	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
 
@@ -341,25 +346,29 @@ public final class LifeStory {
 	public record Realm(int id, String name) {
 	}
 
-	/** Server → player: tell your story (the screen opens; {@code forced}: it can't be shut), with the realms there are to name. */
-	public record Open(boolean forced, List<Realm> realms) implements CustomPacketPayload {
+	/**
+	 * Server → player: tell your story (the screen opens; {@code forced}: it can't be shut), with the realms there are to
+	 * name. (0.7.356) {@code creatorAhead}: MCA's creator comes next, so the story stops short of the road ({@link Road}).
+	 */
+	public record Open(boolean forced, List<Realm> realms, boolean creatorAhead) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("story_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeBoolean(p.forced);
+				buf.writeBoolean(p.creatorAhead);
 				buf.writeVarInt(p.realms.size());
 				for (Realm r : p.realms) {
 					buf.writeVarInt(r.id);
 					buf.writeUtf(r.name);
 				}
 			}, buf -> {
-				boolean forced = buf.readBoolean();
+				boolean forced = buf.readBoolean(), creatorAhead = buf.readBoolean();
 				int n = buf.readVarInt();
 				List<Realm> realms = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
 					realms.add(new Realm(buf.readVarInt(), buf.readUtf()));
 				}
-				return new Open(forced, List.copyOf(realms));
+				return new Open(forced, List.copyOf(realms), creatorAhead);
 			});
 
 		@Override
@@ -406,6 +415,26 @@ public final class LifeStory {
 		}
 	}
 
+	/**
+	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
+	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
+	 * road makes you (the afterlife's).
+	 */
+	public record Road(int road, int roadRealm, int look) implements CustomPacketPayload {
+		public static final Type<Road> TYPE = new Type<>(JaymosKingdoms.id("story_road_pick"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Road> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.road + 1);
+				buf.writeVarInt(p.roadRealm + 1);
+				buf.writeVarInt(p.look);
+			}, buf -> new Road(buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt()));
+
+		@Override
+		public Type<Road> type() {
+			return TYPE;
+		}
+	}
+
 	private LifeStory() {
 	}
 
@@ -414,8 +443,12 @@ public final class LifeStory {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			HUNTS.clear();
 			DEPARTED.clear();
+			ROAD_ASKED.clear();
 		});
-		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> DEPARTED.remove(handler.player.getUUID()));
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			DEPARTED.remove(handler.player.getUUID());
+			ROAD_ASKED.remove(handler.player.getUUID());
+		});
 		// (0.7.304) a death before the story was told shut its screen: it opens again on the new body
 		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (owed(newPlayer)) {
@@ -427,6 +460,8 @@ public final class LifeStory {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
+		PayloadTypeRegistry.serverboundPlay().register(Road.TYPE, Road.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Road.TYPE, (payload, context) -> road(context.player(), payload));
 	}
 
 	/** Whether Jaymo's Powers is here (question 5 is asked, and its answer is an affinity). */
@@ -486,13 +521,44 @@ public final class LifeStory {
 	 * this mod. Anyone part-made before stories came finishes on the heritage and class screens instead.
 	 */
 	static boolean owed(ServerPlayer player) {
+		return untold(player) || roadOwed(player);
+	}
+
+	/** (0.7.356) Whether nothing of {@code player}'s story is told yet. */
+	static boolean untold(ServerPlayer player) {
 		return of(player) == null && Heritage.of(player) == null && Classes.classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE);
 	}
 
-	/** Opens the story screen for {@code player}, with the realms of the world to name. */
+	/**
+	 * (0.7.356) Andy: "I want this screen to come after the Creator". Whether {@code player} told their story up to the
+	 * road before MCA's creator, and still owes the road (its answer "" till then).
+	 */
+	static boolean roadOwed(ServerPlayer player) {
+		return roadOwed(of(player)) && ServerPlayNetworking.canSend(player, Open.TYPE);
+	}
+
+	/** (0.7.356) Once MCA's creator is done, the road is asked (once; again on a new body or a rejoin). From {@link StoryStasis}. */
+	static void askRoad(ServerPlayer player) {
+		if (roadOwed(player) && !McaCompat.destinyPending(player) && !ROAD_ASKED.contains(player.getUUID())) {
+			ask(player, true);
+		}
+	}
+
+	/** (0.7.356) Whether {@code story} is told up to the road, and the road not yet. */
+	public static boolean roadOwed(@Nullable List<String> story) {
+		return story != null && story.size() > Question.ROAD.ordinal() && story.get(Question.ROAD.ordinal()).isEmpty();
+	}
+
+	/**
+	 * Opens the story screen for {@code player}, with the realms of the world to name. (0.7.356) With MCA's creator still
+	 * to come, the story stops short of the road, which is asked once the creator is done.
+	 */
 	static void ask(ServerPlayer player, boolean forced) {
-		if (!ServerPlayNetworking.canSend(player, Open.TYPE)) {
+		if (!ServerPlayNetworking.canSend(player, Open.TYPE) || roadOwed(player) && McaCompat.destinyPending(player)) {
 			return;
+		}
+		if (roadOwed(player)) {
+			ROAD_ASKED.add(player.getUUID());
 		}
 		// (0.7.228) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
 		MinecraftServer server = player.level().getServer();
@@ -510,7 +576,7 @@ public final class LifeStory {
 				realms.add(new Realm(f.id(), f.name()));
 			}
 		}
-		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms)));
+		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player)));
 	}
 
 	/** The answer at {@code index} of {@code q}, or null (out of range, or not asked). */
@@ -563,13 +629,16 @@ public final class LifeStory {
 
 	/** From the story screen: live this life, all of it at once. */
 	private static void live(ServerPlayer player, Live live) {
-		if (!owed(player)) {
+		if (!untold(player)) {
 			return;
 		}
 		MinecraftServer server = player.level().getServer();
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
 			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers());
-		if (born == null || raised == null || child == null || youth == null || road == null || powers() && turn == null || !road.offered()) {
+		// (0.7.356) with MCA's creator still to come, the road is told after it ({@link #road})
+		boolean later = road == null && McaCompat.destinyPending(player);
+		if (born == null || raised == null || child == null || youth == null || road == null && !later || powers() && turn == null
+			|| road != null && !road.offered()) {
 			return;
 		}
 		// the heritage and class picked over the story's, if any: a heritage open to them, any class
@@ -582,16 +651,16 @@ public final class LifeStory {
 			heritage = kinds[live.heritage()];
 		}
 		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
-		if (road.onlyFor() != null && heritage != road.onlyFor()) {
+		if (road != null && road.onlyFor() != null && heritage != road.onlyFor()) {
 			return;
 		}
-		if (road.makes() != null) {
+		if (road != null && road.makes() != null) {
 			heritage = road.makes();
 			Heritage.unlock(player, heritage);
 		}
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
-		Faction roadRealm = road.realm ? realm(server, live.roadRealm()) : null;
-		if (raised.realm && nobleRealm == null || road.realm && roadRealm == null) {
+		Faction roadRealm = road != null && road.realm ? realm(server, live.roadRealm()) : null;
+		if (raised.realm && nobleRealm == null || road != null && road.realm && roadRealm == null) {
 			return;
 		}
 		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
@@ -605,7 +674,7 @@ public final class LifeStory {
 			player.setAttached(GENDER, live.gender() == 1 ? FEMALE : MALE);
 		}
 		// the story first, so the heritage's settling counts its points
-		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road.key));
+		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road == null ? "" : road.key));
 		Heritage.set(player, heritage);
 		HeritageVariants.choose(player, heritage, live.look());
 		Classes.set(player, cls, option);
@@ -624,11 +693,52 @@ public final class LifeStory {
 			atLeast(player, nobleRealm, NOBLE_REPUTATION);
 		}
 
-		// (0.7.304) set out once MCA's creator is done: till then they're held in stasis over the world (StoryStasis)
+		if (road == null) {
+			// (0.7.356) the calling kept for the road, told after MCA's creator
+			player.setAttached(CALLING, power);
+			return;
+		}
+		setOut(player, road, roadRealm, power);
+	}
+
+	/** (0.7.304) Sets out once MCA's creator is done: till then they're held in stasis over the world (StoryStasis). */
+	private static void setOut(ServerPlayer player, Answer road, @Nullable Faction roadRealm, String power) {
 		player.setAttached(ROAD, road.start.name() + "|" + (roadRealm == null ? -1 : roadRealm.id()) + "|" + power);
 		if (!McaCompat.destinyPending(player)) {
 			depart(player);
 		}
+	}
+
+	/**
+	 * (0.7.356) From the road screen after MCA's creator: where the story starts. The Verdant World's road is still the
+	 * Verdant-born's alone, and the afterlife's still makes you Divine-born.
+	 */
+	private static void road(ServerPlayer player, Road payload) {
+		if (!roadOwed(player)) {
+			return;
+		}
+		List<Answer> roads = Question.ROAD.answers;
+		Answer road = payload.road() >= 0 && payload.road() < roads.size() ? roads.get(payload.road()) : null;
+		Heritage.Kind heritage = Heritage.of(player);
+		if (road == null || !road.offered() || road.onlyFor() != null && heritage != road.onlyFor()) {
+			return;
+		}
+		Faction roadRealm = road.realm ? realm(player.level().getServer(), payload.roadRealm()) : null;
+		if (road.realm && roadRealm == null) {
+			return;
+		}
+		if (road.makes() != null && heritage != road.makes()) {
+			Heritage.unlock(player, road.makes());
+			Heritage.set(player, road.makes());
+			HeritageVariants.choose(player, road.makes(), payload.look());
+			Stats.attributes(player);
+		}
+		List<String> story = new ArrayList<>(of(player));
+		story.set(Question.ROAD.ordinal(), road.key);
+		player.setAttached(STORY, List.copyOf(story));
+		String power = player.getAttached(CALLING);
+		player.removeAttached(CALLING);
+		setOut(player, road, roadRealm, power == null ? "" : power);
 	}
 
 	/** (0.7.304) Whether {@code player} has told their story and not yet been put where it starts. */
@@ -1278,6 +1388,7 @@ public final class LifeStory {
 					p.removeAttached(STORY);
 					p.removeAttached(ROAD);
 					p.removeAttached(GENDER);
+					p.removeAttached(CALLING);
 					p.removeAttached(STRANDED);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);

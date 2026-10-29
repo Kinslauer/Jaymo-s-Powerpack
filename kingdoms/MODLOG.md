@@ -6677,3 +6677,22 @@ Andy: "should only be for emberborn". The "Raised by a demon master" start is no
 green sky is the Verdant-born's (`Answer.onlyFor`): others see it greyed with "Only for the Emberborn.", and the
 server refuses it for any other heritage. `onlyFor` keeps answering null for answers with no start.
 - Not seen in game.
+
+## 0.7.356: the road as a carousel, after MCA's creator (pack 0.18.3)
+- Andy: "this screen should scroll from left to right, I dont like how large the list is. It should have a larger image
+  of the icon beside a larger image of your character in their scenario, built out with all their customizations. I
+  also want this screen to come after the Creator". Read as: the story's other pages stay before MCA's creator (it
+  still needs the gender, heritage and look they give), and the road comes after it.
+- Flow: gender, the five questions and the story page ("On to your looks" instead of "Live this life") are sent as
+  `LifeStory.Live` with no road; the server seals them (heritage, class, look, gender, the calling kept in
+  `story_calling`) and leaves the road answer "" (`LifeStory.roadOwed`). MCA's creator opens; once it's done the
+  server asks for the road (`Open.creatorAhead` false; `StoryStasis` asks again via `askRoad` if the creator was still
+  finishing). The road screen sends `LifeStory.Road` (index, realm, look), which sets out as before. Without MCA's
+  creator to come, the whole story is told on one screen as before.
+- The road page is a carousel: one start at a time, its icon at 3x in a well over its name, tale and what it gives;
+  beside it you, drawn as the creator made you (your own body, not the stand-in) acting the start out on a painted
+  backdrop of the place (sky gradient + ground per start); arrows, the wheel, left/right or A/D turn it with a short
+  slide; a strip of all 22 starts underneath (click to jump, ones not open dimmed). The realm page after Sworn or
+  Banished is the old list. Scenes added for the six other-world starts.
+- Still Verdant-only and Divine-making checks on the road, now against the heritage already set.
+- Compile-checked. Not seen in game.
