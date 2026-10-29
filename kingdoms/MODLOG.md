@@ -6495,3 +6495,20 @@ Compile-checked, not seen in game.
   player wakes to a blurred red silhouette of who bit them, no name), `Kinship` + client `KinshipClient` (monsters in
   sight of each other hear a cold slow beat or a growl instead of the mortal heartbeat).
 Compile-checked (`./gradlew build` in kingdoms/), not seen in game.
+
+## 0.7.333: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.161)
+Andy: the golem is "accessed through thaumaturgy", and "clockwork golems should also spawn as mini bosses in the aether
+and overworld dungeons".
+- **Golemancy:** no grid recipe any more. Powers' Codex has a Golemancy entry (Artifice tab, after Artifice and Ichor,
+  only with Kingdoms loaded); the golem is made on the infusion altar from a clock on the centre pedestal with 4 copper
+  blocks, 2 redstone blocks and 2 ichor round it (`data/jaymoskingdoms/alchemy/infusion/clockwork_golem.json`).
+  Hermits hint at it after Artifice.
+- **Rogue golems** (`ClockworkGolem.makeRogue`, `GolemLairs`): 220 HP, 16 damage, armour 10, a boss bar; asleep folded
+  until a player comes near; fight players (and whatever hurts them), not the dungeon's monsters; can't be mended; drop
+  3-6 gold and a diamond 35% of the time. In 75% of Sentry Ruins (a side room, never the Slider's), 60% of strongholds
+  (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), half of every other
+  dungeon, any mod's (a structure, not a village, with a monster or trial spawner: rolled once when a player first comes
+  within 48 blocks of a spawner), and 15% of monster rooms. Overworld and Aether only.
+- **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Never told
+  outright: only a hermit's passing word with the Golemancy hint. Their lights burn red and glow in the dark
+  (`clockwork_golem_rogue.png` and its `_glow`, from `tools/gen_clockwork_golem.py`).

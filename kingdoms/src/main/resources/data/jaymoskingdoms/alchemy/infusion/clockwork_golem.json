@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:clock",
+  "components": [
+    "minecraft:copper_block",
+    "minecraft:copper_block",
+    "minecraft:copper_block",
+    "minecraft:copper_block",
+    "minecraft:redstone_block",
+    "minecraft:redstone_block",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "metal": 16,
+    "motion": 12,
+    "craft": 10,
+    "spirit": 6
+  },
+  "instability": 8,
+  "result": {
+    "item": "jaymoskingdoms:clockwork_golem",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 6
+}

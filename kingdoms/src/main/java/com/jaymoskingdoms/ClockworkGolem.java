@@ -11,18 +11,24 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -36,11 +42,16 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * (0.7.326) A clockwork golem: a copper-and-wood guardian built by hand (a clock, a block of redstone and copper),
+ * (0.7.326) A clockwork golem: a copper-and-wood guardian, (0.7.333) made on Powers' infusion altar once its maker knows
+ * the Golemancy research (a clock wound with copper, redstone and ichor; {@code data/jaymoskingdoms/alchemy/infusion}),
  * drawn as octopusstudio's Mech Golem (Blockbench Workshop, CC BY 4.0). It keeps the place it was set down as an iron
  * golem keeps a village: it fights the monsters that come near and never turns on its makers. With nothing to fight for
  * a while it winds down and folds itself into its shell, its lights out, hard to hurt but standing still; anything
  * hostile nearby or a blow wakes it, and it unfolds and gets to work. It's mended with copper ingots.
+ * <p>
+ * (0.7.333) A <i>rogue</i> one ({@link #makeRogue}), a remnant of the Aether like the monoliths, is a dungeon's mini-boss, set down by {@link GolemLairs}: tougher, with
+ * a boss bar, it sleeps folded until a player comes near, fights only players, can't be mended, and drops gold and maybe a
+ * diamond.
  */
 public class ClockworkGolem extends IronGolem {
 	public static EntityType<ClockworkGolem> TYPE;
@@ -54,10 +65,19 @@ public class ClockworkGolem extends IronGolem {
 	/** How much a copper ingot mends. */
 	static final float COPPER_MEND = 20.0F;
 	public static final byte FOLD = 94, UNFOLD = 95;
+	/** A rogue (dungeon) golem: its health, blow and armour. */
+	static final double ROGUE_HEALTH = 220.0, ROGUE_DAMAGE = 16.0, ROGUE_ARMOR = 10.0;
+	/** What a rogue golem drops besides its copper: gold ingots (min, max) and the chance of a diamond. */
+	static final int ROGUE_GOLD_MIN = 3, ROGUE_GOLD_MAX = 6;
+	static final float ROGUE_DIAMOND_CHANCE = 0.35F;
 
 	private static final EntityDataAccessor<Boolean> FOLDED = SynchedEntityData.defineId(ClockworkGolem.class, EntityDataSerializers.BOOLEAN);
+	/** (0.7.333) Synced so its eyes burn red. */
+	private static final EntityDataAccessor<Boolean> ROGUE = SynchedEntityData.defineId(ClockworkGolem.class, EntityDataSerializers.BOOLEAN);
 
 	private int idle;
+	private final ServerBossEvent bar = new ServerBossEvent(this.getUUID(), Component.translatable("entity.jaymoskingdoms.clockwork_golem.rogue"),
+		BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
 	private int unfolding;
 	/** (Client) the tick it last folded or unfolded. */
 	private int changedAt = -1000;
@@ -85,6 +105,35 @@ public class ClockworkGolem extends IronGolem {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(FOLDED, false);
+		entityData.define(ROGUE, false);
+	}
+
+	@Override
+	protected void registerGoals() {
+		super.registerGoals();
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) -> this.rogue()));
+	}
+
+	public boolean rogue() {
+		return this.entityData.get(ROGUE);
+	}
+
+	/** Turns it into a dungeon's mini-boss: tougher, hostile to players, folded until one comes near. */
+	public void makeRogue() {
+		this.entityData.set(ROGUE, true);
+		this.setPlayerCreated(false);
+		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ROGUE_HEALTH);
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(ROGUE_DAMAGE);
+		this.getAttribute(Attributes.ARMOR).setBaseValue(ROGUE_ARMOR);
+		this.setHealth(this.getMaxHealth());
+		this.entityData.set(FOLDED, true);
+		this.setPersistenceRequired();
+	}
+
+	/** A rogue fights players, and only else what hurt it (monsters around it are its dungeon's). */
+	@Override
+	public boolean canAttack(LivingEntity target) {
+		return (!this.rogue() || target instanceof Player || target == this.getLastHurtByMob()) && super.canAttack(target);
 	}
 
 	public boolean folded() {
@@ -108,6 +157,10 @@ public class ClockworkGolem extends IronGolem {
 			this.fold(level, false);
 		} else if (!this.folded() && ++this.idle >= WIND_DOWN) {
 			this.fold(level, true);
+		}
+		if (this.rogue()) {
+			this.bar.setVisible(!this.folded());
+			this.bar.setProgress(this.getHealth() / this.getMaxHealth());
 		}
 	}
 
@@ -160,6 +213,9 @@ public class ClockworkGolem extends IronGolem {
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
+		if (this.rogue()) {
+			return InteractionResult.PASS;
+		}
 		if (!stack.is(Items.COPPER_INGOT)) {
 			return stack.is(Items.IRON_INGOT) ? InteractionResult.PASS : super.mobInteract(player, hand);
 		}
@@ -170,6 +226,36 @@ public class ClockworkGolem extends IronGolem {
 		stack.consume(1, player);
 		this.playSound(SoundEvents.COPPER_PLACE, 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
 		return InteractionResult.SUCCESS;
+	}
+
+	@Override
+	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		if (this.rogue()) {
+			this.spawnAtLocation(level, new ItemStack(Items.GOLD_INGOT, ROGUE_GOLD_MIN + this.random.nextInt(ROGUE_GOLD_MAX - ROGUE_GOLD_MIN + 1)));
+			if (this.random.nextFloat() < ROGUE_DIAMOND_CHANCE) {
+				this.spawnAtLocation(level, new ItemStack(Items.DIAMOND));
+			}
+		}
+	}
+
+	@Override
+	public void startSeenByPlayer(ServerPlayer player) {
+		super.startSeenByPlayer(player);
+		if (this.rogue()) {
+			this.bar.addPlayer(player);
+		}
+	}
+
+	@Override
+	public void stopSeenByPlayer(ServerPlayer player) {
+		super.stopSeenByPlayer(player);
+		this.bar.removePlayer(player);
+	}
+
+	@Override
+	public boolean removeWhenFarAway(double distance) {
+		return !this.rogue() && super.removeWhenFarAway(distance);
 	}
 
 	@Override
@@ -191,12 +277,15 @@ public class ClockworkGolem extends IronGolem {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putBoolean("folded", this.folded());
+		output.putBoolean("rogue", this.rogue());
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(FOLDED, input.getBooleanOr("folded", false));
+		this.entityData.set(ROGUE, input.getBooleanOr("rogue", false));
+		this.bar.setVisible(this.rogue() && !this.folded());
 	}
 
 	/** The golem, built: set it down on a block and it stands up, its maker's. */
