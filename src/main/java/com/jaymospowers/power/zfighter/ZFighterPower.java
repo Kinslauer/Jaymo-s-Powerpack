@@ -118,20 +118,24 @@ public final class ZFighterPower implements Power {
 
 	// ---- forms (index: 0 base, 1 Super, 2 Super 2, 3 Super 3, 4 Super 4: the Warrior-born's hidden form, ApeRage) ----
 	// (0.17.50) 5 False Super, 6 the god form, 7-9 the legendary line ({@link ZFighterForms}); the other track's forms start at 10
+	// (0.17.190) 4 is now Super Primal Super, and 10 Primal Super, the step before it (ApeRage.PRIMAL_SUPER): the branch forms' ids
+	// live in their own attachment, so 10 is free here
 	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). A third of their bonus before the training slowdown. */
-	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1};
-	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F};
-	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07};
+	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1, 0.64};
+	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F, 1.47F};
+	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07, 0.16};
 	/** Top cruise speed in flight (blocks a tick; Wind's is 2.5 in a plain rainy sky). */
-	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9};
+	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9, 2.3};
 	/** Ki per tick to hold the form (1.5, 3, 6 a second; Super 4, at peace with the ape, 4.4), and times the base appetite. */
-	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F};
-	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F};
+	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F, 0.18F};
+	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F, 4.0F};
 	/** Ki to go into the form (free from half mastery; Super 4 has no mastery: always). */
-	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130};
-	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C};
+	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130, 85};
+	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C, ApeRage.PRIMAL_SUPER_COLOR};
 	/** Super 4's fire: flames a tick each of two kinds, and one in this many ticks an ember spits off him. */
 	static final int SUPER_4_FLAMES = 2, SUPER_4_EMBER_ODDS = 12;
+	/** (0.17.190) Primal Super's fire: one small flame every this many ticks powering up; settled, this many times rarer than Super Primal Super's. */
+	static final int PRIMAL_FLAME_EVERY = 4, PRIMAL_SETTLED_SLOWER = 4;
 	/**
 	 * Andy: the full storm of aura, sparks and fire only for the power-up blast, this many ticks after going into a form.
 	 * After that it settles to the aura and the rising debris, both stronger each form, so the body (Super 4's fur) shows.
@@ -1010,9 +1014,11 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		// (0.15.148) with Super 4 open, C in Super 3 is Super 4 and the Spirit Bomb is raised from there
-		boolean super4 = ApeRage.super4(player);
+		// (0.17.190) the line now runs Super 3, Primal Super, Super Primal Super: the Spirit Bomb is raised from its top
+		int up = ApeRage.nextUp(player, live.form);
+		boolean topOfLine = up == 0 && (live.form == ApeRage.SUPER_4 || live.form == ApeRage.PRIMAL_SUPER || live.form == ZFighterTraining.FORMS);
 		// (0.17.50) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
-		if (!player.isShiftKeyDown() && (live.form == ApeRage.SUPER_4 || live.form == ZFighterForms.GOD || live.form == ZFighterTraining.FORMS && !super4)
+		if (!player.isShiftKeyDown() && (topOfLine || live.form == ZFighterForms.GOD)
 			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !ZFighterBranchForms.canAscend(player, live)) {
 			if (ZFighterTechniques.canRaise(player, live)) {
 				ZFighterTechniques.raise(player, live);
@@ -1027,15 +1033,19 @@ public final class ZFighterPower implements Power {
 				// in base form, a corrupted fighter's sneak+C is Corrupted mode
 				ZFighterCorruption.toggle(player, live);
 			}
-		} else if (live.form >= ZFighterTraining.formsOpen(player) && !(super4 && live.form < ApeRage.SUPER_4)) {
+		} else if (up == 0) {
 			if (!ZFighterBranchForms.ascend(player, live)) {
 				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
-				player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				if (live.form == ApeRage.PRIMAL_SUPER && blocked == null) {
+					// (0.17.190) Super Primal Super waits on time held in Primal Super; Andy: the timer runs unseen, no count shown
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait").withStyle(ChatFormatting.GRAY));
+				} else {
+					player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
+				}
 			}
 		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
-			// (past his highest bought form: Super 4)
-			int next = live.form >= ZFighterTraining.formsOpen(player) ? ApeRage.SUPER_4 : live.form + 1;
+			int next = up;
 			boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(next) >= ZFighterTraining.FREE_ENTRY_MASTERY;
 			if (!free && live.ki < FORM_ENTER_KI[next]) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
@@ -1123,7 +1133,8 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		// (0.15.148) from Super 4 back to the highest form he bought
-		live.form = live.form == ApeRage.SUPER_4 ? Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS) : live.form - 1;
+		// (0.17.190) Super Primal Super steps down to Primal Super, Primal Super to the highest form he bought
+		live.form = live.form == ApeRage.SUPER_4 || live.form == ApeRage.PRIMAL_SUPER ? ApeRage.below(player, live.form) : live.form - 1;
 		if (live.form <= 0) {
 			endSuper(player, live);
 			return;
@@ -1389,6 +1400,9 @@ public final class ZFighterPower implements Power {
 				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.6F, 0.9F);
 			}
+		} else if (live.form == ApeRage.PRIMAL_SUPER && now % PRIMAL_FLAME_EVERY == 0) {
+			// (0.17.190) Andy: Primal Super's particles "far less and dissipate faster": a small flame now and then, no embers
+			level.sendParticles(ParticleTypes.SMALL_FLAME, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.01);
 		}
 	}
 
@@ -1415,6 +1429,10 @@ public final class ZFighterPower implements Power {
 				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.5F, 0.9F);
 			}
+		} else if (live.form == ApeRage.PRIMAL_SUPER && now % (SETTLED_FLAME_EVERY * PRIMAL_SETTLED_SLOWER) == 0) {
+			double a = random.nextDouble() * Math.PI * 2.0, r = 0.8 + random.nextDouble() * 0.2;
+			level.sendParticles(ParticleTypes.SMALL_FLAME, true, false, player.getX() + Math.cos(a) * r, player.getY() + 0.2 + random.nextDouble() * 1.4,
+				player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.01);
 		}
 	}
 

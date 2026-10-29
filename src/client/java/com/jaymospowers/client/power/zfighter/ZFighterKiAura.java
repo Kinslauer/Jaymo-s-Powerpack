@@ -142,7 +142,8 @@ public final class ZFighterKiAura {
 	/**
 	 * (0.17.91) Andy: "base form and supers 1-3 should use the sparking aura ... then primal uses either god or smooth.
 	 * legendary saiyans have sparking". So the form decides: base, Supers 1-3 and the legendary line are always Sparking;
-	 * Primal Super is Godly or Smooth, whichever he picked (Godly if his pick is Sparking); any other form shows his pick.
+	 * Super Primal Super is Godly or Smooth, whichever he picked (Godly if his pick is Sparking); Primal Super always Smooth;
+	 * any other form shows his pick.
 	 */
 	static int style(Player player, int form) {
 		int picked = ZFighterAura.style(player);
@@ -151,6 +152,10 @@ public final class ZFighterKiAura {
 		}
 		if (form == ApeRage.SUPER_4) {
 			return picked == ZFighterAura.SMOOTH ? ZFighterAura.SMOOTH : ZFighterAura.GODLY;
+		}
+		if (form == ApeRage.PRIMAL_SUPER) {
+			// (0.17.190) Andy: Primal Super has the smooth aura
+			return ZFighterAura.SMOOTH;
 		}
 		return picked;
 	}
