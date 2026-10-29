@@ -49,6 +49,8 @@ final class Townscape {
 	private static final String[] MASONRY = {"brick", "cobblestone", "polished_", "cut_", "smooth_", "chiseled_", "tiles", "terracotta", "concrete",
 		"packed_mud", "quartz_block", "prismarine", "calcite"};
 	private static final String[] NOT_MASONRY = {"glazed", "powder", "_ore", "infested", "_stairs", "_slab", "_wall", "_button", "_pressure_plate"};
+	/** The nether's woods: a settlement never builds in them (fields, fences and roofs included), whatever's round it. */
+	private static final String[] NETHER_WOODS = {"crimson", "warped"};
 
 	private Townscape() {
 	}
@@ -109,6 +111,11 @@ final class Townscape {
 		Map<String, Integer> colours) {
 		Block block = state.getBlock();
 		String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
+		for (String nether : NETHER_WOODS) {
+			if (name.startsWith(nether + "_")) {
+				return;
+			}
+		}
 		if (name.endsWith("_planks")) {
 			woods.merge(name.substring(0, name.length() - "_planks".length()), 2, Integer::sum);
 			return;
