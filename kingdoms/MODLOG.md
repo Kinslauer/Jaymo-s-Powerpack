@@ -6741,7 +6741,7 @@ find one living there."
   sparring), each worth less again against the same kind; 1 a day; half for anyone with a power. Ranks Spark 0,
   Kindled 40, Tempered 120 (a second quirk, `Valor.Bent`, from the feats done most), Steeled 300, Unbroken 700.
   Ops: `/valor wake <player>`, `/valor grant <player> <exp>`.
-- **Arts:** the Valor key (mouse side button 2; N, the plan's key, is taken by the horse whistle and Web's mantle) toggles the coatings (Reinforcement from Spark; Armament joins from Kindled); they drain a pool (40 + 30 a
+- **Arts:** the Valor key (`\`, Andy's pick; N, the plan's key, is taken by the horse whistle and Web's mantle) toggles the coatings (Reinforcement from Spark; Armament joins from Kindled); they drain a pool (40 + 30 a
   rank; a third less for the proficient class) that refills out of combat, faster fed or asleep. Running dry: Spent for a
   minute. Reinforcement: 15-40% less harm, 10% more off magic (cap 70% with Grounded); sneaking empty-handed, a blow from in
   front is blocked on the forearms. Armament: +15-40% harm, stagger, stun; shatters a ward's absorption; a full-strength

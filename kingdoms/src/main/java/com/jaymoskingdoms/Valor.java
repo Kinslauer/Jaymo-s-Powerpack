@@ -75,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * <p><b>The arts</b>: Reinforcement (Spark: a dark sheen up the forearms, less harm, block bare-armed while sneaking),
  * Armament (Kindled: down the weapon too, harder blows that stagger and stun, and land on what magic makes untouchable),
  * Senses (always on: the hidden living as outlines, auto-dodges from Kindled, a shot's warning from Steeled, a disguised
- * vampire's cold heartbeat at Unbroken). The Valor key (mouse side button 2) puts the coatings up and down ({@link Use}); they drain the {@link #pool} and
+ * vampire's cold heartbeat at Unbroken). The Valor key (backslash) puts the coatings up and down ({@link Use}); they drain the {@link #pool} and
  * running dry leaves you Spent. Brutes and Warlords are proficient in Reinforcement, those and Thieves in Armament,
  * Archers, Marksmen and Survivalists in Senses: a third less drain and the art's full strength (others top out at Steeled).
  *

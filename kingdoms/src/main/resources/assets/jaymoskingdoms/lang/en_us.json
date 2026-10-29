@@ -7850,7 +7850,7 @@
 	"gui.jaymoskingdoms.valor.stat.endurance": "Endurance",
 	"gui.jaymoskingdoms.valor.feats.none": "No feats yet.",
 	"gui.jaymoskingdoms.valor.feat": "%s: %s",
-	"gui.jaymoskingdoms.valor.hint": "Side button 2: coatings · hold: King's Valor · /valor name",
+	"gui.jaymoskingdoms.valor.hint": "\\: coatings · hold: King's Valor · /valor name",
 	"dialogue.main.jaymoskingdoms_valor": "Ask about their Valor",
 	"dialogue.main.jaymoskingdoms_valor_spar": "Ask them to spar",
 	"dialogue.chat.jaymoskingdoms.valor.none": "Valor? Not me, friend.",

@@ -28,7 +28,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.360) Valor on this client ({@link Valor}): the Valor key, mouse side button 2 (tap: the coatings up or down; hold a second: King's Valor),
+ * (0.7.360) Valor on this client ({@link Valor}): the Valor key, \ (tap: the coatings up or down; hold a second: King's Valor),
  * the pool's thin bar over the hotbar while it isn't full or a coating is up, a pulse of colour at the screen's edges when
  * Valor wakes or ranks up, and Senses: the living hidden from sight near you show as pale outlines, beating slowly; from
  * Steeled a shot coming at you glows red; at Unbroken a disguised vampire's cold heartbeat shows blue, seen or not.
@@ -59,8 +59,8 @@ public final class ValorClient {
 	}
 
 	public static void register() {
-		// (mouse side button 2, beside the Combat Arts' side button 1: N, the plan's key, is the horse whistle's and Web's mantle's)
-		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.valor", InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_5,
+		// (Andy: "move valor to \"; N, the plan's key, is the horse whistle's and Web's mantle's)
+		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.valor", InputConstants.KEY_BACKSLASH,
 			KeyMapping.Category.register(JaymosKingdoms.id("valor"))));
 		ClientTickEvents.END_CLIENT_TICK.register(ValorClient::tick);
 		HudElementRegistry.attachElementBefore(VanillaHudElements.MISC_OVERLAYS, JaymosKingdoms.id("valor"), ValorClient::hud);
