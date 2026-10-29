@@ -117,6 +117,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BloodVision.register();
 		// 0.7.185: the blood fever's and the wolf's holds (they walk you; each key a heave against them)
 		SeizureClient.register();
+		// 0.7.323: the blood turns your head toward a player in sight; a torch-holder sees a vampire's shadow lag
+		BloodTurn.register();
+		HunterSense.register();
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();

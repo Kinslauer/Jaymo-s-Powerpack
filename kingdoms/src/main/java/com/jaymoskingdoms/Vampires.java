@@ -291,6 +291,22 @@ public final class Vampires {
 		return v == null ? null : v.type();
 	}
 
+	/** (0.7.323) How long (ticks) since the last bite the pallor starts to show, and the time without one at which it's full. */
+	static final long PALLOR_FROM = 6000L, PALLOR_FULL = 48000L;
+
+	/**
+	 * (0.7.323) How ashen a vampire player's skin shows (0-1): barely when they fed within the day, fully when starving. Read
+	 * from the synced {@link Vampire#fedAt()}, so it works on either side; 0 for anyone who isn't one.
+	 */
+	public static float pallor(Entity e) {
+		Vampire v = e.getAttached(VAMPIRE);
+		if (v == null) {
+			return 0.0F;
+		}
+		long since = Math.max(0L, e.level().getGameTime() - v.fedAt());
+		return net.minecraft.util.Mth.clamp((since - PALLOR_FROM) / (float)(PALLOR_FULL - PALLOR_FROM), 0.0F, 1.0F);
+	}
+
 	/** A vampire that has shown itself tonight: guards go for it, villagers run. */
 	public static boolean exposed(Entity e) {
 		Long night = EXPOSED.get(e.getUUID());
