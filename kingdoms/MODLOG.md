@@ -6174,3 +6174,9 @@ does, and gen_horses.py takes tools/horse_models/<build>.bbmodel instead of hors
 art-overhaul/horses/blockbench-starters). BreedHorseModel now poses every bone as a change from that build's own rest
 pose (head, reins, tail, forelegs, saddle, stirrups, wings, and each leg's thigh length from its own pivots), so a
 model with other proportions animates the same way.
+
+Andy said yes to Realistic Horse Genetics' coats (sekelsta, art CC BY 4.0; credited in
+textures/entity/breed_horse/CREDITS.txt and tools/rhg/CREDITS.md): `tools/rhg.py` matches each of our hide pixels to the
+same place on that mod's vanilla-shaped horse (scaled from each bone's main box to theirs, same-facing face) and reads
+its masks there: dapples, flecked roan, tobiano pinto, leopard spots, blaze, star, socks and stockings, the dun stripe,
+and its painted coat shading over every coat. The masks are copied unchanged into tools/rhg; the colours are ours.

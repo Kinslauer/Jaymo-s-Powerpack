@@ -30,6 +30,7 @@ import gen_equestrian as ge  # noqa: E402  (the coat specs)
 import horse_preview as hp  # noqa: E402
 import horse_rig as hr  # noqa: E402
 import bbmodel as bbm  # noqa: E402
+import rhg  # noqa: E402
 
 ASSETS = os.path.normpath(os.path.join(HERE, "..", "src/main/resources/assets/jaymoskingdoms"))
 OUT = os.path.join(ASSETS, "textures/entity/breed_horse")
@@ -216,6 +217,8 @@ def tack(x):
     return None
 
 
+MAPPERS = {}  # (0.7.309) each build's rhg.Mapper, set in main
+
 # ---- the breed coats ------------------------------------------------------------------------------------------------------
 LEG_TOP, GROUND = 9.0 - hr.LIFT, 24.1
 HEAD_REGIONS = ("head", "jowl", "muzzle", "lip", "ear")
@@ -297,9 +300,12 @@ def coat(build, breed, name, spec, pxs, seed):
     hairn = ge.HAIRN.get(breed, 12)
     tint = spec["tint"] or (34, 28, 26)
     points_y = LEG_TOP + (GROUND - 3 - LEG_TOP) * spec["points_from"] / 9
+    m = MAPPERS.get(build)  # (0.7.309) Realistic Horse Genetics' patterns, carried onto this build (rhg.py)
 
     def body(x, col):
         w = x.w
+        if m is not None:
+            return rhg_body(x, col)
         if "dapple" in marks and x.face != "bottom":
             d, _ = nearest(w, 2.6, seed + 11)
             k = 0.75 if d < 0.6 else 0.35 if d < 0.95 else 0.0
@@ -321,7 +327,50 @@ def coat(build, breed, name, spec, pxs, seed):
             col = mix(col, stripe, 0.8)
         return col
 
+    def rhg_body(x, col):
+        """The body's patterns from Realistic Horse Genetics' masks (CC-BY): dapples, roan, pinto, leopard, the dun
+        stripe; fleabites stay ours."""
+        if "dapple" in marks:
+            k = max(0.0, min(1.0, (m.cover(x, "gray/dapple12") - 0.3) * 2.8))  # (its masks are soft: firmed up)
+            col = mix(col, spec["spot"], 0.85 * k * (0.6 if x.cube.region == "neck" else 1.0))
+        if "flea" in marks and h3(x.X // 2, x.Y // 2, 2, seed) < 0.11:
+            col = mix(col, spec["spot"], 0.8)
+        if "roan" in marks:
+            # flecked: white hairs as thick as the mask says
+            if h3(x.X // 2, x.Y // 2, 3, seed) < 1.5 * m.cover(x, "roan/roan"):
+                col = mix(col, spec["spot"], 0.4 if h3(x.X // 2, x.Y // 2, 4, seed) < 0.7 else 0.6)
+        if "pinto" in marks and m.cover(x, "pinto/tobiano") > 0.5:
+            col = spec["white"]
+        if "leopard" in marks:
+            if m.cover(x, "leopard/leopard") < 0.5:
+                col = spec["spot"]
+        if "dorsal" in marks:
+            col = mix(col, stripe, 0.8 * m.cover(x, "dun/dorsal"))
+        return col
+
+    def rhg_hide(x, col):
+        """Face and leg white from the masks, and their painted shading over every hide pixel."""
+        r = x.cube.region
+        if "blaze" in marks and m.cover(x, "face/blaze", "face/star") > 0.5:
+            col = spec["white"]
+        if "star" in marks and m.cover(x, "face/star") > 0.5:
+            col = spec["white"]
+        if "socks" in marks and m.cover(x, *rhg.SOCKS) > 0.5:
+            col = spec["white"]
+        if "stockings" in marks and m.cover(x, *rhg.STOCKINGS) > 0.5:
+            col = spec["white"]
+        if "leopard" in marks and r in ("leg_a", "head", "muzzle") and m.cover(x, "leopard/leopard") < 0.5:
+            col = spec["spot"]
+        dark, a = m.colour(x, "shading")
+        return mix(col, dark, 0.55 * a)
+
     def hide(x):
+        col = hide_own(x)
+        if m is not None and eye(x) == 0 and x.cube.region not in ("muzzle", "lip", "ear"):
+            col = rhg_hide(x, col)
+        return col
+
+    def hide_own(x):
         r = x.cube.region
         col = spec["base"]
         if r in HEAD_REGIONS and spec["head"]:
@@ -892,6 +941,7 @@ def main():
     loaded = {b: bbm.load(b) for b in hr.BUILDS}
     rigs = {b: horse for b, (horse, _) in loaded.items()}
     armour_rigs = {b: armour for b, (_, armour) in loaded.items()}
+    MAPPERS.update({b: rhg.Mapper(parts) for b, parts in rigs.items()})
     builds_json(rigs, armour_rigs)
     pxs = {b: pixels(parts) for b, parts in rigs.items()}
     written = {}
