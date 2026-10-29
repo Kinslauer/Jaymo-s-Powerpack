@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
  * ({@link ZFighterVerdantMerge#ki}, {@link ZFighterWarriorComeback#bonus}). The extras themselves: Earthling
  * {@link ZFighterEarthlingRace}, Verdant {@link ZFighterVerdantMerge} and {@link ZFighterVerdantWater}, Frost-born
  * {@link ZFighterFrostReserve}, Warrior-born {@link ZFighterWarriorComeback}. A Divine-born (Kingdoms heritage {@code divine})
- * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}) and (0.17.143) its ki flows easier
+ * is hidden from ki sense and the scouter ({@link ZFighterKiSense#hidesKi}) and (0.17.145) its ki flows easier
  * ({@link ZFighterDivineGrace}); a Rubber-folk's blows and falls bounce off ({@link ZFighterRubberBody}). Both, like the
  * Bio-built, count as Earthlings ({@link ZFighterLineage#fromHeritage}), with (0.17.138) the Bio-built's forms' strengths on
  * top ({@link ZFighterBioForms}).

@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.17.62, Andy's NOEA picks) The halo of the dead over the head of every player who woke in the Other World
- * ({@link ZFighterAfterlife#STAY}, synced to everyone). (0.17.143, Andy: "remove the particle halo and replace it with divine
+ * ({@link ZFighterAfterlife#STAY}, synced to everyone). (0.17.145, Andy: "remove the particle halo and replace it with divine
  * born's for everyone") It is the Divine-born's ring now (Kingdoms' {@code HeritageLooks} halo: a flat gold ring of four
  * thin bars, lit, bobbing over the head), no longer dust. A Divine-born already wears theirs, so they get no second one.
  */

@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
  * ticks on top of the body's own), their blows smite the wicked ({@link #smite}: the undead, illagers, barbarians, a
  * Rogue (a Stealth alignment) or anyone whose power or gift has been corrupted), and healing magic loves them
  * ({@link #heal}, {@link #spellCost}: Restoration's spells and the Sorcerer's Mend, Renewal and Rekindle heal more and
- * cost less mana). (0.7.317, Andy: "Angels have no need for food, though they can eat and drink as a luxury. They also
+ * cost less mana). (0.7.318, Andy: "Angels have no need for food, though they can eat and drink as a luxury. They also
  * have no need for sleep") Their food bar stays full ({@link #FED}), though they may eat whenever they like
  * ({@code mixin/heritage/PlayerDivineEatMixin}: a dish's own effects still take), and they never go long enough unrested
  * for the phantoms to come. Jaymo's Powers reads the heritage tag ({@code jaymoskingdoms_heritage_divine}) to hide them from ki sense
@@ -27,7 +27,7 @@ public final class DivineBorn {
 	/** The extra mending: health every this many ticks (on top of the body's own), while fed and not downed. */
 	static final float REGEN_HEAL = 1.0F;
 	static final int REGEN_EVERY = 80;
-	/** (0.7.317) Their food bar is filled again this often (ticks): they never need to eat. */
+	/** (0.7.318) Their food bar is filled again this often (ticks): they never need to eat. */
 	static final int FED = 20;
 	/** Smite: the share more their blows do to the wicked. */
 	static final float SMITE = 0.25F;
@@ -43,7 +43,7 @@ public final class DivineBorn {
 		ServerTickEvents.END_SERVER_TICK.register(DivineBorn::tick);
 	}
 
-	/** (0.7.317) Whether {@code player} may eat even when full: a Divine-born eats for the pleasure of it. */
+	/** (0.7.318) Whether {@code player} may eat even when full: a Divine-born eats for the pleasure of it. */
 	public static boolean eatsForPleasure(Player player) {
 		return is(player);
 	}
@@ -56,7 +56,7 @@ public final class DivineBorn {
 		if (server.getTickCount() % FED == 0) {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				if (is(player) && player.isAlive()) {
-					// (0.7.317) no need for food or sleep
+					// (0.7.318) no need for food or sleep
 					player.getFoodData().setFoodLevel(20);
 					player.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
 				}
