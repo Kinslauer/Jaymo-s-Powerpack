@@ -74,6 +74,11 @@ public final class Emigrants {
 	static final float CHECKS_A_DAY = 20.0F;
 	/** The chance a day of leaving: restless anyone; for each degree their neighbours mind their blood (up to the cap). */
 	static final float RESTLESS = 0.003F, RIDICULE = 0.004F, RIDICULE_CAP = 0.06F;
+	/**
+	 * (0.7.356, Andy: the Bio-built are "repulsive to all human kingdoms. It is near impossible to live or find one living
+	 * there") A Bio-built villager among humans who mind it is driven out this fast (the chance a day), whatever the cap.
+	 */
+	static final float BIO_DRIVEN = 0.35F;
 	/** ...not of a purist king's blood; under a tyrant; at odds with this many neighbours; this unhappy (MCA mood). */
 	static final float PURIST_OUTSIDER = 0.03F, TYRANT = 0.01F, GRUDGES = 0.015F, UNHAPPY = 0.01F;
 	static final int GRUDGES_LEAST = 3, UNHAPPY_MOOD = -8;
@@ -461,6 +466,9 @@ public final class Emigrants {
 			}
 		}
 		why[0] = Math.min(RIDICULE_CAP, ridicule * RIDICULE);
+		if (ridicule > 0.0F && VillagerHeritage.of(v) == Heritage.Kind.BIOBUILT) {
+			why[0] = BIO_DRIVEN;
+		}
 		Faction f = Factions.around(level.getServer(), level, v.blockPosition(), PLACE_RANGE);
 		Faction ruler = ruler(level.getServer(), f);
 		if (Purists.outsider(ruler, v)) {

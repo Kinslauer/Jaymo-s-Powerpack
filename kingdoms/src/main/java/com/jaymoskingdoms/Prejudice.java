@@ -34,6 +34,11 @@ import org.jspecify.annotations.Nullable;
  * cheerful and devout, and a share of the rest (more of MCA's warm personalities, none of the crabby). A purist ruler's
  * own people ({@link Purists}) always mind, and harder. A full mask hides your blood from them.
  * <p>
+ * (0.7.356) Andy (2026-10-29): "the bio built is unable to hide and is actually repulsive to all human kingdoms. It is
+ * near impossible to live or find one living there." The Bio-built are the furthest from human of all
+ * ({@link #BIOBUILT}): no mask hides what they are ({@link #shows}), and even the human folk who mind no other blood
+ * mind theirs, at {@link #BIO_TOLERANT} of the full weight. Non-humans and the havens take them as any other.
+ * <p>
  * The rivalry (Andy, the same day: "raising a sort of rivalry, between human and nonhumans across the entire world"):
  * many who were ridiculed left for villages of their own ({@link Havens}), and non-humans mind humans back, a little
  * anywhere ({@link #RIVALRY}) and hard in a haven ({@link #HAVEN_RIVALRY}), where a human is the one muttered at,
@@ -52,6 +57,10 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
+	/** (0.7.356) The Bio-built: made, not born, and plainly so; worse than any. */
+	static final int BIOBUILT = 6;
+	/** (0.7.356) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
+	static final float BIO_TOLERANT = 0.5F;
 	/**
 	 * (Havens) The rivalry: how much a non-human minds a human (as a degree), living in a haven, and anywhere else; a
 	 * haven's good name for a human, likewise.
@@ -89,7 +98,7 @@ public final class Prejudice {
 	static final float KIND_CHANCE = 0.04F;
 	static final int KIND_TICKS = 20 * 240;
 	/** Lines ({@code prejudice.jaymoskingdoms.<kind>.<n>}, from 0): mutters by how far from human (low 1-2, high 3-4). */
-	static final int MUTTER_LOW_LINES = 5, MUTTER_HIGH_LINES = 5, CHILD_LINES = 4, SHRINK_LINES = 3, KIND_LINES = 4, KIN_LINES = 3;
+	static final int BIO_LINES = 6, MUTTER_LOW_LINES = 5, MUTTER_HIGH_LINES = 5, CHILD_LINES = 4, SHRINK_LINES = 3, KIND_LINES = 4, KIN_LINES = 3;
 	/** (Havens) The rivalry's lines: a non-human's mutter at a human (a haven's, elsewhere, a child's), a fair one's word, a haven's welcome, gossip. */
 	static final int HAVEN_LINES = 5, RIVAL_LINES = 4, RIVAL_CHILD_LINES = 3, FAIR_LINES = 3, WELCOME_LINES = 4, HAVEN_GOSSIP_LINES = 5,
 		RIVALRY_GOSSIP_LINES = 4;
@@ -121,14 +130,28 @@ public final class Prejudice {
 			case STONEBORN -> STONEBORN;
 			case WARRIORBORN -> WARRIORBORN;
 			case SYLVAN -> SYLVAN;
+			case BIOBUILT -> BIOBUILT;
 			default -> 0;
 		};
+	}
+
+	/**
+	 * (0.7.356) Whether {@code p}'s blood is hidden from townsfolk: a full mask hides it, but never a Bio-built's (their
+	 * whole body shows what they are).
+	 */
+	static boolean masked(Player p) {
+		return Identities.masked(p) && !Heritage.is(p, Heritage.Kind.BIOBUILT);
+	}
+
+	/** (0.7.356) {@code p} shows their blood whatever they wear: the Bio-built. */
+	public static boolean shows(Player p) {
+		return Heritage.is(p, Heritage.Kind.BIOBUILT);
 	}
 
 	/** How far from human {@code e} is seen to be: a player's or villager's blood (a full mask hides a player's). */
 	static int degree(Entity e) {
 		if (e instanceof Player p) {
-			return Identities.masked(p) ? 0 : degree(Heritage.of(p));
+			return masked(p) ? 0 : degree(Heritage.of(p));
 		}
 		return degree(VillagerHeritage.of(e));
 	}
@@ -138,7 +161,7 @@ public final class Prejudice {
 	 * for a purist's own).
 	 */
 	static float minds(LivingEntity who, Entity whom) {
-		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && Identities.masked(p)) {
+		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p)) {
 			return 0.0F;
 		}
 		Heritage.Kind mine = VillagerHeritage.of(who), theirs = Purists.of(whom);
@@ -163,8 +186,8 @@ public final class Prejudice {
 			// (not plainly human themselves: they know how it is)
 			return 0.0F;
 		}
-		// (a purist's own: always, and harder)
-		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? 0.0F : d);
+		// (a purist's own: always, and harder; (0.7.356) the tolerant still mind the Bio-built, if less)
+		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
 	}
 
 	/** {@code who} doesn't mind blood at all, by nature: kindhearted, cheerful or devout, or the luck of who they are. */
@@ -227,7 +250,7 @@ public final class Prejudice {
 
 	/** Good name won or lost with {@code kingdom} by {@code player}, after their blood ({@link Reputation#change}). */
 	static int reputation(Faction kingdom, ServerPlayer player, int by) {
-		if (by == 0 || Identities.hidden(player, kingdom.id())) {
+		if (by == 0 || Identities.hidden(player, kingdom.id()) && !shows(player)) {
 			return by;
 		}
 		int d = degree(player);
@@ -272,7 +295,7 @@ public final class Prejudice {
 	static String prompt(Villager villager, ServerPlayer player) {
 		Heritage.Kind kind = Heritage.of(player);
 		int d = degree(player);
-		if (Identities.masked(player)) {
+		if (masked(player)) {
 			return "";
 		}
 		if (d == 0) {
@@ -297,6 +320,11 @@ public final class Prejudice {
 		float m = minds(villager, player);
 		if (m <= 0.0F) {
 			return "They are " + name + ". Most folk look down on that blood as less than human, but you don't hold it against them.";
+		}
+		if (kind == Heritage.Kind.BIOBUILT) {
+			return "They are Bio-built: a made thing out of the Mad Tinkerer's vats, grown from the blood of every people, that"
+				+ " eats the fallen whole. You find them repulsive and frightening, no matter how they talk or dress. Keep your"
+				+ " distance and let it show.";
 		}
 		return "They are " + name + (m >= SHRINK_DEGREE ? ", which you find unnatural and unsettling, barely human" : ", which you think less of, as most folk do")
 			+ ". Let it show, coolly.";
@@ -333,7 +361,7 @@ public final class Prejudice {
 		}
 		for (ServerPlayer p : level.players()) {
 			int d = degree(p);
-			if (Identities.masked(p) || p.isSpectator() || p.isCreative() || !p.isAlive()) {
+			if (masked(p) || p.isSpectator() || p.isCreative() || !p.isAlive()) {
 				continue;
 			}
 			List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(NOTICE_RANGE),
@@ -398,6 +426,7 @@ public final class Prejudice {
 		String key = d == 0 ? (by.isBaby() ? "rival_child." + random.nextInt(RIVAL_CHILD_LINES)
 			: haven ? "haven." + random.nextInt(HAVEN_LINES) : "rival." + random.nextInt(RIVAL_LINES))
 			: by.isBaby() ? "child." + random.nextInt(CHILD_LINES)
+			: d >= BIOBUILT ? "bio." + random.nextInt(BIO_LINES)
 			: d >= SHRINK_DEGREE ? "high." + random.nextInt(MUTTER_HIGH_LINES) : "low." + random.nextInt(MUTTER_LOW_LINES);
 		Speech.say(level, by, Component.translatable("prejudice.jaymoskingdoms." + key, blood, Identities.shownName(p)), Speech.YELLOW, SPEECH_RANGE);
 		if (!by.isBaby() && random.nextFloat() < 0.4F) {

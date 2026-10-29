@@ -285,7 +285,8 @@ public final class Identities {
 	 */
 	static @Nullable String persona(ServerPlayer player, int faction) {
 		String key = key(player);
-		if (key == null) {
+		if (key == null || Prejudice.shows(player)) {
+			// ((0.7.356) no mask hides a Bio-built: they're known for what they are, and so for who)
 			return null;
 		}
 		Identity id = get(player.level().getServer(), key);
@@ -645,11 +646,13 @@ public final class Identities {
 				noteName(server, cur, tagName(player));
 			}
 			// (0.7.101: MCA's villagers forget you only behind a full mask, not a hood)
-			if (!java.util.Objects.equals(mask, player.getAttached(MASKED_AS))) {
-				if (mask == null) {
+			// ((0.7.356) never a Bio-built's: Prejudice.shows)
+			String forgotten = Prejudice.shows(player) ? null : mask;
+			if (!java.util.Objects.equals(forgotten, player.getAttached(MASKED_AS))) {
+				if (forgotten == null) {
 					player.removeAttached(MASKED_AS);
 				} else {
-					player.setAttached(MASKED_AS, mask);
+					player.setAttached(MASKED_AS, forgotten);
 				}
 			}
 			if (player.level() != level || !player.isAlive() || player.isSpectator()) {
