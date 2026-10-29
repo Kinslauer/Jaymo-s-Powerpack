@@ -49,7 +49,7 @@
 	"item.jaymospowers.soras_dagger.hint1": "Diamonds set along its edge at a Tool Station, bound with a breeze's rod.",
 	"item.jaymospowers.soras_dagger.hint2": "The spoils of three great foes, and a Tempest's hand, could wake it (sneak + right click).",
 	"item.jaymospowers.soras_dagger.hint3": "In a wind's hand, every slash is a gale.",
-	"message.jaymospowers.soras_dagger.unanswered": "The dagger stirs, but only a Tempest could wake it.",
+	"item.jaymospowers.soras_dagger.grip": "Sneak + right click turns it in your grip.",
 	"message.jaymospowers.soras_dagger.missing": "The winds wait for: %s",
 	"message.jaymospowers.soras_dagger.refuses": "The dagger tears free of your grip. It answers only the wind.",
 	"message.jaymospowers.soras_blade_display.says": "%s: Take it. I forged that blade, but it never once answered my hand. Maybe it will answer yours.",
