@@ -119,6 +119,10 @@ import org.jspecify.annotations.Nullable;
  * attack on an entity repeats nothing in vanilla (only digging a block does), so the hold is free; the client says when it
  * starts and stops ({@link Execute}, from {@code FinisherClient}), and Z Fighter's held-attack combos stand aside while
  * it's aimed at someone helpless.
+ * <p>
+ * (0.17.181) Andy: "add a smashing execution with a rock". A loose rock ({@code GroundRocks}) in the main hand plays
+ * {@link Kind#ROCK}, everyone's (no Executioner: anyone can pick up a rock): down on a knee at their head, the off hand
+ * pinning them, the rock brought down again and again, the last with both hands, which breaks it (one rock is used up).
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -197,7 +201,12 @@ public final class Finishers {
 		 * (0.15.148) Garrotte, the leather whip's, (0.16.1) Executioner only: the lash cracked round their neck ({@link #WHIP_CRACK}), then
 		 * hauled tight, leaning back on it, until the neck goes.
 		 */
-		WHIP(64, new int[] {24, 42, 58}, Strike.SNAP);
+		WHIP(64, new int[] {24, 42, 58}, Strike.SNAP),
+		/**
+		 * (0.17.181) Stoned, a loose rock's, everyone's: knelt at their head, the off hand pinning them, the rock raised and
+		 * brought down three times, then lifted high in both hands and dropped onto the skull with everything behind it.
+		 */
+		ROCK(52, new int[] {12, 20, 28, 40}, Strike.CRUSH);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -369,6 +378,10 @@ public final class Finishers {
 		if (com.jaymospowers.armory.Lash.isWhip(stack)) {
 			return Kind.WHIP;
 		}
+		if (com.jaymospowers.ground.FirstTools.rock(stack)) {
+			// (0.17.181) a loose rock is a rock, whatever its name says
+			return Kind.ROCK;
+		}
 		if (gun(stack)) {
 			return Kind.GUN;
 		}
@@ -456,6 +469,10 @@ public final class Finishers {
 		if (kind == Kind.FIST) {
 			// (0.15.146) not a weapon: a tool that wears slams (a fishing rod, a shovel); a torch or a loaf finishes nobody
 			return stack.isDamageableItem() ? Kind.SLAM : null;
+		}
+		if (kind == Kind.ROCK) {
+			// (0.17.181) anyone can bring a rock down on someone
+			return kind;
 		}
 		if (!weaponsUnlocked(player)) {
 			return basic(kind);
@@ -849,6 +866,18 @@ public final class Finishers {
 				}
 			}
 		}
+		if (kind == Kind.ROCK) {
+			// (0.17.181) stone on bone: the rock's crack, and chips of it
+			level.playSound(null, x, y, z, SoundEvents.STONE_BREAK, SoundSource.PLAYERS, kill ? 1.0F : 0.8F, pitch * 0.7F);
+			if (player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BlockItem rock) {
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, rock.getBlock().defaultBlockState()), x, y + 0.2, z, kill ? 16 : 8,
+					0.15, 0.1, 0.15, 0.1);
+			}
+			if (kill && !player.hasInfiniteMaterials()) {
+				// (0.17.181) Andy: "the rock is used up": it breaks on the last blow
+				player.getMainHandItem().shrink(1);
+			}
+		}
 		if (kind == Kind.SLAM || kind == Kind.IMPALE) {
 			// (0.15.146) Andy: "using tools like a bow or fishing rod heavily damages them"
 			wear(player);
@@ -902,6 +931,7 @@ public final class Finishers {
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FIST -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
 			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case ROCK -> SoundEvents.STONE_HIT;
 			case WHIP -> SoundEvents.FISHING_BOBBER_THROW;
 			default -> SoundEvents.ARMOR_EQUIP_IRON.value();
 		};
