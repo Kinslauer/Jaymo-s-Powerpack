@@ -48,8 +48,8 @@ import net.minecraft.world.entity.player.Player;
  * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super.
  * <p>(0.17.192) Andy: "Super primal super can only be achieved now when a primal super user fuses with another z fighter
  * warrior born. It deactivates regardless of remaining ki after the fusion ends." So it is C from Primal Super only while
- * he steers a fused body whose other half is Warrior-born ({@link #fusedWithWarrior}), and the fusion ending (or the
- * halfway swap taking him out of the body) drops him back to Primal Super ({@link #fusionEnded}).
+ * he steers a fused body whose other half is Warrior-born ({@link #fusedWithWarrior}), and the fusion ending drops him
+ * back to Primal Super ({@link #fusionEnded}). (0.17.194) The halfway swap hands the form on with the body.
  */
 public final class ApeRage {
 	/** Rage a second as the ape (times 1 + primal / {@code PRIMAL_RAGE_SCALE}), per point of damage taken, per kill, when crippled. */
@@ -181,18 +181,30 @@ public final class ApeRage {
 	}
 
 	/**
-	 * (0.17.192) His fusion ended, or he went inside at the halfway swap: Super Primal Super goes out whatever ki is left,
-	 * back to Primal Super (or his highest Super). Called before the caller's {@link ZFighterPower#refresh}.
+	 * (0.17.192) His fusion ended: Super Primal Super goes out whatever ki is left, back to Primal Super (or his highest
+	 * Super). (0.17.194) So does any other form the body took over at the halfway swap that he hasn't opened himself: back
+	 * to the highest he has. Called before the caller's {@link ZFighterPower#refresh}.
 	 */
 	static void fusionEnded(ServerPlayer player, ZFighterPower.Live live) {
-		if (live.form != SUPER_4) {
+		java.util.List<Integer> own = ZFighterForms.choices(player);
+		if (live.form == 0 || live.form == ZFighterForms.FALSE_SUPER || own.contains(live.form)) {
 			return;
 		}
-		live.form = below(player, SUPER_4);
-		if (live.form <= 0) {
+		int to = 0;
+		if (live.form == SUPER_4 && super4(player)) {
+			to = PRIMAL_SUPER;
+		} else {
+			for (int form : own) {
+				if (form != ZFighterForms.GOD) {
+					to = form;
+				}
+			}
+		}
+		if (to <= 0) {
 			ZFighterPower.endSuper(player, live);
 			return;
 		}
+		live.form = to;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 0.7F);
 	}
 

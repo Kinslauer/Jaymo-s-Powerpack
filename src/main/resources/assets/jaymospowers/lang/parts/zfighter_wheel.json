@@ -7,5 +7,10 @@
   "screen.jaymospowers.zfighter_wheel.put": "Let go to put it on %s",
   "screen.jaymospowers.zfighter_wheel.add": "Put this technique on the technique wheel (hold the wheel key, Y). The wheel holds eight.",
   "screen.jaymospowers.zfighter_wheel.take_off": "Take this technique off the technique wheel, to make room for another.",
+  "screen.jaymospowers.zfighter_forms": "Forms",
+  "screen.jaymospowers.zfighter_forms.base": "Base",
+  "screen.jaymospowers.zfighter_forms.hint": "Point at a form and let go of C",
+  "screen.jaymospowers.zfighter_forms.on": "You're in this form now",
+  "screen.jaymospowers.zfighter_forms.take": "Let go to take this form",
   "message.jaymospowers.zfighter_wheel.full": "Your technique wheel is full (eight). Take one off on the training screen's Techniques page first."
 }

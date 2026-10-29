@@ -991,7 +991,10 @@ public final class ZFighterPower implements Power {
 		return pose == null ? 0 : pose;
 	}
 
-	/** C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C (held) raises it instead. */
+	/**
+	 * C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C raises it instead. (0.17.194) Holding C
+	 * is the form menu now (client), so C comes as a tap: one raises the Spirit Bomb, the next throws it.
+	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		Live live = live(player);
@@ -1004,6 +1007,10 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		if (!down) {
+			return;
+		}
+		if (live.spiritFrom >= 0) {
+			// (0.17.194) the second tap throws the raised Spirit Bomb
 			ZFighterTechniques.release(player, live);
 			sync(player, live, maxKi(player));
 			return;
@@ -1141,6 +1148,43 @@ public final class ZFighterPower implements Power {
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
 		refresh(player, live);
+	}
+
+	/**
+	 * (0.17.194) The hold-C menu's pick: straight to {@code form}, if it's one he has ({@link ZFighterForms#choices}). Up
+	 * is a transformation (its ki, as C would ask); down is quiet, as sneak+C is; base ends the Super.
+	 */
+	static void pickForm(ServerPlayer player, int form) {
+		Live live = live(player);
+		List<Integer> choices = ZFighterForms.choices(player);
+		if (form == live.form || !choices.contains(form) || !player.isAlive() || Powers.silenced(player) || live.spiritFrom >= 0) {
+			return;
+		}
+		if (live.form == ZFighterForms.GOD) {
+			ZFighterInstinct.end(player, live, false);
+		}
+		if (form == 0) {
+			endSuper(player, live);
+		} else if (live.superOn() && choices.indexOf(form) < choices.indexOf(live.form)) {
+			live.form = form;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
+			refresh(player, live);
+		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
+			if (form == ZFighterForms.GOD) {
+				ZFighterGod.enter(player, live);
+			} else {
+				boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(ZFighterLegendary.chain(form)) >= ZFighterTraining.FREE_ENTRY_MASTERY;
+				if (!free && live.ki < FORM_ENTER_KI[form]) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
+				} else {
+					if (!free) {
+						live.ki -= FORM_ENTER_KI[form];
+					}
+					transform(player, live, form);
+				}
+			}
+		}
+		sync(player, live, maxKi(player));
 	}
 
 	/** All the way back to base (out of ki, or by choice); Limit Break goes with it. */

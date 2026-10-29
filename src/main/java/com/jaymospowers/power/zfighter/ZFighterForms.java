@@ -2,6 +2,8 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.Powers;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -12,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.17.50, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
@@ -69,6 +72,35 @@ public final class ZFighterForms {
 	/** Whether the Spirit Bomb can be raised from this form: Super 3, either primal form and the god form. */
 	public static boolean bombForm(int form) {
 		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD;
+	}
+
+	/**
+	 * (0.17.194) Andy: "a menu for z fighters, accessed by holding C that lets you pick the form instead of sequential up
+	 * and down, as long as you have it unlocked". The forms the menu offers him now, lowest first: base, his bought Supers
+	 * (the legendary line's for a legendary-born), Primal Super, Super Primal Super (while fused with a Warrior-born) and
+	 * the god form. None as the ape. Both sides read it: the menu draws it, the server checks a pick against it.
+	 */
+	public static List<Integer> choices(Player player) {
+		List<Integer> forms = new ArrayList<>();
+		if (ZFighterLineage.ape(player)) {
+			return forms;
+		}
+		forms.add(0);
+		int open = Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+		boolean mutant = ZFighterLegendary.mutant(player);
+		for (int f = 1; f <= open; f++) {
+			forms.add(mutant ? LEGEND_1 + f - 1 : f);
+		}
+		if (ApeRage.super4(player)) {
+			forms.add(ApeRage.PRIMAL_SUPER);
+		}
+		if (ApeRage.superPrimal(player)) {
+			forms.add(ApeRage.SUPER_4);
+		}
+		if (ZFighterGod.unlocked(player)) {
+			forms.add(GOD);
+		}
+		return forms;
 	}
 
 	/** Called once from {@link ZFighterPower#init}. */
