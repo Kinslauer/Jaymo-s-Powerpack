@@ -69,7 +69,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.17.62, Andy's NOEA picks) The space pod: a craftable ship, placed like a block. Right-click it to open the star map and pick
  * where to fly: the Pale Moon (low gravity), Rustfall (a heavy red world), Glacia (a frozen sea), Cinder (a forge world of lava and
- * ore), the Maw (a black hole in a void, with wrecks to loot) and the Verdant World. (0.18.2, Andy) You ride the pod there
+ * ore), the Maw (a black hole in a void, with wrecks to loot) and the Verdant World. (0.18.4, Andy) You ride the pod there
  * ({@link ZFighterPodTrip}): a countdown, a lift-off, a flight shown on screen, and a landing on open ground anywhere on the far
  * world; the pod you came in stands there for the way back. A pod holds fuel ({@link #FUEL}, coal or blaze powder used on it) and
  * each trip burns some by distance ({@link #COSTS}). The pads ({@link #PAD}) are now only the life-story starts' ports.
@@ -85,7 +85,7 @@ public final class ZFighterSpace {
 	/** How far from the pod a launch may start (blocks), and how long the open star map stays good (ticks). */
 	static final double POD_REACH = 10.0;
 	static final int OPEN_TICKS = 1200;
-	/** (0.18.2) The fuel a pod holds at most, and what each trip burns, by destination index (Home burns what the world you are on costs). */
+	/** (0.18.4) The fuel a pod holds at most, and what each trip burns, by destination index (Home burns what the world you are on costs). */
 	public static final int MAX_FUEL = 12;
 	public static final IntegerProperty FUEL = IntegerProperty.create("fuel", 0, MAX_FUEL);
 	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
@@ -368,14 +368,14 @@ public final class ZFighterSpace {
 			return;
 		}
 		if (player.level().dimension() == DESTS[FUTURE].level()) {
-			// (0.18.2, Andy) a lifetime on, every world the pod knows is dust: only going back in time leads home
+			// (0.18.4, Andy) a lifetime on, every world the pod knows is dust: only going back in time leads home
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_future_dead").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (index == HOME_INDEX) {
 			// nothing to do if he is already where home is: the overworld with no trip taken
 		} else if (index == FUTURE) {
-			// (0.18.2) the future is off the star map
+			// (0.18.4) the future is off the star map
 			return;
 		} else if (index < 0 || index >= DESTS.length || DESTS[index].level() == player.level().dimension()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_here").withStyle(ChatFormatting.GRAY));
@@ -536,7 +536,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.2) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern and mast. */
+	/** (0.18.4) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern and mast. */
 	static List<BlockPos> mawDecks() {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);

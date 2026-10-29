@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.62, Andy's NOEA picks) The space pod's star map, opened by right-clicking a pod. (0.18.2, Andy) Now a solar system: the sun
+ * (0.17.62, Andy's NOEA picks) The space pod's star map, opened by right-clicking a pod. (0.18.4, Andy) Now a solar system: the sun
  * in the middle, Cinder, Home (with the Pale Moon going round it), Rustfall, Glacia and the Verdant World slowly turning on their
  * orbits, and the Maw burning off in the corner. Click a world for its card: everything about it (the whole text, never cut), its
  * gravity, how its mission stands, the fuel the trip burns against what the pod holds, and Launch; on a world with a mission, the

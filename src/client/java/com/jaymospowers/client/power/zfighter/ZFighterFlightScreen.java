@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.2, Andy) The pod's flight, shown while the server holds you up past the clouds ({@link ZFighterPodTrip}): deep space, the
+ * (0.18.4, Andy) The pod's flight, shown while the server holds you up past the clouds ({@link ZFighterPodTrip}): deep space, the
  * world you left sliding away behind, the pod (the pod item, drawn big) riding its fire across a field of stars that stream past
  * faster as it gets going and slow again near the end, and the world ahead growing until it fills the right side. Under it, where
  * you are going and how long is left. After a first trip, Space (or a click) skips it. It closes itself when the pod drops

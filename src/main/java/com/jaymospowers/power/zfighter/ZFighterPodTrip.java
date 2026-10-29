@@ -47,7 +47,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.2, Andy) A trip in the space pod, which you now ride: the pod block becomes a pod you sit in ({@link #TAG}, a block
+ * (0.18.4, Andy) A trip in the space pod, which you now ride: the pod block becomes a pod you sit in ({@link #TAG}, a block
  * display drawn {@link #POD_SCALE} times the block), and it counts down shaking and smoking, then lifts off on its fire with you
  * inside while everyone near watches it go. Up past the clouds the client shows the flight ({@code ZFighterFlightScreen}): the pod
  * crossing space from here to there, longer the farther the world ({@link #flightTicks}); after a first trip it can be skipped.
@@ -199,8 +199,9 @@ public final class ZFighterPodTrip {
 		pod.setViewRange(4.0F);
 		pod.setPos(at.x, at.y, at.z);
 		pod.setYRot(yaw);
-		pod.addTag(TAG);
 		level.addFreshEntity(pod);
+		// tagged once it is in the world, so the load check below doesn't take it for a leftover
+		pod.addTag(TAG);
 		return pod;
 	}
 

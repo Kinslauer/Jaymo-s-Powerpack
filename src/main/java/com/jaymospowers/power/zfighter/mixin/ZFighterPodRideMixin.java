@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.2) No climbing out of a space pod mid-trip ({@link ZFighterPodTrip}): sneaking does nothing until it lands. */
+/** (0.18.4) No climbing out of a space pod mid-trip ({@link ZFighterPodTrip}): sneaking does nothing until it lands. */
 @Mixin(Player.class)
 abstract class ZFighterPodRideMixin {
 	@Inject(method = "wantsToStopRiding", at = @At("HEAD"), cancellable = true)

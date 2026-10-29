@@ -3821,11 +3821,31 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   in the pack. No clash with our own screens: our container mixins are accessors and the horse labels, our inventory
   tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
   - Not built (the cloud can't reach Fabric's Maven); not seen in game.
-- **0.18.2, the star map loses the future:** Andy asked to take "The Future" off the pod's star map and drop the line at
-  the bottom ("No mission here..."). `ZFighterStarMapScreen` lists Home and the six worlds only, and off a mission planet
-  (with no titles yet) the bottom box is gone and the panel ends under the last row. `ZFighterSpace.go` refuses the
-  future index. Andy: a pod in the future flies nowhere, since every world it knows is dust a lifetime on; you have to go
-  back in time. Its star map greys every button and says so, `go` refuses there, and the pod's ways in and out of the
-  future (`Future.podGo/podBack/podReady`, the pod set down beside you) are gone. The future dimension and the Chrono
-  leap are unchanged.
-  - Not built (the cloud can't reach Fabric's Maven); not seen in game.
+- **0.18.4, space travel rework:** Andy: take "The Future" and the bottom line off the star map, and "space travel needs a
+  TON of improvement", with a menu or simulation where you see the pod moving through space (pointing at Ad Astra, whose
+  code is MIT but art All Rights Reserved and which stops at 1.21.1: ideas only). He picked all five pitched changes.
+  - **The future:** off the star map; `go` refuses it. A pod in the future flies nowhere (every world it knows is dust a
+    lifetime on; only going back in time leads home): its map is dark. `Future.podGo/podBack/podReady` are gone.
+  - **Star map** (`ZFighterStarMapScreen`, art in `ZFighterSpaceArt`): a solar system drawn in pixel cells, lit from the
+    sun: Cinder, Home (the Pale Moon round it), Rustfall, Glacia, the Verdant World turning slowly on dotted orbits, the
+    Maw burning in the corner. Click a world for its card: a big view of it, gravity, the whole `.about` text (wrapped,
+    never cut), mission state, fuel burned against fuel held, Launch, and Begin/Give up on the world you stand on. The
+    panel shrinks to fit small screens. The `.blurb` lines are replaced by `.about` and `.gravity`.
+  - **Fuel:** the pod block has `fuel` 0-12 (`ZFighterSpace.FUEL`); coal/charcoal 1, blaze powder 2, blaze rod 3, coal block
+    9, used on the pod. Trips burn `COSTS` by world (moon 1, Verdant 2, Rustfall 3, Glacia 3, Cinder 4, Maw 6; Home burns
+    what the world you are on costs, 1 from the overworld). Creative flies free. A mended moon wreck holds 2.
+  - **Riding the pod** (`ZFighterPodTrip`): the block becomes a block display of the pod drawn 2x that you sit in
+    (`ZFighterPodRideMixin` keeps you in; no damage mid-trip). 3 s countdown (smoke, pings, shaking), then it lifts off
+    with you inside, speeding up over 3.5 s, and keeps climbing while the flight shows, so others watch it go.
+  - **Flight screen** (`ZFighterFlightScreen`): space, streaming starfield in 3 layers (up to speed, cruise, slowing), the
+    world you left sliding away, the pod item drawn 3x on its flame trail, the target growing on the right, a bar and
+    seconds left. 5 s + 1.5 s per fuel unit (6.5 s to the moon, 14 s to the Maw). Space or a click skips it after your
+    first trip (`FLIGHTS` attachment). Closes when the pod you ride changes (the landing) or the world changes.
+  - **Landing anywhere:** no pad. The pod drops from 56 blocks over a random flat dry spot within 360 blocks of a world's
+    middle (a cave floor on Cinder, a wreck deck in the Maw), slowing on its fire, and sets down as a block holding the
+    fuel left; you climb out beside it. Home lands where you left from (or the world spawn). The old pads stay only for
+    the life-story starts (Rustfall's mine, the Maw start). Leaving the game mid-trip ends it: before lift-off the pod
+    stands again with its fuel; after, it is set down where it was going and you wake beside it (`PENDING`).
+  - Previews: project files `art-overhaul/space-travel/` (a PIL port of the drawing; the pod there is a stand-in).
+  - Not built with Gradle (the cloud can't reach Fabric's Maven); every changed file compiles against the staged 26.3
+    jars. Not seen in game.

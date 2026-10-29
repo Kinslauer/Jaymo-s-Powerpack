@@ -4,7 +4,7 @@ import com.jaymospowers.power.zfighter.ZFighterSpace;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
- * (0.18.2) The pixel-art bodies of the star map and the flight screen: the sun, Home, the worlds the pod flies to and the Maw. A
+ * (0.18.4) The pixel-art bodies of the star map and the flight screen: the sun, Home, the worlds the pod flies to and the Maw. A
  * world is drawn as a grid of square cells (bigger cells for a bigger world, so it keeps the blocky look), lit from the sun's side,
  * each with its own surface: Home's seas and land, the moon's craters, Rustfall's rust bands, Glacia's ice cracks, Cinder's lava,
  * the Verdant World's forests. The Maw is a black disc in a burning ring.
