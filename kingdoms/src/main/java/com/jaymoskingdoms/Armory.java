@@ -59,9 +59,9 @@ import org.jspecify.annotations.Nullable;
  * warplate, quicker to take enchantments. Mended with gold.
  * <p>
  * (0.7.351) And the <b>Kintsugi Armour</b>: dark lacquered plate whose cracks are mended in gold seams. eanncrod's model
- * (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}. A broken Ronin piece made whole: any Ronin piece
- * and four gold ingots at a crafting table ({@link #KINTSUGI_GOLD}). A step past the Ronin's lamellar, quick to take
- * enchantments. Mended with gold. Not one of {@link #SETS} (the Ronin stays as it is).
+ * (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}. Never made: it is only found on the possessed MCA
+ * zombies who walk the Nether fortresses' halls ({@code nether.FortressHaunts}), and falls with them. A step past the
+ * Ronin's lamellar, quick to take enchantments. Mended with gold. Not one of {@link #SETS} (the Ronin stays as it is).
  * <p>
  * (0.7.351) And the <b>Primal Visage</b>: a skull mask under horns, hide and bone over netherite. eanncrod's model, drawn
  * by {@code ReverentLayer}. Never made: each Nether war fort's warlord carries a piece of it ({@code NetherForts}), and
@@ -85,10 +85,8 @@ public final class Armory {
 	static final ArmorMaterial HEAVENLY = material("heavenly", 42, 3, 6, 8, 3, 25, SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.1F, ItemTags.REPAIRS_GOLD_ARMOR);
 	/** The Heavenly Mantle's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> HEAVENLY_PIECES = new LinkedHashMap<>();
-	/** (0.7.351) The Kintsugi Armour: a Ronin piece mended with gold, a little better than iron, quick to take enchantments. */
+	/** (0.7.351) The Kintsugi Armour: plate mended with gold (worn by the fortress haunts), a little better than iron, quick to take enchantments. */
 	static final ArmorMaterial KINTSUGI = material("kintsugi", 26, 2, 5, 7, 3, 20, SoundEvents.ARMOR_EQUIP_GOLD, 1.5F, 0.05F, ItemTags.REPAIRS_GOLD_ARMOR);
-	/** Gold ingots it takes to mend a Ronin piece into its Kintsugi piece (the recipes in data/jaymoskingdoms/recipe/kintsugi_*.json). */
-	public static final int KINTSUGI_GOLD = 4;
 	/** The Kintsugi Armour's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> KINTSUGI_PIECES = new LinkedHashMap<>();
 	/** (0.7.351) The Primal Visage: netherite's defence and toughness, hard to knock back. */

@@ -6640,9 +6640,13 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   - Compile-checked only; not seen in game.
 - **0.7.351, new Blockbench models (pack 0.17.201):** from six Blockbench Workshop models Andy sent (CC BY 4.0;
   credits in `textures/entity/bb/CREDITS.txt`).
-  - **Kintsugi Armour** (`Armory.KINTSUGI_PIECES`, eanncrod's model, drawn by `ReverentLayer`): any Ronin piece and 4 gold
-    ingots at a crafting table make its Kintsugi piece. A little better than iron, quick to enchant, mended with gold.
-    The Ronin set is unchanged (Andy: "should not replace anything existing").
+  - **Kintsugi Armour** (`Armory.KINTSUGI_PIECES`, eanncrod's model, drawn by `ReverentLayer`): never crafted. Andy: "found
+    on mca zombies in the nether that were possessed and doomed to walk the fortress halls". `nether.FortressHaunts`:
+    every 30 s, 35% of the time, a player inside a Nether fortress sees a haunt rise on the hall bricks 12-28 blocks off
+    (at most 3 within 48 blocks). It's an MCA zombie villager (plain zombie villager without MCA), marked `POSSESSED`,
+    34 health, fireproof, trailing souls, wearing 1-2 random Kintsugi pieces it always drops. A golden apple can't cure
+    one (the soul screams instead). A little better than iron, quick to enchant, mended with gold. The Ronin set is
+    unchanged (Andy: "should not replace anything existing").
   - **Primal Visage** (`Armory.PRIMAL_PIECES`, eanncrod's): netherite-strength hide and bone under a skull mask, fireproof.
     Never made: a fallen Nether war fort warlord drops one random piece (`NetherForts.PRIMAL_PIECES_DROPPED`).
     `ReverentLayer` now skips bones a model lacks and hangs a skirt by `armorWaist` when there's no `bipedWaist`.

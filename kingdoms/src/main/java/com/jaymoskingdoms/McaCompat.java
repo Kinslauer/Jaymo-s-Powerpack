@@ -142,6 +142,11 @@ public final class McaCompat {
 		return LOADED ? McaBridge.spawnGuard(level, at) : null;
 	}
 
+	/** (0.7.351) A new MCA zombie villager at {@code at}, in the world ({@code nether.FortressHaunts}); null without MCA or if it failed. */
+	public static net.minecraft.world.entity.monster.zombie.@Nullable ZombieVillager spawnZombie(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.spawnZombie(level, at) : null;
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
