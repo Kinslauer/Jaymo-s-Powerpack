@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:barrel",
+  "components": [
+    "minecraft:iron_block",
+    "minecraft:iron_block",
+    "minecraft:spruce_log",
+    "minecraft:spruce_log",
+    "minecraft:lantern",
+    "minecraft:redstone_block",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "metal": 12,
+    "motion": 12,
+    "craft": 12,
+    "spirit": 6
+  },
+  "instability": 8,
+  "result": {
+    "item": "jaymoskingdoms:war_barrel",
+    "count": 1
+  },
+  "research": "golemancy",
+  "flux": 6
+}

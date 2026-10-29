@@ -6527,3 +6527,23 @@ strafe in a fight crashed the server.
   the one vanilla returns isn't MCA's. A mounted archer's strafe then steers nothing, the horse carrying him, instead
   of crashing.
 Compile-checked, and deployed to the Deck; not yet seen in a fight.
+
+## 0.7.339: a third batch of Blockbench models (pack 0.17.169)
+All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
+- **Gorgon** (eanncrod's Hydra Guardian, `beasts/Gorgon`): a rare snake-haired archer in jungles and swamps (biome tag
+  `has_gorgon`, one in 8 spawn checks, never two within 64 blocks), 80 health. Its arrows bring Slowness II; it strafes
+  as it shoots; every 10 s or so it looses a volley into the sky that rains ten arrows round its foe.
+- **Goblin war barrel** (polyjo's The Cogwork Golem, `WarBarrel`): every goblin village keeps one inside its gate
+  (`hire` when it is founded, rebuilt as it grows). It stands asleep until a foe of the village comes within 14 blocks,
+  clanks awake, and rams (120 health, armour 12). Never turns on goblins.
+  - Andy: "you can also acquire friendly ones through golem mancy". A **War Barrel** item, made on Powers' infusion
+    altar with the Golemancy research (`alchemy/infusion/war_barrel.json`: barrel, iron blocks, spruce logs, lantern,
+    redstone block, ichor; `tools/gen_war_barrel.py`). Set down, it keeps that place for its maker: fights monsters
+    (creepers left be), never its maker or other friendly barrels, doesn't despawn or stop you sleeping, mended with
+    iron ingots.
+- **Haunted armour stand** (polyjo's Armor Stand, `beasts/HauntedStand`): deep underground (below y 40, rare, alone).
+  It moves only while no player looks at it; caught moving it spins, watched up close it hides its face; unwatched and
+  close it strikes for 7.
+- **Heavenly Mantle** (eanncrod, `Armory.HEAVENLY_PIECES`): the Reverent Warplate's pair, drawn by `ReverentLayer` (now
+  one layer per set). Never made: Powers' afterlife gives one piece to each champion of the tournament of the dead.
+  Netherite's defence, toughness 3.5, enchantability 25, fireproof, mended with gold (`tools/gen_heavenly.py`).

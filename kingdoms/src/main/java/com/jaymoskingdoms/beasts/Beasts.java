@@ -34,7 +34,9 @@ import net.minecraft.world.phys.AABB;
  * (0.7.329) Creatures drawn from Andy's second batch of Blockbench Workshop models (all CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt): the minotaur (a monster of legend), the Piglin King (a Nether boss), the redstone
  * golem (deep in the mines), the skulk golem (the deep dark's guardian) and the wild boar. The scalebane sellswords
- * are {@code ScalebaneArcher} (they serve barbarian and goblin camps). Each with its spawn egg.
+ * are {@code ScalebaneArcher} (they serve barbarian and goblin camps). (0.7.339) And the third batch: the gorgon (jungles
+ * and swamps), the haunted armour stand (deep down) and the goblins' war barrel ({@code WarBarrel}). Each with its spawn
+ * egg.
  */
 public final class Beasts {
 	public static EntityType<Minotaur> MINOTAUR;
@@ -43,11 +45,17 @@ public final class Beasts {
 	public static EntityType<SkulkGolem> SKULK_GOLEM;
 	public static EntityType<WildBoar> WILD_BOAR;
 	public static EntityType<ScalebaneArcher> SCALEBANE;
+	/** (0.7.339) The third batch. */
+	public static EntityType<Gorgon> GORGON;
+	public static EntityType<com.jaymoskingdoms.WarBarrel> WAR_BARREL;
+	public static EntityType<HauntedStand> HAUNTED_STAND;
 
 	/** Natural spawn weights (each also gated in its own spawn check), and the boar's herd size. */
 	static final int PIGLIN_KING_WEIGHT = 2, REDSTONE_GOLEM_WEIGHT = 3, SKULK_GOLEM_WEIGHT = 10, WILD_BOAR_WEIGHT = 6, BOAR_MIN = 2, BOAR_MAX = 4;
 	/** Where boars roam (its own biome tag) and the Nether biomes the Piglin King rules. */
 	static final TagKey<Biome> HAS_WILD_BOAR = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_wild_boar"));
+	static final TagKey<Biome> HAS_GORGON = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_gorgon"));
+	static final int GORGON_WEIGHT = 6, HAUNTED_STAND_WEIGHT = 2;
 	static final TagKey<Biome> HAS_PIGLIN_KING = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_piglin_king"));
 
 	private Beasts() {
@@ -67,10 +75,21 @@ public final class Beasts {
 		SCALEBANE = type("scalebane", EntityType.Builder.of(ScalebaneArcher::new, MobCategory.MONSTER).sized(0.6F, 2.0F).clientTrackingRange(8),
 			ScalebaneArcher.createAttributes());
 
+		GORGON = type("gorgon", EntityType.Builder.of(Gorgon::new, MobCategory.MONSTER).sized(0.8F, 2.6F).clientTrackingRange(10),
+			Gorgon.createAttributes());
+		WAR_BARREL = type("war_barrel", EntityType.Builder.of(com.jaymoskingdoms.WarBarrel::new, MobCategory.MONSTER).sized(2.0F, 3.3F)
+			.clientTrackingRange(10), com.jaymoskingdoms.WarBarrel.createAttributes());
+		HAUNTED_STAND = type("haunted_stand", EntityType.Builder.of(HauntedStand::new, MobCategory.MONSTER).sized(0.6F, 2.0F).clientTrackingRange(10),
+			HauntedStand.createAttributes());
+
 		SpawnPlacements.register(PIGLIN_KING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PiglinKing::checkSpawn);
 		SpawnPlacements.register(REDSTONE_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, RedstoneGolem::checkSpawn);
 		SpawnPlacements.register(SKULK_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SkulkGolem::checkSpawn);
 		SpawnPlacements.register(WILD_BOAR, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
+		SpawnPlacements.register(GORGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Gorgon::checkSpawn);
+		SpawnPlacements.register(HAUNTED_STAND, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, HauntedStand::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GORGON), MobCategory.MONSTER, GORGON, GORGON_WEIGHT, 1, 1);
+		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, HAUNTED_STAND, HAUNTED_STAND_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_PIGLIN_KING), MobCategory.MONSTER, PIGLIN_KING, PIGLIN_KING_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, REDSTONE_GOLEM, REDSTONE_GOLEM_WEIGHT, 1, 1);
 		BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DEEP_DARK), MobCategory.MONSTER, SKULK_GOLEM, SKULK_GOLEM_WEIGHT, 1, 1);

@@ -7,3 +7,19 @@ the infected guardian tree's boss
   "Visage of War" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/visage-of-war
   Changes: baked to our loader's format (it was made for GeckoLib); drawn at 1.5 size; its animations played by our
   own boss's moves. The spawn egg is the Slider's egg recoloured gold, not part of the model.
+
+Item and costume models (also CC BY 4.0, https://creativecommons.org/licenses/by/4.0/):
+
+models/item/armory/iron_dagger.json and textures/item/armory/iron_dagger.png: the Armory's iron dagger
+  "Traveler Dagger" by polyjo, https://blockbenchworkshop.com/model/polyjo/traveler-dagger-polyjo
+  Changes: turned into an item model (tools/blockbench/traveler_dagger.py); held like our other 3D blades.
+
+models/item/soul_saber.json and textures/item/dreaded_blade(_fx).png: the Dreaded Blade (the relic once called the Soul Saber)
+  "Weapon - Dreaded Blade (Animated)" by capellastudio, https://blockbenchworkshop.com/model/capellastudio/weapon-dreaded-blade-animated
+  Changes: turned into an item model (tools/blockbench/dreaded_blade.py), its runes drawn at full light; held like our
+  other 3D blades. Its maker asks that it not be resold on its own.
+
+textures/entity/costume/suit/thief*.png and mask/thief_hood*.png: the costume table's Thief's Leathers and Thief's Hood
+  "Thief Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/thief-armor
+  Changes: its cubes built into our costume models (client/costume/CostumeModels.thief); its texture split into the two
+  dye masks and turned grey for tinting (tools/blockbench/thief_costume.py).
