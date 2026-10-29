@@ -106,8 +106,17 @@ public final class SorasDagger extends Item {
 	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
 	/** (0.17.169) The Flurry's cooldown group (not the dagger's own, so the guard stays up), and a stack that reads it. */
 	static final Identifier FLURRY_GROUP = JaymosPowers.id("soras_flurry");
-	private static final ItemStack FLURRY_PROBE = Util.make(new ItemStack(Items.STICK),
-		probe -> probe.set(DataComponents.USE_COOLDOWN, new UseCooldown(1.0F, Optional.of(FLURRY_GROUP))));
+	// (0.17.189) made on first use: a stack built while this class loads (in register(), during mod init) comes before
+	// item components are bound, and the game and server crashed on start ("Components not bound yet")
+	private static ItemStack flurryProbe;
+
+	private static ItemStack flurryProbe() {
+		if (flurryProbe == null) {
+			flurryProbe = Util.make(new ItemStack(Items.STICK),
+				probe -> probe.set(DataComponents.USE_COOLDOWN, new UseCooldown(1.0F, Optional.of(FLURRY_GROUP))));
+		}
+		return flurryProbe;
+	}
 
 	public final int stage;
 
@@ -197,7 +206,7 @@ public final class SorasDagger extends Item {
 		if (this.stage < DIAMOND || hand != InteractionHand.MAIN_HAND) {
 			return super.use(level, player, hand);
 		}
-		boolean flurry = !forging && wind(player) && !player.getCooldowns().isOnCooldown(FLURRY_PROBE) && !FLURRIES.containsKey(player.getUUID());
+		boolean flurry = !forging && wind(player) && !player.getCooldowns().isOnCooldown(flurryProbe()) && !FLURRIES.containsKey(player.getUUID());
 		if (!forging && !flurry) {
 			// the guard (only a wind can call up the Flurry, and not while it cools down)
 			return super.use(level, player, hand);
