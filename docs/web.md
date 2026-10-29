@@ -1731,3 +1731,39 @@ Small hooks in `WebSymbiote` are marked "(0.17.150)"; the takeover/suit helpers 
   clearing sand and gravel overhead, and moving the marker to the newest step for `WebTakeoverPath` to walk you to. It
   lets go at y 0 (or 6 blocks off the bottom), or stops at water, lava, a block entity, anything unbreakable or harder
   than 20, or a block you may not break.
+
+
+## Body: arm, mantle, strain traits, feeding (0.17.150)
+
+- Andy's ticks: "Arm slots: about 3 items stored in the symbiote's arm, tendrils carry, show and use them (tool
+  breaking, block placing, food eating)"; "Mantle: a furl/unfurl cape drawn as a suit layer, maybe slowing falls or
+  helping Shroud"; "Strain traits: BLACK night hunter, RED sculk-like sense of heartbeats/movement, WHITE unchanged";
+  "WHITE refuses rotten flesh and similar carrion"; and "A feed key, cooked meat counting, refusing food when full | Add,
+  Feed key should be C, pressing C with a mob or player held should grab and hold for a consume".
+- All of it is `WebSymbioteBody` (server, new class) and `WebSymbioteBodyClient` / `WebBodyLayer` / `WebRedSense`
+  (client); `WebSymbiote` only gained small hooks (`consumeHeld`, the shroud bonus, the refusal checks) and
+  `WebSymbioteState.MANTLE` (flag 128).
+- **Arm** (bond 25, `ARM_BOND`; empowered and creative too): three slots in the `ARM` attachment (saved, synced to all,
+  kept through death, dropped like armour unless keepInventory, handed back when the bond ends). K stows the item in your
+  hand into the picked slot (swaps if full), or draws the picked thing out with an empty hand; Sneak + K picks the next
+  slot; hold U and the tendril uses the picked thing: a tool mines the block you aim at (real destroy progress, wear and
+  drops, crack animation, a cord to the block), a block is placed, food is eaten (it's eaten for you, `eatFromArm`),
+  anything else is used on the block or in the air. Stored things hang on the suit (hips and back) for everyone, and
+  three chips left of the hotbar show the slots. Done by briefly swapping the stack into your selected slot so vanilla's
+  own rules run.
+- **Mantle** (bond 40, `MANTLE_BOND`; N): a cape of symbiote unfurls from the shoulders over `MANTLE_TICKS` 10 and
+  furls back into the suit (drawn by `WebBodyLayer`, strain colours). Unfurled in the air (not on a web, wall, wings,
+  water or flying) it holds a fall to `FALL_CAP` 0.35 b/t once you've dropped `FALL_MIN` 3 blocks (client motion), and
+  the server forgives that fall. It also lengthens Shroud by `MANTLE_SHROUD_BONUS` 50 ticks.
+- **Traits:** BLACK is a night hunter: in light level `DARK_LIGHT` 4 or under it hits `NIGHT_DAMAGE` 30% harder and moves
+  `NIGHT_SPEED` 12% faster; in open sun it is `SUN_DAMAGE` 25% weaker and `SUN_SPEED` 12% slower (transient modifiers,
+  a line the first time each way). RED (bond 20, `SENSE_BOND`) feels heartbeats and movement: living things within 20
+  blocks outline red through walls on your screen only, flashing with a lub-dub (slower for the big) or glowing dim while
+  they move; close beats press a little dread on you. WHITE is unchanged except that it refuses carrion (rotten flesh,
+  `CARRION`) as food, as a meal and as prey; the other strains keep the shared raw meat list.
+- **Feeding on C:** C feeds meat from either hand (cooked meat counts too, `COOKED_FEED_PER_NUTRITION` 3 a point, less
+  than raw), and refuses at `FULL_AT` 90 satiety without eating the item (it says so; you can eat it yourself). With a
+  creature held (a tendril grip, a hand hold, or carried) C makes the symbiote keep hold of it, finish it with a lash
+  and Consume it (`WebSymbiote.consumeHeld`, behind Consume's own bond and cooldown): kill first, then carry, then feed;
+  it never feeds on anything living. `ultimateAnswers` now answers for a bonded player so C works without ascension; Web
+  Strike is still ascended-only.

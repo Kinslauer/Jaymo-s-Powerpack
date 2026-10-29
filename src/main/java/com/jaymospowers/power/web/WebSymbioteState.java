@@ -36,6 +36,8 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	public static final int TENDRILS = 32;
 	/** (0.17.149) Collect is on: its tendrils fetch items in Living Armor ({@code WebSymbioteCollect}). */
 	public static final int COLLECT = 64;
+	/** (0.17.150) The mantle is unfurled: a cape of symbiote ({@code WebSymbioteBody}). */
+	public static final int MANTLE = 128;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0, 0);
 
