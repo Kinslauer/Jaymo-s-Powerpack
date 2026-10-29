@@ -71,7 +71,7 @@ public final class WebSymbiote {
 	public static final int ABILITIES = 6;
 	/**
 	 * Not an ability: the Suit slot's sneak-pick, one form down ({@link #suitPress}; the powers keep working with the suit
-	 * off). (0.17.170) The slot itself is {@link #ARMOR}'s: a pick climbs a form, and this comes down one.
+	 * off). (0.17.172) The slot itself is {@link #ARMOR}'s: a pick climbs a form, and this comes down one.
 	 */
 	public static final int SUIT_TOGGLE = 6;
 	/**
@@ -3832,7 +3832,7 @@ public final class WebSymbiote {
 			return;
 		}
 		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player)) {
-			// (0.17.170) the one Suit slot: a pick climbs a form (skin, the suit, Living Armor, the big suit at a whole
+			// (0.17.172) the one Suit slot: a pick climbs a form (skin, the suit, Living Armor, the big suit at a whole
 			// bond), a sneak-pick comes down one, and at the top form a pick comes down too (suitPress)
 			if (!suitPress(player, ability == SUIT_TOGGLE)) {
 				return;
@@ -3951,7 +3951,7 @@ public final class WebSymbiote {
 	}
 
 	/**
-	 * (0.17.170) The Suit slot, one button for every form (Andy: "the living armour can be condensed to a suit button that
+	 * (0.17.172) The Suit slot, one button for every form (Andy: "the living armour can be condensed to a suit button that
 	 * activates your large suit once you hit max bond"). A pick climbs one form: skin to the suit, the suit to Living
 	 * Armor (which the whole bond swells into the big suit at once), the thin armour worn down from the big suit back up
 	 * to it. At the top form you can reach, a pick comes down one instead, as a sneak-pick ({@code down}) always does:

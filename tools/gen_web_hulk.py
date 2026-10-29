@@ -20,7 +20,8 @@ Also draws web_symbiote_flesh.png: four swatches (wet black, black with its shee
 lengths drawn in code (the tongue, the weapon arm, the tendrils that wrap the body; client WebTubes).
 
 Also Consume's maw (client WebMouthLayer) in the same style: the big body's head grown huge, hinged to gape and snap
-(it replaced tools/gen_web_maw.py's plain black box).
+(it replaced tools/gen_web_maw.py's plain black box; 0.17.172: rebuilt from rounded goo masses like the body, the flat
+plates scrapped, Andy: "it doesnt fit the new aesthetic").
 
 Writes:
   src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_hulk.png
@@ -414,9 +415,11 @@ def goo_shade(b, name, xx, yy, rnd):
     return c
 
 
-def paint_hulk(img, rnd):
-    """The big body: the goo shaded mass by mass; the face, mouth, fangs and bone as the maw's (see paint)."""
-    for b in BOXES:
+def paint_hulk(img, rnd, boxes=None, eyes=None):
+    """The big body (or the maw, 0.17.172): the goo shaded mass by mass; the face, mouth, fangs and bone flat (see paint)."""
+    boxes = BOXES if boxes is None else boxes
+    eyes = EYES if eyes is None else eyes
+    for b in boxes:
         kind = b["paint"]
         for name, (x0, y0, w, h) in faces(b).items():
             side = name not in ("top", "bottom")
@@ -455,7 +458,7 @@ def paint_hulk(img, rnd):
                             a = 255
                             c = lerp(BONE, BONE_SHADE, row / 3.0 + rnd.random() * 0.15)
                     if kind == "skull" and name == "front":
-                        ch = EYES[yy][xx] if yy < len(EYES) and xx < len(EYES[yy]) else "."
+                        ch = eyes[yy][xx] if yy < len(eyes) and xx < len(eyes[yy]) else "."
                         if ch == "W":
                             c = EYE_WHITE
                         elif ch == "e":
@@ -464,7 +467,7 @@ def paint_hulk(img, rnd):
                             c = (2, 2, 4)
                     img.putpixel((x0 + xx, y0 + yy), c + (a,))
     # veins: a few dark threads wandering over the bigger faces of the goo
-    for b in BOXES:
+    for b in boxes:
         if b["paint"] not in ("goo", "fore", "back", "pec"):
             continue
         for name, (x0, y0, w, h) in faces(b).items():
@@ -579,28 +582,46 @@ def java():
     JAVA.write_text("\n".join(lines) + "\n")
 
 
-# ---- Consume's maw (client WebMouthLayer; Andy: "fix the old large head eating animation to be more like the new
-# style"): the big body's head grown huge over the wearer's own, in the same wet black hide, veins and teal rims, its
-# big white eyes, a heavy muzzle over a red palate, and rows of cut-out fangs; a hinged skull and jaw that gape wide
-# and snap shut. Parts (all hinged at the back of the head, MAW_HINGE in the head's space): the throat (a red wall
-# closing off the face behind it), the skull and the jaw. Boxes are relative to that hinge. ----
-MAW_TEX_W, MAW_TEX_H = 128, 64
+# ---- Consume's maw (client WebMouthLayer). (0.17.172) Andy: "use the new living armor suit design for the big head that
+# consumes, and scrap the old one. it doesnt fit the new aesthetic." So it's built as the big body is now: rounded
+# masses of congealed goo (mass(), shaded round by paint_hulk) in place of the old flat plates: a swollen cranium with a
+# crown lobe over it and heavy brows, the face a flat plate with the big eyes, cheeks of goo bulging either side of the
+# muzzle, the muzzle and the chin lumpy slabs with the red mouth between, jowls under the jaw, and rows of cut-out fangs.
+# Parts (all hinged at the back of the head, MAW_HINGE in the head's space): the throat (a red wall closing off the
+# face behind it), the skull and the jaw. Boxes are relative to that hinge. ----
+MAW_TEX_W, MAW_TEX_H = 128, 128
 MAW_HINGE = (0, -3, 5)
 MAW_BOXES = []
 
 
 def maw_box(part, name, frm, size, paint):
-    MAW_BOXES.append(dict(part=part, name=name, frm=frm, size=size, paint=paint))
+    centre = tuple(frm[k] + size[k] / 2 for k in range(3))
+    MAW_BOXES.append(dict(part=part, name=name, frm=tuple(frm), size=tuple(size), paint=paint, shape=(centre, tuple(v / 2 for v in size))))
+
+
+def maw_mass(part, name, centre, size, paint, a, c=0):
+    """A rounded mass of the maw: its boxes named name_0, name_1, ... (see rounded())."""
+    for i, b in enumerate(rounded(centre, size, paint, a, c)):
+        b["part"] = part
+        b["name"] = "%s_%d" % (name, i)
+        MAW_BOXES.append(b)
 
 
 maw_box("throat", "wall", (-5, -6, -5), (10, 6, 1), "red")
-maw_box("skull", "cranium", (-5.5, -9, -10.5), (11, 6, 11), "maw_skull")
-maw_box("skull", "brow", (-5, -9.5, -11), (10, 1, 3), "muscle")
-maw_box("skull", "snout", (-5.5, -3, -11.5), (11, 3, 11), "maw_muzzle")
+# the skull: the cranium swelling out round and back, a lobe crowning it, brows humped over the eyes
+maw_mass("skull", "cranium", (0, -6.5, -5), (12, 7, 12), "goo", 2, 1)
+maw_mass("skull", "crown", (0, -9, -2), (8, 4, 8), "goo", 1)
+for side, sx in (("r", -1), ("l", 1)):
+    maw_mass("skull", "brow_" + side, (3 * sx, -9.5, -10), (5, 2, 4), "goo", 1)
+    maw_mass("skull", "cheek_" + side, (6.5 * sx, -4, -6), (3, 5, 7), "goo", 1)
+    maw_mass("jaw", "jowl_" + side, (5.5 * sx, 2, -4), (3, 3, 8), "goo", 1)
+maw_box("skull", "face", (-5.5, -9, -11.5), (11, 6, 1), "skull")
+maw_mass("skull", "snout", (0, -1.5, -6), (11, 3, 11), "muzzle", 1)
 maw_box("skull", "fangs", (-5.5, 0, -11.5), (11, 3, 1), "fangs_down")
 maw_box("skull", "fangs_r", (-5.5, 0, -10.5), (1, 3, 9), "fangs_down")
 maw_box("skull", "fangs_l", (4.5, 0, -10.5), (1, 3, 9), "fangs_down")
-maw_box("jaw", "chin", (-5.5, 0, -11), (11, 3, 11), "chin")
+# the jaw: a lumpy chin slab with the red floor of the mouth on top, jowls under it, fangs up
+maw_mass("jaw", "chin", (0, 1.5, -5.5), (11, 3, 11), "chin", 1)
 maw_box("jaw", "jaw_fangs", (-5, -3, -10.5), (10, 3, 1), "fangs_up")
 maw_box("jaw", "jaw_fangs_r", (-5.5, -3, -9.5), (1, 3, 8), "fangs_up")
 maw_box("jaw", "jaw_fangs_l", (4.5, -3, -9.5), (1, 3, 8), "fangs_up")
@@ -629,8 +650,9 @@ def maw_java():
     lines.append("import net.minecraft.client.model.geom.builders.PartDefinition;")
     lines.append("")
     lines.append("/**")
-    lines.append(" * GENERATED by {@code tools/gen_web_hulk.py}: don't edit by hand. Consume's maw (WebMouthLayer) in the big body's style:")
-    lines.append(" * a throat, a skull and a jaw, all hinged at the back of the head, UV-mapped onto {@code web_symbiote_mouth.png}.")
+    lines.append(" * GENERATED by {@code tools/gen_web_hulk.py}: don't edit by hand. Consume's maw (WebMouthLayer) built as the big body is")
+    lines.append(" * (0.17.172): rounded masses of goo; a throat, a skull and a jaw, all hinged at the back of the head, UV-mapped onto")
+    lines.append(" * {@code web_symbiote_mouth.png}.")
     lines.append(" */")
     lines.append("final class WebMawMesh {")
     lines.append("\tstatic final int TEX_W = %d, TEX_H = %d;" % (MAW_TEX_W, MAW_TEX_H))
@@ -658,7 +680,7 @@ def maw_java():
 def maw():
     pack(MAW_BOXES, MAW_TEX_W, MAW_TEX_H)
     img = Image.new("RGBA", (MAW_TEX_W, MAW_TEX_H), (0, 0, 0, 0))
-    paint(img, random.Random(4343), MAW_BOXES)
+    paint_hulk(img, random.Random(4343), MAW_BOXES, MAW_EYES)
     img.save(TEXTURES / "web_symbiote_mouth.png")
     maw_java()
 

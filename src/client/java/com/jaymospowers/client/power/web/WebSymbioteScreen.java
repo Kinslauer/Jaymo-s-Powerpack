@@ -26,7 +26,7 @@ import net.minecraft.world.item.Items;
  * The symbiote's radial menu: hold X, point the mouse toward an ability, let go to use it (or click). Doesn't pause
  * the game. (0.11.0) Styled like the H screen: its dark panel colours for the disc and tiles, its bar, and a small
  * panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim) where a tooltip
- * would be. (0.17.170) Reworked, Andy: "It's a bit cluttered, and the living armour can be condensed to a suit button
+ * would be. (0.17.172) Reworked, Andy: "It's a bit cluttered, and the living armour can be condensed to a suit button
  * that activates your large suit once you hit max bond." The ring holds six tiles again, 60 degrees apart: the
  * <b>Suit</b> at the top (one button for every form: a pick climbs a form, a sneak-pick comes down one; the little
  * mask that used to sit in the middle and the Living Armor tile are both folded into it), then Tendril Grab, Wall
@@ -123,7 +123,7 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected >= 0) {
 			LocalPlayer player = minecraft.player;
-			// (0.17.170) the Suit picked while sneaking: one form down
+			// (0.17.172) the Suit picked while sneaking: one form down
 			int use = selected == WebSymbiote.ARMOR && player != null && player.isShiftKeyDown() ? WebSymbiote.SUIT_TOGGLE : selected;
 			ClientPlayNetworking.send(new WebNet.SymbioteUse(use));
 		}
@@ -364,7 +364,7 @@ final class WebSymbioteScreen extends Screen {
 			return Component.translatable(WebSymbiote.armored(player) ? "gui.jaymospowers.web_symbiote.tendrils_out" : "gui.jaymospowers.web_symbiote.tendrils_in");
 		}
 		if (selected == WebSymbiote.ARMOR) {
-			// (0.17.170) the Suit: what a pick gives (a form up, or down from the top), what a sneak-pick takes off
+			// (0.17.172) the Suit: what a pick gives (a form up, or down from the top), what a sneak-pick takes off
 			if (form == WebSymbiote.FORM_SKIN) {
 				if (top == WebSymbiote.FORM_SKIN) {
 					return Component.translatable("gui.jaymospowers.web_symbiote.suit_wait", WebSymbiote.unlockedCount(player), WebSymbiote.SUIT_ABILITIES);

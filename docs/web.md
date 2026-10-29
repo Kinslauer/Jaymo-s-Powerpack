@@ -1805,7 +1805,7 @@ entity data holds what it keeps; scene state is per session).
   craters only hold goo, so only meteor blobs rampage.
 - **Debug:** `/powerdebug web symbiote life consume | warn <1-4> | misfire <0-3> | rampage`.
 
-## The X radial reworked: one Suit button (0.17.170)
+## The X radial reworked: one Suit button (0.17.172)
 Andy: "can you rework the symbiote X radial UI? It's a bit cluttered, and the living armour can be condensed to a
 suit button that activates your large suit once you hit max bond."
 - **One Suit tile** at the top of the ring (`WebSymbioteScreen.RING`, ability index `ARMOR`), in place of the Living
@@ -1828,3 +1828,20 @@ suit button that activates your large suit once you hit max bond."
 - **Lang:** `gui.jaymospowers.web_symbiote.suit_pick/suit_climb/suit_top/suit_top_bond` and `form.<skin|suit|armor|bulk>`
   spell out what a pick and a sneak-pick do; `suit_on`/`suit_off` are gone.
 - Not playtested here (compile-checked): expect to nudge the chip row if it crowds the inner ring at small GUI scales.
+
+## Globs off the head, the maw rebuilt as goo (0.17.172)
+Andy: "the tendril blobs should now never come out of the head, also use the new living armor suit design for the
+big head that consumes, and scrap the old one. it doesnt fit the new aesthetic."
+- **Globs:** `WebGooGlobs` lays out its 14 globs the same but the spare that crept over the skull (glob 12, `HEAD`)
+  is a second torso glob now; no glob and so no tendril root is ever on the head. The `HEAD` region's placement code
+  stays (unused) in case it's wanted back.
+- **The maw:** `tools/gen_web_hulk.py`'s maw section builds `WebMawMesh` from rounded masses (`maw_mass`, the body's
+  `rounded()`) instead of flat plates: cranium (12x7x12, edges in 2 and corners 1), a crown lobe, brows, a flat face
+  plate carrying the eyes (`MAW_EYES`), goo cheeks beside a lumpy muzzle, jowls under a lumpy chin, the fangs and the
+  red throat as before. `paint_hulk` now takes the boxes and the eyes map, so the maw is shaded round like the body
+  (`goo_shade`: lit from above, tucked dark at the rims, the wet sheen, the teal rim, veins). The texture is 128x128
+  (`web_symbiote_mouth.png`; `gen_web_strains.py` rewrote the red and white twins). `WebMouthLayer` is unchanged but
+  its doc: the part names it animates (`skull`, `jaw`, `fangs*`, `jaw_fangs*`) are the same. The body's own mesh and
+  texture are byte-identical (the generator's seeds didn't move).
+- Not playtested: check the maw's silhouette against the big body's head in game; the masses' sizes are in the
+  generator's maw section.

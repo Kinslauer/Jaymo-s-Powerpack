@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 final class WebSymbioteMindUi {
 	/** The radial's pick value for the Mind chip (the abilities are 0 and up). */
 	static final int PICK = -2;
-	/** The chip: (0.17.170) centred under the radial's row of switch chips (offsets from the radial's centre, and size). */
+	/** The chip: (0.17.172) centred under the radial's row of switch chips (offsets from the radial's centre, and size). */
 	private static final int CHIP_X = -13, CHIP_Y = 30, CHIP_W = 27, CHIP_H = 10;
 	private static final int ACCENT = 0xFF8A5AB0;
 
