@@ -1677,3 +1677,57 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
 - (0.17.149) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
   unlock at 30." Putting Living Armor on leaves the tendrils as they are (only the big suit forming still brings them
   out); the Tendrils slot works from `WebSymbiote.TENDRILS_BOND` 30 (was Living Armor's 60).
+
+## Trust, mood, stages, orders and requests (0.17.150)
+
+Ideas from the reference mod's checklist (ideas only, none of its code or art). Everything is in `WebSymbioteMind`
+(server logic, saved + owner-synced `Mind` attachment `web_symbiote_mind`, kept out of death), `WebSymbioteDig`, and on
+the client `WebSymbioteMindUi` + `WebSymbioteStatusScreen`. Tuning numbers are the constants at the top of each class.
+Small hooks in `WebSymbiote` are marked "(0.17.150)"; the takeover/suit helpers it needs sit together under
+"mind (0.17.150)" before `standDown`.
+
+- **Trust** (0-100, saved) is separate from `bond` (which still opens the abilities). Up: a meal it was given
+  (`TRUST_FEED` 2; a satiety jump of `MEAL_JUMP` 4 while it doesn't have the wheel), a kill beside you
+  (`TRUST_FIGHT` 1, once per `FIGHT_GAP`), a request granted (`TRUST_REQUEST` 5), a point every 2 minutes while well fed
+  and calm. Down: an ignored request (`TRUST_IGNORED` 6), being hurt by you (the bond dropping 2 or more at once: fire,
+  noise, wrenching free; `TRUST_HURT` 2 a point), a point a minute while starving. It decides whether it obeys an order
+  (a roll when you give it, sure at `OBEY_FULL` 70, nothing below `ORDER_BREAK` 15 and a held order is dropped), whether it
+  ignores a radial pick (under `LISTEN_TRUST` 50 up to 35% of the time, on top of the low-bond ignoring), and how often it
+  takes the wheel on idle takeovers (neglect, curiosity, tours: none skipped at 30 trust, up to 60% skipped at 100).
+- **Mood**, read every second: `GRIEVING` (a grief timer), else `COILED` (stress 55+, or starving), else `ANXIOUS`
+  (stress 25+, satiety under 30, bond under 25, no meal for 15 minutes, or a request past half its time), else
+  `CONTENT`. A new mood must hold 3 checks before it takes (grief takes and lifts at once); it says so (`mood.<m>.in.N`) at
+  most every two minutes. Grief: you went down (3 min), came within 15% of your health (2 min), a tamed pet of yours died
+  or another player died within 48 blocks (4 min). Grieving it all but falls silent (`GRIEF_QUIET`: 92% of narration and
+  remarks swallowed) and takes the wheel on 30% of its idle takeovers.
+- **Voice**: `whisper` asks `WebSymbioteMind.voice` for a variant of a running-commentary line (the black one's
+  `say.<act>.N` and `see.<topic>.N`): `mood.say.<act>.<mood>.1-2` / `mood.see.<topic>.<mood>.1-2` if the lang file has
+  it (it reads the built `en_us.json` once for the `mood.` keys), else the old line. 18 acts and 15 topics are voiced in
+  each mood (Content warm, Anxious nervous, Coiled short and sour, Grieving hushed); the white and red strains keep their own.
+- **Screen edge**: `WebSymbioteDread` takes its vignette and tendril glow from the mood (Content deep teal, Anxious
+  amber, Coiled crimson, Grieving slate blue) and keeps the edge faintly lit in it between lines (not for Content).
+  Andy: "A mood with its own edge colour and voice".
+- **Stages** (`STAGE_AT`, from the unlocks): Attached 0-29, Integrated 30-59 (Wall Crawl, Consume), Cooperative 60-99
+  (Living Armor, Spikes), Dominant 100 (the big body). Said once when you reach one (`stage.<name>`) and shown in the
+  radial's panel (`<stage> - <mood>`) with nothing picked.
+- **Status page** (Andy: "Strain, stage name, stress, mood and any request, in one place | Add but in another menu within
+  the X radial"): the radial's small Mind chip, left of the mask under the bond line; let go of X on it. Strain, bond and
+  stage, trust, mood, stress, satiety and any request with its time left, bars for the numbers, and the order buttons.
+- **Orders** (`WebSymbioteMind.Order` packet, from the Status page): Protect Me (fights for you up to 70% health instead
+  of 30%, and a shell of 4 absorption when something is on you and you're hurt, every 20 s), Hunt (hunts below satiety
+  75 instead of 45, 25% a check instead of 8%; still kill, carry, then feed), Hide (suit and tendrils drawn in when you
+  give it; 85% of idle takeovers skipped; no gift after a takeover; no hunts but starving; no requests), At ease.
+- **Requests**: first ask 5 minutes after the world loads / it bonds, then every 8-14 minutes (a trusting one a little
+  less often), from bond 15, never when hiding, grieving, dormant, asleep or on the wheel. Meat (5 min; any meal you give
+  it), a kill (5 min; a hostile you or it kill), time deep underground (8 min; 1 minute below sea level - 24 with no
+  sky), a night hunt (4 min; a hostile killed at night under open sky), to be worn (4 min; 30 s in the suit). The white
+  one never asks for the kill ones. Granted: trust +5, bond +2, stress -10. At half the time it nags and starts adding
+  stress; at 85% a louder warning and dread; at the end trust -6, stress +15, and it does it itself for 2 minutes: meat
+  is the normal hunt forced on; a kill/night hunt a takeover on the nearest hostile (`feral`); worn it puts the suit on;
+  deep, the dig below. Done by itself it gains no trust.
+- **The dig** (Andy: "A takeover that digs you down deep on purpose | ADD"): `WebSymbiote.mindDig` takes the wheel as a
+  tour (`DIG_SIGHT`) with a marker, and `WebSymbioteDig` cuts a spiral stair round a one-block pillar (the 3x3 ring, a
+  step down every cell, 3 blocks high, 8 blocks a turn) five steps ahead of your feet, flooring any cell with no floor,
+  clearing sand and gravel overhead, and moving the marker to the newest step for `WebTakeoverPath` to walk you to. It
+  lets go at y 0 (or 6 blocks off the bottom), or stops at water, lava, a block entity, anything unbreakable or harder
+  than 20, or a block you may not break.
