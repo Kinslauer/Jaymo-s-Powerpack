@@ -16,6 +16,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.jaymospowers.core.blood.BloodTrail;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -24,37 +25,57 @@ import java.util.TreeSet;
  * of its puddle sprites, turned a random quarter, laid flat over the tops of the blocks under it (slabs, stairs and
  * steps too, each top its own piece, fainter the further down it falls), up to {@link #MAX_DROP} below where it landed.
  * It splats in, stays, then shrinks and fades. Drawn by {@link BloodDecals}, not as a camera-facing quad.
+ *
+ * <p>(0.17.182) One of the server's lasting stains ({@link BloodTrail}) lies as long as the server says, darkening to a
+ * dried brown as it ages (so a trail reads fresh to old), and fades over {@link BloodTrail#FADE}.
  */
 final class BloodPuddle extends Particle {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
 	static final float ALPHA = 0.7F, SPLAT_IN = 1.5F, MAX_DROP = 2.0F;
 	/** How long it lasts (ticks: at least this, up to this many more), the last {@link #FADE} of them fading. */
-	static final int LIFE = 350, LIFE_SPREAD = 150, FADE = 150;
+	static final int LIFE = 1200, LIFE_SPREAD = 600, FADE = 150;
+	/** (0.17.182) A stain is fully dried this far through its life, and dried blood is this dark. */
+	static final float DRIED_AT = 0.5F, DRIED = 0.45F;
 	/** A puddle is this many blocks across at scale 1. */
 	static final float SIZE = 1.5F;
 	private static final double SAME_HEIGHT = 1.0E-4;
 
-	private final float baseSize;
+	private float baseSize;
+	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
+	private final boolean stain;
 	private final float yaw;
 	private final float r, g, b;
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
 	private float alpha = ALPHA;
 
-	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale) {
+	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life) {
 		super(level, x, y, z, 0.0, 0.0, 0.0);
 		this.xd = 0.0;
 		this.yd = 0.0;
 		this.zd = 0.0;
 		this.baseSize = SIZE * scale;
 		this.yaw = this.random.nextInt(4) * Mth.HALF_PI;
-		this.lifetime = LIFE + this.random.nextInt(LIFE_SPREAD);
+		this.stain = life > 0;
+		if (this.stain) {
+			this.age = age;
+			this.lifetime = age + life;
+		} else {
+			this.lifetime = LIFE + this.random.nextInt(LIFE_SPREAD);
+		}
 		this.gravity = 1.0F;
 		this.sprite = sprites.get(this.random);
 		this.r = red(color);
 		this.g = green(color);
 		this.b = blue(color);
 		this.zFight = this.random.nextFloat();
+	}
+
+	/** (0.17.182) The server grew this stain (more blood fell on it): its new size, age and the ticks it has left. */
+	void restain(float scale, int age, int life) {
+		this.baseSize = SIZE * scale;
+		this.age = Math.max(this.age, age);
+		this.lifetime = this.age + life;
 	}
 
 	static float red(int color) {
@@ -86,10 +107,11 @@ final class BloodPuddle extends Particle {
 		if (age <= SPLAT_IN) {
 			size *= age / (SPLAT_IN * 2.0F) + 0.5F;
 		}
-		int fadeFrom = this.lifetime - FADE;
+		int fade = this.stain ? BloodTrail.FADE : FADE;
+		int fadeFrom = this.lifetime - fade;
 		if (age > fadeFrom) {
-			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / FADE);
-			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / FADE, 1.0F - ALPHA, 1.0F);
+			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
+			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - ALPHA, 1.0F);
 		}
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
@@ -166,7 +188,8 @@ final class BloodPuddle extends Particle {
 		float cos = Mth.cos(this.yaw), sin = Mth.sin(this.yaw);
 		// (a hair above the block, a little different for each puddle so overlapping ones don't flicker)
 		float lift = (this.zFight + 0.08F) * Math.max(0.05F, this.alpha - 0.3F) * 0.05F;
-		int color = ARGB.colorFromFloat(this.alpha * fade, this.r, this.g, this.b);
+		float dried = this.stain ? Mth.lerp(Mth.clamp(this.age / (BloodTrail.LIFE * DRIED_AT), 0.0F, 1.0F), 1.0F, DRIED) : 1.0F;
+		int color = ARGB.colorFromFloat(this.alpha * fade, this.r * dried, this.g * dried, this.b * dried);
 		double[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);

@@ -35,12 +35,15 @@ final class BloodDrop extends SingleQuadParticle {
 	private final boolean directional;
 	private final float growIn;
 	private final boolean underwater;
+	/** (0.17.182) Whether it leaves its own splash where it lands (a cut's drip doesn't: the server lays its stain). */
+	private final boolean stains;
 	private boolean mirrored;
 
 	BloodDrop(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites, int frames,
-		int textureSize, boolean directional, int color, float scale) {
+		int textureSize, boolean directional, int color, float scale, boolean stains) {
 		super(level, x, y, z, xd, yd, zd, sprites.first());
 		this.color = color;
+		this.stains = stains;
 		this.frames = frames;
 		this.directional = directional;
 		this.xd = xd;
@@ -73,7 +76,7 @@ final class BloodDrop extends SingleQuadParticle {
 			this.gravity *= 0.99F;
 		}
 		if (this.onGround) {
-			if (this.alpha > 0.5F) {
+			if (this.stains && this.alpha > 0.5F) {
 				// (a drop that has faded under water leaves nothing)
 				Vec3 at = new Vec3(this.x, this.y, this.z);
 				Vec3 ground = this.level.clip(new ClipContext(at.add(0.0, 0.6, 0.0), at, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE,
