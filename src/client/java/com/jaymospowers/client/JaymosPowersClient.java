@@ -148,6 +148,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
+		com.jaymospowers.client.baubles.BaublesClient.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();

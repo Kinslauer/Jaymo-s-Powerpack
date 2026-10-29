@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "F": "minecraft:feather",
+    "M": "minecraft:phantom_membrane",
+    "W": "minecraft:white_wool"
+  },
+  "pattern": [
+    "FMF",
+    "WWW",
+    "W W"
+  ],
+  "result": {
+    "id": "jaymospowers:featherfall_cloak",
+    "count": 1
+  }
+}
