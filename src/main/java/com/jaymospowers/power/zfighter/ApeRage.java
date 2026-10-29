@@ -42,6 +42,11 @@ import net.minecraft.world.entity.player.Player;
  * <p>Andy: "If you are able to fight it off successfully multiple times give access to a new form hidden until you do, a
  * super 4". Win {@link #SUPER_4_FITS} fits and the ape and the man make their peace: {@link #SUPER_4} opens, the
  * primal ape's look on his own body (red fur, a long red mane, fire and sparks), taken with C from his highest form.
+ *
+ * <p>(0.17.190) Andy: "I want a prerequisite form to our current primal super". The fits now open {@link #PRIMAL_SUPER}
+ * (Primal Super: the ape's fur and tail, Super 2's hair in his own villager's colour, a smooth aura, a little fire that
+ * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super and is C
+ * from Primal Super once he has held it {@link #SUPER_PRIMAL_HELD} seconds ({@link #HELD}).
  */
 public final class ApeRage {
 	/** Rage a second as the ape (times 1 + primal / {@code PRIMAL_RAGE_SCALE}), per point of damage taken, per kill, when crippled. */
@@ -59,8 +64,17 @@ public final class ApeRage {
 	/** Primal: gained each change, each minute as the ape, each fit lost, each person killed in a fit; lost each fit won. */
 	static final int PRIMAL_CHANGE = 5, PRIMAL_MINUTE = 1, PRIMAL_LOST_FIT = 3, PRIMAL_KILL = 1, PRIMAL_WON_FIT = 4;
 	public static final int PRIMAL_MAX = 100;
-	/** Fits won (ever) before Super 4 opens; Super 4's form number (past the three bought ones). */
+	/** Fits won (ever) before Primal Super opens; Super Primal Super's form number (past the three bought ones; was Super 4). */
 	public static final int SUPER_4_FITS = 5, SUPER_4 = 4;
+	/**
+	 * (0.17.190) Primal Super's form number: the step between his highest bought form and Super Primal Super. 10 is free in
+	 * {@code live.form} (the branch forms' 10-14 are kept in their own attachment, never as a form).
+	 */
+	public static final int PRIMAL_SUPER = 10;
+	/** Primal Super's aura: an ember orange, between Super 3's gold and Super Primal Super's red. */
+	public static final int PRIMAL_SUPER_COLOR = 0xF06A30;
+	/** Seconds held in Primal Super (ever, in total) before Super Primal Super opens. */
+	public static final int SUPER_PRIMAL_HELD = 300;
 	/** A fit shakes his screen: as it starts, and every this many ticks while it has him. */
 	static final float FIT_SHAKE = 2.2F, FIT_PULSE_SHAKE = 0.8F;
 	static final int FIT_PULSE_EVERY = 30;
@@ -78,7 +92,10 @@ public final class ApeRage {
 	/** Fits he's won, ever (saved, kept through death). */
 	public static final AttachmentType<Integer> TAMED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_tamed"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
-	/** Super 4 is open to him (saved, kept through death, synced to him). */
+	/** Seconds he has held Primal Super, ever, up to {@link #SUPER_PRIMAL_HELD} (saved, kept through death, synced to him). */
+	public static final AttachmentType<Integer> HELD = AttachmentRegistry.create(JaymosPowers.id("zfighter_primal_held"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+	/** Primal Super is open to him (the fits; saved, kept through death, synced to him). Kept under Super 4's old id. */
 	public static final AttachmentType<Boolean> SUPER_4_OPEN = AttachmentRegistry.create(JaymosPowers.id("zfighter_super_4"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
@@ -148,10 +165,65 @@ public final class ApeRage {
 		return r == null ? 0.0F : r;
 	}
 
-	/** Super 4 is his to take now: opened, a Warrior-born past the breakthrough, not the ape. */
+	/** Primal Super is his to take now: opened, a Warrior-born past the breakthrough, not the ape. */
 	public static boolean super4(Player player) {
 		return Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN)) && ZFighterLineage.of(player) == ZFighterLineage.WARRIOR
 			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
+	}
+
+	/** (0.17.190) Super Primal Super is his to take now: Primal Super is, and he has held it long enough. */
+	public static boolean superPrimal(Player player) {
+		return super4(player) && held(player) >= SUPER_PRIMAL_HELD;
+	}
+
+	/** Seconds he has held Primal Super (capped at {@link #SUPER_PRIMAL_HELD}). */
+	public static int held(Player player) {
+		return player.getAttachedOrElse(HELD, 0);
+	}
+
+	/** The top of his regular line: Super Primal Super, Primal Super or his highest bought Super (at most Super 3). */
+	public static int top(Player player) {
+		return superPrimal(player) ? SUPER_4 : super4(player) ? PRIMAL_SUPER : Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+	}
+
+	/** The form C climbs to from {@code form} on the regular line (0: none, he's at the top). */
+	public static int nextUp(Player player, int form) {
+		int open = ZFighterTraining.formsOpen(player);
+		if (form < open) {
+			return form + 1;
+		}
+		if (form == open && super4(player)) {
+			return PRIMAL_SUPER;
+		}
+		return form == PRIMAL_SUPER && superPrimal(player) ? SUPER_4 : 0;
+	}
+
+	/** The form sneak+C steps down to from Super Primal Super or Primal Super (the other forms just go one down). */
+	public static int below(Player player, int form) {
+		if (form == SUPER_4 && super4(player)) {
+			return PRIMAL_SUPER;
+		}
+		return Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+	}
+
+	/** A second in Primal Super (from {@link ZFighterForms#tick}): at {@link #SUPER_PRIMAL_HELD}, Super Primal Super opens. */
+	static void holdPrimal(ServerPlayer player) {
+		int was = held(player);
+		if (was >= SUPER_PRIMAL_HELD) {
+			return;
+		}
+		player.setAttached(HELD, was + 1);
+		if (was + 1 >= SUPER_PRIMAL_HELD) {
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 3.0F, 0.6F);
+			com.jaymospowers.core.Shakes.heavy(player, player.position(), ZFighterLineage.APE_STEP_RANGE, FIT_SHAKE);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_open").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
+		}
+	}
+
+	/** Operators: set the seconds held in Primal Super. */
+	static void setHeld(ServerPlayer player, int seconds) {
+		player.setAttached(HELD, Mth.clamp(seconds, 0, SUPER_PRIMAL_HELD));
 	}
 
 	/**

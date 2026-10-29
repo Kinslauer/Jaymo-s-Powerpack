@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.148) Super 4's body (Andy: "combining the primal ape look with the character"): the Great Ape's red fur over his
+ * (0.15.148) Super 4's body (0.17.190: Super Primal Super's, and Primal Super's too) (Andy: "combining the primal ape look with the character"): the Great Ape's red fur over his
  * arms, shoulders, back and sides, his chest and hands bare, his legs his own. Drawn just over the skin with the player
  * model's own pose ({@code textures/entity/zfighter_primal_fur.png}, {@code tools/gen_primal_fur.py}, in the skin's
  * layout: wide and slim arms both covered). The long red mane is the Super 3 hair in the form's red ({@link ZFighterHair}).
@@ -38,8 +38,9 @@ public final class ZFighterPrimalFur {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		boolean fur = entity instanceof Player player && !ZFighterLineage.ape(player)
-			&& Integer.valueOf(ApeRage.SUPER_4).equals(player.getAttached(ZFighterPower.FORM));
+		// (0.17.190) both primal forms wear the ape's fur
+		Integer form = entity instanceof Player player && !ZFighterLineage.ape(player) ? player.getAttached(ZFighterPower.FORM) : null;
+		boolean fur = form != null && (form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER);
 		state.setData(KEY, fur ? Boolean.TRUE : null);
 	}
 
