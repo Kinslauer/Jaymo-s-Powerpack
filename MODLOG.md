@@ -3718,3 +3718,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
   objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
   - Compile-checked; not seen in game.
+- **0.17.189, Sora's Dagger's Flurry probe (crash fix):** since 0.17.169 the game and server crashed on start
+  ("Components not bound yet" from `SorasDagger.<clinit>`): `FLURRY_PROBE`, a static `ItemStack`, was built when
+  `SorasDagger.register()` first loaded the class during mod init, before item components are bound. It's made on first
+  use now (`flurryProbe()`). No other static stack in the three mods is built that early.
