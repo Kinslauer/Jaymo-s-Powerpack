@@ -1,13 +1,17 @@
 package com.jaymospowers.aether.structure;
 
+import com.jaymospowers.aether.guardian.GuardianMobs;
+import com.jaymospowers.aether.guardian.VisageOfWar;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The infected guardian tree: a vast hollow trunk of guardian wood, a spiral stair up its inner wall, a floor every 12 blocks with
- * a chest and vases, and at the top a vault (the Aether II tree has no boss; ours has none either, just the treasure) under a
- * crown of leaves. Roots splay out round the foot.
+ * a chest and vases, and at the top a vault under a crown of leaves. Roots splay out round the foot. (Powers 0.17.148) The Aether II
+ * tree has no boss; ours now has one, the Visage of War ({@link VisageOfWar}), asleep in the hollow's top chamber, the last one before the vault.
  */
 final class GuardianTree {
 	// ---- tuning ----
@@ -24,6 +28,8 @@ final class GuardianTree {
 	static final double CROWN_R = 16.0, CROWN_H = 10.0;
 	/** Shares: infected wood in the trunk, roots in the bark, lamps in the inner wall, infected leaves in the crown. */
 	static final float INFECTED = 0.12F, BARK_ROOTS = 0.03F, LAMP = 0.015F, SICK_LEAVES = 0.12F;
+	/** How high over the top chamber's floor the Visage of War hangs asleep (blocks, to its feet). */
+	static final double GUARDIAN_UP = 3.0;
 
 	private static final double C = AetherStructure.GUARDIAN_SIZE / 2;
 
@@ -75,6 +81,22 @@ final class GuardianTree {
 		floors(s);
 		vault(s);
 		crown(s);
+		guardian(s);
+	}
+
+	/**
+	 * The Visage of War, hanging asleep in the top chamber of the hollow (between the last two plates, the one the stair climbs
+	 * through to the vault); it guards that chamber.
+	 */
+	private static void guardian(Site s) {
+		int last = (TRUNK_H - 1) / FLOOR_EVERY;
+		int bottom = s.floor + (last - 1) * FLOOR_EVERY, top = s.floor + last * FLOOR_EVERY - 2;
+		int r = (int)Math.ceil(R_IN);
+		int xa = s.x((int)C - r, (int)C - r), xb = s.x((int)C + r, (int)C + r), za = s.z((int)C - r, (int)C - r), zb = s.z((int)C + r, (int)C + r);
+		BoundingBox hollow = new BoundingBox(Math.min(xa, xb), bottom, Math.min(za, zb), Math.max(xa, xb), top, Math.max(za, zb));
+		double x = s.x((int)C, (int)C) + 0.5, z = s.z((int)C, (int)C) + 0.5, y = bottom + GUARDIAN_UP;
+		Vec3 home = new Vec3(x, y, z);
+		s.spawn(GuardianMobs.VISAGE_OF_WAR, x, y, z, s.facing.toYRot() + 180.0F, mob -> mob.setHollow(hollow, home));
 	}
 
 	/** Eight roots flare from the trunk's foot, sinking as they go out. */
