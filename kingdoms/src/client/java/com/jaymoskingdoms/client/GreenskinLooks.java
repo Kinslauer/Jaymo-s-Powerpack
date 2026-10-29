@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * ({@code McaVerdantSkinMixin}); on it, drawn here and tinted by the same green, their features and marks
  * (textures from {@code tools/gen_greenskins.py}):
  * <ul>
- * <li><b>Goblins</b>, in one of two shapes: long ears out to the sides and a hooked nose, or tall bat ears and a needle
- * nose on a warty bulb; and one of four sets of warts, wrinkles and blotches.</li>
+ * <li><b>Goblins</b>: (0.7.320) the goblin's own body ({@link GoblinBody}: its shape, ears, nose, tusks, fists, feet
+ * and gear), and one of four sets of warts, wrinkles and blotches.</li>
  * <li><b>Orcs</b>: tusks up from the jaw, a heavy brow and small swept ears, or an underbite with long tusks, a heavier
  * brow and one ear torn short; one of four sets of marks, and one of four of scars (three with war paint: soot, blood
  * or bone-white). Tusks, scars and paint keep their own colours.</li>
@@ -46,16 +46,15 @@ public final class GreenskinLooks {
 	}
 
 	static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:greenskin_look");
-	/** The shapes and the sets of marks (and of scars) there are of each. */
+	/** The shapes and the sets of marks (and of scars) there are of each (a goblin's shape and scars pick its cap and earring). */
 	static final int SHAPES = 2, MARKS = 4;
-	/** How far a goblin's long ears lift and its bat ears lean out, and an orc's ears sweep back (radians). */
-	static final float EAR_LIFT = 0.2F, BAT_LEAN = 0.45F, EAR_SWEEP = 0.45F;
+	/** How far an orc's ears sweep back (radians). */
+	static final float EAR_SWEEP = 0.45F;
 
-	private static final Identifier GOBLIN_FEATURES = JaymosKingdoms.id("textures/entity/greenskin/goblin_features.png");
 	private static final Identifier ORC_FEATURES = JaymosKingdoms.id("textures/entity/greenskin/orc_features.png");
 	private static final Identifier[] GOBLIN_MARKS = new Identifier[MARKS], ORC_MARKS = new Identifier[MARKS], ORC_SCARS = new Identifier[MARKS];
-	/** Each brood's shapes: its flesh (tinted) and its bone (tusks, as they are), made the first time they're drawn. */
-	private static final ModelPart[][] FLESH = new ModelPart[2][SHAPES], BONE = new ModelPart[2][SHAPES];
+	/** An orc's shapes: its flesh (tinted) and its bone (tusks, as they are), made the first time they're drawn. */
+	private static final ModelPart[] FLESH = new ModelPart[SHAPES], BONE = new ModelPart[SHAPES];
 
 	static {
 		for (int i = 0; i < MARKS; i++) {
@@ -121,18 +120,20 @@ public final class GreenskinLooks {
 				collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(ORC_SCARS[look.scars()]), lightCoords,
 					OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			}
+			if (!orc) {
+				GoblinBody.submit(poseStack, collector, lightCoords, state, model, look);
+				return;
+			}
 			if (!model.head.visible) {
 				return;
 			}
-			Identifier features = orc ? ORC_FEATURES : GOBLIN_FEATURES;
-			int brood = orc ? 1 : 0;
-			bake(brood, look.shape());
+			bake(look.shape());
 			poseStack.pushPose();
 			model.head.translateAndRotate(poseStack);
-			collector.order(1).submitModelPart(FLESH[brood][look.shape()], poseStack, RenderTypes.entityCutout(features), lightCoords,
+			collector.order(1).submitModelPart(FLESH[look.shape()], poseStack, RenderTypes.entityCutout(ORC_FEATURES), lightCoords,
 				OverlayTexture.NO_OVERLAY, null, look.color());
-			if (BONE[brood][look.shape()] != null) {
-				collector.order(1).submitModelPart(BONE[brood][look.shape()], poseStack, RenderTypes.entityCutout(features), lightCoords,
+			if (BONE[look.shape()] != null) {
+				collector.order(1).submitModelPart(BONE[look.shape()], poseStack, RenderTypes.entityCutout(ORC_FEATURES), lightCoords,
 					OverlayTexture.NO_OVERLAY, null, -1);
 			}
 			poseStack.popPose();
@@ -145,33 +146,17 @@ public final class GreenskinLooks {
 	}
 
 	/**
-	 * Brood {@code brood}'s (0 goblin, 1 orc) shape {@code shape}, in head space (the head is -4..4 across, -8..0 up, its face
-	 * at z -4), texture offsets as {@code tools/gen_greenskins.py} lays them out (64x32).
+	 * An orc's shape {@code shape}, in head space (the head is -4..4 across, -8..0 up, its face at z -4), texture offsets
+	 * as {@code tools/gen_greenskins.py} lays them out (64x32).
 	 */
-	private static void bake(int brood, int shape) {
-		if (FLESH[brood][shape] != null) {
+	private static void bake(int shape) {
+		if (FLESH[shape] != null) {
 			return;
 		}
 		MeshDefinition flesh = new MeshDefinition(), bone = new MeshDefinition();
 		PartDefinition f = flesh.getRoot(), b = bone.getRoot();
 		boolean tusks = false;
-		if (brood == 0 && shape == 0) {
-			// long ears out to the sides, tips lifted, and a hooked nose
-			f.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, -1.5F, -0.5F, 5.0F, 3.0F, 1.0F),
-				PartPose.offsetAndRotation(-4.0F, -4.5F, 0.0F, 0.0F, 0.0F, EAR_LIFT));
-			f.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(0, 4).mirror().addBox(0.0F, -1.5F, -0.5F, 5.0F, 3.0F, 1.0F),
-				PartPose.offsetAndRotation(4.0F, -4.5F, 0.0F, 0.0F, 0.0F, -EAR_LIFT));
-			f.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(12, 0).addBox(-1.0F, -4.0F, -6.0F, 2.0F, 2.0F, 2.0F), PartPose.ZERO);
-			f.addOrReplaceChild("hook", CubeListBuilder.create().texOffs(12, 4).addBox(-0.5F, -2.0F, -6.5F, 1.0F, 1.0F, 1.0F), PartPose.ZERO);
-		} else if (brood == 0) {
-			// tall bat ears leaning out, a needle nose on a warty bulb
-			f.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(20, 0).addBox(-1.0F, -6.0F, -0.5F, 2.0F, 6.0F, 1.0F),
-				PartPose.offsetAndRotation(-4.0F, -4.0F, 0.0F, 0.0F, 0.0F, -BAT_LEAN));
-			f.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(26, 0).mirror().addBox(-1.0F, -6.0F, -0.5F, 2.0F, 6.0F, 1.0F),
-				PartPose.offsetAndRotation(4.0F, -4.0F, 0.0F, 0.0F, 0.0F, BAT_LEAN));
-			f.addOrReplaceChild("needle", CubeListBuilder.create().texOffs(32, 0).addBox(-0.5F, -3.5F, -7.0F, 1.0F, 1.0F, 3.0F), PartPose.ZERO);
-			f.addOrReplaceChild("bulb", CubeListBuilder.create().texOffs(40, 0).addBox(-1.0F, -4.0F, -5.0F, 2.0F, 2.0F, 1.0F), PartPose.ZERO);
-		} else if (shape == 0) {
+		if (shape == 0) {
 			// tusks up from the jaw, a heavy brow, small ears swept back
 			tusks = true;
 			b.addOrReplaceChild("right_tusk", CubeListBuilder.create().texOffs(0, 16).addBox(-3.0F, -3.0F, -5.0F, 1.0F, 2.0F, 1.0F), PartPose.ZERO);
@@ -193,7 +178,7 @@ public final class GreenskinLooks {
 			f.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(6, 4).mirror().addBox(0.0F, -1.5F, 0.0F, 1.0F, 3.0F, 2.0F),
 				PartPose.offsetAndRotation(4.0F, -4.5F, -0.5F, 0.0F, EAR_SWEEP, 0.0F));
 		}
-		FLESH[brood][shape] = LayerDefinition.create(flesh, 64, 32).bakeRoot();
-		BONE[brood][shape] = tusks ? LayerDefinition.create(bone, 64, 32).bakeRoot() : null;
+		FLESH[shape] = LayerDefinition.create(flesh, 64, 32).bakeRoot();
+		BONE[shape] = tusks ? LayerDefinition.create(bone, 64, 32).bakeRoot() : null;
 	}
 }

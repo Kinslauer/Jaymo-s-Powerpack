@@ -1,5 +1,5 @@
-"""Draws what goblins and orcs wear on top of MCA's body as villagers (Kingdoms 0.7.292, {@code GreenskinLooks}): their
-features (ears, noses, brows, jaws in flesh; tusks in ivory) and their marks (warts, wrinkles, blotches; an orc's scars and
+"""Draws what goblins and orcs wear on top of MCA's body as villagers (Kingdoms 0.7.292, {@code GreenskinLooks}): an orc's
+features (ears, brows, jaws in flesh; tusks in ivory; a goblin's are its own body's, 0.7.320, gen_goblin_body.py) and their marks (warts, wrinkles, blotches; an orc's scars and
 war paint). The flesh and the marks are drawn in greys, tinted in game by each one's own green ({@code Greenskins.skin});
 tusks, scars and paint keep their colours. Original art. Run from the kingdoms project root: python -I tools/gen_greenskins.py
 (also writes a contact sheet to build/greenskins-preview.png).
@@ -14,13 +14,7 @@ ROOT = "src/main/resources/assets/jaymoskingdoms/textures/entity/greenskin/"
 FLESH = (214, 214, 210)
 IVORY = (236, 226, 196)
 
-# the cubes of each shape: (u, v, w, h, d, bone)
-GOBLIN_SHAPES = [
-    # long ears out to the sides, a hooked nose and its hook
-    [(0, 0, 5, 3, 1, False), (0, 4, 5, 3, 1, False), (12, 0, 2, 2, 2, False), (12, 4, 1, 1, 1, False)],
-    # tall bat ears, a needle nose on a warty bulb
-    [(20, 0, 2, 6, 1, False), (26, 0, 2, 6, 1, False), (32, 0, 1, 1, 3, False), (40, 0, 2, 2, 1, False)],
-]
+# the cubes of each shape: (u, v, w, h, d, bone). (0.7.320) A goblin's ears and nose are its own body's now (gen_goblin_body.py).
 ORC_SHAPES = [
     # tusks up from the jaw, a heavy brow, small swept ears
     [(0, 16, 1, 2, 1, True), (4, 16, 1, 2, 1, True), (0, 0, 8, 1, 1, False), (0, 4, 1, 3, 2, False), (6, 4, 1, 3, 2, False)],
@@ -194,7 +188,7 @@ def preview(drawn, path):
 
 
 if __name__ == "__main__":
-    drawn = {"goblin_features": features(GOBLIN_SHAPES, "goblin-features"), "orc_features": features(ORC_SHAPES, "orc-features")}
+    drawn = {"orc_features": features(ORC_SHAPES, "orc-features")}
     for i in range(4):
         drawn["goblin_marks_%d" % i] = marks(i, False)
         drawn["orc_marks_%d" % i] = marks(i, True)
