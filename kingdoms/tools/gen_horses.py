@@ -29,6 +29,9 @@ sys.path.insert(0, HERE)
 import gen_equestrian as ge  # noqa: E402  (the coat specs)
 import horse_preview as hp  # noqa: E402
 import horse_rig as hr  # noqa: E402
+import bbmodel as bbm  # noqa: E402
+import rhg  # noqa: E402
+import moonlit_horse as moonlit  # noqa: E402
 
 ASSETS = os.path.normpath(os.path.join(HERE, "..", "src/main/resources/assets/jaymoskingdoms"))
 OUT = os.path.join(ASSETS, "textures/entity/breed_horse")
@@ -100,10 +103,13 @@ class Px:
     __slots__ = ("part", "cube", "face", "I", "J", "pw", "ph", "s", "t", "q", "w", "X", "Y")
 
 
-def pixels(parts):
+def pixels(parts, only=None):
+    """Every pixel of the parts' boxes (of `only` parts' boxes, when given: the barding, posed on the horse's bones)."""
     chains = hr.transforms(parts)
     out = []
     for p in parts:
+        if only is not None and p.name not in only:
+            continue
         for c in p.cubes:
             if c.share is not None:
                 continue
@@ -212,8 +218,10 @@ def tack(x):
     return None
 
 
+MAPPERS = {}  # (0.7.322) each build's rhg.Mapper, set in main
+
 # ---- the breed coats ------------------------------------------------------------------------------------------------------
-LEG_TOP, GROUND = 9.0, 24.1
+LEG_TOP, GROUND = 9.0 - hr.LIFT, 24.1
 HEAD_REGIONS = ("head", "jowl", "muzzle", "lip", "ear")
 BODY_REGIONS = ("body", "chest", "withers", "croup", "belly", "neck")
 
@@ -255,6 +263,36 @@ def mouth(x, col, tint):
     return col
 
 
+# (0.7.322) The horse's form, painted in: light on the muscles (shoulder, forearm, hip and gaskin, the crest of the
+# neck), shadow in the hollows (behind the elbow, the flank, under the belly and the jaw). World space, model pixels.
+FORM = [
+    # (centre (|x| or None for the midline), y, z), radius, how much lighter (+) or darker (-)
+    ((5.5, 7.0 - hr.LIFT, -6.5), 3.6, 12),   # the shoulder
+    ((5.5, 6.5 - hr.LIFT, 10.5), 4.2, 12),   # the hip
+    ((5.6, 12.5 - hr.LIFT, -2.5), 2.4, -14),  # behind the elbow, the girth line
+    ((5.6, 8.0 - hr.LIFT, 6.0), 2.6, -10),   # the flank's hollow
+    ((5.8, 12.0 - hr.LIFT, 11.0), 2.5, 8),    # the gaskin's swell
+]
+
+
+def form(x):
+    """How much lighter or darker its body's shape makes a hide pixel."""
+    r = x.cube.region
+    if r not in ("body", "chest", "belly", "croup", "withers", "leg_a"):
+        return 0
+    w = x.w
+    by = 0.0
+    for (cx, cy, cz), rad, k in FORM:
+        d = math.sqrt((abs(w[0]) - cx) ** 2 + (w[1] - cy) ** 2 + (w[2] - cz) ** 2)
+        if d < rad:
+            by += k * (1 - d / rad) ** 1.5
+    if w[1] > 11.0 - hr.LIFT and r in ("body", "belly", "chest"):
+        by -= (w[1] - 11.0 + hr.LIFT) * 5  # the belly in its own shadow
+    if r == "leg_a" and x.face in ("a", "b"):
+        by += 6 * (1 - x.t) - 4  # the forearm rounds into the knee
+    return int(by)
+
+
 def coat(build, breed, name, spec, pxs, seed):
     marks = spec["marks"] | ({"feather"} if build == "draft" else set())
     hair = spec["hair"]
@@ -263,9 +301,12 @@ def coat(build, breed, name, spec, pxs, seed):
     hairn = ge.HAIRN.get(breed, 12)
     tint = spec["tint"] or (34, 28, 26)
     points_y = LEG_TOP + (GROUND - 3 - LEG_TOP) * spec["points_from"] / 9
+    m = MAPPERS.get(build)  # (0.7.322) Realistic Horse Genetics' patterns, carried onto this build (rhg.py)
 
     def body(x, col):
         w = x.w
+        if m is not None:
+            return rhg_body(x, col)
         if "dapple" in marks and x.face != "bottom":
             d, _ = nearest(w, 2.6, seed + 11)
             k = 0.75 if d < 0.6 else 0.35 if d < 0.95 else 0.0
@@ -283,11 +324,54 @@ def coat(build, breed, name, spec, pxs, seed):
             dense = 0.25 + 0.75 * max(0.0, min(1.0, (w[2] + 4) / 16))  # spottier toward the hindquarters
             if d < 0.55 + 0.45 * tag and tag < dense:
                 col = spec["spot"]
-        if "dorsal" in marks and x.cube.region in ("body", "withers", "croup") and abs(w[0]) < 0.8 and w[1] < 4.0:
+        if "dorsal" in marks and x.cube.region in ("body", "withers", "croup") and abs(w[0]) < 0.8 and w[1] < 4.0 - hr.LIFT:
             col = mix(col, stripe, 0.8)
         return col
 
+    def rhg_body(x, col):
+        """The body's patterns from Realistic Horse Genetics' masks (CC-BY): dapples, roan, pinto, leopard, the dun
+        stripe; fleabites stay ours."""
+        if "dapple" in marks:
+            k = max(0.0, min(1.0, (m.cover(x, "gray/dapple12") - 0.3) * 2.8))  # (its masks are soft: firmed up)
+            col = mix(col, spec["spot"], 0.85 * k * (0.6 if x.cube.region == "neck" else 1.0))
+        if "flea" in marks and h3(x.X // 2, x.Y // 2, 2, seed) < 0.11:
+            col = mix(col, spec["spot"], 0.8)
+        if "roan" in marks:
+            # flecked: white hairs as thick as the mask says
+            if h3(x.X // 2, x.Y // 2, 3, seed) < 1.5 * m.cover(x, "roan/roan"):
+                col = mix(col, spec["spot"], 0.4 if h3(x.X // 2, x.Y // 2, 4, seed) < 0.7 else 0.6)
+        if "pinto" in marks and m.cover(x, "pinto/tobiano") > 0.5:
+            col = spec["white"]
+        if "leopard" in marks:
+            if m.cover(x, "leopard/leopard") < 0.5:
+                col = spec["spot"]
+        if "dorsal" in marks:
+            col = mix(col, stripe, 0.8 * m.cover(x, "dun/dorsal"))
+        return col
+
+    def rhg_hide(x, col):
+        """Face and leg white from the masks, and their painted shading over every hide pixel."""
+        r = x.cube.region
+        if "blaze" in marks and m.cover(x, "face/blaze", "face/star") > 0.5:
+            col = spec["white"]
+        if "star" in marks and m.cover(x, "face/star") > 0.5:
+            col = spec["white"]
+        if "socks" in marks and m.cover(x, *rhg.SOCKS) > 0.5:
+            col = spec["white"]
+        if "stockings" in marks and m.cover(x, *rhg.STOCKINGS) > 0.5:
+            col = spec["white"]
+        if "leopard" in marks and r in ("leg_a", "head", "muzzle") and m.cover(x, "leopard/leopard") < 0.5:
+            col = spec["spot"]
+        dark, a = m.colour(x, "shading")
+        return mix(col, dark, 0.55 * a)
+
     def hide(x):
+        col = hide_own(x)
+        if m is not None and eye(x) == 0 and x.cube.region not in ("muzzle", "lip", "ear"):
+            col = rhg_hide(x, col)
+        return col
+
+    def hide_own(x):
         r = x.cube.region
         col = spec["base"]
         if r in HEAD_REGIONS and spec["head"]:
@@ -379,7 +463,9 @@ def coat(build, breed, name, spec, pxs, seed):
             out[(x.X, x.Y)] = light(x, col, 0.6) + (255,)
             continue
         col = hide(x)
-        col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise))
+        col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise) + form(x))
+        if getattr(c, "nostril", False) and x.face in ("front", "a", "b") and 0.3 < x.s < 0.7 and 0.25 < x.t < 0.75:
+            col = (38, 26, 24)  # (0.7.322) the nostril's opening
         if "shimmer" in marks and (x.face == "top" or x.t < 0.45) and h3(x.X, x.Y, 11, seed) < 0.07 and eye(x) == 0:
             col = shade(col, 30)
         out[(x.X, x.Y)] = light(x, col) + (255,)
@@ -458,7 +544,7 @@ def skeleton(pxs, seed):
         col = shade(BONE, int((h3(x.X, x.Y, 14, seed) - 0.5) * 14))
         if r == "body":
             ribs = -9.5 <= w[2] <= 5.0
-            if f in ("a", "b") and ribs and w[1] > 4.2:
+            if f in ("a", "b") and ribs and w[1] > 4.2 - hr.LIFT:
                 band = (w[2] + 9.5) % 2.5
                 if band > 1.25:
                     continue
@@ -473,7 +559,7 @@ def skeleton(pxs, seed):
             elif f == "bottom":
                 if not (abs(w[0]) < 1.1 and w[2] < -2):
                     continue
-            elif f == "front" and abs(w[0]) > 2.5 and w[1] > 6:
+            elif f == "front" and abs(w[0]) > 2.5 and w[1] > 6 - hr.LIFT:
                 continue
         elif r == "neck":
             back = c.pos[2] + c.size[2]
@@ -531,7 +617,7 @@ def zombie(pxs, seed):
         if r in ("muzzle", "lip"):
             col = mouth(x, mix(col, (120, 118, 104), 0.3), (78, 70, 64))
         # the ribs show through a torn flank
-        if r == "body" and f == "a" and ((w[2] + 2) / 4.0) ** 2 + ((w[1] - 7.5) / 2.2) ** 2 < 0.6 + 0.6 * vnoise3(w, 1.5, seed + 3):
+        if r == "body" and f == "a" and ((w[2] + 2) / 4.0) ** 2 + ((w[1] - 7.5 + hr.LIFT) / 2.2) ** 2 < 0.6 + 0.6 * vnoise3(w, 1.5, seed + 3):
             col = BONE if (w[2] % 1.6) < 0.8 else (92, 22, 22)
         elif r in BODY_REGIONS + ("leg_a", "head") and nearest(w, 4.5, seed + 9)[0] < 0.55:
             col = (128, 30, 28) if nearest(w, 4.5, seed + 9)[0] < 0.35 else (70, 34, 28)  # wounds
@@ -604,90 +690,181 @@ def undead(pxs):
     }
 
 
-# ---- horse armour -----------------------------------------------------------------------------------------------------------
-def armour_base(pxs, chain):
-    """The armour's shape, in greys (each material is a ramp over these): a chanfron down the face, a crinet along
-    the neck, a peytral over the chest and plates down the flanks and over the croup, riveted at the edges."""
+# ---- horse armour (0.7.322: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
+METAL, TRIM, LINING, HOLE, CLOTH, CLOTH_ALT = 0, 1, 2, 3, 4, 5
+# the faces left open (nothing drawn): the caparison beneath, before and behind; the neck cloth at its ends; the
+# chanfron under the jaw, behind for the ears and where the nose plate runs on
+OPEN = {"mail": ("bottom",), "caparison": ("bottom", "front", "back"), "neck_cloth": ("top", "bottom"), "chanfron": ("bottom", "back", "front"),
+        "nose": ("bottom", "back")}
+
+
+def armour_base(pxs, mail, fabric=False):
+    """The barding's pixels as (grey, kind): plate (or mail) as greys each material ramps, a trim band (its own ramp),
+    and the leather lining (as it is). Rolled and riveted edges, fluted plates, the crinet's lames lapping, an etched
+    chanfron, a boss on the peytral, the tail's hole in the crupper."""
     out = {}
     for x in pxs:
-        c, f, w, q = x.cube, x.face, x.w, x.q
-        r = c.region
-        if c.kind != "hide" or r is None:
+        c, f, r = x.cube, x.face, x.cube.region
+        fw, fh = x.pw / S, x.ph / S
+        u, v = x.s * fw, x.t * fh  # texels across and down the face
+        edge = min(u, fw - u, v, fh - v)
+        if r == "crupper" and f == "back" and math.hypot(x.q[0], x.q[1] + 8.0) < 1.5:
+            continue  # the tail comes out through here
+        if f in OPEN.get(r, ()):
             continue
-        top = None  # how far down from the armour's lower edge (negative: below it)
-        if r in ("body", "croup", "withers"):
-            if f == "bottom":
+        if r == "helm" and f in ("a", "b"):
+            # (SIMPLE) the eyes left open, a little wider than the eye (as eye() finds it on the head)
+            ez, ey = getattr(c, "eye", None) or (c.pos[2] + 1.75, c.pos[1] + 1.6)
+            if abs(x.q[2] - ez) < 1.25 and abs(x.q[1] - ey) < 0.95:
                 continue
-            edge = 10.0
-            top = edge - w[1]
-        elif r == "chest":
-            if f == "bottom":
-                continue
-            top = 11.5 - w[1]
-        elif r == "neck":
-            back = c.pos[2] + c.size[2]
-            if f == "front":
-                continue
-            top = q[2] - (back - c.size[2] * 0.85)  # all but the throat
-        elif r == "head":
-            if f == "bottom" or (f in ("a", "b") and q[1] > c.pos[1] + 2.4) or eye(x) or \
-                    (f in ("a", "b") and abs(q[2] - (c.pos[2] + 1.75)) < 1.2 and abs(q[1] - (c.pos[1] + 1.6)) < 1.0):
-                continue
-            top = 1.0
-        elif r == "muzzle":
-            if f not in ("top", "a", "b") or (f in ("a", "b") and q[1] > c.pos[1] + 1.2) or q[2] < c.pos[2] + 1.0:
-                continue
-            top = 1.0
+        if r in ("caparison", "neck_cloth") or r == "mail" and fabric:
+            out[(x.X, x.Y)] = cloth(x, fw, fh, u, v)
+            continue
+        if f == "bottom" or (r in ("crinet", "crest", "chanfron", "nose", "crupper") and f == "front" and r != "chanfron"):
+            out[(x.X, x.Y)] = (light(x, (70, 52, 36), 0.6), LINING)  # the padded lining underneath
+            continue
+        plate = (not mail or r in ("chanfron", "nose", "ridge", "guard", "boss", "crest")) and r != "mail"
+        kind = METAL
+        if plate:
+            g = 168 + (12 * (1 - x.t) if f in ("a", "b", "front", "back") else 22)
+            g += 8 * (h3(x.X, x.Y, 18, 1) - 0.5)
+            if r in ("peytral", "plate", "crupper") and f in ("a", "b", "front", "back"):
+                # fluting: raised ribs down the plates
+                along = x.w[2] if f in ("a", "b") else x.w[0]
+                g += 12 if (along * 1.5) % 3.0 < 0.75 else -10 if (along * 1.5) % 3.0 < 1.25 else 0
+            if r in ("chanfron", "helm") and f == "top":
+                # an etched border and a cross down the face
+                if 1.0 <= edge < 1.5 or abs(x.q[0]) < 0.25 or abs(x.q[2] - 0.8) < 0.25:
+                    g -= 46
+            if r == "nose" and f == "top" and abs(x.q[0]) < 0.25:
+                g -= 40
+            if r == "boss":
+                d = math.hypot(x.q[0], x.q[1] - (c.pos[1] + c.size[1] / 2))
+                g = 240 - 60 * d if d < 1.0 else 150
+            if r in ("ridge", "crest") and f == "top" or r == "crest" and f in ("back",):
+                g = 228 if (x.I + x.J) % 2 == 0 else 206
         else:
+            # mail: rows of rings, each with a bright top and a dark hole
+            i, j = x.X % 4, x.Y % 4
+            row = (x.Y // 4) % 2
+            i = (x.X + 2 * row) % 4
+            g = 196 if (i, j) in ((1, 0), (2, 0)) else 60 if (i, j) in ((1, 2), (2, 2), (1, 1), (2, 1)) and j == 2 else 150
+            if (i in (0, 3)) and j in (1, 2):
+                g = 120
+            if r == "mail":
+                g -= 28  # (the mail between plates sits darker than they do)
+        # the rims (in pixels): a dark line at the very edge, the rolled edge bright inside it, then on the bigger plates
+        # a narrow trim band with rivets in it
+        e = edge * S
+        big = min(fw, fh) >= 4
+        trimmed = big and r in ("chanfron", "peytral", "plate", "crupper", "crinet", "helm", "neck_plate")
+        if plate and f in ("a", "b", "front", "back"):
+            # a soft sheen running diagonally across the bigger plates
+            sheen = (x.w[1] * 0.7 + (x.w[2] if f in ("a", "b") else x.w[0])) % 9.0
+            if big and 2.5 < sheen < 4.0:
+                g += 18
+        side = f in ("a", "b", "front", "back")
+        if plate and side:
+            g -= 26 * x.t  # darker toward the hem
+        if e < 1:
+            g = 92
+        elif e < 2:
+            g = 236
+        elif trimmed and side and (fh - v) * S < 4:
+            kind = TRIM  # a band of trim along the hem
+            g = 210 if (fh - v) * S > 2.5 else 150
+        elif trimmed and side and v * S < 4 and x.I % 5 == 2:
+            g = 250 if v * S < 3 else 96  # rivets along the top, each with its shadow under it
+        if mail and not plate and kind == TRIM:
+            kind = LINING  # mail's edges are bound in leather
+            out[(x.X, x.Y)] = (light(x, shade((92, 64, 40), int((g - 170) * 0.25)), 0.7), LINING)
             continue
-        if top < 0:
-            continue
-        if chain:
-            g = 160 if (x.I // 1 + x.J // 1) % 2 == 0 else 104
-            if (x.I % 4 in (1, 2)) and (x.J % 4 in (1, 2)):
-                g = 190
-            col = (g, g, g)
-            if top < 0.6:
-                col = (84, 70, 56)  # the leather trim
-        else:
-            g = 176 + int(12 * (1 - x.t)) if f in ("a", "b", "front", "back") else 196
-            g += int(6 * (h3(x.X, x.Y, 18, 1) - 0.5))
-            col = (g, g, g)
-            if r in ("body", "croup") and f in ("a", "b") and (w[2] + 10) % 6.0 < 0.5:
-                col = (112, 112, 112)  # the seams between the plates
-            if top < 0.55:
-                col = (224, 224, 224) if top > 0.25 else (96, 96, 96)  # the rolled edge
-                if top > 0.25 and int((w[2] + w[0]) * 1.5) % 3 == 0:
-                    col = (70, 70, 70)  # rivets
-            if r == "head" and f == "top" and abs(q[0]) < 0.5:
-                col = (232, 232, 232)  # the ridge down the chanfron
-        out[(x.X, x.Y)] = light(x, col, 0.7) + (255,)
+        if r == "crinet" and f in ("top", "a", "b", "back"):
+            # each lame laps over the next: its lower end in shadow
+            y1 = c.pos[1] + c.size[1]
+            if y1 - x.q[1] < 0.5:
+                g = 80
+        out[(x.X, x.Y)] = (light(x, (g, g, g), 0.7), kind)
     return out
 
 
-def ramp(out, stops):
+def cloth(x, fw, fh, u, v):
+    """(0.7.322) The caparison's cloth as (grey, kind): woven, falling in folds below the belly, a band of trim at the
+    hem and a stitched border above it; quartered (CLOTH_ALT) for the heraldic bardings."""
+    f, w = x.face, x.w
+    g = 176 + 10 * (h3(x.X, x.Y, 23, 2) - 0.5) + (6 if (x.X + x.Y) % 2 == 0 else 0)
+    if f in ("a", "b", "front", "back"):
+        hang = max(0.0, min(1.0, (w[1] - 8.9) / 5.7))  # how far below the side plates it hangs (world y)
+        along = w[2] if f in ("a", "b") else w[0]
+        g += (10 + 18 * hang) * math.sin(along * 1.25)  # the folds, deeper as it hangs free
+        g -= 22 * x.t
+    # quartered: fore and aft, left and right, alternate (the plate barding's arms)
+    alt = (w[2] < 0.5) != (w[0] < 0)
+    kind = CLOTH_ALT if alt else CLOTH
+    e = (fh - v) * S
+    if x.cube.region == "caparison" and f in ("a", "b") and e < 3:
+        kind = TRIM  # the hem
+        g = 220 if 0.5 < e < 2 else 140
+    elif x.cube.region == "caparison" and f in ("a", "b") and 4 <= e < 5 and x.I % 3 != 0:
+        g += 40  # a stitched line above it
+    elif x.cube.region == "neck_cloth" and f != "back" and v * S < 2:
+        kind = TRIM
+        g = 200
+    return (light(x, (g, g, g), 0.7), kind)
+
+
+def ramp_stops(stops, t):
+    for (t0, c0), (t1, c1) in zip(stops, stops[1:]):
+        if t <= t1 or (t1, c1) == stops[-1]:
+            k = 0 if t1 == t0 else max(0.0, min(1.0, (t - t0) / (t1 - t0)))
+            return mix(c0, c1, k)
+    return stops[-1][1]
+
+
+def ramp(base, metal, trim, cloth, cloth_alt=None):
     res = {}
-    for k, p in out.items():
-        t = lum(p) / 255
-        for (t0, c0), (t1, c1) in zip(stops, stops[1:]):
-            if t <= t1 or (t1, c1) == stops[-1]:
-                kk = 0 if t1 == t0 else max(0.0, min(1.0, (t - t0) / (t1 - t0)))
-                res[k] = mix(c0, c1, kk) + (p[3],)
-                break
+    for k, (col, kind) in base.items():
+        if kind == LINING:
+            res[k] = col + (255,)
+            continue
+        stops = {TRIM: trim, CLOTH: cloth, CLOTH_ALT: cloth_alt or cloth}.get(kind, metal)
+        res[k] = ramp_stops(stops, lum(col) / 255) + (255,)
     return res
 
 
+STEEL = [(0.0, (34, 36, 42)), (0.35, (104, 108, 118)), (0.7, (176, 180, 188)), (1.0, (238, 240, 245))]
+BRIGHT_STEEL = [(0.0, (60, 62, 68)), (0.3, (138, 142, 150)), (0.7, (204, 208, 214)), (1.0, (248, 249, 252))]
+BRASS_RAMP = [(0.0, (70, 44, 12)), (0.4, (164, 118, 40)), (0.75, (226, 184, 82)), (1.0, (255, 238, 170))]
+GOLD = [(0.0, (88, 54, 10)), (0.45, (196, 146, 38)), (0.8, (250, 214, 84)), (1.0, (255, 248, 196))]
+RED_GOLD = [(0.0, (70, 24, 10)), (0.45, (168, 84, 30)), (0.8, (226, 150, 64)), (1.0, (255, 214, 150))]
+DIAMOND = [(0.0, (16, 64, 72)), (0.45, (54, 170, 180)), (0.8, (130, 236, 230)), (1.0, (226, 255, 255))]
+COPPER = [(0.0, (60, 30, 18)), (0.35, (150, 78, 46)), (0.7, (214, 128, 84)), (1.0, (250, 196, 150))]
+VERDIGRIS = [(0.0, (20, 56, 48)), (0.45, (52, 128, 106)), (0.8, (104, 190, 160)), (1.0, (190, 240, 220))]
+NETHERITE = [(0.0, (20, 16, 18)), (0.4, (58, 50, 54)), (0.75, (98, 88, 92)), (1.0, (150, 138, 140))]
+GREY = [(0.0, (90, 90, 90)), (0.5, (200, 200, 200)), (1.0, (255, 255, 255))]
+# (0.7.322) the caparisons' cloths
+CRIMSON = [(0.0, (40, 6, 10)), (0.45, (120, 18, 26)), (0.8, (178, 40, 44)), (1.0, (226, 96, 90))]
+ROYAL_BLUE = [(0.0, (8, 14, 46)), (0.45, (30, 52, 130)), (0.8, (60, 96, 190)), (1.0, (140, 170, 236))]
+LINEN = [(0.0, (88, 84, 76)), (0.45, (190, 184, 170)), (0.8, (232, 228, 216)), (1.0, (252, 250, 244))]
+FOREST = [(0.0, (10, 30, 14)), (0.45, (34, 86, 40)), (0.8, (66, 132, 66)), (1.0, (140, 196, 126))]
+SABLE_PURPLE = [(0.0, (12, 6, 16)), (0.45, (40, 20, 52)), (0.8, (74, 40, 92)), (1.0, (130, 90, 150))]
+RUSSET = [(0.0, (36, 20, 10)), (0.45, (104, 62, 32)), (0.8, (150, 98, 56)), (1.0, (204, 160, 110))]
+
+
 def armours(pxs):
-    plate, mail = armour_base(pxs, False), armour_base(pxs, True)
+    # (plates over mail, or over quilted cloth: the plates joined by one or the other)
+    plate, mail, quilted = armour_base(pxs, False), armour_base(pxs, True), armour_base(pxs, False, fabric=True)
+    # leather is dyed over the lot: its lining greyed too
+    leather = {k: ((v[0], METAL) if v[1] != LINING else (mix(v[0], (150, 150, 150), 0.6), METAL)) for k, v in quilted.items()}
     return {
-        "minecraft/iron": ramp(plate, [(0.0, (46, 48, 54)), (0.4, (120, 124, 132)), (0.75, (190, 194, 200)), (1.0, (240, 242, 246))]),
-        "minecraft/gold": ramp(plate, [(0.0, (88, 54, 10)), (0.45, (196, 146, 38)), (0.8, (250, 214, 84)), (1.0, (255, 248, 196))]),
-        "minecraft/diamond": ramp(plate, [(0.0, (16, 64, 72)), (0.45, (54, 170, 180)), (0.8, (130, 236, 230)), (1.0, (226, 255, 255))]),
-        "minecraft/copper": ramp(plate, [(0.0, (60, 30, 18)), (0.35, (150, 78, 46)), (0.7, (214, 128, 84)), (1.0, (250, 196, 150))]),
-        "minecraft/netherite": ramp(plate, [(0.0, (20, 16, 18)), (0.4, (58, 50, 54)), (0.75, (98, 88, 92)), (1.0, (150, 138, 140))]),
-        "minecraft/leather": ramp(plate, [(0.0, (90, 90, 90)), (0.5, (200, 200, 200)), (1.0, (255, 255, 255))]),
-        "jaymoskingdoms/chain_barding": ramp(mail, [(0.0, (40, 40, 44)), (0.4, (110, 114, 120)), (1.0, (200, 204, 210))]),
-        "jaymoskingdoms/plate_barding": ramp(plate, [(0.0, (70, 72, 78)), (0.3, (150, 154, 160)), (0.7, (206, 210, 216)), (1.0, (245, 247, 250))]),
+        "minecraft/iron": ramp(plate, STEEL, BRASS_RAMP, CRIMSON),
+        "minecraft/gold": ramp(quilted, GOLD, RED_GOLD, ROYAL_BLUE),
+        "minecraft/diamond": ramp(plate, DIAMOND, GOLD, LINEN),
+        "minecraft/copper": ramp(quilted, COPPER, VERDIGRIS, FOREST),
+        "minecraft/netherite": ramp(plate, NETHERITE, GOLD, SABLE_PURPLE),
+        "minecraft/leather": ramp(leather, GREY, GREY, GREY),
+        "jaymoskingdoms/chain_barding": ramp(mail, STEEL, STEEL, RUSSET),
+        "jaymoskingdoms/plate_barding": ramp(plate, BRIGHT_STEEL, BRASS_RAMP, CRIMSON, LINEN),
     }
 
 
@@ -700,21 +877,25 @@ def image(out, size):
     return img
 
 
-def builds_json(rigs):
+def part_json(parts):
+    return [{
+        "name": p.name,
+        "parent": p.parent or "",
+        "pose": [round(v, 4) for v in p.pose],
+        "cubes": [{"uv": list(c.uv), "pos": list(c.pos), "size": list(c.size), **({"grow": c.grow} if c.grow else {})}
+                  for c in p.cubes],
+    } for p in parts]
+
+
+def builds_json(rigs, armour_rigs):
     """The builds for BreedHorseModel: each part (parents first) with its pose and boxes."""
     data = {"builds": {}}
     data["texture_size"] = list(hr.TEXTURE)
+    data["armor_texture_size"] = list(hr.ARMOR_TEXTURE)
     for b, parts in rigs.items():
         hr.texture_size(parts)
-        data["builds"][b] = {
-            "parts": [{
-                "name": p.name,
-                "parent": p.parent or "",
-                "pose": [round(v, 4) for v in p.pose],
-                "cubes": [{"uv": list(c.uv), "pos": list(c.pos), "size": list(c.size), **({"grow": c.grow} if c.grow else {})}
-                          for c in p.cubes],
-            } for p in parts],
-        }
+        hr.texture_size(armour_rigs[b], hr.ARMOR_TEXTURE)
+        data["builds"][b] = {"parts": part_json(parts), "armor": part_json(armour_rigs[b])}
     path = os.path.join(ASSETS, "horse", "builds.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as fh:
@@ -741,14 +922,44 @@ def preview(rigs, written):
         sheet.save(os.path.join(PREVIEW, build + ".png"))
 
 
+ARMOURED_HIDDEN = HIDDEN + ("mane", "mane_flow", "forelock", "forelock_tip")
+
+
+def preview_armour(rigs, armour_rigs, written):
+    """(0.7.322) Each build in each barding, larger, from the front quarter and the back quarter."""
+    for build in rigs:
+        coat_rel = next(rel for rel, (b, _) in written.items() if b == build and not rel.startswith("armor/"))
+        coat_img = written[coat_rel][1]
+        tiles = []
+        for rel, (b, img) in written.items():
+            if b != build or not rel.startswith("armor/"):
+                continue
+            qs = hp.quads(rigs[build], coat_img, hidden=ARMOURED_HIDDEN) + hp.quads(rigs[build] + armour_rigs[build], img,
+                                                                                    hidden={p.name for p in rigs[build]})
+            for yaw in (35.0, 150.0):
+                tiles.append(hp.render(qs, yaw=yaw, px=7))
+        w, h = max(t.width for t in tiles), max(t.height for t in tiles)
+        sheet = Image.new("RGBA", (w * 4, h * ((len(tiles) + 3) // 4)), (58, 66, 74, 255))
+        for k, t in enumerate(tiles):
+            sheet.alpha_composite(t, ((k % 4) * w, (k // 4) * h))
+        sheet.save(os.path.join(PREVIEW, build + "_armour.png"))
+
+
 def main():
-    rigs = {b: hr.rig(b) for b in hr.BUILDS}
-    builds_json(rigs)
+    # (each build from its Blockbench model in tools/horse_models if it has one, else horse_rig's)
+    loaded = {b: bbm.load(b) for b in hr.BUILDS}
+    # (the moonlit horse: the Mystical Deer made into a horse, its own painting baked in; tools/moonlit_horse.py)
+    loaded[moonlit.BUILD] = moonlit.build()
+    rigs = {b: horse for b, (horse, _) in loaded.items()}
+    armour_rigs = {b: armour for b, (_, armour) in loaded.items()}
+    MAPPERS.update({b: rhg.Mapper(parts) for b, parts in rigs.items() if b in hr.BUILDS})
+    builds_json(rigs, armour_rigs)
     pxs = {b: pixels(parts) for b, parts in rigs.items()}
     written = {}
 
     def save(out, build, rel):
-        img = image(out, hr.texture_size(rigs[build]))
+        size = hr.ARMOR_TEXTURE if rel.startswith("armor/") else hr.texture_size(rigs[build])
+        img = image(out, size)
         path = os.path.join(OUT, rel + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         img.save(path)
@@ -762,10 +973,13 @@ def main():
     save(bat(pxs["bat_horse"], 3), "bat_horse", "bat_horse/bat")
     for rel, out in undead(pxs["palfrey"]).items():
         save(out, "palfrey", rel)
-    for build in hr.BUILDS:
-        for asset, out in armours(pxs[build]).items():
+    save(moonlit.bake(pxs[moonlit.BUILD]), moonlit.BUILD, f"{moonlit.BUILD}/{moonlit.BUILD}")
+    for build in rigs:
+        apx = pixels(rigs[build] + armour_rigs[build], only={p.name for p in armour_rigs[build]})
+        for asset, out in armours(apx).items():
             save(out, build, f"armor/{asset}/{build}")
     preview(rigs, written)
+    preview_armour(rigs, armour_rigs, written)
     print(f"wrote {len(written)} textures under {OUT}; previews in {PREVIEW}")
 
 

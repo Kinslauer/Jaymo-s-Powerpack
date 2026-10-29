@@ -3566,10 +3566,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
   kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
   clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
-- **0.17.149, Enderscape and Last World Panorama (Kingdoms 0.7.322):** two outside mods join the pack unchanged, downloaded by id.
+- **0.17.149, horse barding (Kingdoms 0.7.322):** armour is its own model now (chanfron with eye guards, lapped crinet
+  that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
+  (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
+  (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.
+  In the end Andy asked for vanilla-shaped horses until better models turn up: every breed is the classic horse
+  shape with Realistic Horse Genetics' coat patterns and segmented armour (plates over the vitals, joined by mail or cloth), plus a rare (1 in 100) moonlit
+  horse made from jsellier23's CC-BY Mystical Deer. See the Kingdoms MODLOG.
+- **0.17.154, Enderscape and Last World Panorama (Kingdoms 0.7.327):** two outside mods join the pack unchanged, downloaded by id.
   Enderscape (code MIT, art all rights reserved) reworks the End: new biomes, plants, mobs, blocks, items, music and sky;
   it needs Lithostitched (MIT) and the pack's YACL. Its built-in data packs (on by default) swap vanilla End cities and
   overworld strongholds for its own, which fill chests from their own loot tables, so the Grand Shield also lives in
-  its stronghold armouries and the Voidreaver in its End city chests (`compat/EnderscapeLoot`; Kingdoms 0.7.322 does
+  its stronghold armouries and the Voidreaver in its End city chests (`compat/EnderscapeLoot`; Kingdoms 0.7.327 does
   the same for writs and quest lairs). Only End chunks generated after this get the new terrain. Last World Panorama (client-only) makes the title screen's panorama a shot of where you last left a world.
   Both sit in `packModsNoCf` until their CurseForge ids are looked up; Enderscape is kept out of the dev game.
