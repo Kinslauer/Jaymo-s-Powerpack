@@ -6512,3 +6512,7 @@ and overworld dungeons".
 - **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Never told
   outright: only a hermit's passing word with the Golemancy hint. Their lights burn red and glow in the dark
   (`clockwork_golem_rogue.png` and its `_glow`, from `tools/gen_clockwork_golem.py`).
+
+## 0.7.334: a rogue golem's bar waits for the fight (pack 0.17.164)
+Andy: "the new healthbar is appearing before being interacted with". A rogue clockwork golem's boss bar now shows only
+once it and a player have traded blows (a player hits it, or it hits a player), and goes away again when it folds up.
