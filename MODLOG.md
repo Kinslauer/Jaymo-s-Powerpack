@@ -3718,5 +3718,34 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
   objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
   - Compile-checked; not seen in game.
-- **0.17.189, tongue voices:** Kingdoms 0.7.346 gives every tongue a spoken greeting, farewell, cheer and scream heard by
+- **0.17.189, Sora's Dagger's Flurry probe (crash fix):** since 0.17.169 the game and server crashed on start
+  ("Components not bound yet" from `SorasDagger.<clinit>`): `FLURRY_PROBE`, a static `ItemStack`, was built when
+  `SorasDagger.register()` first loaded the class during mod init, before item components are bound. It's made on first
+  use now (`flurryProbe()`). No other static stack in the three mods is built that early.
+- **0.17.195, Blockbench batch 4 (Kingdoms 0.7.347):** Andy's eight new models.
+  - The future's Omen mechs: manned mechs, red and blue (`chrono/future/FutureOmen`, `FutureOmens`). Andy: "manned mechs
+    who fight against the androids and zombies overtaking los perrito before it fell".
+    - They spawn only in the future: a squad of one to three (same colour) about once every 12 minutes per player,
+      30-50 blocks out, never within 160 blocks of another.
+    - They attack androids, war and android mechs and ferals on sight. To players they're neutral unless hurt (or
+      their drone is).
+    - Heavy smash plus an arm cannon (FutureGuns heavy MG). 320 health, 22 damage, 22 armour.
+    - Destroyed, a pilot (a villager) climbs out 85% of the time, and a Cockpit Log book drops 35% of the time (the only
+      lore, in the pilot's voice).
+  - Worky drones (`FutureWorky`): one or two with every Omen, future only. They orbit their mech, repair it (2 health
+    every 2.5 s), spot foes (Glowing, and they hand a target over), flee danger, and wave at friendly players.
+  - New item looks: the harpoon (Armory and Kingdoms), the iron rapier (the swept rapier), the Voidreaver relic, and
+    the Tidebreaker relic (the lightning spear). `tools/blockbench/bake.py` snaps rotations Java models can't draw.
+  - Omen pilots are MCA villagers from the future (`FutureOmenPilots`; Andy: "very curious MCA villagers who are from
+    the future so they are surprised you are there"). The first time one sees you it stops and stares, says so, then
+    walks up and watches you a while. Talk: "Tell them where you came from" (they answer your life story's start or
+    heritage) and "Ask what happened here" (six pieces of how the world fell, one per talk, a minute apart, kept on the
+    pilot). Without Kingdoms/MCA a plain villager speaks the same lines on right click.
+  - Lost in time (Andy: "respawn in the future until they escape, no more death to leave"): a stranded starter
+    (`Future.STRANDED`) who dies wakes in the future's arrival square again; only their own leap home (sneak+B after
+    an echo, the pod, `/future back`) ends it.
+  - Tomecraft research (Enchanting, after Spellbinding) unlocks the spell tomes' infusion recipes.
+  - The spell tomes are Kingdoms 0.7.347's.
+  - Compile-checked only; not seen in game.
+- **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
   players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.

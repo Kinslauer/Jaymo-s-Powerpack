@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.346) Leaving a villager's talk menu: if you don't speak their tongue, they bid you goodbye in it ({@link Languages#farewell}). */
+/** (0.7.348) Leaving a villager's talk menu: if you don't speak their tongue, they bid you goodbye in it ({@link Languages#farewell}). */
 @Mixin(InteractionCloseRequest.class)
 abstract class McaCloseMixin {
 	@Shadow

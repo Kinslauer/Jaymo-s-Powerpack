@@ -193,13 +193,13 @@ public final class ZFighterBranchForms {
 
 	/** Whether the branch form he's in still stands: at the top of the regular ladder, on a lineage that has it, not the ape. */
 	private static boolean valid(Player player, ZFighterPower.Live live, int branch) {
-		int top = ApeRage.super4(player) ? ApeRage.SUPER_4 : ZFighterTraining.FORMS;
+		int top = ApeRage.top(player);
 		return live.form == top && !ZFighterLineage.ape(player) && ladder(player).contains(branch);
 	}
 
 	/** The branch form C would take him to now (0: none: he isn't at the top of the ladder, or it ends there). */
 	private static int next(ServerPlayer player, ZFighterPower.Live live) {
-		int top = ApeRage.super4(player) ? ApeRage.SUPER_4 : ZFighterTraining.FORMS;
+		int top = ApeRage.top(player);
 		if (live.form != top || ZFighterTraining.formsOpen(player) < ZFighterTraining.FORMS || ZFighterLineage.ape(player)) {
 			return 0;
 		}

@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:golden_apple",
+    "minecraft:golden_apple",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "life": 14,
+    "light": 8,
+    "arcana": 10
+  },
+  "instability": 7,
+  "result": {
+    "item": "jaymoskingdoms:restoration_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

@@ -49,6 +49,9 @@ public final class AlchemyGear {
 	/** Clockwork golems (Kingdoms' {@code ClockworkGolem}): only with Kingdoms, whose infusion recipe makes them. */
 	public static final String GOLEMANCY = "golemancy";
 	private static final Identifier CLOCKWORK_GOLEM = Identifier.fromNamespaceAndPath("jaymoskingdoms", "clockwork_golem");
+	/** The elemental spell tomes (Kingdoms' {@code Tomes}): only with Kingdoms, whose infusion recipes make them. */
+	public static final String TOMECRAFT = "tomecraft";
+	private static final Identifier WATER_TOME = Identifier.fromNamespaceAndPath("jaymoskingdoms", "water_tome");
 	public static final String ARTIFICE = "artifice", ESSENCE_ENCHANTING = "essence_enchanting", SPELLBINDING = "spellbinding",
 		ICHORIUM = "ichorium", ICHORCLOTH = "ichorcloth", EVERFLAME_LANTERN = "everflame_lantern";
 
@@ -189,6 +192,9 @@ public final class AlchemyGear {
 		Research.register(new Research.Entry(EVERFLAME_LANTERN, art, () -> EVERFLAME_LANTERN_ITEM,
 			EssenceList.of(Essence.LIGHT, 14, Essence.FIRE, 8).plus(Essence.CRAFT, 6), List.of("everflame", ARTIFICE), 0, 3, 2));
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
+			// the Enchanting tab's third column (spellbinding is the second); the icon is a Kingdoms tome by lookup, the book without it
+			Research.register(new Research.Entry(TOMECRAFT, ench, () -> BuiltInRegistries.ITEM.getOptional(WATER_TOME).orElse(Items.BOOK),
+				EssenceList.of(Essence.ARCANA, 16, Essence.MIND, 10).plus(Essence.CRYSTAL, 8), List.of(SPELLBINDING), 0, 2, 0));
 			Research.register(new Research.Entry(GOLEMANCY, art, () -> BuiltInRegistries.ITEM.getOptional(CLOCKWORK_GOLEM).orElse(Items.CLOCK),
 				EssenceList.of(Essence.METAL, 16, Essence.MOTION, 14).plus(Essence.SPIRIT, 10), List.of(ARTIFICE, "ichor"), 0, 0, 4));
 		}

@@ -59,7 +59,7 @@ public final class Voices {
 	}
 
 	/**
-	 * (0.7.346) Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you
+	 * (0.7.348) Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you
 	 * dont speak it." What a villager says in their own tongue to someone who doesn't share it, each said by a man's voice
 	 * and a woman's: MCA's hello, cheer and scream ({@link Languages#voice}), and a goodbye when you leave their talk menu
 	 * ({@link Languages#farewell}). The words are in the lang file as {@code tongue.jaymoskingdoms.<tongue>.<line>}; the
@@ -69,7 +69,7 @@ public final class Voices {
 	public static final List<String> TONGUE_LINES = List.of("greet", "farewell", "celebrate", "scream");
 
 	private static final Map<String, Holder<SoundEvent>> SOUNDS = new HashMap<>();
-	/** (0.7.346) {@code <tongue>.<male|female>.<line>} -> its sound. */
+	/** (0.7.348) {@code <tongue>.<male|female>.<line>} -> its sound. */
 	private static final Map<String, Holder<SoundEvent>> TONGUES = new HashMap<>();
 
 	private Voices() {
@@ -118,7 +118,7 @@ public final class Voices {
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
 	}
 
-	/** (0.7.346) {@code line} ({@link #TONGUE_LINES}) said in {@code tongue} by a woman or a man; null for a line it has none of. */
+	/** (0.7.348) {@code line} ({@link #TONGUE_LINES}) said in {@code tongue} by a woman or a man; null for a line it has none of. */
 	public static @Nullable Holder<SoundEvent> tongue(Languages.Tongue tongue, boolean female, String line) {
 		return TONGUES.get(tongue.id() + "." + (female ? "female" : "male") + "." + line);
 	}

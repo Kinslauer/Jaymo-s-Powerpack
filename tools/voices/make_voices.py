@@ -3,7 +3,7 @@
 Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
 cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
 `Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
-page, every answer's tale and the closing line; the spirits read their summon lines; (Kingdoms 0.7.346) each tongue's
+page, every answer's tale and the closing line; the spirits read their summon lines; (Kingdoms 0.7.348) each tongue's
 greeting, farewell, cheer and scream (`tongue.jaymoskingdoms.<tongue>.<line>`), by a man and a woman of that land, made
 up words heard by those who don't speak it (`Voices.TONGUE_LINES`). Clips go straight into
 kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/<voice>/<name>.ogg (mono Vorbis); a clip already there is
@@ -39,7 +39,7 @@ VOICES = {
     "thessaly": dict(seed=51, desc="A prim, fussy elderly female scholar witch, crisp precise voice, scolding but fond"),
     "quiet": dict(seed=61, desc="An ancient, hollow, breathy whisper, very slow, neither male nor female, distant and echoing"),
 }
-# (Kingdoms 0.7.346) The tongues' speakers, a man and a woman each (`<tongue>_male`, `<tongue>_female`), designed on that
+# (Kingdoms 0.7.348) The tongues' speakers, a man and a woman each (`<tongue>_male`, `<tongue>_female`), designed on that
 # tongue's own greeting and farewell so the made-up words keep its sound. Each line is said in its mood (`TONGUE_MOODS`).
 TONGUE_FOLK = {
     "common": "a plain, friendly country villager from green farmland, clear and homely",

@@ -25,6 +25,8 @@ public final class ZFighterNet {
 	public static final int SAGA_START = 20;
 	public static final int SAGA_ABANDON = 21;
 	public static final int JOB_ABANDON = 22;
+	/** (0.17.194) The hold-C form menu: go straight to form {@code index} ({@link ZFighterForms#choices}). */
+	public static final int PICK_FORM = 23;
 	// (6 was the lineage pick: lineages now come from the heritage)
 
 	private ZFighterNet() {
@@ -308,6 +310,7 @@ public final class ZFighterNet {
 			case SAGA_START -> ZFighterSagas.start(player, train.index() / 3, train.index() % 3);
 			case SAGA_ABANDON -> ZFighterSagas.abandon(player);
 			case JOB_ABANDON -> ZFighterSideQuests.abandon(player, train.index());
+			case PICK_FORM -> ZFighterPower.pickForm(player, train.index());
 			default -> {
 			}
 		}

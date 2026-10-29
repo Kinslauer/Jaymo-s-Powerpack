@@ -510,6 +510,13 @@ public final class ZFighterFusion {
 			ZFighterPower.endFlight(leader, live);
 		}
 		live.charging = false;
+		// (0.17.194) Andy: the halfway swap no longer interrupts a transformation: the body keeps its form (and branch form),
+		// now under the partner, until it's changed, dropped or the ki runs out
+		int form = live.form;
+		long formSince = live.formSince;
+		Integer branch = leader.getAttached(ZFighterBranchForms.BRANCH);
+		live.form = 0;
+		leader.removeAttached(ZFighterBranchForms.BRANCH);
 		// what the old leader brings, on his own
 		ZFighterPower.refresh(leader, live);
 		ZFighterPower.Live partnerLive = ZFighterPower.live(partner);
@@ -537,6 +544,11 @@ public final class ZFighterFusion {
 		leader.removeAttached(LOOK);
 		// the body looks the same after they change places: the first dancer stays first
 		look(partner, leader, leader, partner);
+		partnerLive.form = form;
+		partnerLive.formSince = formSince;
+		if (branch != null) {
+			partner.setAttached(ZFighterBranchForms.BRANCH, branch);
+		}
 		ZFighterPower.refresh(partner, partnerLive);
 		partnerLive.ki = Math.min(ZFighterPower.maxKi(partner), ki);
 		partner.setHealth(Math.max(1.0F, healthShare * partner.getMaxHealth()));
@@ -563,6 +575,8 @@ public final class ZFighterFusion {
 		if (leader != null) {
 			leader.removeAttached(LOOK);
 			ZFighterPower.Live live = ZFighterPower.live(leader);
+			// (0.17.192) Super Primal Super lives only as long as the fusion
+			ApeRage.fusionEnded(leader, live);
 			ZFighterPower.refresh(leader, live);
 			live.ki = Math.min(live.ki, ZFighterPower.maxKi(leader));
 			leader.setHealth(Math.min(leader.getHealth(), leader.getMaxHealth()));

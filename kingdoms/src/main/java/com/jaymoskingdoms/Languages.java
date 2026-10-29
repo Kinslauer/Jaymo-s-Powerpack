@@ -266,14 +266,14 @@ public final class Languages {
 		"no", net.minecraft.sounds.SoundEvents.VILLAGER_NO, "celebrate", net.minecraft.sounds.SoundEvents.VILLAGER_CELEBRATE,
 		"angry", net.minecraft.sounds.SoundEvents.VILLAGER_NO);
 
-	/** (0.7.346) A farewell is said to the same player at most this often (ticks), however often they open and shut the menu. */
+	/** (0.7.348) A farewell is said to the same player at most this often (ticks), however often they open and shut the menu. */
 	static final int FAREWELL_GAP = 20 * 30;
 	/** Player -> when a foreign villager last bid them farewell (server tick). */
 	private static final Map<UUID, Integer> FAREWELLED = new HashMap<>();
 
 	/**
 	 * (0.7.61) ({@code EntityVoiceMixin}) A villager speaks a voice line: each player near hears the words only if they
-	 * understand the speaker ({@link #understands}); everyone else hears a grunt. (0.7.346) Or, for a hello, a cheer and a
+	 * understand the speaker ({@link #understands}); everyone else hears a grunt. (0.7.348) Or, for a hello, a cheer and a
 	 * scream, the line said in the speaker's own tongue ({@link Voices#tongue}). True if it was played here.
 	 */
 	public static boolean voice(Entity speaker, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
@@ -309,7 +309,7 @@ public final class Languages {
 	}
 
 	/**
-	 * (0.7.346) ({@code McaCloseMixin}) {@code player} leaves the talk menu of {@code speaker}, a villager whose tongue they
+	 * (0.7.348) ({@code McaCloseMixin}) {@code player} leaves the talk menu of {@code speaker}, a villager whose tongue they
 	 * don't speak: the villager bids them goodbye in it, in their own voice ({@code pitch}). Not while trading with them
 	 * (the menu shuts to open the trade), and not twice in {@link #FAREWELL_GAP}.
 	 */

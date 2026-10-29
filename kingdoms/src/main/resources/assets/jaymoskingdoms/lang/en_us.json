@@ -6155,7 +6155,7 @@
 	"story.jaymoskingdoms.road.monolith.wake": "You wake within sight of a monolith. Its Giant may be near.",
 	"story.jaymoskingdoms.road.wild.wake": "You wake far from anyone.",
 	"story.jaymoskingdoms.road.skyfall.wake": "You drift down into a crater far from anyone, with shards from somewhere above in your pack.",
-	"story.jaymoskingdoms.road.timelost.wake": "You wake in the future's ruined city with Chrono already awakened (its first ability). The way back is dying, or a Chrono's leap home once you can make one. (If the future hasn't been downloaded yet, you wait between times until it has.)",
+	"story.jaymoskingdoms.road.timelost.wake": "You wake in the future's ruined city with Chrono already awakened (its first ability). Dying only wakes you here again; the way back is a Chrono's leap home, once you can make one. (If the future hasn't been downloaded yet, you wait between times until it has.)",
 	"story.jaymoskingdoms.road.burned.wake": "You wake in a burnt-out ruin with a few things you saved.",
 	"story.jaymoskingdoms.road.snowed.wake": "You wake high in the frozen peaks, half-frozen, with a lantern and a fur coat.",
 	"story.jaymoskingdoms.road.captive.wake": "You wake near a barbarian camp with nothing at all. Its raiders hunt you for a day.",
@@ -6213,7 +6213,7 @@
 	"message.jaymoskingdoms.story.whalers": "You've signed on %s as her harpooner. Stay aboard: she sails when she's fitted out, and every hand who comes home with her gets a share.",
 	"message.jaymoskingdoms.story.making.realm": "The kingdoms of this land are rising. Your story begins in a moment...",
 	"message.jaymoskingdoms.story.making.harbour": "Awaiting a harbour...",
-	"message.jaymoskingdoms.story.timelost": "This isn't your time. Only death, or a Chrono's leap, will take you home.",
+	"message.jaymoskingdoms.story.timelost": "This isn't your time. Only a Chrono's leap will take you home.",
 	"message.jaymoskingdoms.story.job": "The village has work for a %s. Your tools are in your pack, and your work starts when you get there.",
 	"message.jaymoskingdoms.story.limb": "You've lived without your %s for years.",
 	"story.jaymoskingdoms.job.butcher": "butcher",
@@ -7697,5 +7697,14 @@
 	"message.jaymoskingdoms.will.roared": "%s's roar shakes you to the bone!",
 	"message.jaymoskingdoms.will.dread": "Your knees shake before %s.",
 	"message.jaymoskingdoms.will.stare": "%s breaks under your stare.",
-	"message.jaymoskingdoms.will.shrug": "You shrug it off!"
+	"message.jaymoskingdoms.will.shrug": "You shrug it off!",
+	"item.jaymoskingdoms.water_tome": "Water Tome",
+	"item.jaymoskingdoms.fire_tome": "Fire Tome",
+	"item.jaymoskingdoms.earth_tome": "Earth Tome",
+	"item.jaymoskingdoms.air_tome": "Air Tome",
+	"item.jaymoskingdoms.lightning_tome": "Lightning Tome",
+	"item.jaymoskingdoms.ice_tome": "Ice Tome",
+	"item.jaymoskingdoms.restoration_tome": "Restoration Tome",
+	"item.jaymoskingdoms.death_tome": "Death Tome",
+	"item.jaymoskingdoms.blood_tome": "Blood Tome"
 }
