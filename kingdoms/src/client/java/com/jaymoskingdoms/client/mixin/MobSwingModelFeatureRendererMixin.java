@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Right after a model is posed to be drawn (the body, and each armour piece): a mob's Better Combat swing (MobAnimations),
- * and (0.7.320) last, a goblin's body reshaped into the goblin's (GoblinBody).
+ * and (0.7.321) last, a goblin's body reshaped into the goblin's (GoblinBody).
  */
 @Mixin(ModelFeatureRenderer.class)
 abstract class MobSwingModelFeatureRendererMixin {

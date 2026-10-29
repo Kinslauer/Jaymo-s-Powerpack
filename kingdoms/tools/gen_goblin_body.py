@@ -1,4 +1,4 @@
-"""The goblin's body (Kingdoms 0.7.320, {@code GoblinBody}): kokosikk's Blockbench Workshop goblin (CC BY 4.0,
+"""The goblin's body (Kingdoms 0.7.321, {@code GoblinBody}): kokosikk's Blockbench Workshop goblin (CC BY 4.0,
 tools/blockbench/kokosikk_goblin.bbmodel, credit in textures/entity/greenskin/CREDITS.txt) gives a goblin villager its
 shape. MCA's skin, face, clothes and hair (and any armour) are drawn on MCA's own body, reshaped bone by bone into the
 goblin's head, tunic, arms and legs; what the goblin has beyond those (ears, nose, tusks, fists, feet and toenails, and

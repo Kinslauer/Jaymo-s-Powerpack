@@ -104,7 +104,7 @@ final class McaLookModels {
 	}
 
 	/**
-	 * (0.7.320) A goblin's breasts ({@link GoblinBody#apply}): MCA poses them as parts of their own off a man's chest
+	 * (0.7.321) A goblin's breasts ({@link GoblinBody#apply}): MCA poses them as parts of their own off a man's chest
 	 * (each time, from its own dimensions); they go onto the goblin's, scaled with its body and leant into its hunch.
 	 */
 	static void goblinChest(HumanoidModel<?> model, float[] body, float[] scale, float hunch) {

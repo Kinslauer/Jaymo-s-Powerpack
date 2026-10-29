@@ -1,4 +1,4 @@
-The goblin's body (Kingdoms 0.7.320: GoblinBody, goblin_body.png) is adapted from "Goblin" by kokosikk
+The goblin's body (Kingdoms 0.7.321: GoblinBody, goblin_body.png) is adapted from "Goblin" by kokosikk
 (https://blockbenchworkshop.com/model/kokosikk/goblin), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
 The original model is kept unchanged in kingdoms/tools/blockbench/kokosikk_goblin.bbmodel.
 Changes: the skull, tunic, arms and shins are drawn as Minecraft's (MCA's) body reshaped to their sizes, so the goblin
