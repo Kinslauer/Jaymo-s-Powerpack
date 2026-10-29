@@ -21,8 +21,9 @@ import org.jspecify.annotations.Nullable;
  * A Z Fighter's flight, run on the client like Wind's (player motion is client-authoritative): its own velocity,
  * steered toward what the controls ask, handed to the player every tick. Ki alone keeps him up (the server drains it).
  * <ul>
- * <li>Hold Z and scroll up: take off (pose 1), then step through the five poses of the arms; scroll down steps back,
- * and past the first lands. A tap of Z in the air also lands.</li>
+ * <li>Hold Z and scroll up: lift gently off the ground (pose 1), then step through the five poses of the arms; scroll
+ * all the way up straight away and a burst of ki throws him into the sky. Scroll down steps back, and past the first
+ * lands. A tap of Z in the air also lands.</li>
  * <li>Hover: WASD, Jump rises, Sneak sinks (and lands on the ground).</li>
  * <li>Sprint: cruise along your look, faster the higher the form ({@link ZFighterPower#FORM_CRUISE}); let go and you
  * coast back to a hover; S brakes.</li>
@@ -36,7 +37,11 @@ public final class ZFighterFlightClient {
 	static final double HOVER_VERTICAL = 0.4;
 	static final double HOVER_RESPONSE = 0.16;
 	static final double HOVER_BOB = 0.012;
-	/** Take-off: a burst of ki throws him up this fast, then eases off over this many ticks into a hover. */
+	/** Take-off: a gentle lift this fast (about two blocks before he settles into a hover). */
+	static final double LIFT_SPEED = 0.3;
+	/** Scrolled all the way up within this many ticks of lifting off: the boost. */
+	static final int BOOST_WINDOW = 20;
+	/** The boost: a burst of ki throws him up this fast, then eases off over this many ticks into a hover. */
 	static final double TAKEOFF_BURST = 1.6;
 	static final int BURST_TICKS = 10;
 	static final double BURST_DRAG = 0.82;
@@ -58,6 +63,8 @@ public final class ZFighterFlightClient {
 
 	private static int pose;
 	private static int burst;
+	private static int sinceTakeOff;
+	private static boolean boosted;
 	private static boolean cruising;
 	private static Vec3 velocity = Vec3.ZERO;
 	private static double speed;
@@ -113,7 +120,11 @@ public final class ZFighterFlightClient {
 			return true;
 		}
 		pose = next;
-		send(pose);
+		boolean boost = pose == ZFighterPower.FLIGHT_POSES && !boosted && sinceTakeOff <= BOOST_WINDOW;
+		if (boost) {
+			boost();
+		}
+		send(pose, boost);
 		player.level().playLocalSound(player, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.25F, 1.0F + 0.12F * pose);
 		return true;
 	}
@@ -123,8 +134,17 @@ public final class ZFighterFlightClient {
 		cruising = false;
 		speed = 0.0;
 		sinkArmed = false;
+		burst = 0;
+		sinceTakeOff = 0;
+		boosted = false;
+		velocity = new Vec3(player.getDeltaMovement().x * 0.3, Math.max(player.getDeltaMovement().y, LIFT_SPEED), player.getDeltaMovement().z * 0.3);
+	}
+
+	/** Scrolled all the way up just after lifting off: a burst of ki throws him into the sky. */
+	private static void boost() {
+		boosted = true;
 		burst = BURST_TICKS;
-		velocity = new Vec3(player.getDeltaMovement().x * 0.3, Math.max(player.getDeltaMovement().y, TAKEOFF_BURST), player.getDeltaMovement().z * 0.3);
+		velocity = new Vec3(velocity.x, Math.max(velocity.y, TAKEOFF_BURST), velocity.z);
 	}
 
 	private static void land(LocalPlayer player, boolean tell) {
@@ -135,19 +155,20 @@ public final class ZFighterFlightClient {
 		burst = 0;
 		cruising = false;
 		if (tell) {
-			send(0);
+			send(0, false);
 		}
 	}
 
-	private static void send(int value) {
+	private static void send(int value, boolean boost) {
 		sinceSent = 0;
-		ClientPlayNetworking.send(new ZFighterNet.Fly(value));
+		ClientPlayNetworking.send(new ZFighterNet.Fly(value, boost));
 	}
 
 	/** Every client tick, from the power's own tick: the Z key, then the flight itself. */
 	static void tick(Minecraft minecraft, LocalPlayer player) {
 		ticks++;
 		sinceSent++;
+		sinceTakeOff++;
 		boolean z = JaymosPowersClient.modeKey().isDown() && minecraft.gui.screen() == null;
 		if (z && !zHeld) {
 			zScrolled = false;
@@ -161,6 +182,7 @@ public final class ZFighterFlightClient {
 			owner = player;
 			pose = ZFighterPower.flightPose(player);
 			burst = 0;
+			boosted = true;
 			cruising = false;
 			speed = 0.0;
 			sinkArmed = false;
