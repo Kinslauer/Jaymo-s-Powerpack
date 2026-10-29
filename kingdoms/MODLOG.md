@@ -6487,8 +6487,8 @@ Compile-checked, not seen in game.
   every change; use it on its owner to match), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
   from stage 3; replaces SeizureClient's night-only feral edge).
 - **Everyone:** `Suspicion` (villagers who see a monster feed, hunt, change or show tells gossip naming them by MCA
-  name, fades over ~3 days; wary guards watch them), `Accusations` (sneak-use a cleric holding paper: holy water on the
-  nearest other player; guilty ones are exposed till dawn and guards hunt them, the accuser gains realm reputation; a
+  name, fades over ~3 days; wary guards watch them), `Accusations` ("Accuse someone here", a priest's MCA talk option shown while another
+  player is within 10 blocks: holy water on the nearest one; guilty ones are exposed till dawn and guards hunt them, the accuser gains realm reputation; a
   false accusation costs reputation and the priests' ear for a day), `VictimMemory` + client `VictimClient` (a bitten
   player wakes to a blurred red silhouette of who bit them, no name), `Kinship` + client `KinshipClient` (monsters in
   sight of each other hear a cold slow beat or a growl instead of the mortal heartbeat).

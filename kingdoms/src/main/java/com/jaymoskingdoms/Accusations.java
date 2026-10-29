@@ -6,7 +6,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import com.mojang.serialization.Codec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,17 +15,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
-import net.minecraft.world.item.Items;
 
 /**
- * (0.7.332) Accuse at the priest. Sneak and use a cleric while holding a sheet of paper (the written accusation; an empty
- * hand would be a vampire's bite): the nearest other player within {@link #RANGE} blocks is the accused. The priest
- * throws holy water at them (splash, sound), and the paper is spent.
+ * (0.7.332) Accuse at the priest: "Accuse someone here", a talk option on a cleric's MCA menu (Andy: "this should be one
+ * of the context sensitive talk options"), shown only while another player stands within {@link #RANGE} blocks. The
+ * nearest one is the accused, and the priest throws holy water at them (splash, sound).
  *
  * <ul>
  * <li>If the accused is a vampire or a cursed werewolf, they're exposed to the realm until dawn ({@link #exposed}: guards
@@ -41,6 +38,8 @@ import net.minecraft.world.item.Items;
 public final class Accusations {
 	// ---- tuning --------------------------------------------------------------------------------------------------------
 
+	/** The talk option ({@code McaAnswersMixin}, {@code McaDialogueMixin}). */
+	public static final String ANSWER = "jaymoskingdoms_accuse";
 	/** The accused is the nearest other player within this (blocks). */
 	static final double RANGE = 10.0;
 	/** Reputation won for a true accusation, lost for a false one. */
@@ -65,15 +64,12 @@ public final class Accusations {
 	}
 
 	static void register() {
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer accuser) || hand != InteractionHand.MAIN_HAND
-				|| !accuser.isShiftKeyDown() || !accuser.getMainHandItem().is(Items.PAPER) || !priest(entity)) {
-				return InteractionResult.PASS;
-			}
-			accuse(server, accuser, (Villager) entity);
-			return InteractionResult.SUCCESS;
-		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> EXPOSED.clear());
+	}
+
+	/** Whether the talk option shows: a priest, and someone here to accuse. */
+	public static boolean canAccuse(ServerPlayer player, Entity who) {
+		return priest(who) && nearest(player) != null;
 	}
 
 	/** A grown cleric. */
@@ -116,6 +112,11 @@ public final class Accusations {
 		return tod < Vampires.NIGHT_TO ? Vampires.NIGHT_TO - tod : 24000L - tod + Vampires.NIGHT_TO;
 	}
 
+	/** The talk option chosen. */
+	public static void accuse(ServerPlayer accuser, Villager priest) {
+		accuse((ServerLevel) priest.level(), accuser, priest);
+	}
+
 	private static void accuse(ServerLevel level, ServerPlayer accuser, Villager priest) {
 		long now = level.getGameTime();
 		if (now < accuser.getAttachedOrElse(DEAF_UNTIL, 0L)) {
@@ -127,9 +128,6 @@ public final class Accusations {
 		if (accused == null) {
 			accuser.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.accuse.nobody").withStyle(ChatFormatting.GRAY));
 			return;
-		}
-		if (!accuser.isCreative()) {
-			accuser.getMainHandItem().shrink(1);
 		}
 		priest.getLookControl().setLookAt(accused);
 		priest.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);

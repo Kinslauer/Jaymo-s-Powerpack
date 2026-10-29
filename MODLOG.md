@@ -3615,5 +3615,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   sleeping prey, thralls, the Mask, tells (animals flee, food gives nothing), pallor, garlic and silver tests, hunter's
   torch sense, head turns, sneaking away, the blood's and the curse's requests, mood on screen; for werewolves the
   moon's pull, scent trails, hidden-change tells, locking yourself in, the morning after, torn cloth evidence; and for
-  everyone rumours with names, accusing at the priest (with paper), victim memory, and monsters hearing each other.
+  everyone rumours with names, accusing at the priest (a talk option), victim memory, and monsters hearing each other.
   See the Kingdoms MODLOG.
