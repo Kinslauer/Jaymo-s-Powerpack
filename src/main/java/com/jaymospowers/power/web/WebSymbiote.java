@@ -1159,7 +1159,8 @@ public final class WebSymbiote {
 		// it never dies with you: it pours out of your body and stays near it, looking for someone new
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
-				withdraw(player);
+				// (0.17.150) it stays where you fell, holding your things; or, if it killed you, it feeds: WebSymbioteLife
+				WebSymbioteLife.died(player, source);
 			}
 		});
 		// and the body that comes back is nobody's: no bond, no suit, no armour (whatever reached it in between)
@@ -1566,6 +1567,10 @@ public final class WebSymbiote {
 		}
 		// and it has something to say about what you're fighting
 		WebSymbioteFoes.tick(player, now);
+		// (0.17.150) starved to nothing, it takes you: the warnings and the scene (WebSymbioteLife)
+		if (WebSymbioteLife.tick(player, state, now)) {
+			return;
+		}
 		// (0.17.149) its tendrils fetch items for you, and it studies each new kind once
 		WebSymbioteCollect.tick(player, now);
 		// (0.17.150) its trust, mood, orders and requests (WebSymbioteMind)
@@ -2225,6 +2230,12 @@ public final class WebSymbiote {
 		com.jaymospowers.core.Shakes.send(player, 1.0F);
 		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 0, false, false));
 		return withdraw(player).spurn(player);
+	}
+
+	/** (0.17.150) The suit shows itself until {@code until} (game time) though the bond wouldn't have it: a misfire ({@link WebSymbioteLife}). */
+	static void showSuit(ServerPlayer player, long until) {
+		live(player).suitDebutUntil = until;
+		set(player, state(player).withFlag(WebSymbioteState.SUIT, true));
 	}
 
 	/** The suit is coming off by tearing (see {@link #TORN}). */
