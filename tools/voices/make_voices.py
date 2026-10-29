@@ -16,6 +16,7 @@ redesign a voice (then delete its clips too).
     python make_voices.py narrator        # one voice
     python make_voices.py symbiote
     python make_voices.py symbiote --limit=3   # only the first few, to hear them
+    python make_voices.py --resnarl=<folder>   # remake the symbiote's clips from gritted takes, no model
     python make_voices.py --sounds        # only rewrite sounds.json (no model needed)
 """
 import json
@@ -135,9 +136,12 @@ def write_sounds(all_lines):
         print("wrote", path, len(sounds), "sounds")
 
 
-# snarl: each word drawn out this much (WSOLA, so its pitch stays), the growl into it this long (s), and how loud the
-# octave-lower double under the whole line is
-SNARL_STRETCH, SNARL_LEAD, SNARL_DOUBLE = 1.6, 0.36, 0.5
+# snarl: each word drawn out this much (WSOLA, so its pitch stays), the growl into it this long (s) and this loud; under
+# the words, the grunge: the octave-lower double, the rattling low rumble, the raspy hiss, and how loud all of it is
+# (Andy: "it doesnt sound legible at all, i do like the added noise and grunge to the growl, increase that, make it a
+# little more understandable")
+SNARL_STRETCH, SNARL_LEAD, SNARL_LEAD_GAIN = 1.3, 0.32, 0.6
+SNARL_DOUBLE, SNARL_RUMBLE, SNARL_HISS, SNARL_GRUNGE = 0.32, 0.9, 0.35, 0.6
 
 
 def tsm(seg, k):
@@ -184,7 +188,9 @@ def word_dips(wav, rate):
 def snarl(wav, rate):
     """(the symbiote) A long snarl into every word, no dead air: the line is cut into words (at its silences, which are
     dropped, and at the dips between run-together words), each word drawn out and led into by a growl made from its own
-    first moment (an octave down, dragged out, rattling, swelling), then an octave-lower double laid under it all."""
+    first moment (an octave down, dragged out, rattling, swelling). The words stay clear on top; the grunge goes under
+    them, driven hard: noise riding the voice's loudness (a rattling low rumble and a raspy hiss) and an octave-lower
+    double."""
     import numpy as np
     hop = rate // 100
     n = wav.size // hop
@@ -225,7 +231,7 @@ def snarl(wav, rate):
         growl = octave_down(tsm(word[:t_lead], SNARL_LEAD * rate / max(1, min(t_lead, word.size))))
         t = np.arange(growl.size) / rate
         growl = growl * (1.0 + 0.8 * np.sin(2 * np.pi * 29.0 * t) * (0.7 + 0.3 * np.sin(2 * np.pi * 5.1 * t)))
-        growl = growl * np.linspace(0.0, 1.0, growl.size) ** 1.6 * 0.85
+        growl = growl * np.linspace(0.0, 1.0, growl.size) ** 1.6 * SNARL_LEAD_GAIN
         m = min(fade, growl.size, word.size)
         word[:m] += growl[-m:] * np.linspace(1.0, 0.0, m)
         growl = growl[:-m] if m else growl
@@ -237,9 +243,28 @@ def snarl(wav, rate):
             growl = growl[o:]
         out += [growl, word]
     out.append(wav[b:])
-    y = np.concatenate(out)
-    y = y + SNARL_DOUBLE * octave_down(y)
-    return np.tanh(2.2 * y / (float(np.max(np.abs(y))) or 1.0)) / np.tanh(2.2)
+    dry = np.concatenate(out)
+    dry = dry / (float(np.max(np.abs(dry))) or 1.0)
+    k = max(1, int(rate * 0.025))
+    env = np.convolve(np.abs(dry), np.ones(k) / k, mode="same").astype(np.float32)
+    noise = np.random.default_rng(7).standard_normal(dry.size).astype(np.float32)
+    t = np.arange(dry.size) / rate
+    rumble = band(noise, rate, 70, 700) * (1.0 + 0.9 * np.sin(2 * np.pi * 27.0 * t) * (0.7 + 0.3 * np.sin(2 * np.pi * 5.1 * t)))
+    hiss = band(noise, rate, 2000, 7000)
+    rumble /= float(np.max(np.abs(rumble))) or 1.0
+    hiss /= float(np.max(np.abs(hiss))) or 1.0
+    grunge = (SNARL_RUMBLE * rumble + SNARL_HISS * hiss) * env * 2.5 + SNARL_DOUBLE * octave_down(dry)
+    grunge = np.tanh(4.0 * grunge) / np.tanh(4.0)
+    return np.tanh(1.4 * dry) / np.tanh(1.4) + SNARL_GRUNGE * grunge
+
+
+def band(x, rate, lo, hi):
+    """`x` with only lo..hi Hz left."""
+    import numpy as np
+    f = np.fft.rfft(x)
+    hz = np.fft.rfftfreq(x.size, 1.0 / rate)
+    f[(hz < lo) | (hz > hi)] = 0
+    return np.fft.irfft(f, x.size).astype(np.float32)
 
 
 def grit(wav, rate):
@@ -290,6 +315,11 @@ def main():
     write_sounds(all_lines)
     if "--sounds" in sys.argv:
         return
+    for a in sys.argv[1:]:
+        if a.startswith("--resnarl="):
+            resnarl(a[len("--resnarl="):], all_lines)
+            write_sounds(all_lines)
+            return
     only = {a for a in sys.argv[1:] if not a.startswith("--")}
     todo = [(v, k, t) for v, k, t in all_lines if (not only or v in only)
             and not os.path.exists(clip_path(v, k))]
@@ -311,6 +341,27 @@ def main():
     finally:
         # (Powers lists only the clips that exist, so list the new ones even if the run is stopped)
         write_sounds(all_lines)
+
+
+def resnarl(folder, all_lines):
+    """(the symbiote) Remake its clips without the model, from takes already roughened by grit (`folder` holds
+    say_<act>_<n>.ogg): each is run through snarl again. Any clip already made is redone."""
+    import soundfile as sf
+    n = 0
+    for voice, key, _ in all_lines:
+        if voice != "symbiote":
+            continue
+        take = os.path.join(folder, sound_name(key)[1].split("/", 1)[1] + ".ogg")
+        if not os.path.exists(take):
+            print("no take for", key)
+            continue
+        wav, rate = sf.read(take, dtype="float32")
+        path = clip_path(voice, key)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        wav = snarl(wav, rate)
+        sf.write(path, wav * (0.89 / (float(abs(wav).max()) or 1.0)), rate, format="OGG", subtype="VORBIS")
+        n += 1
+    print("resnarled", n, "clips")
 
 
 def make(model, rate, sf, voice, key, text):
