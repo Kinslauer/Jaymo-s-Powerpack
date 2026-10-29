@@ -31,3 +31,7 @@ players can stay on, and it pauses when the server stops and carries on with `ch
 shows how far along it is. It takes a few hours on the Deck and the world folder grows by about a GB, so start it before
 bed. In `server.properties`, `view-distance=12` and `simulation-distance=8` are a good balance on the Deck: more chunks
 are sent ahead of flyers, fewer are ticked.
+
+**Claude Code on the Deck:** start Claude Code inside the repository's checkout on the Deck (the folder with
+`CLAUDE.md`, not `~/jaymos-server`) and it knows "pbdr" / "pbdr new world" from `.claude/skills/pbdr/SKILL.md`: it
+pulls master, builds with the server's own JDK, swaps the mods folder, restarts and sets the voice chat host.
