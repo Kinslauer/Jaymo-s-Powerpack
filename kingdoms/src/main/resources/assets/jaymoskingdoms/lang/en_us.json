@@ -7677,5 +7677,14 @@
 	"message.jaymoskingdoms.will.roared": "%s's roar shakes you to the bone!",
 	"message.jaymoskingdoms.will.dread": "Your knees shake before %s.",
 	"message.jaymoskingdoms.will.stare": "%s breaks under your stare.",
-	"message.jaymoskingdoms.will.shrug": "You shrug it off!"
+	"message.jaymoskingdoms.will.shrug": "You shrug it off!",
+	"item.jaymoskingdoms.water_tome": "Water Tome",
+	"item.jaymoskingdoms.fire_tome": "Fire Tome",
+	"item.jaymoskingdoms.earth_tome": "Earth Tome",
+	"item.jaymoskingdoms.air_tome": "Air Tome",
+	"item.jaymoskingdoms.lightning_tome": "Lightning Tome",
+	"item.jaymoskingdoms.ice_tome": "Ice Tome",
+	"item.jaymoskingdoms.restoration_tome": "Restoration Tome",
+	"item.jaymoskingdoms.death_tome": "Death Tome",
+	"item.jaymoskingdoms.blood_tome": "Blood Tome"
 }

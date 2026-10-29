@@ -391,6 +391,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
+		// the elemental spell tomes: left-click bolts, a loaded page on right click
+		Tomes.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
