@@ -3601,3 +3601,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   rotten flesh), C to feed or consume a held foe, misfires while settling, starving it to zero bond consumes you, any
   other death leaves it waiting at the spot with your things to rebond, and the meteor blob rampages round its crater
   until killed or bonded. Compile-checked; not playtested.
+- **0.17.159, Enderscape and Last World Panorama (Kingdoms 0.7.331):** two outside mods join the pack unchanged, downloaded by id.
+  Enderscape (code MIT, art all rights reserved) reworks the End: new biomes, plants, mobs, blocks, items, music and sky;
+  it needs Lithostitched (MIT) and the pack's YACL. Its built-in data packs (on by default) swap vanilla End cities and
+  overworld strongholds for its own, which fill chests from their own loot tables, so the Grand Shield also lives in
+  its stronghold armouries and the Voidreaver in its End city chests (`compat/EnderscapeLoot`; Kingdoms 0.7.331 does
+  the same for writs and quest lairs). Only End chunks generated after this get the new terrain. Last World Panorama (client-only) makes the title screen's panorama a shot of where you last left a world.
+  Both are in `packMods` with their CurseForge ids, so the CurseForge import downloads them; Enderscape is kept out
+  of the dev game.

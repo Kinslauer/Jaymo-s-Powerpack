@@ -6451,3 +6451,9 @@ Proximity Text Chat is all rights reserved, so only its idea is used; the voice 
   high) and a full mask (a bit lower, muffled) follow the player's own on/off switch (J). A hood leaves it alone.
 - Server: Simple Voice Chat listens on UDP 24454; the Deck's playit tunnel needs a UDP tunnel for it (deck/README.md).
 Compile-checked, not seen in game.
+
+## 0.7.331: Enderscape's strongholds count (pack 0.17.159)
+- The pack adds Enderscape, whose built-in data pack swaps vanilla strongholds for its own (`enderscape:stronghold`) with
+  their own chest tables. Writs and wizards' staffs now turn up in its library chests too (`Classes`), and quest lairs and
+  lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
+  also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
