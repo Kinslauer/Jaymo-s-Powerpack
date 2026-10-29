@@ -115,6 +115,8 @@ final class GoblinVillages {
 		for (int i = START_DRINKERS; i < START_GOBLINS; i++) {
 			spawn(level, id, Goblins.GOBLIN, spot(level, fire, random), fire, GoblinBuildings.HOME_RADIUS);
 		}
+		// (0.7.327) and scalebane sellswords
+		ScalebaneArcher.hire(level, id, fire, ScalebaneArcher.START);
 		JaymosKingdoms.LOGGER.info("A goblin village, {}, rose at {}", village.name(), fire);
 		return Factions.get(server, id);
 	}

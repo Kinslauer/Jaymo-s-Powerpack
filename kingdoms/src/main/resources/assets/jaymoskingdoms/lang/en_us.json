@@ -7479,5 +7479,22 @@
 	"handbook.jaymoskingdoms.8.title": "For Riders",
 	"handbook.jaymoskingdoms.8.body": "Riders read a wild horse at a glance: hold a saddle and look at it to see its breed, sex and stats. Each breed also gives its Rider a gift, which grows at trust 40 and 100: the destrier shields you from a killing blow, the courser bursts, the palfrey keeps road pace, the desert horse starts quick, the draft horse herds, the steppe pony snorts monsters away, the nightmare sees in the dark, the bat horse lands softly, the elephant calms angry beasts, and the mammoth walks on powder snow.",
 	"handbook.jaymoskingdoms.9.title": "Wagons and coaches",
-	"handbook.jaymoskingdoms.9.body": "With Jaymo's Kitchen, horses pull carts. A wagon carries goods and picks up animals and villagers it passes. The six-seat coach is too heavy for anything but a draft horse. Sneak and use a cart to let its passengers out."
+	"handbook.jaymoskingdoms.9.body": "With Jaymo's Kitchen, horses pull carts. A wagon carries goods and picks up animals and villagers it passes. The six-seat coach is too heavy for anything but a draft horse. Sneak and use a cart to let its passengers out.",
+	"entity.jaymoskingdoms.minotaur": "Minotaur",
+	"entity.jaymoskingdoms.piglin_king": "Piglin King",
+	"entity.jaymoskingdoms.redstone_golem": "Redstone Golem",
+	"entity.jaymoskingdoms.skulk_golem": "Skulk Golem",
+	"entity.jaymoskingdoms.wild_boar": "Wild Boar",
+	"entity.jaymoskingdoms.scalebane": "Scalebane Sellsword",
+	"item.jaymoskingdoms.minotaur_spawn_egg": "Minotaur Spawn Egg",
+	"item.jaymoskingdoms.piglin_king_spawn_egg": "Piglin King Spawn Egg",
+	"item.jaymoskingdoms.redstone_golem_spawn_egg": "Redstone Golem Spawn Egg",
+	"item.jaymoskingdoms.skulk_golem_spawn_egg": "Skulk Golem Spawn Egg",
+	"item.jaymoskingdoms.wild_boar_spawn_egg": "Wild Boar Spawn Egg",
+	"item.jaymoskingdoms.scalebane_spawn_egg": "Scalebane Sellsword Spawn Egg",
+	"message.jaymoskingdoms.encounter.wild_boar": "Tusked shapes are grunting and coming your way.",
+	"message.jaymoskingdoms.encounter.minotaur": "Hoofbeats on stone, and a bellow off the rocks. Something with horns is coming down the mountain.",
+	"talk.jaymoskingdoms.gossip.beast.minotaur.0": "A bull that walks like a man, %1$s blocks %2$s of here. Carries a hammer bigger than me.",
+	"talk.jaymoskingdoms.gossip.beast.minotaur.1": "Shepherds won't go %1$s blocks %2$s any more. There's a minotaur up there, and it charges anything it sees.",
+	"talk.jaymoskingdoms.gossip.beast.minotaur.2": "Don't stand in front of the minotaur %1$s blocks %2$s. Get it to charge a wall and hit it while it's dazed."
 }

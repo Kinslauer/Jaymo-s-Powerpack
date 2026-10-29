@@ -80,7 +80,8 @@ public final class Monsters {
 
 	/** The monsters of legend, the ones folk gossip about and send you after. */
 	public static List<EntityType<?>> legends() {
-		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, MUD_GOLEM);
+		// (0.7.327) and the minotaur (beasts/Minotaur)
+		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, MUD_GOLEM, com.jaymoskingdoms.beasts.Beasts.MINOTAUR);
 	}
 
 	public static boolean legend(EntityType<?> type) {

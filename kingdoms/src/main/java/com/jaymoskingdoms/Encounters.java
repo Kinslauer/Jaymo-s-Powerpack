@@ -57,7 +57,9 @@ public final class Encounters {
 	static final List<String> NO_NATURAL_SPAWNS = List.of("bear", "lion", "tiger", "alligator", "komodo_dragon", "rhino",
 		"desert_scorpion", "jungle_scorpion", "elephant", "mammoth",
 		// (0.7.206) its whales: Kingdoms' great whales take their place (whaling)
-		"whale");
+		"whale",
+		// (0.7.327) its boar: Kingdoms' wild boar takes its place (beasts/WildBoar)
+		"boar");
 	/** How often the players' surroundings are weighed (ticks). */
 	static final int CHECK_TICKS = 400;
 	/** The chance, at each check, that something finds a player out in the wild (about once in 15 minutes there). */
@@ -104,7 +106,8 @@ public final class Encounters {
 		new Encounter("naturalist:rhino", "naturalist:has_rhino", 6, 1, 1),
 		new Encounter("naturalist:desert_scorpion", "naturalist:has_desert_scorpion", 10, 2, 3),
 		new Encounter("naturalist:jungle_scorpion", "naturalist:has_jungle_scorpion", 10, 2, 3),
-		new Encounter("naturalist:boar", "naturalist:has_boar", 6, 2, 4),
+		// (0.7.327) Kingdoms' own wild boar in place of Naturalist's (beasts/WildBoar)
+		new Encounter("jaymoskingdoms:wild_boar", "jaymoskingdoms:has_wild_boar", 6, 2, 4),
 		new Encounter("naturalist:snake", "naturalist:has_rattlesnake", 4, 1, 1),
 		new Encounter("naturalist:snake", "naturalist:has_coral_snake", 4, 1, 1),
 		// Kingdoms' own, after Better Animals Plus (wild/Wild)
@@ -121,6 +124,8 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
 		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
 		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", 6, 1, 2),
+		// (0.7.327) the minotaur, in the mountains (beasts/Minotaur)
+		new Encounter("jaymoskingdoms:minotaur", "jaymoskingdoms:has_minotaur", 3, 1, 1),
 		// (0.7.137) the wind dragons (dragons/Dragons), rare: Notus over the badlands, Boreas over the frozen peaks, Zephyrus
 		// in the swamps
 		new Encounter("jaymoskingdoms:notus_dragon", "jaymoskingdoms:has_notus_dragon", 2, 1, 1),
