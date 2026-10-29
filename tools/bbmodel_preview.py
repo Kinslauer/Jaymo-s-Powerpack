@@ -4,7 +4,10 @@ the world, back faces culled (so a face wound the wrong way shows up as a hole).
 in game.
 
 python -I tools/bbmodel_preview.py <assets dir> <name> <out.png> [animation] [time] [texture png]
+POSE env var: extra rotations (degrees, the game's way) and offsets to try a procedural pose, as
+"bone=rx:ry:rz,bone:=rx:ry:rz,bone@=px:py:pz" (= adds to the rotation, := sets it, @ adds to the pivot).
 """
+import os
 import json
 import math
 import sys
@@ -61,6 +64,8 @@ def main():
 	anim = sys.argv[4] if len(sys.argv) > 4 else None
 	at = float(sys.argv[5]) if len(sys.argv) > 5 else 0.0
 	model = json.load(open(f"{assets}/bbmodels/{name}.json"))
+	if anim == "-":
+		anim = None
 	tex = Image.open(sys.argv[6] if len(sys.argv) > 6 else f"{assets}/textures/entity/bb/{name}.png").convert("RGBA")
 	T = tex.load()
 	bones = model["bones"]
@@ -78,6 +83,20 @@ def main():
 				p[0] += v[0]; p[1] += v[1]; p[2] += v[2]
 			else:
 				s[0] *= v[0]; s[1] *= v[1]; s[2] *= v[2]
+	idx = {b["name"]: i for i, b in enumerate(bones)}
+	for item in filter(None, os.environ.get("POSE", "").split(",")):
+		k, v = item.split("=")
+		v = [float(x) for x in v.split(":")]
+		if k.endswith(":"):
+			pose[idx[k[:-1]]][1][:] = [math.radians(x) for x in v]
+		elif k.endswith("@"):
+			p = pose[idx[k[:-1]]][0]
+			for j in range(3):
+				p[j] += v[j]
+		else:
+			r = pose[idx[k]][1]
+			for j in range(3):
+				r[j] += math.radians(v[j])
 	# world matrix of each bone: parent * translate(pivot) * rotate * scale
 	world = {}
 
@@ -97,6 +116,7 @@ def main():
 		return world[i]
 
 	quads = []
+	ext = {}
 	for i, b in enumerate(bones):
 		M, o = wm(i)
 		for q in b["quads"]:
@@ -109,9 +129,14 @@ def main():
 				wx, wy, wz = -w[0] / 16, (24 - w[1]) / 16, w[2] / 16
 				pts.append(((-wx, wy, -wz), (u, v)))
 			quads.append(pts)
+			if b["name"] in os.environ.get("EXT", "").split(","):
+				ext.setdefault(b["name"], []).extend(p for p, _ in pts)
+	for k, ps in ext.items():
+		print(k, "spans (blocks):", [round(min(p[j] for p in ps), 2) for j in range(3)], [round(max(p[j] for p in ps), 2) for j in range(3)])
 	allp = [p for q in quads for p, _ in q]
 	lo = [min(p[k] for p in allp) for k in range(3)]
 	hi = [max(p[k] for p in allp) for k in range(3)]
+	print("extent (blocks, x y z):", [round(v, 2) for v in lo], [round(v, 2) for v in hi])
 	c = [(lo[k] + hi[k]) / 2 for k in range(3)]
 	ext = max(hi[k] - lo[k] for k in range(3)) or 1
 	size, yaws = 360, (30, 90, 150, 0, 210)
