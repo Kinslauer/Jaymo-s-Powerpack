@@ -1,13 +1,19 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.StoryGround;
+import com.jaymoskingdoms.Voices;
+import java.util.ArrayDeque;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.236) Andy: "can the player be held in a stasis menu or faux load screen at the beginning while everything
@@ -22,6 +28,16 @@ final class StoryHoldScreen extends Screen {
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */
 	private static String holding = "";
+	/**
+	 * (0.7.352) The narrator reads the screen ({@link Voices}): its title once, then each line as the hold moves on. What it
+	 * last began reading, the line being read, those still to read, and when the line began (ms).
+	 */
+	private static String read = "";
+	private static @Nullable SimpleSoundInstance reading;
+	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
+	private static long readFrom;
+	/** A sound only counts as playing once the engine has picked it up. */
+	private static final long READ_START_MS = 500L;
 
 	private StoryHoldScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.story.hold.title"));
@@ -35,6 +51,7 @@ final class StoryHoldScreen extends Screen {
 				StoryCurtain.raise();
 			}
 			if (holding.isEmpty()) {
+				hush(minecraft);
 				if (minecraft.gui.screen() instanceof StoryHoldScreen) {
 					minecraft.gui.setScreen(null);
 				}
@@ -48,7 +65,46 @@ final class StoryHoldScreen extends Screen {
 				minecraft.gui.setScreen(new StoryHoldScreen());
 			}
 		});
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> holding = "");
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
+			holding = "";
+			hush(minecraft);
+		});
+	}
+
+	/** The hold is over: stop reading, so the life story's narrator isn't talked over. */
+	private static void hush(Minecraft minecraft) {
+		if (reading != null) {
+			minecraft.getSoundManager().stop(reading);
+			reading = null;
+		}
+		toRead.clear();
+		read = "";
+	}
+
+	private static void narrate() {
+		if (!holding.equals(read)) {
+			if (read.isEmpty()) {
+				toRead.add("gui.jaymoskingdoms.story.hold.title");
+			}
+			read = holding;
+			toRead.add(holding);
+		}
+		Minecraft minecraft = Minecraft.getInstance();
+		if (reading != null) {
+			if (System.currentTimeMillis() - readFrom < READ_START_MS || minecraft.getSoundManager().isActive(reading)) {
+				return;
+			}
+			reading = null;
+		}
+		while (!toRead.isEmpty()) {
+			Holder<SoundEvent> voice = Voices.of(toRead.poll());
+			if (voice != null) {
+				reading = SimpleSoundInstance.forUI(voice.value(), 1.0F, 1.0F);
+				readFrom = System.currentTimeMillis();
+				minecraft.getSoundManager().play(reading);
+				return;
+			}
+		}
 	}
 
 	static boolean holding() {
@@ -76,6 +132,7 @@ final class StoryHoldScreen extends Screen {
 			this.onClose();
 			return;
 		}
+		narrate();
 		graphics.fill(0, 0, this.width, this.height, BACKGROUND);
 		int cx = this.width / 2, cy = this.height / 2;
 		long now = System.currentTimeMillis();

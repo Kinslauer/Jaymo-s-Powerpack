@@ -1422,8 +1422,11 @@ public final class WebSymbiote {
 	static void whisper(ServerPlayer player, String key, Object... args) {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
 		// (0.17.150) in a mood, a line of its commentary has a variant of its own where one was written
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + WebSymbioteMind.voice(player, key), args)
+		String line = WebSymbioteMind.voice(player, key);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + line, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
+		// (0.17.202) its narration is spoken aloud too, where the line has a clip
+		WebSymbioteVoice.speak(player, line);
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
