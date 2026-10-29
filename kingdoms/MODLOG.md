@@ -6547,3 +6547,18 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
 - **Heavenly Mantle** (eanncrod, `Armory.HEAVENLY_PIECES`): the Reverent Warplate's pair, drawn by `ReverentLayer` (now
   one layer per set). Never made: Powers' afterlife gives one piece to each champion of the tournament of the dead.
   Netherite's defence, toughness 3.5, enchantability 25, fireproof, mended with gold (`tools/gen_heavenly.py`).
+
+## 0.7.340: rescue rewards come by Tidings and talk, not chat
+
+- Andy: "this text should not appear, you will find out in game through tidings or gossip". Freeing a captive and
+  bringing them home no longer prints anything in chat. The rewards, favours and pardons themselves are unchanged.
+- **Freed:** a captive taken from a settlement names it as they thank you, in their speech bubble (12 `rescue.lead`
+  lines), so you still learn where to take them. A homeless one thanks you as before.
+- **Home:** what the family and treasury paid goes into your next Tidings letter (`tidings.jaymoskingdoms.captive.*`).
+  The losing or death of a captive you were leading goes there too.
+- **Favours:** Andy: "favors are not listed or tracked in a way the player can see. you will know when you know."
+  Nothing mentions a favour or counts them: the guards simply don't toll or search you, and when an arrest is let go,
+  the town's nearest guard (24 blocks) says so aloud (12 `rescue.pardon` lines).
+- **Speak of the rescue:** Andy: "you can talk to them about it for a context chat option as well". A new MCA menu
+  option on a guard of a town that owes you: they say what it buys you there (no toll, no search, a blind eye), never how
+  many favours are left (12 `rescue.owed` lines; `Captives.ANSWER`, shown by `McaAnswersMixin`, answered in `McaDialogueMixin`).

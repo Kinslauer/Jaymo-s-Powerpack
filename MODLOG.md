@@ -3652,3 +3652,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   click is still the Flurry while it's ready, and the guard while it cools down, as the warhammer's smash does. The
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
   hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
+- **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.

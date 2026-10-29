@@ -61,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
  * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
+ * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
  * (0.7.319) Asked of one of Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}): their talk screen; "Talk
@@ -223,6 +224,13 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
 			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Captives.ANSWER.equals(answer)) {
+			// (0.7.340) a guard of a town that owes you for one you brought home: what that buys you there
+			villager.sendChatMessage(com.jaymoskingdoms.Captives.speakOf(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;

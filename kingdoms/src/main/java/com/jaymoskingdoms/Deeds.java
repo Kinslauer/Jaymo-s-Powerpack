@@ -271,7 +271,13 @@ public final class Deeds {
 
 	/** {@code player} cut {@code captive} loose; {@code home} is where they were taken from, if anywhere. */
 	static void freed(ServerLevel level, ServerPlayer player, Villager captive, @Nullable Faction home) {
-		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.freed", FREED_HEARTS);
+		// (0.7.340) one taken from somewhere names it as they thank you: that's how you learn where to bring them
+		if (home != null) {
+			thank(level, captive, player, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.lead", level.getRandom()),
+				Identities.shownName(player), home.name()), FREED_HEARTS);
+		} else {
+			thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.freed", FREED_HEARTS);
+		}
 		Recollections.remember(captive, player, Recollections.Kind.FREED, Component.empty());
 		if (home != null) {
 			Reputation.change(player, home, FREED_REP);
@@ -308,8 +314,12 @@ public final class Deeds {
 
 	/** {@code who} turns to {@code player}, thanks them in a line of {@code family}, and warms to them by {@code hearts}. */
 	private static void thank(ServerLevel level, LivingEntity who, ServerPlayer player, String family, int hearts) {
+		thank(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), hearts);
+	}
+
+	private static void thank(ServerLevel level, LivingEntity who, ServerPlayer player, Component words, int hearts) {
 		lookAt(who, player);
-		Speech.tell(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.GOLD);
+		Speech.tell(level, who, player, words, Speech.GOLD);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, who.getX(), who.getY() + who.getBbHeight() + 0.3, who.getZ(), 8, 0.4, 0.3, 0.4, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, who.isBaby() ? 1.5F : 1.0F);
 		warm(who, player, hearts);
