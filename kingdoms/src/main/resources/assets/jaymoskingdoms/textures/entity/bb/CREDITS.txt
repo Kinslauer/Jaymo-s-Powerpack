@@ -82,3 +82,10 @@ heavenly_mantle.png (bbmodels/heavenly_mantle.json), and textures/item/heavenly_
   "Heavenly Mantle" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/heavenly-mantle
   Changes: baked to our loader's format (it was made for GeckoLib); the item icons are its pieces drawn small with an
   outline (kingdoms/tools/gen_heavenly.py).
+
+textures/item/*_tome.png (models/item/*_tome): the nine elemental spell tomes
+  "Weapon - Starter Tome", Blockbench Workshop (maker's name not in the file; fill in from the model page)
+  Changes: turned into item models, cover and gem recoloured per element, our own display (tools/blockbench/elemental_tomes.py).
+textures/item/harpoon_3d.png (models/item/harpoon): the whalers' harpoon
+  "Harpoon", Blockbench Workshop (maker's name not in the file)
+  Changes: turned into an item model (tools/blockbench/harpoon.py), its iron texture only, rotations snapped to legal steps.

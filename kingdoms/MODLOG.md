@@ -6572,3 +6572,17 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   talking to them, or helping someone up. Only game: grown wild animals, never pets or people. Runs from
   `Workers.step`, so their brain waits and `Doorways` opens gates for them.
   - Not seen in game.
+- **0.7.347, elemental spell tomes (`Tomes`):** Andy: "different tomes that each have a primary element, all attuned can
+  use them and you can load a spell page with shift right click. It stays with that book. It can be cast with right click
+  on a varying cooldown dependent on the skill's power".
+  - There are nine tomes, one per Sorcerer element. They are crafted shapeless from a book, an amethyst shard and the
+    element's reagent. Casters drop them 6% of the time, and the rarest chests hold one 4% of the time.
+  - Only the attuned can use them.
+  - Left click: tap for a quick bolt; hold to charge a stronger one (3-9 damage, 3-10 mana). Each element's bolt
+    carries Spellcraft's own effect. The restoration bolt heals allies and burns the undead.
+  - Sneak + right click loads a spell scroll (off hand, else the first in the pack) into that tome, where it stays.
+  - Right click casts the loaded scroll through `Arcana.cast`. Mana and cooldown go by tier, from 4 s up to 75 s for
+    Restoration and Death's Door. A page of the tome's own element casts 25% harder. Blood spells cost health.
+  - Death and blood tomes are forbidden arts.
+  - Model: Andy's starter tome, recoloured per element (`tools/blockbench/elemental_tomes.py`).
+  - Compile-checked only; not seen in game.
