@@ -65,7 +65,7 @@ def packMods = [
 	[dep: "maven.modrinth:weaponmaster:M0qt6sse", cf: [608235, 8905060]],
 	[dep: "maven.modrinth:lambdynamiclights:rylKnJ4M", cf: [393442, 8890400]],
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
-	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
+	[dep: "maven.modrinth:sound-physics-remastered:gA7nKz5g", cf: [535489, 9280065]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
 	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
 	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
