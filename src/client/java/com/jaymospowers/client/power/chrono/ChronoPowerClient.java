@@ -93,6 +93,9 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID, FutureAndroidRenderer::new);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.MECH, FutureMechRenderer::war);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID_MECH, FutureMechRenderer::android);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_RED, OmenRenderer::red);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_BLUE, OmenRenderer::blue);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoStreak.init();

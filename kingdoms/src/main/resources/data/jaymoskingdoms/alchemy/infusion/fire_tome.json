@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:blaze_powder",
+    "minecraft:blaze_powder",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "fire": 14,
+    "spark": 8,
+    "arcana": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:fire_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

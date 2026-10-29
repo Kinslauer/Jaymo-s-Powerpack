@@ -550,6 +550,8 @@ def main():
     for name, (pattern, palette) in ITEMS.items():
         assert len(pattern) == 16 and all(len(r) == 16 for r in pattern), name
         sprite(pattern, palette).save(os.path.join(items, name + ".png"))
+        if name == "harpoon":
+            continue  # (batch 4) the harpoon item is the 3D Blockbench model now: tools/blockbench/harpoon.py in the repo root
         write_json(os.path.join(ASSETS, "items", name + ".json"),
                    {"model": {"type": "minecraft:model", "model": "jaymoskingdoms:item/" + name}})
         parent = "minecraft:item/handheld" if name == "harpoon" else "minecraft:item/generated"
