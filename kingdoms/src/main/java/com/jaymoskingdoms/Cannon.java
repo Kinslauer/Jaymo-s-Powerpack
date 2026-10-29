@@ -45,8 +45,9 @@ public final class Cannon extends Entity {
 	static final float TRAVERSE = 6.0F, ON_MARK = 8.0F;
 	/** How wide a shot may stray (blocks per block flown). */
 	static final double SPREAD = 0.03;
-	/** The barrel's pivot above the ground, and its muzzle's distance out from that (blocks). */
-	public static final double PIVOT = 1.0, MUZZLE = 1.35;
+	/** The barrel's pivot above the ground, and its muzzle's distance out from that (blocks). (0.7.321) Its trunnions sit
+	 * this low on the Canon model's carriage. */
+	public static final double PIVOT = 0.75, MUZZLE = 1.35;
 	/** Its barrel can't be raised beyond this nor lowered below that (degrees). */
 	static final float MAX_PITCH = 40.0F, MIN_PITCH = -20.0F;
 	/** Blows it takes from players before it breaks. */

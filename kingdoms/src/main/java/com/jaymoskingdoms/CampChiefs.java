@@ -71,7 +71,13 @@ final class CampChiefs {
 	/** A villager chief's step ({@code Workers.step}, his brain runs after): his bar to those near, and his rally. */
 	static void step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
-		if (mob instanceof Folk || mob.isSleeping() || Downed.isDowned(mob)) {
+		if (mob instanceof Folk) {
+			return;
+		}
+		if (w.role() == Orcs.WARCHIEF) {
+			Bodies.wear(mob, Bodies.WARCHIEF);
+		}
+		if (mob.isSleeping() || Downed.isDowned(mob)) {
 			return;
 		}
 		if (mob.tickCount % 5 == 0) {
@@ -97,6 +103,7 @@ final class CampChiefs {
 			}
 		}
 		level.playSound(null, chief.getX(), chief.getY(), chief.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4.0F, 1.0F);
+		Bodies.act(level, chief, "roar");
 		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, chief.getBoundingBox().inflate(32.0))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", chief.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		}
