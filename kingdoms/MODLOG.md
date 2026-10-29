@@ -6237,7 +6237,29 @@ down upon the target. stretching over and engulfing them into a bulge that flows
 - **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
 Compile-checked against 26.3 with javac (changed files), not seen in game.
 
-## 0.7.315: sailors don't offer "Seek an audience" (pack 0.17.141)
+## 0.7.316: clearing parties go in first; ATi compounds spaced out; the dojo only in cherry groves (pack 0.17.142)
+Andy (with a screenshot of ATi's dojo by the water near spawn): "If villagers are to take any of these overworld
+structures they need to send a party in for clearing the enemies first ... way too many of these spawned in close
+proximity, this specific one should only spawn near the blossom villages and biomes ... dead women and children should
+always be avoided by the inhabitants."
+- **`Clearing`** (new): every 60 ticks each standing settlement looks over the surface structures (not villages) within
+  112 blocks of its seat. While monsters (`Enemy`, not anyone's folk, thrall, captive, pet or a camp's illagers) are in
+  one, a party of its fighters (guards and armed folk, never the ruler or posted archers; 2 per monster, 8 at most,
+  fetched from 96 blocks) is sent after them (`Rulers.charge`), and everyone else near it (MCA villagers of any kind,
+  children, builders and other workers) is walked out 10 blocks past its edge toward the seat and held there
+  (`Frights.shelter`). Once it's empty and the party has been in, its spawners are smashed so it stays clear. A
+  structure in another settlement's land is left to them; a monster inside the settlement's own seat structure only
+  gets the party (Frights already sends people running there). Grim holds and camps taken by `GrimSites` are cleared
+  the same way: the fighters arrive first and the builders wait outside until it's clear.
+- **ATi compounds** (`ati_compounds`): spacing 64/32 -> 100/50 chunks, 2-3 members (was 3-4) on a 4-chunk ring (was 3),
+  and none within 32 chunks (512 blocks) of the world's middle (`spawn_clearance`). The old compounds put 3-4 ATi
+  buildings within ~50 blocks of each other, denser than ATi's own sets.
+- **The dojo** (`ati_structures:dojo`, the black-and-red pagoda) only goes in a compound in `minecraft:cherry_grove`,
+  where Blossom villages rise: `CompoundStructure` reads a new `only_in` map (structure id to biomes) that replaces a
+  member's own biome tag (ATi's put it in plains, forests and jungles). It was already the cherry Grand Seat.
+Compile-checked (Clearing, CompoundStructure), not seen in game. Existing chunks keep what they generated.
+
+## 0.7.317: sailors don't offer "Seek an audience" (pack 0.17.143)
 Andy: "the sailors shouldnt have this audience option". A ship's hands are enlisted in the guard role, so MCA's talk
 menu offered every navy, merchant and whaler crewman "Seek an audience". `Audiences.canAsk` now turns down ship crew
 (`Crewmen.tagged`, or anyone seated aboard a `Ship`), caravan escorts (task `caravan`) and soldiers out with a war party
