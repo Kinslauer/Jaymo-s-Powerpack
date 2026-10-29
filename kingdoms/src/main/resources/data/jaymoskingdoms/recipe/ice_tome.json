@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:amethyst_shard",
+    "minecraft:blue_ice"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:ice_tome"
+  }
+}
