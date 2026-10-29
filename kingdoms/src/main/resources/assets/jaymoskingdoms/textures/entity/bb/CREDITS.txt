@@ -64,3 +64,16 @@ skulk_golem.png (bbmodels/skulk_golem.json): the skulk golem
 wild_boar.png (bbmodels/wild_boar.json): the wild boar
   "Wild Boar" by lukygive, https://blockbenchworkshop.com/model/lukygive/wild-boar
   Changes: baked to our loader's format without its hitbox and shadow guide cubes; drawn at 0.9 size.
+
+gorgon.png (bbmodels/gorgon.json): the gorgon, the jungles' and swamps' serpent-haired archer
+  "Hydra Guardian" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/hydra-guardian
+  Changes: baked to our loader's format; drawn at 0.8 size; its animations played by our own archer's moves.
+
+war_barrel.png (bbmodels/war_barrel.json), and textures/item/war_barrel.png: the goblin villages' war barrel, and the
+friendly one built through Golemancy
+  "The Cogwork Golem (2025 Version)" by polyjo, https://blockbenchworkshop.com/model/polyjo/the-cogwork-golem-2025-version
+  Changes: baked to our loader's format; drawn at 0.9 size. The item icon is the model drawn small.
+
+haunted_stand.png (bbmodels/haunted_stand.json): the haunted armour stand deep underground
+  "Armor Stand" by polyjo, https://blockbenchworkshop.com/model/polyjo/armor-stand-polyjo
+  Changes: baked to our loader's format; drawn at full size.

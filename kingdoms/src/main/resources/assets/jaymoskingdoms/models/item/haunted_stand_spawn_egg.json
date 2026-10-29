@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "jaymoskingdoms:item/haunted_stand_spawn_egg"
+	}
+}
