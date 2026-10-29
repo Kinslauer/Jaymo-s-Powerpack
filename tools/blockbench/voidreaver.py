@@ -1,5 +1,5 @@
 """(Andy's batch 4) The Voidreaver relic (power/arsenal/RelicWeapons, items/voidreaver.json -> models/item/voidreaver) drawn
-as a Blockbench Workshop sword model (CC BY 4.0), the file tools/bbmodels/trollhunters-sword-of-daylight.bbmodel. Only the
+as a Blockbench Workshop sword model (CC BY 4.0), the file tools/bbmodels/voidreaver-sword.bbmodel. Only the
 model's shape is used: the weapon keeps our name, Voidreaver, everywhere (the model's credit line says only that it is from
 the Blockbench Workshop).
 
@@ -19,7 +19,7 @@ sys.path.insert(0, HERE)
 from bake import build_atlas, convert_cubes, load, texture_images, write_json
 from display import display
 
-SRC = os.path.join(HERE, "..", "bbmodels", "trollhunters-sword-of-daylight.bbmodel")
+SRC = os.path.join(HERE, "..", "bbmodels", "voidreaver-sword.bbmodel")
 ASSETS = "src/main/resources/assets/jaymospowers"
 LIFT = 2
 
