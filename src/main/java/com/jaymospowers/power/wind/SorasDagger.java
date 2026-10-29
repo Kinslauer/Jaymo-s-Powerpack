@@ -46,6 +46,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwingAnimationType;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.component.UseCooldown;
@@ -186,10 +187,16 @@ public final class SorasDagger extends Item {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
+		boolean forging = this.stage == DIAMOND && hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && canForge(player);
+		if (player.isShiftKeyDown() && !forging) {
+			if (!level.isClientSide()) {
+				turnGrip(player, stack);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (this.stage < DIAMOND || hand != InteractionHand.MAIN_HAND) {
 			return super.use(level, player, hand);
 		}
-		boolean forging = this.stage == DIAMOND && player.isShiftKeyDown();
 		boolean flurry = !forging && wind(player) && !player.getCooldowns().isOnCooldown(FLURRY_PROBE) && !FLURRIES.containsKey(player.getUUID());
 		if (!forging && !flurry) {
 			// the guard (only a wind can call up the Flurry, and not while it cools down)
@@ -209,6 +216,26 @@ public final class SorasDagger extends Item {
 		serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), wind ? SoundEvents.BREEZE_CHARGE : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, 0.9F, 1.3F);
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * (0.17.174) Andy: "both on shift m2": sneak + use turns the dagger in the hand, from the sword grip (angled up out of
+	 * the fist) to the reverse grip (blade down past the little finger) and back. Only the look changes: the item models'
+	 * first custom_model_data flag ({@code items/soras_dagger*.json}), so it carries through the Tempest forging.
+	 */
+	static boolean reversed(ItemStack stack) {
+		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
+		return look != null && Boolean.TRUE.equals(look.getBoolean(0));
+	}
+
+	private static void turnGrip(Player player, ItemStack stack) {
+		if (reversed(stack)) {
+			stack.remove(DataComponents.CUSTOM_MODEL_DATA);
+		} else {
+			stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(true), List.of(), List.of()));
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.PLAYERS,
+			0.5F, 1.6F);
 	}
 
 	/**
@@ -343,14 +370,23 @@ public final class SorasDagger extends Item {
 	/** The three spoils the forging takes. */
 	private static final Item[] SPOILS = {Items.NETHER_STAR, Items.DRAGON_BREATH, Items.HEAVY_CORE};
 
-	private static void forge(ServerPlayer player, ServerLevel level, ItemStack stack) {
+	/**
+	 * (0.17.174) Sneak + use forges the diamond dagger only for an ascended wind carrying any of the three spoils (or in
+	 * creative), who is told what's still missing; for anyone else it turns the grip ({@link #turnGrip}).
+	 */
+	private static boolean canForge(Player player) {
 		if (!Powers.has(player, WindPower.INSTANCE) || !Fate.isAscended(player)) {
-			// the winds don't answer: only the Tempest can wake it
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.soras_dagger.unanswered").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.7F, 0.5F);
-			player.getCooldowns().addCooldown(stack, 20);
-			return;
+			return false;
 		}
+		for (Item spoil : SPOILS) {
+			if (player.isCreative() || player.getInventory().contains(new ItemStack(spoil))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void forge(ServerPlayer player, ServerLevel level, ItemStack stack) {
 		List<Component> missing = new ArrayList<>();
 		for (Item spoil : SPOILS) {
 			if (!player.getInventory().contains(new ItemStack(spoil)) && !player.isCreative()) {

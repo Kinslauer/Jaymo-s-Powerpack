@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The knapping grid: the rock's chips as a 3x3 of buttons (a click knocks one out; the server decides), the rock on the
  * left, the head it has become on the right. A panel of the shapes beside it; hover one to see where its chips lie.
- * (0.17.176) The shapes panel is handed to JEI, so its item list starts right of it instead of under it.
+ * (0.17.180) The shapes panel is handed to JEI, so its item list starts right of it instead of under it.
  */
 public class KnappingScreen extends AbstractContainerScreen<KnappingMenu> implements TableAreas {
 	private static final int GRID_X = 61, GRID_Y = 14, CELL = 18;
