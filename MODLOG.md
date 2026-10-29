@@ -3821,7 +3821,28 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   in the pack. No clash with our own screens: our container mixins are accessors and the horse labels, our inventory
   tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
   - Not built (the cloud can't reach Fabric's Maven); not seen in game.
-- **0.18.4, space travel rework:** Andy: take "The Future" and the bottom line off the star map, and "space travel needs a
+
+- **0.18.4, the Bio-built are shunned by every human kingdom (Kingdoms 0.7.357):** no mask hides one, even the
+  tolerant mind them, and Bio-built villagers are driven out of human towns within days. See the Kingdoms MODLOG.
+- **0.18.5, the downed rise on their own, and die to a real blow:** Andy: "while downed, any attack that would deal 3
+  hearts or more of damage kills instantly, crippled mobs and players still work like before and if anyone goes down
+  without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too wounded to get
+  up shift will give up. the animation takes longer but animates them rising to their feet, and is interrupted after 2
+  hits. Add a node to the Will tree that lets you withstand more hits during charged interactions".
+  - `Downed.KILL_BLOW` (6): any attack (a swing, an arrow, a bite, a blast; not fire, falls or hunger) of 6 or more on
+    anyone downed, player or mob, is their death, credited to the attacker. Smaller blows work as before (a downed
+    player's 10 hearts, a downed mob's ten wounds). The crippled (off their feet, not downed) are untouched.
+  - Self rise: a downed player whose arms, legs and feet were all above red on the wounds screen (more than 25%, none
+    broken or gone) as they fell, and still are, holds sneak for 8 s (`RISE_TICKS`, give-up was 5 s) to get up by
+    themselves, at 30% health (`RISE_HEALTH`) and battered as usual. The 2nd hit meanwhile knocks them back down (let go
+    of sneak to try again). Too wounded, or passed out, sneak gives up as before. Carried or in water, no rising.
+  - The rise is drawn (`CrawlPose`, synced `Downed.RISING`): pushed up on shaking arms, knees drawn under with a hand on
+    one knee, then up onto their feet; vanilla's leftover swimming tilt is cancelled as they stand.
+  - The same 2-hit rule now breaks off a revive (hold use on a downed one) and Second Wind's eating.
+  - Kingdoms 0.7.358's Will node **Unflinching** (2 ranks): each rank, one more hit before those held actions break off
+    (`WillSkill.holdHits`).
+  - Built, not seen in game.
+- **0.18.6, space travel rework:** Andy: take "The Future" and the bottom line off the star map, and "space travel needs a
   TON of improvement", with a menu or simulation where you see the pod moving through space (pointing at Ad Astra, whose
   code is MIT but art All Rights Reserved and which stops at 1.21.1: ideas only). He picked all five pitched changes.
   - **The future:** off the star map; `go` refuses it. A pod in the future flies nowhere (every world it knows is dust a
@@ -3847,5 +3868,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the life-story starts (Rustfall's mine, the Maw start). Leaving the game mid-trip ends it: before lift-off the pod
     stands again with its fuel; after, it is set down where it was going and you wake beside it (`PENDING`).
   - Previews: project files `art-overhaul/space-travel/` (a PIL port of the drawing; the pod there is a stand-in).
+  - **Pods are rare:** Andy: the pod is the Tinkerer's lost technology, gone with his time machine, and not for sale. The
+    grid recipe is gone; a mined pod drops itself with its fuel (`loot_table/blocks/space_pod`). Ask the Tinkerer about
+    pods and he says as much, in his own muddled way (`talk.jaymospowers.tinkerer.pod.*`).
+  - **Warrior-born raiders** (`ZFighterRaiders`, Andy picked a new raider band): every 5 days or so, at nightfall, 3-5
+    pods come down 30-45 blocks from a settlement with a player near (world tier 1+). A chief (a weakened Tyrant, one
+    of 8 names) and Champion-grade raiders step out and go for villagers, golems and players within 32 blocks. Beat them
+    all and one pod stays as a block with 3 fuel; the rest burn out. Left alone 10 minutes, they fly off.
+  - **Galactic Patrol** (`ZFighterPatrol`): every 3 days a patrolman (an MCA villager Z Fighter in the Patrol suit,
+    Kingdoms' `patrolman` kind) lands by a town in his pod, fights monsters near it, and flies off after 25 minutes.
+    Once introduced he tells his travels (8 stories). At power level 1500+ he offers to swear you in: you get a pod
+    (12 fuel) and a Patrol Licence. Members get 4 blaze powder once a visit and a rank report. Landing on another
+    world with the licence posts a warrant there (one per world per day): a glowing, weakened Tyrant hides 40-70
+    blocks off, tougher with each rank; the arrest pays 12 emeralds and 300 TP, +50% per rank. Ranks at 0/3/8/15/25
+    arrests (Rookie to Commander). Leave the world and the criminal escapes. Using the licence shows rank and warrant.
   - Not built with Gradle (the cloud can't reach Fabric's Maven); every changed file compiles against the staged 26.3
     jars. Not seen in game.

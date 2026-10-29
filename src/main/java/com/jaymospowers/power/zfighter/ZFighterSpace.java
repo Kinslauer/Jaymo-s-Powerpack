@@ -85,7 +85,7 @@ public final class ZFighterSpace {
 	/** How far from the pod a launch may start (blocks), and how long the open star map stays good (ticks). */
 	static final double POD_REACH = 10.0;
 	static final int OPEN_TICKS = 1200;
-	/** (0.18.4) The fuel a pod holds at most, and what each trip burns, by destination index (Home burns what the world you are on costs). */
+	/** (0.18.6) The fuel a pod holds at most, and what each trip burns, by destination index (Home burns what the world you are on costs). */
 	public static final int MAX_FUEL = 12;
 	public static final IntegerProperty FUEL = IntegerProperty.create("fuel", 0, MAX_FUEL);
 	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
@@ -375,7 +375,7 @@ public final class ZFighterSpace {
 		if (index == HOME_INDEX) {
 			// nothing to do if he is already where home is: the overworld with no trip taken
 		} else if (index == FUTURE) {
-			// (0.18.4) the future is off the star map
+			// (0.18.6) the future is off the star map
 			return;
 		} else if (index < 0 || index >= DESTS.length || DESTS[index].level() == player.level().dimension()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_here").withStyle(ChatFormatting.GRAY));
@@ -536,7 +536,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.4) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern and mast. */
+	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern and mast. */
 	static List<BlockPos> mawDecks() {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);

@@ -64,7 +64,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.5) Andy (2026-10-29): "galactic patrolmen will now appear as well, they are villager z fighters who are constantly
+ * (0.18.6) Andy (2026-10-29): "galactic patrolmen will now appear as well, they are villager z fighters who are constantly
  * battling with evil forces, and also use a pod to get around. they will tell you of their travels, after an introduction,
  * and judging on your power level will recruit you to be one as well. giving you a galactic patrol job, a pod and a license
  * to fight crime on various planets."

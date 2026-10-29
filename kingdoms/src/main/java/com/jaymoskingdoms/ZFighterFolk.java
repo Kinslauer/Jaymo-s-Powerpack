@@ -46,7 +46,7 @@ public final class ZFighterFolk {
 
 	/** Powers' Omen pilots (the future's mech pilots): their tag and kind. They roam and watch on Powers' own say, in MCA's own clothes. */
 	static final String PILOT_TAG = "jaymospowers.omen_pilot", PILOT_KIND = "omen_pilot";
-	/** (0.7.358) Powers' galactic patrolmen: they come and go in their pods, roam and fight on Powers' say, in the patrol's uniform. */
+	/** (0.7.359) Powers' galactic patrolmen: they come and go in their pods, roam and fight on Powers' say, in the patrol's uniform. */
 	static final String PATROL_TAG = "jaymospowers.patrolman";
 
 	/** Powers' tags for its characters, and the outfits each wears ({@code skins/clothing/zfighter/<kind>_<n>}). */
@@ -126,7 +126,7 @@ public final class ZFighterFolk {
 		PathfinderMob mob = w.mob();
 		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG)) {
 			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
-			// ((0.7.358) a galactic patrolman: Powers walks them round the town and into fights)
+			// ((0.7.359) a galactic patrolman: Powers walks them round the town and into fights)
 			return true;
 		}
 		mob.getNavigation().stop();

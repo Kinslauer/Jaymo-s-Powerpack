@@ -188,7 +188,7 @@ public final class ZFighterNpcs {
 				return com.jaymospowers.power.chrono.future.FutureOmenPilots.talk(player, npc);
 			}
 			if (npc.entityTags().contains(ZFighterPatrol.TAG)) {
-				// (0.18.5) a galactic patrolman
+				// (0.18.6) a galactic patrolman
 				ZFighterPatrol.talk(player, npc);
 				return true;
 			}

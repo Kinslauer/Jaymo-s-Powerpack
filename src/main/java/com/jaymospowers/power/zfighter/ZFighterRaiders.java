@@ -33,7 +33,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.5) Andy (2026-10-29): pods are the Tinkerer's lost technology, "hard to find outside the raider warrior born
+ * (0.18.6) Andy (2026-10-29): pods are the Tinkerer's lost technology, "hard to find outside the raider warrior born
  * parties". A Warrior-born raider band: every {@link #BAND_DAYS} days or so, as night falls, {@link #BAND_MIN} to
  * {@link #BAND_MAX} pods come down out of the sky a little way off a town a player is near, and out of each steps a raider
  * (a rogue fighter, {@link ZFighterRogue}), one of them their chief (a tyrant), and they go for the town's people, its golems
