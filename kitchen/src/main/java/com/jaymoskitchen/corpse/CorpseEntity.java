@@ -180,13 +180,23 @@ public class CorpseEntity extends Entity {
 	/**
 	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: sneak + use held on it drags it along
 	 * the ground behind you, {@code DRAG_BEHIND} blocks back (plus half its length), at up to {@code DRAG_SPEED} blocks a
-	 * tick, up steps of a block. You're slowed hard while you haul it. A right-click anywhere lets go; one on a butcher
-	 * block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table. Further off than
+	 * tick, up steps of a block. You're slowed ({@code DRAG_SLOWNESS}) while you haul it. A right-click anywhere lets go; one
+	 * on a butcher block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table. Further off than
 	 * {@code DRAG_LEASH} and it slips from your hands.
+	 * (0.5.36) Andy sent a clip of a friend struggling to drag a cow. It was held behind wherever you looked, so turning to
+	 * it or backing up swung it round through you, and it caught on corners. Now it's on a rope: it only moves when the
+	 * rope goes taut, straight at you when nothing's in the way, else along the path you walked ({@code DRAG_CRUMB} apart).
 	 */
-	public static final double DRAG_BEHIND = 0.9, DRAG_SPEED = 0.3, DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5;
+	public static final double DRAG_BEHIND = 0.9, DRAG_SPEED = 0.3, DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5, DRAG_CRUMB = 0.35;
+	/** (0.5.36) Slowness amplifier while hauling (1 = Slowness II; it was III). */
+	public static final int DRAG_SLOWNESS = 1;
 	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt. */
 	private static final int DRAG_SCRAPE_EVERY = 8;
+	/** (0.5.36) The most of your path a dragged carcass remembers, and how far it turns a tick to lie along the pull. */
+	private static final int DRAG_TRAIL_MAX = 48;
+	private static final float DRAG_TURN = 12.0F;
+	/** (0.5.36) Server: where its hauler has walked since it last had a clear line to them, oldest first. Never saved. */
+	private final java.util.ArrayDeque<Vec3> dragTrail = new java.util.ArrayDeque<>();
 
 	private CorpseKind kind = CorpseKind.OTHER;
 	private List<ItemStack> loot = new ArrayList<>();
@@ -1419,6 +1429,7 @@ public class CorpseEntity extends Entity {
 		this.ragdoll = null;
 		this.entityData.set(TUMBLING, false);
 		this.entityData.set(DRAGGER, player.getId());
+		dragTrail.clear();
 		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.dragging"));
 		return InteractionResult.SUCCESS_SERVER;
@@ -1445,6 +1456,7 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		this.entityData.set(DRAGGER, -1);
+		dragTrail.clear();
 		grabCooldown = GRAB_COOLDOWN;
 		setDeltaMovement(Vec3.ZERO);
 		lieDown(Vec3.ZERO, onButcherBlock());
@@ -1453,27 +1465,57 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	/** (0.5.31) Server, each tick it's dragged: pulled along behind, over the ground and up steps. */
+	/**
+	 * (0.5.31) Server, each tick it's dragged: pulled along behind, over the ground and up steps. (0.5.36) On a rope: still
+	 * while there's slack, and taut, hauled toward you, round corners along the path you took.
+	 */
 	private void tickDrag(ServerLevel level, Entity dragger) {
 		if (!(dragger instanceof Player player) || !player.isAlive() || player.level() != level || player.isSpectator() || player.isPassenger()
 			|| distanceToSqr(player) > DRAG_LEASH * DRAG_LEASH || carriedBy(player) != null) {
 			stopDrag();
 			return;
 		}
-		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-		Vec3 back = new Vec3(Mth.sin(yaw), 0.0, -Mth.cos(yaw));
-		Vec3 target = player.position().add(back.scale(DRAG_BEHIND + getBbWidth() * 0.5));
-		Vec3 pull = target.subtract(position()).multiply(1.0, 0.0, 1.0);
+		Vec3 feet = player.position();
+		if (dragTrail.isEmpty() || dragTrail.peekLast().distanceToSqr(feet) >= DRAG_CRUMB * DRAG_CRUMB) {
+			dragTrail.addLast(feet);
+			if (dragTrail.size() > DRAG_TRAIL_MAX) {
+				dragTrail.removeFirst();
+			}
+		}
+		// nothing between it and you: the rope runs straight, and the path behind is forgotten
+		Vec3 from = position().add(0.0, Math.min(0.3, getBbHeight() * 0.5), 0.0);
+		Vec3 to = feet.add(0.0, 0.3, 0.0);
+		if (level.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, this)).getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+			dragTrail.clear();
+		}
+		// points of the path it has reached are behind it
+		while (!dragTrail.isEmpty() && flat(dragTrail.peekFirst().subtract(position())).lengthSqr() < 0.25) {
+			dragTrail.removeFirst();
+		}
+		Vec3 next = dragTrail.isEmpty() ? feet : dragTrail.peekFirst();
+		double rope = flat(next.subtract(position())).length();
+		Vec3 last = next;
+		for (Vec3 crumb : dragTrail) {
+			rope += flat(crumb.subtract(last)).length();
+			last = crumb;
+		}
+		rope += flat(feet.subtract(last)).length();
+		double taut = rope - (DRAG_BEHIND + getBbWidth() * 0.5);
+		Vec3 pull = flat(next.subtract(position()));
 		double dist = pull.length();
-		Vec3 along = dist > 0.05 ? pull.scale(Math.min(DRAG_SPEED, dist) / dist) : Vec3.ZERO;
+		Vec3 along = taut > 0.02 && dist > 0.01 ? pull.scale(Math.min(DRAG_SPEED, Math.min(taut, dist)) / dist) : Vec3.ZERO;
 		Vec3 motion = new Vec3(along.x, onGround() ? -0.08 : Math.max(-1.0, getDeltaMovement().y - 0.08), along.z);
 		setDeltaMovement(motion);
 		move(net.minecraft.world.entity.MoverType.SELF, motion);
-		// head first, feet trailing: it lies along the way it's hauled
-		setYRot(player.getYRot() + 90.0F);
+		// head first, feet trailing: it lies along the rope, turning a little at a time
+		if (dist > 0.05) {
+			float facing = (float) (Mth.atan2(-pull.x, pull.z) * Mth.RAD_TO_DEG) + 90.0F;
+			setYRot(Mth.approachDegrees(getYRot(), facing, DRAG_TURN));
+		}
 		if (tickCount % 20 == 0) {
 			// a dead weight: hauling it is slow going
-			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 2, false, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, DRAG_SLOWNESS, false, false, true));
 		}
 		if (along.lengthSqr() > 0.0025 && tickCount % DRAG_SCRAPE_EVERY == 0) {
 			net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(blockPosition().below());
@@ -1483,6 +1525,11 @@ public class CorpseEntity extends Entity {
 				level.playSound(null, getX(), getY(), getZ(), ground.getSoundType().getStepSound(), SoundSource.NEUTRAL, 0.4F, 0.6F);
 			}
 		}
+	}
+
+	/** (0.5.36) {@code v} on the level: its rise dropped. */
+	private static Vec3 flat(Vec3 v) {
+		return new Vec3(v.x, 0.0, v.z);
 	}
 
 	@Override
