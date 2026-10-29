@@ -3588,7 +3588,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     mountains, the Piglin King as a Nether boss, a redstone golem deep below, the skulk golem in the deep dark, a wild
     boar in place of Naturalist's, and scalebane sellswords in barbarian camps and goblin villages. See the Kingdoms
     MODLOG.
-- **0.17.157, symbiote Collect, swing engulf and the checklist picks:** the symbiote's wheel has a Collect slot (bond 70): in Living Armor
+- **0.17.158, symbiote Collect, swing engulf and the checklist picks:** the symbiote's wheel has a Collect slot (bond 70): in Living Armor
   its tendrils fetch items within 12 blocks to your feet; below bond 70 it fetches on its own whenever its tendrils are
   out. The first time it holds a kind of item it studies it in front of you with a comment and, given time, a hint
   (Use takes it early); one look per kind, ever. Swinging in the suit, tendrils pour out of the body and wrap the whole
