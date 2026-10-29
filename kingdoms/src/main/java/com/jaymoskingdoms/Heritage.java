@@ -97,7 +97,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Deepborn:</b> (0.7.106, earned) sneaking, they sense the creatures round them through walls (client); they never
  * set off sculk (the Warden can't hear them either). Blasts stun them, and the open sun dulls them.</li>
  * <li><b>Divine-born:</b> (0.7.262) the celestial blood: a halo and gold-touched skin, mends faster, smites the wicked, takes to
- * healing magic; (0.7.318) no need for food or sleep ({@link DivineBorn}).</li>
+ * healing magic; (0.7.320) no need for food or sleep ({@link DivineBorn}).</li>
  * <li><b>Bio-built:</b> (0.7.262) a made being that absorbs downed foes to evolve through three forms, drains life from what
  * it hits and, at the last form, buds small copies ({@link BioBuilt}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
@@ -106,7 +106,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
  * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.140) The Stormborn is earned too: it wakes in a
- * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). (0.7.318, Andy) The Divine-born too: it wakes in one
+ * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). (0.7.320, Andy) The Divine-born too: it wakes in one
  * of the dead who dies again in the afterlife (Jaymo's Powers' Other World, {@link PowersCompat#amongTheDead}). (0.7.184) Earning one ({@link #UNLOCKED}) no
  * longer changes your own blood (the Blood Rite is gone): your children are born to your heritage or one you've earned
  * ({@link VillagerHeritage#passed}), and you take it up by living on as one of them ({@link Lineage}).
@@ -254,7 +254,7 @@ public final class Heritage {
 		ENDBORN(true, 0, Items.ENDER_PEARL, Stats.Stat.WITS, Stats.Stat.FINESSE),
 		DRAGONBLOOD(true, 0, Items.DRAGON_BREATH, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
 		DEEPBORN(true, 0, Items.ECHO_SHARD, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
-		// (0.7.262, Andy's NOEA picks) three new bloods, picked at the start like the first ten; (0.7.318, Andy) the Divine-born
+		// (0.7.262, Andy's NOEA picks) three new bloods, picked at the start like the first ten; (0.7.320, Andy) the Divine-born
 		// is earned now: it wakes in one who dies again in the afterlife ({@link #died})
 		DIVINE(true, 0, Items.TOTEM_OF_UNDYING, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
 		BIOBUILT(0, Items.COPPER_INGOT, Stats.Stat.MIGHT, Stats.Stat.GRIT),
@@ -1047,7 +1047,7 @@ public final class Heritage {
 	}
 
 	/**
-	 * Something died: a dragon slain by a player wakes their Dragonblood, a Warden their Deepborn. (0.7.318) One of the dead
+	 * Something died: a dragon slain by a player wakes their Dragonblood, a Warden their Deepborn. (0.7.320) One of the dead
 	 * dying again in the afterlife wakes their Divine-born.
 	 */
 	private static void died(LivingEntity entity, DamageSource source) {

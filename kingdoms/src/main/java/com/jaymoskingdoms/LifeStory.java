@@ -198,7 +198,7 @@ public final class LifeStory {
 				Answer.born(Heritage.Kind.WARRIORBORN, "warband"),
 				Answer.born(Heritage.Kind.EARTHLING, "scholars"),
 				Answer.born(Heritage.Kind.DAWNBORN, "temple"),
-				// (0.7.262, Andy's NOEA picks) the new bloods: a workshop's vats, a travelling fair ((0.7.318) the Divine-born's
+				// (0.7.262, Andy's NOEA picks) the new bloods: a workshop's vats, a travelling fair ((0.7.320) the Divine-born's
 				// hilltop shrine is gone: that blood is earned now, by dying again in the afterlife)
 				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
 				Answer.born(Heritage.Kind.RUBBERFOLK, "fair")));

@@ -5,7 +5,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.145, Andy: every heritage gets something as a Z Fighter) A Rubber-folk Z Fighter (Kingdoms heritage
+ * (0.17.147, Andy: every heritage gets something as a Z Fighter) A Rubber-folk Z Fighter (Kingdoms heritage
  * {@code rubberfolk}) fights like rubber: blows and close hits bounce off ({@link #BLOWS} less from anything that hits him
  * by hand, claw or weapon), falls barely hurt ({@link #FALLS} less), and the stretchy fists snap back harder ({@link #FISTS}
  * more fist damage). Still an Earthling's lineage otherwise ({@link ZFighterLineage#fromHeritage}). Hooked from

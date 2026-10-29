@@ -1119,6 +1119,10 @@ public final class Approaches {
 			// (0.7.220) a talk about work
 			return;
 		}
+		if (ZFighterFolk.answer(player, answer)) {
+			// (0.7.319) a talk with one of Powers' Z Fighter characters
+			return;
+		}
 		if (ShipTalk.answer(player, answer)) {
 			// (0.7.270) a talk about work aboard ship: your berth, your lay
 			return;

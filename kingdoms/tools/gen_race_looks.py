@@ -105,7 +105,7 @@ def halo_texture():
 
 
 def halo_white_texture():
-    """(0.7.318) The same ring in near-white, tinted in game: pale blue for the Starlit, white for the Seraphic."""
+    """(0.7.320) The same ring in near-white, tinted in game: pale blue for the Starlit, white for the Seraphic."""
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     for y in range(32):
         for x in range(32):
