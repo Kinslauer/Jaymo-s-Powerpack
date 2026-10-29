@@ -3710,3 +3710,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `tools/blockbench/soras_dagger_reverse_original.bbmodel`) now gives the `_reverse` models their held transforms.
   The weapon guard no longer refuses sneak + use on Sora's Dagger when something is in the off hand, which had stopped
   the turn before the dagger saw it.
+- **0.17.188, Friends & Foes:** Andy asked whether its baubles fit our slots, then for it in the pack. Friends & Foes
+  (CC BY-NC-ND 4.0, Faboslav) and the Resourceful Lib it needs (MIT) join `packMods` unchanged, downloaded by id. They
+  bring the mob-vote losers (copper golem, glare, moobloom, mauler, rascal, tuff golem, wildfire, iceologer,
+  illusioner...). Its Totems of Freezing and Illusion fire from the hand or from the slot mods on its compat list;
+  `compat/FriendsAndFoesCompat` puts our bauble slots on that list by reflection, and the charm tag takes both totems,
+  so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
+  objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
+  - Compile-checked; not seen in game.
