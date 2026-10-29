@@ -92,6 +92,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.rig.Rig.init();
 		// (0.11.89) the Backpack: worn on the back, set down on the ground, torn apart only by strong blasts
 		com.jaymospowers.backpack.Backpack.init();
+		// (0.17.184) Baubles-style accessory slots (amulet, two rings, belt, head, body, charm) and seven baubles to wear
+		com.jaymospowers.baubles.Baubles.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
@@ -138,7 +140,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.heritage.HeritageMoves",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "aether.structure.OutpostTracker",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "baubles.Baubles", "armory.Lash", "armory.FlintlockDraw", "armory.HammerSlam", "aether.structure.OutpostTracker",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing",
 		};
 		for (String holder : holders) {

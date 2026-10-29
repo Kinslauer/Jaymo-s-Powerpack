@@ -14,7 +14,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
- * The runic amulet: a gold trinket from the altar. While it is carried, anywhere in the inventory, it slowly draws the
+ * The runic amulet: a gold trinket from the altar. While it is carried, anywhere in the inventory, or worn in the amulet bauble slot, it slowly draws the
  * fleeting corruption out of its bearer ({@link #BLEED_TICKS} per point). It does nothing for lingering or deep corruption.
  */
 public class RunicAmuletItem extends Item {

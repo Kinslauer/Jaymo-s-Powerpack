@@ -201,7 +201,7 @@ public final class Guard {
 			return InteractionResult.PASS;
 		}
 		if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof SorasDagger) {
-			// (0.17.184) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
+			// (0.17.186) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
 			return InteractionResult.PASS;
 		}
 		ItemStack off = player.getOffhandItem();

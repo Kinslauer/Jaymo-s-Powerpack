@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    "LLL",
+    "LNL"
+  ],
+  "result": {
+    "id": "jaymospowers:brawlers_belt",
+    "count": 1
+  }
+}
