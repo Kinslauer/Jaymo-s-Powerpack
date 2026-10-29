@@ -104,6 +104,16 @@ def halo_texture():
     return img
 
 
+def halo_white_texture():
+    """(0.7.320) The same ring in near-white, tinted in game: pale blue for the Starlit, white for the Seraphic."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for y in range(32):
+        for x in range(32):
+            t = (x + y) % 5
+            img.putpixel((x, y), ((246, 246, 246, 255), (226, 226, 226, 255), (255, 255, 255, 255), (234, 234, 234, 255), (215, 215, 215, 255))[t])
+    return img
+
+
 # ---- Bio-built -----------------------------------------------------------------------------------------------------------
 
 STEEL = [(132, 154, 148, 255), (104, 128, 124, 255), (78, 100, 98, 255)]
@@ -304,6 +314,7 @@ s, g = make(divine, seed=1)
 save("divine", s, g)
 eyes("divine", (255, 244, 208))
 halo_texture().save(os.path.join(OUT, "halo.png"))
+halo_white_texture().save(os.path.join(OUT, "halo_white.png"))
 
 for form in range(3):
     s, g = make(biobuilt, form, seed=10 + form)

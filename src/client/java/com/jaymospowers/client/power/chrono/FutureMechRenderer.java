@@ -4,90 +4,91 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.chrono.future.FutureMech;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
-import net.minecraft.client.model.animal.golem.IronGolemModel;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
-import net.minecraft.client.renderer.entity.state.IronGolemRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 
 /**
- * The war mech: the iron golem's frame in our own gunmetal plating (tools/gen_future_machines.py), half as big again,
- * visor and reactor aglow. When it fires, both arm cannons come up level at its target.
+ * The future's mechs on our own {@link AndroidMechModel}, in one of its four builds (picked by the mech's id, so it keeps
+ * it), visor, core and lights aglow. The war mech is drawn bigger than the android mech the Mad Tinkerer sets on you. When
+ * it fires, its cannon arms come up level at its target.
  */
-public class FutureMechRenderer extends MobRenderer<FutureMech, IronGolemRenderState, FutureMechRenderer.Model> {
-	static final Identifier SKIN = JaymosPowers.id("textures/entity/future/war_mech.png");
-	static final RenderType EYES = RenderTypes.eyes(JaymosPowers.id("textures/entity/future/war_mech_eyes.png"));
-	static final RenderStateDataKey<Boolean> AIMING = RenderStateDataKey.create(() -> "jaymospowers:mech_aiming");
-	/** How much bigger than an iron golem. */
-	static final float SCALE = 1.5F;
+public class FutureMechRenderer extends MobRenderer<FutureMech, AndroidMechModel.State, AndroidMechModel> {
+	static final String[] BUILDS = {"warden", "bulwark", "strider", "reclaimer"};
+	static final Identifier[] SKINS = new Identifier[BUILDS.length];
+	static final RenderType[] EYES = new RenderType[BUILDS.length];
+	/** How much bigger than the model each is drawn: the war mech (about 4 blocks), the android mech (about 3). */
+	static final float WAR_SCALE = 1.3F, ANDROID_SCALE = 1.0F;
 
-	public FutureMechRenderer(EntityRendererProvider.Context context) {
-		super(context, new Model(context.bakeLayer(ModelLayers.IRON_GOLEM)), 0.7F * SCALE);
+	static {
+		for (int i = 0; i < BUILDS.length; i++) {
+			SKINS[i] = JaymosPowers.id("textures/entity/future/android_mech_" + BUILDS[i] + ".png");
+			EYES[i] = RenderTypes.eyes(JaymosPowers.id("textures/entity/future/android_mech_" + BUILDS[i] + "_eyes.png"));
+		}
+	}
+
+	private final float scale;
+
+	public static FutureMechRenderer war(EntityRendererProvider.Context context) {
+		return new FutureMechRenderer(context, WAR_SCALE);
+	}
+
+	public static FutureMechRenderer android(EntityRendererProvider.Context context) {
+		return new FutureMechRenderer(context, ANDROID_SCALE);
+	}
+
+	private FutureMechRenderer(EntityRendererProvider.Context context, float scale) {
+		super(context, AndroidMechModel.create(), 0.8F * scale);
+		this.scale = scale;
 		this.addLayer(new EyesLayer<>(this) {
 			@Override
 			public RenderType renderType() {
-				return EYES;
+				return EYES[0];
+			}
+
+			@Override
+			public void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, AndroidMechModel.State state, float yRot, float xRot) {
+				collector.order(1).submitModel(this.getParentModel(), state, poseStack, EYES[state.build], light, OverlayTexture.NO_OVERLAY,
+					state.outlineColor);
 			}
 		});
 	}
 
 	@Override
-	public IronGolemRenderState createRenderState() {
-		return new IronGolemRenderState();
+	public AndroidMechModel.State createRenderState() {
+		return new AndroidMechModel.State();
 	}
 
 	@Override
-	public void extractRenderState(FutureMech entity, IronGolemRenderState state, float partialTicks) {
+	public void extractRenderState(FutureMech entity, AndroidMechModel.State state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
-		state.attackTicksRemaining = entity.getAttackAnimationTick() > 0 ? entity.getAttackAnimationTick() - partialTicks : 0.0F;
-		state.setData(AIMING, entity.aiming() ? Boolean.TRUE : null);
+		state.build = Math.floorMod(entity.getUUID().hashCode(), BUILDS.length);
+		state.aiming = entity.aiming();
+		state.attackTicks = entity.getAttackAnimationTick() > 0 ? entity.getAttackAnimationTick() - partialTicks : 0.0F;
 	}
 
 	@Override
-	public Identifier getTextureLocation(IronGolemRenderState state) {
-		return SKIN;
+	public Identifier getTextureLocation(AndroidMechModel.State state) {
+		return SKINS[state.build];
 	}
 
 	@Override
-	protected void scale(IronGolemRenderState state, PoseStack poseStack) {
-		poseStack.scale(SCALE, SCALE, SCALE);
+	protected void scale(AndroidMechModel.State state, PoseStack poseStack) {
+		poseStack.scale(this.scale, this.scale, this.scale);
 	}
 
 	@Override
-	protected void setupRotations(IronGolemRenderState state, PoseStack poseStack, float bodyRot, float entityScale) {
+	protected void setupRotations(AndroidMechModel.State state, PoseStack poseStack, float bodyRot, float entityScale) {
 		super.setupRotations(state, poseStack, bodyRot, entityScale);
 		if (state.walkAnimationSpeed >= 0.01F) {
 			// a heavy, swaying stride
 			float wave = (Math.abs((state.walkAnimationPos + 6.0F) % 13.0F - 6.5F) - 3.25F) / 3.25F;
-			poseStack.rotateDegrees(Axis.ZP, 4.0F * wave);
-		}
-	}
-
-	/** The golem's frame, arms raised level while it fires. */
-	public static class Model extends IronGolemModel {
-		private final ModelPart rightArm;
-		private final ModelPart leftArm;
-
-		public Model(ModelPart root) {
-			super(root);
-			this.rightArm = root.getChild("right_arm");
-			this.leftArm = root.getChild("left_arm");
-		}
-
-		@Override
-		public void setupAnim(IronGolemRenderState state) {
-			super.setupAnim(state);
-			if (state.attackTicksRemaining <= 0.0F && Boolean.TRUE.equals(state.getData(AIMING))) {
-				float aim = -1.45F + state.xRot * (float) (Math.PI / 180.0);
-				this.rightArm.xRot = aim;
-				this.leftArm.xRot = aim;
-			}
+			poseStack.rotateDegrees(Axis.ZP, 2.5F * wave);
 		}
 	}
 }

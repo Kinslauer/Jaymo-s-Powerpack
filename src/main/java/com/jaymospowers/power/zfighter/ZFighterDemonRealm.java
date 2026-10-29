@@ -148,7 +148,8 @@ public final class ZFighterDemonRealm {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterDemonRealm::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || !entity.entityTags().contains(MASTER_TAG)) {
+			if (hand != InteractionHand.MAIN_HAND || !entity.entityTags().contains(MASTER_TAG) || ZFighterNpcs.viaMca(entity)) {
+				// ((0.17.146) as an MCA villager, his menu leads to his talk: talk)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -410,7 +411,21 @@ public final class ZFighterDemonRealm {
 
 	// ---------------------------------------------------------------- the dark master
 
+	/** (0.17.146) A demon master's talk (MCA's "Talk about work"): a lesson in blood, once a day. */
+	static void talk(ServerPlayer player, net.minecraft.world.entity.LivingEntity master) {
+		Long last = player.getAttached(LESSON);
+		boolean today = last != null && last >= player.level().getGameTime() / DAY && !player.isCreative();
+		java.util.List<ZFighterNpcs.Option> options = java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.demon_master.lesson",
+			!today && Powers.has(player, ZFighterPower.INSTANCE), () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, true), () -> talk(player, master))));
+		ZFighterNpcs.ask(player, master, Component.translatable(today ? "talk.jaymospowers.demon_master.greet_today" : "talk.jaymospowers.demon_master.greet"), options);
+	}
+
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master) {
+		teach(player, master, false);
+	}
+
+	/** (0.17.146) {@code asked}: asked for on his talk screen (no sneaking up to him). */
+	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master, boolean asked) {
 		String voice = "message.jaymospowers.zfighter_demon_master";
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			player.sendSystemMessage(Component.translatable(voice + "_no_spark", master.getDisplayName()).withStyle(ChatFormatting.DARK_PURPLE));
@@ -421,7 +436,7 @@ public final class ZFighterDemonRealm {
 			player.sendSystemMessage(Component.translatable(voice + "_refuses", master.getDisplayName()).withStyle(ChatFormatting.DARK_PURPLE));
 			return;
 		}
-		if (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty()) {
+		if (!asked && (!player.isShiftKeyDown() || !player.getMainHandItem().isEmpty())) {
 			player.sendSystemMessage(Component.translatable(voice + "_hint", master.getDisplayName()).withStyle(ChatFormatting.DARK_PURPLE));
 			return;
 		}

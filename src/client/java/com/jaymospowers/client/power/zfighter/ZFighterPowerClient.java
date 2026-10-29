@@ -78,8 +78,6 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterOrbs.init();
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
-		// (0.17.62) the halo of the dead
-		ZFighterHalo.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
@@ -103,6 +101,8 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterFormLooks.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
+				// (0.17.147) the halo of the dead, the Divine-born's ring
+				helper.register(new ZFighterHalo.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
 				// (0.16.7) the faint ki glow round his outline, over everything of him
@@ -203,6 +203,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterComboPose.extract(entity, state, partialTicks);
 		ZFighterDiscPose.extract(entity, state, partialTicks);
 		ZFighterMark.extract(entity, state);
+		ZFighterHalo.extract(entity, state);
 		ZFighterFusionLook.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state, partialTicks);

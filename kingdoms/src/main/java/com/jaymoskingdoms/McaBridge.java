@@ -258,21 +258,31 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.290) Andy: rubber-folk "change with what they absorb". Moves {@code player}'s MCA Size and Width
-	 * {@code share} of the way toward {@code size} and {@code width}, kept to their heritage's body, re-saving their look
-	 * and showing it to everyone.
+	 * (0.7.312) {@code player}'s MCA Size and Width genes as {@code {size, width}}, or null if MCA hasn't set them up yet.
 	 */
-	static void shiftBody(ServerPlayer player, float size, float width, float share) {
+	static float @org.jspecify.annotations.Nullable [] bodyGenes(ServerPlayer player) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.isEntityDataSet()) {
+			return null;
+		}
+		CompoundTag mca = NbtHelper.getCompoundOrSelf(save.getEntityData(), "MCAData");
+		return new float[] {mca.getFloat(SIZE_GENE).orElse(0.5F), mca.getFloat(WIDTH_GENE).orElse(0.5F)};
+	}
+
+	/**
+	 * (0.7.312, was shiftBody) Andy: rubber-folk "change with what they absorb". Sets {@code player}'s MCA Size and Width
+	 * to {@code size} and {@code width}, kept to their heritage's body, re-saving their look and showing it to everyone.
+	 */
+	static void setBody(ServerPlayer player, float size, float width) {
 		PlayerSaveData save = PlayerSaveData.get(player);
 		if (!save.isEntityDataSet()) {
 			return;
 		}
 		CompoundTag data = save.getEntityData();
 		CompoundTag mca = NbtHelper.getCompoundOrSelf(data, "MCAData");
-		float was = mca.getFloat(SIZE_GENE).orElse(0.5F), wasWidth = mca.getFloat(WIDTH_GENE).orElse(0.5F);
 		Heritage.Kind kind = Heritage.of(player);
-		mca.putFloat(SIZE_GENE, BodySizes.clampSize(kind, was + (size - was) * share));
-		mca.putFloat(WIDTH_GENE, BodySizes.clampWidth(kind, wasWidth + (width - wasWidth) * share));
+		mca.putFloat(SIZE_GENE, BodySizes.clampSize(kind, size));
+		mca.putFloat(WIDTH_GENE, BodySizes.clampWidth(kind, width));
 		save.setEntityData(data);
 		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
 			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
@@ -503,6 +513,35 @@ final class McaBridge {
 		villager.setPersistenceRequired();
 		worker(villager).enlist(role, -1);
 		villager.setHomeTo(home, radius);
+		return villager;
+	}
+
+	/**
+	 * (0.7.319) {@link ZFighterFolk#spawn}: one of Powers' Z Fighter characters, a grown villager of no settlement named
+	 * {@code name}, tagged {@code tag}, held at {@code at}, dressed for their part, never hurt, out of MCA's family tree;
+	 * grey-haired if {@code old}.
+	 */
+	static @Nullable PathfinderMob zfighter(ServerLevel level, Vec3 at, float yaw, String tag, String name, boolean female, boolean old) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(female ? Gender.FEMALE : Gender.MALE)
+			.withName(name).build(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		villager.setYHeadRot(yaw);
+		villager.addTag(tag);
+		villager.setPersistenceRequired();
+		villager.setPermanentlyInvulnerable(true);
+		worker(villager).enlist(ZFighterFolk.ROLE, -1);
+		villager.setHomeTo(BlockPos.containing(at), 1);
+		if (!level.addFreshEntity(villager)) {
+			return null;
+		}
+		FamilyTree.get(level).remove(villager.getUUID());
+		if (old) {
+			greyHair(villager, false);
+		}
+		Uniforms.fit(villager);
 		return villager;
 	}
 
@@ -845,7 +884,8 @@ final class McaBridge {
 	static List<Worker> workers(ServerLevel level, AABB box, Predicate<Worker> test) {
 		List<Worker> found = new ArrayList<>();
 		// (0.7.242) a ship's crew serve her, not any town: never called on for its work, guard calls or escorts
-		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && test.test(worker(v)))) {
+		// ((0.7.319) nor are Powers' Z Fighter characters, ZFighterFolk)
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && !ZFighterFolk.is(v) && test.test(worker(v)))) {
 			found.add(worker(v));
 		}
 		return found;

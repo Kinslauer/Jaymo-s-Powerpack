@@ -144,6 +144,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		CampChiefs.register();
 		StoryTalk.register();
 		ShipTalk.register();
+		ZFighterFolk.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Prejudice.register();
@@ -158,6 +159,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		Clearing.register();
 		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
@@ -232,11 +234,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
-		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED);
+		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
+			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE);
 		HeritageHold.register();
 		DivineBorn.register();
 		BioBuilt.register();
 		RubberFolk.register();
+		RubberStomach.register();
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();

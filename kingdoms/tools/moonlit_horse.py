@@ -1,4 +1,4 @@
-"""(0.7.309) The moonlit horse: a rare look any horse can be born with (Equine.MOONLIT), drawn as its own build of
+"""(0.7.322) The moonlit horse: a rare look any horse can be born with (Equine.MOONLIT), drawn as its own build of
 BreedHorseModel. Its shape is jsellier23's Mystical Deer made into a horse (tools/horseify.py); this lays it on our bones
 and bakes its own painted texture (and the silver hair horseify adds) into our box-UV layout, so it loads like any build.
 

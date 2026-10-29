@@ -35,6 +35,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
+		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);
 		com.jaymoskingdoms.client.VillagerLooks.extract(entity, state);
 	}
@@ -48,8 +49,11 @@ abstract class MobSwingLivingEntityRendererMixin {
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.BioAbsorbPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.RubberEngulf.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.HandshakePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		// (0.7.321) last: a goblin's body is the goblin's (so held items and the parts on it follow)
+		com.jaymoskingdoms.client.GoblinBody.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 }

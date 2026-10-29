@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * hoof comes forward), the head, neck and mane together, the mouth opening to eat, the tail lifting with speed and
  * swishing, vanilla's rear and graze as blends, the saddle, stirrups, headstall and reins of a vanilla saddle; so the
  * tack ({@link TackLayer}) hangs on any build's bones. The pieces hung from the bones (forelock, mane, feathering...)
- * follow them. Texture 128x192 (coats drawn at twice that). (0.7.309) Its barding is a model of its own on the same
+ * follow them. Texture 128x192 (coats drawn at twice that). (0.7.322) Its barding is a model of its own on the same
  * bones ({@link #createArmorLayer}): chanfron, crinet and crest, peytral, flanchards and crupper, shaped to each build
  * (texture 128x64); while it's worn the mane and forelock lie hidden under it.
  */
@@ -43,10 +43,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	/** The head's pitch at rest, reared and grazing. */
 	private static final float HEAD_TILT = 30.0F * DEG, HEAD_TILT_REARED = 15.0F * DEG, HEAD_TILT_GRAZING = 2.18166F;
 	/**
-	 * (0.7.309, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
+	 * (0.7.322, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
 	 * much higher) and the neck this much longer (the head set out along it); as {@code LIFT} and {@code NECK} in
 	 * tools/horse_rig.py. Everything is posed as a change from each build's own rest pose (builds.json), so a build
-	 * brought in from Blockbench with other proportions moves the same way. (0.7.309, later) Both 0 while the horses are
+	 * brought in from Blockbench with other proportions moves the same way. (0.7.322, later) Both 0 while the horses are
 	 * the classic shape again (tools/horse_rig.py SIMPLE).
 	 */
 	static final float LIFT = 0.0F, NECK = 0.0F;
@@ -70,10 +70,10 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	/** The builds, by name, as read from builds.json; and its texture size. */
 	private static final Map<String, List<Piece>> BUILDS = new LinkedHashMap<>();
 	private static int textureWidth = 128, textureHeight = 192;
-	/** (0.7.309) The barding's pieces on each build's bones, and their texture's size. */
+	/** (0.7.322) The barding's pieces on each build's bones, and their texture's size. */
 	private static final Map<String, List<Piece>> ARMOR = new LinkedHashMap<>();
 	private static int armorWidth = 128, armorHeight = 128;
-	/** (0.7.309) How far out each build's stirrups hang under barding: clear of its side plates. */
+	/** (0.7.322) How far out each build's stirrups hang under barding: clear of its side plates. */
 	private static final Map<String, Float> STIRRUP_OUT = new HashMap<>();
 	private static final float STIRRUP_CLEAR = 0.6F;
 
@@ -164,7 +164,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.0F), textureWidth, textureHeight);
 	}
 
-	/** (0.7.309) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
+	/** (0.7.322) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
 	static LayerDefinition createArmorLayer() {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), false, 0.0F, true), armorWidth, armorHeight);
 	}
@@ -236,7 +236,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		final ModelPart headSaddle, saddle, saddleB, saddleC, stirrupLeft, stirrupLeftIron, stirrupRight, stirrupRightIron;
 		final ModelPart bitLeft, bitRight, reinLeft, reinRight;
 		final ModelPart[] headParts, saddleParts;
-		/** (0.7.309) The forelock's pieces (hidden under a chanfron). */
+		/** (0.7.322) The forelock's pieces (hidden under a chanfron). */
 		final List<ModelPart> forelock = new ArrayList<>();
 		/** The mane that falls over the neck, on the long-maned builds. */
 		final @Nullable ModelPart maneFlow;
@@ -391,7 +391,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.stirrupLeft.xRot = this.stirrupLeftIron.xRot = this.stirrupRight.xRot = this.stirrupRightIron.xRot = swingX;
 			this.stirrupLeft.zRot = this.stirrupLeftIron.zRot = swingZ;
 			this.stirrupRight.zRot = this.stirrupRightIron.zRot = -swingZ;
-			// (0.7.309) under barding they hang outside the side plates
+			// (0.7.322) under barding they hang outside the side plates
 			Float out = state.armor != null ? STIRRUP_OUT.get(state.build) : null;
 			for (ModelPart part : new ModelPart[] {this.stirrupLeft, this.stirrupLeftIron, this.stirrupRight, this.stirrupRightIron}) {
 				float x = part.getInitialPose().x();
@@ -417,7 +417,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				part.visible = saddled;
 			}
 			this.headSaddle.visible = this.bitLeft.visible = this.bitRight.visible = state.headstall;
-			// (0.7.309) under barding the mane and forelock lie hidden beneath the crinet and chanfron
+			// (0.7.322) under barding the mane and forelock lie hidden beneath the crinet and chanfron
 			boolean barded = state.armor != null;
 			this.mane.visible = !barded;
 			for (ModelPart part : this.forelock) {

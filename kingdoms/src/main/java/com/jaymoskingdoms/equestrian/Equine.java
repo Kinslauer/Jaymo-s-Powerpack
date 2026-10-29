@@ -34,7 +34,7 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 		Equine::new);
 
 	/**
-	 * (0.7.309) The moonlit horse: rarer than any breed's rare coat, a horse of any breed (but the elephants and the
+	 * (0.7.322) The moonlit horse: rarer than any breed's rare coat, a horse of any breed (but the elephants and the
 	 * mythic mounts) is now and then born pale and silver-maned, drawn in a shape of its own (jsellier23's Mystical Deer
 	 * made into a horse, CC BY 4.0). Its coat index, past every breed's coats; foals take it from a parent as any coat.
 	 */

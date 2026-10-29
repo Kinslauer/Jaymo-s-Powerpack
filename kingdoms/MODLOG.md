@@ -6128,7 +6128,182 @@ Then Andy's picks from the Icy's Better Horses gap list (ideas only, our own cod
 - Draft horses carry the `jaymoskingdoms.draft` tag for Kitchen's six-seat coach (Kitchen 0.5.35).
 Compile-checked, not seen in game.
 
-## 0.7.309: barding of its own, taller horses, and more detailed horses (pack 0.17.127)
+## 0.7.307: whalers cut in alongside, their tryworks burn; harpoon boats keep their crew at the oars (pack 0.17.125)
+
+From Andy's clip of a whaling voyage:
+- **Loose things stay in the sea** ("alot of items were following the ship as it sailed instead of floating in the
+  water outside"): `Ship.carry` took along everything inside her outline, so dropped items floating in the sea by
+  her narrow bow and stern sailed with her and looked like water inside her. Now only what rests on her or in her is
+  carried: in her dry hold, in one of her part-blocks, or on a piece just below (a walker two below, mid-stride).
+  Anything she sails into inside a full block of hers is left behind (`Hull.dry`, `Hull.solid`).
+- **The whale is lashed alongside and she anchors** ("the whale just didnt attach to the boat"): cutting in now lets
+  go her anchor (`Ship.rideAtAnchor`: no way on her, no turn, no tow on her lines) and lashes the carcass amidships on
+  the side it lies (`WhaleCarcass.lash`, hauled in at most 0.25 a tick and laid along her). A lashed carcass counts as
+  alongside, so players can flense it with her crew. Her captain calls it out.
+- **Her gang fills the tryworks** ("the crew should start filling the tryworks"): every whaler has a tryworks on her
+  centreline forward of her middle (set on a whaler already at sea too). Three hands turn to: the cutter at the rail
+  over the carcass with a spade, a stroke every 24 ticks (meat, bone and ambergris below to her hold), and carriers
+  who take the blubber from the rail to the tryworks in their arms, four at a time, and pitch it in (a lone hand does
+  both). The tryworks light and fill (their BLUBBER state, up to 8; the rest to the blubber room).
+- **The tryworks burn on** ("they burn as we either return home or search for another"): fire and smoke now go up
+  from the tryworks themselves, 2 blubber to a bottle of oil every 160 ticks, fed again from her hold by a hand until
+  all of it is rendered, whether she's hunting or homeward. At home, what's left in the pots is rendered ashore.
+- **Harpoon boats keep their crew at the oars** ("When you join on a harpoon boat the ai should retain control"): the
+  game gives a boat to any player in its first seat and seats players first, so a player in a whaleboat took its
+  steering and the boat never towed the carcass home. Whaleboats now carry a synced `Whalers.CREWED` mark and
+  `BoatCrewedMixin` gives them no controlling passenger: her oarsmen row as her captain orders and the player only
+  throws irons. A boat cast adrift (no hand left) loses the mark, so a player can row it.
+- A player in a boat when it's hoisted in is set on her deck, not dropped in the sea beside her.
+Compile-checked against the 26.3 jars, not seen in game.
+
+## 0.7.311: shamans and raiders leave captives alone (pack 0.17.131)
+Andy: "shaman is repeatedly attacking the prisoner."
+- A captive in chains is never prey: `Barbarians.prey`/`villagerPrey` (raiders, greenskins, pirates) and
+  `Casters.foe` (a camp's shaman, necromancer or blood witch) skip them. They were invulnerable, so the blows did
+  nothing, but the shaman kept casting at them.
+- Andy also asked why barbarians had lost their armour: MCA's own equipment routine (`EquipmentTask`) puts a guard's
+  armour on only while they fight. He likes that, so it stays as MCA has it.
+## 0.7.312: Rubber-folk bring their last swallow back up, hold swallowed players alive, and grow with what they eat (pack 0.17.134)
+Andy: "eating a pillager made me smaller for some reason, it should add their mass to the user, not subtract. and the
+mass should increase per pulse as the absorbed gets smaller." And: "rubbers should be able to eject their last
+swallow, leaving a pink mass that slowly reveals the now corpse. If a downed player is absorbed they stay alive, but
+wounded and appear inside the rubber folk. able to fight their way out by disturbing structures representing the
+rubber's internal organs."
+- **Mass, not a shift**: the old swallow moved your MCA height and width toward the foe's, measured after it had shrunk
+  to 5%, so everything made you smaller. Now the foe's shape is taken as the swallow starts (`HeritageHold.Channel`)
+  and 30% of its bulk is added to yours (`BodySizes.withMass`, `ABSORB_MASS`), a step with each pulse (`RubberFolk.grow`).
+  Letting go puts you back as you were.
+- **The last swallow stays in you** (`RubberStomach.STOMACH`): the Kitchen corpse it would leave (and a digested
+  player's things). **Sneak + heritage key** pukes it up a step ahead of you under a pink rubber mound that wobbles,
+  sags into a puddle and fades over 30 s (`MASS` on a short cloud that drips pink; drawn by `RubberStomachView`). What you
+  took from it (stats, gifts, swallowed power, bulk) goes with it. A new swallow replaces it; death loses it.
+- **Downed players swallowed alive**: they get up, wounded (8 health at most), inside you. No new world: they hang 24
+  blocks over the build limit above you, following you (like `StoryStasis`), and their screen draws your insides round
+  them: pulsing walls, the heart ahead, a lung each side, the stomach below. Their attack key hits the organ under the
+  crosshair (`Strike`, at most every 5 ticks, scaled by their blow and cooldown): you take half of each blow (more for
+  the heart), a lung blow knocks your breath out and slows you, a stomach blow makes you sick and hungry, and screens
+  shake. Beat 60% of the organs and you retch them up (and take 4 more). The stomach takes 1 health from them every
+  2.5 s; if they go down in there they're digested, and you get their power, stats and body as with any swallow. Your
+  belly stays full and heaves while they're in there. Sneak + heritage key pukes them back up. Either one logging off, you
+  going down or dying lets them out; a server stop puts them down where they were swallowed.
+- Powers 0.17.134: `SwallowedPower.drop` is public, so bringing a swallow up takes its power back.
+Compile-checked, not seen in game.
+
+## 0.7.313: the Bio-built remade after Cell: three bodies, a tail that swallows, absorb anyone but the Dawnborn and Divine (pack 0.17.138)
+Andy: "bio android should be able to absorb enemies that are crippled and crawling not just downed". The heritage key
+(`BioBuilt.helpless`) now takes in a foe that is downed (lying or crawling), has a broken leg (Powers'
+`jaymospowers_crippled` tag, splinted or not), has a leg cut off (`jaymoskitchen.missing.left_leg`/`right_leg`), or is
+Crippled by a hidden blade. The rest is as before: up close, a toggle, broken off by any harm; a crippled foe that
+can still swing at you will break it. The Rubber-folk swallow is unchanged.
+
+Then Andy on the buds: "the buds should use a charge of your absorption and they should look like smaller versions of
+the user, not zombies."
+- **Charges** (`BioBuilt.CHARGES`, saved, lost on death): every foe absorbed stores one, up to 4. Each bud spends one
+  (two buds, two charges; one charge, one bud). Budding no longer costs health or hunger, and the wait is 20 s (was
+  60). With nothing stored the key says so. In the third form the absorb message shows the charges.
+- **Small copies** (`BioBud`, entity `jaymoskingdoms:bio_copy`): a zombie's brain so `Thralls` leads it as before, but
+  drawn by `BioBudRenderer` as its maker: their skin on a player's body (slim or wide arms, as theirs), at 0.6 size,
+  with the third form's plates, glowing nodes and amber eyes. No rag, nothing in its hands. The sun doesn't burn it,
+  water doesn't turn it, it never makes zombie villagers, it doesn't groan, and it drops nothing.
+
+Then Andy: "bio-built's lore involves it being created by the mad tinkerer, and they contain DNA from all other
+heritages except dawn and divine. This allows them to absorb anyone who isnt that race. I also want the forms to be
+drastically different from each other. with the third form becoming the most powerful, and stable. as a z fighter they
+gain various buffs per form and are more akin to Cell from dragon ball ... the first form shouldnt necessarily be larval,
+but intensely grotesque and with a tail ... The tail should now be what absorbs in first form. it extends overhead, and
+down upon the target. stretching over and engulfing them into a bulge that flows down the tail and into the BB".
+- **Who** (`BioBuilt.absorbable`): any monster as before, and now any person too (a villager, a kingdom's folk, another
+  player not in creative), downed or crippled, unless they are Dawnborn or Divine (`BioBuilt.alien`). A person is
+  worth the most (4) and dies of it, credited to you, leaving no body (as with the Rubber-folk). Lore in the heritage's
+  description and gift.
+- **The forms** (client `BioForms`, textures and parts table from `tools/gen_bio_forms.py`, in three palettes: the
+  seamed green, the Brassbound's bronze, the Opaline's pearl): Imperfect, hunched (head thrust low and forward, arms
+  hanging forward), spotted carapace, black chest plates, orange segmented belly, insect face with a beak and pink slit
+  eyes, V horns, wing cases, claws, spine ridge, a shoulder growth, steel bracers, a long swaying segmented tail with a
+  stinger; Semi-Perfect, a size up (`BioBuilt.SIZE`, +15%) and bulked (wider body and arms), black forearms and shins,
+  heavy lips and no nose, a crown of horns, pauldrons, steel gauntlets over the fists and steel plates down a short thick
+  tail; Perfect, as tall as the second but sleek, pale face with purple cheek stripes, black chest, the old steel
+  plating from shoulder to wrist and on the cheekbones, slim steel plates over the shoulders and shoulder blades (no
+  wings: Andy, "no wings, and instead the armor plates"), slim crown horns, the tail folded to a steel stinger nub. The
+  steel is the old forms' plating ("I do want the steel plating to reintegrate like it did before"). Twelve beads in the
+  heritages' colours glow down every form's spine. The form is the whole body: MCA's face, clothes and hair are left off
+  (`McaBioFormLayerMixin`), and a skin's hat and sleeves. Villagers of the heritage keep their old marks.
+- **The tail swallow** (`BioTailEngulf`, all three forms; the Perfect form unfurls it from its stinger): the tail rises
+  off the back in an arch over your head and comes down on the foe's crown, splits and stretches down over it like a
+  sheath until it's swallowed, then the sheath tightens as the foe shrinks and the bulges run up the arch and into your
+  back. Reach 4.5 blocks; the foe is held 1.8 blocks off (`HeritageHold.step` takes a touch distance now). No more hand
+  reach for the Bio-built.
+- **Buds** (`BioBudRenderer`): small copies of the Perfect form in their maker's palette.
+- **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
+Compile-checked against 26.3 with javac (changed files), not seen in game.
+
+## 0.7.316: clearing parties go in first; ATi compounds spaced out; the dojo only in cherry groves (pack 0.17.142)
+Andy (with a screenshot of ATi's dojo by the water near spawn): "If villagers are to take any of these overworld
+structures they need to send a party in for clearing the enemies first ... way too many of these spawned in close
+proximity, this specific one should only spawn near the blossom villages and biomes ... dead women and children should
+always be avoided by the inhabitants."
+- **`Clearing`** (new): every 60 ticks each standing settlement looks over the surface structures (not villages) within
+  112 blocks of its seat. While monsters (`Enemy`, not anyone's folk, thrall, captive, pet or a camp's illagers) are in
+  one, a party of its fighters (guards and armed folk, never the ruler or posted archers; 2 per monster, 8 at most,
+  fetched from 96 blocks) is sent after them (`Rulers.charge`), and everyone else near it (MCA villagers of any kind,
+  children, builders and other workers) is walked out 10 blocks past its edge toward the seat and held there
+  (`Frights.shelter`). Once it's empty and the party has been in, its spawners are smashed so it stays clear. A
+  structure in another settlement's land is left to them; a monster inside the settlement's own seat structure only
+  gets the party (Frights already sends people running there). Grim holds and camps taken by `GrimSites` are cleared
+  the same way: the fighters arrive first and the builders wait outside until it's clear.
+- **ATi compounds** (`ati_compounds`): spacing 64/32 -> 100/50 chunks, 2-3 members (was 3-4) on a 4-chunk ring (was 3),
+  and none within 32 chunks (512 blocks) of the world's middle (`spawn_clearance`). The old compounds put 3-4 ATi
+  buildings within ~50 blocks of each other, denser than ATi's own sets.
+- **The dojo** (`ati_structures:dojo`, the black-and-red pagoda) only goes in a compound in `minecraft:cherry_grove`,
+  where Blossom villages rise: `CompoundStructure` reads a new `only_in` map (structure id to biomes) that replaces a
+  member's own biome tag (ATi's put it in plains, forests and jungles). It was already the cherry Grand Seat.
+Compile-checked (Clearing, CompoundStructure), not seen in game. Existing chunks keep what they generated.
+
+## 0.7.317: sailors don't offer "Seek an audience" (pack 0.17.143)
+Andy: "the sailors shouldnt have this audience option". A ship's hands are enlisted in the guard role, so MCA's talk
+menu offered every navy, merchant and whaler crewman "Seek an audience". `Audiences.canAsk` now turns down ship crew
+(`Crewmen.tagged`, or anyone seated aboard a `Ship`), caravan escorts (task `caravan`) and soldiers out with a war party
+(`WarParties.isSoldier`). Rulers and a realm's posted guards keep the option; the folk-guard chat line and
+`/kingdom audience` follow the same check.
+Not compile-checked (no game jars staged), not seen in game.
+## 0.7.319: Jaymo's Powers' Z Fighter characters are MCA villagers with talk screens (pack 0.17.146)
+Andy: "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys immersion seeing one of those
+things instead of a humanoid. ... they should have context sensitive talk interactions that handle the quest objectives
+instead of them appearing in chat like now."
+- `ZFighterFolk.spawn` (called by Powers): a grown MCA villager named for the part, tagged with Powers' tag, enlisted to
+  no settlement in role 95, out of the family tree, permanently invulnerable, home set at the spot. `Workers.step` hands
+  them to `ZFighterFolk.step` first: navigation stopped, stepped back if pushed 1.5+ blocks off their post, facing the
+  nearest player; the brain never runs (no wandering, beds, homes, old age). Kept out of `McaBridge.workers`, and they
+  speak to anyone (`Languages.look` gives them no tongue).
+- Outfits (`Uniforms.zfighter`, `tools/gen_zfighter_outfits.py`, four each, registered neutral): the Keeper's temple
+  robe and mantle, the Hermit's beach shirt, shorts and straw hat, the Tinkerer's lab coat, gloves and brass goggles, the
+  Judge's black robe with bands and stole, the road master's travelling gi, the teller's robe, shawl and headscarf, a
+  demon master's dark gi with spiked pauldrons. Hermit and Tinkerer go grey.
+- MCA's "Talk about work" on them goes to Powers' talk (`PowersCompat.zfighterTalk`), and a Z Fighter master (a town's
+  villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
+  `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).
+
+## 0.7.321: goblins have the workshop goblin's body (pack 0.17.148)
+Andy: "can this replace our goblins?" (kokosikk's Blockbench Workshop goblin, CC BY 4.0), then "Whole body, clothes
+redrawn". Goblin villagers now have its shape: a big head, a short body bent forward in a hunch, thin arms, short legs.
+- `GoblinBody.apply` (last in both pose hooks, `MobSwingLivingEntityRendererMixin` and
+  `MobSwingModelFeatureRendererMixin`): every humanoid body drawn for a goblin, MCA's skin, face, clothes and hair, the
+  marks, any armour, is reshaped bone by bone: each bone moved to the goblin's pivot and scaled so a man's box fills the
+  goblin's (head 1.125 wide; body 0.75 tall, 1.25 deep; arms 0.65 x 0.75; legs 0.75 x 0.67), the body, head and arms
+  leant 12 degrees into the hunch at the hip. So whatever MCA dresses a goblin in is drawn on the goblin's body. MCA's
+  skin layer hands its pose on to the other layers (without the scale), so the move is made once (a goblin's right
+  leg sits 1.4 further out than a man's) and the scale every time. A woman's breasts go onto the goblin's chest
+  (`McaLookModels.goblinChest`).
+- `GoblinBody.submit` (from `GreenskinLooks`, which still draws the marks): the model's own parts, painted in the pack's
+  style by `tools/gen_goblin_body.py` (flesh in greys tinted by the goblin's green): ears out and up, a drooping nose,
+  two small tusks, fists, wide feet with toenails, a belt with buckle and pouch, a loincloth, shin wraps; half of them
+  a red cap, one in four an earring. Feet and wraps go under boots, the loincloth under leggings, the cap under a helmet.
+  The two old goblin head shapes (`goblin_features.png`) are gone; orcs are unchanged.
+- `GoblinHandMixin` (`HumanoidModel.translateToHand`): a held item isn't squashed by the thin arm and sits in the fist.
+- Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
+  `tools/blockbench/kokosikk_goblin.bbmodel`.
+Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+## 0.7.322: barding of its own, taller horses, and more detailed horses (pack 0.17.149)
 
 Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
 anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or

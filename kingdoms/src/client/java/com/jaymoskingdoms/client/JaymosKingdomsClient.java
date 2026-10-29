@@ -48,6 +48,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.279) a spirit's floating hand (far hand, catch)
 		com.jaymoskingdoms.client.spirits.SpiritHandRenderer.register();
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
+		// (0.7.310) a Bio-built's buds, small copies of their maker
+		BioBudRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -74,6 +76,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		HandshakePose.register();
 		// (0.7.290) a Rubber-folk swallowing: the rubber over the foe, the swell after
 		RubberEngulf.register();
+		BioTailEngulf.register();
+		RubberStomachView.register();
 		HandshakeCinematic.register();
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker

@@ -46,12 +46,18 @@ public final class ZFighterNet {
 		}
 	}
 
-	/** Client → server: hold Z and scroll; take off into, or change to, flight pose {@code pose} (1-5), or land (0). */
-	public record Fly(int pose) implements CustomPacketPayload {
+	/**
+	 * Client → server: hold Z and scroll; take off into, or change to, flight pose {@code pose} (1-5), or land (0).
+	 * {@code boost}: scrolled all the way up straight after lifting off, so the take-off burst goes off.
+	 */
+	public record Fly(int pose, boolean boost) implements CustomPacketPayload {
 		public static final Type<Fly> TYPE = new Type<>(JaymosPowers.id("zfighter_fly"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Fly> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.pose),
-			buf -> new Fly(buf.readVarInt()));
+			(p, buf) -> {
+				buf.writeVarInt(p.pose);
+				buf.writeBoolean(p.boost);
+			},
+			buf -> new Fly(buf.readVarInt(), buf.readBoolean()));
 
 		@Override
 		public Type<Fly> type() {
@@ -280,7 +286,7 @@ public final class ZFighterNet {
 		PayloadTypeRegistry.serverboundPlay().register(Fly.TYPE, Fly.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Fly.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE)) {
-				ZFighterPower.fly(ctx.player(), payload.pose());
+				ZFighterPower.fly(ctx.player(), payload.pose(), payload.boost());
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Train.TYPE, (payload, ctx) -> train(ctx.player(), payload));

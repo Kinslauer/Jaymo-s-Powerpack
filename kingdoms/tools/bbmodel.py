@@ -1,4 +1,4 @@
-"""Blockbench models for our horses (0.7.309): a build (or its barding) read from a Blockbench project, and every build
+"""Blockbench models for our horses (0.7.322): a build (or its barding) read from a Blockbench project, and every build
 written out as one for whoever models them.
 
 Make a horse in Blockbench as a "Modded Entity" project (box UV). Name each group after one of our bones (body, head,

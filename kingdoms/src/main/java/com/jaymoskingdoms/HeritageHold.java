@@ -59,13 +59,19 @@ public final class HeritageHold {
 	/** The foe shrinking away as it's taken in. */
 	private static final Identifier SHRINK_ID = JaymosKingdoms.id("heritage_absorb_shrink");
 
-	/** One absorbing under way: the foe, and how many ticks it has run. */
+	/**
+	 * One absorbing under way: the foe, its shape as it was taken (before it shrank), how many ticks it has run, and how
+	 * far along it was at the last pulse (0 .. 1).
+	 */
 	static final class Channel {
 		final LivingEntity target;
+		final net.minecraft.world.entity.EntityDimensions shape;
 		int ticks;
+		double pulsed;
 
 		Channel(LivingEntity target) {
 			this.target = target;
+			this.shape = target.getType().getDimensions().scale(target.getScale());
 		}
 	}
 
@@ -145,6 +151,12 @@ public final class HeritageHold {
 	 */
 	static @Nullable LivingEntity step(ServerLevel level, ServerPlayer player, Predicate<LivingEntity> still, double reach, int need,
 		ParticleOptions fx, SoundEvent throb, String bar) {
+		return step(level, player, still, reach, need, fx, throb, bar, TOUCH);
+	}
+
+	/** (0.7.313) As above, with the foe drawn in only to {@code touch} blocks (the Bio-built's tail reaches farther than a hand). */
+	static @Nullable LivingEntity step(ServerLevel level, ServerPlayer player, Predicate<LivingEntity> still, double reach, int need,
+		ParticleOptions fx, SoundEvent throb, String bar, double touch) {
 		Channel channel = CHANNELS.get(player.getUUID());
 		if (channel == null) {
 			return null;
@@ -160,7 +172,7 @@ public final class HeritageHold {
 		// drawn in close, under the hand
 		Vec3 away = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 		if (away.lengthSqr() > 1.0E-4) {
-			Vec3 to = player.position().add(away.normalize().scale(TOUCH)).subtract(foe.position()).multiply(1.0, 0.0, 1.0);
+			Vec3 to = player.position().add(away.normalize().scale(touch)).subtract(foe.position()).multiply(1.0, 0.0, 1.0);
 			double length = to.length();
 			if (length > 0.1) {
 				Vec3 move = to.scale(Math.min(DRAW, length) / length);
@@ -171,6 +183,7 @@ public final class HeritageHold {
 		shrink(foe, SHRINK * progress * progress * (3.0 - 2.0 * progress));
 		int every = Math.max(PULSE_LAST, Math.round(Mth.lerp((float)progress, PULSE_FIRST, PULSE_LAST)));
 		if (channel.ticks % every == 0) {
+			channel.pulsed = progress;
 			pulse(level, player, foe, fx, throb, progress);
 		}
 		if (channel.ticks % PROGRESS_EVERY == 0) {

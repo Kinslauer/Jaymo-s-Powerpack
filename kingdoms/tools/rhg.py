@@ -1,4 +1,4 @@
-"""(0.7.309) Coat patterns from Realistic Horse Genetics (sekelsta, github.com/sekelsta/horse-colors), whose art is CC-BY
+"""(0.7.322) Coat patterns from Realistic Horse Genetics (sekelsta, github.com/sekelsta/horse-colors), whose art is CC-BY
 4.0: the masks in tools/rhg (credits in tools/rhg/CREDITS.md), drawn for its vanilla-shaped horse, carried onto ours.
 
 Each of our hide pixels is matched to the same place on that horse: its bone's box there (the body for everything on

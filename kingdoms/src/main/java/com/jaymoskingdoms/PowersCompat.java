@@ -107,6 +107,33 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
+	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle among;
+	private static boolean lookedForAmong;
+
+	/** (0.7.320) Whether {@code player} is one of the dead in Jaymo's Powers' Other World (the afterlife); false without Powers. */
+	public static boolean amongTheDead(Player player) {
+		if (!lookedForAmong) {
+			lookedForAmong = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					among = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterAfterlife"),
+						"among", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' afterlife (older Powers?)", e);
+				}
+			}
+		}
+		if (among == null) {
+			return false;
+		}
+		try {
+			return (boolean)among.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
@@ -979,6 +1006,32 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.312) Powers' {@code SwallowedPower.drop(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle dropPower;
+	private static boolean lookedForDrop;
+
+	/** (0.7.312) A Rubber-folk brought up their last swallow: the power they took from it leaves them (nothing without Powers 0.17.134). */
+	public static void dropPower(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDrop) {
+			lookedForDrop = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dropPower = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SwallowedPower"), "drop",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' SwallowedPower.drop (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (dropPower != null) {
+				dropPower.invoke(player);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't take a swallowed power back", e);
+		}
+	}
+
 	/**
 	 * Tells {@code listener} of every forging finished on one of Powers' Smithing Anvils (the smith and the result), by adding
 	 * it to Powers' {@code Provenance.FORGED_LISTENERS}. Nothing happens without Powers (or an older one).
@@ -993,6 +1046,37 @@ public final class PowersCompat {
 			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack>>)list).add(listener);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' forging (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
+	private static boolean lookedForZFighterTalk;
+
+	/**
+	 * (0.7.319) "Talk about work" (or "Talk about training") with one of Powers' Z Fighter characters ({@link ZFighterFolk}):
+	 * their talk screen. False without Powers, or when they had nothing to say.
+	 */
+	public static boolean zfighterTalk(net.minecraft.server.level.ServerPlayer player, LivingEntity speaker) {
+		if (!lookedForZFighterTalk) {
+			lookedForZFighterTalk = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					zfighterTalk = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterNpcs"), "talk",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Z Fighter talk (older Powers?)", e);
+				}
+			}
+		}
+		if (zfighterTalk == null) {
+			return false;
+		}
+		try {
+			return (boolean)zfighterTalk.invoke(player, speaker);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't talk with {}", speaker.getName().getString(), e);
+			return false;
 		}
 	}
 }

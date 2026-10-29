@@ -57,7 +57,7 @@ public final class HorseLooks {
 			path = "zombie/" + ZOMBIE[Math.floorMod(e.coat(), ZOMBIE.length)];
 			state.setData(MODEL, UNDEAD_BUILD);
 		} else if (e.moonlit()) {
-			// (0.7.309) the moonlit horse: its own shape and painting, whatever its breed
+			// (0.7.322) the moonlit horse: its own shape and painting, whatever its breed
 			path = "moonlit/moonlit";
 			state.setData(MODEL, MOONLIT_BUILD);
 		} else {

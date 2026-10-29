@@ -27,9 +27,13 @@ import org.jspecify.annotations.Nullable;
 public final class FutureMachines {
 	public static EntityType<FutureAndroid> ANDROID;
 	public static EntityType<FutureMech> MECH;
+	/** (0.17.135) The smaller android mech: now and then at the head of a patrol, and the Mad Tinkerer's test unit. */
+	public static EntityType<FutureMech> ANDROID_MECH;
 
 	/** One check in this many (with the hordes, every 2 s) sends a patrol of this many androids, while fewer than the cap are near. */
 	static final int PATROL_CHANCE = 45, PATROL_MIN = 1, PATROL_MAX = 3, ANDROID_CAP = 4;
+	/** One patrol in this many is led by an android mech. */
+	static final int PATROL_MECH_CHANCE = 6;
 	/** One check in this many sends a mech, while none is within {@link #MECH_SPACE}. */
 	static final int MECH_CHANCE = 240;
 	static final double NEAR = 64.0, MECH_SPACE = 128.0;
@@ -44,8 +48,11 @@ public final class FutureMachines {
 			.sized(0.6F, 1.95F).eyeHeight(1.74F).clientTrackingRange(10).noLootTable());
 		MECH = register("future_mech", EntityType.Builder.<FutureMech>of(FutureMech::new, MobCategory.MONSTER)
 			.sized(2.1F, 4.0F).eyeHeight(3.5F).clientTrackingRange(12).noLootTable());
+		ANDROID_MECH = register("android_mech", EntityType.Builder.<FutureMech>of(FutureMech::new, MobCategory.MONSTER)
+			.sized(1.6F, 3.1F).eyeHeight(2.7F).clientTrackingRange(10).noLootTable());
 		FabricDefaultAttributeRegistry.register(ANDROID, FutureAndroid.createAttributes());
 		FabricDefaultAttributeRegistry.register(MECH, FutureMech.createAttributes());
+		FabricDefaultAttributeRegistry.register(ANDROID_MECH, FutureMech.createAndroidAttributes());
 	}
 
 	private static <T extends Mob> EntityType<T> register(String name, EntityType.Builder<T> builder) {
@@ -68,10 +75,16 @@ public final class FutureMachines {
 						level.addFreshEntity(android);
 					}
 				}
+				if (random.nextInt(PATROL_MECH_CHANCE) == 0) {
+					FutureMech lead = ANDROID_MECH.create(level, EntitySpawnReason.EVENT);
+					if (lead != null && place(level, lead, at)) {
+						level.addFreshEntity(lead);
+					}
+				}
 			}
 		}
 		if (random.nextInt(MECH_CHANCE) == 0
-			&& level.getEntitiesOfClass(FutureMech.class, player.getBoundingBox().inflate(MECH_SPACE), FutureMech::isAlive).isEmpty()) {
+			&& level.getEntitiesOfClass(FutureMech.class, player.getBoundingBox().inflate(MECH_SPACE), m -> m.isAlive() && m.getType() == MECH).isEmpty()) {
 			BlockPos at = spot(level, player, random);
 			FutureMech mech = at == null ? null : MECH.create(level, EntitySpawnReason.EVENT);
 			if (mech != null && place(level, mech, at)) {

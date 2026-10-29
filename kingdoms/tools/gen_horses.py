@@ -218,7 +218,7 @@ def tack(x):
     return None
 
 
-MAPPERS = {}  # (0.7.309) each build's rhg.Mapper, set in main
+MAPPERS = {}  # (0.7.322) each build's rhg.Mapper, set in main
 
 # ---- the breed coats ------------------------------------------------------------------------------------------------------
 LEG_TOP, GROUND = 9.0 - hr.LIFT, 24.1
@@ -263,7 +263,7 @@ def mouth(x, col, tint):
     return col
 
 
-# (0.7.309) The horse's form, painted in: light on the muscles (shoulder, forearm, hip and gaskin, the crest of the
+# (0.7.322) The horse's form, painted in: light on the muscles (shoulder, forearm, hip and gaskin, the crest of the
 # neck), shadow in the hollows (behind the elbow, the flank, under the belly and the jaw). World space, model pixels.
 FORM = [
     # (centre (|x| or None for the midline), y, z), radius, how much lighter (+) or darker (-)
@@ -301,7 +301,7 @@ def coat(build, breed, name, spec, pxs, seed):
     hairn = ge.HAIRN.get(breed, 12)
     tint = spec["tint"] or (34, 28, 26)
     points_y = LEG_TOP + (GROUND - 3 - LEG_TOP) * spec["points_from"] / 9
-    m = MAPPERS.get(build)  # (0.7.309) Realistic Horse Genetics' patterns, carried onto this build (rhg.py)
+    m = MAPPERS.get(build)  # (0.7.322) Realistic Horse Genetics' patterns, carried onto this build (rhg.py)
 
     def body(x, col):
         w = x.w
@@ -465,7 +465,7 @@ def coat(build, breed, name, spec, pxs, seed):
         col = hide(x)
         col = shade(col, int((h3(x.X, x.Y, 10, seed) - 0.5) * 2 * noise) + form(x))
         if getattr(c, "nostril", False) and x.face in ("front", "a", "b") and 0.3 < x.s < 0.7 and 0.25 < x.t < 0.75:
-            col = (38, 26, 24)  # (0.7.309) the nostril's opening
+            col = (38, 26, 24)  # (0.7.322) the nostril's opening
         if "shimmer" in marks and (x.face == "top" or x.t < 0.45) and h3(x.X, x.Y, 11, seed) < 0.07 and eye(x) == 0:
             col = shade(col, 30)
         out[(x.X, x.Y)] = light(x, col) + (255,)
@@ -690,7 +690,7 @@ def undead(pxs):
     }
 
 
-# ---- horse armour (0.7.309: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
+# ---- horse armour (0.7.322: its own pieces, tools/horse_rig.py armour()) ------------------------------------------------
 METAL, TRIM, LINING, HOLE, CLOTH, CLOTH_ALT = 0, 1, 2, 3, 4, 5
 # the faces left open (nothing drawn): the caparison beneath, before and behind; the neck cloth at its ends; the
 # chanfron under the jaw, behind for the ears and where the nose plate runs on
@@ -789,7 +789,7 @@ def armour_base(pxs, mail, fabric=False):
 
 
 def cloth(x, fw, fh, u, v):
-    """(0.7.309) The caparison's cloth as (grey, kind): woven, falling in folds below the belly, a band of trim at the
+    """(0.7.322) The caparison's cloth as (grey, kind): woven, falling in folds below the belly, a band of trim at the
     hem and a stitched border above it; quartered (CLOTH_ALT) for the heraldic bardings."""
     f, w = x.face, x.w
     g = 176 + 10 * (h3(x.X, x.Y, 23, 2) - 0.5) + (6 if (x.X + x.Y) % 2 == 0 else 0)
@@ -842,7 +842,7 @@ COPPER = [(0.0, (60, 30, 18)), (0.35, (150, 78, 46)), (0.7, (214, 128, 84)), (1.
 VERDIGRIS = [(0.0, (20, 56, 48)), (0.45, (52, 128, 106)), (0.8, (104, 190, 160)), (1.0, (190, 240, 220))]
 NETHERITE = [(0.0, (20, 16, 18)), (0.4, (58, 50, 54)), (0.75, (98, 88, 92)), (1.0, (150, 138, 140))]
 GREY = [(0.0, (90, 90, 90)), (0.5, (200, 200, 200)), (1.0, (255, 255, 255))]
-# (0.7.309) the caparisons' cloths
+# (0.7.322) the caparisons' cloths
 CRIMSON = [(0.0, (40, 6, 10)), (0.45, (120, 18, 26)), (0.8, (178, 40, 44)), (1.0, (226, 96, 90))]
 ROYAL_BLUE = [(0.0, (8, 14, 46)), (0.45, (30, 52, 130)), (0.8, (60, 96, 190)), (1.0, (140, 170, 236))]
 LINEN = [(0.0, (88, 84, 76)), (0.45, (190, 184, 170)), (0.8, (232, 228, 216)), (1.0, (252, 250, 244))]
@@ -926,7 +926,7 @@ ARMOURED_HIDDEN = HIDDEN + ("mane", "mane_flow", "forelock", "forelock_tip")
 
 
 def preview_armour(rigs, armour_rigs, written):
-    """(0.7.309) Each build in each barding, larger, from the front quarter and the back quarter."""
+    """(0.7.322) Each build in each barding, larger, from the front quarter and the back quarter."""
     for build in rigs:
         coat_rel = next(rel for rel, (b, _) in written.items() if b == build and not rel.startswith("armor/"))
         coat_img = written[coat_rel][1]

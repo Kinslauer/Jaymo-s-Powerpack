@@ -1,4 +1,4 @@
-"""(0.7.309) jsellier23's Mystical Deer (Blockbench Workshop, CC BY 4.0: credit in tools/horse_models/source/CREDITS.md)
+"""(0.7.322) jsellier23's Mystical Deer (Blockbench Workshop, CC BY 4.0: credit in tools/horse_models/source/CREDITS.md)
 made into a horse, the moonlit horse (tools/moonlit_horse.py): its antlers and wisteria taken off, its body, neck, head
 and legs bulked, the body lengthened, the neck shortened and leaned forward, the cannons shortened, the snout longer,
 the ears stood up, and a mane, forelock and long tail of silver hair added. Works on the Blockbench project itself

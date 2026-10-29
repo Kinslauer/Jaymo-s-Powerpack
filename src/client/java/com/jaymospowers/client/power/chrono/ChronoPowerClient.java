@@ -91,10 +91,12 @@ public final class ChronoPowerClient implements PowerClient {
 		ClientPlayNetworking.registerGlobalReceiver(ChronoSync.TYPE, (payload, ctx) -> INSTANCE.accept(payload));
 		EntityRendererRegistry.register(ChronoEchoes.ECHO, ChronoEchoRenderer::new);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID, FutureAndroidRenderer::new);
-		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.MECH, FutureMechRenderer::new);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.MECH, FutureMechRenderer::war);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.ANDROID_MECH, FutureMechRenderer::android);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoStreak.init();
+		MuzzleFlashParticle.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
 	}
 

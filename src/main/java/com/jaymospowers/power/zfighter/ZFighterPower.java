@@ -53,8 +53,9 @@ import net.minecraft.world.phys.Vec3;
  * comes in fast while charging, from landing punches, and from eating. The techniques spend it.</li>
  * <li>R (hold), Charge Ki: stand your ground, the aura flares, ki pours in (hungry work).</li>
  * <li>G, Ki Blast; V (hold), Ki Wave; B, Flash Step ({@link ZFighterKi}).</li>
- * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up takes off and
- * steps through five poses of the arms, down steps back and lands. Charging works in the air.</li>
+ * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up lifts him
+ * gently off the ground and steps through five poses of the arms (all the way up at once: a burst of ki throws him
+ * into the sky), down steps back and lands. Charging works in the air.</li>
  * <li>C (ascended): up a form; sneak+C: down one. Super is reached through hardship ({@link ZFighterBattle}); Super 2
  * and 3 are bought with training ({@link ZFighterTraining}). Each hits harder and burns more ki and food; mastery
  * lifts its power and eases its drain.</li>
@@ -201,9 +202,13 @@ public final class ZFighterPower implements Power {
 	/**
 	 * (0.16.20) Andy: "after achieving max it stays for a bit until your ki falls". Let go of a full charge and the charging
 	 * aura holds this long, or until his ki drops under this share of full.
+	 * (0.17.133) Andy: "ki charge should expand the size of the aura, then it levels back out as your ki diminishes". It
+	 * now holds down to 80% of his ki (was 90%), still 8 s at most, so spending it shrinks the aura back before it goes.
 	 */
 	static final int AURA_HOLD_TICKS = 160;
-	static final float AURA_HOLD_KI = 0.9F;
+	static final float AURA_HOLD_KI = 0.8F;
+	/** (0.17.133) His ki as a share of full is sent to everyone in this many steps (the aura's size; few, to send little). */
+	public static final int KI_SHARE_STEPS = 20;
 	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
 	static final double SHOUT_RANGE = 32.0;
 	static final int SHOUT_LINES = 3;
@@ -262,6 +267,12 @@ public final class ZFighterPower implements Power {
 	/** (0.16.20) The game time his ki last hit full on a charge (the ki glow's pulse), for everyone's client; not saved. */
 	public static final AttachmentType<Long> KI_FULL = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_full"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.17.133) His ki out of {@link #KI_SHARE_STEPS} of full, for everyone's client: the aura swells with it
+	 * ({@code ZFighterKiAura}). Absent at none; not saved.
+	 */
+	public static final AttachmentType<Integer> KI_SHARE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_share"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/**
 	 * (0.13.27) Andy: "every zfighter should spawn with a random ki color". The ki colour each Z Fighter is born with,
 	 * drawn from {@link #KI_PALETTE} when the power comes (or the first time it's missing): his blasts, disc, waves, bomb,
@@ -434,6 +445,8 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
+		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
+		ZFighterNpcs.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
@@ -595,6 +608,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(CHARGE);
 		player.removeAttached(AURA_HOLD);
 		player.removeAttached(KI_FULL);
+		player.removeAttached(KI_SHARE);
 		ZFighterDisc.forget(player);
 		ZFighterCorruption.clear(player);
 		ZFighterBranchForms.clear(player);
@@ -673,7 +687,7 @@ public final class ZFighterPower implements Power {
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
-			live.ki += KI_REGEN * ZFighterRealism.kiRegen();
+			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
 
 		ZFighterKi.tickWave(player, live);
@@ -687,7 +701,8 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost();
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player)
+					* ZFighterDivineGrace.flight(player);
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
@@ -707,7 +722,7 @@ public final class ZFighterPower implements Power {
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form)
-				* ZFighterBranchForms.drainFactor(player, live);
+				* ZFighterBranchForms.drainFactor(player, live) * ZFighterDivineGrace.drain(player);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
 			// (0.15.59) and a little harder the stronger he's grown
@@ -889,9 +904,10 @@ public final class ZFighterPower implements Power {
 
 	/**
 	 * From the client (hold Z and scroll): take off into pose {@code pose} (1-{@link #FLIGHT_POSES}), change pose, or come
-	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms.
+	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms. A plain take-off
+	 * lifts him gently (a puff of dust); {@code boost} (scrolled all the way up right after) is the burst of ki.
 	 */
-	static void fly(ServerPlayer player, int pose) {
+	static void fly(ServerPlayer player, int pose, boolean boost) {
 		Live live = live(player);
 		pose = Mth.clamp(pose, 0, FLIGHT_POSES);
 		if (pose == 0) {
@@ -911,6 +927,9 @@ public final class ZFighterPower implements Power {
 				live.flying = true;
 				live.lastFlyPos = player.position();
 				player.resetFallDistance();
+				liftOff(player, live);
+			}
+			if (boost) {
 				takeOffBurst(player, live);
 			}
 			player.setAttached(FLIGHT, pose);
@@ -931,7 +950,20 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
-	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
+	/** A gentle take-off (scrolled up partway): a soft puff of dust and a wisp of his aura as he lifts. */
+	private static void liftOff(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		double x = player.getX(), y = player.getY(), z = player.getZ();
+		for (int i = 0; i < 10; i++) {
+			double a = i * Math.PI * 2.0 / 10.0;
+			level.sendParticles(ParticleTypes.CLOUD, true, false, x + Math.cos(a) * 0.5, y + 0.05, z + Math.sin(a) * 0.5, 0, Math.cos(a), 0.0,
+				Math.sin(a), 0.12);
+		}
+		level.sendParticles(dust(live), true, false, x, y + 0.5, z, 10, 0.3, 0.5, 0.3, 0.05);
+		level.playSound(null, x, y, z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.4F, 1.2F);
+	}
+
+	/** The boost (scrolled all the way up): a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();
 		double x = player.getX(), y = player.getY(), z = player.getZ();
@@ -1207,6 +1239,16 @@ public final class ZFighterPower implements Power {
 	 * then, or when his ki falls under {@link #AURA_HOLD_KI} of full. Synced only once he's let go (charging shows on its own).
 	 */
 	static void auraHold(ServerPlayer player, Live live, long now, int max) {
+		// (0.17.133) the share of ki the aura's size follows, sent only when it moves a step
+		int share = max <= 0 ? 0 : Mth.clamp(Math.round(KI_SHARE_STEPS * live.ki / max), 0, KI_SHARE_STEPS);
+		Integer sent = player.getAttached(KI_SHARE);
+		if ((sent == null ? 0 : sent) != share) {
+			if (share == 0) {
+				player.removeAttached(KI_SHARE);
+			} else {
+				player.setAttached(KI_SHARE, share);
+			}
+		}
 		boolean full = live.ki >= max * AURA_HOLD_KI;
 		if (live.charging) {
 			live.auraHold = live.ki >= max ? now + AURA_HOLD_TICKS : -1L;
@@ -1528,7 +1570,8 @@ public final class ZFighterPower implements Power {
 	static double fistBonus(Player player) {
 		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
-			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH);
+			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH)
+			+ ZFighterBioForms.fists(player) + ZFighterRubberBody.fists(player);
 	}
 
 	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
@@ -1649,7 +1692,7 @@ public final class ZFighterPower implements Power {
 	public static int maxKi(Player player) {
 		return BASE_MAX_KI + KI_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY)
-			+ ZFighterVerdantMerge.ki(player)
+			+ ZFighterVerdantMerge.ki(player) + ZFighterBioForms.ki(player)
 			+ (player instanceof ServerPlayer server ? ZFighterFusion.ki(server) : 0);
 	}
 

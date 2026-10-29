@@ -3511,7 +3511,62 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   two riders, ride on, charge), banner and carpet tack, Rider-only wild stats and breed gifts, a handbook, and
   Kitchen 0.5.35's six-seat coach for draft horses. See the Kingdoms MODLOG.
 
-- **0.17.127, horse barding (Kingdoms 0.7.309):** armour is its own model now (chanfron with eye guards, lapped crinet
+- **0.17.125, whaling voyages (Kingdoms 0.7.307):** a whaler lashes her whale alongside and anchors, her crew cut it in
+  and carry the blubber to her tryworks, which burn on while she hunts or sails home; harpoon boats stay under their
+  crew's oars when you get in; loose items no longer sail along inside her outline. See the Kingdoms MODLOG.
+
+- **0.17.130, rapier and dagger fixes (Andy):** the iron rapier's blade is 12 pixels longer (its hilt moved down to
+  make room), and it's turned half round in the hand so the knuckle bow guards the fingers instead of facing up. The
+  rapier's lunge is shorter everywhere (about 2.8 blocks instead of 4.7); locked onto a foe, or a mob lunging at its
+  target, it runs just as far as it needs to reach them, up to the old distance (`RapierItem.speedToReach`;
+  `LockOn.target(Player)` now answers on either side). Thrown daggers fly and stick tip first: the 3D iron dagger was
+  rolled for a sprite, and every point-first weapon is drawn back along its flight so only the tip sinks in. The 3D
+  iron dagger and rapier sit deeper in the hand: `tools/blockbench/display.py` puts the middle of each grip where a
+  vanilla sword's grip sits. Compile-checked, not seen in game.
+- **0.17.131, captives left alone (Kingdoms 0.7.311):** camp shamans and raiders no longer attack captives in chains.
+- **0.17.134, Rubber-folk stomachs (Kingdoms 0.7.312):** swallows add the foe's bulk instead of shrinking you; sneak +
+  heritage key brings the last swallow's body back up under a melting pink mound; downed players are swallowed alive
+  and fight their way out by hitting the heart, lungs and stomach, or get digested. `SwallowedPower.drop` is public for
+  it. See the Kingdoms MODLOG.
+- **0.17.135, bigger muzzle flash on future guns (Andy: "there should be more muzzle flash on the guns from the
+  future"):** every shot from a future gun (gunners, mech cannons, players' TaCZ guns) throws a full-bright star burst
+  at the muzzle, two smaller ones forward as a plume, and smoke that everyone near sees (`chrono/future/MuzzleFlash`,
+  particle `jaymospowers:muzzle_flash`, our own three 16px sprites under `textures/particle/muzzle/`, client
+  `MuzzleFlashParticle`). Sizes per gun kind (pistol 0.9 up to sniper 1.8) at the top of `MuzzleFlash`. Everyone sees
+  the burst, the shooter too; TaCZ's flash on the gun in your hands is also drawn 2.2x (`TaczMuzzleFlashMixin`,
+  optional config `jaymospowers.tacz.client.mixins.json`). Players' shots come from TaCZ's `GunFireEvent`, hooked by
+  reflection. Silenced guns don't flash. Gunners' muzzles now sit at the gun hand, not straight ahead of the eye.
+- **0.17.138, Bio-built remade after Cell (Kingdoms 0.7.313):** made by the Mad Tinkerer from every heritage's blood but
+  the Dawnborn's and the Divine's, the Bio-built now absorb anyone downed or crippled who isn't one of those two (monsters,
+  villagers, players), not only downed monsters; a crippled foe (a leg broken or cut off) counts too. Their three forms
+  are three different bodies: Imperfect (hunched, grotesque, a long stinger tail that does the absorbing: it arcs over the
+  head, swallows the foe whole and the bulge runs back down it), Semi-Perfect (bigger, bulked, steel on the fists and tail) and Perfect (as tall, sleek, steel-plated arms and shoulders, the
+  strongest). Buds spend a stored absorb charge and are small copies of the Perfect form. New in Powers:
+  `ZFighterBioForms` gives a Bio-built Z Fighter more ki, fists and ki regen per form (read from Kingdoms' tag
+  `jaymoskingdoms_bio_form_<n>`), and the Perfect form heals with ki. See the Kingdoms MODLOG.
+- **0.17.142, clearing parties and fewer ATi structures (Kingdoms 0.7.316):** settlements send their guards into any
+  monster-held structure near them before their people go near it, and keep women, children and workers out until
+  it's clear; ATi's compounds are rarer and smaller, none near spawn, and its dojo (the pagoda) only rises in cherry
+  groves. See the Kingdoms MODLOG.
+- **0.17.143, sailors no longer offer "Seek an audience" (Kingdoms 0.7.317):** only rulers and a realm's posted guards
+  do; ship crews, caravan escorts and soldiers at war don't. See the Kingdoms MODLOG.
+- **0.17.146, Z Fighter characters as MCA villagers (Kingdoms 0.7.319):** Andy: "Mad tinkerer, Hermit, all z fighter npcs
+  need MCA villager equivalents ... they should have context sensitive talk interactions that handle the quest objectives
+  instead of them appearing in chat like now." With Kingdoms and MCA, the Keeper, the Tower Hermit, the Mad Tinkerer, the
+  Judge, the Master of the Road, the Fortune Teller and the demon masters spawn as MCA villagers held at their post
+  (`ZFighterNpcs.villager` → Kingdoms' `ZFighterFolk.spawn`), and the old frozen wandering traders near players are
+  swapped for one, tags kept (`ZFighterNpcs.convert`). Right-click opens MCA's menu; "Talk about work" opens their talk
+  screen (`ZFighterNpcs.talk`): the Keeper's blessing and the sagas, the Hermit's wares for emeralds (no trader stall
+  any more), the Tinkerer's next step by stage (parts list, test, the table), the Judge on the place and the tournament,
+  the road's lesson, the teller's way back (emeralds from the pack or TP), a demon master's lesson in blood. A town's
+  masters get "Talk about training" (lesson, sagas, side jobs, errands) in place of the sneak right-clicks. Whatever an
+  answer used to put in chat is caught (`ZFighterTranscriptMixin` on `ServerPlayer.sendSystemMessage`) and shown as their
+  reply on the screen, with "Ask something else". Without Kingdoms or MCA everything is as before. Lang:
+  `lang/parts/zfighter_talk.json`.
+- **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
+  kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
+  clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
+- **0.17.149, horse barding (Kingdoms 0.7.322):** armour is its own model now (chanfron with eye guards, lapped crinet
   that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
   (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
   (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.

@@ -62,6 +62,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
+ * (0.7.319) Asked of one of Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}): their talk screen; "Talk
+ * about training" with a town's Z Fighter master, too.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -164,11 +166,21 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
 			// (0.7.220) a talk about work: what their town has for you; (0.7.270) aboard ship, your berth and her voyage
 			villager.getInteractions().stopInteracting();
-			if (ShipTalk.offersWork(villager)) {
+			if (com.jaymoskingdoms.ZFighterFolk.is(villager)) {
+				// (0.7.319) one of Powers' Z Fighter characters: what they have for you, on the talk screen
+				com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
+			} else if (ShipTalk.offersWork(villager)) {
 				ShipTalk.talk(player, villager);
 			} else {
 				Careers.talk(player, villager);
 			}
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.ZFighterFolk.TRAINING.equals(answer)) {
+			// (0.7.319) a town's Z Fighter master: lessons, the sagas and their jobs, on the talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.ZFighterFolk.talk(player, villager);
 			ci.cancel();
 			return;
 		}

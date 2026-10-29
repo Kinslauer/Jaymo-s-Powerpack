@@ -1,7 +1,8 @@
-"""Our own skins for the future's machines (Chrono's Los Perrito future): three androids and the war mech.
+"""Our own skins for the future's machines (Chrono's Los Perrito future): three androids. (The mechs have their own
+model and skins now: tools/gen_android_mech.py.)
 
-Androids are 64x64 on the humanoid layout (head, hat, body, right arm, right leg; the left limbs mirror). The mech is
-128x128 on the iron golem's layout, drawn as a gunmetal walker. Each has an _eyes texture that glows in the dark.
+Androids are 64x64 on the humanoid layout (head, hat, body, right arm, right leg; the left limbs mirror). Each has an
+_eyes texture that glows in the dark.
 
     python3 tools/gen_future_machines.py
 """
@@ -132,113 +133,12 @@ def android(index):
     return name, img, eyes
 
 
-def mech():
-    r = random.Random(0x3EC4)
-    img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-    eyes = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-    metal = (78, 84, 92)
-    dark = (40, 42, 46)
-    hazard = (210, 170, 40)
-    rust = (120, 70, 40)
-    glow = (255, 60, 30)
-
-    def plate(face, x, y, fw, fh, base=metal):
-        c = shade(base, 0.9 + r.random() * 0.15)
-        if face in ("left", "right"):
-            c = shade(c, 0.85)
-        elif face == "back":
-            c = shade(c, 0.9)
-        if r.random() < 0.04:
-            c = rust
-        if (x == 0 or x == fw - 1 or y in (0, fh - 1)) and face not in ("top", "bottom"):
-            c = shade(c, 0.7)                            # plate edges
-        return c
-
-    def head(face, x, y, fw, fh):
-        c = plate(face, x, y, fw, fh)
-        if face == "front" and 4 <= y <= 5 and 1 <= x <= 6:
-            return (60, 14, 10)                          # visor slit
-        if face == "front" and y >= 8:
-            return dark                                  # jaw grille
-        return c
-
-    def nose(face, x, y, fw, fh):
-        return shade(dark, 1.2) if face != "front" else (20, 20, 22)  # a sensor barrel
-
-    def body(face, x, y, fw, fh):
-        c = plate(face, x, y, fw, fh)
-        if face == "front":
-            if 3 <= y <= 7 and 6 <= x <= 11:
-                return dark if (y + x) % 2 else shade(dark, 1.3)   # reactor vent
-            if 5 == y and x in (8, 9):
-                return (180, 40, 20)
-            if y == 1 and (x < 4 or x > 13):
-                return hazard if (x // 2) % 2 == 0 else dark
-            if y == 9 and x in (2, 3, 14, 15):
-                return (230, 230, 230)                   # stencil
-        if face == "top" and (x < 4 or x >= fw - 4):
-            return hazard if ((x + y) // 2) % 2 == 0 else dark
-        return c
-
-    def waist(face, x, y, fw, fh):
-        return plate(face, x, y, fw, fh, dark)
-
-    def arm(face, x, y, fw, fh):
-        c = plate(face, x, y, fw, fh)
-        if face == "bottom":
-            return (12, 12, 14) if 1 <= x <= 2 else dark  # the muzzle
-        if y >= 22:
-            return shade(dark, 1.1) if y % 3 else (24, 24, 26)  # cannon barrel
-        if y in (2, 3) and face == "front":
-            return hazard if x % 2 == 0 else dark
-        if y == 12:
-            return dark                                  # elbow
-        return c
-
-    def leg(face, x, y, fw, fh):
-        c = plate(face, x, y, fw, fh)
-        if y in (6, 7):
-            return dark                                  # knee
-        if y >= 13:
-            return shade(dark, 0.9)                      # foot
-        if face == "front" and y == 2:
-            return hazard if x % 2 == 0 else dark
-        return c
-
-    box(img, 0, 0, 8, 10, 8, head)
-    box(img, 24, 0, 2, 4, 2, nose)
-    box(img, 0, 40, 18, 12, 11, body)
-    box(img, 0, 70, 9, 5, 6, waist)
-    box(img, 60, 21, 4, 30, 6, arm)
-    box(img, 60, 58, 4, 30, 6, arm)
-    box(img, 37, 0, 6, 16, 5, leg)
-    box(img, 60, 0, 6, 16, 5, leg)
-    # glow: the visor and the reactor
-    fx, fy = 8, 8
-    for x in range(1, 7):
-        for y in (4, 5):
-            eyes.putpixel((fx + x, fy + y), glow + (255,))
-    bx, by = 11, 51
-    for x in (8, 9):
-        eyes.putpixel((bx + x, by + 5), (255, 120, 40, 255))
-    # grime
-    for _ in range(900):
-        x, y = r.randrange(128), r.randrange(128)
-        c = img.getpixel((x, y))
-        if c[3]:
-            img.putpixel((x, y), shade(c[:3], 0.8) + (255,))
-    return img, eyes
-
-
 def main():
     os.makedirs(OUT, exist_ok=True)
     for i in range(len(ANDROIDS)):
         name, img, eyes = android(i)
         img.save(os.path.join(OUT, "android_%s.png" % name))
         eyes.save(os.path.join(OUT, "android_%s_eyes.png" % name))
-    img, eyes = mech()
-    img.save(os.path.join(OUT, "war_mech.png"))
-    eyes.save(os.path.join(OUT, "war_mech_eyes.png"))
     print("wrote the machines to", os.path.normpath(OUT))
 
 
