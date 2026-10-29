@@ -3550,3 +3550,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   groves. See the Kingdoms MODLOG.
 - **0.17.143, sailors no longer offer "Seek an audience" (Kingdoms 0.7.317):** only rulers and a realm's posted guards
   do; ship crews, caravan escorts and soldiers at war don't. See the Kingdoms MODLOG.
+- **0.17.146, Z Fighter characters as MCA villagers (Kingdoms 0.7.319):** Andy: "Mad tinkerer, Hermit, all z fighter npcs
+  need MCA villager equivalents ... they should have context sensitive talk interactions that handle the quest objectives
+  instead of them appearing in chat like now." With Kingdoms and MCA, the Keeper, the Tower Hermit, the Mad Tinkerer, the
+  Judge, the Master of the Road, the Fortune Teller and the demon masters spawn as MCA villagers held at their post
+  (`ZFighterNpcs.villager` → Kingdoms' `ZFighterFolk.spawn`), and the old frozen wandering traders near players are
+  swapped for one, tags kept (`ZFighterNpcs.convert`). Right-click opens MCA's menu; "Talk about work" opens their talk
+  screen (`ZFighterNpcs.talk`): the Keeper's blessing and the sagas, the Hermit's wares for emeralds (no trader stall
+  any more), the Tinkerer's next step by stage (parts list, test, the table), the Judge on the place and the tournament,
+  the road's lesson, the teller's way back (emeralds from the pack or TP), a demon master's lesson in blood. A town's
+  masters get "Talk about training" (lesson, sagas, side jobs, errands) in place of the sneak right-clicks. Whatever an
+  answer used to put in chat is caught (`ZFighterTranscriptMixin` on `ServerPlayer.sendSystemMessage`) and shown as their
+  reply on the screen, with "Ask something else". Without Kingdoms or MCA everything is as before. Lang:
+  `lang/parts/zfighter_talk.json`.

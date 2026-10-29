@@ -49,6 +49,15 @@ public final class Uniforms {
 	private Uniforms() {
 	}
 
+	/**
+	 * (0.7.319) A Z Fighter character's outfits ({@link ZFighterFolk}): the Keeper's temple robe, the Hermit's beach
+	 * shirt and straw hat, the Tinkerer's lab coat and goggles, the Judge's black robe, the road's master's travelling
+	 * gi, the fortune teller's shawl and scarf, a demon master's dark gi (drawn by {@code tools/gen_zfighter_outfits.py}).
+	 */
+	static List<String> zfighter(String kind) {
+		return ids("zfighter/" + kind);
+	}
+
 	private static String id(String path) {
 		return PREFIX + path + ".png";
 	}
@@ -91,6 +100,11 @@ public final class Uniforms {
 			return List.of();
 		}
 		int role = villager instanceof Worker w ? w.role() : -1;
+		List<String> zfighter = ZFighterFolk.outfits(villager);
+		if (zfighter != null) {
+			// (0.7.319) one of Powers' Z Fighter characters
+			return zfighter;
+		}
 		if (Crewmen.tagged(villager)) {
 			Crew.Side side = side(villager);
 			if (role == Pirates.CAPTAIN) {
