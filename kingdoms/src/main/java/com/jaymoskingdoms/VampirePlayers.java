@@ -244,6 +244,11 @@ public final class VampirePlayers {
 		}
 		BloodRequests.fed(player, target);
 		VampireMask.fed(player);
+		// (0.7.323) villagers who saw it suspect them by name ({@link Suspicion}); a player bitten remembers the biter ({@link VictimMemory})
+		Suspicion.witnessed(level, player, Suspicion.VAMPIRE, Suspicion.ADD_FEEDING, player.isShiftKeyDown() ? Suspicion.FEED_RANGE * Suspicion.SNEAK_SHARE : Suspicion.FEED_RANGE, false);
+		if (target instanceof ServerPlayer victim && Vampires.isVampire(player)) {
+			VictimMemory.bitten(victim, player);
+		}
 		// (0.7.185) every bite eases the blood fever
 		BloodFever.bit(player, thrall);
 		if (Vampires.night(clock)) {

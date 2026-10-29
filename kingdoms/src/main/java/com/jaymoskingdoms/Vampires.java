@@ -310,7 +310,9 @@ public final class Vampires {
 	/** A vampire that has shown itself tonight: guards go for it, villagers run. */
 	public static boolean exposed(Entity e) {
 		Long night = EXPOSED.get(e.getUUID());
-		return night != null && e.isAlive() && isVampire(e) && night == nightIndex(e.level().getOverworldClockTime()) && night(e.level().getOverworldClockTime());
+		// (0.7.323) or named to the realm by a priest ({@link Accusations})
+		return night != null && e.isAlive() && isVampire(e) && night == nightIndex(e.level().getOverworldClockTime()) && night(e.level().getOverworldClockTime())
+			|| isVampire(e) && Accusations.exposed(e);
 	}
 
 	/** One of the world's people a vampire may feed on: a grown villager (MCA's too), or a realm's folk; not another vampire. */

@@ -294,7 +294,8 @@ public final class BloodFever {
 					wounded = Math.max(wounded, WOUNDED_RISE);
 				}
 			}
-			if (close <= seen && !favourite) {
+			if (close <= seen && !favourite || Kinship.monster(other) && !favourite) {
+				// (0.7.323) kin are heard another way ({@link Kinship}): no red pulse
 				continue;
 			}
 			if (inSight(player, other)) {

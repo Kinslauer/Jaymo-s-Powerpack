@@ -375,6 +375,8 @@ public final class WerewolfPlayers {
 		Caging.toreOut(level, player, f.forced);
 		MorningAfter.began(player, f.forced);
 		CurseRequests.changed(player);
+		// (0.7.323) villagers who saw the change suspect them by name
+		Suspicion.witnessed(level, player, Suspicion.WOLF, Suspicion.ADD_CHANGE, Suspicion.CHANGE_RANGE, false);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) == null) {
 			health.addTransientModifier(new AttributeModifier(HEALTH, BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));

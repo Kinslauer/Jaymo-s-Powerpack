@@ -124,6 +124,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WolfScreen.register();
 		ScentClient.register();
 		WolfTells.register();
+		// 0.7.323: the victim's memory of the biter, and kin heard in each other
+		VictimClient.register();
+		KinshipClient.register();
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();

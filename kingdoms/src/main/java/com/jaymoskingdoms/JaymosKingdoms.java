@@ -450,6 +450,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		MorningAfter.register();
 		TornCloth.register();
 		CurseRequests.register();
+		// 0.7.323: paranoia and deception: rumours with names, accusing at the priest, victim memory, monster kinship (their attachments)
+		LOGGER.debug("paranoia attachments: {} {} {} {}", Suspicion.MARKS, Accusations.DEAF_UNTIL, VictimMemory.BITER, Kinship.HEARD);
+		Suspicion.register();
+		Accusations.register();
+		VictimMemory.register();
+		Kinship.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();

@@ -105,7 +105,8 @@ public final class MoonPull {
 			}
 			nearest = Math.min(nearest, d);
 			float close = (float)(1.0 - d / RANGE);
-			if (close <= seen) {
+			if (close <= seen || Kinship.monster(other)) {
+				// (0.7.323) kin are heard another way ({@link Kinship}): no golden pulse
 				continue;
 			}
 			Vec3 to = other.getEyePosition().subtract(eye);

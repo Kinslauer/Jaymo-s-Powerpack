@@ -909,6 +909,10 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
+					// (0.7.323) a suspicion against another player, by name (Suspicion)
+					said = Suspicion.gossip(a.mob, player, level.getRandom());
+				}
+				if (said == null) {
 					// (0.7.130) a purist realm's pride in its blood (or a grumble from one not of it)
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
