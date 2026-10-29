@@ -6303,10 +6303,86 @@ redrawn". Goblin villagers now have its shape: a big head, a short body bent for
 - Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
   `tools/blockbench/kokosikk_goblin.bbmodel`.
 Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+## 0.7.322: barding of its own, taller horses, and more detailed horses (pack 0.17.149)
 
-## 0.7.326: Blockbench Workshop models (pack 0.17.153)
+Andy (after 0.7.305 in game): the draft horse's mane clipped through the armour, and the head plate didn't look like
+anything a horse wears; "use block bench for the armor and horse model so it looks similar to mo creatures or
+equestrian, there just needs to be more detail". Horse armour is no longer a slightly larger copy of the horse painted
+over the coat: `horse_rig.armour()` builds it from its own boxes hung on each build's bones, written to builds.json
+(`armor`, texture 128x64) and baked by `BreedHorseModel.createArmorLayer()`:
+- a chanfron over the face with a nose plate, a ridge, brow guards over the eyes and rims behind them (the eyes
+  stay clear), and cheek plates;
+- a crinet of five lames, each a little wider than the one above so they lap, with a raised crest; while barding is
+  worn the model hides the mane and forelock under it (no more clipping);
+- a peytral with a boss and wings over the shoulders, flanchards before and behind the stirrups, and a crupper over
+  the croup and haunches with a ridged spine and a hole for the tail.
+Painted by `gen_horses.armour_base()`: rolled and dark-lined edges, rivet rows, a trim band along the hems (brass on
+iron and plate, red gold on gold, gold on diamond and netherite, verdigris on copper), fluted plates with a sheen,
+an etched chanfron, lapped lames, a padded leather lining underneath; chain barding is mail bound in leather with plate
+at the head. Horses got more pieces too: shoulders and a rounded barrel, knees, hocks and gaskins, cheeks, flared
+nostrils, coronet bands and ergot tufts, and muscle light and shadow painted in (`FORM`). Horse texture now 128x192.
+Compile-checked, not seen in game; previews in the project files (art-overhaul/horses/armour-detail.png).
+
+Then Andy: "the armor looks far too disjointed. the plates are fine but they need to be connected somehow", pointing at
+SWEM's horses (All Rights Reserved, Forge only, so ideas only, nothing of theirs used). In its style, our own:
+- the horse stands taller: legs 3 px longer (`LIFT`: body, saddle, tail and wings that much higher; THIGH 10) and the
+  neck 3 px longer (`NECK`: the head set out along it, `BreedHorseModel` working its pivot out from the head's pitch so
+  the neck still meets the chest); tails longer; riders sit `Mounted.SEAT_LIFT` higher (not on war elephants);
+- the barding is joined up: a cloth caparison under it all (round the neck under the crinet, over the back and down the
+  sides to hang below the belly, open beneath and before and behind for the legs, folds and a trimmed hem; crimson on
+  iron, royal blue on gold, linen on diamond, green on copper, purple on netherite, russet under mail, quartered
+  crimson and linen under plate, dyed with leather); the crinet's sixth lame runs into the peytral; one side plate a
+  side from the peytral to the crupper (stepped in along its top); a chanfron over the face, and a nose plate; the stirrups hang outside the side plates
+  (`STIRRUP_OUT`, from each build's plate). Armour texture 128x128.
+
+Andy then: the eyes were hidden. The chanfron is now a face plate whose side flanges stop above the eyes, the neck
+cloth and crinet start below the head, and necks wider than the head (draft, destrier, steppe pony) start below the
+eyes; they had buried them, armoured or not.
+
+Then Andy asked whether we use Blockbench (we hadn't: the boxes were placed by hand in horse_rig.py) and picked loading
+Blockbench models plus a hunt for openly licensed ones. None good enough turned up (Overhauled Livestock, Beyond
+Horses, SWEM, Icy's and Mo' Creatures are All Rights Reserved; Realistic Horse Genetics' art is CC-BY but its horse
+is vanilla-shaped). So: `tools/bbmodel.py` reads a Blockbench "Modded Entity" project (groups named after our bones,
+armor_* groups for barding, cube names saying how each is painted) with the same conversion Blockbench's Java export
+does, and gen_horses.py takes tools/horse_models/<build>.bbmodel instead of horse_rig's shapes when there is one;
+`python3 tools/bbmodel.py export` writes every build as a starter project (in the project files,
+art-overhaul/horses/blockbench-starters). BreedHorseModel now poses every bone as a change from that build's own rest
+pose (head, reins, tail, forelegs, saddle, stirrups, wings, and each leg's thigh length from its own pivots), so a
+model with other proportions animates the same way.
+
+Andy said yes to Realistic Horse Genetics' coats (sekelsta, art CC BY 4.0; credited in
+textures/entity/breed_horse/CREDITS.txt and tools/rhg/CREDITS.md): `tools/rhg.py` matches each of our hide pixels to the
+same place on that mod's vanilla-shaped horse (scaled from each bone's main box to theirs, same-facing face) and reads
+its masks there: dapples, flecked roan, tobiano pinto, leopard spots, blaze, star, socks and stockings, the dun stripe,
+and its painted coat shading over every coat. The masks are copied unchanged into tools/rhg; the colours are ours.
+
+Then Andy, after renders of the Mystical Deer (jsellier23, CC BY 4.0) made into a horse: "it's not looking right at
+all"; keep that one as a rare horse and simplify the rest to vanilla "until i find horse models that fit what i
+desire". So:
+- `horse_rig.SIMPLE`: every build is the classic horse's shape again (vanilla's before 1.14, whose bones these are and
+  whose shape Realistic Horse Genetics paints for), the breeds differing only a little in leg and tail sizes; the extra
+  pieces, the taller legs and longer neck are off (`LIFT`/`NECK` 0 here and in BreedHorseModel, `Mounted.SEAT_LIFT` 0).
+  Turning SIMPLE off brings the detailed horse back; a Blockbench model still overrides either.
+- Segmented armour (Andy: one continuous sheet looked wrong; "large plates connected by chainmail or fabric, and the
+  plates only cover the vitals"): `horse_rig.segmented_armour()` puts a mail coat (quilted cloth on gold, copper and
+  leather: royal blue, green, dyed) over the body and neck, and plates on it over the vitals only, with gaps where the
+  mail shows: a face plate over the brow (eyes, ears and jaw clear), a nose plate, three lames down the neck's crest
+  with a raised crest, a peytral with a boss, a plate over each side's ribs ahead of the stirrups, and a crupper over the
+  rump with a ridged spine; nothing on the legs. The knight's barding stays in `knights_armour()` for the detailed horse.
+  The stirrups hang outside the rib plates.
+- The moonlit horse: 1 horse in 100 of any horse breed (`Equine.MOONLIT`, a coat past every breed's; foals inherit it
+  like any coat) is born pale and silver-maned in a shape of its own, "Moonlit" on its papers. `tools/horseify.py`
+  makes the deer a horse in Blockbench space (antlers and wisteria off; bulked, longer body, shorter leaned neck,
+  shorter cannons, longer snout, ears up; silver mane, forelock and tail), and `tools/moonlit_horse.py` lays it on our
+  bones (the head's pieces all at the neck's base so they turn as one, thigh and hock on legN_a, cannon on legN_b, the
+  tail turned back against BreedHorseModel's lift), scales it to the classic horse's back height so the tack fits,
+  and bakes its own painting into our box-UV texture (`breed_horse/moonlit/moonlit.png`). Its armour covers each of
+  its body and neck in mail, its plates sized from its own body and neck. Source kept unchanged in tools/horse_models/source with its credit; credit
+  also in textures/entity/breed_horse/CREDITS.txt.
+
+## 0.7.329: Blockbench Workshop models (pack 0.17.156)
 Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
-(Zephyrus and the rest unchanged; Eurus and Aeolus wait for a model Andy is sending). Every model is CC BY 4.0, credited
+(Zephyrus and the rest unchanged); then a second batch of seven, eanncrod's Kintsugi for Eurus and Aeolus among them. Every model is CC BY 4.0, credited
 with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.
 - **Loader** (`client/bb/BbModel`, `Molang`): reads a Blockbench model baked by `tools/bbmodel_bake.py` (bones, cubes,
   per-face UVs, animations with their Molang) into ModelParts and plays its animations by time and weight.
@@ -6323,4 +6399,47 @@ with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the s
   set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
   into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
 - **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
-  sabatons), each piece hung on the wearer's own bones. Forged at Powers' smithing anvil from iron, no grid recipe.
+  sabatons), each piece hung on the wearer's own bones. Andy: "the warplate should be extraordinary and a drop from the
+  visage boss". A point over netherite in every piece (4/7/9/4), toughness 4, knockback resistance 0.15, durability 45x,
+  enchantability 22, fireproof, epic; mended with gold. Never crafted or forged: Powers' Visage of War drops all four.
+- **Eurus and Aeolus:** eanncrod's Kintsugi wyvern (`KintsugiDragonModel`, replacing `EurusDragonModel` and
+  `AeolusDragonModel`). Aeolus is grey-white with its gold seams glowing (gold, the four winds' colours, white-gold,
+  silver); Eurus is storm-blue and violet with seams in electric cyan (`tools/gen_kintsugi_dragons.py`). Its own idle,
+  knockdown, hover and flight animations; walking, sitting and gliding posed over them. Drawn at 0.28 and 0.75; seats
+  and breath mouths moved to fit (`EurusDragon`, `AeolusDragon`).
+- **Second batch of creatures** (`beasts/`, each with a spawn egg, loot and `tools/gen_beasts.py`). They play their
+  models' own animations through `BbMobRenderer`; a move is a synced animation name (`Acting`, `ActingMonster`).
+  - **Minotaur** (eanncrod): a monster of legend of the mountains (`has_minotaur`, wilderness encounter and gossip).
+    140 HP; hammer swing, a slam that throws everyone round it, and a charge from 6-16 blocks that gores whoever it
+    meets (a wall stops it dazed).
+  - **Piglin King** (eanncrod's Musclebound Piglin King): a rare boss of the Nether wastes and crimson woods
+    (`has_piglin_king`, one in 12 spawn checks, none within 160 blocks of another). It sleeps on its feet until someone
+    comes within 14 blocks or hits it, then wakes with a boss bar. 300 HP, fireproof: claw rake, a volley of four
+    embers, a fire burst that sets everyone close alight, and below half health a roar that brings two piglin brutes
+    (four at most). Its model's ice moves play as fire. Piglins can't hurt it and it never hits them. Drops gold, a gold
+    block, a piglin head and maybe netherite scrap.
+  - **Redstone golem** (polyjo; the design is Mojang's Minecraft Dungeons mob): a great foe below y 0, rare and alone.
+    220 HP, unmoved by knockback; pounds with both fists and sets four spots under its foes glowing, which burst a
+    moment later. Its core glows in the dark. Its pound and eruption are posed in code (the model has idle and walk).
+  - **Skulk golem** (elma_taburlas): the deep dark's guardian, rare and alone. A statue (25% damage) until someone
+    comes within 10 blocks (3 sneaking) or hits it; its blows bring Darkness; still again after 20 s with no foe.
+  - **Wild boar** (lukygive): replaces Naturalist's boar, in natural spawns (forests, taiga, savanna, `has_wild_boar`)
+    and as the boar encounter. Grazes, and gores whoever comes too close or hits it.
+  - **Scalebane sellswords** (eanncrod's Scalebane Archer; Andy: "common sellswords among barbarians and goblin
+    encampments"): `ScalebaneArcher`. New barbarian camps and goblin villages take on two, and a camp short of them
+    hires one now and then as it grows (three at most about its fire). Bowmen who shoot what their camp would (outlaws
+    it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
+    turn rogue and shoot any player.
+
+## 0.7.330: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.157)
+Andy: the golem is "accessed through thaumaturgy", and "clockwork golems should also spawn as mini bosses in the aether
+and overworld dungeons".
+- **Golemancy:** no grid recipe any more. Powers' Codex has a Golemancy entry (Artifice tab, after Artifice and Ichor,
+  only with Kingdoms loaded); the golem is made on the infusion altar from a clock on the centre pedestal with 4 copper
+  blocks, 2 redstone blocks and 2 ichor round it (`data/jaymoskingdoms/alchemy/infusion/clockwork_golem.json`).
+  Hermits hint at it after Artifice.
+- **Rogue golems** (`ClockworkGolem.makeRogue`, `GolemLairs`): 220 HP, 16 damage, armour 10, a boss bar; asleep folded
+  until a player comes near; fight players (and whatever hurts them), not the dungeon's monsters; can't be mended; drop
+  3-6 gold and a diamond 35% of the time. In 75% of Sentry Ruins (a side room, never the Slider's), 60% of strongholds
+  (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), and 15% of monster rooms
+  (looked at once when a player first comes within 48 blocks).

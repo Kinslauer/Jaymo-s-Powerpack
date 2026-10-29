@@ -32,3 +32,35 @@ reverent_warplate.png (bbmodels/reverent_warplate.json), and textures/item/rever
   "Reverent Warplate" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/reverent-warplate
   Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer (it was made for
   GeckoLib); the item icons are its pieces drawn small with an outline (kingdoms/tools/gen_reverent.py).
+
+kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/ and dragon/aeolus/ hide_*.png, marks_*.png: Eurus and Aeolus
+  "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
+  Changes: baked to our loader's format; walking, sitting and gliding posed by our own code over its own animations;
+  drawn at 0.28 (Eurus) and 0.75 (Aeolus) size. Aeolus's hides are its texture lifted grey-white in four shades, his
+  markings its gold seams glowing (gold, the four winds' colours, white-gold, silver); Eurus's hides are it turned
+  storm-blue and violet, his markings its seams in electric cyan (kingdoms/tools/gen_kintsugi_dragons.py).
+
+minotaur.png (bbmodels/minotaur.json): the minotaur
+  "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur
+  Changes: baked to our loader's format; drawn at 0.85 size; walks with its run (it came without a walk).
+
+piglin_king.png (bbmodels/piglin_king.json): the Piglin King
+  "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
+  Changes: baked to our loader's format; drawn at 0.96 size; its ice-themed moves play as fire attacks.
+
+redstone_golem.png, redstone_golem_1.png (bbmodels/redstone_golem.json): the redstone golem
+  "Redstone Golem (Minecraft Dungeons)" by polyjo, https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons
+  Changes: baked to our loader's format; drawn at 0.94 size; its glow texture drawn bright in the dark; its pound and
+  eruption posed by our own code (it came with an idle and a walk). The design is Mojang's Minecraft Dungeons mob.
+
+scalebane_archer.png (bbmodels/scalebane_archer.json): the scalebane sellswords
+  "Scalebane Archer" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/scalebane-archer
+  Changes: baked to our loader's format; drawn at 0.96 size.
+
+skulk_golem.png (bbmodels/skulk_golem.json): the skulk golem
+  "Skulk golem" by elma_taburlas, https://blockbenchworkshop.com/model/elma_taburlas/skulk-golem
+  Changes: baked to our loader's format; drawn at full size.
+
+wild_boar.png (bbmodels/wild_boar.json): the wild boar
+  "Wild Boar" by lukygive, https://blockbenchworkshop.com/model/lukygive/wild-boar
+  Changes: baked to our loader's format without its hitbox and shadow guide cubes; drawn at 0.9 size.

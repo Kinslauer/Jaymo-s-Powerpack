@@ -30,7 +30,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 /**
- * (0.7.328) Rogue {@link ClockworkGolem}s, sleeping folded in dungeons as mini-bosses:
+ * (0.7.330) Rogue {@link ClockworkGolem}s, sleeping folded in dungeons as mini-bosses:
  * <ul>
  * <li><b>Dungeon structures</b> ({@link #LAIRS}: the Aether's Sentry Ruins, strongholds, trial chambers): when the
  * structure is built, one in {@link #LAIRS}' chance of them gets a golem on the floor of one of its rooms (any piece but the
