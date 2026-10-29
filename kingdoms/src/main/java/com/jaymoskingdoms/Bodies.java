@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.322) A villager drawn as a body of its own instead of MCA's (the client's {@code BbBodies}, from a Blockbench
+ * (0.7.326) A villager drawn as a body of its own instead of MCA's (the client's {@code BbBodies}, from a Blockbench
  * model): the orc warchief as nyxaris' Chieftain. On the villager, synced: the body, and what it last did and when
  * ({@code kind}, or {@code kind|act|game time}), so its slam and its roar play as they happen. Set again each step, so
  * it needs no saving.

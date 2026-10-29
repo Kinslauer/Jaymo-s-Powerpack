@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The infected guardian tree: a vast hollow trunk of guardian wood, a spiral stair up its inner wall, a floor every 12 blocks with
- * a chest and vases, and at the top a vault under a crown of leaves. Roots splay out round the foot. (Powers 0.17.149) The Aether II
+ * a chest and vases, and at the top a vault under a crown of leaves. Roots splay out round the foot. (Powers 0.17.153) The Aether II
  * tree has no boss; ours now has one, the Visage of War ({@link VisageOfWar}), asleep in the hollow's top chamber, the last one before the vault.
  */
 final class GuardianTree {

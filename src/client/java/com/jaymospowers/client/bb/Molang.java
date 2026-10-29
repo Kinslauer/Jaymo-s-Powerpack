@@ -3,7 +3,7 @@ package com.jaymospowers.client.bb;
 import com.google.gson.JsonElement;
 
 /**
- * (Powers 0.17.149, a copy of Kingdoms' own) The bit of Molang a Blockbench keyframe can hold: numbers, {@code + - * /}, brackets, {@code query.anim_time}
+ * (Powers 0.17.153, a copy of Kingdoms' own) The bit of Molang a Blockbench keyframe can hold: numbers, {@code + - * /}, brackets, {@code query.anim_time}
  * (the animation's own clock, seconds) and {@code math.sin/cos} (degrees), {@code abs, max, min, clamp, sqrt, floor,
  * round, pi}. Read once when the model loads; anything else reads as 0.
  */

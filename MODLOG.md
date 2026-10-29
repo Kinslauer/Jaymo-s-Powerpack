@@ -3566,7 +3566,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
   kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
   clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
-- **0.17.149, Blockbench models from the workshop (Kingdoms 0.7.322):** Andy downloaded eleven Blockbench Workshop
+- **0.17.153, Blockbench models from the workshop (Kingdoms 0.7.326):** Andy downloaded eleven Blockbench Workshop
   models (CC BY 4.0) and wanted them all in. Powers' part:
   - **Flintlock musket:** the future musket is drawn as 9greenworks' Flintlock Musket Rifle (`tools/gen_flintlock_rifle.py`
     writes the item models; texture and credit under `textures/item/gun/`).

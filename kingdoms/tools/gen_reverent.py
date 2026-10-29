@@ -1,5 +1,5 @@
 """
-(0.7.322) The Reverent Warplate's items (Armory.REVERENT_PIECES): each piece's icon is its part of eanncrod's model
+(0.7.326) The Reverent Warplate's items (Armory.REVERENT_PIECES): each piece's icon is its part of eanncrod's model
 (baked by tools/bbmodel_bake.py) drawn front three-quarter by tools/bbmodel_preview.py and shrunk to 16x16; plus its
 item models, its equipment asset (no flat layer: the client's ReverentLayer draws the model) and names.
 

@@ -330,7 +330,7 @@ def species(name, hides):
 if __name__ == '__main__':
     for d in (ITEM, ASSETS + 'items/', ASSETS + 'models/item/', DATA + 'jaymoskingdoms/loot_table/entities/'):
         os.makedirs(d, exist_ok=True)
-    # (0.7.322) Notus wears nyxaris' Fire Dragon now: its hides and markings come from tools/gen_fire_dragons.py
+    # (0.7.326) Notus wears nyxaris' Fire Dragon now: its hides and markings come from tools/gen_fire_dragons.py
     # species('notus', NOTUS_HIDES)
     egg('notus_dragon_spawn_egg', rgb(0x8A3320), rgb(0xFF8A1A), 77)
     write(ASSETS + 'items/notus_dragon_spawn_egg.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/notus_dragon_spawn_egg'}})

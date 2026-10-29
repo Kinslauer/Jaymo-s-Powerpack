@@ -1,5 +1,5 @@
 """
-(0.7.322) Notus's and Boreas's hides and glowing markings, from nyxaris' Fire Dragon (Blockbench Workshop, CC BY 4.0;
+(0.7.326) Notus's and Boreas's hides and glowing markings, from nyxaris' Fire Dragon (Blockbench Workshop, CC BY 4.0;
 credits in textures/entity/bb/CREDITS.txt), whose texture tools/bbmodel_bake.py put at textures/entity/bb/fire_dragon.png.
 
 Notus wears it as drawn (hide_0), and three shades of it: redder, more golden, darker. Boreas wears it turned to ice:

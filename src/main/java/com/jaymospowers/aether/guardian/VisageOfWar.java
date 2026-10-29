@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (Powers 0.17.149) The Visage of War: the infected guardian tree's guardian (docs/aether.md listed "a guardian tree boss"
+ * (Powers 0.17.153) The Visage of War: the infected guardian tree's guardian (docs/aether.md listed "a guardian tree boss"
  * as not done), a golden winged knight with a lance, drawn as eanncrod's model (Blockbench Workshop, CC BY 4.0). It
  * hangs asleep in the hollow under the tree's vault until someone climbs within {@link #WAKE_RANGE}, then flies at them
  * in the trunk: it circles above, and in turn thrusts its lance, sweeps it round in a wide cleave, rises and comes down

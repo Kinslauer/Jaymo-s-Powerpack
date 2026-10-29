@@ -6304,7 +6304,7 @@ redrawn". Goblin villagers now have its shape: a big head, a short body bent for
   `tools/blockbench/kokosikk_goblin.bbmodel`.
 Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
 
-## 0.7.322: Blockbench Workshop models (pack 0.17.149)
+## 0.7.326: Blockbench Workshop models (pack 0.17.153)
 Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
 (Zephyrus and the rest unchanged; Eurus and Aeolus wait for a model Andy is sending). Every model is CC BY 4.0, credited
 with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.

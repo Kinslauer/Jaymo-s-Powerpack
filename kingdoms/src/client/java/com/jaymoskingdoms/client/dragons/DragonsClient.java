@@ -62,7 +62,7 @@ public final class DragonsClient {
 	static final int BAR_WIDTH = 64, CHIP = 20;
 	/** The species' shadows (blocks). */
 	static final float NOTUS_SHADOW = 2.0F, BOREAS_SHADOW = 1.8F, ZEPHYRUS_SHADOW = 1.8F, EURUS_SHADOW = 1.6F, AEOLUS_SHADOW = 5.0F;
-	/** (0.7.322) How big the Fire Dragon model is drawn for each: its back under the riders' seats. */
+	/** (0.7.326) How big the Fire Dragon model is drawn for each: its back under the riders' seats. */
 	static final float NOTUS_SCALE = 0.53F, BOREAS_SCALE = 0.45F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
@@ -72,7 +72,7 @@ public final class DragonsClient {
 	}
 
 	public static void register() {
-		// (0.7.322) both nyxaris' Fire Dragon, drawn down to each one's size: Notus's back as high as its saddle, Boreas smaller
+		// (0.7.326) both nyxaris' Fire Dragon, drawn down to each one's size: Notus's back as high as its saddle, Boreas smaller
 		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new WindDragonRenderer<>(c, "notus", new FireDragonModel(), NOTUS_SHADOW, NOTUS_SCALE));
 		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new WindDragonRenderer<>(c, "boreas", new FireDragonModel(), BOREAS_SHADOW, BOREAS_SCALE));
 		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel

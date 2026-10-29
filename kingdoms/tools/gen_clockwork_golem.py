@@ -1,5 +1,5 @@
 """
-(0.7.322) The clockwork golem's item icon: its baked model (tools/bbmodel_bake.py) drawn three-quarter on by
+(0.7.326) The clockwork golem's item icon: its baked model (tools/bbmodel_bake.py) drawn three-quarter on by
 tools/bbmodel_preview.py, cropped and shrunk to 16x16. Its recipe, loot and item model are written here too.
 
 Run from the project root:  python -I kingdoms/tools/gen_clockwork_golem.py

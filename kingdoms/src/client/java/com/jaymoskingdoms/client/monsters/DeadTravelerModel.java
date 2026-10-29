@@ -7,7 +7,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.322) The silver skeleton, drawn as polyjo's Dead Traveler Skeleton (Blockbench Workshop, CC BY 4.0, credits in
+ * (0.7.326) The silver skeleton, drawn as polyjo's Dead Traveler Skeleton (Blockbench Workshop, CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt): a sword in its right hand, a buckler on its left. Its own animations: idle, walk,
  * the charge when it sprints, the slash when it cuts, the buckler raised when it takes a blow on it, and knocked aside
  * when an axe breaks its guard.

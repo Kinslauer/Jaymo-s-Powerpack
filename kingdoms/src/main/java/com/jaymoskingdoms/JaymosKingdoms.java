@@ -466,7 +466,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
 		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
-		// 0.7.322: villagers drawn as a Blockbench body of their own (the warchief)
+		// 0.7.326: villagers drawn as a Blockbench body of their own (the warchief)
 		LOGGER.debug("body attachment: {}", Bodies.BODY);
 		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
 		BeaconWatch.register();

@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.322) The clockwork golem ({@link ClockworkGolem}), drawn as octopusstudio's Mech Golem (Blockbench Workshop,
+ * (0.7.326) The clockwork golem ({@link ClockworkGolem}), drawn as octopusstudio's Mech Golem (Blockbench Workshop,
  * CC BY 4.0, credits in textures/entity/bb/CREDITS.txt) with its own animations: idle, walk, its blow, folding into its
  * shell (its lights going out) and unfolding from it.
  */

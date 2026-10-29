@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.ArmorType;
 
 /**
- * (0.7.322) {@link Armory}'s Reverent Warplate, drawn over anything humanoid that wears it: eanncrod's model (Blockbench
+ * (0.7.326) {@link Armory}'s Reverent Warplate, drawn over anything humanoid that wears it: eanncrod's model (Blockbench
  * Workshop, CC BY 4.0, credits in textures/entity/bb/CREDITS.txt), each slot's pieces hung on the wearer's own head,
  * body, arms and legs ({@link WornModel}, so they take every pose the vanilla armour does). The helm on the head; the
  * breastplate, pauldrons and cape on the body and arms; the cuisses and the skirt on the legs and waist; the sabatons on

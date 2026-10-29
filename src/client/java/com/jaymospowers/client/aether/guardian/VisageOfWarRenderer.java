@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 
 /**
- * (Powers 0.17.149) The Visage of War ({@link VisageOfWar}), drawn as eanncrod's model (Blockbench Workshop, CC BY 4.0,
+ * (Powers 0.17.153) The Visage of War ({@link VisageOfWar}), drawn as eanncrod's model (Blockbench Workshop, CC BY 4.0,
  * credits in textures/entity/bb/CREDITS.txt) with its own animations: asleep it holds its promo pose, awake it hovers or
  * flies, and each move plays its own from the moment it began. Dying it hangs in its recovery pose as it falls.
  */

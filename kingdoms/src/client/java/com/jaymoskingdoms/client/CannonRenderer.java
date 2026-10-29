@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.322) A field cannon: iexogen's "Canon" (Blockbench Workshop, CC BY 4.0, credits in textures/entity/bb/CREDITS.txt), a
+ * (0.7.326) A field cannon: iexogen's "Canon" (Blockbench Workshop, CC BY 4.0, credits in textures/entity/bb/CREDITS.txt), a
  * long cast barrel on a four-wheeled wooden carriage, drawn to the cannon's own size with its barrel swung on its
  * trunnions to its mark and kicking back when it fires. (Until 0.7.320 it was put together from blocks.)
  */

@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * from {@code #c:ingots/steel} (Jaymo's Powers' smeltery or kiln) buckled with {@code #c:leather_straps} (Jaymo's
  * Kitchen's), or with plain leather for more steel. Not one of {@link #SETS} (it has no 3D shape).
  * <p>
- * (0.7.322) And the <b>Reverent Warplate</b>, the Aether's paladins' harness: white enamelled plate edged in gold, a
+ * (0.7.326) And the <b>Reverent Warplate</b>, the Aether's paladins' harness: white enamelled plate edged in gold, a
  * winged helm, a red tabard and cape. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn whole over the wearer by
  * the client's {@code ReverentLayer} (no flat layer under it). No grid recipe: Jaymo's Powers' smithing anvil hammers it
  * out of iron. Not one of {@link #SETS} either.
@@ -59,7 +59,7 @@ public final class Armory {
 	static final TagKey<Item> STEEL_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
 	static final ArmorMaterial STEEL_PLATE = material("steel_plate", 30, 3, 6, 7, 3, 10, SoundEvents.ARMOR_EQUIP_IRON, 2.5F, 0.05F, STEEL_INGOTS);
 
-	/** (0.7.322) The Reverent Warplate: a little stronger than the paladin's, quick to take enchantments. */
+	/** (0.7.326) The Reverent Warplate: a little stronger than the paladin's, quick to take enchantments. */
 	static final ArmorMaterial REVERENT = material("reverent", 26, 3, 6, 8, 3, 18, SoundEvents.ARMOR_EQUIP_IRON, 1.5F, 0.05F, ItemTags.REPAIRS_IRON_ARMOR);
 	/** The Reverent Warplate's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> REVERENT_PIECES = new LinkedHashMap<>();

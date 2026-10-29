@@ -42,7 +42,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
-		// (0.7.322) the clockwork golem
+		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
@@ -133,7 +133,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
-		// (0.7.322) the Reverent Warplate
+		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
 		// 0.7.23: Verdants' antennae
 		VerdantLook.register();
