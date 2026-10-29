@@ -7,7 +7,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.321) Notus and Boreas: nyxaris' Fire Dragon (Blockbench Workshop, CC BY 4.0, credits in
+ * (0.7.322) Notus and Boreas: nyxaris' Fire Dragon (Blockbench Workshop, CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt), Notus in its own hide and Boreas in an icy one ({@code tools/gen_fire_dragons.py}).
  * The model comes posed for flight with one animation, its wingbeat; the rest is posed here from the render state.
  * <p>

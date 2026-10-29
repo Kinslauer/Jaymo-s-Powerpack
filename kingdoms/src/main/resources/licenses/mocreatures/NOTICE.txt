@@ -25,7 +25,7 @@ Taken from it, under that licence:
   wolffire1-3, weredude, werehuman, wereoldie, werewoman, ogregreen, ogrered, wraith, flamewraith and silverskeleton
   (the originals are in kingdoms/tools/mocreatures/), as they are, under our names in
   assets/jaymoskingdoms/textures/entity/legend/, and ogre_cave there: ogregreen's skin turned slate grey
-  (kingdoms/tools/gen_legends.py). (Since 0.7.321 the silver skeleton is drawn as polyjo's Dead Traveler, CC BY 4.0;
+  (kingdoms/tools/gen_legends.py). (Since 0.7.322 the silver skeleton is drawn as polyjo's Dead Traveler, CC BY 4.0;
   SilverSkeletonModel and silverskeleton are no longer used.)
 
 WarElephantModel and BreedHorseModel are likewise licensed under the GNU GPL v3. Their source is in

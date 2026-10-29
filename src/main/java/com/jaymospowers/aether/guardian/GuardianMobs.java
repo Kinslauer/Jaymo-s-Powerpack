@@ -14,7 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 
 /**
- * (Powers 0.17.148) The infected guardian tree's guardian, the Visage of War ({@link VisageOfWar}), and its spawn egg.
+ * (Powers 0.17.149) The infected guardian tree's guardian, the Visage of War ({@link VisageOfWar}), and its spawn egg.
  * It doesn't spawn by itself: the tree places it in its hollow.
  */
 public final class GuardianMobs {

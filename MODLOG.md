@@ -3563,3 +3563,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   answer used to put in chat is caught (`ZFighterTranscriptMixin` on `ServerPlayer.sendSystemMessage`) and shown as their
   reply on the screen, with "Ask something else". Without Kingdoms or MCA everything is as before. Lang:
   `lang/parts/zfighter_talk.json`.
+- **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
+  kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
+  clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
+- **0.17.149, Blockbench models from the workshop (Kingdoms 0.7.322):** Andy downloaded eleven Blockbench Workshop
+  models (CC BY 4.0) and wanted them all in. Powers' part:
+  - **Flintlock musket:** the future musket is drawn as 9greenworks' Flintlock Musket Rifle (`tools/gen_flintlock_rifle.py`
+    writes the item models; texture and credit under `textures/item/gun/`).
+  - **Reverent Warplate forging:** the smithing anvil's iron armour list gains Kingdoms' Reverent Warplate pieces
+    (`ArmourForging`, 6/9/8/5 iron), only when Kingdoms registers them.
+  - **Visage of War:** the infected guardian tree finally has its boss, eanncrod's winged lance knight
+    (`aether/guardian/VisageOfWar`, 300 HP, flies, boss bar). It sleeps in the tree's top chamber under the vault, wakes
+    when a player comes near, circles above its foe and thrusts, wide-cleaves, comes down in a cut or shoves; under half
+    health it charges too and attacks faster. With nobody near for 10 s it goes home and heals. Its model plays its own
+    16 animations through a Powers copy of Kingdoms' Blockbench loader (`client/bb/BbModel`). Gold spawn egg in the
+    Aether tab. Credits: `textures/entity/bb/CREDITS.txt`.

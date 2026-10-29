@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.321) A villager with a body of its own ({@link BbBodies}): that body is handed in in place of the renderer's
+ * (0.7.322) A villager with a body of its own ({@link BbBodies}): that body is handed in in place of the renderer's
  * model, and none of the renderer's layers are drawn over it (MCA's clothes and hair, armour, held things, our looks).
  */
 @Mixin(LivingEntityRenderer.class)

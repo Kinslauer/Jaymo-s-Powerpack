@@ -20,7 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.321) Villagers drawn as a body of their own ({@link Bodies}) in place of MCA's: the renderer's model is swapped
+ * (0.7.322) Villagers drawn as a body of their own ({@link Bodies}) in place of MCA's: the renderer's model is swapped
  * for the body's as it's handed in, and MCA's clothes, hair, armour and held things are left off (the body has its own),
  * by {@code BbBodyLivingEntityRendererMixin}. The bodies:
  * <ul>

@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.5.56) The silver skeleton (after Mo' Creatures'): a skeleton warrior that sprints at you from afar and cuts at you;
- * daylight burns it. Now and then one drops its silver sword, the bane of werewolves. (0.7.321) Drawn as polyjo's Dead
+ * daylight burns it. Now and then one drops its silver sword, the bane of werewolves. (0.7.322) Drawn as polyjo's Dead
  * Traveler, with one sword and a buckler: it cuts with the sword and now and then takes a blow from the front on the
  * buckler instead; an axe knocks its guard down for a while.
  */
@@ -34,7 +34,7 @@ public class SilverSkeleton extends LegendMonster {
 	static final double HEALTH = 25.0, SPEED = 0.27, DAMAGE = 4.0;
 	/** It sprints at anyone farther than this (blocks). */
 	static final double SPRINT_FROM = 4.0;
-	/** (0.7.321) How often it takes a blow from in front on its buckler, and how wide "in front" is (degrees either side). */
+	/** (0.7.322) How often it takes a blow from in front on its buckler, and how wide "in front" is (degrees either side). */
 	static final float BLOCK_CHANCE = 0.3F, BLOCK_ARC = 70.0F;
 	/** How long an axe blow on the buckler leaves it unable to block (ticks). */
 	static final int GUARD_BROKEN_TICKS = 100;
@@ -70,7 +70,7 @@ public class SilverSkeleton extends LegendMonster {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.npc.villager.AbstractVillager.class, true));
 	}
 
-	/** (0.7.321) Its sword is in its right hand. */
+	/** (0.7.322) Its sword is in its right hand. */
 	@Override
 	protected int nextArm() {
 		return RIGHT;

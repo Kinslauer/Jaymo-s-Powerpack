@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
  * (Smithing) Armour is hammered out on the Smithing Anvil: iron, gold and copper helmets, chestplates, leggings and
  * boots, for the ingots the grid recipe took (5, 8, 7, 4; the grid recipes are switched off in data,
  * tools/tinkering_assets.py), with blows to match ({@link Forging#hitsFor}). The piece takes its grade like any head
- * ({@link Grades#bake} adds or takes away armour points and durability). (Powers 0.17.148) Kingdoms' Reverent Warplate
+ * ({@link Grades#bake} adds or takes away armour points and durability). (Powers 0.17.149) Kingdoms' Reverent Warplate
  * is hammered out of iron here too, a heavier harness ({@link #REVERENT_INGOTS}); it has no grid recipe.
  */
 public final class ArmourForging {

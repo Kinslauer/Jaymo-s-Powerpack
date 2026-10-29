@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.137) Draws a wind dragon: its species' model ({@link FireDragonModel} for Notus and Boreas since 0.7.321,
+ * (0.7.137) Draws a wind dragon: its species' model ({@link FireDragonModel} for Notus and Boreas since 0.7.322,
  * {@link ZephyrusDragonModel}) in its own hide (one of the species' shades, by its {@link DragonLook}), with its glowing
  * markings and eyes over it ({@link DragonLooks}, drawn as the wild beasts' and the heritages' glowing eyes are, so they
  * show in the dark).

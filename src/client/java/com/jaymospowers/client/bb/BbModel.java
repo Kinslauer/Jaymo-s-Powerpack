@@ -22,7 +22,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (Powers 0.17.148, a copy of Kingdoms' own) A Blockbench model in game, baked by {@code tools/bbmodel_bake.py} into {@code bbmodels/<name>.json}: its
+ * (Powers 0.17.149, a copy of Kingdoms' own) A Blockbench model in game, baked by {@code tools/bbmodel_bake.py} into {@code bbmodels/<name>.json}: its
  * bones as ModelParts (pivots and resting angles as drawn), every face its own textured quad (so per-face UVs, rotated
  * cubes and inflate come through; vanilla's cubes only know box UVs), and its animations, played onto the parts with
  * {@link #play}. Keyframes go linear, Catmull-Rom or step as Blockbench has them; a Molang value (the procedural loops

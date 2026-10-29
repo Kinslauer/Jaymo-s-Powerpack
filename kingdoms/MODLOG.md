@@ -6282,3 +6282,45 @@ instead of them appearing in chat like now."
 - MCA's "Talk about work" on them goes to Powers' talk (`PowersCompat.zfighterTalk`), and a Z Fighter master (a town's
   villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
   `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).
+
+## 0.7.321: goblins have the workshop goblin's body (pack 0.17.148)
+Andy: "can this replace our goblins?" (kokosikk's Blockbench Workshop goblin, CC BY 4.0), then "Whole body, clothes
+redrawn". Goblin villagers now have its shape: a big head, a short body bent forward in a hunch, thin arms, short legs.
+- `GoblinBody.apply` (last in both pose hooks, `MobSwingLivingEntityRendererMixin` and
+  `MobSwingModelFeatureRendererMixin`): every humanoid body drawn for a goblin, MCA's skin, face, clothes and hair, the
+  marks, any armour, is reshaped bone by bone: each bone moved to the goblin's pivot and scaled so a man's box fills the
+  goblin's (head 1.125 wide; body 0.75 tall, 1.25 deep; arms 0.65 x 0.75; legs 0.75 x 0.67), the body, head and arms
+  leant 12 degrees into the hunch at the hip. So whatever MCA dresses a goblin in is drawn on the goblin's body. MCA's
+  skin layer hands its pose on to the other layers (without the scale), so the move is made once (a goblin's right
+  leg sits 1.4 further out than a man's) and the scale every time. A woman's breasts go onto the goblin's chest
+  (`McaLookModels.goblinChest`).
+- `GoblinBody.submit` (from `GreenskinLooks`, which still draws the marks): the model's own parts, painted in the pack's
+  style by `tools/gen_goblin_body.py` (flesh in greys tinted by the goblin's green): ears out and up, a drooping nose,
+  two small tusks, fists, wide feet with toenails, a belt with buckle and pouch, a loincloth, shin wraps; half of them
+  a red cap, one in four an earring. Feet and wraps go under boots, the loincloth under leggings, the cap under a helmet.
+  The two old goblin head shapes (`goblin_features.png`) are gone; orcs are unchanged.
+- `GoblinHandMixin` (`HumanoidModel.translateToHand`): a held item isn't squashed by the thin arm and sits in the fist.
+- Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
+  `tools/blockbench/kokosikk_goblin.bbmodel`.
+Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+
+## 0.7.322: Blockbench Workshop models (pack 0.17.149)
+Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
+(Zephyrus and the rest unchanged; Eurus and Aeolus wait for a model Andy is sending). Every model is CC BY 4.0, credited
+with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.
+- **Loader** (`client/bb/BbModel`, `Molang`): reads a Blockbench model baked by `tools/bbmodel_bake.py` (bones, cubes,
+  per-face UVs, animations with their Molang) into ModelParts and plays its animations by time and weight.
+- **Warchief:** drawn as nyxaris' Chieftain at 0.69 size (`Bodies`, `BbBodies`, `BbBodyLivingEntityRendererMixin`).
+- **Cannon:** iexogen's Canon (`CannonRenderer`), barrel pivot on its trunnions, recoil along the barrel;
+  `Cannon.PIVOT` 0.75.
+- **Silver skeleton:** polyjo's Dead Traveler (`DeadTravelerModel`). It now cuts with its sword arm and blocks on its
+  buckler: 30% of blows from the front within 70 degrees, an axe breaks its guard for 5 s.
+- **Notus and Boreas:** the Fire Dragon (`FireDragonModel`), Notus in its own hide and three re-shadings, Boreas
+  recoloured to ice, glowing markings from its glow half (`tools/gen_fire_dragons.py`). Ground, walk, sit, land and crash
+  poses are our own; flight plays its wingbeat in time with the stroke. Drawn at 0.53 and 0.45 to match the riders'
+  seats. They lose the old models' saddles and horn variety.
+- **Clockwork golem** (`ClockworkGolem`): octopusstudio's Mech Golem. Crafted from a clock, a redstone block and copper,
+  set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
+  into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
+- **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
+  sabatons), each piece hung on the wearer's own bones. Forged at Powers' smithing anvil from iron, no grid recipe.
