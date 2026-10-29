@@ -3789,3 +3789,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Jolt physics (the Velthoric mod) was looked at: LGPL, 1.20.1/1.21.1 only, and a physics engine adds work rather than
     removing block-update cost, so it isn't used.
   - Compile-checked only; not seen in game.
+- **0.17.201, new Blockbench models (Kingdoms 0.7.351):** Andy sent six Blockbench Workshop models (all CC BY 4.0) and
+  asked where they'd fit.
+  - Arsenal's Void Flintlock is the "Dueling Pistol" in the hand and in the inventory (`models/item/flintlock_3d`,
+    `tools/blockbench/dueling_pistol.py`), laid on the old held sprite's diagonal so the old hand placements fit. The spent
+    gun uses the same model.
+  - The Echo Cleaver relic is the "Mandrake" sword, a mandrake root wound round its hilt (`tools/blockbench/mandrake.py`).
+  - `tools/blockbench/freeform.py`: converts a model to item-model elements with its turns kept exactly (26.3 reads
+    free x/y/z element rotations), group turns and inflate folded in.
+  - Kingdoms: the Kintsugi Armour and Primal Visage sets, whaleboats drawn as a launch, and the Skeleton Lord boss (see
+    the Kingdoms MODLOG, 0.7.351).
+  - Compile-checked only; not seen in game, and no dev server was booted for the new Kingdoms registries.

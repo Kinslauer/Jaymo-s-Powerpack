@@ -33,6 +33,10 @@ import net.minecraft.world.item.equipment.ArmorType;
  * <p>
  * (0.7.339) The Heavenly Mantle ({@link Armory#HEAVENLY_PIECES}) the same way: eanncrod's model of the same make, its
  * bones named alike. Each set is its own layer ({@link Set}).
+ * <p>
+ * (0.7.351) The Kintsugi Armour and the Primal Visage ({@link Armory#KINTSUGI_PIECES}, {@link Armory#PRIMAL_PIECES}), both
+ * eanncrod's, the same way. The Primal Visage keeps its skirt ({@code armorWaist}) straight under the body, with no
+ * {@code bipedWaist} above it, so a bone the model doesn't have is skipped and the skirt is hung by its own name.
  */
 public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 	/** A set drawn this way: its model (and texture) name and its pieces by {@link ArmorType}. */
@@ -40,6 +44,9 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 	}
 
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	/** A skirt hung by its own name only in a model with no {@code bipedWaist} (in the others it's under that bone already). */
+	private static final String WAIST = "armorWaist";
+
 	/** Each slot's pieces: the model's bone, and the wearer's bone it hangs on. */
 	private static final Map<EquipmentSlot, Map<String, String>> PIECES = new EnumMap<>(EquipmentSlot.class);
 
@@ -47,7 +54,7 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 		PIECES.put(EquipmentSlot.HEAD, Map.of("armorHead", "head"));
 		PIECES.put(EquipmentSlot.CHEST, Map.of("armorBody", "body", "armorRightArm", "right_arm", "armorLeftArm", "left_arm"));
 		// the skirt's bone hangs at the feet, from the body
-		PIECES.put(EquipmentSlot.LEGS, Map.of("armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "bipedWaist", "body"));
+		PIECES.put(EquipmentSlot.LEGS, Map.of("armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "bipedWaist", "body", WAIST, "body"));
 		PIECES.put(EquipmentSlot.FEET, Map.of("armorRightBoot", "right_leg", "armorLeftBoot", "left_leg"));
 	}
 
@@ -81,8 +88,9 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 	private static ModelPart bone(BbModel model, Map<String, String> pieces, String name, PartPose pose, Map<String, ModelPart> extra) {
 		Map<String, ModelPart> children = new LinkedHashMap<>(extra);
 		pieces.forEach((piece, on) -> {
-			if (on.equals(name)) {
-				children.put(piece, model.part(piece));
+			ModelPart part = model.find(piece);
+			if (on.equals(name) && part != null && !(piece.equals(WAIST) && model.find("bipedWaist") != null)) {
+				children.put(piece, part);
 			}
 		});
 		ModelPart part = new ModelPart(List.of(), children);
@@ -97,6 +105,8 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer, new Set("reverent_warplate", Armory.REVERENT_PIECES)));
 				helper.register(create(renderer, new Set("heavenly_mantle", Armory.HEAVENLY_PIECES)));
+				helper.register(create(renderer, new Set("kintsugi_armour", Armory.KINTSUGI_PIECES)));
+				helper.register(create(renderer, new Set("primal_visage", Armory.PRIMAL_PIECES)));
 			}
 		});
 	}

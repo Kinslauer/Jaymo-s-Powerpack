@@ -49,7 +49,8 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
  * once, when a player first comes near one of its spawners: {@link #DUNGEON_CHANCE} of them get a golem near it.</li>
  * <li><b>Monster rooms</b> (a spawner on a cobblestone floor, in no structure): {@link #MONSTER_ROOM_CHANCE} of them.</li>
  * </ul>
- * Only in the Overworld and the Aether.
+ * Only in the Overworld and the Aether. (0.7.351) {@link SkeletonLord#LAIR_SHARE} of the Overworld's lairs hold a
+ * sleeping Skeleton Lord instead.
  */
 public final class GolemLairs {
 	/** Dungeon structures that may hold a rogue golem, and the chance each one does. */
@@ -249,8 +250,22 @@ public final class GolemLairs {
 		return state.getCollisionShape(level, at).isEmpty() && state.getFluidState().isEmpty();
 	}
 
-	/** A rogue golem, folded, at {@code at}; false if it doesn't fit there. */
+	/** A rogue golem, folded, at {@code at} (or, in the Overworld, now and then a sleeping {@link SkeletonLord}); false if
+	 * it doesn't fit there. */
 	private static boolean spawn(WorldGenLevel level, BlockPos at, float yaw) {
+		if (level.getLevel().dimension() == Level.OVERWORLD && level.getRandom().nextFloat() < SkeletonLord.LAIR_SHARE) {
+			SkeletonLord lord = SkeletonLord.TYPE.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
+			if (lord != null) {
+				lord.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+				lord.yHeadRot = yaw;
+				lord.yBodyRot = yaw;
+				if (level.noCollision(lord)) {
+					lord.sleep();
+					level.addFreshEntityWithPassengers(lord);
+					return true;
+				}
+			}
+		}
 		ClockworkGolem golem = ClockworkGolem.TYPE.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
 		if (golem == null) {
 			return false;

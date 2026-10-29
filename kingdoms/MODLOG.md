@@ -6638,3 +6638,19 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   The radius is now really chunks: 40 (640 blocks), which still reaches the village his last world used (30 chunks out). The capital's
   90 s give-up time starts once the search is over. The log line gives the places looked at and the time it took.
   - Compile-checked only; not seen in game.
+- **0.7.351, new Blockbench models (pack 0.17.201):** from six Blockbench Workshop models Andy sent (CC BY 4.0;
+  credits in `textures/entity/bb/CREDITS.txt`).
+  - **Kintsugi Armour** (`Armory.KINTSUGI_PIECES`, eanncrod's model, drawn by `ReverentLayer`): any Ronin piece and 4 gold
+    ingots at a crafting table make its Kintsugi piece. A little better than iron, quick to enchant, mended with gold.
+    The Ronin set is unchanged (Andy: "should not replace anything existing").
+  - **Primal Visage** (`Armory.PRIMAL_PIECES`, eanncrod's): netherite-strength hide and bone under a skull mask, fireproof.
+    Never made: a fallen Nether war fort warlord drops one random piece (`NetherForts.PRIMAL_PIECES_DROPPED`).
+    `ReverentLayer` now skips bones a model lacks and hangs a skirt by `armorWaist` when there's no `bipedWaist`.
+  - **Whaleboats** are drawn as the "Launch" (a long open rowing boat) instead of a spruce boat: `Whalers.LAUNCH` (saved,
+    synced, kept when cast adrift), client `WhaleboatLookMixin` on `AbstractBoatRenderer`, drawn at 1.2 size.
+  - **Skeleton Lord** (`SkeletonLord`, `SkeletonLordRenderer`): a 260-health boss, undead. 35% of the Overworld's rogue golem
+    lairs (`GolemLairs`) hold him instead, asleep as a statue under amethyst (75% of a blow kept off) until a player
+    comes within 8 blocks in sight or hits him. He laughs for 2 s, the crystals burst, then fights with staff blows and,
+    every 6 s at a foe within 7 blocks, a spell that throws everything within 6 blocks back for 6 harm. Purple boss bar
+    once blows are traded. Drops 6-10 bones, 4-8 amethyst shards, 3-6 emeralds. Spawn egg in the spawn eggs tab.
+  - Compile-checked only; not seen in game, and no dev server was booted for the new registries.

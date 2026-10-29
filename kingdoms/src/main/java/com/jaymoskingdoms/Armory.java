@@ -57,6 +57,15 @@ import org.jspecify.annotations.Nullable;
  * the same way. Never made: one piece is given to each champion of the tournament of the dead in the afterlife (Jaymo's
  * Powers' Other World), the crown first, then the mantle, the greaves and the sabatons. A little lighter than the
  * warplate, quicker to take enchantments. Mended with gold.
+ * <p>
+ * (0.7.351) And the <b>Kintsugi Armour</b>: dark lacquered plate whose cracks are mended in gold seams. eanncrod's model
+ * (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}. A broken Ronin piece made whole: any Ronin piece
+ * and four gold ingots at a crafting table ({@link #KINTSUGI_GOLD}). A step past the Ronin's lamellar, quick to take
+ * enchantments. Mended with gold. Not one of {@link #SETS} (the Ronin stays as it is).
+ * <p>
+ * (0.7.351) And the <b>Primal Visage</b>: a skull mask under horns, hide and bone over netherite. eanncrod's model, drawn
+ * by {@code ReverentLayer}. Never made: each Nether war fort's warlord carries a piece of it ({@code NetherForts}), and
+ * it falls with him. Netherite's toughness, fireproof, hard to knock back. Mended with netherite.
  */
 public final class Armory {
 	/** Each set's numbers: durability multiplier, defence (boots, leggings, chest, helmet), enchantability, toughness, knockback resistance. */
@@ -76,6 +85,16 @@ public final class Armory {
 	static final ArmorMaterial HEAVENLY = material("heavenly", 42, 3, 6, 8, 3, 25, SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.1F, ItemTags.REPAIRS_GOLD_ARMOR);
 	/** The Heavenly Mantle's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> HEAVENLY_PIECES = new LinkedHashMap<>();
+	/** (0.7.351) The Kintsugi Armour: a Ronin piece mended with gold, a little better than iron, quick to take enchantments. */
+	static final ArmorMaterial KINTSUGI = material("kintsugi", 26, 2, 5, 7, 3, 20, SoundEvents.ARMOR_EQUIP_GOLD, 1.5F, 0.05F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** Gold ingots it takes to mend a Ronin piece into its Kintsugi piece (the recipes in data/jaymoskingdoms/recipe/kintsugi_*.json). */
+	public static final int KINTSUGI_GOLD = 4;
+	/** The Kintsugi Armour's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> KINTSUGI_PIECES = new LinkedHashMap<>();
+	/** (0.7.351) The Primal Visage: netherite's defence and toughness, hard to knock back. */
+	static final ArmorMaterial PRIMAL = material("primal", 37, 3, 6, 8, 3, 15, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.0F, 0.15F, ItemTags.REPAIRS_NETHERITE_ARMOR);
+	/** The Primal Visage's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> PRIMAL_PIECES = new LinkedHashMap<>();
 	/** (Smithing) The steel plate pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> STEEL_PLATE_PIECES = new LinkedHashMap<>();
 	/** The sets by name, each its pieces by {@link ArmorType} (helmet, chestplate, leggings, boots). */
@@ -102,6 +121,8 @@ public final class Armory {
 		STEEL_PLATE_PIECES.putAll(pieces("steel_plate", STEEL_PLATE, all));
 		REVERENT_PIECES.putAll(pieces("reverent", REVERENT, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
 		HEAVENLY_PIECES.putAll(pieces("heavenly", HEAVENLY, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
+		KINTSUGI_PIECES.putAll(pieces("kintsugi", KINTSUGI, all, properties -> properties.rarity(Rarity.RARE)));
+		PRIMAL_PIECES.putAll(pieces("primal", PRIMAL, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
 			for (Item item : all) {
