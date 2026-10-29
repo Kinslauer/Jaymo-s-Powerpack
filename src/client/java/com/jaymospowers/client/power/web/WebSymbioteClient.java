@@ -801,7 +801,16 @@ public final class WebSymbioteClient {
 
 	// ---- per tick (while the web power is active) --------------------------------------------------------------------
 
+	/** Use was down last tick (an item's inspection is taken on the press). */
+	private static boolean inspectUse;
+
 	static void tick(Minecraft minecraft, LocalPlayer player, WebSwing swing) {
+		// (0.17.149) it's studying an item it fetched: Use takes it from its grip (WebSymbioteCollect)
+		boolean use = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null;
+		if (use && !inspectUse && player.getAttached(com.jaymospowers.power.web.WebSymbioteCollect.INSPECTING) != null) {
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.InspectGrab());
+		}
+		inspectUse = use;
 		// tethered to a wall by the tendrils: hung off it on them, leaning against their pull (a web of yours outpulls them)
 		WebSymbiote.Wall wall = player.getAttached(WebSymbiote.WALL);
 		if (wall != null && wall.landed() >= 0L && !player.input.keyPresses.jump() && !swing.attached() && swing.pull == null) {

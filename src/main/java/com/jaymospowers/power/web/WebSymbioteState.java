@@ -34,6 +34,8 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	 * the wheel (a takeover, the near-death roar); the armour coming off leaves it alone.
 	 */
 	public static final int TENDRILS = 32;
+	/** (0.17.149) Collect is on: its tendrils fetch items in Living Armor ({@code WebSymbioteCollect}). */
+	public static final int COLLECT = 64;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0, 0);
 

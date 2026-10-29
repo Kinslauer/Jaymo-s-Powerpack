@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebSymbiote;
+import com.jaymospowers.power.web.WebSymbioteCollect;
 import com.jaymospowers.power.web.WebSymbioteState;
 import com.jaymospowers.client.UiStyle;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -50,12 +51,15 @@ final class WebSymbioteScreen extends Screen {
 	/**
 	 * (0.13.23) The ring's slots: the six abilities, then the Mask (the suit's head off or on, {@link WebSymbiote#MASK_TOGGLE}),
 	 * then (0.15.153) the Tendrils (the tendrils out or in, {@link WebSymbiote#TENDRILS_TOGGLE}),
+	 * then (0.17.149) Collect (its tendrils fetching items, {@link WebSymbiote#COLLECT_TOGGLE}),
 	 * {@code SLOT_DEGREES} apart clockwise from the top.
 	 */
-	private static final int SLOTS = WebSymbiote.ABILITIES + 2, MASK_SLOT = WebSymbiote.ABILITIES, TENDRILS_SLOT = WebSymbiote.ABILITIES + 1;
+	private static final int SLOTS = WebSymbiote.ABILITIES + 3, MASK_SLOT = WebSymbiote.ABILITIES, TENDRILS_SLOT = WebSymbiote.ABILITIES + 1,
+		COLLECT_SLOT = WebSymbiote.ABILITIES + 2;
 	private static final double SLOT_DEGREES = 360.0 / SLOTS;
 	private static final Item MASK_ICON = Items.PLAYER_HEAD;
 	private static final Item TENDRILS_ICON = Items.WEEPING_VINES;
+	private static final Item COLLECT_ICON = Items.BUNDLE;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -133,7 +137,8 @@ final class WebSymbioteScreen extends Screen {
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
 			int slot = Math.floorMod((int)Math.round(angle / SLOT_DEGREES), SLOTS);
-			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot == TENDRILS_SLOT ? WebSymbiote.TENDRILS_TOGGLE : slot;
+			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot == TENDRILS_SLOT ? WebSymbiote.TENDRILS_TOGGLE
+				: slot == COLLECT_SLOT ? WebSymbiote.COLLECT_TOGGLE : slot;
 		}
 		if (selected != before && selected >= 0) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
@@ -245,11 +250,31 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 
+		{
+			// (0.17.149) Collect: its tendrils fetch items in Living Armor; lit while on; dim until its bond
+			double t = Math.toRadians(COLLECT_SLOT * SLOT_DEGREES - 90.0);
+			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
+			boolean picked = selected == WebSymbiote.COLLECT_TOGGLE;
+			boolean usable = WebSymbioteCollect.unlocked(player);
+			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
+			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW_ALT);
+			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(COLLECT_ICON), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+			if (!usable) {
+				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
+			}
+			if (usable && state.has(WebSymbioteState.COLLECT)) {
+				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
+			}
+		}
+
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
 		if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
 			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected == WebSymbiote.TENDRILS_TOGGLE ? "tendrils"
+				: selected == WebSymbiote.COLLECT_TOGGLE ? "collect"
 				: selected >= NAMES.length ? "suit"
 				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
 			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
@@ -307,6 +332,13 @@ final class WebSymbioteScreen extends Screen {
 				return Component.translatable("gui.jaymospowers.web_symbiote.mask_no_suit");
 			}
 			return Component.translatable(WebSymbiote.unmasked(player) ? "gui.jaymospowers.web_symbiote.mask_off" : "gui.jaymospowers.web_symbiote.mask_on");
+		}
+		if (selected == WebSymbiote.COLLECT_TOGGLE) {
+			if (!WebSymbioteCollect.unlocked(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.collect_locked", WebSymbioteCollect.COLLECT_BOND);
+			}
+			return Component.translatable(WebSymbiote.state(player).has(WebSymbioteState.COLLECT) ? "gui.jaymospowers.web_symbiote.collect_on"
+				: "gui.jaymospowers.web_symbiote.collect_off");
 		}
 		if (selected == WebSymbiote.TENDRILS_TOGGLE) {
 			if (!WebSymbiote.unlocked(player, WebSymbiote.ARMOR)) {

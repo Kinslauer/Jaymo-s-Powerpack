@@ -87,6 +87,12 @@ public final class WebSymbiote {
 	 */
 	public static final int TENDRILS_TOGGLE = 8;
 	public static final int TENDRILS_TOGGLE_GAP = 10;
+	/**
+	 * (0.17.149) Not an ability either: the menu's Collect slot, its tendrils fetching items in Living Armor
+	 * ({@link WebSymbioteState#COLLECT}, {@link WebSymbioteCollect}); it works from {@link WebSymbioteCollect#COLLECT_BOND},
+	 * before which it fetches on its own whenever its tendrils are out. At most once every {@code TENDRILS_TOGGLE_GAP}.
+	 */
+	public static final int COLLECT_TOGGLE = 9;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -854,6 +860,31 @@ public final class WebSymbiote {
 		}
 	}
 
+	/** The Collect slot: its tendrils fetch items for you (or stop), from its bond (see {@link #COLLECT_TOGGLE}). */
+	public static void toggleCollect(ServerPlayer player) {
+		if (!isBonded(player) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		Long last = LAST_COLLECT.get(player.getUUID());
+		if (last != null && now - last >= 0 && now - last < TENDRILS_TOGGLE_GAP) {
+			return;
+		}
+		LAST_COLLECT.put(player.getUUID(), now);
+		if (!WebSymbioteCollect.unlocked(player)) {
+			// it fetches what it likes until it trusts you more (WebSymbioteCollect.COLLECT_BOND)
+			whisper(player, "collect_locked");
+			return;
+		}
+		WebSymbioteState state = state(player);
+		boolean on = !state.has(WebSymbioteState.COLLECT);
+		set(player, state.withFlag(WebSymbioteState.COLLECT, on));
+		whisper(player, on ? (livingArmor(player) ? "collect_on" : "collect_on_armor") : "collect_off");
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.6F, on ? 1.2F : 0.8F);
+	}
+
+	private static final java.util.Map<java.util.UUID, Long> LAST_COLLECT = new java.util.concurrent.ConcurrentHashMap<>();
+
 	/** The tendrils are out on their own (not the armour's): until when, else -1. */
 	public static long tendrilsOut(Player player) {
 		Long until = player.getAttached(TENDRILS_OUT);
@@ -1525,6 +1556,8 @@ public final class WebSymbiote {
 		}
 		// and it has something to say about what you're fighting
 		WebSymbioteFoes.tick(player, now);
+		// (0.17.149) its tendrils fetch items for you, and it studies each new kind once
+		WebSymbioteCollect.tick(player, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
@@ -3582,6 +3615,10 @@ public final class WebSymbiote {
 		}
 		if (ability == TENDRILS_TOGGLE) {
 			toggleTendrils(player);
+			return;
+		}
+		if (ability == COLLECT_TOGGLE) {
+			toggleCollect(player);
 			return;
 		}
 		if (isBonded(player) && WebSymbioteBond.dormant(player) && !(ability == CONSUME && WebSymbioteStrains.asleep(player))) {
