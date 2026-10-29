@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -40,6 +42,12 @@ import org.jspecify.annotations.Nullable;
  * this life" seals it. It can't be shut; the answers so far are kept if something else closes it. (0.7.275) "On second
  * thought..." asks whether to skip the story: yes picks every answer at random and turns to the story page, where it
  * can still be changed.
+ * (0.7.356) Andy: "this screen should scroll from left to right ... a larger image of the icon beside a larger image of
+ * your character in their scenario, built out with all their customizations. I also want this screen to come after the
+ * Creator". The road (where you start) is a carousel: one start at a time, its picture large beside you acting it out
+ * on a backdrop of that place, stepped through with the arrows, the wheel, the keys or the strip of starts under it.
+ * With MCA's creator still to come, the story stops at its last page short of the road; the creator follows, and then
+ * this screen opens again on the road alone, with you drawn as the creator made you.
  */
 final class LifeStoryScreen extends Screen {
 	static final int MAX_W = 440, MAX_H = 300, TELL_W = 168, LIST_ROW = 19, MIN_ROW = 12, HEADER = 24, FOOTER = 24;
@@ -57,6 +65,15 @@ final class LifeStoryScreen extends Screen {
 	static final int ASK_W = 240, ASK_H = 96;
 	/** (0.7.282) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
+	/**
+	 * (0.7.356) The road's carousel: the arrows' width, the strip of starts under the stage (its height and a cell's
+	 * width), the big picture's well and scale, the text column's share of the stage, and how long a turn slides (ms)
+	 * and how far (pixels).
+	 */
+	static final int ARROW_W = 16, STRIP_H = 24, CELL_W = 22, ICON_WELL = 64, ICON_SCALE = 3;
+	static final float TEXT_SHARE = 0.44F;
+	static final long SLIDE_MS = 220L;
+	static final int SLIDE_PX = 36;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
 	private record Step(@Nullable Question question, boolean realm, boolean gender) {
@@ -85,13 +102,18 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private final boolean forced;
-	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo;
+	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
+	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
+	private long slidAt;
+	private int slideDir;
 	private int scroll, contentH, viewH;
 	/** (0.7.275) Whether "On second thought..." is asking if they'd skip the story. */
 	private boolean asking;
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
 	private static boolean owed;
+	/** (0.7.356) MCA's creator comes after this screen: the story stops short of the road, told after the creator. */
+	private static boolean creatorAhead;
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
 	private static Draft draft = new Draft();
@@ -113,6 +135,7 @@ final class LifeStoryScreen extends Screen {
 		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
 			realms = payload.realms();
+			creatorAhead = payload.creatorAhead();
 			StoryCurtain.raise();
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
@@ -129,6 +152,7 @@ final class LifeStoryScreen extends Screen {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			owed = false;
+			creatorAhead = false;
 			draft = new Draft();
 			narrated = null;
 			toRead.clear();
@@ -145,10 +169,20 @@ final class LifeStoryScreen extends Screen {
 		return draft.gender;
 	}
 
-	/** Whether the story is told: it came back from the server. */
+	/**
+	 * Whether the story is told: it came back from the server. (0.7.356) Told up to the road with MCA's creator to come,
+	 * this screen is done till the creator is; after it, only once the road is told too.
+	 */
 	private static boolean done() {
 		Minecraft minecraft = Minecraft.getInstance();
-		return minecraft.player != null && LifeStory.of(minecraft.player) != null;
+		List<String> story = minecraft.player == null ? null : LifeStory.of(minecraft.player);
+		return story != null && (creatorAhead || !LifeStory.roadOwed(story));
+	}
+
+	/** (0.7.356) Whether only the road is left to tell (the rest was told before MCA's creator). */
+	private static boolean roadOnly() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.player != null && LifeStory.roadOwed(LifeStory.of(minecraft.player));
 	}
 
 	@Override
@@ -173,12 +207,22 @@ final class LifeStoryScreen extends Screen {
 	/** The pages as the answers so far make them: each question asked, a realm page after an answer that names one, then the story. */
 	private static List<Step> steps() {
 		List<Step> out = new ArrayList<>();
+		// (0.7.356) after MCA's creator: the road, and the realm it names
+		if (roadOnly()) {
+			out.add(new Step(Question.ROAD, false, false));
+			Answer a = picked(Question.ROAD);
+			if (a != null && a.realm()) {
+				out.add(new Step(Question.ROAD, true, false));
+			}
+			return out;
+		}
 		// (0.7.304) who you are comes first: MCA's body is a man's or a woman's
 		if (McaCompat.LOADED) {
 			out.add(Step.GENDER);
 		}
 		for (Question q : Question.values()) {
-			if (!q.asked()) {
+			// (0.7.356) the road waits for MCA's creator when it's still to come
+			if (!q.asked() || q == Question.ROAD && creatorAhead) {
 				continue;
 			}
 			out.add(new Step(q, false, false));
@@ -199,6 +243,11 @@ final class LifeStoryScreen extends Screen {
 
 	private static @Nullable Answer picked(Question q) {
 		int i = draft.answers[q.ordinal()];
+		// (0.7.356) on the road alone, the rest is the story told before MCA's creator
+		Minecraft minecraft = Minecraft.getInstance();
+		if (i < 0 && q != Question.ROAD && minecraft.player != null && roadOnly()) {
+			return LifeStory.answer(minecraft.player, q);
+		}
 		return i >= 0 && i < q.answers().size() ? q.answers().get(i) : null;
 	}
 
@@ -243,7 +292,12 @@ final class LifeStoryScreen extends Screen {
 			Classes.PlayerClass cls = youthClass();
 			return cls == null || cls.options.isEmpty() || draft.option >= 0;
 		}
-		return s.realm ? realmOf(s.question) >= 0 : picked(s.question) != null;
+		if (s.realm) {
+			return realmOf(s.question) >= 0;
+		}
+		// (0.7.356) the carousel shows every road, open or not: only an open one goes on
+		Answer a = picked(s.question);
+		return a != null && (s.question != Question.ROAD || open(a));
 	}
 
 	/** The heritage the story makes (or the one picked over it), and its look (the childhood's leaning until one is picked). */
@@ -258,13 +312,23 @@ final class LifeStoryScreen extends Screen {
 		return storyHeritage();
 	}
 
+	/** (0.7.356) Your heritage as the story told before MCA's creator made it (null before then). */
+	private static Heritage.@Nullable Kind told() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.player != null && roadOnly() ? Heritage.of(minecraft.player) : null;
+	}
+
 	private static Heritage.@Nullable Kind storyHeritage() {
 		Answer road = picked(Question.ROAD);
-		return road != null && road.makes() != null ? road.makes() : bornAs();
+		return road != null && road.makes() != null ? road.makes() : told() != null ? told() : bornAs();
 	}
 
 	/** (0.7.349) The heritage the birthplace gives, whatever the road makes of it. */
 	private static Heritage.@Nullable Kind bornAs() {
+		// (0.7.356) after MCA's creator, the heritage already yours (the server checks the Verdant World's road against it)
+		if (told() != null) {
+			return told();
+		}
 		Answer born = picked(Question.BORN);
 		return born == null ? null : born.heritage();
 	}
@@ -399,6 +463,10 @@ final class LifeStoryScreen extends Screen {
 		// question pages it sits where the story page's look button does
 		this.skip = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip"), b -> this.asking = true)
 			.bounds(left() + 6, y, TELL_W - 12, 16).build());
+		// (0.7.356) the road's carousel: a turn back and a turn on, either side of the stage
+		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
+		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
+		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
 		this.skipYes = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
 			randomize();
@@ -423,7 +491,7 @@ final class LifeStoryScreen extends Screen {
 					open.add(i);
 				}
 			}
-			int pick = !q.asked() || open.isEmpty() ? -1 : open.get(random.nextInt(open.size()));
+			int pick = !q.asked() || open.isEmpty() || q == Question.ROAD && creatorAhead ? -1 : open.get(random.nextInt(open.size()));
 			draft.answers[q.ordinal()] = pick;
 			if (pick >= 0 && q.answers().get(pick).realm()) {
 				setRealm(q, realms.get(random.nextInt(realms.size())).id());
@@ -522,6 +590,19 @@ final class LifeStoryScreen extends Screen {
 		if (!answered(s)) {
 			return;
 		}
+		// (0.7.356) after MCA's creator: the road's last page sets out
+		if (roadOnly()) {
+			if (draft.step < steps().size() - 1) {
+				draft.step++;
+				this.scroll = 0;
+				return;
+			}
+			Answer road = picked(Question.ROAD);
+			ClientPlayNetworking.send(new LifeStory.Road(draft.answers[Question.ROAD.ordinal()], road != null && road.realm() ? draft.roadRealm : -1, lookIndex()));
+			quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+			onClose();
+			return;
+		}
 		if (!s.summary()) {
 			draft.step++;
 			this.scroll = 0;
@@ -567,7 +648,16 @@ final class LifeStoryScreen extends Screen {
 				return true;
 			}
 		}
-		if (s.gender) {
+		if (carousel(s)) {
+			int cell = cellAt(mx, my);
+			if (cell >= 0) {
+				int cur = draft.answers[Question.ROAD.ordinal()];
+				if (cell != cur) {
+					pickRoad(cell, cell < cur ? -1 : 1);
+				}
+				return true;
+			}
+		} else if (s.gender) {
 			int row = rowAt(s, mx, my);
 			if (row >= 0) {
 				draft.gender = row;
@@ -630,11 +720,33 @@ final class LifeStoryScreen extends Screen {
 		if (this.asking) {
 			return true;
 		}
+		// (0.7.356) the wheel turns the carousel
+		if (carousel(step()) && scrollY != 0) {
+			turn(scrollY > 0 ? -1 : 1);
+			return true;
+		}
 		if (this.contentH > this.viewH && mouseX >= paneX()) {
 			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
 			return true;
 		}
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	}
+
+	@Override
+	public boolean keyPressed(KeyEvent event) {
+		// (0.7.356) left and right (or A and D) turn the carousel
+		if (!this.asking && carousel(step())) {
+			int key = event.key();
+			if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
+				turn(-1);
+				return true;
+			}
+			if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D) {
+				turn(1);
+				return true;
+			}
+		}
+		return super.keyPressed(event);
 	}
 
 	private static boolean over(@Nullable Button b, int mx, int my) {
@@ -663,28 +775,31 @@ final class LifeStoryScreen extends Screen {
 		narrate(s, this.asking);
 		int x = left(), y = top(), w = panelW(), h = panelH();
 		Ui.panel(graphics, x, y, w, h, ACCENT);
-		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
-
-		// the header over the right: the question (or the realm's, or the story's); (0.7.269) the line under it is only heard
-		int px = paneX(), pw = paneW();
-		Ui.line(graphics, this.font, heading(s), px + 8, y + 7, pw - 16, Ui.TEXT);
-		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
-
-		int viewTop = y + HEADER, viewBottom = y + h - FOOTER;
-		this.viewH = viewBottom - viewTop;
-		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
-		if (!s.summary()) {
-			rows(graphics, s, mouseX, mouseY);
+		boolean wheel = carousel(s);
+		if (wheel) {
+			carouselPage(graphics, mouseX, mouseY);
 		} else {
-			summary(graphics, mouseX, mouseY);
+			page(graphics, s, mouseX, mouseY);
 		}
-		graphics.disableScissor();
-		Ui.scrollbar(graphics, px + pw - 4, viewTop, this.viewH, this.viewH, this.contentH, this.scroll);
 
-		tell(graphics, s, mouseX, mouseY);
+		if (this.back != null) {
+			this.back.setX(wheel ? x + 6 : paneX() + 6);
+		}
+		if (this.skip != null) {
+			this.skip.setX(wheel ? x + 70 : x + 6);
+		}
+		for (Button b : new Button[] {this.prev, this.after}) {
+			if (b != null) {
+				b.visible = wheel && !this.asking;
+			}
+		}
 
 		if (this.next != null) {
-			this.next.setMessage(Component.translatable(s.summary() ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"));
+			// (0.7.356) with MCA's creator to come the story's page leads on to it; after it, the road's last page sets out
+			boolean last = draft.step >= steps().size() - 1;
+			String label = roadOnly() ? last ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"
+				: s.summary() ? creatorAhead ? "gui.jaymoskingdoms.story.creator" : "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next";
+			this.next.setMessage(Component.translatable(label));
 			this.next.active = answered(s);
 		}
 		if (this.back != null) {
@@ -715,7 +830,7 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		if (this.skip != null) {
-			this.skip.visible = s.question != null;
+			this.skip.visible = s.question != null && !roadOnly();
 		}
 		if (this.asking) {
 			ask(graphics);
@@ -738,6 +853,207 @@ final class LifeStoryScreen extends Screen {
 			this.skipNo.visible = this.asking;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** A page as it always was: the answers (or the story) down the right, the one pointed at told on the left. */
+	private void page(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
+		int x = left(), y = top(), h = panelH();
+		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
+		// the header over the right: the question (or the realm's, or the story's); (0.7.269) the line under it is only heard
+		int px = paneX(), pw = paneW();
+		Ui.line(graphics, this.font, heading(s), px + 8, y + 7, pw - 16, Ui.TEXT);
+		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
+
+		int viewTop = y + HEADER, viewBottom = y + h - FOOTER;
+		this.viewH = viewBottom - viewTop;
+		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
+		if (!s.summary()) {
+			rows(graphics, s, mouseX, mouseY);
+		} else {
+			summary(graphics, mouseX, mouseY);
+		}
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, px + pw - 4, viewTop, this.viewH, this.viewH, this.contentH, this.scroll);
+
+		tell(graphics, s, mouseX, mouseY);
+	}
+
+	// ---- the road's carousel (0.7.356) -------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.356) Each start's backdrop behind the figure: the sky's top and foot, and the ground (ARGB), by road key. A
+	 * start without one stands on a dusk road.
+	 */
+	static final java.util.Map<String, int[]> BACKDROPS = java.util.Map.ofEntries(
+		java.util.Map.entry("city", new int[] {0xFF3A2A4A, 0xFFC08050, 0xFF6A5A4A}),
+		java.util.Map.entry("banished", new int[] {0xFF2A2A34, 0xFF6A5A5A, 0xFF4A3A2A}),
+		java.util.Map.entry("cave", new int[] {0xFF08080C, 0xFF20242C, 0xFF3A3A40}),
+		java.util.Map.entry("shipwreck", new int[] {0xFF4A6A8A, 0xFF8AB0C8, 0xFFC8B880}),
+		java.util.Map.entry("sworn", new int[] {0xFF3A4A6A, 0xFF8A9AB0, 0xFF6A6A6A}),
+		java.util.Map.entry("village", new int[] {0xFF5A8AC8, 0xFFB0D0E8, 0xFF5A8A3A}),
+		java.util.Map.entry("monolith", new int[] {0xFF2A1A4A, 0xFF7A5AA0, 0xFF5A5A62}),
+		java.util.Map.entry("wild", new int[] {0xFF4A7AA8, 0xFFA8C8D8, 0xFF3A6A2A}),
+		java.util.Map.entry("skyfall", new int[] {0xFF1A2A6A, 0xFF8AA8E8, 0xFF7A5A3A}),
+		java.util.Map.entry("timelost", new int[] {0xFF0A1A2A, 0xFF2A7A8A, 0xFF3A4A52}),
+		java.util.Map.entry("burned", new int[] {0xFF2A0A0A, 0xFFC04A1A, 0xFF2A2420}),
+		java.util.Map.entry("snowed", new int[] {0xFF8A9AB0, 0xFFE0E8F0, 0xFFF4F8FC}),
+		java.util.Map.entry("captive", new int[] {0xFF2A1A12, 0xFF8A5A3A, 0xFF4A3A2A}),
+		java.util.Map.entry("whalers", new int[] {0xFF2A3A4A, 0xFF7A8A9A, 0xFF1A3A5A}),
+		java.util.Map.entry("unarmed", new int[] {0xFF2A2A2A, 0xFF6A6A6A, 0xFF4A4A4A}),
+		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
+		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
+		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
+		java.util.Map.entry("maw", new int[] {0xFF000000, 0xFF2A0A3A, 0xFF1A1A1A}),
+		java.util.Map.entry("demon", new int[] {0xFF1A0000, 0xFF8A1A1A, 0xFF3A1010}),
+		java.util.Map.entry("afterlife", new int[] {0xFFB0C8E8, 0xFFF8F0D0, 0xFFF0F0F0}),
+		java.util.Map.entry("fate", new int[] {0xFF0A0A2A, 0xFF4A2A7A, 0xFF2A2A3A}));
+	static final int[] DUSK = {0xFF2A2A4A, 0xFF8A6A6A, 0xFF4A4A3A};
+
+	/** (0.7.356) Whether page {@code s} is the road's carousel (not the realm it names). */
+	private static boolean carousel(Step s) {
+		return s.question == Question.ROAD && !s.realm;
+	}
+
+	/** (0.7.356) Turns the carousel one start back ({@code -1}) or on ({@code 1}), wrapping. */
+	private void turn(int dir) {
+		int n = Question.ROAD.answers().size(), cur = draft.answers[Question.ROAD.ordinal()];
+		pickRoad(cur < 0 ? (dir > 0 ? 0 : n - 1) : Math.floorMod(cur + dir, n), dir);
+	}
+
+	/** (0.7.356) Shows (and picks, if it's open) road {@code i}, sliding in from {@code dir}'s side. */
+	private void pickRoad(int i, int dir) {
+		Answer a = Question.ROAD.answers().get(i);
+		draft.answers[Question.ROAD.ordinal()] = i;
+		// (0.7.349) a road that fixes the heritage drops one picked over the story's
+		if (a.makes() != null || a.onlyFor() != null) {
+			draft.heritage = -1;
+			draft.look = -1;
+		}
+		this.slidAt = System.currentTimeMillis();
+		this.slideDir = dir;
+		click();
+	}
+
+	/** (0.7.356) The strip's first cell's left edge: centred when it fits, else scrolled to keep the shown start in the middle. */
+	private int stripStart() {
+		int n = Question.ROAD.answers().size(), view = panelW() - 16, total = n * CELL_W;
+		if (total <= view) {
+			return left() + 8 + (view - total) / 2;
+		}
+		int cur = Math.max(0, draft.answers[Question.ROAD.ordinal()]);
+		return left() + 8 - Math.clamp(cur * CELL_W + CELL_W / 2 - view / 2, 0, total - view);
+	}
+
+	private int stripY() {
+		return top() + panelH() - FOOTER - STRIP_H;
+	}
+
+	/** (0.7.356) The strip's cell under the mouse, or -1. */
+	private int cellAt(int mx, int my) {
+		int y = stripY();
+		if (my < y || my >= y + STRIP_H - 4 || mx < left() + 8 || mx >= left() + panelW() - 8) {
+			return -1;
+		}
+		int i = Math.floorDiv(mx - stripStart(), CELL_W);
+		return i >= 0 && i < Question.ROAD.answers().size() ? i : -1;
+	}
+
+	/**
+	 * (0.7.356) The road, one start at a time: its picture large on the left over its name, its line of your past and
+	 * what it gives; you on the right acting it out on a backdrop of the place; the strip of every start under them.
+	 */
+	private void carouselPage(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		List<Answer> roads = Question.ROAD.answers();
+		int ri = Question.ROAD.ordinal();
+		// (the first open start is shown when none is picked yet)
+		if (draft.answers[ri] < 0 || draft.answers[ri] >= roads.size()) {
+			for (int i = 0; i < roads.size(); i++) {
+				if (open(roads.get(i))) {
+					draft.answers[ri] = i;
+					break;
+				}
+			}
+		}
+		int cur = Math.max(0, draft.answers[ri]);
+		Answer a = roads.get(cur);
+		int x = left(), y = top(), w = panelW();
+		Ui.line(graphics, this.font, Component.translatable("story.jaymoskingdoms.road.title"), x + 8, y + 7, w - 70, Ui.TEXT);
+		Ui.lineRight(graphics, this.font, Component.literal((cur + 1) + " / " + roads.size()), x + w - 8, y + 7, 60, Ui.DIM);
+		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+
+		int sx0 = x + ARROW_W + 8, sx1 = x + w - ARROW_W - 8, sy0 = y + HEADER, sy1 = stripY() - 4;
+		int textW = (int)((sx1 - sx0) * TEXT_SHARE), split = sx0 + textW;
+		float t = Math.min(1F, (System.currentTimeMillis() - this.slidAt) / (float)SLIDE_MS);
+		int off = Math.round(this.slideDir * (1F - (1F - (1F - t) * (1F - t) * (1F - t))) * SLIDE_PX);
+
+		// the place: its sky and ground, framed
+		int bx0 = split + 6, bx1 = sx1, ground = sy1 - (sy1 - sy0) / 5;
+		int[] colors = BACKDROPS.getOrDefault(a.key(), DUSK);
+		Ui.well(graphics, bx0 - 1, sy0 - 1, bx1 - bx0 + 2, sy1 - sy0 + 2);
+		graphics.fillGradient(bx0, sy0, bx1, ground, colors[0], colors[1]);
+		graphics.fill(bx0, ground, bx1, sy1, colors[2]);
+		graphics.fill(bx0, ground, bx1, ground + 1, 0x40000000);
+		graphics.fillGradient(bx0, ground + 1, bx1, sy1, 0x00000000, 0x60000000);
+
+		graphics.enableScissor(sx0, sy0, sx1, sy1);
+		// you, acting the start out on the ground of the place
+		figure(graphics, new Step(Question.ROAD, false, false), -1, -1, bx0 + off, sy0 + 4, bx1 + off, ground + (sy1 - ground) / 2);
+
+		// its picture, large
+		int ix = sx0 + off, wx = ix + (textW - ICON_WELL) / 2, wy = sy0 + 4;
+		Ui.well(graphics, wx, wy, ICON_WELL, ICON_WELL);
+		int size = 16 * ICON_SCALE;
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(wx + (ICON_WELL - size) / 2F, wy + (ICON_WELL - size) / 2F);
+		graphics.pose().scale(ICON_SCALE, ICON_SCALE);
+		graphics.item(new ItemStack(a.icon()), 0, 0);
+		graphics.pose().popMatrix();
+		boolean open = open(a);
+		if (!open) {
+			graphics.fill(wx + 1, wy + 1, wx + ICON_WELL - 1, wy + ICON_WELL - 1, 0x90000000);
+		}
+
+		// its name, its line of your past, and what it gives
+		Component name = Component.translatable("story.jaymoskingdoms.road." + a.key());
+		int ny = wy + ICON_WELL + 6;
+		if (this.font.width(name) <= textW - 8) {
+			graphics.centeredText(this.font, name, ix + textW / 2, ny, open ? ACCENT : Ui.HINT);
+		} else {
+			Ui.line(graphics, this.font, name, ix + 4, ny, textW - 8, open ? ACCENT : Ui.HINT);
+		}
+		List<Component> lines = new ArrayList<>();
+		lines.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".tale", realmName(Question.ROAD)));
+		if (!open) {
+			lines.add(reason(a).withColor(Ui.BAD));
+		}
+		graphics.disableScissor();
+		block(graphics, lines, gives(Question.ROAD, a, false), sx0 - 9 + off, ny + 14, textW + 10, sy1);
+
+		// the strip: every start, the shown one marked, those not open dimmed
+		int stripY = stripY(), x0 = stripStart();
+		int hover = cellAt(mouseX, mouseY);
+		graphics.enableScissor(x + 8, stripY, x + w - 8, stripY + STRIP_H - 4);
+		for (int i = 0; i < roads.size(); i++) {
+			int cx = x0 + i * CELL_W;
+			boolean shown = i == cur, can = open(roads.get(i));
+			graphics.fill(cx + 1, stripY, cx + CELL_W - 1, stripY + STRIP_H - 4, shown ? Ui.ROW_PICKED : i == hover ? Ui.ROW_HOVER : Ui.ROW_ALT);
+			if (shown) {
+				graphics.fill(cx + 1, stripY + STRIP_H - 6, cx + CELL_W - 1, stripY + STRIP_H - 4, ACCENT);
+			}
+			graphics.item(new ItemStack(roads.get(i).icon()), cx + (CELL_W - 16) / 2, stripY + 2);
+			if (!can) {
+				graphics.fill(cx + 1, stripY, cx + CELL_W - 1, stripY + STRIP_H - 4, 0xA0101018);
+			}
+		}
+		graphics.disableScissor();
+	}
+
+	/** (0.7.356) Why an answer can't be picked here. */
+	private static net.minecraft.network.chat.MutableComponent reason(Answer a) {
+		return !a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
+			: a.onlyFor() != null && bornAs() != a.onlyFor()
+				? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
+				: Component.translatable("gui.jaymoskingdoms.story.no_realms");
 	}
 
 	/** (0.7.275) The skip-the-story ask, over the dimmed page: the question, what skipping does, and the yes and no under it. */
@@ -895,6 +1211,10 @@ final class LifeStoryScreen extends Screen {
 
 	/** The class the story makes, or the one picked over it. */
 	private static Classes.@Nullable PlayerClass youthClass() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player != null && roadOnly()) {
+			return Classes.classOf(minecraft.player);
+		}
 		if (draft.cls >= 0 && draft.cls < Classes.PlayerClass.values().length) {
 			return Classes.PlayerClass.values()[draft.cls];
 		}
@@ -1014,7 +1334,6 @@ final class LifeStoryScreen extends Screen {
 	/** The left: the answer pointed at or picked, its line of your past and what it gives; on the story page, your heritage's look. */
 	private void tell(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = TELL_W;
-		int textW = w - 18;
 		Component name;
 		ItemStack icon = ItemStack.EMPTY;
 		List<Component> lines = new ArrayList<>();
@@ -1059,10 +1378,7 @@ final class LifeStoryScreen extends Screen {
 				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tale", realmName(s.question)));
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {
-					lines.add((!a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
-						: a.onlyFor() != null && bornAs() != a.onlyFor()
-							? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
-							: Component.translatable("gui.jaymoskingdoms.story.no_realms")).withColor(Ui.BAD));
+					lines.add(reason(a).withColor(Ui.BAD));
 				}
 			}
 		}
@@ -1083,6 +1399,15 @@ final class LifeStoryScreen extends Screen {
 			bottom -= figureH;
 			figure(graphics, s, mouseX, mouseY, x + 8, bottom + 2, x + w - 8, bottom + figureH);
 		}
+		block(graphics, lines, good, x, ty, w, bottom);
+	}
+
+	/**
+	 * The lines of a tale (each in its own colour, white if none) and, under a rule, what it gives (green), in the
+	 * column {@code x}..{@code x + w} from {@code ty} down to {@code bottom}.
+	 */
+	private void block(GuiGraphicsExtractor graphics, List<Component> lines, List<Component> good, int x, int ty, int w, int bottom) {
+		int textW = w - 18;
 		// (UI text pass) laid out first; a tale longer than the room scrolls slowly through it and back
 		List<FormattedCharSequence> seqs = new ArrayList<>();
 		List<Integer> at = new ArrayList<>(), colors = new ArrayList<>();
@@ -1173,6 +1498,12 @@ final class LifeStoryScreen extends Screen {
 					break;
 				}
 			}
+		}
+		// (0.7.356) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
+		if (roadOnly()) {
+			Answer road = picked(Question.ROAD);
+			StoryFigure.drawYou(graphics, player, road != null ? road.makes() : null, look, scene, icon, x0, y0, x1, y1);
+			return;
 		}
 		StoryFigure.draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, draft.gender);
 	}
