@@ -6572,3 +6572,20 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   talking to them, or helping someone up. Only game: grown wild animals, never pets or people. Runs from
   `Workers.step`, so their brain waits and `Doorways` opens gates for them.
   - Not seen in game.
+
+## 0.7.346: every tongue greets, waves off, cheers and screams in its own words (pack 0.17.189)
+- Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you dont speak
+  it". Each of the five tongues (Common, Northern, Southern, Wildwood, Blossom) has four made-up lines in the lang file
+  (`tongue.jaymoskingdoms.<tongue>.<greet|farewell|celebrate|scream>`), spoken by a man and a woman of that land
+  (`tools/voices/make_voices.py`: VoxCPM2 voices `<tongue>_male`/`_female`, designed on the tongue's own greeting and
+  farewell so the words keep its sound; 40 clips, each said in its mood).
+- **Heard:** an MCA villager's hello, cheer and death scream reach players who don't speak their tongue as that tongue's
+  line in the speaker's sex's voice (`Languages.voice`, where the grunts were; the grunt stays for yes/no/angry and for a
+  line not recorded yet). Those who understand them hear MCA's words as before.
+- **Farewell:** shutting a foreign villager's talk menu (`McaCloseMixin` on MCA's `InteractionCloseRequest`), they bid
+  you goodbye in their tongue, at their own voice pitch, to you alone, at most once every 30 s (`Languages.farewell`); not
+  when the menu shuts to open a trade.
+- `Voices` registers a tongue's sound only if its clip is in the jar, and the script lists only made clips in
+  sounds.json, so the feature grows as clips are generated and nothing is missing before then.
+  - Clips not generated yet (Andy's PC is busy with the symbiote voices); plumbing compile-checked by eye only, no game
+    jars in the cloud session.

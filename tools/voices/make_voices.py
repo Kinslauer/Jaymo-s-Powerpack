@@ -3,7 +3,9 @@
 Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
 cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
 `Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
-page, every answer's tale and the closing line; the spirits read their summon lines. Clips go straight into
+page, every answer's tale and the closing line; the spirits read their summon lines; (Kingdoms 0.7.346) each tongue's
+greeting, farewell, cheer and scream (`tongue.jaymoskingdoms.<tongue>.<line>`), by a man and a woman of that land, made
+up words heard by those who don't speak it (`Voices.TONGUE_LINES`). Clips go straight into
 kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/<voice>/<name>.ogg (mono Vorbis); a clip already there is
 skipped, so a stopped run picks up where it left off. Delete a clip to remake it; delete a ref wav (or change its seed) to
 redesign a voice (then delete its clips too).
@@ -37,6 +39,21 @@ VOICES = {
     "thessaly": dict(seed=51, desc="A prim, fussy elderly female scholar witch, crisp precise voice, scolding but fond"),
     "quiet": dict(seed=61, desc="An ancient, hollow, breathy whisper, very slow, neither male nor female, distant and echoing"),
 }
+# (Kingdoms 0.7.346) The tongues' speakers, a man and a woman each (`<tongue>_male`, `<tongue>_female`), designed on that
+# tongue's own greeting and farewell so the made-up words keep its sound. Each line is said in its mood (`TONGUE_MOODS`).
+TONGUE_FOLK = {
+    "common": "a plain, friendly country villager from green farmland, clear and homely",
+    "northern": "a hardy villager from the frozen north, deep and strong, with hard rolled r's and clipped words",
+    "southern": "a desert trader from hot dunes, warm and lilting, with soft breathy h's and rolling vowels",
+    "wildwood": "a villager from a steaming jungle, bright and rhythmic, quick clicking consonants and open vowels",
+    "blossom": "a soft-spoken villager from cherry-blossom hills, light, even and polite, crisp short syllables",
+}
+TONGUE_LINES = ["greet", "farewell", "celebrate", "scream"]
+TONGUE_MOODS = {"greet": "warm and welcoming", "farewell": "kind, saying goodbye", "celebrate": "cheering loudly with joy",
+                "scream": "screaming in terror, loud, shrill and panicked"}
+for _n, (_tongue, _desc) in enumerate(TONGUE_FOLK.items()):
+    for _g, _who in (("male", "A man in his thirties"), ("female", "A woman in her thirties")):
+        VOICES[_tongue + "_" + _g] = dict(seed=101 + _n * 10 + (_g == "female"), desc=_who + ", " + _desc, tongue=_tongue)
 
 QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road"]
 SPIRIT_LINES = [f"spirit.jaymoskingdoms.{s}.summon.{n}" for s in ("grimsby", "varro", "ambrose", "thessaly") for n in (1, 2, 3)] \
@@ -65,6 +82,10 @@ def lines(lang):
     out.append(("narrator", STORY_END, lang["gui.jaymoskingdoms.story.summary_sub"]))
     for key in SPIRIT_LINES:
         out.append((key.split(".")[2], key, lang[key]))
+    for tongue in TONGUE_FOLK:
+        for g in ("male", "female"):
+            for line in TONGUE_LINES:
+                out.append((tongue + "_" + g, f"tongue.jaymoskingdoms.{tongue}.{g}.{line}", lang[f"tongue.jaymoskingdoms.{tongue}.{line}"]))
     return out
 
 
@@ -72,6 +93,9 @@ def sound_name(key):
     """The same rule as Voices.soundPath: (sound id, file under sounds/voice/<voice>/)."""
     if key.startswith("story.jaymoskingdoms."):
         voice, rest = "narrator", key[len("story.jaymoskingdoms."):]
+    elif key.startswith("tongue.jaymoskingdoms."):
+        # tongue.jaymoskingdoms.northern.female.greet -> voice.tongue.northern.female.greet, tongue/northern_female_greet
+        voice, rest = "tongue", key[len("tongue.jaymoskingdoms."):]
     else:
         voice, rest = key[len("spirit.jaymoskingdoms."):].split(".", 1)
     return "voice." + voice + "." + rest, voice + "/" + rest.replace(".", "_")
@@ -81,6 +105,9 @@ def write_sounds(all_lines):
     sounds = {}
     for voice, key, _ in all_lines:
         sid, file = sound_name(key)
+        if "tongue" in VOICES.get(voice, {}) and not os.path.exists(os.path.join(OUT, file + ".ogg")):
+            # (Kingdoms registers a tongue's line only once its clip exists)
+            continue
         entry = {"name": "jaymoskingdoms:voice/" + file}
         if voice == "narrator":
             entry["stream"] = True
@@ -130,22 +157,34 @@ def main():
     os.makedirs(REFS, exist_ok=True)
     model = VoxCPM.from_pretrained("openbmb/VoxCPM2", load_denoiser=False)
     rate = model.tts_model.sample_rate
-    for n, (voice, key, text) in enumerate(todo, 1):
-        v = VOICES[voice]
-        ref = os.path.join(REFS, voice + ".wav")
-        ref_text = v.get("ref", REF_TEXT)
-        if not os.path.exists(ref):
-            seeded(v["seed"])
-            wav = model.generate(text="(" + v["desc"] + ")" + ref_text, cfg_value=2.0, inference_timesteps=10)
-            sf.write(ref, tidy(wav, rate), rate)
-            print("designed", ref)
+    try:
+        for n, (voice, key, text) in enumerate(todo, 1):
+            make(model, rate, sf, lang, voice, key, text)
+            print(f"[{n}/{len(todo)}] wrote", os.path.join(OUT, sound_name(key)[1] + ".ogg"))
+    finally:
+        # (tongue lines are listed only once made, so list the new ones even if the run is stopped)
+        write_sounds(all_lines)
+
+
+def make(model, rate, sf, lang, voice, key, text):
+    v = VOICES[voice]
+    ref = os.path.join(REFS, voice + ".wav")
+    ref_text = v.get("ref", REF_TEXT)
+    if "tongue" in v:
+        ref_text = lang[f"tongue.jaymoskingdoms.{v['tongue']}.greet"] + " " + lang[f"tongue.jaymoskingdoms.{v['tongue']}.farewell"]
+        # a tongue's line is said in its mood: (screaming in terror...)Aiyee!
+        text = "(" + TONGUE_MOODS[key.rsplit(".", 1)[1]] + ")" + text
+    if not os.path.exists(ref):
         seeded(v["seed"])
-        wav = model.generate(text=text, prompt_wav_path=ref, prompt_text=ref_text, reference_wav_path=ref,
-                             cfg_value=2.0, inference_timesteps=10)
-        path = os.path.join(OUT, sound_name(key)[1] + ".ogg")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        sf.write(path, tidy(wav, rate), rate, format="OGG", subtype="VORBIS")
-        print(f"[{n}/{len(todo)}] wrote", path)
+        wav = model.generate(text="(" + v["desc"] + ")" + ref_text, cfg_value=2.0, inference_timesteps=10)
+        sf.write(ref, tidy(wav, rate), rate)
+        print("designed", ref)
+    seeded(v["seed"])
+    wav = model.generate(text=text, prompt_wav_path=ref, prompt_text=ref_text, reference_wav_path=ref,
+                         cfg_value=2.0, inference_timesteps=10)
+    path = os.path.join(OUT, sound_name(key)[1] + ".ogg")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    sf.write(path, tidy(wav, rate), rate, format="OGG", subtype="VORBIS")
 
 
 if __name__ == "__main__":

@@ -3718,3 +3718,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
   objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
   - Compile-checked; not seen in game.
+- **0.17.189, tongue voices:** Kingdoms 0.7.346 gives every tongue a spoken greeting, farewell, cheer and scream heard by
+  players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
