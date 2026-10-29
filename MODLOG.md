@@ -3566,6 +3566,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
   kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
   clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
-- **0.17.149, vampires hunger among players (Kingdoms 0.7.322):** a vampire within 150 blocks of a mortal player or villager grows
+- **0.17.149, horse barding (Kingdoms 0.7.322):** armour is its own model now (chanfron with eye guards, lapped crinet
+  that hides the mane, peytral, flanchards, crupper) with rivets, trims and fluting, and horses have more pieces
+  (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
+  (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.
+  In the end Andy asked for vanilla-shaped horses until better models turn up: every breed is the classic horse
+  shape with Realistic Horse Genetics' coat patterns and segmented armour (plates over the vitals, joined by mail or cloth), plus a rare (1 in 100) moonlit
+  horse made from jsellier23's CC-BY Mystical Deer. See the Kingdoms MODLOG.
+- **0.17.150, vampires hunger among players (Kingdoms 0.7.323):** a vampire within 150 blocks of a mortal player or villager grows
   hungry and feverish, faster the closer they are; with one in sight, their screen pulses red and a heartbeat pounds,
   louder and quicker up close. See the Kingdoms MODLOG.

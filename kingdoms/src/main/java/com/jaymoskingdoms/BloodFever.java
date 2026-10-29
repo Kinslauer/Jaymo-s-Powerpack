@@ -77,7 +77,7 @@ public final class BloodFever {
 	static final int FRENZY_TICKS = 1200, FRENZY_STRENGTH = 0, FRENZY_SPEED = 0;
 	/** Surrender stages: bloodbound, ravenous, lost. */
 	static final int BLOODBOUND = 50, RAVENOUS = 75, LOST = 100;
-	/** (0.7.322) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
+	/** (0.7.323) Another mortal player, or one of the world's people, within this (blocks; Andy: "vampires should hunger when within 150
 	 * blocks of other players", and asked whether villagers count too, "yes"). */
 	static final double PLAYER_RANGE = 150.0;
 	/** A player that near: the fever's extra climb a second, and the hunger it costs (food exhaustion a second), at the range's edge and up close. */
@@ -97,7 +97,7 @@ public final class BloodFever {
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/**
-	 * (0.7.322) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
+	 * (0.7.323) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
 	 * vampire alone, whose screen pulses and ears pound with it ({@code BloodVision}). Not kept.
 	 */
 	public static final AttachmentType<Float> HEARTBEAT = AttachmentRegistry.create(JaymosKingdoms.id("blood_heartbeat"),
@@ -248,7 +248,7 @@ public final class BloodFever {
 	}
 
 	/**
-	 * (0.7.322) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
+	 * (0.7.323) Others near them: the nearest mortal player or person within {@link #PLAYER_RANGE} makes them hungry and the
 	 * fever climb, more the closer they are; the nearest one in their sight sets their {@link #HEARTBEAT}. Returns the
 	 * fever's extra climb this second.
 	 */

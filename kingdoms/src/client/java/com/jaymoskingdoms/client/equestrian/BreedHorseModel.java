@@ -34,16 +34,24 @@ import org.jspecify.annotations.Nullable;
  * hoof comes forward), the head, neck and mane together, the mouth opening to eat, the tail lifting with speed and
  * swishing, vanilla's rear and graze as blends, the saddle, stirrups, headstall and reins of a vanilla saddle; so the
  * tack ({@link TackLayer}) hangs on any build's bones. The pieces hung from the bones (forelock, mane, feathering...)
- * follow them. Texture 128x160 (coats drawn at twice that).
+ * follow them. Texture 128x192 (coats drawn at twice that). (0.7.322) Its barding is a model of its own on the same
+ * bones ({@link #createArmorLayer}): chanfron, crinet and crest, peytral, flanchards and crupper, shaped to each build
+ * (texture 128x64); while it's worn the mane and forelock lie hidden under it.
  */
 class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	private static final float DEG = Mth.DEG_TO_RAD;
 	/** The head's pitch at rest, reared and grazing. */
 	private static final float HEAD_TILT = 30.0F * DEG, HEAD_TILT_REARED = 15.0F * DEG, HEAD_TILT_GRAZING = 2.18166F;
-	/** The open mouth: the upper jaw lifts, the lower drops. */
-	private static final float UPPER_JAW_OPEN = -5.0F * DEG, LOWER_JAW_OPEN = 15.0F * DEG;
-	/** How long each upper leg is, to where the cannon hangs from it. */
-	private static final float THIGH = 7.0F;
+	/**
+	 * (0.7.322, a taller horse after SWEM's look) the legs are this much longer (the body, saddle, tail and wings sit that
+	 * much higher) and the neck this much longer (the head set out along it); as {@code LIFT} and {@code NECK} in
+	 * tools/horse_rig.py. Everything is posed as a change from each build's own rest pose (builds.json), so a build
+	 * brought in from Blockbench with other proportions moves the same way. (0.7.322, later) Both 0 while the horses are
+	 * the classic shape again (tools/horse_rig.py SIMPLE).
+	 */
+	static final float LIFT = 0.0F, NECK = 0.0F;
+	/** Where the head's pivot is at rest, looking level (the head is posed as a change from there). */
+	private static final float HEAD_REST_Y = 4.0F - LIFT - NECK * Mth.cos(HEAD_TILT), HEAD_REST_Z = -10.0F - NECK * Mth.sin(HEAD_TILT);
 	/** The mouth opens past this much of vanilla's feeding animation. */
 	private static final float MOUTH_OPEN = 0.3F;
 	/** How far a mane that falls over the neck swings out at a gallop (radians), and how fast it ripples. */
@@ -61,7 +69,13 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 
 	/** The builds, by name, as read from builds.json; and its texture size. */
 	private static final Map<String, List<Piece>> BUILDS = new LinkedHashMap<>();
-	private static int textureWidth = 128, textureHeight = 160;
+	private static int textureWidth = 128, textureHeight = 192;
+	/** (0.7.322) The barding's pieces on each build's bones, and their texture's size. */
+	private static final Map<String, List<Piece>> ARMOR = new LinkedHashMap<>();
+	private static int armorWidth = 128, armorHeight = 128;
+	/** (0.7.322) How far out each build's stirrups hang under barding: clear of its side plates. */
+	private static final Map<String, Float> STIRRUP_OUT = new HashMap<>();
+	private static final float STIRRUP_CLEAR = 0.6F;
 
 	private final Map<String, Rig> rigs = new HashMap<>();
 	private final @Nullable Rig fallback;
@@ -93,25 +107,48 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			JsonArray size = json.getAsJsonArray("texture_size");
 			textureWidth = size.get(0).getAsInt();
 			textureHeight = size.get(1).getAsInt();
+			if (json.has("armor_texture_size")) {
+				JsonArray armor = json.getAsJsonArray("armor_texture_size");
+				armorWidth = armor.get(0).getAsInt();
+				armorHeight = armor.get(1).getAsInt();
+			}
 			BUILDS.clear();
+			ARMOR.clear();
+			STIRRUP_OUT.clear();
 			for (Map.Entry<String, JsonElement> build : json.getAsJsonObject("builds").entrySet()) {
-				List<Piece> pieces = new ArrayList<>();
-				for (JsonElement e : build.getValue().getAsJsonObject().getAsJsonArray("parts")) {
-					JsonObject p = e.getAsJsonObject();
-					List<Box> boxes = new ArrayList<>();
-					for (JsonElement b : p.getAsJsonArray("cubes")) {
-						JsonObject c = b.getAsJsonObject();
-						JsonArray uv = c.getAsJsonArray("uv");
-						boxes.add(new Box(uv.get(0).getAsInt(), uv.get(1).getAsInt(), floats(c.getAsJsonArray("pos")), floats(c.getAsJsonArray("size")),
-							c.has("grow") ? c.get("grow").getAsFloat() : 0.0F));
+				JsonObject b = build.getValue().getAsJsonObject();
+				BUILDS.put(build.getKey(), pieces(b.getAsJsonArray("parts")));
+				if (b.has("armor")) {
+					List<Piece> armor = pieces(b.getAsJsonArray("armor"));
+					ARMOR.put(build.getKey(), armor);
+					for (Piece p : armor) {
+						// (the side plate, or a plain armour's body)
+						if ((p.name().equals("armor_flank_left") || p.name().equals("armor_body")) && !p.boxes().isEmpty()) {
+							Box box = p.boxes().get(0);
+							STIRRUP_OUT.put(build.getKey(), box.pos()[0] + box.size()[0] + box.grow() + STIRRUP_CLEAR);
+						}
 					}
-					pieces.add(new Piece(p.get("name").getAsString(), p.get("parent").getAsString(), floats(p.getAsJsonArray("pose")), boxes));
 				}
-				BUILDS.put(build.getKey(), pieces);
 			}
 		} catch (Exception e) {
 			JaymosKingdoms.LOGGER.error("Equestrian: couldn't read {}", path, e);
 		}
+	}
+
+	private static List<Piece> pieces(JsonArray parts) {
+		List<Piece> pieces = new ArrayList<>();
+		for (JsonElement e : parts) {
+			JsonObject p = e.getAsJsonObject();
+			List<Box> boxes = new ArrayList<>();
+			for (JsonElement b : p.getAsJsonArray("cubes")) {
+				JsonObject c = b.getAsJsonObject();
+				JsonArray uv = c.getAsJsonArray("uv");
+				boxes.add(new Box(uv.get(0).getAsInt(), uv.get(1).getAsInt(), floats(c.getAsJsonArray("pos")), floats(c.getAsJsonArray("size")),
+					c.has("grow") ? c.get("grow").getAsFloat() : 0.0F));
+			}
+			pieces.add(new Piece(p.get("name").getAsString(), p.get("parent").getAsString(), floats(p.getAsJsonArray("pose")), boxes));
+		}
+		return pieces;
 	}
 
 	private static float[] floats(JsonArray array) {
@@ -127,17 +164,22 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.0F), textureWidth, textureHeight);
 	}
 
-	/** Its armour: the same boxes, a little larger, for an overlay texture drawn over the coat. */
+	/** (0.7.322) Its barding: each build's bones carrying the barding's own pieces (until 0.7.305 a larger copy of the horse). */
 	static LayerDefinition createArmorLayer() {
-		return LayerDefinition.create(mesh(BUILDS.keySet(), true, 0.1F), textureWidth, textureHeight);
+		return LayerDefinition.create(mesh(BUILDS.keySet(), false, 0.0F, true), armorWidth, armorHeight);
 	}
 
 	/** One build's bones alone (no boxes), for {@link TackLayer} to hang its pieces on. */
 	static MeshDefinition bones() {
-		return mesh(List.of(TACK_BUILD), false, 0.0F);
+		return mesh(List.of(TACK_BUILD), false, 0.0F, false);
 	}
 
 	private static MeshDefinition mesh(Iterable<String> builds, boolean boxes, float grow) {
+		return mesh(builds, boxes, grow, false);
+	}
+
+	/** The builds' parts (with their boxes or bare), and with {@code armor} the barding's pieces hung on them. */
+	private static MeshDefinition mesh(Iterable<String> builds, boolean boxes, float grow, boolean armor) {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		for (String build : builds) {
@@ -147,21 +189,31 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			}
 			PartDefinition group = root.addOrReplaceChild(build, CubeListBuilder.create(), PartPose.ZERO);
 			Map<String, PartDefinition> parts = new HashMap<>();
-			for (Piece p : pieces) {
-				CubeListBuilder cubes = CubeListBuilder.create();
-				if (boxes) {
-					for (Box b : p.boxes()) {
-						cubes.texOffs(b.u(), b.v()).addBox(b.pos()[0], b.pos()[1], b.pos()[2], b.size()[0], b.size()[1], b.size()[2],
-							new CubeDeformation(b.grow() + grow));
-					}
-				}
-				float[] o = p.pose();
+			List<Piece> all = new ArrayList<>(pieces);
+			if (armor) {
+				all.addAll(ARMOR.getOrDefault(build, List.of()));
+			}
+			for (Piece p : all) {
+				boolean own = boxes || armor && p.name().startsWith("armor_");
 				PartDefinition parent = p.parent().isEmpty() ? group : parts.getOrDefault(p.parent(), group);
-				parts.put(p.name(), parent.addOrReplaceChild(p.name(), cubes,
-					PartPose.offsetAndRotation(o[0], o[1], o[2], o[3] * DEG, o[4] * DEG, o[5] * DEG)));
+				parts.put(p.name(), parent.addOrReplaceChild(p.name(), own ? cubes(p, grow) : CubeListBuilder.create(), pose(p)));
 			}
 		}
 		return mesh;
+	}
+
+	private static CubeListBuilder cubes(Piece p, float grow) {
+		CubeListBuilder cubes = CubeListBuilder.create();
+		for (Box b : p.boxes()) {
+			cubes.texOffs(b.u(), b.v()).addBox(b.pos()[0], b.pos()[1], b.pos()[2], b.size()[0], b.size()[1], b.size()[2],
+				new CubeDeformation(b.grow() + grow));
+		}
+		return cubes;
+	}
+
+	private static PartPose pose(Piece p) {
+		float[] o = p.pose();
+		return PartPose.offsetAndRotation(o[0], o[1], o[2], o[3] * DEG, o[4] * DEG, o[5] * DEG);
 	}
 
 	@Override
@@ -184,6 +236,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		final ModelPart headSaddle, saddle, saddleB, saddleC, stirrupLeft, stirrupLeftIron, stirrupRight, stirrupRightIron;
 		final ModelPart bitLeft, bitRight, reinLeft, reinRight;
 		final ModelPart[] headParts, saddleParts;
+		/** (0.7.322) The forelock's pieces (hidden under a chanfron). */
+		final List<ModelPart> forelock = new ArrayList<>();
 		/** The mane that falls over the neck, on the long-maned builds. */
 		final @Nullable ModelPart maneFlow;
 		/** The bat horse's wings. */
@@ -229,6 +283,11 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.reinLeft = g.getChild("rein_left");
 			this.reinRight = g.getChild("rein_right");
 			this.maneFlow = this.mane.hasChild("mane_flow") ? this.mane.getChild("mane_flow") : null;
+			for (String name : new String[] {"forelock", "forelock_tip"}) {
+				if (this.head.hasChild(name)) {
+					this.forelock.add(this.head.getChild(name));
+				}
+			}
 			boolean wings = g.hasChild("inner_wing");
 			this.innerWing = wings ? g.getChild("inner_wing") : null;
 			this.midWing = wings ? g.getChild("mid_wing") : null;
@@ -258,22 +317,27 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			}
 
 			// the head, neck, mane and ears: up when reared, down to the grass when grazing
-			float headY = 4.0F * rest + -6.0F * stand + 11.0F * graze;
-			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze;
+			// (where the neck meets the chest: the head's pivot is set out NECK along the neck from there; grazing, the
+			// taller horse reaches down as far as the old one did)
 			float headX = (HEAD_TILT + pitch) * rest + (HEAD_TILT_REARED + pitch) * stand + HEAD_TILT_GRAZING * graze;
-			float headYaw = yaw * (rest + stand);
 			headX += HEAD_DIP * state.headDip * rest;
+			float headY = (4.0F - LIFT) * rest + (-6.0F - LIFT) * stand + 11.0F * graze - NECK * Mth.cos(headX);
+			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze - NECK * Mth.sin(headX);
+			float headYaw = yaw * (rest + stand);
 			headY += HEAD_DIP_DROP * state.headDip * rest;
+			// (as changes from where the head rests: at rest and level it's where builds.json puts it)
+			float dY = headY - HEAD_REST_Y, dZ = headZ - HEAD_REST_Z, dX = headX - HEAD_TILT;
 			boolean open = state.feedingAnimation > MOUTH_OPEN;
 			for (ModelPart part : this.headParts) {
-				pose(part, headY, headZ, headX, headYaw);
+				PartPose o = part.getInitialPose();
+				pose(part, o.y() + dY, o.z() + dZ, o.xRot() + dX, o.yRot() + headYaw);
 			}
-			this.upperMouthOpen.xRot = headX + UPPER_JAW_OPEN;
-			this.lowerMouthOpen.xRot = headX + LOWER_JAW_OPEN;
 			this.upperMouth.visible = this.lowerMouth.visible = !open;
 			this.upperMouthOpen.visible = this.lowerMouthOpen.visible = open;
-			pose(this.reinLeft, headY, headZ, pitch, headYaw);
-			pose(this.reinRight, headY, headZ, pitch, headYaw);
+			for (ModelPart rein : new ModelPart[] {this.reinLeft, this.reinRight}) {
+				PartPose o = rein.getInitialPose();
+				pose(rein, o.y() + dY, o.z() + dZ, o.xRot() + pitch, o.yRot() + headYaw);
+			}
 			if (this.maneFlow != null) {
 				// the fallen mane lifts off the neck with speed, rippling
 				this.maneFlow.zRot = -MANE_SWAY * Math.min(1.0F, speed) * (0.6F + 0.4F * Mth.sin(ticks * MANE_RIPPLE));
@@ -281,7 +345,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 
 			// rearing: up on the hind legs
 			this.body.xRot = -45.0F * DEG * stand;
-			this.tailA.y = 3.0F + 6.0F * stand;
+			float tailUp = 6.0F * stand;
+			this.tailA.y = this.tailA.getInitialPose().y() + tailUp;
 
 			// the legs: walking, and reared (the forelegs paw the air, the hind legs fold under)
 			float rB = rLeg, lB = lLeg, rC = rLeg, lC = lLeg;
@@ -302,19 +367,22 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float rPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F + Mth.PI);
 			float lPaw = -60.0F * DEG + Mth.cos(ticks * 0.4F);
 			float pawBend = 45.0F * DEG, hindUpper = -15.0F * DEG, hindLower = 15.0F * DEG;
-			float frontY = Mth.lerp(stand, 9.0F, -2.0F), frontZ = Mth.lerp(stand, -8.0F, -2.0F);
-			this.leg3A.y = this.leg4A.y = frontY;
-			this.leg3A.z = this.leg4A.z = frontZ;
+			// reared, the forelegs come up and back under the chest
+			float frontY = -11.0F * stand, frontZ = 6.0F * stand;
+			for (ModelPart leg : new ModelPart[] {this.leg3A, this.leg4A}) {
+				leg.y = leg.getInitialPose().y() + frontY;
+				leg.z = leg.getInitialPose().z() + frontZ;
+			}
 			leg(this.leg1A, this.leg1B, this.leg1C, Mth.lerp(stand, lLeg, hindUpper), Mth.lerp(stand, lC, hindLower), lLeg, hindUpper, stand);
 			leg(this.leg2A, this.leg2B, this.leg2C, Mth.lerp(stand, rLeg, hindUpper), Mth.lerp(stand, rC, hindLower), rLeg, hindUpper, stand);
 			leg(this.leg3A, this.leg3B, this.leg3C, Mth.lerp(stand, rLeg, rPaw), Mth.lerp(stand, rB, pawBend), rLeg, rPaw, stand);
 			leg(this.leg4A, this.leg4B, this.leg4C, Mth.lerp(stand, lLeg, lPaw), Mth.lerp(stand, lB, pawBend), lLeg, lPaw, stand);
 
 			// the saddle sits back along the reared body; the stirrups swing unless someone's feet are in them
-			float saddleY = Mth.lerp(stand, 2.0F, 0.5F), saddleZ = Mth.lerp(stand, 2.0F, 11.0F);
+			float saddleY = -1.5F * stand, saddleZ = 9.0F * stand;
 			for (ModelPart part : this.saddleParts) {
-				part.y = saddleY;
-				part.z = saddleZ;
+				part.y = part.getInitialPose().y() + saddleY;
+				part.z = part.getInitialPose().z() + saddleZ;
 			}
 			this.saddle.xRot = this.saddleB.xRot = this.saddleC.xRot = this.body.xRot;
 			boolean ridden = state.isRidden;
@@ -323,6 +391,12 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.stirrupLeft.xRot = this.stirrupLeftIron.xRot = this.stirrupRight.xRot = this.stirrupRightIron.xRot = swingX;
 			this.stirrupLeft.zRot = this.stirrupLeftIron.zRot = swingZ;
 			this.stirrupRight.zRot = this.stirrupRightIron.zRot = -swingZ;
+			// (0.7.322) under barding they hang outside the side plates
+			Float out = state.armor != null ? STIRRUP_OUT.get(state.build) : null;
+			for (ModelPart part : new ModelPart[] {this.stirrupLeft, this.stirrupLeftIron, this.stirrupRight, this.stirrupRightIron}) {
+				float x = part.getInitialPose().x();
+				part.x = out == null ? x : Math.copySign(Math.max(Math.abs(x), out), x);
+			}
 
 			// the tail: hangs at rest, lifts as it goes faster, swishes now and then
 			float tailLift = Math.min(0.0F, -1.3089F + speed * 1.5F);
@@ -331,7 +405,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				tailYaw = Mth.cos(ticks * 0.7F);
 				tailLift = 0.0F;
 			}
-			this.tailB.y = this.tailC.y = this.tailA.y;
+			this.tailB.y = this.tailB.getInitialPose().y() + tailUp;
+			this.tailC.y = this.tailC.getInitialPose().y() + tailUp;
 			this.tailA.yRot = this.tailB.yRot = this.tailC.yRot = tailYaw;
 			this.tailA.xRot = this.tailB.xRot = tailLift;
 			this.tailC.xRot = -0.2618F + tailLift;
@@ -342,6 +417,12 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				part.visible = saddled;
 			}
 			this.headSaddle.visible = this.bitLeft.visible = this.bitRight.visible = state.headstall;
+			// (0.7.322) under barding the mane and forelock lie hidden beneath the crinet and chanfron
+			boolean barded = state.armor != null;
+			this.mane.visible = !barded;
+			for (ModelPart part : this.forelock) {
+				part.visible = !barded;
+			}
 			this.reinLeft.visible = this.reinRight.visible = state.headstall && ridden;
 			this.wings(state, walked, ticks, stand);
 		}
@@ -360,8 +441,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			if (!state.wings) {
 				return;
 			}
-			this.innerWing.y = stand > 0.5F ? -5.0F : 3.0F;
-			this.innerWing.z = stand > 0.5F ? 4.0F : -6.0F;
+			this.innerWing.y = this.innerWing.getInitialPose().y() + (stand > 0.5F ? -8.0F : 0.0F);
+			this.innerWing.z = this.innerWing.getInitialPose().z() + (stand > 0.5F ? 10.0F : 0.0F);
 			float wingRot = state.flapping ? Mth.cos(ticks * 0.3F + Mth.PI) * 1.2F : Mth.cos(walked * 0.5F) * 0.1F;
 			if (state.airborne) {
 				this.outerWing.yRot = -0.3228859F + wingRot / 2.0F;
@@ -398,8 +479,13 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 		private static void leg(ModelPart a, ModelPart b, ModelPart c, float upper, float lower, float walkAngle, float standAngle, float stand) {
 			a.xRot = upper;
 			float hang = Mth.lerp(stand, walkAngle, standAngle);
-			b.y = c.y = a.y + Mth.sin(90.0F * DEG + hang) * THIGH;
-			b.z = c.z = a.z + Mth.cos(270.0F * DEG + hang) * THIGH;
+			// the upper leg's length: from its pivot down to the cannon's, at rest
+			PartPose a0 = a.getInitialPose(), b0 = b.getInitialPose(), c0 = c.getInitialPose();
+			float thigh = b0.y() - a0.y();
+			b.y = a.y + Mth.sin(90.0F * DEG + hang) * thigh;
+			b.z = a.z + Mth.cos(270.0F * DEG + hang) * thigh + (b0.z() - a0.z());
+			c.y = b.y + (c0.y() - b0.y());
+			c.z = b.z + (c0.z() - b0.z());
 			b.xRot = c.xRot = lower;
 		}
 	}

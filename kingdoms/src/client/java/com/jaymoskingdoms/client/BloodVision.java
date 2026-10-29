@@ -26,7 +26,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
  * walls, beating in time. Starving, the beat quickens, the red deepens, and they smell blood from further off. Only
  * the vampire sees any of it. Undead, golems and armour stands have no blood to see.
  *
- * <p>(0.7.322) Another mortal player in their sight, up to 150 blocks off ({@link com.jaymoskingdoms.BloodFever#HEARTBEAT}),
+ * <p>(0.7.323) Another mortal player in their sight, up to 150 blocks off ({@link com.jaymoskingdoms.BloodFever#HEARTBEAT}),
  * beats for them day or night: the edges pulse red and a heartbeat pounds in their ears, louder and quicker the
  * closer the player is.
  */
