@@ -3625,6 +3625,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and third person, the ground, the inventory, item frames and shelves. The shapes and texture are unchanged; all four
   stages now take his transforms in place of ours (`tools/blockbench/sora.py` uses the file's display when it sets
   every slot). Not seen in game.
+- **0.17.164, no more lying in the suit on broken legs:** Andy (2026-10-29) was stuck on the ground in the symbiote suit
+  after a town's brawlers beat him down: the symbiote got him up, but two broken legs hold you to a crawl till a priest
+  sets them, and Jump did nothing, so he lay there (Creative didn't help either). Now the symbiote knits your bones as it
+  rescues you, and a bonded symbiote never leaves you crawling on broken legs: it binds them whole for 10 of its hunger
+  with a line (`WebSymbioteRescue.knit`, `Wounds.knitBones`; not when it's too weak to rescue you). And Jump stands you
+  up from any crawl the server holds that nothing keeps you in any more (`CrawlTaps`), as it does from a crawl of your
+  own. Built, not playtested.
 - **0.17.166, a third batch of Blockbench models (Kingdoms 0.7.336):** all CC BY 4.0, credited in
   `textures/entity/bb/CREDITS.txt` (both mods).
   - **Traveler Dagger** (polyjo) is the Armory's iron dagger's new 3D look (`tools/blockbench/traveler_dagger.py`).
