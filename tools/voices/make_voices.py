@@ -17,6 +17,7 @@ redesign a voice (then delete its clips too).
     python make_voices.py symbiote
     python make_voices.py symbiote --limit=3   # only the first few, to hear them
     python make_voices.py --resnarl=<folder>   # remake the symbiote's clips from gritted takes, no model
+    python make_voices.py --audition           # candidate symbiote voices, 5 lines each, into audition/
     python make_voices.py --sounds        # only rewrite sounds.json (no model needed)
 """
 import json
@@ -52,6 +53,21 @@ VOICES = {
                      desc="A deep, guttural, snarling monster voice, wet and raspy, growling and hissing through bared teeth, hungry and menacing, inhuman",
                      ref="We are hungry. Tear it open. Take what is ours, and feed us."),
 }
+# (2026-10-29) Andy: "the voice itself sounds too much like the wizards, it needs more snarl and twist like an evil lich
+# or swamp thing". Candidate symbiote voices for `--audition`: each designed on SYMBIOTE_REF, then made to say
+# AUDITION_LINES, roughened and snarled, into tools/voices/audition/<name>_<n>.ogg. The one Andy picks becomes "symbiote".
+SYMBIOTE_REF = "The wall is ours. Tear it open, and feed us. Nothing escapes us."
+AUDITION = {
+    "lich": dict(seed=81, desc="An ancient undead lich, a dry, rotten, rasping voice, cruel and sneering, hissing every s and "
+                               "drawing out every l, twisted and evil, inhuman"),
+    "swamp": dict(seed=82, desc="A huge swamp monster, a wet, bubbling, gurgling throat, slurred and twisted, deep and guttural, "
+                                "sneering, dragging out the ends of its words"),
+    "venom": dict(seed=83, desc="A twisted demonic creature, a raw, raspy, venomous snarl, spitting and hissing its s sounds, "
+                                "rolling its l sounds, mocking and cruel, inhuman"),
+    "rot": dict(seed=84, desc="A rotting, choking, croaking ghoul voice, deep and wet, slurring and hissing, sinister and hungry, "
+                              "inhuman and evil"),
+}
+AUDITION_LINES = ["The wall is ours.", "Tear it. Throw it.", "Hold on.", "Up. We pull.", "Out of the way."]
 # where each voice's clips go
 NAMESPACE = {"symbiote": "jaymospowers"}
 SYMBIOTE = "message.jaymospowers.web_symbiote."
@@ -142,6 +158,8 @@ def write_sounds(all_lines):
 # little more understandable")
 SNARL_STRETCH, SNARL_LEAD, SNARL_LEAD_GAIN = 1.3, 0.32, 0.6
 SNARL_DOUBLE, SNARL_RUMBLE, SNARL_HISS, SNARL_GRUNGE = 0.32, 0.9, 0.35, 0.6
+# and each word's end dragged out further, this much of it this many times (Andy: "The wallll is ourssss.")
+SNARL_TAIL, SNARL_TAIL_STRETCH = 0.35, 2.0
 
 
 def tsm(seg, k):
@@ -227,7 +245,9 @@ def snarl(wav, rate):
         if word.size < rate * 0.06:
             out.append(word)
             continue
-        word = tsm(word, SNARL_STRETCH).copy()
+        tail = int(word.size * SNARL_TAIL)
+        word = np.concatenate([tsm(word[:-tail], SNARL_STRETCH), tsm(word[-tail:], SNARL_STRETCH * SNARL_TAIL_STRETCH)]) \
+            if tail > 0 else tsm(word, SNARL_STRETCH).copy()
         growl = octave_down(tsm(word[:t_lead], SNARL_LEAD * rate / max(1, min(t_lead, word.size))))
         t = np.arange(growl.size) / rate
         growl = growl * (1.0 + 0.8 * np.sin(2 * np.pi * 29.0 * t) * (0.7 + 0.3 * np.sin(2 * np.pi * 5.1 * t)))
@@ -315,6 +335,9 @@ def main():
     write_sounds(all_lines)
     if "--sounds" in sys.argv:
         return
+    if "--audition" in sys.argv:
+        audition()
+        return
     for a in sys.argv[1:]:
         if a.startswith("--resnarl="):
             resnarl(a[len("--resnarl="):], all_lines)
@@ -341,6 +364,32 @@ def main():
     finally:
         # (Powers lists only the clips that exist, so list the new ones even if the run is stopped)
         write_sounds(all_lines)
+
+
+def audition():
+    """Each candidate symbiote voice says AUDITION_LINES, the way the symbiote's clips are made."""
+    import soundfile as sf
+    from voxcpm import VoxCPM
+    out = os.path.join(HERE, "audition")
+    os.makedirs(out, exist_ok=True)
+    os.makedirs(REFS, exist_ok=True)
+    model = VoxCPM.from_pretrained("openbmb/VoxCPM2", load_denoiser=False)
+    rate = model.tts_model.sample_rate
+    for name, v in AUDITION.items():
+        ref = os.path.join(REFS, "audition_" + name + ".wav")
+        if not os.path.exists(ref):
+            seeded(v["seed"])
+            wav = model.generate(text="(" + v["desc"] + ")" + SYMBIOTE_REF, cfg_value=2.0, inference_timesteps=10)
+            sf.write(ref, tidy(wav, rate), rate)
+        for n, text in enumerate(AUDITION_LINES, 1):
+            path = os.path.join(out, f"{name}_{n}.ogg")
+            if os.path.exists(path):
+                continue
+            seeded(v["seed"])
+            wav = model.generate(text=text, prompt_wav_path=ref, prompt_text=SYMBIOTE_REF, reference_wav_path=ref,
+                                 cfg_value=2.0, inference_timesteps=10)
+            sf.write(path, tidy(wav, rate, True, True), rate, format="OGG", subtype="VORBIS")
+            print("wrote", path)
 
 
 def resnarl(folder, all_lines):
