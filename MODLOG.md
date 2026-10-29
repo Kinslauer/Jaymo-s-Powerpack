@@ -3821,7 +3821,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   in the pack. No clash with our own screens: our container mixins are accessors and the horse labels, our inventory
   tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
   - Not built (the cloud can't reach Fabric's Maven); not seen in game.
-- **0.18.4, the downed rise on their own, and die to a real blow:** Andy: "while downed, any attack that would deal 3
+
+- **0.18.4, the Bio-built are shunned by every human kingdom (Kingdoms 0.7.357):** no mask hides one, even the
+  tolerant mind them, and Bio-built villagers are driven out of human towns within days. See the Kingdoms MODLOG.
+- **0.18.5, the downed rise on their own, and die to a real blow:** Andy: "while downed, any attack that would deal 3
   hearts or more of damage kills instantly, crippled mobs and players still work like before and if anyone goes down
   without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too wounded to get
   up shift will give up. the animation takes longer but animates them rising to their feet, and is interrupted after 2
@@ -3836,6 +3839,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - The rise is drawn (`CrawlPose`, synced `Downed.RISING`): pushed up on shaking arms, knees drawn under with a hand on
     one knee, then up onto their feet; vanilla's leftover swimming tilt is cancelled as they stand.
   - The same 2-hit rule now breaks off a revive (hold use on a downed one) and Second Wind's eating.
-  - Kingdoms 0.7.357's Will node **Unflinching** (2 ranks): each rank, one more hit before those held actions break off
+  - Kingdoms 0.7.358's Will node **Unflinching** (2 ranks): each rank, one more hit before those held actions break off
     (`WillSkill.holdHits`).
   - Built, not seen in game.

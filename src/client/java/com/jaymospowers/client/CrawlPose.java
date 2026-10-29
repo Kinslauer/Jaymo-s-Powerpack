@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * read as dragging rather than gliding. Sneak (held to give up) no longer flattens the upper body into the ground
  * (vanilla's crouch on a body lying flat): it plays the push-up struggle instead.
  * <p>
- * (0.18.4) Getting up by themselves ({@link Downed#RISING}): pushed up on straight arms, then the knees drawn under and a
+ * (0.18.5) Getting up by themselves ({@link Downed#RISING}): pushed up on straight arms, then the knees drawn under and a
  * hand on one knee, then up onto their feet, the whole body turned up off the ground about the feet till it stands. Once
  * up, the swimming tilt vanilla eases out over a few ticks is cancelled ({@link #RISEN_KEY}), so they don't pitch
  * forward again as they stand.
@@ -78,12 +78,12 @@ public final class CrawlPose {
 	/** Falling down: the jolt as the body hits (degrees), how fast it rings (per tick) and dies away (per tick). */
 	static final float FALL_JOLT = 7.0F, FALL_RING = 0.9F, FALL_DECAY = 0.25F;
 	/**
-	 * (0.18.4) Rising: the share of the rise spent pushing up, then kneeling (the rest is standing), how far the body is
+	 * (0.18.5) Rising: the share of the rise spent pushing up, then kneeling (the rest is standing), how far the body is
 	 * turned up by the end of each (degrees: 90 stands), the knees drawn under kneeling (radians), and the hand on the knee.
 	 */
 	static final float PUSH_SHARE = 0.3F, KNEEL_SHARE = 0.65F, PUSH_DEGREES = 25.0F, KNEEL_DEGREES = 60.0F, KNEEL_LEGS = -1.25F,
 		KNEE_HAND_X = -0.7F;
-	/** (0.18.4) How long after rising the leftover swimming tilt is cancelled (ticks). */
+	/** (0.18.5) How long after rising the leftover swimming tilt is cancelled (ticks). */
 	static final long RISEN_TICKS = 30L;
 	/** Passed out: the head turned to the side, the arms slack by the body. */
 	static final float OUT_HEAD_TURN = 1.1F, OUT_ARM_X = -0.35F, OUT_ARM_OUT = 0.25F;
@@ -99,9 +99,9 @@ public final class CrawlPose {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
-	/** (0.18.4) Just risen by themselves: vanilla's swimming tilt, still easing out, is cancelled. */
+	/** (0.18.5) Just risen by themselves: vanilla's swimming tilt, still easing out, is cancelled. */
 	static final RenderStateDataKey<Boolean> RISEN_KEY = RenderStateDataKey.create(() -> "jaymospowers:risen");
-	/** (0.18.4) Player entity id → the game time they were last seen nearly risen (client side). */
+	/** (0.18.5) Player entity id → the game time they were last seen nearly risen (client side). */
 	private static final Map<Integer, Long> RISEN = new HashMap<>();
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("crawl");
@@ -148,7 +148,7 @@ public final class CrawlPose {
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		State crawl = state.getData(KEY);
 		if (crawl == null && state.getData(RISEN_KEY) != null && state.swimAmount > 0.0F) {
-			// (0.18.4) up on their feet: vanilla's tilt (and its shift, while the pose lasts) undone as it eases out
+			// (0.18.5) up on their feet: vanilla's tilt (and its shift, while the pose lasts) undone as it eases out
 			if (state.isVisuallySwimming) {
 				poseStack.translate(0.0F, 1.0F, -0.3F);
 			}
@@ -159,7 +159,7 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl.rise() >= 0.0F) {
-			// (0.18.4) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
+			// (0.18.5) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
 			float up = PoseBlend.smooth(crawl.rise());
 			poseStack.translate(0.0F, up, -0.3F * up);
 			poseStack.rotateDegrees(Axis.XP, riseDegrees(crawl.rise()) + Mth.sin(crawl.age() * 2.3F) * 0.6F * (1.0F - crawl.rise()));
@@ -327,7 +327,7 @@ public final class CrawlPose {
 		f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, headRest, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 	}
 
-	/** (0.18.4) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
+	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
 	static float riseDegrees(float t) {
 		if (t < PUSH_SHARE) {
 			return PUSH_DEGREES * PoseBlend.smooth(t / PUSH_SHARE);
@@ -339,7 +339,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.18.4) Rising's limbs: arms pressed straight down under the shoulders, shaking; then the knees drawn under, a
+	 * (0.18.5) Rising's limbs: arms pressed straight down under the shoulders, shaking; then the knees drawn under, a
 	 * hand on the knee; then straightening, arms down by the sides. The head looks ahead, coming upright with the body.
 	 */
 	private static void rise(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {

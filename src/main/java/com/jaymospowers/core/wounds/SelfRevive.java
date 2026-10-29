@@ -107,7 +107,7 @@ public final class SelfRevive {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** (0.18.4) {@code player} took a hit: the {@code most}th breaks off their eating ({@link Downed}'s held actions). */
+	/** (0.18.5) {@code player} took a hit: the {@code most}th breaks off their eating ({@link Downed}'s held actions). */
 	static void struck(ServerPlayer player, int most) {
 		Eating e = EATING.get(player.getUUID());
 		if (e != null && ++e.hits >= most) {
