@@ -142,6 +142,9 @@ public final class WerewolfPlayers {
 			if (source.getEntity() instanceof ServerPlayer killer && beast(killer)) {
 				// (0.7.185) every kill takes more of them
 				FeralCurse.kill(killer, entity);
+				// (0.7.323) the night's tally, and the curse's asking
+				MorningAfter.kill(killer, entity);
+				CurseRequests.killed(killer);
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> end(handler.player, false));
@@ -367,6 +370,11 @@ public final class WerewolfPlayers {
 		}
 		FeralCurse.toreOut(player, f.forced && !f.wild, f.wild);
 		Lycans.tearFx(level, player);
+		// (0.7.323) what the change leaves behind and sets going: a scrap of their clothes, a locked room's cage, the night's tally
+		TornCloth.drop(level, player);
+		Caging.toreOut(level, player, f.forced);
+		MorningAfter.began(player, f.forced);
+		CurseRequests.changed(player);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) == null) {
 			health.addTransientModifier(new AttributeModifier(HEALTH, BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
@@ -437,6 +445,9 @@ public final class WerewolfPlayers {
 		if (f.beast != null) {
 			f.beast.discard();
 		}
+		// (0.7.323) the cage opens, and a night's dawn leaves its mark
+		Caging.end(player);
+		MorningAfter.ended(player, sick && f.forced && f.beast != null);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) != null) {
 			health.removeModifier(HEALTH);

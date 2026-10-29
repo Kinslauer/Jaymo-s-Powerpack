@@ -426,10 +426,20 @@ public final class JaymosKingdoms implements ModInitializer {
 		NightbornBlood.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
 		// drive you (their attachments)
-		LOGGER.debug("takeover attachments: {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL);
+		LOGGER.debug("takeover attachments: {} {} {} {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL,
+			MoonPull.HEARTBEAT, HiddenChange.TELLS, CurseRequests.ASK);
 		Seizures.register();
 		BloodFever.register();
 		FeralCurse.register();
+		// 0.7.323: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
+		// room, the morning after, torn cloth as evidence, and what the curse asks for
+		MoonPull.register();
+		ScentTrails.register();
+		HiddenChange.register();
+		Caging.register();
+		MorningAfter.register();
+		TornCloth.register();
+		CurseRequests.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();

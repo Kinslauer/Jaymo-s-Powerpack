@@ -117,6 +117,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BloodVision.register();
 		// 0.7.185: the blood fever's and the wolf's holds (they walk you; each key a heave against them)
 		SeizureClient.register();
+		// 0.7.323: a werewolf's own screen (mood, the moon's pull, the morning after), the scent trail, and the tells others can spot
+		WolfScreen.register();
+		ScentClient.register();
+		WolfTells.register();
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
