@@ -849,6 +849,7 @@
 	"entity.jaymoskingdoms.clockwork_golem": "Clockwork Golem",
 	"item.jaymoskingdoms.clockwork_golem": "Clockwork Golem",
 	"entity.jaymoskingdoms.clockwork_golem.rogue": "Rogue Clockwork Golem",
+	"message.jaymoskingdoms.clockwork_golem.wakes": "A clockwork remnant of the Aether unfolds. It wants you gone.",
 	"entity.jaymoskingdoms.cannonball": "Cannonball",
 	"entity.jaymoskingdoms.dynamite": "Dynamite",
 	"item.jaymoskingdoms.dynamite": "Dynamite",

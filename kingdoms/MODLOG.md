@@ -6441,5 +6441,9 @@ and overworld dungeons".
 - **Rogue golems** (`ClockworkGolem.makeRogue`, `GolemLairs`): 220 HP, 16 damage, armour 10, a boss bar; asleep folded
   until a player comes near; fight players (and whatever hurts them), not the dungeon's monsters; can't be mended; drop
   3-6 gold and a diamond 35% of the time. In 75% of Sentry Ruins (a side room, never the Slider's), 60% of strongholds
-  (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), and 15% of monster rooms
-  (looked at once when a player first comes within 48 blocks).
+  (Enderscape's too), 50% of trial chambers (placed at worldgen from `StructureStartMixin`), half of every other
+  dungeon, any mod's (a structure, not a village, with a monster or trial spawner: rolled once when a player first comes
+  within 48 blocks of a spawner), and 15% of monster rooms. Overworld and Aether only.
+- **Lore:** Andy: "they are a remnant from the aether, like the monoliths. only they want to keep you out." Waking, a
+  rogue warns the players near it; its lights burn red and glow in the dark (`clockwork_golem_rogue.png` and its
+  `_glow`, from `tools/gen_clockwork_golem.py`).

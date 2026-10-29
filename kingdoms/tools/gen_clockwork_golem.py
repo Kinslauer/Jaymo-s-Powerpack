@@ -50,8 +50,30 @@ def icon():
 	small.save(ASSETS + 'textures/item/clockwork_golem.png')
 
 
+def rogue_textures():
+	"""(0.7.330) A rogue golem's lights burn red: its lit texture with every light (what differs from the dark one) turned
+	red, and a glow texture holding only those lights, drawn bright in the dark."""
+	bb = ASSETS + 'textures/entity/bb/'
+	lit = Image.open(bb + 'clockwork_golem.png').convert('RGBA')
+	dark = Image.open(bb + 'clockwork_golem_1.png').convert('RGBA')
+	rogue = lit.copy()
+	glow = Image.new('RGBA', lit.size)
+	pl, pd, pr, pg = lit.load(), dark.load(), rogue.load(), glow.load()
+	for y in range(lit.height):
+		for x in range(lit.width):
+			if pl[x, y] != pd[x, y]:
+				r, g, b, a = pl[x, y]
+				bright = (r + g + b) / (3 * 255)
+				red = (255, int(40 * bright), int(24 * bright), a)
+				pr[x, y] = red
+				pg[x, y] = red
+	rogue.save(bb + 'clockwork_golem_rogue.png')
+	glow.save(bb + 'clockwork_golem_rogue_glow.png')
+
+
 def main():
 	icon()
+	rogue_textures()
 	write(ASSETS + 'items/clockwork_golem.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/clockwork_golem'}})
 	write(ASSETS + 'models/item/clockwork_golem.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': 'jaymoskingdoms:item/clockwork_golem'}})
 	# No grid recipe: it is made on Powers' infusion altar once the Golemancy research is known (read by Powers' loader).
