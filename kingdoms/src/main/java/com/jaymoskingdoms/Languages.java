@@ -160,12 +160,14 @@ public final class Languages {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			REMINDED.remove(handler.player.getUUID());
 			REMARKED.remove(handler.player.getUUID());
+			FAREWELLED.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FACTIONS.clear();
 			SPEAKERS.clear();
 			REMINDED.clear();
 			REMARKED.clear();
+			FAREWELLED.clear();
 		});
 	}
 
@@ -264,9 +266,15 @@ public final class Languages {
 		"no", net.minecraft.sounds.SoundEvents.VILLAGER_NO, "celebrate", net.minecraft.sounds.SoundEvents.VILLAGER_CELEBRATE,
 		"angry", net.minecraft.sounds.SoundEvents.VILLAGER_NO);
 
+	/** (0.7.348) A farewell is said to the same player at most this often (ticks), however often they open and shut the menu. */
+	static final int FAREWELL_GAP = 20 * 30;
+	/** Player -> when a foreign villager last bid them farewell (server tick). */
+	private static final Map<UUID, Integer> FAREWELLED = new HashMap<>();
+
 	/**
 	 * (0.7.61) ({@code EntityVoiceMixin}) A villager speaks a voice line: each player near hears the words only if they
-	 * understand the speaker ({@link #understands}); everyone else hears a grunt. True if it was played here.
+	 * understand the speaker ({@link #understands}); everyone else hears a grunt. (0.7.348) Or, for a hello, a cheer and a
+	 * scream, the line said in the speaker's own tongue ({@link Voices#tongue}). True if it was played here.
 	 */
 	public static boolean voice(Entity speaker, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
 		if (!(speaker instanceof Villager) || !(speaker.level() instanceof ServerLevel level) || speaker.isSilent()) {
@@ -276,8 +284,12 @@ public final class Languages {
 		if (key == null || !key.getNamespace().equals("mca") || !key.getPath().startsWith("villager.")) {
 			return false;
 		}
-		net.minecraft.sounds.SoundEvent grunt = GRUNTS.get(key.getPath().substring(key.getPath().lastIndexOf('.') + 1));
-		if (grunt == null || of(speaker) == null) {
+		String kind = key.getPath().substring(key.getPath().lastIndexOf('.') + 1);
+		net.minecraft.sounds.SoundEvent grunt = GRUNTS.get(kind);
+		Tongue t = of(speaker);
+		net.minecraft.core.@Nullable Holder<net.minecraft.sounds.SoundEvent> spoken = t == null ? null
+			: Voices.tongue(t, key.getPath().startsWith("villager.female."), kind);
+		if (t == null || (grunt == null && spoken == null)) {
 			return false;
 		}
 		double range = sound.getRange(volume);
@@ -286,12 +298,37 @@ public final class Languages {
 			if (p.distanceToSqr(speaker) > range * range) {
 				continue;
 			}
-			net.minecraft.sounds.SoundEvent heard = understands(p, speaker) ? sound : grunt;
-			p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
-				net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(heard), speaker.getSoundSource(),
+			// (their words; a line in their tongue; a grunt; or, with neither made yet, the words anyway)
+			net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> heard = understands(p, speaker) ? net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound)
+				: spoken != null ? spoken
+				: net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(grunt != null ? grunt : sound);
+			p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(heard, speaker.getSoundSource(),
 				speaker.getX(), speaker.getY(), speaker.getZ(), volume, pitch, seed));
 		}
 		return true;
+	}
+
+	/**
+	 * (0.7.348) ({@code McaCloseMixin}) {@code player} leaves the talk menu of {@code speaker}, a villager whose tongue they
+	 * don't speak: the villager bids them goodbye in it, in their own voice ({@code pitch}). Not while trading with them
+	 * (the menu shuts to open the trade), and not twice in {@link #FAREWELL_GAP}.
+	 */
+	public static void farewell(ServerPlayer player, Entity speaker, float pitch) {
+		if (!(speaker instanceof Villager v) || !(speaker.level() instanceof ServerLevel level) || speaker.isSilent() || !v.isAlive()
+			|| v.getTradingPlayer() == player || understands(player, speaker)) {
+			return;
+		}
+		Tongue t = of(speaker);
+		net.minecraft.core.@Nullable Holder<net.minecraft.sounds.SoundEvent> sound = t == null ? null
+			: Voices.tongue(t, McaCompat.female(v), "farewell");
+		int now = level.getServer().getTickCount();
+		Integer last = FAREWELLED.get(player.getUUID());
+		if (sound == null || (last != null && now - last < FAREWELL_GAP)) {
+			return;
+		}
+		FAREWELLED.put(player.getUUID(), now);
+		player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(sound, speaker.getSoundSource(),
+			speaker.getX(), speaker.getY(), speaker.getZ(), 1.0F, pitch, level.getRandom().nextLong()));
 	}
 
 	/** {@link #understands}, and if not, a reminder over the hotbar (now and then) that only simple things will do. */

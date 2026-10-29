@@ -737,5 +737,285 @@
 				"name": "jaymoskingdoms:voice/quiet/word_1"
 			}
 		]
+	},
+	"voice.tongue.common.male.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_male_greet"
+			}
+		]
+	},
+	"voice.tongue.common.male.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_male_farewell"
+			}
+		]
+	},
+	"voice.tongue.common.male.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_male_celebrate"
+			}
+		]
+	},
+	"voice.tongue.common.male.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_male_scream"
+			}
+		]
+	},
+	"voice.tongue.common.female.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_female_greet"
+			}
+		]
+	},
+	"voice.tongue.common.female.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_female_farewell"
+			}
+		]
+	},
+	"voice.tongue.common.female.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_female_celebrate"
+			}
+		]
+	},
+	"voice.tongue.common.female.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/common_female_scream"
+			}
+		]
+	},
+	"voice.tongue.northern.male.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_male_greet"
+			}
+		]
+	},
+	"voice.tongue.northern.male.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_male_farewell"
+			}
+		]
+	},
+	"voice.tongue.northern.male.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_male_celebrate"
+			}
+		]
+	},
+	"voice.tongue.northern.male.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_male_scream"
+			}
+		]
+	},
+	"voice.tongue.northern.female.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_female_greet"
+			}
+		]
+	},
+	"voice.tongue.northern.female.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_female_farewell"
+			}
+		]
+	},
+	"voice.tongue.northern.female.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_female_celebrate"
+			}
+		]
+	},
+	"voice.tongue.northern.female.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/northern_female_scream"
+			}
+		]
+	},
+	"voice.tongue.southern.male.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_male_greet"
+			}
+		]
+	},
+	"voice.tongue.southern.male.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_male_farewell"
+			}
+		]
+	},
+	"voice.tongue.southern.male.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_male_celebrate"
+			}
+		]
+	},
+	"voice.tongue.southern.male.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_male_scream"
+			}
+		]
+	},
+	"voice.tongue.southern.female.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_female_greet"
+			}
+		]
+	},
+	"voice.tongue.southern.female.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_female_farewell"
+			}
+		]
+	},
+	"voice.tongue.southern.female.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_female_celebrate"
+			}
+		]
+	},
+	"voice.tongue.southern.female.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/southern_female_scream"
+			}
+		]
+	},
+	"voice.tongue.wildwood.male.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_male_greet"
+			}
+		]
+	},
+	"voice.tongue.wildwood.male.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_male_farewell"
+			}
+		]
+	},
+	"voice.tongue.wildwood.male.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_male_celebrate"
+			}
+		]
+	},
+	"voice.tongue.wildwood.male.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_male_scream"
+			}
+		]
+	},
+	"voice.tongue.wildwood.female.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_female_greet"
+			}
+		]
+	},
+	"voice.tongue.wildwood.female.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_female_farewell"
+			}
+		]
+	},
+	"voice.tongue.wildwood.female.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_female_celebrate"
+			}
+		]
+	},
+	"voice.tongue.wildwood.female.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/wildwood_female_scream"
+			}
+		]
+	},
+	"voice.tongue.blossom.male.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_male_greet"
+			}
+		]
+	},
+	"voice.tongue.blossom.male.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_male_farewell"
+			}
+		]
+	},
+	"voice.tongue.blossom.male.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_male_celebrate"
+			}
+		]
+	},
+	"voice.tongue.blossom.male.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_male_scream"
+			}
+		]
+	},
+	"voice.tongue.blossom.female.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_female_greet"
+			}
+		]
+	},
+	"voice.tongue.blossom.female.farewell": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_female_farewell"
+			}
+		]
+	},
+	"voice.tongue.blossom.female.celebrate": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_female_celebrate"
+			}
+		]
+	},
+	"voice.tongue.blossom.female.scream": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/tongue/blossom_female_scream"
+			}
+		]
 	}
 }

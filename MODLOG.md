@@ -3747,3 +3747,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Tomecraft research (Enchanting, after Spellbinding) unlocks the spell tomes' infusion recipes.
   - The spell tomes are Kingdoms 0.7.347's.
   - Compile-checked only; not seen in game.
+- **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
+  players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.

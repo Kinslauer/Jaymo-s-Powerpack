@@ -58,7 +58,19 @@ public final class Voices {
 		}
 	}
 
+	/**
+	 * (0.7.348) Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you
+	 * dont speak it." What a villager says in their own tongue to someone who doesn't share it, each said by a man's voice
+	 * and a woman's: MCA's hello, cheer and scream ({@link Languages#voice}), and a goodbye when you leave their talk menu
+	 * ({@link Languages#farewell}). The words are in the lang file as {@code tongue.jaymoskingdoms.<tongue>.<line>}; the
+	 * sound is {@code voice.tongue.<tongue>.<male|female>.<line>}, registered only once its clip is in the jar (the script
+	 * lists only made clips in sounds.json too), so a line not yet recorded is a grunt, as before.
+	 */
+	public static final List<String> TONGUE_LINES = List.of("greet", "farewell", "celebrate", "scream");
+
 	private static final Map<String, Holder<SoundEvent>> SOUNDS = new HashMap<>();
+	/** (0.7.348) {@code <tongue>.<male|female>.<line>} -> its sound. */
+	private static final Map<String, Holder<SoundEvent>> TONGUES = new HashMap<>();
 
 	private Voices() {
 	}
@@ -90,7 +102,25 @@ public final class Voices {
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, soundPath(key));
 			SOUNDS.put(key, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
 		}
+		for (Languages.Tongue t : Languages.Tongue.values()) {
+			for (String gender : new String[] {"male", "female"}) {
+				for (String line : TONGUE_LINES) {
+					String rest = t.id() + "." + gender + "." + line;
+					if (Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/tongue/" + rest.replace('.', '_') + ".ogg") == null) {
+						// (not recorded yet: a grunt is heard instead, as before)
+						continue;
+					}
+					Identifier id = JaymosKingdoms.id("voice.tongue." + rest);
+					TONGUES.put(rest, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
+				}
+			}
+		}
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
+	}
+
+	/** (0.7.348) {@code line} ({@link #TONGUE_LINES}) said in {@code tongue} by a woman or a man; null for a line it has none of. */
+	public static @Nullable Holder<SoundEvent> tongue(Languages.Tongue tongue, boolean female, String line) {
+		return TONGUES.get(tongue.id() + "." + (female ? "female" : "male") + "." + line);
 	}
 
 	/** {@code story.jaymoskingdoms.born.title} -> {@code voice.narrator.born.title}; {@code spirit.jaymoskingdoms.varro.summon.1} -> {@code voice.varro.summon.1}. */

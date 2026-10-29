@@ -6595,3 +6595,20 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   - Omen pilots (Powers 0.17.195) are listed in `ZFighterFolk` so MCA gives them a talk option. Two time-lost story lines
     no longer say dying takes you home.
   - Compile-checked only; not seen in game.
+
+## 0.7.348: every tongue greets, waves off, cheers and screams in its own words (pack 0.17.197)
+- Andy: "a distinct greeting, farewell, celebration, and scream in every kingdom/biome's language when you dont speak
+  it". Each of the five tongues (Common, Northern, Southern, Wildwood, Blossom) has four made-up lines in the lang file
+  (`tongue.jaymoskingdoms.<tongue>.<greet|farewell|celebrate|scream>`), spoken by a man and a woman of that land
+  (`tools/voices/make_voices.py`: VoxCPM2 voices `<tongue>_male`/`_female`, designed on the tongue's own greeting and
+  farewell so the words keep its sound; 40 clips, each said in its mood).
+- **Heard:** an MCA villager's hello, cheer and death scream reach players who don't speak their tongue as that tongue's
+  line in the speaker's sex's voice (`Languages.voice`, where the grunts were; the grunt stays for yes/no/angry and for a
+  line not recorded yet). Those who understand them hear MCA's words as before.
+- **Farewell:** shutting a foreign villager's talk menu (`McaCloseMixin` on MCA's `InteractionCloseRequest`), they bid
+  you goodbye in their tongue, at their own voice pitch, to you alone, at most once every 30 s (`Languages.farewell`); not
+  when the menu shuts to open a trade.
+- `Voices` registers a tongue's sound only if its clip is in the jar, and the script lists only made clips in
+  sounds.json, so the feature grows as clips are generated and nothing is missing before then.
+  - All 40 clips generated on Andy's PC (2.2 MB); plumbing checked by eye against MCA's bytecode only, no game jars in
+    the cloud session; not seen in game.
