@@ -3822,5 +3822,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
   - Not built (the cloud can't reach Fabric's Maven); not seen in game.
 
-- **0.18.3, the Bio-built are shunned by every human kingdom (Kingdoms 0.7.356):** no mask hides one, even the
+- **0.18.4, the Bio-built are shunned by every human kingdom (Kingdoms 0.7.357):** no mask hides one, even the
   tolerant mind them, and Bio-built villagers are driven out of human towns within days. See the Kingdoms MODLOG.

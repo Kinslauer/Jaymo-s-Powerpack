@@ -145,6 +145,13 @@ final class StoryFigure {
 		scene("road.whalers", Act.USE, Items.TRIDENT, null, null, lc, null, lb);
 		scene("road.unarmed", Act.STAND, null);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
+		// (0.7.357) the other worlds' starts (0.7.349)
+		scene("road.moon", Act.WORK, Items.IRON_INGOT, null, null, null, null, null);
+		scene("road.verdant", Act.WALK, Items.VINE);
+		scene("road.rustfall", Act.WORK, Items.IRON_PICKAXE, null, null, null, ll, null);
+		scene("road.maw", Act.LOOK_UP, Items.CRYING_OBSIDIAN);
+		scene("road.demon", Act.SWING, null, null, null, null, null, null);
+		scene("road.afterlife", Act.LOOK_UP, Items.TOTEM_OF_UNDYING);
 	}
 
 	private static void jobs(String job, String... answers) {
@@ -194,8 +201,22 @@ final class StoryFigure {
 	 */
 	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender) {
+		draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, gender, false);
+	}
+
+	/**
+	 * (0.7.357) You yourself, after MCA's creator: your own body as the creator made it, playing {@code scene}; lent
+	 * heritage {@code kind}'s look {@code look} only for this draw (null: your own).
+	 */
+	static void drawYou(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
+		int x0, int y0, int x1, int y1) {
+		draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, -1, true);
+	}
+
+	private static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
+		int x0, int y0, int x1, int y1, int gender, boolean you) {
 		Scene sc = of(scene, icon);
-		LivingEntity target = McaCompat.LOADED ? McaStoryFigure.figure(player, kind, look, job(scene), gender) : null;
+		LivingEntity target = McaCompat.LOADED && !you ? McaStoryFigure.figure(player, kind, look, job(scene), gender) : null;
 		boolean standIn = target != null;
 		if (target == null) {
 			target = player;

@@ -75,7 +75,7 @@ public final class Emigrants {
 	/** The chance a day of leaving: restless anyone; for each degree their neighbours mind their blood (up to the cap). */
 	static final float RESTLESS = 0.003F, RIDICULE = 0.004F, RIDICULE_CAP = 0.06F;
 	/**
-	 * (0.7.356, Andy: the Bio-built are "repulsive to all human kingdoms. It is near impossible to live or find one living
+	 * (0.7.357, Andy: the Bio-built are "repulsive to all human kingdoms. It is near impossible to live or find one living
 	 * there") A Bio-built villager among humans who mind it is driven out this fast (the chance a day), whatever the cap.
 	 */
 	static final float BIO_DRIVEN = 0.35F;

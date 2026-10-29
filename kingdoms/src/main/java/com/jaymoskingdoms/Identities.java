@@ -286,7 +286,7 @@ public final class Identities {
 	static @Nullable String persona(ServerPlayer player, int faction) {
 		String key = key(player);
 		if (key == null || Prejudice.shows(player)) {
-			// ((0.7.356) no mask hides a Bio-built: they're known for what they are, and so for who)
+			// ((0.7.357) no mask hides a Bio-built: they're known for what they are, and so for who)
 			return null;
 		}
 		Identity id = get(player.level().getServer(), key);
@@ -646,7 +646,7 @@ public final class Identities {
 				noteName(server, cur, tagName(player));
 			}
 			// (0.7.101: MCA's villagers forget you only behind a full mask, not a hood)
-			// ((0.7.356) never a Bio-built's: Prejudice.shows)
+			// ((0.7.357) never a Bio-built's: Prejudice.shows)
 			String forgotten = Prejudice.shows(player) ? null : mask;
 			if (!java.util.Objects.equals(forgotten, player.getAttached(MASKED_AS))) {
 				if (forgotten == null) {
