@@ -16,7 +16,8 @@ import net.minecraft.network.chat.Component;
  * (0.17.62, Andy's NOEA picks) The space pod's star map, opened by right-clicking a pod: Home, the Pale Moon, Rustfall, Glacia, Cinder,
  * the Maw and the Verdant World, one button each with a line about the place or how its mission stands, and, on a planet with a
  * mission, a box to begin or give up the mission and the titles earned. Escape closes it. (0.18.2) The future is no longer on the
- * map, and off a mission planet the box is gone and the panel ends under the last row.
+ * map, and off a mission planet the box is gone and the panel ends under the last row. A pod in the future flies nowhere: every
+ * button is greyed and the map says only going back in time leads home.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int ROW = 20;
@@ -128,15 +129,15 @@ public class ZFighterStarMapScreen extends Screen {
 		int x = left();
 		int y = top();
 		UiStyle.panel(graphics, x, y, PANEL_W, panelH(), ACCENT);
-		UiStyle.header(graphics, this.font, x, y, PANEL_W, null, this.title, Component.translatable("screen.jaymospowers.zfighter_space.sub"), ACCENT, 0);
-		ZFighterSpaceMissions.Data data = ZFighterSpaceMissions.of(player);
 		ZFighterSpace.Dest here = ZFighterSpace.here(player.level());
 		boolean inFuture = here != null && here.level() == ZFighterSpace.DESTS[ZFighterSpace.FUTURE].level();
+		UiStyle.header(graphics, this.font, x, y, PANEL_W, null, this.title, Component.translatable(inFuture ? "screen.jaymospowers.zfighter_space.dead" : "screen.jaymospowers.zfighter_space.sub"), ACCENT, 0);
+		ZFighterSpaceMissions.Data data = ZFighterSpaceMissions.of(player);
 		for (int i = 0; i < this.buttons.size(); i++) {
 			int index = this.indices.get(i);
 			Button button = this.buttons.get(i);
 			boolean there = index != ZFighterSpace.HOME_INDEX && here == ZFighterSpace.DESTS[index];
-			button.active = index == ZFighterSpace.HOME_INDEX || (!there && !inFuture);
+			button.active = !inFuture && (index == ZFighterSpace.HOME_INDEX || !there);
 			int ry = y + UiStyle.HEADER + i * ROW;
 			Component text = index == ZFighterSpace.HOME_INDEX ? Component.translatable("space.jaymospowers.home.blurb") : status(index, data);
 			UiStyle.line(graphics, this.font, text, x + BUTTON_W + 14, ry + 5, PANEL_W - BUTTON_W - 22, there ? GOLD : UiStyle.DIM);

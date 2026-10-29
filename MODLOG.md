@@ -3824,6 +3824,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.18.2, the star map loses the future:** Andy asked to take "The Future" off the pod's star map and drop the line at
   the bottom ("No mission here..."). `ZFighterStarMapScreen` lists Home and the six worlds only, and off a mission planet
   (with no titles yet) the bottom box is gone and the panel ends under the last row. `ZFighterSpace.go` refuses the
-  future index, so only a pod already in the future (Lost in time) still flies, and only Home. The future dimension and
-  its other ways in are unchanged.
+  future index. Andy: a pod in the future flies nowhere, since every world it knows is dust a lifetime on; you have to go
+  back in time. Its star map greys every button and says so, `go` refuses there, and the pod's ways in and out of the
+  future (`Future.podGo/podBack/podReady`, the pod set down beside you) are gone. The future dimension and the Chrono
+  leap are unchanged.
   - Not built (the cloud can't reach Fabric's Maven); not seen in game.

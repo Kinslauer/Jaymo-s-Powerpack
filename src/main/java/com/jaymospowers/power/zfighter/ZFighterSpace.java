@@ -316,17 +316,18 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_cooldown", (next - now + 19) / 20).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		boolean inFuture = player.level().dimension() == DESTS[FUTURE].level();
+		if (player.level().dimension() == DESTS[FUTURE].level()) {
+			// (0.18.2, Andy) a lifetime on, every world the pod knows is dust: only going back in time leads home
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_future_dead").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		if (index == HOME_INDEX) {
 			// nothing to do if he is already where home is: the overworld with no trip taken
 		} else if (index == FUTURE) {
-			// (0.18.2) the future is off the star map; only the pod already in the future still flies (home)
+			// (0.18.2) the future is off the star map
 			return;
 		} else if (index < 0 || index >= DESTS.length || DESTS[index].level() == player.level().dimension()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_here").withStyle(ChatFormatting.GRAY));
-			return;
-		} else if (inFuture) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_future_only_home").withStyle(ChatFormatting.GRAY));
 			return;
 		} else if (server.getLevel(DESTS[index].level()) == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unreachable").withStyle(ChatFormatting.RED));
@@ -588,29 +589,14 @@ public final class ZFighterSpace {
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
-		boolean inFuture = from.dimension() == DESTS[FUTURE].level();
-		if (!far(from.dimension()) && !inFuture) {
+		if (!far(from.dimension()) && from.dimension() != DESTS[FUTURE].level()) {
 			player.setAttached(HOME, new Home(from.dimension().identifier().toString(), launch.pod));
 		}
 		if (launch.dest == HOME_INDEX) {
-			if (inFuture) {
-				Future.podBack(player);
-				landMessage(player, null);
-				return;
-			}
 			arriveHome(player, server);
 			return;
 		}
 		Dest dest = DESTS[launch.dest];
-		if (dest.kind() == Kind.FUTURE) {
-			// the leap remembers where he left from: back on the ground by the pod, not up in the lift
-			player.teleportTo(from, launch.origin.x, launch.origin.y, launch.origin.z, Set.of(), player.getYRot(), player.getXRot(), false);
-			if (Future.podGo(player)) {
-				podBeside(player);
-				landMessage(player, dest);
-			}
-			return;
-		}
 		ServerLevel to = server.getLevel(dest.level());
 		if (to == null) {
 			return;
@@ -784,22 +770,5 @@ public final class ZFighterSpace {
 			}
 		}
 		level.setBlock(spot, POD.defaultBlockState(), Block.UPDATE_ALL);
-	}
-
-	/** In the future: a pod on the ground close to where the leap set him down (best effort; the city is built, not generated). */
-	private static void podBeside(ServerPlayer player) {
-		ServerLevel level = player.level();
-		BlockPos at = player.blockPosition();
-		int[][] offsets = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}, {3, 1}, {-3, -1}, {1, 3}, {-1, -3}};
-		for (int[] offset : offsets) {
-			for (int dy = 2; dy >= -2; dy--) {
-				BlockPos spot = at.offset(offset[0], dy, offset[1]);
-				if (level.getBlockState(spot).isAir() && level.getBlockState(spot.above()).isAir() && level.getBlockState(spot.below()).isFaceSturdy(level, spot.below(),
-					net.minecraft.core.Direction.UP)) {
-					level.setBlock(spot, POD.defaultBlockState(), Block.UPDATE_ALL);
-					return;
-				}
-			}
-		}
 	}
 }
