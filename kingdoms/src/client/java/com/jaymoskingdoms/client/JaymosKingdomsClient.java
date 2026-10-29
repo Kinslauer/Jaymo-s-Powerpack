@@ -120,6 +120,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.323: the blood turns your head toward a player in sight; a torch-holder sees a vampire's shadow lag
 		BloodTurn.register();
 		HunterSense.register();
+		// 0.7.323: a werewolf's own screen (mood, the moon's pull, the morning after), the scent trail, and the tells others can spot
+		WolfScreen.register();
+		ScentClient.register();
+		WolfTells.register();
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
