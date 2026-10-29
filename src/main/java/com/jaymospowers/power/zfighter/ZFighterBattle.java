@@ -212,7 +212,7 @@ final class ZFighterBattle {
 			damage = ZFighterFusion.toughness(player, damage);
 			// (0.17.56) a Frost-born's ki-hardened body
 			damage = ZFighterFrostReserve.harden(player, source, damage);
-			// (0.17.139) a Rubber-folk's blows and falls bounce off
+			// (0.17.143) a Rubber-folk's blows and falls bounce off
 			damage = ZFighterRubberBody.bounce(player, source, damage);
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			damage = ZFighterGuard.guard(player, live, source, damage);

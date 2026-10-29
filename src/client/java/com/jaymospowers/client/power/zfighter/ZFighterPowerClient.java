@@ -101,7 +101,7 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterFormLooks.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
-				// (0.17.139) the halo of the dead, the Divine-born's ring
+				// (0.17.143) the halo of the dead, the Divine-born's ring
 				helper.register(new ZFighterHalo.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
