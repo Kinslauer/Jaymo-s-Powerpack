@@ -23,6 +23,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -37,9 +39,18 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -58,8 +69,13 @@ public final class StoryGround {
 	/**
 	 * (0.7.243) The first capital: a village at most this far from spawn (chunks), else a citadel by spawn. Andy's world
 	 * raised one in a village 900 blocks off, and making all that land at once stalled the server for nearly a minute.
+	 * (0.7.350) Really chunks now: findNearestMapStructure counted it in village spacings (24 of them, thousands of
+	 * blocks), and its search held a new player's join up for 20 s. 40 chunks still reaches the village Andy's last world
+	 * found (30 chunks out).
 	 */
-	static final int CAPITAL_VILLAGE_SEARCH = 24;
+	static final int CAPITAL_VILLAGE_SEARCH = 40;
+	/** (0.7.350) Time the capital's village search may take each tick (ms), so the server keeps ticking meanwhile. */
+	static final int VILLAGE_SEARCH_MS = 15;
 	/** A new barbarian camp: this far from spawn. */
 	static final int CAMP_MIN = 200, CAMP_MAX = 360;
 	/** A new monolith: this far from spawn, and the spots tried. */
@@ -87,6 +103,8 @@ public final class StoryGround {
 		final java.util.function.Consumer<ServerLevel> fallback;
 		final List<Runnable> then = new ArrayList<>();
 		final List<UUID> waiting = new ArrayList<>();
+		/** (0.7.350) The capital's village still being looked for (null: found, or not looked for). */
+		@Nullable VillageSearch search;
 
 		Job(BlockPos at, long giveUpAt, Predicate<ServerLevel> attempt, java.util.function.Consumer<ServerLevel> fallback) {
 			this.at = at;
@@ -125,6 +143,7 @@ public final class StoryGround {
 	}
 
 	static void register() {
+		ServerTickEvents.END_SERVER_TICK.register(StoryGround::searchVillages);
 		ServerTickEvents.END_SERVER_TICK.register(StoryGround::tick);
 		ServerTickEvents.END_SERVER_TICK.register(StoryGround::holds);
 		PayloadTypeRegistry.clientboundPlay().register(Hold.TYPE, Hold.CODEC);
@@ -174,13 +193,18 @@ public final class StoryGround {
 		}
 		ServerLevel level = Factions.level(server);
 		if (capital == null) {
-			BlockPos spawn = level.getRespawnData().pos();
-			BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, spawn, CAPITAL_VILLAGE_SEARCH, false);
-			BlockPos at = village != null ? village : spawn;
-			// (0.7.243) with no village near, the citadel goes up at the first try, not after waiting out the village's time
-			capital = new Job(at, level.getGameTime() + GIVE_UP_TICKS,
-				l -> village != null ? foundInVillage(l, village) : citadel(l, at) != null || !realmless(l.getServer()), l -> citadel(l, at));
-			JaymosKingdoms.LOGGER.info("No realm yet for a life story: raising a capital {}", village != null ? "in the village at " + village : "at spawn");
+			// (0.7.350) the village is looked for a few places a tick (searchVillages), not all at once on the join
+			VillageSearch search = new VillageSearch(level, level.getRespawnData().pos());
+			Job job = new Job(search.spawn, Long.MAX_VALUE, l -> {
+				if (job().search != null) {
+					return false;
+				}
+				// (0.7.243) with no village near, the citadel goes up at the first try, not after waiting out the village's time
+				BlockPos village = search.found;
+				return village != null ? foundInVillage(l, village) : citadel(l, job().at) != null || !realmless(l.getServer());
+			}, l -> citadel(l, job().at));
+			job.search = search;
+			capital = job;
 		}
 		if (waiting != null) {
 			capital.waiting.add(waiting.getUUID());
@@ -188,6 +212,122 @@ public final class StoryGround {
 		if (then != null) {
 			capital.then.add(then);
 		}
+	}
+
+	/** The capital's job, from inside its own tries (only ever run while it's set). */
+	private static Job job() {
+		return java.util.Objects.requireNonNull(capital);
+	}
+
+	/**
+	 * (0.7.350) Where the first capital's village might be: every village's possible starts within
+	 * {@link #CAPITAL_VILLAGE_SEARCH} chunks of spawn, nearest first, looked at for a few ms a tick. What vanilla's
+	 * findNearestMapStructure does, but bounded in chunks and spread over ticks.
+	 */
+	private static final class VillageSearch {
+		record Spot(Structure structure, StructurePlacement placement, ChunkPos chunk, int distance) {
+		}
+
+		final BlockPos spawn;
+		final List<Spot> spots = new ArrayList<>();
+		int next;
+		@Nullable BlockPos found;
+		final long startedAt = System.nanoTime();
+
+		VillageSearch(ServerLevel level, BlockPos spawn) {
+			this.spawn = spawn;
+			if (!level.structureManager().shouldGenerateStructures()) {
+				return;
+			}
+			Optional<HolderSet.Named<Structure>> villages = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(StructureTags.VILLAGE);
+			if (villages.isEmpty()) {
+				return;
+			}
+			ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
+			ChunkPos origin = ChunkPos.containing(spawn);
+			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
+			for (Holder<Structure> village : villages.get()) {
+				for (StructurePlacement placement : state.getPlacementsForStructure(village)) {
+					if (!(placement instanceof RandomSpreadStructurePlacement spread)) {
+						continue;
+					}
+					int spacing = spread.spacing();
+					int cells = CAPITAL_VILLAGE_SEARCH / spacing + 1;
+					for (int dx = -cells; dx <= cells; dx++) {
+						for (int dz = -cells; dz <= cells; dz++) {
+							ChunkPos chunk = spread.getPotentialStructureChunk(state.getLevelSeed(), origin.x() + dx * spacing, origin.z() + dz * spacing);
+							int distance = chunk.distanceSquared(origin);
+							if (distance <= reach) {
+								this.spots.add(new Spot(village.value(), placement, chunk, distance));
+							}
+						}
+					}
+				}
+			}
+			this.spots.sort(Comparator.comparingInt(Spot::distance));
+		}
+
+		/** Looks at spots till {@code budgetNanos} is used up; true once it's over (found, or none left). */
+		boolean step(ServerLevel level, long budgetNanos) {
+			long until = System.nanoTime() + budgetNanos;
+			while (this.next < this.spots.size()) {
+				Spot spot = this.spots.get(this.next++);
+				this.found = village(level, spot);
+				if (this.found != null) {
+					return true;
+				}
+				if (System.nanoTime() >= until) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/** Whether a village starts at {@code spot}, where vanilla's search would say (null: none). */
+		private static @Nullable BlockPos village(ServerLevel level, Spot spot) {
+			StructureManager structures = level.structureManager();
+			StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), spot.structure(), spot.placement(), false);
+			if (result == StructureCheckResult.START_PRESENT) {
+				return spot.placement().getLocatePos(spot.chunk());
+			}
+			if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
+				ChunkAccess chunk = level.getChunk(spot.chunk().x(), spot.chunk().z(), ChunkStatus.STRUCTURE_STARTS);
+				StructureStart start = structures.getStartForStructure(spot.structure(), chunk);
+				if (start != null && start.isValid()) {
+					return spot.placement().getLocatePos(start.getChunkPos());
+				}
+			}
+			return null;
+		}
+	}
+
+	/** (0.7.350) Each tick: a few ms more of the capital's village search, and the capital set going once it's over. */
+	private static void searchVillages(MinecraftServer server) {
+		Job job = capital;
+		if (job == null || job.search == null) {
+			return;
+		}
+		VillageSearch search = job.search;
+		ServerLevel level = Factions.level(server);
+		boolean over;
+		try {
+			over = search.step(level, VILLAGE_SEARCH_MS * 1_000_000L);
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("The first capital's village search failed; raising it at spawn", e);
+			search.found = null;
+			over = true;
+		}
+		if (!over) {
+			return;
+		}
+		job.search = null;
+		if (search.found != null) {
+			job.at = search.found;
+		}
+		job.giveUpAt = level.getGameTime() + GIVE_UP_TICKS;
+		JaymosKingdoms.LOGGER.info("No realm yet for a life story: raising a capital {} ({} of {} places looked at in {} ms)",
+			search.found != null ? "in the village at " + search.found : "at spawn", search.next, search.spots.size(),
+			(System.nanoTime() - search.startedAt) / 1_000_000L);
 	}
 
 	/** The village at {@code village} becomes a kingdom's capital, once it's loaded round its bell (false: not yet). */

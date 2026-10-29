@@ -3766,3 +3766,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - `ZFighterDemonRealm.raiseHome` builds or reuses the demon village nearest a spot; `ZFighterSpace.surface` is
     package-private for the moon.
   - Compile-checked only; not seen in game.
+- **0.17.199, faster loading (Kingdoms 0.7.350):** Andy asked whether FastNoiseLite would speed up load times. It
+  wouldn't: our dimensions are vanilla density-function JSON, so vanilla's noise code does that work, and swapping it
+  would change every world's terrain. His log showed where a new world's time goes instead: 60 s picking the spawn,
+  34 s of spawn chunks, then 20 s stuck between "logged in" and "joined" on Kingdoms' capital search. So:
+  - Kingdoms 0.7.350 looks for the first capital's village a few places a tick instead of all at once on the join.
+  - The pack now ships Lithium 0.26.3, FerriteCore 9.0.0 and C2ME 0.4.2-alpha.0.106 (26.3 builds, unchanged; not in
+    the CurseForge zip until their CurseForge ids are looked up). ModernFix has no 26.3 build.
+  - `core/StreamsPreset` sets Streams Reflowing's terrain accuracy from MEDIUM to LOW once per install (lighter stream
+    planning per new chunk). Its fast terrain mode is on by default already; Streams turns it off where it doesn't fit.
+  - Compile-checked only; not seen in game.
