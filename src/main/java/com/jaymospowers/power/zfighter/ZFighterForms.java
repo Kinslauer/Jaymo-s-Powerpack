@@ -101,10 +101,6 @@ public final class ZFighterForms {
 		ZFighterFalseSuper.tick(player, live);
 		ZFighterInstinct.tick(player, live);
 		ZFighterGoldenApe.tick(player, live);
-		if (live.form == ApeRage.PRIMAL_SUPER && player.tickCount % 20 == 0) {
-			// (0.17.190) time held here opens Super Primal Super
-			ApeRage.holdPrimal(player);
-		}
 		if (live.form == GOD && player.tickCount % 40 == 0 && !live.charging) {
 			ZFighterGod.glow(player);
 		}

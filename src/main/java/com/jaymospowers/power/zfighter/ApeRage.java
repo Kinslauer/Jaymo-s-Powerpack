@@ -45,8 +45,11 @@ import net.minecraft.world.entity.player.Player;
  *
  * <p>(0.17.190) Andy: "I want a prerequisite form to our current primal super". The fits now open {@link #PRIMAL_SUPER}
  * (Primal Super: the ape's fur and tail, Super 2's hair in his own villager's colour, a smooth aura, a little fire that
- * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super and is C
- * from Primal Super once he has held it {@link #SUPER_PRIMAL_HELD} seconds ({@link #HELD}).
+ * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super.
+ * <p>(0.17.191) Andy: "Super primal super can only be achieved now when a primal super user fuses with another z fighter
+ * warrior born. It deactivates regardless of remaining ki after the fusion ends." So it is C from Primal Super only while
+ * he steers a fused body whose other half is Warrior-born ({@link #fusedWithWarrior}), and the fusion ending (or the
+ * halfway swap taking him out of the body) drops him back to Primal Super ({@link #fusionEnded}).
  */
 public final class ApeRage {
 	/** Rage a second as the ape (times 1 + primal / {@code PRIMAL_RAGE_SCALE}), per point of damage taken, per kill, when crippled. */
@@ -73,8 +76,6 @@ public final class ApeRage {
 	public static final int PRIMAL_SUPER = 10;
 	/** Primal Super's aura: an ember orange, between Super 3's gold and Super Primal Super's red. */
 	public static final int PRIMAL_SUPER_COLOR = 0xF06A30;
-	/** Seconds held in Primal Super (ever, in total) before Super Primal Super opens. */
-	public static final int SUPER_PRIMAL_HELD = 300;
 	/** A fit shakes his screen: as it starts, and every this many ticks while it has him. */
 	static final float FIT_SHAKE = 2.2F, FIT_PULSE_SHAKE = 0.8F;
 	static final int FIT_PULSE_EVERY = 30;
@@ -92,9 +93,6 @@ public final class ApeRage {
 	/** Fits he's won, ever (saved, kept through death). */
 	public static final AttachmentType<Integer> TAMED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_tamed"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
-	/** Seconds he has held Primal Super, ever, up to {@link #SUPER_PRIMAL_HELD} (saved, kept through death, synced to him). */
-	public static final AttachmentType<Integer> HELD = AttachmentRegistry.create(JaymosPowers.id("zfighter_primal_held"),
-		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 	/** Primal Super is open to him (the fits; saved, kept through death, synced to him). Kept under Super 4's old id. */
 	public static final AttachmentType<Boolean> SUPER_4_OPEN = AttachmentRegistry.create(JaymosPowers.id("zfighter_super_4"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
@@ -171,14 +169,31 @@ public final class ApeRage {
 			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
 	}
 
-	/** (0.17.190) Super Primal Super is his to take now: Primal Super is, and he has held it long enough. */
+	/** (0.17.191) Super Primal Super is his to take now: Primal Super is, and he steers a fusion with another Warrior-born. */
 	public static boolean superPrimal(Player player) {
-		return super4(player) && held(player) >= SUPER_PRIMAL_HELD;
+		return super4(player) && fusedWithWarrior(player);
 	}
 
-	/** Seconds he has held Primal Super (capped at {@link #SUPER_PRIMAL_HELD}). */
-	public static int held(Player player) {
-		return player.getAttachedOrElse(HELD, 0);
+	/** He steers a fused body and the one inside it (the first, in a five-way) is Warrior-born. */
+	public static boolean fusedWithWarrior(Player player) {
+		ZFighterFusion.Look look = player.getAttached(ZFighterFusion.LOOK);
+		return look != null && look.innerLineage() == ZFighterLineage.WARRIOR;
+	}
+
+	/**
+	 * (0.17.191) His fusion ended, or he went inside at the halfway swap: Super Primal Super goes out whatever ki is left,
+	 * back to Primal Super (or his highest Super). Called before the caller's {@link ZFighterPower#refresh}.
+	 */
+	static void fusionEnded(ServerPlayer player, ZFighterPower.Live live) {
+		if (live.form != SUPER_4) {
+			return;
+		}
+		live.form = below(player, SUPER_4);
+		if (live.form <= 0) {
+			ZFighterPower.endSuper(player, live);
+			return;
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 0.7F);
 	}
 
 	/** The top of his regular line: Super Primal Super, Primal Super or his highest bought Super (at most Super 3). */
@@ -206,25 +221,6 @@ public final class ApeRage {
 		return Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
 	}
 
-	/** A second in Primal Super (from {@link ZFighterForms#tick}): at {@link #SUPER_PRIMAL_HELD}, Super Primal Super opens. */
-	static void holdPrimal(ServerPlayer player) {
-		int was = held(player);
-		if (was >= SUPER_PRIMAL_HELD) {
-			return;
-		}
-		player.setAttached(HELD, was + 1);
-		if (was + 1 >= SUPER_PRIMAL_HELD) {
-			ServerLevel level = player.level();
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 3.0F, 0.6F);
-			com.jaymospowers.core.Shakes.heavy(player, player.position(), ZFighterLineage.APE_STEP_RANGE, FIT_SHAKE);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_open").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
-		}
-	}
-
-	/** Operators: set the seconds held in Primal Super. */
-	static void setHeld(ServerPlayer player, int seconds) {
-		player.setAttached(HELD, Mth.clamp(seconds, 0, SUPER_PRIMAL_HELD));
-	}
 
 	/**
 	 * (0.17.91) Why Primal Super, though opened, isn't his to take now (a lang key), or null when it is or was never opened.
