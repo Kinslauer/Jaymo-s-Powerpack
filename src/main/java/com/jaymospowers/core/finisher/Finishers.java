@@ -122,7 +122,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.17.181) Andy: "add a smashing execution with a rock". A loose rock ({@code GroundRocks}) in the main hand plays
  * {@link Kind#ROCK}, everyone's (no Executioner: anyone can pick up a rock): down on a knee at their head, the off hand
- * pinning them, the rock brought down again and again, the last with both hands. The rock isn't spent or worn.
+ * pinning them, the rock brought down again and again, the last with both hands, which breaks it (one rock is used up).
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -872,6 +872,10 @@ public final class Finishers {
 			if (player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BlockItem rock) {
 				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, rock.getBlock().defaultBlockState()), x, y + 0.2, z, kill ? 16 : 8,
 					0.15, 0.1, 0.15, 0.1);
+			}
+			if (kill && !player.hasInfiniteMaterials()) {
+				// (0.17.181) Andy: "the rock is used up": it breaks on the last blow
+				player.getMainHandItem().shrink(1);
 			}
 		}
 		if (kind == Kind.SLAM || kind == Kind.IMPALE) {
