@@ -51,6 +51,12 @@ import org.jspecify.annotations.Nullable;
  * the client's {@code ReverentLayer} (no flat layer under it). Extraordinary: better than netherite, fireproof, and
  * never made. The only set in the world is the Visage of War's, the Aether guardian tree's boss in Jaymo's Powers,
  * which drops all four pieces when it falls. Mended with gold. Not one of {@link #SETS} either.
+ * <p>
+ * (0.7.339) And the <b>Heavenly Mantle</b>, the Reverent Warplate's pair: white and gold plate under a crown of horns,
+ * feathered wings folded down the back. eanncrod's model (Blockbench Workshop, CC BY 4.0), drawn by {@code ReverentLayer}
+ * the same way. Never made: one piece is given to each champion of the tournament of the dead in the afterlife (Jaymo's
+ * Powers' Other World), the crown first, then the mantle, the greaves and the sabatons. A little lighter than the
+ * warplate, quicker to take enchantments. Mended with gold.
  */
 public final class Armory {
 	/** Each set's numbers: durability multiplier, defence (boots, leggings, chest, helmet), enchantability, toughness, knockback resistance. */
@@ -66,6 +72,10 @@ public final class Armory {
 	static final ArmorMaterial REVERENT = material("reverent", 45, 4, 7, 9, 4, 22, SoundEvents.ARMOR_EQUIP_NETHERITE, 4.0F, 0.15F, ItemTags.REPAIRS_GOLD_ARMOR);
 	/** The Reverent Warplate's pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> REVERENT_PIECES = new LinkedHashMap<>();
+	/** (0.7.339) The Heavenly Mantle: netherite's defence, tougher, longer-lasting, the quickest to take enchantments. */
+	static final ArmorMaterial HEAVENLY = material("heavenly", 42, 3, 6, 8, 3, 25, SoundEvents.ARMOR_EQUIP_GOLD, 3.5F, 0.1F, ItemTags.REPAIRS_GOLD_ARMOR);
+	/** The Heavenly Mantle's pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> HEAVENLY_PIECES = new LinkedHashMap<>();
 	/** (Smithing) The steel plate pieces by {@link ArmorType}. */
 	public static final Map<ArmorType, Item> STEEL_PLATE_PIECES = new LinkedHashMap<>();
 	/** The sets by name, each its pieces by {@link ArmorType} (helmet, chestplate, leggings, boots). */
@@ -91,6 +101,7 @@ public final class Armory {
 		register("warlord", WARLORD, all);
 		STEEL_PLATE_PIECES.putAll(pieces("steel_plate", STEEL_PLATE, all));
 		REVERENT_PIECES.putAll(pieces("reverent", REVERENT, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
+		HEAVENLY_PIECES.putAll(pieces("heavenly", HEAVENLY, all, properties -> properties.rarity(Rarity.EPIC).fireResistant()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
 			for (Item item : all) {

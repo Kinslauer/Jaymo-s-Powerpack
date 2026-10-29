@@ -3632,3 +3632,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with a line (`WebSymbioteRescue.knit`, `Wounds.knitBones`; not when it's too weak to rescue you). And Jump stands you
   up from any crawl the server holds that nothing keeps you in any more (`CrawlTaps`), as it does from a crawl of your
   own. Built, not playtested.
+- **0.17.169, a third batch of Blockbench models (Kingdoms 0.7.339):** all CC BY 4.0, credited in
+  `textures/entity/bb/CREDITS.txt` (both mods).
+  - **Traveler Dagger** (polyjo) is the Armory's iron dagger's new 3D look (`tools/blockbench/traveler_dagger.py`).
+  - **Dreaded Blade** (capellastudio): Andy, "replace the arsenal's relic weapons with one of these". It is the Nether
+    relic once called the Soul Saber (same id `soul_saber`, same life steal and soul-fire slash), now named the Dreaded
+    Blade and drawn as the black sword with its green runes animated at full light (`tools/blockbench/dreaded_blade.py`).
+    The flat Soul Saber icon is gone (`gen_relics.py` and `vanilla_style/powers.py` skip it).
+  - **Thief Armor** (eanncrod): Andy, "add it to the costumes no bonus, useful for hiding as a thief or assassin same as
+    the cowl". The Costume Table's **Thief's Leathers** cut (`Cut.THIEF`, its own cubes in `CostumeModels.thief` on a
+    128-square sheet) and **Thief's Hood** (`Mask.THIEF_HOOD`, a hood like the peaked hood: `isHood`, face showing, no
+    bonus). Both dyeable; `tools/blockbench/thief_costume.py` splits the texture into the two dye masks.
+  - **Heavenly Mantle** (eanncrod): each champion of the tournament of the dead (the afterlife's ring) is given the
+    next piece he lacks, crown first (`ZFighterAfterlife.heavenlyPiece`, tags `jaymospowers.heavenly.*`). The armour is
+    Kingdoms'.
+  - Not seen in game.
+- **0.17.169, Sora's Dagger parries:** Andy, "sora's dagger should be able to parry". Every stage takes the weapon guard
+  (`Guard`): right click raises it, with the perfect parry and parry windows. From the diamond stage a wind's right
+  click is still the Flurry while it's ready, and the guard while it cools down, as the warhammer's smash does. The
+  Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
+  hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.

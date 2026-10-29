@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -25,8 +26,10 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +49,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.illager.Vindicator;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -125,6 +129,8 @@ public final class ZFighterAfterlife {
 	public static final float TRAINING_BONUS = 1.5F;
 	/** The tournament: bouts, the TP of each (times the round), the spirit fighters' health and the damage each round adds. */
 	static final int ROUNDS = 3;
+	/** (0.17.169) The Heavenly Mantle's pieces (Jaymo's Kingdoms' items), one to each champion in this order. */
+	static final String[] HEAVENLY = {"heavenly_helmet", "heavenly_chestplate", "heavenly_leggings", "heavenly_boots"};
 	static final int ROUND_TP = 60;
 	static final double SPIRIT_HEALTH = 60.0;
 	static final double SPIRIT_HEALTH_PER_ROUND = 30.0;
@@ -644,12 +650,38 @@ public final class ZFighterAfterlife {
 			if (gauntlet.round >= ROUNDS) {
 				player.setAttached(CHAMPION, true);
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_ring_champion").withStyle(ChatFormatting.GOLD));
+				heavenlyPiece(player);
 				world.playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
 				it.remove();
 				continue;
 			}
 			gauntlet.round++;
 			spawnSpirit(world, player, gauntlet);
+		}
+	}
+
+	/**
+	 * (0.17.169, with Jaymo's Kingdoms) A champion's prize: the next piece of the Heavenly Mantle he hasn't been given yet
+	 * ({@link #HEAVENLY}, in that order, each marked on him by a tag), until he has all four.
+	 */
+	private static void heavenlyPiece(ServerPlayer player) {
+		for (String piece : HEAVENLY) {
+			String tag = "jaymospowers.heavenly." + piece;
+			if (player.entityTags().contains(tag)) {
+				continue;
+			}
+			Optional<Item> item = BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymoskingdoms", piece));
+			if (item.isEmpty()) {
+				return;
+			}
+			player.addTag(tag);
+			ItemStack stack = new ItemStack(item.get());
+			if (!player.getInventory().add(stack)) {
+				player.spawnAtLocation(player.level(), stack);
+			}
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_heavenly", stack.getHoverName())
+				.withStyle(ChatFormatting.GOLD));
+			return;
 		}
 	}
 

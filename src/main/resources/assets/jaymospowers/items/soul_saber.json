@@ -1,6 +1,6 @@
 {
-  "model": {
-    "type": "minecraft:model",
-    "model": "jaymospowers:item/soul_saber"
-  }
+	"model": {
+		"type": "minecraft:model",
+		"model": "jaymospowers:item/soul_saber"
+	}
 }

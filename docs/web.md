@@ -1805,7 +1805,7 @@ entity data holds what it keeps; scene state is per session).
   craters only hold goo, so only meteor blobs rampage.
 - **Debug:** `/powerdebug web symbiote life consume | warn <1-4> | misfire <0-3> | rampage`.
 
-## The X radial reworked: one Suit button (0.17.165)
+## The X radial reworked: one Suit button (0.17.170)
 Andy: "can you rework the symbiote X radial UI? It's a bit cluttered, and the living armour can be condensed to a
 suit button that activates your large suit once you hit max bond."
 - **One Suit tile** at the top of the ring (`WebSymbioteScreen.RING`, ability index `ARMOR`), in place of the Living

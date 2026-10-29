@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -18,6 +19,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +28,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -45,6 +48,7 @@ import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -99,6 +103,10 @@ public final class SorasDagger extends Item {
 	}
 
 	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
+	/** (0.17.169) The Flurry's cooldown group (not the dagger's own, so the guard stays up), and a stack that reads it. */
+	static final Identifier FLURRY_GROUP = JaymosPowers.id("soras_flurry");
+	private static final ItemStack FLURRY_PROBE = Util.make(new ItemStack(Items.STICK),
+		probe -> probe.set(DataComponents.USE_COOLDOWN, new UseCooldown(1.0F, Optional.of(FLURRY_GROUP))));
 
 	public final int stage;
 
@@ -169,30 +177,35 @@ public final class SorasDagger extends Item {
 		}
 	}
 
+	/**
+	 * (0.17.169) Andy: "sora's dagger should be able to parry." Every stage takes the weapon guard ({@link Guard}): right
+	 * click raises it. From the diamond stage, a wind's right click is the Flurry while it's ready, and the guard while
+	 * it cools down (as the warhammer's smash), so the cooldown is kept on its own group ({@link #FLURRY_GROUP}): an item
+	 * cooldown on the dagger would stop it being raised at all.
+	 */
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (this.stage < DIAMOND || hand != InteractionHand.MAIN_HAND) {
-			return InteractionResult.PASS;
+			return super.use(level, player, hand);
+		}
+		boolean forging = this.stage == DIAMOND && player.isShiftKeyDown();
+		boolean flurry = !forging && wind(player) && !player.getCooldowns().isOnCooldown(FLURRY_PROBE) && !FLURRIES.containsKey(player.getUUID());
+		if (!forging && !flurry) {
+			// the guard (only a wind can call up the Flurry, and not while it cools down)
+			return super.use(level, player, hand);
 		}
 		if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) {
 			return InteractionResult.SUCCESS;
 		}
-		if (this.stage == DIAMOND && player.isShiftKeyDown()) {
+		if (forging) {
 			forge(serverPlayer, serverLevel, stack);
 			return InteractionResult.SUCCESS;
-		}
-		if (!wind(serverPlayer)) {
-			// only a wind can call up the Flurry
-			return InteractionResult.PASS;
-		}
-		if (player.getCooldowns().isOnCooldown(stack) || FLURRIES.containsKey(player.getUUID())) {
-			return InteractionResult.FAIL;
 		}
 		boolean wind = this.stage == TEMPEST;
 		int slashes = wind ? FLURRY_SLASHES_WIND : this.stage == TEMPEST ? FLURRY_SLASHES_TEMPEST : FLURRY_SLASHES;
 		FLURRIES.put(player.getUUID(), new Flurry(serverLevel, player.getUUID(), this.stage, wind, slashes, 0));
-		player.getCooldowns().addCooldown(stack, WindCold.cooldown(player, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN));
+		player.getCooldowns().addCooldown(FLURRY_GROUP, WindCold.cooldown(player, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN));
 		serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), wind ? SoundEvents.BREEZE_CHARGE : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, 0.9F, 1.3F);
 		return InteractionResult.SUCCESS;
