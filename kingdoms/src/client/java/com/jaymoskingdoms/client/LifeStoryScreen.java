@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * this life" seals it. It can't be shut; the answers so far are kept if something else closes it. (0.7.275) "On second
  * thought..." asks whether to skip the story: yes picks every answer at random and turns to the story page, where it
  * can still be changed.
- * (0.7.357) Andy: "this screen should scroll from left to right ... a larger image of the icon beside a larger image of
+ * (0.7.356) Andy: "this screen should scroll from left to right ... a larger image of the icon beside a larger image of
  * your character in their scenario, built out with all their customizations. I also want this screen to come after the
  * Creator". The road (where you start) is a carousel: one start at a time, its picture large beside you acting it out
  * on a backdrop of that place, stepped through with the arrows, the wheel, the keys or the strip of starts under it.
@@ -66,7 +66,7 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.282) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
 	/**
-	 * (0.7.357) The road's carousel: the arrows' width, the strip of starts under the stage (its height and a cell's
+	 * (0.7.356) The road's carousel: the arrows' width, the strip of starts under the stage (its height and a cell's
 	 * width), the big picture's well and scale, the text column's share of the stage, and how long a turn slides (ms)
 	 * and how far (pixels).
 	 */
@@ -103,7 +103,7 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
-	/** (0.7.357) The carousel's last turn: when, and which way (-1 back, 1 on). */
+	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
 	private long slidAt;
 	private int slideDir;
 	private int scroll, contentH, viewH;
@@ -112,7 +112,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
 	private static boolean owed;
-	/** (0.7.357) MCA's creator comes after this screen: the story stops short of the road, told after the creator. */
+	/** (0.7.356) MCA's creator comes after this screen: the story stops short of the road, told after the creator. */
 	private static boolean creatorAhead;
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
@@ -170,7 +170,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * Whether the story is told: it came back from the server. (0.7.357) Told up to the road with MCA's creator to come,
+	 * Whether the story is told: it came back from the server. (0.7.356) Told up to the road with MCA's creator to come,
 	 * this screen is done till the creator is; after it, only once the road is told too.
 	 */
 	private static boolean done() {
@@ -179,7 +179,7 @@ final class LifeStoryScreen extends Screen {
 		return story != null && (creatorAhead || !LifeStory.roadOwed(story));
 	}
 
-	/** (0.7.357) Whether only the road is left to tell (the rest was told before MCA's creator). */
+	/** (0.7.356) Whether only the road is left to tell (the rest was told before MCA's creator). */
 	private static boolean roadOnly() {
 		Minecraft minecraft = Minecraft.getInstance();
 		return minecraft.player != null && LifeStory.roadOwed(LifeStory.of(minecraft.player));
@@ -207,7 +207,7 @@ final class LifeStoryScreen extends Screen {
 	/** The pages as the answers so far make them: each question asked, a realm page after an answer that names one, then the story. */
 	private static List<Step> steps() {
 		List<Step> out = new ArrayList<>();
-		// (0.7.357) after MCA's creator: the road, and the realm it names
+		// (0.7.356) after MCA's creator: the road, and the realm it names
 		if (roadOnly()) {
 			out.add(new Step(Question.ROAD, false, false));
 			Answer a = picked(Question.ROAD);
@@ -221,7 +221,7 @@ final class LifeStoryScreen extends Screen {
 			out.add(Step.GENDER);
 		}
 		for (Question q : Question.values()) {
-			// (0.7.357) the road waits for MCA's creator when it's still to come
+			// (0.7.356) the road waits for MCA's creator when it's still to come
 			if (!q.asked() || q == Question.ROAD && creatorAhead) {
 				continue;
 			}
@@ -243,7 +243,7 @@ final class LifeStoryScreen extends Screen {
 
 	private static @Nullable Answer picked(Question q) {
 		int i = draft.answers[q.ordinal()];
-		// (0.7.357) on the road alone, the rest is the story told before MCA's creator
+		// (0.7.356) on the road alone, the rest is the story told before MCA's creator
 		Minecraft minecraft = Minecraft.getInstance();
 		if (i < 0 && q != Question.ROAD && minecraft.player != null && roadOnly()) {
 			return LifeStory.answer(minecraft.player, q);
@@ -295,7 +295,7 @@ final class LifeStoryScreen extends Screen {
 		if (s.realm) {
 			return realmOf(s.question) >= 0;
 		}
-		// (0.7.357) the carousel shows every road, open or not: only an open one goes on
+		// (0.7.356) the carousel shows every road, open or not: only an open one goes on
 		Answer a = picked(s.question);
 		return a != null && (s.question != Question.ROAD || open(a));
 	}
@@ -312,7 +312,7 @@ final class LifeStoryScreen extends Screen {
 		return storyHeritage();
 	}
 
-	/** (0.7.357) Your heritage as the story told before MCA's creator made it (null before then). */
+	/** (0.7.356) Your heritage as the story told before MCA's creator made it (null before then). */
 	private static Heritage.@Nullable Kind told() {
 		Minecraft minecraft = Minecraft.getInstance();
 		return minecraft.player != null && roadOnly() ? Heritage.of(minecraft.player) : null;
@@ -325,7 +325,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** (0.7.349) The heritage the birthplace gives, whatever the road makes of it. */
 	private static Heritage.@Nullable Kind bornAs() {
-		// (0.7.357) after MCA's creator, the heritage already yours (the server checks the Verdant World's road against it)
+		// (0.7.356) after MCA's creator, the heritage already yours (the server checks the Verdant World's road against it)
 		if (told() != null) {
 			return told();
 		}
@@ -463,7 +463,7 @@ final class LifeStoryScreen extends Screen {
 		// question pages it sits where the story page's look button does
 		this.skip = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip"), b -> this.asking = true)
 			.bounds(left() + 6, y, TELL_W - 12, 16).build());
-		// (0.7.357) the road's carousel: a turn back and a turn on, either side of the stage
+		// (0.7.356) the road's carousel: a turn back and a turn on, either side of the stage
 		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
 		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
 		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
@@ -590,7 +590,7 @@ final class LifeStoryScreen extends Screen {
 		if (!answered(s)) {
 			return;
 		}
-		// (0.7.357) after MCA's creator: the road's last page sets out
+		// (0.7.356) after MCA's creator: the road's last page sets out
 		if (roadOnly()) {
 			if (draft.step < steps().size() - 1) {
 				draft.step++;
@@ -720,7 +720,7 @@ final class LifeStoryScreen extends Screen {
 		if (this.asking) {
 			return true;
 		}
-		// (0.7.357) the wheel turns the carousel
+		// (0.7.356) the wheel turns the carousel
 		if (carousel(step()) && scrollY != 0) {
 			turn(scrollY > 0 ? -1 : 1);
 			return true;
@@ -734,7 +734,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		// (0.7.357) left and right (or A and D) turn the carousel
+		// (0.7.356) left and right (or A and D) turn the carousel
 		if (!this.asking && carousel(step())) {
 			int key = event.key();
 			if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
@@ -795,7 +795,7 @@ final class LifeStoryScreen extends Screen {
 		}
 
 		if (this.next != null) {
-			// (0.7.357) with MCA's creator to come the story's page leads on to it; after it, the road's last page sets out
+			// (0.7.356) with MCA's creator to come the story's page leads on to it; after it, the road's last page sets out
 			boolean last = draft.step >= steps().size() - 1;
 			String label = roadOnly() ? last ? "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next"
 				: s.summary() ? creatorAhead ? "gui.jaymoskingdoms.story.creator" : "gui.jaymoskingdoms.story.live" : "gui.jaymoskingdoms.story.next";
@@ -878,10 +878,10 @@ final class LifeStoryScreen extends Screen {
 		tell(graphics, s, mouseX, mouseY);
 	}
 
-	// ---- the road's carousel (0.7.357) -------------------------------------------------------------------------------
+	// ---- the road's carousel (0.7.356) -------------------------------------------------------------------------------
 
 	/**
-	 * (0.7.357) Each start's backdrop behind the figure: the sky's top and foot, and the ground (ARGB), by road key. A
+	 * (0.7.356) Each start's backdrop behind the figure: the sky's top and foot, and the ground (ARGB), by road key. A
 	 * start without one stands on a dusk road.
 	 */
 	static final java.util.Map<String, int[]> BACKDROPS = java.util.Map.ofEntries(
@@ -909,18 +909,18 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("fate", new int[] {0xFF0A0A2A, 0xFF4A2A7A, 0xFF2A2A3A}));
 	static final int[] DUSK = {0xFF2A2A4A, 0xFF8A6A6A, 0xFF4A4A3A};
 
-	/** (0.7.357) Whether page {@code s} is the road's carousel (not the realm it names). */
+	/** (0.7.356) Whether page {@code s} is the road's carousel (not the realm it names). */
 	private static boolean carousel(Step s) {
 		return s.question == Question.ROAD && !s.realm;
 	}
 
-	/** (0.7.357) Turns the carousel one start back ({@code -1}) or on ({@code 1}), wrapping. */
+	/** (0.7.356) Turns the carousel one start back ({@code -1}) or on ({@code 1}), wrapping. */
 	private void turn(int dir) {
 		int n = Question.ROAD.answers().size(), cur = draft.answers[Question.ROAD.ordinal()];
 		pickRoad(cur < 0 ? (dir > 0 ? 0 : n - 1) : Math.floorMod(cur + dir, n), dir);
 	}
 
-	/** (0.7.357) Shows (and picks, if it's open) road {@code i}, sliding in from {@code dir}'s side. */
+	/** (0.7.356) Shows (and picks, if it's open) road {@code i}, sliding in from {@code dir}'s side. */
 	private void pickRoad(int i, int dir) {
 		Answer a = Question.ROAD.answers().get(i);
 		draft.answers[Question.ROAD.ordinal()] = i;
@@ -934,7 +934,7 @@ final class LifeStoryScreen extends Screen {
 		click();
 	}
 
-	/** (0.7.357) The strip's first cell's left edge: centred when it fits, else scrolled to keep the shown start in the middle. */
+	/** (0.7.356) The strip's first cell's left edge: centred when it fits, else scrolled to keep the shown start in the middle. */
 	private int stripStart() {
 		int n = Question.ROAD.answers().size(), view = panelW() - 16, total = n * CELL_W;
 		if (total <= view) {
@@ -948,7 +948,7 @@ final class LifeStoryScreen extends Screen {
 		return top() + panelH() - FOOTER - STRIP_H;
 	}
 
-	/** (0.7.357) The strip's cell under the mouse, or -1. */
+	/** (0.7.356) The strip's cell under the mouse, or -1. */
 	private int cellAt(int mx, int my) {
 		int y = stripY();
 		if (my < y || my >= y + STRIP_H - 4 || mx < left() + 8 || mx >= left() + panelW() - 8) {
@@ -959,7 +959,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.357) The road, one start at a time: its picture large on the left over its name, its line of your past and
+	 * (0.7.356) The road, one start at a time: its picture large on the left over its name, its line of your past and
 	 * what it gives; you on the right acting it out on a backdrop of the place; the strip of every start under them.
 	 */
 	private void carouselPage(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -1048,7 +1048,7 @@ final class LifeStoryScreen extends Screen {
 		graphics.disableScissor();
 	}
 
-	/** (0.7.357) Why an answer can't be picked here. */
+	/** (0.7.356) Why an answer can't be picked here. */
 	private static net.minecraft.network.chat.MutableComponent reason(Answer a) {
 		return !a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
 			: a.onlyFor() != null && bornAs() != a.onlyFor()
@@ -1499,7 +1499,7 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
-		// (0.7.357) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
+		// (0.7.356) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
 		if (roadOnly()) {
 			Answer road = picked(Question.ROAD);
 			StoryFigure.drawYou(graphics, player, road != null ? road.makes() : null, look, scene, icon, x0, y0, x1, y1);

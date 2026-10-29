@@ -334,10 +334,10 @@ public final class LifeStory {
 	 */
 	public static final AttachmentType<String> STRANDED = AttachmentRegistry.create(JaymosKingdoms.id("story_stranded"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath());
-	/** (0.7.357) The calling (the power) a story told before MCA's creator keeps for its road. Saved, kept through death. */
+	/** (0.7.356) The calling (the power) a story told before MCA's creator keeps for its road. Saved, kept through death. */
 	public static final AttachmentType<String> CALLING = AttachmentRegistry.create(JaymosKingdoms.id("story_calling"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath());
-	/** (0.7.357) Players asked for their road since they joined. */
+	/** (0.7.356) Players asked for their road since they joined. */
 	private static final Set<java.util.UUID> ROAD_ASKED = new java.util.HashSet<>();
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
 	private static final Set<java.util.UUID> DEPARTED = new java.util.HashSet<>();
@@ -348,7 +348,7 @@ public final class LifeStory {
 
 	/**
 	 * Server → player: tell your story (the screen opens; {@code forced}: it can't be shut), with the realms there are to
-	 * name. (0.7.357) {@code creatorAhead}: MCA's creator comes next, so the story stops short of the road ({@link Road}).
+	 * name. (0.7.356) {@code creatorAhead}: MCA's creator comes next, so the story stops short of the road ({@link Road}).
 	 */
 	public record Open(boolean forced, List<Realm> realms, boolean creatorAhead) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("story_open"));
@@ -416,7 +416,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.357) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
+	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
 	 * road makes you (the afterlife's).
 	 */
@@ -524,33 +524,33 @@ public final class LifeStory {
 		return untold(player) || roadOwed(player);
 	}
 
-	/** (0.7.357) Whether nothing of {@code player}'s story is told yet. */
+	/** (0.7.356) Whether nothing of {@code player}'s story is told yet. */
 	static boolean untold(ServerPlayer player) {
 		return of(player) == null && Heritage.of(player) == null && Classes.classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE);
 	}
 
 	/**
-	 * (0.7.357) Andy: "I want this screen to come after the Creator". Whether {@code player} told their story up to the
+	 * (0.7.356) Andy: "I want this screen to come after the Creator". Whether {@code player} told their story up to the
 	 * road before MCA's creator, and still owes the road (its answer "" till then).
 	 */
 	static boolean roadOwed(ServerPlayer player) {
 		return roadOwed(of(player)) && ServerPlayNetworking.canSend(player, Open.TYPE);
 	}
 
-	/** (0.7.357) Once MCA's creator is done, the road is asked (once; again on a new body or a rejoin). From {@link StoryStasis}. */
+	/** (0.7.356) Once MCA's creator is done, the road is asked (once; again on a new body or a rejoin). From {@link StoryStasis}. */
 	static void askRoad(ServerPlayer player) {
 		if (roadOwed(player) && !McaCompat.destinyPending(player) && !ROAD_ASKED.contains(player.getUUID())) {
 			ask(player, true);
 		}
 	}
 
-	/** (0.7.357) Whether {@code story} is told up to the road, and the road not yet. */
+	/** (0.7.356) Whether {@code story} is told up to the road, and the road not yet. */
 	public static boolean roadOwed(@Nullable List<String> story) {
 		return story != null && story.size() > Question.ROAD.ordinal() && story.get(Question.ROAD.ordinal()).isEmpty();
 	}
 
 	/**
-	 * Opens the story screen for {@code player}, with the realms of the world to name. (0.7.357) With MCA's creator still
+	 * Opens the story screen for {@code player}, with the realms of the world to name. (0.7.356) With MCA's creator still
 	 * to come, the story stops short of the road, which is asked once the creator is done.
 	 */
 	static void ask(ServerPlayer player, boolean forced) {
@@ -635,7 +635,7 @@ public final class LifeStory {
 		MinecraftServer server = player.level().getServer();
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
 			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers());
-		// (0.7.357) with MCA's creator still to come, the road is told after it ({@link #road})
+		// (0.7.356) with MCA's creator still to come, the road is told after it ({@link #road})
 		boolean later = road == null && McaCompat.destinyPending(player);
 		if (born == null || raised == null || child == null || youth == null || road == null && !later || powers() && turn == null
 			|| road != null && !road.offered()) {
@@ -694,7 +694,7 @@ public final class LifeStory {
 		}
 
 		if (road == null) {
-			// (0.7.357) the calling kept for the road, told after MCA's creator
+			// (0.7.356) the calling kept for the road, told after MCA's creator
 			player.setAttached(CALLING, power);
 			return;
 		}
@@ -710,7 +710,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.357) From the road screen after MCA's creator: where the story starts. The Verdant World's road is still the
+	 * (0.7.356) From the road screen after MCA's creator: where the story starts. The Verdant World's road is still the
 	 * Verdant-born's alone, and the afterlife's still makes you Divine-born.
 	 */
 	private static void road(ServerPlayer player, Road payload) {

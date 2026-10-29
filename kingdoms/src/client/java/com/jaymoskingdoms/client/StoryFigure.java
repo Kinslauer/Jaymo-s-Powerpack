@@ -145,7 +145,7 @@ final class StoryFigure {
 		scene("road.whalers", Act.USE, Items.TRIDENT, null, null, lc, null, lb);
 		scene("road.unarmed", Act.STAND, null);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
-		// (0.7.357) the other worlds' starts (0.7.349)
+		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.IRON_INGOT, null, null, null, null, null);
 		scene("road.verdant", Act.WALK, Items.VINE);
 		scene("road.rustfall", Act.WORK, Items.IRON_PICKAXE, null, null, null, ll, null);
@@ -205,7 +205,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * (0.7.357) You yourself, after MCA's creator: your own body as the creator made it, playing {@code scene}; lent
+	 * (0.7.356) You yourself, after MCA's creator: your own body as the creator made it, playing {@code scene}; lent
 	 * heritage {@code kind}'s look {@code look} only for this draw (null: your own).
 	 */
 	static void drawYou(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,

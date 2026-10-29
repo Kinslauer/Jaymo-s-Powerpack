@@ -40,7 +40,7 @@ final class StoryCurtain {
 				|| screen instanceof StoryHoldScreen
 				// (0.7.304) told, still in stasis till they're set down at their start: black, but for MCA's creator
 				|| minecraft.player.hasAttached(LifeStory.ROAD) && !isCreator(screen)
-				// (0.7.357) the road still to tell after MCA's creator: black till its screen is up
+				// (0.7.356) the road still to tell after MCA's creator: black till its screen is up
 				|| LifeStory.roadOwed(LifeStory.of(minecraft.player)) && !isCreator(screen)) {
 				up = true;
 				lastHeld = now;

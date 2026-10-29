@@ -77,7 +77,7 @@ public final class StoryStasis {
 			if (LifeStory.departing(player) && !LifeStory.owed(player) && !McaCompat.destinyPending(player)) {
 				LifeStory.depart(player);
 			}
-			// (0.7.357) the road, told after MCA's creator
+			// (0.7.356) the road, told after MCA's creator
 			LifeStory.askRoad(player);
 			Held held = HELD.get(player.getUUID());
 			if (!owed(player)) {
