@@ -250,10 +250,11 @@ def pack(sizes, columns=None):
     return pos, (atlas_w, y + row_h)
 
 
-def build_atlas(textures, columns=None):
+def build_atlas(textures, columns=None, layout=None):
     """Merges the model's textures into one image. Returns (image, [(x, y) of each], function (texture index, [u, v...]) ->
-    UVs in the atlas, in the sixteenths a Java model counts in)."""
-    pos, (aw, ah) = pack([img.size for img, _, _, _ in textures], columns)
+    UVs in the atlas, in the sixteenths a Java model counts in). layout = ([(x, y) of each], (width, height)) to place them
+    by hand instead of in a grid or shelves."""
+    pos, (aw, ah) = layout if layout else pack([img.size for img, _, _, _ in textures], columns)
     atlas = Image.new("RGBA", (aw, ah), (0, 0, 0, 0))
     for (img, _, _, _), (x, y) in zip(textures, pos):
         atlas.paste(img, (x, y))
@@ -269,12 +270,36 @@ def build_atlas(textures, columns=None):
     return atlas, pos, uv
 
 
-def texture_index(bb, texture_id):
-    """The position in the file's texture list of the texture a face names (faces name a texture's id)."""
-    for i, tex in enumerate(bb["textures"]):
-        if str(tex.get("id", i)) == str(texture_id):
-            return i
-    raise KeyError(texture_id)
+def texture_index(bb, texture):
+    """The position in the file's texture list of the texture a face names (a face's "texture" is an index into the list,
+    whatever the textures' own ids say)."""
+    return int(texture)
+
+
+def convert_cubes(bb, atlas_uv, shift=(0, 0, 0), scale=1.0, spin=None, texture=None):
+    """Every cube of the model as legal elements, its faces' UVs put into the atlas (texture: a texture index to use for every
+    face instead of the face's own). Faces with no texture or no area are left out. Returns (elements, worst tilt error)."""
+    elements, worst = [], 0.0
+    for el, chain in flatten(bb):
+        new, mapping, err = bake_cube(el["from"], el["to"], chain, shift=shift, scale=scale, spin=spin)
+        worst = max(worst, err)
+        faces = {}
+        for name, (new_name, k) in mapping.items():
+            face = el["faces"][name]
+            if face.get("texture") is None:
+                continue
+            u0, v0, u1, v1 = face["uv"]
+            if u0 == u1 or v0 == v1:
+                continue
+            index = texture if texture is not None else texture_index(bb, face["texture"])
+            entry = {"uv": atlas_uv(index, face["uv"]), "texture": "#0"}
+            if k:
+                entry["rotation"] = uv_rotation(k)
+            faces[new_name] = entry
+        if faces:
+            new["faces"] = faces
+            elements.append(new)
+    return elements, worst
 
 
 def write_json(path, obj):
