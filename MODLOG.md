@@ -3813,3 +3813,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (0.92), each line's pitch wandering a little. A line is voiced when Powers' `sounds.json` lists it, which the script writes
   from the clips it has made; its moods' `mood.say.*` variants are text only for now.
   - Not seen in game.
+- **0.18.0, Mouse Tweaks and ClientSort:** Andy asked for both. Each has a Fabric build for 26.3 and joins `packMods`
+  unchanged, downloaded by id with its CurseForge ids: Mouse Tweaks 26.3-2.31 (BSD-3-Clause, YaLTeR; CurseForge 60089,
+  file 8887995), client-only, for drag-spreading, shift-dragging and scrolling items between slots; ClientSort
+  3.104.1+26.3 (Apache-2.0, TerminalMC; CurseForge 1049891, file 8978806), which sorts an inventory on a middle click
+  or its button and adds fill-stacks, restock and transfer. ClientSort needs Cloth Config and Mod Menu, both already
+  in the pack. No clash with our own screens: our container mixins are accessors and the horse labels, our inventory
+  tabs sit outside the panel's left edge, and middle mouse (lock-on) only acts with no screen open.
+  - Not built (the cloud can't reach Fabric's Maven); not seen in game.
