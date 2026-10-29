@@ -6696,3 +6696,19 @@ server refuses it for any other heritage. `onlyFor` keeps answering null for ans
   Banished is the old list. Scenes added for the six other-world starts.
 - Still Verdant-only and Divine-making checks on the road, now against the heritage already set.
 - Compile-checked. Not seen in game.
+## 0.7.357: the Bio-built are repulsive to every human kingdom, and can't hide it (pack 0.18.4)
+Andy: "the bio built is unable to hide and is actually repulsive to all human kingdoms. It is near impossible to live or
+find one living there."
+- **Furthest from human** (`Prejudice.BIOBUILT`, degree 6, past the Tideborn's 4): in human towns, prices are 36% higher,
+  good name comes about half as fast and goes about half again as fast, guards halt you four times as often,
+  townsfolk shrink from you, and they mutter their own lines about the vat things (`prejudice.jaymoskingdoms.bio.*`).
+  MCA's chat AI is told they find you repulsive.
+- **Even the tolerant** (kindhearted, cheerful, devout, MCA's warm) mind a Bio-built, at half (`BIO_TOLERANT`). Other
+  non-humans and the havens take them like any other blood.
+- **Can't hide:** a full mask hides no Bio-built's blood (`Prejudice.masked`/`shows`), and doesn't make them a stranger
+  either (`Identities.persona` is null for them; MCA's villagers don't forget them behind it).
+- **Not living there:** a Bio-built villager among humans who mind it is driven out at 35% a day (`Emigrants.BIO_DRIVEN`,
+  past the usual ridicule cap), so one is rarely found in a human town for long. They are still only ever born to their
+  own (never rolled).
+- Heritage card: "Shunned" line for the Bio-built, and the flaw says so.
+- Compile-checked against 26.3 with javac (changed files); not seen in game.
