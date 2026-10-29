@@ -7,6 +7,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -239,5 +242,24 @@ final class Site {
 				this.set(u + du, y, v + dv, state);
 			}
 		}
+	}
+
+	// ---- mobs ----
+
+	/** Spawns a mob at an exact spot, after {@code setup} has dressed it (only the chunk the spot is in does it), as the ruins' site does. */
+	<T extends Mob> T spawn(EntityType<T> type, double x, double y, double z, float yaw, java.util.function.Consumer<T> setup) {
+		if (!this.chunk.isInside(BlockPos.containing(x, y, z))) {
+			return null;
+		}
+		T mob = type.create(this.level.getLevel(), EntitySpawnReason.STRUCTURE);
+		if (mob == null) {
+			return null;
+		}
+		mob.snapTo(x, y, z, yaw, 0.0F);
+		setup.accept(mob);
+		mob.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.STRUCTURE, null);
+		mob.setPersistenceRequired();
+		this.level.addFreshEntityWithPassengers(mob);
+		return mob;
 	}
 }

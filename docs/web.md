@@ -1641,7 +1641,7 @@ to 3 removals."
 - **Check first in game:** engulfed-arm sizes and first-person offsets; the hand grab's skewer aim; execution
   keyframes (hand-authored); grey line darkness at default brightness; the well-fed whisper timing.
 
-## Swing engulf (0.17.149)
+## Swing engulf (0.17.157)
 
 Andy: "The tendrils when swinging with R should extend from the body and arm fully engulfing it and retracting as soon as
 the button is released. leaving no remnant line. much like the Symbiote: A Bonding Experience mod."
@@ -1655,7 +1655,7 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
   leaves a falling line. Plain webs still fall and fade. Own first person draws no wrap (the arm is the camera's); the
   cord still waits for the wrap and reels in.
 
-## Collect mode and first looks (0.17.149)
+## Collect mode and first looks (0.17.157)
 
 - Andy: "Add an option to the wheel for a "Collect" mode. When active (and using living armor) it will use living
   tendrils to periodically reach out and grab items bringing them to you. This is unlocked at 70 Bond, and before then
@@ -1674,17 +1674,17 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
   drop, block, misc), then at 3.5 s (`HINT_AT`) a hint about what it's good for (`hint.<kind>.N`, with the hunger it
   fills, how many uses it lasts, or how many stack). Use (right click) takes it at once (`WebNet.InspectGrab`), with a
   grumble (`inspect.skip.N`) and no hint.
-- (0.17.149) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
+- (0.17.157) Andy: Living Armor "shouldnt activate tendrils anymore, we have a button for that now. tendrils should
   unlock at 30." Putting Living Armor on leaves the tendrils as they are (only the big suit forming still brings them
   out); the Tendrils slot works from `WebSymbiote.TENDRILS_BOND` 30 (was Living Armor's 60).
 
-## Trust, mood, stages, orders and requests (0.17.150)
+## Trust, mood, stages, orders and requests (0.17.157)
 
 Ideas from the reference mod's checklist (ideas only, none of its code or art). Everything is in `WebSymbioteMind`
 (server logic, saved + owner-synced `Mind` attachment `web_symbiote_mind`, kept out of death), `WebSymbioteDig`, and on
 the client `WebSymbioteMindUi` + `WebSymbioteStatusScreen`. Tuning numbers are the constants at the top of each class.
-Small hooks in `WebSymbiote` are marked "(0.17.150)"; the takeover/suit helpers it needs sit together under
-"mind (0.17.150)" before `standDown`.
+Small hooks in `WebSymbiote` are marked "(0.17.157)"; the takeover/suit helpers it needs sit together under
+"mind (0.17.157)" before `standDown`.
 
 - **Trust** (0-100, saved) is separate from `bond` (which still opens the abilities). Up: a meal it was given
   (`TRUST_FEED` 2; a satiety jump of `MEAL_JUMP` 4 while it doesn't have the wheel), a kill beside you
@@ -1733,7 +1733,7 @@ Small hooks in `WebSymbiote` are marked "(0.17.150)"; the takeover/suit helpers 
   than 20, or a block you may not break.
 
 
-## Body: arm, mantle, strain traits, feeding (0.17.150)
+## Body: arm, mantle, strain traits, feeding (0.17.157)
 
 - Andy's ticks: "Arm slots: about 3 items stored in the symbiote's arm, tendrils carry, show and use them (tool
   breaking, block placing, food eating)"; "Mantle: a furl/unfurl cape drawn as a suit layer, maybe slowing falls or
@@ -1768,7 +1768,7 @@ Small hooks in `WebSymbiote` are marked "(0.17.150)"; the takeover/suit helpers 
   it never feeds on anything living. `ultimateAnswers` now answers for a bonded player so C works without ascension; Web
   Strike is still ascended-only.
 
-## Life and death with the symbiote (0.17.150)
+## Life and death with the symbiote (0.17.157)
 
 New class `WebSymbioteLife`, with small hooks in `WebSymbiote` (after-death, tick, `showSuit`), `WebSymbioteBond`
 (dormancy tick), `WebSymbioteBlob` and `WebDebugCommand`; lang in `lang/parts/web_life.json`. No attachments (the blob's

@@ -31,6 +31,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
+		// (0.7.329) the second batch of Blockbench Workshop creatures
+		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
 		// 0.7.7: ships under sail, and the client's part in sailing
 		EntityRenderers.register(com.jaymoskingdoms.sailing.Ship.TYPE, ShipRenderer::new);
@@ -42,6 +44,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
+		// (0.7.326) the clockwork golem
+		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -131,6 +135,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
+		// (0.7.326) the Reverent Warplate
+		ReverentLayer.register();
 		// 0.7.23: Verdants' antennae
 		VerdantLook.register();
 		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands

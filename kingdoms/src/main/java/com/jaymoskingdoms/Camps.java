@@ -309,6 +309,8 @@ public final class Camps {
 		for (int i = 0; i < START_BARBARIANS; i++) {
 			KingdomEvents.spawn(level, Factions.get(server, id), Folk.BARBARIAN);
 		}
+		// (0.7.329) and a pair of scalebane sellswords
+		ScalebaneArcher.hire(level, id, fire, ScalebaneArcher.START);
 		Builders.spawnCrew(level, Factions.get(server, id));
 		JaymosKingdoms.LOGGER.info("A barbarian camp, {}, rose at {}", camp.name(), fire);
 		return Factions.get(server, id);
@@ -530,6 +532,10 @@ public final class Camps {
 		}
 		if (goblin(server, camp.id())) {
 			GoblinVillages.grow(level, camp, days);
+			CampData goblins = data(server, camp.id());
+			if (goblins != null) {
+				ScalebaneArcher.grow(level, camp.id(), goblins.center(), days);
+			}
 			return;
 		}
 		if (orc(server, camp.id())) {
@@ -560,6 +566,10 @@ public final class Camps {
 		}
 		CampData data = data(server, camp.id());
 		long age = data == null ? 0 : (level.getGameTime() - data.founded()) / DAY_TICKS;
+		if (data != null) {
+			// (0.7.329) sellswords
+			ScalebaneArcher.grow(level, camp.id(), data.center(), days);
+		}
 		int cap = (int)Math.min(MAX_BARBARIANS, START_BARBARIANS + age / DAYS_PER_BARBARIAN);
 		for (int i = 0; i < days; i++) {
 			Faction now = Factions.get(server, camp.id());

@@ -403,7 +403,8 @@ def species():
 if __name__ == '__main__':
     for d in (ITEM, ASSETS + 'items/', ASSETS + 'models/item/', DATA + 'jaymoskingdoms/loot_table/entities/'):
         os.makedirs(d, exist_ok=True)
-    species()
+    # (0.7.329) Eurus is drawn as eanncrod's Kintsugi wyvern now: tools/gen_kintsugi_dragons.py paints his hides
+    # species()
     egg('eurus_dragon_spawn_egg', rgb(0x4A5068), rgb(0xA8F4FF), 123)
     write(ASSETS + 'items/eurus_dragon_spawn_egg.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/eurus_dragon_spawn_egg'}})
     write(ASSETS + 'models/item/eurus_dragon_spawn_egg.json',

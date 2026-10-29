@@ -268,7 +268,8 @@ def species(name, hides):
 if __name__ == '__main__':
     for d in (g.ITEM, g.ASSETS + 'items/', g.ASSETS + 'models/item/', g.DATA + 'jaymoskingdoms/loot_table/entities/'):
         os.makedirs(d, exist_ok=True)
-    species('boreas', BOREAS_HIDES)
+    # (0.7.326) Boreas wears an icy recolour of nyxaris' Fire Dragon now: tools/gen_fire_dragons.py
+    # species('boreas', BOREAS_HIDES)
     g.egg('boreas_dragon_spawn_egg', rgb(0xA9CBE6), rgb(0x5ADCFF), 78)
     g.write(g.ASSETS + 'items/boreas_dragon_spawn_egg.json',
             {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/boreas_dragon_spawn_egg'}})
