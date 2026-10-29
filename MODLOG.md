@@ -3653,3 +3653,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the
   hotbar while it cools. Sneak and right click on the diamond dagger still forges the Tempest.
 - **0.17.171, rescue rewards out of chat (Kingdoms 0.7.340):** see Kingdoms 0.7.340.
+- **0.17.175, pebble piles on grass (`ground/PebblePilesFeature`):** Andy: "you should be able to rarely find the rocks
+  on grass as well, mostly in pebble piles. changing dependent on biome". About one chunk in six has a pebble pile on
+  grass: 3-7 small rock piles (mostly 1-2 rocks) within 2 blocks. Most are the biome's rock: granite on savannas,
+  diorite in birch woods, cherry groves, meadows and flower lands, andesite in taigas, snowy plains and the hills,
+  mossy in jungles, swamps and dark or old-growth woods, red sandstone in the badlands, sandstone on beaches, plain
+  stone elsewhere; the rest are plain stone (andesite where the biome's is stone). A telling stone up to 4 blocks under
+  the turf still decides. The scattered rocks now keep to grass only 1 time in 5 (`GroundRocksFeature.ON_GRASS`), so
+  rocks on grass mostly come in piles. Rarity in `worldgen/placed_feature/pebble_piles.json`.
+  - Not seen in game.

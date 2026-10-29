@@ -40,6 +40,8 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 	/** Flint lies on gravel always; by water or on beaches this often (in 100); elsewhere this often. */
 	public static final int FLINT_BY_WATER = 50;
 	public static final int FLINT_ELSEWHERE = 15;
+	/** (0.17.175) Scattered rocks keep to grass this seldom (in 100); grass mostly gets pebble piles (PebblePilesFeature). */
+	public static final int ON_GRASS = 20;
 	/** In jungles, swamps and lush caves, plain stone rocks are mossy this often (in 100). */
 	public static final int MOSSY_CHANCE = 60;
 
@@ -56,6 +58,9 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 			BlockPos spot = this.ground(level, i == 0 ? origin
 				: origin.offset(random.nextInt(SPREAD * 2 + 1) - SPREAD, 0, random.nextInt(SPREAD * 2 + 1) - SPREAD));
 			if (spot == null) {
+				continue;
+			}
+			if (!this.flint && level.getBlockState(spot.below()).is(Blocks.GRASS_BLOCK) && random.nextInt(100) >= ON_GRASS) {
 				continue;
 			}
 			BlockState state;
@@ -130,7 +135,7 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 	}
 
 	/** The rock a telling block makes, or null for plain stone, dirt and the rest (keep looking). */
-	private static GroundRocks.Variant stoneOf(BlockState state) {
+	static GroundRocks.Variant stoneOf(BlockState state) {
 		if (state.is(Blocks.GRANITE)) {
 			return GroundRocks.Variant.GRANITE;
 		} else if (state.is(Blocks.DIORITE)) {
@@ -151,7 +156,7 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 		return null;
 	}
 
-	private static int size(RandomSource random, int[] weights) {
+	static int size(RandomSource random, int[] weights) {
 		int roll = random.nextInt(100);
 		for (int i = 0; i < weights.length; i++) {
 			roll -= weights[i];
