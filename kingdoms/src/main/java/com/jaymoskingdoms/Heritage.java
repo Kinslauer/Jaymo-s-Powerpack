@@ -97,7 +97,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Deepborn:</b> (0.7.106, earned) sneaking, they sense the creatures round them through walls (client); they never
  * set off sculk (the Warden can't hear them either). Blasts stun them, and the open sun dulls them.</li>
  * <li><b>Divine-born:</b> (0.7.262) the celestial blood: a halo and gold-touched skin, mends faster, smites the wicked, takes to
- * healing magic; hunger burns bright ({@link DivineBorn}).</li>
+ * healing magic; (0.7.314) no need for food or sleep ({@link DivineBorn}).</li>
  * <li><b>Bio-built:</b> (0.7.262) a made being that absorbs downed foes to evolve through three forms, drains life from what
  * it hits and, at the last form, buds small copies ({@link BioBuilt}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
@@ -744,7 +744,6 @@ public final class Heritage {
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
 			case DAWNBORN -> dark(player) ? DAWN_DARK_HUNGER : 1.0F;
-			case DIVINE -> DivineBorn.HUNGER;
 			default -> 1.0F;
 		};
 	}

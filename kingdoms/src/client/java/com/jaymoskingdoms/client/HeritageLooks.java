@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.NightbornBlood;
@@ -75,7 +76,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Deepborn:</b> (0.7.106) teal sculk veins up the forearms pulsing slowly; pale eyes; now and then a sculk pop in
  * dark places.</li>
  * <li><b>Divine-born:</b> (0.7.262, textures from {@code kingdoms/tools/gen_race_looks.py}) a faint gold glow in fine
- * filigree up the forearms and on the brow, warm white eyes, a halo (a flat gold ring, a model part) floating over the head,
+ * filigree up the forearms and on the brow, warm white eyes, a halo (a flat gold ring, a model part) floating over the head
+ * (0.7.314: the Starlit and the Seraphic wear it larger, round the neck),
  * and motes of light drifting off the skin.</li>
  * <li><b>Bio-built:</b> (0.7.313: a player is drawn as their form's own body instead, {@link BioForms}; villagers keep these) (0.7.262) steel-green seams and plating that grow with each form ({@link BioBuilt#form}: three drawings,
  * the second plated to the elbow, the third to the shoulder and the cheeks), amber nodes that glow; amber eyes. A variant's
@@ -371,7 +373,12 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 			}
 		}
-		if (kind == Kind.DIVINE && !headFinsCovered && marks.head.visible) {
+		if (kind == Kind.DIVINE && style != null && (style.variant() == HeritageVariants.Variant.STARLIT || style.variant() == HeritageVariants.Variant.SERAPHIC)) {
+			// (0.7.314, Andy) the Starlit and the Seraphic wear it larger, round the neck
+			if (marks.body.visible) {
+				neckHalo(poseStack, collector, marks, state.ageInTicks);
+			}
+		} else if (kind == Kind.DIVINE && !headFinsCovered && marks.head.visible) {
 			halo(poseStack, collector, marks, state.ageInTicks);
 		}
 		if (kind == Kind.TIDEBORN) {
@@ -410,6 +417,20 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		poseStack.pushPose();
 		model.head.translateAndRotate(poseStack);
 		poseStack.translate(0.0F, (-8.0F - HALO_RISE + Mth.sin(age * HALO_SPEED) * HALO_BOB) / 16.0F, 0.0F);
+		collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(HALO), 0xF000F0,
+			OverlayTexture.NO_OVERLAY, null, -1);
+		poseStack.popPose();
+	}
+
+	/** (0.7.314) The neck halo: this much larger than the head's, resting this high over the shoulders (model pixels), bobbing this much. */
+	static final float NECK_HALO_SCALE = 1.4F, NECK_HALO_RISE = 0.5F, NECK_HALO_BOB = 0.25F;
+
+	/** (0.7.314) The halo worn larger, resting round the neck on the shoulders (body space: the top of the body at y 0). */
+	private static void neckHalo(PoseStack poseStack, SubmitNodeCollector collector, net.minecraft.client.model.HumanoidModel<?> model, float age) {
+		poseStack.pushPose();
+		model.body.translateAndRotate(poseStack);
+		poseStack.translate(0.0F, (-NECK_HALO_RISE + Mth.sin(age * HALO_SPEED) * NECK_HALO_BOB) / 16.0F, 0.0F);
+		poseStack.scale(NECK_HALO_SCALE, 1.0F, NECK_HALO_SCALE);
 		collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(HALO), 0xF000F0,
 			OverlayTexture.NO_OVERLAY, null, -1);
 		poseStack.popPose();

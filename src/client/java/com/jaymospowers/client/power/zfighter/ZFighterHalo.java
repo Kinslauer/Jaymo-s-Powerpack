@@ -1,50 +1,81 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.particles.DustParticleOptions;
+import com.jaymospowers.power.zfighter.ZFighterLineage;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.62, Andy's NOEA picks) The halo of the dead: a thin gold ring turning over the head of every player who woke in the
- * Other World ({@link ZFighterAfterlife#STAY}, synced to everyone), drawn on this client only, in dust that fades by itself.
- * Nothing is sent: each client draws the rings of the players it can see.
+ * (0.17.62, Andy's NOEA picks) The halo of the dead over the head of every player who woke in the Other World
+ * ({@link ZFighterAfterlife#STAY}, synced to everyone). (0.17.139, Andy: "remove the particle halo and replace it with divine
+ * born's for everyone") It is the Divine-born's ring now (Kingdoms' {@code HeritageLooks} halo: a flat gold ring of four
+ * thin bars, lit, bobbing over the head), no longer dust. A Divine-born already wears theirs, so they get no second one.
  */
 public final class ZFighterHalo {
-	/** The ring's radius above the head (blocks), how far over the head it floats, how many motes a tick, and the dust. */
-	static final double RADIUS = 0.34;
-	static final double LIFT = 0.28;
-	static final int MOTES = 4;
-	static final float TURN = 0.21F;
-	static final int COLOR = 0xFFE680;
-	static final float SIZE = 0.55F;
+	/** Whether this player wears the halo of the dead. */
+	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_halo");
+	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_halo.png");
+	static final int FULL_BRIGHT = 0xF000F0;
+	/** How far above the top of the head it floats (model pixels), how far it bobs, and how fast (radians a tick). */
+	static final float RISE = 4.0F, BOB = 0.5F, SPEED = 0.08F;
+
+	private static ModelPart halo;
 
 	private ZFighterHalo() {
 	}
 
-	static void init() {
-		ClientTickEvents.END_CLIENT_TICK.register(ZFighterHalo::tick);
+	/** The ring, made the first time it's drawn (head space: the top of the head at y -8). */
+	private static ModelPart halo() {
+		if (halo == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("ring", CubeListBuilder.create()
+				.texOffs(0, 0).addBox(-5.0F, 0.0F, -5.0F, 10.0F, 0.0F, 1.0F)
+				.texOffs(0, 2).addBox(-5.0F, 0.0F, 4.0F, 10.0F, 0.0F, 1.0F)
+				.texOffs(0, 4).addBox(-5.0F, 0.0F, -4.0F, 1.0F, 0.0F, 8.0F)
+				.texOffs(0, 14).addBox(4.0F, 0.0F, -4.0F, 1.0F, 0.0F, 8.0F), PartPose.ZERO);
+			halo = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		}
+		return halo;
 	}
 
-	private static void tick(Minecraft minecraft) {
-		ClientLevel level = minecraft.level;
-		if (level == null || minecraft.isPaused()) {
-			return;
+	static void extract(Avatar entity, AvatarRenderState state) {
+		boolean dead = entity instanceof Player player && player.isAlive() && !player.isSpectator() && ZFighterAfterlife.among(player)
+			&& !ZFighterLineage.divine(player);
+		state.setData(KEY, dead ? Boolean.TRUE : null);
+	}
+
+	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
+		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
+			super(renderer);
 		}
-		for (Player player : level.players()) {
-			if (!player.isAlive() || !ZFighterAfterlife.among(player) || player.isSpectator()) {
-				continue;
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+			if (state.getData(KEY) == null || state.isInvisible || !this.getParentModel().head.visible) {
+				return;
 			}
-			// first person: the ring is above the camera, so only others (and the third-person view) see it
-			double y = player.getY() + player.getBbHeight() + LIFT;
-			for (int i = 0; i < MOTES; i++) {
-				float angle = (player.tickCount + i * (Mth.TWO_PI / MOTES / 2.0F)) * TURN + i * Mth.TWO_PI / MOTES;
-				level.addParticle(new DustParticleOptions(COLOR, SIZE), player.getX() + Mth.cos(angle) * RADIUS, y,
-					player.getZ() + Mth.sin(angle) * RADIUS, 0.0, 0.0, 0.0);
-			}
+			poseStack.pushPose();
+			this.getParentModel().head.translateAndRotate(poseStack);
+			poseStack.translate(0.0F, (-8.0F - RISE + Mth.sin(state.ageInTicks * SPEED) * BOB) / 16.0F, 0.0F);
+			collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(TEXTURE), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, -1);
+			poseStack.popPose();
 		}
 	}
 }

@@ -684,7 +684,7 @@ public final class ZFighterPower implements Power {
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
-			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player);
+			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
 
 		ZFighterKi.tickWave(player, live);
@@ -698,7 +698,8 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player);
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost() * ZFighterBioForms.flight(player)
+					* ZFighterDivineGrace.flight(player);
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
@@ -718,7 +719,7 @@ public final class ZFighterPower implements Power {
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form)
-				* ZFighterBranchForms.drainFactor(player, live);
+				* ZFighterBranchForms.drainFactor(player, live) * ZFighterDivineGrace.drain(player);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
 			// (0.15.59) and a little harder the stronger he's grown
@@ -1550,7 +1551,7 @@ public final class ZFighterPower implements Power {
 		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
 			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH)
-			+ ZFighterBioForms.fists(player);
+			+ ZFighterBioForms.fists(player) + ZFighterRubberBody.fists(player);
 	}
 
 	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
