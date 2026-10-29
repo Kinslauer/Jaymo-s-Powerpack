@@ -125,7 +125,6 @@ public final class SorasDagger extends Item {
 			List<Component> lore = new ArrayList<>();
 			lore.add(Component.translatable("item.jaymospowers.soras_dagger.stage" + stage).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			lore.add(Component.translatable("item.jaymospowers.soras_dagger.hint" + stage).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-			lore.add(Component.translatable("item.jaymospowers.soras_dagger.grip").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			Item.Properties properties = new Item.Properties().setId(key)
 				.sword(materials[stage], 0.0F, SPEED[stage])
 				.attributes(attributes(stage))
