@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up.
+ * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}) shows only on a guard of a town that owes you a favour.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -96,6 +97,10 @@ abstract class McaAnswersMixin {
 			if (!SharedHistory.canAskAfter(player, villager)) {
 				cir.getReturnValue().remove(SharedHistory.ASK_AFTER);
 			}
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Captives.canSpeakOf(player, villager)) {
+			// (0.7.340) only a guard of a town that owes you for one you brought home
+			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
