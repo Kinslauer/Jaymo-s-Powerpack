@@ -128,4 +128,5 @@ DAGGER = [
 
 # the rapier is turned half round in the hand so its knuckle bow guards the fingers (Andy: it faced up)
 build("iron_rapier", RAPIER, display(tp=0.55, fp=0.5, gui=0.4, center_y=12, grip_y=-3.75, flip=True))
-build("iron_dagger", DAGGER, display(tp=0.7, fp=0.6, gui=0.62, center_y=11.75, grip_y=6.5))
+# (0.17.164) the iron dagger is polyjo's Traveler Dagger now (tools/blockbench/traveler_dagger.py)
+# build("iron_dagger", DAGGER, display(tp=0.7, fp=0.6, gui=0.62, center_y=11.75, grip_y=6.5))
