@@ -24,7 +24,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.320, Andy: "can this replace our goblins?", then "Whole body, clothes redrawn") A goblin villager's body: the
+ * (0.7.321, Andy: "can this replace our goblins?", then "Whole body, clothes redrawn") A goblin villager's body: the
  * shape of kokosikk's Blockbench Workshop goblin (CC BY 4.0, {@code tools/blockbench/kokosikk_goblin.bbmodel}, credit in
  * {@code textures/entity/greenskin/CREDITS.txt}): a big head, a short tunic of a body bent forward in a hunch, thin arms
  * and short bandy legs.

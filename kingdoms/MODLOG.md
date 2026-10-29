@@ -6283,7 +6283,7 @@ instead of them appearing in chat like now."
   villager tagged by Powers) gets "Talk about training" (`ZFighterFolk.TRAINING`). Powers fills a talk screen through
   `ZFighterFolk.ask` (any answers, a callback for the pick; answered via `Approaches`).
 
-## 0.7.320: goblins have the workshop goblin's body (pack 0.17.147)
+## 0.7.321: goblins have the workshop goblin's body (pack 0.17.148)
 Andy: "can this replace our goblins?" (kokosikk's Blockbench Workshop goblin, CC BY 4.0), then "Whole body, clothes
 redrawn". Goblin villagers now have its shape: a big head, a short body bent forward in a hunch, thin arms, short legs.
 - `GoblinBody.apply` (last in both pose hooks, `MobSwingLivingEntityRendererMixin` and

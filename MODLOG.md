@@ -3563,6 +3563,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   answer used to put in chat is caught (`ZFighterTranscriptMixin` on `ServerPlayer.sendSystemMessage`) and shown as their
   reply on the screen, with "Ask something else". Without Kingdoms or MCA everything is as before. Lang:
   `lang/parts/zfighter_talk.json`.
-- **0.17.147, goblins with the workshop goblin's body (Kingdoms 0.7.320):** goblin villagers take the shape of
+- **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
   kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
   clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.

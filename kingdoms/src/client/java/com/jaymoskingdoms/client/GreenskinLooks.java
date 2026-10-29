@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * ({@code McaVerdantSkinMixin}); on it, drawn here and tinted by the same green, their features and marks
  * (textures from {@code tools/gen_greenskins.py}):
  * <ul>
- * <li><b>Goblins</b>: (0.7.320) the goblin's own body ({@link GoblinBody}: its shape, ears, nose, tusks, fists, feet
+ * <li><b>Goblins</b>: (0.7.321) the goblin's own body ({@link GoblinBody}: its shape, ears, nose, tusks, fists, feet
  * and gear), and one of four sets of warts, wrinkles and blotches.</li>
  * <li><b>Orcs</b>: tusks up from the jaw, a heavy brow and small swept ears, or an underbite with long tusks, a heavier
  * brow and one ear torn short; one of four sets of marks, and one of four of scars (three with war paint: soot, blood

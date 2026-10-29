@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.320) What a goblin holds sits in its fist, not stretched by its thin arm's scale (GoblinBody#hand). */
+/** (0.7.321) What a goblin holds sits in its fist, not stretched by its thin arm's scale (GoblinBody#hand). */
 @Mixin(HumanoidModel.class)
 abstract class GoblinHandMixin {
 	@Inject(method = "translateToHand(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
