@@ -64,6 +64,8 @@ public final class DragonsClient {
 	static final float NOTUS_SHADOW = 2.0F, BOREAS_SHADOW = 1.8F, ZEPHYRUS_SHADOW = 1.8F, EURUS_SHADOW = 1.6F, AEOLUS_SHADOW = 5.0F;
 	/** (0.7.326) How big the Fire Dragon model is drawn for each: its back under the riders' seats. */
 	static final float NOTUS_SCALE = 0.53F, BOREAS_SCALE = 0.45F;
+	/** (0.7.327) How big the Kintsugi wyvern is drawn for each (it stands 7.9 blocks, 25 across the wings), and how far it reaches from its middle at full size. */
+	static final float EURUS_SCALE = 0.28F, AEOLUS_SCALE = 0.75F, KINTSUGI_REACH = 13.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -77,10 +79,11 @@ public final class DragonsClient {
 		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new WindDragonRenderer<>(c, "boreas", new FireDragonModel(), BOREAS_SHADOW, BOREAS_SCALE));
 		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
 			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
-		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new EurusDragonModel(EurusDragonModel.createBodyLayer()
-			.bakeRoot()), EURUS_SHADOW));
-		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new AeolusDragonModel(AeolusDragonModel
-			.createBodyLayer().bakeRoot()), AEOLUS_SHADOW, AeolusDragonModel.SCALE));
+		// (0.7.327) both eanncrod's Kintsugi wyvern: Eurus small enough to ride, Aeolus vast
+		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new KintsugiDragonModel(), EURUS_SHADOW, EURUS_SCALE,
+			KINTSUGI_REACH));
+		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new KintsugiDragonModel(), AEOLUS_SHADOW, AEOLUS_SCALE,
+			KINTSUGI_REACH));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);

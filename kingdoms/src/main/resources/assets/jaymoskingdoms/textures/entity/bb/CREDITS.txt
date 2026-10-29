@@ -32,3 +32,10 @@ reverent_warplate.png (bbmodels/reverent_warplate.json), and textures/item/rever
   "Reverent Warplate" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/reverent-warplate
   Changes: baked to our loader's format and hung on the wearer's bones by our own armour layer (it was made for
   GeckoLib); the item icons are its pieces drawn small with an outline (kingdoms/tools/gen_reverent.py).
+
+kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/ and dragon/aeolus/ hide_*.png, marks_*.png: Eurus and Aeolus
+  "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
+  Changes: baked to our loader's format; walking, sitting and gliding posed by our own code over its own animations;
+  drawn at 0.28 (Eurus) and 0.75 (Aeolus) size. Aeolus's hides are its texture lifted grey-white in four shades, his
+  markings its gold seams glowing (gold, the four winds' colours, white-gold, silver); Eurus's hides are it turned
+  storm-blue and violet, his markings its seams in electric cyan (kingdoms/tools/gen_kintsugi_dragons.py).

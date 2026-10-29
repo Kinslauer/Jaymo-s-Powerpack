@@ -35,6 +35,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 
 	private final String species;
 	private final float scale;
+	private final float reach;
 
 	/** {@code species}: its folder under {@code textures/entity/dragon/}; {@code shadow}: its shadow's radius (blocks). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow) {
@@ -43,9 +44,15 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 
 	/** (0.7.141) {@code scale}: how much bigger than its model it's drawn (Aeolus). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow, float scale) {
+		this(context, species, model, shadow, scale, (float) REACH);
+	}
+
+	/** (0.7.327) {@code reach}: how far it reaches past its box when drawn at full size (blocks; the Kintsugi's wings). */
+	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow, float scale, float reach) {
 		super(context, model, shadow);
 		this.species = species;
 		this.scale = scale;
+		this.reach = reach;
 		this.addLayer(new Glow<>(this));
 	}
 
@@ -86,7 +93,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 
 	@Override
 	protected AABB getBoundingBoxForCulling(WindDragon dragon, float partialTicks) {
-		return dragon.getBoundingBox().inflate(REACH * this.scale, REACH_UP * this.scale, REACH * this.scale);
+		return dragon.getBoundingBox().inflate(this.reach * this.scale, Math.max(REACH_UP, this.reach * 0.5) * this.scale, this.reach * this.scale);
 	}
 
 	/** Its markings and eyes, glowing. */
