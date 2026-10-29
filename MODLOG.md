@@ -3688,3 +3688,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
   `BloodTrail.follow` (plain types, for reflection).
   - Not seen in game.
+- **0.17.183, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
+  symbiotes?" and picked its combat calls first. Every `say.*` line (201: what it says as it strikes, kills, grabs,
+  feeds, digs, climbs, slings and so on, for all three strains) is spoken aloud as well as shown, only to the host, at
+  their head. The voice is designed with VoxCPM2 (Apache-2.0, from a description: deep, guttural, wet, snarling; no real
+  person cloned) by `tools/voices/make_voices.py`, which then roughens each clip with a throat-rattle flutter and soft
+  clipping (`grit`). In game the black strain is pitched lowest (0.88), the red quicker (1.06), the white near the clip
+  (0.97), each line wandering a little. A line is voiced when Powers' `sounds.json` lists it, which the script writes
+  from the clips it has made; its moods' `mood.say.*` variants are text only for now.
+  - Not seen in game.

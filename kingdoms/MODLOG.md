@@ -6572,3 +6572,11 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   talking to them, or helping someone up. Only game: grown wild animals, never pets or people. Runs from
   `Workers.step`, so their brain waits and `Doorways` opens gates for them.
   - Not seen in game.
+
+## 0.7.342: the narrator reads the rest of the intro (`Voices.INTRO_LINES`)
+- Andy: "redo the intro lines that dont already have lines". The narrator now reads the pages it was still silent on:
+  "Who are you?" and the grey line under it (now only heard, like the questions' lines), the skip-the-story ask and what
+  skipping does (saying no goes back to the page without reading it again), and the hold screen: its title once, then
+  each line as the hold moves on, stopped when the hold ends so the story isn't talked over (`StoryHoldScreen.narrate`).
+  9 new narrator clips from `tools/voices/make_voices.py`; `gui.jaymoskingdoms.story.*` keys sound as `voice.narrator.*`.
+  - Not seen in game.

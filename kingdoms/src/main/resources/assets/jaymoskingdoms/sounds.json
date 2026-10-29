@@ -647,6 +647,78 @@
 			}
 		]
 	},
+	"voice.narrator.gender.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/gender_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.gender.desc": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/gender_desc",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.skip.ask": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/skip_ask",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.skip.desc": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/skip_desc",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.realm": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_realm",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.harbour": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_harbour",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.future": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_future",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.hold.arriving": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/hold_arriving",
+				"stream": true
+			}
+		]
+	},
 	"voice.grimsby.summon.1": {
 		"sounds": [
 			{

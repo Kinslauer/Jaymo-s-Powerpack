@@ -38,6 +38,15 @@ public final class Voices {
 		"spirit.jaymoskingdoms.quiet.word.1");
 	/** (0.7.269) The story's closing line, read after the whole tale (its text is gui.jaymoskingdoms.story.summary_sub). */
 	public static final String STORY_END = "story.jaymoskingdoms.summary.end";
+	/**
+	 * (0.7.342) Andy: "redo the intro lines that dont already have lines". The pages the narrator was still silent on: who
+	 * you are (the ask and its grey line, now only heard), the skip-the-story ask, and the hold screen's lines.
+	 */
+	public static final List<String> INTRO_LINES = List.of(
+		"story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc",
+		"gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc",
+		"gui.jaymoskingdoms.story.hold.title", "gui.jaymoskingdoms.story.hold.realm", "gui.jaymoskingdoms.story.hold.harbour",
+		"gui.jaymoskingdoms.story.hold.future", "gui.jaymoskingdoms.story.hold.arriving");
 
 	/** How loud a spirit is: it speaks at its keeper's shoulder. */
 	static final float SPIRIT_VOLUME = 1.0F;
@@ -82,6 +91,7 @@ public final class Voices {
 			}
 		}
 		out.add(STORY_END);
+		out.addAll(INTRO_LINES);
 		return out;
 	}
 
@@ -93,10 +103,16 @@ public final class Voices {
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
 	}
 
-	/** {@code story.jaymoskingdoms.born.title} -> {@code voice.narrator.born.title}; {@code spirit.jaymoskingdoms.varro.summon.1} -> {@code voice.varro.summon.1}. */
+	/**
+	 * {@code story.jaymoskingdoms.born.title} -> {@code voice.narrator.born.title}; {@code gui.jaymoskingdoms.story.skip.ask}
+	 * -> {@code voice.narrator.skip.ask}; {@code spirit.jaymoskingdoms.varro.summon.1} -> {@code voice.varro.summon.1}.
+	 */
 	static String soundPath(String key) {
 		if (key.startsWith("story.jaymoskingdoms.")) {
 			return "voice.narrator." + key.substring("story.jaymoskingdoms.".length());
+		}
+		if (key.startsWith("gui.jaymoskingdoms.story.")) {
+			return "voice.narrator." + key.substring("gui.jaymoskingdoms.story.".length());
 		}
 		return "voice." + key.substring("spirit.jaymoskingdoms.".length());
 	}
