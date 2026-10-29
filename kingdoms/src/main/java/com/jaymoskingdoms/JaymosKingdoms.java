@@ -426,7 +426,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		NightbornBlood.register();
 		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
 		// drive you (their attachments)
-		LOGGER.debug("takeover attachments: {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, FeralCurse.FERAL);
+		LOGGER.debug("takeover attachments: {} {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, BloodFever.HEARTBEAT, FeralCurse.FERAL);
 		Seizures.register();
 		BloodFever.register();
 		FeralCurse.register();

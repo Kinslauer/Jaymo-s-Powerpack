@@ -77,6 +77,12 @@ public final class BloodFever {
 	static final int FRENZY_TICKS = 1200, FRENZY_STRENGTH = 0, FRENZY_SPEED = 0;
 	/** Surrender stages: bloodbound, ravenous, lost. */
 	static final int BLOODBOUND = 50, RAVENOUS = 75, LOST = 100;
+	/** (0.7.322) Another mortal player within this (blocks; Andy: "vampires should hunger when within 150 blocks of other players"). */
+	static final double PLAYER_RANGE = 150.0;
+	/** A player that near: the fever's extra climb a second, and the hunger it costs (food exhaustion a second), at the range's edge and up close. */
+	static final float NEAR_RISE = 0.04F, NEAR_RISE_CLOSE = 0.12F, NEAR_HUNGER = 0.02F, NEAR_HUNGER_CLOSE = 0.08F;
+	/** One in their sight (within this half-angle of where they look, degrees, nothing in between): this much more again, scaled by closeness. */
+	static final float SEEN_ANGLE = 40.0F, SEEN_RISE = 0.15F;
 	/** The fever's warnings: once it climbs past each. */
 	static final float[] WARN_AT = {40.0F, 60.0F, 80.0F};
 
@@ -88,6 +94,13 @@ public final class BloodFever {
 	/** Surrender (0-100); synced to the vampire. */
 	public static final AttachmentType<Integer> SURRENDER = AttachmentRegistry.create(JaymosKingdoms.id("blood_surrender"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+
+	/**
+	 * (0.7.322) How loud the nearest mortal player in their sight beats for them (0 none, 1 face to face): synced to the
+	 * vampire alone, whose screen pulses and ears pound with it ({@code BloodVision}). Not kept.
+	 */
+	public static final AttachmentType<Float> HEARTBEAT = AttachmentRegistry.create(JaymosKingdoms.id("blood_heartbeat"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
 
 	/** No urge before this game time (not kept). */
 	private static final java.util.Map<java.util.UUID, Long> READY = new java.util.HashMap<>();
@@ -114,6 +127,12 @@ public final class BloodFever {
 
 	public static float fever(Player player) {
 		Float f = player.getAttached(FEVER);
+		return f == null ? 0.0F : f;
+	}
+
+	/** The heartbeat in their sight (0-1), on either side. */
+	public static float heartbeat(Player player) {
+		Float f = player.getAttached(HEARTBEAT);
 		return f == null ? 0.0F : f;
 	}
 
@@ -186,13 +205,15 @@ public final class BloodFever {
 			}
 			if (!feverish(player)) {
 				// (cured, or never one: nothing to keep)
-				if (player.hasAttached(FEVER) || player.hasAttached(SURRENDER)) {
+				if (player.hasAttached(FEVER) || player.hasAttached(SURRENDER) || player.hasAttached(HEARTBEAT)) {
 					player.removeAttached(FEVER);
 					player.removeAttached(SURRENDER);
+					player.removeAttached(HEARTBEAT);
 				}
 				continue;
 			}
 			if (!player.isAlive() || player.isSpectator() || player.isCreative()) {
+				setHeartbeat(player, 0.0F);
 				continue;
 			}
 			float was = fever(player);
@@ -201,6 +222,7 @@ public final class BloodFever {
 			if (!Seizures.held(player) && bleeding(player)) {
 				rise += SCENT;
 			}
+			rise += amongPlayers(player);
 			float fever = Math.min(100.0F, was + rise);
 			setFever(player, fever);
 			for (int i = 0; i < WARN_AT.length; i++) {
@@ -221,6 +243,61 @@ public final class BloodFever {
 			if (player.getRandom().nextFloat() < chance) {
 				urge(player);
 			}
+		}
+	}
+
+	/**
+	 * (0.7.322) Other players near them: the nearest mortal one within {@link #PLAYER_RANGE} makes them hungry and the
+	 * fever climb, more the closer they are; the nearest one in their sight sets their {@link #HEARTBEAT}. Returns the
+	 * fever's extra climb this second.
+	 */
+	private static float amongPlayers(ServerPlayer player) {
+		double nearest = Double.MAX_VALUE;
+		float seen = 0.0F;
+		net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+		net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
+		double cos = Math.cos(Math.toRadians(SEEN_ANGLE));
+		for (ServerPlayer other : player.level().players()) {
+			if (other == player || !Vampires.mortal(other) || other.isInvisible()) {
+				continue;
+			}
+			double d = other.distanceTo(player);
+			if (d > PLAYER_RANGE) {
+				continue;
+			}
+			nearest = Math.min(nearest, d);
+			float close = (float)(1.0 - d / PLAYER_RANGE);
+			if (close <= seen) {
+				continue;
+			}
+			net.minecraft.world.phys.Vec3 to = other.getEyePosition().subtract(eye);
+			net.minecraft.world.phys.Vec3 chest = other.position().add(0.0, other.getBbHeight() * 0.6, 0.0);
+			if (to.lengthSqr() > 1.0E-4 && to.normalize().dot(look) >= cos && (sees(player, eye, other.getEyePosition()) || sees(player, eye, chest))) {
+				seen = close;
+			}
+		}
+		setHeartbeat(player, seen);
+		if (nearest == Double.MAX_VALUE) {
+			return 0.0F;
+		}
+		float close = (float)(1.0 - nearest / PLAYER_RANGE);
+		player.causeFoodExhaustion(Mth.lerp(close, NEAR_HUNGER, NEAR_HUNGER_CLOSE));
+		return Mth.lerp(close, NEAR_RISE, NEAR_RISE_CLOSE) + SEEN_RISE * seen;
+	}
+
+	private static boolean sees(ServerPlayer player, net.minecraft.world.phys.Vec3 from, net.minecraft.world.phys.Vec3 to) {
+		return player.level().clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.VISUAL,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, player)).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
+	}
+
+	private static void setHeartbeat(ServerPlayer player, float value) {
+		float was = heartbeat(player);
+		if (value <= 0.0F) {
+			if (player.hasAttached(HEARTBEAT)) {
+				player.removeAttached(HEARTBEAT);
+			}
+		} else if (Math.abs(value - was) > 0.01F) {
+			player.setAttached(HEARTBEAT, value);
 		}
 	}
 

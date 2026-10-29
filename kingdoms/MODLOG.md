@@ -6303,3 +6303,13 @@ redrawn". Goblin villagers now have its shape: a big head, a short body bent for
 - Credit and the list of changes: `textures/entity/greenskin/CREDITS.txt`; the model unchanged in
   `tools/blockbench/kokosikk_goblin.bbmodel`.
 Compile-checked (all of Kingdoms against the 26.3, MCA and mod jars: 0 errors), not seen in game.
+
+## 0.7.322: vampires hunger among players (pack 0.17.149)
+- **Hunger among players** (`BloodFever.amongPlayers`, Andy: "vampires should hunger when within 150 blocks of other
+  players"): the nearest mortal player (not a vampire, not a changed werewolf, not creative/spectator/invisible) within
+  150 blocks drains a vampire's food (0.02-0.08 exhaustion a second) and climbs the blood fever 0.04-0.12 a second more,
+  edge to face. One in sight (within 40 degrees of where they look, a clear line to eyes or chest) adds up to 0.15 more.
+  Dhampirs feel none of it.
+- **Heartbeat** (`BloodFever.HEARTBEAT`, synced to the vampire only; `BloodVision`): with a player in sight the red
+  edges pulse day or night and the warden's heartbeat plays in their ears with each beat, 0.25-1.0 volume and a beat
+  every 24 down to 11 ticks as the player gets closer. Nobody else sees or hears it.

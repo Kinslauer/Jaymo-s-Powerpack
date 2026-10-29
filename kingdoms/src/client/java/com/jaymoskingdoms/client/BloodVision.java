@@ -25,6 +25,10 @@ import net.minecraft.world.entity.decoration.ArmorStand;
  * screen, {@link #SIRBEN}, worn always). At night, too, the screen's edges darken to blood red and beat like a heart; every warm-blooded creature near them glows red through
  * walls, beating in time. Starving, the beat quickens, the red deepens, and they smell blood from further off. Only
  * the vampire sees any of it. Undead, golems and armour stands have no blood to see.
+ *
+ * <p>(0.7.322) Another mortal player in their sight, up to 150 blocks off ({@link com.jaymoskingdoms.BloodFever#HEARTBEAT}),
+ * beats for them day or night: the edges pulse red and a heartbeat pounds in their ears, louder and quicker the
+ * closer the player is.
  */
 public final class BloodVision {
 	/** How far they see blood (blocks); further when starving. */
@@ -37,6 +41,10 @@ public final class BloodVision {
 	static final int DIM = 0x7A0A0A, BRIGHT = 0xE01818;
 	/** How fast the sight fades in at dusk and out at dawn (per tick). */
 	static final float FADE = 0.02F;
+	/** A player in sight: the beat's period face to face (ticks), how much the edges darken at rest and at the top of a beat, and how fast it fades in and out (per tick). */
+	static final float SEEN_BEAT = 11.0F, SEEN_EDGE = 0.2F, SEEN_EDGE_BEAT = 0.55F, SEEN_FADE = 0.05F;
+	/** The heartbeat's volume at the range's edge and face to face, and its pitch. */
+	static final float HEART_QUIET = 0.25F, HEART_LOUD = 1.0F, HEART_PITCH = 1.0F;
 
 	private static final Identifier VIGNETTE = Identifier.withDefaultNamespace("textures/misc/vignette.png");
 	/**
@@ -48,6 +56,8 @@ public final class BloodVision {
 
 	/** 0 by day, 1 at night; eased. */
 	private static float strength, lastStrength;
+	/** A player in sight (0-1), eased; and the beat's phase (0-1) and period (ticks) now. */
+	private static float seen, lastSeen, phase, period = BEAT;
 	private static boolean vampire, on, starving;
 
 	private BloodVision() {
@@ -62,7 +72,7 @@ public final class BloodVision {
 		LocalPlayer player = minecraft.player;
 		lastStrength = strength;
 		if (player == null || minecraft.level == null) {
-			strength = lastStrength = 0.0F;
+			strength = lastStrength = seen = lastSeen = 0.0F;
 			vampire = on = false;
 			return;
 		}
@@ -71,6 +81,18 @@ public final class BloodVision {
 		// (0.7.185) a fever past the urge's line runs as hot as starving ({@link com.jaymoskingdoms.BloodFever})
 		starving = vampire && (VampirePlayers.starving(player) || com.jaymoskingdoms.BloodFever.burning(player));
 		strength = Mth.clamp(strength + (on ? FADE : -FADE), 0.0F, 1.0F);
+		lastSeen = seen;
+		float target = vampire ? com.jaymoskingdoms.BloodFever.heartbeat(player) : 0.0F;
+		seen = target > seen ? Math.min(target, seen + SEEN_FADE) : Math.max(target, seen - SEEN_FADE);
+		period = Mth.lerp(seen, starving ? STARVING_BEAT : BEAT, SEEN_BEAT);
+		phase += 1.0F / period;
+		if (phase >= 1.0F) {
+			phase -= 1.0F;
+			if (seen > 0.05F) {
+				minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+					net.minecraft.sounds.SoundEvents.WARDEN_HEARTBEAT, HEART_PITCH, Mth.lerp(seen, HEART_QUIET, HEART_LOUD)));
+			}
+		}
 	}
 
 	/** The Sirben screen to ask for this frame, or null. */
@@ -80,12 +102,10 @@ public final class BloodVision {
 
 	/** The beat now: 0 at rest, 1 at the top of the first thump, a smaller second thump after it. */
 	static float beat(float partialTicks) {
-		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.level == null) {
+		if (Minecraft.getInstance().level == null) {
 			return 0.0F;
 		}
-		float period = starving ? STARVING_BEAT : BEAT;
-		float t = ((minecraft.level.getGameTime() % 1000L) + partialTicks) % period / period;
+		float t = (phase + partialTicks / period) % 1.0F;
 		return Math.max(thump(t, 0.0F), 0.6F * thump(t, 0.22F));
 	}
 
@@ -113,7 +133,7 @@ public final class BloodVision {
 
 	/** The outline colour of a sensed creature right now. */
 	public static int color(float partialTicks) {
-		float k = beat(partialTicks) * Mth.lerp(partialTicks, lastStrength, strength);
+		float k = beat(partialTicks) * Math.max(Mth.lerp(partialTicks, lastStrength, strength), Mth.lerp(partialTicks, lastSeen, seen));
 		return ARGB.opaque(ARGB.srgbLerp(k, DIM, BRIGHT));
 	}
 
@@ -121,10 +141,12 @@ public final class BloodVision {
 	private static void edges(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		float partialTicks = delta.getGameTimeDeltaPartialTick(false);
 		float s = Mth.lerp(partialTicks, lastStrength, strength);
-		if (s <= 0.0F) {
+		float p = Mth.lerp(partialTicks, lastSeen, seen);
+		if (s <= 0.0F && p <= 0.0F) {
 			return;
 		}
-		float k = s * ((starving ? STARVING_EDGE : EDGE) + EDGE_BEAT * beat(partialTicks));
+		float b = beat(partialTicks);
+		float k = Math.max(s * ((starving ? STARVING_EDGE : EDGE) + EDGE_BEAT * b), p * (SEEN_EDGE + SEEN_EDGE_BEAT * b));
 		int color = ARGB.colorFromFloat(1.0F, 0.15F * k, Math.min(1.0F, k), Math.min(1.0F, k));
 		graphics.blit(RenderPipelines.VIGNETTE, VIGNETTE, 0, 0, 0.0F, 0.0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(),
 			graphics.guiHeight(), color);
