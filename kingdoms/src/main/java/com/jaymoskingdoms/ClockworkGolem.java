@@ -36,7 +36,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * (0.7.326) A clockwork golem: a copper-and-wood guardian built by hand (a clock, a block of redstone and copper),
+ * (0.7.326) A clockwork golem: a copper-and-wood guardian, (0.7.328) made on Powers' infusion altar once its maker knows
+ * the Golemancy research (a clock wound with copper, redstone and ichor; {@code data/jaymoskingdoms/alchemy/infusion}),
  * drawn as octopusstudio's Mech Golem (Blockbench Workshop, CC BY 4.0). It keeps the place it was set down as an iron
  * golem keeps a village: it fights the monsters that come near and never turns on its makers. With nothing to fight for
  * a while it winds down and folds itself into its shell, its lights out, hard to hurt but standing still; anything

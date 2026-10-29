@@ -1,6 +1,6 @@
 """
 (0.7.326) The clockwork golem's item icon: its baked model (tools/bbmodel_bake.py) drawn three-quarter on by
-tools/bbmodel_preview.py, cropped and shrunk to 16x16. Its recipe, loot and item model are written here too.
+tools/bbmodel_preview.py, cropped and shrunk to 16x16. Its infusion recipe, loot and item model are written here too.
 
 Run from the project root:  python -I kingdoms/tools/gen_clockwork_golem.py
 """
@@ -54,11 +54,15 @@ def main():
 	icon()
 	write(ASSETS + 'items/clockwork_golem.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/clockwork_golem'}})
 	write(ASSETS + 'models/item/clockwork_golem.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': 'jaymoskingdoms:item/clockwork_golem'}})
-	write(DATA + 'recipe/clockwork_golem.json', {
-		'type': 'minecraft:crafting_shaped', 'category': 'misc',
-		'pattern': [' K ', 'CRC', ' C '],
-		'key': {'K': 'minecraft:clock', 'R': 'minecraft:redstone_block', 'C': 'minecraft:copper_block'},
-		'result': {'id': 'jaymoskingdoms:clockwork_golem'}})
+	# No grid recipe: it is made on Powers' infusion altar once the Golemancy research is known (read by Powers' loader).
+	write(DATA + 'alchemy/infusion/clockwork_golem.json', {
+		'centre': 'minecraft:clock',
+		'components': ['minecraft:copper_block'] * 4 + ['minecraft:redstone_block'] * 2 + ['jaymospowers:ichor'] * 2,
+		'essences': {'metal': 16, 'motion': 12, 'craft': 10, 'spirit': 6},
+		'instability': 8,
+		'result': {'item': 'jaymoskingdoms:clockwork_golem', 'count': 1},
+		'research': 'golemancy',
+		'flux': 6})
 	write(DATA + 'loot_table/entities/clockwork_golem.json', {
 		'type': 'minecraft:entity',
 		'pools': [
