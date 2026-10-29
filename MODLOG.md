@@ -3695,7 +3695,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   a chest tab there goes back. There's an unbound Open baubles key too (the only way in from creative). Right-clicking
   a bauble puts it straight into a free slot that takes it. What fits each slot is an item tag
   (`jaymospowers:baubles/<slot>`), so a data pack can make any item wearable; only our own baubles give bonuses, and
-  only while worn there. Worn baubles drop where you die unless keepInventory holds.
+  only while worn there. Any worn item ticks as if carried, so Alchemy's Runic Amulet (the only alchemy trinket; the
+  Scrying Lens is a held tool) is tagged an amulet and draws off fleeting taint from that slot. Worn baubles drop where you die unless keepInventory holds.
   Seven baubles to start (own art, `tools/gen_baubles.py`; crafted, in Tools & Utilities):
   Heartstone Amulet (+4 max health: string, gold, a glistering melon slice), Swiftfoot Ring (+8% speed: gold and a
   diamond), Delver's Ring (+20% mining speed: copper and an amethyst shard), Brawler's Belt (+25% knockback

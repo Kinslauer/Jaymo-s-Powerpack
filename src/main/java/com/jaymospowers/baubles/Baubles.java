@@ -43,7 +43,8 @@ import net.minecraft.world.level.gamerules.GameRules;
  * <ul>
  * <li>The slots have their own screen, opened from a tab on the inventory's left edge (or the unbound Baubles key).</li>
  * <li>What fits each slot is an item tag ({@code jaymospowers:baubles/<slot>}), so any item can be made wearable by
- * data. Our own {@link BaubleItem}s give their bonuses while worn there, and only there.</li>
+ * data. Our own {@link BaubleItem}s give their bonuses while worn there, and only there; any worn item ticks as if
+ * carried, so Alchemy's Runic Amulet (tagged an amulet) works from its slot.</li>
  * <li>Worn baubles drop where you die unless keepInventory holds.</li>
  * </ul>
  */
@@ -100,8 +101,9 @@ public final class Baubles {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (server.getTickCount() % REFRESH_TICKS == 0) {
-				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				tickWorn(player);
+				if (server.getTickCount() % REFRESH_TICKS == 0) {
 					refresh(player);
 				}
 			}
@@ -193,6 +195,22 @@ public final class Baubles {
 		}
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
+		}
+	}
+
+	/**
+	 * Worn baubles tick as if carried, so an item that works from the inventory (the Runic Amulet) works from its slot
+	 * too. No equipment slot is passed: to the item it is just carried.
+	 */
+	private static void tickWorn(ServerPlayer player) {
+		List<ItemStack> saved = player.getAttached(WORN);
+		if (saved == null) {
+			return;
+		}
+		for (ItemStack stack : saved) {
+			if (!stack.isEmpty()) {
+				stack.getItem().inventoryTick(stack, player.level(), player, null);
+			}
 		}
 	}
 
