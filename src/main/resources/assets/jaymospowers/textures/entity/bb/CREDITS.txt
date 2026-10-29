@@ -23,3 +23,24 @@ textures/entity/costume/suit/thief*.png and mask/thief_hood*.png: the costume ta
   "Thief Armor" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/thief-armor
   Changes: its cubes built into our costume models (client/costume/CostumeModels.thief); its texture split into the two
   dye masks and turned grey for tinting (tools/blockbench/thief_costume.py).
+
+Batch 4 (2026-10-29). Andy downloaded these from the Blockbench Workshop. The makers' names aren't in the files; fill
+them in from the model pages.
+omen_red.png, omen_blue.png (bbmodels/omen_red.json, omen_blue.json): the future's Omen mechs
+  "The Omen Red" and "The Omen Blue", Blockbench Workshop
+  Changes: baked to our loader's format; walking, aiming and smashing posed in code (client/power/chrono/OmenRenderer).
+worky_drone.png (bbmodels/worky_drone.json): the Omens' Worky drones
+  "bb-worky", Blockbench Workshop
+  Changes: baked to our loader's format, first frame of its texture strip only, drawn at 0.45 scale.
+textures/item/armory/harpoon_3d.png (models/item/armory/harpoon): the harpoon
+  "Harpoon", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/harpoon.py), its iron texture only, rotations snapped to legal steps.
+textures/item/armory/iron_rapier.png (models/item/armory/iron_rapier): the iron rapier
+  "Swept Rapier", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/swept_rapier.py), its mesh guard rebuilt from cubes, scaled down.
+textures/item/voidreaver_3d.png (models/item/voidreaver): the Voidreaver relic
+  a Blockbench Workshop sword model (tools/bbmodels/voidreaver-sword.bbmodel)
+  Changes: turned into an item model (tools/blockbench/voidreaver.py), rotations snapped; our name, not the model's.
+textures/item/tidebreaker_3d.png (models/item/tidebreaker): the Tidebreaker relic
+  "Lighting Spear", Blockbench Workshop
+  Changes: turned into an item model (tools/blockbench/tidebreaker.py), rotations snapped.

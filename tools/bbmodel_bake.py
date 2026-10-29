@@ -87,6 +87,10 @@ def load_textures(data):
 		img = Image.open(io.BytesIO(base64.b64decode(src.split(",", 1)[1]))).convert("RGBA")
 		uw = t.get("uv_width") or data.get("resolution", {}).get("width") or img.width
 		uh = t.get("uv_height") or data.get("resolution", {}).get("height") or img.height
+		# an animated texture is a strip of frames (Blockbench's UV space is one frame): keep the first
+		frame = round(img.width * uh / uw)
+		if frame > 0 and img.height > frame and img.height % frame == 0:
+			img = img.crop((0, 0, img.width, frame))
 		out.append((t, img, uw, uh))
 	return out
 

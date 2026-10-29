@@ -44,6 +44,9 @@ public final class ZFighterFolk {
 	/** How far they may be pushed from their post before they step back (blocks), and how far they look for someone to face. */
 	static final double POST_SLACK = 1.5, LOOK_RANGE = 8.0;
 
+	/** Powers' Omen pilots (the future's mech pilots): their tag and kind. They roam and watch on Powers' own say, in MCA's own clothes. */
+	static final String PILOT_TAG = "jaymospowers.omen_pilot", PILOT_KIND = "omen_pilot";
+
 	/** Powers' tags for its characters, and the outfits each wears ({@code skins/clothing/zfighter/<kind>_<n>}). */
 	static final Map<String, String> KINDS = Map.of(
 		"jaymospowers_keeper", "keeper",
@@ -52,7 +55,9 @@ public final class ZFighterFolk {
 		"jaymospowers_judge", "judge",
 		"jaymospowers_afterlife_master", "road_master",
 		"jaymospowers_fortune_teller", "teller",
-		"jaymospowers_demon_master", "demon_master");
+		"jaymospowers_demon_master", "demon_master",
+		// (0.7.348) Andy: an Omen's pilot, out of its mech in Powers' future, a curious villager (Powers moves and talks for them)
+		PILOT_TAG, PILOT_KIND);
 	/** A town's (or a camp's) Z Fighter masters: their own villagers, picked by Powers. */
 	static final Set<String> MASTERS = Set.of("jaymospowers_master", "jaymospowers_dark_master");
 
@@ -116,6 +121,10 @@ public final class ZFighterFolk {
 	 */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (mob.entityTags().contains(PILOT_TAG)) {
+			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
+			return true;
+		}
 		mob.getNavigation().stop();
 		if (mob.hasHome() && mob.distanceToSqr(Vec3.atBottomCenterOf(mob.getHomePosition())) > POST_SLACK * POST_SLACK && !mob.isPassenger()) {
 			Vec3 post = Vec3.atBottomCenterOf(mob.getHomePosition());
@@ -131,7 +140,8 @@ public final class ZFighterFolk {
 	/** Their outfits ({@link Uniforms#zfighter}), or null for anyone else. */
 	static @Nullable List<String> outfits(Entity e) {
 		String kind = kind(e);
-		return kind == null ? null : Uniforms.zfighter(kind);
+		// (an Omen's pilot keeps MCA's own clothes: no outfits of ours)
+		return kind == null ? null : PILOT_KIND.equals(kind) ? List.of() : Uniforms.zfighter(kind);
 	}
 
 	/** "Talk about work" with one of them: Powers' talk. */

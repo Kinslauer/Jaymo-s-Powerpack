@@ -131,7 +131,8 @@ def model_of(aow, name):
 
 
 # (0.17.109) modelled in 3D in Blockbench (tools/blockbench/): their model and 32x32 texture aren't AoW's any more
-BLOCKBENCH_MODELS = {"iron_rapier", "iron_dagger"}
+# (batch 4: the harpoon too, tools/blockbench/harpoon.py; its 16x16 sprite stays, the Harpoon Head part icon is cut from it)
+BLOCKBENCH_MODELS = {"iron_rapier", "iron_dagger", "harpoon"}
 
 
 def copy_texture(aow, src, dest):

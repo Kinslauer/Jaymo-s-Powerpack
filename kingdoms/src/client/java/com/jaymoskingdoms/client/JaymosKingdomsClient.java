@@ -115,6 +115,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
+		// the spell tomes left click (press and release go to the server)
+		TomeClient.register();
 		WerewolfKey.register();
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
