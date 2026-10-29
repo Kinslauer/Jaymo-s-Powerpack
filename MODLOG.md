@@ -3749,3 +3749,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Compile-checked only; not seen in game.
 - **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
   players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
+- **0.17.198, meteor lag:** the Gravity Meteor's big ticks are spread out and made lighter, without changing how it looks.
+  - Crater-ring blasts go off `CRATER_BLASTS_PER_TICK` (3) a tick, in a scattered order, instead of a whole ring (up
+    to 22 TNT-strength blasts) in one tick.
+  - The sweep of what's left hanging brings down `GravityMeteorSweep.BREAK_PER_TICK` (1200) blocks a tick, highest
+    first, instead of up to 12000 in one tick. Its "already floating" scan runs when the meteor is called (before the
+    rock has cut anything loose) instead of on the impact tick, and its flood fill no longer makes a BlockPos for every
+    ground block.
+  - Blocks the rock or sweep break with nothing but air or other breaking blocks round them go without neighbour or
+    shape updates; only the hole's edge gets full updates.
+  - Fewer drops: 3% of carved and swept blocks drop items (was 10%).
+  - Low-end mode halves the burst's debris, smoke and hanging dust on that client (`GravityMeteorFx.LOW_END_SHARE`).
+  - Jolt physics (the Velthoric mod) was looked at: LGPL, 1.20.1/1.21.1 only, and a physics engine adds work rather than
+    removing block-update cost, so it isn't used.
+  - Compile-checked only; not seen in game.
