@@ -14,8 +14,9 @@ import net.minecraft.network.chat.Component;
 
 /**
  * (0.17.62, Andy's NOEA picks) The space pod's star map, opened by right-clicking a pod: Home, the Pale Moon, Rustfall, Glacia, Cinder,
- * the Maw, the Verdant World and the future, one button each with a line about the place or how its mission stands, and, on a planet
- * with a mission, a box to begin or give up the mission and the titles earned. Escape closes it.
+ * the Maw and the Verdant World, one button each with a line about the place or how its mission stands, and, on a planet with a
+ * mission, a box to begin or give up the mission and the titles earned. Escape closes it. (0.18.2) The future is no longer on the
+ * map, and off a mission planet the box is gone and the panel ends under the last row.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int ROW = 20;
@@ -25,6 +26,8 @@ public class ZFighterStarMapScreen extends Screen {
 	private static final int GOLD = 0xFFFFD866;
 
 	private final List<Button> buttons = new ArrayList<>();
+	/** The destination each button flies to, Home first; the future is left off the map. */
+	private final List<Integer> indices = new ArrayList<>();
 	private Button begin;
 	private Button abandon;
 
@@ -37,11 +40,17 @@ public class ZFighterStarMapScreen extends Screen {
 	}
 
 	private int rows() {
-		return ZFighterSpace.DESTS.length + 1;
+		return this.indices.size();
+	}
+
+	/** Whether the bottom box shows: on a mission planet, or once a title is earned. */
+	private boolean box() {
+		LocalPlayer player = this.minecraft == null ? null : this.minecraft.player;
+		return player != null && (ZFighterSpaceMissions.planetOf(player.level()) >= 0 || !ZFighterSpaceMissions.titles(player).isEmpty());
 	}
 
 	private int panelH() {
-		return UiStyle.HEADER + rows() * ROW + 70;
+		return UiStyle.HEADER + rows() * ROW + (box() ? 70 : 6);
 	}
 
 	private int left() {
@@ -59,8 +68,15 @@ public class ZFighterStarMapScreen extends Screen {
 	@Override
 	protected void init() {
 		this.buttons.clear();
+		this.indices.clear();
+		this.indices.add(ZFighterSpace.HOME_INDEX);
+		for (int i = 0; i < ZFighterSpace.DESTS.length; i++) {
+			if (i != ZFighterSpace.FUTURE) {
+				this.indices.add(i);
+			}
+		}
 		for (int i = 0; i < rows(); i++) {
-			int index = i == 0 ? ZFighterSpace.HOME_INDEX : i - 1;
+			int index = this.indices.get(i);
 			Component label = Component.translatable("space.jaymospowers.dest." + (index == ZFighterSpace.HOME_INDEX ? "home" : ZFighterSpace.DESTS[index].key()));
 			this.buttons.add(addRenderableWidget(Button.builder(label, b -> {
 				ClientPlayNetworking.send(new ZFighterSpace.Command(ZFighterSpace.GO, index));
@@ -117,7 +133,7 @@ public class ZFighterStarMapScreen extends Screen {
 		ZFighterSpace.Dest here = ZFighterSpace.here(player.level());
 		boolean inFuture = here != null && here.level() == ZFighterSpace.DESTS[ZFighterSpace.FUTURE].level();
 		for (int i = 0; i < this.buttons.size(); i++) {
-			int index = i == 0 ? ZFighterSpace.HOME_INDEX : i - 1;
+			int index = this.indices.get(i);
 			Button button = this.buttons.get(i);
 			boolean there = index != ZFighterSpace.HOME_INDEX && here == ZFighterSpace.DESTS[index];
 			button.active = index == ZFighterSpace.HOME_INDEX || (!there && !inFuture);
@@ -126,7 +142,9 @@ public class ZFighterStarMapScreen extends Screen {
 			UiStyle.line(graphics, this.font, text, x + BUTTON_W + 14, ry + 5, PANEL_W - BUTTON_W - 22, there ? GOLD : UiStyle.DIM);
 		}
 		int by = boxY();
-		graphics.fill(x + 6, by - 3, x + PANEL_W - 6, by - 2, UiStyle.ROW);
+		if (box()) {
+			graphics.fill(x + 6, by - 3, x + PANEL_W - 6, by - 2, UiStyle.ROW);
+		}
 		int planet = ZFighterSpaceMissions.planetOf(player.level());
 		boolean onMission = planet >= 0;
 		int value = onMission ? data.of(planet) : 0;
@@ -139,8 +157,6 @@ public class ZFighterStarMapScreen extends Screen {
 			Component what = data.settled(planet) ? Component.translatable("screen.jaymospowers.zfighter_space.settled")
 				: running ? status(ZFighterSpaceMissions.destOf(planet), data) : Component.translatable("screen.jaymospowers.zfighter_space.idle");
 			wrapped(graphics, what, x + 8, by + 16, PANEL_W - 16, 2, UiStyle.TEXT);
-		} else {
-			wrapped(graphics, Component.translatable("screen.jaymospowers.zfighter_space.no_mission"), x + 8, by + 3, PANEL_W - 16, 2, UiStyle.DIM);
 		}
 		List<Component> titles = ZFighterSpaceMissions.titles(player);
 		if (!titles.isEmpty()) {

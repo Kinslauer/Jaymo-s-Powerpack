@@ -319,6 +319,9 @@ public final class ZFighterSpace {
 		boolean inFuture = player.level().dimension() == DESTS[FUTURE].level();
 		if (index == HOME_INDEX) {
 			// nothing to do if he is already where home is: the overworld with no trip taken
+		} else if (index == FUTURE) {
+			// (0.18.2) the future is off the star map; only the pod already in the future still flies (home)
+			return;
 		} else if (index < 0 || index >= DESTS.length || DESTS[index].level() == player.level().dimension()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_here").withStyle(ChatFormatting.GRAY));
 			return;
@@ -327,8 +330,6 @@ public final class ZFighterSpace {
 			return;
 		} else if (server.getLevel(DESTS[index].level()) == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unreachable").withStyle(ChatFormatting.RED));
-			return;
-		} else if (index == FUTURE && !Future.podReady(player)) {
 			return;
 		}
 		Launch launch = new Launch(index, opened.pod(), player.position());
