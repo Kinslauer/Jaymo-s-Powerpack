@@ -6672,6 +6672,12 @@ Andy crashed on the new world's first screen ("Rendering screen", `LifeStory$Ans
 `Set.of` throws on `contains(null)`: every page of the life story crashed the client. A null start is offered.
 Compile-checked; deployed to the Deck.
 
+## 0.7.355: a demon master raises only the Emberborn (pack 0.18.2)
+Andy: "should only be for emberborn". The "Raised by a demon master" start is now the Emberborn's alone, like the
+green sky is the Verdant-born's (`Answer.onlyFor`): others see it greyed with "Only for the Emberborn.", and the
+server refuses it for any other heritage. `onlyFor` keeps answering null for answers with no start.
+- Not seen in game.
+
 ## 0.7.356: the road as a carousel, after MCA's creator (pack 0.18.3)
 - Andy: "this screen should scroll from left to right, I dont like how large the list is. It should have a larger image
   of the icon beside a larger image of your character in their scenario, built out with all their customizations. I
