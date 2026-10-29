@@ -1038,9 +1038,8 @@ public final class ZFighterPower implements Power {
 				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
 				if (live.form == ApeRage.PRIMAL_SUPER && blocked == null) {
-					// (0.17.190) Super Primal Super waits on time held in Primal Super
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait",
-						ApeRage.SUPER_PRIMAL_HELD - ApeRage.held(player)).withStyle(ChatFormatting.GRAY));
+					// (0.17.190) Super Primal Super waits on time held in Primal Super; Andy: the timer runs unseen, no count shown
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait").withStyle(ChatFormatting.GRAY));
 				} else {
 					player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
 				}
