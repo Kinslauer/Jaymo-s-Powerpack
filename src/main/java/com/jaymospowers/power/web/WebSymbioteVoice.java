@@ -21,11 +21,12 @@ import org.jspecify.annotations.Nullable;
  * VoxCPM2 (a voice designed from a description, no real person cloned) by {@code tools/voices/make_voices.py} and
  * roughened there. A line is voiced when Powers' {@code sounds.json} lists
  * {@code jaymospowers:voice.symbiote.<rest of its lang key>}, so the script can make the clips a few at a time. Only the
- * host hears it, at their head, a touch lower for the black strain and quicker for the red.
+ * host hears it, at their head. Each strain has a voice of its own (Andy picked them by ear, 2026-10-29): black a
+ * venomous snarl, red a choking ghoul, white a dry, cold lich.
  */
 public final class WebSymbioteVoice {
-	/** Each strain's pitch: black lowest (the deepest snarl), red wilder and quicker, white nearest the clip. */
-	static final float BLACK_PITCH = 0.88F, RED_PITCH = 1.06F, WHITE_PITCH = 0.97F;
+	/** Each strain's pitch: black a touch lower, the others as made (each already has its own voice). */
+	static final float BLACK_PITCH = 0.92F, RED_PITCH = 1.0F, WHITE_PITCH = 1.0F;
 	/** How loud it is, and how much each line's pitch wanders. */
 	static final float VOLUME = 1.0F, PITCH_SPREAD = 0.04F;
 

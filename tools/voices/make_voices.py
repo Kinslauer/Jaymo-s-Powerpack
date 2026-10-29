@@ -72,7 +72,8 @@ for _n, (_tongue, _desc) in enumerate(TONGUE_FOLK.items()):
         VOICES[_tongue + "_" + _g] = dict(seed=101 + _n * 10 + (_g == "female"), desc=_who + ", " + _desc, tongue=_tongue)
 # (2026-10-29) Andy: "the voice itself sounds too much like the wizards, it needs more snarl and twist like an evil lich
 # or swamp thing". Candidate symbiote voices for `--audition`: each designed on SYMBIOTE_REF, then made to say
-# AUDITION_LINES, roughened and snarled, into tools/voices/audition/<name>_<n>.ogg. The one Andy picks becomes "symbiote".
+# AUDITION_LINES, roughened and snarled, into tools/voices/audition/<name>_<n>.ogg. Andy: "These are INCREDIBLE"; each
+# strain took one (SYMBIOTE_STRAINS), cloned from its audition ref.
 SYMBIOTE_REF = "The wall is ours. Tear it open, and feed us. Nothing escapes us."
 AUDITION = {
     "lich": dict(seed=81, desc="An ancient undead lich, a dry, rotten, rasping voice, cruel and sneering, hissing every s and "
@@ -86,7 +87,12 @@ AUDITION = {
 }
 AUDITION_LINES = ["The wall is ours.", "Tear it. Throw it.", "Hold on.", "Up. We pull.", "Out of the way."]
 # where each voice's clips go
-NAMESPACE = {"symbiote": "jaymospowers"}
+# (2026-10-29) the strain each symbiote line belongs to (by its say.<strain>. key; black has none) and the voice it takes
+SYMBIOTE_STRAINS = {"": "venom", "red.": "rot", "white.": "lich"}
+for _name in SYMBIOTE_STRAINS.values():
+    VOICES["symbiote_" + _name] = dict(seed=AUDITION[_name]["seed"], grit=True, snarl=True, desc=AUDITION[_name]["desc"],
+                                       ref=SYMBIOTE_REF, ref_file="audition_" + _name)
+NAMESPACE = {"symbiote": "jaymospowers", **{"symbiote_" + n: "jaymospowers" for n in SYMBIOTE_STRAINS.values()}}
 SYMBIOTE = "message.jaymospowers.web_symbiote."
 
 QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road"]
@@ -131,7 +137,9 @@ def lines(lang, powers):
     for start in ("say.",):
         for key in sorted(k for k in powers if k.startswith(SYMBIOTE + start)):
             if "%" not in powers[key]:
-                out.append(("symbiote", key, powers[key]))
+                rest = key[len(SYMBIOTE + start):]
+                strain = next((k for k in ("red.", "white.") if rest.startswith(k)), "")
+                out.append(("symbiote_" + SYMBIOTE_STRAINS[strain], key, powers[key]))
     return out
 
 
@@ -425,7 +433,7 @@ def resnarl(folder, all_lines):
     import soundfile as sf
     n = 0
     for voice, key, _ in all_lines:
-        if voice != "symbiote":
+        if not voice.startswith("symbiote"):
             continue
         take = os.path.join(folder, sound_name(key)[1].split("/", 1)[1] + ".ogg")
         if not os.path.exists(take):
@@ -442,8 +450,12 @@ def resnarl(folder, all_lines):
 
 def make(model, rate, sf, lang, voice, key, text):
     v = VOICES[voice]
-    ref = os.path.join(REFS, voice + ".wav")
+    ref = os.path.join(REFS, v.get("ref_file", voice) + ".wav")
     ref_text = v.get("ref", REF_TEXT)
+    if "tongue" in v:
+        ref_text = lang[f"tongue.jaymoskingdoms.{v['tongue']}.greet"] + " " + lang[f"tongue.jaymoskingdoms.{v['tongue']}.farewell"]
+        # a tongue's line is said in its mood: (screaming in terror...)Aiyee!
+        text = "(" + TONGUE_MOODS[key.rsplit(".", 1)[1]] + ")" + text
     if not os.path.exists(ref):
         seeded(v["seed"])
         wav = model.generate(text="(" + v["desc"] + ")" + ref_text, cfg_value=2.0, inference_timesteps=10)
