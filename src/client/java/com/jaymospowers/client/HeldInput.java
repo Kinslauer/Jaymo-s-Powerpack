@@ -71,7 +71,7 @@ public final class HeldInput {
 
 	/** Whether a hold has the attack key: no click, held swing (Better Combat's too) or digging. */
 	public static boolean locksAttack(Minecraft minecraft) {
-		return locked || FinisherClient.holdsAttack(minecraft);
+		return locked || FinisherClient.holdsAttack(minecraft) || com.jaymospowers.client.tome.TomeClient.holdsAttack(minecraft);
 	}
 
 	/** Whether a hold has the use key: its repeats still go to the server, but don't swing the arm. */

@@ -71,6 +71,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.cryo.CryoPower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
+		// (Andy's batch 4) the spell tome, a new weapon type: bolts with left click, elements and a stored spell on right click
+		com.jaymospowers.tome.Tome.init();
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.tinkering.Tinkering.init();

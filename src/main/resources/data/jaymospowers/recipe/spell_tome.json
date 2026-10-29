@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:book",
+    "G": "minecraft:gold_ingot",
+    "L": "minecraft:lapis_lazuli"
+  },
+  "pattern": [
+    "ALA",
+    "GBG",
+    "ALA"
+  ],
+  "result": {
+    "id": "jaymospowers:spell_tome",
+    "count": 1
+  }
+}
