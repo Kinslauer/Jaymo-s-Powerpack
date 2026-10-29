@@ -173,10 +173,11 @@ public final class LifeStory {
 
 		/**
 		 * Whether it can be picked here: the unarmed and lost-in-time starts need Jaymo's Powers (its lost limbs, its
-		 * future), and (0.7.349) so do the other worlds' starts.
+		 * future), and (0.7.349) so do the other worlds' starts. (0.7.354) Only road answers have a start; the others
+		 * are always offered (and {@code Set.of} throws on {@code contains(null)}: every life-story page crashed).
 		 */
 		public boolean offered() {
-			return this.start != Start.UNARMED && this.start != Start.TIMELOST && !OTHER_WORLDS.contains(this.start) || powers();
+			return this.start == null || this.start != Start.UNARMED && this.start != Start.TIMELOST && !OTHER_WORLDS.contains(this.start) || powers();
 		}
 
 		/** (0.7.349, Andy: "Verdant only") The heritage a start is only for: the Verdant World's, the Verdant-born's; null for any. */

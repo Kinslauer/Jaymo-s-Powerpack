@@ -6665,3 +6665,9 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   each line as the hold moves on, stopped when the hold ends so the story isn't talked over (`StoryHoldScreen.narrate`).
   9 new narrator clips from `tools/voices/make_voices.py`; `gui.jaymoskingdoms.story.*` keys sound as `voice.narrator.*`.
   - Not seen in game.
+
+## 0.7.354: the life story opens again (pack 0.18.1)
+Andy crashed on the new world's first screen ("Rendering screen", `LifeStory$Answer.offered`). Since 0.7.349
+`offered()` asked `OTHER_WORLDS.contains(this.start)` for every answer, but only road answers have a start, and
+`Set.of` throws on `contains(null)`: every page of the life story crashed the client. A null start is offered.
+Compile-checked; deployed to the Deck.
