@@ -455,7 +455,6 @@ public final class ZFighterDemonRealm {
 		player.hurtServer(level, level.damageSources().magic(), ZFighterMasters.DARK_PRICE);
 		ZFighterPower.addHardship(player, ZFighterMasters.DARK_HARDSHIP);
 		ZFighterCorruption.darkLesson(player);
-		DreadedBlade.afterLesson(player, master);
 		level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 0.6F, 1.4F);
 	}

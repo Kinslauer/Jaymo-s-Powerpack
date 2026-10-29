@@ -46,8 +46,5 @@
   "message.jaymospowers.zfighter_demon_master_teaches": "%1$s teaches you, in blood: %2$s. (%3$s TP.)",
   "biome.jaymospowers.demon_gloam": "The Gloam",
   "biome.jaymospowers.demon_ash": "The Ash",
-  "biome.jaymospowers.demon_abyss": "The Abyss",
-	"item.jaymospowers.dreaded_blade": "Dreaded Blade",
-	"item.jaymospowers.dreaded_blade.lore": "A demon master's blade. It drinks from every wound.",
-	"message.jaymospowers.zfighter_demon_master_blade": "%s presses his own blade into your hands. \"The dark has you now. Let it drink.\""
+  "biome.jaymospowers.demon_abyss": "The Abyss"
 }

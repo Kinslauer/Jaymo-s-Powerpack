@@ -445,8 +445,6 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
-		// (0.17.164) the demon masters' Dreaded Blade
-		DreadedBlade.register();
 		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
 		ZFighterCorruption.init();

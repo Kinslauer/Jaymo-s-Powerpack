@@ -1,4 +1,4 @@
-"""(0.17.164) The Dreaded Blade (power/zfighter/DreadedBlade): capellastudio's "Weapon - Dreaded Blade (Animated)"
+"""(0.17.164) The Soul Saber relic (power/arsenal/RelicWeapons), now named the Dreaded Blade: capellastudio's "Weapon - Dreaded Blade (Animated)"
 (Blockbench Workshop, CC BY 4.0, https://blockbenchworkshop.com/model/capellastudio/weapon-dreaded-blade-animated)
 as the item's model. Its two animated 32x320 textures (ten frames, two ticks each) are written with their .mcmeta; the
 rune plane on the second is drawn at full light (light_emission 15). Cubes, UVs and 45-degree turns as drawn; our
@@ -17,11 +17,10 @@ SRC = os.path.join(HERE, "..", "bbmodels", "weapon-dreaded-blade-animated.bbmode
 ASSETS = "src/main/resources/assets/jaymospowers"
 NAMES = ["dreaded_blade", "dreaded_blade_fx"]
 bb = json.load(open(SRC))
-os.makedirs(f"{ASSETS}/textures/item/zfighter", exist_ok=True)
 for name, tex in zip(NAMES, bb["textures"]):
     png = base64.b64decode(tex["source"].split(",", 1)[1])
-    Image.open(io.BytesIO(png)).convert("RGBA").save(f"{ASSETS}/textures/item/zfighter/{name}.png")
-    with open(f"{ASSETS}/textures/item/zfighter/{name}.png.mcmeta", "w", newline="\n") as fh:
+    Image.open(io.BytesIO(png)).convert("RGBA").save(f"{ASSETS}/textures/item/{name}.png")
+    with open(f"{ASSETS}/textures/item/{name}.png.mcmeta", "w", newline="\n") as fh:
         json.dump({"animation": {"frametime": tex.get("frame_time", 2)}}, fh, indent="\t")
         fh.write("\n")
 
@@ -48,16 +47,16 @@ for el in bb["elements"]:
 model = {
     "credit": "Weapon - Dreaded Blade (Animated) by capellastudio (Blockbench Workshop, CC BY 4.0)",
     "texture_size": [16, 16],
-    "textures": {"0": "jaymospowers:item/zfighter/dreaded_blade", "1": "jaymospowers:item/zfighter/dreaded_blade_fx",
-                 "particle": "jaymospowers:item/zfighter/dreaded_blade"},
+    "textures": {"0": "jaymospowers:item/dreaded_blade", "1": "jaymospowers:item/dreaded_blade_fx",
+                 "particle": "jaymospowers:item/dreaded_blade"},
     "elements": elements,
     # the grip (2.75 to 7.75) in the fist, the blade's 24 pixels centred on 12.7
     "display": display(tp=0.85, fp=0.68, gui=0.6, center_y=12.7, grip_y=5.25),
 }
-with open(f"{ASSETS}/models/item/dreaded_blade.json", "w", newline="\n") as fh:
+with open(f"{ASSETS}/models/item/soul_saber.json", "w", newline="\n") as fh:
     json.dump(model, fh, indent="\t")
     fh.write("\n")
-with open(f"{ASSETS}/items/dreaded_blade.json", "w", newline="\n") as fh:
-    json.dump({"model": {"type": "minecraft:model", "model": "jaymospowers:item/dreaded_blade"}}, fh, indent="\t")
+with open(f"{ASSETS}/items/soul_saber.json", "w", newline="\n") as fh:
+    json.dump({"model": {"type": "minecraft:model", "model": "jaymospowers:item/soul_saber"}}, fh, indent="\t")
     fh.write("\n")
 print(len(elements), "elements")

@@ -54,7 +54,8 @@ import org.jspecify.annotations.Nullable;
  * belongs ({@link #THEMES}). They're relics like any other ({@link ArsenalRelics#RELIC}): an Arsenal user who picks one
  * up claims it into the Rift Hoard (the old Pocket Stash), and Reach brings it out first. Anyone can swing one.
  * <ul>
- * <li><b>Soul Saber</b> (the Nether): drinks {@link #LIFE_STEAL} of the harm it does; right click looses a slash of
+ * <li><b>Dreaded Blade</b> (the Nether; id {@code soul_saber}, the old Soul Saber, drawn since 0.17.164 as capellastudio's
+ * Weapon - Dreaded Blade (Animated), Blockbench Workshop, CC BY 4.0, its green runes alive and lit): drinks {@link #LIFE_STEAL} of the harm it does; right click looses a slash of
  * soul fire down your sight line.</li>
  * <li><b>Grand Shield</b> (mansions, outposts, strongholds): raised, it sends projectiles back where they came from.</li>
  * <li><b>Voidreaver</b> (End cities): blinds what it cuts; right click steps you through the void to behind your target.</li>
