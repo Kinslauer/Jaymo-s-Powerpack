@@ -6458,7 +6458,45 @@ Compile-checked, not seen in game.
   lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
   also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
 
-## 0.7.332: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.160)
+## 0.7.332: vampires and werewolves hide among friends (pack 0.17.160)
+- **Hunger among players** (`BloodFever.amongPlayers`, Andy: "vampires should hunger when within 150 blocks of other
+  players"; villagers count too, Andy: "yes"): the nearest mortal player (not a vampire, not a changed werewolf, not
+  creative/spectator/invisible) or grown villager/folk within 150 blocks drains a vampire's food (0.02-0.08 exhaustion a second) and climbs the blood fever 0.04-0.12 a second more,
+  edge to face. One in sight (within 40 degrees of where they look, a clear line to eyes or chest) adds up to 0.15 more.
+  Dhampirs feel none of it.
+- **Heartbeat** (`BloodFever.HEARTBEAT`, synced to the vampire only; `BloodVision`): with a player in sight the red
+  edges pulse day or night (players only, not villagers) and the warden's heartbeat plays in their ears with each beat, 0.25-0.8 volume (Andy: "grows to an 80% maximum") and a beat
+  every 24 down to 11 ticks as the player gets closer. Nobody else sees or hears it.
+- **Vampires** (Andy ticked every item on the deception pick list, https://claude.ai/artifact/4k22memmMbtEq7rQnobfbD):
+  `Favourites` (the player you've spent 120 s near is your favourite: fever x2, louder beat), `BloodTemptation`
+  (whispers on the action bar with a player in sight; past the urge line the blood turns your head toward them,
+  client `BloodTurn`), wounded players spike the fever and glow red for you, `SleepingPrey` (sneak-drink a sleeping
+  player; the first bite doesn't wake them; bite marks for a day, Weakness, "You slept badly"; sleeper bites never
+  infect), `BloodThralls` (3 nights on the same player makes them your thrall: they hear your beat, their blood heals
+  double; cure or turning frees them), `VampireMask` (stand still 3 s by day to look human, costs fever), `VampireTells`
+  (animals flee, tamed wolves growl; `VampireFoodMixin`: food feeds you nothing, cake excepted), pallor scales with time
+  since feeding, `Garlic` (new item, 3% from grass; garlic or any silver item makes a vampire flinch unless they hold
+  out), `HunterSense` (a torch holder sees dark smoke trailing a vampire at night), `BloodFever.loner` (among players
+  the urge prefers a person away from the group), `BloodRequests` (the blood asks for something each day; kept eases
+  fever and surrender, broken raises fever), mood (surrender darkens the red and drops the beat's pitch).
+- **Werewolves:** `MoonPull` (the full moon and two nights before: an amber heartbeat for mortals in sight, feral creeps
+  up near them), `ScentTrails` (sneak 2 s to take a scent and see the trail for 60 s), `HiddenChange` + client `WolfTells`
+  (from feral stage 2 or the hour before a change: furred hands, yellow eye flashes, growl when hit), `Caging` (change in
+  a closed room and the beast stays in, clawing the walls), `MorningAfter` (bloody hands and a count of the night's
+  kills, "someone you knew"; look at the Kitchen corpse to learn who), `TornCloth` (a scrap in your rag colour drops at
+  every change; use it on its owner to match), `ClothesColour` (Andy: rags, cloth and clothes "should all be one and the
+  same": each client reads its player's MCA clothes as drawn, in the inventory or third person, and tells the server;
+  a player's beast rags and torn cloth take that colour), `CurseRequests`, client `WolfScreen` (amber mood edges by stage, growls
+  from stage 3; replaces SeizureClient's night-only feral edge).
+- **Everyone:** `Suspicion` (villagers who see a monster feed, hunt, change or show tells gossip naming them by MCA
+  name, fades over ~3 days; wary guards watch them), `Accusations` ("Accuse someone here", a priest's MCA talk option shown while another
+  player is within 10 blocks: holy water on the nearest one; guilty ones are exposed till dawn and guards hunt them, the accuser gains realm reputation; a
+  false accusation costs reputation and the priests' ear for a day), `VictimMemory` + client `VictimClient` (a bitten
+  player wakes to a blurred red silhouette of who bit them, no name), `Kinship` + client `KinshipClient` (monsters in
+  sight of each other hear a cold slow beat or a growl instead of the mortal heartbeat).
+Compile-checked (`./gradlew build` in kingdoms/), not seen in game.
+
+## 0.7.333: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.161)
 Andy: the golem is "accessed through thaumaturgy", and "clockwork golems should also spawn as mini bosses in the aether
 and overworld dungeons".
 - **Golemancy:** no grid recipe any more. Powers' Codex has a Golemancy entry (Artifice tab, after Artifice and Ichor,

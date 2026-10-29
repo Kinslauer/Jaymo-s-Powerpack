@@ -78,6 +78,10 @@ abstract class McaAnswersMixin {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
+			// (0.7.332) only a priest, with someone here to accuse
+			cir.getReturnValue().remove(com.jaymoskingdoms.Accusations.ANSWER);
+		}
 		if ("main".equals(name)) {
 			// (0.7.254) only what your history with them calls for
 			if (!SharedHistory.canThank(player, villager)) {

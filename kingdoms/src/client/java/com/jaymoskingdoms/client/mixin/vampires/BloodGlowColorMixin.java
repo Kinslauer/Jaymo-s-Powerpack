@@ -17,10 +17,12 @@ abstract class BloodGlowColorMixin {
 		at = @At("TAIL"))
 	private void jaymoskingdoms$bloodColor(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		state.setData(com.jaymoskingdoms.client.VampireLooks.LOOK, com.jaymoskingdoms.client.VampireLooks.look(entity));
+		state.setData(com.jaymoskingdoms.client.VampireLooks.PALLOR, com.jaymoskingdoms.client.VampireLooks.pallor(entity));
+		state.setData(com.jaymoskingdoms.client.VampireLooks.MARKS, com.jaymoskingdoms.client.VampireLooks.marks(entity));
 		state.setData(com.jaymoskingdoms.client.NightGiftsClient.WINGS, com.jaymoskingdoms.client.NightGiftsClient.wings(entity));
 		if (state.outlineColor != 0 && !entity.isCurrentlyGlowing() && BloodVision.sensed(entity)) {
 			state.outlineColor = com.jaymoskingdoms.client.NightGiftsClient.revealed(entity) ? com.jaymoskingdoms.client.NightGiftsClient.revealColor()
-				: BloodVision.color(partialTicks);
+				: BloodVision.color(entity, partialTicks);
 		}
 	}
 }

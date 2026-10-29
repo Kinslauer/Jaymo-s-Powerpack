@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * After a structure's pieces are placed in a chunk, the gaps under any that float are filled ({@link Foundations}), and a
- * village's fires get stone hearths and chimneys ({@link Hearths}), and (0.7.332) dungeons may get a rogue clockwork golem
+ * village's fires get stone hearths and chimneys ({@link Hearths}), and (0.7.333) dungeons may get a rogue clockwork golem
  * ({@link GolemLairs}).
  */
 @Mixin(StructureStart.class)

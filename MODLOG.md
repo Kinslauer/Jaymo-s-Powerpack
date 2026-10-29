@@ -3609,3 +3609,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the same for writs and quest lairs). Only End chunks generated after this get the new terrain. Last World Panorama (client-only) makes the title screen's panorama a shot of where you last left a world.
   Both are in `packMods` with their CurseForge ids, so the CurseForge import downloads them; Enderscape is kept out
   of the dev game.
+- **0.17.160, vampires and werewolves hide among friends (Kingdoms 0.7.332):** a vampire within 150 blocks of a mortal
+  player or villager grows hungry and feverish; with a player in sight the screen pulses red and a heartbeat pounds
+  (up to 80% volume). Plus all 24 deception ideas Andy picked: a favourite victim, blood whispers, wounded friends,
+  sleeping prey, thralls, the Mask, tells (animals flee, food gives nothing), pallor, garlic and silver tests, hunter's
+  torch sense, head turns, sneaking away, the blood's and the curse's requests, mood on screen; for werewolves the
+  moon's pull, scent trails, hidden-change tells, locking yourself in, the morning after, torn cloth evidence; and for
+  everyone rumours with names, accusing at the priest (a talk option), victim memory, and monsters hearing each other.
+  See the Kingdoms MODLOG.

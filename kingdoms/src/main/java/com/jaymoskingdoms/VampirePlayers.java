@@ -75,6 +75,11 @@ public final class VampirePlayers {
 				drink(server, sp, target);
 				return InteractionResult.SUCCESS;
 			}
+			// (0.7.332) sleeping prey: a mortal player asleep in a bed ({@link SleepingPrey})
+			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && target != sp && SleepingPrey.prey(target)) {
+				SleepingPrey.bite(server, sp, (ServerPlayer) target);
+				return InteractionResult.SUCCESS;
+			}
 			return InteractionResult.PASS;
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_DRINK.clear());
@@ -117,6 +122,11 @@ public final class VampirePlayers {
 			if (v == null || player.isCreative()) {
 				continue;
 			}
+			if (v.fedAt() == 0L) {
+				// (0.7.332) never fed yet: the pallor ({@link Vampires#pallor}) counts from now
+				v = new Vampires.Vampire(v.kind(), v.fedNight(), overworld.getGameTime());
+				player.setAttached(Vampires.VAMPIRE, v);
+			}
 			if (v.type() == Vampires.Kind.DHAMPIR) {
 				if (night) {
 					player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
@@ -150,7 +160,13 @@ public final class VampirePlayers {
 		return Vampires.nightIndex(clock);
 	}
 
-	private static boolean sunlit(ServerPlayer player) {
+	/** (0.7.332) A dhampir (half a vampire: none of the weaknesses, none of the tells); on either side. */
+	public static boolean dhampir(net.minecraft.world.entity.Entity e) {
+		Vampires.Vampire v = e.getAttached(Vampires.VAMPIRE);
+		return v != null && v.type() == Vampires.Kind.DHAMPIR;
+	}
+
+	static boolean sunlit(ServerPlayer player) {
 		ServerLevel level = player.level();
 		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition()));
 	}
@@ -160,7 +176,8 @@ public final class VampirePlayers {
 		player.removeAttached(Vampires.BITTEN);
 		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
 		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
-		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, 0L));
+		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, player.level().getGameTime()));
+		BloodThralls.release(player); // (0.7.332) a thrall who turns is no one's thrall
 		player.sendSystemMessage(Component.translatable(half ? "message.jaymoskingdoms.vampire.turned_half" : "message.jaymoskingdoms.vampire.turned")
 			.withStyle(ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.6F, 0.5F);
@@ -180,6 +197,14 @@ public final class VampirePlayers {
 
 	/** A bite from a player who's one of them. */
 	static void drink(ServerLevel level, ServerPlayer player, LivingEntity target) {
+		drink(level, player, target, false, true);
+	}
+
+	/**
+	 * A bite. {@code quiet}: (0.7.332) on a sleeper, the first bite takes its blood without a blow and without waking them
+	 * ({@link SleepingPrey}); {@code infect}: whether a survivor turns at the next nightfall.
+	 */
+	static void drink(ServerLevel level, ServerPlayer player, LivingEntity target, boolean quiet, boolean infect) {
 		long now = level.getGameTime();
 		Long last = LAST_DRINK.get(player.getUUID());
 		if (last != null && now - last < DRINK_EVERY) {
@@ -188,11 +213,16 @@ public final class VampirePlayers {
 		LAST_DRINK.put(player.getUUID(), now);
 		long clock = level.getOverworldClockTime();
 		long nightNo = Vampires.nightIndex(clock);
-		if (target.isSleeping()) {
-			target.stopSleeping();
+		if (quiet) {
+			// (0.7.332) no blow, so no waking: the blood is taken, never to the last heart
+			target.setHealth(Math.max(SleepingPrey.QUIET_FLOOR, target.getHealth() - DRINK_DAMAGE));
+		} else {
+			if (target.isSleeping()) {
+				target.stopSleeping();
+			}
+			target.hurtServer(level, level.damageSources().playerAttack(player), DRINK_DAMAGE);
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
 		}
-		target.hurtServer(level, level.damageSources().playerAttack(player), DRINK_DAMAGE);
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3, false, false, false));
 		player.heal(DRINK_HEAL);
 		player.getFoodData().eat(DRINK_FOOD, DRINK_SATURATION);
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
@@ -203,12 +233,24 @@ public final class VampirePlayers {
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.9F, 0.55F);
 		if (target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
-		} else if (target.isAlive() && target instanceof ServerPlayer bitten) {
+		} else if (infect && target.isAlive() && target instanceof ServerPlayer bitten) {
 			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
 			bitten(bitten);
 		}
+		// (0.7.332) a bite on their thrall heals twice over and eases the fever more; a mortal player bitten counts toward binding them
+		boolean thrall = BloodThralls.isThrall(player, target);
+		if (target instanceof ServerPlayer victim && target.isAlive()) {
+			BloodThralls.drank(player, victim, nightNo);
+		}
+		BloodRequests.fed(player, target);
+		VampireMask.fed(player);
+		// (0.7.332) villagers who saw it suspect them by name ({@link Suspicion}); a player bitten remembers the biter ({@link VictimMemory})
+		Suspicion.witnessed(level, player, Suspicion.VAMPIRE, Suspicion.ADD_FEEDING, player.isShiftKeyDown() ? Suspicion.FEED_RANGE * Suspicion.SNEAK_SHARE : Suspicion.FEED_RANGE, false);
+		if (target instanceof ServerPlayer victim && Vampires.isVampire(player)) {
+			VictimMemory.bitten(victim, player);
+		}
 		// (0.7.185) every bite eases the blood fever
-		BloodFever.bit(player);
+		BloodFever.bit(player, thrall);
 		if (Vampires.night(clock)) {
 			Vampires.expose(player, nightNo);
 		}
