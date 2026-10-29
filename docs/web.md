@@ -1640,3 +1640,17 @@ to 3 removals."
   same twice running; no Executioner perk needed (the suit is the weapon); priority over the bare-hand neck snap.
 - **Check first in game:** engulfed-arm sizes and first-person offsets; the hand grab's skewer aim; execution
   keyframes (hand-authored); grey line darkness at default brightness; the well-fed whisper timing.
+
+## Swing engulf (0.17.149)
+
+Andy: "The tendrils when swinging with R should extend from the body and arm fully engulfing it and retracting as soon as
+the button is released. leaving no remnant line. much like the Symbiote: A Bonding Experience mod."
+
+- **`WebEngulf` (client):** per player and hand, tracks a wrap (0-1) and a reel (0-1) each tick. On R in the suit,
+  `WRAP_TICKS` 3: nine tendrils pour out of the torso, over the shoulder and spiral down the whole arm to the hand; the
+  cord only shoots once the wrap is `CORD_AT` 0.75 of the way. While held the arm stays wrapped (plus the existing
+  `armSheath` braiding into the cord). On release the cord reels from the anchor into the hand (`REEL_TICKS` 3, taut),
+  then the wrap draws back into the body (`UNWRAP_TICKS` 4).
+- **No remnant:** `WebSpentLines.spend` ignores dark (symbiote) lines, so neither a released swing nor a broken hitch
+  leaves a falling line. Plain webs still fall and fade. Own first person draws no wrap (the arm is the camera's); the
+  cord still waits for the wrap and reels in.

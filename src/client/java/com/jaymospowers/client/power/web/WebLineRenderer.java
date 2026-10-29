@@ -83,6 +83,7 @@ final class WebLineRenderer {
 		}
 		// (spent lines go by which creatures are hitched, to leave a broken hitch's line behind)
 		WebSpentLines.tick(minecraft, HITCHED);
+		WebEngulf.tick(minecraft);
 		if (minecraft.level == null) {
 			return;
 		}
@@ -316,6 +317,22 @@ final class WebLineRenderer {
 			lineStrain = com.jaymospowers.power.web.WebSymbioteStrains.of(player);
 			// both webs on one catch (a Web Whip): one web, held in both hands
 			boolean twoHanded = WebArms.twoHanded(player);
+			boolean ownFirstPerson = player == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
+			if (dark) {
+				// (0.17.149) the suit's tendrils wrap the swinging arm from the body, before the cord shoots, and unwrap after it reels in
+				for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
+					if (!ownFirstPerson) {
+						WebEngulf.render(context, minecraft, player, handIndex, partialTick, camera);
+					}
+					Vec3 handNow = handPos(minecraft, player, handIndex, partialTick);
+					Vec3 reeled = WebEngulf.reelingEnd(player, handIndex, partialTick, handNow);
+					if (reeled != null && WebArms.lineEnd(minecraft, level, player, handIndex, partialTick) == null) {
+						// released: the cord reels back from the anchor into the hand, taut, and leaves nothing behind
+						Vec3 f = handNow.subtract(camera), t = reeled.subtract(camera);
+						bundle(context, f, t, width);
+					}
+				}
+			}
 			for (int handIndex = WebNet.MAIN; handIndex <= (twoHanded ? WebNet.MAIN : WebNet.OFF); handIndex++) {
 				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, partialTick);
 				if (end == null) {
@@ -326,6 +343,10 @@ final class WebLineRenderer {
 				Vec3 hand = twoHanded ? handPos(minecraft, player, WebNet.MAIN, partialTick).lerp(handPos(minecraft, player, WebNet.OFF, partialTick), 0.5)
 					: nozzle ? nozzlePos(minecraft, player, handIndex, partialTick) : handPos(minecraft, player, handIndex, partialTick);
 				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
+					continue;
+				}
+				// the cord waits for the wrap to reach the hand
+				if (dark && WebEngulf.wrap(player, handIndex, partialTick) < WebEngulf.CORD_AT) {
 					continue;
 				}
 				// shooting out to where it sticks (the symbiote's ropes slower than a web)
