@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
  * was running ends, as if downed.</li>
  * <li><b>Will Over Flesh</b>: above half health, another player's power moves you {@link #OVER_FLESH_PER_RANK} less per
  * rank ({@link #pushed}): the pushes made while that player's power ticks or answers a key.</li>
+ * <li><b>Unflinching</b> (0.18.5): a held action (getting yourself up, a revive, Second Wind's eating) takes one more hit
+ * a rank before it's broken off ({@link #holdHits}).</li>
  * </ul>
  */
 public final class WillSkill {
@@ -165,6 +167,11 @@ public final class WillSkill {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			// (nobody saw)
 		}
+	}
+
+	/** Unflinching: the hits {@code player}'s held action takes before it's broken off, {@code base} without the perk. */
+	public static int holdHits(@Nullable Entity player, int base) {
+		return base + rank(player, "unflinching");
 	}
 
 	/** Whether {@code player} counts {@code other} weaker (Kingdoms' measure); false without Kingdoms. */

@@ -95,7 +95,7 @@ public final class Voices {
 		List<String> out = new ArrayList<>(SPIRIT_LINES);
 		for (LifeStory.Question q : LifeStory.Question.values()) {
 			out.add("story.jaymoskingdoms." + q.key() + ".title");
-			// (0.7.357) a question's title and the line under it are read apart (the line only if the page waits)
+			// (0.7.360) a question's title and the line under it are read apart (the line only if the page waits)
 			if (q != LifeStory.Question.ROAD) {
 				out.add("story.jaymoskingdoms." + q.key() + ".sub");
 			}

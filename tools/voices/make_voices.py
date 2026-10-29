@@ -113,7 +113,7 @@ def realm_free(text):
 def lines(lang, powers):
     """(voice, lang key, text) for every voiced line, questions first so a short run still voices every page."""
     s = "story.jaymoskingdoms."
-    # (Kingdoms 0.7.357) each question's title alone, and the line under it apart (read only if the page waits; none
+    # (Kingdoms 0.7.360) each question's title alone, and the line under it apart (read only if the page waits; none
     # for the road)
     out = [("narrator", s + q + ".title", lang[s + q + ".title"]) for q in QUESTIONS]
     out += [("narrator", s + q + ".sub", lang[s + q + ".sub"]) for q in QUESTIONS if q != "road"]

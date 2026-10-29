@@ -27,7 +27,7 @@ final class StoryHoldScreen extends Screen {
 	private static final long DOT_MS = 400L, SWEEP_MS = 1800L;
 	private static final int BAR_W = 160, BAR_H = 4, BACKGROUND = 0xFF0C0C12, BAR_BACK = 0xFF2A2A34;
 	/**
-	 * (0.7.357) Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white
+	 * (0.7.360) Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white
 	 * text should cycle, with a series of a minimum 40 lines hinting at how different game mechanics work. The narrator can
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on, while the narrator still reads what the hold is for. Widest a hint may run.
@@ -97,7 +97,7 @@ final class StoryHoldScreen extends Screen {
 
 	private static void narrate() {
 		if (!holding.equals(read)) {
-			// (0.7.357) the life story's narrator never reads over this one
+			// (0.7.360) the life story's narrator never reads over this one
 			LifeStoryScreen.hush();
 			if (read.isEmpty()) {
 				toRead.add("gui.jaymoskingdoms.story.hold.title");
@@ -154,7 +154,7 @@ final class StoryHoldScreen extends Screen {
 		long now = System.currentTimeMillis();
 		String dots = ".".repeat((int)(now / DOT_MS % 4));
 		graphics.centeredText(this.font, this.title.copy().append(dots), cx, cy - 24, Ui.GOLD);
-		// (0.7.357) a hint at how something works, a new one every HINT_MS (what the hold is for is only heard)
+		// (0.7.360) a hint at how something works, a new one every HINT_MS (what the hold is for is only heard)
 		int hint = (this.firstHint + (int)((now - this.opened) / HINT_MS)) % HINTS + 1;
 		int ty = cy - 6;
 		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.hint." + hint),

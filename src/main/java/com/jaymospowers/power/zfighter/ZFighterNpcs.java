@@ -187,6 +187,11 @@ public final class ZFighterNpcs {
 				// (0.17.192) an Omen's pilot, in the future
 				return com.jaymospowers.power.chrono.future.FutureOmenPilots.talk(player, npc);
 			}
+			if (npc.entityTags().contains(ZFighterPatrol.TAG)) {
+				// (0.18.6) a galactic patrolman
+				ZFighterPatrol.talk(player, npc);
+				return true;
+			}
 			if (npc.entityTags().contains(ZFighterMasters.TAG) || npc.entityTags().contains(ZFighterMasters.DARK_TAG)) {
 				ZFighterMasters.talk(player, npc);
 				return true;

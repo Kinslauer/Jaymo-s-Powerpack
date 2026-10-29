@@ -62,7 +62,7 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.269) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
 	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
 	/**
-	 * (0.7.357) Andy: "'as a child you were....' should be all it says. If players spend more than 10s on this screen then
+	 * (0.7.360) Andy: "'as a child you were....' should be all it says. If players spend more than 10s on this screen then
 	 * it plays, 'what kind of child were you?'". A question is read by its title alone; its line underneath only once
 	 * the page has stood this long (ms) unanswered. The road's page is only ever its title.
 	 */
@@ -131,7 +131,7 @@ final class LifeStoryScreen extends Screen {
 	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
 	/** (0.7.269) When the line being read began, and when the next may (ms). */
 	private static long readFrom, readNext;
-	/** (0.7.357) When the page being read first showed (ms), and whether its line underneath has been read. */
+	/** (0.7.360) When the page being read first showed (ms), and whether its line underneath has been read. */
 	private static long pageSince;
 	private static boolean subRead;
 
@@ -198,13 +198,13 @@ final class LifeStoryScreen extends Screen {
 	public void removed() {
 		// (0.7.286) the stand-in figure is no longer MCA's editor figure
 		StoryFigure.closed();
-		// (0.7.357) Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off
+		// (0.7.360) Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off
 		// anytime the player advances." Leaving the story cuts the reading off too
 		hush();
 		super.removed();
 	}
 
-	/** (0.7.357) The narrator stops at once, and forgets what it was about to read. */
+	/** (0.7.360) The narrator stops at once, and forgets what it was about to read. */
 	static void hush() {
 		if (reading != null) {
 			Minecraft.getInstance().getSoundManager().stop(reading);
@@ -554,7 +554,7 @@ final class LifeStoryScreen extends Screen {
 			narrated = page;
 			pageSince = now;
 			subRead = false;
-			// (0.7.357) whatever was still being read stops: this page's lines only, never two at once
+			// (0.7.360) whatever was still being read stops: this page's lines only, never two at once
 			hush();
 			StoryHoldScreen.hush(minecraft);
 			toRead.addAll(asking ? List.of("gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc") : lines(s));
@@ -571,7 +571,7 @@ final class LifeStoryScreen extends Screen {
 		if (now < readNext) {
 			return;
 		}
-		// (0.7.357) a question left unanswered a while: its line underneath, once
+		// (0.7.360) a question left unanswered a while: its line underneath, once
 		if (!asking && !subRead && toRead.isEmpty() && !s.gender && !s.realm && s.question != null && s.question != Question.ROAD
 			&& picked(s.question) == null && now - pageSince >= SUB_DELAY_MS) {
 			subRead = true;
@@ -591,7 +591,7 @@ final class LifeStoryScreen extends Screen {
 	/** The lines the narrator reads on page {@code s}, as lang keys. */
 	private static List<String> lines(Step s) {
 		if (s.gender) {
-			// (0.7.357) Andy: "should just say, 'Who are you' no other voice line, on this screen"
+			// (0.7.360) Andy: "should just say, 'Who are you' no other voice line, on this screen"
 			return List.of("story.jaymoskingdoms.gender.title");
 		}
 		if (s.question == null) {
@@ -1051,7 +1051,7 @@ final class LifeStoryScreen extends Screen {
 			Ui.line(graphics, this.font, name, ix + 4, ny, textW - 8, open ? ACCENT : Ui.HINT);
 		}
 		List<Component> lines = new ArrayList<>();
-		// (0.7.357) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
+		// (0.7.360) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
 		// its short line; the whole tale is kept for the story on the last page
 		lines.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".short", realmName(Question.ROAD)));
 		if (!open) {
@@ -1406,7 +1406,7 @@ final class LifeStoryScreen extends Screen {
 			} else {
 				icon = new ItemStack(a.icon());
 				name = Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key());
-				// (0.7.357) the option's short line; its whole tale is told on the last page
+				// (0.7.360) the option's short line; its whole tale is told on the last page
 				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".short", realmName(s.question)));
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {

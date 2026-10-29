@@ -372,25 +372,6 @@ public final class Future {
 		}
 	}
 
-	/** (0.17.62, Andy's NOEA picks) The space pod's way in: is the city ready? If not it is started and the player told. */
-	public static boolean podReady(ServerPlayer player) {
-		return ready(player);
-	}
-
-	/** (0.17.62) The space pod's flight into the future: set down in the city, with no Echo needed. False if the city is not ready. */
-	public static boolean podGo(ServerPlayer player) {
-		if (!ready(player)) {
-			return false;
-		}
-		goForward(player, 0, 1);
-		return true;
-	}
-
-	/** (0.17.62) The space pod's flight home from the future. */
-	public static void podBack(ServerPlayer player) {
-		goBack(player);
-	}
-
 	/** Back to where they left from (or the world spawn if that's gone). */
 	static void goBack(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();

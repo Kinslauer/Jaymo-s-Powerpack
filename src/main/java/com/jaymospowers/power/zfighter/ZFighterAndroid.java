@@ -399,6 +399,10 @@ public final class ZFighterAndroid {
 			case OPERATION_STAGE -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.operate", true, next));
 			default -> options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.after", true, next));
 		}
+		// (0.18.5, Andy) the pod was his: he lost the know-how along with his time machine
+		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.pod", true, () -> ZFighterNpcs.ask(player, scientist,
+			Component.translatable("talk.jaymospowers.tinkerer.pod." + (1 + player.getRandom().nextInt(3))),
+			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		ZFighterNpcs.ask(player, scientist, Component.translatable("talk.jaymospowers.tinkerer.greet." + Math.min(stage, DONE)), options);
 	}
 

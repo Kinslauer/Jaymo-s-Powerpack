@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import java.util.HashMap;
+import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,6 +36,11 @@ import org.jspecify.annotations.Nullable;
  * and the arms haul the body hand over hand, the chest lifting with each pull, quick enough for the slow downed crawl to
  * read as dragging rather than gliding. Sneak (held to give up) no longer flattens the upper body into the ground
  * (vanilla's crouch on a body lying flat): it plays the push-up struggle instead.
+ * <p>
+ * (0.18.5) Getting up by themselves ({@link Downed#RISING}): pushed up on straight arms, then the knees drawn under and a
+ * hand on one knee, then up onto their feet, the whole body turned up off the ground about the feet till it stands. Once
+ * up, the swimming tilt vanilla eases out over a few ticks is cancelled ({@link #RISEN_KEY}), so they don't pitch
+ * forward again as they stand.
  */
 public final class CrawlPose {
 	/** Strokes per unit of the walk cycle (vanilla's walk is 0.6662), and the uneven downed crawl's hitch on each pull. */
@@ -70,6 +77,14 @@ public final class CrawlPose {
 	static final float PRESS_X = -1.6F, PRESS_OUT = 0.3F;
 	/** Falling down: the jolt as the body hits (degrees), how fast it rings (per tick) and dies away (per tick). */
 	static final float FALL_JOLT = 7.0F, FALL_RING = 0.9F, FALL_DECAY = 0.25F;
+	/**
+	 * (0.18.5) Rising: the share of the rise spent pushing up, then kneeling (the rest is standing), how far the body is
+	 * turned up by the end of each (degrees: 90 stands), the knees drawn under kneeling (radians), and the hand on the knee.
+	 */
+	static final float PUSH_SHARE = 0.3F, KNEEL_SHARE = 0.65F, PUSH_DEGREES = 25.0F, KNEEL_DEGREES = 60.0F, KNEEL_LEGS = -1.25F,
+		KNEE_HAND_X = -0.7F;
+	/** (0.18.5) How long after rising the leftover swimming tilt is cancelled (ticks). */
+	static final long RISEN_TICKS = 30L;
 	/** Passed out: the head turned to the side, the arms slack by the body. */
 	static final float OUT_HEAD_TURN = 1.1F, OUT_ARM_X = -0.35F, OUT_ARM_OUT = 0.25F;
 
@@ -80,10 +95,14 @@ public final class CrawlPose {
 	 * (0.15.86) downed and holding Sneak to give up.
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
-		boolean sneak) {
+		boolean sneak, float rise) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
+	/** (0.18.5) Just risen by themselves: vanilla's swimming tilt, still easing out, is cancelled. */
+	static final RenderStateDataKey<Boolean> RISEN_KEY = RenderStateDataKey.create(() -> "jaymospowers:risen");
+	/** (0.18.5) Player entity id → the game time they were last seen nearly risen (client side). */
+	private static final Map<Integer, Long> RISEN = new HashMap<>();
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("crawl");
 
@@ -95,15 +114,29 @@ public final class CrawlPose {
 		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
 			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
 			state.setData(KEY, null);
+			Long risen = RISEN.get(entity.getId());
+			boolean fresh = risen != null && entity.level().getGameTime() - risen <= RISEN_TICKS;
+			if (risen != null && !fresh) {
+				RISEN.remove(entity.getId());
+			}
+			state.setData(RISEN_KEY, fresh && !entity.isInWater() ? Boolean.TRUE : null);
 			return;
 		}
+		state.setData(RISEN_KEY, null);
 		long time = player.level().getGameTime();
 		Float roll = player == Minecraft.getInstance().player ? CrawlTaps.localRollProgress(time, partialTicks)
 			: Crawl.rollProgress(player, time, partialTicks);
 		boolean downed = Downed.isDowned(player);
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
+		Long rising = downed ? player.getAttached(Downed.RISING) : null;
+		float rise = rising == null ? -1.0F : Mth.clamp((time - rising + partialTicks) / Downed.RISE_TICKS, 0.0F, 1.0F);
+		if (rise >= 0.9F) {
+			RISEN.put(player.getId(), time);
+		} else if (downed) {
+			RISEN.remove(player.getId());
+		}
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
-			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown()));
+			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise));
 		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
 		state.isCrouching = false;
 	}
@@ -114,7 +147,22 @@ public final class CrawlPose {
 	 */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		State crawl = state.getData(KEY);
+		if (crawl == null && state.getData(RISEN_KEY) != null && state.swimAmount > 0.0F) {
+			// (0.18.5) up on their feet: vanilla's tilt (and its shift, while the pose lasts) undone as it eases out
+			if (state.isVisuallySwimming) {
+				poseStack.translate(0.0F, 1.0F, -0.3F);
+			}
+			poseStack.rotateDegrees(Axis.XP, 90.0F * state.swimAmount);
+			return;
+		}
 		if (crawl == null || !state.isVisuallySwimming) {
+			return;
+		}
+		if (crawl.rise() >= 0.0F) {
+			// (0.18.5) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
+			float up = PoseBlend.smooth(crawl.rise());
+			poseStack.translate(0.0F, up, -0.3F * up);
+			poseStack.rotateDegrees(Axis.XP, riseDegrees(crawl.rise()) + Mth.sin(crawl.age() * 2.3F) * 0.6F * (1.0F - crawl.rise()));
 			return;
 		}
 		if (crawl.roll() != null) {
@@ -198,6 +246,11 @@ public final class CrawlPose {
 		}
 		int broken = crawl.broken();
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
+		if (crawl.rise() >= 0.0F) {
+			rise(f, crawl, rightArm, leftArm);
+			track.apply(h, f, 1.2F);
+			return;
+		}
 		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F);
 		float press = crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F;
 		if (press > 0.0F) {
@@ -272,6 +325,43 @@ public final class CrawlPose {
 		float look = Math.abs(Mth.sin(phase)) * moving;
 		float headRest = downed ? HEAD_DOWN_REST : HEAD_REST;
 		f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, headRest, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
+	}
+
+	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
+	static float riseDegrees(float t) {
+		if (t < PUSH_SHARE) {
+			return PUSH_DEGREES * PoseBlend.smooth(t / PUSH_SHARE);
+		}
+		if (t < KNEEL_SHARE) {
+			return Mth.lerp(PoseBlend.smooth((t - PUSH_SHARE) / (KNEEL_SHARE - PUSH_SHARE)), PUSH_DEGREES, KNEEL_DEGREES);
+		}
+		return Mth.lerp(PoseBlend.smooth((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE)), KNEEL_DEGREES, 90.0F);
+	}
+
+	/**
+	 * (0.18.5) Rising's limbs: arms pressed straight down under the shoulders, shaking; then the knees drawn under, a
+	 * hand on the knee; then straightening, arms down by the sides. The head looks ahead, coming upright with the body.
+	 */
+	private static void rise(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {
+		float t = crawl.rise();
+		float press = 1.0F - PoseBlend.seg(t, PUSH_SHARE * 0.7F, KNEEL_SHARE);
+		float kneel = PoseBlend.bump(t, PUSH_SHARE * 0.6F, PUSH_SHARE + 0.1F, KNEEL_SHARE, 1.0F);
+		float stand = PoseBlend.seg(t, KNEEL_SHARE, 1.0F);
+		float shake = Mth.sin(crawl.age() * 2.3F) * 0.05F * (1.0F - stand);
+		if (rightArm) {
+			f.set(PoseBlend.RIGHT_ARM, Mth.lerp(press, Mth.lerp(stand, KNEE_HAND_X, 0.0F), PRESS_X), 0.0F, Mth.lerp(press, 0.1F, PRESS_OUT));
+			f.shake(PoseBlend.RIGHT_ARM, shake);
+		}
+		if (leftArm) {
+			f.set(PoseBlend.LEFT_ARM, Mth.lerp(press, Mth.lerp(stand, -0.25F, 0.0F), PRESS_X), 0.0F, Mth.lerp(press, -0.1F, -PRESS_OUT));
+			f.shake(PoseBlend.LEFT_ARM, -shake);
+		}
+		// the knees drawn under the body, the right more (the foot planted to stand on), straightening as they stand
+		f.set(PoseBlend.RIGHT_LEG, KNEEL_LEGS * kneel * 1.1F, 0.0F, 0.05F);
+		f.set(PoseBlend.LEFT_LEG, KNEEL_LEGS * kneel * 0.85F, 0.0F, -0.05F);
+		f.set(PoseBlend.BODY + 1, 0.0F);
+		f.set(PoseBlend.HIP_YAW, 0.0F);
+		f.set(PoseBlend.HEAD, HEAD_LOOK * (1.0F - riseDegrees(t) / 90.0F), 0.0F, 0.0F);
 	}
 
 	/** How much of the stroke shows (0 lying still to 1 crawling); downed, the slow drag shows it all. */
