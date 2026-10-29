@@ -6697,11 +6697,20 @@ server refuses it for any other heritage. `onlyFor` keeps answering null for ans
 - Still Verdant-only and Divine-making checks on the road, now against the heritage already set.
 - Compile-checked. Not seen in game.
 
-## 0.7.357: hints on the hold screen (pack 0.18.4)
+## 0.7.357: hints on the hold screen, a quieter narrator (pack 0.18.4)
 - Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white text should
   cycle, with a series of a minimum 40 lines hinting at how different game mechanics work. The narrator can continue
   saying what it does now". `StoryHoldScreen` keeps "Your story is being written" (its dots moved onto it) and under it
   shows one of 44 hints (`gui.jaymoskingdoms.story.hint.1-44`: climbing, parries, finishers, smithing, lockpicking,
   boards, careers, horses, alchemy, mana and more), a new one every 7 s from a random one on, wrapped to two lines if
   long. The narrator still reads the title and what the hold is for (the capital rising, the whaler, the future).
+  - Not seen in game.
+- Andy, on the life story's narration: "should just say, 'Who are you' no other voice line, on this screen. 'as a child
+  you were....' should be all it says. If players spend more than 10s on this screen then it plays, 'what kind of child
+  were you?' ... It can simply say, 'what sets you on the road now?'". Each question is now read by its title alone; its
+  line underneath is read only once the page has stood 10 s unanswered (`LifeStoryScreen.SUB_DELAY_MS`), never on the
+  road's page. The who-are-you page reads only "Who are you?". 11 narrator clips remade (titles alone, lines apart).
+- Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off anytime the
+  player advances." Next, a new page, and leaving the story (`removed`) all cut the narrator off at once
+  (`LifeStoryScreen.hush`), and the loading screen's narrator and the story's never talk over each other.
   - Not seen in game.

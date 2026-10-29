@@ -86,7 +86,7 @@ final class StoryHoldScreen extends Screen {
 	}
 
 	/** The hold is over: stop reading, so the life story's narrator isn't talked over. */
-	private static void hush(Minecraft minecraft) {
+	static void hush(Minecraft minecraft) {
 		if (reading != null) {
 			minecraft.getSoundManager().stop(reading);
 			reading = null;
@@ -97,6 +97,8 @@ final class StoryHoldScreen extends Screen {
 
 	private static void narrate() {
 		if (!holding.equals(read)) {
+			// (0.7.357) the life story's narrator never reads over this one
+			LifeStoryScreen.hush();
 			if (read.isEmpty()) {
 				toRead.add("gui.jaymoskingdoms.story.hold.title");
 			}
