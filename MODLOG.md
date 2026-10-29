@@ -3705,3 +3705,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   membrane, white wool) and Rabbit's Foot Charm (+1 luck: string, a gold nugget, a rabbit's foot). The bonuses are set
   in `Baubles.init`.
   - Compile-checked; not seen in game.
+- **0.17.186, Sora's Dagger reverse grip, again:** Andy: "the reverse grip didnt seem to be working, he modeled it
+  differently". The friend's "Reverse grip sora dagger" file (same cubes, his hand slots turned over, kept as
+  `tools/blockbench/soras_dagger_reverse_original.bbmodel`) now gives the `_reverse` models their held transforms.
+  The weapon guard no longer refuses sneak + use on Sora's Dagger when something is in the off hand, which had stopped
+  the turn before the dagger saw it.
