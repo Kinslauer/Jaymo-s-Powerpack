@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
 import java.util.HashMap;
@@ -58,9 +59,16 @@ public final class ZFighterScouter {
 	static final double STAT_WEIGHT = 20.0;
 	/**
 	 * A fighter's multiplier by form (base, Super, Super 2, Super 3, Super Primal Super, False Super, god, Legend 1-3, Primal
-	 * Super). (0.17.190) Andy: Super Primal Super's power level is Primal Super's times 4.
+	 * Super). (0.17.190) Andy: Super Primal Super's power level is Primal Super's times 4. False Super's entry is unused: it
+	 * reads {@link #falseSuper}.
 	 */
 	static final double[] FORM_MULTIPLIER = {1.0, 2.5, 4.0, 6.0, 7.0 * 4.0, 4.0, 11.0, 5.0, 8.0, 12.0, 7.0};
+	/**
+	 * (0.17.193) Andy: False Super comes before Super, so it multiplies by this much, rising to this much as he nears the
+	 * real breakthrough: half by his hardship toward {@link ZFighterBattle#SUPER_HARDSHIP}, half by the abilities he has
+	 * mastered toward ascending ({@link Mastery#ALL}).
+	 */
+	static final double FALSE_SUPER_MIN = 1.5, FALSE_SUPER_MAX = 3.0;
 	/** Plus this much per Limit Break tier, this much at full mastery of the form he's in, and this much times over in Rage. */
 	static final double LIMIT_MULTIPLIER = 0.25;
 	static final double MASTERY_MULTIPLIER = 0.5;
@@ -100,7 +108,7 @@ public final class ZFighterScouter {
 		if (entity instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			level += ZFighterPower.maxKi(player) * KI_WEIGHT + ZFighterTraining.of(player).totalLevels() * STAT_WEIGHT;
-			level *= FORM_MULTIPLIER[Mth.clamp(live.form, 0, FORM_MULTIPLIER.length - 1)];
+			level *= live.form == ZFighterForms.FALSE_SUPER ? falseSuper(player) : FORM_MULTIPLIER[Mth.clamp(live.form, 0, FORM_MULTIPLIER.length - 1)];
 			level *= 1.0 + LIMIT_MULTIPLIER * live.limit;
 			level *= 1.0 + MASTERY_MULTIPLIER * ZFighterTraining.mastery(player, live.form);
 			if (live.raging()) {
@@ -108,6 +116,13 @@ public final class ZFighterScouter {
 			}
 		}
 		return (int)Math.min(Integer.MAX_VALUE / 2, Math.round(level));
+	}
+
+	/** False Super's multiplier: {@link #FALSE_SUPER_MIN} to {@link #FALSE_SUPER_MAX} by how close he is to his first Super. */
+	static double falseSuper(ServerPlayer player) {
+		double hardship = Mth.clamp(ZFighterPower.hardship(player) / (double)ZFighterBattle.SUPER_HARDSHIP, 0.0, 1.0);
+		double mastered = Mth.clamp(Mastery.unlocked(player) / (double)Mastery.ALL, 0.0, 1.0);
+		return Mth.lerp((hardship + mastered) / 2.0, FALSE_SUPER_MIN, FALSE_SUPER_MAX);
 	}
 
 	/** From the wearer: he is looking at entity {@code id}. Reads it back to him, and burns the scouter out on too big a number. */
