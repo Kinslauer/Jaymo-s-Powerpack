@@ -17,9 +17,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -32,7 +30,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -47,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * androids, android and war mechs and the dead on sight, and is neutral toward players unless one hurts it or its drone
  * ({@link FutureWorky}); then it answers, and so does the rest of its squad. It hoses its target with a heavy arm cannon
  * (the future's own gun code, {@link FutureGuns}) and smashes what gets close. Beaten, it leaves scrap, now and then a
- * cockpit log, and its pilot climbs out of the hatch (a plain survivor).
+ * cockpit log, and its pilot climbs out of the hatch (a curious survivor from the future, an MCA villager: {@link FutureOmenPilots}).
  * <p>Squads turn up rarely, with their drones, in the future only ({@link FutureOmens}). Nothing its own kind fires
  * (or its drones) does it harm.
  */
@@ -223,18 +220,16 @@ public class FutureOmen extends PathfinderMob {
 	}
 
 	private void ejectPilot(ServerLevel level) {
-		Villager pilot = EntityTypes.VILLAGER.create(level, EntitySpawnReason.EVENT);
+		double angle = getRandom().nextDouble() * Math.PI * 2.0;
+		LivingEntity pilot = FutureOmenPilots.spawn(level, new Vec3(getX() + Math.cos(angle) * 0.8, getY() + getBbHeight() * 0.85, getZ() + Math.sin(angle) * 0.8),
+			getRandom().nextFloat() * 360.0F);
 		if (pilot == null) {
 			return;
 		}
-		double angle = getRandom().nextDouble() * Math.PI * 2.0;
-		pilot.snapTo(getX() + Math.cos(angle) * 0.8, getY() + getBbHeight() * 0.85, getZ() + Math.sin(angle) * 0.8, getRandom().nextFloat() * 360.0F, 0.0F);
 		pilot.setDeltaMovement(Math.cos(angle) * 0.25, 0.45, Math.sin(angle) * 0.25);
-		pilot.addTag(PILOT_TAG);
 		pilot.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, PILOT_SHIELD, 4));
 		pilot.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, PILOT_SHIELD, 0));
 		pilot.addEffect(new MobEffectInstance(MobEffects.SPEED, PILOT_SHIELD * 2, 1));
-		level.addFreshEntity(pilot);
 	}
 
 	/**
