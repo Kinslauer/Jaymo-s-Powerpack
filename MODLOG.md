@@ -3516,5 +3516,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (shoulders, knees, hocks, cheeks, nostrils, coronets) and muscle shading. Then after SWEM's look: taller horses
   (longer legs and neck, riders higher) and joined-up barding over a cloth caparison, full chanfron, stirrups outside.
   In the end Andy asked for vanilla-shaped horses until better models turn up: every breed is the classic horse
-  shape with Realistic Horse Genetics' coat patterns and plain vanilla-style armour, plus a rare (1 in 100) moonlit
+  shape with Realistic Horse Genetics' coat patterns and segmented armour (plates over the vitals, joined by mail or cloth), plus a rare (1 in 100) moonlit
   horse made from jsellier23's CC-BY Mystical Deer. See the Kingdoms MODLOG.

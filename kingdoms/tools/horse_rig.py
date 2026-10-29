@@ -243,32 +243,94 @@ def armour(build, parts):
 
 
 def plain_armour(build, parts):
-    """(SIMPLE) Plain horse armour as vanilla's is: the horse's own boxes a little bigger, plated (over the head with the
-    eyes left open, the muzzle, the neck, the body and the upper legs). Each box of those bones (and of the pieces hung
-    from them) gets its cover, on the same part."""
+    """(SIMPLE) The classic horse's armour (segmented_armour), its face plate on the head and its nose plate on the
+    muzzle (both on the head bone, which the muzzle shares a pivot with)."""
     by = {p.name: p for p in parts}
-    covers = {"head": ("helm", 0.35), "upper_mouth": ("muzzle_plate", 0.3), "neck": ("neck_plate", 0.4), "body": ("plate", 0.45)}
-    covers.update({f"leg{k}_a": ("leg_plate", 0.3) for k in range(1, 5)})
+    return segmented_armour(parts, (by["head"], by["head"].cubes[0]), (by["head"], by["upper_mouth"].cubes[0]))
+
+
+def bounds_in(parts, bone):
+    """The box (x0, x1, y0, y1, z0, z1) round every hide box of `bone` and the pieces hung from it, in the bone's space."""
+    by = {p.name: p for p in parts}
+    chains = transforms(parts)
+    pts = []
+    for p in parts:
+        q = p
+        while q.parent is not None and q.name != bone:
+            q = by[q.parent]
+        if q.name != bone:
+            continue
+        for c in p.cubes:
+            if c.kind != "hide":
+                continue
+            for i in (0, 1):
+                for j in (0, 1):
+                    for k in (0, 1):
+                        pts.append(apply(chains[p.name][1:], (c.pos[0] + i * c.size[0], c.pos[1] + j * c.size[1], c.pos[2] + k * c.size[2])))
+    return tuple(f(v[a] for v in pts) for a in range(3) for f in (min, max))
+
+
+def segmented_armour(parts, head, muzzle):
+    """(SIMPLE, Andy: "large plates connected by chainmail or fabric, and the plates only cover the vitals") A coat of
+    mail (or quilted cloth) over the body and neck, and on it plates over the vitals only, with gaps between them where
+    the mail shows: a face plate over the brow and a nose plate (the eyes, ears and jaw left clear), three lames down the
+    neck's crest, a peytral over the chest with a boss, a plate over each side's ribs (ahead of the stirrups) and a
+    crupper over the rump with a ridged spine. Nothing on the legs. `head` and `muzzle` are (part, box) to plate."""
+    by = {p.name: p for p in parts}
     out = []
 
-    def bone(p):
-        while p.parent is not None and p.name not in covers:
-            p = by[p.parent]
-        return p.name
+    def add(name, parent, region, x0, x1, y0, y1, z0, z1, grow=0.0):
+        c = Cube((round(x0, 3), round(y0, 3), round(z0, 3)), (round(x1 - x0, 3), round(y1 - y0, 3), round(z1 - z0, 3)), kind="armor",
+                 region=region, grow=grow)
+        out.append(Part("armor_" + name, parent, (0, 0, 0, 0, 0, 0), [c]))
 
+    # ---- the mail coat: each body and neck box a little bigger ----
+    k = 0
     for p in parts:
-        b = bone(p)
-        if b not in covers or not p.cubes:
+        q = p
+        while q.parent is not None and q.name not in ("body", "neck"):
+            q = by[q.parent]
+        if q.name not in ("body", "neck"):
             continue
-        region, grow = covers[b]
-        for k, cube in enumerate(p.cubes):
-            if cube.kind != "hide":
-                continue
-            c = Cube(cube.pos, cube.size, kind="armor", region=region, grow=grow + cube.grow)
-            c.eye = getattr(cube, "eye", None)
-            # the muzzle's cover rides on the head (it stays on when the mouth opens)
-            on = "head" if p.name == "upper_mouth" else p.name
-            out.append(Part(f"armor_{p.name}_{k}" if (p.name, k) != ("body", 0) else "armor_body", on, (0, 0, 0, 0, 0, 0), [c]))
+        for cube in p.cubes:
+            if cube.kind == "hide":
+                k += 1
+                c = Cube(cube.pos, cube.size, kind="armor", region="mail", grow=cube.grow + 0.3)
+                out.append(Part(f"armor_mail_{k}", p.name, (0, 0, 0, 0, 0, 0), [c]))
+
+    # ---- the face: a plate over the brow and down the face's sides to just above the eyes, and a nose plate ----
+    hp, hc = head
+    x0, y0, z0 = hc.pos
+    w, h, d = hc.size
+    add("chanfron", hp.name, "chanfron", x0 - 0.45, x0 + w + 0.45, y0 - 0.55, y0 + 1.0, z0 - 0.3, z0 + d - 1.6)
+    if muzzle is not None:
+        mp, mc = muzzle
+        mx0, my0, mz0 = mc.pos
+        add("nose", mp.name, "nose", mx0 - 0.35, mx0 + mc.size[0] + 0.35, my0 - 0.5, my0 + 0.6, mz0 + 0.6, mz0 + mc.size[2] + 0.2)
+
+    # ---- the neck: three lames down its crest, gaps between them (the neck runs +y, its crest on +z) ----
+    nx0, nx1, ny0, ny1, nz0, nz1 = bounds_in(parts, "neck")
+    top = ny0 + (ny1 - ny0) * 0.32  # (below the head)
+    step = (ny1 - top) / 3
+    for i in range(3):
+        add(f"crinet_{i}", "neck", "crinet", nx0 - 0.75, nx1 + 0.75, top + i * step, top + (i + 1) * step - 0.9, nz1 - (nz1 - nz0) * 0.4,
+            nz1 + 0.75)
+    add("crest", "neck", "crest", -0.7, 0.7, top + 0.3, ny1 - 1.2, nz1 + 0.6, nz1 + 1.3)
+
+    # ---- the body (forward is -z, the back is low y) ----
+    bx0, bx1, by0, by1, bz0, bz1 = bounds_in(parts, "body")
+    half = max(-bx0, bx1)
+    ln, ht = bz1 - bz0, by1 - by0
+    # the peytral over the chest, wrapping a little round the shoulders
+    add("peytral", "body", "peytral", -half - 0.8, half + 0.8, by0 + ht * 0.2, by1 - ht * 0.12, bz0 - 0.9, bz0 + ln * 0.11)
+    add("boss", "body", "boss", -1.0, 1.0, by0 + ht * 0.4, by0 + ht * 0.6, bz0 - 1.5, bz0 - 0.8)
+    # a plate over each side's ribs (the heart and lungs), between the peytral and the stirrups
+    for side, sx in (("left", 1), ("right", -1)):
+        lo, hi = (half + 0.45, half + 1.05) if sx > 0 else (-half - 1.05, -half - 0.45)
+        add("flank_" + side, "body", "plate", lo, hi, by0 + ht * 0.12, by0 + ht * 0.68, bz0 + ln * 0.16, bz0 + ln * 0.44)
+    # the crupper over the rump and loins (behind the saddle), skirts down its sides, the spine ridged
+    add("crupper", "body", "crupper", -half - 0.8, half + 0.8, by0 - 0.8, by0 + ht * 0.42, bz1 - ln * 0.3, bz1 + 0.7)
+    add("spine", "body", "ridge", -0.5, 0.5, by0 - 1.35, by0 - 0.75, bz1 - ln * 0.28, bz1 + 0.5)
     pack(out, ARMOR_TEXTURE)
     return out
 

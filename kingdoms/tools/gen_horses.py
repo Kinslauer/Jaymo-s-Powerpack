@@ -694,11 +694,11 @@ def undead(pxs):
 METAL, TRIM, LINING, HOLE, CLOTH, CLOTH_ALT = 0, 1, 2, 3, 4, 5
 # the faces left open (nothing drawn): the caparison beneath, before and behind; the neck cloth at its ends; the
 # chanfron under the jaw, behind for the ears and where the nose plate runs on
-OPEN = {"caparison": ("bottom", "front", "back"), "neck_cloth": ("top", "bottom"), "chanfron": ("bottom", "back", "front"),
+OPEN = {"mail": ("bottom",), "caparison": ("bottom", "front", "back"), "neck_cloth": ("top", "bottom"), "chanfron": ("bottom", "back", "front"),
         "nose": ("bottom", "back")}
 
 
-def armour_base(pxs, mail):
+def armour_base(pxs, mail, fabric=False):
     """The barding's pixels as (grey, kind): plate (or mail) as greys each material ramps, a trim band (its own ramp),
     and the leather lining (as it is). Rolled and riveted edges, fluted plates, the crinet's lames lapping, an etched
     chanfron, a boss on the peytral, the tail's hole in the crupper."""
@@ -717,13 +717,13 @@ def armour_base(pxs, mail):
             ez, ey = getattr(c, "eye", None) or (c.pos[2] + 1.75, c.pos[1] + 1.6)
             if abs(x.q[2] - ez) < 1.25 and abs(x.q[1] - ey) < 0.95:
                 continue
-        if r in ("caparison", "neck_cloth"):
+        if r in ("caparison", "neck_cloth") or r == "mail" and fabric:
             out[(x.X, x.Y)] = cloth(x, fw, fh, u, v)
             continue
         if f == "bottom" or (r in ("crinet", "crest", "chanfron", "nose", "crupper") and f == "front" and r != "chanfron"):
             out[(x.X, x.Y)] = (light(x, (70, 52, 36), 0.6), LINING)  # the padded lining underneath
             continue
-        plate = not mail or r in ("chanfron", "nose", "ridge", "guard", "boss", "crest")
+        plate = (not mail or r in ("chanfron", "nose", "ridge", "guard", "boss", "crest")) and r != "mail"
         kind = METAL
         if plate:
             g = 168 + (12 * (1 - x.t) if f in ("a", "b", "front", "back") else 22)
@@ -751,6 +751,8 @@ def armour_base(pxs, mail):
             g = 196 if (i, j) in ((1, 0), (2, 0)) else 60 if (i, j) in ((1, 2), (2, 2), (1, 1), (2, 1)) and j == 2 else 150
             if (i in (0, 3)) and j in (1, 2):
                 g = 120
+            if r == "mail":
+                g -= 28  # (the mail between plates sits darker than they do)
         # the rims (in pixels): a dark line at the very edge, the rolled edge bright inside it, then on the bigger plates
         # a narrow trim band with rivets in it
         e = edge * S
@@ -850,14 +852,15 @@ RUSSET = [(0.0, (36, 20, 10)), (0.45, (104, 62, 32)), (0.8, (150, 98, 56)), (1.0
 
 
 def armours(pxs):
-    plate, mail = armour_base(pxs, False), armour_base(pxs, True)
+    # (plates over mail, or over quilted cloth: the plates joined by one or the other)
+    plate, mail, quilted = armour_base(pxs, False), armour_base(pxs, True), armour_base(pxs, False, fabric=True)
     # leather is dyed over the lot: its lining greyed too
-    leather = {k: ((v[0], METAL) if v[1] != LINING else (mix(v[0], (150, 150, 150), 0.6), METAL)) for k, v in plate.items()}
+    leather = {k: ((v[0], METAL) if v[1] != LINING else (mix(v[0], (150, 150, 150), 0.6), METAL)) for k, v in quilted.items()}
     return {
         "minecraft/iron": ramp(plate, STEEL, BRASS_RAMP, CRIMSON),
-        "minecraft/gold": ramp(plate, GOLD, RED_GOLD, ROYAL_BLUE),
+        "minecraft/gold": ramp(quilted, GOLD, RED_GOLD, ROYAL_BLUE),
         "minecraft/diamond": ramp(plate, DIAMOND, GOLD, LINEN),
-        "minecraft/copper": ramp(plate, COPPER, VERDIGRIS, FOREST),
+        "minecraft/copper": ramp(quilted, COPPER, VERDIGRIS, FOREST),
         "minecraft/netherite": ramp(plate, NETHERITE, GOLD, SABLE_PURPLE),
         "minecraft/leather": ramp(leather, GREY, GREY, GREY),
         "jaymoskingdoms/chain_barding": ramp(mail, STEEL, STEEL, RUSSET),

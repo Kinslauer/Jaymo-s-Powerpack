@@ -155,7 +155,10 @@ def build():
         for c in p.cubes:
             if getattr(c, "bb_name", "") == "crane":
                 c.eye = eye(c)  # (the armour leaves it open)
-    armour = hr.plain_armour(BUILD, parts)
+    def find(name):
+        return next((p, c) for p in parts for c in p.cubes if getattr(c, "bb_name", "") == name)
+
+    armour = hr.segmented_armour(parts, find("crane"), find("museau"))
     return parts, armour
 
 
