@@ -117,7 +117,7 @@ final class GoblinVillages {
 		}
 		// (0.7.329) and scalebane sellswords
 		ScalebaneArcher.hire(level, id, fire, ScalebaneArcher.START);
-		// (0.7.334) and its war barrel by the gate
+		// (0.7.335) and its war barrel by the gate
 		WarBarrel.hire(level, id);
 		JaymosKingdoms.LOGGER.info("A goblin village, {}, rose at {}", village.name(), fire);
 		return Factions.get(server, id);

@@ -77,3 +77,8 @@ friendly one built through Golemancy
 haunted_stand.png (bbmodels/haunted_stand.json): the haunted armour stand deep underground
   "Armor Stand" by polyjo, https://blockbenchworkshop.com/model/polyjo/armor-stand-polyjo
   Changes: baked to our loader's format; drawn at full size.
+
+heavenly_mantle.png (bbmodels/heavenly_mantle.json), and textures/item/heavenly_*.png: the Heavenly Mantle armour
+  "Heavenly Mantle" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/heavenly-mantle
+  Changes: baked to our loader's format (it was made for GeckoLib); the item icons are its pieces drawn small with an
+  outline (kingdoms/tools/gen_heavenly.py).

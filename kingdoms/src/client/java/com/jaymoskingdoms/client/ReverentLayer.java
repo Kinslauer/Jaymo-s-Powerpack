@@ -30,9 +30,15 @@ import net.minecraft.world.item.equipment.ArmorType;
  * body, arms and legs ({@link WornModel}, so they take every pose the vanilla armour does). The helm on the head; the
  * breastplate, pauldrons and cape on the body and arms; the cuisses and the skirt on the legs and waist; the sabatons on
  * the feet.
+ * <p>
+ * (0.7.335) The Heavenly Mantle ({@link Armory#HEAVENLY_PIECES}) the same way: eanncrod's model of the same make, its
+ * bones named alike. Each set is its own layer ({@link Set}).
  */
 public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
-	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/bb/reverent_warplate.png");
+	/** A set drawn this way: its model (and texture) name and its pieces by {@link ArmorType}. */
+	record Set(String model, Map<ArmorType, net.minecraft.world.item.Item> pieces) {
+	}
+
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 	/** Each slot's pieces: the model's bone, and the wearer's bone it hangs on. */
 	private static final Map<EquipmentSlot, Map<String, String>> PIECES = new EnumMap<>(EquipmentSlot.class);
@@ -45,32 +51,34 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 		PIECES.put(EquipmentSlot.FEET, Map.of("armorRightBoot", "right_leg", "armorLeftBoot", "left_leg"));
 	}
 
-	/** The model, read once: its pieces never move on their own, so every wearer's layer hangs the same ones. */
-	private static BbModel model;
+	/** The models, each read once: their pieces never move on their own, so every wearer's layer hangs the same ones. */
+	private static final Map<String, BbModel> MODELS = new java.util.HashMap<>();
 
+	private final Set set;
+	private final Identifier texture;
 	private final Map<EquipmentSlot, WornModel> worn = new EnumMap<>(EquipmentSlot.class);
 
-	private ReverentLayer(RenderLayerParent<S, HumanoidModel<S>> renderer) {
+	private ReverentLayer(RenderLayerParent<S, HumanoidModel<S>> renderer, Set set) {
 		super(renderer);
-		if (model == null) {
-			model = BbModel.load(JaymosKingdoms.MOD_ID, "reverent_warplate");
-		}
-		PIECES.forEach((slot, pieces) -> this.worn.put(slot, new WornModel(skeleton(pieces), this::getParentModel)));
+		this.set = set;
+		this.texture = JaymosKingdoms.id("textures/entity/bb/" + set.model() + ".png");
+		BbModel model = MODELS.computeIfAbsent(set.model(), name -> BbModel.load(JaymosKingdoms.MOD_ID, name));
+		PIECES.forEach((slot, pieces) -> this.worn.put(slot, new WornModel(skeleton(model, pieces), this::getParentModel)));
 	}
 
 	/** The humanoid's bones at their usual places, with {@code pieces} hung on them. */
-	private static ModelPart skeleton(Map<String, String> pieces) {
+	private static ModelPart skeleton(BbModel model, Map<String, String> pieces) {
 		Map<String, ModelPart> bones = new LinkedHashMap<>();
-		bones.put("head", bone(pieces, "head", PartPose.ZERO, Map.of("hat", new ModelPart(List.of(), Map.of()))));
-		bones.put("body", bone(pieces, "body", PartPose.ZERO, Map.of()));
-		bones.put("right_arm", bone(pieces, "right_arm", PartPose.offset(-5.0F, 2.0F, 0.0F), Map.of()));
-		bones.put("left_arm", bone(pieces, "left_arm", PartPose.offset(5.0F, 2.0F, 0.0F), Map.of()));
-		bones.put("right_leg", bone(pieces, "right_leg", PartPose.offset(-1.9F, 12.0F, 0.0F), Map.of()));
-		bones.put("left_leg", bone(pieces, "left_leg", PartPose.offset(1.9F, 12.0F, 0.0F), Map.of()));
+		bones.put("head", bone(model, pieces, "head", PartPose.ZERO, Map.of("hat", new ModelPart(List.of(), Map.of()))));
+		bones.put("body", bone(model, pieces, "body", PartPose.ZERO, Map.of()));
+		bones.put("right_arm", bone(model, pieces, "right_arm", PartPose.offset(-5.0F, 2.0F, 0.0F), Map.of()));
+		bones.put("left_arm", bone(model, pieces, "left_arm", PartPose.offset(5.0F, 2.0F, 0.0F), Map.of()));
+		bones.put("right_leg", bone(model, pieces, "right_leg", PartPose.offset(-1.9F, 12.0F, 0.0F), Map.of()));
+		bones.put("left_leg", bone(model, pieces, "left_leg", PartPose.offset(1.9F, 12.0F, 0.0F), Map.of()));
 		return new ModelPart(List.of(), bones);
 	}
 
-	private static ModelPart bone(Map<String, String> pieces, String name, PartPose pose, Map<String, ModelPart> extra) {
+	private static ModelPart bone(BbModel model, Map<String, String> pieces, String name, PartPose pose, Map<String, ModelPart> extra) {
 		Map<String, ModelPart> children = new LinkedHashMap<>(extra);
 		pieces.forEach((piece, on) -> {
 			if (on.equals(name)) {
@@ -87,14 +95,15 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 	public static void register() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
-				helper.register(create(renderer));
+				helper.register(create(renderer, new Set("reverent_warplate", Armory.REVERENT_PIECES)));
+				helper.register(create(renderer, new Set("heavenly_mantle", Armory.HEAVENLY_PIECES)));
 			}
 		});
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private static ReverentLayer<?> create(LivingEntityRenderer<?, ?, ?> renderer) {
-		return new ReverentLayer((RenderLayerParent) renderer);
+	private static ReverentLayer<?> create(LivingEntityRenderer<?, ?, ?> renderer, Set set) {
+		return new ReverentLayer((RenderLayerParent) renderer, set);
 	}
 
 	@Override
@@ -112,10 +121,10 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 				case LEGS -> ArmorType.LEGGINGS;
 				default -> ArmorType.BOOTS;
 			};
-			if (stack.isEmpty() || stack.getItem() != Armory.REVERENT_PIECES.get(type)) {
+			if (stack.isEmpty() || stack.getItem() != this.set.pieces().get(type)) {
 				continue;
 			}
-			collector.submitModel(this.worn.get(slot), state, poseStack, RenderTypes.armorCutoutNoCull(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.submitModel(this.worn.get(slot), state, poseStack, RenderTypes.armorCutoutNoCull(this.texture), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 	}

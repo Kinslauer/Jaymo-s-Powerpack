@@ -30,7 +30,7 @@ public final class BeastsClient {
 			.withGlow(JaymosKingdoms.id("textures/entity/bb/redstone_golem_1.png")).withExtra(BeastsClient::golemArms));
 		look(Beasts.SKULK_GOLEM, new BbMobRenderer.Look("skulk_golem", 1.0F, 0.9F, "none", "walk", null, null, 0.4F, 1.0F, "head"));
 		look(Beasts.WILD_BOAR, new BbMobRenderer.Look("wild_boar", 0.9F, 0.6F, "idle", "walk", "run", "death", 0.4F, 0.6F, "h_head"));
-		// (0.7.334) the third batch: the haunted stand has no walk (it glides) and no idle (it stands dead still)
+		// (0.7.335) the third batch: the haunted stand has no walk (it glides) and no idle (it stands dead still)
 		look(Beasts.GORGON, new BbMobRenderer.Look("gorgon", 0.8F, 0.6F, "rest", "running", null, null, 0.45F, 1.0F, "head"));
 		look(Beasts.WAR_BARREL, new BbMobRenderer.Look("war_barrel", 0.9F, 1.4F, "idle", "walk", null, null, 0.5F, 1.0F, null));
 		look(Beasts.HAUNTED_STAND, new BbMobRenderer.Look("haunted_stand", 1.0F, 0.4F, "none", "none", null, null, 0.5F, 1.0F, "head"));

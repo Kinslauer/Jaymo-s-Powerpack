@@ -1,4 +1,4 @@
-"""(0.17.164) The Costume Table's thief cut and thief's hood (costume/CostumeDesign: Cut.THIEF, Mask.THIEF_HOOD) from
+"""(0.17.165) The Costume Table's thief cut and thief's hood (costume/CostumeDesign: Cut.THIEF, Mask.THIEF_HOOD) from
 eanncrod's "Thief Armor" (Blockbench Workshop, CC BY 4.0, https://blockbenchworkshop.com/model/eanncrod/thief-armor).
 
 Its 128x128 box-UV texture is split for the costume's two dyes: the blue cloth goes to the primary texture, the metal,

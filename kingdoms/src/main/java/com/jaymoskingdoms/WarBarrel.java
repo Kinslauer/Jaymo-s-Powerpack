@@ -45,13 +45,13 @@ import net.minecraft.world.item.CreativeModeTabs;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.334) The goblins' war barrel, drawn as polyjo's The Cogwork Golem (2025 Version) (Blockbench Workshop, CC BY
+ * (0.7.335) The goblins' war barrel, drawn as polyjo's The Cogwork Golem (2025 Version) (Blockbench Workshop, CC BY
  * 4.0): a walking barrel of planks and iron hoops with a lantern on a pole, the goblin villages' war machine. Each
  * village keeps one by its gate ({@link #hire}, when it rises and, if it has lost it, as it grows). It stands still
  * until a foe of the village comes near, wakes with a clank ("activate"), and lumbers after them, ramming with its
  * iron-banded bulk. Slow, heavy, hard to hurt, and never turns on a goblin. With its village gone it stops and stays.
  * <p>
- * (0.7.334) A <i>friendly</i> one is built on Powers' infusion altar once its maker knows the Golemancy research, like the
+ * (0.7.335) A <i>friendly</i> one is built on Powers' infusion altar once its maker knows the Golemancy research, like the
  * clockwork golem ({@code data/jaymoskingdoms/alchemy/infusion/war_barrel.json}). Set down, it keeps that place for its
  * maker ({@link #owner}): it wakes for monsters that come near and rams them, never turns on its maker or another
  * friendly barrel, doesn't keep anyone from sleeping, and is mended with iron ingots.
@@ -77,7 +77,7 @@ public class WarBarrel extends ActingMonster {
 
 	/** The goblin village it serves; -1 for none. */
 	private int camp = -1;
-	/** (0.7.334) Who built it, for a friendly one; null for a goblin village's. */
+	/** (0.7.335) Who built it, for a friendly one; null for a goblin village's. */
 	private @Nullable UUID owner;
 	private boolean awake;
 	private int ramGap, quiet;
@@ -105,7 +105,7 @@ public class WarBarrel extends ActingMonster {
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true, (target, level) -> this.prey(level, target)));
 	}
 
-	/** (0.7.334) Built by a player through Golemancy. */
+	/** (0.7.335) Built by a player through Golemancy. */
 	public boolean friendly() {
 		return this.owner != null;
 	}

@@ -34,7 +34,7 @@ import net.minecraft.world.phys.AABB;
  * (0.7.329) Creatures drawn from Andy's second batch of Blockbench Workshop models (all CC BY 4.0, credits in
  * textures/entity/bb/CREDITS.txt): the minotaur (a monster of legend), the Piglin King (a Nether boss), the redstone
  * golem (deep in the mines), the skulk golem (the deep dark's guardian) and the wild boar. The scalebane sellswords
- * are {@code ScalebaneArcher} (they serve barbarian and goblin camps). (0.7.334) And the third batch: the gorgon (jungles
+ * are {@code ScalebaneArcher} (they serve barbarian and goblin camps). (0.7.335) And the third batch: the gorgon (jungles
  * and swamps), the haunted armour stand (deep down) and the goblins' war barrel ({@code WarBarrel}). Each with its spawn
  * egg.
  */
@@ -45,7 +45,7 @@ public final class Beasts {
 	public static EntityType<SkulkGolem> SKULK_GOLEM;
 	public static EntityType<WildBoar> WILD_BOAR;
 	public static EntityType<ScalebaneArcher> SCALEBANE;
-	/** (0.7.334) The third batch. */
+	/** (0.7.335) The third batch. */
 	public static EntityType<Gorgon> GORGON;
 	public static EntityType<com.jaymoskingdoms.WarBarrel> WAR_BARREL;
 	public static EntityType<HauntedStand> HAUNTED_STAND;

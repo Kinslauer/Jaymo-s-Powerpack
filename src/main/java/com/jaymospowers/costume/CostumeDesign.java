@@ -50,7 +50,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		ASSASSIN,
 		// (0.17.60) Z Fighter's gi and armour patterns
 		WRAP_GI("zfighter"), SLEEVELESS_GI("zfighter"), WEIGHTED_GI("zfighter"), BATTLE_ARMOUR("zfighter"), PADDED_SUIT("zfighter"),
-		// (0.17.164) anyone's: eanncrod's Thief Armor (its own model, CostumeModels.thief); looks only, no bonus
+		// (0.17.165) anyone's: eanncrod's Thief Armor (its own model, CostumeModels.thief); looks only, no bonus
 		THIEF;
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
@@ -80,14 +80,14 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter"),
 		// (0.14.3) anyone's: a deep hood with a peak over the brow; like the plain hood it leaves the face showing
 		PEAKED_HOOD(false),
-		// (0.17.164) anyone's: the Thief Armor's deep hood, falling to the neck; a hood like the peaked one (no bonus)
+		// (0.17.165) anyone's: the Thief Armor's deep hood, falling to the neck; a hood like the peaked one (no bonus)
 		THIEF_HOOD(false);
 
 		public static final Codec<Mask> CODEC = StringRepresentable.fromEnum(Mask::values);
 		public static final StreamCodec<ByteBuf, Mask> STREAM_CODEC = CostumeDesign.byOrdinal(values());
 
 		/**
-		 * (0.14.3) Whether it is a hood ({@link #HOOD}, {@link #PEAKED_HOOD}, (0.17.164) {@link #THIEF_HOOD}): the face
+		 * (0.14.3) Whether it is a hood ({@link #HOOD}, {@link #PEAKED_HOOD}, (0.17.165) {@link #THIEF_HOOD}): the face
 		 * shows, but a hooded player is harder to pick out at a distance ({@code SecretIdentity#HOODED}, the name tag's
 		 * range) and Kingdoms' stealth reads it.
 		 */

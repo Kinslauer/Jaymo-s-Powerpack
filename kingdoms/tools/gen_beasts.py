@@ -11,7 +11,7 @@ from gen_nether import ASSETS, entry, egg, rgb, table, write  # noqa: E402
 EGGS = {'minotaur_spawn_egg': (0x5A3B28, 0xD4A640), 'piglin_king_spawn_egg': (0xC9877A, 0xE8B840),
         'redstone_golem_spawn_egg': (0x8A8A8A, 0xE0201A), 'skulk_golem_spawn_egg': (0x1F2A33, 0x2FB5B5),
         'wild_boar_spawn_egg': (0x4A3326, 0xD8C8A8), 'scalebane_spawn_egg': (0x3E6B3A, 0xC8A050),
-        # (0.7.334) the third batch
+        # (0.7.335) the third batch
         'gorgon_spawn_egg': (0x4E5A24, 0x2E8A6A), 'war_barrel_spawn_egg': (0x7A5230, 0x6E7686),
         'haunted_stand_spawn_egg': (0x9A7448, 0x3A2A1A)}
 

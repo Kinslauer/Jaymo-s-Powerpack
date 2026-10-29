@@ -54,7 +54,7 @@ public final class CostumeModels {
 	static final int TAIL_TOP = 9, TAIL_LENGTH = 11;
 	static final float TAIL_GAP = 0.05F, TAIL_SWAY = 0.6F;
 	static final float BRACER_GROW = 0.15F, MANTLE_GROW = 0.2F, HOOD_BRIM_GROW = 0.4F, COWL_GROW = 0.6F;
-	/** (0.17.164) The thief's hood stands off the head as its model has it. */
+	/** (0.17.165) The thief's hood stands off the head as its model has it. */
 	static final float THIEF_HOOD_GROW = 1.0F;
 	/** The emblem patch on the chest: its size (pixels) and the gap in front of the suit's chest. */
 	static final float EMBLEM_SIZE = 6.0F, EMBLEM_TOP = 1.5F, EMBLEM_GAP = 0.05F;
@@ -386,7 +386,7 @@ public final class CostumeModels {
 	}
 
 	/**
-	 * (0.17.164) The thief cut: eanncrod's Thief Armor (Blockbench Workshop, CC BY 4.0) in place of the suit, its own
+	 * (0.17.165) The thief cut: eanncrod's Thief Armor (Blockbench Workshop, CC BY 4.0) in place of the suit, its own
 	 * cubes on its own 128-square sheet ({@code tools/blockbench/thief_costume.py}): a padded tunic and belt, sloped
 	 * leather straps over the shoulders, a short cloak at the back, pauldrons and bracers, wrapped legs and boots. Slim
 	 * arms hang half a pixel lower, so their pieces do too.
@@ -459,7 +459,7 @@ public final class CostumeModels {
 			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(32, 0).addBox(-0.5F, -11.0F, -4.5F, 1.0F, 2.0F, 9.0F), PartPose.ZERO);
 		}
 		if (mask == CostumeDesign.Mask.THIEF_HOOD) {
-			// (0.17.164) the Thief Armor's hood: deeper than the head, falling past the jaw to the neck
+			// (0.17.165) the Thief Armor's hood: deeper than the head, falling past the jaw to the neck
 			MeshDefinition hood = bones();
 			hood.getRoot().getChild("head").addOrReplaceChild("mask", CubeListBuilder.create().texOffs(0, 0)
 				.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(THIEF_HOOD_GROW)), PartPose.ZERO);
