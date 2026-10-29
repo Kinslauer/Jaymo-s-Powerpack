@@ -6323,4 +6323,6 @@ with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the s
   set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
   into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
 - **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
-  sabatons), each piece hung on the wearer's own bones. Forged at Powers' smithing anvil from iron, no grid recipe.
+  sabatons), each piece hung on the wearer's own bones. Andy: "the warplate should be extraordinary and a drop from the
+  visage boss". A point over netherite in every piece (4/7/9/4), toughness 4, knockback resistance 0.15, durability 45x,
+  enchantability 22, fireproof, epic; mended with gold. Never crafted or forged: Powers' Visage of War drops all four.

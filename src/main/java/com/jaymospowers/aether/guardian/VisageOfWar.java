@@ -3,8 +3,10 @@ package com.jaymospowers.aether.guardian;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.ValueInput;
@@ -41,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * in the trunk: it circles above, and in turn thrusts its lance, sweeps it round in a wide cleave, rises and comes down
  * in a cut, or shoves off anyone pressing it. Below {@link #RAGE_FRACTION} of its health it charges too, and every
  * move comes quicker. It never leaves its hollow; when everyone has gone it floats home and heals. On death it falls,
- * bursting light, and gives up a great deal of experience. Fire doesn't touch it; it can't drown or fall.
+ * bursting light, and gives up a great deal of experience and (with Jaymo's Kingdoms) the whole Reverent Warplate, the
+ * only set in the world. Fire doesn't touch it; it can't drown or fall.
  * <p>
  * Its moves, by number for its client, each with its animation, length, and when its blow lands (seconds in).
  */
@@ -60,6 +64,8 @@ public class VisageOfWar extends Monster {
 	/** How long it falls dying (ticks); how long it waits with nobody in its hollow before going home (ticks). */
 	public static final int DEATH_TICKS = 80, QUIET_TICKS = 200;
 	public static final int XP = 300;
+	/** (With Jaymo's Kingdoms) what it leaves when it falls: the Reverent Warplate, all four pieces. */
+	static final String[] DROPS = {"reverent_helmet", "reverent_chestplate", "reverent_leggings", "reverent_boots"};
 
 	/** Its moves: what the client plays, how long (ticks), and when its blow lands (ticks in, -1 for a blow on contact). */
 	public enum Move {
@@ -448,6 +454,10 @@ public class VisageOfWar extends Monster {
 			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE08A), this.getX(), this.getY() + 1.5, this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0F, 0.5F);
 			ExperienceOrb.award(level, this.position(), XP);
+			for (String drop : DROPS) {
+				BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymoskingdoms", drop))
+					.ifPresent(item -> this.spawnAtLocation(level, new ItemStack(item), 1.0F));
+			}
 			this.bar.removeAllPlayers();
 			this.remove(Entity.RemovalReason.KILLED);
 		}

@@ -55,8 +55,7 @@ from it at the Tool Station.
   "forge" order for a smith's job in a town (Kingdoms: `Careers`, "Hammer out N pieces at a smithing anvil").
 - **Armour.** Iron, gold and copper helmets, chestplates, leggings and boots are hammered for 5/8/7/4 ingots (blows
   scale with ingots). Their grid recipes are switched off (`tools/tinkering_assets.py` `OFF_ARMOUR`); diamond and
-  chainmail armour stay loot-only. No steel armour exists in the pack yet. Kingdoms' Reverent Warplate (0.17.153) is
-  hammered from iron too, one ingot more a piece (6/9/8/5), and has no grid recipe.
+  chainmail armour stay loot-only. No steel armour exists in the pack yet.
 
 ## Finishing, casting and blueprints
 Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithTiers`, `StoneAnvil`, `Blueprints`,
