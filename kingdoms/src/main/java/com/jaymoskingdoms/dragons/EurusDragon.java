@@ -39,10 +39,10 @@ public class EurusDragon extends WindDragon {
 	static final float FLAP_DRAIN = 1.1F, GLIDE_DRAIN = 0.1F;
 	/** How loud its wingbeats are (Notus 2): sharp and quick. */
 	static final float FLAP_VOLUME = 1.0F;
-	/** Its riders' seat height (blocks): the model's back top is 1.22, the saddle 0.1 over it. */
-	static final double SEAT_HEIGHT = 1.32;
-	/** Its mouth, on the ground and in the air: how far ahead of its middle, and how high above its feet. */
-	static final double MOUTH_AHEAD_GROUND = 2.8, MOUTH_UP_GROUND = 1.4, MOUTH_AHEAD_AIR = 3.3, MOUTH_UP_AIR = 1.05;
+	/** Its riders' seat height (blocks): (0.7.329) the Kintsugi wyvern's back, drawn at 0.28. */
+	static final double SEAT_HEIGHT = 1.65;
+	/** Its mouth, on the ground and in the air: how far ahead of its middle, and how high above its feet (0.7.329: the wyvern's). */
+	static final double MOUTH_AHEAD_GROUND = 1.7, MOUTH_UP_GROUND = 1.5, MOUTH_AHEAD_AIR = 1.9, MOUTH_UP_AIR = 1.0;
 	/** How much faster a Wind user flies it: in rain or thunder, and in clear weather. */
 	static final float STORM_RIDER = 1.3F, CLEAR_RIDER = 1.15F;
 

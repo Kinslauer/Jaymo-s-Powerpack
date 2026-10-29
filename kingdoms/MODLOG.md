@@ -6379,3 +6379,54 @@ desire". So:
   and bakes its own painting into our box-UV texture (`breed_horse/moonlit/moonlit.png`). Its armour covers each of
   its body and neck in mail, its plates sized from its own body and neck. Source kept unchanged in tools/horse_models/source with its credit; credit
   also in textures/entity/breed_horse/CREDITS.txt.
+
+## 0.7.329: Blockbench Workshop models (pack 0.17.156)
+Andy: "I want them all, in the ways you said implemented", with nyxaris' Fire Dragon reskinning Notus and Boreas
+(Zephyrus and the rest unchanged); then a second batch of seven, eanncrod's Kintsugi for Eurus and Aeolus among them. Every model is CC BY 4.0, credited
+with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the sources sit in `tools/bbmodels/`.
+- **Loader** (`client/bb/BbModel`, `Molang`): reads a Blockbench model baked by `tools/bbmodel_bake.py` (bones, cubes,
+  per-face UVs, animations with their Molang) into ModelParts and plays its animations by time and weight.
+- **Warchief:** drawn as nyxaris' Chieftain at 0.69 size (`Bodies`, `BbBodies`, `BbBodyLivingEntityRendererMixin`).
+- **Cannon:** iexogen's Canon (`CannonRenderer`), barrel pivot on its trunnions, recoil along the barrel;
+  `Cannon.PIVOT` 0.75.
+- **Silver skeleton:** polyjo's Dead Traveler (`DeadTravelerModel`). It now cuts with its sword arm and blocks on its
+  buckler: 30% of blows from the front within 70 degrees, an axe breaks its guard for 5 s.
+- **Notus and Boreas:** the Fire Dragon (`FireDragonModel`), Notus in its own hide and three re-shadings, Boreas
+  recoloured to ice, glowing markings from its glow half (`tools/gen_fire_dragons.py`). Ground, walk, sit, land and crash
+  poses are our own; flight plays its wingbeat in time with the stroke. Drawn at 0.53 and 0.45 to match the riders'
+  seats. They lose the old models' saddles and horn variety.
+- **Clockwork golem** (`ClockworkGolem`): octopusstudio's Mech Golem. Crafted from a clock, a redstone block and copper,
+  set down like a spawn egg; guards like an iron golem made by a player. After 30 s with nothing to fight it folds
+  into its shell (lights out, 60% less damage) and unfolds when hit or a foe comes. Mended with copper ingots.
+- **Reverent Warplate** (`Armory.REVERENT`, `ReverentLayer`): eanncrod's armour as a new set (helm, warplate, tassets,
+  sabatons), each piece hung on the wearer's own bones. Andy: "the warplate should be extraordinary and a drop from the
+  visage boss". A point over netherite in every piece (4/7/9/4), toughness 4, knockback resistance 0.15, durability 45x,
+  enchantability 22, fireproof, epic; mended with gold. Never crafted or forged: Powers' Visage of War drops all four.
+- **Eurus and Aeolus:** eanncrod's Kintsugi wyvern (`KintsugiDragonModel`, replacing `EurusDragonModel` and
+  `AeolusDragonModel`). Aeolus is grey-white with its gold seams glowing (gold, the four winds' colours, white-gold,
+  silver); Eurus is storm-blue and violet with seams in electric cyan (`tools/gen_kintsugi_dragons.py`). Its own idle,
+  knockdown, hover and flight animations; walking, sitting and gliding posed over them. Drawn at 0.28 and 0.75; seats
+  and breath mouths moved to fit (`EurusDragon`, `AeolusDragon`).
+- **Second batch of creatures** (`beasts/`, each with a spawn egg, loot and `tools/gen_beasts.py`). They play their
+  models' own animations through `BbMobRenderer`; a move is a synced animation name (`Acting`, `ActingMonster`).
+  - **Minotaur** (eanncrod): a monster of legend of the mountains (`has_minotaur`, wilderness encounter and gossip).
+    140 HP; hammer swing, a slam that throws everyone round it, and a charge from 6-16 blocks that gores whoever it
+    meets (a wall stops it dazed).
+  - **Piglin King** (eanncrod's Musclebound Piglin King): a rare boss of the Nether wastes and crimson woods
+    (`has_piglin_king`, one in 12 spawn checks, none within 160 blocks of another). It sleeps on its feet until someone
+    comes within 14 blocks or hits it, then wakes with a boss bar. 300 HP, fireproof: claw rake, a volley of four
+    embers, a fire burst that sets everyone close alight, and below half health a roar that brings two piglin brutes
+    (four at most). Its model's ice moves play as fire. Piglins can't hurt it and it never hits them. Drops gold, a gold
+    block, a piglin head and maybe netherite scrap.
+  - **Redstone golem** (polyjo; the design is Mojang's Minecraft Dungeons mob): a great foe below y 0, rare and alone.
+    220 HP, unmoved by knockback; pounds with both fists and sets four spots under its foes glowing, which burst a
+    moment later. Its core glows in the dark. Its pound and eruption are posed in code (the model has idle and walk).
+  - **Skulk golem** (elma_taburlas): the deep dark's guardian, rare and alone. A statue (25% damage) until someone
+    comes within 10 blocks (3 sneaking) or hits it; its blows bring Darkness; still again after 20 s with no foe.
+  - **Wild boar** (lukygive): replaces Naturalist's boar, in natural spawns (forests, taiga, savanna, `has_wild_boar`)
+    and as the boar encounter. Grazes, and gores whoever comes too close or hits it.
+  - **Scalebane sellswords** (eanncrod's Scalebane Archer; Andy: "common sellswords among barbarians and goblin
+    encampments"): `ScalebaneArcher`. New barbarian camps and goblin villages take on two, and a camp short of them
+    hires one now and then as it grows (three at most about its fire). Bowmen who shoot what their camp would (outlaws
+    it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
+    turn rogue and shoot any player.

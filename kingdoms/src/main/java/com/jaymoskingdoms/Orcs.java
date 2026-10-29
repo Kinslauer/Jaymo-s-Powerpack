@@ -223,6 +223,7 @@ public final class Orcs {
 	/** The warchief brings his axe down on the ground: everyone near (not his own) is hurt and thrown back. */
 	private static void slam(ServerLevel level, PathfinderMob chief, int camp) {
 		SLAM_READY.put(chief.getUUID(), level.getGameTime() + SLAM_COOLDOWN);
+		Bodies.act(level, chief, "slam");
 		chief.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		DamageSource source = level.damageSources().mobAttack(chief);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, chief.getBoundingBox().inflate(SLAM_RADIUS, 1.5, SLAM_RADIUS),
