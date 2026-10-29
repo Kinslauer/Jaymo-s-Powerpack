@@ -111,6 +111,11 @@ final class WebSymbioteScreen extends Screen {
 			return;
 		}
 		chosen = true;
+		if (selected == WebSymbioteMindUi.PICK) {
+			// (0.17.150) the Mind chip: its status page and your standing orders
+			WebSymbioteMindUi.open();
+			return;
+		}
 		if (selected >= 0) {
 			ClientPlayNetworking.send(new WebNet.SymbioteUse(selected));
 		}
@@ -132,6 +137,8 @@ final class WebSymbioteScreen extends Screen {
 		int maskY = cy + MASK_Y;
 		if (mouseX >= maskX - 1 && mouseX <= maskX + MASK_W && mouseY >= maskY - 1 && mouseY <= maskY + MASK_H) {
 			selected = WebSymbiote.SUIT_TOGGLE;
+		} else if (WebSymbioteMindUi.overChip(mouseX, mouseY, cx, cy)) {
+			selected = WebSymbioteMindUi.PICK;
 		} else if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
 			selected = -1;
 		} else {
@@ -140,7 +147,7 @@ final class WebSymbioteScreen extends Screen {
 			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot == TENDRILS_SLOT ? WebSymbiote.TENDRILS_TOGGLE
 				: slot == COLLECT_SLOT ? WebSymbiote.COLLECT_TOGGLE : slot;
 		}
-		if (selected != before && selected >= 0) {
+		if (selected != before && (selected >= 0 || selected == WebSymbioteMindUi.PICK)) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
 				0.3F, 1.4F + selected * 0.05F, false);
 		}
@@ -271,7 +278,9 @@ final class WebSymbioteScreen extends Screen {
 
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
-		if (selected >= 0) {
+		if (selected == WebSymbioteMindUi.PICK) {
+			name = Component.translatable("screen.jaymospowers.web_symbiote_status");
+		} else if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
 			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected == WebSymbiote.TENDRILS_TOGGLE ? "tendrils"
 				: selected == WebSymbiote.COLLECT_TOGGLE ? "collect"
@@ -296,6 +305,7 @@ final class WebSymbioteScreen extends Screen {
 			String need = WebSymbiote.unlockedCount(player) + "/" + WebSymbiote.SUIT_ABILITIES;
 			graphics.text(font, need, maskX + MASK_W / 2 - font.width(need) / 2, maskY + MASK_H + 2, 0xFF8070A0);
 		}
+		WebSymbioteMindUi.drawChip(graphics, font, cx, cy, selected == WebSymbioteMindUi.PICK);
 		int barWidth = 34;
 		float fed = Mth.clamp(state.satiety() / (float)WebSymbiote.SATIETY_MAX, 0.0F, 1.0F);
 		boolean starving = state.satiety() <= WebSymbiote.STARVING;
@@ -309,7 +319,7 @@ final class WebSymbioteScreen extends Screen {
 		int ix = cx - INFO_W / 2;
 		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
 		UiStyle.panel(graphics, ix, iy, INFO_W, INFO_H, ACCENT);
-		UiStyle.line(graphics, font, name != null ? name : title, ix + 8, iy + 6, INFO_W - 16, ACCENT);
+		UiStyle.line(graphics, font, name != null ? name : WebSymbioteMindUi.heading(player, title), ix + 8, iy + 6, INFO_W - 16, ACCENT);
 		UiStyle.line(graphics, font, status(player, state, cooldowns, now), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
 	}
 
@@ -323,6 +333,9 @@ final class WebSymbioteScreen extends Screen {
 			// dormant after the first bond: how long it has left settling in (minutes, rounded up)
 			int ticks = com.jaymospowers.power.web.WebSymbioteBond.dormantTicks(player);
 			return Component.translatable("gui.jaymospowers.web_symbiote.dormant", (ticks + 1199) / 1200);
+		}
+		if (selected == WebSymbioteMindUi.PICK) {
+			return Component.translatable("gui.jaymospowers.web_symbiote.status_hint");
 		}
 		if (selected < 0) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.hint");

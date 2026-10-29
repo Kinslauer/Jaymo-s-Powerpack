@@ -3,6 +3,7 @@ package com.jaymospowers.power.web;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Soundscape;
+import com.jaymospowers.core.wounds.Downed;
 import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -1408,7 +1409,8 @@ public final class WebSymbiote {
 	/** A line with {@code args} filled in (what it's fighting, say). */
 	static void whisper(ServerPlayer player, String key, Object... args) {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key, args)
+		// (0.17.150) in a mood, a line of its commentary has a variant of its own where one was written
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + WebSymbioteMind.voice(player, key), args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
@@ -1455,7 +1457,7 @@ public final class WebSymbiote {
 		Live live = live(player);
 		long now = player.level().getGameTime();
 		float bond = Mth.clamp(state(player).bond() / (float)BOND_MAX, 0.0F, 1.0F);
-		if (now < live.narrateAt || player.getRandom().nextFloat() >= Mth.lerp(bond, NARRATE_MIN, NARRATE_MAX)) {
+		if (now < live.narrateAt || player.getRandom().nextFloat() >= Mth.lerp(bond, NARRATE_MIN, NARRATE_MAX) || WebSymbioteMind.quiet(player)) {
 			return;
 		}
 		// (white and red have lines of their own: say.white.<act>, say.red.<act>)
@@ -1558,6 +1560,8 @@ public final class WebSymbiote {
 		WebSymbioteFoes.tick(player, now);
 		// (0.17.149) its tendrils fetch items for you, and it studies each new kind once
 		WebSymbioteCollect.tick(player, now);
+		// (0.17.150) its trust, mood, orders and requests (WebSymbioteMind)
+		WebSymbioteMind.tick(player, state, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
@@ -1721,13 +1725,16 @@ public final class WebSymbiote {
 
 		// hungry, it feeds itself: a corpse, or something it kills first (swelling into the armour for it, if it wasn't);
 		// once it has started it isn't satisfied until it has actually eaten
-		boolean hungry = next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging;
-		boolean huntCheck = (hungry || next.satiety() < HUNGRY_HUNT_BELOW) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
+		// (0.17.150) an ignored request for meat has it hunt for it itself; the Hunt order hunts on a lighter appetite
+		boolean mindMeat = WebSymbioteMind.forcing(player, WebSymbioteMind.MEAT, now);
+		int huntBelow = WebSymbioteMind.huntBelow(player, HUNGRY_HUNT_BELOW);
+		boolean hungry = next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging || mindMeat;
+		boolean huntCheck = (hungry || next.satiety() < huntBelow) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
 			&& live.roarAt <= 0L && live.feedStage == FEED_NONE && !sulking(player) && !dormant && player.tickCount % SELF_FEED_EVERY == 0;
 		// hungry, it now and then takes the wheel to hunt (starving, it always does)
 		// (the white one only ever hunts when it's starving, and then only a hostile: see huntable)
-		boolean hunt = live.gorging || !player.isCreative() && next.satiety() < HUNGRY_HUNT_BELOW && now >= live.takeoverReadyAt
-			&& next.kind() != WebSymbioteStrain.WHITE && player.getRandom().nextFloat() < HUNGRY_HUNT_CHANCE;
+		boolean hunt = live.gorging || mindMeat || !player.isCreative() && next.satiety() < huntBelow && now >= live.takeoverReadyAt
+			&& next.kind() != WebSymbioteStrain.WHITE && player.getRandom().nextFloat() < WebSymbioteMind.huntChance(player, HUNGRY_HUNT_CHANCE);
 		if (huntCheck && (hungry || hunt) && selfFeed(player, live, now, hunt, hungry)) {
 			live.craving = true;
 			if (!armor) {
@@ -1826,7 +1833,8 @@ public final class WebSymbiote {
 				live.rivalry = true;
 				startTakeover(player, live, now, rival);
 				live.rivalry = live.takeoverTicks > 0;
-			} else if (now >= live.takeoverReadyAt) {
+			} else if (now >= live.takeoverReadyAt && WebSymbioteMind.takeoverAllowed(player)) {
+				// (0.17.150) trust lets some of its idle takeovers go by, hiding and grief most
 				// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
 				int neglectBond = strain == WebSymbioteStrain.RED ? WebSymbioteStrains.RED_NEGLECT_BOND : NEGLECT_BOND;
 				// ((0.16.7) well fed, it's half as likely to feel ignored: WELL_FED_NEGLECT_MULT)
@@ -1903,7 +1911,7 @@ public final class WebSymbiote {
 		if (live.giftPending) {
 			live.giftPending = false;
 			if (live.takeoverTicks <= 0 && live.roarAt <= 0L && !live.fleeing && !sulking(player) && player.isAlive() && !dormant
-				&& player.getRandom().nextFloat() < TAKEOVER_GIFT_CHANCE) {
+				&& !WebSymbioteMind.hiding(player) && player.getRandom().nextFloat() < TAKEOVER_GIFT_CHANCE) {
 				live.giftUntil = now + TAKEOVER_GIFT_TICKS;
 				// (its own now: not the armour it swelled into only to eat, put away after the meal)
 				live.feedingArmor = false;
@@ -1927,6 +1935,11 @@ public final class WebSymbiote {
 		} else if (live.takeoverTicks <= 0 && roarAge < 0L && live.engulfed) {
 			live.engulfed = false;
 			next = next.withFlag(WebSymbioteState.SUIT, live.suitBeforeTakeover);
+		}
+		// (0.17.150) an ignored request to be worn: it puts the suit on itself
+		if (!next.has(WebSymbioteState.SUIT) && !sulking(player) && !dormant && WebSymbioteMind.wearsItself(player)) {
+			next = next.withFlag(WebSymbioteState.SUIT, true);
+			live.suitDebutUntil = now + SUIT_DEBUT_TICKS;
 		}
 		// the suit shows itself on bonding, then withdraws until it trusts you with it (see SUIT_ABILITIES)
 		// (dormant, it withdraws whatever the bond: it isn't yours to wear yet)
@@ -2255,6 +2268,7 @@ public final class WebSymbiote {
 		}
 		removeArmor(player);
 		WebSymbioteBond.clear(player);
+		player.removeAttached(WebSymbioteMind.MIND);
 		player.removeAttached(STATE);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(LIVE);
@@ -2458,7 +2472,7 @@ public final class WebSymbiote {
 			}
 			return false;
 		}
-		if (threat == null || !lowHealth(player, PROTECT_HEALTH) || player.isCreative() || live.bondTicks > 0
+		if (threat == null || !lowHealth(player, WebSymbioteMind.protectHealth(player, PROTECT_HEALTH)) || player.isCreative() || live.bondTicks > 0
 			|| live.roarAt > 0L && live.roarDefend || now < live.protectSuppressUntil) {
 			return false;
 		}
@@ -2637,6 +2651,146 @@ public final class WebSymbiote {
 		player.removeAttached(STARING);
 		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	// ---- mind (0.17.150): what WebSymbioteMind needs from the takeover and suit code -----------------------------------
+
+	/** The tunnelling takeover's sight (see {@link #mindDig}). */
+	private static final String DIG_SIGHT = "dig";
+
+	/** It can take the wheel now: nothing else has it, it's awake and you're on your feet. */
+	private static boolean mindFree(ServerPlayer player, Live live) {
+		return live.takeoverTicks <= 0 && live.feedStage == FEED_NONE && live.roarAt <= 0L && live.bondTicks <= 0 && player.getAttached(EATING) == null
+			&& !live.fleeing && !sulking(player) && !WebSymbioteBond.dormant(player) && !player.isCreative() && player.isAlive() && !player.isSpectator()
+			&& !player.isPassenger() && !Downed.isDowned(player) && !WebSymbioteRescue.rescuing(player);
+	}
+
+	/** Hide: the suit comes off and the tendrils draw in (the armour and the big body stay as they are). */
+	static void mindHide(ServerPlayer player) {
+		if (!isBonded(player) || driving(player) || roaring(player)) {
+			return;
+		}
+		if (armored(player)) {
+			drawIn(player);
+		}
+		WebSymbioteState state = state(player);
+		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player)) {
+			set(player, state.withFlag(WebSymbioteState.SUIT, false));
+			torn(player);
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.9F, 0.6F);
+			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
+		}
+	}
+
+	/** An ignored request for a kill (or a night hunt): it takes the wheel for the nearest hostile, or any wild creature if none. */
+	static boolean mindHunt(ServerPlayer player, long now) {
+		Live live = live(player);
+		if (!mindFree(player, live)) {
+			return false;
+		}
+		LivingEntity target = null;
+		double best = Double.MAX_VALUE;
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(TAKEOVER_RANGE * 2.0),
+			m -> m.isAlive() && m instanceof net.minecraft.world.entity.monster.Enemy && !m.hasCustomName())) {
+			double d = mob.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				target = mob;
+			}
+		}
+		if (target == null) {
+			target = prey(player, false);
+		}
+		if (target == null) {
+			return false;
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.feral = true;
+		startTakeover(player, live, now, target);
+		live.feral = live.takeoverTicks > 0;
+		if (live.takeoverTicks <= 0) {
+			return false;
+		}
+		whisper(player, "req.hunt_itself." + (1 + player.getRandom().nextInt(2)));
+		return true;
+	}
+
+	/** An ignored request for time deep underground: it takes the wheel and tunnels you down a spiral stair (WebSymbioteDig). */
+	static boolean mindDig(ServerPlayer player, long now) {
+		Live live = live(player);
+		ServerLevel level = player.level();
+		if (!mindFree(player, live) || level.dimension() != net.minecraft.world.level.Level.OVERWORLD || player.blockPosition().getY() <= WebSymbioteDig.GOAL_Y + 2) {
+			return false;
+		}
+		net.minecraft.world.entity.Interaction marker = net.minecraft.world.entity.EntityTypes.INTERACTION.create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+		if (marker == null) {
+			return false;
+		}
+		marker.setPos(player.position());
+		marker.addTag(TOUR_TAG);
+		SIGHTS.put(marker.getUUID(), now + WebSymbioteDig.LIMIT_TICKS + 100L);
+		if (!level.addFreshEntity(marker)) {
+			SIGHTS.remove(marker.getUUID());
+			return false;
+		}
+		WebSymbioteDig.start(player);
+		live.rampage = false;
+		live.curious = false;
+		live.touring = true;
+		live.tourSight = DIG_SIGHT;
+		live.tourFrom = player.position();
+		live.stareUntil = 0L;
+		live.struggle = 0.0F;
+		live.resisted = false;
+		live.surges = 0;
+		live.surged = false;
+		live.giftPending = false;
+		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
+		live.takeoverTicks = WebSymbioteDig.LIMIT_TICKS;
+		live.takeoverTarget = marker.getId();
+		live.headwayAt = null;
+		syncStruggle(player, live);
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
+		dread(player, 100, true, true);
+		com.jaymospowers.core.Shakes.send(player, 1.1F, null);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 0.9F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_DIG, SoundSource.PLAYERS, 1.0F, 0.8F);
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
+		whisper(player, "dig.go." + (1 + player.getRandom().nextInt(2)));
+		return true;
+	}
+
+	/** Tunnelling down: the stair is cut ahead, the path walks you down it; deep enough, it lets go. */
+	private static void tickDig(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
+			WebSymbioteDig.forget(player);
+			endTakeover(player, live);
+			whisper(player, "dig.stuck");
+			return;
+		}
+		int result = WebSymbioteDig.tick(player, target, now);
+		if (result != WebSymbioteDig.CONTINUE) {
+			WebSymbioteDig.forget(player);
+			endTakeover(player, live);
+			boolean done = result == WebSymbioteDig.DONE;
+			WebSymbioteMind.digEnded(player, done);
+			whisper(player, done ? "dig.there." + (1 + player.getRandom().nextInt(2)) : "dig.blocked");
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 0.8F);
+			return;
+		}
+		WebTakeoverPath.tick(player, live.route, target, false, false, TAKEOVER_REACH, now);
+		if (live.takeoverTicks % 5 == 0) {
+			player.level().sendParticles(dust(1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.6, 0.3, 0.0);
+		}
+		if (live.takeoverTicks % 60 == 0) {
+			// the whole way down, your screen stays dark under it
+			dread(player, 80, false);
+			narrate(player, "dig");
+		}
 	}
 
 	/** (0.15.69) Whatever it was doing with your body stops: a rescue has the wheel now (WebSymbioteRescue). */
@@ -2833,6 +2987,11 @@ public final class WebSymbiote {
 			return;
 		}
 		if (now < live.remarkAt || now < live.narrateAt) {
+			return;
+		}
+		if (WebSymbioteMind.quiet(player)) {
+			// (0.17.150) grieving, it hardly speaks
+			live.remarkAt = now + gap;
 			return;
 		}
 		live.remarkAt = now + gap;
@@ -3298,6 +3457,10 @@ public final class WebSymbiote {
 		if (letGoIfStuck(player, live, now)) {
 			return;
 		}
+		if (DIG_SIGHT.equals(live.tourSight)) {
+			tickDig(player, live, now, target);
+			return;
+		}
 		if (STORM_SIGHT.equals(live.tourSight)) {
 			tickStorm(player, live, now, target);
 			return;
@@ -3733,8 +3896,9 @@ public final class WebSymbiote {
 		// (toggle: set() keeps them out); it never draws them in (Andy). Nothing here is keyed on armored().
 		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
 		// ((0.16.7) well fed, it ignores you half as often: WELL_FED_IGNORE_MULT)
-		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
-			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND) * (wellFed(state) ? WELL_FED_IGNORE_MULT : 1.0F)) {
+		// (0.17.150) and a low trust ignores you too, whatever the bond (WebSymbioteMind.ignores)
+		float ignoreChance = state.bond() < IGNORE_BOND ? IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND) * (wellFed(state) ? WELL_FED_IGNORE_MULT : 1.0F) : 0.0F;
+		if (!puttingAway && !player.isCreative() && WebSymbioteMind.ignores(player, ignoreChance)) {
 			nag(player, "ignores");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.5F, 1.6F);
 			player.setAttached(COOLDOWNS, cooldowns.with(ability, now + 20, ABILITIES));
