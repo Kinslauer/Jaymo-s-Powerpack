@@ -74,6 +74,10 @@ import org.jspecify.annotations.Nullable;
  * A page of the tome's own element casts {@link #OWN_PAGE} times as hard.</li>
  * <li><b>Right click</b>: casts the page ({@link Arcana#cast}; it isn't used up) for mana, then the tome waits as long as
  * the spell's tier says ({@link #TIER}, {@link #COOLDOWN}, {@link #MANA}).</li>
+ * <li><b>Crafting</b> is by infusion ({@code data/jaymoskingdoms/alchemy/infusion/<element>_tome.json}), behind Jaymo's
+ * Powers' Tomecraft research. <b>Glyphs</b> (the enchanting table's runes with the element's own particle) stream off the
+ * pages in amounts that vary by tome ({@link #GLYPHS}) and by action; a bolt's trail mixes the element's particles with the
+ * mana glow. The book opens, and turns its pages, on the client ({@code TomeClient}).</li>
  * </ul>
  */
 public final class Tomes {
@@ -121,6 +125,28 @@ public final class Tomes {
 	static final int QUICK_LIFE = 14, FULL_LIFE = 22;
 	/** A hold nobody lets go of is dropped after this (ticks). */
 	static final int MAX_HOLD = 1200;
+	/** The mana glow behind a bolt: motes per sample point along its path (quick, charged) and a cluster at its head, beside the element's own particles. */
+	static final int TRAIL_MANA = 1, TRAIL_MANA_CHARGED = 2, HEAD_MANA = 2;
+	/** How far apart the trail's samples lie (blocks) and how loosely the mana motes drift from them. */
+	static final double TRAIL_STEP = 0.35, MANA_DRIFT = 0.07;
+
+	// ---- tuning: the glyphs off the pages (the enchanting table's runes, with the element's own particle beside them) ----
+	/** Each tome's own base glyph count (a calm tome sheds few, lightning's many); every action scales it. */
+	static final Map<String, Integer> GLYPHS = Map.ofEntries(
+		Map.entry("water", 4), Map.entry("fire", 6), Map.entry("earth", 3), Map.entry("air", 5), Map.entry("lightning", 7),
+		Map.entry("ice", 3), Map.entry("restoration", 5), Map.entry("death", 6), Map.entry("blood", 4));
+	static final int DEFAULT_GLYPHS = 4;
+	/** While charging, every this many ticks: base * (CHARGE_MIN + charge * CHARGE_GROWTH) glyphs. */
+	static final int CHARGE_EVERY = 2;
+	static final float CHARGE_MIN = 0.4F, CHARGE_GROWTH = 2.4F;
+	/** A bolt loosed: base * (SHOT_MIN + charge * SHOT_GROWTH). */
+	static final float SHOT_MIN = 1.5F, SHOT_GROWTH = 3.5F;
+	/** A page stored: base * this, all at once. */
+	static final float STORE_BURST = 6.0F;
+	/** A page cast: base * (CAST_MIN + spell tier * CAST_PER_TIER). */
+	static final float CAST_MIN = 1.0F, CAST_PER_TIER = 1.2F;
+	/** The element's own particle, as a share of the glyph count (never fewer than one). */
+	static final float OWN_SHARE = 0.4F;
 	/** Rare loot: a tome from a slain caster, and one in the rarest chests. */
 	static final float CASTER_DROP = 0.06F, CHEST_LOOT = 0.04F;
 
@@ -211,6 +237,25 @@ public final class Tomes {
 		return page == null || page.isEmpty() ? null : page;
 	}
 
+	// ---- the glyphs off the pages -------------------------------------------------------------------------------------
+
+	/** Where the pages are: the book in the hand. */
+	private static Vec3 book(ServerPlayer player) {
+		return player.getEyePosition().add(player.getLookAngle().scale(0.7)).add(0.0, -0.3, 0.0);
+	}
+
+	/** {@code tome}'s base glyph count. */
+	private static int glyphs(String element) {
+		return GLYPHS.getOrDefault(element, DEFAULT_GLYPHS);
+	}
+
+	/** Sheds {@code count} glyphs (the enchanting table's runes) around {@code at}, and the element's own particle among them. */
+	private static void shed(ServerLevel level, Vec3 at, String element, float count) {
+		int n = Math.max(1, Math.round(count));
+		level.sendParticles(ParticleTypes.ENCHANT, at.x, at.y, at.z, n, 0.25, 0.25, 0.25, 0.5);
+		level.sendParticles(Spellcraft.particle(element), at.x, at.y, at.z, Math.max(1, Math.round(n * OWN_SHARE)), 0.12, 0.12, 0.12, 0.02);
+	}
+
 	// ---- who can use it, and how hard ----------------------------------------------------------------------------------
 
 	private static boolean usable(Player player) {
@@ -283,7 +328,8 @@ public final class Tomes {
 		tome.set(PAGE, page.spell);
 		scroll.consume(1, player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.9F);
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.3, player.getZ(), 20, 0.3, 0.3, 0.3, 0.5);
+		String element = ((Tome) tome.getItem()).element;
+		shed(level, book(player), element, glyphs(element) * STORE_BURST);
 		player.sendOverlayMessage(Spellcraft.spellName(page.spell));
 		return true;
 	}
@@ -323,7 +369,8 @@ public final class Tomes {
 			Mana.ripple(player, Mana.intent(spell));
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
+		String element = ((Tome) tome.getItem()).element;
+		shed(level, book(player), element, glyphs(element) * (CAST_MIN + tier * CAST_PER_TIER));
 		boolean caster = Mana.natural(player);
 		player.getCooldowns().addCooldown(tome, Math.round(COOLDOWN[tier - 1] * (caster ? 1.0F : ATTUNED_WAIT)));
 		Spellcraft.afterCast(player, level, spell);
@@ -371,7 +418,7 @@ public final class Tomes {
 	}
 
 	/** {@code held} ticks of charge, as a share of the full charge (0 for a tap). */
-	static float charge(int held) {
+	public static float charge(int held) {
 		return held <= QUICK_TICKS ? 0.0F : Math.min(1.0F, (held - QUICK_TICKS) / (float) (FULL_TICKS - QUICK_TICKS));
 	}
 
@@ -390,6 +437,7 @@ public final class Tomes {
 		Vec3 start = player.getEyePosition().add(look.scale(0.6)).add(0.0, -0.25, 0.0);
 		BOLTS.add(new Bolt(level, player.getUUID(), element, start, look.scale(SPEED), f, strength(player), Math.round(QUICK_LIFE + f * (FULL_LIFE - QUICK_LIFE))));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		shed(level, book(player), element, glyphs(element) * (SHOT_MIN + f * SHOT_GROWTH));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), Spellcraft.sound(element), SoundSource.PLAYERS, 0.8F, 1.5F - 0.4F * f);
 		Spellcraft.afterCast(player, level, element);
 	}
@@ -407,9 +455,8 @@ public final class Tomes {
 				float f = charge((int) held);
 				int filled = Math.round(f * BAR_LENGTH);
 				player.sendOverlayMessage(Component.literal("|".repeat(filled) + ".".repeat(BAR_LENGTH - filled)).withStyle(ChatFormatting.AQUA));
-				if (held % 4 == 0 && player.level() instanceof ServerLevel level) {
-					Vec3 hand = player.getEyePosition().add(player.getLookAngle().scale(0.7)).add(0.0, -0.3, 0.0);
-					level.sendParticles(Spellcraft.particle(tome.element), hand.x, hand.y, hand.z, 1 + (int) (f * 3), 0.1, 0.1, 0.1, 0.01);
+				if (held % CHARGE_EVERY == 0 && player.level() instanceof ServerLevel level) {
+					shed(level, book(player), tome.element, glyphs(tome.element) * (CHARGE_MIN + f * CHARGE_GROWTH));
 				}
 				if (held == FULL_TICKS) {
 					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.6F);
@@ -423,7 +470,7 @@ public final class Tomes {
 		}
 	}
 
-	/** A bolt in flight, flown by the server: a trail of the element's particles, stopped by the first creature or block. */
+	/** A bolt in flight, flown by the server: a trail of the element's particles mixed with the mana glow, stopped by the first creature or block. */
 	private static final class Bolt {
 		final ServerLevel level;
 		final UUID owner;
@@ -473,11 +520,14 @@ public final class Tomes {
 			}
 			ParticleOptions trail = Spellcraft.particle(element);
 			Vec3 stop = target != null ? from.add(vel.normalize().scale(Math.sqrt(nearest))) : end;
-			int n = Math.max(1, (int) (from.distanceTo(stop) / 0.35));
+			int n = Math.max(1, (int) (from.distanceTo(stop) / TRAIL_STEP));
 			for (int i = 0; i <= n; i++) {
 				Vec3 p = from.lerp(stop, i / (double) n);
 				level.sendParticles(trail, p.x, p.y, p.z, 1 + (charge > 0.5F ? 1 : 0), 0.04, 0.04, 0.04, 0.0);
+				// the mana glow, left loosely behind where the bolt has been
+				level.sendParticles(Mana.MOTE, p.x, p.y, p.z, charge > 0.5F ? TRAIL_MANA_CHARGED : TRAIL_MANA, MANA_DRIFT, MANA_DRIFT, MANA_DRIFT, 0.0);
 			}
+			level.sendParticles(Mana.MOTE, stop.x, stop.y, stop.z, HEAD_MANA, 0.1, 0.1, 0.1, 0.01);
 			if (target != null) {
 				hit(shooter, target);
 				return false;

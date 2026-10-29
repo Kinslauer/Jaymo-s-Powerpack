@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:blue_ice",
+    "minecraft:blue_ice",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "frost": 14,
+    "water": 6,
+    "arcana": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:ice_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

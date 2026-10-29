@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:prismarine_shard",
+    "minecraft:prismarine_shard",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "water": 14,
+    "mercury": 6,
+    "arcana": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:water_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

@@ -5,6 +5,11 @@ One model per element (`item/<element>_tome`: the five cubes and the display fro
 recoloured texture each: the cover and the gem tinted per element, the pages, the clasp's iron and the gem's glints kept
 as drawn. Each element's item definition (`items/<element>_tome.json`) points at its model.
 
+The book animates: besides the closed model there are the same book half open, open, and open with a leaf of the pages
+caught mid-turn (five angles), `item/<element>_tome_half`, `_open`, `_flip1`..`_flip5`. The item definition picks one with
+a `range_dispatch` on the client-side property `jaymoskingdoms:tome_pose` (0 closed, 1 half, 2 open, 3..7 the leaf's five
+angles; Kingdoms' `TomePose`), except in the inventory, on the ground and in frames, where it stays the closed book.
+
 Run from the repo root: python3 -I tools/blockbench/elemental_tomes.py
 """
 import base64, io, json, os
@@ -129,6 +134,54 @@ display = {
     "fixed": place([0, -90, 0], 1.7, (0.0, 0.0, 0.0)),
 }
 
+# ---- the animation: the covers swing out about the spine, the pages split in two stacks, a leaf turns between ----
+HINGE = [8.0, 6.625, 9.25]  # the spine's inner face, in the middle: the covers and pages hinge about this line
+SPINE_OPEN = (7.0, 9.0)  # the spine narrows to the middle of its width once the covers have left it
+HALF = (34, 22)  # (cover angle, page stack angle) in degrees, half open
+OPEN = (76, 62)  # and open
+LEAF_ANGLES = [-54, -27, 0, 27, 54]  # the turning leaf: from the east stack over to the west one
+LEAF = {"from": [7.9, 3.4, 3.7], "to": [8.1, 11.85, 9.4]}
+
+
+def crop_x(el, x0, x1):
+    """The cube `el` cut to x0..x1: its faces whose u runs along x keep the matching slice of their UVs."""
+    lo, hi = el["from"][0], el["to"][0]
+    out = {"from": [x0] + el["from"][1:], "to": [x1] + el["to"][1:], "faces": {}}
+    for k, face in el["faces"].items():
+        u0, v0, u1, v1 = face["uv"]
+        if k in ("north", "south", "up", "down"):
+            # a north face's u starts at the high x, the others' at the low
+            a, b = ((hi - x1) / (hi - lo), (hi - x0) / (hi - lo)) if k == "north" else ((x0 - lo) / (hi - lo), (x1 - lo) / (hi - lo))
+            u0, u1 = round(u0 + (u1 - u0) * a, 4), round(u0 + (u1 - u0) * b, 4)
+        out["faces"][k] = {"uv": [u0, v0, u1, v1], "texture": "#0"}
+    return out
+
+
+def swing(el, angle):
+    """A copy of `el` turned `angle` degrees about the hinge (the spine's inner line, vertical)."""
+    out = dict(el)
+    out["rotation"] = {"angle": angle, "axis": "y", "origin": HINGE}
+    return out
+
+
+def pose(cover_angle, page_angle, leaf_angle=None):
+    """The open book: [pages, spine, west cover, east cover, clasp] of the closed one rearranged; the clasp is left off."""
+    pages, spine, west, east = elements[0], elements[1], elements[2], elements[3]
+    out = [crop_x(spine, *SPINE_OPEN), swing(west, cover_angle), swing(east, -cover_angle)]
+    out += [swing(crop_x(pages, 7.0, 8.0), page_angle), swing(crop_x(pages, 8.0, 9.0), -page_angle)]
+    if leaf_angle is not None:
+        # a leaf of the page's own paper, both sides
+        sides = {k: {"uv": pages["faces"][k]["uv"], "texture": "#0"} for k in ("east", "west")}
+        out.append(swing({**LEAF, "faces": sides}, leaf_angle))
+    return out
+
+
+POSES = {"half": pose(*HALF), "open": pose(*OPEN)}
+for i, angle in enumerate(LEAF_ANGLES, 1):
+    POSES[f"flip{i}"] = pose(*OPEN, angle)
+# the order `tome_pose` counts them in: 1 half, 2 open, 3..7 flip1..flip5
+POSE_ORDER = ["half", "open"] + [f"flip{i}" for i in range(1, len(LEAF_ANGLES) + 1)]
+
 for name, (cover, gem) in ELEMENTS.items():
     tex = f"{MOD}:item/{name}_tome"
     os.makedirs(f"{ASSETS}/textures/item", exist_ok=True)
@@ -139,5 +192,25 @@ for name, (cover, gem) in ELEMENTS.items():
         "elements": elements,
         "display": display,
     })
-    write_json(f"{ASSETS}/items/{name}_tome.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{name}_tome"}})
-print(len(elements), "cubes,", len(ELEMENTS), "elements")
+    for pose_name, pose_elements in POSES.items():
+        write_json(f"{ASSETS}/models/item/{name}_tome_{pose_name}.json", {
+            "credit": "Weapon - Starter Tome, Andy's Blockbench model",
+            "textures": {"0": tex, "particle": tex},
+            "elements": pose_elements,
+            "display": display,
+        })
+
+    def model(suffix=""):
+        return {"type": "minecraft:model", "model": f"{MOD}:item/{name}_tome{suffix}"}
+
+    # the closed book in the inventory, on the ground and in frames; in a hand the client's tome_pose picks the frame
+    write_json(f"{ASSETS}/items/{name}_tome.json", {"model": {
+        "type": "minecraft:select", "property": "minecraft:display_context",
+        "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"], "model": model()}],
+        "fallback": {
+            "type": "minecraft:range_dispatch", "property": f"{MOD}:tome_pose",
+            "entries": [{"threshold": i, "model": model("_" + n)} for i, n in enumerate(POSE_ORDER, 1)],
+            "fallback": model(),
+        },
+    }})
+print(len(elements), "cubes,", len(POSES), "poses,", len(ELEMENTS), "elements")
