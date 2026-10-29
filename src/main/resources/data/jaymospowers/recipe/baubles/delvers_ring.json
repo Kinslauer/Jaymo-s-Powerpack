@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    " A ",
+    "C C",
+    " C "
+  ],
+  "result": {
+    "id": "jaymospowers:delvers_ring",
+    "count": 1
+  }
+}

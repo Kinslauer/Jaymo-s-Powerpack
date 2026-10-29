@@ -3,8 +3,10 @@
 Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
 cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
 `Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
-page, every answer's tale and the closing line, plus (Kingdoms 0.7.342) the who-are-you page, the skip-the-story ask and
-the hold screen; the spirits read their summon lines. Clips go straight into
+page, every answer's tale and the closing line, plus (Kingdoms 0.7.349) the who-are-you page, the skip-the-story ask and
+the hold screen; the spirits read their summon lines; (Kingdoms 0.7.348) each tongue's
+greeting, farewell, cheer and scream (`tongue.jaymoskingdoms.<tongue>.<line>`), by a man and a woman of that land, made
+up words heard by those who don't speak it (`Voices.TONGUE_LINES`). Clips go straight into
 kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/<voice>/<name>.ogg (mono Vorbis); a clip already there is
 skipped, so a stopped run picks up where it left off. (Powers 0.17.183) The symbiote's combat calls (every say.* line;
 its mood variants, mood.say.*, can follow) goes into Powers' assets/jaymospowers/sounds/voice/symbiote, roughened afterwards
@@ -53,6 +55,21 @@ VOICES = {
                      desc="A deep, guttural, snarling monster voice, wet and raspy, growling and hissing through bared teeth, hungry and menacing, inhuman",
                      ref="We are hungry. Tear it open. Take what is ours, and feed us."),
 }
+# (Kingdoms 0.7.348) The tongues' speakers, a man and a woman each (`<tongue>_male`, `<tongue>_female`), designed on that
+# tongue's own greeting and farewell so the made-up words keep its sound. Each line is said in its mood (`TONGUE_MOODS`).
+TONGUE_FOLK = {
+    "common": "a plain, friendly country villager from green farmland, clear and homely",
+    "northern": "a hardy villager from the frozen north, deep and strong, with hard rolled r's and clipped words",
+    "southern": "a desert trader from hot dunes, warm and lilting, with soft breathy h's and rolling vowels",
+    "wildwood": "a villager from a steaming jungle, bright and rhythmic, quick clicking consonants and open vowels",
+    "blossom": "a soft-spoken villager from cherry-blossom hills, light, even and polite, crisp short syllables",
+}
+TONGUE_LINES = ["greet", "farewell", "celebrate", "scream"]
+TONGUE_MOODS = {"greet": "warm and welcoming", "farewell": "kind, saying goodbye", "celebrate": "cheering loudly with joy",
+                "scream": "screaming in terror, loud, shrill and panicked"}
+for _n, (_tongue, _desc) in enumerate(TONGUE_FOLK.items()):
+    for _g, _who in (("male", "A man in his thirties"), ("female", "A woman in her thirties")):
+        VOICES[_tongue + "_" + _g] = dict(seed=101 + _n * 10 + (_g == "female"), desc=_who + ", " + _desc, tongue=_tongue)
 # (2026-10-29) Andy: "the voice itself sounds too much like the wizards, it needs more snarl and twist like an evil lich
 # or swamp thing". Candidate symbiote voices for `--audition`: each designed on SYMBIOTE_REF, then made to say
 # AUDITION_LINES, roughened and snarled, into tools/voices/audition/<name>_<n>.ogg. The one Andy picks becomes "symbiote".
@@ -105,6 +122,10 @@ def lines(lang, powers):
         out.append(("narrator", key, lang[key]))
     for key in SPIRIT_LINES:
         out.append((key.split(".")[2], key, lang[key]))
+    for tongue in TONGUE_FOLK:
+        for g in ("male", "female"):
+            for line in TONGUE_LINES:
+                out.append((tongue + "_" + g, f"tongue.jaymoskingdoms.{tongue}.{g}.{line}", lang[f"tongue.jaymoskingdoms.{tongue}.{line}"]))
     # the symbiote: its combat calls (say.*; Andy picked these first, 2026-10-29). Add "mood.say." here for its moods'
     # variants, which are text only until then. A line with a %s in it stays text only.
     for start in ("say.",):
@@ -122,6 +143,9 @@ def sound_name(key):
         voice, rest = "narrator", key[len("gui.jaymoskingdoms.story."):]
     elif key.startswith(SYMBIOTE):
         voice, rest = "symbiote", key[len(SYMBIOTE):]
+    elif key.startswith("tongue.jaymoskingdoms."):
+        # tongue.jaymoskingdoms.northern.female.greet -> voice.tongue.northern.female.greet, tongue/northern_female_greet
+        voice, rest = "tongue", key[len("tongue.jaymoskingdoms."):]
     else:
         voice, rest = key[len("spirit.jaymoskingdoms."):].split(".", 1)
     return "voice." + voice + "." + rest, voice + "/" + rest.replace(".", "_")
@@ -132,12 +156,15 @@ def clip_path(voice, key):
 
 
 def write_sounds(all_lines):
-    """Each mod's sounds.json. Kingdoms registers its list in code, so it lists every line; Powers lists only the clips
+    """Each mod's sounds.json. Kingdoms registers its list in code, so it lists every line (a tongue's only once made); Powers lists only the clips
     made so far, since what it lists is what the symbiote says aloud."""
     for ns, assets in ASSETS_OF.items():
         sounds = {}
         for voice, key, _ in all_lines:
-            if NAMESPACE.get(voice, "jaymoskingdoms") != ns or (ns == "jaymospowers" and not os.path.exists(clip_path(voice, key))):
+            if NAMESPACE.get(voice, "jaymoskingdoms") != ns:
+                continue
+            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {})) and not os.path.exists(clip_path(voice, key)):
+                # (Kingdoms registers a tongue's line only once its clip exists)
                 continue
             sid, file = sound_name(key)
             entry = {"name": ns + ":voice/" + file}
@@ -359,10 +386,10 @@ def main():
     rate = model.tts_model.sample_rate
     try:
         for n, (voice, key, text) in enumerate(todo, 1):
-            make(model, rate, sf, voice, key, text)
+            make(model, rate, sf, lang, voice, key, text)
             print(f"[{n}/{len(todo)}] wrote", clip_path(voice, key))
     finally:
-        # (Powers lists only the clips that exist, so list the new ones even if the run is stopped)
+        # (Powers and the tongues list only the clips that exist, so list the new ones even if the run is stopped)
         write_sounds(all_lines)
 
 
@@ -413,7 +440,7 @@ def resnarl(folder, all_lines):
     print("resnarled", n, "clips")
 
 
-def make(model, rate, sf, voice, key, text):
+def make(model, rate, sf, lang, voice, key, text):
     v = VOICES[voice]
     ref = os.path.join(REFS, voice + ".wav")
     ref_text = v.get("ref", REF_TEXT)

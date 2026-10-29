@@ -1,0 +1,25 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:redstone",
+    "minecraft:redstone",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "spark": 14,
+    "metal": 6,
+    "arcana": 8
+  },
+  "instability": 7,
+  "result": {
+    "item": "jaymoskingdoms:lightning_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}

@@ -6,6 +6,7 @@
 		"AttackTellBrainMixin",
 		"AttackTellGoalMixin",
 		"BackpackExplosionMixin",
+		"WillPushMixin",
 		"CarryBlockItemMixin",
 		"CauldronBrewItemMixin",
 		"CarryLivingEntityMixin",

@@ -3688,7 +3688,68 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
   `BloodTrail.follow` (plain types, for reflection).
   - Not seen in game.
-- **0.17.183, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
+- **0.17.184, Baubles:** Andy asked for the Baubles mod. Baubles is 1.12 Forge only, and no accessory-slot mod
+  (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own (`baubles/`), laid out as Baubles was:
+  seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm. A tab on the survival inventory's
+  left edge (under the powers tab) opens them: the player in the middle, the slots either side, the inventory below;
+  a chest tab there goes back. There's an unbound Open baubles key too (the only way in from creative). Right-clicking
+  a bauble puts it straight into a free slot that takes it. What fits each slot is an item tag
+  (`jaymospowers:baubles/<slot>`), so a data pack can make any item wearable; only our own baubles give bonuses, and
+  only while worn there. Any worn item ticks as if carried, so Alchemy's Runic Amulet (the only alchemy trinket; the
+  Scrying Lens is a held tool) is tagged an amulet and draws off fleeting taint from that slot. Worn baubles drop where you die unless keepInventory holds.
+  Seven baubles to start (own art, `tools/gen_baubles.py`; crafted, in Tools & Utilities):
+  Heartstone Amulet (+4 max health: string, gold, a glistering melon slice), Swiftfoot Ring (+8% speed: gold and a
+  diamond), Delver's Ring (+20% mining speed: copper and an amethyst shard), Brawler's Belt (+25% knockback
+  resistance: leather and an iron nugget), Diver's Circlet (breath lasts about twice as long, +50% mining underwater:
+  gold nuggets and prismarine crystals), Featherfall Cloak (+2 blocks before a fall hurts: feathers, a phantom
+  membrane, white wool) and Rabbit's Foot Charm (+1 luck: string, a gold nugget, a rabbit's foot). The bonuses are set
+  in `Baubles.init`.
+  - Compile-checked; not seen in game.
+- **0.17.186, Sora's Dagger reverse grip, again:** Andy: "the reverse grip didnt seem to be working, he modeled it
+  differently". The friend's "Reverse grip sora dagger" file (same cubes, his hand slots turned over, kept as
+  `tools/blockbench/soras_dagger_reverse_original.bbmodel`) now gives the `_reverse` models their held transforms.
+  The weapon guard no longer refuses sneak + use on Sora's Dagger when something is in the off hand, which had stopped
+  the turn before the dagger saw it.
+- **0.17.188, Friends & Foes:** Andy asked whether its baubles fit our slots, then for it in the pack. Friends & Foes
+  (CC BY-NC-ND 4.0, Faboslav) and the Resourceful Lib it needs (MIT) join `packMods` unchanged, downloaded by id. They
+  bring the mob-vote losers (copper golem, glare, moobloom, mauler, rascal, tuff golem, wildfire, iceologer,
+  illusioner...). Its Totems of Freezing and Illusion fire from the hand or from the slot mods on its compat list;
+  `compat/FriendsAndFoesCompat` puts our bauble slots on that list by reflection, and the charm tag takes both totems,
+  so one worn as a charm saves you just as one in hand does (and is used up). Worn bauble stacks are now the same
+  objects as the open bauble screen's, so a totem used while that screen is open can't come back when it closes.
+  - Compile-checked; not seen in game.
+- **0.17.189, Sora's Dagger's Flurry probe (crash fix):** since 0.17.169 the game and server crashed on start
+  ("Components not bound yet" from `SorasDagger.<clinit>`): `FLURRY_PROBE`, a static `ItemStack`, was built when
+  `SorasDagger.register()` first loaded the class during mod init, before item components are bound. It's made on first
+  use now (`flurryProbe()`). No other static stack in the three mods is built that early.
+- **0.17.195, Blockbench batch 4 (Kingdoms 0.7.347):** Andy's eight new models.
+  - The future's Omen mechs: manned mechs, red and blue (`chrono/future/FutureOmen`, `FutureOmens`). Andy: "manned mechs
+    who fight against the androids and zombies overtaking los perrito before it fell".
+    - They spawn only in the future: a squad of one to three (same colour) about once every 12 minutes per player,
+      30-50 blocks out, never within 160 blocks of another.
+    - They attack androids, war and android mechs and ferals on sight. To players they're neutral unless hurt (or
+      their drone is).
+    - Heavy smash plus an arm cannon (FutureGuns heavy MG). 320 health, 22 damage, 22 armour.
+    - Destroyed, a pilot (a villager) climbs out 85% of the time, and a Cockpit Log book drops 35% of the time (the only
+      lore, in the pilot's voice).
+  - Worky drones (`FutureWorky`): one or two with every Omen, future only. They orbit their mech, repair it (2 health
+    every 2.5 s), spot foes (Glowing, and they hand a target over), flee danger, and wave at friendly players.
+  - New item looks: the harpoon (Armory and Kingdoms), the iron rapier (the swept rapier), the Voidreaver relic, and
+    the Tidebreaker relic (the lightning spear). `tools/blockbench/bake.py` snaps rotations Java models can't draw.
+  - Omen pilots are MCA villagers from the future (`FutureOmenPilots`; Andy: "very curious MCA villagers who are from
+    the future so they are surprised you are there"). The first time one sees you it stops and stares, says so, then
+    walks up and watches you a while. Talk: "Tell them where you came from" (they answer your life story's start or
+    heritage) and "Ask what happened here" (six pieces of how the world fell, one per talk, a minute apart, kept on the
+    pilot). Without Kingdoms/MCA a plain villager speaks the same lines on right click.
+  - Lost in time (Andy: "respawn in the future until they escape, no more death to leave"): a stranded starter
+    (`Future.STRANDED`) who dies wakes in the future's arrival square again; only their own leap home (sneak+B after
+    an echo, the pod, `/future back`) ends it.
+  - Tomecraft research (Enchanting, after Spellbinding) unlocks the spell tomes' infusion recipes.
+  - The spell tomes are Kingdoms 0.7.347's.
+  - Compile-checked only; not seen in game.
+- **0.17.197, tongue voices:** Kingdoms 0.7.348 gives every tongue a spoken greeting, farewell, cheer and scream heard by
+  players who don't speak it (see `kingdoms/MODLOG.md`). Powers unchanged but for the pack number.
+- **0.17.198, the symbiote speaks (`power/web/WebSymbioteVoice`):** Andy: "Can you add a snarling visceral voice to the
   symbiotes?" and picked its combat calls first. Every `say.*` line (201: what it says as it strikes, kills, grabs,
   feeds, digs, climbs, slings and so on, for all three strains) is spoken aloud as well as shown, only to the host, at
   their head. The voice is designed with VoxCPM2 (Apache-2.0, from a description: deep, guttural, wet, snarling; no real

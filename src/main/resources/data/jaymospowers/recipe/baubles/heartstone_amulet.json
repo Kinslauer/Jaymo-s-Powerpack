@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:string",
+    "G": "minecraft:gold_ingot",
+    "M": "minecraft:glistering_melon_slice"
+  },
+  "pattern": [
+    "S S",
+    " S ",
+    "GMG"
+  ],
+  "result": {
+    "id": "jaymospowers:heartstone_amulet",
+    "count": 1
+  }
+}

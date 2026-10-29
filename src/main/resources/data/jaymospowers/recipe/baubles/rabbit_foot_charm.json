@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:string",
+    "N": "minecraft:gold_nugget",
+    "R": "minecraft:rabbit_foot"
+  },
+  "pattern": [
+    " S ",
+    " N ",
+    " R "
+  ],
+  "result": {
+    "id": "jaymospowers:rabbit_foot_charm",
+    "count": 1
+  }
+}

@@ -2,6 +2,8 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.Powers;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -12,10 +14,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.17.50, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
- * Supers and Primal Super (4, {@link ApeRage#SUPER_4}):
+ * Supers, Super Primal Super (4, {@link ApeRage#SUPER_4}) and Primal Super (10, {@link ApeRage#PRIMAL_SUPER}):
  * <ul>
  * <li>{@link #FALSE_SUPER} (5), a near-death flare before the first Super ({@link ZFighterFalseSuper});</li>
  * <li>{@link #GOD} (6), the god form lifted by five at the Lookout ({@link ZFighterGodRitual}, {@link ZFighterGod}), with
@@ -33,6 +36,8 @@ public final class ZFighterForms {
 	private static final int[] COLORS = {0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C};
 	/** How hard a form's particles, aura and shake play (the number of the Super it matches), by form 5-9. */
 	private static final int[] TIERS = {2, 3, 2, 3, 4};
+	/** (0.17.190) Primal Super's tier: Super 3's, so its burst, shake and aura are a step under Super Primal Super's. */
+	static final int PRIMAL_SUPER_TIER = 3;
 
 	private ZFighterForms() {
 	}
@@ -42,24 +47,72 @@ public final class ZFighterForms {
 		return form >= FIRST && form <= LAST;
 	}
 
-	/** The tier a form's effects play at: its own number up to Primal Super, a set one for the newer forms. */
+	/** The tier a form's effects play at: its own number up to Super Primal Super, a set one for the newer forms. */
 	public static int tier(int form) {
+		if (form == ApeRage.PRIMAL_SUPER) {
+			// (0.17.190) Primal Super plays a step under Super Primal Super
+			return PRIMAL_SUPER_TIER;
+		}
 		return special(form) ? TIERS[form - FIRST] : Math.clamp(form, 0, ApeRage.SUPER_4);
 	}
 
-	/** The aura colour of a form past Primal Super (clamped). */
+	/** The aura colour of a form past Super Primal Super (clamped). */
 	public static int color(int form) {
-		return COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
+		return form == ApeRage.PRIMAL_SUPER ? ApeRage.PRIMAL_SUPER_COLOR : COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
 	}
 
-	/** The hair a form wears, as a Super's number (1-3): False Super the first Super's, the rest Super 3's mane. */
+	/**
+	 * The hair a form wears, as a Super's number (1-3): False Super the first Super's, Primal Super Super 2's (Andy), the rest
+	 * Super 3's mane.
+	 */
 	public static int hairForm(int form) {
-		return form == FALSE_SUPER ? 1 : Math.min(form, 3);
+		return form == FALSE_SUPER ? 1 : form == ApeRage.PRIMAL_SUPER ? 2 : Math.min(form, 3);
 	}
 
-	/** Whether the Spirit Bomb can be raised from this form: Super 3, Primal Super and the god form. */
+	/** Whether the Spirit Bomb can be raised from this form: Super 3, either primal form and the god form. */
 	public static boolean bombForm(int form) {
-		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == GOD;
+		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD;
+	}
+
+	/**
+	 * (0.17.194) Andy: "a menu for z fighters, accessed by holding C that lets you pick the form instead of sequential up
+	 * and down, as long as you have it unlocked". The forms the menu offers him now, lowest first: base, his bought Supers
+	 * (the legendary line's for a legendary-born), Primal Super, Super Primal Super (while fused with a Warrior-born) and
+	 * the god form. None as the ape. Both sides read it: the menu draws it, the server checks a pick against it.
+	 */
+	/** (0.17.196) Not a form: the hold-C menu's Spirit Bomb tile ({@link #menu}, {@link ZFighterPower#pickForm}). */
+	public static final int SPIRIT_BOMB_PICK = 99;
+
+	/** (0.17.196) The hold-C menu's tiles: his forms ({@link #choices}), then the Spirit Bomb once he knows it. */
+	public static List<Integer> menu(Player player) {
+		List<Integer> tiles = choices(player);
+		if (!tiles.isEmpty() && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)) {
+			tiles.add(SPIRIT_BOMB_PICK);
+		}
+		return tiles;
+	}
+
+	public static List<Integer> choices(Player player) {
+		List<Integer> forms = new ArrayList<>();
+		if (ZFighterLineage.ape(player)) {
+			return forms;
+		}
+		forms.add(0);
+		int open = Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+		boolean mutant = ZFighterLegendary.mutant(player);
+		for (int f = 1; f <= open; f++) {
+			forms.add(mutant ? LEGEND_1 + f - 1 : f);
+		}
+		if (ApeRage.super4(player)) {
+			forms.add(ApeRage.PRIMAL_SUPER);
+		}
+		if (ApeRage.superPrimal(player)) {
+			forms.add(ApeRage.SUPER_4);
+		}
+		if (ZFighterGod.unlocked(player)) {
+			forms.add(GOD);
+		}
+		return forms;
 	}
 
 	/** Called once from {@link ZFighterPower#init}. */
@@ -130,7 +183,8 @@ public final class ZFighterForms {
 		if (sneak) {
 			return false;
 		}
-		boolean topOfLine = form == ApeRage.SUPER_4 || form == ZFighterTraining.FORMS && !ApeRage.super4(player);
+		// (0.17.190) the top is Super Primal Super, Primal Super or Super 3, whichever he has reached
+		boolean topOfLine = form == ApeRage.top(player) && (form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == ZFighterTraining.FORMS);
 		if (ZFighterGod.unlocked(player) && (topOfLine || form == LEGEND_3) && !ZFighterLineage.ape(player)) {
 			ZFighterGod.enter(player, live);
 			return true;

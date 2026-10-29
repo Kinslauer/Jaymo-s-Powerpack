@@ -71,7 +71,9 @@ public final class ZFighterKiGlow {
 		Long full = player.getAttached(ZFighterPower.KI_FULL);
 		long since = full == null ? Long.MAX_VALUE : player.level().getGameTime() - full;
 		float pulse = since >= 0L && since < PULSE_TICKS ? 1.0F - (float)since / PULSE_TICKS : 0.0F;
-		return new float[] {color(player, f), strength + PULSE * pulse, pulse};
+		// (0.17.190) Primal Super plays at Super 3's tier but glows its own colour
+		int shade = form != null && form == com.jaymospowers.power.zfighter.ApeRage.PRIMAL_SUPER ? form : f;
+		return new float[] {color(player, shade), strength + PULSE * pulse, pulse};
 	}
 
 	/** His ki colour in base form, the form's in a form. */

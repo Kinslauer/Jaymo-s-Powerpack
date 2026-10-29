@@ -163,6 +163,10 @@ public final class Arcana {
 	 * took (a target was there).
 	 */
 	public static boolean cast(String spell, ServerLevel level, Player player, float power) {
+		// (0.7.342) hushed by a Spellbreaker Blow (Will)
+		if (Will.hushed(player)) {
+			return false;
+		}
 		return switch (spell) {
 			case "raising" -> raising(level, player, power);
 			case "draining" -> draining(level, player, power);

@@ -280,8 +280,8 @@ public final class ClassPerks {
 			case BRUTE -> weapon.is(BLUDGEONS);
 			case ARCHER -> weapon.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
 			case MARKSMAN -> weapon.is(GUNS) || weapon.getItem() instanceof net.minecraft.world.item.CrossbowItem;
-			case SORCERER -> weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(LIGHT_BLADES);
-			case MAGE -> weapon.is(Arcana.BONE_STAFF) || weapon.is(Arcana.TOTEM_STAFF) || weapon.is(Arcana.WIZARD_STAFF);
+			case SORCERER -> weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(LIGHT_BLADES) || Tomes.isTome(weapon);
+			case MAGE -> weapon.is(Arcana.BONE_STAFF) || weapon.is(Arcana.TOTEM_STAFF) || weapon.is(Arcana.WIZARD_STAFF) || Tomes.isTome(weapon);
 			case RIDER -> player.getVehicle() != null;
 			case SURVIVALIST -> false;
 		};

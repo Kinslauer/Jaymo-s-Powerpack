@@ -40,8 +40,8 @@ public final class ZFighterNpcs {
 	static final double CONVERT_NEAR = 64.0;
 
 	/** One answer on a talk screen: its words, whether it can be picked, and what picking it does. */
-	record Option(Component label, boolean enabled, Runnable pick) {
-		static Option of(String key, boolean enabled, Runnable pick, Object... args) {
+	public record Option(Component label, boolean enabled, Runnable pick) {
+		public static Option of(String key, boolean enabled, Runnable pick, Object... args) {
 			return new Option(Component.translatable(key, args), enabled, pick);
 		}
 	}
@@ -74,7 +74,7 @@ public final class ZFighterNpcs {
 	}
 
 	/** Whether the characters are MCA villagers here (Kingdoms and MCA, and a Kingdoms that knows them). */
-	static boolean villagers() {
+	public static boolean villagers() {
 		return SPAWN != null && ASK != null;
 	}
 
@@ -87,7 +87,7 @@ public final class ZFighterNpcs {
 	 * One of the characters, as an MCA villager at {@code at} facing {@code yaw}, tagged {@code tag} and named by
 	 * {@code nameKey}; null without Kingdoms and MCA (the caller makes the old trader).
 	 */
-	static @Nullable LivingEntity villager(ServerLevel level, Vec3 at, float yaw, String tag, String nameKey, boolean female) {
+	public static @Nullable LivingEntity villager(ServerLevel level, Vec3 at, float yaw, String tag, String nameKey, boolean female) {
 		if (!villagers()) {
 			return null;
 		}
@@ -183,6 +183,10 @@ public final class ZFighterNpcs {
 		}
 		String tag = tag(npc);
 		if (tag == null) {
+			if (npc.entityTags().contains(com.jaymospowers.power.chrono.future.FutureOmen.PILOT_TAG)) {
+				// (0.17.192) an Omen's pilot, in the future
+				return com.jaymospowers.power.chrono.future.FutureOmenPilots.talk(player, npc);
+			}
 			if (npc.entityTags().contains(ZFighterMasters.TAG) || npc.entityTags().contains(ZFighterMasters.DARK_TAG)) {
 				ZFighterMasters.talk(player, npc);
 				return true;
@@ -200,7 +204,7 @@ public final class ZFighterNpcs {
 	}
 
 	/** {@code npc} says {@code words}, with these answers and a farewell. Without the talk screen, the words go to chat. */
-	static void ask(ServerPlayer player, LivingEntity npc, Component words, List<Option> options) {
+	public static void ask(ServerPlayer player, LivingEntity npc, Component words, List<Option> options) {
 		List<Option> all = new ArrayList<>(options);
 		all.add(Option.of("talk.jaymospowers.zfighter.farewell", true, () -> {
 		}));

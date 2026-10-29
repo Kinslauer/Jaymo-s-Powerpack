@@ -1,0 +1,23 @@
+{
+  "centre": "minecraft:book",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:moss_block",
+    "minecraft:moss_block",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "earth": 14,
+    "crystal": 6,
+    "arcana": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymoskingdoms:earth_tome",
+    "count": 1
+  },
+  "research": "tomecraft",
+  "flux": 4
+}
