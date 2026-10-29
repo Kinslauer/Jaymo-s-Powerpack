@@ -64,7 +64,7 @@ public final class ZFighterScouter {
 	 */
 	static final double[] FORM_MULTIPLIER = {1.0, 2.5, 4.0, 6.0, 7.0 * 4.0, 4.0, 11.0, 5.0, 8.0, 12.0, 7.0};
 	/**
-	 * (0.17.191) Andy: False Super comes before Super, so it multiplies by this much, rising to this much as he nears the
+	 * (0.17.193) Andy: False Super comes before Super, so it multiplies by this much, rising to this much as he nears the
 	 * real breakthrough: half by his hardship toward {@link ZFighterBattle#SUPER_HARDSHIP}, half by the abilities he has
 	 * mastered toward ascending ({@link Mastery#ALL}).
 	 */
