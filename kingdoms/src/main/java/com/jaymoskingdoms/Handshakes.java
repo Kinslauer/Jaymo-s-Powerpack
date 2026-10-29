@@ -38,9 +38,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.184) Andy: "you can see their player tags once finding and interacting with them, (both players right clicking
@@ -70,6 +74,15 @@ import net.minecraft.world.phys.Vec3;
  * opens straight away ({@link #GREETED}). Every villager handshake is on film only with someone {@linkplain #special
  * special} (a dragon walking as a villager, a master of a gift); with anyone else it's the shake alone. Not a ruler, a
  * child, one with a grudge against you, or behind a full mask: those go straight to the menu as before.
+ * <p>
+ * (0.7.337) Andy: "Villagers should be able to run up to you with a wave or handshake for introduction". Every so
+ * often ({@link #COME_SCAN}, at most once in {@link #COME_GAP} for each player) a villager near you who doesn't know you
+ * hails you and hurries over ({@link #comeOver}): who comes goes by their temperament ({@link #COME_WEIGHTS}: the
+ * cheerful and kindhearted most, the suspicious, timid and spiteful never) and what they remember of you. Up close they
+ * either hold out a hand ({@link Introductions#takesHand}, "women usually wave" as before), which you take by using
+ * them (the shake, and their name), or give you a wave and tell you their name. Leave a hand hanging and they let it
+ * drop; they don't come again that day. Not at night, not mid-fight, not to someone masked, riding, or with a screen
+ * open, and never one of {@link Approaches}' at the same time.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -90,6 +103,29 @@ public final class Handshakes {
 	public static final int WAVE_TICKS = 30;
 	/** (0.7.289) Andy: "women usually wave": the chance a woman shakes your hand at a first meeting, when she'd take it at all. */
 	static final float WOMAN_SHAKES = 0.2F;
+	/** (0.7.337) How often (ticks) players are looked at for a villager to come over, how far off they may be (blocks), and the chance a look brings one. */
+	static final int COME_SCAN = 40;
+	static final double COME_RANGE = 14.0;
+	static final float COME_CHANCE = 0.3F;
+	/** (0.7.337) Between villagers coming over to one player (ticks): at least this, plus up to this; the first after joining. */
+	static final int COME_GAP = 20 * 60, COME_GAP_SPREAD = 20 * 120, COME_FIRST = 20 * 30;
+	/** (0.7.337) Hurrying over: speed (MCA's brain), how near is near enough, how long before they give up, how far off you may get. */
+	static final float COME_SPEED = 0.75F;
+	static final double COME_ARRIVE = 2.2, COME_GIVE_UP = 28.0;
+	static final int COME_WALK_TICKS = 20 * 20;
+	/** (0.7.337) How long (ticks) a villager who came over holds out their hand, and how far you may step off before they let it drop. */
+	static final int COME_OFFER_TICKS = 20 * 8;
+	static final double COME_LEAVE = 6.0;
+	/**
+	 * (0.7.337) How keen each temperament is to come over and introduce themselves ({@link Temperaments.Temperament} order:
+	 * kindhearted, cheerful, devout, dutiful, brave, proud, greedy, suspicious, timid, hotheaded, spiteful, gloomy).
+	 */
+	static final int[] COME_WEIGHTS = {5, 6, 3, 2, 3, 1, 2, 0, 0, 1, 0, 1};
+	/** (0.7.337) Keenness with no temperament, and what a warm memory of you adds. */
+	static final int COME_PLAIN = 2, COME_WARM = 2;
+	/** (0.7.337) How many ways they hail you on setting off, and how far it carries (blocks). */
+	static final int HAILS = 4;
+	static final double HAIL_RANGE = 16.0;
 
 	/** (0.7.289) On a player: the villagers who've greeted them, whose menu opens straight away from then (saved, kept through death). */
 	static final AttachmentType<Set<UUID>> GREETED = AttachmentRegistry.create(JaymosKingdoms.id("greeted"),
@@ -115,13 +151,36 @@ public final class Handshakes {
 	private static final Map<UUID, Greeting> GREETINGS = new HashMap<>();
 	/** (0.7.289) Waves at a first meeting going on. */
 	private static final List<Wave> WAVES = new ArrayList<>();
+	/** (0.7.337) Player → the villager coming over to introduce themselves. */
+	private static final Map<UUID, Comer> COMERS = new HashMap<>();
+	/** (0.7.337) Player → when a villager may next come over (game time). */
+	private static final Map<UUID, Long> COME_NEXT = new HashMap<>();
+	/** (0.7.337) "villager/player" → the day that villager last came over to that player. */
+	private static final Map<String, Long> CAME = new HashMap<>();
 
 	/** (0.7.289) Your hand is out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it, or waves. */
 	private record Greeting(Villager villager, long decide, boolean takes) {
 	}
 
-	/** (0.7.289) {@code villager} waves to {@code player} from {@code start} (game time); the menu opens after. */
-	private record Wave(UUID player, Villager villager, long start) {
+	/** (0.7.289) {@code villager} waves to {@code player} from {@code start} (game time); the menu {@code opens} after (0.7.334: not when they came to you). */
+	private record Wave(UUID player, Villager villager, long start, boolean opens) {
+	}
+
+	/**
+	 * (0.7.337) {@code villager} is coming over to {@code player} (till {@code until}, game time), and once there will
+	 * hold out a hand ({@code takes}) or wave; {@code offering} once the hand's out.
+	 */
+	private static final class Comer {
+		final Villager villager;
+		final boolean takes;
+		long until;
+		boolean offering;
+
+		Comer(Villager villager, boolean takes, long until) {
+			this.villager = villager;
+			this.takes = takes;
+			this.until = until;
+		}
 	}
 
 	/** (0.7.204) {@code player} holds a hand out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it or not. */
@@ -182,6 +241,11 @@ public final class Handshakes {
 		JaymosKingdoms.LOGGER.debug("handshake attachments: {} {}", SHOOK, GREETED);
 		PayloadTypeRegistry.clientboundPlay().register(Hand.TYPE, Hand.CODEC);
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (hand == InteractionHand.MAIN_HAND && entity instanceof Villager villager && player instanceof ServerPlayer sp && !world.isClientSide()
+				&& meetComer(sp, villager)) {
+				// (0.7.337) the villager who came over to you: take their hand, or have them say hello now
+				return InteractionResult.SUCCESS;
+			}
 			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player other) || !can(player) || !can(other)
 				|| player.isShiftKeyDown() || !player.getMainHandItem().isEmpty() || player.distanceTo(other) > REACH) {
 				return InteractionResult.PASS;
@@ -211,6 +275,9 @@ public final class Handshakes {
 			TURNED_DOWN.clear();
 			GREETINGS.clear();
 			WAVES.clear();
+			COMERS.clear();
+			COME_NEXT.clear();
+			CAME.clear();
 		});
 	}
 
@@ -317,7 +384,22 @@ public final class Handshakes {
 				return true;
 			}
 		}
+		for (Comer c : COMERS.values()) {
+			if (c.villager == villager) {
+				return true;
+			}
+		}
 		return false;
+	}
+
+	/** (0.7.337) {@code mob} is coming over to someone, weighing a hand, shaking one or waving ({@link Approaches} leaves them be). */
+	static boolean engaged(net.minecraft.world.entity.Mob mob) {
+		return mob instanceof Villager v && busy(v);
+	}
+
+	/** (0.7.337) A villager is on their way to {@code player} to introduce themselves. */
+	static boolean awaited(ServerPlayer player) {
+		return COMERS.containsKey(player.getUUID());
 	}
 
 	/** (0.7.204) {@code villager} answers {@code player}'s hand: takes it (the shake begins) or leaves it hanging. */
@@ -386,6 +468,13 @@ public final class Handshakes {
 	/** (0.7.204) Whatever handshake {@code villager} is in is broken off (0.7.289: or greeting). */
 	private static void breakOff(Villager villager) {
 		MinecraftServer server = villager.level().getServer();
+		for (Iterator<Map.Entry<UUID, Comer>> it = COMERS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Comer> e = it.next();
+			if (e.getValue().villager == villager) {
+				it.remove();
+				leave(server.getPlayerList().getPlayer(e.getKey()), e.getValue());
+			}
+		}
 		for (Iterator<Map.Entry<UUID, Greeting>> it = GREETINGS.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Greeting> e = it.next();
 			if (e.getValue().villager == villager) {
@@ -488,6 +577,10 @@ public final class Handshakes {
 	private static void breakOff(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
 		ASKED.removeIf(a -> a.player.equals(player.getUUID()));
+		Comer comer = COMERS.remove(player.getUUID());
+		if (comer != null) {
+			leave(player, comer);
+		}
 		if (GREETINGS.remove(player.getUUID()) != null) {
 			send(player, -1, Hand.DOWN);
 		}
@@ -526,6 +619,13 @@ public final class Handshakes {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % COME_SCAN == 0) {
+			// (0.7.337) someone may come over to introduce themselves
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				considerComing(player);
+			}
+		}
+		tickComers(server);
 		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty() && GREETINGS.isEmpty() && WAVES.isEmpty()) {
 			return;
 		}
@@ -668,7 +768,7 @@ public final class Handshakes {
 		}
 		send(player, -1, Hand.DOWN);
 		send(villager, player.getId(), Hand.WAVE);
-		WAVES.add(new Wave(player.getUUID(), villager, now));
+		WAVES.add(new Wave(player.getUUID(), villager, now, true));
 		player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.greet.waved").withStyle(ChatFormatting.GRAY), true);
 	}
@@ -710,7 +810,182 @@ public final class Handshakes {
 			if (now - w.start >= WAVE_TICKS) {
 				it.remove();
 				endWave(server, w);
-				menu(p, w.villager);
+				if (w.opens) {
+					menu(p, w.villager);
+				}
+			}
+		}
+	}
+
+	// ---- (0.7.337) they come to you -----------------------------------------------------------------------------------
+
+	/** (0.7.337) Maybe a villager near {@code player} who doesn't know them comes over to introduce themselves. */
+	private static void considerComing(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		UUID id = player.getUUID();
+		Long next = COME_NEXT.get(id);
+		if (next == null) {
+			COME_NEXT.put(id, now + COME_FIRST);
+			return;
+		}
+		if (now < next || COMERS.containsKey(id) || GREETINGS.containsKey(id) || shaking(id) || !can(player) || player.isPassenger()
+			|| player.containerMenu != player.inventoryMenu || Identities.masked(player) || Approaches.engaged(id) || Approaches.fighting(player)
+			|| Approaches.night(level) || level.getRandom().nextFloat() > COME_CHANCE) {
+			return;
+		}
+		long today = Deeds.today(level.getServer());
+		Villager best = null;
+		int total = 0;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(COME_RANGE))) {
+			int w = comeWeight(level, player, v, today);
+			// (a weighted draw over everyone who'd come)
+			if (w > 0) {
+				total += w;
+				if (level.getRandom().nextInt(total) < w) {
+					best = v;
+				}
+			}
+		}
+		if (best != null) {
+			comeOver(player, best, now, today);
+		}
+	}
+
+	/** (0.7.337) How keen {@code v} is to come over and introduce themselves to {@code player} (0: they won't). */
+	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today) {
+		if (!McaCompat.isMca(v) || v.isBaby() || v.isTrading() || McaCompat.panicking(v) || busy(v) || !Approaches.free(v)
+			|| Introductions.knows(player, v) || greetedBy(player, v) || Rulers.is(v) || Recollections.refuses(v, player)) {
+			return 0;
+		}
+		Long came = CAME.get(v.getUUID() + "/" + player.getUUID());
+		if (came != null && came == today || !v.hasLineOfSight(player)) {
+			return 0;
+		}
+		Faction f = Approaches.home(level, v);
+		if (f != null && (Reputation.get(player, f.id()) <= Reputation.HOSTILE || Theft.wanted(player, f.id()))) {
+			// (their people hate you, or are after you)
+			return 0;
+		}
+		Temperaments.Temperament t = Temperaments.of(v);
+		int w = t == null ? COME_PLAIN : COME_WEIGHTS[t.ordinal()];
+		int lean = Recollections.leaning(v, player);
+		if (lean <= Recollections.COLD) {
+			return 0;
+		}
+		return w > 0 && lean >= Recollections.WARM ? w + COME_WARM : w;
+	}
+
+	/** (0.7.337) {@code villager} hails {@code player} and hurries over; whether they'll offer a hand is settled now. */
+	private static void comeOver(ServerPlayer player, Villager villager, long now, long today) {
+		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
+		COMERS.put(player.getUUID(), new Comer(villager, takes, now + COME_WALK_TICKS));
+		CAME.put(villager.getUUID() + "/" + player.getUUID(), today);
+		COME_NEXT.put(player.getUUID(), now + COME_GAP + villager.getRandom().nextInt(COME_GAP_SPREAD));
+		Speech.say(player.level(), villager, Component.translatable("greet.jaymoskingdoms.hail." + villager.getRandom().nextInt(HAILS)), Speech.WHITE, HAIL_RANGE);
+		comeWalk(villager, player);
+	}
+
+	private static void comeWalk(Villager villager, ServerPlayer player) {
+		BehaviorUtils.setWalkAndLookTargetMemories(villager, new EntityTracker(player, true), COME_SPEED, 1);
+	}
+
+	/** (0.7.337) Villagers coming over kept going, arriving, holding out a hand, or giving up. */
+	private static void tickComers(MinecraftServer server) {
+		if (COMERS.isEmpty()) {
+			return;
+		}
+		long now = server.overworld().getGameTime();
+		for (Iterator<Map.Entry<UUID, Comer>> it = COMERS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Comer> e = it.next();
+			Comer c = e.getValue();
+			Villager v = c.villager;
+			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+			if (p == null || !can(p) || !v.isAlive() || v.isRemoved() || p.level() != v.level() || v.isSleeping() || v.getTarget() != null
+				|| McaCompat.panicking(v) || now > c.until || p.distanceTo(v) > (c.offering ? COME_LEAVE : COME_GIVE_UP)) {
+				it.remove();
+				leave(p, c);
+				continue;
+			}
+			if (c.offering) {
+				stand(v, p);
+			} else if (p.distanceTo(v) <= COME_ARRIVE) {
+				if (arrive(p, c, now)) {
+					it.remove();
+				}
+			} else if (now % 10 == 0) {
+				comeWalk(v, p);
+			}
+		}
+	}
+
+	/** (0.7.337) {@code villager} stood still, looking at {@code player}. */
+	private static void stand(Villager villager, ServerPlayer player) {
+		villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		villager.getNavigation().stop();
+		villager.getLookControl().setLookAt(player, 30.0F, 30.0F);
+	}
+
+	/**
+	 * (0.7.337) {@code c}'s villager has reached {@code player}: they hold out a hand, or wave and say their name (the
+	 * name needs no shared tongue). True when it's done with (a wave); false while the hand waits.
+	 */
+	private static boolean arrive(ServerPlayer player, Comer c, long now) {
+		Villager villager = c.villager;
+		stand(villager, player);
+		if (c.takes) {
+			c.offering = true;
+			c.until = now + COME_OFFER_TICKS;
+			send(villager, player.getId(), Hand.OFFERED);
+			player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.NEUTRAL, 0.4F, 1.3F);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.greet.came_offer")
+				.withStyle(ChatFormatting.GRAY), true);
+			return false;
+		}
+		greeted(player, villager);
+		Introductions.learn(player, villager);
+		send(villager, player.getId(), Hand.WAVE);
+		WAVES.add(new Wave(player.getUUID(), villager, now, false));
+		Component name = Component.literal(villager.getName().getString());
+		Speech.say(player.level(), villager, Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(Introductions.LINES), name),
+			Speech.WHITE, 12.0);
+		player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
+		player.sendSystemMessage(Component.translatable(Languages.understands(player, villager) ? "message.jaymoskingdoms.greet.came_waved"
+			: "message.jaymoskingdoms.greet.came_waved_foreign", name).withStyle(ChatFormatting.GREEN), true);
+		return true;
+	}
+
+	/**
+	 * (0.7.337) {@code player} used {@code villager}: if it's the one coming over to them, take their hand (it's out), or
+	 * have them say hello there and then (they're on their way). True if it was them.
+	 */
+	private static boolean meetComer(ServerPlayer player, Villager villager) {
+		Comer c = COMERS.get(player.getUUID());
+		if (c == null || c.villager != villager || player.isShiftKeyDown()) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		if (!c.offering) {
+			if (arrive(player, c, now)) {
+				COMERS.remove(player.getUUID());
+			}
+			return true;
+		}
+		COMERS.remove(player.getUUID());
+		greeted(player, villager);
+		shake(player, villager, now, false);
+		return true;
+	}
+
+	/** (0.7.337) {@code c}'s villager gives up coming over (or lets the hand they held out drop) and goes back about their day. */
+	private static void leave(@Nullable ServerPlayer player, Comer c) {
+		if (c.villager.isAlive()) {
+			c.villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		}
+		if (c.offering) {
+			send(c.villager, -1, Hand.DOWN);
+			if (player != null && c.villager.isAlive()) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.greet.came_dropped").withStyle(ChatFormatting.GRAY), true);
 			}
 		}
 	}
