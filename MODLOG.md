@@ -3579,4 +3579,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   overworld strongholds for its own, which fill chests from their own loot tables, so the Grand Shield also lives in
   its stronghold armouries and the Voidreaver in its End city chests (`compat/EnderscapeLoot`; Kingdoms 0.7.327 does
   the same for writs and quest lairs). Only End chunks generated after this get the new terrain. Last World Panorama (client-only) makes the title screen's panorama a shot of where you last left a world.
-  Both sit in `packModsNoCf` until their CurseForge ids are looked up; Enderscape is kept out of the dev game.
+  Both are in `packMods` with their CurseForge ids, so the CurseForge import downloads them; Enderscape is kept out
+  of the dev game.
