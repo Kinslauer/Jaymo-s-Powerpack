@@ -243,6 +243,16 @@ def packMods = [
 	// 5.0.4, Fabric 26.3; needs Resourceful Lib (MIT, Team Resourceful). Client and server.
 	[dep: "maven.modrinth:friends-and-foes:RT5VU8LW", cf: [551364, 9331872], dev: false],
 	[dep: "maven.modrinth:resourceful-lib:P6Jq77km", cf: [570073, 8991147], dev: false],
+	// Inventory handling (0.17.204), both shipped unchanged. Mouse Tweaks (BSD-3-Clause, YaLTeR): drag with the right or
+	// left button to spread or gather items, shift-drag to move many stacks, scroll over a slot to move items one at a
+	// time. Client-only (Fabric skips it on the server); works on any screen built on AbstractContainerScreen, ours too.
+	// 26.3-2.31-fabric (Modrinth version LeMuMhLv).
+	[dep: "maven.modrinth:mouse-tweaks:LeMuMhLv", cf: [60089, 8887995]],
+	// ClientSort (Apache-2.0, TerminalMC): middle-click over an inventory (or its little button) sorts it; Shift, Ctrl
+	// and Alt sort by count, name or id; buttons to fill stacks, restock and transfer. Works client-only; the server copy
+	// sorts faster. Middle mouse is also lock-on, but that key only acts with no screen open and ClientSort's only inside
+	// one, so they never clash. Needs Cloth Config and Mod Menu (above). 3.104.1+26.3 (Modrinth version UWMryUad).
+	[dep: "maven.modrinth:clientsort:UWMryUad", cf: [1049891, 8978806]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
