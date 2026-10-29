@@ -75,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
  * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
- * (0.17.166) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
+ * (0.17.169) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  */
 public final class Guard {

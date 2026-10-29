@@ -3632,7 +3632,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with a line (`WebSymbioteRescue.knit`, `Wounds.knitBones`; not when it's too weak to rescue you). And Jump stands you
   up from any crawl the server holds that nothing keeps you in any more (`CrawlTaps`), as it does from a crawl of your
   own. Built, not playtested.
-- **0.17.166, a third batch of Blockbench models (Kingdoms 0.7.336):** all CC BY 4.0, credited in
+- **0.17.169, a third batch of Blockbench models (Kingdoms 0.7.339):** all CC BY 4.0, credited in
   `textures/entity/bb/CREDITS.txt` (both mods).
   - **Traveler Dagger** (polyjo) is the Armory's iron dagger's new 3D look (`tools/blockbench/traveler_dagger.py`).
   - **Dreaded Blade** (capellastudio): Andy, "replace the arsenal's relic weapons with one of these". It is the Nether
@@ -3647,7 +3647,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     next piece he lacks, crown first (`ZFighterAfterlife.heavenlyPiece`, tags `jaymospowers.heavenly.*`). The armour is
     Kingdoms'.
   - Not seen in game.
-- **0.17.166, Sora's Dagger parries:** Andy, "sora's dagger should be able to parry". Every stage takes the weapon guard
+- **0.17.169, Sora's Dagger parries:** Andy, "sora's dagger should be able to parry". Every stage takes the weapon guard
   (`Guard`): right click raises it, with the perfect parry and parry windows. From the diamond stage a wind's right
   click is still the Flurry while it's ready, and the guard while it cools down, as the warhammer's smash does. The
   Flurry's cooldown now runs on its own group (`SorasDagger.FLURRY_GROUP`), so the dagger no longer greys out in the

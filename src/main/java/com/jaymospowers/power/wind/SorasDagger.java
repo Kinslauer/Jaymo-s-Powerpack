@@ -103,7 +103,7 @@ public final class SorasDagger extends Item {
 	}
 
 	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
-	/** (0.17.166) The Flurry's cooldown group (not the dagger's own, so the guard stays up), and a stack that reads it. */
+	/** (0.17.169) The Flurry's cooldown group (not the dagger's own, so the guard stays up), and a stack that reads it. */
 	static final Identifier FLURRY_GROUP = JaymosPowers.id("soras_flurry");
 	private static final ItemStack FLURRY_PROBE = Util.make(new ItemStack(Items.STICK),
 		probe -> probe.set(DataComponents.USE_COOLDOWN, new UseCooldown(1.0F, Optional.of(FLURRY_GROUP))));
@@ -178,7 +178,7 @@ public final class SorasDagger extends Item {
 	}
 
 	/**
-	 * (0.17.166) Andy: "sora's dagger should be able to parry." Every stage takes the weapon guard ({@link Guard}): right
+	 * (0.17.169) Andy: "sora's dagger should be able to parry." Every stage takes the weapon guard ({@link Guard}): right
 	 * click raises it. From the diamond stage, a wind's right click is the Flurry while it's ready, and the guard while
 	 * it cools down (as the warhammer's smash), so the cooldown is kept on its own group ({@link #FLURRY_GROUP}): an item
 	 * cooldown on the dagger would stop it being raised at all.

@@ -63,7 +63,7 @@ def soul_saber(u, v):
     return grip(u, v, -8.0, -1.5, 0.95, "H", "h") or ("G" if -9.5 <= u < -8.0 and abs(v) <= 1.5 else None)
 
 
-# (0.17.166) the Soul Saber is drawn by the Dreaded Blade's 3D model now (tools/blockbench/dreaded_blade.py)
+# (0.17.169) the Soul Saber is drawn by the Dreaded Blade's 3D model now (tools/blockbench/dreaded_blade.py)
 # draw("soul_saber", (10.5, 21.5), soul_saber, {"E": (110, 240, 255), "B": (60, 64, 76), "b": (34, 36, 44), "G": (40, 200, 220),
 #                                              "g": (20, 110, 130), "H": (70, 50, 40), "h": (40, 28, 22)})
 

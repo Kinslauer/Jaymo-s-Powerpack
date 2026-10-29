@@ -40,7 +40,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.336) The gorgon, drawn as eanncrod's Hydra Guardian (Blockbench Workshop, CC BY 4.0): a snake-haired archer
+ * (0.7.339) The gorgon, drawn as eanncrod's Hydra Guardian (Blockbench Workshop, CC BY 4.0): a snake-haired archer
  * with a serpent bow who guards the jungles and swamps, rare and alone. Its arrows bring a stiffness like stone
  * (Slowness), it strafes as it shoots, and now and then it looses a volley into the sky that rains down round its foe.
  */

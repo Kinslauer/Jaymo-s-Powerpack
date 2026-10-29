@@ -1,5 +1,5 @@
 """
-(0.7.336) The friendly war barrel's item icon (its baked model drawn three-quarter on by tools/bbmodel_preview.py,
+(0.7.339) The friendly war barrel's item icon (its baked model drawn three-quarter on by tools/bbmodel_preview.py,
 cropped and shrunk to 16x16, as gen_clockwork_golem.py does), its item model, and its infusion recipe (Golemancy).
 
 Run from the repo root:  python3 -I kingdoms/tools/gen_war_barrel.py

@@ -1,4 +1,4 @@
-"""(0.17.166) The Armory's iron dagger drawn as polyjo's Traveler Dagger (Blockbench Workshop, CC BY 4.0,
+"""(0.17.169) The Armory's iron dagger drawn as polyjo's Traveler Dagger (Blockbench Workshop, CC BY 4.0,
 https://blockbenchworkshop.com/model/polyjo/traveler-dagger-polyjo), the silver skeleton's (Dead Traveler's) own.
 Its cubes are moved onto the item grid (centred, its pommel one pixel up), the two edge faces of its flat blade are
 dropped, and our display() puts its grip in the fist. Its 16x16 texture is used as drawn.

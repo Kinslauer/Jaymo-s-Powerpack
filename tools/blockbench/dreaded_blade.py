@@ -1,4 +1,4 @@
-"""(0.17.166) The Soul Saber relic (power/arsenal/RelicWeapons), now named the Dreaded Blade: capellastudio's "Weapon - Dreaded Blade (Animated)"
+"""(0.17.169) The Soul Saber relic (power/arsenal/RelicWeapons), now named the Dreaded Blade: capellastudio's "Weapon - Dreaded Blade (Animated)"
 (Blockbench Workshop, CC BY 4.0, https://blockbenchworkshop.com/model/capellastudio/weapon-dreaded-blade-animated)
 as the item's model. Its two animated 32x320 textures (ten frames, two ticks each) are written with their .mcmeta; the
 rune plane on the second is drawn at full light (light_emission 15). Cubes, UVs and 45-degree turns as drawn; our

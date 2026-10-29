@@ -6516,8 +6516,19 @@ and overworld dungeons".
 ## 0.7.334: a rogue golem's bar waits for the fight (pack 0.17.164)
 Andy: "the new healthbar is appearing before being interacted with". A rogue clockwork golem's boss bar now shows only
 once it and a player have traded blows (a player hits it, or it hits a player), and goes away again when it folds up.
+## 0.7.338: a mounted archer no longer crashes the server (pack 0.17.168)
+The Deck server went down at 00:16 on 2026-10-29: "Ticking entity", a horse near spawn with the MCA archer Mirjam on
+it. MCA's `ArcherMovementTask` casts `villager.getMoveControl()` to its `MCAMoveControl` to strafe, but vanilla's
+`Mob.getMoveControl()` returns the vehicle's control while a mob rides another mob, and a horse's is a plain
+`MoveControl`. MCA never put its archers on horses; `Cavalry` has since 0.7.295, so the first mounted archer to
+strafe in a fight crashed the server.
+- `mca.McaMountedArcherMixin`: the task's three `getMoveControl()` calls (`continueStrafe`, `finishStrafe`,
+  `clearCombatState`) get the villager's own control (`MobAccessor.jaymoskingdoms$moveControl`, the field) whenever
+  the one vanilla returns isn't MCA's. A mounted archer's strafe then steers nothing, the horse carrying him, instead
+  of crashing.
+Compile-checked, and deployed to the Deck; not yet seen in a fight.
 
-## 0.7.336: a third batch of Blockbench models (pack 0.17.166)
+## 0.7.339: a third batch of Blockbench models (pack 0.17.169)
 All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
 - **Gorgon** (eanncrod's Hydra Guardian, `beasts/Gorgon`): a rare snake-haired archer in jungles and swamps (biome tag
   `has_gorgon`, one in 8 spawn checks, never two within 64 blocks), 80 health. Its arrows bring Slowness II; it strafes
