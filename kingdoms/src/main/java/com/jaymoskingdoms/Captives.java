@@ -116,6 +116,8 @@ public final class Captives {
 	static final int FAVOURS_MOST = 3;
 	/** (0.7.335) How near (blocks) a guard of theirs must be to tell you they're letting an arrest go. */
 	static final double PARDON_RANGE = 24.0;
+	/** (0.7.335) The MCA {@code main} menu answer (our dialogue data): "Speak of the rescue". */
+	public static final String ANSWER = "jaymoskingdoms_rescue";
 
 	/**
 	 * A captive: the settlement they were taken from (-1: none), who freed them (empty while bound), since when (game time),
@@ -564,12 +566,33 @@ public final class Captives {
 		return true;
 	}
 
+	/**
+	 * (0.7.335) "Speak of the rescue" ({@link #ANSWER}, MCA's main menu): one of the watch of a town that owes you for one
+	 * you brought home. Andy: "you can talk to them about it". They say what it means, never how many are owed.
+	 */
+	public static boolean canSpeakOf(ServerPlayer player, LivingEntity who) {
+		Faction f = Downed.isGuard(who) && who.level() instanceof ServerLevel level ? watchOf(level, who) : null;
+		return f != null && owed(player, f.id()) > 0;
+	}
+
+	/** What the guard says, asked about the rescue. */
+	public static Component speakOf(ServerPlayer player, LivingEntity who) {
+		Faction f = who.level() instanceof ServerLevel level ? watchOf(level, who) : null;
+		return Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.owed", who.getRandom()), Recollections.nameTo(player, who),
+			f == null ? Component.empty() : f.name());
+	}
+
+	/** The settlement {@code guard} keeps watch for: a folk guard's own, else where they stand. */
+	private static @Nullable Faction watchOf(ServerLevel level, LivingEntity guard) {
+		return guard instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : Theft.lawAt(level, guard.blockPosition());
+	}
+
 	/** {@code f}'s guard nearest {@code player}, within {@link #PARDON_RANGE}, or null. */
 	private static @Nullable LivingEntity nearestGuard(ServerLevel level, ServerPlayer player, Faction f) {
 		LivingEntity best = null;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(PARDON_RANGE),
 			x -> x.isAlive() && Downed.isGuard(x))) {
-			Faction theirs = e instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : Theft.lawAt(level, e.blockPosition());
+			Faction theirs = watchOf(level, e);
 			if (theirs != null && theirs.id() == f.id() && (best == null || e.distanceToSqr(player) < best.distanceToSqr(player))) {
 				best = e;
 			}
