@@ -119,7 +119,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoDirectives", "power.chrono.ChronoSpeed", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebTendrils", "power.web.WebHeldGrab", "power.web.WebExecutions",
-			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect",
+			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.SorasLineage", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone", "power.wind.WindJet", "power.wind.aether.WindAether",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",

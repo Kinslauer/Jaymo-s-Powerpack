@@ -2221,7 +2221,8 @@ public final class WebSymbiote {
 
 	/** Eating raw meat while bonded feeds it instead of you. Returns true if it took the meal. */
 	public static boolean feedOnMeat(ServerPlayer player, ItemStack stack, int nutrition) {
-		if (!isBonded(player) || !RAW_MEAT.contains(stack.getItem())) {
+		// (0.17.150) the white one won't touch carrion, and none of them eat when full: you eat it yourself then (WebSymbioteBody)
+		if (!isBonded(player) || !RAW_MEAT.contains(stack.getItem()) || WebSymbioteBody.turnsDown(player, stack)) {
 			return false;
 		}
 		WebSymbioteState state = state(player);
@@ -4428,7 +4429,7 @@ public final class WebSymbiote {
 		Entity carried = corpses ? KitchenCompat.carriedCorpse(player) : null;
 		if (carried != null) {
 			// already in your arms: straight to the meal (one it won't touch, and it waits)
-			if (!edible(carried)) {
+			if (!edible(carried) || WebSymbioteBody.refusesBody(player, carried)) {
 				return false;
 			}
 			whisper(player, "self_feed");
@@ -4446,7 +4447,7 @@ public final class WebSymbiote {
 		Entity corpse = null;
 		double best = SELF_FEED_RANGE * SELF_FEED_RANGE;
 		for (Entity e : !corpses ? java.util.List.<Entity>of()
-			: player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE), e -> freeCorpse(e))) {
+			: player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE), e -> freeCorpse(e) && !WebSymbioteBody.refusesBody(player, e))) {
 			double d = e.distanceToSqr(player);
 			if (d < best) {
 				best = d;
@@ -4510,7 +4511,7 @@ public final class WebSymbiote {
 
 	/** Something it may hunt for food: a creature that leaves a corpse (no pets, no named ones), or another player. */
 	private static boolean huntable(ServerPlayer player, LivingEntity e, boolean rampage) {
-		if (!e.isAlive() || e.isSpectator() || e instanceof ArmorStand || !edible(e)) {
+		if (!e.isAlive() || e.isSpectator() || e instanceof ArmorStand || !edible(e) || WebSymbioteBody.refusesBody(player, e)) {
 			return false;
 		}
 		if (state(player).kind() == WebSymbioteStrain.WHITE && !(e instanceof net.minecraft.world.entity.monster.Enemy)) {
@@ -5084,7 +5085,7 @@ public final class WebSymbiote {
 		// (0.15.33) your asking: it doesn't stop over a player's body (hesitates)
 		live.feedAsked = true;
 		Entity carried = KitchenCompat.carriedCorpse(player);
-		if (carried != null && edible(carried)) {
+		if (carried != null && edible(carried) && !WebSymbioteBody.refusesBody(player, carried)) {
 			startMeal(player, live, now, carried);
 			return true;
 		}
@@ -5099,7 +5100,7 @@ public final class WebSymbiote {
 		Vec3 look = player.getViewVector(1.0F);
 		Entity corpse = null;
 		double bestScore = Double.MAX_VALUE;
-		for (Entity e : level.getEntities(player, player.getBoundingBox().inflate(CONSUME_CORPSE_RANGE), WebSymbiote::freeCorpse)) {
+		for (Entity e : level.getEntities(player, player.getBoundingBox().inflate(CONSUME_CORPSE_RANGE), e -> freeCorpse(e) && !WebSymbioteBody.refusesBody(player, e))) {
 			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
 			double distance = to.length();
 			if (distance > CONSUME_CORPSE_RANGE + e.getBbWidth() * 0.5) {
@@ -5143,6 +5144,39 @@ public final class WebSymbiote {
 		}
 		startKill(player, live, now, best, true);
 		return true;
+	}
+
+	/**
+	 * (0.17.150) C with something living held (see {@link WebSymbioteBody#onUltimate}): it keeps hold of it, finishes it off
+	 * with a lash and takes its corpse in to eat, as Consume does, behind the same gates (Consume's bond, its cooldown) and
+	 * turning down what it won't hunt (a pet, a named thing, the white one's non-hostile, a player where bodies aren't left).
+	 * Nothing is ever eaten alive: kill first, then carry, then feed.
+	 */
+	static void consumeHeld(ServerPlayer player, LivingEntity prey) {
+		Live live = live(player);
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (live.takeoverTicks > 0 || live.bondTicks > 0 || live.roarAt > 0L || player.getAttached(EATING) != null || live.feedStage != FEED_NONE) {
+			return;
+		}
+		if (!unlocked(player, CONSUME)) {
+			nag(player, "locked");
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
+			return;
+		}
+		WebSymbioteState.Cooldowns cooldowns = player.getAttachedOrElse(COOLDOWNS, WebSymbioteState.Cooldowns.NONE);
+		if (now < cooldowns.end(CONSUME)) {
+			return;
+		}
+		if (WebSymbioteStrains.asleep(player) || !huntable(player, prey, false)) {
+			// it recoils from that one
+			nag(player, "inedible");
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
+			return;
+		}
+		live.feedAsked = true;
+		startKill(player, live, now, prey, true);
+		player.setAttached(COOLDOWNS, cooldowns.with(CONSUME, now + COOLDOWN[CONSUME], ABILITIES));
 	}
 
 	/** A tendril takes it and brings it to the maw (see {@link #EAT_REACH}). */
@@ -5238,7 +5272,7 @@ public final class WebSymbiote {
 	}
 
 	/** Feeds the symbiote (and calms it). */
-	private static void feed(ServerPlayer player, int satiety, int calm) {
+	static void feed(ServerPlayer player, int satiety, int calm) {
 		WebSymbioteState state = state(player);
 		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + satiety)).withStress(Math.max(0, state.stress() - calm)));
 		// the white one asleep: a meal wakes it early
@@ -5495,8 +5529,10 @@ public final class WebSymbiote {
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */
 	private static boolean shroud(ServerPlayer player) {
 		ServerLevel level = player.level();
-		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, SHROUD_TICKS, 0, false, false));
-		live(player).shroudUntil = level.getGameTime() + SHROUD_TICKS;
+		// (0.17.150) longer with the mantle out (WebSymbioteBody)
+		int shroudTicks = SHROUD_TICKS + WebSymbioteBody.shroudBonus(player);
+		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, shroudTicks, 0, false, false));
+		live(player).shroudUntil = level.getGameTime() + shroudTicks;
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.35, 0.8, 0.35, 0.03);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 0.8, player.getZ(), 10, 0.35, 0.6, 0.35, 0.01);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.6F);
