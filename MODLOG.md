@@ -3625,3 +3625,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and third person, the ground, the inventory, item frames and shelves. The shapes and texture are unchanged; all four
   stages now take his transforms in place of ours (`tools/blockbench/sora.py` uses the file's display when it sets
   every slot). Not seen in game.
+- **0.17.165, rescue rewards out of chat (Kingdoms 0.7.335):** see Kingdoms 0.7.335.

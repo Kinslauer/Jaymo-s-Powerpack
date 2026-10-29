@@ -92,6 +92,8 @@ public final class Deeds {
 	static final int SPREAD_LEAST = 2;
 	/** The chance a gossip who knows what you did talks of that rather than something else. */
 	static final float GOSSIP_CHANCE = 0.5F;
+	/** (0.7.335) The chance talk of a rescue, in the town you brought them home to, is of the favour it owes you instead. */
+	static final float FAVOUR_TALK = 0.5F;
 	/** How much more a rescue, and a save, weighs than a fire when folk choose which to bring up. */
 	static final int RESCUE_WEIGHT = 4, SAVE_WEIGHT = 2;
 
@@ -271,7 +273,13 @@ public final class Deeds {
 
 	/** {@code player} cut {@code captive} loose; {@code home} is where they were taken from, if anywhere. */
 	static void freed(ServerLevel level, ServerPlayer player, Villager captive, @Nullable Faction home) {
-		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.freed", FREED_HEARTS);
+		// (0.7.335) one taken from somewhere names it as they thank you: that's how you learn where to bring them
+		if (home != null) {
+			thank(level, captive, player, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.lead", level.getRandom()),
+				Identities.shownName(player), home.name()), FREED_HEARTS);
+		} else {
+			thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.freed", FREED_HEARTS);
+		}
 		Recollections.remember(captive, player, Recollections.Kind.FREED, Component.empty());
 		if (home != null) {
 			Reputation.change(player, home, FREED_REP);
@@ -308,8 +316,12 @@ public final class Deeds {
 
 	/** {@code who} turns to {@code player}, thanks them in a line of {@code family}, and warms to them by {@code hearts}. */
 	private static void thank(ServerLevel level, LivingEntity who, ServerPlayer player, String family, int hearts) {
+		thank(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), hearts);
+	}
+
+	private static void thank(ServerLevel level, LivingEntity who, ServerPlayer player, Component words, int hearts) {
 		lookAt(who, player);
-		Speech.tell(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.GOLD);
+		Speech.tell(level, who, player, words, Speech.GOLD);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, who.getX(), who.getY() + who.getBbHeight() + 0.3, who.getZ(), 8, 0.4, 0.3, 0.4, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, who.isBaby() ? 1.5F : 1.0F);
 		warm(who, player, hearts);
@@ -432,6 +444,11 @@ public final class Deeds {
 		}
 		Kind kind = pick(d, level.getRandom());
 		Faction from = d.heardFrom() >= 0 ? Factions.get(level.getServer(), d.heardFrom()) : null;
+		// (0.7.335) where you brought one of their own home, folk let on what the town owes you (once chat told you)
+		if (kind == Kind.RESCUE && from == null && Captives.owed(player, f.id()) > 0 && level.getRandom().nextFloat() < FAVOUR_TALK) {
+			return Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.favour", level.getRandom()), Identities.shownName(player),
+				f.name());
+		}
 		String family = what.equals("gossip") ? "talk.jaymoskingdoms.gossip.deed." + kind.key() : "talk.jaymoskingdoms.deed." + kind.key() + ".greet";
 		if (from != null) {
 			return Component.translatable(Oddities.line(family + ".heard", level.getRandom()), Identities.shownName(player), from.name());
