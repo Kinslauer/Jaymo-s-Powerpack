@@ -6713,4 +6713,7 @@ server refuses it for any other heritage. `onlyFor` keeps answering null for ans
 - Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off anytime the
   player advances." Next, a new page, and leaving the story (`removed`) all cut the narrator off at once
   (`LifeStoryScreen.hush`), and the loading screen's narrator and the story's never talk over each other.
+- Andy: "The ending story should keep the extent of the flavor text included in every option. For every option it
+  self, shorten the white text to a sentence or two at most." Every answer has a short line (`<q>.<a>.short`, 9 words at
+  most) shown when you point at it and on the road carousel; the story on the last page still tells every whole tale.
   - Not seen in game.

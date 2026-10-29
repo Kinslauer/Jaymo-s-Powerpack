@@ -1051,7 +1051,9 @@ final class LifeStoryScreen extends Screen {
 			Ui.line(graphics, this.font, name, ix + 4, ny, textW - 8, open ? ACCENT : Ui.HINT);
 		}
 		List<Component> lines = new ArrayList<>();
-		lines.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".tale", realmName(Question.ROAD)));
+		// (0.7.357) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
+		// its short line; the whole tale is kept for the story on the last page
+		lines.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".short", realmName(Question.ROAD)));
 		if (!open) {
 			lines.add(reason(a).withColor(Ui.BAD));
 		}
@@ -1404,7 +1406,8 @@ final class LifeStoryScreen extends Screen {
 			} else {
 				icon = new ItemStack(a.icon());
 				name = Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key());
-				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tale", realmName(s.question)));
+				// (0.7.357) the option's short line; its whole tale is told on the last page
+				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".short", realmName(s.question)));
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {
 					lines.add(reason(a).withColor(Ui.BAD));
