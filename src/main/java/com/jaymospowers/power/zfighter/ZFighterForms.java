@@ -2,6 +2,8 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.Powers;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -12,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.17.50, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
@@ -71,6 +74,47 @@ public final class ZFighterForms {
 		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD;
 	}
 
+	/**
+	 * (0.17.194) Andy: "a menu for z fighters, accessed by holding C that lets you pick the form instead of sequential up
+	 * and down, as long as you have it unlocked". The forms the menu offers him now, lowest first: base, his bought Supers
+	 * (the legendary line's for a legendary-born), Primal Super, Super Primal Super (while fused with a Warrior-born) and
+	 * the god form. None as the ape. Both sides read it: the menu draws it, the server checks a pick against it.
+	 */
+	/** (0.17.196) Not a form: the hold-C menu's Spirit Bomb tile ({@link #menu}, {@link ZFighterPower#pickForm}). */
+	public static final int SPIRIT_BOMB_PICK = 99;
+
+	/** (0.17.196) The hold-C menu's tiles: his forms ({@link #choices}), then the Spirit Bomb once he knows it. */
+	public static List<Integer> menu(Player player) {
+		List<Integer> tiles = choices(player);
+		if (!tiles.isEmpty() && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)) {
+			tiles.add(SPIRIT_BOMB_PICK);
+		}
+		return tiles;
+	}
+
+	public static List<Integer> choices(Player player) {
+		List<Integer> forms = new ArrayList<>();
+		if (ZFighterLineage.ape(player)) {
+			return forms;
+		}
+		forms.add(0);
+		int open = Math.min(ZFighterTraining.formsOpen(player), ZFighterTraining.FORMS);
+		boolean mutant = ZFighterLegendary.mutant(player);
+		for (int f = 1; f <= open; f++) {
+			forms.add(mutant ? LEGEND_1 + f - 1 : f);
+		}
+		if (ApeRage.super4(player)) {
+			forms.add(ApeRage.PRIMAL_SUPER);
+		}
+		if (ApeRage.superPrimal(player)) {
+			forms.add(ApeRage.SUPER_4);
+		}
+		if (ZFighterGod.unlocked(player)) {
+			forms.add(GOD);
+		}
+		return forms;
+	}
+
 	/** Called once from {@link ZFighterPower#init}. */
 	static void init() {
 		ZFighterFalseSuper.init();
@@ -101,10 +145,6 @@ public final class ZFighterForms {
 		ZFighterFalseSuper.tick(player, live);
 		ZFighterInstinct.tick(player, live);
 		ZFighterGoldenApe.tick(player, live);
-		if (live.form == ApeRage.PRIMAL_SUPER && player.tickCount % 20 == 0) {
-			// (0.17.190) time held here opens Super Primal Super
-			ApeRage.holdPrimal(player);
-		}
 		if (live.form == GOD && player.tickCount % 40 == 0 && !live.charging) {
 			ZFighterGod.glow(player);
 		}

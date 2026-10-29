@@ -147,19 +147,6 @@ final class ZFighterDebugCommand {
 							c.getSource().sendSuccess(() -> blocked == null ? Component.literal("Primal Super unlocked: C from your highest form.")
 								: Component.literal("Primal Super unlocked, but not reachable yet: ").append(Component.translatable(blocked)), false);
 							return 1;
-						}))
-					// (0.17.190) Super Primal Super: Primal Super opened and held long enough
-					.then(Commands.literal("superprimal")
-						.executes(c -> {
-							ServerPlayer player = c.getSource().getPlayerOrException();
-							if (!Boolean.TRUE.equals(player.getAttached(ApeRage.SUPER_4_OPEN))) {
-								ApeRage.openSuper4(player);
-							}
-							ApeRage.setHeld(player, ApeRage.SUPER_PRIMAL_HELD);
-							String blocked = ApeRage.super4Blocked(player);
-							c.getSource().sendSuccess(() -> blocked == null ? Component.literal("Super Primal Super unlocked: C from Primal Super.")
-								: Component.literal("Super Primal Super unlocked, but not reachable yet: ").append(Component.translatable(blocked)), false);
-							return 1;
 						})))
 				.then(Commands.literal("raid")
 					.executes(c -> {

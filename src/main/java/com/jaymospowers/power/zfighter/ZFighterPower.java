@@ -346,6 +346,8 @@ public final class ZFighterPower implements Power {
 		/** Since when the Spirit Bomb has been gathering (-1: it isn't), and what it holds. */
 		long spiritFrom = -1L;
 		float spiritEnergy;
+		/** (0.17.196) The Spirit Bomb is picked on the hold-C menu: the next tap of C raises it. */
+		boolean bombPicked;
 		/** Rage (before he has ever gone Super): the meter (0-1), ticks left in it, ticks before it can fill again. */
 		float rage;
 		int rageTicks;
@@ -991,7 +993,10 @@ public final class ZFighterPower implements Power {
 		return pose == null ? 0 : pose;
 	}
 
-	/** C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C (held) raises it instead. */
+	/**
+	 * C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C raises it instead. (0.17.194) Holding C
+	 * is the form menu now (client), so C comes as a tap: one raises the Spirit Bomb, the next throws it.
+	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		Live live = live(player);
@@ -1004,7 +1009,23 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		if (!down) {
+			return;
+		}
+		if (live.spiritFrom >= 0) {
+			// (0.17.194) the second tap throws the raised Spirit Bomb; (0.17.196) and C is the forms' again
 			ZFighterTechniques.release(player, live);
+			live.bombPicked = false;
+			sync(player, live, maxKi(player));
+			return;
+		}
+		if (live.bombPicked && !player.isShiftKeyDown()) {
+			// (0.17.196) Andy: the Spirit Bomb is on the hold-C menu, "only activated by the tap when selected"
+			if (ZFighterTechniques.canRaise(player, live)) {
+				ZFighterTechniques.raise(player, live);
+				refresh(player, live);
+			} else {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_wait").withStyle(ChatFormatting.GRAY));
+			}
 			sync(player, live, maxKi(player));
 			return;
 		}
@@ -1013,20 +1034,9 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
-		// (0.15.148) with Super 4 open, C in Super 3 is Super 4 and the Spirit Bomb is raised from there
-		// (0.17.190) the line now runs Super 3, Primal Super, Super Primal Super: the Spirit Bomb is raised from its top
 		int up = ApeRage.nextUp(player, live.form);
-		boolean topOfLine = up == 0 && (live.form == ApeRage.SUPER_4 || live.form == ApeRage.PRIMAL_SUPER || live.form == ZFighterTraining.FORMS);
-		// (0.17.50) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
-		if (!player.isShiftKeyDown() && (topOfLine || live.form == ZFighterForms.GOD)
-			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !ZFighterBranchForms.canAscend(player, live)) {
-			if (ZFighterTechniques.canRaise(player, live)) {
-				ZFighterTechniques.raise(player, live);
-				refresh(player, live);
-			} else {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_wait").withStyle(ChatFormatting.GRAY));
-			}
-		} else if (player.isShiftKeyDown()) {
+		// (0.17.196) the Spirit Bomb is no longer raised from the top of the line: it's picked on the hold-C menu
+		if (player.isShiftKeyDown()) {
 			if (live.superOn()) {
 				descend(player, live);
 			} else {
@@ -1038,7 +1048,7 @@ public final class ZFighterPower implements Power {
 				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
 				if (live.form == ApeRage.PRIMAL_SUPER && blocked == null) {
-					// (0.17.190) Super Primal Super waits on time held in Primal Super; Andy: the timer runs unseen, no count shown
+					// (0.17.192) Super Primal Super needs a fusion with another Warrior-born; only a hint, nothing spelled out
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait").withStyle(ChatFormatting.GRAY));
 				} else {
 					player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
@@ -1141,6 +1151,61 @@ public final class ZFighterPower implements Power {
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
 		refresh(player, live);
+	}
+
+	/**
+	 * (0.17.194) The hold-C menu's pick: straight to {@code form}, if it's one he has ({@link ZFighterForms#choices}). Up
+	 * is a transformation (its ki, as C would ask); down is quiet, as sneak+C is; base ends the Super.
+	 */
+	static void pickForm(ServerPlayer player, int form) {
+		Live live = live(player);
+		List<Integer> choices = ZFighterForms.choices(player);
+		if (!player.isAlive() || Powers.silenced(player) || live.spiritFrom >= 0) {
+			return;
+		}
+		if (form == ZFighterForms.SPIRIT_BOMB_PICK) {
+			// (0.17.196) the Spirit Bomb's tile: C now raises it (ZFighterForms.menu only offers it once he knows it)
+			if (ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !live.bombPicked) {
+				live.bombPicked = true;
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.4F);
+				sync(player, live, maxKi(player));
+			}
+			return;
+		}
+		// any form's tile gives C back to the forms
+		boolean was = live.bombPicked;
+		live.bombPicked = false;
+		if (form == live.form || !choices.contains(form)) {
+			if (was) {
+				sync(player, live, maxKi(player));
+			}
+			return;
+		}
+		if (live.form == ZFighterForms.GOD) {
+			ZFighterInstinct.end(player, live, false);
+		}
+		if (form == 0) {
+			endSuper(player, live);
+		} else if (live.superOn() && choices.indexOf(form) < choices.indexOf(live.form)) {
+			live.form = form;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
+			refresh(player, live);
+		} else if (live.superOn() || ready(player, ZFighterState.SUPER_SLOT)) {
+			if (form == ZFighterForms.GOD) {
+				ZFighterGod.enter(player, live);
+			} else {
+				boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(ZFighterLegendary.chain(form)) >= ZFighterTraining.FREE_ENTRY_MASTERY;
+				if (!free && live.ki < FORM_ENTER_KI[form]) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
+				} else {
+					if (!free) {
+						live.ki -= FORM_ENTER_KI[form];
+					}
+					transform(player, live, form);
+				}
+			}
+		}
+		sync(player, live, maxKi(player));
 	}
 
 	/** All the way back to base (out of ki, or by choice); Limit Break goes with it. */
@@ -1659,7 +1724,8 @@ public final class ZFighterPower implements Power {
 
 	private static void sync(ServerPlayer player, Live live, int max) {
 		int flags = (live.charging ? ZFighterState.CHARGING : 0) | (live.flying ? ZFighterState.FLYING : 0)
-			| (live.superOn() ? ZFighterState.SUPER : 0) | (live.raging() ? ZFighterState.RAGE : 0) | (live.barrierTicks > 0 ? ZFighterState.BARRIER : 0);
+			| (live.superOn() ? ZFighterState.SUPER : 0) | (live.raging() ? ZFighterState.RAGE : 0) | (live.barrierTicks > 0 ? ZFighterState.BARRIER : 0)
+			| (live.bombPicked ? ZFighterState.BOMB_PICKED : 0);
 		int bomb = live.spiritFrom < 0 ? -1 : Math.round(100.0F * live.spiritEnergy / ZFighterTechniques.SPIRIT_MAX);
 		int rage = live.raging() ? 100 : Math.round(100.0F * live.rage);
 		int combo = player.level().getGameTime() - live.lastHit <= ZFighterBattle.COMBO_WINDOW ? live.combo : 0;
