@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.139) Andy (2026-10-28): "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys
+ * (0.17.146) Andy (2026-10-28): "Mad tinkerer, Hermit, all z fighter npcs need MCA villager equivalents. it destroys
  * immersion seeing one of those things instead of a humanoid ... they should have context sensitive talk interactions
  * that handle the quest objectives instead of them appearing in chat like now."
  * <p>

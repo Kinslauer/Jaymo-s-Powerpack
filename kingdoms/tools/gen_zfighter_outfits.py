@@ -1,4 +1,4 @@
-"""Draws the outfits Jaymo's Powers' Z Fighter characters wear as MCA villagers (Kingdoms 0.7.314, ZFighterFolk; Andy
+"""Draws the outfits Jaymo's Powers' Z Fighter characters wear as MCA villagers (Kingdoms 0.7.319, ZFighterFolk; Andy
 2026-10-28: "it destroys immersion seeing one of those things instead of a humanoid"). MCA clothing, as in
 tools/gen_uniforms.py: 64x64 in the humanoid layout, the head left bare for the villager's own face and hair (only the hat
 layer is drawn on), and no skin painted (each is drawn with two skin tones and the pixels that change are cleared).

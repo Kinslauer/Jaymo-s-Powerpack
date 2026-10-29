@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.17.139) While a Z Fighter character's talk is being answered, what would go to the player's chat goes on the talk screen ({@link ZFighterNpcs}). */
+/** (0.17.146) While a Z Fighter character's talk is being answered, what would go to the player's chat goes on the talk screen ({@link ZFighterNpcs}). */
 @Mixin(ServerPlayer.class)
 abstract class ZFighterTranscriptMixin {
 	@Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", at = @At("HEAD"), cancellable = true)

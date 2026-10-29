@@ -207,7 +207,7 @@ public final class Languages {
 
 	private static @Nullable Tongue look(ServerLevel level, Entity speaker) {
 		if (ZFighterFolk.is(speaker)) {
-			// (0.7.314) Powers' Z Fighter characters speak to anyone who comes to them
+			// (0.7.319) Powers' Z Fighter characters speak to anyone who comes to them
 			return null;
 		}
 		MinecraftServer server = level.getServer();

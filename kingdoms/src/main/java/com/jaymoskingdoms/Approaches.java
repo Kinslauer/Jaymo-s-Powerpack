@@ -1120,7 +1120,7 @@ public final class Approaches {
 			return;
 		}
 		if (ZFighterFolk.answer(player, answer)) {
-			// (0.7.314) a talk with one of Powers' Z Fighter characters
+			// (0.7.319) a talk with one of Powers' Z Fighter characters
 			return;
 		}
 		if (ShipTalk.answer(player, answer)) {

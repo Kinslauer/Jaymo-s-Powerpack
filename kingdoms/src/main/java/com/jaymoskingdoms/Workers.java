@@ -104,7 +104,7 @@ public final class Workers {
 			return true;
 		}
 		if (ZFighterFolk.is(mob)) {
-			// (0.7.314) one of Powers' Z Fighter characters: held at their post
+			// (0.7.319) one of Powers' Z Fighter characters: held at their post
 			return ZFighterFolk.step(level, w);
 		}
 		if (Crewmen.tagged(mob)) {

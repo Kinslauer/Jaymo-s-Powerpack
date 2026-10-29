@@ -517,7 +517,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.314) {@link ZFighterFolk#spawn}: one of Powers' Z Fighter characters, a grown villager of no settlement named
+	 * (0.7.319) {@link ZFighterFolk#spawn}: one of Powers' Z Fighter characters, a grown villager of no settlement named
 	 * {@code name}, tagged {@code tag}, held at {@code at}, dressed for their part, never hurt, out of MCA's family tree;
 	 * grey-haired if {@code old}.
 	 */
@@ -884,7 +884,7 @@ final class McaBridge {
 	static List<Worker> workers(ServerLevel level, AABB box, Predicate<Worker> test) {
 		List<Worker> found = new ArrayList<>();
 		// (0.7.242) a ship's crew serve her, not any town: never called on for its work, guard calls or escorts
-		// ((0.7.314) nor are Powers' Z Fighter characters, ZFighterFolk)
+		// ((0.7.319) nor are Powers' Z Fighter characters, ZFighterFolk)
 		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && !ZFighterFolk.is(v) && test.test(worker(v)))) {
 			found.add(worker(v));
 		}

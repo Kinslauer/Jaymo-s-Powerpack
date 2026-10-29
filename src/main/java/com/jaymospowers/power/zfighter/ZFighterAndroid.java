@@ -136,7 +136,7 @@ public final class ZFighterAndroid {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterAndroid::tickServer);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (!entity.entityTags().contains(TAG) || ZFighterNpcs.viaMca(entity)) {
-				// ((0.17.139) as an MCA villager, his menu leads to his talk: talkMenu)
+				// ((0.17.146) as an MCA villager, his menu leads to his talk: talkMenu)
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server && hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
@@ -299,7 +299,7 @@ public final class ZFighterAndroid {
 			if (!level.getFluidState(at.below()).isEmpty() || !level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
 				continue;
 			}
-			// (0.17.139) with Kingdoms and MCA, an MCA villager held at his bench; else the old frozen trader
+			// (0.17.146) with Kingdoms and MCA, an MCA villager held at his bench; else the old frozen trader
 			Entity npc = ZFighterNpcs.villager(level, Vec3.atBottomCenterOf(at), random.nextFloat() * 360.0F, TAG, "entity.jaymospowers.scientist", false);
 			if (npc == null) {
 				WanderingTrader trader = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
@@ -374,7 +374,7 @@ public final class ZFighterAndroid {
 	}
 
 	/**
-	 * (0.17.139) His talk (MCA's "Talk about work"): where your rebuild stands, and the one thing to do next (what he
+	 * (0.17.146) His talk (MCA's "Talk about work"): where your rebuild stands, and the one thing to do next (what he
 	 * says back comes on the screen, {@link ZFighterNpcs#reply}).
 	 */
 	static void talkMenu(ServerPlayer player, net.minecraft.world.entity.LivingEntity scientist) {

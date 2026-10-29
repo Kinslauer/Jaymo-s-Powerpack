@@ -53,8 +53,9 @@ import net.minecraft.world.phys.Vec3;
  * comes in fast while charging, from landing punches, and from eating. The techniques spend it.</li>
  * <li>R (hold), Charge Ki: stand your ground, the aura flares, ki pours in (hungry work).</li>
  * <li>G, Ki Blast; V (hold), Ki Wave; B, Flash Step ({@link ZFighterKi}).</li>
- * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up takes off and
- * steps through five poses of the arms, down steps back and lands. Charging works in the air.</li>
+ * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up lifts him
+ * gently off the ground and steps through five poses of the arms (all the way up at once: a burst of ki throws him
+ * into the sky), down steps back and lands. Charging works in the air.</li>
  * <li>C (ascended): up a form; sneak+C: down one. Super is reached through hardship ({@link ZFighterBattle}); Super 2
  * and 3 are bought with training ({@link ZFighterTraining}). Each hits harder and burns more ki and food; mastery
  * lifts its power and eases its drain.</li>
@@ -444,7 +445,7 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
-		// (0.17.139) the Z Fighter characters as MCA villagers, and their talk screens
+		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
@@ -902,9 +903,10 @@ public final class ZFighterPower implements Power {
 
 	/**
 	 * From the client (hold Z and scroll): take off into pose {@code pose} (1-{@link #FLIGHT_POSES}), change pose, or come
-	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms.
+	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms. A plain take-off
+	 * lifts him gently (a puff of dust); {@code boost} (scrolled all the way up right after) is the burst of ki.
 	 */
-	static void fly(ServerPlayer player, int pose) {
+	static void fly(ServerPlayer player, int pose, boolean boost) {
 		Live live = live(player);
 		pose = Mth.clamp(pose, 0, FLIGHT_POSES);
 		if (pose == 0) {
@@ -924,6 +926,9 @@ public final class ZFighterPower implements Power {
 				live.flying = true;
 				live.lastFlyPos = player.position();
 				player.resetFallDistance();
+				liftOff(player, live);
+			}
+			if (boost) {
 				takeOffBurst(player, live);
 			}
 			player.setAttached(FLIGHT, pose);
@@ -944,7 +949,20 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
-	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
+	/** A gentle take-off (scrolled up partway): a soft puff of dust and a wisp of his aura as he lifts. */
+	private static void liftOff(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		double x = player.getX(), y = player.getY(), z = player.getZ();
+		for (int i = 0; i < 10; i++) {
+			double a = i * Math.PI * 2.0 / 10.0;
+			level.sendParticles(ParticleTypes.CLOUD, true, false, x + Math.cos(a) * 0.5, y + 0.05, z + Math.sin(a) * 0.5, 0, Math.cos(a), 0.0,
+				Math.sin(a), 0.12);
+		}
+		level.sendParticles(dust(live), true, false, x, y + 0.5, z, 10, 0.3, 0.5, 0.3, 0.05);
+		level.playSound(null, x, y, z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.4F, 1.2F);
+	}
+
+	/** The boost (scrolled all the way up): a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();
 		double x = player.getX(), y = player.getY(), z = player.getZ();
