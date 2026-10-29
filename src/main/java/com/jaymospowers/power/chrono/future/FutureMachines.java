@@ -63,6 +63,7 @@ public final class FutureMachines {
 	/** With the hordes' check, for a player in the future. */
 	static void check(ServerLevel level, ServerPlayer player) {
 		RandomSource random = level.getRandom();
+		FutureOmens.check(level, player);
 		if (random.nextInt(PATROL_CHANCE) == 0
 			&& level.getEntitiesOfClass(FutureAndroid.class, player.getBoundingBox().inflate(NEAR), FutureAndroid::isAlive).size() < ANDROID_CAP) {
 			BlockPos at = spot(level, player, random);
@@ -93,7 +94,7 @@ public final class FutureMachines {
 		}
 	}
 
-	private static @Nullable BlockPos spot(ServerLevel level, ServerPlayer player, RandomSource random) {
+	static @Nullable BlockPos spot(ServerLevel level, ServerPlayer player, RandomSource random) {
 		double angle = random.nextDouble() * Math.PI * 2.0;
 		int dist = SPAWN_MIN + random.nextInt(SPAWN_MAX - SPAWN_MIN + 1);
 		int x = (int) Math.floor(player.getX() + Math.cos(angle) * dist);
@@ -105,7 +106,7 @@ public final class FutureMachines {
 	}
 
 	/** Stand it at {@code pos} if there's room and dry ground. */
-	private static boolean place(ServerLevel level, Mob mob, BlockPos pos) {
+	static boolean place(ServerLevel level, Mob mob, BlockPos pos) {
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
 		BlockPos at = new BlockPos(pos.getX(), y, pos.getZ());
 		if (!level.getFluidState(at.below()).isEmpty() || !level.getFluidState(at).isEmpty()) {
