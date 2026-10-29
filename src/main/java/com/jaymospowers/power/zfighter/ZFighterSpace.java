@@ -597,6 +597,7 @@ public final class ZFighterSpace {
 		weigh(player);
 		NEXT_LAUNCH.put(player.getUUID(), player.level().getGameTime() + COOLDOWN_TICKS);
 		ZFighterSpaceMissions.arrived(player);
+		ZFighterPatrol.arrived(player, dest);
 	}
 
 	// ---------------------------------------------------------------- the landing pad

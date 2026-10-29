@@ -454,6 +454,8 @@ public final class ZFighterPower implements Power {
 		ZFighterStarts.init();
 		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
+		ZFighterPatrol.init();
+		ZFighterRaiders.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
