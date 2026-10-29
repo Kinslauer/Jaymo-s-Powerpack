@@ -51,7 +51,7 @@ def icon():
 
 
 def rogue_textures():
-	"""(0.7.330) A rogue golem's lights burn red: its lit texture with every light (what differs from the dark one) turned
+	"""(0.7.332) A rogue golem's lights burn red: its lit texture with every light (what differs from the dark one) turned
 	red, and a glow texture holding only those lights, drawn bright in the dark."""
 	bb = ASSETS + 'textures/entity/bb/'
 	lit = Image.open(bb + 'clockwork_golem.png').convert('RGBA')

@@ -6431,7 +6431,34 @@ with maker, page, licence and changes in `textures/entity/bb/CREDITS.txt`; the s
     it spares and players passing for goblins go unshot) and never their own side. When their camp is cleared they
     turn rogue and shoot any player.
 
-## 0.7.330: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.157)
+## 0.7.330: proximity chat, and voices that change with the body (pack 0.17.157)
+Andy: "I also want to add proximity chat", linking Voice Physics, Proximity Text Chat and Simple Voice Voice Changer.
+Proximity Text Chat is all rights reserved, so only its idea is used; the voice mods ship in the pack (Powers'
+`build.gradle`): Simple Voice Chat (ARR, downloaded by id), Voice Physics (MIT) and Simple Voice Voice Changer
+(CC BY-NC-SA 4.0), all unchanged.
+- `ProximityChat` (Fabric `ServerMessageEvents.ALLOW_CHAT_MESSAGE`, which cancels the vanilla broadcast): typed chat is
+  heard only nearby. Talk is whole within 24 blocks, then words drop out ("...") and the line greys toward 40. Sneak
+  while sending to whisper (4, fading to 8); start with `!` to shout (64 / 96); start with `*` to act ("* Aldric
+  waves"). No line of sight counts as 1.6 times as far. The downed only whisper. Names as the hearer knows them
+  ("Stranger" until introduced). A werewolf in full beast form only growls, a Great Ape roars (`PowersCompat.greatApe`),
+  except to their own kind. Each hearer also gets their version as a speech bubble (`Speech.Said`). With nobody in
+  earshot the speaker is told so on the action bar. `/ooc <words>` is out of character, to everyone. The server log
+  keeps every line whole with the username. MCA's villager chat AI still hears typed lines (its mixin sits before
+  the broadcast).
+- `VoiceMasks` (server, every 10 ticks, sent on change) and `client/VoiceMaskClient` + `client/VoiceChangerCompat`
+  (only with `sv-voice-changer` loaded): the voice changer's API override turns the player's voice: a werewolf beast
+  (demon-based growl) and a Great Ape (titan-based, deeper, some room) are forced on; a goblin disguise (kid-based,
+  high) and a full mask (a bit lower, muffled) follow the player's own on/off switch (J). A hood leaves it alone.
+- Server: Simple Voice Chat listens on UDP 24454; the Deck's playit tunnel needs a UDP tunnel for it (deck/README.md).
+Compile-checked, not seen in game.
+
+## 0.7.331: Enderscape's strongholds count (pack 0.17.159)
+- The pack adds Enderscape, whose built-in data pack swaps vanilla strongholds for its own (`enderscape:stronghold`) with
+  their own chest tables. Writs and wizards' staffs now turn up in its library chests too (`Classes`), and quest lairs and
+  lore errands that send you to a stronghold find its strongholds (and End cities) by the same name (`QuestBoard.locate`
+  also tries `enderscape:<name>`). Matched by id only, so nothing changes without Enderscape.
+
+## 0.7.332: the clockwork golem through alchemy, and rogue golems in dungeons (pack 0.17.160)
 Andy: the golem is "accessed through thaumaturgy", and "clockwork golems should also spawn as mini bosses in the aether
 and overworld dungeons".
 - **Golemancy:** no grid recipe any more. Powers' Codex has a Golemancy entry (Artifice tab, after Artifice and Ichor,

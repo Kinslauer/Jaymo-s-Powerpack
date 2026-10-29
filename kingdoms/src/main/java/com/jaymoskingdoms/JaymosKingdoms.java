@@ -267,6 +267,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
+		ProximityChat.register();
+		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
@@ -294,7 +297,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		ClockworkGolem.register();
-		// (0.7.330) rogue clockwork golems as dungeon mini-bosses (and their attachment)
+		// (0.7.332) rogue clockwork golems as dungeon mini-bosses (and their attachment)
 		GolemLairs.register();
 		Cannonball.register();
 		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)

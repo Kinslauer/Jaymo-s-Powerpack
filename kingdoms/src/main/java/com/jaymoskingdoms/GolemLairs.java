@@ -39,7 +39,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 /**
- * (0.7.330) Rogue {@link ClockworkGolem}s, sleeping folded in dungeons as mini-bosses. Like the monoliths they are remnants
+ * (0.7.332) Rogue {@link ClockworkGolem}s, sleeping folded in dungeons as mini-bosses. Like the monoliths they are remnants
  * the Aether left scattered over the world, only these want to keep you out:
  * <ul>
  * <li><b>Known dungeons</b> ({@link #LAIRS}: the Aether's Sentry Ruins, strongholds, trial chambers): when the structure

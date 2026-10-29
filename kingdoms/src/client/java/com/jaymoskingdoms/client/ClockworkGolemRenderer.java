@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 /**
  * (0.7.326) The clockwork golem ({@link ClockworkGolem}), drawn as octopusstudio's Mech Golem (Blockbench Workshop,
  * CC BY 4.0, credits in textures/entity/bb/CREDITS.txt) with its own animations: idle, walk, its blow, folding into its
- * shell (its lights going out) and unfolding from it. (0.7.330) A rogue one's lights burn red and glow in the dark.
+ * shell (its lights going out) and unfolding from it. (0.7.332) A rogue one's lights burn red and glow in the dark.
  */
 public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, ClockworkGolemRenderer.State, ClockworkGolemRenderer.Model> {
 	static final Identifier LIT = JaymosKingdoms.id("textures/entity/bb/clockwork_golem.png");

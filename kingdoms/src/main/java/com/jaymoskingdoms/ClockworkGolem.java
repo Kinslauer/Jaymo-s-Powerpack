@@ -42,14 +42,14 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * (0.7.326) A clockwork golem: a copper-and-wood guardian, (0.7.330) made on Powers' infusion altar once its maker knows
+ * (0.7.326) A clockwork golem: a copper-and-wood guardian, (0.7.332) made on Powers' infusion altar once its maker knows
  * the Golemancy research (a clock wound with copper, redstone and ichor; {@code data/jaymoskingdoms/alchemy/infusion}),
  * drawn as octopusstudio's Mech Golem (Blockbench Workshop, CC BY 4.0). It keeps the place it was set down as an iron
  * golem keeps a village: it fights the monsters that come near and never turns on its makers. With nothing to fight for
  * a while it winds down and folds itself into its shell, its lights out, hard to hurt but standing still; anything
  * hostile nearby or a blow wakes it, and it unfolds and gets to work. It's mended with copper ingots.
  * <p>
- * (0.7.330) A <i>rogue</i> one ({@link #makeRogue}), a remnant of the Aether like the monoliths, is a dungeon's mini-boss, set down by {@link GolemLairs}: tougher, with
+ * (0.7.332) A <i>rogue</i> one ({@link #makeRogue}), a remnant of the Aether like the monoliths, is a dungeon's mini-boss, set down by {@link GolemLairs}: tougher, with
  * a boss bar, it sleeps folded until a player comes near, fights only players, can't be mended, and drops gold and maybe a
  * diamond.
  */
@@ -72,7 +72,7 @@ public class ClockworkGolem extends IronGolem {
 	static final float ROGUE_DIAMOND_CHANCE = 0.35F;
 
 	private static final EntityDataAccessor<Boolean> FOLDED = SynchedEntityData.defineId(ClockworkGolem.class, EntityDataSerializers.BOOLEAN);
-	/** (0.7.330) Synced so its eyes burn red. */
+	/** (0.7.332) Synced so its eyes burn red. */
 	private static final EntityDataAccessor<Boolean> ROGUE = SynchedEntityData.defineId(ClockworkGolem.class, EntityDataSerializers.BOOLEAN);
 
 	private int idle;

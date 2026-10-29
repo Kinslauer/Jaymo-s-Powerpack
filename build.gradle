@@ -214,6 +214,29 @@ def packMods = [
 	// unless someone picks a Lost Cities profile when making a world. Needs Forge Config API Port (above). McJty's own
 	// 26.3 Fabric build, 26.3-12.0.0-fabric (Modrinth version xuEuPjKk).
 	[dep: "maven.modrinth:the-lost-cities:xuEuPjKk", cf: [269024, 9277225]],
+	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
+	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
+	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
+	[dep: "maven.modrinth:simple-voice-chat:x9jLR94Q", cf: [416089, 9350669]],
+	// Voice Physics (MIT, Shamanalle; shipped unchanged): voices muffled by walls by material, echo in caves and stone
+	// rooms, weather and water, quieter sneaking; needs Simple Voice Chat. CurseForge only.
+	[dep: "curse.maven:voice-physics-1712556:9251110", cf: [1712556, 9251110], dev: false],
+	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; shipped unchanged in a free pack): your own voice changed
+	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
+	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
+	[dep: "maven.modrinth:simple-voice-voice-changer:acFxvUQp", cf: [1658503, 9030770], dev: false],
+	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): the End
+	// reworked with new biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs,
+	// blocks, items, music and sky. Its built-in data packs, on by default, swap the vanilla End cities and overworld
+	// strongholds for its own (our relics, writs and quests look in those too: EnderscapeLoot, Kingdoms' Classes and
+	// QuestBoard). Only End chunks generated after it's added get the new terrain. Client and server; needs
+	// Lithostitched (MIT, by Apollo; worldgen library) and YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
+	[dep: "maven.modrinth:enderscape:1VZBnRYm", cf: [536638, 9177560], dev: false],
+	[dep: "maven.modrinth:lithostitched:pZgI6b2t", cf: [936015, 9154966], dev: false],
+	// Last World Panorama (by slovuka; Modrinth says all rights reserved, the jar carries CC0; downloaded by id): the
+	// title screen's panorama is shot from where you last stood, retaken each time you leave a world or server.
+	// Client-only (Fabric skips it on the server).
+	[dep: "maven.modrinth:last-world-panorama:XkXkj2N1", cf: [1643044, 9283694]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
