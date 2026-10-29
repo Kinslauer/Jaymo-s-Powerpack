@@ -3688,3 +3688,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
   `BloodTrail.follow` (plain types, for reflection).
   - Not seen in game.
+- **0.17.184, Baubles:** Andy asked for the Baubles mod. Baubles is 1.12 Forge only, and no accessory-slot mod
+  (Trinkets, Accessories, Curios) has a Fabric 26.3 build, so this is our own (`baubles/`), laid out as Baubles was:
+  seven slots, an amulet, two rings, a belt, a head piece, a body piece and a charm. A tab on the survival inventory's
+  left edge (under the powers tab) opens them: the player in the middle, the slots either side, the inventory below;
+  a chest tab there goes back. There's an unbound Open baubles key too (the only way in from creative). Right-clicking
+  a bauble puts it straight into a free slot that takes it. What fits each slot is an item tag
+  (`jaymospowers:baubles/<slot>`), so a data pack can make any item wearable; only our own baubles give bonuses, and
+  only while worn there. Any worn item ticks as if carried, so Alchemy's Runic Amulet (the only alchemy trinket; the
+  Scrying Lens is a held tool) is tagged an amulet and draws off fleeting taint from that slot. Worn baubles drop where you die unless keepInventory holds.
+  Seven baubles to start (own art, `tools/gen_baubles.py`; crafted, in Tools & Utilities):
+  Heartstone Amulet (+4 max health: string, gold, a glistering melon slice), Swiftfoot Ring (+8% speed: gold and a
+  diamond), Delver's Ring (+20% mining speed: copper and an amethyst shard), Brawler's Belt (+25% knockback
+  resistance: leather and an iron nugget), Diver's Circlet (breath lasts about twice as long, +50% mining underwater:
+  gold nuggets and prismarine crystals), Featherfall Cloak (+2 blocks before a fall hurts: feathers, a phantom
+  membrane, white wool) and Rabbit's Foot Charm (+1 luck: string, a gold nugget, a rabbit's foot). The bonuses are set
+  in `Baubles.init`.
+  - Compile-checked; not seen in game.

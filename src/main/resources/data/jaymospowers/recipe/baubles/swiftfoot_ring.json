@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "minecraft:diamond",
+    "G": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    " D ",
+    "G G",
+    " G "
+  ],
+  "result": {
+    "id": "jaymospowers:swiftfoot_ring",
+    "count": 1
+  }
+}

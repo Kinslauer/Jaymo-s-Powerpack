@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "N": "minecraft:gold_nugget",
+    "P": "minecraft:prismarine_crystals"
+  },
+  "pattern": [
+    "NNN",
+    "N N",
+    "NPN"
+  ],
+  "result": {
+    "id": "jaymospowers:divers_circlet",
+    "count": 1
+  }
+}
