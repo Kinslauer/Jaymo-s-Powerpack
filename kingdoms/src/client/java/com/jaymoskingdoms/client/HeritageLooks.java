@@ -77,7 +77,7 @@ import org.jspecify.annotations.Nullable;
  * dark places.</li>
  * <li><b>Divine-born:</b> (0.7.262, textures from {@code kingdoms/tools/gen_race_looks.py}) a faint gold glow in fine
  * filigree up the forearms and on the brow, warm white eyes, a halo (a flat gold ring, a model part) floating over the head
- * (0.7.318: the Starlit and the Seraphic wear it larger, round the neck),
+ * (0.7.318: the Starlit and the Seraphic wear it larger, floating round the neck, pale blue and white),
  * and motes of light drifting off the skin.</li>
  * <li><b>Bio-built:</b> (0.7.313: a player is drawn as their form's own body instead, {@link BioForms}; villagers keep these) (0.7.262) steel-green seams and plating that grow with each form ({@link BioBuilt#form}: three drawings,
  * the second plated to the elbow, the third to the shoulder and the cheeks), amber nodes that glow; amber eyes. A variant's
@@ -374,9 +374,10 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			}
 		}
 		if (kind == Kind.DIVINE && style != null && (style.variant() == HeritageVariants.Variant.STARLIT || style.variant() == HeritageVariants.Variant.SERAPHIC)) {
-			// (0.7.318, Andy) the Starlit and the Seraphic wear it larger, round the neck
+			// (0.7.318, Andy) the Starlit and the Seraphic wear it larger, floating round the neck, blue or white
 			if (marks.body.visible) {
-				neckHalo(poseStack, collector, marks, state.ageInTicks);
+				neckHalo(poseStack, collector, marks, state.ageInTicks,
+					style.variant() == HeritageVariants.Variant.STARLIT ? STARLIT_HALO : SERAPHIC_HALO);
 			}
 		} else if (kind == Kind.DIVINE && !headFinsCovered && marks.head.visible) {
 			halo(poseStack, collector, marks, state.ageInTicks);
@@ -422,17 +423,25 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		poseStack.popPose();
 	}
 
-	/** (0.7.318) The neck halo: this much larger than the head's, resting this high over the shoulders (model pixels), bobbing this much. */
-	static final float NECK_HALO_SCALE = 1.4F, NECK_HALO_RISE = 0.5F, NECK_HALO_BOB = 0.25F;
+	/**
+	 * (0.7.318, Andy, after the angels of the old shows) The neck halo: a ring floating round the neck, this much larger than
+	 * the head's, its middle this high over the shoulders (model pixels), tipped back by this much (degrees: high behind the
+	 * head, low over the chest), bobbing this much; pale blue for the Starlit, white for the Seraphic.
+	 */
+	static final float NECK_HALO_SCALE = 1.4F, NECK_HALO_RISE = 1.5F, NECK_HALO_TILT = 20.0F, NECK_HALO_BOB = 0.6F;
+	static final int STARLIT_HALO = 0xFF8ED6FF, SERAPHIC_HALO = 0xFFFFFFFF;
+	private static final Identifier HALO_WHITE = JaymosKingdoms.id("textures/entity/heritage/halo_white.png");
 
-	/** (0.7.318) The halo worn larger, resting round the neck on the shoulders (body space: the top of the body at y 0). */
-	private static void neckHalo(PoseStack poseStack, SubmitNodeCollector collector, net.minecraft.client.model.HumanoidModel<?> model, float age) {
+	/** (0.7.318) The halo floating round the neck (body space: the top of the body at y 0). */
+	private static void neckHalo(PoseStack poseStack, SubmitNodeCollector collector, net.minecraft.client.model.HumanoidModel<?> model, float age,
+		int color) {
 		poseStack.pushPose();
 		model.body.translateAndRotate(poseStack);
 		poseStack.translate(0.0F, (-NECK_HALO_RISE + Mth.sin(age * HALO_SPEED) * NECK_HALO_BOB) / 16.0F, 0.0F);
+		poseStack.rotateDegrees(com.mojang.math.Axis.XP, NECK_HALO_TILT);
 		poseStack.scale(NECK_HALO_SCALE, 1.0F, NECK_HALO_SCALE);
-		collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(HALO), 0xF000F0,
-			OverlayTexture.NO_OVERLAY, null, -1);
+		collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(HALO_WHITE), 0xF000F0,
+			OverlayTexture.NO_OVERLAY, null, color);
 		poseStack.popPose();
 	}
 
