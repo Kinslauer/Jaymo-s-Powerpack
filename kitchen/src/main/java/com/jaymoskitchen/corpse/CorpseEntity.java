@@ -32,8 +32,6 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -180,7 +178,7 @@ public class CorpseEntity extends Entity {
 	/**
 	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: sneak + use held on it drags it along
 	 * the ground behind you, {@code DRAG_BEHIND} blocks back (plus half its length), at up to {@code DRAG_SPEED} blocks a
-	 * tick, up steps of a block. You're slowed ({@code DRAG_SLOWNESS}) while you haul it. A right-click anywhere lets go; one
+	 * tick, up steps of a block. You're slowed while you haul it, less the stronger you are ({@link Hauling}). A right-click anywhere lets go; one
 	 * on a butcher block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table. Further off than
 	 * {@code DRAG_LEASH} and it slips from your hands.
 	 * (0.5.36) Andy sent a clip of a friend struggling to drag a cow. It was held behind wherever you looked, so turning to
@@ -188,8 +186,6 @@ public class CorpseEntity extends Entity {
 	 * rope goes taut, straight at you when nothing's in the way, else along the path you walked ({@code DRAG_CRUMB} apart).
 	 */
 	public static final double DRAG_BEHIND = 0.9, DRAG_SPEED = 0.3, DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5, DRAG_CRUMB = 0.35;
-	/** (0.5.36) Slowness amplifier while hauling (1 = Slowness II; it was III). */
-	public static final int DRAG_SLOWNESS = 1;
 	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt. */
 	private static final int DRAG_SCRAPE_EVERY = 8;
 	/** (0.5.36) The most of your path a dragged carcass remembers, and how far it turns a tick to lie along the pull. */
@@ -1014,8 +1010,8 @@ public class CorpseEntity extends Entity {
 					|| carrier.distanceToSqr(this) > CARRY_LEASH_SQ) {
 					setCarrier(null);
 				} else if (carrier instanceof Player player && tickCount % 20 == 0) {
-					// heavy: slows whoever is carrying it
-					player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, isBigCarcass() ? 2 : 0, false, false, true));
+					// heavy: slows whoever is carrying it, (0.5.36) less the stronger they are
+					Hauling.encumber(player, isBigCarcass() ? Hauling.CARRY_BIG_SLOWNESS : Hauling.CARRY_SLOWNESS);
 				}
 				serverTick(level);
 			}
@@ -1405,11 +1401,13 @@ public class CorpseEntity extends Entity {
 		}
 		liftLast = now;
 		long held = now - liftStart;
+		// (0.5.36) the strong lift what everyone else has to drag
+		boolean drags = tooBigToLift() && !(Hauling.canLiftBig(player) && !isHuge());
 		if (held >= LIFT_TICKS) {
 			liftBy = null;
-			return tooBigToLift() ? drag(level, player) : carry(level, player);
+			return drags ? drag(level, player) : carry(level, player);
 		}
-		player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
+		player.sendOverlayMessage(Component.translatable(drags ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
 			bar(held, LIFT_TICKS)));
 		return InteractionResult.SUCCESS_SERVER;
 	}
@@ -1514,8 +1512,8 @@ public class CorpseEntity extends Entity {
 			setYRot(Mth.approachDegrees(getYRot(), facing, DRAG_TURN));
 		}
 		if (tickCount % 20 == 0) {
-			// a dead weight: hauling it is slow going
-			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, DRAG_SLOWNESS, false, false, true));
+			// a dead weight: hauling it is slow going, (0.5.36) Slowness IV less your brawn
+			Hauling.encumber(player, Hauling.DRAG_SLOWNESS);
 		}
 		if (along.lengthSqr() > 0.0025 && tickCount % DRAG_SCRAPE_EVERY == 0) {
 			net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(blockPosition().below());
@@ -1645,6 +1643,12 @@ public class CorpseEntity extends Entity {
 		}
 		var size = type.getDimensions();
 		return size.width() > SLING_WIDTH || size.height() > SLING_HEIGHT;
+	}
+
+	/** (0.5.36) Something huge (a ghast): lies as big as it is, and no one's arms take it, however strong. */
+	private boolean isHuge() {
+		EntityType<?> type = sourceType();
+		return type != null && Math.min(type.getDimensions().width(), type.getDimensions().height()) >= HUGE;
 	}
 
 	/**

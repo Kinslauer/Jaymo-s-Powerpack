@@ -422,6 +422,27 @@ public final class KitchenCompat {
 	}
 
 	/**
+	 * (0.17.203) Andy: "obviously the stronger characters can lift with less encumberment". Kitchen 0.5.36's
+	 * {@code Hauling.addBrawn}: a Z Fighter has {@link #ZFIGHTER_BRAWN} points of brawn, each a level off the Slowness of
+	 * hauling a body.
+	 */
+	public static void registerBrawn() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.ToIntFunction<Player> brawn = player -> com.jaymospowers.core.Powers.has(player,
+				com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE) ? ZFIGHTER_BRAWN : 0;
+			Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("addBrawn", java.util.function.ToIntFunction.class).invoke(null, brawn);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen: hauling slows everyone alike
+		}
+	}
+
+	/** (0.17.203) A Z Fighter's hauling brawn. */
+	static final int ZFIGHTER_BRAWN = 2;
+
+	/**
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all ({@code BladeBlood.corpse}).
 	 * Kitchen (0.5.17 on) tells us of each blow that lands on a body with flesh on it.
 	 */

@@ -115,6 +115,27 @@ final class KitchenCompat {
 	}
 
 	/**
+	 * (0.7.353) Andy: "obviously the stronger characters can lift with less encumberment". Kitchen 0.5.36's
+	 * {@code Hauling.addBrawn}: every {@link #MIGHT_PER_BRAWN} Might is a point of brawn, and Packhorse one more, each a
+	 * level off the Slowness of hauling a body (Might 10 + Packhorse lifts a cow). Without that Kitchen, nothing.
+	 */
+	static void registerBrawn() {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player> brawn = player ->
+				Stats.value(player, Stats.Stat.MIGHT) / MIGHT_PER_BRAWN + (Skills.rank(player, Skills.Perk.PACKHORSE) > 0 ? 1 : 0);
+			Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("addBrawn", java.util.function.ToIntFunction.class).invoke(null, brawn);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for strength to ease hauling (needs 0.5.36): {}", e.toString());
+		}
+	}
+
+	/** (0.7.353) Might points to a point of hauling brawn. */
+	static final int MIGHT_PER_BRAWN = 3;
+
+	/**
 	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.6.
 	 */
