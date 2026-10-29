@@ -3548,3 +3548,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   monster-held structure near them before their people go near it, and keep women, children and workers out until
   it's clear; ATi's compounds are rarer and smaller, none near spawn, and its dojo (the pagoda) only rises in cherry
   groves. See the Kingdoms MODLOG.
+- **0.17.143, sailors no longer offer "Seek an audience" (Kingdoms 0.7.317):** only rulers and a realm's posted guards
+  do; ship crews, caravan escorts and soldiers at war don't. See the Kingdoms MODLOG.

@@ -6258,3 +6258,11 @@ always be avoided by the inhabitants."
   where Blossom villages rise: `CompoundStructure` reads a new `only_in` map (structure id to biomes) that replaces a
   member's own biome tag (ATi's put it in plains, forests and jungles). It was already the cherry Grand Seat.
 Compile-checked (Clearing, CompoundStructure), not seen in game. Existing chunks keep what they generated.
+
+## 0.7.317: sailors don't offer "Seek an audience" (pack 0.17.143)
+Andy: "the sailors shouldnt have this audience option". A ship's hands are enlisted in the guard role, so MCA's talk
+menu offered every navy, merchant and whaler crewman "Seek an audience". `Audiences.canAsk` now turns down ship crew
+(`Crewmen.tagged`, or anyone seated aboard a `Ship`), caravan escorts (task `caravan`) and soldiers out with a war party
+(`WarParties.isSoldier`). Rulers and a realm's posted guards keep the option; the folk-guard chat line and
+`/kingdom audience` follow the same check.
+Not compile-checked (no game jars staged), not seen in game.

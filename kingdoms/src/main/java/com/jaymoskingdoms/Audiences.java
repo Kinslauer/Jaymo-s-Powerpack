@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.sailing.Ship;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,9 +81,16 @@ public final class Audiences {
 		return faction + "/" + player;
 	}
 
-	/** {@code mob} is one of a realm's guards whose ruler holds court: someone to ask for an audience. */
+	/**
+	 * {@code mob} is one of a realm's guards whose ruler holds court: someone to ask for an audience. (0.7.314) Andy: "the
+	 * sailors shouldnt have this audience option": a ship's hands are enlisted as guards, but no sailor, caravan escort
+	 * or soldier off to war walks you to the throne.
+	 */
 	public static boolean canAsk(@Nullable Entity mob) {
 		if (!(mob instanceof Worker w) || w.role() != Folk.GUARD || !mob.isAlive() || !(mob.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		if (Crewmen.tagged(mob) || mob.getVehicle() instanceof Ship || w.task().equals(Caravans.TASK) || WarParties.isSoldier(w)) {
 			return false;
 		}
 		Faction f = Factions.get(level.getServer(), w.factionId());
