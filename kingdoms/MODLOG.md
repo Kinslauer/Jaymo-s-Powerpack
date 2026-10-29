@@ -6236,3 +6236,11 @@ down upon the target. stretching over and engulfing them into a bulge that flows
 - **Buds** (`BioBudRenderer`): small copies of the Perfect form in their maker's palette.
 - **Z Fighters** (Powers 0.17.138): the tag `jaymoskingdoms_bio_form_<n>` tells Powers the form.
 Compile-checked against 26.3 with javac (changed files), not seen in game.
+
+## 0.7.315: sailors don't offer "Seek an audience" (pack 0.17.141)
+Andy: "the sailors shouldnt have this audience option". A ship's hands are enlisted in the guard role, so MCA's talk
+menu offered every navy, merchant and whaler crewman "Seek an audience". `Audiences.canAsk` now turns down ship crew
+(`Crewmen.tagged`, or anyone seated aboard a `Ship`), caravan escorts (task `caravan`) and soldiers out with a war party
+(`WarParties.isSoldier`). Rulers and a realm's posted guards keep the option; the folk-guard chat line and
+`/kingdom audience` follow the same check.
+Not compile-checked (no game jars staged), not seen in game.
