@@ -1654,3 +1654,23 @@ the button is released. leaving no remnant line. much like the Symbiote: A Bondi
 - **No remnant:** `WebSpentLines.spend` ignores dark (symbiote) lines, so neither a released swing nor a broken hitch
   leaves a falling line. Plain webs still fall and fade. Own first person draws no wrap (the arm is the camera's); the
   cord still waits for the wrap and reels in.
+
+## Collect mode and first looks (0.17.149)
+
+- Andy: "Add an option to the wheel for a "Collect" mode. When active (and using living armor) it will use living
+  tendrils to periodically reach out and grab items bringing them to you. This is unlocked at 70 Bond, and before then
+  it will do it on it's own while tendrils are active, grabbing surrounding items within 12 blocks, and upon the first
+  time grabbing an item, the symbiote will hold it in front of you, taking time to inspect and examine it like it does
+  mobs. you can grab the item at any time to skip, but the symbiote will comment on it and give information hints if
+  given time. Only one inspection per item ever."
+- `WebSymbioteCollect`: every 1.5 s (`EVERY` 30) a free tendril grabs the nearest item it can see within 12 blocks that
+  nobody just dropped, and once it has it, drops it at your feet. From bond 70 (`COLLECT_BOND`; empowered and creative
+  too) only with the wheel's new Collect slot on (`WebSymbiote.COLLECT_TOGGLE` 9, `WebSymbioteState.COLLECT` 64, a bundle
+  icon) and Living Armor on, tendrils out; below 70 it fetches on its own whenever its tendrils are out, and the slot
+  only whispers.
+- The first time it ever holds a kind of item (`SEEN`, saved, kept through death) it holds it up in front of you, head
+  swelling as when it stares at a creature (`STARING`), for 6 s (`INSPECT_TICKS` 120): a line on what it makes of it
+  (`inspect.<kind>.N`, 15 kinds: fire, noise, valuable, meat, food, weapon, armor, tool, potion, book, ore, plant,
+  drop, block, misc), then at 3.5 s (`HINT_AT`) a hint about what it's good for (`hint.<kind>.N`, with the hunger it
+  fills, how many uses it lasts, or how many stack). Use (right click) takes it at once (`WebNet.InspectGrab`), with a
+  grumble (`inspect.skip.N`) and no hint.

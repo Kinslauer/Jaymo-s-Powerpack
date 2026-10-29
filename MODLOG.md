@@ -3566,3 +3566,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.148, goblins with the workshop goblin's body (Kingdoms 0.7.321):** goblin villagers take the shape of
   kokosikk's Blockbench Workshop goblin (CC BY 4.0): big head, hunched short body, thin arms, short legs, with their MCA
   clothes, hair and armour drawn on it, plus its ears, nose, tusks, feet, cap and belt gear. See the Kingdoms MODLOG.
+- **0.17.149, symbiote Collect and swing engulf:** the symbiote's wheel has a Collect slot (bond 70): in Living Armor
+  its tendrils fetch items within 12 blocks to your feet; below bond 70 it fetches on its own whenever its tendrils are
+  out. The first time it holds a kind of item it studies it in front of you with a comment and, given time, a hint
+  (Use takes it early); one look per kind, ever. Swinging in the suit, tendrils pour out of the body and wrap the whole
+  arm before the cord shoots, and on release the cord reels back in and the wrap withdraws, leaving no line. See
+  docs/web.md. Compile-checked; not playtested.
