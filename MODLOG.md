@@ -3617,3 +3617,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   moon's pull, scent trails, hidden-change tells, locking yourself in, the morning after, torn cloth evidence; and for
   everyone rumours with names, accusing at the priest (a talk option), victim memory, and monsters hearing each other.
   See the Kingdoms MODLOG.
+- **0.17.162, the server starts again (Kingdoms 0.7.333):** Simple Voice Chat 2.6.27 refuses to load beside Sound Physics
+  Remastered older than 1.5.2, so the pack's Sound Physics Remastered moves from 1.5.1 to 1.5.2+26.3 (Modrinth
+  `gA7nKz5g`, CurseForge file 9280065). Nothing else changes.
