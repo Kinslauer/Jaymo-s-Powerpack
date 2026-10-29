@@ -83,6 +83,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterWishScreen.register();
 		// (0.17.62) the space pod's star map
 		ZFighterStarMapScreen.register();
+		ZFighterFlightScreen.register();
 		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);

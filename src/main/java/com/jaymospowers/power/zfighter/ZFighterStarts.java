@@ -364,7 +364,7 @@ public final class ZFighterStarts {
 		}
 
 		private static void mended(ServerLevel level, BlockPos pos, Player player) {
-			level.setBlock(pos, ZFighterSpace.POD.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(pos, ZFighterSpace.withFuel(ZFighterSpace.MENDED_FUEL), Block.UPDATE_ALL);
 			level.playSound(null, pos, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.BLOCKS, 1.0F, 0.5F);
 			level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.8F, 1.4F);
 			level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5, 30, 0.4, 0.1, 0.4, 0.05);
