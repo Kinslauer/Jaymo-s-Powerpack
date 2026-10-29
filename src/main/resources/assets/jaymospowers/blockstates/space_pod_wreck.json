@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/space_pod_wreck"
+      }
+    }
+  ]
+}

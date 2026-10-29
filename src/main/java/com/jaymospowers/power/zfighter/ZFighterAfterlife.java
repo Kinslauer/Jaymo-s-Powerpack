@@ -378,6 +378,24 @@ public final class ZFighterAfterlife {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_halo").withStyle(ChatFormatting.AQUA));
 	}
 
+	/**
+	 * (0.17.198) A life story's "back from the afterlife" start (Jaymo's Kingdoms, through {@link ZFighterStarts}): the newcomer
+	 * wakes among the dead with a halo, as one who died does, and is let go by the same ways (the fortune teller, the wish, the
+	 * long wait); {@code home} is where they come back to among the living. False if the Aether isn't there.
+	 */
+	static boolean strand(ServerPlayer player, ServerLevel homeLevel, BlockPos home) {
+		MinecraftServer server = player.level().getServer();
+		if (server.getLevel(WindAether.AETHER) == null) {
+			return false;
+		}
+		player.setAttached(HOME, new Home(homeLevel.dimension(), home));
+		player.setAttached(STAY, player.level().getGameTime());
+		player.removeAttached(TAUGHT);
+		player.removeAttached(CHAMPION);
+		arrive(server, player);
+		return inOtherWorld(player);
+	}
+
 	/** Back among the living: to where he woke in the world, whole, the halo gone. */
 	static void returnHome(ServerPlayer player) {
 		endGauntlet(player);

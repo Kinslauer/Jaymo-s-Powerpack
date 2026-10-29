@@ -78,5 +78,17 @@
   "message.jaymospowers.space_flag_not_yet": "The flag is not for planting yet, or not here.",
   "message.jaymospowers.space_flag_blocked": "Clear room for the pole and the cloth first.",
   "message.jaymospowers.space_done": "%1$s! +%2$s TP and the planet's ore.",
-  "message.jaymospowers.space_told": "%1$s has earned a title: %2$s."
+  "message.jaymospowers.space_told": "%1$s has earned a title: %2$s.",
+  "block.jaymospowers.space_pod_wreck": "Wrecked Space Pod",
+  "message.jaymospowers.pod_wreck.needs": "The wreck needs %s more %s for the %s.",
+  "message.jaymospowers.pod_wreck.coal": "Coal",
+  "message.jaymospowers.pod_wreck.part.hull": "hull",
+  "message.jaymospowers.pod_wreck.part.wiring": "wiring",
+  "message.jaymospowers.pod_wreck.part.controls": "controls",
+  "message.jaymospowers.pod_wreck.part.fuel": "burner",
+  "message.jaymospowers.pod_wreck.mended": "The burner coughs, then catches. The pod will fly again.",
+  "book.jaymospowers.pod_log.page1": "Run thirty-one. Holds full by the second dark. Teo swears the tall ones followed us up from the shaft again. They never come past the lamps. They only watch.",
+  "book.jaymospowers.pod_log.page2": "Old Hask put his ear to the dust and said it hums like the great stones back home do in a storm. Then he laughed at us for listening. Nobody laughed on the way back to the pod.",
+  "book.jaymospowers.pod_log.page3": "Something hit the burner on the climb. We're going down hard. If anyone finds her: iron for the hull, copper for the wiring, redstone for the controls, coal for the burner. She still wants to fly.",
+  "entity.jaymospowers.overseer": "Iron-Master's Overseer"
 }

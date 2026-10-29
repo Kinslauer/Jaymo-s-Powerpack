@@ -6612,3 +6612,20 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   sounds.json, so the feature grows as clips are generated and nothing is missing before then.
   - All 40 clips generated on Andy's PC (2.2 MB); plumbing checked by eye against MCA's bytecode only, no game jars in
     the cloud session; not seen in game.
+
+## 0.7.349: life-story starts on the other worlds (pack 0.17.198)
+- Andy: "new starts, involving the other worlds". Six new roads on the story's last question, when Jaymo's Powers is
+  loaded (`LifeStory.OTHER_WORLDS`, put down by Powers' `ZFighterStarts` through `PowersCompat.otherWorld`): stranded on
+  the Pale Moon, raised under the Verdant World's sky, escaped Rustfall's mines, a Maw salvager, raised by a Nether demon
+  master, back from the afterlife. If Powers can't place you, you start in the wild.
+- **Respawn:** Andy: "you respawn on the world, or where you spawned for the start initially". You respawn at the landing
+  spot until you first leave that world (`LifeStory.STRANDED`, cleared on the level change, and the respawn point with
+  it if it's still there). The afterlife start's home is the overworld spot.
+- **Heritage:** Andy: "Verdant only": the Verdant World road is only offered to the Verdant-born (`Answer.onlyFor`). Andy:
+  "you can start as divine born again, but only if you pick that start": the afterlife road makes you Divine-born
+  (`Answer.makes`, unlocked like an earned one). The story screen shows why a road is shut, locks the heritage a road
+  sets, and drops a road the birthplace no longer allows.
+- Rustfall's escapee gets +1 Might. Each start echoes its power (moon and Maw: gravity; the rest: Z Fighter).
+- `StoryTalk` landings remember their dimension, so only villagers on the same world talk about how you arrived; new
+  first-meeting lines for the Verdant, demon and afterlife starts.
+  - Compile-checked only; not seen in game.
