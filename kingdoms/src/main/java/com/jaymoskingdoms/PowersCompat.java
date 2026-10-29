@@ -1106,4 +1106,53 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	// ---- (0.7.342) Will (Will) --------------------------------------------------------------------------------------
+
+	/** Powers' {@code Downed.knockOut} and {@code ZFighterScouter.powerLevel}. */
+	private static java.lang.invoke.@Nullable MethodHandle knockOut, powerLevel;
+	private static boolean lookedForWill;
+
+	private static void lookForWill() {
+		if (lookedForWill) {
+			return;
+		}
+		lookedForWill = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			knockOut = lookup.findStatic(Class.forName("com.jaymospowers.core.wounds.Downed"), "knockOut", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.server.level.ServerLevel.class, LivingEntity.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' knock-out (older Powers?)", e);
+		}
+		try {
+			powerLevel = lookup.findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterScouter"), "powerLevel",
+				java.lang.invoke.MethodType.methodType(int.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' power levels (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.342) Knocks {@code entity} out where it stands for {@code ticks}, by Powers' downing; false without Powers or if it can't be. */
+	public static boolean knockOut(net.minecraft.server.level.ServerLevel level, LivingEntity entity, int ticks) {
+		lookForWill();
+		try {
+			return knockOut != null && (boolean)knockOut.invoke(level, entity, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
+	public static int powerLevel(LivingEntity entity) {
+		lookForWill();
+		try {
+			return powerLevel == null ? 0 : (int)powerLevel.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
 }

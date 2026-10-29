@@ -192,7 +192,8 @@ public final class Powers {
 				if (!player.onGround() && player.getY() > player.yo + 1.0E-3) {
 					player.resetFallDistance();
 				}
-				power.tick(player);
+				// ((0.17.183) acting: what it moves of someone else is Will Over Flesh's to lessen)
+				com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
 				Mastery.tick(player);
 				continue;
 			}
@@ -256,7 +257,7 @@ public final class Powers {
 		PowerInput.set(player, key, down);
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			// a broken one throws the aim off
-			LimbUse.aimed(player, need, () -> power.onKey(player, key, down));
+			LimbUse.aimed(player, need, () -> com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.onKey(player, key, down)));
 			if (down) {
 				Mastery.used(player);
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);

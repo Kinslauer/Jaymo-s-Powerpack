@@ -358,7 +358,9 @@ public final class Downed {
 	private static boolean spared(LivingEntity entity, DamageSource source) {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
-			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING);
+			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
+			// (0.17.183) Kingdoms' Will: No Mercy for the weaker ({@link WillSkill#noMercy})
+			&& !WillSkill.noMercy(entity, source);
 	}
 
 	// ---- going down, getting up ------------------------------------------------------------------------------------------
@@ -449,6 +451,11 @@ public final class Downed {
 	/** {@code battered}: (0.15.82) false for a knock-out from standing, which was no downing. */
 	private static void getUp(ServerLevel level, LivingEntity entity, boolean battered) {
 		if (!isDowned(entity)) {
+			return;
+		}
+		// (0.17.183) Kingdoms' Will: No Getting Up while a player with it stands near ({@link WillSkill#heldDown})
+		DamageSource felled = FELLED_BY.get(entity);
+		if (battered && WillSkill.heldDown(level, entity, felled == null ? null : felled.getEntity())) {
 			return;
 		}
 		if (Carry.carrierOf(entity) instanceof ServerPlayer carrier) {
@@ -881,16 +888,27 @@ public final class Downed {
 					body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
-			ItemStack stack = player.getInventory().getItem(slot);
-			Component eaten = stack.getHoverName();
-			stack.consume(1, player);
-			player.getInventory().setChanged();
-			getUp(level, body);
-			MedicineSkill.broughtRound(player, body);
-			MedicineSkill.treated(player);
-			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
+			// (0.17.183) held down by someone else's Will (No Getting Up): no getting them up while that one stands near
+			DamageSource felled = FELLED_BY.get(body);
+			WillSkill.reviver = player;
+			try {
+				if (WillSkill.heldDown(level, body, felled == null ? null : felled.getEntity())) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.held_down", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+					continue;
+				}
+				ItemStack stack = player.getInventory().getItem(slot);
+				Component eaten = stack.getHoverName();
+				stack.consume(1, player);
+				player.getInventory().setChanged();
+				getUp(level, body);
+				MedicineSkill.broughtRound(player, body);
+				MedicineSkill.treated(player);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
+				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
+			} finally {
+				WillSkill.reviver = null;
+			}
 		}
 	}
 
