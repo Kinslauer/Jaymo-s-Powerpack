@@ -6587,5 +6587,5 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
   when the menu shuts to open a trade.
 - `Voices` registers a tongue's sound only if its clip is in the jar, and the script lists only made clips in
   sounds.json, so the feature grows as clips are generated and nothing is missing before then.
-  - Clips not generated yet (Andy's PC is busy with the symbiote voices); plumbing compile-checked by eye only, no game
-    jars in the cloud session.
+  - All 40 clips generated on Andy's PC (2.2 MB); plumbing checked by eye against MCA's bytecode only, no game jars in
+    the cloud session; not seen in game.
