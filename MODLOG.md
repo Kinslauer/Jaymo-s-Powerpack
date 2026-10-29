@@ -3685,5 +3685,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   bleeder's stains within 16 blocks and walk them stain by stain toward fresher blood, until they see the bleeder
   (12 blocks) and go for it. Monsters follow players' and villagers' blood; wild beasts follow smaller animals', and a
   player's only when the player is down or under 40% health; tamed animals never track. Stains are kept in memory, so a
-  server restart washes them away.
+  server restart washes them away. Kingdoms 0.7.341's hunter villagers follow wounded animals' trails too, through
+  `BloodTrail.follow` (plain types, for reflection).
   - Not seen in game.

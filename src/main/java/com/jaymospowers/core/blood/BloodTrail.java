@@ -276,6 +276,33 @@ public final class BloodTrail {
 		return best;
 	}
 
+	/**
+	 * For Jaymo's Kingdoms' hunters (looked up by reflection, so plain types only): with {@code by} null, the nearest
+	 * stain within {@code range} of {@code from} whose living bleeder {@code prey} accepts; otherwise the next of
+	 * {@code by}'s stains spilt after {@code after} ({@link #fresher}). As {@code {Vec3 at, UUID by, Long laid}}, or null.
+	 */
+	public static Object @Nullable [] follow(ServerLevel level, Vec3 from, double range, @Nullable UUID by, long after,
+		Predicate<LivingEntity> prey) {
+		Mark found;
+		if (by != null) {
+			found = fresher(level, from, range, by, after);
+		} else {
+			found = null;
+			double best = Double.MAX_VALUE;
+			for (Mark mark : near(level, from, range, mark -> {
+				LivingEntity bleeder = bleeder(level, mark.by);
+				return bleeder != null && prey.test(bleeder);
+			})) {
+				double d = from.distanceToSqr(mark.x, mark.y, mark.z);
+				if (d < best) {
+					best = d;
+					found = mark;
+				}
+			}
+		}
+		return found == null || found.by == null ? null : new Object[] {found.position(), found.by, found.laid};
+	}
+
 	/** Whether {@code entity} is in this level and alive. */
 	static @Nullable LivingEntity bleeder(ServerLevel level, @Nullable UUID by) {
 		if (by == null) {

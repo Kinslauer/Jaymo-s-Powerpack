@@ -6562,3 +6562,13 @@ All CC BY 4.0, credited in `textures/entity/bb/CREDITS.txt`. Not seen in game.
 - **Speak of the rescue:** Andy: "you can talk to them about it for a context chat option as well". A new MCA menu
   option on a guard of a town that owes you: they say what it buys you there (no toll, no search, a blind eye), never how
   many favours are left (12 `rescue.owed` lines; `Captives.ANSWER`, shown by `McaAnswersMixin`, answered in `McaDialogueMixin`).
+
+## 0.7.341: hunters follow blood trails (`BloodHunters`)
+- Andy: "MCA hunter villagers follow trails, can you". A town's hunters (fletchers, who take the hunting lodge's
+  fletching table, and leatherworkers) notice a wounded wild animal's blood within 20 blocks (Jaymo's Powers 0.17.182's
+  lasting stains, `BloodTrail.follow` by reflection, nothing without Powers), walk it stain by stain toward fresher
+  blood, and once they see the animal (14 blocks) run it down and finish it with knife blows (4 a second). They keep
+  within 48 blocks of where they set out, give up after 90 s, and leave off for bedtime, a fright, a blow, someone
+  talking to them, or helping someone up. Only game: grown wild animals, never pets or people. Runs from
+  `Workers.step`, so their brain waits and `Doorways` opens gates for them.
+  - Not seen in game.
