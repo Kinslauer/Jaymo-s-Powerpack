@@ -72,7 +72,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.7.349) Six starts wake you on Jaymo's Powers' other worlds ({@link #OTHER_WORLDS}, made by its {@code ZFighterStarts}):
  * stranded on the Pale Moon, raised under the Verdant World's green sky (the Verdant-born's alone), escaped from Rustfall's
- * mines (+1 Might), a salvager at the Maw, raised by a demon master in the Nether, and back from the afterlife (which makes
+ * mines (+1 Might), a salvager at the Maw, raised by a demon master in the Nether (the Emberborn's alone), and back from the afterlife (which makes
  * you Divine-born). Till they first leave that world they respawn where they landed ({@link #STRANDED}).
  */
 public final class LifeStory {
@@ -180,9 +180,16 @@ public final class LifeStory {
 			return this.start == null || this.start != Start.UNARMED && this.start != Start.TIMELOST && !OTHER_WORLDS.contains(this.start) || powers();
 		}
 
-		/** (0.7.349, Andy: "Verdant only") The heritage a start is only for: the Verdant World's, the Verdant-born's; null for any. */
+		/**
+		 * (0.7.349, Andy: "Verdant only") The heritage a start is only for: the Verdant World's, the Verdant-born's; (0.7.355,
+		 * Andy: "should only be for emberborn") a demon master's hall, the Emberborn's; null for any.
+		 */
 		public Heritage.@Nullable Kind onlyFor() {
-			return this.start == Start.VERDANT ? Heritage.Kind.VERDANT : null;
+			return switch (this.start) {
+				case VERDANT -> Heritage.Kind.VERDANT;
+				case DEMON -> Heritage.Kind.EMBERBORN;
+				case null, default -> null;
+			};
 		}
 
 		/** (0.7.349, Andy: "you can start as divine born again, but only if you pick that start") The heritage a start makes you, over your birth's; null for none. */
@@ -574,7 +581,7 @@ public final class LifeStory {
 			}
 			heritage = kinds[live.heritage()];
 		}
-		// (0.7.349) the Verdant World's start is the Verdant-born's alone; the afterlife's makes you Divine-born
+		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
 		if (road.onlyFor() != null && heritage != road.onlyFor()) {
 			return;
 		}
