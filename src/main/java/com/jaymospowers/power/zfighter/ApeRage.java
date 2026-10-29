@@ -46,7 +46,7 @@ import net.minecraft.world.entity.player.Player;
  * <p>(0.17.190) Andy: "I want a prerequisite form to our current primal super". The fits now open {@link #PRIMAL_SUPER}
  * (Primal Super: the ape's fur and tail, Super 2's hair in his own villager's colour, a smooth aura, a little fire that
  * dies quickly), taken with C from his highest form; the old form, {@link #SUPER_4}, is now Super Primal Super.
- * <p>(0.17.191) Andy: "Super primal super can only be achieved now when a primal super user fuses with another z fighter
+ * <p>(0.17.192) Andy: "Super primal super can only be achieved now when a primal super user fuses with another z fighter
  * warrior born. It deactivates regardless of remaining ki after the fusion ends." So it is C from Primal Super only while
  * he steers a fused body whose other half is Warrior-born ({@link #fusedWithWarrior}), and the fusion ending (or the
  * halfway swap taking him out of the body) drops him back to Primal Super ({@link #fusionEnded}).
@@ -169,7 +169,7 @@ public final class ApeRage {
 			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
 	}
 
-	/** (0.17.191) Super Primal Super is his to take now: Primal Super is, and he steers a fusion with another Warrior-born. */
+	/** (0.17.192) Super Primal Super is his to take now: Primal Super is, and he steers a fusion with another Warrior-born. */
 	public static boolean superPrimal(Player player) {
 		return super4(player) && fusedWithWarrior(player);
 	}
@@ -181,7 +181,7 @@ public final class ApeRage {
 	}
 
 	/**
-	 * (0.17.191) His fusion ended, or he went inside at the halfway swap: Super Primal Super goes out whatever ki is left,
+	 * (0.17.192) His fusion ended, or he went inside at the halfway swap: Super Primal Super goes out whatever ki is left,
 	 * back to Primal Super (or his highest Super). Called before the caller's {@link ZFighterPower#refresh}.
 	 */
 	static void fusionEnded(ServerPlayer player, ZFighterPower.Live live) {

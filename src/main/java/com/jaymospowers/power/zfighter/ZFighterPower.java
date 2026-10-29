@@ -1038,7 +1038,7 @@ public final class ZFighterPower implements Power {
 				// (0.17.91) Primal Super opened but out of reach: say why, not just "no higher form"
 				String blocked = ApeRage.super4Blocked(player);
 				if (live.form == ApeRage.PRIMAL_SUPER && blocked == null) {
-					// (0.17.191) Super Primal Super needs a fusion with another Warrior-born; only a hint, nothing spelled out
+					// (0.17.192) Super Primal Super needs a fusion with another Warrior-born; only a hint, nothing spelled out
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_primal_wait").withStyle(ChatFormatting.GRAY));
 				} else {
 					player.sendOverlayMessage(Component.translatable(blocked != null ? blocked : "message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));

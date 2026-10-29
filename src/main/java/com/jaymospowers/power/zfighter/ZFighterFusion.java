@@ -510,7 +510,7 @@ public final class ZFighterFusion {
 			ZFighterPower.endFlight(leader, live);
 		}
 		live.charging = false;
-		// (0.17.191) going inside ends his Super Primal Super
+		// (0.17.192) going inside ends his Super Primal Super
 		ApeRage.fusionEnded(leader, live);
 		// what the old leader brings, on his own
 		ZFighterPower.refresh(leader, live);
@@ -565,7 +565,7 @@ public final class ZFighterFusion {
 		if (leader != null) {
 			leader.removeAttached(LOOK);
 			ZFighterPower.Live live = ZFighterPower.live(leader);
-			// (0.17.191) Super Primal Super lives only as long as the fusion
+			// (0.17.192) Super Primal Super lives only as long as the fusion
 			ApeRage.fusionEnded(leader, live);
 			ZFighterPower.refresh(leader, live);
 			live.ki = Math.min(live.ki, ZFighterPower.maxKi(leader));
