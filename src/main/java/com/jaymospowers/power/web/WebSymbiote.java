@@ -69,7 +69,10 @@ public final class WebSymbiote {
 	public static final int SPIKES = 4;
 	public static final int SHROUD = 5;
 	public static final int ABILITIES = 6;
-	/** Not an ability: the little mask in the middle of the menu shows or hides the suit (the powers keep working). */
+	/**
+	 * Not an ability: the Suit slot's sneak-pick, one form down ({@link #suitPress}; the powers keep working with the suit
+	 * off). (0.17.165) The slot itself is {@link #ARMOR}'s: a pick climbs a form, and this comes down one.
+	 */
 	public static final int SUIT_TOGGLE = 6;
 	/**
 	 * (0.13.23) Not an ability either: the menu's Mask slot (or the costume mask key with no costume mask to flip) takes
@@ -3828,63 +3831,14 @@ public final class WebSymbiote {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
 			return;
 		}
-		if (ability == SUIT_TOGGLE && isBonded(player)) {
-			WebSymbioteState state = state(player);
-			if (livingArmor(player) && !driving(player) && !roaring(player) && (state.has(WebSymbioteState.SUIT) || suitAllowed(player))) {
-				// Living Armor (or the big body) comes down to the plain suit first, one form a press (Andy: "activating
-				// the suit while wearing the living armor brings you back to the suit, then back to your skin ... that way
-				// you can access whatever at whatever bond level"); with Living Armor put away the bond doesn't swell it
-				// back into the big body. The next press takes the suit off (WebSymbioteBond's fight, or the tear-off).
-				// The big body worn by choice (the bond whole, or its gift) sheds only the big body: Living Armor's
-				// tendrils stay out over the suit (Andy), and the next press brings that down as usual.
-				player.removeAttached(WebSymbioteBond.FACE);
-				Live slim = live(player);
-				if (bulked(player) && state.has(WebSymbioteState.ARMOR) && slim.takeoverTicks <= 0 && !slim.armorSlim) {
-					slim.armorSlim = true;
-					set(player, state.withFlag(WebSymbioteState.SUIT, true));
-					ServerLevel level = player.level();
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
-					level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
-					return;
-				}
-				set(player, state.withFlag(WebSymbioteState.SUIT, true).withFlag(WebSymbioteState.ARMOR, false));
-				long at = player.level().getGameTime();
-				WebSymbioteState.Cooldowns cooldowns = player.getAttached(COOLDOWNS);
-				player.setAttached(COOLDOWNS, (cooldowns == null ? WebSymbioteState.Cooldowns.NONE : cooldowns).with(ARMOR, at + COOLDOWN[ARMOR], ABILITIES));
-				ServerLevel level = player.level();
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
-				level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
+		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player)) {
+			// (0.17.165) the one Suit slot: a pick climbs a form (skin, the suit, Living Armor, the big suit at a whole
+			// bond), a sneak-pick comes down one, and at the top form a pick comes down too (suitPress)
+			if (!suitPress(player, ability == SUIT_TOGGLE)) {
 				return;
 			}
-			boolean on = !state.has(WebSymbioteState.SUIT);
-			if (on && !suitAllowed(player)) {
-				// it showed you once; it won't cover you again until it trusts you more
-				nag(player, "suit_locked");
-				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
-				return;
-			}
-			// taking it off at a weak bond, the first few times: it fights you for it, and lets go of your face at most
-			// (WebSymbioteBond); otherwise it's torn off (WebSuitTear)
-			if (!on && WebSymbioteBond.resistRemoval(player)) {
-				return;
-			}
-			// (put on again: the face is covered too)
-			player.removeAttached(WebSymbioteBond.FACE);
-			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
-			// (the tendrils stay out: they work over any suit, or none)
-			set(player, next);
-			if (!on) {
-				torn(player);
-			}
-			if (on) {
-				// put on by hand (for the manual-equip animation; see DONNED)
-				player.setAttached(DONNED, player.level().getGameTime());
-			}
-			ServerLevel level = player.level();
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), on ? SoundEvents.SLIME_BLOCK_PLACE : SoundEvents.HONEY_BLOCK_SLIDE,
-				SoundSource.PLAYERS, 0.8F, on ? 0.6F : 1.2F);
-			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
-			return;
+			// (the suit on and the armour its next form: Living Armor goes on below, with its unlock, cooldown and cost)
+			ability = ARMOR;
 		}
 		if (ability < 0 || ability >= ABILITIES || !isBonded(player) || !player.isAlive() || player.isSpectator()) {
 			return;
@@ -3969,6 +3923,123 @@ public final class WebSymbiote {
 			WebSymbioteState after = state(player);
 			set(player, after.withSatiety(Math.max(0, after.satiety() - COST[ability])));
 		}
+	}
+
+	/** The forms the Suit slot climbs ({@link #suitPress}): bare skin, the plain suit, Living Armor (the thin armour) and the big suit. */
+	public static final int FORM_SKIN = 0, FORM_SUIT = 1, FORM_ARMOR = 2, FORM_BULK = 3;
+
+	/** The form you wear now (see {@link #FORM_SKIN}): the big suit if it's up, else the thin armour, the suit, or none. */
+	public static int form(Player player) {
+		WebSymbioteState state = state(player);
+		return state.has(WebSymbioteState.BULK) ? FORM_BULK : state.has(WebSymbioteState.ARMOR) ? FORM_ARMOR : state.has(WebSymbioteState.SUIT) ? FORM_SUIT : FORM_SKIN;
+	}
+
+	/**
+	 * The highest form the Suit slot can take you to now: the suit once it comes at your call ({@link #suitAllowed}),
+	 * Living Armor from its unlock ({@link #UNLOCK_BOND}[{@link #ARMOR}], or while its gift lasts), and the big suit with
+	 * the bond whole ({@link #fullBond}; Andy: "a suit button that activates your large suit once you hit max bond").
+	 */
+	public static int topForm(Player player) {
+		if (!suitAllowed(player)) {
+			return FORM_SKIN;
+		}
+		boolean gift = player instanceof ServerPlayer server && live(server).giftUntil > player.level().getGameTime();
+		if (!unlocked(player, ARMOR) && !gift) {
+			return FORM_SUIT;
+		}
+		return fullBond(player) ? FORM_BULK : FORM_ARMOR;
+	}
+
+	/**
+	 * (0.17.165) The Suit slot, one button for every form (Andy: "the living armour can be condensed to a suit button that
+	 * activates your large suit once you hit max bond"). A pick climbs one form: skin to the suit, the suit to Living
+	 * Armor (which the whole bond swells into the big suit at once), the thin armour worn down from the big suit back up
+	 * to it. At the top form you can reach, a pick comes down one instead, as a sneak-pick ({@code down}) always does:
+	 * the big suit to the thin armour (tendrils kept out), the armour to the suit, the suit off (fought for at a weak
+	 * bond, or torn). Returns true when the armour should go on: the caller runs Living Armor's own press (its unlock,
+	 * cooldown, cost and the ignore roll).
+	 */
+	private static boolean suitPress(ServerPlayer player, boolean down) {
+		WebSymbioteState state = state(player);
+		ServerLevel level = player.level();
+		int form = form(player);
+		int top = topForm(player);
+		if (form == FORM_SKIN || !down && form < top) {
+			// climbing
+			if (form == FORM_SKIN) {
+				if (!suitAllowed(player)) {
+					// it showed you once; it won't cover you again until it trusts you more
+					nag(player, "suit_locked");
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
+					return false;
+				}
+				// (put on: the face is covered too)
+				player.removeAttached(WebSymbioteBond.FACE);
+				// (the tendrils stay as they are: they work over any suit, or none)
+				set(player, state.withFlag(WebSymbioteState.SUIT, true));
+				// put on by hand (for the manual-equip animation; see DONNED)
+				player.setAttached(DONNED, level.getGameTime());
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 0.6F);
+				level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
+				return false;
+			}
+			if (form == FORM_SUIT) {
+				// Living Armor goes on (the whole bond swells it into the big suit in the tick)
+				return true;
+			}
+			// the thin armour worn down from the big suit (armorSlim), the bond whole: back up into it
+			Live live = live(player);
+			if (live.takeoverTicks > 0 || live.bondTicks > 0 || live.roarAt > 0L) {
+				return false;
+			}
+			live.armorSlim = false;
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
+			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 18, 0.35, 0.7, 0.35, 0.0);
+			return false;
+		}
+		// coming down one form
+		if (form >= FORM_ARMOR) {
+			if (driving(player) || roaring(player)) {
+				// it has the wheel: no key answers
+				return false;
+			}
+			// Living Armor (or the big suit) comes down to the plain suit, one form a press (Andy: "activating the suit
+			// while wearing the living armor brings you back to the suit, then back to your skin ... that way you can
+			// access whatever at whatever bond level"); with Living Armor put away the bond doesn't swell it back into
+			// the big suit. The big suit worn by choice (the bond whole, or its gift) sheds only the big suit: Living
+			// Armor's tendrils stay out over the suit (Andy).
+			player.removeAttached(WebSymbioteBond.FACE);
+			Live slim = live(player);
+			if (form == FORM_BULK && state.has(WebSymbioteState.ARMOR) && slim.takeoverTicks <= 0 && !slim.armorSlim) {
+				slim.armorSlim = true;
+				set(player, state.withFlag(WebSymbioteState.SUIT, true));
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+				level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
+				return false;
+			}
+			if (form == FORM_BULK && !state.has(WebSymbioteState.ARMOR)) {
+				// the big suit it put up on its own: not yours to shed
+				return false;
+			}
+			set(player, state.withFlag(WebSymbioteState.SUIT, true).withFlag(WebSymbioteState.ARMOR, false));
+			long at = level.getGameTime();
+			WebSymbioteState.Cooldowns cooldowns = player.getAttached(COOLDOWNS);
+			player.setAttached(COOLDOWNS, (cooldowns == null ? WebSymbioteState.Cooldowns.NONE : cooldowns).with(ARMOR, at + COOLDOWN[ARMOR], ABILITIES));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
+			return false;
+		}
+		// the suit off: at a weak bond, the first few times, it fights you for it, and lets go of your face at most
+		// (WebSymbioteBond); otherwise it's torn off (WebSuitTear)
+		if (WebSymbioteBond.resistRemoval(player)) {
+			return false;
+		}
+		player.removeAttached(WebSymbioteBond.FACE);
+		set(player, state.withFlag(WebSymbioteState.SUIT, false));
+		torn(player);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.8F, 1.2F);
+		level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
+		return false;
 	}
 
 	/** Tendril Grab: a creature under the crosshair is yanked to you; a block yanks you to it. */
