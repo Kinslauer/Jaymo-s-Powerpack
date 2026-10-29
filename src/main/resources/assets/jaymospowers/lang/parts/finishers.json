@@ -17,5 +17,6 @@
 	"message.jaymospowers.finisher.impale": "Stabbed through: %s",
 	"message.jaymospowers.finisher.flail": "Ball and chain: %s",
 	"message.jaymospowers.finisher.whip": "Garrotte: %s",
+	"message.jaymospowers.finisher.rock": "Stoned: %s",
 	"message.jaymospowers.finisher.head": "Kneel at %s's head to snap the neck"
 }

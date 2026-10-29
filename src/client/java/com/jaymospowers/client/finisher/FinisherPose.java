@@ -240,6 +240,22 @@ public final class FinisherPose {
 			at(haul, 14), at(haul, 20), at(tight, 24), at(haul, 30), at(haul, 37), at(tight, 42), at(haul, 48), at(haul, 53),
 			k(58, 0.28F, -30, 10, -0.3F, -0.25F, 0, -0.4F, 0.35F, 0, -0.7F, 0.9F, 0.5F, 0),
 			at(haul, 61), rest(64, 0)});
+		// (0.17.181) Stoned: down on a knee at their head, the off hand flat on their chest, the rock raised high in the main
+		// hand and smashed down three times, quicker each time; then both hands under it, lifted overhead, and dropped onto
+		// the skull with the whole body behind it, held a moment, and up
+		Key raise = k(0, 0.4F, 10, -6, -2.85F, -0.1F, 0.25F, -0.75F, 0.25F, -0.1F, -1.15F, 1.35F, 0.5F, 0);
+		Key smash = k(0, 0.46F, 38, 4, -0.55F, -0.2F, 0.05F, -0.75F, 0.3F, -0.1F, -1.15F, 1.35F, 0.7F, 0);
+		Key heave = k(0, 0.32F, -8, 0, -3.05F, 0.3F, 0.15F, -3.05F, -0.3F, -0.15F, -1.15F, 1.35F, 0.35F, 0);
+		Key drop = k(0, 0.52F, 48, 0, -0.5F, 0.35F, 0, -0.5F, -0.35F, 0, -1.15F, 1.35F, 0.75F, 0);
+		KEYS.put(Finishers.Kind.ROCK, new Key[] {
+			rest(0, 0),
+			k(5, 0.42F, 25, 0, -0.8F, -0.1F, 0.1F, -0.75F, 0.3F, -0.1F, -1.15F, 1.35F, 0.6F, 0),
+			at(raise, 9), at(smash, 12), at(smash, 13),
+			turned(raise, 17, -10), turned(smash, 20, 6), turned(smash, 21, 6),
+			turned(raise, 25, -4), turned(smash, 28, 2), at(smash, 29),
+			at(heave, 36), at(drop, 40), at(drop, 44),
+			k(48, 0.3F, 15, 0, -0.5F, -0.1F, 0.1F, -0.4F, 0.1F, -0.1F, -1.0F, 1.2F, 0.5F, 0),
+			rest(52, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
@@ -314,8 +330,8 @@ public final class FinisherPose {
 		float step = 0.0F;
 		Entity body = entity.level().getEntity(finish.target());
 		if (body != null) {
-			// (0.15.146) the neck snap kneels to the head, not the middle
-			net.minecraft.world.phys.Vec3 at = kind == Finishers.Kind.FIST && body instanceof net.minecraft.world.entity.LivingEntity living
+			// (0.15.146) the neck snap kneels to the head, not the middle; (0.17.181) so does the rock
+			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();
 			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
 			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;

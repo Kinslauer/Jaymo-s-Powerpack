@@ -149,7 +149,7 @@ public final class FirstTools {
 	}
 
 	/** A loose rock ({@link GroundRocks}). */
-	static boolean rock(ItemStack stack) {
+	public static boolean rock(ItemStack stack) {
 		return stack.getItem() instanceof net.minecraft.world.item.BlockItem item && GroundRocks.ROCKS.containsValue(item.getBlock());
 	}
 
