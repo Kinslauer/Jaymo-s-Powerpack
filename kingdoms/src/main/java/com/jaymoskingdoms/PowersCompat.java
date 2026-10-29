@@ -107,6 +107,33 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
+	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle among;
+	private static boolean lookedForAmong;
+
+	/** (0.7.320) Whether {@code player} is one of the dead in Jaymo's Powers' Other World (the afterlife); false without Powers. */
+	public static boolean amongTheDead(Player player) {
+		if (!lookedForAmong) {
+			lookedForAmong = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					among = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterAfterlife"),
+						"among", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' afterlife (older Powers?)", e);
+				}
+			}
+		}
+		if (among == null) {
+			return false;
+		}
+		try {
+			return (boolean)among.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
