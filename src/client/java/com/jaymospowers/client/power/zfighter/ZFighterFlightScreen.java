@@ -31,14 +31,14 @@ public class ZFighterFlightScreen extends Screen {
 	private static final int STARS = 160, LAYERS = 3;
 	/** The share of the flight spent getting up to speed, and slowing down at the end. */
 	private static final float RAMP = 0.2F;
-	/** (0.18.55) The share of the world's growth (0 to 1) at which a Starlit Lens starts showing the zones. */
+	/** (0.18.56) The share of the world's growth (0 to 1) at which a Starlit Lens starts showing the zones. */
 	private static final float LENS_FROM = 0.45F;
 
 	private final int to;
 	private final int ticks;
 	private final boolean skippable;
 	private final int from;
-	/** (0.18.55) A Starlit Lens on the pod's mast: the world ahead is shown with its mission zones. */
+	/** (0.18.56) A Starlit Lens on the pod's mast: the world ahead is shown with its mission zones. */
 	private final boolean lens;
 	private int age;
 	private boolean skipped;
@@ -170,7 +170,7 @@ public class ZFighterFlightScreen extends Screen {
 	}
 
 	/**
-	 * (0.18.55) The Starlit Lens: a pip on the world ahead for each mission zone, a ring about one still waiting, a filled pip for
+	 * (0.18.56) The Starlit Lens: a pip on the world ahead for each mission zone, a ring about one still waiting, a filled pip for
 	 * one dealt with. Pips only, no words; they come up as the world grows.
 	 */
 	private void zones(GuiGraphicsExtractor graphics, float cx, float cy, float r, float come) {

@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.55, Andy's SevTech picks: "Back home") What the far worlds send home, besides metal:
+ * (0.18.56, Andy's SevTech picks: "Back home") What the far worlds send home, besides metal:
  * <ul>
  * <li><b>Maw dust</b>, the Starlight essence's body: a wreck's first salvage leaves {@link #WRECK_DUST} of it, and the glass of the
  * black hole's rim sheds a little when broken ({@link #RIM_CHANCE}). The sky hermits of Jaymo's Kingdoms sell it.</li>

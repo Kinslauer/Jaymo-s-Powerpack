@@ -61,7 +61,7 @@ public enum TinkerMaterial {
 	FEATHER("feather", null, Trait.AERODYNAMIC),
 	LEAVES("leaves", null, Trait.SOLAR_POWERED),
 	BLAZE_ROD("blaze_rod", null, Trait.SEARING),
-	// ---- (0.18.55) back home: star metal, from fallen stars (its own block: keep it apart when merging far-world metals) ----
+	// ---- (0.18.56) back home: star metal, from fallen stars (its own block: keep it apart when merging far-world metals) ----
 	/** Melted from star metal ore (1 ore = 1 ingot), cast and forged only: light, quick, Starlit. */
 	STAR_METAL("star_metal", Stats.STAR_METAL, Trait.STARLIT, true);
 
@@ -100,7 +100,7 @@ public enum TinkerMaterial {
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
-		/** (0.18.55) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
+		/** (0.18.56) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
 		static final Stats STAR_METAL = new Stats(640, 7.5F, 2.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.1F);
 		/** (0.18.54) The first metals: iron-tier (the Cinder and Maw ones diamond-tier, for ancient debris), none beyond steel. */
 		static final Stats PALE_ALLOY = new Stats(300, 6.5F, 2.0F, Tier.IRON, 0.05F, 0.05F, 0.0F, 0.05F);

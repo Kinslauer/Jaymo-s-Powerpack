@@ -24,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.55, SevTech picks: quench-glacia) Edges. A hot piece quenched in a water cauldron that has something from a far world
+ * (0.18.56, SevTech picks: quench-glacia) Edges. A hot piece quenched in a water cauldron that has something from a far world
  * lying in it takes an edge for good: the Glacia ice-glass ({@link PodGrades}'s second world part) gives the <b>Cold Edge</b>
  * (a hit slows what it strikes), a Cinder Ember ({@link PodFuel#CINDER_EMBER}) the <b>Hot Edge</b> (a hit sets it alight). Drop the
  * item into the cauldron before the dip; it is used up by the quench. A piece takes one edge only: one that has an edge

@@ -58,7 +58,7 @@ public final class BreathCompat {
 			return 0.0;
 		}
 		if (com.jaymospowers.power.zfighter.backhome.FarFood.warded(player)) {
-			// (0.18.55) a far-world meal's ward keeps the cold off
+			// (0.18.56) a far-world meal's ward keeps the cold off
 			return 0.0;
 		}
 		double chill = CHILL * (player.level().canSeeSky(player.blockPosition().above()) ? 1.0 : SHELTERED);

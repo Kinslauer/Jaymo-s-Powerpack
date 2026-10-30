@@ -1,4 +1,4 @@
-"""Writes the assets and data of Track 7, "Back home" (SevTech picks; Powers 0.18.55, Kingdoms 0.7.385, Kitchen 0.5.38):
+"""Writes the assets and data of Track 7, "Back home" (SevTech picks; Powers 0.18.56, Kingdoms 0.7.387, Kitchen 0.5.38):
 
 * Star metal: the Tinkering material (every part and tool layer recoloured from the iron ones, its models and a star_metal case
   in every item definition), the ore block and the ingot, molten star metal, the Starlight essence's symbol;

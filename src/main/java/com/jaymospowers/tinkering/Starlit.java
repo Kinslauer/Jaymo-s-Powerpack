@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.55, SevTech picks: star-metal) The Starlit trait's second half. The first, a quicker swing, is in {@link ToolStats}. A
+ * (0.18.56, SevTech picks: star-metal) The Starlit trait's second half. The first, a quicker swing, is in {@link ToolStats}. A
  * Starlit tool swung in the air (at something, or at a block) lets its holder come down without the fall's damage: the landing
  * is soft for {@link #GUARD_TICKS} after the swing. Only while the tool is whole, and never in the creative sense of "free":
  * the guard is spent by the first fall it softens.

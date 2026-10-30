@@ -59,7 +59,7 @@ public class PodEntity extends Entity {
 	static final EntityDataAccessor<Integer> FUEL = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	/** (0.18.49) The grade of the fuel in the tank (0 = put in before grades; see {@code PodFuel}). */
 	static final EntityDataAccessor<Integer> FUEL_GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
-	/** (0.18.55) A Starlit Lens is fitted to the beacon mast (the flight screen then shows the world's mission zones). */
+	/** (0.18.56) A Starlit Lens is fitted to the beacon mast (the flight screen then shows the world's mission zones). */
 	static final EntityDataAccessor<Boolean> LENS = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.BOOLEAN);
 
 	// ---- tuning ----
@@ -225,7 +225,7 @@ public class PodEntity extends Entity {
 		if (player.isSecondaryUseActive() && PodGrades.tryGrade(server, this, held)) {
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		// (0.18.55) a Starlit Lens set in the beacon mast
+		// (0.18.56) a Starlit Lens set in the beacon mast
 		if (com.jaymospowers.power.zfighter.backhome.BackHome.fitLens(server, this, held)) {
 			return InteractionResult.SUCCESS_SERVER;
 		}
@@ -433,7 +433,7 @@ public class PodEntity extends Entity {
 		return grade() >= PodGrades.SECOND_SEAT_GRADE ? 2 : 1;
 	}
 
-	/** (0.18.55) Whether a Starlit Lens is fitted to the mast. */
+	/** (0.18.56) Whether a Starlit Lens is fitted to the mast. */
 	public boolean lens() {
 		return entityData.get(LENS);
 	}

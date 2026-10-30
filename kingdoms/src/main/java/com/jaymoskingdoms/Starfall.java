@@ -31,7 +31,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.385, Andy's SevTech picks: "Back home") Falling stars. On a rare night a light comes down out of the sky and lands in the
+ * (0.7.387, Andy's SevTech picks: "Back home") Falling stars. On a rare night a light comes down out of the sky and lands in the
  * wild within {@link #NEAR_MAX} blocks of a town: a streak of fire and sparks, a boom, and a small scorched crater with a few
  * lumps of Jaymo's Powers' star metal ore in its floor (the only place the ore is found). Everyone within {@link #TELL_RANGE}
  * blocks reads of it in the next Tidings as a bearing from the town ("a light fell toward the hills north of X").

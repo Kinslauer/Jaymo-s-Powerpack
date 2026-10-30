@@ -191,7 +191,7 @@ public final class Breath {
 				continue;
 			}
 			if (player.getVehicle() instanceof PodEntity || com.jaymospowers.power.zfighter.backhome.FarFood.breathing(player)) {
-				// inside the pod, or (0.18.55) on a far-world meal's breath
+				// inside the pod, or (0.18.56) on a far-world meal's breath
 				EXPOSED.remove(id);
 				continue;
 			}

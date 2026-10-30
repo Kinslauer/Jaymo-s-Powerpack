@@ -56,7 +56,7 @@ public final class ToolStats {
 	static final float BLOCK_RAISE_SECONDS = 0.15F, BLOCK_ANGLE = 120.0F, BLOCK_SHARE = 0.5F;
 	/** Shears (kama, scythe): mining speed on cobwebs and on wool. */
 	static final float SHEARS_COBWEB_SPEED = 15.0F, SHEARS_WOOL_SPEED = 5.0F;
-	/** (0.18.55) Starlit (star metal): the swing is this much faster, however many star metal parts there are. */
+	/** (0.18.56) Starlit (star metal): the swing is this much faster, however many star metal parts there are. */
 	static final float STARLIT_SPEED = 0.10F;
 	/** One material unit repairs this share of the tool, over the cost of its main part (a pick head: 25% a unit). */
 	static final float REPAIR_FACTOR = 0.5F;

@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.18.55) JEI's pages for what comes back from the far worlds: the Quench (a hot piece dipped in a water cauldron with a far
+ * (0.18.56) JEI's pages for what comes back from the far worlds: the Quench (a hot piece dipped in a water cauldron with a far
  * world's ice-glass or a Cinder Ember lying in it takes a Cold or a Hot Edge, {@link Edges}) and the Starlit Lens fitted to a
  * pod's beacon mast ({@link BackHome#fitLens}). Star metal's smeltery, casting and forging pages are TinkeringJei's, the lens's
  * own infusion AlchemyJei's. Only loaded by JEI (the {@code jei_mod_plugin} entrypoint), on {@link SimpleCategory}.

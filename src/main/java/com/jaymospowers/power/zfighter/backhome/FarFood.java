@@ -11,7 +11,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.18.55, SevTech picks: far-spice) The trip buffs of Jaymo's Kitchen's far-world dishes, as three plain effects the dishes give
+ * (0.18.56, SevTech picks: far-spice) The trip buffs of Jaymo's Kitchen's far-world dishes, as three plain effects the dishes give
  * (Kitchen finds them by id, {@code jaymospowers:far_breath} and the rest, so it needs no link to this class):
  * <ul>
  * <li><b>Far Breath</b>: on a world with no air, the eater breathes as if they carried a reserve ({@link #BREATH_TICKS}, a minute);</li>

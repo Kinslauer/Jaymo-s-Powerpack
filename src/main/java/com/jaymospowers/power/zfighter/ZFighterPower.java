@@ -452,7 +452,7 @@ public final class ZFighterPower implements Power {
 		com.jaymospowers.power.zfighter.pod.PodParts.init();
 		com.jaymospowers.power.zfighter.fuel.PodFuel.init();
 		com.jaymospowers.power.zfighter.breath.Breath.init();
-		// (0.18.55) back home: Maw dust, the Starlit Lens, the far-world pantry's ingredients and trip buffs
+		// (0.18.56) back home: Maw dust, the Starlit Lens, the far-world pantry's ingredients and trip buffs
 		com.jaymospowers.power.zfighter.backhome.BackHome.init();
 		ZFighterRaids.init();
 		ZFighterTournaments.init();

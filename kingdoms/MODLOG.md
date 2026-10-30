@@ -6915,7 +6915,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
   the class. No new text. Compile-checked; not seen in game.
 
-## 0.7.385: falling stars (SevTech picks) (pack 0.18.55)
+## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
 - **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
   time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
   `NEAR_MIN` to `NEAR_MAX` (90 to 300) blocks from its seat, in loaded chunks, dry, and never inside any town's claim (up to

@@ -21,7 +21,7 @@ final class WiderSmithingClient {
 			if (Wear.broken(stack)) {
 				lines.add(1, Component.translatable("tooltip.jaymospowers.broken").withStyle(ChatFormatting.RED));
 			}
-			// (0.18.55) a Cold or Hot Edge from a quench
+			// (0.18.56) a Cold or Hot Edge from a quench
 			String edge = stack.get(Edges.EDGE);
 			if (edge != null) {
 				var trait = Edges.trait(edge);

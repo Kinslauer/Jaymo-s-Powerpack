@@ -62,7 +62,7 @@ public final class StarFolk {
 	static final int REMEMBERED = 64;
 	/** Powers' tags on pods: a raiders' band, and a patrolman's visit. */
 	static final String RAIDER_TAG = "jaymospowers.raider", PATROL_TAG = "jaymospowers.patrol_pod";
-	/** (0.7.385) A hermit trades Maw dust, the grit off the Maw's rim: this many pieces for this many emeralds (Powers' item, looked up by id). */
+	/** (0.7.387) A hermit trades Maw dust, the grit off the Maw's rim: this many pieces for this many emeralds (Powers' item, looked up by id). */
 	static final int DUST_COUNT = 2, DUST_PRICE = 10;
 	static final Identifier MAW_DUST = Identifier.fromNamespaceAndPath("jaymospowers", "maw_dust");
 	/** A talk's colour (the stars' pale blue). */

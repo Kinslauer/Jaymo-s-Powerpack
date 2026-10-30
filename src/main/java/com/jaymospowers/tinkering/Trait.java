@@ -44,7 +44,7 @@ public enum Trait {
 	VEIN("vein", ChatFormatting.AQUA),
 	// (0.15.x) feather: arrows and bows fly truer
 	AERODYNAMIC("aerodynamic", ChatFormatting.WHITE),
-	// (0.18.55) back home: star metal's own trait, and the two edges a quench in a far world's cold or ember gives
+	// (0.18.56) back home: star metal's own trait, and the two edges a quench in a far world's cold or ember gives
 	STARLIT("starlit", ChatFormatting.LIGHT_PURPLE),
 	COLD_EDGE("cold_edge", ChatFormatting.AQUA),
 	HOT_EDGE("hot_edge", ChatFormatting.GOLD);

@@ -102,7 +102,7 @@ public final class Tinkering {
 	/** (Smithing) Steel: its ingot (in {@link #ALLOY_INGOTS}), nugget and block, and the crucible blend a kiln fires into it. */
 	public static Block STEEL_BLOCK;
 	public static Item STEEL_INGOT, STEEL_NUGGET, STEEL_BLEND;
-	/** (0.18.55) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
+	/** (0.18.56) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
 	public static Block STAR_METAL_ORE;
 	public static Item STAR_METAL_INGOT;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
@@ -316,7 +316,7 @@ public final class Tinkering {
 	}
 
 	/**
-	 * (0.18.55, SevTech picks: star-metal) Star metal. Its ore lies only in the craters of fallen stars; it melts in the smeltery, one
+	 * (0.18.56, SevTech picks: star-metal) Star metal. Its ore lies only in the craters of fallen stars; it melts in the smeltery, one
 	 * ore for one ingot's worth, and the ingot casts and forges like any metal. It has no grid recipe and no furnace recipe.
 	 */
 	private static void registerStarMetal() {

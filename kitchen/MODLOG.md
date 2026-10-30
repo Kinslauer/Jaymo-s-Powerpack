@@ -1244,7 +1244,7 @@ player from the same villager). Kingdoms 0.7.363 reads them to draw a Bio-built'
 carries the tags; it knows nothing of Kingdoms.
 - Compile-checked against 26.3 with javac (changed files); not seen in game.
 
-## 0.5.38: the far-world pantry (SevTech picks) (pack 0.18.55)
+## 0.5.38: the far-world pantry (SevTech picks) (pack 0.18.56)
 Four dishes from Jaymo's Powers' Verdant fruit and Glacia salt, for a trip to another world. `Step.VERDANT_FRUIT` and
 `Step.GLACIA_SALT` (in the decoy pool; absent without Powers) feed: **Verdant Fruit Salad** (board; Perfect gives `far_breath`,
 a minute more breath), **Glacia Salt Broth** (pot; `far_ward`, 10 minutes safe from Cinder heat and Glacia cold), **Frosted Fruit

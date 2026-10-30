@@ -414,7 +414,7 @@ public final class ZFighterSpace {
 		}
 		int fuel = pod.fuel();
 		int cost = player.isCreative() ? 0 : PodGrades.discount(pod.grade(), cost(index, player.level().dimension()));
-		// (0.18.55) a thrifty meal: this launch burns one less, once (the meal is used up when the trip starts)
+		// (0.18.56) a thrifty meal: this launch burns one less, once (the meal is used up when the trip starts)
 		boolean thrifty = cost > 0 && com.jaymospowers.power.zfighter.backhome.FarFood.thrifty(player);
 		if (thrifty) {
 			cost--;

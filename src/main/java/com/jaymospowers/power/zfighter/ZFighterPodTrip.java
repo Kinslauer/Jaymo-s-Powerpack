@@ -111,7 +111,7 @@ public final class ZFighterPodTrip {
 		/** (0.18.50) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
 		boolean finished;
 		int grade;
-		/** (0.18.55) A Starlit Lens on the mast, carried to the pod that lands. */
+		/** (0.18.56) A Starlit Lens on the mast, carried to the pod that lands. */
 		boolean lens;
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;

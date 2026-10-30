@@ -184,7 +184,7 @@ public final class ZFighterSpaceMissions {
 	}
 
 	/**
-	 * (0.18.55) The mission zones of destination {@code dest} as a pod's Starlit Lens shows them on the flight screen: one for each
+	 * (0.18.56) The mission zones of destination {@code dest} as a pod's Starlit Lens shows them on the flight screen: one for each
 	 * captain or champion, then one for the boss or the flag (1 where it is dealt with, 0 where it still waits); empty for a world with
 	 * no mission.
 	 */
