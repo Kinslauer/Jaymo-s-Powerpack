@@ -6813,4 +6813,7 @@ find one living there."
   whaler holds a harpoon, the moon a stone pickaxe, no picture-in-hand fallback.
 - "should just show a random divine born instead of the totem in hand of your current char": the afterlife road (a road
   that makes another blood) shows a stand-in of that blood in a random look instead of you.
+- "make this a ki ghost instead of the character, implying what is all within us": the "Let fate decide" road shows
+  `KiGhost`, a flat figure of layered pale-blue ki light (player proportions, legs fading to a tail, bright eyes,
+  breathing, wisps rising). Preview: project files art-overhaul/ki-ghost/ki-ghost-preview.png.
 - Compile-checked. Not seen in game.

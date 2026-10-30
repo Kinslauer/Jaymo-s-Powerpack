@@ -1529,6 +1529,12 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
+		// (0.7.362) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
+		// no one in particular, only the ki every one of them holds
+		if (s.question == Question.ROAD && here != null && here.start() == LifeStory.Start.FATE) {
+			KiGhost.draw(graphics, x0, y0, x1, y1);
+			return;
+		}
 		List<String> scenes = new ArrayList<>();
 		for (Question q : Question.values()) {
 			if (!q.asked()) {
