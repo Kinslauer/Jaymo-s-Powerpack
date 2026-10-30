@@ -59,7 +59,7 @@ public final class Drifters {
 	static final float TAVERN_CHANCE = 0.6F;
 	/** On a road: how many route points from the settlement's end they stand (at least, and up to this much more). */
 	static final int ROAD_MIN = 24, ROAD_MORE = 40;
-	/** Emeralds to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the hearts they take to you. */
+	/** Emeralds to hire one (MCA's is 5 for a short contract), how long they're hired for (ticks; MCA's long contract), the least hearts they take to you ({@link #keptHearts} raises it to what MCA needs to keep them). */
 	static final int HIRE_COST = 2, HIRED_TICKS = 168000, HIRE_HEARTS = 30;
 	/** What they start with (a villager's is 20 and 1). */
 	static final double HEALTH = 8.0, DAMAGE = 1.0;
@@ -142,8 +142,12 @@ public final class Drifters {
 	/** Drifters nobody took on move along; a player who comes close to one hears their pitch. */
 	private static void look(ServerLevel level, long now) {
 		for (VillagerEntityMCA v : new ArrayList<>(LOADED)) {
-			if (!v.isAlive() || v.level() != level) {
+			if (!v.isAlive()) {
 				LOADED.remove(v);
+				continue;
+			}
+			if (v.level() != level) {
+				// (in another dimension: left for its own pass)
 				continue;
 			}
 			if (Learners.hired(v)) {
@@ -211,6 +215,14 @@ public final class Drifters {
 		return level.isPositionEntityTicking(p) ? Construction.standable(level, p.above(), 2) : null;
 	}
 
+	/**
+	 * Hearts a hire gives: at least MCA's marriage requirement, since at the contract's end MCA keeps a mercenary only if
+	 * {@code nextInt(requirement) < hearts} (and discards them otherwise), and a hired drifter is always to be kept.
+	 */
+	static int keptHearts() {
+		return Math.max(HIRE_HEARTS, net.conczin.mca.Config.getInstance().marriageHeartsRequirement);
+	}
+
 	/** {@code v} starts out thin and weak. */
 	static void weaken(VillagerEntityMCA v) {
 		AttributeInstance health = v.getAttribute(Attributes.MAX_HEALTH), damage = v.getAttribute(Attributes.ATTACK_DAMAGE);
@@ -235,9 +247,18 @@ public final class Drifters {
 			return InteractionResult.SUCCESS;
 		}
 		Purse.take(sp, Items.EMERALD, HIRE_COST);
+		String rags = v.getClothes();
 		v.makeMercenary();
+		// (making them a mercenary dresses them again, and so does the contract's end: keep their rags)
+		v.setClothes(rags);
+		v.setClothingLocked(true);
 		v.setDespawnDelay(HIRED_TICKS);
-		v.getVillagerBrain().getMemoriesForPlayer(sp).modHearts(HIRE_HEARTS);
+		net.conczin.mca.entity.ai.Memories memories = v.getVillagerBrain().getMemoriesForPlayer(sp);
+		memories.setHearts(Math.max(memories.getHearts(), keptHearts()));
+		// (hired, they never go back to the drifter pool: no cap, no moving along)
+		v.removeAttached(DRIFTER);
+		LOADED.remove(v);
+		PITCHED.remove(v.getUUID());
 		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.drifter.hired", v.getName(), HIRE_COST).withStyle(ChatFormatting.GRAY), true);
 		Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.hired." + server.getRandom().nextInt(LINES)), Speech.WHITE);
 		return InteractionResult.SUCCESS;
