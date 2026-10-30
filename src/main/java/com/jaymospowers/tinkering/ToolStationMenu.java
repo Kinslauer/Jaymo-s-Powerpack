@@ -306,6 +306,8 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 	private @Nullable ItemStack assembleWeapon() {
 		int head = -1;
 		List<PartType> others = new ArrayList<>();
+		// (0.18.14) the plain items beside the head (a Sealed Helm's glass block)
+		List<Item> loose = new ArrayList<>();
 		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);
 			if (stack.isEmpty()) {
@@ -320,10 +322,19 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				others.add(part.part);
 			} else {
 				others.add(null);
+				loose.add(stack.getItem());
 			}
 		}
 		if (head == -1) {
 			return null;
+		}
+		Item extra = ((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().extra;
+		if (extra != null) {
+			int at = loose.indexOf(extra);
+			if (at < 0) {
+				return ItemStack.EMPTY;
+			}
+			others.remove(null);
 		}
 		List<PartType> needed = new ArrayList<>(((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().parts);
 		ItemStack out = SorasLineage.carry(inputs.getItem(head), WeaponPartItem.weapon(inputs.getItem(head)));

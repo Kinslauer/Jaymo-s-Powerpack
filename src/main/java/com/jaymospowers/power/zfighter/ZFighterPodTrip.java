@@ -93,6 +93,8 @@ public final class ZFighterPodTrip {
 		final int dest;
 		final int fuelLeft;
 		final int fuelBefore;
+		/** (0.18.14) The grade of the fuel in the tank, carried to the pod that lands. */
+		int fuelGrade;
 		final ResourceKey<Level> from;
 		final BlockPos origin;
 		Phase phase = Phase.COUNTDOWN;
@@ -184,6 +186,7 @@ public final class ZFighterPodTrip {
 		ServerLevel level = player.level();
 		BlockPos at = pod.blockPosition();
 		Trip trip = new Trip(dest, fuelLeft, fuelBefore, level.dimension(), at);
+		trip.fuelGrade = pod.fuelGrade();
 		trip.filled = pod.filled();
 		trip.damaged = pod.damagedMask();
 		trip.pod = pod;
@@ -199,6 +202,7 @@ public final class ZFighterPodTrip {
 	/** The pod you ride, carrying the trip's parts, in the air at {@code at} (held up, tagged for the trip). */
 	private static PodEntity pod(ServerLevel level, Vec3 at, float yaw, Trip trip) {
 		PodEntity pod = PodEntity.spawn(level, at, false, trip.fuelBefore);
+		pod.setFuelGrade(trip.fuelGrade);
 		pod.setParts(trip.filled, trip.damaged);
 		pod.setYRot(yaw);
 		pod.setHovering(true);
@@ -485,6 +489,7 @@ public final class ZFighterPodTrip {
 	private static PodEntity stand(ServerLevel level, BlockPos ground, Trip trip, int fuel) {
 		Vec3 at = room(level, ground);
 		PodEntity pod = PodEntity.spawn(level, at, false, fuel);
+		pod.setFuelGrade(trip.fuelGrade);
 		pod.setParts(trip.filled, trip.damaged);
 		pod.setFuel(fuel);
 		return pod;
