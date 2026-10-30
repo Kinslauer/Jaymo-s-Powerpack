@@ -1,0 +1,11 @@
+{
+	"technique.jaymospowers.zfighter.flying_sword": "Flying Sword",
+	"technique.jaymospowers.zfighter.eight_sign": "Eight-Sign Circle",
+	"message.jaymospowers.zfighter_divine.wait": "%s: %ss",
+	"message.jaymospowers.zfighter_flying_sword.none": "Hold a sword or a spear to send it flying.",
+	"message.jaymospowers.zfighter_flying_sword.out": "Your blade flies on its own.",
+	"message.jaymospowers.zfighter_eight_sign.ground": "The signs can only be drawn on the ground.",
+	"message.jaymospowers.zfighter_eight_sign.open": "The Eight Signs are drawn.",
+	"message.jaymospowers.zfighter_eight_sign.sealed": "The Eight Signs bind your power.",
+	"entity.jaymospowers.zfighter_flying_sword": "Flying Sword"
+}

@@ -799,6 +799,11 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
+		// (0.18.48) a Divine-born's sneak+G (Flying Sword) and sneak+B (Eight-Sign Circle)
+		if (down && player.isShiftKeyDown() && ZFighterDivineMoves.key(player, live, key)) {
+			sync(player, live, maxKi(player));
+			return;
+		}
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down && player.getFoodData().getFoodLevel() <= 0 && !player.isCreative()) {

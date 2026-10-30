@@ -3913,6 +3913,31 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
 
+- **0.18.48, Weapon Forms patch 6, part A: Flying Sword, Eight-Sign Circle, Comet Ram, Gate Ricochet (Kingdoms 0.7.386):**
+  - Divine-born (Kingdoms heritage `divine`) get two lineage moves on sneak taps, so no existing key changes for anyone else:
+    sneak+G = Flying Sword, sneak+B = Eight-Sign Circle (`ZFighterDivineMoves`, hooked ahead of the ordinary G and B in
+    `ZFighterPower.onKey`; a sneaking Divine-born's G or B does these in place of the ordinary move). New `zfighter/divine/` package.
+  - **Flying Sword** (20 ki, 12 s wait): the sword or spear (`ItemTags.SWORDS`/`SPEARS`) in the main hand leaves it as a
+    `FlyingSword` entity (a `Projectile` drawn as the item by `FlyingSwordRenderer`) and fights for 5 s: circles the lock-on target,
+    else what you last struck, else the nearest `Enemy` within 16 blocks, darting in to strike every 8 ticks for 0.9x your attack
+    damage with the blade in hand (min 3). Then it flies back and settles in its slot. Never lost: handed back (slot, else inventory,
+    else dropped) when caught, on logout (`recall`), death, a world change, `/kill`; saved with the world and dropped if it loads
+    ownerless. Fall rules untouched.
+  - **Eight-Sign Circle** (35 ki, 20 s wait, on the ground): a ring of eight signs (gold motes, light columns) of radius 6.5 for 8 s.
+    Anyone but the caster inside is sealed while inside and 1.5 s after. Players: the ring is a `Powers.addSilencer`, so every
+    ability, mode and ultimate press is refused server-side. Anything else: `EightSignCircle.sealed(Entity)` (public static).
+    Kingdoms: `PowersCompat.sealed(Entity)` reads it by reflection and `Forms.fire`/`Forms.perform` refuse while sealed.
+  - **Comet Ram** (Gravity, sneak+B; `GravityCometRam`; 12 s wait, 3 exhaustion): 22 ticks driven the way you looked (bending a
+    little toward where you look), speeding up to 2 blocks a tick; creatures in the path (up to 6) are caught up for 3 damage and
+    carried ahead of you; at a wall, the ground or the end of the run they are slammed down (9 + up to 3 damage), the rest within
+    4 blocks hurt for 5 and thrown, debris and shake. A crash with nothing carried hurts you by speed squared (1.5x, max 8). No
+    fall-damage reset (a ram ending in the air leaves you to fall). Sneak+B used to start Crush's charge; Inversion (R held) still wins.
+  - **Gate Ricochet** (Arsenal, Void Gates; `ArsenalRicochet`, no key): your own projectile (arrow, trident, javelin, cannonball,
+    flying Barrage blade) whose path passes within 1.7 blocks of one of your gates comes out of the next gate in your list in that
+    world, turned toward the lock-on, else what you last struck, else the nearest foe within 28 blocks of that gate (else straight
+    on), at least 1.2 blocks a tick; it may pass on through up to 3 gates. Needs two gates in the same world.
+  - Lang: new `lang/parts/zfighter_divine.json`; key help appended in `zfighter.json` (G, B), `gravity.json` (B) and `arsenal.json` (V, corrupted).
+  - Compile-checked; not seen in game.
 - **0.18.47, Fang Gauntlets and the Clockwork Hornet Hive (Weapon Forms patch 3; Kingdoms 0.7.383):**
   - Fang Gauntlets (`jaymospowers:fang_gauntlets`): claws for Kingdoms' Claw forms (in its `form_claws` tag). Forged only,
     as the pack's iron-tool rule says: a new `WeaponParts` kind (Fang Blades, three ingots, with a Tool Binding at the Tool

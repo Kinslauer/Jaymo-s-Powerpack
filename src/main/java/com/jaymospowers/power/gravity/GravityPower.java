@@ -493,6 +493,7 @@ public final class GravityPower implements Power {
 			GravityRockFlight.stop(handler.player);
 			GravitySkyfall.land(handler.player);
 			GravityForward.forget(handler.player);
+			GravityCometRam.forget(handler.player);
 			GravityWalk.stop(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -511,6 +512,7 @@ public final class GravityPower implements Power {
 			GravityOrbit.clear();
 			GravitySideFall.clear();
 			GravityForward.clear();
+			GravityCometRam.clear();
 			GravityWalk.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
@@ -585,6 +587,7 @@ public final class GravityPower implements Power {
 		GravityWalk.stop(player);
 		GravityRockFlight.stop(player);
 		GravityForward.stop(player);
+		GravityCometRam.stop(player);
 	}
 
 	@Override
@@ -595,6 +598,7 @@ public final class GravityPower implements Power {
 		}
 		setWeightless(player, false);
 		GravityForward.forget(player);
+		GravityCometRam.forget(player);
 		GravityWalk.stop(player);
 		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
@@ -617,7 +621,7 @@ public final class GravityPower implements Power {
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player) || GravityForward.falling(player)
-			|| GravityWalk.walking(player);
+			|| GravityCometRam.ramming(player) || GravityWalk.walking(player);
 	}
 
 	// ---------------------------------------------------------------- keys
@@ -695,6 +699,9 @@ public final class GravityPower implements Power {
 						int cooldown = GravityGutPunch.COOLDOWN;
 						player.setAttached(COOLDOWNS, cooldowns(player).withCrush(player.level().getGameTime() + cooldown, cooldown));
 						state.crushFrom = -1;
+					} else if (player.isShiftKeyDown() && !state.chunkHold && state.ripFrom < 0) {
+						// (0.18.48) sneak+B: Comet Ram (wrap yourself in gravity and ram forward, carrying what's in the way)
+						GravityCometRam.start(player);
 					} else if (ready(player, CRUSH) || ownWell(player) != null) {
 						state.crushFrom = player.level().getGameTime();
 						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.5F, 1.6F);
@@ -1761,6 +1768,7 @@ public final class GravityPower implements Power {
 				setWeightless(player, false);
 			}
 			GravityForward.stop(player);
+			GravityCometRam.stop(player);
 			if (player.getAttached(ROCK_FLIGHT) != null) {
 				GravityRockFlight.stop(player);
 			}
@@ -1819,6 +1827,7 @@ public final class GravityPower implements Power {
 			crushZone(player, state);
 		}
 		GravityForward.tick(player);
+		GravityCometRam.tick(player);
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
 			// no fall counts while weightless: only what you fall after it ends

@@ -8023,6 +8023,7 @@
 	"message.jaymoskingdoms.form.weapon": "%s wants a different weapon in hand.",
 	"message.jaymoskingdoms.form.wait": "%s: %ss",
 	"message.jaymoskingdoms.form.masterstroke": "A masterstroke needs a fallen foe before you.",
+	"message.jaymoskingdoms.form.sealed": "The Eight Signs bind your forms.",
 	"message.jaymoskingdoms.form.mounted": "The lance is couched from the saddle: mount up first.",
 	"message.jaymoskingdoms.form.couched": "Lance couched. Ride at them!",
 	"message.jaymoskingdoms.form.pinned": "Pinned! Press again to tug the spear back.",

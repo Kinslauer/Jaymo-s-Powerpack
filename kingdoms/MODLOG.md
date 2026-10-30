@@ -6952,3 +6952,9 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **School masks**: five head-slot items `school_mask_<school>` (art by `tools/gen_school_masks.py`), in the combat tab, given at mastery.
   Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
 - Compile-checked; not seen in game.
+
+## 0.7.386: Weapon Forms, patch 6 (Powers side): the Eight-Sign Circle seals forms
+- `PowersCompat.sealed(Entity)` calls Powers' `EightSignCircle.sealed(Entity)` by reflection (false without Powers). `forms/Forms.fire` refuses
+  with "The Eight Signs bind your forms." while the player stands in a Divine-born's ring (and after the cooldown is spent, no
+  hunger), and `Forms.perform` does nothing if a wind-up runs on into a ring. Schooled guards/duels are untouched.
+- Compile-checked; not seen in game.
