@@ -82,7 +82,7 @@ public final class ZFighterPodTrip {
 	/** Where on a far world the pod may come down: within this many blocks of the middle, tried this many times. */
 	static final int LAND_RANGE = 360, LAND_TRIES = 40;
 
-	/** (0.18.17) For the pod package: tells Kingdoms {@code player} did a deed that opens a world tier (see {@code ZFighterKingdoms.deed}). */
+	/** (0.18.22) For the pod package: tells Kingdoms {@code player} did a deed that opens a world tier (see {@code ZFighterKingdoms.deed}). */
 	public static void deed(ServerPlayer player, String deed) {
 		ZFighterKingdoms.deed(player, deed);
 	}
@@ -541,7 +541,7 @@ public final class ZFighterPodTrip {
 		}
 		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
 		if (trip.dest == ZFighterSpace.HOME_INDEX) {
-			// (0.18.17) a pod flown out and landed home again: the deed that opens Dread
+			// (0.18.22) a pod flown out and landed home again: the deed that opens Dread
 			ZFighterKingdoms.deed(player, "pod_flight");
 		}
 		ZFighterSpace.arrived(player, dest);
