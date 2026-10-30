@@ -427,6 +427,12 @@ public final class ZFighterPodTrip {
 				trip.to = overworld.dimension();
 				trip.ground = groundAt(overworld, overworld.getRespawnData().pos());
 			}
+			// (0.18.54) a landing yard within reach of the home ground: down on a free pad
+			ServerLevel homeLevel = trip.to == null ? null : server.getLevel(trip.to);
+			BlockPos pad = homeLevel == null || trip.ground == null ? null : ZFighterYard.freePad(homeLevel, trip.ground);
+			if (pad != null) {
+				trip.ground = pad;
+			}
 			return;
 		}
 		ZFighterSpace.Dest dest = ZFighterSpace.DESTS[trip.dest];
@@ -544,6 +550,8 @@ public final class ZFighterPodTrip {
 			// (0.18.52) a pod flown out and landed home again: the deed that opens Dread
 			ZFighterKingdoms.deed(player, "pod_flight");
 		}
+		// (0.18.54) a Pilot is paid for a trip with a passenger or a parcel aboard (Kingdoms' Careers)
+		ZFighterKingdoms.flown(player, guest, level, at);
 		ZFighterSpace.arrived(player, dest);
 		if (guest != null) {
 			ZFighterSpace.arrived(guest, dest);

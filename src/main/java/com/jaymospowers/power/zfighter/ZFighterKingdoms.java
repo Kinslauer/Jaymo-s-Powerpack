@@ -45,6 +45,13 @@ final class ZFighterKingdoms {
 	private static Method NEAREST_MONOLITH;
 	/** (0.18.52) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
+	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
+	private static Method TIER_OPEN;
+	private static Object[] TIERS;
+	/** (0.18.54) Kingdoms' LandingYard: padsNear(level, pos, range), nameNear(level, pos, range), touched(level, pos). */
+	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED;
+	/** (0.18.54) Kingdoms' Careers.flown(pilot, passenger, level, pos) and Careers.firstFind(player, world, kind). */
+	private static Method FLOWN, FIRST_FIND;
 	private static Object[] STATS;
 	private static int STAT_MAX;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
@@ -112,6 +119,28 @@ final class ZFighterKingdoms {
 				DEED = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("deed", ServerPlayer.class, String.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				DEED = null;
+			}
+			try {
+				Class<?> tier = Class.forName("com.jaymoskingdoms.WorldTiers$Tier");
+				TIER_OPEN = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("open", net.minecraft.world.entity.player.Player.class, tier);
+				TIERS = tier.getEnumConstants();
+			} catch (ReflectiveOperationException | LinkageError e) {
+				TIER_OPEN = null;
+			}
+			try {
+				Class<?> yard = Class.forName("com.jaymoskingdoms.LandingYard");
+				YARD_PADS = yard.getMethod("padsNear", ServerLevel.class, BlockPos.class, double.class);
+				YARD_NAME = yard.getMethod("nameNear", ServerLevel.class, BlockPos.class, double.class);
+				YARD_TOUCHED = yard.getMethod("touched", ServerLevel.class, BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				YARD_PADS = null;
+			}
+			try {
+				Class<?> careers = Class.forName("com.jaymoskingdoms.Careers");
+				FLOWN = careers.getMethod("flown", ServerPlayer.class, ServerPlayer.class, ServerLevel.class, BlockPos.class);
+				FIRST_FIND = careers.getMethod("firstFind", ServerPlayer.class, String.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				FLOWN = null;
 			}
 			try {
 				TRAINED = Class.forName("com.jaymoskingdoms.ClassPerks").getMethod("trainedWith", ServerPlayer.class, net.minecraft.world.item.ItemStack.class);
@@ -182,6 +211,92 @@ final class ZFighterKingdoms {
 			DEED.invoke(null, player, deed);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			DEED = null;
+		}
+	}
+
+	/**
+	 * (0.18.54, Andy's SevTech picks: "Ranks Follow Rungs") The highest world tier open to {@code player} through his deeds, from 0
+	 * (Hearth), or -1 without Kingdoms (the Patrol then goes by power alone).
+	 */
+	static int openTier(net.minecraft.world.entity.player.Player player) {
+		if (TIER_OPEN == null || TIERS == null) {
+			return -1;
+		}
+		try {
+			int top = 0;
+			for (int i = 0; i < TIERS.length; i++) {
+				if ((boolean)TIER_OPEN.invoke(null, player, TIERS[i])) {
+					top = i;
+				}
+			}
+			return top;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			TIER_OPEN = null;
+			return -1;
+		}
+	}
+
+	/**
+	 * (0.18.54) A Landing Yard within {@code range} of {@code from}: its beacon post first, then the block to stand a pod on for
+	 * each pad. Empty without Kingdoms or a yard.
+	 */
+	@SuppressWarnings("unchecked")
+	static List<BlockPos> yardPads(ServerLevel level, BlockPos from, double range) {
+		if (YARD_PADS == null) {
+			return List.of();
+		}
+		try {
+			return (List<BlockPos>)YARD_PADS.invoke(null, level, from, range);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return List.of();
+		}
+	}
+
+	/** (0.18.54) The name of the town whose yard is within {@code range} of {@code from}, or "". */
+	static String yardName(ServerLevel level, BlockPos from, double range) {
+		if (YARD_NAME == null) {
+			return "";
+		}
+		try {
+			return (String)YARD_NAME.invoke(null, level, from, range);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return "";
+		}
+	}
+
+	/** (0.18.54) A patrol pod stood down at {@code at}: the yard's town is named in the next Tidings. */
+	static void yardTouched(ServerLevel level, BlockPos at) {
+		if (YARD_TOUCHED == null) {
+			return;
+		}
+		try {
+			YARD_TOUCHED.invoke(null, level, at);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			YARD_TOUCHED = null;
+		}
+	}
+
+	/** (0.18.54) {@code pilot} flew a trip and came down at {@code at} (with {@code passenger} in the second seat, or null): a Pilot's work. */
+	static void flown(ServerPlayer pilot, @Nullable ServerPlayer passenger, ServerLevel level, BlockPos at) {
+		if (FLOWN == null) {
+			return;
+		}
+		try {
+			FLOWN.invoke(null, pilot, passenger, level, at);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			FLOWN = null;
+		}
+	}
+
+	/** (0.18.54) A first find ({@link Prospecting#found}): a Prospector's work. */
+	static void firstFind(ServerPlayer player, String world, String kind) {
+		if (FIRST_FIND == null) {
+			return;
+		}
+		try {
+			FIRST_FIND.invoke(null, player, world, kind);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			FIRST_FIND = null;
 		}
 	}
 
