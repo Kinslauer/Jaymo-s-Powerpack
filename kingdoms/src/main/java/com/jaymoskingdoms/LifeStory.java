@@ -549,9 +549,10 @@ public final class LifeStory {
 	 * and {@code roadRealm}: the realm named for a noble family and for a banished or sworn start (-1: none);
 	 * {@code look}: the heritage's look (0: its first); {@code option}: a Mage's first spell or a Sorcerer's element (-1);
 	 * {@code heritage} and {@code cls}: (Andy: "allow a player override AFTER the result") a heritage or class ordinal
-	 * picked over the story's on its last page (-1: the story's).
+	 * picked over the story's on its last page (-1: the story's). (0.7.420) {@code flaws}: the flaws taken, a bit each
+	 * ({@link Flaws.Flaw#bit}); {@code switches}: the hard-road options and start from nothing ({@link Flaws#WARY} and the rest).
 	 */
-	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls, int gender) implements CustomPacketPayload {
+	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls, int gender, int flaws, int switches) implements CustomPacketPayload {
 		public static final Type<Live> TYPE = new Type<>(JaymosKingdoms.id("story_live"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Live> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -566,6 +567,8 @@ public final class LifeStory {
 				buf.writeVarInt(p.heritage + 1);
 				buf.writeVarInt(p.cls + 1);
 				buf.writeVarInt(p.gender + 1);
+				buf.writeVarInt(p.flaws);
+				buf.writeVarInt(p.switches);
 			}, buf -> {
 				int n = Math.min(buf.readVarInt(), Question.values().length);
 				List<Integer> answers = new ArrayList<>(n);
@@ -573,7 +576,7 @@ public final class LifeStory {
 					answers.add(buf.readVarInt() - 1);
 				}
 				return new Live(List.copyOf(answers), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt() - 1,
-					buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt() - 1);
+					buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt());
 			});
 
 		@Override
@@ -659,6 +662,15 @@ public final class LifeStory {
 
 	/** Free points in {@code stat} {@code player}'s story gave (who raised them, what they did as a child). */
 	public static int points(Player player, Stats.Stat stat) {
+		// (0.7.420) a life from nothing gave the story's up; a finished aim pays them back double
+		int n = Flaws.gaveUp(player) ? Flaws.repaid(player, stat.ordinal()) : storyPoints(player, stat);
+		// (0.7.418) the free point a finished aim gave
+		n += LifeAims.bonus(player, stat);
+		return n;
+	}
+
+	/** (0.7.420) What the story itself gave in {@code stat} (who raised them, what they did as a child, Rustfall's weight). */
+	static int storyPoints(Player player, Stats.Stat stat) {
 		int n = 0;
 		for (Question q : List.of(Question.RAISED, Question.CHILDHOOD)) {
 			Answer a = answer(player, q);
@@ -670,8 +682,6 @@ public final class LifeStory {
 		if (stat == RUSTFALL_STAT && startedAs(player, Start.RUSTFALL)) {
 			n++;
 		}
-		// (0.7.418) the free point a finished aim gave
-		n += LifeAims.bonus(player, stat);
 		return n;
 	}
 
@@ -683,6 +693,12 @@ public final class LifeStory {
 
 	/** Points to spend as they like that {@code player}'s story gave (a foundling's). */
 	public static int freePoints(Player player) {
+		// (0.7.420) the flaws taken pay a free point each; a life from nothing gave the foundling's up, to be paid back double
+		return (Flaws.gaveUp(player) ? Flaws.repaid(player, Flaws.freeSlot()) : storyFreePoints(player)) + Flaws.points(player);
+	}
+
+	/** (0.7.420) The free point the story itself gave (a foundling's): 1 or 0. */
+	static int storyFreePoints(Player player) {
 		Answer a = answer(player, Question.RAISED);
 		return a != null && a.freePoint ? 1 : 0;
 	}
@@ -815,6 +831,10 @@ public final class LifeStory {
 			|| road != null && !road.offered()) {
 			return;
 		}
+		// (0.7.420) at most two flaws, known ids only: the client is not trusted with that
+		if (!Flaws.valid(live.flaws(), live.switches())) {
+			return;
+		}
 		// (0.7.419) a locked road is only for a deed done in this world or a past that opens it: the client is not trusted with that
 		if (road != null && !RoadLocks.allowed(server, player, road.start, q -> {
 			Answer a = at(q, live.answers());
@@ -856,6 +876,8 @@ public final class LifeStory {
 		}
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road == null ? "" : road.key));
+		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
+		Flaws.choose(player, live.flaws(), live.switches());
 		Heritage.set(player, heritage);
 		HeritageVariants.choose(player, heritage, live.look());
 		Classes.set(player, cls, option);
@@ -926,6 +948,10 @@ public final class LifeStory {
 		List<String> story = new ArrayList<>(of(player));
 		story.set(Question.ROAD.ordinal(), road.key);
 		player.setAttached(STORY, List.copyOf(story));
+		// (0.7.420) a road told after the creator may add story points of its own (Rustfall's), which a life from nothing gives up too
+		if (road.start == Start.RUSTFALL) {
+			Flaws.giveUpMore(player, RUSTFALL_STAT, 1);
+		}
 		String power = player.getAttached(CALLING);
 		player.removeAttached(CALLING);
 		setOut(player, road, roadRealm, power == null ? "" : power);
@@ -1019,7 +1045,13 @@ public final class LifeStory {
 					Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
 			}
 		}
-		kit(player, start, landed, raised, cls, option, random);
+		// (0.7.420) nothing but rags: no kit lines at all (the aim's Journal page below still comes)
+		RAGS_ONLY = Flaws.rags(player);
+		try {
+			kit(player, start, landed, raised, cls, option, random);
+		} finally {
+			RAGS_ONLY = false;
+		}
 		// (0.7.246) where it set them down, for the folk about it to talk of (StoryTalk)
 		Hunt hunt = HUNTS.get(player.getUUID());
 		StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
@@ -1027,6 +1059,8 @@ public final class LifeStory {
 			: (landed == Start.BANISHED || landed == Start.SWORN || landed == Start.SENTENCED || landed == Start.EVICTED) && roadRealm != null ? roadRealm.id() : -1);
 		// (0.7.418) and the one thing they mean to do (a page in their pack, LifeAims)
 		LifeAims.begin(player, landed, roadRealm);
+		// (0.7.420) everyone is wary, a price on their head: once, as the road lands
+		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
 		if (start == Start.TIMELOST) {
@@ -1695,7 +1729,7 @@ public final class LifeStory {
 
 	/** Puts on armour (and a shield in the off hand) where that slot is free; anything else goes in the pack. */
 	private static void equip(ServerPlayer player, ItemStack stack) {
-		if (stack.isEmpty()) {
+		if (stack.isEmpty() || RAGS_ONLY) {
 			return;
 		}
 		Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
@@ -1947,7 +1981,13 @@ public final class LifeStory {
 		}
 	}
 
+	/** (0.7.420) Set while the road's kit is made for someone who chose nothing but rags: nothing is given or put on. */
+	private static boolean RAGS_ONLY;
+
 	private static void give(ServerPlayer player, ItemStack stack) {
+		if (RAGS_ONLY) {
+			return;
+		}
 		player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
 	}
 
@@ -1981,6 +2021,7 @@ public final class LifeStory {
 		StoryHard.clear(p);
 		StoryKit.clear(p);
 		LifeAims.clear(p);
+		Flaws.clear(p);
 		DEPARTED.remove(p.getUUID());
 		ROAD_ASKED.remove(p.getUUID());
 		LANDINGS.remove(p.getUUID());

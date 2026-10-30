@@ -157,6 +157,10 @@ public final class LifeAims {
 		AIMS.put(Start.MAW, new Aim(Kind.SURVIVE, 7, Stats.Stat.MIGHT));
 		AIMS.put(Start.DEMON, new Aim(Kind.SURVIVE, 10, Stats.Stat.FINESSE));
 		AIMS.put(Start.AFTERLIFE, new Aim(Kind.SURVIVE, 7, Stats.Stat.WITS));
+		// (0.7.420) the roads of patch 3 (the lab, the bench, the moon's mark), so every road has an aim to pay back a start from nothing
+		AIMS.put(Start.LAB, new Aim(Kind.SETTLE, 1, Stats.Stat.FINESSE));
+		AIMS.put(Start.ANDROID, new Aim(Kind.MONSTERS, 15, Stats.Stat.MIGHT));
+		AIMS.put(Start.MOON_CURSED, new Aim(Kind.SURVIVE, 10, Stats.Stat.GRIT));
 	}
 
 	// ---- state ---------------------------------------------------------------------------------------------------------
@@ -328,6 +332,12 @@ public final class LifeAims {
 		}
 		Aim aim = aimOf(life);
 		return aim != null && aim.perk() == stat ? 1 : 0;
+	}
+
+	/** (0.7.420) Whether {@code player} has finished their life's aim (what pays back the points a life from nothing gave up). */
+	public static boolean finished(net.minecraft.world.entity.player.Player player) {
+		Life life = player.getAttached(LIFE_AIM);
+		return life != null && life.done();
 	}
 
 	// ---- counting ------------------------------------------------------------------------------------------------------

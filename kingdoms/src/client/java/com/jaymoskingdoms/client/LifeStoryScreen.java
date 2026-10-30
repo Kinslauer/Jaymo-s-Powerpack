@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.Flaws;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.LifeStory;
@@ -102,6 +103,8 @@ final class LifeStoryScreen extends Screen {
 		int raisedRealm = -1, roadRealm = -1, look = -1, option = -1, heritage = -1, cls = -1, step;
 		/** (0.7.304) 0 male, 1 female, -1 not picked yet. */
 		int gender = -1;
+		/** (0.7.420) The flaws taken (a bit each, {@link Flaws.Flaw#bit}) and the hard-road switches ({@link Flaws#WARY} and the rest). */
+		int flaws, switches;
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -693,7 +696,8 @@ final class LifeStoryScreen extends Screen {
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
-			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender));
+			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender,
+			draft.flaws, draft.switches));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
 	}
@@ -787,6 +791,13 @@ final class LifeStoryScreen extends Screen {
 			int chip = chipAt(mx, my);
 			if (chip >= 0) {
 				draft.option = chip;
+				click();
+				return true;
+			}
+			// (0.7.420) a flaw or a switch of a harder life
+			int choice = choiceAt(mx, my);
+			if (choice >= 0 && event.button() == 0) {
+				flip(choice);
 				click();
 				return true;
 			}
@@ -1305,8 +1316,107 @@ final class LifeStoryScreen extends Screen {
 		} else {
 			this.chipsTop = -1;
 		}
+		y = choices(graphics, mouseX, mouseY, y, px, pw, textW);
 		this.contentH = y + this.scroll - startY + 4;
 		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, this.contentH - this.viewH));
+	}
+
+	// ---- a harder life (0.7.420) --------------------------------------------------------------------------------------
+
+	/** The switches shown under the flaws, as {bit, key}. */
+	private static final String[] SWITCH_KEYS = {"wary", "hunted", "rags", "nothing"};
+	private static final int[] SWITCH_BITS = {Flaws.WARY, Flaws.HUNTED, Flaws.RAGS, Flaws.NOTHING};
+	/** (0.7.420) The choice rows as last laid out: {unscrolled y, height, index} (0..3 a flaw, 4..7 a switch). */
+	private final List<int[]> choiceRows = new ArrayList<>();
+
+	/** The effect line of choice {@code i}, with its numbers. */
+	private static Component effect(int i) {
+		return switch (i) {
+			case 0 -> Component.translatable("gui.jaymoskingdoms.story.flaw.light_sleeper.fx", (int)Flaws.SLEEPER_RANGE);
+			case 1 -> Component.translatable("gui.jaymoskingdoms.story.flaw.glass_jaw.fx", Math.round((Flaws.JAW_TAKEN - 1.0F) * 100.0F));
+			case 2 -> Component.translatable("gui.jaymoskingdoms.story.flaw.poor_swimmer.fx", Math.round(-Flaws.SWIM_SLOW * 100.0));
+			case 3 -> Component.translatable("gui.jaymoskingdoms.story.flaw.dark_fear.fx", Flaws.DARK_LIGHT, Math.round(-Flaws.DARK_MINING * 100.0));
+			case 4 -> Component.translatable("gui.jaymoskingdoms.story.switch.wary.fx", Flaws.WARY_DROP);
+			case 5 -> Component.translatable("gui.jaymoskingdoms.story.switch.hunted.fx");
+			case 6 -> Component.translatable("gui.jaymoskingdoms.story.switch.rags.fx");
+			default -> Component.translatable("gui.jaymoskingdoms.story.switch.nothing.fx", Flaws.REPAY);
+		};
+	}
+
+	private static boolean chosen(int i) {
+		return i < 4 ? (draft.flaws & Flaws.Flaw.values()[i].bit()) != 0 : (draft.switches & SWITCH_BITS[i - 4]) != 0;
+	}
+
+	/** Whether choice {@code i} can be switched on or off now (a third flaw can't be taken). */
+	private static boolean choosable(int i) {
+		return i >= 4 || chosen(i) || Integer.bitCount(draft.flaws) < Flaws.MAX;
+	}
+
+	private static Component choiceName(int i) {
+		return Component.translatable(i < 4 ? "gui.jaymoskingdoms.story.flaw." + Flaws.Flaw.values()[i].key() : "gui.jaymoskingdoms.story.switch." + SWITCH_KEYS[i - 4]);
+	}
+
+	/** Draws the flaws and switches under the story's results, and returns the y under them. */
+	private int choices(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int y, int px, int pw, int textW) {
+		this.choiceRows.clear();
+		y += 6;
+		Ui.rule(graphics, px + 6, px + pw - 6, y - 3);
+		int free = Integer.bitCount(draft.flaws) * Flaws.POINTS_EACH;
+		graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.harder"), px + 10, y, ACCENT);
+		y += 11;
+		for (int i = 0; i < 8; i++) {
+			if (i == 0) {
+				graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.flaws", Flaws.MAX, Flaws.POINTS_EACH, free), px + 10, y, Ui.DIM);
+				y += 11;
+			} else if (i == 4) {
+				y += 4;
+				graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.switches"), px + 10, y, Ui.DIM);
+				y += 11;
+			}
+			boolean on = chosen(i), able = choosable(i);
+			List<FormattedCharSequence> fx = this.font.split(effect(i), textW - 14);
+			int rh = (1 + fx.size()) * Ui.LINE + 5;
+			boolean hover = Ui.over(mouseX, mouseY, px + 6, y, pw - 14, rh - 1) && mouseY >= top() + HEADER && mouseY < top() + panelH() - FOOTER;
+			this.choiceRows.add(new int[] {y + this.scroll, rh, i});
+			if (on) {
+				graphics.fill(px + 6, y, px + pw - 8, y + rh - 1, Ui.ROW_PICKED);
+				graphics.fill(px + 6, y, px + 8, y + rh - 1, ACCENT);
+			} else {
+				Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, i, hover && able);
+			}
+			graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(choiceName(i)), px + 12, y + 2, on ? ACCENT : able ? Ui.TEXT : Ui.HINT);
+			for (int l = 0; l < fx.size(); l++) {
+				graphics.text(this.font, fx.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, able ? Ui.DIM : Ui.HINT);
+			}
+			y += rh;
+		}
+		return y;
+	}
+
+	/** The choice row at the mouse, or -1. */
+	private int choiceAt(int mouseX, int mouseY) {
+		if (!step().summary() || mouseY < top() + HEADER || mouseY >= top() + panelH() - FOOTER || mouseX < paneX() + 6 || mouseX >= paneX() + paneW() - 8) {
+			return -1;
+		}
+		for (int[] row : this.choiceRows) {
+			int ry = row[0] - this.scroll;
+			if (mouseY >= ry && mouseY < ry + row[1] - 1) {
+				return row[2];
+			}
+		}
+		return -1;
+	}
+
+	/** Flips choice {@code i}: a flaw (never a third), or a switch. */
+	private static void flip(int i) {
+		if (!choosable(i)) {
+			return;
+		}
+		if (i < 4) {
+			draft.flaws ^= Flaws.Flaw.values()[i].bit();
+		} else {
+			draft.switches ^= SWITCH_BITS[i - 4];
+		}
 	}
 
 	/** Where the option chips start (in unscrolled screen space, -1: none), as the story page last laid them out. */

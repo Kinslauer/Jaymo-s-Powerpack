@@ -274,6 +274,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();
+		// 0.7.420: flaws for points, hard-road options, starting from nothing (and their attachments)
+		LOGGER.debug("flaw attachments: {} {} {}", Flaws.TAKEN, Flaws.GIVEN_UP, Flaws.PENDING);
+		Flaws.register();
 		// 0.7.418: a life's aim for every road, and the road deeds record
 		LifeAims.register();
 		// 0.7.419: roads earned by deeds (and the roads a player took)
