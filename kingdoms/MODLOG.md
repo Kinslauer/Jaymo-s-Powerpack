@@ -6872,7 +6872,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   *Feral Pounce* leaps onto the foe ahead, a savage blow, a short bleed, knocked flat.
 - Compile-checked. Not seen in game.
 
-## 0.7.382: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.30)
+## 0.7.382: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.46)
 - **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
   foe; the last is a heavy blow with Powers' impact frames (`PowersCompat.impactFrame`, reflection; Powers has no afterimage
   hook, so the trail is particles) and the whole thing runs under Powers' new hard-cut film (`FILM_CUTS`, witnesses get bars).
