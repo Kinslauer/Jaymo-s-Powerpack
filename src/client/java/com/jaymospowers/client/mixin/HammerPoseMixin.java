@@ -1,6 +1,7 @@
 package com.jaymospowers.client.mixin;
 
 import com.jaymospowers.armory.HammerSlam;
+import com.jaymospowers.armory.KnifeGuard;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -22,6 +23,10 @@ abstract class HammerPoseMixin {
 	@WrapOperation(method = "getArmPose(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/client/model/HumanoidModel$ArmPose;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))
 	private static ItemUseAnimation jaymospowers$hammerPose(ItemStack stack, Operation<ItemUseAnimation> original, Avatar avatar, ItemStack held,
 		InteractionHand hand) {
+		if (KnifeGuard.isKnife(stack.getItem()) && KnifeGuard.pose(avatar) != null) {
+			// (0.18.64) a WeaponMod knife held up as a guard rather than drawn back to throw
+			return ItemUseAnimation.BLOCK;
+		}
 		return HammerSlam.isWarhammer(stack.getItem()) ? HammerSlam.pose(avatar) : original.call(stack);
 	}
 }

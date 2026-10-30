@@ -2,6 +2,7 @@ package com.jaymospowers.combat;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.HammerSlam;
+import com.jaymospowers.armory.KnifeGuard;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.darktide.DarktidePower;
@@ -81,6 +82,7 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
  * (0.17.169) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
+ * (0.18.64) And Balkon's knife, on a plain right click; sneak + right click still throws it ({@link KnifeGuard}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  * <p>
  * (0.18.24) Andy: "make the parry meter consistent across all weapons/ powers that block, including z fighters and
@@ -193,7 +195,7 @@ public final class Guard {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
-		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || item instanceof SorasDagger, (builder, lookup, item) ->
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.isKnife(item) || item instanceof SorasDagger, (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
 				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, GUARD_SHARE)),
 				new BlocksAttacks.ItemDamageFunction(3.0F, 0.0F, 0.5F),
@@ -253,13 +255,18 @@ public final class Guard {
 	 * guard.
 	 */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand) {
-		if (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
-			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem())) {
+		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.isKnife(player.getMainHandItem().getItem());
+		if (!knife && (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
+			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem()))) {
 			return InteractionResult.PASS;
 		}
 		if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof SorasDagger) {
 			// (0.17.186) sneak + use turns Sora's Dagger in the hand, whatever's in the other ({@link SorasDagger#use})
 			return InteractionResult.PASS;
+		}
+		if (knife && player.isShiftKeyDown()) {
+			// (0.18.64) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use})
+			return KnifeGuard.use(player, hand);
 		}
 		ItemStack off = player.getOffhandItem();
 		if (!off.isEmpty() && !off.has(DataComponents.WEAPON)) {
@@ -267,6 +274,10 @@ public final class Guard {
 		}
 		if (DarktidePower.has(player) && DarktideWeapons.canGuard(player)) {
 			return InteractionResult.FAIL;
+		}
+		if (knife) {
+			// (0.18.64) a WeaponMod knife's own use throws it; here it raises the guard instead
+			return KnifeGuard.use(player, hand);
 		}
 		return InteractionResult.PASS;
 	}
