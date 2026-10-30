@@ -6948,6 +6948,13 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Foes** (weaker, as before) break by what they are: one of a ship's crew goes over the side; a rider is thrown and the
   mount bolts; a caster is hushed as by a Spellbreaker Blow; a bandit or anyone with a live bounty kneels (knocked out for 10
   s, with Jaymo's Powers) to be taken in. Everyone else drops their weapon or runs as before.
+- **Between players** (`WillClash`), Andy: "this can be done between players, and when one initiates a stare, the other is
+  notified, then it starts a clash". Sneak-staring at another player warns them at once (a line, a heartbeat, a shiver); held
+  `LOCK_TICKS` (2 s) the two lock eyes: rooted, turned to face each other, pressing jump for `TICKS` (5 s). A press is worth 1
+  plus a quarter of your Will, and the greater Will gains a little every tick; both see a gold/red bar on the action bar. A
+  30-point lead ends it early. The loser looks away: slowed and weakened 10 s, knees buckling 2 s, powers and spells hushed;
+  the winner gets 4 Strength experience. A draw shoves both back. 30 s before either can clash again. Shrug It Off and Stare
+  Down are off while you're locked in. Never during a spirit clash.
 - Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
   `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
 

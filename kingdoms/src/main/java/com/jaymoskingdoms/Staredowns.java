@@ -352,7 +352,7 @@ final class Staredowns {
 		Vec3 out = mob.position().subtract(ship.position()).multiply(1.0, 0.0, 1.0);
 		out = out.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, ship.getYRot() + 90.0F) : out.normalize();
 		mob.setDeltaMovement(out.x * OVERBOARD_PUSH, OVERBOARD_LIFT, out.z * OVERBOARD_PUSH);
-		mob.needsSync = true;
+		mob.syncVelocity = true;
 		if (mob instanceof PathfinderMob pm) {
 			pm.getNavigation().stop();
 		}

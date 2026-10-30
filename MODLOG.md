@@ -4084,4 +4084,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.
 - **0.18.57 (Kingdoms 0.7.389):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
   poor ruler in their hall into giving up the crown (a richer one pays you to go), when your Will beats their nerve; crew go
-  over the side, riders are thrown, casters are hushed, outlaws kneel. See kingdoms/MODLOG.md 0.7.389.
+  over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.389.

@@ -650,8 +650,11 @@ public final class Will {
 				continue;
 			}
 			long now = level.getGameTime();
-			stare(level, sp, now);
-			shrug(level, sp, now);
+			// (0.7.389) locked in a clash of wills: nothing else of Will's keys
+			if (!WillClash.in(sp)) {
+				stare(level, sp, now);
+				shrug(level, sp, now);
+			}
 			if (tickCount % SCAN_TICKS == 0) {
 				presence(level, sp, now);
 			}
@@ -764,8 +767,20 @@ public final class Will {
 			STARING.remove(sp.getUUID());
 			return;
 		}
-		Mob seen = gazedAt(level, sp);
 		Object[] was = STARING.get(sp.getUUID());
+		// (0.7.389) another player: they're warned, then the two clash ({@link WillClash})
+		ServerPlayer rival = gazedPlayer(level, sp);
+		if (rival != null && WillClash.may(sp, rival, now)) {
+			if (was == null || was[0] != rival) {
+				STARING.put(sp.getUUID(), new Object[] {rival, now});
+				WillClash.warn(level, sp, rival);
+			} else if (now - (long) was[1] >= WillClash.LOCK_TICKS / surge(sp)) {
+				STARING.remove(sp.getUUID());
+				WillClash.begin(level, sp, rival, now);
+			}
+			return;
+		}
+		Mob seen = gazedAt(level, sp);
 		// (0.7.389) the great (a captain, a ruler) weigh your Will against their nerve instead
 		if (seen == null || !Staredowns.great(sp, seen) && !weaker(sp, seen) || FLEEING.containsKey(seen)) {
 			STARING.remove(sp.getUUID());
@@ -801,6 +816,29 @@ public final class Will {
 			level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.ITEM_BREAK.value(), SoundSource.HOSTILE, 0.4F, 1.4F);
 		}
 		flee(seen, sp, now, FLEE_TICKS);
+	}
+
+	/** (0.7.389) The player {@code sp} is looking straight at, within reach and in sight, or null. */
+	private static @Nullable ServerPlayer gazedPlayer(ServerLevel level, ServerPlayer sp) {
+		Vec3 eye = sp.getEyePosition(), look = sp.getLookAngle();
+		ServerPlayer best = null;
+		double bestCos = STARE_COS;
+		for (ServerPlayer other : level.players()) {
+			if (other == sp || other.isSpectator()) {
+				continue;
+			}
+			Vec3 to = other.getEyePosition().subtract(eye);
+			double d = to.length();
+			if (d < 1.0E-3 || d > STARE_REACH) {
+				continue;
+			}
+			double cos = to.scale(1.0 / d).dot(look);
+			if (cos > bestCos && sp.hasLineOfSight(other)) {
+				bestCos = cos;
+				best = other;
+			}
+		}
+		return best;
 	}
 
 	/** The foe {@code sp} is looking straight at, within reach and in sight, or null. */
