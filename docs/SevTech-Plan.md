@@ -119,3 +119,78 @@ events.
 0 (JEI, into PR #699) first. Then two tracks at a time: 3 + 4 (both pod-side, disjoint packages) since they finish the
 pod Andy just built; then 1 + 2 (the ladder and the sky); then 5 + 6; then 7. Each patch is its own PR with a version
 bump; each pair ships before the next starts.
+
+## Track briefs for patches 3 and 4 (run in parallel, 2026-10-30; Andy: "all eight in the doc's order")
+Both tracks start from the PR #699 branch (the pod entity and parts exist). Shared rules for both:
+- Compile-check with `bash /home/user/cc21/check.sh <repo> <every changed .java file> src/main/java/com/jaymospowers/power/zfighter/pod/*.java`
+  (the staged old Powers jar predates the pod, so the pod sources must always ride along). 0 errors before you stop.
+- Every new recipe or route shows in JEI (`client/jei`: `TinkeringJei` already lists `WeaponParts.Kind`s, `KilnJei` the
+  kiln, `AlchemyJei` the infusion altar; grid recipes show by themselves; anything else gets a `SimpleCategory` page).
+- No grid recipe for an iron or metal part or tool (forge route: `WeaponParts.Kind`, kiln, casting). A plain block or
+  a leather thing may be a grid recipe. Pods and keels have no recipe at all.
+- No screen text stating lore; names and one-line grey tooltips only, hints through villagers/hermits/patrolmen.
+- Tuning numbers in `static final` constants at the top of each class. Lang in `lang/parts/<feature>.json`. Any class
+  holding an attachment goes in `JaymosPowers.registerAttachments()`. Models: 26.3 block models need `#variable` face
+  textures; items need `items/<id>.json`. Textures are our own, vanilla-style, painted by a small Python script under
+  `tools/` (see tools/gen_pod_parts.py).
+- MODLOG.md gets one entry per patch (same voice as the rest); bump `gradle.properties`. Commit on your branch with the
+  attribution lines you were given; do not push.
+
+### Track 3, Mending (Powers 0.18.13; files: `power/zfighter/pod/**`, `client/power/zfighter/pod/**`, ZFighterRaiders,
+the Maw part of ZFighterSpace, ZFighterSpaceMissions rewards, loot tables, lang `zfighter_pod.json`, a `SalvageJei` page)
+- **Finish With a Hammer**: `PodEntity` gains a synched FINISHED flag. A plain hammer hit on a complete, unfinished pod
+  finishes it (anvil ring, sparks, the beacon mast lights up in the model; particles) instead of detaching. Only a
+  finished pod launches (`canLaunch`). Detaching or damaging any part clears FINISHED. Hammer detach now needs sneaking
+  when the pod is complete and unfinished (so the finishing hit can't pop the mast); on any other pod a plain hit still
+  detaches as today.
+- **Salvage Rack**: block `salvage_rack` (grid recipe: 4 iron nuggets? no: metal parts are forged, but a rack is
+  furniture: 2 planks + 2 sticks + 1 chain, shown in JEI by itself). A carried damaged pod part set onto the rack (the
+  normal set-down onto the rack) lies on it (block entity, rendered). Hammer blows on the rack with the part's metal in
+  the off hand (iron ingot for plates/mast/keel, steel ingot for fins, copper ingot for tank/bell, a glass block for the
+  canopy) mend it in 3 blows (uses one ingot on the first blow); sneak + hammer breaks it to scrap instead (nuggets /
+  glass panes). Taking the mended part off the rack puts it in your arms (carry). `SalvageJei` page: damaged part + metal
+  -> sound part, with the blow count as a note.
+- **Wreck Part Sets**: each Maw wreck deck holds a fixed set (deck 1: the three fins; deck 2: tank + bell; deck 3: four
+  plates; deeper/boss: canopy + mast) in its wrecked pod and chest, instead of random parts; a per-player attachment
+  remembers which sets they have taken so the same deck gives the next unfilled set on a later visit, and plain scrap
+  once every set is held.
+- **Strip the Raider Pod**: raider pods in flight (`ZFighterRaiders`) are real pods with random missing slots (1-3 of
+  plates, canopy, mast) so they visibly fly without a door or glass; the pod the band leaves keeps those gaps and its 3
+  fuel; a hammer strips it for parts (today's detach) instead of flying it. The tooltip-free hint: a patrolman line
+  already exists for pods; add one WorkTalk/patrol line about raiders flying "without the glass".
+- **Mended Better / One Part Per World**: `PodEntity` gains a synched GRADE 0-3. Three world parts, plain items (our
+  art): `rustfall_plate` (Rustfall), `glacia_ice_glass` (Glacia), `cinder_bell_alloy` (Cinder). They come from planet
+  mission rewards on that world (`ZFighterSpaceMissions`: conquer reward adds one) and that world's wreck chests. Sneak +
+  right-click a FINISHED pod with the next grade's part grades it up (I needs the Rustfall plate, II the Glacia glass,
+  III the Cinder alloy): grade I = fuel cost -1 on worlds costing 3 or more, grade II = a second seat (a passenger rides
+  along; the trip carries both), grade III = a hard landing never knocks parts off. The model shows the grade (a brass
+  band per grade on the keel posts). A pod stripped to its keel keeps its grade (the keel carries it: the keel block
+  item remembers the grade in a component).
+
+### Track 4, Fuel and breath (Powers 0.18.14; files: new `power/zfighter/breath/**`, new `power/zfighter/fuel/**`,
+WeaponParts (one new Kind), alchemy crucible or still recipe, ZFighterStarMapScreen (grade shown), lang `zfighter_fuel.json`)
+- **Fuel grades**: `fuel/PodFuel`: grade 1 = coal, charcoal, coal block; grade 2 = blaze powder/rod and Pod Spirit (from
+  the still); grade 3 = Cinder Ember (an item found only on Cinder: lava-side loot and mission rewards; our art). Each
+  world needs a grade: Pale Moon 1, Verdant 2, Rustfall 2, Glacia 2, Cinder 2, Maw 3 (constants). `PodEntity` gets ONE
+  new synched int FUEL_GRADE with getter/setter and one check in the fuel-item hook (the smallest possible edit to
+  PodEntity: Track 3 edits the same class); adding lower-grade fuel to a tank lowers the tank's grade; the star map
+  (`ZFighterStarMapScreen`) shows each world's needed grade and greys worlds the tank can't reach; `ZFighterSpace.go`
+  refuses with an action-bar line.
+- **Fuel Still**: an Alchemy route (use the existing crucible if it takes item recipes, else a `still` block on the
+  crucible's pattern) that makes Pod Spirit: whale oil (Kingdoms Whaling's item, through a compat/OptionalItems check,
+  the STRONG input: 1 oil -> 4 spirit) or Kitchen resin / honey bottle (weak: 1 -> 1), with Fire essence. Shows in JEI
+  (add a crucible page if there is none).
+- **Hide Air Skin**: item `air_skin` (grid: 4 leather + 1 string + 1 glass bottle is fine, leather isn't metal; Kitchen's
+  tanned hide also accepted via tag when loaded). Held in the off hand or chest slot? Worn: it is a chestplate-slot item
+  with no armour, drawn as a bag on the back (simple cube model). On airless worlds (Pale Moon, the Maw; constants) a
+  player with no air source takes "thin air": slowness + 1 damage every 5 s after 20 s outside the pod. An Air Skin
+  gives 3 minutes of air, refilled by standing in/next to a pod for 10 s; it tears (breaks) when the wearer takes a hit
+  over 6 damage.
+- **Sealed Helm**: `WeaponParts.Kind` "seal" (iron, 2 ingots, `Assembly.ALONE`) + a helmet made at the Tool Station
+  from the seal blank and a glass block (list it as an assembly so TinkeringJei shows it): `sealed_helm`, leather-tier
+  armour, gives 8 minutes of air and never tears; worn with the Air Skin the times add.
+- **Cold and Heat Gear**: Glacia applies the Seasons winter cold rule (find the existing cold code: PR #358 Seasons in
+  Powers 0.15.30, likely `seasons/` or `weather/`); Cinder a mirrored heat rule (`breath/Heat`): slow, then 1 damage per
+  8 s unless standing in water or holding/eating a cooling thing; a quenched Overgeared piece (the existing quench
+  component) worn or held cuts heat damage in half; warm Kitchen food (the existing warm-food effect from Seasons) cuts
+  cold the same way. Constants at the top.
