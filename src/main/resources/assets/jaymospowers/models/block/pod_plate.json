@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "all": "jaymospowers:block/pod_plate",
+    "particle": "jaymospowers:block/pod_plate"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        1,
+        6
+      ],
+      "to": [
+        15,
+        15,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "down": {
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

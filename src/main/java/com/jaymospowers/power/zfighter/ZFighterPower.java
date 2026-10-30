@@ -447,6 +447,13 @@ public final class ZFighterPower implements Power {
 		ZFighterSagas.init();
 		// (0.17.62) the space pod, the far places and their missions
 		ZFighterSpace.init();
+		// (0.18.53) the star charts and the Star-Sight Bench
+		com.jaymospowers.power.zfighter.sky.Sky.init();
+		com.jaymospowers.power.zfighter.pod.PodParts.init();
+		com.jaymospowers.power.zfighter.fuel.PodFuel.init();
+		com.jaymospowers.power.zfighter.breath.Breath.init();
+		// (0.18.56) back home: Maw dust, the Starlit Lens, the far-world pantry's ingredients and trip buffs
+		com.jaymospowers.power.zfighter.backhome.BackHome.init();
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();

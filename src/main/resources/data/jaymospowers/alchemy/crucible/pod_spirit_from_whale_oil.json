@@ -1,0 +1,11 @@
+{
+  "catalyst": "jaymoskingdoms:whale_oil",
+  "essences": {
+    "fire": 8
+  },
+  "result": {
+    "item": "jaymospowers:pod_spirit",
+    "count": 4
+  },
+  "research": "fuel_still"
+}

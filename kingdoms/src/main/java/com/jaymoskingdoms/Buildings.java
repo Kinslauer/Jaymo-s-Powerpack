@@ -106,6 +106,8 @@ final class Buildings {
 		town(FactionType.VILLAGE, "palisade", Buildings::palisade, 10, 22);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 3, 24);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 8, 28);
+		// (0.7.385) a kingdom's landing yard for the sky-folk's pods ({@link LandingYard})
+		LandingYard.register();
 		for (String ring : new String[] {"wall", "tower", "gatehouse"}) {
 			Planner.setRings(ring, WALL_RING_MIN, WALL_RING_MAX);
 		}

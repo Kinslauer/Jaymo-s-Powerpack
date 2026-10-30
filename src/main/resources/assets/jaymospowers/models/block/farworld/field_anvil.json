@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/template_anvil",
+  "textures": {
+    "particle": "jaymospowers:block/farworld/field_anvil_body",
+    "body": "jaymospowers:block/farworld/field_anvil_body",
+    "top": "jaymospowers:block/farworld/field_anvil_top"
+  }
+}

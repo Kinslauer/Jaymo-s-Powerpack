@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "#jaymospowers:air_skin_hides",
+    "#jaymospowers:air_skin_hides",
+    "#jaymospowers:air_skin_hides",
+    "#jaymospowers:air_skin_hides",
+    "minecraft:string",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "jaymospowers:air_skin",
+    "count": 1
+  }
+}

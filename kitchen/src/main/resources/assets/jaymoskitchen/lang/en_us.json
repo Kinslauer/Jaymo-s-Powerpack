@@ -462,6 +462,8 @@
 	"step.jaymoskitchen.burrukai_rib": "Burrukai Rib Cut",
 	"step.jaymoskitchen.kirrid_loin": "Kirrid Loin",
 	"step.jaymoskitchen.prismallard_leg": "Prismallard Leg",
+	"step.jaymoskitchen.verdant_fruit": "Verdant Fruit",
+	"step.jaymoskitchen.glacia_salt": "Glacia Salt",
 	"step.jaymoskitchen.cooked_cod": "Cooked Cod",
 	"step.jaymoskitchen.cooked_salmon": "Cooked Salmon",
 	"step.jaymoskitchen.cooked_porkchop": "Cooked Porkchop",
@@ -937,5 +939,9 @@
 	"step.jaymoskitchen.mutton_chops": "Mutton Chops",
 	"step.jaymoskitchen.roll_salmon": "Salmon Roll",
 	"step.jaymoskitchen.roll_cod": "Cod Roll",
-	"step.jaymoskitchen.kelp_roll_slice": "Kelp Roll Slice"
+	"step.jaymoskitchen.kelp_roll_slice": "Kelp Roll Slice",
+	"item.jaymoskitchen.verdant_fruit_salad": "Verdant Fruit Salad",
+	"item.jaymoskitchen.glacia_salt_broth": "Glacia Salt Broth",
+	"item.jaymoskitchen.frosted_fruit_cup": "Frosted Fruit Cup",
+	"item.jaymoskitchen.salt_trail_bread": "Salt Trail Bread"
 }

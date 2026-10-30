@@ -1,0 +1,106 @@
+{
+  "textures": {
+    "base": "jaymospowers:block/star_bench_base",
+    "lens": "jaymospowers:block/star_bench_lens_lit",
+    "particle": "jaymospowers:block/star_bench_base"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        4,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        },
+        "up": {
+          "texture": "#base"
+        },
+        "down": {
+          "texture": "#base"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        4,
+        6
+      ],
+      "to": [
+        10,
+        9,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        },
+        "up": {
+          "texture": "#base"
+        },
+        "down": {
+          "texture": "#base"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        9,
+        5
+      ],
+      "to": [
+        11,
+        12,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lens"
+        },
+        "east": {
+          "texture": "#lens"
+        },
+        "south": {
+          "texture": "#lens"
+        },
+        "west": {
+          "texture": "#lens"
+        },
+        "up": {
+          "texture": "#lens"
+        },
+        "down": {
+          "texture": "#lens"
+        }
+      },
+      "light_emission": 15
+    }
+  ]
+}

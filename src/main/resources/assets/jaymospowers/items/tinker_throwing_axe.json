@@ -178,6 +178,55 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/throwing_axe/head_steel"
             }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_amber_bronze"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_star_metal"
+            }
           }
         ],
         "fallback": {

@@ -1,0 +1,22 @@
+{
+  "centre": "minecraft:glass",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:quartz",
+    "minecraft:quartz"
+  ],
+  "essences": {
+    "crystal": 8,
+    "air": 6
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymospowers:pod_canopy",
+    "count": 1
+  },
+  "research": "pod_canopy",
+  "flux": 2
+}

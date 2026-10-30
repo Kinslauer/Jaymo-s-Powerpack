@@ -83,9 +83,14 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterApeSteps.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
+		// (0.18.49) the space pod, drawn from its parts
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.pod.PodEntity.TYPE,
+			com.jaymospowers.client.power.zfighter.pod.PodRenderer::new);
 		ZFighterWishScreen.register();
 		// (0.17.62) the space pod's star map
 		ZFighterStarMapScreen.register();
+		// (0.18.53) star charts' book page, and the worlds read as lights in the night sky
+		com.jaymospowers.client.power.zfighter.sky.SkyPlanets.init();
 		ZFighterFlightScreen.register();
 		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();

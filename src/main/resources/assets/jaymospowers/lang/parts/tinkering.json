@@ -314,5 +314,13 @@
   "tooltip.jaymospowers.tinkering.accuracy": "Accuracy: %s",
   "tooltip.jaymospowers.tinkering.projectile_damage": "Projectile Damage: %s",
   "item.jaymospowers.bow_limb_cast": "Bow Limb Cast",
-  "item.jaymospowers.bow_grip_cast": "Bow Grip Cast"
+  "item.jaymospowers.bow_grip_cast": "Bow Grip Cast",
+  "jei.jaymospowers.kiln": "Brick Kiln",
+  "jei.jaymospowers.kiln.heat": "Fire it in a brick kiln over %s",
+  "jei.jaymospowers.kiln.heat.1": "any fire (heat 1)",
+  "jei.jaymospowers.kiln.heat.2": "soul fire, lava, magma or a lit forge hearth (heat 2)",
+  "jei.jaymospowers.kiln.heat.3": "a hearth or soul fire with the bellows pumping (heat 3)",
+  "jei.jaymospowers.kiln.heat.more": "heat %s",
+  "jei.jaymospowers.kiln.bonus": "%s%% chance of one more each",
+  "jei.jaymospowers.kiln.how": "Right-click the thing into a brick-walled space over the fire"
 }

@@ -1,0 +1,30 @@
+{
+  "items": {
+    "jaymospowers:maw_dust": {
+      "starlight": 12,
+      "shadow": 2
+    },
+    "jaymospowers:star_metal_ore": {
+      "starlight": 14,
+      "metal": 8,
+      "crystal": 4
+    },
+    "jaymospowers:star_metal_ingot": {
+      "starlight": 8,
+      "metal": 8
+    },
+    "jaymospowers:starlit_lens": {
+      "starlight": 16,
+      "light": 8,
+      "crystal": 6
+    },
+    "jaymospowers:verdant_fruit": {
+      "plant": 4,
+      "life": 2
+    },
+    "jaymospowers:glacia_salt": {
+      "salt": 6,
+      "frost": 3
+    }
+  }
+}

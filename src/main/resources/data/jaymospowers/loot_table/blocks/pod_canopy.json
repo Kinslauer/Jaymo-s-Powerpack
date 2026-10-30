@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:pod_canopy",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:pod_canopy",
+              "properties": [
+                "damaged"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/pod_canopy"
+}
