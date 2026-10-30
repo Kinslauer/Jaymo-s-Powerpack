@@ -53,6 +53,7 @@
 		"BeamCinematicCameraMixin",
 		"UltimateCinematicCameraMixin",
 		"CarryFirstPersonMixin",
+		"MusketSightsMixin",
 		"PowerArmsFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",

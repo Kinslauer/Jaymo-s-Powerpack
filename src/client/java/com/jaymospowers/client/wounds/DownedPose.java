@@ -112,7 +112,7 @@ public final class DownedPose {
 	 */
 	public static void calm(LivingEntityRenderState state) {
 		Down pose = state.getData(KEY);
-		// ((0.18.69) and the tripped, face down with their hands out)
+		// ((0.18.71) and the tripped, face down with their hands out)
 		if (pose == null && !TrippedPose.tripped(state)) {
 			return;
 		}

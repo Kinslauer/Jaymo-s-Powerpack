@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.14.1) Someone downed is laid on the ground (see DownedPose): onto the render state, the pose stack and the model.
- * (0.18.69) And one tripped by a bolas (TrippedPose).
+ * (0.18.71) And one tripped by a bolas (TrippedPose).
  */
 @Mixin(LivingEntityRenderer.class)
 abstract class DownedLivingEntityRendererMixin {

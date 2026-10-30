@@ -1454,7 +1454,7 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
-	// ---- (0.7.402) bolas: the trip ------------------------------------------------------------------------------------
+	// ---- (0.7.404) bolas: the trip ------------------------------------------------------------------------------------
 
 	private static boolean lookedForTrip;
 	/** Powers' {@code Tripped.bind(LivingEntity, Entity, int)}, {@code Tripped.tripped(Entity)} and {@code Tripped.trippable(Entity)}. */
@@ -1481,7 +1481,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.402) A bolas wraps {@code target}'s legs ({@code by} threw it): Powers breaks a leg and trips it onto its face for
+	 * (0.7.404) A bolas wraps {@code target}'s legs ({@code by} threw it): Powers breaks a leg and trips it onto its face for
 	 * {@code ticks}. False without Powers (or an older one), or if it isn't built like a person.
 	 */
 	public static boolean trip(LivingEntity target, net.minecraft.world.entity.@Nullable Entity by, int ticks) {
@@ -1493,7 +1493,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.402) Whether {@code body} is still down from a bolas (Powers' trip); false without Powers. */
+	/** (0.7.404) Whether {@code body} is still down from a bolas (Powers' trip); false without Powers. */
 	public static boolean tripped(net.minecraft.world.entity.Entity body) {
 		lookForTrip();
 		try {
@@ -1503,7 +1503,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.402) Whether a bolas can trip {@code body} (a mob built like a person, on its feet); false without Powers. */
+	/** (0.7.404) Whether a bolas can trip {@code body} (a mob built like a person, on its feet); false without Powers. */
 	public static boolean trippable(net.minecraft.world.entity.Entity body) {
 		lookForTrip();
 		try {

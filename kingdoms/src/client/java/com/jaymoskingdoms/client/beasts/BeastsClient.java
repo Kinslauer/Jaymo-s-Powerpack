@@ -18,13 +18,19 @@ public final class BeastsClient {
 	static final float POUND_HIT = 18.0F, ERUPT_HIT = 28.0F;
 	/** Its arms raised overhead, and brought down (degrees). */
 	static final float ARMS_UP = -160.0F, ARMS_DOWN = -35.0F;
+	/** The Piglin King's stride: leg and arm swing at a full walk, the forearms' bend, and its idle breath (degrees). */
+	static final float KING_LEG_SWING = 32.0F, KING_ARM_SWING = 24.0F, KING_FOREARM_BEND = -12.0F, KING_BREATH = 3.0F;
 
 	private BeastsClient() {
 	}
 
 	public static void register() {
 		look(Beasts.MINOTAUR, new BbMobRenderer.Look("minotaur", 0.85F, 1.2F, "idle", "running", null, null, 0.35F, 1.0F, "head"));
-		look(Beasts.PIGLIN_KING, new BbMobRenderer.Look("piglin_king", 0.96F, 1.3F, "idle", "walk", null, null, 0.5F, 1.0F, "head"));
+		// (0.7.403) Andy: "piglin arm is broken". The file's idle and walk hold a twisted fighting stance with the left arm
+		// thrust out, pushed off its shoulder and missing what it was drawn to hold; it stands and walks in its rest pose
+		// here instead, and its own moves (claw, volley, roar) still play as drawn
+		look(Beasts.PIGLIN_KING, new BbMobRenderer.Look("piglin_king", 0.96F, 1.3F, "none", "none", null, null, 0.5F, 1.0F, "head")
+			.withExtra(BeastsClient::kingStride));
 		look(Beasts.REDSTONE_GOLEM, new BbMobRenderer.Look("redstone_golem", 0.94F, 1.5F, "redstone_golem_idle_animation_1",
 			"redstone_golem_walk_animation_1", null, null, 0.4F, 1.0F, "redstone_golem_head")
 			.withGlow(JaymosKingdoms.id("textures/entity/bb/redstone_golem_1.png")).withExtra(BeastsClient::golemArms));
@@ -40,6 +46,24 @@ public final class BeastsClient {
 	private static <T extends net.minecraft.world.entity.Mob & com.jaymoskingdoms.beasts.Acting> void look(
 		net.minecraft.world.entity.EntityType<T> type, BbMobRenderer.Look look) {
 		EntityRenderers.register(type, context -> new BbMobRenderer<>(context, look));
+	}
+
+	/** The Piglin King's walk (legs and arms swinging opposite) and idle (a slow breath in the arms), when not mid-move. */
+	private static void kingStride(BbModel bb, BbMobRenderer.State state) {
+		if (state.action != null) {
+			return;
+		}
+		float speed = Math.min(state.walkAnimationSpeed, 1.0F);
+		float swing = Mth.cos(state.walkAnimationPos * 0.6662F) * speed;
+		float breath = Mth.sin(state.ageInTicks * 0.06F) * KING_BREATH;
+		bb.part("left_leg").xRot += swing * KING_LEG_SWING * Mth.DEG_TO_RAD;
+		bb.part("right_leg").xRot -= swing * KING_LEG_SWING * Mth.DEG_TO_RAD;
+		bb.part("left_arm").xRot -= swing * KING_ARM_SWING * Mth.DEG_TO_RAD;
+		bb.part("right_arm").xRot += swing * KING_ARM_SWING * Mth.DEG_TO_RAD;
+		bb.part("left_arm").zRot -= breath * Mth.DEG_TO_RAD;
+		bb.part("right_arm").zRot += breath * Mth.DEG_TO_RAD;
+		bb.part("left_forearm").xRot += KING_FOREARM_BEND * Mth.DEG_TO_RAD;
+		bb.part("right_forearm").xRot += KING_FOREARM_BEND * Mth.DEG_TO_RAD;
 	}
 
 	/** The redstone golem's pound (both fists up, then down on the ground) and eruption (the same, slower, held down). */

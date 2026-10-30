@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  * Whether it hits or misses, it drops back as the item where it ends ({@link #land}), also if it flies too long or is
  * unloaded; it is never lost except to the void and to lava.
  * <p>
- * (0.7.402) Andy (2026-10-30): "bolas should force a cripple on humanoid mobs, and animate wrapping and tripping them".
+ * (0.7.404) Andy (2026-10-30): "bolas should force a cripple on humanoid mobs, and animate wrapping and tripping them".
  * With Jaymo's Powers, anything built like a person (villagers, MCA folk, bandits, illagers, piglins, zombies, skeletons)
  * is fair game too, not only foes, and the bolas trips it ({@code PowersCompat.trip}): a leg broken in Powers' wounds, the
  * cord whipped round its shins, and it pitches onto its face for {@link #TRIP_TICKS}. The bolas stays on its legs till
@@ -64,12 +64,12 @@ public final class Bolas extends Projectile implements ItemSupplier {
 	static final int TANGLE_SLOW = 1, TANGLE_TICKS = 80, TANGLE_PER_RANK = 20;
 	/** A bolas hits for this little (a wrap, not a blow). */
 	static final float WRAP_DAMAGE = 1.0F;
-	/** (0.7.402) A trip: how long on the ground (ticks), and a little more at each rank of the form. */
+	/** (0.7.404) A trip: how long on the ground (ticks), and a little more at each rank of the form. */
 	static final int TRIP_TICKS = 60, TRIP_PER_RANK = 10;
-	/** (0.7.402) The longest a bolas is kept on a tripped body's legs before it's dropped anyway (ticks). */
+	/** (0.7.404) The longest a bolas is kept on a tripped body's legs before it's dropped anyway (ticks). */
 	static final int WRAPPED_MAX_TICKS = 400;
 
-	/** (0.7.402) Bolas on a tripped body's legs: dropped at its feet when it's up (or dead, or gone). Not saved. */
+	/** (0.7.404) Bolas on a tripped body's legs: dropped at its feet when it's up (or dead, or gone). Not saved. */
 	private static final java.util.List<Wrapped> WRAPPED = new java.util.ArrayList<>();
 
 	private record Wrapped(LivingEntity body, ServerLevel level, long since) {
@@ -106,7 +106,7 @@ public final class Bolas extends Projectile implements ItemSupplier {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> dropWrapped(true));
 	}
 
-	/** (0.7.402) Drops each bolas whose body is up again, dead or gone (or every one, {@code all}). */
+	/** (0.7.404) Drops each bolas whose body is up again, dead or gone (or every one, {@code all}). */
 	private static void dropWrapped(boolean all) {
 		for (java.util.Iterator<Wrapped> it = WRAPPED.iterator(); it.hasNext(); ) {
 			Wrapped w = it.next();
@@ -176,7 +176,7 @@ public final class Bolas extends Projectile implements ItemSupplier {
 	}
 
 	/**
-	 * It wraps the foe's legs and falls to its feet; (0.7.402) one built like a person is tripped, the bolas staying on
+	 * It wraps the foe's legs and falls to its feet; (0.7.404) one built like a person is tripped, the bolas staying on
 	 * its legs till it's up.
 	 */
 	private void wrap(ServerLevel level, LivingEntity foe) {

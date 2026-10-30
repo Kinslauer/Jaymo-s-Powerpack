@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.69) A body tripped by a bolas ({@link Tripped}), drawn: the cord whips round its shins and cinches, the legs snap
+ * (0.18.71) A body tripped by a bolas ({@link Tripped}), drawn: the cord whips round its shins and cinches, the legs snap
  * together, it teeters with its arms flung out, then pitches forward onto its face, arms thrown out to catch itself, with
  * a little bounce as it lands. Down, it kicks its bound legs together and paws at the ground, head up. When the trip's
  * over it pushes itself back up and the cord drops off (Kingdoms drops the bolas there). The cord and its two stone

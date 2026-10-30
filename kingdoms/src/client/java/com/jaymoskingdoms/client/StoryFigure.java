@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -73,8 +74,12 @@ final class StoryFigure {
 		}
 	}
 
-	/** (0.7.364) Powers' left-arm bit ({@code Dismember.LEFT_ARM}): the arm the Unarmed start's figure is drawn without. */
-	static final int LEFT_ARM = 4;
+	/** (0.7.364) Powers' arm bits ({@code Dismember.RIGHT_ARM}, {@code LEFT_ARM}). */
+	static final int RIGHT_ARM = 2, LEFT_ARM = 4;
+	/** (0.7.402) How big a dropped item lies on the floor, in blocks (the figure's own scale), and how flat it lies (1: upright). */
+	static final float DROPPED_SIZE = 0.75F, DROPPED_FLAT = 0.55F;
+	/** (0.7.402) How far beside the feet a dropped item lies, in blocks. */
+	static final float DROPPED_OUT = 0.55F;
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
 	/** (0.7.286) The MCA job whose clothes the stand-in wears, by answer key ({@code "none"}: everyday clothes). */
@@ -157,8 +162,8 @@ final class StoryFigure {
 		SCENES.put("road.captive", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
 		// (0.7.364) Andy: "the pickaxe or sword or harpoon make sense. not the trident"
 		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
-		// (0.7.364) Andy: "he shouldnt still have his limb"
-		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
+		// (0.7.364) Andy: "he shouldnt still have his limb"; (0.7.402) the sword arm, so what the hand held lies on the floor
+		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, RIGHT_ARM));
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);
@@ -312,6 +317,17 @@ final class StoryFigure {
 		}
 		EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
 		Item[] gear = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
+		// (0.7.402) Andy: "if the origin gives them an item in this hand it should comically be on the floor": a hand whose
+		// arm is gone lets go of what it held, and it lies at the feet on that side
+		boolean rightMain = target.getMainArm() == HumanoidArm.RIGHT;
+		Item[] dropped = new Item[2];
+		for (int h = 0; h < 2; h++) {
+			boolean right = (h == 0) == rightMain;
+			if ((sc.missing() & (right ? RIGHT_ARM : LEFT_ARM)) != 0) {
+				dropped[h] = gear[4 + h];
+				gear[4 + h] = null;
+			}
+		}
 		ItemStack[] was = new ItemStack[slots.length];
 		String heritageWas = player.getAttached(Heritage.HERITAGE), variantWas = player.getAttached(HeritageVariants.VARIANT);
 		boolean using = false, lent = !standIn && kind != null;
@@ -356,7 +372,16 @@ final class StoryFigure {
 				case WORK, LOOK_DOWN -> LOOK_DOWN;
 				default -> 0F;
 			};
-			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, Math.max(10, (int)((y1 - y0) * SCALE)), 0.0625F, lookX, lookY, target);
+			int size = Math.max(10, (int)((y1 - y0) * SCALE));
+			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, lookX, lookY, target);
+			for (int h = 0; h < 2; h++) {
+				if (dropped[h] != null) {
+					// the figure faces you, so its right side is on your left
+					boolean right = (h == 0) == rightMain;
+					float feet = (y0 + y1) / 2F + (target.getBbHeight() / Math.max(0.01F, target.getScale()) / 2F + 0.0625F) * size;
+					dropped(graphics, new ItemStack(dropped[h]), (x0 + x1) / 2F + (right ? -1 : 1) * DROPPED_OUT * size, feet, size, right);
+				}
+			}
 		} finally {
 			if (using) {
 				target.stopUsingItem();
@@ -375,6 +400,22 @@ final class StoryFigure {
 				dress.run();
 			}
 		}
+	}
+
+	/**
+	 * (0.7.402) {@code stack} lying on the floor at {@code x}, its bottom on {@code feet}: turned so its length lies along
+	 * the ground (an item's picture runs corner to corner), flattened as if seen from a little above, pointing away from
+	 * the figure on its {@code right} side or left.
+	 */
+	private static void dropped(GuiGraphicsExtractor graphics, ItemStack stack, float x, float feet, int size, boolean right) {
+		float s = size * DROPPED_SIZE / 16F;
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, feet - 8F * s * DROPPED_FLAT);
+		graphics.pose().scale(right ? -s : s, s * DROPPED_FLAT);
+		graphics.pose().rotate((float)Math.PI / 4F);
+		graphics.pose().translate(-8F, -8F);
+		graphics.item(stack, 0, 0);
+		graphics.pose().popMatrix();
 	}
 
 	private static @Nullable AttachmentType<Integer> missing;

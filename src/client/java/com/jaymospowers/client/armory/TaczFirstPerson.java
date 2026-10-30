@@ -57,23 +57,24 @@ public final class TaczFirstPerson {
 		FabricLoader loader = FabricLoader.getInstance();
 		if (loader.isModLoaded("tacz") && loader.isModLoaded("firstperson")) {
 			// after First-person Model has loaded its config, before its first-tick reload of the list (which reads it)
-			ClientLifecycleEvents.CLIENT_STARTED.register(client -> addGunToVanillaHands());
+			ClientLifecycleEvents.CLIENT_STARTED.register(client -> addToVanillaHands(GUN_ITEM));
 		}
 	}
 
+	/** Puts {@code item} on First-person Model's vanilla-hands list (also the musket's, {@link MusketSights}). */
 	@SuppressWarnings("unchecked")
-	private static void addGunToVanillaHands() {
+	static void addToVanillaHands(String item) {
 		try {
 			Class<?> core = Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore");
 			Object instance = core.getField("instance").get(null);
 			Object config = core.getMethod("getConfig").invoke(instance);
 			Set<String> items = (Set<String>)config.getClass().getField("autoVanillaHands").get(config);
-			if (items.add(GUN_ITEM)) {
+			if (items.add(item)) {
 				Object logic = core.getMethod("getLogicHandler").invoke(instance);
 				logic.getClass().getMethod("reloadAutoVanillaHandsSettings").invoke(logic);
 			}
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
-			JaymosPowers.LOGGER.warn("Couldn't put TaCZ guns on First-person Model's vanilla-hands list; guns may sit low in first person", e);
+			JaymosPowers.LOGGER.warn("Couldn't put {} on First-person Model's vanilla-hands list; it may sit low in first person", item, e);
 		}
 	}
 }

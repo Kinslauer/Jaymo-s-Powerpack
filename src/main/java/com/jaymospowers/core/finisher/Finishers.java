@@ -632,7 +632,7 @@ public final class Finishers {
 
 	/**
 	 * (0.15.114) Whether {@code body} is down for a finisher: downed, or (Andy: "crippled enemies should be executable too")
-	 * crippled, off its feet: Darktide's crawl, both legs broken ({@link Breaks#crawlOnly}), or a leg cut off. (0.18.69) Or
+	 * crippled, off its feet: Darktide's crawl, both legs broken ({@link Breaks#crawlOnly}), or a leg cut off. (0.18.71) Or
 	 * tripped by a bolas, face down with its legs bound ({@code Tripped}).
 	 */
 	public static boolean helpless(LivingEntity body) {

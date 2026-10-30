@@ -7156,7 +7156,19 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   louder the wider the lead, with a ring of dust. The one who breaks gets a sonic boom and a ringing bell; a draw rings too.
   Not seen in game.
 
-## 0.7.402: bolas trip people and break a leg (pack 0.18.69)
+## 0.7.402: the Unarmed figure drops what it held (pack 0.18.69)
+- Andy: "if the origin gives them an item in this hand it should comically be on the floor". The road page's Unarmed
+  figure now lacks its sword arm (Powers' right arm), and any hand whose arm is gone lets go: what it held (an earlier
+  answer's bow, sword, pickaxe) lies flat on the floor at the feet on that side, pointing away. Sizes in
+  `StoryFigure.DROPPED_*`.
+
+## 0.7.403: the Piglin King stands straight (pack 0.18.70)
+- Andy: "piglin arm is broken". The model file's idle and walk hold a twisted fighting stance, the left arm thrust out
+  and pushed off its shoulder (made to hold something it doesn't have). It now stands in its rest pose and walks with
+  its legs and arms swinging (`BeastsClient.kingStride`); its claw, volley, cold snap and roar still play as drawn.
+- Compile-checked; not seen in game.
+
+## 0.7.404: bolas trip people and break a leg (pack 0.18.71)
 - Andy: "bolas should force a cripple on humanoid mobs, and animate wrapping and tripping them". With Jaymo's Powers, a
   bolas that hits anything built like a person (villagers, MCA folk, bandits, illagers, piglins, zombies, skeletons; now
   any of them, not only foes) calls Powers' `Tripped.bind` through `PowersCompat.trip`: one leg is broken in the wounds

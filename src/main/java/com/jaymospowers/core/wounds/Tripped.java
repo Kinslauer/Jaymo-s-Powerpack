@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.69) Tripped by a bolas. Andy (2026-10-30): "bolas should force a cripple on humanoid mobs, and animate wrapping
+ * (0.18.71) Tripped by a bolas. Andy (2026-10-30): "bolas should force a cripple on humanoid mobs, and animate wrapping
  * and tripping them". Kingdoms' bolas (through its {@code PowersCompat}) calls {@link #bind} on any mob built like a
  * person ({@link BodyPlan#HUMANOID}: villagers, MCA folk, bandits, illagers, piglins, zombies, skeletons):
  * <ul>
