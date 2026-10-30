@@ -57,6 +57,8 @@ public final class ZFighterRaiders {
 	static final int PRIZE_FUEL = 3;
 	/** (0.18.12) What a burnt-out pod leaves: its keel and this many sound parts at random. */
 	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
+	/** (0.18.13) How many of a raider pod's hull plates, canopy and mast are gone when it comes down (it flies stripped, and the one left keeps the gaps). */
+	static final int STRIP_MIN = 1, STRIP_MAX = 3;
 	static final int NAMES = 8;
 	static final String TAG = "jaymospowers.raider";
 	static final long DAY = 24000L;
@@ -178,6 +180,7 @@ public final class ZFighterRaiders {
 			boolean chief = i == 0;
 			ZFighterPatrol.Flier flier = ZFighterPatrol.land(level, ground, random.nextInt(NAMES), f -> stepOut(band, f, chief));
 			flier.pod.addTag(TAG);
+			strip(flier.pod, random);
 			band.pods.add(flier.pod);
 		}
 		level.playSound(null, middle.getX(), middle.getY() + 30, middle.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
@@ -284,7 +287,8 @@ public final class ZFighterRaiders {
 		if (kept == null) {
 			return;
 		}
-		// (0.18.12) the kept pod is a complete pod of your own, no longer locked to the band
+		// (0.18.12) the kept pod is a pod of your own, no longer locked to the band; (0.18.13) it keeps the gaps it came down with
+		// (no hull door, no glass) and, never having been hammered to a finish, is not flight-ready: mend it, or strip it with a hammer
 		kept.removeTag(TAG);
 		kept.removeTag(ZFighterPatrol.POD_TAG);
 		kept.setFuel(PRIZE_FUEL);
@@ -292,6 +296,26 @@ public final class ZFighterRaiders {
 		for (ServerPlayer player : level.getPlayers(p -> p.blockPosition().distSqr(prize) < 96 * 96)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.raiders.beaten").withStyle(ChatFormatting.GOLD));
 		}
+	}
+
+	/**
+	 * (0.18.13) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast
+	 * are not there, so the pod comes down (and is drawn) without a door or glass, and it is not finished.
+	 */
+	private static void strip(PodEntity pod, RandomSource random) {
+		List<Integer> slots = new ArrayList<>();
+		for (int i = 0; i < PodPart.PLATE.count; i++) {
+			slots.add(PodPart.PLATE.bit(i));
+		}
+		slots.add(PodPart.CANOPY.bit(0));
+		slots.add(PodPart.MAST.bit(0));
+		int filled = pod.filled();
+		int count = STRIP_MIN + random.nextInt(STRIP_MAX - STRIP_MIN + 1);
+		for (int i = 0; i < count && !slots.isEmpty(); i++) {
+			filled &= ~slots.remove(random.nextInt(slots.size()));
+		}
+		pod.setParts(filled, 0);
+		pod.setFinished(false);
 	}
 
 	/** (0.18.12) A burnt-out pod is a bare pod: its keel and {@link #SCRAP_MIN} to {@link #SCRAP_MAX} sound parts, left lying. */

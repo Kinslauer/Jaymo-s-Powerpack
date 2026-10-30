@@ -173,35 +173,6 @@
           }
         }
       ]
-    },
-    {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 1,
-        "max": 2
-      },
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:pod_fin",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:pod_plate",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:pod_mast",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:pod_tank",
-          "weight": 1
-        }
-      ]
     }
   ]
 }

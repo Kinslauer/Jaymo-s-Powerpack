@@ -3,15 +3,22 @@
   "pools": [
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "type": "minecraft:survives_explosion"
-        }
-      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jaymospowers:pod_fin"
+          "name": "jaymospowers:pod_fin",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:pod_fin",
+              "properties": [
+                "damaged"
+              ]
+            }
+          ]
         }
       ]
     }

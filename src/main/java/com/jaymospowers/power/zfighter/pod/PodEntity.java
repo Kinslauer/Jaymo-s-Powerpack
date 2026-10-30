@@ -51,6 +51,9 @@ import org.jspecify.annotations.Nullable;
  * {@link #outermost}. Track A may add anything else.
  */
 public class PodEntity extends Entity {
+	/** (0.18.13) Hammered to a finish (flight-ready), and how well it was mended (0 to {@link PodGrades#MAX_GRADE}). */
+	static final EntityDataAccessor<Boolean> FINISHED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.BOOLEAN);
+	static final EntityDataAccessor<Integer> GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> FILLED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> DAMAGED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> FUEL = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
@@ -60,6 +63,8 @@ public class PodEntity extends Entity {
 	static final float WIDTH = 2.0F, HEIGHT = 3.5F;
 	/** The pilot's seat: how high above its feet (blocks), inside the hull. */
 	public static final double SEAT = 1.1;
+	/** (0.18.13) With two seated, how far (blocks) each sits from the middle. */
+	static final double SEAT_APART = 0.4;
 	/** Settling: gravity a tick, the share of fall speed kept, and how often (ticks) a pod at rest checks its footing. */
 	static final double GRAVITY = 0.06, DRAG = 0.98;
 	static final int REST_CHECK = 10;
@@ -131,7 +136,13 @@ public class PodEntity extends Entity {
 
 	/** On a trip, or a Patrol's or raider's pod: nobody can open it or climb in. */
 	public boolean locked() {
-		return entityTags().contains(ZFighterPodTrip.TAG) || entityTags().contains(ZFighterPatrol.POD_TAG) || entityTags().contains(ZFighterPatrol.FLYING_TAG);
+		return entityTags().contains(ZFighterPodTrip.TAG) || entityTags().contains(ZFighterPatrol.POD_TAG) || entityTags().contains(ZFighterPatrol.FLYING_TAG)
+			|| wreckDeck() >= 0;
+	}
+
+	/** (0.18.13) Which Maw wreck deck this pod is the wreck of ({@link PodWrecks}), or -1 for a pod that isn't one. */
+	public int wreckDeck() {
+		return PodWrecks.deckOf(this);
 	}
 
 	// ---------------------------------------------------------------- standing, and the pilot
@@ -155,13 +166,18 @@ public class PodEntity extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return passenger instanceof Player && getPassengers().isEmpty();
+		return passenger instanceof Player && getPassengers().size() < seats();
 	}
 
-	/** The pilot sits inside the hull. */
+	/** The pilot sits inside the hull; with a second seat (grade II) the two sit side by side. */
 	@Override
 	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
-		moveFunction.accept(passenger, getX(), getY() + SEAT, getZ());
+		double side = 0.0;
+		if (getPassengers().size() > 1) {
+			side = getPassengers().indexOf(passenger) == 0 ? -SEAT_APART : SEAT_APART;
+		}
+		float radians = getYRot() * Mth.DEG_TO_RAD;
+		moveFunction.accept(passenger, getX() + -Mth.cos(radians) * side, getY() + SEAT, getZ() + -Mth.sin(radians) * side);
 	}
 
 	@Override
@@ -201,12 +217,16 @@ public class PodEntity extends Entity {
 			return InteractionResult.SUCCESS;
 		}
 		ItemStack held = player.getItemInHand(hand);
+		// (0.18.13) a world's own part, sneaking: the pod is mended a grade better
+		if (player.isSecondaryUseActive() && PodGrades.tryGrade(server, this, held)) {
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		int worth = ZFighterSpace.fuelWorth(held);
 		if (worth > 0) {
 			fuelUp(server, held, worth);
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		if (player.isSecondaryUseActive() && getPassengers().isEmpty() && !player.isPassenger()) {
+		if (player.isSecondaryUseActive() && getPassengers().size() < seats() && !player.isPassenger()) {
 			player.startRiding(this);
 			return InteractionResult.SUCCESS_SERVER;
 		}
@@ -234,6 +254,8 @@ public class PodEntity extends Entity {
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(FINISHED, false);
+		builder.define(GRADE, 0);
 		builder.define(FILLED, 0);
 		builder.define(DAMAGED, 0);
 		builder.define(FUEL, 0);
@@ -241,13 +263,18 @@ public class PodEntity extends Entity {
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
+		entityData.set(GRADE, Mth.clamp(input.getIntOr("grade", 0), 0, PodGrades.MAX_GRADE));
 		entityData.set(FILLED, input.getIntOr("filled", 0));
 		entityData.set(DAMAGED, input.getIntOr("damaged", 0));
+		// a pod saved before pods were finished by hand is finished if it was whole
+		entityData.set(FINISHED, input.getBooleanOr("finished", complete()));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 	}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
+		output.putInt("grade", entityData.get(GRADE));
+		output.putBoolean("finished", entityData.get(FINISHED));
 		output.putInt("filled", entityData.get(FILLED));
 		output.putInt("damaged", entityData.get(DAMAGED));
 		output.putInt("fuel", entityData.get(FUEL));
@@ -308,6 +335,9 @@ public class PodEntity extends Entity {
 		int bit = part.bit(index);
 		entityData.set(FILLED, filled() | bit);
 		entityData.set(DAMAGED, isDamaged ? damagedMask() | bit : damagedMask() & ~bit);
+		if (isDamaged) {
+			setFinished(false);
+		}
 		return true;
 	}
 
@@ -339,6 +369,7 @@ public class PodEntity extends Entity {
 		}
 		entityData.set(FILLED, filled() & ~bit);
 		entityData.set(DAMAGED, damagedMask() & ~bit);
+		setFinished(false);
 		if (part == PodPart.TANK) {
 			entityData.set(FUEL, 0);
 		}
@@ -350,9 +381,41 @@ public class PodEntity extends Entity {
 		return filled() == PodPart.ALL_SLOTS && damagedMask() == 0;
 	}
 
-	/** Whether it can lift at all: keel, every fin on, bell, tank and canopy on (plates and mast may be missing or damaged). */
-	public boolean canLaunch() {
+	/** Whether it has what a lift needs: keel, every fin on, bell, tank and canopy on (plates and mast may be missing or damaged). */
+	public boolean launchParts() {
 		return has(PodPart.KEEL, 0) && countOf(PodPart.FIN) == 3 && has(PodPart.BELL, 0) && has(PodPart.TANK, 0) && has(PodPart.CANOPY, 0);
+	}
+
+	/** (0.18.13) Whether it can lift at all: it has {@link #launchParts} and a hammer has finished it. */
+	public boolean canLaunch() {
+		return finished() && launchParts();
+	}
+
+	/** (0.18.13) Whether a hammer blow finishes it (rather than takes a part off): it could fly but hasn't been finished. */
+	public boolean readyToFinish() {
+		return !finished() && launchParts();
+	}
+
+	public boolean finished() {
+		return entityData.get(FINISHED);
+	}
+
+	public void setFinished(boolean finished) {
+		entityData.set(FINISHED, finished);
+	}
+
+	/** (0.18.13) How well it was mended, 0 (as built) to {@link PodGrades#MAX_GRADE}. */
+	public int grade() {
+		return entityData.get(GRADE);
+	}
+
+	public void setGrade(int grade) {
+		entityData.set(GRADE, Mth.clamp(grade, 0, PodGrades.MAX_GRADE));
+	}
+
+	/** (0.18.13) How many can ride: the pilot, and from grade {@link PodGrades#SECOND_SEAT_GRADE} a passenger. */
+	public int seats() {
+		return grade() >= PodGrades.SECOND_SEAT_GRADE ? 2 : 1;
 	}
 
 	public int fuel() {
@@ -367,5 +430,6 @@ public class PodEntity extends Entity {
 	public void makeComplete() {
 		entityData.set(FILLED, PodPart.ALL_SLOTS);
 		entityData.set(DAMAGED, 0);
+		setFinished(true);
 	}
 }

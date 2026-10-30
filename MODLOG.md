@@ -3916,3 +3916,27 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
+
+- **0.18.13, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+  `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
+  flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
+  in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer
+  on a pod that could fly now needs sneaking to take a part off. Pods the Patrol, the legacy block and the far-world pads
+  give are finished already. **Salvage Rack** (`SalvageRack`, `salvage_rack`: two planks, two sticks and a chain): a worn
+  part (a hammered-off damaged part is no longer scrap but a worn part block/item, `damaged` state, kept in the item's
+  block_state) is carried to the rack and set down looking at it; a hammer in the main hand and the part's metal in the other
+  (iron for frame, plates and mast, steel for fins, copper for tank and bell, glass for the canopy) mend it in three blows, the
+  first taking one of the metal; sneak and strike breaks it to labelled scrap; empty arms take the mended part back into the
+  carry. JEI: the Salvage Rack page and a Pod Mending page (`SalvageJei`). **Wreck Part Sets** (`PodWrecks`): each Maw wreck deck
+  holds a fixed set (the three fins; tank and bell; four plates; canopy and mast), drawn on its wrecked pod, worn in part; a
+  hammer on the wreck salvages it once per player, giving the deck's set or, if they hold it, the next one they lack, and plain
+  scrap once every set is held (a per-player attachment remembers); the chest no longer holds random parts. **Strip the Raider
+  Pod:** raider pods come down with one to three of their plates, canopy and mast missing (visibly, no door or glass) and the
+  pod the band leaves keeps the gaps, its three fuel and no finish: mend it, or strip it for parts with a hammer; a patrolman
+  tells of raiders flying "without the glass". **Mended Better / One Part Per World** (`PodGrades`): pods have grades I to III
+  and a brass band on the keel posts for each; the Rustfall plate, the Glacia ice-glass and the Cinder bell alloy (plain items,
+  the prize of settling that world the first time) grade a finished pod up when used sneaking: I takes 1 off trips that burn 3 or
+  more, II adds a second seat (the passenger rides, lands and wakes with the pilot), III keeps a hard landing from shaking
+  parts off. A pod stripped to its keel keeps its grade in the keel block. Textures are painted by `tools/gen_pod_parts.py`
+  (worn parts, grade bands) and `tools/gen_pod_mending.py` (rack, world parts); `tools/gen_pod.py` gained the lamp and the bands.
+  Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 3.

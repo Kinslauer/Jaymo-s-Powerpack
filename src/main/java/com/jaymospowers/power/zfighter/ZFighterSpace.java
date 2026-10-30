@@ -5,6 +5,8 @@ import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.chrono.future.Future;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
+import com.jaymospowers.power.zfighter.pod.PodGrades;
+import com.jaymospowers.power.zfighter.pod.PodWrecks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -96,8 +98,6 @@ public final class ZFighterSpace {
 	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
 	/** What Home burns from anywhere that isn't a far world (the overworld, the Nether...). */
 	public static final int HOME_COST = 1;
-	/** (0.18.12) The Maw wrecks' pods: how many of their parts (besides the keel and fins) are there, and how many of those are damaged. */
-	static final int WRECK_POD_EXTRA_MIN = 2, WRECK_POD_EXTRA_MAX = 5, WRECK_POD_DAMAGED_MIN = 1, WRECK_POD_DAMAGED_MAX = 3;
 	/** The landing pad's radius, and how far (blocks) the search for a flat place widens each try; how many tries. */
 	static final int PAD_RADIUS = 3, SEARCH_STEP = 28, SEARCH_TRIES = 36;
 	/** How much the surface may rise and fall across a pad before the spot is passed over. */
@@ -399,8 +399,12 @@ public final class ZFighterSpace {
 				.withStyle(ChatFormatting.RED));
 			return;
 		}
+		if (!pod.finished()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.unfinished").withStyle(ChatFormatting.RED));
+			return;
+		}
 		int fuel = pod.fuel();
-		int cost = player.isCreative() ? 0 : cost(index, player.level().dimension());
+		int cost = player.isCreative() ? 0 : PodGrades.discount(pod.grade(), cost(index, player.level().dimension()));
 		if (fuel < cost) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_fuel", cost, fuel).withStyle(ChatFormatting.RED));
 			return;
@@ -533,11 +537,11 @@ public final class ZFighterSpace {
 			}
 		}
 		RandomSource random = RandomSource.create(MAW_SEED);
-		wrecks(random, centre -> wreck(level, centre, random));
+		wrecks(random, (centre, deck) -> wreck(level, centre, random, deck));
 	}
 
 	/** The wrecks' middles, the same every time ({@link #MAW_SEED}), each handed to {@code each} with the random still in step. */
-	private static void wrecks(RandomSource random, java.util.function.Consumer<BlockPos> each) {
+	private static void wrecks(RandomSource random, java.util.function.ObjIntConsumer<BlockPos> each) {
 		for (int i = 0; i < MAW_WRECKS; i++) {
 			double angle = Math.PI * 2.0 * i / MAW_WRECKS + random.nextDouble() * 0.5;
 			double distance = MAW_WRECK_MIN + random.nextDouble() * (MAW_WRECK_MAX - MAW_WRECK_MIN);
@@ -546,7 +550,7 @@ public final class ZFighterSpace {
 			if (Math.abs(centre.getX() - MAW_PAD_X) < 12 && Math.abs(centre.getZ()) < 12) {
 				continue;
 			}
-			each.accept(centre);
+			each.accept(centre, i);
 		}
 	}
 
@@ -555,7 +559,7 @@ public final class ZFighterSpace {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);
 		// the same draws as building them, so the middles match: each wreck takes its own random draws after its middle
-		wrecks(random, centre -> {
+		wrecks(random, (centre, deck) -> {
 			decks.add(centre.offset(1, 1, -2));
 			wreckDraws(random);
 		});
@@ -580,7 +584,7 @@ public final class ZFighterSpace {
 	}
 
 	/** One wreck: a ragged floating deck of blackstone with a chest of the Maw's loot, a lantern and a broken mast. */
-	private static void wreck(ServerLevel level, BlockPos centre, RandomSource random) {
+	private static void wreck(ServerLevel level, BlockPos centre, RandomSource random, int deck) {
 		for (int dx = -3; dx <= 3; dx++) {
 			for (int dz = -3; dz <= 3; dz++) {
 				if (dx * dx + dz * dz > 10 || (Math.abs(dx) == 3 && random.nextInt(2) == 0)) {
@@ -600,42 +604,9 @@ public final class ZFighterSpace {
 		for (int up = 1; up <= 3; up++) {
 			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
-		// (0.18.12) and a pod that came down with the ship: spare parts, some of them broken (its own random: the wrecks' draws stay in step)
-		wreckedPod(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), RandomSource.create(MAW_SEED ^ centre.asLong()));
-	}
-
-	/**
-	 * (0.18.12) A wrecked pod at {@code at}: the keel and the three fins, {@link #WRECK_POD_EXTRA_MIN} to {@link #WRECK_POD_EXTRA_MAX}
-	 * of the other parts at random, and {@link #WRECK_POD_DAMAGED_MIN} to {@link #WRECK_POD_DAMAGED_MAX} of its parts damaged.
-	 * No fuel. The Maw is where spare parts come from.
-	 */
-	static PodEntity wreckedPod(ServerLevel level, Vec3 at, RandomSource random) {
-		List<PodPart> pool = new ArrayList<>(List.of(PodPart.BELL, PodPart.TANK, PodPart.CANOPY, PodPart.MAST));
-		for (int i = 0; i < PodPart.PLATE.count; i++) {
-			pool.add(PodPart.PLATE);
-		}
-		int filled = PodPart.KEEL.bits() | PodPart.FIN.bits();
-		int[] used = new int[PodPart.values().length];
-		int extra = WRECK_POD_EXTRA_MIN + random.nextInt(WRECK_POD_EXTRA_MAX - WRECK_POD_EXTRA_MIN + 1);
-		for (int i = 0; i < extra && !pool.isEmpty(); i++) {
-			PodPart part = pool.remove(random.nextInt(pool.size()));
-			filled |= part.bit(used[part.ordinal()]++);
-		}
-		List<Integer> soundBits = new ArrayList<>();
-		for (int bit = 1; bit != 0 && bit <= PodPart.ALL_SLOTS; bit <<= 1) {
-			if ((filled & bit) != 0 && (PodPart.KEEL.bits() & bit) == 0) {
-				soundBits.add(bit);
-			}
-		}
-		int damaged = 0;
-		int count = WRECK_POD_DAMAGED_MIN + random.nextInt(WRECK_POD_DAMAGED_MAX - WRECK_POD_DAMAGED_MIN + 1);
-		for (int i = 0; i < count && !soundBits.isEmpty(); i++) {
-			damaged |= soundBits.remove(random.nextInt(soundBits.size()));
-		}
-		PodEntity pod = PodEntity.spawn(level, at, false, 0);
-		pod.setParts(filled, damaged);
-		pod.setYRot(random.nextFloat() * 360.0F);
-		return pod;
+		// (0.18.12) and a pod that came down with the ship; (0.18.13) it holds its deck's own set of parts, worn in part, for a hammer to salvage
+		// (its own random: the wrecks' draws stay in step)
+		PodWrecks.build(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), deck, RandomSource.create(MAW_SEED ^ centre.asLong()).nextFloat() * 360.0F);
 	}
 
 	// ---------------------------------------------------------------- arriving

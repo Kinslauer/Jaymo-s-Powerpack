@@ -3,6 +3,10 @@
 an item definition and a loot table (drops itself); and for the four metal parts that are forged (fin, plate, mast, tank)
 the blank's textures, models and item definition (WeaponParts kinds pod_<part>_blank, shown stone and metal).
 
+(0.18.13) Every part block also has a worn state (property damaged: a bent, scorched, cracked texture, pod_<part>_worn) that
+its item keeps (block_state component), and the keel a mend grade (property grade 0 to 3: a brass band on its post for each
+grade, models pod_keel_g1..g3). tools/gen_pod_mending.py draws the salvage rack and the three world parts.
+
     python -I tools/gen_pod_parts.py
 
 The boxes in BOXES must match PodParts.shapeOf (pixels of 16). Model faces reference #variables, never a raw sprite id
@@ -25,6 +29,7 @@ DATA = os.path.join(ROOT, "data", "jaymospowers")
 
 IRON, BRASS, BONE = (74, 78, 86), (176, 134, 62), (226, 222, 210)
 GLASS, RED = (120, 190, 230), (170, 46, 40)
+SCORCH = (58, 46, 40)
 
 PARTS = ["keel", "fin", "bell", "tank", "plate", "canopy", "mast"]
 # the texture a part is drawn with (#all) and the one the accents use (#band: red band, rivets, beacon)
@@ -94,12 +99,57 @@ def save(img, rel):
     img.save(path)
 
 
-def model(part):
+def model(part, worn=False):
     used = sorted({box[6] for box in BOXES[part]} | {"all"})
     tex = {v: "jaymospowers:block/pod_" + (part if v == "all" else "band" if v == "band" else part + "_frame") for v in used}
+    if worn:
+        tex["all"] += "_worn"
     tex["particle"] = tex["all"]
     elements = [{"from": list(b[:3]), "to": list(b[3:6]), "faces": {f: {"texture": "#" + b[6]} for f in FACES}} for b in BOXES[part]]
     return {"textures": tex, "elements": elements}
+
+
+def worn_texture(part):
+    """The part's texture gone dull: darker, scorched in patches, with cracks (fixed seed, so reruns match)."""
+    rng = random.Random(part + "-worn")
+    img = texture(part).convert("RGBA")
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            r, g, b, a = px[x, y]
+            px[x, y] = tuple(int(c * 0.78) for c in (r, g, b)) + (a,)
+    for _ in range(3):
+        cx, cy = rng.randint(2, 13), rng.randint(2, 13)
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                if dx * dx + dy * dy <= 4 and rng.random() < 0.7:
+                    x, y = cx + dx, cy + dy
+                    if 0 <= x < 16 and 0 <= y < 16:
+                        px[x, y] = shade(SCORCH, rng.randint(-6, 6)) + (255,)
+    for _ in range(2):
+        x, y = rng.randint(1, 14), 0
+        while y < 16:
+            px[x, y] = (22, 22, 26, 255)
+            y += 1
+            x = max(0, min(15, x + rng.choice((-1, 0, 0, 1))))
+    return img
+
+
+def keel_model(grade):
+    """The keel with a brass band round its post for each grade (the bands sit just outside the post, 6 to 10)."""
+    base = model("keel")
+    base["textures"]["brass"] = "jaymospowers:block/pod_brass"
+    for g in range(grade):
+        y = 4 + 2 * g
+        base["elements"].append({"from": [5, y, 5], "to": [11, y + 1, 11], "faces": {f: {"texture": "#brass"} for f in FACES}})
+    return base
+
+
+def select(prop, cases, fallback):
+    """An item definition that picks its model from a block_state property of the stack."""
+    return {"model": {"type": "minecraft:select", "property": "minecraft:block_state", "block_state_property": prop,
+                      "cases": [{"when": when, "model": {"type": "minecraft:model", "model": "jaymospowers:block/" + name}} for when, name in cases],
+                      "fallback": {"type": "minecraft:model", "model": "jaymospowers:block/" + fallback}}}
 
 
 def blocks():
@@ -107,17 +157,32 @@ def blocks():
         name = "pod_" + part
         save(texture(part), "block/" + name)
         write(os.path.join(ASSETS, "models", "block", name + ".json"), model(part))
-        write(os.path.join(ASSETS, "blockstates", name + ".json"),
-              {"multipart": [{"apply": {"model": "jaymospowers:block/" + name}}]})
-        write(os.path.join(ASSETS, "items", name + ".json"),
-              {"model": {"type": "minecraft:model", "model": "jaymospowers:block/" + name}})
+        # (the keel is only worn on a salvage rack; as a block it carries its grade instead)
+        save(worn_texture(part), "block/" + name + "_worn")
+        write(os.path.join(ASSETS, "models", "block", name + "_worn.json"), model(part, worn=True))
+        props = ["damaged"]
+        if part == "keel":
+            for grade in (1, 2, 3):
+                write(os.path.join(ASSETS, "models", "block", "%s_g%d.json" % (name, grade)), keel_model(grade))
+            write(os.path.join(ASSETS, "blockstates", name + ".json"), {"multipart": [
+                {"when": {"grade": str(grade)}, "apply": {"model": "jaymospowers:block/" + name + ("_g%d" % grade if grade else "")}}
+                for grade in (0, 1, 2, 3)]})
+            write(os.path.join(ASSETS, "items", name + ".json"), select("grade", [(str(g), "%s_g%d" % (name, g)) for g in (1, 2, 3)], name))
+            props.append("grade")
+        else:
+            write(os.path.join(ASSETS, "blockstates", name + ".json"), {"variants": {
+                "damaged=false": {"model": "jaymospowers:block/" + name},
+                "damaged=true": {"model": "jaymospowers:block/" + name + "_worn"}}})
+            write(os.path.join(ASSETS, "items", name + ".json"), select("damaged", [("true", name + "_worn")], name))
         write(os.path.join(DATA, "loot_table", "blocks", name + ".json"), {
             "type": "minecraft:block",
             "pools": [{"rolls": 1, "condition": {"type": "minecraft:survives_explosion"},
-                       "entries": [{"type": "minecraft:item", "name": "jaymospowers:" + name}]}],
+                       "entries": [{"type": "minecraft:item", "name": "jaymospowers:" + name,
+                                    "modifier": [{"type": "minecraft:copy_state", "block": "jaymospowers:" + name, "properties": props}]}]}],
             "random_sequence": "jaymospowers:blocks/" + name})
     save(solid(RED), "block/pod_band")
     save(solid(IRON), "block/pod_canopy_frame")
+    save(solid(BRASS), "block/pod_brass")
 
 
 # the blanks: 16x16 heads like the smith's ('#' outline, 'x' metal, 'o' shine), added to the weapon part drawings

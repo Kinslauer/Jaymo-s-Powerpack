@@ -298,6 +298,25 @@ public final class CarryBlock {
 	}
 
 	/**
+	 * (0.18.13) Puts a block that never stood in the world (a pod part taken off a salvage rack) straight into
+	 * {@code carrier}'s arms, as if they had lifted it.
+	 */
+	public static void carryNew(ServerLevel level, ServerPlayer carrier, BlockState state) {
+		Display.BlockDisplay block = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
+		block.setBlockState(state);
+		block.setTransformation(new Transformation(new Vector3f(-SCALE / 2.0F, HOLD_UP, HOLD_AHEAD), null, new Vector3f(SCALE), null));
+		block.setAttached(STATE, state);
+		block.setWidth(2.0F);
+		block.setHeight(2.0F);
+		block.setPos(carrier.getX(), carrier.getY(), carrier.getZ());
+		block.setYRot(carrier.getYRot());
+		level.addFreshEntity(block);
+		block.addTag(TAG);
+		level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.7F, 0.9F);
+		Carry.pickUp(carrier, block);
+	}
+
+	/**
 	 * Puts a carried block back into the world as a falling block moving at {@code velocity}: ahead of the carrier
 	 * (or to a side, or behind, if that's blocked) when there is one, otherwise where the display is. If nowhere is
 	 * free, it drops as its item. Returns where it went.

@@ -6,6 +6,7 @@ import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Research;
 import com.jaymospowers.core.CarryBlock;
 import java.util.EnumMap;
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -29,16 +31,25 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -50,8 +61,10 @@ import org.jspecify.annotations.Nullable;
  * {@code pod_fin}, {@code pod_bell}, {@code pod_tank}, {@code pod_plate}, {@code pod_canopy}, {@code pod_mast}. They are
  * carried like a crafting table ({@code CarryBlock.carriable}) and set down onto a pod entity you are looking at
  * ({@link #tryAttach}, called from {@code Carry.release}); a keel set down on the ground becomes a bare pod
- * ({@link KeelBlock}). Hitting a pod with a hammer takes the outermost part off again ({@link #takeOff}); a part that was
- * damaged only comes off as scrap ({@link #itemOf}). Where the parts are made: {@code WeaponParts} (fin, plate, mast, tank
+ * ({@link KeelBlock}). Hitting a pod with a hammer takes the outermost part off again ({@link #takeOff}); (0.18.13) a part that
+ * was damaged comes off as a worn part (the block's {@link #DAMAGED} state, kept by its item), to be mended at a
+ * {@link SalvageRack}, and a launch-ready pod's first hammer blow finishes it instead ({@link #finish}). A keel carries the
+ * pod's mend grade ({@link #GRADE}). Where the parts are made: {@code WeaponParts} (fin, plate, mast, tank
  * blanks), the kiln (bell), an Alchemy infusion (canopy; research {@code pod_canopy}). The models are drawn by
  * tools/gen_pod_parts.py; keep the shapes here and the boxes there the same.
  */
@@ -60,8 +73,13 @@ public final class PodParts {
 	public static final double REACH = 4.0, AIM_SLACK = 0.6;
 	/** Iron nuggets and glass panes a damaged part is worth. */
 	public static final int METAL_SCRAP = 3, GLASS_SCRAP = 2;
+	/** How high (blocks) the beacon mast's tip is above the pod's feet, for the finishing sparks. */
+	static final double HEIGHT_OF_MAST = 3.1;
 	/** Tool tag of the hammers that take a pod apart (the mace is in it too). */
 	public static final TagKey<Item> HAMMERS = TagKey.create(Registries.ITEM, JaymosPowers.id("hammers"));
+	/** (0.18.13) A part block's wear (a worn one is mended at a rack), and a keel's mend grade. */
+	public static final BooleanProperty DAMAGED = BooleanProperty.create("damaged");
+	public static final IntegerProperty GRADE = IntegerProperty.create("grade", 0, PodGrades.MAX_GRADE);
 	/** The research that teaches the canopy's infusion. */
 	public static final String CANOPY_RESEARCH = "pod_canopy";
 
@@ -97,7 +115,7 @@ public final class PodParts {
 			Block block = Registry.register(BuiltInRegistries.BLOCK, key,
 				part == PodPart.KEEL ? new KeelBlock(properties, shape) : new PartBlock(properties, shape));
 			ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(part.blockPath()));
-			Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
+			Registry.register(BuiltInRegistries.ITEM, itemKey, new PartItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
 			BLOCKS.put(part, block);
 			PARTS.put(block, part);
 		}
@@ -107,18 +125,34 @@ public final class PodParts {
 			}
 		});
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!(entity instanceof PodEntity pod) || player.isSpectator() || !player.getItemInHand(hand).is(HAMMERS)) {
+				return InteractionResult.PASS;
+			}
+			// (0.18.13) a wreck in the Maw is salvaged for a set of parts, once for each player
+			if (pod.wreckDeck() >= 0) {
+				if (level instanceof ServerLevel server && player instanceof ServerPlayer hitter) {
+					PodWrecks.salvage(server, hitter, pod);
+				}
+				return InteractionResult.SUCCESS;
+			}
 			// a pod on a trip, the Patrol's or the raiders', or one with somebody in it, is not for taking apart
-			if (!(entity instanceof PodEntity pod) || player.isSpectator() || !player.getItemInHand(hand).is(HAMMERS) || pod.locked()
-				|| !pod.getPassengers().isEmpty()) {
+			if (pod.locked() || !pod.getPassengers().isEmpty()) {
 				return InteractionResult.PASS;
 			}
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer hitter) {
-				takeOff(server, hitter, pod);
+				// (0.18.13) a pod that could fly is finished by the first plain blow; sneaking takes a part off it instead
+				if (pod.readyToFinish() && !hitter.isShiftKeyDown()) {
+					finish(server, hitter, pod);
+				} else {
+					takeOff(server, hitter, pod);
+				}
 			}
 			return InteractionResult.SUCCESS;
 		});
 		Research.register(new Research.Entry(CANOPY_RESEARCH, Research.Category.INFUSION, () -> BLOCKS.get(PodPart.CANOPY).asItem(),
 			EssenceList.of(Essence.CRYSTAL, 8, Essence.AIR, 6), List.of("infusion"), 0, 2, 1));
+		SalvageRack.init();
+		PodGrades.init();
 	}
 
 	// ---------------------------------------------------------------- lookups
@@ -138,15 +172,53 @@ public final class PodParts {
 		return PARTS.get(state.getBlock());
 	}
 
-	/**
-	 * What a part is as an item: its block item, or when it was damaged only scrap (three iron nuggets for the metal
-	 * ones, two glass panes for the canopy).
-	 */
+	/** What a part is as an item: its block item, with the block's worn state when {@code damaged}. */
 	public static ItemStack itemOf(PodPart part, boolean damaged) {
-		if (!damaged) {
-			return new ItemStack(item(part));
+		return stackOf(part, damaged, 0);
+	}
+
+	/** A part as an item, worn or sound; a keel also remembers the pod's mend {@code grade}. */
+	public static ItemStack stackOf(PodPart part, boolean damaged, int grade) {
+		ItemStack stack = new ItemStack(item(part));
+		BlockItemStateProperties props = BlockItemStateProperties.EMPTY;
+		boolean any = false;
+		if (damaged) {
+			props = props.with(DAMAGED, true);
+			any = true;
 		}
-		return part == PodPart.CANOPY ? new ItemStack(Items.GLASS_PANE, GLASS_SCRAP) : new ItemStack(Items.IRON_NUGGET, METAL_SCRAP);
+		if (part == PodPart.KEEL && grade > 0) {
+			props = props.with(GRADE, grade);
+			any = true;
+		}
+		if (any) {
+			stack.set(DataComponents.BLOCK_STATE, props);
+		}
+		return stack;
+	}
+
+	/** The block of a part as the pod gives it up: worn or sound, a keel with its grade. */
+	public static BlockState stateOf(PodPart part, boolean damaged, int grade) {
+		BlockState state = block(part).defaultBlockState().setValue(DAMAGED, damaged);
+		return part == PodPart.KEEL ? state.setValue(GRADE, Math.max(0, Math.min(PodGrades.MAX_GRADE, grade))) : state;
+	}
+
+	/**
+	 * Labelled scrap for a broken-up {@code part} (iron nuggets for the metal ones, copper for the tank and bell, glass panes for
+	 * the canopy), or plain scrap for {@code part == null}; {@code count} 0 is the usual amount.
+	 */
+	public static ItemStack scrapOf(@Nullable PodPart part, int count) {
+		ItemStack stack;
+		if (part == PodPart.CANOPY) {
+			stack = new ItemStack(Items.GLASS_PANE, count > 0 ? count : GLASS_SCRAP);
+		} else if (part == PodPart.TANK || part == PodPart.BELL) {
+			stack = new ItemStack(Items.COPPER_NUGGET, count > 0 ? count : METAL_SCRAP);
+		} else {
+			stack = new ItemStack(Items.IRON_NUGGET, count > 0 ? count : METAL_SCRAP);
+		}
+		Component name = part == null ? Component.translatable("item.jaymospowers.pod_scrap.plain")
+			: Component.translatable("item.jaymospowers.pod_scrap", nameOf(part));
+		stack.set(DataComponents.CUSTOM_NAME, name.copy().withStyle(style -> style.withItalic(false)));
+		return stack;
 	}
 
 	private static Component nameOf(PodPart part) {
@@ -182,11 +254,17 @@ public final class PodParts {
 		if (part == null) {
 			return Attach.NONE;
 		}
+		// (0.18.13) a worn part looked at a salvage rack lies on the rack
+		Attach racked = tryRack(carrier, carried, part);
+		if (racked != Attach.NONE) {
+			return racked;
+		}
 		PodEntity pod = aimedPod(carrier);
 		if (pod == null || part == PodPart.KEEL) {
 			return Attach.NONE;
 		}
-		if (!pod.attach(part, false)) {
+		boolean worn = CarryBlock.stateOf(carried).getValue(DAMAGED);
+		if (!pod.attach(part, worn)) {
 			Component message = pod.nextFree(part) < 0
 				? Component.translatable("message.jaymospowers.pod.full", nameOf(part))
 				: Component.translatable("message.jaymospowers.pod.needs_first", nameOf(PodPart.ORDER.get(PodPart.ORDER.indexOf(part) - 1)));
@@ -202,16 +280,54 @@ public final class PodParts {
 		return Attach.DONE;
 	}
 
-	// ---------------------------------------------------------------- taking one off
+	/** A worn part set down looking at an empty {@link SalvageRack} (within {@link #REACH}) lies on it; one that is sound goes down the ordinary way. */
+	private static Attach tryRack(ServerPlayer carrier, Entity carried, PodPart part) {
+		ServerLevel level = carrier.level();
+		Vec3 eye = carrier.getEyePosition();
+		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(carrier.getLookAngle().scale(REACH)), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, carrier));
+		if (hit.getType() != HitResult.Type.BLOCK) {
+			return Attach.NONE;
+		}
+		BlockState rack = level.getBlockState(hit.getBlockPos());
+		if (!rack.is(SalvageRack.BLOCK) || !CarryBlock.stateOf(carried).getValue(DAMAGED)) {
+			return Attach.NONE;
+		}
+		if (rack.getValue(SalvageRack.LAID) != SalvageRack.Laid.NONE) {
+			carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.salvage.full").withStyle(ChatFormatting.GRAY));
+			return Attach.REFUSED;
+		}
+		SalvageRack.lay(level, hit.getBlockPos(), rack, part);
+		carried.discard();
+		carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.salvage.laid", nameOf(part)).withStyle(ChatFormatting.GRAY));
+		return Attach.DONE;
+	}
+
+	// ---------------------------------------------------------------- finishing, and taking one off
 
 	/**
-	 * A hammer blow on a pod: its outermost part comes off. A sound one is set down as a block at the nearest free spot
-	 * beside the pod (the hitter's hands are full of hammer), or dropped as an item if there is none; a damaged one is only
-	 * scrap. The keel only ever comes off last, and takes the pod with it.
+	 * (0.18.13) The first hammer blow on a pod that could fly: it rings, throws sparks, the beacon lights, and the pod is
+	 * finished (flight-ready) until a part comes off or is damaged.
+	 */
+	static void finish(ServerLevel level, ServerPlayer hitter, PodEntity pod) {
+		pod.setFinished(true);
+		Vec3 at = pod.getBoundingBox().getCenter();
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.2F, 1.4F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.7F, 1.6F);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 30, 0.7, 1.0, 0.7, 0.4);
+		level.sendParticles(ParticleTypes.END_ROD, pod.getX(), pod.getY() + HEIGHT_OF_MAST, pod.getZ(), 12, 0.1, 0.4, 0.1, 0.05);
+		hitter.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.finished").withStyle(ChatFormatting.GOLD));
+	}
+
+	/**
+	 * A hammer blow on a pod: its outermost part comes off, as its block set down at the nearest free spot beside the pod (the
+	 * hitter's hands are full of hammer), or dropped as an item if there is none. (0.18.13) A damaged one comes off worn, for
+	 * the salvage rack. The keel only ever comes off last, and takes the pod with it (and its grade stays with the keel).
 	 */
 	static void takeOff(ServerLevel level, ServerPlayer hitter, PodEntity pod) {
 		int bit = pod.outermost();
 		boolean[] wasDamaged = new boolean[1];
+		int grade = pod.grade();
 		PodPart part = bit == 0 ? null : pod.detach(bit, wasDamaged);
 		if (part == null) {
 			if (bit == 0) {
@@ -220,29 +336,22 @@ public final class PodParts {
 			return;
 		}
 		Vec3 at = pod.getBoundingBox().getCenter();
-		if (wasDamaged[0]) {
-			drop(level, at, itemOf(part, true));
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8F, 1.3F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.8F, 0.9F);
-			hitter.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.scrap", nameOf(part)).withStyle(ChatFormatting.GRAY));
-		} else {
-			BlockPos spot = freeSpot(level, pod, hitter);
-			if (spot != null) {
-				boolean keel = part == PodPart.KEEL;
-				settingKeel = keel;
-				try {
-					level.setBlock(spot, block(part).defaultBlockState(), Block.UPDATE_ALL);
-				} finally {
-					settingKeel = false;
-				}
-			} else {
-				drop(level, at, itemOf(part, false));
+		BlockPos spot = freeSpot(level, pod, hitter);
+		if (spot != null) {
+			boolean keel = part == PodPart.KEEL;
+			settingKeel = keel;
+			try {
+				level.setBlock(spot, stateOf(part, wasDamaged[0], grade), Block.UPDATE_ALL);
+			} finally {
+				settingKeel = false;
 			}
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8F, 1.0F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.5F, 1.2F);
-			hitter.sendOverlayMessage(Component.translatable(part == PodPart.KEEL ? "message.jaymospowers.pod.keel_last" : "message.jaymospowers.pod.detached",
-				nameOf(part)).withStyle(ChatFormatting.GRAY));
+		} else {
+			drop(level, at, stackOf(part, wasDamaged[0], grade));
 		}
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8F, wasDamaged[0] ? 1.3F : 1.0F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 0.5F, 1.2F);
+		hitter.sendOverlayMessage(Component.translatable(part == PodPart.KEEL ? "message.jaymospowers.pod.keel_last"
+			: wasDamaged[0] ? "message.jaymospowers.pod.worn_off" : "message.jaymospowers.pod.detached", nameOf(part)).withStyle(ChatFormatting.GRAY));
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.4, 0.5, 0.4, 0.2);
 		if (part == PodPart.KEEL) {
 			pod.discard();
@@ -297,13 +406,19 @@ public final class PodParts {
 		};
 	}
 
-	/** A pod part set down as a block. */
+	/** A pod part set down as a block; (0.18.13) it is {@link #DAMAGED} or not. */
 	private static class PartBlock extends Block {
 		private final VoxelShape shape;
 
 		PartBlock(BlockBehaviour.Properties properties, VoxelShape shape) {
 			super(properties);
 			this.shape = shape;
+			registerDefaultState(defaultBlockState().setValue(DAMAGED, false));
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			builder.add(DAMAGED);
 		}
 
 		@Override
@@ -312,10 +427,37 @@ public final class PodParts {
 		}
 	}
 
-	/** The keel: set down on the ground it stands up as a bare pod (keel only), the one part that is a pod by itself. */
+	/** The part's block item: a worn one (or a keel with a grade) says so. */
+	private static final class PartItem extends BlockItem {
+		PartItem(Block block, Item.Properties properties) {
+			super(block, properties);
+		}
+
+		@Override
+		@SuppressWarnings("deprecation")
+		public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+			BlockItemStateProperties props = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+			if (Boolean.TRUE.equals(props.get(DAMAGED))) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.pod.worn").withStyle(ChatFormatting.GRAY));
+			}
+			Integer grade = props.get(GRADE);
+			if (grade != null && grade > 0) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.pod.keel_grade", PodGrades.roman(grade)).withStyle(ChatFormatting.GOLD));
+			}
+		}
+	}
+
+	/** The keel: set down on the ground it stands up as a bare pod (keel only), the one part that is a pod by itself. (0.18.13) It keeps the pod's mend grade. */
 	private static final class KeelBlock extends PartBlock {
 		KeelBlock(BlockBehaviour.Properties properties, VoxelShape shape) {
 			super(properties, shape);
+			registerDefaultState(defaultBlockState().setValue(GRADE, 0));
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			super.createBlockStateDefinition(builder);
+			builder.add(GRADE);
 		}
 
 		@Override
@@ -326,6 +468,7 @@ public final class PodParts {
 			PodEntity pod = new PodEntity(PodEntity.TYPE, server);
 			pod.setPos(Vec3.atBottomCenterOf(pos));
 			pod.attach(PodPart.KEEL, false);
+			pod.setGrade(state.getValue(GRADE));
 			server.removeBlock(pos, false);
 			server.addFreshEntity(pod);
 			server.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.7F, 0.9F);
