@@ -31,7 +31,7 @@ public final class HermitAlchemy {
 	/** The path through alchemy, in order: the first one the player hasn't learned is what the hermit hints at. */
 	private static final List<String> PATH = List.of("alchemy_basics", "essences", "crucible", "principles", "orichalc", "alembic",
 		"everflame", "transmutation", "flux", "cleansing", "infusion", "stability", "runic_amulet", "ichor", "artifice",
-		"golemancy", "essence_enchanting", "spellbinding", "ichorium", "ichorcloth", "everflame_lantern", "infused_enchanting");
+		"golemancy", "essence_enchanting", "spellbinding", "ichorium", "ichorcloth", "everflame_lantern", "infused_enchanting", "starlit_lens");
 
 	private HermitAlchemy() {
 	}

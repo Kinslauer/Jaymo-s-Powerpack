@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "jaymospowers:block/farworld/field_anvil",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "jaymospowers:block/farworld/field_anvil",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/farworld/field_anvil"
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/farworld/field_anvil",
+      "y": 90
+    }
+  }
+}

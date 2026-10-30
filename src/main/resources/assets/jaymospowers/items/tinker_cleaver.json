@@ -142,6 +142,55 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/handle_steel"
                   }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -283,6 +332,55 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_broken_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -419,6 +517,55 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_star_metal"
                     }
                   }
                 ],
@@ -562,6 +709,55 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_broken_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -698,6 +894,55 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_star_metal"
                     }
                   }
                 ],
@@ -836,6 +1081,55 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_steel"
+                  }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_star_metal"
                   }
                 }
               ],
@@ -981,6 +1275,55 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/handle_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1122,6 +1465,55 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1258,6 +1650,55 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_star_metal"
                 }
               }
             ],
@@ -1401,6 +1842,55 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1537,6 +2027,55 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_star_metal"
                 }
               }
             ],
@@ -1675,6 +2214,55 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_star_metal"
               }
             }
           ],

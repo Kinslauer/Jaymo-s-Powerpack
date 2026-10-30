@@ -486,6 +486,23 @@ public final class ZFighterLookout {
 		}
 	}
 
+	/** How far above the floor layer the Lookout's buildings reach (blocks): what counts as standing on the platform. */
+	static final int PLATFORM_HEADROOM = 10;
+
+	/** (0.18.53) Whether {@code pos} is on the Lookout's platform: over its disc, from the floor up to the tops of its buildings. */
+	public static boolean onPlatform(ServerLevel level, BlockPos pos) {
+		if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+			return false;
+		}
+		ZFighterSites.Data data = level.getAttached(ZFighterSites.DATA);
+		if (data == null || !data.towerBuilt() || data.tower().isEmpty()) {
+			return false;
+		}
+		BlockPos tower = data.tower().get();
+		double dx = pos.getX() - tower.getX(), dz = pos.getZ() - tower.getZ();
+		return dx * dx + dz * dz <= (double)RADIUS * RADIUS && pos.getY() >= ZFighterSites.LOOKOUT_Y && pos.getY() <= ZFighterSites.LOOKOUT_Y + PLATFORM_HEADROOM;
+	}
+
 	/** Whether the point stands in the pool's water (feet at the water's depth). */
 	private static boolean inPool(BlockPos tower, double x, double y, double z) {
 		double dx = x - tower.getX() - 0.5, dz = z - tower.getZ() - 0.5;

@@ -82,6 +82,7 @@ public final class Finishing {
 
 		CastRules.register();
 		Quenching.register();
+		Edges.register();
 		SmithTiers.register();
 		StoneAnvil.register();
 		Blueprints.register();

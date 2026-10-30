@@ -6838,3 +6838,97 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   hair is hidden under the hat. CC BY, credited.
 - Compile-checked; not seen in game.
 
+
+## 0.7.382: a shorter Valor screen
+- Before it wakes, the Valor page only says "Your Valor hasn't woken."
+- Once woken, the left column shows only its origin and its look (quirk, soul colour and King's Valor lines removed).
+- The Feats heading had borrowed the long "how to wake it" line and slid it across the right side; it now reads "Feats".
+## 0.7.383, the ladder (SevTech picks) (pack 0.18.52)
+- Andy picked the SevTech ladder: one system for the world tiers, in four parts.
+- **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED
+  (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
+  a Tool Station; Powers' `Provenance.FORGED_LISTENERS` and the new `Tinkering.TOOL_BUILT_LISTENERS` through
+  `PowersCompat.onForged`/`onToolBuilt`), AETHER_TROPHY (in the Overworld carrying something only the Aether's guardians give:
+  the `#jaymoskingdoms:aether_trophies` tag, the Visage of War's reverent armour and the sentry boss chest's armour (not irradiated holystone: it is also mined from the ground); the Giants give
+  nothing of the sort, and wake only for Wildlands anyway), POD_FLIGHT (a pod trip landed home) and MAW_SALVAGE (a part set taken
+  from a Maw wreck), the last two told by Powers through `WorldTiers.deed(player, key)`. `FEAT_NEEDED` is now a mask per tier:
+  Borderlands FORGED, Wildlands NETHER and AETHER_TROPHY, Dread WITHER and POD_FLIGHT, Legend DRAGON and MAW_SALVAGE (foe counts
+  as before); the tier screen's requirement line lists all of them. A deed gives a murmur and a line in the next Tidings. Players
+  already in a tier when this lands keep it (joining counts the tier you stand in as opened). `/kingdom tier deed <players> <deed>`
+  for ops.
+- **Rung Journal** (`journal/RungJournal`, item `rung_journal`, a book and string): a small book with one page per tier of odd
+  short hints, given the first time a player enters Borderlands. Each line that has a feat behind it shows `[ ]` and ticks to `[x]`
+  when it lands, read from the player's progress each time the book is opened; it opens as a written book. Hints only, no lore.
+  The Wildlands page hints at the Aether test. Icon painted by `tools/gen_rung_journal.py`.
+- **The Ground Changes** (`GroundChanges`): when a tier opens for a player, the chunks already loaded within 8 chunks of them
+  get that tier's veins laid over stone and deepslate: iron and copper (Borderlands), gold and lapis (Wildlands), buried diamond
+  (Dread), ancient debris in the Nether (Legend). Each chunk remembers the highest tier it was seeded for (saved with the chunk),
+  so it happens once; a walk every 4 ticks looks at 12 chunks per player and seeds at most 2. A floor raise lifts everyone's tier,
+  so it seeds round everyone. Every number is a constant at the top of the class.
+- **Hidden Until Reached** (`TierGate`): before a trade screen opens, offers whose item belongs to a higher tier are set aside on
+  the merchant (saved with it) and put back for a player who has reached it; a Tinkering part is read by its material
+  (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
+  Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
+  JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
+## 0.7.384: stargazers and sky tidings (SevTech picks) (pack 0.18.53)
+- Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
+  "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen
+  (`ZFighterFolk.ask`): a few words about the sky and the charts the player hasn't read, cheapest trip first, for emeralds (6, and 4
+  more for each place down the cost order). A hermit sells one at a time (`Hermits.CHARTS_OFFERED`), a stargazer two
+  (`StarFolk.STARGAZER_OFFERED`). Powers is reached by reflection through its `SkyApi` only; without it the question is not asked.
+- **Stargazers** (`GiftedFolk.stargaze`): each grown MCA villager is weighed once, and about one in `STARGAZER_ODDS` (12) is
+  one (the `jaymoskingdoms_stargazer` tag). Talking to one puts a line into the player's next Tidings, once a day for each of them.
+- **Lights in the sky** (`StarFolk.lights`): before a player has flown a pod, a raiders' pod or a patrolman's pod coming down
+  within 96 blocks of the seat of a town he is within 160 of is written up in his Tidings, once for each pod: a light that fell, or
+  a stranger seen at dusk. Read from Powers' pod tags (`jaymospowers.raider`, `jaymospowers.patrol_pod`) on the pod entity.
+- Compile-checked; not seen in game.
+
+## 0.7.385: who flies (SevTech picks) (pack 0.18.54)
+- **Landing Yard** (`LandingYard`): a kingdom's or fiefdom's builders put up a yard (15 x 19; a settlement of 34 or more) of
+  stone-brick paving round a copper beacon post, with 4 to 9 pads (`PADS_MIN`/`PADS_MAX`, by the variant) of smooth stone cornered
+  in waxed cut copper. No recipe and no new block: a build, in the growth order (`Blueprint.register`). The pads are found again
+  from the finished building (a pad's middle is waxed copper, the post's foot waxed chiseled copper). Powers asks through
+  reflection: `padsNear(level, pos, 64)` (post first, then each pad), `nameNear`, `touched`. While a pod stands on one of a town's
+  pads, `MerchantOrders` prices there are `DISCOUNT` (10%) lower (`tradeFactor`). A patrol pod standing down puts the town in the
+  next Tidings (`news.jaymoskingdoms.landing_yard.*`, at most once a day for a yard).
+- **Pilot and Prospector** (`Careers.Job.PILOT`, `PROSPECTOR`): two more jobs with the usual three ranks and dusk wages. Only a town
+  with a landing yard offers them (`Job.yardOnly`, and the yard is their `hall`, so the town is always hiring and pays the hall
+  bonus). Pilot: `Careers.flown(pilot, passenger, level, pos)` (called by Powers when a pod trip lands) counts a trip with a
+  passenger in the second seat or a MerchantOrders parcel in the pack as a `fly` order done (an order is made on the spot if none
+  is open) and pays a fare at once (`PILOT_FARE`, 0/1/3 emeralds). A `ferry:<town>` order names another town with a yard: come
+  down within `FERRY_AT` of its yard with a parcel and the parcel is unpacked into that town's storehouse (counts
+  `FERRY_ORDERS`). Prospector: `Careers.firstFind(player, world, kind)` records each "world|kind" once per player (the `first_finds`
+  attachment) and, for a Prospector, fills a `find` order and pays `FIND_BONUS` (0/2/5) at once.
+  **Hook for Track 5's ore code:** call `com.jaymospowers.power.zfighter.Prospecting.found(player, worldKey, kind)` where a player
+  first reveals an ore kind on a world (`kind` = the ore's block id) and where they knap a world's first metal (`kind` =
+  `"metal:" + item id`); worldKey is moon, rustfall, glacia, cinder, maw or verdant. `Prospecting.FIRST_FIND_LISTENERS` takes more
+  listeners. Kingdoms is one, by reflection; repeated finds do nothing.
+- **Off-World Orders**: a Merchant Orders sheet shows (to a player with Dread open) two wants a day (`OffWorldGoods`): a far-world
+  good, how many, the world named, a price in emeralds, and `FAR_STANDING_XP` (25) standing, which is faster than a ware ordered
+  earns it. The Bounty board's town notices (`TownNotices.FAR_CHANCE`) may be a warrant for the same goods, a gather errand
+  from the poster that names the world, once anyone on has Dread. Goods: the six first metals (looked for under a few ids until Track
+  5 names them), Rustfall plate, Glacia ice glass, Cinder bell alloy, Cinder Ember, Glacia salt (Kitchen's salt).
+- A life story's job lean never draws Pilot or Prospector. Compile-checked; not seen in game.
+## 0.7.386: star-touched foes (SevTech picks) (pack 0.18.55)
+- On Jaymo's Powers' six far worlds (the Pale Moon, Rustfall, Glacia, Cinder, the Maw, the Verdant World, found by their
+  dimension's name; Powers is never compiled against), `StarTouched` marks about three in ten hostile mobs (`STAR_CHANCE`, rolled
+  once when the mob first loads, saved as `star_touched`) as star-touched: `MonsterGear.starLook` dyes a leather piece into each
+  empty armour slot of a mob that wears armour (the world's colour, never dropped) and every one gives off motes of light
+  (END_ROD, smoke, snowflakes, flame, portal, happy villager). One trait for the world, no new mobs: the Moon leaps at its target
+  from 4 to 18 blocks, Rustfall hits half as hard again and throws what it hits, Glacia's blows slow and chill, Cinder's set you
+  alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
+  the class. No new text. Compile-checked; not seen in game.
+
+## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
+- **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
+  time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
+  `NEAR_MIN` to `NEAR_MAX` (90 to 300) blocks from its seat, in loaded chunks, dry, and never inside any town's claim (up to
+  `TRIES` tries). The fall takes `FALL_TICKS` (90): a streak of flame, sparks and smoke from `FALL_HEIGHT` above, a whistle, then a
+  boom (a blockless explosion, thunder, a burst of sparks) and a bowl of radius `BOWL` dug out of the ground (never bedrock or a
+  block with an inventory), lined with blackstone and basalt, with `ORE_MIN` to `ORE_MAX` lumps of Powers' `star_metal_ore` in its
+  floor. Nothing falls without Jaymo's Powers. Everyone within `TELL_RANGE` (500) reads it in the next Tidings with a bearing from
+  the town: "a light fell out of the sky toward the hills north-east of X". `/kingdom starfall` (gamemasters) drops one now near the
+  sender, whatever the night. Roll state is one saved Overworld attachment (`starfall`).
+- **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
+  only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
+- Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.

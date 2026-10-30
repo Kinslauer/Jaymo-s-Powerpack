@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/scythe/accessory_amber_bronze"
+  }
+}

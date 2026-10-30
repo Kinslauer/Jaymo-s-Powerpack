@@ -30,5 +30,12 @@
   "research.jaymospowers.runic_amulet": "The Runic Amulet",
   "research.jaymospowers.runic_amulet.text": "A gold ingot infused with the rose metal and a pinch of salt, steeped in spirit and salt. Carried about, it quietly draws off the fleeting taint that clings to those who work with flux.",
   "research.jaymospowers.infused_enchanting": "Infused Enchanting",
-  "research.jaymospowers.infused_enchanting.text": "An enchanted thing in the middle, four lapis lazuli, two ingots of the rose metal and a book that holds an enchantment the thing already bears at its fullest. The stone raises that enchantment one level beyond what any table can grant. It is a loud and unruly working, and it leaves much flux behind."
+  "research.jaymospowers.infused_enchanting.text": "An enchanted thing in the middle, four lapis lazuli, two ingots of the rose metal and a book that holds an enchantment the thing already bears at its fullest. The stone raises that enchantment one level beyond what any table can grant. It is a loud and unruly working, and it leaves much flux behind.",
+  "jei.jaymospowers.infusion": "Infusion Altar",
+  "jei.jaymospowers.infusion.essences": "Essences from the jars: %s",
+  "jei.jaymospowers.infusion.essence": "%s %s",
+  "jei.jaymospowers.infusion.research": "Needs the research %s",
+  "jei.jaymospowers.infusion.unstable": "Instability %s, leaves %s flux",
+  "jei.jaymospowers.infusion.centre": "Centre pedestal; the rest on pedestals around it",
+  "jei.jaymospowers.infusion.any_enchanted": "Any enchanted item in the centre; one of its enchantments goes a level past its cap"
 }

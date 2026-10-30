@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_3",
+  "textures": {
+    "all": "jaymospowers:block/farworld/maw_rock"
+  }
+}

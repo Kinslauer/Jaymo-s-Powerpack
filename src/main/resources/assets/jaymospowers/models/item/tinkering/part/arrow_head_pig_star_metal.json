@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/part/arrow_head_pig_star_metal"
+  }
+}

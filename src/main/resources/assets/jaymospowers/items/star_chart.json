@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "moon",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_moon"
+        }
+      },
+      {
+        "when": "rustfall",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_rustfall"
+        }
+      },
+      {
+        "when": "glacia",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_glacia"
+        }
+      },
+      {
+        "when": "cinder",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_cinder"
+        }
+      },
+      {
+        "when": "maw",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_maw"
+        }
+      },
+      {
+        "when": "verdant",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/star_chart_verdant"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/star_chart_moon"
+    }
+  }
+}
