@@ -393,6 +393,12 @@ public final class Deeds {
 
 	/** {@code f} saw {@code player} do {@code kind}. */
 	private static void record(ServerPlayer player, Faction f, Kind kind) {
+		// (0.7.419) road deeds: a fire put out, a life saved (anyone doing it opens a road for everyone, RoadLocks)
+		if (kind == Kind.FIRE) {
+			done(player.level().getServer(), "fire.doused");
+		} else if (kind == Kind.SAVE) {
+			done(player.level().getServer(), "life.saved");
+		}
 		if (Identities.hidden(player, f.id())) {
 			// (0.7.62) a masked stranger did it: the costume's name is made by it (its reputation), not theirs
 			return;

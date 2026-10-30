@@ -506,6 +506,8 @@ public final class Whalers {
 			v.hands.add(player.getUUID());
 		}
 		v.berths.put(player.getUUID(), berth);
+		// (0.7.419) a road deed: someone signed on with a whaler
+		Deeds.done(player.level().getServer(), "whalers.signed");
 	}
 
 	/**

@@ -239,6 +239,8 @@ public final class Starfall {
 		if (ore == null || !level.hasChunksAt(at.getX() - reach, at.getZ() - reach, at.getX() + reach, at.getZ() + reach)) {
 			return;
 		}
+		// (0.7.419) a road deed: a star came down
+		Deeds.done(level.getServer(), "star.fell");
 		RandomSource random = level.getRandom();
 		// the bowl, dug out of whatever is there (never bedrock or a chest), then lined with scorched rock
 		List<BlockPos> floor = new ArrayList<>();

@@ -300,6 +300,10 @@ public final class Moons {
 	/** The moon over the Overworld changed: everyone's told, and a harvest moon's dawn grows the settlements' fields. */
 	private static void change(ServerLevel level, Moon was, Moon moon) {
 		shown = moon;
+		// (0.7.419) a road deed: a blood moon that has come and gone
+		if (was.blood() && !moon.blood()) {
+			Deeds.done(level.getServer(), "moon.blood");
+		}
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			ServerPlayNetworking.send(player, new Sync(moon.ordinal()));
 		}
