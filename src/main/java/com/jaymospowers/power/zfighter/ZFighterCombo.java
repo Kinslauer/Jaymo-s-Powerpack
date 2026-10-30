@@ -532,9 +532,8 @@ public final class ZFighterCombo {
 
 	/** Who he's hitting: the foe he's been on if it's still in reach, else whatever is nearest in front of him. */
 	private static @Nullable LivingEntity target(ServerPlayer player, Run run) {
-		double reach = player.entityInteractionRange() + REACH_BONUS;
 		double keep = REACH_BONUS + LUNGE_RANGE;
-		double far = reach + LUNGE_RANGE;
+		double far = far(player);
 		// (0.17.45) locked on: he fights the one he locked
 		LivingEntity locked = LockOn.target(player);
 		if (locked != null && valid(player, locked) && player.isWithinEntityInteractionRange(locked, far)) {
@@ -549,6 +548,20 @@ public final class ZFighterCombo {
 			&& player.isWithinEntityInteractionRange(last, keep)) {
 			return last;
 		}
+		return inFront(player, far);
+	}
+
+	/** How far the hold combo reaches for a foe in front of him (plain reach, a little more, and the lunge). */
+	public static double far(Player player) {
+		return player.entityInteractionRange() + REACH_BONUS + LUNGE_RANGE;
+	}
+
+	/**
+	 * (0.18.25) Whatever the hold combo would go after: the nearest foe in front of him within {@code far}, seen. Both
+	 * sides: the client asks it too, so a race's left hold (Frost-born, Emberborn, Stormborn, Dawnborn) doesn't take the
+	 * click from the combo just because the crosshair isn't on the foe.
+	 */
+	public static @Nullable LivingEntity inFront(Player player, double far) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		LivingEntity best = null;
@@ -587,7 +600,7 @@ public final class ZFighterCombo {
 		return foe;
 	}
 
-	private static boolean valid(ServerPlayer player, LivingEntity living) {
+	private static boolean valid(Player player, LivingEntity living) {
 		if (living == player || !living.isAlive() || !living.isAttackable() || living.isSpectator() || living.isPassengerOfSameVehicle(player)) {
 			return false;
 		}

@@ -8,6 +8,7 @@ import com.jaymospowers.power.heritage.HeritageMoves;
 import com.jaymospowers.power.smoke.SmokePower;
 import com.jaymospowers.power.zfighter.FrostBeam;
 import com.jaymospowers.power.zfighter.RaceMoves;
+import com.jaymospowers.power.zfighter.ZFighterCombo;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -28,8 +29,9 @@ import org.jspecify.annotations.Nullable;
  * (0.11.101) The races' left-mouse holds ({@link RaceMoves}): bare-handed, not at a block. A Verdant's stretch punch goes
  * off after {@link #STRETCH_HOLD} ticks, asked for again every {@link RaceMoves#STRETCH_EVERY} while held (the server
  * lets one through per {@link RaceMoves#STRETCH_COOLDOWN}); a Frost-born's ice
- * prison once a hold, after {@link #FROST_HOLD}. A Frost-born Z Fighter keeps his hold combo for anything within plain
- * reach: the race move only takes the hold when nothing is. A Verdant Z Fighter's whole hold is his hold combo, which
+ * prison once a hold, after {@link #FROST_HOLD}. A Frost-born (or Emberborn, Stormborn, Dawnborn) Z Fighter keeps his
+ * hold combo for any foe it would go after (0.18.25: in its reach and cone, not only under the crosshair), and for a
+ * string already going: the race move only takes the hold when there's none. A Verdant Z Fighter's whole hold is his hold combo, which
  * stretches (0.13.30, {@code ZFighterStretchCombo}). Also the stretching arm itself, on everyone.
  * <p>
  * (0.13.30) Andy: "Swap the lineage click hold ability to secondary when you have a power or any other click hold, for
@@ -110,7 +112,11 @@ public final class RaceHoldClient {
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			return true;
 		}
-		return ZFighterLineage.of(player) != ZFighterLineage.VERDANT && type == HitResult.Type.MISS;
+		// (0.18.25) Jung, a Z Fighter, held left click and nothing got hit: the combo finds its foe in a cone, not under the
+		// crosshair, so the race's move took the click whenever the crosshair slipped off the foe (or was never on it). Now
+		// it waits till no foe is in the combo's reach, and never cuts into a string already going.
+		return ZFighterLineage.of(player) != ZFighterLineage.VERDANT && type == HitResult.Type.MISS && !ZFighterPowerClient.comboHeld()
+			&& ZFighterCombo.inFront(player, ZFighterCombo.far(player)) == null;
 	}
 
 	/** Another power's left-click hold, which a sneaking Verdant or Frost-born hands the click to (registered at init). */

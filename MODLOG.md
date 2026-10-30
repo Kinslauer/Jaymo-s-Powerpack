@@ -3912,3 +3912,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
+- **0.18.25, the hold combo keeps the click from the race's left hold (Andy: "jung couldnt attack as a z fighter. he's holding
+  the left click but no damage occurs"):** a Frost-born, Emberborn, Stormborn or Dawnborn Z Fighter's held left click went
+  to the race's move (ice prison, Kindle, Thunderclap, Sunflare) whenever the crosshair wasn't on an entity, though the
+  combo finds its foe in a cone up to reach + 2.8 blocks; and once a string was going, the crosshair slipping off the reeling
+  or launched foe ended it and started the race move. Kindle and the race holds also swallow the click's punch, so holding
+  on did nothing to the foe. Now `RaceHoldClient.claims` gives a Z Fighter's hold to the race only when no foe is in the
+  combo's reach and cone (`ZFighterCombo.inFront`, the same scan the server's combo uses) and no string is going.
+  Compile-checked; not seen in game.
