@@ -4207,3 +4207,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `blocks/training_post` used the pre-26.3 `block_state_property` condition, which 26.3 dropped for `match_block`; the old
   layer tables only survive because a pack mod upgrades them on the fly, and it skipped this one). Rewritten in the 26.3
   form, like `amberoot_door`. Server-checked on the Deck.
+
+- **0.18.75, Fang Gauntlets worn:** Andy: "the fang gauntlets should animate over the hands like the hidden blade, only with no
+  springing action". Held in the main hand they're no longer drawn as a held sword (third and first person): a leather cuff,
+  an iron plate over the back of the hand and three fang claws past the knuckles are drawn on both forearms (the off hand's
+  only while it is empty), always out (`client/armory/FangGauntletsClient`, texture from `tools/gen_fang_gauntlets.py`).
+  Idle, both arms are held up ahead in a fighting guard with only a small walk sway; first person shows both bare arms in the
+  guard with the claws ahead. Attacks are untouched: the game's swing and Better Combat's combo animations drive the arms
+  (the guard lets go while one plays, and there is no custom thrust). The guard is a pose of ours (`ModelPoses`,
+  `FangGauntletsModelFeatureRendererMixin`, `PoseTakeover`), so Entity Model Features / Fresh Animations pause for it. No
+  gameplay change. Compile-checked; not seen in game.

@@ -97,6 +97,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.LashRenderer.init();
 		// (0.17.98) the warhammer smash swings down from overhead
 		com.jaymospowers.client.armory.HammerSlamClient.init();
+		// (0.18.75) the Fang Gauntlets worn on the hands
+		com.jaymospowers.client.armory.FangGauntletsClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the

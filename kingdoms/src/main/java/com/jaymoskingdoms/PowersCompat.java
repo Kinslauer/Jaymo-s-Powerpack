@@ -192,6 +192,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.406) Powers' {@code Breaks.armless(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle armless;
+	private static boolean lookedForArmless;
+
+	/** (0.7.406) Whether {@code player} has both arms broken (Jaymo's Powers' wounds); false without Powers (or an older one). */
+	public static boolean armless(Player player) {
+		if (!lookedForArmless) {
+			lookedForArmless = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					armless = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Breaks"),
+						"armless", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' broken arms (older Powers?)", e);
+				}
+			}
+		}
+		if (armless == null) {
+			return false;
+		}
+		try {
+			return (boolean)armless.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();

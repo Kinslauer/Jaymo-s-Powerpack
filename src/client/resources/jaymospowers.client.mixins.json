@@ -72,7 +72,11 @@
 		"ScreenShakeExplosionMixin",
 		"TerrainAheadMixin",
 		"FallingLeavesInvoker",
-		"MinecraftAttackInvoker"
+		"MinecraftAttackInvoker",
+		"FangGauntletsAvatarRendererMixin",
+		"FangGauntletsFirstPersonMixin",
+		"FangGauntletsItemInHandLayerMixin",
+		"FangGauntletsModelFeatureRendererMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

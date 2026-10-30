@@ -148,7 +148,7 @@ final class LifeStoryScreen extends Screen {
 			realms = payload.realms();
 			creatorAhead = payload.creatorAhead();
 			StoryCurtain.raise();
-			// (0.7.406) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
+			// (0.7.407) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
 			// MCA marks the body made partway through its creator, and the road was asked on top of it. While the creator
 			// is up the road waits; it opens on the first tick with no screen ({@code owed})
 			if (payload.forced() && StoryCurtain.isCreator(context.client().gui.screen())) {
@@ -1292,7 +1292,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.406) {@code a}'s short line, or null for an answer that names a realm before one is named. Andy: "dont add the
+	 * (0.7.407) {@code a}'s short line, or null for an answer that names a realm before one is named. Andy: "dont add the
 	 * white sworn to text unless you have favor": the realm page after it is where you pick whose favour you have, so
 	 * until then there's no "Sworn to , at its keep."
 	 */
