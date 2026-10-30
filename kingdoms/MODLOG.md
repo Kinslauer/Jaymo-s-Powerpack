@@ -7142,3 +7142,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
   constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
   keeps exact rotations. See the Powers MODLOG 0.18.63.
+## 0.7.400: Hold screen narrator says only its title (pack 0.18.65)
+- Andy: "all the narrator should say here is your story is being written." `StoryHoldScreen` reads its title once and
+  no longer reads what the hold is for (capital, harbour, future, arriving); the hints still cycle as text. The four
+  unused hold-reason clips are gone from `Voices.INTRO_LINES`, `sounds.json` and `make_voices.py`.

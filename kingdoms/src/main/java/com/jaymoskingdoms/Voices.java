@@ -40,13 +40,13 @@ public final class Voices {
 	public static final String STORY_END = "story.jaymoskingdoms.summary.end";
 	/**
 	 * (0.7.352) Andy: "redo the intro lines that dont already have lines". The pages the narrator was still silent on: who
-	 * you are (the ask and its grey line, now only heard), the skip-the-story ask, and the hold screen's lines.
+	 * you are (the ask and its grey line, now only heard), the skip-the-story ask, and the hold screen's title (0.7.400: only
+	 * that, Andy: "all the narrator should say here is your story is being written").
 	 */
 	public static final List<String> INTRO_LINES = List.of(
 		"story.jaymoskingdoms.gender.title",
 		"gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc",
-		"gui.jaymoskingdoms.story.hold.title", "gui.jaymoskingdoms.story.hold.realm", "gui.jaymoskingdoms.story.hold.harbour",
-		"gui.jaymoskingdoms.story.hold.future", "gui.jaymoskingdoms.story.hold.arriving");
+		"gui.jaymoskingdoms.story.hold.title");
 
 	/** How loud a spirit is: it speaks at its keeper's shoulder. */
 	static final float SPIRIT_VOLUME = 1.0F;
