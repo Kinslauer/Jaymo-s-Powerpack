@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.18.14) JEI's Infusion Altar page: every infusion recipe the server sent ({@link Infusion#recipes()}): the centre
+ * (0.18.19) JEI's Infusion Altar page: every infusion recipe the server sent ({@link Infusion#recipes()}): the centre
  * item first, then each kind of component with how many pedestals it fills, the result, and what it costs in essence,
  * research and instability. A recipe for any enchanted item shows an enchanted book. Only loaded by JEI (the
  * {@code jei_mod_plugin} entrypoint), on {@link SimpleCategory}.
