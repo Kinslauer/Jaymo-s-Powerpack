@@ -1539,4 +1539,47 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	// ---- (0.7.414) a forged blade (the Heirloom road) ----------------------------------------------------------------
+
+	/** Powers' {@code ToolStats.build(ToolType, List<TinkerMaterial>)}, its {@code ToolType.SWORD}, and {@code TinkerMaterial.byId(String)}. */
+	private static java.lang.invoke.@Nullable MethodHandle buildTool, materialById;
+	private static @Nullable Object swordType;
+	private static boolean lookedForBlades;
+
+	/**
+	 * (0.7.414) A Tinkers sword of Jaymo's Powers put together as its Tool Station does, from {@code head} (a metal's id, such as
+	 * {@code "iron"} or {@code "steel"}) and {@code handle} (a wood's id) for the blade and both grips. Null without Powers (or an
+	 * older one), or with materials it doesn't know: the caller falls back to a plain sword.
+	 */
+	public static net.minecraft.world.item.@Nullable ItemStack tinkerSword(String head, String handle) {
+		if (!lookedForBlades) {
+			lookedForBlades = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> type = Class.forName("com.jaymospowers.tinkering.ToolType"), material = Class.forName("com.jaymospowers.tinkering.TinkerMaterial");
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					swordType = type.getField("SWORD").get(null);
+					materialById = lookup.findStatic(material, "byId", java.lang.invoke.MethodType.methodType(material, String.class));
+					buildTool = lookup.findStatic(Class.forName("com.jaymospowers.tinkering.ToolStats"), "build",
+						java.lang.invoke.MethodType.methodType(net.minecraft.world.item.ItemStack.class, type, java.util.List.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' tool building (older Powers?)", e);
+				}
+			}
+		}
+		if (buildTool == null || materialById == null || swordType == null) {
+			return null;
+		}
+		try {
+			Object blade = materialById.invoke(head), grip = materialById.invoke(handle);
+			if (blade == null || grip == null) {
+				return null;
+			}
+			return (net.minecraft.world.item.ItemStack)buildTool.invoke(swordType, java.util.List.of(blade, grip, grip));
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't build a Tinkers sword from {} and {}", head, handle, e);
+			return null;
+		}
+	}
 }

@@ -307,7 +307,8 @@ final class MerchantOrders {
 			if (o.buyer().equals(player.getUUID()) && o.townId() == town.id()) {
 				views.add(new QuestNet.View("order:" + o.id(), QuestNet.ACTIVE, false,
 					Component.translatable("orders.jaymoskingdoms.title.ordered", o.goods().getHoverName(), o.goods().getCount()),
-					Component.translatable("orders.jaymoskingdoms.text.ordered", o.merchant(), o.paid()),
+					o.paid() == 0 ? Component.translatable("orders.jaymoskingdoms.text.taken", o.merchant())
+						: Component.translatable("orders.jaymoskingdoms.text.ordered", o.merchant(), o.paid()),
 					Component.translatable(level.getGameTime() < o.ready() ? "orders.jaymoskingdoms.objective.making" : "orders.jaymoskingdoms.objective.courier"),
 					List.of(o.goods().copy()), List.of()));
 			}
@@ -406,6 +407,16 @@ final class MerchantOrders {
 		player.setAttached(LEDGER, ledger.bought(w.id(), today, 1, w.offer().getXp()));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.0F);
 		level.playSound(null, at, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.1F);
+	}
+
+	/**
+	 * (0.7.414) An order already taken and paid for: {@code goods} from the merchants of {@code town}, ready {@code wait}
+	 * ticks from now, sent out to {@code buyer} like any order (a townsman from the town's seat, or the post). The Wandering
+	 * Trader road's two. It counts against no day's buying and earns no standing, and nothing was paid for it, so cancelling refunds nothing.
+	 */
+	static void taken(ServerLevel level, ServerPlayer buyer, Faction town, ItemStack goods, long wait) {
+		put(level.getServer(), new Order(UUID.randomUUID().toString(), buyer.getUUID(), goods, 0, town.name(), town.name(), town.id(),
+			town.seat(), level.getGameTime() + wait, "", 0));
 	}
 
 	// ---- off-world wants (0.7.385) ---------------------------------------------------------------------------------------

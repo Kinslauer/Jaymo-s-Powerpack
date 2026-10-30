@@ -944,6 +944,11 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("evicted", new int[] {0xFF1A1A3A, 0xFF6A5A7A, 0xFF4A4448}),
 		java.util.Map.entry("hideout", new int[] {0xFF0A0A12, 0xFF3A2A1A, 0xFF2A1E16}),
 		java.util.Map.entry("cast_out", new int[] {0xFF1A2A2E, 0xFF5A7A6A, 0xFF3A4A3A}),
+		// (0.7.414) the kit roads: a dusk road with a far fire, a King's Road under morning light, a meadow at first light, a grey dawn over a bare moor
+		java.util.Map.entry("heirloom", new int[] {0xFF1A2230, 0xFF9A6A4A, 0xFF3A3A32}),
+		java.util.Map.entry("trader", new int[] {0xFF5A7AA8, 0xFFE0C890, 0xFF8A7A5A}),
+		java.util.Map.entry("pup", new int[] {0xFF6A9AC8, 0xFFE8E0B0, 0xFF5A9A3A}),
+		java.util.Map.entry("nobodies", new int[] {0xFF3A4048, 0xFF8A8A82, 0xFF4A4438}),
 		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
 		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
 		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
@@ -1125,7 +1130,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** (0.7.356) Why an answer can't be picked here. */
 	private static net.minecraft.network.chat.MutableComponent reason(Answer a) {
-		return !a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
+		return !a.offered() ? Component.translatable(a.start() == LifeStory.Start.NOBODIES ? "gui.jaymoskingdoms.story.needs_mca" : "gui.jaymoskingdoms.story.needs_powers")
 			: a.onlyFor() != null && bornAs() != a.onlyFor()
 				? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
 				: Component.translatable("gui.jaymoskingdoms.story.no_realms");

@@ -311,6 +311,15 @@ public final class McaCompat {
 		return LOADED && McaBridge.follow(v, player);
 	}
 
+	/**
+	 * (0.7.414) {@code n} poor villagers hired to {@code player} from the first minute (MCA's mercenaries, following, in our
+	 * {@code outfits}, with {@code health} and {@code damage}, for {@code contract} ticks): the Nobodies road. How many were made;
+	 * none without MCA.
+	 */
+	static int hireNobodies(ServerLevel level, ServerPlayer player, BlockPos around, int n, List<String> outfits, double health, double damage, int contract) {
+		return LOADED ? McaBridge.hireNobodies(level, player, around, n, outfits, health, damage, contract) : 0;
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;

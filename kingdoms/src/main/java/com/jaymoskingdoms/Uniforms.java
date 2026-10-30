@@ -46,6 +46,12 @@ public final class Uniforms {
 	/** A guard's gambesons by their realm's land ({@link Climate#skinGroup}: temperate, sunny, cold). */
 	static final List<List<String>> GUARDS = List.of(ids("guard/temperate"), ids("guard/sunny"), ids("guard/cold"));
 
+	/**
+	 * (0.7.414) The poorest outfits of ours: a deckhand's plain slops. The Nobodies ({@link StoryKit#nobodies}) wear them, clothes
+	 * locked so {@link #fit} leaves them be (MCA's own clothes are banned; these are the pack's own).
+	 */
+	static final List<String> POOR = DECKHANDS;
+
 	private Uniforms() {
 	}
 

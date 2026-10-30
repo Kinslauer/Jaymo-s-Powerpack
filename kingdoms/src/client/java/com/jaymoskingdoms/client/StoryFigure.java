@@ -174,6 +174,11 @@ final class StoryFigure {
 		scene("road.evicted", Act.WALK, Items.EMERALD, Items.BUNDLE, null, null, null, null);
 		scene("road.hideout", Act.STAND, Items.STONE_SWORD, null, lh, null, null, null);
 		scene("road.cast_out", Act.WALK, null);
+		// (0.7.414) the kit roads: the family blade held out, a trader with a coin and a bundle, a pup's bone, the nobodies' wooden sword and rags
+		scene("road.heirloom", Act.STAND, Items.IRON_SWORD);
+		scene("road.trader", Act.WALK, Items.EMERALD, Items.BUNDLE, null, lc, null, lb);
+		scene("road.pup", Act.LOOK_DOWN, Items.BONE);
+		scene("road.nobodies", Act.WALK, Items.WOODEN_SWORD);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);
@@ -203,7 +208,11 @@ final class StoryFigure {
 		jobs("miner", "caves", "cave", "monolith", "bite", "mountain", "forge");
 		jobs("shepherd", "winter", "snowed", "blizzard", "snow", "north", "foundling");
 		jobs("toolsmith", "gunsmith");
-		jobs("fletcher", "messenger", "wild");
+		jobs("fletcher", "messenger", "wild", "nobodies");
+		// (0.7.414) a trader dresses as a cartographer-merchant, the heirloom's heir as a guard, the pup's keeper as a shepherd
+		jobs("cartographer", "trader");
+		jobs("guard", "heirloom");
+		jobs("shepherd", "pup");
 		jobs("butcher", "fire", "smoke", "burned");
 	}
 

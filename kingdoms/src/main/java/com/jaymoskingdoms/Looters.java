@@ -725,7 +725,7 @@ public final class Looters {
 	}
 
 	/** A guard free to take a prisoner: a settlement's fighting folk, not its ruler, not busy, fighting or down. */
-	private static boolean free(Worker w) {
+	static boolean free(Worker w) {
 		// ((0.7.295) a folk or an MCA guard)
 		PathfinderMob f = w.mob();
 		Folk.Role role = Folk.role(w.role());

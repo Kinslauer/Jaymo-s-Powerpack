@@ -389,6 +389,21 @@ final class Assassins {
 		}
 	}
 
+	/**
+	 * (0.7.414) A price on {@code player}'s head for a blade they carry (the Heirloom road: motive "heirloom"), the blade coming
+	 * from now, as a contract on a player does (at night, when a player is by, after the whispers). It goes past
+	 * {@link #MAX_CONTRACTS}: it is the story's, not the world's.
+	 */
+	static void laidOn(ServerPlayer player, String motive) {
+		MinecraftServer server = player.level().getServer();
+		ServerLevel level = Factions.level(server);
+		if (contractOn(server, player.getStringUUID()) != null) {
+			return;
+		}
+		replace(server, contract(player.getStringUUID(), -1, motive, level.getGameTime(), level.getRandom(), false));
+		JaymosKingdoms.LOGGER.info("A contract on {} ({})", player.getName().getString(), motive);
+	}
+
 	private static Contract contract(String target, int hirer, String motive, long now, RandomSource random, boolean forced) {
 		long wait = forced ? 0L : (WHISPER_DAYS_MIN + random.nextInt(WHISPER_DAYS_MAX - WHISPER_DAYS_MIN + 1)) * 24000L;
 		return new Contract(target, hirer, motive, now + wait, now + EXPIRE_DAYS * 24000L, false, forced, FEE_MIN + random.nextInt(FEE_MAX - FEE_MIN + 1));

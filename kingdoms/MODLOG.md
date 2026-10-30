@@ -7330,3 +7330,36 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   to hire them as MCA's mercenary (MCA's own Hire is 5 or 10). They start with 8 health and 1 damage, so Companions
   Who Learn is what makes them worth it. Until hired they have no tie, so MCA's stranger rule refuses them every
   order; hired, they count as involved. Hiring also gives `HIRE_HEARTS` so they're kept when the contract ends.
+
+## 0.7.414: Kit roads
+- Andy's picks from the Kenshi and Streets of Rogue study (`docs/NewRoads-Plan.md`, patch 2): four new starts and a kit for
+  the Sworn road, in the existing pattern (`LifeStory.Start`, a `ROAD` answer with a vanilla icon, a `begin` case, kit
+  lines, `.name`/`.tale`/`.short`/`.wake` lang, a `LifeStoryScreen.BACKDROPS` colour, a `StoryFigure` scene, `TERMS`, talk
+  lines for the folk who meet you). What they ask after you wake is in `StoryKit` (and `Manacles`).
+- **The Heirloom Blade** (`HEIRLOOM`, Hard): a wild landing with a fine Tinkers sword of Jaymo's Powers' (iron blade, wood
+  grips, `PowersCompat.tinkerSword`; a named iron sword with Sharpness 2 and Unbreaking 2 without Powers) named for you and
+  marked as yours, bread only, no armour. Two to four days in (`HEIRLOOM_MIN`, `HEIRLOOM_SPREAD`), if the blade is still in your
+  pack, a contract is laid on you (`Assassins.laidOn`, motive "heirloom") and an assassin comes at night like any contract on a
+  player (the villagers whisper of it first). Sold or dropped and lost by then, nobody comes. A hired outlaw band was left out:
+  the assassin is the one existing way to be hunted by name.
+- **The Wandering Trader** (`TRADER`, Fair): you wake 2-5 blocks from a King's Road milestone (`Roads.stoneNear`) with a pack mule
+  (a horse can't carry a chest in 26.3, a mule can; `ChestedHorseInvoker`) tamed to you, its chest holding the land's goods
+  (`RoamingCaravans.cargo`), a saddle, a lead, 6 emeralds and two Merchant Orders already taken from the town the road runs on to
+  (`MerchantOrders.taken`: sent on like any order, a courier or the post, 6000 and 12000 ticks on). `StoryGround.milestone` makes
+  what is missing: a capital if no realm stands, a second citadel `SECOND_TOWN_MIN`-`SECOND_TOWN_MAX` blocks off if only one, then
+  plans the road (`Roads.hurry`) and loads the chunks where its milestones go (`Roads.openEnds`) so paving sets them up; after
+  `ROAD_GIVE_UP_TICKS` (4 minutes) the wild is the fallback. Their loading screen reads "A road is being laid for you".
+- **A Pup at Heel** (`PUP`, Fair): a wild landing with a tamed wolf pup (a baby for `PUP_GROW_DAYS` 3 days) and 4 bones. For every
+  day of its age the pup has `PUP_HEALTH_PER_DAY` 2.0 more health and `PUP_DAMAGE_PER_DAY` 0.5 more damage, up to `PUP_MAX_DAYS` 10
+  (+20 health, +5 damage). Its birth tick is kept on the player (`StoryKit.PUP`, with the wolf's id), not on the wolf, and applied
+  every `PUP_CHECK` ticks while the pup is loaded.
+- **The Nobodies** (`NOBODIES`, Fair, needs MCA): a wild landing with three poor villagers hired to you from the first minute: MCA
+  mercenaries (`makeMercenary`, so the strangers rule counts them as involved), following, in the pack's poorest outfit of ours
+  (`Uniforms.POOR`, the deckhand's slops, clothes locked on so `Uniforms.fit` leaves them), a wooden sword, `NOBODY_HEALTH` 12 and
+  `NOBODY_DAMAGE` 1.5, on MCA's long contract (168000 ticks) and liked enough to be kept when it ends.
+- **Watch Recruit** (the Sworn road, no new start): the recruit is issued two pairs of **Manacles** (new item, `Manacles`,
+  `tools/gen_manacles.py`; not craftable). Use them on a downed (or helpless) outlaw (`Outlaws.is`): a looter with one of the
+  realm's free guards within `GUARD_SEARCH` 48 blocks is handed over (`Arrests.handOver`), got up and marched to the ruler, and the
+  bounty (`BOUNTY` 6 emeralds, and `BOUNTY_REPUTATION` goodwill) is paid when the sentence is carried out (not for a pardon). Any other
+  downed outlaw (a raider, an assassin, a masked bandit) is collected: a guard takes them to the cells (out of the world, with a
+  word) and the bounty is paid at once, since only looters have a walk to the ruler to be led on.
