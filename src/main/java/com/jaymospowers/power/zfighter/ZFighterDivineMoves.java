@@ -67,6 +67,11 @@ final class ZFighterDivineMoves {
 		if (!ZFighterLineage.divine(player) || key != PowerKey.ABILITY_2 && key != PowerKey.ABILITY_4) {
 			return false;
 		}
+		// (sneak+G with no blade in hand stays the quick technique; sneak+B stays Instant Teleport when it's on B)
+		if (key == PowerKey.ABILITY_2 && !blade(player.getMainHandItem()) && !FlyingSword.out(player)
+			|| key == PowerKey.ABILITY_4 && ZFighterTeleport.equipped(player)) {
+			return false;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			sword(player, live);
 		} else {
