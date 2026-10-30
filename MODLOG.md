@@ -3912,7 +3912,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
-- **0.18.25, Jung couldn't hit anything (Andy: "jung couldnt attack as a z fighter. he's holding the left click but no damage
+- **0.18.47, Jung couldn't hit anything (Andy: "jung couldnt attack as a z fighter. he's holding the left click but no damage
   occurs", "not even breaking blocks", "i think his arm was broken"):** both arms broken (or one broken, the other gone) is
   `Breaks.armless`, which refuses every attack and dig on purpose, but silently, and the Z Fighter hold combo ignored it
   and kept throwing punches at fists cut 60% by the breaks. Now:

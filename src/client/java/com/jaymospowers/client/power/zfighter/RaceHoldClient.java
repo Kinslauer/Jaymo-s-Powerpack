@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * off after {@link #STRETCH_HOLD} ticks, asked for again every {@link RaceMoves#STRETCH_EVERY} while held (the server
  * lets one through per {@link RaceMoves#STRETCH_COOLDOWN}); a Frost-born's ice
  * prison once a hold, after {@link #FROST_HOLD}. A Frost-born (or Emberborn, Stormborn, Dawnborn) Z Fighter keeps his
- * hold combo for any foe it would go after (0.18.25: in its reach and cone, not only under the crosshair), and for a
+ * hold combo for any foe it would go after (0.18.47: in its reach and cone, not only under the crosshair), and for a
  * string already going: the race move only takes the hold when there's none. A Verdant Z Fighter's whole hold is his hold combo, which
  * stretches (0.13.30, {@code ZFighterStretchCombo}). Also the stretching arm itself, on everyone.
  * <p>
@@ -112,7 +112,7 @@ public final class RaceHoldClient {
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			return true;
 		}
-		// (0.18.25) Jung, a Z Fighter, held left click and nothing got hit: the combo finds its foe in a cone, not under the
+		// (0.18.47) Jung, a Z Fighter, held left click and nothing got hit: the combo finds its foe in a cone, not under the
 		// crosshair, so the race's move took the click whenever the crosshair slipped off the foe (or was never on it). Now
 		// it waits till no foe is in the combo's reach, and never cuts into a string already going.
 		return ZFighterLineage.of(player) != ZFighterLineage.VERDANT && type == HitResult.Type.MISS && !ZFighterPowerClient.comboHeld()

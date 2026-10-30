@@ -1109,6 +1109,24 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.380) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
+	 * {@code List<BiConsumer<ServerPlayer, ?>>}): {@code Carry.PICKED_UP_LISTENERS} and the like ({@link Rescues}).
+	 * Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void listen(String owner, String field, java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T> listener) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName(owner).getField(field).get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T>>)list).add(listener);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' {}.{} (older Powers?)", owner, field, e);
+		}
+	}
+
 	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
 	private static boolean lookedForZFighterTalk;

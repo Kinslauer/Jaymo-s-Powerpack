@@ -324,7 +324,7 @@ public final class Breaks {
 	}
 
 	/**
-	 * (0.18.25) {@link #armless}, and if so said why: Jung (a Z Fighter, both arms broken) held left click and nothing hit
+	 * (0.18.47) {@link #armless}, and if so said why: Jung (a Z Fighter, both arms broken) held left click and nothing hit
 	 * or dug, with no word of it. The click is refused on the client before anything goes to the server, so it's said there.
 	 */
 	private static boolean handsGone(Player player) {
@@ -339,12 +339,12 @@ public final class Breaks {
 		return true;
 	}
 
-	/** (0.18.25) How a refused click is said: at most once this often (ticks), on the client. */
+	/** (0.18.47) How a refused click is said: at most once this often (ticks), on the client. */
 	static final int ARMLESS_NOTE_TICKS = 60;
 	private static long armlessSaidAt = Long.MIN_VALUE / 2;
 
 	/**
-	 * (0.18.25) The share of attack damage {@code entity}'s broken arms take ({@link #ARM_DAMAGE} per arm; 0 to -0.6): a
+	 * (0.18.47) The share of attack damage {@code entity}'s broken arms take ({@link #ARM_DAMAGE} per arm; 0 to -0.6): a
 	 * blow thrown with the legs (a Z Fighter's kick) divides it back out.
 	 */
 	public static double armDamageShare(LivingEntity entity) {

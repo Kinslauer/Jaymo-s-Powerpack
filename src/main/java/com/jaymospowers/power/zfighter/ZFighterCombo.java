@@ -68,7 +68,7 @@ public final class ZFighterCombo {
 		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, FLYING_DOUBLE_KICK, DRAGON_FIST},
 	};
 	/**
-	 * (0.18.25, Andy: "Kicks only") Each tier's string with both arms broken ({@link Breaks#armless}): the hands can't
+	 * (0.18.47, Andy: "Kicks only") Each tier's string with both arms broken ({@link Breaks#armless}): the hands can't
 	 * hit, so it's all knees and kicks, the last its finisher. Kicks never lose damage to broken arms ({@link #fists}).
 	 */
 	static final int[][] KICK_STRINGS = {
@@ -537,7 +537,7 @@ public final class ZFighterCombo {
 		Shakes.send(player, HIT_SHAKE + HIT_SHAKE_PER_TIER * run.tier, at);
 	}
 
-	/** His fists' damage for {@code move}: a kick never loses any to broken arms (0.18.25). */
+	/** His fists' damage for {@code move}: a kick never loses any to broken arms (0.18.47). */
 	static double fists(ServerPlayer player, int move) {
 		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		double arms = kick(move) ? Breaks.armDamageShare(player) : 0.0;
@@ -579,7 +579,7 @@ public final class ZFighterCombo {
 	}
 
 	/**
-	 * (0.18.25) Whatever the hold combo would go after: the nearest foe in front of him within {@code far}, seen. Both
+	 * (0.18.47) Whatever the hold combo would go after: the nearest foe in front of him within {@code far}, seen. Both
 	 * sides: the client asks it too, so a race's left hold (Frost-born, Emberborn, Stormborn, Dawnborn) doesn't take the
 	 * click from the combo just because the crosshair isn't on the foe.
 	 */

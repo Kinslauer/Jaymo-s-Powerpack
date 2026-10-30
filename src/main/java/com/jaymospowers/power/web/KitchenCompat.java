@@ -153,7 +153,7 @@ public final class KitchenCompat {
 	}
 
 	/** {@code body} is to leave no corpse when it dies (its chunks are thrown by {@link #blowApart} instead). */
-	static void leaveNoCorpse(net.minecraft.world.entity.LivingEntity body) {
+	public static void leaveNoCorpse(net.minecraft.world.entity.LivingEntity body) {
 		if (LOADED) {
 			body.addTag(NO_CORPSE_TAG);
 		}
