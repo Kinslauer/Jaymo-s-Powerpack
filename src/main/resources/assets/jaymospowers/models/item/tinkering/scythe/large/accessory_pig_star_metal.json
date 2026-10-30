@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:item/tinkering/large_tool",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/scythe/large/accessory_pig_star_metal"
+  }
+}

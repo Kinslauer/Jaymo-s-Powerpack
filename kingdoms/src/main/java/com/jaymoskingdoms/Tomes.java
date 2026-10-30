@@ -81,7 +81,7 @@ import org.jspecify.annotations.Nullable;
  * Powers' Tomecraft research. <b>Glyphs</b> (the enchanting table's runes with the element's own particle) stream off the
  * pages in amounts that vary by tome ({@link #GLYPHS}) and by action; a bolt's trail mixes the element's particles with the
  * mana glow. The book opens, and turns its pages, on the client ({@code TomeClient}).</li>
- * <li><b>Afloat</b> (0.7.383; Andy: "the tome should in front of you float open, bobbing slowly up and down and following
+ * <li><b>Afloat</b> (0.7.389; Andy: "the tome should in front of you float open, bobbing slowly up and down and following
  * the aim, and pages flipping emitting particles as you click or lock on, and will return to hand if you unlock, or after 3s
  * and no firing"): a click, a spell cast or a lock taken (Jaymo's Powers' lock-on) lifts the book out of the hand to float
  * open before you ({@link #floatAt}); bolts fly from it. It turns a leaf and sheds glyphs as it rises and at each new lock,
@@ -173,7 +173,7 @@ public final class Tomes {
 	/** The spell loaded into a tome (its name, as {@link Arcana#SPELLS}). */
 	public static DataComponentType<String> PAGE;
 	/**
-	 * (0.7.383) Whether a player's book floats before them: 0 (or none) in the hand; afloat, a number that changes each time it
+	 * (0.7.389) Whether a player's book floats before them: 0 (or none) in the hand; afloat, a number that changes each time it
 	 * rises or takes a new lock, so every client turns a leaf. Synced to everyone, not kept.
 	 */
 	public static final AttachmentType<Integer> AFLOAT = AttachmentRegistry.create(JaymosKingdoms.id("tome_afloat"),

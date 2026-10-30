@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.383) The spell tome afloat ({@link Tomes#AFLOAT}): drawn open in the air before whoever casts with it, off the right
+ * (0.7.389) The spell tome afloat ({@link Tomes#AFLOAT}): drawn open in the air before whoever casts with it, off the right
  * shoulder, bobbing slowly and swinging round after their aim a little behind it, tipped back so its pages face them. Its
  * pages are the same frames the book has in the hand ({@code tome_pose}, {@link TomeClient#pose}): a leaf turns as it rises,
  * at each new lock and with every bolt or spell. While it floats the hand holding it is drawn empty (first person:

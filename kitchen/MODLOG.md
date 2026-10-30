@@ -1243,3 +1243,12 @@ MCA's villager look of the player only while its render state is taken, then tak
 player from the same villager). Kingdoms 0.7.363 reads them to draw a Bio-built's form, as it was at death. Kitchen only
 carries the tags; it knows nothing of Kingdoms.
 - Compile-checked against 26.3 with javac (changed files); not seen in game.
+
+## 0.5.38: the far-world pantry (SevTech picks) (pack 0.18.56)
+Four dishes from Jaymo's Powers' Verdant fruit and Glacia salt, for a trip to another world. `Step.VERDANT_FRUIT` and
+`Step.GLACIA_SALT` (in the decoy pool; absent without Powers) feed: **Verdant Fruit Salad** (board; Perfect gives `far_breath`,
+a minute more breath), **Glacia Salt Broth** (pot; `far_ward`, 10 minutes safe from Cinder heat and Glacia cold), **Frosted Fruit
+Cup** (board; `far_ward` and Fire Resistance) and **Salt Trail Bread** (oven; `far_thrift`, the next launch costs 1 less, once). The
+buffs are Powers' own effects, found by id when first needed: `Dish.Buff` now takes a supplier (`Buff.far(id, ticks)`; the old
+constructor with a Holder is kept), and falls back to Luck if Powers is missing. Each recipe loads only when its items exist
+(`fabric:load_conditions`). Art, models, recipes and lang come from Powers' `tools/gen_back_home.py`. Compile-checked; not seen in game.

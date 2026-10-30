@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #pose}. A page stored is seen as the tome's page component changing, a cast as its cooldown starting. Other players'
  * books open and turn a leaf for as long as their hand swings (the server swings the hand for a shot or a cast).
  * <p>
- * (0.7.383) A book afloat ({@link TomeFloat}) stays open the whole time it floats, and turns a leaf as it rises and at each
+ * (0.7.389) A book afloat ({@link TomeFloat}) stays open the whole time it floats, and turns a leaf as it rises and at each
  * new lock, yours and everyone else's.
  */
 final class TomeClient {

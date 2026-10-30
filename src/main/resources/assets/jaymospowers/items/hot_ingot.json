@@ -120,6 +120,97 @@
             }
           ]
         }
+      },
+      {
+        "when": "pale_alloy",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/pale_alloy_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "rust_iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/rust_iron_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "ice_iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/ice_iron_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "cinder_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cinder_bronze_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "void_shard",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/void_shard_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "amber_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/amber_bronze_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "star_metal",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/star_metal_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
       }
     ],
     "fallback": {

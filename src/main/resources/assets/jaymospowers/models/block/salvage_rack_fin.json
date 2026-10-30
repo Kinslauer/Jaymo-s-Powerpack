@@ -1,0 +1,72 @@
+{
+  "textures": {
+    "all": "jaymospowers:block/pod_fin",
+    "particle": "jaymospowers:block/pod_fin"
+  },
+  "elements": [
+    {
+      "from": [
+        7.0,
+        13.0,
+        5.0
+      ],
+      "to": [
+        9.0,
+        14.0,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "down": {
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        14.0,
+        5.0
+      ],
+      "to": [
+        8.5,
+        18.5,
+        7.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "down": {
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

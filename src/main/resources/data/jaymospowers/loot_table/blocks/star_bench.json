@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:star_bench"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/star_bench"
+}
