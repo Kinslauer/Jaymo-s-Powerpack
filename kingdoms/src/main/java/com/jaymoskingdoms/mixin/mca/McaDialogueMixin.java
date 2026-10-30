@@ -250,7 +250,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.forms.GuardDrills.ANSWER.equals(answer)) {
-			// (0.7.366) a veteran guard sets today's drill (Weapon Forms)
+			// (0.7.370) a veteran guard sets today's drill (Weapon Forms)
 			com.jaymoskingdoms.forms.GuardDrills.offer(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
