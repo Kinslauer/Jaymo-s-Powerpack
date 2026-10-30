@@ -5,6 +5,7 @@ import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import com.jaymospowers.power.xenoform.nadir.NadirAim;
+import com.jaymospowers.power.xenoform.nadir.NadirFilm;
 import com.jaymospowers.power.xenoform.nadir.NadirGraviton;
 import com.jaymospowers.power.xenoform.nadir.NadirNet;
 import com.jaymospowers.power.xenoform.nadir.NadirRift;
@@ -40,6 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>V, the Graviton ({@link NadirGraviton}): at a creature, Heavy Hand (tap yank, hold slam; sneaking, shove and
  * launch); at nothing, tap for a Weightless zone, hold for an Event Horizon.</li>
  * <li>B, the Command ({@link NadirRules}): the Rules screen, where the void writes what the world must do.</li>
+ * <li>C (ascended), the Three Worlds Film ({@link NadirFilm}): a short skippable film of the Overworld, the Nether and
+ * the Aether flashing up behind what you look at, then a heavy blow. Only a picture: no portal, no new realm.</li>
  * </ul>
  * It takes no fall, fire or drowning, and its body is the strongest the band knows. G V B are from-scratch takes on
  * the Rift, Graviton and Command powers of The Awakening (all rights reserved: ideas only).
@@ -105,6 +108,27 @@ public final class Nadir extends XenoForm {
 			player.getAbilities().flying = false;
 		}
 		player.onUpdateAbilities();
+	}
+
+	@Override
+	public boolean ultimateIsMove() {
+		return true;
+	}
+
+	/** C: the Three Worlds Film at what you look at. Nadir stays Nadir; only the move's own cooldown runs. */
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		if (!ultimateReady(player, live)) {
+			long wait = (live.ultimateNext - player.level().getGameTime() + 19) / 20;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir.film_wait", wait).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+			return false;
+		}
+		if (!NadirFilm.start(player)) {
+			say(player, "film_no_target");
+			return false;
+		}
+		ultimateCooldown(player, live, NadirFilm.COOLDOWN);
+		return true;
 	}
 
 	@Override

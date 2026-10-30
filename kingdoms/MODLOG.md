@@ -7104,3 +7104,13 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Down are off while you're locked in. Never during a spirit clash.
 - Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
   `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
+
+## 0.7.396: Weapon Forms, patch 6: the Eight-Sign Circle seals forms; Bolt Step and Storm Ring (was 0.7.386; pack 0.18.62)
+- `PowersCompat.sealed(Entity)` calls Powers' `EightSignCircle.sealed(Entity)` by reflection (false without Powers). `forms/Forms.fire` refuses
+  with "The Eight Signs bind your forms." while the player stands in a Divine-born's ring (no cooldown or hunger spent), and
+  `Forms.perform` does nothing if a wind-up runs on into a ring. Schooled guards/duels are untouched.
+- Lightning Sorcerers (`StormArts`): **Bolt Step**, sneak + J with no creature in sight (a target in sight keeps the bolt): a
+  blink up to 9 blocks along your look, stopping short of walls, 6 to each non-player foe passed, 14 mana, 4 s, fall distance
+  kept. **Storm Ring**, J with no blade in hand (a blade keeps the Imbue): eight light-only bolts at 4.5 blocks, 5 and a shove
+  to non-player foes within 2 of each, nothing set alight, 30 mana, 10 s.
+- Compile-checked; not seen in game.

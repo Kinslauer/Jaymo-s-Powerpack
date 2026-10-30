@@ -25,6 +25,8 @@ final class ZFighterRaces {
 
 	static void init() {
 		ZFighterVerdantMerge.init();
+		// (0.18.48) the Divine-born's Flying Sword and Eight-Sign Circle
+		ZFighterDivineMoves.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			ZFighterEarthlingRace.clear();

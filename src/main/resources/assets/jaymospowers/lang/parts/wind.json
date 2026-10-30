@@ -12,7 +12,7 @@
 	"power.jaymospowers.wind.key.ability_3.name": "Gale Barrier",
 	"power.jaymospowers.wind.key.ability_4": "Hold: Zephyr's Breath (heal)",
 	"power.jaymospowers.wind.key.ability_4.name": "Zephyr's Breath",
-	"power.jaymospowers.wind.key.ultimate": "Cyclone Lance: a spear of wind along your aim (stuns while a mode is on)",
+	"power.jaymospowers.wind.key.ultimate": "Cyclone Lance: a spear of wind along your aim (stuns while a mode is on). In Thunderhead mode, in the air (not flying), looking steeply down: Thunder Dive, a plunge that lands in a thunderclap shockwave (fall damage still applies)",
 	"power.jaymospowers.wind.key.ultimate.name": "Cyclone Lance",
 	"ability.jaymospowers.wind.tailwind": "Tailwind",
 	"ability.jaymospowers.wind.gale_barrier": "Gale Barrier",
@@ -93,5 +93,7 @@
 	"power.jaymospowers.wind.key.special.ascended_corrupted.name": "Tempest Kick / Cyclone / Wind Whistle",
 	"message.jaymospowers.aether.arrived": "The Aether. Fall off its edge to go home.",
 	"message.jaymospowers.aether.lore": "This is the Aether, the sky the world once had. It scattered remnants of itself across the Overworld: the monoliths, and the four Giants below. Highfields, magnetic woods, frozen lakes and irradiated wastes float here, on great islands of holystone with broken islets drifting above them, under a day and a night of their own.",
-	"message.jaymospowers.aether.home": "You fall out of the Aether and the wind catches you, high above the world."
+	"message.jaymospowers.aether.home": "You fall out of the Aether and the wind catches you, high above the world.",
+	"message.jaymospowers.wind.dive_low": "Too close to the ground to dive.",
+	"message.jaymospowers.wind.dive_wait": "The thunder gathers again in %s s."
 }
