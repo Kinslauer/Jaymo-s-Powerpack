@@ -393,7 +393,8 @@ public final class SpearForms {
 	private static void pinningThrow(ServerLevel level, ServerPlayer player, Form form, int rank) {
 		LivingEntity foe = Forms.masterTarget(player);
 		ItemStack held = player.getMainHandItem();
-		if (foe == null || held.isEmpty() || PINS.containsKey(player.getUUID())) {
+		// (re-checked: the hand may have been swapped during the wind-up)
+		if (foe == null || held.isEmpty() || !Forms.Family.SPEAR.holds(held) || PINS.containsKey(player.getUUID())) {
 			return;
 		}
 		// the spear leaves the hand (one of a stack of javelins: one), and is kept, on the player too, until it comes home
@@ -461,7 +462,9 @@ public final class SpearForms {
 		} else if (dropAtFoe || !player.isAlive() || !level.dimension().equals(pin.dimension)) {
 			if (level.dimension().equals(pin.dimension)) {
 				Vec3 at = foe != null ? foe.position() : pin.lastAt;
-				level.addFreshEntity(new ItemEntity(level, at.x, at.y + 0.3, at.z, pin.spear));
+				if (!level.addFreshEntity(new ItemEntity(level, at.x, at.y + 0.3, at.z, pin.spear))) {
+					giveBack(player, pin.spear);
+				}
 			} else {
 				// (another dimension: it can't drop where the foe lay)
 				giveBack(player, pin.spear);
