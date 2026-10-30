@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.zfighter;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
+import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -48,17 +49,21 @@ public class ZFighterStarMapScreen extends Screen {
 		ZFighterSpace.VERDANT, ZFighterSpace.MAW};
 
 	private final int fuel;
+	/** (0.18.15) The grade of the fuel in the tank (0: empty). */
+	private final int grade;
 	private int picked;
 	private float scale = 1.0F;
 	private int ox, oy;
 
-	public ZFighterStarMapScreen(int fuel) {
+	public ZFighterStarMapScreen(int fuel, int grade) {
 		super(Component.translatable("screen.jaymospowers.zfighter_space"));
 		this.fuel = fuel;
+		this.grade = grade;
 	}
 
 	static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(ZFighterSpace.Open.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload.fuel())));
+		ClientPlayNetworking.registerGlobalReceiver(ZFighterSpace.Open.TYPE,
+			(payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload.fuel(), payload.grade())));
 	}
 
 	@Override
@@ -170,7 +175,15 @@ public class ZFighterStarMapScreen extends Screen {
 		if (this.fuel < cost) {
 			return Component.translatable("screen.jaymospowers.zfighter_space.short", cost - this.fuel);
 		}
+		if (tooCoarse(player, index)) {
+			return Component.translatable("screen.jaymospowers.zfighter_space.grade_short", PodFuel.roman(PodFuel.needed(index)));
+		}
 		return null;
+	}
+
+	/** (0.18.15) Whether the tank's fuel is too poor a grade to reach {@code index} (a creative pilot needs no grade). */
+	private boolean tooCoarse(LocalPlayer player, int index) {
+		return !player.isCreative() && this.grade < PodFuel.needed(index);
 	}
 
 	private int cost(LocalPlayer player, int index) {
@@ -225,8 +238,8 @@ public class ZFighterStarMapScreen extends Screen {
 
 	private void fuelGauge(GuiGraphicsExtractor graphics) {
 		int right = PANEL_W - 8;
-		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel", this.fuel, ZFighterSpace.MAX_FUEL), right, 7, 96,
-			GOLD);
+		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel_grade", this.fuel, ZFighterSpace.MAX_FUEL,
+			PodFuel.roman(this.grade)), right, 7, 96, GOLD);
 		UiStyle.bar(graphics, right - 96, 19, 96, 5, this.fuel / (float)ZFighterSpace.MAX_FUEL, 0xFFFF9A30);
 	}
 
@@ -250,6 +263,10 @@ public class ZFighterStarMapScreen extends Screen {
 		for (int index : BODIES) {
 			float[] p = at(index);
 			ZFighterSpaceArt.world(graphics, index, p[0], p[1], p[2], cx, cy);
+			if (index != ZFighterSpace.HOME_INDEX && !isHere(player, index) && tooCoarse(player, index)) {
+				// (0.18.15) the tank's fuel can't reach it: greyed over
+				ZFighterSpaceArt.disc(graphics, p[0], p[1], p[2], 0xB0101018);
+			}
 			if (index == this.picked) {
 				ZFighterSpaceArt.ring(graphics, p[0], p[1], p[2] + 3.0F, GOLD, 1);
 			} else if (index == hover) {
@@ -284,6 +301,10 @@ public class ZFighterStarMapScreen extends Screen {
 		UiStyle.line(graphics, this.font, Component.translatable("space.jaymospowers." + key(index) + ".gravity"), x + 50, y + 20, w - 54, UiStyle.DIM);
 		if (here) {
 			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.you_are_here"), x + 50, y + 32, w - 54, 0xFF7CFF7C);
+		} else if (!dark) {
+			// (0.18.15) the grade of fuel the trip needs
+			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.needs_grade", PodFuel.roman(PodFuel.needed(index))), x + 50,
+				y + 32, w - 54, tooCoarse(player, index) ? RED : UiStyle.DIM);
 		}
 		int ty = y + 52;
 		ty += 2 + 9 * UiStyle.wrapped(graphics, this.font, Component.translatable("space.jaymospowers." + key(index) + ".about"), x + 2, ty, w - 8, 7, 9,

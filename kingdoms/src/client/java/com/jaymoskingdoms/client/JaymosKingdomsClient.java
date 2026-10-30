@@ -155,6 +155,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArmoryLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
+		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
+		TinkererOutfit.register();
 		// 0.7.23: Verdants' antennae
 		VerdantLook.register();
 		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands

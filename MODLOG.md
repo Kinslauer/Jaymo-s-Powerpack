@@ -3894,7 +3894,25 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Kitchen 0.5.37):** Andy's screenshot showed a Bio-built player's horns and tail over MCA's clothes and white hair, and
   their corpse in their human look. Now a player's corpse keeps the look they died in. See the Kingdoms and Kitchen
   MODLOGs.
-- **0.18.12, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+
+- **0.18.12, no body in the logout panorama:** Andy: "the logout screen shouldn't render the player's body". Last World
+  Panorama shoots six first-person views as you leave a world (the saving screen, then the title screen's panorama), and
+  First-person Model drew your own body into them. `FirstPersonCompat.hideInPanoramas` registers a First-person Model
+  `ActivationHandler` (by reflection, as before) that turns it off while the camera is panoramic. Compile-checked against
+  the 26.3 jar; not seen in game.
+- **0.18.13, Arsenal pulls quest items; Sunfang's new look (Kingdoms 0.7.365):** Andy: "arsenal has a chance to pull
+  special quest items out of his portals, like sora's stone blade if it isnt already in the world. and it is also
+  possible to pull it from where it is in the world, striaght through the portal."
+  - `ArsenalQuestItems`: a full Reach has a 1 in 150 chance to bring out Sora's stone blade (the only one-of-a-kind
+    quest item so far; the table takes more). If the Sora's line isn't out, a new marked blade comes through. If it is,
+    the copy is found (other online players, ender chests, dropped items, frames, mobs, villagers, container entities,
+    containers in loaded chunks within 6 chunks of a player; nothing is loaded) and pulled out of there with a portal
+    flash and a thread of motes; a later stage of the dagger comes less often (half per step). Unreachable: a normal
+    weapon.
+  - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
+    textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
+  - Compile-checked; not seen in game.
+- **0.18.14, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
@@ -3916,6 +3934,30 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
+- **0.18.15, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+  matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
+  blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
+  sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
+  Pale Moon 1, Verdant, Rustfall, Glacia and Cinder 2, the Maw 3; Home only 1 so nobody is stranded); the pod's tank holds
+  the lowest grade put in since it was empty, so a scoop of coal in a grade 2 tank drops it to 1 (`PodEntity` gained one
+  synched `FUEL_GRADE`, carried through trips by `ZFighterPodTrip`; fuel put in before grades counts as 2). The star map
+  writes each world's needed grade on its card, shows the tank's grade beside the fuel gauge and greys the worlds the tank
+  can't reach; `ZFighterSpace.go` refuses with a line on the action bar. **The Fuel Still** is Alchemy: the research
+  `fuel_still` (after the alembic) and three crucible recipes with Fire essence: whale oil (Kingdoms) 1 -> 4 Pod Spirit, the
+  strong input, Kitchen resin or a honey bottle 1 -> 1. The crucible had no JEI page, so it has one now (`AlchemyJei`, fed by
+  `Crucibles.Sync` like the infusion altar), listing every catalyst recipe. **Breath** (`power/zfighter/breath`): the Pale
+  Moon and the Maw have no air; out of the pod with none to draw on, a player is slowed after 20 s and takes a point every
+  5 s. The **Hide Air Skin** (4 leather or Kitchen's wet tanned hide, string, glass bottle: shapeless, shown in JEI by
+  itself; worn in the chest slot, no armour, drawn as a bag on the back by its worn layer) holds 3 minutes of air and tears
+  to a hit of more than 6; the **Sealed Helm** (the `helm_seal` kind in `WeaponParts`, 2 iron ingots, finished at the Tool
+  Station with a glass block, which meant a new `Assembly.GLASS` with a plain-item slot; TinkeringJei lists it) is leather's
+  armour with 8 minutes of air that never tears; worn together the times add. Both show their air as the item bar and refill
+  after 10 s beside a pod. **Cold and heat:** Glacia's cold is Kitchen's body heat (the winter rule: snow lands chill you,
+  shivering burns food, warm clothes and hot meals keep it off) with an extra chill on top through Kitchen's weather hook
+  (`BreathCompat`; without it, hunger instead); Cinder gets the mirrored `breath/Heat`: slowed after 30 s, a point every 8 s
+  after a minute, off while you stand in water, are fire-proof or hold or eat something from `#jaymospowers:cooling_items`,
+  and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
+  or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
 
 - **0.18.16, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not

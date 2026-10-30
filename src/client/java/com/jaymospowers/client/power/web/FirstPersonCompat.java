@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.web;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Proxy;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 
@@ -16,6 +17,7 @@ public final class FirstPersonCompat {
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("firstperson");
 	private static final String API = "dev.tr7zw.firstperson.api.FirstPersonAPI";
 	private static final String STATE_ACCESS = "dev.tr7zw.firstperson.access.LivingEntityRenderStateAccess";
+	private static final String ACTIVATION = "dev.tr7zw.firstperson.api.ActivationHandler";
 	private static MethodHandle enabled;
 	private static boolean looked;
 	private static Class<?> stateAccess;
@@ -28,6 +30,37 @@ public final class FirstPersonCompat {
 
 	public static boolean loaded() {
 		return LOADED;
+	}
+
+	/**
+	 * (0.18.12) Andy: "the logout screen shouldn't render the player's body". Last World Panorama shoots six first-person
+	 * views from where you stand as you leave a world (the title screen's panorama after), and First-person Model drew
+	 * your body into them. This hands it an {@code ActivationHandler} that turns it off while the camera is panoramic
+	 * (vanilla's {@code Camera.enablePanoramicMode}, which that mod's shots and vanilla's panorama screenshot both use).
+	 */
+	public static void hideInPanoramas() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			Class<?> handler = Class.forName(ACTIVATION);
+			Object prevent = Proxy.newProxyInstance(handler.getClassLoader(), new Class<?>[] {handler}, (proxy, method, args) -> switch (method.getName()) {
+				case "preventFirstperson" -> panoramic();
+				case "hashCode" -> System.identityHashCode(proxy);
+				case "equals" -> proxy == args[0];
+				case "toString" -> "JaymosPowers panorama handler";
+				default -> null;
+			});
+			MethodHandles.publicLookup().findStatic(Class.forName(API), "registerPlayerHandler", MethodType.methodType(void.class, Object.class))
+				.invoke(prevent);
+		} catch (Throwable e) {
+			// its API moved: the body may show in the panorama, nothing worse
+		}
+	}
+
+	private static boolean panoramic() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.gameRenderer != null && minecraft.gameRenderer.mainCamera().isPanoramicMode();
 	}
 
 	/** Your own body (and so its tendrils) is being drawn in first person right now, by First-person Model. */

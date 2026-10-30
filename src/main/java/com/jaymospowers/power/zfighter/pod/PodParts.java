@@ -57,7 +57,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.12, Andy) The blocks and items the space pod is built from, one per {@link PodPart}: {@code jaymospowers:pod_keel},
+ * (0.18.14, Andy) The blocks and items the space pod is built from, one per {@link PodPart}: {@code jaymospowers:pod_keel},
  * {@code pod_fin}, {@code pod_bell}, {@code pod_tank}, {@code pod_plate}, {@code pod_canopy}, {@code pod_mast}. They are
  * carried like a crafting table ({@code CarryBlock.carriable}) and set down onto a pod entity you are looking at
  * ({@link #tryAttach}, called from {@code Carry.release}); a keel set down on the ground becomes a bare pod
