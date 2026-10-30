@@ -123,6 +123,11 @@ import org.jspecify.annotations.Nullable;
  * (0.17.181) Andy: "add a smashing execution with a rock". A loose rock ({@code GroundRocks}) in the main hand plays
  * {@link Kind#ROCK}, everyone's (no Executioner: anyone can pick up a rock): down on a knee at their head, the off hand
  * pinning them, the rock brought down again and again, the last with both hands, which breaks it (one rock is used up).
+ * <p>
+ * (0.18.25) Andy: "z fighter needs at least 3 bare handed executions, maybe more with different forms, for example
+ * frostborn should use the beam". A Z Fighter's empty hands play one of the {@code Z_*} kinds ({@link Strike#KI}) instead
+ * of the neck snap, as the suit's play its own: no Executioner, anywhere round the body. What they pick, cost and look like
+ * is {@code ZFighterExecutions}'; the hold, roots and poses are the same as every finisher's.
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -151,7 +156,7 @@ public final class Finishers {
 	static final int IMPROVISED_WEAR_MIN = 4, WEAPON_WEAR = 1;
 
 	/** How a blow lands: what it sounds and looks like. */
-	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP }
+	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI }
 
 	/**
 	 * One finisher per kind of weapon: how long it plays (ticks), the beats its blows land on (the last is the kill), how
@@ -206,7 +211,24 @@ public final class Finishers {
 		 * (0.17.181) Stoned, a loose rock's, everyone's: knelt at their head, the off hand pinning them, the rock raised and
 		 * brought down three times, then lifted high in both hands and dropped onto the skull with everything behind it.
 		 */
-		ROCK(52, new int[] {12, 20, 28, 40}, Strike.CRUSH);
+		ROCK(52, new int[] {12, 20, 28, 40}, Strike.CRUSH),
+		// ---- (0.18.25) a Z Fighter's bare hands (ZFighterExecutions) ----------------------------------------------------
+		/** Point-Blank: stood over them, a palm thrust down at the chest, the ki gathered in it, and let go. */
+		Z_PALM(34, new int[] {22}, Strike.KI),
+		/** Flurry: down on a knee, both fists into them too fast to count, and the last one, with ki, into the ground. */
+		Z_FLURRY(46, new int[] {8, 11, 14, 17, 20, 23, 26, 36}, Strike.KI),
+		/** Hammer Fist: both fists clasped overhead and brought down, heaved up again, and down hard enough to crack the ground. */
+		Z_HAMMER(40, new int[] {14, 30}, Strike.KI),
+		/** Cupped Wave, an Earthling's: the hands cupped at the hip, the ki gathered there, and thrust down at them in a beam. */
+		Z_WAVE(46, new int[] {30}, Strike.KI),
+		/** Crimson Cannon, a Warrior-born's: the arms flung wide as it gathers, the palms slammed together, and a heavy beam. */
+		Z_CANNON(44, new int[] {28}, Strike.KI),
+		/** Spiral Lance, a Verdant's: two fingers to the brow, crackling, then pointed down, and the spiral beam through them. */
+		Z_LANCE(42, new int[] {30}, Strike.KI),
+		/** Frost Needle, a Frost-born's: unhurried, one finger, a hair-thin beam through a leg, an arm, and then the head. */
+		Z_NEEDLE(48, new int[] {12, 22, 36}, Strike.KI),
+		/** Supernova Palm, in any form: on a knee, the palm on their chest, the aura poured through it until nothing's left. */
+		Z_NOVA(44, new int[] {30}, Strike.KI);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -328,6 +350,8 @@ public final class Finishers {
 	public static void register() {
 		// (0.16.8) the symbiote's own executions play out on their own loop, begun from the hold below
 		com.jaymospowers.power.web.WebExecutions.register();
+		// (0.18.25) and a Z Fighter's bare hands
+		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
@@ -663,7 +687,9 @@ public final class Finishers {
 			ItemStack stack = player.getMainHandItem();
 			// (0.16.8) with the symbiote suit showing, empty hands are its own: no neck snap, one of WebExecutions' moves
 			boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
-			boolean bare = stack.isEmpty() && !suit;
+			// (0.18.25) and a Z Fighter's are his own: no neck snap, one of ZFighterExecutions' moves, from anywhere round them
+			boolean fighter = stack.isEmpty() && !suit && com.jaymospowers.power.zfighter.ZFighterExecutions.applies(player);
+			boolean bare = stack.isEmpty() && !suit && !fighter;
 			if (!suit && move(player, stack) == null) {
 				// (0.15.110) a torch or a loaf finishes nobody
 				hold.start = now;
@@ -681,6 +707,10 @@ public final class Finishers {
 				it.remove();
 				if (suit) {
 					com.jaymospowers.power.web.WebExecutions.begin(level, player, hold.body);
+					continue;
+				}
+				if (fighter) {
+					begin(level, player, hold.body, com.jaymospowers.power.zfighter.ZFighterExecutions.pick(player));
 					continue;
 				}
 				// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
@@ -717,6 +747,11 @@ public final class Finishers {
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
 			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+		if (kind.strike == Strike.KI) {
+			// (0.18.25) a Z Fighter's: the ki paid, and his own opening
+			com.jaymospowers.power.zfighter.ZFighterExecutions.begin(level, player, body, kind);
+			return;
+		}
 		if (kind == Kind.GUN && TaczGuns.gunSound(player, TaczGuns.gunId(player.getMainHandItem()), "fire_select", 16, 1.0F, 1.0F)) {
 			// (0.15.114) the gun's own cock
 			return;
@@ -764,6 +799,10 @@ public final class Finishers {
 				// (0.15.148) the lash cracks round the neck
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.9F, 1.9F);
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.1F);
+			}
+			if (kind.strike == Strike.KI) {
+				// (0.18.25) the ki gathering, the film, the beam held on them
+				com.jaymospowers.power.zfighter.ZFighterExecutions.tick(level, player, body, kind, t, present);
 			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
@@ -855,6 +894,8 @@ public final class Finishers {
 				BladeBlood.splash(body, 10.0F);
 				Shakes.around(level, muzzle, AROUND_RANGE, SHOT_AROUND_SHAKE);
 			}
+			// (0.18.25) a Z Fighter's: his ki, his fists
+			case KI -> com.jaymospowers.power.zfighter.ZFighterExecutions.blow(level, player, body, kind, kill);
 			case SNAP -> {
 				if (kill) {
 					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -899,7 +940,7 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
-		if (kind.strike == Strike.CRUSH || kind == Kind.GREATSWORD) {
+		if (kind.strike == Strike.CRUSH || kind == Kind.GREATSWORD || com.jaymospowers.power.zfighter.ZFighterExecutions.crushes(kind)) {
 			// (0.15.117) a spider under it is crushed flat: legs, no body (Kitchen); a greatsword is heavy enough too (Andy)
 			com.jaymospowers.core.Crushing.mark(body);
 		}
@@ -942,6 +983,9 @@ public final class Finishers {
 		Finish finish = of(player);
 		if (finish != null && finish.type() == Kind.FLAIL) {
 			com.jaymospowers.armory.Lash.flailThrown(player, false);
+		}
+		if (finish != null && finish.type().strike == Strike.KI) {
+			com.jaymospowers.power.zfighter.ZFighterExecutions.end(body);
 		}
 		player.removeAttached(FINISHING);
 		root(player, false);

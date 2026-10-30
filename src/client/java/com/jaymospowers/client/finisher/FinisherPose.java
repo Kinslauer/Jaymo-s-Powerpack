@@ -256,6 +256,94 @@ public final class FinisherPose {
 			at(heave, 36), at(drop, 40), at(drop, 44),
 			k(48, 0.3F, 15, 0, -0.5F, -0.1F, 0.1F, -0.4F, 0.1F, -0.1F, -1.0F, 1.2F, 0.5F, 0),
 			rest(52, 0)});
+		zfighter();
+	}
+
+	/**
+	 * (0.18.25) A Z Fighter's bare hands ({@code ZFighterExecutions}): the ki in them is the server's (particles, beams,
+	 * the film); these are the bodies under it.
+	 */
+	private static void zfighter() {
+		// Point-Blank: stood over them, the palm thrust down at the chest, the off hand bracing the wrist as it fills, the kick
+		KEYS.put(Finishers.Kind.Z_PALM, new Key[] {
+			rest(0, 0),
+			k(6, 0.1F, 20, -10, -1.0F, 0.1F, 0.1F, -0.3F, 0, -0.15F, -0.35F, 0.3F, 0.55F, 0),
+			k(18, 0.15F, 24, -14, -1.05F, 0.15F, 0.12F, -0.5F, 0.3F, -0.1F, -0.4F, 0.35F, 0.6F, 0),
+			k(21, 0.12F, 22, -16, -1.0F, 0.15F, 0.12F, -0.55F, 0.35F, -0.1F, -0.4F, 0.35F, 0.6F, 0),
+			k(22, 0.05F, 10, -8, -1.35F, 0.1F, 0.15F, -0.6F, 0.3F, -0.1F, -0.3F, 0.3F, 0.45F, 0),
+			k(26, 0.08F, 14, -6, -1.2F, 0.1F, 0.1F, -0.4F, 0.2F, -0.1F, -0.3F, 0.3F, 0.5F, 0),
+			rest(34, 0)});
+		// Flurry: down on a knee over them, right, left, right... too fast to follow, then the right fist raised high and
+		// brought down with everything
+		Key right = k(0, 0.45F, 36, 6, -0.55F, 0, 0, 0.1F, 0, -0.1F, -1.15F, 1.35F, 0.65F, 0);
+		Key left = k(0, 0.45F, 36, -6, 0.1F, 0, 0.1F, -0.55F, 0, 0, -1.15F, 1.35F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Z_FLURRY, new Key[] {
+			rest(0, 0),
+			k(5, 0.42F, 30, 0, -0.8F, 0, 0.1F, -0.8F, 0, -0.1F, -1.15F, 1.35F, 0.6F, 0),
+			at(right, 8), at(left, 11), at(right, 14), at(left, 17), at(right, 20), at(left, 23), at(right, 26),
+			k(32, 0.38F, 20, -14, -2.9F, 0, 0.3F, -0.4F, 0, -0.1F, -1.15F, 1.35F, 0.5F, 0),
+			k(33, 0.38F, 19, -15, -2.95F, 0, 0.3F, -0.4F, 0, -0.1F, -1.15F, 1.35F, 0.5F, 0),
+			k(36, 0.5F, 46, 6, -0.4F, 0, 0, -0.5F, 0.1F, -0.1F, -1.15F, 1.35F, 0.75F, 0),
+			k(40, 0.5F, 45, 5, -0.42F, 0, 0, -0.5F, 0.1F, -0.1F, -1.15F, 1.35F, 0.72F, 0),
+			rest(46, 0)});
+		// Hammer Fist: both fists clasped overhead, down on them, up again, and down with the whole body behind it
+		Key overhead = k(0, -0.04F, -10, 0, -3.0F, -0.3F, 0, -3.0F, 0.3F, 0, -0.3F, 0.3F, 0.35F, 0);
+		Key hammered = k(0, 0.3F, 40, 0, -0.6F, -0.35F, 0, -0.6F, 0.35F, 0, -0.85F, 0.7F, 0.6F, 0);
+		KEYS.put(Finishers.Kind.Z_HAMMER, new Key[] {
+			rest(0, 0),
+			at(overhead, 9), at(hammered, 14), at(hammered, 17), at(overhead, 25),
+			k(30, 0.42F, 50, 0, -0.45F, -0.35F, 0, -0.45F, 0.35F, 0, -1.0F, 0.85F, 0.7F, 0),
+			k(34, 0.42F, 49, 0, -0.47F, -0.35F, 0, -0.47F, 0.35F, 0, -1.0F, 0.85F, 0.68F, 0),
+			rest(40, 0)});
+		// Cupped Wave: turned to the right with both hands cupped at the hip as it gathers, then thrust down at them
+		Key hip = k(0, 0.12F, 8, -35, 0.3F, -0.1F, 0.15F, -0.2F, 0.7F, 0.35F, -0.45F, 0.5F, 0.4F, 0);
+		Key thrust = k(0, 0.2F, 26, 0, -1.15F, -0.25F, 0, -1.15F, 0.25F, 0, -0.6F, 0.55F, 0.55F, 0);
+		KEYS.put(Finishers.Kind.Z_WAVE, new Key[] {
+			rest(0, 0),
+			at(hip, 6),
+			k(26, 0.14F, 6, -38, 0.35F, -0.1F, 0.15F, -0.15F, 0.72F, 0.35F, -0.5F, 0.55F, 0.4F, 0),
+			at(thrust, 30), at(thrust, 37),
+			k(40, 0.15F, 20, 0, -1.25F, -0.25F, 0, -1.25F, 0.25F, 0, -0.5F, 0.5F, 0.5F, 0),
+			rest(46, 0)});
+		// Crimson Cannon: the arms flung wide as it gathers, the head back, then the palms slammed together at them, the recoil
+		Key wide = k(0, 0.1F, -6, 0, -0.2F, 0, 1.35F, -0.2F, 0, -1.35F, -0.35F, 0.35F, 0.2F, 0);
+		Key palms = k(0, 0.15F, 22, 0, -1.25F, -0.3F, 0, -1.25F, 0.3F, 0, -0.55F, 0.5F, 0.55F, 0);
+		KEYS.put(Finishers.Kind.Z_CANNON, new Key[] {
+			rest(0, 0),
+			at(wide, 7),
+			k(22, 0.12F, -10, 0, -0.3F, 0, 1.45F, -0.3F, 0, -1.45F, -0.4F, 0.4F, 0.15F, 0),
+			at(palms, 26), at(palms, 28),
+			k(30, 0.1F, 12, 0, -1.45F, -0.3F, 0, -1.45F, 0.3F, 0, -0.5F, 0.5F, 0.45F, 0),
+			at(palms, 36), rest(44, 0)});
+		// Spiral Lance: two fingers to the brow, the off hand gripping the wrist, crackling; then the arm thrown down at them
+		Key point = k(0, 0.1F, 18, 0, -1.05F, -0.05F, 0, -0.3F, 0, -0.1F, -0.4F, 0.35F, 0.55F, 0);
+		KEYS.put(Finishers.Kind.Z_LANCE, new Key[] {
+			rest(0, 0),
+			k(6, 0.05F, 0, 0, -2.5F, -0.6F, 0, -1.5F, 0.6F, 0, -0.3F, 0.3F, 0.15F, 0),
+			k(26, 0.05F, -2, 0, -2.55F, -0.62F, 0, -1.55F, 0.62F, 0, -0.3F, 0.3F, 0.1F, 0),
+			at(point, 29), at(point, 30),
+			k(32, 0.06F, 10, 0, -1.3F, -0.05F, 0, -0.3F, 0, -0.1F, -0.4F, 0.35F, 0.45F, 0),
+			at(point, 36), rest(42, 0)});
+		// Frost Needle: stood tall, the off hand behind the back, one finger pointed down: a leg, an arm, a moment's
+		// look at the head, and the last
+		Key aim = k(0, 0.0F, 6, 0, -0.95F, -0.05F, 0.05F, 0.55F, 0.4F, 0.15F, -0.1F, 0.1F, 0.5F, 0);
+		Key flick = k(0, 0.0F, 4, 0, -1.15F, -0.05F, 0.05F, 0.55F, 0.4F, 0.15F, -0.1F, 0.1F, 0.45F, 0);
+		KEYS.put(Finishers.Kind.Z_NEEDLE, new Key[] {
+			rest(0, 0),
+			turned(aim, 6, 8), turned(aim, 11, 8), turned(flick, 12, 8),
+			turned(aim, 18, -6), turned(aim, 21, -6), turned(flick, 22, -6),
+			k(28, 0.0F, 4, 0, -1.0F, -0.05F, 0.05F, 0.55F, 0.4F, 0.15F, -0.1F, 0.1F, 0.6F, 0),
+			k(35, 0.0F, 4, 0, -1.0F, -0.05F, 0.05F, 0.55F, 0.4F, 0.15F, -0.1F, 0.1F, 0.6F, 0),
+			at(flick, 36), at(flick, 39), rest(48, 0)});
+		// Supernova Palm: on a knee, the palm flat on their chest, trembling as the aura pours through it, and the flare
+		Key pressed = k(0, 0.45F, 36, 0, -0.6F, 0, 0.05F, 0.05F, 0, -0.2F, -1.15F, 1.35F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Z_NOVA, new Key[] {
+			rest(0, 0),
+			at(pressed, 6), turned(pressed, 12, 3), turned(pressed, 16, -3), turned(pressed, 20, 3), turned(pressed, 24, -3),
+			turned(pressed, 28, 0),
+			k(30, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
+			k(36, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
+			rest(44, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
