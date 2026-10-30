@@ -3,7 +3,7 @@
 an item definition and a loot table (drops itself); and for the four metal parts that are forged (fin, plate, mast, tank)
 the blank's textures, models and item definition (WeaponParts kinds pod_<part>_blank, shown stone and metal).
 
-(0.18.21) Every part block also has a worn state (property damaged: a bent, scorched, cracked texture, pod_<part>_worn) that
+(0.18.49) Every part block also has a worn state (property damaged: a bent, scorched, cracked texture, pod_<part>_worn) that
 its item keeps (block_state component), and the keel a mend grade (property grade 0 to 3: a brass band on its post for each
 grade, models pod_keel_g1..g3). tools/gen_pod_mending.py draws the salvage rack and the three world parts.
 

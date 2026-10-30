@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.21, Andy's SevTech picks: "Wreck Part Sets") What the Maw's wrecked pods hold. Each wreck deck has a fixed set of
+ * (0.18.49, Andy's SevTech picks: "Wreck Part Sets") What the Maw's wrecked pods hold. Each wreck deck has a fixed set of
  * parts ({@link #SETS}: the three fins; the tank and the bell; the four hull plates; the canopy and the mast), not whatever
  * the dice gave, and the wreck's pod is drawn with that set on. Hitting a wreck with a hammer salvages it for the hitter
  * alone: the set their deck holds, or if they already hold that one the next set they haven't, or once every set is held only
