@@ -18,6 +18,14 @@ import java.util.Set;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -131,7 +139,7 @@ public final class Infusion {
 		}
 	}
 
-	record Loaded(Identifier id, Recipe recipe) {
+	public record Loaded(Identifier id, Recipe recipe) {
 	}
 
 	private static List<Loaded> recipes = List.of();
@@ -186,7 +194,7 @@ public final class Infusion {
 	}
 
 	/** Every recipe with its id, in id order. */
-	static List<Loaded> entries() {
+	public static List<Loaded> entries() {
 		return recipes;
 	}
 
@@ -369,7 +377,61 @@ public final class Infusion {
 					recipes = List.copyOf(sorted);
 				}
 			});
+		// (0.18.12) the recipe list goes to every client, so JEI's Infusion page shows what this server's altar makes
+		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
+		ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> {
+			if (joined) {
+				send(player);
+			}
+		});
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
+			if (success) {
+				for (ServerPlayer player : PlayerLookup.all(server)) {
+					send(player);
+				}
+			}
+		});
 		registerResearch();
+	}
+
+	private static void send(ServerPlayer player) {
+		if (ServerPlayNetworking.canSend(player, Sync.TYPE)) {
+			ServerPlayNetworking.send(player, new Sync(recipes));
+		}
+	}
+
+	/** (0.18.12) Server to client: every infusion recipe with its id, for JEI. */
+	public record Sync(List<Loaded> recipes) implements CustomPacketPayload {
+		public static final Type<Sync> TYPE = new Type<>(JaymosPowers.id("infusions"));
+		private static final StreamCodec<RegistryFriendlyByteBuf, Recipe> RECIPE = ByteBufCodecs.fromCodecWithRegistries(Recipe.CODEC);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Sync> CODEC = CustomPacketPayload.codec(Sync::write, Sync::read);
+
+		private void write(RegistryFriendlyByteBuf buf) {
+			buf.writeVarInt(recipes.size());
+			for (Loaded loaded : recipes) {
+				buf.writeIdentifier(loaded.id());
+				RECIPE.encode(buf, loaded.recipe());
+			}
+		}
+
+		private static Sync read(RegistryFriendlyByteBuf buf) {
+			List<Loaded> list = new ArrayList<>();
+			for (int i = buf.readVarInt(); i > 0; i--) {
+				Identifier id = buf.readIdentifier();
+				list.add(new Loaded(id, RECIPE.decode(buf)));
+			}
+			return new Sync(List.copyOf(list));
+		}
+
+		@Override
+		public Type<Sync> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client side: takes the server's recipe list. */
+	public static void accept(Sync sync) {
+		recipes = sync.recipes();
 	}
 
 	private static void registerResearch() {

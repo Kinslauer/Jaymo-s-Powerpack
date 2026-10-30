@@ -13,7 +13,7 @@
 		"server": ["com.jaymospowers.JaymosPowersServer"],
 		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset", "com.jaymospowers.core.StreamsPreset", "com.jaymospowers.client.ShaderPreset"],
 		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei", "com.jaymospowers.client.jei.MedicineJei",
-			"com.jaymospowers.client.jei.GatheringJei"],
+			"com.jaymospowers.client.jei.GatheringJei", "com.jaymospowers.client.jei.KilnJei", "com.jaymospowers.client.jei.AlchemyJei"],
 		"jade": ["com.jaymospowers.client.compat.JadeEntitiesOnly"]
 	},
 	"mixins": [

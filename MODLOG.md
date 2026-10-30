@@ -3911,4 +3911,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (copper) as Tool Station blanks cast like the throwing star (`WeaponParts`); the bell by firing a copper block at the
   kiln's hottest; the canopy at the infusion altar (glass, amethyst, quartz; research `pod_canopy`); Maw wreck chests
   also hold spare parts. Old pod blocks stay loadable and become a complete pod when used. Compile-checked against the
-  26.3 jar; not seen in game. Plan: docs/Pod-Parts-Plan.md.
+  26.3 jar; not seen in game. Plan: docs/Pod-Parts-Plan.md. Andy's rule from the SevTech picks, "make sure all new recipes
+  and routes are also in JEI": the brick kiln (`client/jei/KilnJei`, every firing with the heat it needs) and the
+  infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
+  bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
+  matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.

@@ -134,6 +134,11 @@ public final class Kiln {
 		CreativeModeTabEvents.modifyOutputEvent(tab()).register(output -> output.accept(UNFIRED_POT));
 	}
 
+	/** (0.18.12) Every firing, for JEI. */
+	public static List<Recipe> recipes() {
+		return recipes;
+	}
+
 	/** What firing {@code stack} makes, or null if the kiln can't fire it. */
 	public static @Nullable Recipe recipe(ItemStack stack) {
 		for (Recipe recipe : recipes) {

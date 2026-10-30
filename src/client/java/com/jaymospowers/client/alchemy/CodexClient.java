@@ -35,6 +35,8 @@ public final class CodexClient {
 			return minecraft.isSameThread() ? minecraft.player : null;
 		};
 		ClientPlayNetworking.registerGlobalReceiver(Essences.Sync.TYPE, (payload, context) -> Essences.accept(payload));
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.alchemy.infusion.Infusion.Sync.TYPE,
+			(payload, context) -> com.jaymospowers.alchemy.infusion.Infusion.accept(payload));
 		ClientPlayNetworking.registerGlobalReceiver(CodexNet.Open.TYPE, (payload, context) -> context.client().gui.setScreen(new CodexScreen()));
 		LensHud.init();
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
