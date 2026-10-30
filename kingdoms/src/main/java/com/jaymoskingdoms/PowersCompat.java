@@ -1110,7 +1110,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.366) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
+	 * (0.7.381) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
 	 * builder and the tool), by adding it to Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
 	 */
 	@SuppressWarnings("unchecked")

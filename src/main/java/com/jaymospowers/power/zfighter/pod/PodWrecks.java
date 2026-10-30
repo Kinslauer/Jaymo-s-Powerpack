@@ -137,7 +137,7 @@ public final class PodWrecks {
 		}
 		player.setAttached(SALVAGED, new Salvaged(set < 0 ? got.sets() : got.sets() | 1 << set, got.wrecks() | 1 << deck));
 		if (set >= 0) {
-			// (0.18.22) a part set taken from a wreck: the deed that opens Legend
+			// (0.18.50) a part set taken from a wreck: the deed that opens Legend
 			ZFighterPodTrip.deed(player, "maw_salvage");
 		}
 		for (ItemStack stack : stacks) {
