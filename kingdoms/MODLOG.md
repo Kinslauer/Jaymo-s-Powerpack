@@ -7401,3 +7401,24 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   same game never counts); a chained or captive player wakes beside the mate only when it is the mate's camp that holds
   them; in a den, beside the mate only on a standable step of the same floor; a mate's village that would shun your blood
   is not joined (you go where you would alone).
+
+## 0.7.418: A life's aim
+- Andy's picks from the Kenshi and Streets of Rogue study (`docs/NewRoads-Plan.md`, patch 6): every road (fate resolves to a real
+  one) gives one aim, a plain goal written on a one-page Journal in the kit (no lore). The table is `LifeAims.AIMS` (one row a
+  road: kind, goal, the attribute that gets the point); progress is the saved attachment `life_aim` (aim, count, done, broken,
+  lost, start time, last day counted, heirloom time missing, realm of the start, scorn lines left; kept through death). Counted
+  by events where there is one (`Captives.free`, `MerchantOrders` sending orders on, deaths for spiders/monsters/assassin/whale)
+  and a 200-tick look otherwise (days with a bed or job, reputation, rank, settlement joined, wolf grown, days survived).
+  Tuning (check rate, rep lost, scorn lines, ranges, heirloom grace) in constants at the top of `LifeAims`.
+- **Finishing**: a title that goes by your name (`Careers.title`: over the head and in the tab list, after a job's title) and one
+  free point in an attribute (`LifeAims.bonus`, counted by `LifeStory.points`, so the stats screen shows it as story points).
+  Said in your next Tidings and by a villager standing near, not in chat.
+- **Rise Up**: finishing the aim of a Very Hard or Cruel road records the deed `rise.<road>` in `RoadDeeds` (a list of ids on the
+  Overworld, saved with the world), reached as `Deeds.done(server, id)` and `Deeds.has(server, id)`. Nothing reads it yet.
+- **Turning Your Back on It**: losing the heirloom for two days, the pup dying, a nobody dying more than 64 blocks from you
+  (tagged `jaymoskingdoms_nobody_of_<uuid>`), or picking out of the sentenced cells marks the aim broken: no title, no perk,
+  `BETRAY_REP` off your name with the realm the story began in, and the next three villagers who know it (on that realm's land
+  or near where you woke) say so when they meet you. The kindhearted, cheerful and devout speak gently and give `FORGIVE_REP`
+  back; the spiteful, proud, suspicious, greedy and hotheaded are cold. A nobody dying at your side only loses the aim.
+
+- Review fixes: the heirloom counts as kept while it is in the pack, ender chest or a shulker box in either (five days online out of reach before it is lost); only the assassin sent for you counts; nobodies lose their tag when the contract ends and betray only while it runs with you online in that world (a fall at your side ends the aim with a Tidings line); each villager speaks and forgives once; a reputation or rank aim with no real realm becomes a ten-day survive aim; monsters must have been after you (no slime splits); days count whole days online; a pup dying while you are away still counts; only the story's own cell breaks the sentenced aim.

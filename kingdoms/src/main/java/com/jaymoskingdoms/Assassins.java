@@ -974,6 +974,8 @@ final class Assassins {
 				expose(server, f, hirer);
 			}
 		} else if (killer != null && killer.getUUID().equals(c.player())) {
+			// (0.7.418) a life's aim: the one sent for them is dead
+			LifeAims.assassinKilled(killer);
 			killer.sendSystemMessage(Component.translatable(hirer != null ? "assassin.jaymoskingdoms.player.caught.hirer" : "assassin.jaymoskingdoms.player.caught",
 				hirer != null ? hirer.name() : "").withStyle(ChatFormatting.GOLD));
 		}

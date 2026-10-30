@@ -274,6 +274,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();
+		// 0.7.418: a life's aim for every road, and the road deeds record
+		LifeAims.register();
 		Manacles.register();
 		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it

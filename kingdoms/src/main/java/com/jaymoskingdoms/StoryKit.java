@@ -141,7 +141,7 @@ public final class StoryKit {
 	// ---- the heirloom blade ----------------------------------------------------------------------------------------------
 
 	/** Whether {@code stack} is the family blade of the player whose UUID is {@code owner}. */
-	private static boolean isHeirloom(ItemStack stack, String owner) {
+	static boolean isHeirloom(ItemStack stack, String owner) {
 		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
 		return data != null && owner.equals(data.copyTag().getStringOr(HEIRLOOM_KEY, ""));
 	}

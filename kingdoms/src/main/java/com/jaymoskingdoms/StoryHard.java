@@ -333,7 +333,7 @@ public final class StoryHard {
 			Lockpicking.pickVirtual(player, Speakeasy.doorAt(jail.cell()), CELL_LEVEL, jail.cell().asLong() ^ 0x2545F491L, () -> {
 				ServerPlayer again = level.getServer().getPlayerList().getPlayer(id);
 				if (again != null && again.hasAttached(Busts.JAILED)) {
-					breakOut(again, f);
+					breakOut(again, f, jail.until());
 				}
 			});
 			return;
@@ -343,7 +343,7 @@ public final class StoryHard {
 	}
 
 	/** The cell door is picked: out, but a fugitive of {@code f} now, as any other prisoner who escapes ({@link Busts}). */
-	private static void breakOut(ServerPlayer player, Faction f) {
+	private static void breakOut(ServerPlayer player, Faction f, long jailUntil) {
 		ServerLevel level = Factions.level(player.level().getServer());
 		player.removeAttached(Busts.JAILED);
 		let(level, player, f);
@@ -351,6 +351,8 @@ public final class StoryHard {
 		Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));
 		Theft.arrest(player, level, f, Theft.OUTLAW_TICKS);
 		Busts.charge(player, f, "escape");
+		// (0.7.418) a life's aim: out of the cells instead of serving
+		LifeAims.brokeOut(player, jailUntil);
 	}
 
 	/** Puts a prisoner out by the seat. */

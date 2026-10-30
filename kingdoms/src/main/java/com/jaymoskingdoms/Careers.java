@@ -585,7 +585,10 @@ public final class Careers {
 				best = p;
 			}
 		}
-		return best == null ? null : title(best.kind(), c.rank(best.job()));
+		Component job = best == null ? null : title(best.kind(), c.rank(best.job()));
+		// (0.7.418) and what a finished aim made of them
+		Component aim = LifeAims.title(player);
+		return job == null ? aim : aim == null ? job : Component.translatable("aim.jaymoskingdoms.titled", job, aim);
 	}
 
 	/** {@code pos} is in {@code f}'s town: near its seat, or on its land (the settlements' world only). */

@@ -604,12 +604,15 @@ final class MerchantOrders {
 				}
 				Couriers.start(level, courier, parcel(lot), null, first.buyer());
 				Post.tidings(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.sent", first.town(), courier.getName()));
+				// (0.7.418) a life's aim: these orders are on their way
+				LifeAims.ordersSent(server, first.buyer(), lot.size());
 			} else if (now - first.ready() > POST_AFTER) {
 				for (Order o : lot) {
 					remove(server, o.id());
 				}
 				Post.later(first.buyer(), parcel(lot));
 				Post.tidings(first.buyer(), Component.translatable("orders.jaymoskingdoms.tidings.post", first.town()));
+				LifeAims.ordersSent(server, first.buyer(), lot.size());
 			}
 		}
 	}
