@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "awake=false": {
+      "model": "jaymospowers:block/star_bench"
+    },
+    "awake=true": {
+      "model": "jaymospowers:block/star_bench_awake"
+    }
+  }
+}

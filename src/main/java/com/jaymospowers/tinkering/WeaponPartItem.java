@@ -58,6 +58,9 @@ public class WeaponPartItem extends Item {
 	/** "with a Crossguard and a Tough Handle", "on its own". */
 	public static Component with(WeaponParts.Assembly assembly) {
 		List<PartType> parts = assembly.parts;
+		if (assembly.extra != null) {
+			return Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.with", new ItemStack(assembly.extra).getHoverName());
+		}
 		return switch (parts.size()) {
 			case 0 -> Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.alone");
 			case 1 -> Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.with", name(parts.get(0)));

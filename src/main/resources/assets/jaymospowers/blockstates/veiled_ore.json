@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "host=stone": {
+      "model": "jaymospowers:block/farworld/veiled_stone"
+    },
+    "host=deepslate": {
+      "model": "jaymospowers:block/farworld/veiled_deepslate"
+    },
+    "host=netherrack": {
+      "model": "jaymospowers:block/farworld/veiled_netherrack"
+    },
+    "host=blackstone": {
+      "model": "jaymospowers:block/farworld/veiled_blackstone"
+    }
+  }
+}

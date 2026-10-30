@@ -132,6 +132,55 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickadze/handle_steel"
             }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_amber_bronze"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +322,55 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickadze/pick_broken_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +507,55 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickadze/pick_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_star_metal"
               }
             }
           ],
@@ -547,6 +694,55 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickadze/adze_steel"
+            }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_amber_bronze"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_star_metal"
             }
           }
         ],

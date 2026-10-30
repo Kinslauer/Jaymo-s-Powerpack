@@ -49,6 +49,9 @@ public final class MonsterGear {
 	static final float RARE_ENCHANT_CHANCE = 0.3F;
 	static final int RARE_ENCHANT_LEVEL = 12, LEGENDARY_ENCHANT_LEVEL = 25;
 
+	/** (0.7.386) How often a star-touched mob that wears armour takes each empty slot's dyed piece. */
+	static final float STAR_PIECE_CHANCE = 0.75F;
+
 	/** Per grade: helmet, chestplate, leggings, boots. */
 	private static final Item[][] ARMOR = {
 		{Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS},
@@ -132,6 +135,26 @@ public final class MonsterGear {
 		}
 		return EnchantmentHelper.enchantItem(random, stack, grade == 4 ? LEGENDARY_ENCHANT_LEVEL : RARE_ENCHANT_LEVEL, level.registryAccess(),
 			level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT));
+	}
+
+	/**
+	 * (0.7.386) A star-touched mob's look ({@link StarTouched}): where it wears armour, each empty slot takes a leather piece dyed
+	 * {@code colour} (never dropped); the rest show it by their motes of light.
+	 */
+	static void starLook(Mob mob, int colour) {
+		if (!wears(mob)) {
+			return;
+		}
+		Item[] leather = {Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS};
+		for (int i = 0; i < ARMOR_SLOTS.length; i++) {
+			EquipmentSlot slot = ARMOR_SLOTS[i];
+			if (mob.getItemBySlot(slot).isEmpty() && mob.getRandom().nextFloat() < STAR_PIECE_CHANCE) {
+				ItemStack piece = new ItemStack(leather[i]);
+				piece.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(colour));
+				mob.setItemSlot(slot, piece);
+				mob.setDropChance(slot, 0.0F);
+			}
+		}
 	}
 
 	private static Optional<Item> item(String id) {

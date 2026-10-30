@@ -3,7 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.gifted.Gifted;
-import com.mojang.math.Transformation;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -110,18 +110,26 @@ public final class ZFighterPatrol {
 	static final double RANK_PAYS = 0.5;
 	/** The arrests each rank needs: Rookie, Officer, Sergeant, Inspector, Commander. */
 	static final int[] RANKS = {0, 3, 8, 15, 25};
+	/**
+	 * (0.18.54, "Ranks Follow Rungs") The world tier (0 Hearth ... 4 Legend) each rank needs open through Kingdoms' deeds as well as
+	 * its arrests: Rookie Borderlands, Officer (the Patrolman) Wildlands, Sergeant and Inspector Dread, Commander Legend. Without
+	 * Kingdoms the Patrol goes by power and arrests alone.
+	 */
+	static final int[] RANK_TIER = {1, 2, 3, 3, 4};
+	/** A travel story about the landing yard, told once: its bit in {@link #TOLD}. */
+	static final int YARD_STORY_BIT = 1 << 30;
 	/** How many ways each line is said, and how many travel stories there are. */
-	static final int GREET_LINES = 3, STORIES = 8, NOT_YET_LINES = 3, OFFER_LINES = 2, REST_LINES = 2, NAMES = 10;
+	static final int GREET_LINES = 3, STORIES = 9, NOT_YET_LINES = 3, OFFER_LINES = 2, REST_LINES = 2, NAMES = 10;
 	/** The pod's arrival and departure: how high it starts, how fast it comes down or goes up (blocks a tick). */
 	static final int ARRIVE_HEIGHT = 60;
 	static final double ARRIVE_SPEED = 0.7, DEPART_SPEED = 1.2;
 	static final int DEPART_TICKS = 90;
 
 	public static final String TAG = "jaymospowers.patrolman";
-	static final String POD_TAG = "jaymospowers.patrol_pod";
+	public static final String POD_TAG = "jaymospowers.patrol_pod";
 	static final String WANTED_TAG = "jaymospowers.wanted";
 	/** On a patrol pod while it flies (not while it stands parked). */
-	static final String FLYING_TAG = "jaymospowers.patrol_pod_flying";
+	public static final String FLYING_TAG = "jaymospowers.patrol_pod_flying";
 	static final long DAY = 24000L;
 
 	/** A patrolman's visit: where his pod stands and when he leaves. */
@@ -157,14 +165,14 @@ public final class ZFighterPatrol {
 
 	/** A pod coming down (and what steps out when it lands), or going up with whoever flew it gone. */
 	static final class Flier {
-		final Display.BlockDisplay pod;
+		final PodEntity pod;
 		final BlockPos ground;
 		final boolean arriving;
 		final int name;
 		final java.util.function.@Nullable Consumer<Flier> landed;
 		int ticks;
 
-		Flier(Display.BlockDisplay pod, BlockPos ground, boolean arriving, int name, java.util.function.@Nullable Consumer<Flier> landed) {
+		Flier(PodEntity pod, BlockPos ground, boolean arriving, int name, java.util.function.@Nullable Consumer<Flier> landed) {
 			this.pod = pod;
 			this.ground = ground;
 			this.arriving = arriving;
@@ -216,6 +224,16 @@ public final class ZFighterPatrol {
 			if (arrests >= RANKS[i]) {
 				rank = i;
 			}
+		}
+		return rank;
+	}
+
+	/** The rank an officer with {@code arrests} holds, held back to what the world tiers open to {@code player} allow. */
+	static int rank(Player player, int arrests) {
+		int rank = rank(arrests);
+		int tier = ZFighterKingdoms.openTier(player);
+		while (tier >= 0 && rank > 0 && RANK_TIER[rank] > tier) {
+			rank--;
 		}
 		return rank;
 	}
@@ -281,6 +299,16 @@ public final class ZFighterPatrol {
 	/** A patrolman's pod starts down over open ground by {@code seat}; true if a spot was found. */
 	static boolean arrive(ServerLevel level, BlockPos seat, int name) {
 		RandomSource random = level.getRandom();
+		// (0.18.54) a landing yard within reach: down on a free pad, and the town named for it
+		BlockPos pad = ZFighterYard.freePad(level, seat);
+		if (pad != null) {
+			land(level, pad, name, f -> {
+				stepOut((ServerLevel)f.pod.level(), f);
+				ZFighterKingdoms.yardTouched((ServerLevel)f.pod.level(), f.ground);
+			});
+			level.playSound(null, pad.getX(), pad.getY() + 20, pad.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
+			return true;
+		}
 		for (int tries = 0; tries < 12; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = LAND_MIN + random.nextDouble() * (LAND_MAX - LAND_MIN);
@@ -299,32 +327,25 @@ public final class ZFighterPatrol {
 
 	/** A pod starts down out of the sky over {@code ground}; {@code landed} runs when it sets down. */
 	static Flier land(ServerLevel level, BlockPos ground, int name, java.util.function.Consumer<Flier> landed) {
-		Display.BlockDisplay pod = pod(level, new Vec3(ground.getX() + 0.5, ground.getY() + ARRIVE_HEIGHT, ground.getZ() + 0.5));
+		PodEntity pod = pod(level, new Vec3(ground.getX() + 0.5, ground.getY() + ARRIVE_HEIGHT, ground.getZ() + 0.5));
 		Flier flier = new Flier(pod, ground, true, name, landed);
 		FLIERS.add(flier);
 		pod.addTag(FLYING_TAG);
+		pod.setHovering(true);
 		return flier;
 	}
 
 	/** A parked pod at {@code at} goes up and away. */
-	static void takeOff(ServerLevel level, Display.BlockDisplay pod) {
+	static void takeOff(ServerLevel level, PodEntity pod) {
 		FLIERS.add(new Flier(pod, pod.blockPosition(), false, 0, null));
 		pod.addTag(FLYING_TAG);
+		pod.setHovering(true);
 		level.playSound(null, pod.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.5F);
 	}
 
-	/** A pod nobody can take: the pod drawn big. */
-	static Display.BlockDisplay pod(ServerLevel level, Vec3 at) {
-		Display.BlockDisplay pod = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
-		pod.setBlockState(ZFighterSpace.POD.defaultBlockState());
-		float scale = ZFighterPodTrip.POD_SCALE;
-		pod.setTransformation(new Transformation(new Vector3f(-scale / 2.0F, 0.0F, -scale / 2.0F), null, new Vector3f(scale), null));
-		pod.setPosRotInterpolationDuration(2);
-		pod.setWidth(scale);
-		pod.setHeight(scale);
-		pod.setViewRange(4.0F);
-		pod.setPos(at.x, at.y, at.z);
-		level.addFreshEntity(pod);
+	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
+	static PodEntity pod(ServerLevel level, Vec3 at) {
+		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
 		pod.addTag(POD_TAG);
 		return pod;
 	}
@@ -349,6 +370,7 @@ public final class ZFighterPatrol {
 					level.sendParticles(ParticleTypes.CLOUD, at.x, f.ground.getY() + 0.2, at.z, 30, 1.4, 0.1, 1.4, 0.1);
 					level.playSound(null, f.ground, SoundEvents.IRON_DOOR_OPEN, SoundSource.NEUTRAL, 1.0F, 0.7F);
 					f.pod.removeTag(FLYING_TAG);
+					f.pod.setHovering(false);
 					if (f.landed != null) {
 						f.landed.accept(f);
 					}
@@ -459,8 +481,8 @@ public final class ZFighterPatrol {
 	/** His stay is over: he climbs in and the pod goes up. */
 	private static void depart(ServerLevel level, PathfinderMob man, Visit visit) {
 		Vec3 at = Vec3.atBottomCenterOf(visit.pod());
-		Display.BlockDisplay pod = null;
-		for (Display.BlockDisplay d : level.getEntitiesOfClass(Display.BlockDisplay.class, new AABB(visit.pod()).inflate(3.0), d -> d.entityTags().contains(POD_TAG))) {
+		PodEntity pod = null;
+		for (PodEntity d : level.getEntitiesOfClass(PodEntity.class, new AABB(visit.pod()).inflate(3.0), d -> d.entityTags().contains(POD_TAG))) {
 			pod = d;
 		}
 		if (pod == null) {
@@ -495,6 +517,13 @@ public final class ZFighterPatrol {
 					ZFighterNpcs.ask(player, man, line("not_yet", NOT_YET_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 					return;
 				}
+				// (0.18.54) power is not enough: a Rookie has the first deed (Borderlands) behind them
+				int tier = ZFighterKingdoms.openTier(player);
+				if (tier >= 0 && tier < RANK_TIER[0]) {
+					ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.deeds"),
+						List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+					return;
+				}
 				ZFighterNpcs.ask(player, man, line("offer", OFFER_LINES, man), List.of(
 					ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.swear", true, () -> {
 						join(player);
@@ -512,8 +541,10 @@ public final class ZFighterPatrol {
 				ZFighterSagas.give(player, new ItemStack(Items.BLAZE_POWDER, FUEL_GIFT));
 				ZFighterNpcs.ask(player, man, line("fuel", REST_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 			}));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.writ", officerRank(player) >= WRIT_RANK,
+				() -> com.jaymospowers.power.zfighter.farworld.PatrolWrit.ask(player, man, back)));
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
-				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(member.arrests())), member.arrests()),
+				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(player, member.arrests())), member.arrests()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);
@@ -522,6 +553,14 @@ public final class ZFighterPatrol {
 	/** The next of his travel stories, or that he has told them all. */
 	private static Component story(LivingEntity man) {
 		int told = man.getAttachedOrElse(TOLD, 0);
+		if ((told & YARD_STORY_BIT) == 0 && man.level() instanceof ServerLevel here) {
+			// (0.18.54) a landing yard near: the town is a stop he names
+			String town = ZFighterKingdoms.yardName(here, man.blockPosition(), ZFighterYard.RANGE);
+			if (!town.isEmpty()) {
+				man.setAttached(TOLD, told | YARD_STORY_BIT);
+				return Component.translatable("talk.jaymospowers.patrol.yard", town);
+			}
+		}
 		List<Integer> left = new ArrayList<>();
 		for (int i = 0; i < STORIES; i++) {
 			if ((told & (1 << i)) == 0) {
@@ -543,11 +582,12 @@ public final class ZFighterPatrol {
 	/** Sworn in: an officer, with a pod full of fuel and the license. */
 	static void join(ServerPlayer player) {
 		player.setAttached(MEMBER, new Member(0, 0L));
-		ItemStack pod = new ItemStack(ZFighterSpace.POD_ITEM);
-		pod.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(ZFighterSpace.FUEL, ZFighterSpace.MAX_FUEL));
-		ZFighterSagas.give(player, pod);
-		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		ServerLevel level = player.level();
+		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
+		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
+		ZFighterSagas.give(player, new ItemStack(LICENSE));
+		// (0.18.53) and the chart of Rustfall, where the Patrol's work is
+		ZFighterSagas.give(player, com.jaymospowers.power.zfighter.sky.Charts.stack(ZFighterSpace.RUSTFALL));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
@@ -614,7 +654,7 @@ public final class ZFighterPatrol {
 		}
 		NEXT_WARRANT.put(key, now + WARRANT_GAP);
 		WARRANTS.add(new Warrant(player.getUUID(), criminal.getUUID(), level.dimension(), planet));
-		int rank = rank(player.getAttached(MEMBER).arrests());
+		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.warrant", criminal.getDisplayName(),
 			Component.translatable("space.jaymospowers.dest." + dest.key()), bounty(rank)).withStyle(ChatFormatting.GOLD));
 	}
@@ -645,7 +685,7 @@ public final class ZFighterPatrol {
 		if (fighter == null) {
 			return null;
 		}
-		int rank = rank(player.getAttached(MEMBER).arrests());
+		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		double tougher = 1.0 + RANK_TOUGHER * rank;
 		fighter.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 		fighter.become(ZFighterRogue.TYRANT, Component.translatable("entity.jaymospowers.wanted." + random.nextInt(NAMES)));
@@ -701,7 +741,7 @@ public final class ZFighterPatrol {
 			return;
 		}
 		Member member = owner.getAttachedOrElse(MEMBER, new Member(0, 0L));
-		int was = rank(member.arrests());
+		int was = rank(owner, member.arrests());
 		Member now = new Member(member.arrests() + 1, member.fuelled());
 		owner.setAttached(MEMBER, now);
 		ZFighterSagas.give(owner, new ItemStack(Items.EMERALD, bounty(was)));
@@ -711,11 +751,67 @@ public final class ZFighterPatrol {
 		}
 		owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", dead.getDisplayName(), bounty(was), now.arrests())
 			.withStyle(ChatFormatting.AQUA));
-		int rank = rank(now.arrests());
+		int rank = rank(owner, now.arrests());
+		if (rank(now.arrests()) > rank(member.arrests()) && rank <= was) {
+			// (0.18.54) the arrests are enough for the next rank; the deeds are not
+			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.held_back", rankName(rank(now.arrests()))).withStyle(ChatFormatting.GRAY));
+		}
 		if (rank > was) {
 			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.promoted", rankName(rank)).withStyle(ChatFormatting.GOLD));
 			level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
 		}
+	}
+
+	// ---------------------------------------------------------------- (0.18.55) the skip writ (farworld/PatrolWrit)
+
+	/** The rank an officer needs to be given a skip writ: Sergeant (the index into {@link #RANKS}). */
+	public static final int WRIT_RANK = 2;
+
+	/** The rank (0 Rookie to 4 Commander) of {@code player}, or -1 if he is no officer. */
+	public static int officerRank(Player player) {
+		Member member = player.getAttached(MEMBER);
+		return member == null ? -1 : rank(member.arrests());
+	}
+
+	/** Whether a patrolman can be called down at all (they are MCA villagers, through Kingdoms). */
+	public static boolean writCanLand() {
+		return ZFighterNpcs.villagers() && ZFighterKingdoms.present();
+	}
+
+	/** Open ground for a called patrolman's pod near {@code player} on the far world he stands on, or null. */
+	public static @Nullable BlockPos writGround(ServerLevel level, ServerPlayer player, ZFighterSpace.Kind kind) {
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < 16; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double distance = 12.0 + random.nextDouble() * 10.0;
+			int x = Mth.floor(player.getX() + Math.cos(angle) * distance), z = Mth.floor(player.getZ() + Math.sin(angle) * distance);
+			level.getChunk(x >> 4, z >> 4);
+			BlockPos ground = kind == ZFighterSpace.Kind.FORGE ? ZFighterSpace.forgeFloor(level, x, z) : ZFighterSpace.surface(level, x, z);
+			if (ground != null) {
+				return ground;
+			}
+		}
+		return null;
+	}
+
+	/** A pod (nobody can take it) comes down over {@code ground}; {@code landed} runs when it sets down. */
+	public static void writLand(ServerLevel level, BlockPos ground, java.util.function.Consumer<PodEntity> landed) {
+		land(level, ground, 0, f -> landed.accept(f.pod));
+		level.playSound(null, ground.getX(), ground.getY() + 20, ground.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
+	}
+
+	/** The called patrolman's pod goes up and away. */
+	public static void writLeave(ServerLevel level, PodEntity pod) {
+		takeOff(level, pod);
+	}
+
+	/** The called patrolman as an MCA villager (null without MCA); {@code tag} keeps him out of the visiting patrolmen's roaming. */
+	public static @Nullable LivingEntity writMan(ServerLevel level, Vec3 feet, String tag, String nameKey, boolean female) {
+		LivingEntity man = ZFighterNpcs.villager(level, feet, level.getRandom().nextFloat() * 360.0F, tag, nameKey, female);
+		if (man != null) {
+			Gifted.give(man, "zfighter", Gifted.BOLD, true, true);
+		}
+		return man;
 	}
 
 	// ---------------------------------------------------------------- the license
@@ -741,7 +837,7 @@ public final class ZFighterPatrol {
 						held = Component.translatable("message.jaymospowers.patrol.holding", criminal.getDisplayName(), (int)Math.round(server.distanceTo(criminal)));
 					}
 				}
-				server.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.license", rankName(rank(member.arrests())), member.arrests(), held)
+				server.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.license", rankName(rank(server, member.arrests())), member.arrests(), held)
 					.withStyle(ChatFormatting.GOLD));
 			}
 			return InteractionResult.SUCCESS;

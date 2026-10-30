@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.zfighter;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
+import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,6 +22,7 @@ import org.jspecify.annotations.Nullable;
  * gravity, how its mission stands, the fuel the trip burns against what the pod holds, and Launch; on a world with a mission, the
  * card of the world you are on also begins or gives up the mission. The future is not on the map, and a pod in the future shows
  * the map dark. The whole panel shrinks to fit small screens. Escape closes it.
+ * (0.18.53) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int MAP = 200;
@@ -48,17 +50,24 @@ public class ZFighterStarMapScreen extends Screen {
 		ZFighterSpace.VERDANT, ZFighterSpace.MAW};
 
 	private final int fuel;
+	/** (0.18.50) The grade of the fuel in the tank (0: empty). */
+	private final int grade;
+	/** (0.18.53) The star charts read: bit w is destination w. */
+	private final int read;
 	private int picked;
 	private float scale = 1.0F;
 	private int ox, oy;
 
-	public ZFighterStarMapScreen(int fuel) {
+	public ZFighterStarMapScreen(int fuel, int grade, int read) {
 		super(Component.translatable("screen.jaymospowers.zfighter_space"));
 		this.fuel = fuel;
+		this.grade = grade;
+		this.read = read;
 	}
 
 	static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(ZFighterSpace.Open.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload.fuel())));
+		ClientPlayNetworking.registerGlobalReceiver(ZFighterSpace.Open.TYPE,
+			(payload, ctx) -> ctx.client().gui.setScreen(new ZFighterStarMapScreen(payload.fuel(), payload.grade(), payload.read())));
 	}
 
 	@Override
@@ -68,10 +77,16 @@ public class ZFighterStarMapScreen extends Screen {
 		this.oy = Math.round((this.height - PANEL_H * this.scale) / 2.0F);
 		LocalPlayer player = this.minecraft.player;
 		ZFighterSpace.Dest here = player == null ? null : ZFighterSpace.here(player.level());
-		this.picked = ZFighterSpace.MOON;
+		this.picked = ZFighterSpace.HOME_INDEX;
+		for (int index : BODIES) {
+			if (index != ZFighterSpace.HOME_INDEX && shown(index)) {
+				this.picked = index;
+				break;
+			}
+		}
 		if (here != null) {
 			for (int i = 0; i < ZFighterSpace.DESTS.length; i++) {
-				if (ZFighterSpace.DESTS[i] == here && i != ZFighterSpace.FUTURE) {
+				if (ZFighterSpace.DESTS[i] == here && i != ZFighterSpace.FUTURE && shown(i)) {
 					this.picked = i;
 				}
 			}
@@ -84,6 +99,11 @@ public class ZFighterStarMapScreen extends Screen {
 	}
 
 	// ---------------------------------------------------------------- where things are (in panel pixels)
+
+	/** (0.18.53) Whether {@code index} is on the map: Home, or a world whose chart is read. */
+	private boolean shown(int index) {
+		return index == ZFighterSpace.HOME_INDEX || (this.read & 1 << index) != 0;
+	}
 
 	private float time() {
 		return (System.currentTimeMillis() % 3_600_000L) / 60_000.0F;
@@ -114,6 +134,9 @@ public class ZFighterStarMapScreen extends Screen {
 		int best = Integer.MIN_VALUE;
 		double bestD = Double.MAX_VALUE;
 		for (int index : BODIES) {
+			if (!shown(index)) {
+				continue;
+			}
 			float[] p = at(index);
 			double dx = mx - p[0], dy = my - p[1];
 			double d = dx * dx + dy * dy;
@@ -170,7 +193,15 @@ public class ZFighterStarMapScreen extends Screen {
 		if (this.fuel < cost) {
 			return Component.translatable("screen.jaymospowers.zfighter_space.short", cost - this.fuel);
 		}
+		if (tooCoarse(player, index)) {
+			return Component.translatable("screen.jaymospowers.zfighter_space.grade_short", PodFuel.roman(PodFuel.needed(index)));
+		}
 		return null;
+	}
+
+	/** (0.18.50) Whether the tank's fuel is too poor a grade to reach {@code index} (a creative pilot needs no grade). */
+	private boolean tooCoarse(LocalPlayer player, int index) {
+		return !player.isCreative() && this.grade < PodFuel.needed(index);
 	}
 
 	private int cost(LocalPlayer player, int index) {
@@ -225,8 +256,8 @@ public class ZFighterStarMapScreen extends Screen {
 
 	private void fuelGauge(GuiGraphicsExtractor graphics) {
 		int right = PANEL_W - 8;
-		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel", this.fuel, ZFighterSpace.MAX_FUEL), right, 7, 96,
-			GOLD);
+		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.fuel_grade", this.fuel, ZFighterSpace.MAX_FUEL,
+			PodFuel.roman(this.grade)), right, 7, 96, GOLD);
 		UiStyle.bar(graphics, right - 96, 19, 96, 5, this.fuel / (float)ZFighterSpace.MAX_FUEL, 0xFFFF9A30);
 	}
 
@@ -241,15 +272,23 @@ public class ZFighterStarMapScreen extends Screen {
 			return;
 		}
 		graphics.enableScissor(x0, y0, x0 + MAP, y0 + MAP);
-		for (float[] orbit : new float[][] {ORBITS[ZFighterSpace.CINDER], HOME_ORBIT, ORBITS[ZFighterSpace.RUSTFALL], ORBITS[ZFighterSpace.GLACIA],
-			ORBITS[ZFighterSpace.VERDANT]}) {
-			ZFighterSpaceArt.orbit(graphics, cx, cy, orbit[0], 0x40A0B0FF);
+		for (int index : new int[] {ZFighterSpace.CINDER, ZFighterSpace.HOME_INDEX, ZFighterSpace.RUSTFALL, ZFighterSpace.GLACIA, ZFighterSpace.VERDANT}) {
+			if (shown(index)) {
+				ZFighterSpaceArt.orbit(graphics, cx, cy, (index == ZFighterSpace.HOME_INDEX ? HOME_ORBIT : ORBITS[index])[0], 0x40A0B0FF);
+			}
 		}
 		ZFighterSpaceArt.sun(graphics, cx, cy, 9);
 		int hover = bodyAt(mx, my);
 		for (int index : BODIES) {
+			if (!shown(index)) {
+				continue;
+			}
 			float[] p = at(index);
 			ZFighterSpaceArt.world(graphics, index, p[0], p[1], p[2], cx, cy);
+			if (index != ZFighterSpace.HOME_INDEX && !isHere(player, index) && tooCoarse(player, index)) {
+				// (0.18.50) the tank's fuel can't reach it: greyed over
+				ZFighterSpaceArt.disc(graphics, p[0], p[1], p[2], 0xB0101018);
+			}
 			if (index == this.picked) {
 				ZFighterSpaceArt.ring(graphics, p[0], p[1], p[2] + 3.0F, GOLD, 1);
 			} else if (index == hover) {
@@ -264,6 +303,11 @@ public class ZFighterStarMapScreen extends Screen {
 			}
 		}
 		graphics.disableScissor();
+		if (this.read == 0) {
+			// (0.18.53) no chart read yet: only Home is on the map
+			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.uncharted"), x0 + MAP / 2, y0 + MAP - 14, MAP - 12,
+				UiStyle.HINT);
+		}
 		if (hover != Integer.MIN_VALUE) {
 			float[] p = at(hover);
 			UiStyle.lineCentred(graphics, this.font, Component.translatable("space.jaymospowers.dest." + key(hover)), Math.round(p[0]),
@@ -284,6 +328,10 @@ public class ZFighterStarMapScreen extends Screen {
 		UiStyle.line(graphics, this.font, Component.translatable("space.jaymospowers." + key(index) + ".gravity"), x + 50, y + 20, w - 54, UiStyle.DIM);
 		if (here) {
 			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.you_are_here"), x + 50, y + 32, w - 54, 0xFF7CFF7C);
+		} else if (!dark) {
+			// (0.18.50) the grade of fuel the trip needs
+			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.needs_grade", PodFuel.roman(PodFuel.needed(index))), x + 50,
+				y + 32, w - 54, tooCoarse(player, index) ? RED : UiStyle.DIM);
 		}
 		int ty = y + 52;
 		ty += 2 + 9 * UiStyle.wrapped(graphics, this.font, Component.translatable("space.jaymospowers." + key(index) + ".about"), x + 2, ty, w - 8, 7, 9,

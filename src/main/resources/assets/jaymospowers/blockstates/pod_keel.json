@@ -1,0 +1,36 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "grade": "0"
+      },
+      "apply": {
+        "model": "jaymospowers:block/pod_keel"
+      }
+    },
+    {
+      "when": {
+        "grade": "1"
+      },
+      "apply": {
+        "model": "jaymospowers:block/pod_keel_g1"
+      }
+    },
+    {
+      "when": {
+        "grade": "2"
+      },
+      "apply": {
+        "model": "jaymospowers:block/pod_keel_g2"
+      }
+    },
+    {
+      "when": {
+        "grade": "3"
+      },
+      "apply": {
+        "model": "jaymospowers:block/pod_keel_g3"
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/battlesign/head_broken_ice_star_metal"
+  }
+}

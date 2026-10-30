@@ -1,6 +1,8 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,14 +23,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -55,6 +55,10 @@ public final class ZFighterRaiders {
 	static final double RAIDER_HEALTH = 2.5, RAIDER_DAMAGE = 1.6, CHIEF_HEALTH = 0.6, CHIEF_DAMAGE = 0.9, HUNT = 32.0;
 	/** The fuel the pod left behind holds. */
 	static final int PRIZE_FUEL = 3;
+	/** (0.18.50) What a burnt-out pod leaves: its keel and this many sound parts at random. */
+	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
+	/** (0.18.51) How many of a raider pod's hull plates, canopy and mast are gone when it comes down (it flies stripped, and the one left keeps the gaps). */
+	static final int STRIP_MIN = 1, STRIP_MAX = 3;
 	static final int NAMES = 8;
 	static final String TAG = "jaymospowers.raider";
 	static final long DAY = 24000L;
@@ -66,7 +70,7 @@ public final class ZFighterRaiders {
 	/** A band on the ground: its pods, its raiders, and when it gives up. */
 	private static final class Band {
 		final ServerLevel level;
-		final List<Display.BlockDisplay> pods = new ArrayList<>();
+		final List<PodEntity> pods = new ArrayList<>();
 		final List<UUID> raiders = new ArrayList<>();
 		final long until;
 		int coming;
@@ -149,7 +153,8 @@ public final class ZFighterRaiders {
 	/** A band's pods start down a little way off {@code seat}. True if they found ground. */
 	static boolean land(ServerLevel level, BlockPos seat) {
 		RandomSource random = level.getRandom();
-		BlockPos middle = null;
+		// (0.18.54) a landing yard within reach: they come down just outside it, never on its pads
+		BlockPos middle = ZFighterYard.outside(level, seat, random);
 		for (int tries = 0; tries < 12 && middle == null; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = LAND_MIN + random.nextDouble() * (LAND_MAX - LAND_MIN);
@@ -176,6 +181,7 @@ public final class ZFighterRaiders {
 			boolean chief = i == 0;
 			ZFighterPatrol.Flier flier = ZFighterPatrol.land(level, ground, random.nextInt(NAMES), f -> stepOut(band, f, chief));
 			flier.pod.addTag(TAG);
+			strip(flier.pod, random);
 			band.pods.add(flier.pod);
 		}
 		level.playSound(null, middle.getX(), middle.getY() + 30, middle.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
@@ -231,7 +237,7 @@ public final class ZFighterRaiders {
 					level.sendParticles(ParticleTypes.CLOUD, raider.getX(), raider.getY() + 1.0, raider.getZ(), 12, 0.3, 0.6, 0.3, 0.05);
 					raider.discard();
 				}
-				for (Display.BlockDisplay pod : band.pods) {
+				for (PodEntity pod : band.pods) {
 					if (!pod.isRemoved()) {
 						ZFighterPatrol.takeOff(level, pod);
 					}
@@ -263,10 +269,10 @@ public final class ZFighterRaiders {
 		}
 	}
 
-	/** The band is beaten: one pod is still sound and stays, a pod of whoever finds it; the others burn out. */
+	/** The band is beaten: one pod is still sound and stays, a pod of whoever finds it; the others burn out, leaving what is sound of them. */
 	private static void beaten(ServerLevel level, Band band) {
-		Display.@Nullable BlockDisplay kept = null;
-		for (Display.BlockDisplay pod : band.pods) {
+		@Nullable PodEntity kept = null;
+		for (PodEntity pod : band.pods) {
 			if (pod.isRemoved()) {
 				continue;
 			}
@@ -277,20 +283,57 @@ public final class ZFighterRaiders {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, pod.getX(), pod.getY() + 1.0, pod.getZ(), 30, 0.6, 0.8, 0.6, 0.04);
 			level.sendParticles(ParticleTypes.FLAME, pod.getX(), pod.getY() + 0.5, pod.getZ(), 20, 0.5, 0.5, 0.5, 0.03);
 			level.playSound(null, pod.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.NEUTRAL, 1.0F, 1.2F);
-			pod.discard();
+			burnt(level, pod);
 		}
 		if (kept == null) {
 			return;
 		}
-		BlockPos at = kept.blockPosition();
-		kept.discard();
-		if (!level.getBlockState(at).canBeReplaced()) {
-			at = at.above();
-		}
-		level.setBlock(at, ZFighterSpace.withFuel(PRIZE_FUEL), Block.UPDATE_ALL);
-		BlockPos prize = at;
+		// (0.18.47) the kept pod is a pod of your own, no longer locked to the band; (0.18.51) it keeps the gaps it came down with
+		// (no hull door, no glass) and, never having been hammered to a finish, is not flight-ready: mend it, or strip it with a hammer
+		kept.removeTag(TAG);
+		kept.removeTag(ZFighterPatrol.POD_TAG);
+		kept.setFuel(PRIZE_FUEL);
+		BlockPos prize = kept.blockPosition();
 		for (ServerPlayer player : level.getPlayers(p -> p.blockPosition().distSqr(prize) < 96 * 96)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.raiders.beaten").withStyle(ChatFormatting.GOLD));
 		}
+	}
+
+	/**
+	 * (0.18.51) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast
+	 * are not there, so the pod comes down (and is drawn) without a door or glass, and it is not finished.
+	 */
+	private static void strip(PodEntity pod, RandomSource random) {
+		List<Integer> slots = new ArrayList<>();
+		for (int i = 0; i < PodPart.PLATE.count; i++) {
+			slots.add(PodPart.PLATE.bit(i));
+		}
+		slots.add(PodPart.CANOPY.bit(0));
+		slots.add(PodPart.MAST.bit(0));
+		int filled = pod.filled();
+		int count = STRIP_MIN + random.nextInt(STRIP_MAX - STRIP_MIN + 1);
+		for (int i = 0; i < count && !slots.isEmpty(); i++) {
+			filled &= ~slots.remove(random.nextInt(slots.size()));
+		}
+		pod.setParts(filled, 0);
+		pod.setFinished(false);
+	}
+
+	/** (0.18.47) A burnt-out pod is a bare pod: its keel and {@link #SCRAP_MIN} to {@link #SCRAP_MAX} sound parts, left lying. */
+	private static void burnt(ServerLevel level, PodEntity pod) {
+		RandomSource random = level.getRandom();
+		List<PodPart> pool = new ArrayList<>(List.of(PodPart.FIN, PodPart.FIN, PodPart.FIN, PodPart.BELL, PodPart.TANK, PodPart.PLATE, PodPart.PLATE,
+			PodPart.PLATE, PodPart.PLATE, PodPart.CANOPY, PodPart.MAST));
+		int[] used = new int[PodPart.values().length];
+		int filled = PodPart.KEEL.bits();
+		int count = SCRAP_MIN + random.nextInt(SCRAP_MAX - SCRAP_MIN + 1);
+		for (int i = 0; i < count && !pool.isEmpty(); i++) {
+			PodPart part = pool.remove(random.nextInt(pool.size()));
+			filled |= part.bit(used[part.ordinal()]++);
+		}
+		pod.setParts(filled, 0);
+		pod.setFuel(0);
+		pod.removeTag(TAG);
+		pod.removeTag(ZFighterPatrol.POD_TAG);
 	}
 }
