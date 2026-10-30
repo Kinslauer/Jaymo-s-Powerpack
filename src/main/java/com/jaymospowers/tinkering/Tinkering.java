@@ -102,8 +102,30 @@ public final class Tinkering {
 	/** (Smithing) Steel: its ingot (in {@link #ALLOY_INGOTS}), nugget and block, and the crucible blend a kiln fires into it. */
 	public static Block STEEL_BLOCK;
 	public static Item STEEL_INGOT, STEEL_NUGGET, STEEL_BLEND;
+	/** (0.18.56) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
+	public static Block STAR_METAL_ORE;
+	public static Item STAR_METAL_INGOT;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
+	/** (0.18.52) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
+	public static final List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, ItemStack>> TOOL_BUILT_LISTENERS = new ArrayList<>();
+	/** (0.18.52) The materials that make a tool a forged iron one. */
+	static final Set<String> IRONWORK = Set.of("iron", "pig_iron", "steel");
+
+	/** (0.18.52) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
+	public static void toolBuilt(net.minecraft.world.entity.player.Player player, ItemStack tool) {
+		if (!(player instanceof net.minecraft.server.level.ServerPlayer smith) || tool.isEmpty() || TOOL_MATERIALS == null) {
+			return;
+		}
+		List<String> made = tool.get(TOOL_MATERIALS);
+		if (made == null || made.stream().noneMatch(IRONWORK::contains)) {
+			return;
+		}
+		for (java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, ItemStack> listener : TOOL_BUILT_LISTENERS) {
+			listener.accept(smith, tool);
+		}
+	}
+
 	/** Whether tooltips spell out what each trait does (the client makes this "Shift is held"). */
 	public static BooleanSupplier traitDetails = () -> true;
 
@@ -195,6 +217,7 @@ public final class Tinkering {
 			output.accept(STEEL_NUGGET);
 			output.accept(STEEL_BLOCK);
 			output.accept(STEEL_BLEND);
+			output.accept(STAR_METAL_ORE);
 			CASTS.forEach((shape, cast) -> {
 				if (shape != CastItem.Shape.WEAPON) {
 					output.accept(cast);
@@ -231,6 +254,7 @@ public final class Tinkering {
 			}
 		});
 		TraitEffects.init();
+		Starlit.init();
 	}
 
 	private static void registerSmeltery() {
@@ -252,12 +276,18 @@ public final class Tinkering {
 		SEARED_BRICK = item("seared_brick", Item::new, Function.identity());
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
-		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL)) {
-			Item ingot = item(alloy.id + "_ingot", Item::new, Function.identity());
+		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL,
+			// (0.18.55) the six first metals of the far worlds
+			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE)) {
+			com.jaymospowers.power.zfighter.farworld.FarWorld firstOf = com.jaymospowers.power.zfighter.farworld.FarWorld.ofMolten(alloy);
+			// (0.18.55) a far world's first metal tells the Prospecting career when it is first knapped
+			Item ingot = item(alloy.id + "_ingot", firstOf == null ? Item::new : p -> new com.jaymospowers.power.zfighter.farworld.FirstMetalIngot(p, firstOf),
+				Function.identity());
 			ALLOY_INGOTS.put(alloy, ingot);
 			TinkerMaterial.own(alloy.material, 1, ingot);
 		}
 		registerSteel();
+		registerStarMetal();
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}
@@ -283,6 +313,19 @@ public final class Tinkering {
 			Component.translatable("tooltip.jaymospowers.tinkering.steel_blend").withStyle(ChatFormatting.GRAY)))));
 		TinkerMaterial.own(TinkerMaterial.STEEL, 9, STEEL_BLOCK.asItem());
 		Melting.alloyForms(Molten.STEEL, STEEL_NUGGET, STEEL_BLOCK.asItem());
+	}
+
+	/**
+	 * (0.18.56, SevTech picks: star-metal) Star metal. Its ore lies only in the craters of fallen stars; it melts in the smeltery, one
+	 * ore for one ingot's worth, and the ingot casts and forges like any metal. It has no grid recipe and no furnace recipe.
+	 */
+	private static void registerStarMetal() {
+		STAR_METAL_ORE = block("star_metal_ore", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(4.0F, 6.0F).sound(SoundType.AMETHYST).lightLevel(state -> 4).requiresCorrectToolForDrops());
+		STAR_METAL_INGOT = item("star_metal_ingot", Item::new, p -> p.rarity(net.minecraft.world.item.Rarity.UNCOMMON));
+		ALLOY_INGOTS.put(Molten.STAR_METAL, STAR_METAL_INGOT);
+		TinkerMaterial.own(TinkerMaterial.STAR_METAL, 1, STAR_METAL_INGOT);
+		Melting.starMetal(STAR_METAL_ORE.asItem());
 	}
 
 	/** (0.8.111) Silver ore in the Overworld, smelted like iron or melted (doubled) in the smeltery; a metal for parts. */

@@ -39,6 +39,8 @@ public enum Essence {
 	DEATH(0x3A3340, LIFE, ROT),
 	MIND(0xF2A8E0, SPIRIT, LIGHT),
 	SHADOW(0x2B2240, LIGHT, ROT),
+	/** (0.18.56) What falls from the sky and what drifts at the black hole's rim: light carried on the air. */
+	STARLIGHT(0xC8D4FF, LIGHT, AIR),
 	ARCANA(0x9B4DFF, SPIRIT, CRYSTAL),
 	WEALTH(0xF5C542, METAL, CRYSTAL),
 	// third compounds

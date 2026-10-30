@@ -13,7 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -165,7 +174,59 @@ public final class Crucibles {
 					recipes = List.copyOf(sorted);
 				}
 			});
+		// (0.18.50) the recipe list goes to every client, so JEI's Crucible page shows what this server's pot makes
+		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
+		ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> {
+			if (joined) {
+				send(player);
+			}
+		});
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
+			if (success) {
+				for (ServerPlayer player : PlayerLookup.all(server)) {
+					send(player);
+				}
+			}
+		});
 		registerResearch();
+	}
+
+	private static void send(ServerPlayer player) {
+		if (ServerPlayNetworking.canSend(player, Sync.TYPE)) {
+			ServerPlayNetworking.send(player, new Sync(recipes));
+		}
+	}
+
+	/** (0.18.50) Server to client: every crucible recipe, for JEI. */
+	public record Sync(List<Recipe> recipes) implements CustomPacketPayload {
+		public static final Type<Sync> TYPE = new Type<>(JaymosPowers.id("crucible_recipes"));
+		private static final StreamCodec<RegistryFriendlyByteBuf, Recipe> RECIPE = ByteBufCodecs.fromCodecWithRegistries(Recipe.CODEC);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Sync> CODEC = CustomPacketPayload.codec(Sync::write, Sync::read);
+
+		private void write(RegistryFriendlyByteBuf buf) {
+			buf.writeVarInt(recipes.size());
+			for (Recipe recipe : recipes) {
+				RECIPE.encode(buf, recipe);
+			}
+		}
+
+		private static Sync read(RegistryFriendlyByteBuf buf) {
+			List<Recipe> list = new ArrayList<>();
+			for (int i = buf.readVarInt(); i > 0; i--) {
+				list.add(RECIPE.decode(buf));
+			}
+			return new Sync(List.copyOf(list));
+		}
+
+		@Override
+		public Type<Sync> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client side: takes the server's recipe list. */
+	public static void accept(Sync sync) {
+		recipes = sync.recipes();
 	}
 
 	private static void registerResearch() {

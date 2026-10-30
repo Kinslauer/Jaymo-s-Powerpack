@@ -161,7 +161,8 @@ public final class Prejudice {
 	 * for a purist's own).
 	 */
 	static float minds(LivingEntity who, Entity whom) {
-		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p)) {
+		// ((0.7.381) never by the village that took them in on their story's start: StoryHomes)
+		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) || StoryHomes.takenIn(who, whom)) {
 			return 0.0F;
 		}
 		Heritage.Kind mine = VillagerHeritage.of(who), theirs = Purists.of(whom);
@@ -250,7 +251,7 @@ public final class Prejudice {
 
 	/** Good name won or lost with {@code kingdom} by {@code player}, after their blood ({@link Reputation#change}). */
 	static int reputation(Faction kingdom, ServerPlayer player, int by) {
-		if (by == 0 || Identities.hidden(player, kingdom.id()) && !shows(player)) {
+		if (by == 0 || Identities.hidden(player, kingdom.id()) && !shows(player) || StoryHomes.of(kingdom, player)) {
 			return by;
 		}
 		int d = degree(player);

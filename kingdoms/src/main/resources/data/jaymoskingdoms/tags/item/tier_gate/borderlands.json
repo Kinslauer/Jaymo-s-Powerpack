@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:blueprint",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:large_plate_cast",
+      "required": false
+    }
+  ]
+}

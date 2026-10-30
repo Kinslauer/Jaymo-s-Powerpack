@@ -84,6 +84,9 @@ public enum Step {
 	BURRUKAI_RIB(() -> powers("burrukai_rib_cut"), null),
 	KIRRID_LOIN(() -> powers("kirrid_loin"), null),
 	PRISMALLARD_LEG(() -> powers("prismallard_leg"), null),
+	// (0.5.38) the far-world pantry
+	VERDANT_FRUIT(() -> powers("verdant_fruit"), null),
+	GLACIA_SALT(() -> powers("glacia_salt"), null),
 	// vanilla's cooked fish and meat, and bread
 	COOKED_COD(() -> Items.COOKED_COD, null),
 	COOKED_SALMON(() -> Items.COOKED_SALMON, null),
