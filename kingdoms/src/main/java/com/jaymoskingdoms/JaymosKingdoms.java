@@ -198,6 +198,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
 		// the villager screens open, so the trades are there when they do)
 		Remedies.register();
+		// (0.7.366) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
+		TierGate.register();
 		// a realm's smiths sell better-forged gear to those it thinks well of (with Jaymo's Powers)
 		GradedTrades.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
@@ -235,6 +237,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		// (0.7.366) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
+		GroundChanges.register();
+		com.jaymoskingdoms.journal.RungJournal.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
