@@ -3988,7 +3988,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   relay the pod package can reach); a Tool Station tool with iron, pig iron or steel in it fires `Tinkering.TOOL_BUILT_LISTENERS`
   (the Smithing Anvil already had `Provenance.FORGED_LISTENERS`), which Kingdoms listens on for the first forged iron tool. No
   new items, text or recipes. Compile-checked against the 26.3 jar; not seen in game.
-- **0.18.51, reading the sky (SevTech picks; Kingdoms 0.7.382):** a world is on the star map only once its chart is read. Six
+- **0.18.52, reading the sky (SevTech picks; Kingdoms 0.7.382):** a world is on the star map only once its chart is read. Six
   picks, all in `power/zfighter/sky`. **Star charts** (`StarChartItem`, `Charts`): one item `star_chart` with a world component
   (`star_chart_world`; the six worlds from the Pale Moon to the Verdant World); using one marks the world read on the player's
   `zfighter_sky_charts` attachment (a bitmask, synced to its owner, kept through death) and opens a book page of four odd short

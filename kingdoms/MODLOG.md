@@ -6866,7 +6866,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
   Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
   JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
-## 0.7.382: stargazers and sky tidings (SevTech picks) (pack 0.18.51)
+## 0.7.382: stargazers and sky tidings (SevTech picks) (pack 0.18.52)
 - Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
   "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen
   (`ZFighterFolk.ask`): a few words about the sky and the charts the player hasn't read, cheapest trip first, for emeralds (6, and 4

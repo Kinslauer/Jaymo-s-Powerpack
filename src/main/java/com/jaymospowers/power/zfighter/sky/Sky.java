@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
- * (0.18.51, Andy's SevTech picks: "Reading the sky") The star charts and the Star-Sight Bench. A world is on the pod's star
+ * (0.18.52, Andy's SevTech picks: "Reading the sky") The star charts and the Star-Sight Bench. A world is on the pod's star
  * map only once its chart is read ({@link Charts}); the first chart (the Pale Moon) comes from the bench ({@link StarBench}),
  * the Rustfall chart from the Patrol, the others from sky hermits and stargazing villagers (Jaymo's Kingdoms, through
  * {@link SkyApi}). The sky itself (a point of light for each world read) is drawn by the client.
