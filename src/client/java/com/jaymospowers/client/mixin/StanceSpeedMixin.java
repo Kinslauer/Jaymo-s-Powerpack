@@ -14,7 +14,7 @@ abstract class StanceSpeedMixin {
 	@Inject(method = "modifyInput", at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$lowCrouchSpeed(Vec2 input, CallbackInfoReturnable<Vec2> cir) {
 		LocalPlayer self = (LocalPlayer) (Object) this;
-		if (self.isCrouching() && Stance.low(self)) {
+		if (Stance.LOW_SPEED != 1.0F && self.isCrouching() && Stance.low(self)) {
 			cir.setReturnValue(cir.getReturnValue().scale(Stance.LOW_SPEED));
 		}
 	}
