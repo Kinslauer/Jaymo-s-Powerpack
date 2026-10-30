@@ -6928,6 +6928,29 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   host's chosen tier if they stood below it (the cooldown is not asked). A member who was offline catches up on logging in
   (`catchUp`). Leaving a party keeps what you had. Compile-checked; not seen in game.
 
+## 0.7.389: Stare Down by who you stare at (pack 0.18.57)
+- Andy: "Will staredown has context sensitive interactions with npcs and enemies, like making a captain jump ship, or a weak
+  poor king submit the seat". `Staredowns` decides what a held stare does; `Will.stare` still finds and holds the gaze.
+- **The great** (a crewed ship's captain at her wheel, a ruler on a throne) can be stared at even when they're no foe, for
+  longer (`CAPTAIN_STARE_TICKS` 80, `RULER_STARE_TICKS` 120). Being weaker isn't enough: your **Will** (ranks of Dread
+  Presence, Stare Down, Broken Morale, Name That Carries and Last Look, plus your world tier, +1 aligned to Strength, +2 on
+  Second Breath) must beat their **nerve**. A captain's: 2, +1 per 3 able hands aboard, -3 if she's sinking. A ruler's: 3,
+  +1 per guard within 16, +3 per step of the realm's wealth, -1 for a lord. Both: -1 under half health, temperament
+  (brave/proud/hotheaded +2, dutiful/devout +1, timid -2, gloomy -1). Bosses never break.
+  - **A captain jumps ship:** thrown over the side, discharged from her crew (an MCA villager wherever he swims to), and he
+    runs; she has no hand at her helm. Each weaker hand aboard goes over after him half the time; the rest are weakened. A
+    realm's ship (navy, merchant, whaler) costs 60 reputation with the realm.
+  - **A weak, poor ruler yields the seat:** a POOR realm, stared down within 16 blocks of the throne, no player already
+    wearing its crown and you wearing none: `Crowns.crown` makes you its sovereign, the ruler stays as steward, the realm's
+    allies take -100 (half a usurper's), and the server hears of it. Otherwise a weak ruler pays you to go: a quarter of the
+    treasury, at most 64 emeralds, leaving 10, once a day per realm, -80 with the realm.
+  - Whoever's nerve holds says so and can't be stared at by you again for 5 minutes.
+- **Foes** (weaker, as before) break by what they are: one of a ship's crew goes over the side; a rider is thrown and the
+  mount bolts; a caster is hushed as by a Spellbreaker Blow; a bandit or anyone with a live bounty kneels (knocked out for 10
+  s, with Jaymo's Powers) to be taken in. Everyone else drops their weapon or runs as before.
+- Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
+  `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
+
 ## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
 - **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
   time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
