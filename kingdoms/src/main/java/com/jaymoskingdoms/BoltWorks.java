@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.389) What a tome's bolt does to the world (Andy: "charged ice tome should freeze water, and all should have fitting
+ * (0.7.390) What a tome's bolt does to the world (Andy: "charged ice tome should freeze water, and all should have fitting
  * interactions"). Any bolt does the small things where it lands: fire lights candles and campfires and melts snow and ice,
  * water and air put fires, candles and campfires out. A charged one ({@link #CHARGED} or more) does more, over a patch that
  * grows with the charge ({@link #radius}):

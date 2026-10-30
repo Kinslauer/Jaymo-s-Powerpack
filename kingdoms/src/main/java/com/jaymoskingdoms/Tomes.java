@@ -81,13 +81,13 @@ import org.jspecify.annotations.Nullable;
  * Powers' Tomecraft research. <b>Glyphs</b> (the enchanting table's runes with the element's own particle) stream off the
  * pages in amounts that vary by tome ({@link #GLYPHS}) and by action; a bolt's trail mixes the element's particles with the
  * mana glow. The book opens, and turns its pages, on the client ({@code TomeClient}).</li>
- * <li><b>Afloat</b> (0.7.389; Andy: "the tome should in front of you float open, bobbing slowly up and down and following
+ * <li><b>Afloat</b> (0.7.390; Andy: "the tome should in front of you float open, bobbing slowly up and down and following
  * the aim, and pages flipping emitting particles as you click or lock on, and will return to hand if you unlock, or after 3s
  * and no firing"): a click, a spell cast or a lock taken (Jaymo's Powers' lock-on) lifts the book out of the hand to float
  * open before you ({@link #floatAt}); bolts fly from it. It turns a leaf and sheds glyphs as it rises and at each new lock,
  * and goes back to the hand when you let go of the lock, or {@link #FLOAT_LINGER} after the last bolt or spell with nothing
  * locked. The server decides ({@link #AFLOAT}, synced to everyone); the client draws it ({@code TomeFloat}).</li>
- * <li><b>The world</b> (0.7.389): bolts light, douse, freeze, melt, grow and wither what they cross and land on, more for a
+ * <li><b>The world</b> (0.7.390): bolts light, douse, freeze, melt, grow and wither what they cross and land on, more for a
  * charged one: a charged ice bolt freezes the water it crosses ({@link BoltWorks}).</li>
  * </ul>
  */
@@ -175,7 +175,7 @@ public final class Tomes {
 	/** The spell loaded into a tome (its name, as {@link Arcana#SPELLS}). */
 	public static DataComponentType<String> PAGE;
 	/**
-	 * (0.7.389) Whether a player's book floats before them: 0 (or none) in the hand; afloat, a number that changes each time it
+	 * (0.7.390) Whether a player's book floats before them: 0 (or none) in the hand; afloat, a number that changes each time it
 	 * rises or takes a new lock, so every client turns a leaf. Synced to everyone, not kept.
 	 */
 	public static final AttachmentType<Integer> AFLOAT = AttachmentRegistry.create(JaymosKingdoms.id("tome_afloat"),
@@ -601,7 +601,7 @@ public final class Tomes {
 		final float charge, strength;
 		Vec3 pos, vel;
 		int life;
-		/** (0.7.389) The water this bolt has frozen on its way ({@link BoltWorks#along}). */
+		/** (0.7.390) The water this bolt has frozen on its way ({@link BoltWorks#along}). */
 		final java.util.Set<net.minecraft.core.BlockPos> frozen = new java.util.HashSet<>();
 
 		Bolt(ServerLevel level, UUID owner, String element, Vec3 pos, Vec3 vel, float charge, float strength, int life) {
@@ -648,7 +648,7 @@ public final class Tomes {
 			int n = Math.max(1, (int) (from.distanceTo(stop) / TRAIL_STEP));
 			for (int i = 0; i <= n; i++) {
 				Vec3 p = from.lerp(stop, i / (double) n);
-				// (0.7.389) what it does to the world on its way (ice freezes the water it crosses); fire dies in water
+				// (0.7.390) what it does to the world on its way (ice freezes the water it crosses); fire dies in water
 				if (!BoltWorks.along(level, shooter, element, p, charge, frozen)) {
 					return false;
 				}

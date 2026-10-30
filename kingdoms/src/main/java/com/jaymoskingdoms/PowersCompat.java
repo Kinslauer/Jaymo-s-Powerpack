@@ -1215,13 +1215,13 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.389) Lock-on ----------------------------------------------------------------------------------------
+	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------
 
 	/** Powers' {@code LockOn.target(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle lockTarget;
 	private static boolean lookedForLock;
 
-	/** (0.7.389) Who {@code player} is locked onto with Powers' lock-on (middle mouse), or null (always without Powers). */
+	/** (0.7.390) Who {@code player} is locked onto with Powers' lock-on (middle mouse), or null (always without Powers). */
 	public static @Nullable LivingEntity lockTarget(net.minecraft.server.level.ServerPlayer player) {
 		if (!lookedForLock) {
 			lookedForLock = true;
@@ -1245,7 +1245,7 @@ public final class PowersCompat {
 	private static java.lang.invoke.@Nullable MethodHandle layStain;
 	private static boolean lookedForStain;
 
-	/** (0.7.389) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
+	/** (0.7.390) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
 	public static void stain(net.minecraft.server.level.ServerLevel level, int colour, double x, double from, double z, float size) {
 		if (!lookedForStain) {
 			lookedForStain = true;
