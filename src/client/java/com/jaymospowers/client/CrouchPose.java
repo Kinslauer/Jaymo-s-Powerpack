@@ -2,6 +2,7 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Kneel;
+import com.jaymospowers.core.Stance;
 import com.jaymospowers.core.finisher.Finishers;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.Tending;
@@ -15,6 +16,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.17.7) Andy: "shift should now animate a crouch, the players gets low, hands out to the side, swaying as they move, ready
@@ -31,6 +33,8 @@ import net.minecraft.world.entity.Avatar;
  * <p>(0.17.18) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the
  * knee, and stay bent while firing ... same for all ranged weapons". The front thigh now goes out level and the shin bends
  * down to the foot ({@link KneeBend}); the legs hold that whatever is in the hands, bow, crossbow, gun or thrown.
+ * <p>(0.18.57) The low crouch from the stance wheel ({@link Stance}): both thighs forward and both knees bent so the shins
+ * stand straight ({@link KneeBend}), the body sunk {@link #LOW_DROP} lower to keep the feet on the ground.
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
@@ -48,11 +52,18 @@ public final class CrouchPose {
 	 * (radians), and the back (left) leg trailing to the knee on the ground. Drawn while aiming and firing too.
 	 */
 	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
+	/** The low crouch: both thighs this far forward (radians), and the body sunk to match (blocks: 6 px of thigh, 1 - cos). */
+	static final float LOW_THIGH = 1.2F, LOW_DROP = 0.24F;
+	/** Into and out of the low crouch (ticks). */
+	static final float LOW_IN = 5.0F;
 	/** Under this walking speed (vanilla's 0..1) the body counts as still. */
 	static final float STILL_SPEED = 0.05F;
 
-	/** {@code ready}: 0 to 1, arms out; {@code kneel}: 0 to 1, on the knee; {@code pos}, {@code speed}: the stride's. */
-	public record Crouch(float ready, float kneel, float pos, float speed) {
+	/**
+	 * {@code ready}: 0 to 1, arms out; {@code kneel}: 0 to 1, on the knee; {@code pos}, {@code speed}: the stride's;
+	 * {@code low}: 0 to 1, in the low crouch.
+	 */
+	public record Crouch(float ready, float kneel, float pos, float speed, float low) {
 	}
 
 	public static final RenderStateDataKey<Crouch> KEY = RenderStateDataKey.create(() -> "jaymospowers:crouch");
@@ -60,6 +71,7 @@ public final class CrouchPose {
 	private static final class Track {
 		float ready;
 		float kneel;
+		float low;
 		float stillSince = -1.0F;
 		float last = -1.0F;
 	}
@@ -93,12 +105,15 @@ public final class CrouchPose {
 		boolean kneel = still && now - track.stillSince >= Kneel.KNEEL_AFTER;
 		track.ready = approach(track.ready, crouched ? 1.0F : 0.0F, dt / READY_IN);
 		track.kneel = approach(track.kneel, kneel ? 1.0F : 0.0F, dt / (kneel ? KNEEL_IN : GET_UP));
-		if (!crouched && track.ready <= 0.0F && track.kneel <= 0.0F || entity.isRemoved()) {
+		boolean low = crouched && entity instanceof Player player && Stance.low(player);
+		track.low = approach(track.low, low ? 1.0F : 0.0F, dt / LOW_IN);
+		if (!crouched && track.ready <= 0.0F && track.kneel <= 0.0F && track.low <= 0.0F || entity.isRemoved()) {
 			TRACKS.remove(entity.getId());
 			state.setData(KEY, null);
 			return;
 		}
-		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed));
+		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed,
+			smooth(track.low)));
 	}
 
 	/** Another full-body pose has them: tending, a finisher, carrying or being carried, crawling, downed. */
@@ -113,7 +128,7 @@ public final class CrouchPose {
 		if (c == null || state.deathTime > 0.0F || !state.isCrouching) {
 			return;
 		}
-		poseStack.translate(0.0F, -LOW * c.ready() * (1.0F - c.kneel()) - SINK * c.kneel(), 0.0F);
+		poseStack.translate(0.0F, -(LOW * c.ready() + LOW_DROP * c.low()) * (1.0F - c.kneel()) - SINK * c.kneel(), 0.0F);
 		if (c.kneel() > 0.0F) {
 			poseStack.translate(0.0F, HIP, 0.0F);
 			poseStack.rotate(Axis.XP.rotationDegrees(-KNEEL_LEAN * c.kneel()));
@@ -145,6 +160,12 @@ public final class CrouchPose {
 			}
 		}
 		float k = c.kneel();
+		float low = c.low() * (1.0F - k);
+		if (low > 0.0F) {
+			// the low crouch: thighs forward (half the stride still swings them), knees bent at bendKnee
+			h.rightLeg.xRot = Mth.lerp(low, h.rightLeg.xRot, h.rightLeg.xRot * 0.5F - LOW_THIGH);
+			h.leftLeg.xRot = Mth.lerp(low, h.leftLeg.xRot, h.leftLeg.xRot * 0.5F - LOW_THIGH);
+		}
 		if (k <= 0.0F) {
 			return;
 		}
@@ -179,8 +200,19 @@ public final class CrouchPose {
 	 */
 	public static void bendKnee(Model<?> model, Object renderState) {
 		Crouch c = posed(model, renderState);
-		if (c != null && c.kneel() > 0.0F) {
-			KneeBend.bend(((HumanoidModel<?>) model).rightLeg, FRONT_KNEE * c.kneel());
+		if (c == null) {
+			return;
+		}
+		HumanoidModel<?> h = (HumanoidModel<?>) model;
+		// (0.18.57) in the low crouch each knee bends as far as its thigh is forward, so the shin stands straight
+		float low = c.low() * (1.0F - c.kneel());
+		float right = Mth.lerp(c.kneel(), Math.max(0.0F, -h.rightLeg.xRot) * c.low(), FRONT_KNEE);
+		float left = Math.max(0.0F, -h.leftLeg.xRot) * low;
+		if (right > 0.0F) {
+			KneeBend.bend(h.rightLeg, right);
+		}
+		if (left > 0.0F) {
+			KneeBend.bend(h.leftLeg, left);
 		}
 	}
 

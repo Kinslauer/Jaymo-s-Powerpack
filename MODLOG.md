@@ -4082,3 +4082,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
   dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
   `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.
+- **0.18.57, the stance wheel:** Andy: "shift + scroll should adjust you through stances, from prone to a crouch to a sneak
+  to standing", with a Tarkov-style corner display. Sneak + scroll steps prone / low crouch / sneak / standing, held after
+  Sneak is let go (`core/Stance`, `client/StanceScroll`). The low crouch is 1.25 tall at 0.6x sneak speed, knees bent
+  (`CrouchPose` LOW_*). Jump or a Sneak tap stands you up; rising waits for headroom. `client/StanceHud`: a figure and
+  a sliding height bar, bottom-left, fading 3 s after you're back on your feet. Sneak + scroll never moves the hotbar.
+- **0.18.58, keybind names that fit (Kingdoms 0.7.389):** Andy's screenshot showed "Valor (tap: coatings up or down; hold:
+  King's Valor)" running under the key button in Controls. Every pack key name is now 30 characters or fewer (Symbiote Arm,
+  Arm use, Mantle, Power Skill, Rig, Backpack, Z Fighter wheel, Meditate here; seven in Kingdoms). The tap/hold details live in
+  each feature's in-game hints. Lang only; not seen in game.
