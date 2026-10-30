@@ -1,7 +1,10 @@
 # New roads: Kenshi and Streets of Rogue cross-reference, the plan (2026-10-30)
 
-Andy picked all 34 rows on the pick page (https://claude.ai/artifact/F66nVbuNypWGxh7q1zty4s, copy in project files
-`kenshi-sor-study/starts-picklist.html`), no notes. Both games are commercial: ideas only. Our own names, own code,
+Andy picked 29 of 34 rows on the pick page (https://claude.ai/artifact/F66nVbuNypWGxh7q1zty4s, copy in project files
+`kenshi-sor-study/starts-picklist.html`). Left out: Raid Gone Wrong, Mech Pilot, Born into a Feud, Hired Blade,
+Barber-Surgeon. His notes: Cast Out and Lab Escapee are Bio-built only; secret roads: "the only available starts
+without this should be basic ones and req ones, like verdant and divine born" (read as: every other road is found by a
+matching past or a deed; basic = capital, village, wild, sworn, banished, shipwreck, fate). Both games are commercial: ideas only. Our own names, own code,
 vanilla-style art, no text or names from either game.
 
 What we borrow: Kenshi's hard starts (the first hour is about getting out alive, and several starts give you a squad or
@@ -18,7 +21,7 @@ has none yet (Andy: "generate whatever is required for the player to choose any 
 
 ## Patches
 
-### Patch 1, Hard roads (Kingdoms; picks in-chains, rock-bottom, sentenced, evicted, raid-gone-wrong, hideout, cast-out, labels)
+### Patch 1, Hard roads (Kingdoms; picks in-chains, rock-bottom, sentenced, evicted, hideout, cast-out, labels)
 - **Still in Chains** (`CHAINED`): wake shackled among a barbarian camp's captives (Captives/Caging). Pick the shackle
   with the Pin lockpicking game, or slip it after dark (sneak still for a few seconds at night). Once free, the
   Escaped captive road's day-long hunt runs (`HUNTS`). The figure is drawn bare and chained.
@@ -29,17 +32,15 @@ has none yet (Andy: "generate whatever is required for the player to choose any 
 - **Evicted** (`EVICTED`, names a realm): the capital road with a fuller purse but no home. Between dusk and dawn the
   watch moves you on (warning, then a night in the cells) while you sleep rough inside the walls, until you hold a
   Careers job or pay an inn for a bed.
-- **Raid Gone Wrong** (`RAID`): you and one hired companion (an MCA villager hired to you) wake at dusk inside a
-  barbarian camp after a raid went wrong. Some camp folk are already awake.
 - **The Hideout** (`HIDEOUT`): wake inside an Underworld speakeasy (or a barbarian camp when none exists) as one of
   them. Outlaws and camps spare you (the barbarian-outlaws rule), and one realm hates you at banished level.
-- **Cast Out by Your Own** (`CAST_OUT`): your own heritage's settlements turn you away (the Bio-built shunning path, for
+- **Cast Out by Your Own** (`CAST_OUT`, Bio-built only via `onlyFor`): your own heritage's settlements turn you away (the Bio-built shunning path, for
   your heritage), and your map starts with nothing marked (Xaero waypoints off for the first days). Other heritages may
   take you in.
 - **Difficulty and Purse on Every Road**: each carousel card shows a difficulty mark (Easy, Fair, Hard, Very Hard, Cruel)
   and the starting purse; set per `Start` in one table.
 
-### Patch 2, Kit roads (Kingdoms; picks heirloom, pack-trader, pup, nobodies, feud, watch-recruit, hired-blade, barber-surgeon)
+### Patch 2, Kit roads (Kingdoms; picks heirloom, pack-trader, pup, nobodies, watch-recruit)
 - **The Heirloom Blade** (`HEIRLOOM`): wild landing with a fine Tinkers blade named for your family, no armour, bread
   only. Two to four days in, an Assassins contract or a hired band comes for it (Assassins/Outlaws).
 - **Wandering Trader** (`TRADER`): on a King's Road by a milestone (Milestones) with a pack horse (Stables breeds,
@@ -48,25 +49,17 @@ has none yet (Andy: "generate whatever is required for the player to choose any 
   damage step up per day of age, capped).
 - **The Nobodies** (`NOBODIES`): three poor MCA villagers hired to you from the first minute (follow, carry, fight),
   allowed by the MCA strangers rule because they are hired.
-- **Born into a Feud** (`FEUD`, names a realm): born to one of two realms that hate each other; your realm's guards
-  greet you, the rival realm's attack on sight. Picks or makes a rival pair.
 - **Watch Recruit**: the Sworn road gets manacles. A downed outlaw can be manacled and walked to the cells (Arrests)
   for a bounty instead of killed.
-- **Hired Blade** (`HIRED_BLADE`): start holding an Assassins contract on someone in the nearest realm, with a hidden
-  blade (HiddenBlade). Finished unseen, the trade remembers you (better contracts).
-- **Barber-Surgeon** (`SURGEON`): dressings and splints for Wounds, plus a sleeping cloth that downs a foe without
-  killing it.
 
-### Patch 3, Powered roads (Powers + Kingdoms; picks lab-escapee, mech-pilot, fresh-android, moon-cursed)
-- **Lab Escapee** (`LAB`): wake in a hermit alchemist's lab (Alchemy) as a test subject with one random infusion that
+### Patch 3, Powered roads (Powers + Kingdoms; picks lab-escapee, fresh-android, moon-cursed)
+- **Lab Escapee** (`LAB`, Bio-built only): wake in a hermit alchemist's lab (Alchemy) as a test subject with one random infusion that
   has a good side and a bad side; the alchemist's golems follow you out.
-- **Mech Pilot** (`MECH`): start inside a battered android mech (one of the four builds), low fuel; frail out of it;
-  mended with metal like the moon wreck.
 - **Fresh Off the Bench** (`ANDROID`): wake on the Mad Tinkerer's bench as a new android (Powers androids: endless ki,
   no food, metal repairs), with a note in your pocket.
 - **Moon-Cursed** (`MOON_CURSED`): under a blood moon (Kingdoms `Moons`) you turn feral (fast, strong, attacks whatever
   is near, screen tinted, no control of targets). A temple or healer cure ends it.
-All three Powers-side starts need Jaymo's Powers (`offered()`), reached by `PowersCompat`.
+The lab and android starts need Jaymo's Powers (`offered()`), reached by `PowersCompat`.
 
 ### Patch 4, Bands and companions (Powers + Kingdoms; picks start-together, companions-learn, drifters, prosthetics)
 - **Wooden and Iron Limbs** (Powers `core/Dismember`): a smith fits a wooden or forged iron arm or leg for a severed or
@@ -80,12 +73,13 @@ All three Powers-side starts need Jaymo's Powers (`offered()`), reached by `Powe
 ### Patch 5, Roads earned by deeds (Kingdoms; picks deed-unlocks, book-of-lives, writ-full-story, secret-roads)
 - **Deeds**: a server-wide record (saved on the Overworld) of deeds that unlock roads for everyone: free a chained
   captive -> Still in Chains; serve a sentence or break out -> Sentenced; sign on with whalers -> Whalers; survive the
-  Pale Moon -> Moon; free a lab captive -> Lab Escapee; etc. The original 22 roads stay open; the new ones (and only
-  a few old ones) start locked. Table in one place.
+  Pale Moon -> Moon; etc. Table in one place. Andy: only the basic roads (capital, village, wild, sworn, banished,
+  shipwreck, fate) and the heritage-locked ones (Verdant World for Verdant-born, afterlife) are open from the start;
+  every other road, old or new, is found by a deed or a secret past.
 - **Locked cards**: locked roads show dim on the carousel with one oblique hint line (never lore).
 - **A Writ opens the whole story**: a Writ of Rebirth reopens the full life story, unlocked roads included.
 - **Secret roads**: some roads only show for a matching past (raised by outlaws + cutpurse youth -> The Hideout; healers
-  + books -> Barber-Surgeon).
+  + caves -> Rock Bottom). Each locked road has at least one of the two ways in.
 
 ### Patch 6, A life's aim (Kingdoms; picks lifes-aim, rise-up, broken-aim)
 - **A Life's Aim**: each road gives one aim, spoken at the start or written on a journal page; finishing it gives a
