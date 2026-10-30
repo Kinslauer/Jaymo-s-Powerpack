@@ -138,6 +138,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
 		LOGGER.debug("standing attachment: {}", Standing.LINES);
+		// (0.7.405) a Z Fighter character's part, shown on MCA's screen (synced: registered on both sides)
+		LOGGER.debug("zfighter part attachment: {}", ZFighterFolk.PART);
 		Rulers.register();
 		// 0.7.242: ship crews as MCA villagers
 		Crewmen.register();
