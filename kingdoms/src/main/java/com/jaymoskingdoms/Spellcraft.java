@@ -189,6 +189,7 @@ public final class Spellcraft {
 	static void clear() {
 		IMBUED.clear();
 		AIR_BLOWS.clear();
+		StormArts.clear();
 	}
 
 	// ---- the Mage -----------------------------------------------------------------------------------------------
@@ -357,13 +358,19 @@ public final class Spellcraft {
 		}
 		if (bolt) {
 			// (0.7.231) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
-			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)) {
+			// (patch 6) lightning's: Bolt Step when no one is in sight
+			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)
+				|| element.equals("lightning") && StormArts.stepKey(player, level)) {
 				return;
 			}
 			bolt(level, player, element);
 			return;
 		}
 		ItemStack held = player.getMainHandItem();
+		// (patch 6) a lightning Sorcerer with no blade in hand: the Storm Ring
+		if (!blade(held) && element.equals("lightning") && StormArts.ring(player, level)) {
+			return;
+		}
 		if (!blade(held)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.imbue.no_blade"));
 			return;

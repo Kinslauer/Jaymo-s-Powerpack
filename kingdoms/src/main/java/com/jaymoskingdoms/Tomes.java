@@ -87,7 +87,7 @@ import org.jspecify.annotations.Nullable;
  * open before you ({@link #floatAt}); bolts fly from it. It turns a leaf and sheds glyphs as it rises and at each new lock,
  * and goes back to the hand when you let go of the lock, or {@link #FLOAT_LINGER} after the last bolt or spell with nothing
  * locked. The server decides ({@link #AFLOAT}, synced to everyone); the client draws it ({@code TomeFloat}).</li>
- * <li><b>The off hand</b> (0.7.396; Andy: "it should also work from offhand for mages and sorcerers, so they can wield
+ * <li><b>The off hand</b> (0.7.398; Andy: "it should also work from offhand for mages and sorcerers, so they can wield
  * another"): a Mage or Sorcerer works a tome in the off hand by right click (Andy's pick): tap for a bolt, hold to charge,
  * sneak and right click to cast its page. A main-hand weapon gives up its right-click guard to it
  * ({@code ItemGuardTomeMixin}); a main-hand tome passes right click to it unless loading a page. It floats on the other
@@ -185,7 +185,7 @@ public final class Tomes {
 	 */
 	public static final AttachmentType<Integer> AFLOAT = AttachmentRegistry.create(JaymosKingdoms.id("tome_afloat"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** (0.7.396) {@link #AFLOAT} for the book in the off hand. */
+	/** (0.7.398) {@link #AFLOAT} for the book in the off hand. */
 	public static final AttachmentType<Integer> AFLOAT_OFF = AttachmentRegistry.create(JaymosKingdoms.id("tome_afloat_off"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -225,7 +225,7 @@ public final class Tomes {
 		return !off || offHanded(player) ? tome : null;
 	}
 
-	/** (0.7.396) Whether {@code player} may work a tome in the off hand: a Mage or a Sorcerer, or anyone in creative. */
+	/** (0.7.398) Whether {@code player} may work a tome in the off hand: a Mage or a Sorcerer, or anyone in creative. */
 	public static boolean offHanded(Player player) {
 		return player.isCreative() || Classes.is(player, Classes.PlayerClass.MAGE) || Classes.is(player, Classes.PlayerClass.SORCERER);
 	}
@@ -456,7 +456,7 @@ public final class Tomes {
 			if (hand != InteractionHand.MAIN_HAND) {
 				return useOff(level, player, stack);
 			}
-			// (0.7.396) with a book in the off hand too, right click is the off hand's (but for loading a page with a scroll to hand)
+			// (0.7.398) with a book in the off hand too, right click is the off hand's (but for loading a page with a scroll to hand)
 			if (tomeIn(player, true) != null && !(player.isShiftKeyDown() && hasScroll(player))) {
 				return InteractionResult.PASS;
 			}
@@ -473,7 +473,7 @@ public final class Tomes {
 			return castPage(server, sp, stack, false) ? InteractionResult.SUCCESS : InteractionResult.FAIL;
 		}
 
-		/** (0.7.396) Right click on the off hand's book: hold to charge a bolt, let go to loose it; sneaking, cast its page. */
+		/** (0.7.398) Right click on the off hand's book: hold to charge a bolt, let go to loose it; sneaking, cast its page. */
 		private InteractionResult useOff(Level level, Player player, ItemStack stack) {
 			if (tomeIn(player, true) == null) {
 				return InteractionResult.PASS;

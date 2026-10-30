@@ -7075,7 +7075,62 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
 - Compile-checked; not seen in game.
 
-## 0.7.396: off-hand tomes for Mages and Sorcerers
+## 0.7.395 (again, PR #725: it shipped under the same number as Weapon Forms patch 5, #718): Stare Down by who you stare at (pack 0.18.61)
+- Andy: "Will staredown has context sensitive interactions with npcs and enemies, like making a captain jump ship, or a weak
+  poor king submit the seat". `Staredowns` decides what a held stare does; `Will.stare` still finds and holds the gaze.
+- **The great** (a crewed ship's captain at her wheel, a ruler on a throne) can be stared at even when they're no foe, for
+  longer (`CAPTAIN_STARE_TICKS` 80, `RULER_STARE_TICKS` 120). Being weaker isn't enough: your **Will** (ranks of Dread
+  Presence, Stare Down, Broken Morale, Name That Carries and Last Look, plus your world tier, +1 aligned to Strength, +2 on
+  Second Breath) must beat their **nerve**. A captain's: 2, +1 per 3 able hands aboard, -3 if she's sinking. A ruler's: 3,
+  +1 per guard within 16, +3 per step of the realm's wealth, -1 for a lord. Both: -1 under half health, temperament
+  (brave/proud/hotheaded +2, dutiful/devout +1, timid -2, gloomy -1). Bosses never break.
+  - **A captain jumps ship:** thrown over the side, discharged from her crew (an MCA villager wherever he swims to), and he
+    runs; she has no hand at her helm. Each weaker hand aboard goes over after him half the time; the rest are weakened. A
+    realm's ship (navy, merchant, whaler) costs 60 reputation with the realm.
+  - **A weak, poor ruler yields the seat:** a POOR realm, stared down within 16 blocks of the throne, no player already
+    wearing its crown and you wearing none: `Crowns.crown` makes you its sovereign, the ruler stays as steward, the realm's
+    allies take -100 (half a usurper's), and the server hears of it. Otherwise a weak ruler pays you to go: a quarter of the
+    treasury, at most 64 emeralds, leaving 10, once a day per realm, -80 with the realm.
+  - Whoever's nerve holds says so and can't be stared at by you again for 5 minutes.
+- **Foes** (weaker, as before) break by what they are: one of a ship's crew goes over the side; a rider is thrown and the
+  mount bolts; a caster is hushed as by a Spellbreaker Blow; a bandit or anyone with a live bounty kneels (knocked out for 10
+  s, with Jaymo's Powers) to be taken in. Everyone else drops their weapon or runs as before.
+- **Between players** (`WillClash`), Andy: "this can be done between players, and when one initiates a stare, the other is
+  notified, then it starts a clash". Sneak-staring at another player warns them at once (a line, a heartbeat, a shiver); held
+  `LOCK_TICKS` (2 s) the two lock eyes: rooted, turned to face each other, pressing jump for `TICKS` (5 s). A press is worth 1
+  plus a quarter of your Will, and the greater Will gains a little every tick; both see a gold/red bar on the action bar. A
+  30-point lead ends it early. The loser looks away: slowed and weakened 10 s, knees buckling 2 s, powers and spells hushed;
+  the winner gets 4 Strength experience. A draw shoves both back. Neither can clash again for two in-game days (`COOLDOWN_TICKS`, saved on the player, kept through death). Shrug It Off and Stare
+  Down are off while you're locked in. Never during a spirit clash.
+- Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
+  `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
+
+## 0.7.396: Weapon Forms, patch 6: the Eight-Sign Circle seals forms; Bolt Step and Storm Ring (was 0.7.386; pack 0.18.62)
+- `PowersCompat.sealed(Entity)` calls Powers' `EightSignCircle.sealed(Entity)` by reflection (false without Powers). `forms/Forms.fire` refuses
+  with "The Eight Signs bind your forms." while the player stands in a Divine-born's ring (no cooldown or hunger spent), and
+  `Forms.perform` does nothing if a wind-up runs on into a ring. Schooled guards/duels are untouched.
+- Lightning Sorcerers (`StormArts`): **Bolt Step**, sneak + J with no creature in sight (a target in sight keeps the bolt): a
+  blink up to 9 blocks along your look, stopping short of walls, 6 to each non-player foe passed, 14 mana, 4 s, fall distance
+  kept. **Storm Ring**, J with no blade in hand (a blade keeps the Imbue): eight light-only bolts at 4.5 blocks, 5 and a shove
+  to non-player foes within 2 of each, nothing set alight, 30 mana, 10 s.
+- Compile-checked; not seen in game.
+## 0.7.397: outlaws don't introduce themselves, and the dead get no instant tombstone
+- Andy: "looters / bandits should not introduce themselves, nor should villagers / bandits instantly get tombstones".
+- **Outlaws** (`Outlaws`): looters, assassins, a camp's people (barbarian raiders and chiefs, pirates, goblins and orcs, camp
+  casters) and anyone in a bandit mask or bandana. They never come over to introduce themselves (`Handshakes.comeWeight`), never
+  put a hand out at a first meeting (`Handshakes.greet`: their menu opens as it is) or take yours (`Introductions.takesHand`), and
+  won't give their name (`name_outlaw` lines). Opening their MCA menu skips MCA's stranger's welcome ("Welcome to the village,
+  stranger!") and its greetings for a curt word (`outlaw_opening`, or a hard look without a shared tongue: `McaBridge.outlawOpening`).
+- **No instant tombstone** (`mixin/mca/McaTombstoneMixin`): MCA laid a dead villager in the nearest empty tombstone, or raised a
+  new one where they fell (one with family or a player's hearts, bandits included), the tick after they died, over the Kitchen
+  corpse. While Kitchen's burials are on (`Bearers.seenTo`), MCA finds and raises no tombstone: the body lies where it fell until a
+  bearer carries it to the graveyard and digs the grave. MCA's mourning still runs. The Staff of Life has no MCA tombstone to raise
+  them from.
+- **Outlaws' bodies are burned** (`Bearers.Dead.ours`): an MCA villager's corpse now carries its Kingdoms job, so a looter's or a
+  camp raider's body in a settlement's land is burned with the enemy's dead instead of buried in its graveyard, and robbing it is
+  no grave robbing. (A body whose saved look was cut down to the basics loses the job and is buried as before.)
+
+## 0.7.398: off-hand tomes for Mages and Sorcerers
 - A Mage or Sorcerer (or anyone in creative) works a spell tome in the off hand beside whatever the main hand wields, by right
   click (Andy's pick): tap for a bolt, hold to charge (the item's use; `Tome.useOff`, `releaseUsing`), sneak + right click to
   cast its page. A main-hand weapon gives up its right-click guard to the book (`mixin/ItemGuardTomeMixin`; shields keep

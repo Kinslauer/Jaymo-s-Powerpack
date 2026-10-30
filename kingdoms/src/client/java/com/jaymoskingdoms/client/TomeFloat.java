@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * at each new lock and with every bolt or spell. While it floats the hand holding it is drawn empty (first person:
  * {@code TomeFloatHandMixin}; everyone else: {@code TomeHeldItemMixin}).
  * <p>
- * (0.7.396) A Mage's or Sorcerer's off-hand book floats the same way off the other shoulder ({@link Tomes#AFLOAT_OFF}).
+ * (0.7.398) A Mage's or Sorcerer's off-hand book floats the same way off the other shoulder ({@link Tomes#AFLOAT_OFF}).
  */
 public final class TomeFloat {
 	/** How quickly it swings round after the aim (per second: higher follows tighter). */

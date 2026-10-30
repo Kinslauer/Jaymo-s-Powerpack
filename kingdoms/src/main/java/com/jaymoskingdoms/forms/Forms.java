@@ -628,6 +628,11 @@ public final class Forms {
 		if (SpearForms.tug(player)) {
 			return;
 		}
+		// (0.7.386) inside a Divine-born's Eight-Sign Circle no form can be used
+		if (PowersCompat.sealed(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.sealed").withStyle(ChatFormatting.GOLD));
+			return;
+		}
 		String id = book.belt().get(sneaking ? Math.floorMod(book.slot() + 1, BELT_SLOTS) : book.slot());
 		Form form = FORMS.get(id);
 		if (form == null || !book.knows(id)) {
@@ -678,6 +683,10 @@ public final class Forms {
 	}
 
 	private static void perform(ServerPlayer player, Form form) {
+		// (0.7.386) a wind-up that ran on into an Eight-Sign Circle comes to nothing (no hunger spent)
+		if (PowersCompat.sealed(player)) {
+			return;
+		}
 		player.causeFoodExhaustion(form.hunger());
 		int rank = Math.max(1, rank(player, form.id()));
 		if (form.family() == Family.BLADE) {

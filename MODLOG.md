@@ -3975,6 +3975,38 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
   or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
 
+- **0.18.62, Weapon Forms patch 6: Flying Sword, Eight-Sign Circle, Comet Ram, Gate Ricochet, Three Worlds Film, Thunder Dive (Kingdoms 0.7.396; was 0.18.48):**
+  - Divine-born (Kingdoms heritage `divine`) get two lineage moves on sneak taps, so no existing key changes for anyone else:
+    sneak+G = Flying Sword, sneak+B = Eight-Sign Circle (`ZFighterDivineMoves`, hooked ahead of the ordinary G and B in
+    `ZFighterPower.onKey`; sneak+G only with a sword or spear in hand, else the quick technique as before; sneak+B not when Instant Teleport is on B, which keeps it). New `zfighter/divine/` package.
+  - **Flying Sword** (20 ki, 12 s wait): the sword or spear (`ItemTags.SWORDS`/`SPEARS`) in the main hand leaves it as a
+    `FlyingSword` entity (a `Projectile` drawn as the item by `FlyingSwordRenderer`) and fights for 5 s: circles the lock-on target,
+    else what you last struck, else the nearest `Enemy` within 16 blocks, darting in to strike every 8 ticks for 0.9x your attack
+    damage with the blade in hand (min 3). Then it flies back and settles in its slot. Never lost: handed back (slot, else inventory,
+    else dropped) when caught, on logout (`recall`), death, a world change, `/kill`; never saved with the world (a chunk unload or server stop hands it back first).
+    Fall rules untouched.
+  - **Eight-Sign Circle** (35 ki, 20 s wait, on the ground): a ring of eight signs (gold motes, light columns) of radius 6.5 for 8 s.
+    Anyone but the caster inside is sealed while inside and 1.5 s after. Players: the ring is a `Powers.addSilencer`, so every
+    ability, mode and ultimate press is refused server-side. Anything else: `EightSignCircle.sealed(Entity)` (public static).
+    Kingdoms: `PowersCompat.sealed(Entity)` reads it by reflection and `Forms.fire`/`Forms.perform` refuse while sealed.
+  - **Comet Ram** (Gravity, sprint+B, not inside your own Well; `GravityCometRam`; 12 s wait, 3 exhaustion): 22 ticks driven the way you looked (bending a
+    little toward where you look), speeding up to 2 blocks a tick; creatures in the path (up to 6) are caught up for 3 damage and
+    carried ahead of you; at a wall, the ground or the end of the run they are slammed down (9 + up to 3 damage), the rest within
+    4 blocks hurt for 5 and thrown, debris and shake. A crash with nothing carried hurts you by speed squared (1.5x, max 8). No
+    fall-damage reset (a ram ending in the air leaves you to fall). Crush keeps B otherwise (G+B in your own Well included); Inversion (R held) still wins.
+  - **Gate Ricochet** (Arsenal, Void Gates; `ArsenalRicochet`, no key): your own projectile (arrow, trident, javelin, cannonball,
+    flying Barrage blade) whose path passes within 1.7 blocks of one of your gates comes out of the next gate in your list in that
+    world, turned toward the lock-on, else what you last struck, else the nearest foe within 28 blocks of that gate (else straight
+    on), at least 1.2 blocks a tick; it may pass on through up to 3 gates. Needs two gates in the same world.
+  - **Part B (storm):** Nadir's C is the **Three Worlds Film** (`NadirFilm`; look at a creature within 28 blocks): a skippable
+    DUTCH film (66 ticks, bars for witnesses within 48) with Overworld, Nether and Aether panels behind the target at ticks 14/28/42,
+    then a blow at tick 60 (34 to the target, 10 within 3.5 blocks, a shove), 75 s wait; visual only, no portal, no realm.
+    `XenoForm.ultimateIsMove()` lets a form's C run a move in place of an Ultimate form. **Thunder Dive** (`WindThunderDive`;
+    Thunderhead, in the air, not in wind flight, looking 40 degrees down with 5+ blocks of air): C plunges at 1.9 blocks a tick
+    and lands in a thunderclap ring (6-20 by the drop, up to 40 blocks), 35 s wait; fall damage still applies. Lightning
+    Sorcerers' **Bolt Step** and **Storm Ring** are in Kingdoms (`StormArts`, 0.7.396).
+  - Lang: new `lang/parts/zfighter_divine.json`; key help appended in `zfighter.json` (G, B), `gravity.json` (B) and `arsenal.json` (V, corrupted).
+  - Compile-checked; not seen in game.
 - **0.18.51, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
   flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
@@ -4113,3 +4145,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     forward axis by it, refreshes `up` and `left` and dirties the view matrices again. Other shots return 0, so nothing else changes.
   - `ZFighterSenses.impactFrame` is public now (Kingdoms' Rain of Cuts calls it by reflection).
   - Compile-checked; not seen in game.
+- **0.18.61 (Kingdoms 0.7.395):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
+  poor ruler in their hall into giving up the crown (a richer one pays you to go), when your Will beats their nerve; crew go
+  over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.395.
