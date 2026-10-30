@@ -144,7 +144,7 @@ final class ZFighterSparring {
 			return InteractionResult.SUCCESS;
 		}
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
-			// (0.18.71) anyone else stands a still practice dummy (Weapon Forms practice, the belt)
+			// (0.18.72) anyone else stands a still practice dummy (Weapon Forms practice, the belt)
 			return PracticeDummy.place(context, player, level);
 		}
 		for (Iterator<Map.Entry<UUID, Bout>> it = BOUTS.entrySet().iterator(); it.hasNext(); ) {

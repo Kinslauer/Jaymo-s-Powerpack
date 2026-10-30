@@ -7167,3 +7167,12 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   and pushed off its shoulder (made to hold something it doesn't have). It now stands in its rest pose and walks with
   its legs and arms swinging (`BeastsClient.kingStride`); its claw, volley, cold snap and roar still play as drawn.
 - Compile-checked; not seen in game.
+
+## 0.7.404: bolas trip people and break a leg (pack 0.18.71)
+- Andy: "bolas should force a cripple on humanoid mobs, and animate wrapping and tripping them". With Jaymo's Powers, a
+  bolas that hits anything built like a person (villagers, MCA folk, bandits, illagers, piglins, zombies, skeletons; now
+  any of them, not only foes) calls Powers' `Tripped.bind` through `PowersCompat.trip`: one leg is broken in the wounds
+  doll (unless one already is), the cord whips round the shins, and it falls on its face for `TRIP_TICKS` (3 s, +0.5 s a
+  rank of Tangle Cord), then gets up limping. The bolas stays on its legs and drops at its feet when it rises
+  (`WRAPPED`; on shutdown they all drop). Animals and the rest are tangled with Slowness as before, as is everything
+  without Powers. Not seen in game.

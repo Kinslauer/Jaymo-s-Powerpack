@@ -25,7 +25,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.71) The Training Post: two blocks tall and shaped like the vanilla mannequin (a player's proportions: legs, a
+ * (0.18.72) The Training Post: two blocks tall and shaped like the vanilla mannequin (a player's proportions: legs, a
  * padded body, arms, a sacking head), facing whoever set it. The lower half is the post proper (its item, its drop);
  * the upper half comes with it and goes with it. A lower half set by a structure grows its upper half when there's room.
  */

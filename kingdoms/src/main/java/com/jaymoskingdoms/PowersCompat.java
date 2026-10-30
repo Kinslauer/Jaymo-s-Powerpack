@@ -1454,4 +1454,62 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
+	// ---- (0.7.404) bolas: the trip ------------------------------------------------------------------------------------
+
+	private static boolean lookedForTrip;
+	/** Powers' {@code Tripped.bind(LivingEntity, Entity, int)}, {@code Tripped.tripped(Entity)} and {@code Tripped.trippable(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bindTrip, tripped, trippable;
+
+	private static void lookForTrip() {
+		if (lookedForTrip) {
+			return;
+		}
+		lookedForTrip = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> type = Class.forName("com.jaymospowers.core.wounds.Tripped");
+			bindTrip = lookup.findStatic(type, "bind", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class,
+				net.minecraft.world.entity.Entity.class, int.class));
+			tripped = lookup.findStatic(type, "tripped", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+			trippable = lookup.findStatic(type, "trippable", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no bolas trip (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.404) A bolas wraps {@code target}'s legs ({@code by} threw it): Powers breaks a leg and trips it onto its face for
+	 * {@code ticks}. False without Powers (or an older one), or if it isn't built like a person.
+	 */
+	public static boolean trip(LivingEntity target, net.minecraft.world.entity.@Nullable Entity by, int ticks) {
+		lookForTrip();
+		try {
+			return bindTrip != null && (boolean)bindTrip.invoke(target, by, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.404) Whether {@code body} is still down from a bolas (Powers' trip); false without Powers. */
+	public static boolean tripped(net.minecraft.world.entity.Entity body) {
+		lookForTrip();
+		try {
+			return tripped != null && (boolean)tripped.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.404) Whether a bolas can trip {@code body} (a mob built like a person, on its feet); false without Powers. */
+	public static boolean trippable(net.minecraft.world.entity.Entity body) {
+		lookForTrip();
+		try {
+			return trippable != null && (boolean)trippable.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

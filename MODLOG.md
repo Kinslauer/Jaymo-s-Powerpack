@@ -4184,7 +4184,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   First-person Model's vanilla-hands list like TaCZ's guns, so the body no longer holds it pointed at the ground.
   Crouched (and not aiming) it drops to a low ready, muzzle down and in, pivoting on the grip (Andy: "it should lower
   into a low ready as you crouch"); aiming from a crouch still brings it straight up to the sights.
-- **0.18.71, a Training Post shaped like the mannequin, and a Practice Dummy for everyone:** Andy: "training post should
+- **0.18.71 (Kingdoms 0.7.404), bolas trips:** Andy: "bolas should force a cripple on humanoid mobs, and animate wrapping
+  and tripping them". `Tripped` (wounds): Kingdoms' bolas breaks one leg on anything built like a person and trips it.
+  `TrippedPose`: the cord spins in and cinches round both shins (a two-turn cord with two stone weights, drawn on the legs),
+  the legs snap together, it teeters with its arms windmilling, pitches onto its face with a bounce and a thud, kicks its
+  bound legs and paws at the ground, then pushes itself up as the cord drops off. Down, it's stunned and can be finished
+  (`Finishers.helpless`). Not seen in game.
+
+- **0.18.72, a Training Post shaped like the mannequin, and a Practice Dummy for everyone:** Andy: "training post should
   be the same proportions as the vanilla dummy", and "i cant seem to place sparring dummy" (he isn't a Z Fighter). The
   Training Post (`TrainingPostBlock`) now stands two blocks tall with a player's proportions (two log legs, a hay-padded
   body, log arms, an 8-pixel hay head), facing whoever set it; the top half comes and goes with the post, only the bottom

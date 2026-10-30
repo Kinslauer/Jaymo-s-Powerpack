@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 
 /**
- * (0.18.71) The Sparring Dummy for anyone who isn't a Z Fighter: it stands a still practice dummy (a mannequin) where it's
+ * (0.18.72) The Sparring Dummy for anyone who isn't a Z Fighter: it stands a still practice dummy (a mannequin) where it's
  * used, for Weapon Forms practice and setting the belt. Blows land on it but never hurt it; sneak and strike it to take
  * it back up. A Z Fighter's use is still the sparring partner ({@link ZFighterSparring}).
  */
