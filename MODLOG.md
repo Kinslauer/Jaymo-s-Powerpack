@@ -3928,7 +3928,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the race only when no foe is in the combo's reach and cone (`ZFighterCombo.inFront`, the server's own scan) and no
     string is going.
   - Compile-checked; not seen in game.
-- **0.18.48, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+- **0.18.49, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
@@ -3950,7 +3950,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
-- **0.18.49, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+- **0.18.50, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
   matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
   blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
   sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
@@ -3975,7 +3975,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
   or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
 
-- **0.18.50, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+- **0.18.51, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
   flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
   in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer

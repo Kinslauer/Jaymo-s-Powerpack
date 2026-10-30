@@ -6839,6 +6839,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
+## 0.7.382: a shorter Valor screen
+- Before it wakes, the Valor page only says "Your Valor hasn't woken."
+- Once woken, the left column shows only its origin and its look (quirk, soul colour and King's Valor lines removed).
+- The Feats heading had borrowed the long "how to wake it" line and slid it across the right side; it now reads "Feats".
 ## 0.7.383, the ladder (SevTech picks) (pack 0.18.52)
 - Andy picked the SevTech ladder: one system for the world tiers, in four parts.
 - **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED

@@ -315,7 +315,7 @@ public final class ZFighterPatrol {
 		level.playSound(null, pod.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.5F);
 	}
 
-	/** A pod nobody can take (0.18.48: a complete pod entity, locked by {@link #POD_TAG}). */
+	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
 	static PodEntity pod(ServerLevel level, Vec3 at) {
 		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
 		pod.addTag(POD_TAG);
@@ -538,7 +538,7 @@ public final class ZFighterPatrol {
 	static void join(ServerPlayer player) {
 		player.setAttached(MEMBER, new Member(0, 0L));
 		ServerLevel level = player.level();
-		// (0.18.48) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
+		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
 		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
 		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.2F);
