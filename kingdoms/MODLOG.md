@@ -6918,3 +6918,17 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   from 4 to 18 blocks, Rustfall hits half as hard again and throws what it hits, Glacia's blows slow and chill, Cinder's set you
   alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
   the class. No new text. Compile-checked; not seen in game.
+
+## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
+- **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
+  time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
+  `NEAR_MIN` to `NEAR_MAX` (90 to 300) blocks from its seat, in loaded chunks, dry, and never inside any town's claim (up to
+  `TRIES` tries). The fall takes `FALL_TICKS` (90): a streak of flame, sparks and smoke from `FALL_HEIGHT` above, a whistle, then a
+  boom (a blockless explosion, thunder, a burst of sparks) and a bowl of radius `BOWL` dug out of the ground (never bedrock or a
+  block with an inventory), lined with blackstone and basalt, with `ORE_MIN` to `ORE_MAX` lumps of Powers' `star_metal_ore` in its
+  floor. Nothing falls without Jaymo's Powers. Everyone within `TELL_RANGE` (500) reads it in the next Tidings with a bearing from
+  the town: "a light fell out of the sky toward the hills north-east of X". `/kingdom starfall` (gamemasters) drops one now near the
+  sender, whatever the night. Roll state is one saved Overworld attachment (`starfall`).
+- **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
+  only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
+- Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.

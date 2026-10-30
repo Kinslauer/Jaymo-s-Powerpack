@@ -184,6 +184,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/handle_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -367,6 +374,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -545,6 +559,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_star_metal"
                     }
                   }
                 ],
@@ -730,6 +751,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -908,6 +936,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_star_metal"
                     }
                   }
                 ],
@@ -1088,6 +1123,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_star_metal"
                   }
                 }
               ],
@@ -1275,6 +1317,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/handle_amber_bronze"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1458,6 +1507,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1636,6 +1692,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_star_metal"
                 }
               }
             ],
@@ -1821,6 +1884,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1999,6 +2069,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_star_metal"
                 }
               }
             ],
@@ -2179,6 +2256,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_star_metal"
               }
             }
           ],

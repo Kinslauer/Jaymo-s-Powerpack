@@ -220,6 +220,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/arrow/head_amber_bronze"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/arrow/head_star_metal"
+            }
           }
         ],
         "fallback": {

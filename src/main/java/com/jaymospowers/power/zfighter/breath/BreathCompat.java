@@ -57,6 +57,10 @@ public final class BreathCompat {
 		if (player.level().dimension() != ZFighterSpace.DESTS[ZFighterSpace.GLACIA].level()) {
 			return 0.0;
 		}
+		if (com.jaymospowers.power.zfighter.backhome.FarFood.warded(player)) {
+			// (0.18.56) a far-world meal's ward keeps the cold off
+			return 0.0;
+		}
 		double chill = CHILL * (player.level().canSeeSky(player.blockPosition().above()) ? 1.0 : SHELTERED);
 		int warm = 0;
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
@@ -76,7 +80,8 @@ public final class BreathCompat {
 			return;
 		}
 		for (ServerPlayer player : glacia.players()) {
-			if (player.isAlive() && !player.isCreative() && !player.isSpectator()) {
+			if (player.isAlive() && !player.isCreative() && !player.isSpectator()
+				&& !com.jaymospowers.power.zfighter.backhome.FarFood.warded(player)) {
 				player.causeFoodExhaustion(FALLBACK_EXHAUSTION);
 			}
 		}

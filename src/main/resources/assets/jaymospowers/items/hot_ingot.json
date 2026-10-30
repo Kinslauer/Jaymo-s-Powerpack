@@ -198,6 +198,19 @@
             }
           ]
         }
+      },
+      {
+        "when": "star_metal",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/star_metal_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
       }
     ],
     "fallback": {

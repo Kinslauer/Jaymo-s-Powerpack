@@ -184,6 +184,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/handle_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -367,6 +374,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -545,6 +559,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_star_metal"
                     }
                   }
                 ],
@@ -725,6 +746,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/grip_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_star_metal"
                   }
                 }
               ],
@@ -926,6 +954,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/binding_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -1112,6 +1147,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/handle_amber_bronze"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1295,6 +1337,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_broken_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1473,6 +1522,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_star_metal"
                 }
               }
             ],
@@ -1653,6 +1709,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/grip_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_star_metal"
               }
             }
           ],
@@ -1853,6 +1916,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/binding_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_star_metal"
               }
             }
           ],

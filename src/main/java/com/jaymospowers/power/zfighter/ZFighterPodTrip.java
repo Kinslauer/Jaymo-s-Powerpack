@@ -111,6 +111,8 @@ public final class ZFighterPodTrip {
 		/** (0.18.51) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
 		boolean finished;
 		int grade;
+		/** (0.18.56) A Starlit Lens on the mast, carried to the pod that lands. */
+		boolean lens;
 		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
@@ -138,15 +140,16 @@ public final class ZFighterPodTrip {
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
 	/** Server → client: the flight is under way; show it. {@code to} is a destination index or Home. */
-	public record Flight(int to, int ticks, boolean skippable) implements CustomPacketPayload {
+	public record Flight(int to, int ticks, boolean skippable, boolean lens) implements CustomPacketPayload {
 		public static final Type<Flight> TYPE = new Type<>(JaymosPowers.id("zfighter_space_flight"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Flight> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.to + 1);
 				buf.writeVarInt(p.ticks);
 				buf.writeBoolean(p.skippable);
+				buf.writeBoolean(p.lens);
 			},
-			buf -> new Flight(buf.readVarInt() - 1, buf.readVarInt(), buf.readBoolean()));
+			buf -> new Flight(buf.readVarInt() - 1, buf.readVarInt(), buf.readBoolean(), buf.readBoolean()));
 
 		@Override
 		public Type<Flight> type() {
@@ -225,7 +228,8 @@ public final class ZFighterPodTrip {
 		trip.pod = pod;
 		trip.finished = pod.finished();
 		trip.grade = pod.grade();
-		// (0.18.51) a second seat: whoever else is aboard comes along
+		trip.lens = pod.lens() && pod.has(PodPart.MAST, 0);
+		// (0.18.50) a second seat: whoever else is aboard comes along
 		ServerPlayer guest = null;
 		for (Entity rider : pod.getPassengers()) {
 			if (guest == null && pod.seats() > 1 && rider instanceof ServerPlayer other && other != player) {
@@ -254,6 +258,7 @@ public final class ZFighterPodTrip {
 		pod.setParts(trip.filled, trip.damaged);
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
+		pod.setLens(trip.lens);
 		pod.setYRot(yaw);
 		pod.setHovering(true);
 		// tagged once it is in the world, so the load check doesn't take it for a leftover
@@ -399,10 +404,10 @@ public final class ZFighterPodTrip {
 		player.setAttached(FLIGHTS, flown + 1);
 		trip.phase = Phase.FLIGHT;
 		trip.ticks = flightTicks(cost);
-		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, flown > 0));
+		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, flown > 0, trip.lens));
 		ServerPlayer guest = guest(player.level().getServer(), trip);
 		if (guest != null) {
-			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false));
+			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false, trip.lens));
 		}
 	}
 
@@ -427,7 +432,7 @@ public final class ZFighterPodTrip {
 				trip.to = overworld.dimension();
 				trip.ground = groundAt(overworld, overworld.getRespawnData().pos());
 			}
-			// (0.18.54) a landing yard within reach of the home ground: down on a free pad
+			// (0.18.55) a landing yard within reach of the home ground: down on a free pad
 			ServerLevel homeLevel = trip.to == null ? null : server.getLevel(trip.to);
 			BlockPos pad = homeLevel == null || trip.ground == null ? null : ZFighterYard.freePad(homeLevel, trip.ground);
 			if (pad != null) {
@@ -550,7 +555,7 @@ public final class ZFighterPodTrip {
 			// (0.18.52) a pod flown out and landed home again: the deed that opens Dread
 			ZFighterKingdoms.deed(player, "pod_flight");
 		}
-		// (0.18.54) a Pilot is paid for a trip with a passenger or a parcel aboard (Kingdoms' Careers)
+		// (0.18.55) a Pilot is paid for a trip with a passenger or a parcel aboard (Kingdoms' Careers)
 		ZFighterKingdoms.flown(player, guest, level, at);
 		ZFighterSpace.arrived(player, dest);
 		if (guest != null) {
@@ -604,6 +609,7 @@ public final class ZFighterPodTrip {
 		pod.setParts(trip.filled, trip.damaged);
 		pod.setFinished(trip.finished);
 		pod.setGrade(trip.grade);
+		pod.setLens(trip.lens);
 		pod.setFuel(fuel);
 		return pod;
 	}

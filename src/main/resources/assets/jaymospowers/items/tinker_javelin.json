@@ -188,6 +188,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -324,6 +331,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_star_metal"
                     }
                   }
                 ],
@@ -504,6 +518,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -640,6 +661,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_star_metal"
                     }
                   }
                 ],
@@ -825,6 +853,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -961,6 +996,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_star_metal"
                     }
                   }
                 ],
@@ -1141,6 +1183,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1277,6 +1326,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_star_metal"
                     }
                   }
                 ],
@@ -1469,6 +1525,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1605,6 +1668,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_star_metal"
                 }
               }
             ],
@@ -1785,6 +1855,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_broken_large_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1921,6 +1998,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_star_metal"
                 }
               }
             ],
@@ -2106,6 +2190,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -2242,6 +2333,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_star_metal"
                 }
               }
             ],
@@ -2422,6 +2520,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_large_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -2558,6 +2663,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_star_metal"
                 }
               }
             ],

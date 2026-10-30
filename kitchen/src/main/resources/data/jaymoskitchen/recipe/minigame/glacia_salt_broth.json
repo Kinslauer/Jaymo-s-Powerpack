@@ -1,0 +1,14 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "jaymospowers:glacia_salt"
+      ]
+    }
+  ],
+  "type": "jaymoskitchen:minigame",
+  "category": "misc",
+  "dish": "glacia_salt_broth"
+}

@@ -319,6 +319,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "star_metal",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/broad_blade_star_metal",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -503,6 +516,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/broad_blade_amber_bronze"
+          }
+        },
+        {
+          "when": "star_metal",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/broad_blade_star_metal"
           }
         }
       ],

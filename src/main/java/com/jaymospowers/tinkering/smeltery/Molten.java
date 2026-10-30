@@ -28,7 +28,9 @@ public enum Molten {
 	AMBER_BRONZE("amber_bronze", 0xFFE6A82E, TinkerMaterial.AMBER_BRONZE),
 	SLIME("slime", 0xFF7EBE5A, null),
 	HONEY("honey", 0xFFF9A42C, null),
-	BLOOD("blood", 0xFF6B0000, null);
+	BLOOD("blood", 0xFF6B0000, null),
+	// ---- (0.18.56) back home (keep apart when merging far-world metals) ----
+	STAR_METAL("star_metal", 0xFFC9C2FF, TinkerMaterial.STAR_METAL);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;

@@ -136,6 +136,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -272,6 +279,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
               }
             }
           ],
@@ -453,6 +467,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -589,6 +610,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                     }
                   }
                 ],
@@ -771,6 +799,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -907,6 +942,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                     }
                   }
                 ],
@@ -1091,6 +1133,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -1227,6 +1276,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                   }
                 }
               ],
@@ -1408,6 +1464,13 @@
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                         }
+                      },
+                      {
+                        "when": "star_metal",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                        }
                       }
                     ],
                     "fallback": {
@@ -1544,6 +1607,13 @@
                         "model": {
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                        }
+                      },
+                      {
+                        "when": "star_metal",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                         }
                       }
                     ],
@@ -1722,6 +1792,13 @@
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                         }
+                      },
+                      {
+                        "when": "star_metal",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                        }
                       }
                     ],
                     "fallback": {
@@ -1858,6 +1935,13 @@
                         "model": {
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                        }
+                      },
+                      {
+                        "when": "star_metal",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                         }
                       }
                     ],
@@ -2035,6 +2119,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -2171,6 +2262,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_star_metal"
                     }
                   }
                 ],

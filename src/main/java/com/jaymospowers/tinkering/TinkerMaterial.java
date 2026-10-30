@@ -60,7 +60,10 @@ public enum TinkerMaterial {
 	// (0.15.x) arrow parts only: fletching (feather, leaves) and a blaze rod shaft; they have no head, handle or binding stats
 	FEATHER("feather", null, Trait.AERODYNAMIC),
 	LEAVES("leaves", null, Trait.SOLAR_POWERED),
-	BLAZE_ROD("blaze_rod", null, Trait.SEARING);
+	BLAZE_ROD("blaze_rod", null, Trait.SEARING),
+	// ---- (0.18.56) back home: star metal, from fallen stars (its own block: keep it apart when merging far-world metals) ----
+	/** Melted from star metal ore (1 ore = 1 ingot), cast and forged only: light, quick, Starlit. */
+	STAR_METAL("star_metal", Stats.STAR_METAL, Trait.STARLIT, true);
 
 	/** Mining tiers, weakest first: what each can't harvest. */
 	public enum Tier {
@@ -97,6 +100,8 @@ public enum TinkerMaterial {
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
+		/** (0.18.56) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
+		static final Stats STAR_METAL = new Stats(640, 7.5F, 2.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.1F);
 		/** (0.18.55) The first metals: iron-tier (the Cinder and Maw ones diamond-tier, for ancient debris), none beyond steel. */
 		static final Stats PALE_ALLOY = new Stats(300, 6.5F, 2.0F, Tier.IRON, 0.05F, 0.05F, 0.0F, 0.05F);
 		static final Stats RUST_IRON = new Stats(420, 6.0F, 2.5F, Tier.IRON, 0.1F, 0.0F, 0.05F, 0.0F);
@@ -128,6 +133,7 @@ public enum TinkerMaterial {
 		limb(Stats.PIG_IRON, new Limb(580, 0.0F, 0.0F, 0.1F), new Grip(0.1F, -0.15F, 2.5F));
 		limb(Stats.SLIMESTEEL, new Limb(1040, -0.05F, -0.05F, 0.15F), new Grip(0.2F, -0.1F, 2.5F));
 		limb(Stats.STEEL, new Limb(775, -0.2F, 0.2F, -0.1F), new Grip(0.05F, -0.05F, 2.75F));
+		limb(Stats.STAR_METAL, new Limb(640, 0.1F, 0.05F, 0.1F), new Grip(0.0F, 0.1F, 2.0F));
 	}
 
 	private static void limb(Stats family, Limb limb, Grip grip) {

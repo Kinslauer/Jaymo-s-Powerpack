@@ -183,6 +183,29 @@ public final class ZFighterSpaceMissions {
 		return data == null ? Data.NONE : data;
 	}
 
+	/**
+	 * (0.18.56) The mission zones of destination {@code dest} as a pod's Starlit Lens shows them on the flight screen: one for each
+	 * captain or champion, then one for the boss or the flag (1 where it is dealt with, 0 where it still waits); empty for a world with
+	 * no mission.
+	 */
+	public static int[] zones(Player player, int dest) {
+		for (int i = 0; i < PLANETS.length; i++) {
+			if (PLANETS[i].dest() != dest) {
+				continue;
+			}
+			Data data = of(player);
+			int value = data.of(i);
+			boolean settled = data.settled(i), begun = mode(value) != 0;
+			int[] zones = new int[CAPTAINS + 1];
+			for (int z = 0; z < CAPTAINS; z++) {
+				zones[z] = settled || begun && (phase(value) == 1 || z < count(value)) ? 1 : 0;
+			}
+			zones[CAPTAINS] = settled ? 1 : 0;
+			return zones;
+		}
+		return new int[0];
+	}
+
 	/** Which planet with a mission {@code level} is, or -1. */
 	public static int planetOf(Level level) {
 		for (int i = 0; i < PLANETS.length; i++) {

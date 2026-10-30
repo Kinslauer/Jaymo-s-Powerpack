@@ -15,3 +15,4 @@ modpack/
 
 Serverfiles/
 libs/DistantHorizons-*.jar
+__pycache__/

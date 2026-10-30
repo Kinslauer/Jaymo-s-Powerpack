@@ -184,6 +184,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/handle_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -367,6 +374,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -545,6 +559,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_star_metal"
                     }
                   }
                 ],
@@ -730,6 +751,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_broken_amber_bronze"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -908,6 +936,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_star_metal"
                     }
                   }
                 ],
@@ -1110,6 +1145,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/broad_axe/binding_amber_bronze"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -1296,6 +1338,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/handle_amber_bronze"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1479,6 +1528,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1657,6 +1713,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_star_metal"
                 }
               }
             ],
@@ -1842,6 +1905,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_amber_bronze"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -2020,6 +2090,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_star_metal"
                 }
               }
             ],
@@ -2221,6 +2298,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/binding_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_star_metal"
               }
             }
           ],
