@@ -48,7 +48,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.371) Veteran guard drills (Weapon Forms, patch 1). A <b>veteran</b> is one of a realm's guards (its folk, or an MCA
+ * (0.7.381) Veteran guard drills (Weapon Forms, patch 1). A <b>veteran</b> is one of a realm's guards (its folk, or an MCA
  * villager in its service or in the job: {@link Downed#isGuard}) who has been grown {@link #VETERAN_DAYS} days or more
  * (the same service {@code WeaponForms.experienced} counts). Asked for a drill on MCA's main menu ({@link #ANSWER}, the way
  * {@code Captives} offers "Speak of the rescue"), a veteran sets one of three drills, rotating with the day:

@@ -22,7 +22,7 @@ final class CombatArtKey {
 	static void register() {
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_art", InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_4,
 			KeyMapping.Category.register(JaymosKingdoms.id("combat_arts"))));
-		// (0.7.371) with a form's weapon in hand the key is also the Battle Stance (hold) and the forms (tap): Weapon Forms decides
+		// (0.7.381) with a form's weapon in hand the key is also the Battle Stance (hold) and the forms (tap): Weapon Forms decides
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> FormsClient.key(minecraft, key, () -> {
 			if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(CombatArts.Use.TYPE)) {
 				ClientPlayNetworking.send(new CombatArts.Use(minecraft.player.isShiftKeyDown()));

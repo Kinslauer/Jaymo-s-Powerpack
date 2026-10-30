@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.371) Weapon Forms, the engine (Andy's picks from Ultimate Battle, ideas only: docs/WeaponForms-Plan.md). A <i>form</i>
+ * (0.7.381) Weapon Forms, the engine (Andy's picks from Ultimate Battle, ideas only: docs/WeaponForms-Plan.md). A <i>form</i>
  * is one learned fighting move, tied to a weapon family ({@link Family}), an art or a masterstroke ({@link Kind}).
  * Nobody has a belt or a stance at first: learning your first form ({@link #teach}, from a teacher or {@code /forms teach})
  * unlocks both.

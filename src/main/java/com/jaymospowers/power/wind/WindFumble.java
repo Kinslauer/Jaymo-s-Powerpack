@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
  * ability used has a {@link #CAST_CHANCE} chance, and each second of flight a {@link #FLIGHT_CHANCE_PER_SECOND} one, of
  * the main-hand item slipping out: it's thrown ahead as an item (nothing is destroyed). A player carried in flight can
  * slip from your arms too, each second at {@link #CARRY_DROP_CHANCE_PER_SECOND}'s chance for your mastery: often for a
- * fresh wind, rarely near mastery, never once everything is mastered. Never in creative.
+ * fresh wind, rarely near mastery, never once everything is mastered. Never in creative, and never an axe.
  */
 final class WindFumble {
 	/** Abilities mastered before the grip holds. */
@@ -66,7 +66,7 @@ final class WindFumble {
 
 	private static boolean canFumble(ServerPlayer player) {
 		return !player.isCreative() && !player.isSpectator() && player.isAlive() && Powers.has(player, WindPower.INSTANCE)
-			&& Mastery.unlocked(player) < MASTERED && !player.getMainHandItem().isEmpty();
+			&& Mastery.unlocked(player) < MASTERED && !player.getMainHandItem().isEmpty() && !WindPower.isAxe(player.getMainHandItem());
 	}
 
 	private static void slip(ServerPlayer player) {
