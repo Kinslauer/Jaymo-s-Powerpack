@@ -249,6 +249,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.forms.GuardDrills.ANSWER.equals(answer)) {
+			// (0.7.366) a veteran guard sets today's drill (Weapon Forms)
+			com.jaymoskingdoms.forms.GuardDrills.offer(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
 			villager.sendChatMessage(Introductions.askName(player, villager), player);
