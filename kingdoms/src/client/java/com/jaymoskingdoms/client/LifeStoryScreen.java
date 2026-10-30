@@ -122,6 +122,8 @@ final class LifeStoryScreen extends Screen {
 	private static boolean owed;
 	/** (0.7.356) MCA's creator comes after this screen: the story stops short of the road, told after the creator. */
 	private static boolean creatorAhead;
+	/** (0.7.417, Start Together) The party mates who took a road lately, as the server last told. */
+	private static List<LifeStory.Mate> mates = List.of();
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
 	private static Draft draft = new Draft();
@@ -147,6 +149,7 @@ final class LifeStoryScreen extends Screen {
 			owed |= payload.forced();
 			realms = payload.realms();
 			creatorAhead = payload.creatorAhead();
+			mates = payload.mates();
 			StoryCurtain.raise();
 			// (0.7.407) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
 			// MCA marks the body made partway through its creator, and the road was asked on top of it. While the creator
@@ -170,6 +173,7 @@ final class LifeStoryScreen extends Screen {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			owed = false;
 			creatorAhead = false;
+			mates = List.of();
 			draft = new Draft();
 			narrated = null;
 			toRead.clear();
@@ -298,13 +302,27 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
 	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty()) && (a.onlyFor() == null || bornAs() == a.onlyFor());
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs());
+	}
+
+	/** (0.7.417) The heritages a road is only for, as "A, B or C" (in heritage order). */
+	private static Component onlyForNames(Answer a) {
+		List<Heritage.Kind> kinds = new ArrayList<>(a.onlyFor());
+		kinds.sort(java.util.Comparator.comparingInt(Heritage.Kind::ordinal));
+		net.minecraft.network.chat.MutableComponent out = Component.empty();
+		for (int i = 0; i < kinds.size(); i++) {
+			if (i > 0) {
+				out.append(Component.translatable(i == kinds.size() - 1 ? "gui.jaymoskingdoms.story.only_for.or" : "gui.jaymoskingdoms.story.only_for.comma"));
+			}
+			out.append(Component.translatable("heritage.jaymoskingdoms." + kinds.get(i).key()));
+		}
+		return out;
 	}
 
 	/** (0.7.349) The road's hold on the heritage: the start that makes you one (the afterlife's), or is only for one (the Verdant World's). */
 	private static boolean roadFixesHeritage() {
 		Answer road = picked(Question.ROAD);
-		return road != null && (road.makes() != null || road.onlyFor() != null);
+		return road != null && (road.makes() != null || !road.onlyFor().isEmpty());
 	}
 
 	/** Whether the page is answered, so Next can go on. */
@@ -721,7 +739,7 @@ final class LifeStoryScreen extends Screen {
 							draft.cls = -1;
 						}
 						// (0.7.349) a road that fixes the heritage drops one picked over the story's; a new birthplace drops a road it shuts
-						if (s.question == Question.ROAD && (a.makes() != null || a.onlyFor() != null)) {
+						if (s.question == Question.ROAD && (a.makes() != null || !a.onlyFor().isEmpty())) {
 							draft.heritage = -1;
 							draft.look = -1;
 						}
@@ -949,6 +967,10 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("trader", new int[] {0xFF5A7AA8, 0xFFE0C890, 0xFF8A7A5A}),
 		java.util.Map.entry("pup", new int[] {0xFF6A9AC8, 0xFFE8E0B0, 0xFF5A9A3A}),
 		java.util.Map.entry("nobodies", new int[] {0xFF3A4048, 0xFF8A8A82, 0xFF4A4438}),
+		// (0.7.417) the powered roads: a lab's green glass and lamplight, a workshop's brass dusk, a sky with the moon rising red over a field
+		java.util.Map.entry("lab", new int[] {0xFF0C1A14, 0xFF4A9A6A, 0xFF3A3A34}),
+		java.util.Map.entry("android", new int[] {0xFF14181E, 0xFF8A7A5A, 0xFF4A4C50}),
+		java.util.Map.entry("moon_cursed", new int[] {0xFF0A0610, 0xFFA02A2A, 0xFF2A2A2E}),
 		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
 		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
 		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
@@ -986,7 +1008,7 @@ final class LifeStoryScreen extends Screen {
 		Answer a = Question.ROAD.answers().get(i);
 		draft.answers[Question.ROAD.ordinal()] = i;
 		// (0.7.349) a road that fixes the heritage drops one picked over the story's
-		if (a.makes() != null || a.onlyFor() != null) {
+		if (a.makes() != null || !a.onlyFor().isEmpty()) {
 			draft.heritage = -1;
 			draft.look = -1;
 		}
@@ -1093,6 +1115,13 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		List<Component> lines = new ArrayList<>();
+		// (0.7.417, Start Together) a party mate who took this road: you will wake beside them
+		for (LifeStory.Mate mate : mates) {
+			if (mate.road().equals(a.key())) {
+				lines.add(Component.translatable(mate.realm().isEmpty() ? "gui.jaymoskingdoms.story.together" : "gui.jaymoskingdoms.story.together.realm",
+					mate.name(), mate.realm()).withColor(ACCENT));
+			}
+		}
 		// (0.7.360) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
 		// its short line; the whole tale is kept for the story on the last page
 		Component line = shortLine(Question.ROAD, a);
@@ -1131,8 +1160,8 @@ final class LifeStoryScreen extends Screen {
 	/** (0.7.356) Why an answer can't be picked here. */
 	private static net.minecraft.network.chat.MutableComponent reason(Answer a) {
 		return !a.offered() ? Component.translatable(a.start() == LifeStory.Start.NOBODIES ? "gui.jaymoskingdoms.story.needs_mca" : "gui.jaymoskingdoms.story.needs_powers")
-			: a.onlyFor() != null && bornAs() != a.onlyFor()
-				? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
+			: !a.fits(bornAs())
+				? Component.translatable("gui.jaymoskingdoms.story.only_for", onlyForNames(a))
 				: Component.translatable("gui.jaymoskingdoms.story.no_realms");
 	}
 

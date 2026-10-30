@@ -7362,3 +7362,24 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - `PowersCompat.labEscape(ServerPlayer)` and `PowersCompat.androidStart(ServerPlayer)` (reflection on Powers 0.18.83's
   `LabEscape.start` and `ZFighterAndroidStart.start`; false without Powers or if no ground was found). Nothing calls them yet:
   the life story's roads come in a later patch (the lab road is for Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan).
+
+## 0.7.417: Three powered roads, and Start Together
+- Andy's picks (`docs/NewRoads-Plan.md`, patches 3b and 4c): three starts in the existing pattern (`LifeStory.Start`, a `ROAD`
+  answer with a vanilla icon, a `begin` case, `TERMS`, `.name`/`.tale`/`.short`/`.wake`/message lang, three `met.*` lines, a
+  `LifeStoryScreen.BACKDROPS` colour, a `StoryFigure` scene).
+- **Escaped the alchemist's lab** (`LAB`, Very Hard, needs Powers): `PowersCompat.labEscape` builds the lab, gives the mark and wakes
+  the golems; the wild if it can't. Only for the Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan (`LAB_KINDS`): the card
+  is greyed with the reason, and the server re-checks. `Answer.onlyFor()` now returns the set of heritages a road is for (empty: any;
+  Verdant, Demon and Cast Out keep their one), and `Answer.fits(kind)` is the check every caller uses. Bread only.
+- **Fresh off the bench** (`ANDROID`, Hard, needs Powers): `PowersCompat.androidStart` (workshop, finished android, the note); the wild if
+  it can't. Echoes the Z Fighter calling (`echo`).
+- **The moon's mark** (`MOON_CURSED`, Hard): a wild landing, or half the time the edge of a village (`MOON_CURSED_VILLAGE_MIN`-`MAX`),
+  and `MoonCurse.curse`. The lang only hints at it.
+- **Start Together**: party members (`Parties.members`) who take the same road (and the same realm, for a road that names one) wake
+  beside each other. The road's landing is kept in memory (`LANDINGS`); a mate who landed within `TOGETHER_WINDOW_TICKS` (10 minutes)
+  and is online is the one you wake `TOGETHER_MIN`-`TOGETHER_MAX` (2-5) blocks from (`beside`, looking a few blocks up and down so a
+  cave works). Chained: the same camp, next to their shackle. Captive: the same camp. Sentenced: the same cell, a step from them
+  (`StoryHard.imprison(..., beside)`). Hideout: the same den, a step off. Village: the village they woke in takes you in. Lab and
+  Android: stood beside them first so Powers raises your lab or workshop in the same stretch of country (it builds its own room). The
+  other worlds' starts: by them if Powers sets you down in their world. Not shared: Lost in Time and the Whalers (Powers' and the
+  harbour's own placing). The road page shows "<name> took this road; you'll wake beside them" (`LifeStory.Open.mates`).
