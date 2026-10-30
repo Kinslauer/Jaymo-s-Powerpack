@@ -451,6 +451,8 @@ public final class Forms {
 		practice.merge(formId, amount, Integer::sum);
 		Book after = before.with(practice);
 		player.setAttached(BOOK, after);
+		// (0.7.384) practice in a joined school's family is standing there
+		Schools.practiced(player, form.family(), amount);
 		if (after.rank(formId) > before.rank(formId)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.rank", form.name(), after.rank(formId)).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.8F);

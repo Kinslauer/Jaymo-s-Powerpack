@@ -259,9 +259,23 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.forms.Schools.ANSWER.equals(answer)) {
+			// (0.7.384) a school master: join, a lesson, or how you stand (Weapon Forms)
+			com.jaymoskingdoms.forms.Schools.talk(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.forms.Duels.ANSWER.equals(answer)) {
 			// (0.7.385) a student (or a master) takes up an honour duel, or is challenged to one
 			com.jaymoskingdoms.forms.Duels.offer(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.forms.WizardTrials.ANSWER.equals(answer)) {
+			// (0.7.384) a court wizard sets today's trial (Weapon Forms)
+			com.jaymoskingdoms.forms.WizardTrials.offer(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;

@@ -108,6 +108,14 @@ abstract class McaAnswersMixin {
 			// (0.7.381) only a veteran guard sets drills
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.GuardDrills.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.Schools.canTalk(player, villager)) {
+			// (0.7.384) only a school master talks of the school
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Schools.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.WizardTrials.canOffer(player, villager)) {
+			// (0.7.384) only a court wizard (or a realm's necromancer) sets trials
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.WizardTrials.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.forms.Duels.canOffer(player, villager)) {
 			// (0.7.385) only a student of a school, or its master, fights an honour duel
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Duels.ANSWER);

@@ -70,6 +70,8 @@ final class Buildings {
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
 			realm(type, "barracks", Buildings::barracks, 1, 32);
+			// (0.7.384) the school's hall, its master at the middle ({@link SchoolHalls}; Weapon Forms)
+			realm(type, "training_hall", JobHalls::trainingHall, 1, 34);
 			realm(type, "house", Buildings::house, 7, 36);
 			town(type, "wall", Buildings::wall, 12, 40);
 			town(type, "tower", Buildings::tower, 4, 40);
