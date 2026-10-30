@@ -4174,3 +4174,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 
 - **0.18.67 (Kingdoms 0.7.401):** the Piglin King's arm (see the Kingdoms MODLOG), and Sora's Dagger turned the other
   quarter (Andy: "turned the wrong way"): the edge leads and the serrated spine trails.
+  The musket is a fifth larger and, in first person, held level at the hip, barrel forward; holding it ready to fire
+  brings it up to the eye with the front sight on the crosshair (Andy: "it should come up for a proper sight picture";
+  `client/armory/MusketSights`, `MusketSightsMixin`: no bow pose for it, slid hip to sights over 4 ticks). It's on
+  First-person Model's vanilla-hands list like TaCZ's guns, so the body no longer holds it pointed at the ground.
