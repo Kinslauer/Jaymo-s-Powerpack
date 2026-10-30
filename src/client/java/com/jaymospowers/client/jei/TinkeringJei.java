@@ -124,7 +124,7 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addRecipes(CASTING_BASIN, basin());
 		registration.addRecipes(MELTING, melting);
 		registration.addRecipes(ALLOYING, alloying(melts));
-		// (0.18.54) the far worlds' routes: the field anvil, and each world's first metal
+		// (0.18.55) the far worlds' routes: the field anvil, and each world's first metal
 		registration.addIngredientInfo(com.jaymospowers.power.zfighter.farworld.FarWorlds.FIELD_ANVIL, Component.translatable("jei.jaymospowers.field_anvil"));
 		for (com.jaymospowers.power.zfighter.farworld.FarWorld world : com.jaymospowers.power.zfighter.farworld.FarWorld.values()) {
 			registration.addIngredientInfo(world.ingot(), Component.translatable("jei.jaymospowers.first_metal." + world.molten.id));
@@ -272,7 +272,7 @@ public final class TinkeringJei implements IModPlugin {
 				for (PartType part : kind.assembly().parts) {
 					inputs.add(anyMaterial.get(part));
 				}
-				// (0.18.49) a plain item beside the head: the Sealed Helm's glass block
+				// (0.18.50) a plain item beside the head: the Sealed Helm's glass block
 				if (kind.assembly().extra != null) {
 					inputs.add(List.of(new ItemStack(kind.assembly().extra)));
 				}

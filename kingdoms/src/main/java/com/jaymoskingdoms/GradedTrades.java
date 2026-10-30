@@ -91,7 +91,7 @@ public final class GradedTrades {
 		for (MerchantOffer offer : v.getOffers()) {
 			ItemStack result = offer.getResult();
 			if (offer.getUses() == 0 && gear(result)) {
-				// (0.7.381) and never above the grade the buyer's world tier allows (TierGate)
+				// (0.7.383) and never above the grade the buyer's world tier allows (TierGate)
 				result.set(type, GRADES[Math.min(roll(rep, draw(player.getUUID(), v.getUUID(), index)), TierGate.maxGrade(player))]);
 			}
 			index++;

@@ -6839,7 +6839,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
-## 0.7.381, the ladder (SevTech picks) (pack 0.18.51)
+## 0.7.382: a shorter Valor screen
+- Before it wakes, the Valor page only says "Your Valor hasn't woken."
+- Once woken, the left column shows only its origin and its look (quirk, soul colour and King's Valor lines removed).
+- The Feats heading had borrowed the long "how to wake it" line and slid it across the right side; it now reads "Feats".
+## 0.7.383, the ladder (SevTech picks) (pack 0.18.52)
 - Andy picked the SevTech ladder: one system for the world tiers, in four parts.
 - **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED
   (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
@@ -6866,7 +6870,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
   Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
   JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
-## 0.7.382: stargazers and sky tidings (SevTech picks) (pack 0.18.52)
+## 0.7.384: stargazers and sky tidings (SevTech picks) (pack 0.18.53)
 - Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
   "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen
   (`ZFighterFolk.ask`): a few words about the sky and the charts the player hasn't read, cheapest trip first, for emeralds (6, and 4
@@ -6879,7 +6883,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   a stranger seen at dusk. Read from Powers' pod tags (`jaymospowers.raider`, `jaymospowers.patrol_pod`) on the pod entity.
 - Compile-checked; not seen in game.
 
-## 0.7.383: who flies (SevTech picks) (pack 0.18.53)
+## 0.7.385: who flies (SevTech picks) (pack 0.18.54)
 - **Landing Yard** (`LandingYard`): a kingdom's or fiefdom's builders put up a yard (15 x 19; a settlement of 34 or more) of
   stone-brick paving round a copper beacon post, with 4 to 9 pads (`PADS_MIN`/`PADS_MAX`, by the variant) of smooth stone cornered
   in waxed cut copper. No recipe and no new block: a build, in the growth order (`Blueprint.register`). The pads are found again
@@ -6905,7 +6909,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   from the poster that names the world, once anyone on has Dread. Goods: the six first metals (looked for under a few ids until Track
   5 names them), Rustfall plate, Glacia ice glass, Cinder bell alloy, Cinder Ember, Glacia salt (Kitchen's salt).
 - A life story's job lean never draws Pilot or Prospector. Compile-checked; not seen in game.
-## 0.7.384: star-touched foes (SevTech picks) (pack 0.18.54)
+## 0.7.386: star-touched foes (SevTech picks) (pack 0.18.55)
 - On Jaymo's Powers' six far worlds (the Pale Moon, Rustfall, Glacia, Cinder, the Maw, the Verdant World, found by their
   dimension's name; Powers is never compiled against), `StarTouched` marks about three in ten hostile mobs (`STAR_CHANCE`, rolled
   once when the mob first loads, saved as `star_touched`) as star-touched: `MonsterGear.starLook` dyes a leather piece into each

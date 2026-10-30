@@ -5,7 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.18.53, Andy's SevTech picks: the Prospector career) The far worlds' first finds, for whoever needs to hear of them. The
+ * (0.18.54, Andy's SevTech picks: the Prospector career) The far worlds' first finds, for whoever needs to hear of them. The
  * world's ore code (Track 5, "Prospecting First") calls {@link #found} when a player reveals an ore kind for the first time
  * on a world, and when they knap a world's first metal; Jaymo's Kingdoms' Prospector career is one listener (added here, through
  * {@link ZFighterKingdoms}), and counts each kind once per world per player itself. Anything else may add a listener to

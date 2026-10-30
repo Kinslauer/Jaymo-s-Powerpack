@@ -54,7 +54,7 @@ import net.minecraft.world.level.material.PushReaction;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.54, SevTech: far worlds restart the stone age) On the six far worlds the ground starts again from the flint days.
+ * (0.18.55, SevTech: far worlds restart the stone age) On the six far worlds the ground starts again from the flint days.
  * <ul>
  * <li><b>Prospecting First</b>: ore there is swapped, the first time its chunk loads, for a {@link VeiledOreBlock} that looks like the
  * stone round it. A pick tapped on any block there shows the ore within {@link #TAP_RADIUS}; a read chart of the world shows the ore

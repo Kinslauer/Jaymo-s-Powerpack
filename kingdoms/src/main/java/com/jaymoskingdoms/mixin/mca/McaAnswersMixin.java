@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * ship's crew ({@link ShipTalk}).
  * (0.7.319) "Talk about work" also shows on Powers' Z Fighter characters ({@link com.jaymoskingdoms.ZFighterFolk}); "Talk
  * about training" only on a Z Fighter master.
- * (0.7.382) "Ask about the stars" ({@link com.jaymoskingdoms.StarFolk#ANSWER}) shows only on a hermit or a stargazer.
+ * (0.7.384) "Ask about the stars" ({@link com.jaymoskingdoms.StarFolk#ANSWER}) shows only on a hermit or a stargazer.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up; (0.7.380) only the one for the latest of it ({@link SharedHistory#current}).
@@ -73,7 +73,7 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.StarFolk.canAsk(villager)) {
-			// (0.7.382) only a floating island's hermit or a stargazer talks of the stars (and sells their charts)
+			// (0.7.384) only a floating island's hermit or a stargazer talks of the stars (and sells their charts)
 			cir.getReturnValue().remove(com.jaymoskingdoms.StarFolk.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.ManaFolk.canAsk(villager)) {

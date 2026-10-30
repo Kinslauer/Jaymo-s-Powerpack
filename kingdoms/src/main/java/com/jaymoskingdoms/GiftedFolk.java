@@ -79,7 +79,7 @@ public final class GiftedFolk {
 	static final float OPEN_BRASH = 0.6F, OPEN_BOLD = 0.3F, OPEN_REST = 0.08F, OPEN_MASTER = 0.25F;
 	/** A player this many hearts warm with them is a friend (hidden from); a villager who thinks this well of them too. */
 	static final int FRIEND_HEARTS = 40, FRIEND_REGARD = 40;
-	/** (0.7.382) One villager in this many is a stargazer ({@link StarFolk}): weighed once, tagged {@code STARS_ROLLED}, then {@link StarFolk#STARGAZER}. */
+	/** (0.7.384) One villager in this many is a stargazer ({@link StarFolk}): weighed once, tagged {@code STARS_ROLLED}, then {@link StarFolk#STARGAZER}. */
 	static final int STARGAZER_ODDS = 12;
 	static final String STARS_ROLLED = "jaymoskingdoms_stars_rolled";
 	/** Tagged once a gift's ways are weighed (master, open), for the gifted of a world from before them. */
@@ -303,7 +303,7 @@ public final class GiftedFolk {
 		}
 	}
 
-	/** (0.7.382) A grown MCA villager is weighed once for stargazing: about one in {@link #STARGAZER_ODDS} watches the sky and sells star charts. */
+	/** (0.7.384) A grown MCA villager is weighed once for stargazing: about one in {@link #STARGAZER_ODDS} watches the sky and sells star charts. */
 	static void stargaze(ServerLevel level, PathfinderMob mob) {
 		if (mob.isBaby() || mob.entityTags().contains(STARS_ROLLED) || !McaCompat.isMca(mob) || ZFighterFolk.is(mob)) {
 			return;

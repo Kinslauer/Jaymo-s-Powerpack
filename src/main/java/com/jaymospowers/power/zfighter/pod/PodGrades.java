@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.50, Andy's SevTech picks: "Mended Better" and "One Part Per World") A pod can be mended past the way it was built.
+ * (0.18.51, Andy's SevTech picks: "Mended Better" and "One Part Per World") A pod can be mended past the way it was built.
  * Each grade needs a part only one far world gives, taken from the planet's mission prize ({@code ZFighterSpaceMissions}):
  * grade I the Rustfall plate, II the Glacia ice-glass, III the Cinder bell alloy. Sneak and use the next one on a
  * finished pod ({@link #tryGrade}). What a grade is worth is in the constants: I, a trip that burns {@link #DISCOUNT_FROM} or

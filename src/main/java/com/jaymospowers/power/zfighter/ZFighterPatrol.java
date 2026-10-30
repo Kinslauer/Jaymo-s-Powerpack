@@ -111,7 +111,7 @@ public final class ZFighterPatrol {
 	/** The arrests each rank needs: Rookie, Officer, Sergeant, Inspector, Commander. */
 	static final int[] RANKS = {0, 3, 8, 15, 25};
 	/**
-	 * (0.18.53, "Ranks Follow Rungs") The world tier (0 Hearth ... 4 Legend) each rank needs open through Kingdoms' deeds as well as
+	 * (0.18.54, "Ranks Follow Rungs") The world tier (0 Hearth ... 4 Legend) each rank needs open through Kingdoms' deeds as well as
 	 * its arrests: Rookie Borderlands, Officer (the Patrolman) Wildlands, Sergeant and Inspector Dread, Commander Legend. Without
 	 * Kingdoms the Patrol goes by power and arrests alone.
 	 */
@@ -299,7 +299,7 @@ public final class ZFighterPatrol {
 	/** A patrolman's pod starts down over open ground by {@code seat}; true if a spot was found. */
 	static boolean arrive(ServerLevel level, BlockPos seat, int name) {
 		RandomSource random = level.getRandom();
-		// (0.18.53) a landing yard within reach: down on a free pad, and the town named for it
+		// (0.18.54) a landing yard within reach: down on a free pad, and the town named for it
 		BlockPos pad = ZFighterYard.freePad(level, seat);
 		if (pad != null) {
 			land(level, pad, name, f -> {
@@ -343,7 +343,7 @@ public final class ZFighterPatrol {
 		level.playSound(null, pod.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.5F);
 	}
 
-	/** A pod nobody can take (0.18.48: a complete pod entity, locked by {@link #POD_TAG}). */
+	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
 	static PodEntity pod(ServerLevel level, Vec3 at) {
 		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
 		pod.addTag(POD_TAG);
@@ -517,7 +517,7 @@ public final class ZFighterPatrol {
 					ZFighterNpcs.ask(player, man, line("not_yet", NOT_YET_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 					return;
 				}
-				// (0.18.53) power is not enough: a Rookie has the first deed (Borderlands) behind them
+				// (0.18.54) power is not enough: a Rookie has the first deed (Borderlands) behind them
 				int tier = ZFighterKingdoms.openTier(player);
 				if (tier >= 0 && tier < RANK_TIER[0]) {
 					ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.deeds"),
@@ -554,7 +554,7 @@ public final class ZFighterPatrol {
 	private static Component story(LivingEntity man) {
 		int told = man.getAttachedOrElse(TOLD, 0);
 		if ((told & YARD_STORY_BIT) == 0 && man.level() instanceof ServerLevel here) {
-			// (0.18.53) a landing yard near: the town is a stop he names
+			// (0.18.54) a landing yard near: the town is a stop he names
 			String town = ZFighterKingdoms.yardName(here, man.blockPosition(), ZFighterYard.RANGE);
 			if (!town.isEmpty()) {
 				man.setAttached(TOLD, told | YARD_STORY_BIT);
@@ -583,10 +583,10 @@ public final class ZFighterPatrol {
 	static void join(ServerPlayer player) {
 		player.setAttached(MEMBER, new Member(0, 0L));
 		ServerLevel level = player.level();
-		// (0.18.48) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
+		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
 		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
 		ZFighterSagas.give(player, new ItemStack(LICENSE));
-		// (0.18.52) and the chart of Rustfall, where the Patrol's work is
+		// (0.18.53) and the chart of Rustfall, where the Patrol's work is
 		ZFighterSagas.give(player, com.jaymospowers.power.zfighter.sky.Charts.stack(ZFighterSpace.RUSTFALL));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
@@ -753,7 +753,7 @@ public final class ZFighterPatrol {
 			.withStyle(ChatFormatting.AQUA));
 		int rank = rank(owner, now.arrests());
 		if (rank(now.arrests()) > rank(member.arrests()) && rank <= was) {
-			// (0.18.53) the arrests are enough for the next rank; the deeds are not
+			// (0.18.54) the arrests are enough for the next rank; the deeds are not
 			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.held_back", rankName(rank(now.arrests()))).withStyle(ChatFormatting.GRAY));
 		}
 		if (rank > was) {
@@ -762,7 +762,7 @@ public final class ZFighterPatrol {
 		}
 	}
 
-	// ---------------------------------------------------------------- (0.18.54) the skip writ (farworld/PatrolWrit)
+	// ---------------------------------------------------------------- (0.18.55) the skip writ (farworld/PatrolWrit)
 
 	/** The rank an officer needs to be given a skip writ: Sergeant (the index into {@link #RANKS}). */
 	public static final int WRIT_RANK = 2;

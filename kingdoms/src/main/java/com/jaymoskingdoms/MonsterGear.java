@@ -49,7 +49,7 @@ public final class MonsterGear {
 	static final float RARE_ENCHANT_CHANCE = 0.3F;
 	static final int RARE_ENCHANT_LEVEL = 12, LEGENDARY_ENCHANT_LEVEL = 25;
 
-	/** (0.7.384) How often a star-touched mob that wears armour takes each empty slot's dyed piece. */
+	/** (0.7.386) How often a star-touched mob that wears armour takes each empty slot's dyed piece. */
 	static final float STAR_PIECE_CHANCE = 0.75F;
 
 	/** Per grade: helmet, chestplate, leggings, boots. */
@@ -138,7 +138,7 @@ public final class MonsterGear {
 	}
 
 	/**
-	 * (0.7.384) A star-touched mob's look ({@link StarTouched}): where it wears armour, each empty slot takes a leather piece dyed
+	 * (0.7.386) A star-touched mob's look ({@link StarTouched}): where it wears armour, each empty slot takes a leather piece dyed
 	 * {@code colour} (never dropped); the rest show it by their motes of light.
 	 */
 	static void starLook(Mob mob, int colour) {

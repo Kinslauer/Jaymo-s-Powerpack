@@ -314,7 +314,7 @@ public final class ZFighterSpaceMissions {
 		}
 	}
 
-	// ---------------------------------------------------------------- (0.18.54) the patrol's skip writ
+	// ---------------------------------------------------------------- (0.18.55) the patrol's skip writ
 
 	/** Whether {@code player} is freeing the planet he stands on and still has its captains to face (the writ's case). */
 	public static boolean captainsAhead(ServerPlayer player) {
@@ -638,7 +638,7 @@ public final class ZFighterSpaceMissions {
 		for (int i = 0; i < info.items().length; i++) {
 			ZFighterSagas.give(player, new ItemStack(info.items()[i], Math.max(1, Math.round(info.counts()[i] * ore))));
 		}
-		// (0.18.50) the first time a world is settled it also gives the one part only it has, for mending a pod better
+		// (0.18.51) the first time a world is settled it also gives the one part only it has, for mending a pod better
 		Item worldPart = firstTime ? com.jaymospowers.power.zfighter.pod.PodGrades.worldPart(info.key()) : null;
 		if (worldPart != null) {
 			ZFighterSagas.give(player, new ItemStack(worldPart));
