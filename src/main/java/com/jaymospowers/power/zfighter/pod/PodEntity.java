@@ -54,7 +54,7 @@ public class PodEntity extends Entity {
 	static final EntityDataAccessor<Integer> FILLED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> DAMAGED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> FUEL = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
-	/** (0.18.49) The grade of the fuel in the tank (0 = put in before grades; see {@code PodFuel}). */
+	/** (0.18.50) The grade of the fuel in the tank (0 = put in before grades; see {@code PodFuel}). */
 	static final EntityDataAccessor<Integer> FUEL_GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 
 	// ---- tuning ----
@@ -369,7 +369,7 @@ public class PodEntity extends Entity {
 		entityData.set(FUEL, Mth.clamp(fuel, 0, ZFighterSpace.MAX_FUEL));
 	}
 
-	/** (0.18.49) The stored grade of the fuel in the tank; read it through {@code PodFuel.effective}. */
+	/** (0.18.50) The stored grade of the fuel in the tank; read it through {@code PodFuel.effective}. */
 	public int fuelGrade() {
 		return entityData.get(FUEL_GRADE);
 	}

@@ -93,7 +93,7 @@ public final class ZFighterPodTrip {
 		final int dest;
 		final int fuelLeft;
 		final int fuelBefore;
-		/** (0.18.49) The grade of the fuel in the tank, carried to the pod that lands. */
+		/** (0.18.50) The grade of the fuel in the tank, carried to the pod that lands. */
 		int fuelGrade;
 		final ResourceKey<Level> from;
 		final BlockPos origin;
