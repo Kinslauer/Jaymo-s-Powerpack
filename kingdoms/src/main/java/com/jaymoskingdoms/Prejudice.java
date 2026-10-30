@@ -165,6 +165,11 @@ public final class Prejudice {
 		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) || StoryHomes.takenIn(who, whom)) {
 			return 0.0F;
 		}
+		// ((0.7.412) a cast-out start: their own kind turn them away for the first days, StoryHard)
+		float cast = StoryHard.castOutMinds(who, whom);
+		if (cast > 0.0F) {
+			return cast;
+		}
 		Heritage.Kind mine = VillagerHeritage.of(who), theirs = Purists.of(whom);
 		if (mine == null || theirs == null && !(whom instanceof Player) || mine == theirs) {
 			// (no blood to mind, or their own)
@@ -260,8 +265,8 @@ public final class Prejudice {
 		}
 		float m;
 		if (Havens.is(player.level().getServer(), kingdom)) {
-			// (a haven: a human is the outsider, and their own kind are welcome)
-			if (d > 0) {
+			// (a haven: a human is the outsider, and their own kind are welcome; (0.7.412) not one who's been cast out by them)
+			if (d > 0 && !StoryHard.castOutActive(player)) {
 				return by;
 			}
 			m = HAVEN_RIVALRY;

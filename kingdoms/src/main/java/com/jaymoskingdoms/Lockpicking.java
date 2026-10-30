@@ -150,6 +150,8 @@ public final class Lockpicking {
 
 	/** Player → the lock they're picking. */
 	private static final Map<UUID, BlockPos> PICKING = new HashMap<>();
+	/** (0.7.412) Player → what happens when the lock they're picking is no container's but a story's (a shackle, a cell door): see {@link #pickVirtual}. */
+	private static final Map<UUID, Runnable> VIRTUAL = new HashMap<>();
 
 	private Lockpicking() {
 	}
@@ -161,8 +163,14 @@ public final class Lockpicking {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Result.TYPE, Result.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Result.TYPE, (payload, context) -> result(context.player(), payload));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> PICKING.remove(handler.getPlayer().getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> PICKING.clear());
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			PICKING.remove(handler.getPlayer().getUUID());
+			VIRTUAL.remove(handler.getPlayer().getUUID());
+		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			PICKING.clear();
+			VIRTUAL.clear();
+		});
 		UseBlockCallback.EVENT.register(Lockpicking::use);
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
 			if (level.isClientSide() || player.isCreative() || !(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
@@ -208,6 +216,7 @@ public final class Lockpicking {
 		if (!ServerPlayNetworking.canSend(sp, Open.TYPE)) {
 			return InteractionResult.FAIL;
 		}
+		VIRTUAL.remove(sp.getUUID());
 		PICKING.put(sp.getUUID(), lockPos);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
@@ -227,6 +236,12 @@ public final class Lockpicking {
 		ServerLevel level = player.level();
 		if (player.distanceToSqr(Vec3.atCenterOf(pos)) > REACH * REACH) {
 			PICKING.remove(player.getUUID());
+			VIRTUAL.remove(player.getUUID());
+			return;
+		}
+		Runnable virtual = VIRTUAL.get(player.getUUID());
+		if (virtual != null) {
+			virtualResult(player, result, pos, virtual);
 			return;
 		}
 		Lock lock = lockOf(level, pos);
@@ -258,6 +273,52 @@ public final class Lockpicking {
 				state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
 			}
 			default -> PICKING.remove(player.getUUID());
+		}
+	}
+
+	/**
+	 * (0.7.412) A lock that is no container's: a story's shackle or cell door, picked with the same Pin game on the lock at
+	 * {@code at} (the pick's reach is measured from there). {@code picked} runs once the game is won. False if they've no
+	 * lockpick (or can't play it): nothing opens.
+	 */
+	public static boolean pickVirtual(ServerPlayer sp, BlockPos at, int level, long seed, Runnable picked) {
+		int picks = sp.getInventory().countItem(LOCKPICK);
+		if (picks == 0 || !ServerPlayNetworking.canSend(sp, Open.TYPE)) {
+			return false;
+		}
+		VIRTUAL.put(sp.getUUID(), picked);
+		PICKING.put(sp.getUUID(), at);
+		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
+		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess);
+		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
+		ServerPlayNetworking.send(sp, new Open(at, Kind.PIN.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
+			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
+		return true;
+	}
+
+	/** (0.7.412) How a try at a story's lock went: a snapped pick is used up, a won game runs {@code picked}. */
+	private static void virtualResult(ServerPlayer player, Result result, BlockPos pos, Runnable picked) {
+		ServerLevel level = player.level();
+		switch (result.outcome()) {
+			case Result.SNAPPED -> {
+				if (!usePick(player)) {
+					PICKING.remove(player.getUUID());
+					VIRTUAL.remove(player.getUUID());
+				}
+				level.playSound(null, pos, SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.7F, 1.6F);
+			}
+			case Result.PICKED -> {
+				PICKING.remove(player.getUUID());
+				VIRTUAL.remove(player.getUUID());
+				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
+				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL);
+				picked.run();
+			}
+			default -> {
+				PICKING.remove(player.getUUID());
+				VIRTUAL.remove(player.getUUID());
+			}
 		}
 	}
 
