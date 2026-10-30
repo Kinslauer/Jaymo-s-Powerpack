@@ -4225,3 +4225,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   knuckle bow, wrapped grip, gold pommel. Its five textures share the project's 64x64 UV space and are merged into one
   atlas; the model is turned a quarter so the blade's flat faces like a sword sprite's, and `display()` puts the grip in
   the fist like the Armory's other 3D blades. The other sabers keep their sprites. Not seen in game.
+- **0.18.79, mannequins no longer kick TaCZ clients:** Andy: "bad crash just then". Every client in sight of a mannequin was
+  dropped with "Network Protocol Error": TaCZ registers its player-animation layers for every Avatar and its rotation
+  layer casts the avatar to Player, and a 26.3 mannequin (the Practice Dummy, sparring partners, afterimages, or one
+  anyone places) is not one. `client/mixin/tacz/TaczMannequinAnimMixin` hands a non-player avatar the plain controller
+  instead. Client-side only: the server needs no restart for it. Compile-checked; not seen in game.

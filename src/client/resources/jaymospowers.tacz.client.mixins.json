@@ -3,7 +3,8 @@
 	"package": "com.jaymospowers.client.mixin.tacz",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"TaczMuzzleFlashMixin"
+		"TaczMuzzleFlashMixin",
+		"TaczMannequinAnimMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0
