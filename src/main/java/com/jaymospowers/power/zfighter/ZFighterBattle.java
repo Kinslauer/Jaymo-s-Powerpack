@@ -236,6 +236,7 @@ final class ZFighterBattle {
 			return damage;
 		}
 		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE)) {
+			damage = ZFighterGuard.counter(player, source, damage);
 			damage = weaponBlow(player, source, damage);
 			damage = grudge(player, victim) ? damage * (1.0F + FOE_BONUS) : damage;
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK) && !ZFighterLineage.ape(player)) {

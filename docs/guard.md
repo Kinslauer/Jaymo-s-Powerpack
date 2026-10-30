@@ -79,25 +79,20 @@ Andy: "All guns should red glint too, all sailors should have at least one flint
 9. A pirate or musketeer glints red with a click before each shot; a raised sword blocks the ball but never parries it.
 10. Every ship's crew who fight draw a flintlock; some fire two or three in a row before reloading.
 
-## One parry for everything that blocks (Powers 0.18.24)
+## One timing bar for everything that blocks (Powers 0.18.24)
 Andy (2026-10-30): "make the parry meter consistent across all weapons/ powers that block, including z fighters and
-darktide".
+darktide", then, on their own windows: "yeah keep that but give a bar that represents their timings".
 
-Before: weapons and shields used `Guard` (perfect 0-5 / parry 6-12 ticks, lock-on bonus, mashing rule, unparryable
-red blows, timing bar). Z Fighter's crossed arms and Darktide's guard each had their own single 8-tick window, a 20-tick
-cooldown after a parry, their own stun/shove/counter, no timing bar, and they parried red heavy blows and gunshots.
-
-Now `combat/Guard` is the one parry:
-- A power's guard calls `Guard.powerRaised` / `powerLowered` when it goes up and down, asks `Guard.timing(...)` what a blow
-  meets (BLOCK, PARRY or PERFECT), and answers a parry with `Guard.parried(...)`: the same windows, lock-on bonus,
-  mashing rule, unparryable blows and shots, the same stun, shove, riposte (1.5x / 1.25x on your next blow), perfect-parry
-  feathers and the same sparks, ring and bar flash.
-- Each power adds only its flavour: Z Fighter +10 ki and poise wear; Darktide +8 Flow, the next R empowered, the katana's
-  instant slash on humanoids and the blade's reflect. Blocking (what isn't parried) still costs each its own resource
-  (feathers, ki, Flow) and breaks its own way.
-- `GuardClient`'s timing bar draws for all three, from the server's raise (`Guard.SHOWN`, owner only); a raise too eager
-  to parry shows grey only.
-- Darktide's Gedan stance keeps its own hold-to-parry, but flashes the bar and counts as a parry.
+- Weapons and shields keep `Guard` as before (perfect 0-5 / parry 6-12 ticks, lock-on bonus, mashing rule, red blows and
+  shots unparryable). Their bar now also turns grey-only when the raise is too eager to parry.
+- Z Fighter's crossed arms and Darktide's guard keep their own parry: one 8-tick window from the raise, a 20-tick
+  cooldown after a parry, red heavy blows parried too, and their own outcomes (ki/poise; Flow, empowered R, katana
+  riposte, reflect).
+- The same bar under the crosshair now draws for them, from their own timings: their window in gold, grey while the
+  parry is still cooling down, the red notch moving along it. They call `Guard.showPower(player, start, window, readyAt)`
+  when the guard goes up and after a parry, and `Guard.hidePower` when it comes down; the server syncs it to the owner as
+  `Guard.SHOWN`.
+- Every parry flashes the bar the same way (`Guard.cue`), Darktide's Gedan stance included.
 - `Guard.PARRIED` (Fabric event: player, attacker, perfect) fires for every parry of any kind, for drills and quests.
 - Not changed: Chrono's Time Flow counters (a held blow answered by right click, not a guard), mobs' own parries
   (Kingdoms `MobParry`), Wind/Gravity projectile deflects, mana spirits' parries.

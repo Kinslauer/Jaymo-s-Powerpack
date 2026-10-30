@@ -84,11 +84,9 @@ import org.jspecify.annotations.Nullable;
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  * <p>
  * (0.18.24) Andy: "make the parry meter consistent across all weapons/ powers that block, including z fighters and
- * darktide". This is now the one parry for everything that blocks. A power's guard tells it when it goes up and down
- * ({@link #powerRaised}, {@link #powerLowered}), asks it what a blow meets ({@link #timing}) and lets it answer a parry
- * ({@link #parried}): the same windows, lock-on bonus, mashing rule and unparryable blows, the same stun, shove, riposte
- * and cue, and the same timing bar ({@link #SHOWN}). The power adds only its own flavour on top (ki, Flow, the katana's
- * slash). Every parry, any kind, fires {@link #PARRIED}.
+ * darktide", then "keep [their own windows] but give a bar that represents their timings". The powers' guards keep their
+ * own parry (one window, a cooldown after a parry, red blows parried too), but show the same timing bar
+ * ({@link #showPower}, {@link #SHOWN}) and the same flash ({@link #cue}). Every parry, any kind, fires {@link #PARRIED}.
  */
 public final class Guard {
 	/** A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry. */
@@ -148,11 +146,17 @@ public final class Guard {
 		}
 	});
 
-	/** (0.18.24) The guard's raise, for the owner's timing bar: when it went up, and whether it was too eager to parry. */
-	public record Shown(long start, boolean eager) {
+	/**
+	 * (0.18.24) The guard's raise, for the owner's timing bar: when it went up and whether it was too eager to parry; for a
+	 * power's own guard, its single parry {@code window} (ticks from the raise; 0 for a weapon or shield, which use this
+	 * class's windows) and when its parry is ready again after the last one ({@code readyAt}, game time).
+	 */
+	public record Shown(long start, boolean eager, int window, long readyAt) {
 		public static final StreamCodec<ByteBuf, Shown> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Shown::start,
 			ByteBufCodecs.BOOL, Shown::eager,
+			ByteBufCodecs.VAR_INT, Shown::window,
+			ByteBufCodecs.VAR_LONG, Shown::readyAt,
 			Shown::new);
 	}
 
@@ -171,13 +175,10 @@ public final class Guard {
 		}
 	}
 
-	/**
-	 * One player's raises: when the current one started, whether it's up, whether it parried, whether it was too eager,
-	 * and whether it's a power's guard (raised and lowered by the power, not by the item in use).
-	 */
+	/** One player's raises: when the current one started, whether it's up, whether it parried, whether it was too eager. */
 	private static final class Raise {
 		long start = Long.MIN_VALUE / 2;
-		boolean up, parried, eager, power;
+		boolean up, parried, eager;
 	}
 
 	/** A riposte owed: on whom, until when, how much harder. */
@@ -205,10 +206,9 @@ public final class Guard {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				boolean up = raised(player);
 				Raise raise = RAISES.get(player.getUUID());
-				// a power's guard is raised and lowered by the power; an item raised takes over from it
-				if (up && (raise == null || !raise.up || raise.power)) {
+				if (up && (raise == null || !raise.up)) {
 					raise(player);
-				} else if (!up && raise != null && raise.up && !raise.power) {
+				} else if (!up && raise != null && raise.up) {
 					raise.up = false;
 					player.removeAttached(SHOWN);
 				}
@@ -283,35 +283,26 @@ public final class Guard {
 		raise.start = now;
 		raise.parried = false;
 		raise.up = true;
-		raise.power = false;
-		player.setAttached(SHOWN, new Shown(now, raise.eager));
+		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L));
 		return raise;
 	}
 
-	/** (0.18.24) A power's own guard went up (a Z Fighter's crossed arms, Darktide's guard): its parry windows start now. */
-	public static void powerRaised(ServerPlayer player) {
-		raise(player).power = true;
+	/**
+	 * (0.18.24) A power's own guard (a Z Fighter's crossed arms, Darktide's) is up: the owner's bar shows its own timing,
+	 * one parry window of {@code window} ticks from {@code start}, closed until {@code readyAt}. Call again when a parry
+	 * moves {@code readyAt}.
+	 */
+	public static void showPower(ServerPlayer player, long start, int window, long readyAt) {
+		player.setAttached(SHOWN, new Shown(start, false, window, readyAt));
 	}
 
-	/** (0.18.24) A power's own guard came down (let go, broken, the power gone). */
-	public static void powerLowered(ServerPlayer player) {
-		Raise raise = RAISES.get(player.getUUID());
-		if (raise != null && raise.power) {
-			raise.up = false;
-			raise.power = false;
-			player.removeAttached(SHOWN);
-		}
-	}
-
-	/** (0.18.24) How long a power's guard has been up (ticks), or -1 when none is. */
-	public static int powerHeld(ServerPlayer player) {
-		Raise raise = RAISES.get(player.getUUID());
-		return raise != null && raise.up && raise.power ? (int) (player.level().getGameTime() - raise.start) : -1;
+	/** (0.18.24) A power's own guard came down. */
+	public static void hidePower(ServerPlayer player) {
+		player.removeAttached(SHOWN);
 	}
 
 	/**
-	 * (0.18.24) What a blow from {@code source} meets on {@code player}'s guard, up {@code held} ticks: the one rule for
-	 * every guard. A perfect parry in the first {@link #PERFECT_TICKS} (arrows too), a parry up to {@link #PARRY_TICKS}
+	 * (0.18.24) What a blow from {@code source} meets on {@code player}'s weapon or shield guard, up {@code held} ticks. A perfect parry in the first {@link #PERFECT_TICKS} (arrows too), a parry up to {@link #PARRY_TICKS}
 	 * (melee only), both longer against the one you're locked onto; never for a too-eager raise or an unparryable blow.
 	 */
 	public static Timing timing(ServerPlayer player, DamageSource source, int held) {
