@@ -18,6 +18,7 @@
 		"CrawlJumpMixin",
 		"ZombieFrostMixin",
 		"CrawlPlayerMixin",
+		"StanceDimensionsMixin",
 		"DismemberMobMixin",
 		"ExplosionLogMixin",
 		"DownedMobMixin",

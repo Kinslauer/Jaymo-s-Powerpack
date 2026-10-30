@@ -1,0 +1,135 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack"
+      }
+    },
+    {
+      "when": {
+        "laid": "keel",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_keel_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "keel",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_keel"
+      }
+    },
+    {
+      "when": {
+        "laid": "fin",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_fin_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "fin",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_fin"
+      }
+    },
+    {
+      "when": {
+        "laid": "bell",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_bell_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "bell",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_bell"
+      }
+    },
+    {
+      "when": {
+        "laid": "tank",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_tank_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "tank",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_tank"
+      }
+    },
+    {
+      "when": {
+        "laid": "plate",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_plate_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "plate",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_plate"
+      }
+    },
+    {
+      "when": {
+        "laid": "canopy",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_canopy_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "canopy",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_canopy"
+      }
+    },
+    {
+      "when": {
+        "laid": "mast",
+        "mended": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_mast_worn"
+      }
+    },
+    {
+      "when": {
+        "laid": "mast",
+        "mended": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/salvage_rack_mast"
+      }
+    }
+  ]
+}

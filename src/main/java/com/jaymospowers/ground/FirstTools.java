@@ -150,7 +150,8 @@ public final class FirstTools {
 
 	/** A loose rock ({@link GroundRocks}). */
 	public static boolean rock(ItemStack stack) {
-		return stack.getItem() instanceof net.minecraft.world.item.BlockItem item && GroundRocks.ROCKS.containsValue(item.getBlock());
+		return stack.getItem() instanceof net.minecraft.world.item.BlockItem item && (GroundRocks.ROCKS.containsValue(item.getBlock())
+			|| com.jaymospowers.power.zfighter.farworld.FarWorlds.ROCKS.containsValue(item.getBlock()));
 	}
 
 	/** Flint struck on a rock, at the clicked block: sparks, and sometimes a fire (or a campfire or candle lit). */

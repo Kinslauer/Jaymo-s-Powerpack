@@ -21,7 +21,7 @@ final class SimpleCategory implements IRecipeCategory<SimpleCategory.Recipe> {
 	record Recipe(List<List<ItemStack>> inputs, List<ItemStack> output, List<Component> notes) {
 	}
 
-	static final int MAX_INPUTS = 4;
+	static final int MAX_INPUTS = 5;
 	private static final int SLOT = 18, ARROW = 24, TEXT_LINE = 10, WIDTH = SLOT * MAX_INPUTS + 4 + ARROW + 4 + SLOT + 40;
 
 	private final IRecipeType<Recipe> type;

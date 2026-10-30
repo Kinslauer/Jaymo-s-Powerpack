@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:pod_mast",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:pod_mast",
+              "properties": [
+                "damaged"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/pod_mast"
+}

@@ -124,6 +124,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.forms.KnifeClient.register();
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();
+		TomeFloat.register();
 		WerewolfKey.register();
 		FrostPrisonKey.register();
 		NightGiftsClient.register();

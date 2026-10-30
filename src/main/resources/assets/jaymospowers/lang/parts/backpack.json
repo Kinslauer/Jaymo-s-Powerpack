@@ -2,7 +2,7 @@
 	"block.jaymospowers.backpack": "Backpack",
 	"item.jaymospowers.backpack.slots": "%s / %s slots used",
 	"item.jaymospowers.backpack.hint": "Right-click the air to wear it, a block to set it down. Only a strong explosion can break it.",
-	"key.jaymospowers.backpack": "Open backpack (sneak: take it off)",
+	"key.jaymospowers.backpack": "Backpack (sneak: take off)",
 	"message.jaymospowers.backpack.none": "You aren't wearing a backpack",
 	"message.jaymospowers.backpack.already": "You already wear a backpack"
 }

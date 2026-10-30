@@ -8,7 +8,7 @@
  "block.jaymospowers.rig_forge": "Rig Forge",
  "block.jaymospowers.dead_rig": "Dead Rig",
  "block.jaymospowers.fallen_rig": "Fallen Rig",
- "key.jaymospowers.rig": "Rig Active (Sneak: next active; hold: lock on)",
+ "key.jaymospowers.rig": "Rig Active (hold: lock on)",
  "tooltip.jaymospowers.rig.helm.passive": "HUD: charge, target, the Mind's warnings. Hides your face",
  "tooltip.jaymospowers.rig.helm.set": "Full set: hover, palm blast, shoulder launcher",
  "tooltip.jaymospowers.rig.core.passive": "Holds the charge and the Mind, which levels up as you fight, salvage and survive",

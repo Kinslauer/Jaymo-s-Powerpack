@@ -142,6 +142,55 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/handle_steel"
                   }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -283,6 +332,55 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_broken_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -419,6 +517,55 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/excavator/head_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_amber_bronze"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_star_metal"
                     }
                   }
                 ],
@@ -557,6 +704,55 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/grip_steel"
+                  }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_star_metal"
                   }
                 }
               ],
@@ -716,6 +912,55 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/excavator/binding_steel"
                   }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_amber_bronze"
+                  }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -860,6 +1105,55 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/handle_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1001,6 +1295,55 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_broken_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1137,6 +1480,55 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/excavator/large/head_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_amber_bronze"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_star_metal"
                 }
               }
             ],
@@ -1275,6 +1667,55 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/grip_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_star_metal"
               }
             }
           ],
@@ -1433,6 +1874,55 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/excavator/large/binding_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_amber_bronze"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_star_metal"
               }
             }
           ],

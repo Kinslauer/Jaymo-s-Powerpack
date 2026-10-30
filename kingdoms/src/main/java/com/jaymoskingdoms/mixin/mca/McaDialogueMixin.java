@@ -152,6 +152,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.StarFolk.ANSWER.equals(answer)) {
+			// (0.7.384) asked about the stars: a few words about the sky, and the star charts for sale on the talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.StarFolk.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.ManaFolk.ANSWER.equals(answer)) {
 			// (0.7.244) asked about their magic: how strong it is, and how it measures against yours
 			com.jaymoskingdoms.ManaFolk.answer(player, villager, words -> villager.sendChatMessage(words, player));
