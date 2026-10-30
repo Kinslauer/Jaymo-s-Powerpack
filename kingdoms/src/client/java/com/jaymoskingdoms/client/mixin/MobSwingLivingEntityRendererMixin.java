@@ -35,6 +35,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.ValorLook.extract(entity, state);
+		com.jaymoskingdoms.client.ValorWingsLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
 		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);

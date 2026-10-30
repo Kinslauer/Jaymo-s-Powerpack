@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.410) The coat's raised plates (Andy: "a growing scale system ... modeled off the player like bio built"): small
+ * (0.7.411) The coat's raised plates (Andy: "a growing scale system ... modeled off the player like bio built"): small
  * boxes laid on the arms the way BioForms lays its steel plates, posed with the arm as it's drawn. They cover the arm as far
  * as the rank's coat does (the hand first, the shoulder last; a pauldron at Unbroken), and when the coat goes up they grow
  * in one after another from the hand ({@link #GROW_TICKS}).

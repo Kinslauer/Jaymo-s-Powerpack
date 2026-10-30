@@ -167,6 +167,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands
 		EmberLook.register();
 		ValorLook.register();
+		ValorWingsLook.register();
 		// 0.7.79: every other heritage's look (Heartlander and Warrior-born aside)
 		HeritageLooks.register();
 		ManaClient.register();

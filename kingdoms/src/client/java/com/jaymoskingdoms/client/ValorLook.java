@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
  * <li>its rank: the hands at Spark, half the forearm, the forearm, the whole arm, and at Unbroken over the shoulders;</li>
  * <li>its {@link Valor.Bent} (Tempered on): a mark round the wrist, a bracer, crossed slashes, claw stripes, runes or a scar;</li>
  * <li>King's Valor Coating: the coat's own lines (the scales' edges, the cracks, the bands) glow and beat in the soul colour;</li>
- * <li>(0.7.410) raised plates that grow up the arm with the coat, and grow in when it goes up ({@link ValorPlates});</li>
+ * <li>(0.7.411) raised plates that grow up the arm with the coat, and grow in when it goes up ({@link ValorPlates});</li>
  * <li>a Hunter's eyes glint amber while coated (the other origins have their own particles, {@code Valor#coatParticles}).</li>
  * </ul>
  * Drawn on a shell just past the sleeves, or just past armour when a chestplate is worn, so armour never hides it; on players,

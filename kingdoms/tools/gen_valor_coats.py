@@ -1,4 +1,4 @@
-"""Valor coatings (Kingdoms 0.7.409; plates 0.7.410): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
+"""Valor coatings (Kingdoms 0.7.409; plates 0.7.411): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
 ValorLook over the 64x64 player skin layout (only the base arms, hands and, at Unbroken, the shoulders: the coat model is a
 humanoid mesh grown just past the sleeves, or past armour).
 
@@ -7,7 +7,7 @@ humanoid mesh grown just past the sleeves, or past armour).
   coat/<look>_veins_<rank>.png   the same coat's lines (scale edges, cracks, bands...) in white, drawn emissive in the soul
                             colour while King's Valor Coating is up
   coat/bent_<bent>.png      the second quirk's mark at the wrist (Tempered on), white, tinted by ValorLook
-  coat/plate_<look>.png     (0.7.410) the raised plates' box (ValorPlates: 8x8x2 at 0,0 on 32x16): its two broad faces drawn
+  coat/plate_<look>.png     (0.7.411) the raised plates' box (ValorPlates: 8x8x2 at 0,0 on 32x16): its two broad faces drawn
                             as the plate (a rounded scale, a riveted band, a lump of rock, a flake, a shell segment), its
                             edges darker; plate_<look>_glow.png its rim, white, for King's coating (no plates for haze)
 
