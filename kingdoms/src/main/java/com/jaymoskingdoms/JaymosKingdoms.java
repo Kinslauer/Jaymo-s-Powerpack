@@ -198,7 +198,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
 		// the villager screens open, so the trades are there when they do)
 		Remedies.register();
-		// (0.7.381) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
+		// (0.7.383) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
 		TierGate.register();
 		// a realm's smiths sell better-forged gear to those it thinks well of (with Jaymo's Powers)
 		GradedTrades.register();
@@ -237,7 +237,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
-		// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
+		// (0.7.383) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();
 		FrostPrison.register();
@@ -256,6 +256,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
 		LifeStory.register();
+		// 0.7.381: the village start's village takes you in, whatever your blood (and its attachments)
+		LOGGER.debug("story home attachments: {} {}", StoryHomes.HOME, StoryHomes.PENDING);
+		StoryHomes.register();
 		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
@@ -409,7 +412,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sorcery.register();
 		// 0.5.62: the villager on a floating island is a hermit wizard with a story
 		Hermits.register();
-		// 0.7.382: star charts for sale, and lights in the sky in the Tidings
+		// 0.7.384: star charts for sale, and lights in the sky in the Tidings
 		StarFolk.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();

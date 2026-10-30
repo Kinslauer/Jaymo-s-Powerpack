@@ -1,9 +1,9 @@
-"""Writes the space pod parts' assets (0.18.48, power/zfighter/pod/PodParts): for each of the seven part blocks
+"""Writes the space pod parts' assets (0.18.49, power/zfighter/pod/PodParts): for each of the seven part blocks
 (pod_keel, pod_fin, pod_bell, pod_tank, pod_plate, pod_canopy, pod_mast) a 16x16 texture, a block model, a blockstate,
 an item definition and a loot table (drops itself); and for the four metal parts that are forged (fin, plate, mast, tank)
 the blank's textures, models and item definition (WeaponParts kinds pod_<part>_blank, shown stone and metal).
 
-(0.18.50) Every part block also has a worn state (property damaged: a bent, scorched, cracked texture, pod_<part>_worn) that
+(0.18.51) Every part block also has a worn state (property damaged: a bent, scorched, cracked texture, pod_<part>_worn) that
 its item keeps (block_state component), and the keel a mend grade (property grade 0 to 3: a brass band on its post for each
 grade, models pod_keel_g1..g3). tools/gen_pod_mending.py draws the salvage rack and the three world parts.
 
