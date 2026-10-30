@@ -613,7 +613,7 @@ public final class Carry {
 			return;
 		}
 		if (!toss && CarryBlock.is(entry.carried)) {
-			// (0.18.9) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
+			// (0.18.12) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
 			switch (com.jaymospowers.power.zfighter.pod.PodParts.tryAttach(carrier, entry.carried)) {
 				case DONE -> {
 					end(carrier, entry, Let.SET_DOWN);

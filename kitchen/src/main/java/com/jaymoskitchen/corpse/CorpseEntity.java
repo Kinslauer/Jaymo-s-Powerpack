@@ -89,6 +89,16 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.INT);
 	private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.STRING);
+	/**
+	 * (0.5.37, Andy: a player's corpse "should always look the way it did when the player died") The dead player's own
+	 * tags that carry their look ({@link #LOOK_TAG_PREFIXES}: Kingdoms' heritage and Bio-built form), space-separated, so
+	 * the body keeps them whatever the player becomes after. Kitchen only carries them; the client puts them on the body
+	 * as it's drawn ({@link #lookTags}), for whoever draws the look to read.
+	 */
+	private static final EntityDataAccessor<String> LOOK_TAGS = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.STRING);
+	/** Which of a dead player's tags are kept for their look. */
+	static final String[] LOOK_TAG_PREFIXES = {"jaymoskingdoms_heritage_", "jaymoskingdoms_bio_"};
 	/** A heavy corpse (an iron golem) falling apart once it's been looted (see {@link #crumble}). */
 	private static final EntityDataAccessor<Boolean> CRUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
@@ -257,6 +267,7 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(LOOK, "{id:\"minecraft:player\"}");
 		this.entityData.set(OWNER, owner.toString());
 		this.entityData.set(OWNER_NAME, name);
+		this.entityData.set(LOOK_TAGS, "");
 		this.kind = CorpseKind.PLAYER;
 		for (int i = 0; i < this.hotbar.size(); i++) {
 			this.hotbar.set(i, i < hotbar.size() ? hotbar.get(i).copy() : ItemStack.EMPTY);
@@ -697,6 +708,26 @@ public class CorpseEntity extends Entity {
 		return this.entityData.get(OWNER_NAME);
 	}
 
+	/** (0.5.37) Keeps {@code player}'s look-bearing tags on their body, as they were at death. */
+	void keepLookTags(net.minecraft.world.entity.player.Player player) {
+		StringBuilder kept = new StringBuilder();
+		for (String tag : player.entityTags()) {
+			for (String prefix : LOOK_TAG_PREFIXES) {
+				if (tag.startsWith(prefix) && tag.indexOf(' ') < 0) {
+					kept.append(kept.isEmpty() ? "" : " ").append(tag);
+					break;
+				}
+			}
+		}
+		this.entityData.set(LOOK_TAGS, kept.toString());
+	}
+
+	/** (0.5.37) The dead player's look-bearing tags, as they were at death (none for any other body). */
+	public List<String> lookTags() {
+		String tags = this.entityData.get(LOOK_TAGS);
+		return tags.isEmpty() ? List.of() : List.of(tags.split(" "));
+	}
+
 	public String look() {
 		return this.entityData.get(LOOK);
 	}
@@ -731,6 +762,7 @@ public class CorpseEntity extends Entity {
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
 		builder.define(OWNER_NAME, "");
+		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
 		builder.define(MISSING, 0);
 		builder.define(BORN, 0L);
@@ -2620,6 +2652,7 @@ public class CorpseEntity extends Entity {
 		this.age = input.getIntOr("Age", 0);
 		this.entityData.set(OWNER, input.getStringOr("Owner", ""));
 		this.entityData.set(OWNER_NAME, input.getStringOr("OwnerName", ""));
+		this.entityData.set(LOOK_TAGS, input.getStringOr("LookTags", ""));
 		this.slim = input.getBooleanOr("Slim", false);
 		List<ItemStack> savedHotbar = input.read("Hotbar", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of());
 		for (int i = 0; i < this.hotbar.size(); i++) {
@@ -2677,6 +2710,7 @@ public class CorpseEntity extends Entity {
 		output.putInt("Age", age);
 		output.putString("Owner", ownerId());
 		output.putString("OwnerName", ownerName());
+		output.putString("LookTags", this.entityData.get(LOOK_TAGS));
 		output.store("Hotbar", ItemStack.OPTIONAL_CODEC.listOf(), hotbar);
 		output.putInt("Selected", selected);
 		output.putString("Killer", killer);

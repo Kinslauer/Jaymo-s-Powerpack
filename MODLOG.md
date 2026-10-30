@@ -3889,7 +3889,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   or a shot loosed coated) now lands through Chrono's intangible counter (`ChronoFlow`), Darktide's untouchable flurry
   (`DarktideGuard`), Smoke's Vapour Form and wholly-smoke (`SmokeVapour`), and a Flame Avatar's flame (`FlameAvatar.absorb`).
   Without Kingdoms nothing changes. Compile-checked; not seen in game.
-- **0.18.9, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+
+- **0.18.10, Bio-built forms no longer wear MCA's clothes and hair; their corpses keep the form (Kingdoms 0.7.363,
+  Kitchen 0.5.37):** Andy's screenshot showed a Bio-built player's horns and tail over MCA's clothes and white hair, and
+  their corpse in their human look. Now a player's corpse keeps the look they died in. See the Kingdoms and Kitchen
+  MODLOGs.
+- **0.18.12, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing

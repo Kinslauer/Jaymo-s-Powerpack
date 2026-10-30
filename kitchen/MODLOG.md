@@ -1234,3 +1234,12 @@ three tracks. Not taken: the other knives and Backstabbing (Andy wanted only the
   - The animal cart's behaviour is unchanged (`loadAnimals`); the supply cart and plow take no mobs.
 - 26.3 notes: `Entity.entityTags()` is the read side of `addTag`; `Leashable.isLeashed()` is a default method on `Mob`.
 - Not run in game (cloud session, no Gradle): the compile check shows no errors in the changed files.
+
+## 0.5.37: a dead player's body keeps the look they died in (pack 0.18.10)
+Andy (on a Bio-built's corpse that lay there in human clothes): "it should always look the way it did when the player
+died". A player's corpse keeps the dead player's look-bearing tags (`CorpseEntity.LOOK_TAGS`: Kingdoms'
+`jaymoskingdoms_heritage_` and `jaymoskingdoms_bio_` ones, saved and synced), and `CorpseRenderer.lookState` puts them on
+MCA's villager look of the player only while its render state is taken, then takes them off again (MCA draws the living
+player from the same villager). Kingdoms 0.7.363 reads them to draw a Bio-built's form, as it was at death. Kitchen only
+carries the tags; it knows nothing of Kingdoms.
+- Compile-checked against 26.3 with javac (changed files); not seen in game.

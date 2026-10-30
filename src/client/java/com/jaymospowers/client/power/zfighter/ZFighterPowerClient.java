@@ -80,7 +80,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterApeSteps.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
-		// (0.18.9) the space pod, drawn from its parts
+		// (0.18.12) the space pod, drawn from its parts
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.pod.PodEntity.TYPE,
 			com.jaymospowers.client.power.zfighter.pod.PodRenderer::new);
 		ZFighterWishScreen.register();
