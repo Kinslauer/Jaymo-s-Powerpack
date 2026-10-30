@@ -51,7 +51,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #outermost}. Track A may add anything else.
  */
 public class PodEntity extends Entity {
-	/** (0.18.50) Hammered to a finish (flight-ready), and how well it was mended (0 to {@link PodGrades#MAX_GRADE}). */
+	/** (0.18.51) Hammered to a finish (flight-ready), and how well it was mended (0 to {@link PodGrades#MAX_GRADE}). */
 	static final EntityDataAccessor<Boolean> FINISHED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.BOOLEAN);
 	static final EntityDataAccessor<Integer> GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> FILLED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
@@ -65,7 +65,7 @@ public class PodEntity extends Entity {
 	static final float WIDTH = 2.0F, HEIGHT = 3.5F;
 	/** The pilot's seat: how high above its feet (blocks), inside the hull. */
 	public static final double SEAT = 1.1;
-	/** (0.18.50) With two seated, how far (blocks) each sits from the middle. */
+	/** (0.18.51) With two seated, how far (blocks) each sits from the middle. */
 	static final double SEAT_APART = 0.4;
 	/** Settling: gravity a tick, the share of fall speed kept, and how often (ticks) a pod at rest checks its footing. */
 	static final double GRAVITY = 0.06, DRAG = 0.98;
@@ -142,7 +142,7 @@ public class PodEntity extends Entity {
 			|| wreckDeck() >= 0;
 	}
 
-	/** (0.18.50) Which Maw wreck deck this pod is the wreck of ({@link PodWrecks}), or -1 for a pod that isn't one. */
+	/** (0.18.51) Which Maw wreck deck this pod is the wreck of ({@link PodWrecks}), or -1 for a pod that isn't one. */
 	public int wreckDeck() {
 		return PodWrecks.deckOf(this);
 	}
@@ -219,7 +219,7 @@ public class PodEntity extends Entity {
 			return InteractionResult.SUCCESS;
 		}
 		ItemStack held = player.getItemInHand(hand);
-		// (0.18.50) a world's own part, sneaking: the pod is mended a grade better
+		// (0.18.51) a world's own part, sneaking: the pod is mended a grade better
 		if (player.isSecondaryUseActive() && PodGrades.tryGrade(server, this, held)) {
 			return InteractionResult.SUCCESS_SERVER;
 		}
@@ -392,12 +392,12 @@ public class PodEntity extends Entity {
 		return has(PodPart.KEEL, 0) && countOf(PodPart.FIN) == 3 && has(PodPart.BELL, 0) && has(PodPart.TANK, 0) && has(PodPart.CANOPY, 0);
 	}
 
-	/** (0.18.50) Whether it can lift at all: it has {@link #launchParts} and a hammer has finished it. */
+	/** (0.18.51) Whether it can lift at all: it has {@link #launchParts} and a hammer has finished it. */
 	public boolean canLaunch() {
 		return finished() && launchParts();
 	}
 
-	/** (0.18.50) Whether a hammer blow finishes it (rather than takes a part off): it could fly but hasn't been finished. */
+	/** (0.18.51) Whether a hammer blow finishes it (rather than takes a part off): it could fly but hasn't been finished. */
 	public boolean readyToFinish() {
 		return !finished() && launchParts();
 	}
@@ -410,7 +410,7 @@ public class PodEntity extends Entity {
 		entityData.set(FINISHED, finished);
 	}
 
-	/** (0.18.50) How well it was mended, 0 (as built) to {@link PodGrades#MAX_GRADE}. */
+	/** (0.18.51) How well it was mended, 0 (as built) to {@link PodGrades#MAX_GRADE}. */
 	public int grade() {
 		return entityData.get(GRADE);
 	}
@@ -419,7 +419,7 @@ public class PodEntity extends Entity {
 		entityData.set(GRADE, Mth.clamp(grade, 0, PodGrades.MAX_GRADE));
 	}
 
-	/** (0.18.50) How many can ride: the pilot, and from grade {@link PodGrades#SECOND_SEAT_GRADE} a passenger. */
+	/** (0.18.51) How many can ride: the pilot, and from grade {@link PodGrades#SECOND_SEAT_GRADE} a passenger. */
 	public int seats() {
 		return grade() >= PodGrades.SECOND_SEAT_GRADE ? 2 : 1;
 	}
