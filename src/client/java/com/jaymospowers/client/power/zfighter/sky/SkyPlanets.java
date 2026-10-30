@@ -131,7 +131,8 @@ public final class SkyPlanets {
 
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!active(minecraft)) {
+		if (!active(minecraft) || minecraft.gui.screen() != null) {
+			// the hud is also drawn under a screen: the sky is for the open view only
 			return;
 		}
 		ClientLevel level = minecraft.level;
@@ -147,8 +148,11 @@ public final class SkyPlanets {
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		double turn = turn(level, partial);
 		float fov = camera.getFov();
-		double tan = Math.tan((fov > 6.4F ? Math.toRadians(fov) : fov) / 2.0);
+		double tan = Math.tan(Math.toRadians(fov) / 2.0);
 		int width = graphics.guiWidth(), height = graphics.guiHeight();
+		if (tan <= 0.0 || width <= 0 || height <= 0) {
+			return;
+		}
 		double aspect = width / (double)height;
 		Vec3 forward = vec(camera.forwardVector()), left = vec(camera.leftVector()), up = vec(camera.upVector());
 		for (int world = 0; world < Charts.WORLDS; world++) {
