@@ -51,6 +51,14 @@ public final class UltimateCinematic {
 	static final double PUSH_SHARE = 0.45;
 	/** {@link UltimateFilm#CHASE}: how far to the side and up it keeps (blocks). */
 	static final double CHASE_SIDE = 4.0, CHASE_UP = 1.2;
+	/** (0.18.30) {@link UltimateFilm#DUTCH}: the tilt (degrees, at its fullest), how far out it sits (from, to; blocks) and how low. */
+	static final float DUTCH_ROLL = 17.0F;
+	static final double DUTCH_FROM = 3.6, DUTCH_TO = 2.4, DUTCH_LOW = 0.5;
+	/** (0.18.30) {@link UltimateFilm#CUTS}: how many angles the film jumps between, and how far out each sits (blocks). */
+	static final int CUT_ANGLES = 3;
+	static final double CUT_CLOSE = 2.2, CUT_WIDE = 5.5, CUT_HIGH = 3.2;
+	/** (0.18.30) {@link UltimateFilm#CUTS}: the tilt of the sideways cut (degrees). */
+	static final float CUT_ROLL = 11.0F;
 	/** The vanilla HUD hidden while your own film runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
@@ -158,7 +166,10 @@ public final class UltimateCinematic {
 		viewBefore = null;
 	}
 
-	/** Where the camera is and which way it looks this frame ({x, y, z, yaw, pitch}), or null when your film isn't running. */
+	/**
+	 * Where the camera is and which way it looks this frame ({x, y, z, yaw, pitch, roll}; roll in degrees, 0 for most shots),
+	 * or null when your film isn't running.
+	 */
 	public static double @Nullable [] view(Minecraft minecraft, float partialTicks) {
 		LocalPlayer self = minecraft.player;
 		if (!filming() || self == null || minecraft.getCameraEntity() != self) {
@@ -172,6 +183,7 @@ public final class UltimateCinematic {
 		Entity subject = target >= 0 ? self.level().getEntity(target) : null;
 		Vec3 pos;
 		Vec3 look;
+		float roll = 0.0F;
 		switch (shot) {
 			case UltimateFilm.ZOOM -> {
 				// out slowly and faster, then in faster still, back into your own eyes
@@ -188,7 +200,7 @@ public final class UltimateCinematic {
 				look = eyes.add(ahead.scale(4.0));
 				if (d < 0.6) {
 					// close in, look the way you look (or the body fills the screen)
-					return aimed(clipped(self, eyes, pos), look);
+					return aimed(clipped(self, eyes, pos), look, 0.0F);
 				}
 				look = eyes;
 			}
@@ -240,19 +252,50 @@ public final class UltimateCinematic {
 				pos = feet.add(sideways.scale(CHASE_SIDE)).subtract(toward.scale(1.0)).add(0.0, CHASE_UP, 0.0);
 				look = feet.add(toward.scale(2.0)).add(0.0, 1.0, 0.0);
 			}
+			case UltimateFilm.DUTCH -> {
+				// (0.18.30) a low, close shot at an angle: it leans in on the subject while the horizon tilts and settles back
+				Vec3 on = subject != null ? subject.getPosition(partialTicks).add(0.0, subject.getBbHeight() * 0.55, 0.0) : at.add(0.0, 1.0, 0.0);
+				Vec3 toward = on.subtract(eyes).horizontal();
+				toward = toward.lengthSqr() < 1.0E-4 ? facing : toward.normalize();
+				Vec3 sideways = new Vec3(toward.z, 0.0, -toward.x).scale(side);
+				double out = Mth.lerp(k, DUTCH_FROM, DUTCH_TO);
+				pos = on.subtract(toward.scale(out)).add(sideways.scale(out * 0.45)).add(0.0, DUTCH_LOW - 0.4, 0.0);
+				look = on;
+				// in fast, a hold, and out again
+				roll = side * DUTCH_ROLL * Mth.clamp(Mth.sin(t * Mth.PI) * 2.5F, 0.0F, 1.0F);
+			}
+			case UltimateFilm.CUTS -> {
+				// (0.18.30) hard cuts between angles round the subject: close and low, wide from the side (tilted), high behind
+				Vec3 on = subject != null ? subject.getPosition(partialTicks).add(0.0, subject.getBbHeight() * 0.55, 0.0) : at.add(0.0, 1.0, 0.0);
+				Vec3 toward = on.subtract(eyes).horizontal();
+				toward = toward.lengthSqr() < 1.0E-4 ? facing : toward.normalize();
+				Vec3 sideways = new Vec3(toward.z, 0.0, -toward.x).scale(side);
+				int angle = Math.min(CUT_ANGLES - 1, (int)(t * CUT_ANGLES));
+				// (the time inside this angle, so each one drifts a little but never blends into the next)
+				float drift = t * CUT_ANGLES - angle;
+				switch (angle) {
+					case 0 -> pos = on.subtract(toward.scale(CUT_CLOSE - 0.5 * drift)).add(sideways.scale(0.5)).add(0.0, -0.5, 0.0);
+					case 1 -> {
+						pos = on.add(sideways.scale(CUT_WIDE - 0.8 * drift)).add(0.0, 0.3, 0.0);
+						roll = -side * CUT_ROLL;
+					}
+					default -> pos = on.subtract(toward.scale(-CUT_CLOSE * 1.2)).add(sideways.scale(-1.0)).add(0.0, CUT_HIGH - 0.8 * drift, 0.0);
+				}
+				look = on;
+			}
 			default -> {
 				return null;
 			}
 		}
-		return aimed(clipped(self, look, pos), look);
+		return aimed(clipped(self, look, pos), look, roll);
 	}
 
-	private static double[] aimed(Vec3 pos, Vec3 look) {
+	private static double[] aimed(Vec3 pos, Vec3 look, float roll) {
 		Vec3 dir = look.subtract(pos);
 		dir = dir.lengthSqr() < 1.0E-6 ? facing : dir.normalize();
 		double yaw = Math.toDegrees(Math.atan2(-dir.x, dir.z));
 		double pitch = Math.toDegrees(-Math.asin(Mth.clamp(dir.y, -1.0, 1.0)));
-		return new double[] {pos.x, pos.y, pos.z, yaw, pitch};
+		return new double[] {pos.x, pos.y, pos.z, yaw, pitch, roll};
 	}
 
 	private static float smooth(float t) {
