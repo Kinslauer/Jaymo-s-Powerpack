@@ -584,7 +584,7 @@ public final class ZFighterSpaceMissions {
 		for (int i = 0; i < info.items().length; i++) {
 			ZFighterSagas.give(player, new ItemStack(info.items()[i], Math.max(1, Math.round(info.counts()[i] * ore))));
 		}
-		// (0.18.16) the first time a world is settled it also gives the one part only it has, for mending a pod better
+		// (0.18.21) the first time a world is settled it also gives the one part only it has, for mending a pod better
 		Item worldPart = firstTime ? com.jaymospowers.power.zfighter.pod.PodGrades.worldPart(info.key()) : null;
 		if (worldPart != null) {
 			ZFighterSagas.give(player, new ItemStack(worldPart));

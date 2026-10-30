@@ -50,7 +50,7 @@ public class ZFighterStarMapScreen extends Screen {
 		ZFighterSpace.VERDANT, ZFighterSpace.MAW};
 
 	private final int fuel;
-	/** (0.18.15) The grade of the fuel in the tank (0: empty). */
+	/** (0.18.20) The grade of the fuel in the tank (0: empty). */
 	private final int grade;
 	/** (0.18.23) The star charts read: bit w is destination w. */
 	private final int read;
@@ -199,7 +199,7 @@ public class ZFighterStarMapScreen extends Screen {
 		return null;
 	}
 
-	/** (0.18.15) Whether the tank's fuel is too poor a grade to reach {@code index} (a creative pilot needs no grade). */
+	/** (0.18.20) Whether the tank's fuel is too poor a grade to reach {@code index} (a creative pilot needs no grade). */
 	private boolean tooCoarse(LocalPlayer player, int index) {
 		return !player.isCreative() && this.grade < PodFuel.needed(index);
 	}
@@ -286,7 +286,7 @@ public class ZFighterStarMapScreen extends Screen {
 			float[] p = at(index);
 			ZFighterSpaceArt.world(graphics, index, p[0], p[1], p[2], cx, cy);
 			if (index != ZFighterSpace.HOME_INDEX && !isHere(player, index) && tooCoarse(player, index)) {
-				// (0.18.15) the tank's fuel can't reach it: greyed over
+				// (0.18.20) the tank's fuel can't reach it: greyed over
 				ZFighterSpaceArt.disc(graphics, p[0], p[1], p[2], 0xB0101018);
 			}
 			if (index == this.picked) {
@@ -329,7 +329,7 @@ public class ZFighterStarMapScreen extends Screen {
 		if (here) {
 			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.you_are_here"), x + 50, y + 32, w - 54, 0xFF7CFF7C);
 		} else if (!dark) {
-			// (0.18.15) the grade of fuel the trip needs
+			// (0.18.20) the grade of fuel the trip needs
 			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.needs_grade", PodFuel.roman(PodFuel.needed(index))), x + 50,
 				y + 32, w - 54, tooCoarse(player, index) ? RED : UiStyle.DIM);
 		}

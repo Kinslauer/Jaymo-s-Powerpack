@@ -57,11 +57,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.14, Andy) The blocks and items the space pod is built from, one per {@link PodPart}: {@code jaymospowers:pod_keel},
+ * (0.18.19, Andy) The blocks and items the space pod is built from, one per {@link PodPart}: {@code jaymospowers:pod_keel},
  * {@code pod_fin}, {@code pod_bell}, {@code pod_tank}, {@code pod_plate}, {@code pod_canopy}, {@code pod_mast}. They are
  * carried like a crafting table ({@code CarryBlock.carriable}) and set down onto a pod entity you are looking at
  * ({@link #tryAttach}, called from {@code Carry.release}); a keel set down on the ground becomes a bare pod
- * ({@link KeelBlock}). Hitting a pod with a hammer takes the outermost part off again ({@link #takeOff}); (0.18.16) a part that
+ * ({@link KeelBlock}). Hitting a pod with a hammer takes the outermost part off again ({@link #takeOff}); (0.18.21) a part that
  * was damaged comes off as a worn part (the block's {@link #DAMAGED} state, kept by its item), to be mended at a
  * {@link SalvageRack}, and a launch-ready pod's first hammer blow finishes it instead ({@link #finish}). A keel carries the
  * pod's mend grade ({@link #GRADE}). Where the parts are made: {@code WeaponParts} (fin, plate, mast, tank
@@ -77,7 +77,7 @@ public final class PodParts {
 	static final double HEIGHT_OF_MAST = 3.1;
 	/** Tool tag of the hammers that take a pod apart (the mace is in it too). */
 	public static final TagKey<Item> HAMMERS = TagKey.create(Registries.ITEM, JaymosPowers.id("hammers"));
-	/** (0.18.16) A part block's wear (a worn one is mended at a rack), and a keel's mend grade. */
+	/** (0.18.21) A part block's wear (a worn one is mended at a rack), and a keel's mend grade. */
 	public static final BooleanProperty DAMAGED = BooleanProperty.create("damaged");
 	public static final IntegerProperty GRADE = IntegerProperty.create("grade", 0, PodGrades.MAX_GRADE);
 	/** The research that teaches the canopy's infusion. */
@@ -128,7 +128,7 @@ public final class PodParts {
 			if (!(entity instanceof PodEntity pod) || player.isSpectator() || !player.getItemInHand(hand).is(HAMMERS)) {
 				return InteractionResult.PASS;
 			}
-			// (0.18.16) a wreck in the Maw is salvaged for a set of parts, once for each player
+			// (0.18.21) a wreck in the Maw is salvaged for a set of parts, once for each player
 			if (pod.wreckDeck() >= 0) {
 				if (level instanceof ServerLevel server && player instanceof ServerPlayer hitter) {
 					PodWrecks.salvage(server, hitter, pod);
@@ -140,7 +140,7 @@ public final class PodParts {
 				return InteractionResult.PASS;
 			}
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer hitter) {
-				// (0.18.16) a pod that could fly is finished by the first plain blow; sneaking takes a part off it instead
+				// (0.18.21) a pod that could fly is finished by the first plain blow; sneaking takes a part off it instead
 				if (pod.readyToFinish() && !hitter.isShiftKeyDown()) {
 					finish(server, hitter, pod);
 				} else {
@@ -254,7 +254,7 @@ public final class PodParts {
 		if (part == null) {
 			return Attach.NONE;
 		}
-		// (0.18.16) a worn part looked at a salvage rack lies on the rack
+		// (0.18.21) a worn part looked at a salvage rack lies on the rack
 		Attach racked = tryRack(carrier, carried, part);
 		if (racked != Attach.NONE) {
 			return racked;
@@ -305,7 +305,7 @@ public final class PodParts {
 	// ---------------------------------------------------------------- finishing, and taking one off
 
 	/**
-	 * (0.18.16) The first hammer blow on a pod that could fly: it rings, throws sparks, the beacon lights, and the pod is
+	 * (0.18.21) The first hammer blow on a pod that could fly: it rings, throws sparks, the beacon lights, and the pod is
 	 * finished (flight-ready) until a part comes off or is damaged.
 	 */
 	static void finish(ServerLevel level, ServerPlayer hitter, PodEntity pod) {
@@ -321,7 +321,7 @@ public final class PodParts {
 
 	/**
 	 * A hammer blow on a pod: its outermost part comes off, as its block set down at the nearest free spot beside the pod (the
-	 * hitter's hands are full of hammer), or dropped as an item if there is none. (0.18.16) A damaged one comes off worn, for
+	 * hitter's hands are full of hammer), or dropped as an item if there is none. (0.18.21) A damaged one comes off worn, for
 	 * the salvage rack. The keel only ever comes off last, and takes the pod with it (and its grade stays with the keel).
 	 */
 	static void takeOff(ServerLevel level, ServerPlayer hitter, PodEntity pod) {
@@ -406,7 +406,7 @@ public final class PodParts {
 		};
 	}
 
-	/** A pod part set down as a block; (0.18.16) it is {@link #DAMAGED} or not. */
+	/** A pod part set down as a block; (0.18.21) it is {@link #DAMAGED} or not. */
 	private static class PartBlock extends Block {
 		private final VoxelShape shape;
 
@@ -447,7 +447,7 @@ public final class PodParts {
 		}
 	}
 
-	/** The keel: set down on the ground it stands up as a bare pod (keel only), the one part that is a pod by itself. (0.18.16) It keeps the pod's mend grade. */
+	/** The keel: set down on the ground it stands up as a bare pod (keel only), the one part that is a pod by itself. (0.18.21) It keeps the pod's mend grade. */
 	private static final class KeelBlock extends PartBlock {
 		KeelBlock(BlockBehaviour.Properties properties, VoxelShape shape) {
 			super(properties, shape);
