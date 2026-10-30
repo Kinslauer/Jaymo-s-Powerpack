@@ -21,8 +21,9 @@ import net.minecraft.world.entity.player.Player;
  * you stay in the one you pick once you let go of Sneak (the client's {@code StanceScroll}):
  * <ol>
  * <li>{@link #PRONE}: flat on your belly, the crawl ({@link Crawl});</li>
- * <li>{@link #LOW}: a low crouch, knees deep, {@link #LOW_HEIGHT} blocks tall so it gets under a gap a sneak can't, and
- * slower ({@link #LOW_SPEED} of a sneak);</li>
+ * <li>{@link #LOW}: a low crouch, knees deep, {@link #LOW_HEIGHT} blocks tall so it gets under a gap a sneak can't,
+ * moving at a sneak's pace (0.18.77: Andy, "you should still be able to move like vanilla when sneaking. its the kneel
+ * that stops you"); standing still in it you go down on one knee;</li>
  * <li>{@link #SNEAK}: vanilla's sneak, held without the key (0.18.66: the arms-out sway and the kneel are the low crouch's now);</li>
  * <li>{@link #STAND}: on your feet.</li>
  * </ol>
@@ -36,8 +37,8 @@ public final class Stance {
 	public static final float LOW_HEIGHT = 1.25F;
 	/** A sneak's height (blocks), vanilla's crouching box. */
 	public static final float SNEAK_HEIGHT = 1.5F;
-	/** The low crouch's walking speed, as a share of a sneak's. */
-	public static final float LOW_SPEED = 0.6F;
+	/** The low crouch's walking speed, as a share of a sneak's (0.18.77: a sneak's own; was 0.6). */
+	public static final float LOW_SPEED = 1.0F;
 
 	/** On a player in the low crouch: present while they hold it (synced to everyone). */
 	public static final AttachmentType<Boolean> LOW_CROUCH = AttachmentRegistry.create(JaymosPowers.id("low_crouch"),

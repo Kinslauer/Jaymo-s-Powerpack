@@ -4217,7 +4217,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (the guard lets go while one plays, and there is no custom thrust). The guard is a pose of ours (`ModelPoses`,
   `FangGauntletsModelFeatureRendererMixin`, `PoseTakeover`), so Entity Model Features / Fresh Animations pause for it. No
   gameplay change. Compile-checked; not seen in game.
-- **0.18.77, the Iron Saber in 3D:** Andy: "can you replace the iron saber with the new model". The Iron Saber is now his
+- **0.18.77, the low crouch walks at a sneak's pace:** Andy: "you should still be able to move like vanilla when sneaking.
+  its the kneel that stops you". `Stance.LOW_SPEED` 0.6 -> 1.0; standing still in the low crouch still kneels.
+- **0.18.78, the Iron Saber in 3D:** Andy: "can you replace the iron saber with the new model". The Iron Saber is now his
   "Saber reworked" Blockbench model (`tools/bbmodels/saber-reworked.bbmodel`, baked by `tools/blockbench/iron_saber.py`
   into `models/item/armory/iron_saber.json` + `textures/item/armory/iron_saber_3d.png`): steel blade, gold guard and
   knuckle bow, wrapped grip, gold pommel. Its five textures share the project's 64x64 UV space and are merged into one

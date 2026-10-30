@@ -1,4 +1,4 @@
-"""(0.18.77) The Iron Saber (armory/Armory, items/iron_saber.json -> models/item/armory/iron_saber) drawn as Andy's
+"""(0.18.78) The Iron Saber (armory/Armory, items/iron_saber.json -> models/item/armory/iron_saber) drawn as Andy's
 "Saber reworked" Blockbench model (tools/bbmodels/saber-reworked.bbmodel; Andy: "can you replace the iron saber with the
 new model"), in place of the flat sprite.
 
