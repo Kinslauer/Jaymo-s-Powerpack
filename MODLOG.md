@@ -3894,6 +3894,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Kitchen 0.5.37):** Andy's screenshot showed a Bio-built player's horns and tail over MCA's clothes and white hair, and
   their corpse in their human look. Now a player's corpse keeps the look they died in. See the Kingdoms and Kitchen
   MODLOGs.
+
+- **0.18.12, no body in the logout panorama:** Andy: "the logout screen shouldn't render the player's body". Last World
+  Panorama shoots six first-person views as you leave a world (the saving screen, then the title screen's panorama), and
+  First-person Model drew your own body into them. `FirstPersonCompat.hideInPanoramas` registers a First-person Model
+  `ActivationHandler` (by reflection, as before) that turns it off while the camera is panoramic. Compile-checked against
+  the 26.3 jar; not seen in game.
 - **0.18.13, Arsenal pulls quest items; Sunfang's new look (Kingdoms 0.7.365):** Andy: "arsenal has a chance to pull
   special quest items out of his portals, like sora's stone blade if it isnt already in the world. and it is also
   possible to pull it from where it is in the world, striaght through the portal."
