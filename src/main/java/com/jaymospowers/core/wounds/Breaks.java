@@ -156,8 +156,8 @@ public final class Breaks {
 		});
 		// both arms gone: nothing can be swung, dug, placed or used, but food and drink still go down (and phase 4's
 		// medicine); one arm: no shield or bow from its hand
-		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> armless(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> armless(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> handsGone(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> handsGone(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> armless(player) && !player.getItemInHand(hand).isEmpty()
 			&& !consumable(player.getItemInHand(hand)) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseItemCallback.EVENT.register((player, level, hand) -> armless(player) && !consumable(player.getItemInHand(hand))
@@ -323,8 +323,38 @@ public final class Breaks {
 		return isBroken(entity, arm) || missing(entity, arm);
 	}
 
+	/**
+	 * (0.18.47) {@link #armless}, and if so said why: Jung (a Z Fighter, both arms broken) held left click and nothing hit
+	 * or dug, with no word of it. The click is refused on the client before anything goes to the server, so it's said there.
+	 */
+	private static boolean handsGone(Player player) {
+		if (!armless(player)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		if (player.level().isClientSide() && (now - armlessSaidAt >= ARMLESS_NOTE_TICKS || now < armlessSaidAt)) {
+			armlessSaidAt = now;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.armless").withStyle(ChatFormatting.GOLD));
+		}
+		return true;
+	}
+
+	/** (0.18.47) How a refused click is said: at most once this often (ticks), on the client. */
+	static final int ARMLESS_NOTE_TICKS = 60;
+	private static long armlessSaidAt = Long.MIN_VALUE / 2;
+
+	/**
+	 * (0.18.47) The share of attack damage {@code entity}'s broken arms take ({@link #ARM_DAMAGE} per arm; 0 to -0.6): a
+	 * blow thrown with the legs (a Z Fighter's kick) divides it back out.
+	 */
+	public static double armDamageShare(LivingEntity entity) {
+		AttributeInstance instance = entity.getAttribute(Attributes.ATTACK_DAMAGE);
+		AttributeModifier modifier = instance == null ? null : instance.getModifier(ARM_DAMAGE_ID);
+		return modifier == null ? 0.0 : modifier.amount();
+	}
+
 	/** A player with both arms broken (or one broken and the other gone), and at least one broken: no hands to use. */
-	static boolean armless(Player player) {
+	public static boolean armless(Player player) {
 		int mask = broken(player);
 		if ((mask & (bit(BodyPart.LEFT_ARM) | bit(BodyPart.RIGHT_ARM))) == 0) {
 			return false;
