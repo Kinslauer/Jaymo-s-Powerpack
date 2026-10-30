@@ -6794,3 +6794,18 @@ find one living there."
   Strength in the K screen), `mixin/vampires/ValorGlowColorMixin`.
 - Built (Powers 0.18.8 and Kingdoms 0.7.361 compile and jar). Not seen in game.
 
+
+## 0.7.362: the story figure builds up; the moon wakes ki; Stoneborn need no air (pack 0.18.9)
+- Andy: "is it possible to have every choice influence the model displayed, so it builds instead of resetting every page?
+  It should culminate with a different look on the end screen every time." `StoryFigure.compose` lays every answer's
+  scene so far over the last (gear stacks slot by slot, the last answer says what the figure does); the stand-in's MCA
+  clothes come from who raised you, then your trade, then the road, in a cut picked by upbringing + trade. The story page
+  and the road after MCA's creator show the whole life.
+- Escaped captors: "he should really have nothing at all": a bare scene (no gear, no clothes; your own MCA clothes are
+  taken off for the draw via `McaStoryFigure.undress`). Unarmed: "he shouldnt still have his limb": drawn without the left
+  arm (Powers' `Dismember.MISSING` lent while drawn).
+- Pale Moon: "this should start you as z fighter, sorcerer, or mage ... stoneborn too". A Mage, Sorcerer or Stoneborn
+  lands as they are (`LifeStory.spaceborn`); anyone else is awakened as a Z Fighter on landing, and the carousel says so.
+- Stoneborn: "can now breath underwater because they dont need air": their air is kept full (`Heritage.tick`); gift line
+  updated.
+- Compile-checked. Not seen in game.

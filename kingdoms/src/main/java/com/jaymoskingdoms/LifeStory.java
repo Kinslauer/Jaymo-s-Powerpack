@@ -834,12 +834,24 @@ public final class LifeStory {
 		if (start == Start.TIMELOST) {
 			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
 			PowersCompat.awaken(player, "chrono");
+		} else if (landed == Start.MOON && !spaceborn(Heritage.of(player), cls)) {
+			// (0.7.362) Andy: "this should start you as z fighter, sorcerer, or mage, as they can hold their breath / use ki long
+			// enough to survive in space without help ... stoneborn too": anyone else wakes on the moon with ki already
+			PowersCompat.awaken(player, "zfighter");
 		} else if (!calling.isEmpty() && calling.equals(echo(landed))) {
 			PowersCompat.call(player, calling, ECHO_TICKS);
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
 			Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
+	}
+
+	/**
+	 * (0.7.362) Whether one of {@code heritage} and {@code cls} lives on the Pale Moon unaided: a Mage's or Sorcerer's
+	 * breath held by magic, a Stoneborn's stone lungs. Anyone else is woken there as a Z Fighter, whose ki keeps them.
+	 */
+	public static boolean spaceborn(Heritage.@Nullable Kind heritage, Classes.@Nullable PlayerClass cls) {
+		return heritage == Heritage.Kind.STONEBORN || cls == Classes.PlayerClass.MAGE || cls == Classes.PlayerClass.SORCERER;
 	}
 
 	/** "Let fate decide" on the start: any start that needs no realm named (a capital only if there's one). */

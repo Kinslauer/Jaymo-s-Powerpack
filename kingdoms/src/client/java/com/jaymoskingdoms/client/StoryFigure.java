@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.McaCompat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -60,9 +61,20 @@ final class StoryFigure {
 		LOOK_DOWN
 	}
 
-	/** A scene: the act, and the gear (null slots left bare): head, chest, legs, feet, main hand, off hand. */
-	record Scene(Act act, @Nullable Item head, @Nullable Item chest, @Nullable Item legs, @Nullable Item feet, @Nullable Item main, @Nullable Item off) {
+	/**
+	 * A scene: the act, and the gear (null slots left bare): head, chest, legs, feet, main hand, off hand. (0.7.362)
+	 * {@code bare}: everything worn and held before it is stripped, clothes too; {@code missing}: the Jaymo's Powers parts
+	 * (its {@code Dismember} bits) the figure is drawn without.
+	 */
+	record Scene(Act act, @Nullable Item head, @Nullable Item chest, @Nullable Item legs, @Nullable Item feet, @Nullable Item main, @Nullable Item off,
+		boolean bare, int missing) {
+		Scene(Act act, @Nullable Item head, @Nullable Item chest, @Nullable Item legs, @Nullable Item feet, @Nullable Item main, @Nullable Item off) {
+			this(act, head, chest, legs, feet, main, off, false, 0);
+		}
 	}
+
+	/** (0.7.362) Powers' left-arm bit ({@code Dismember.LEFT_ARM}): the arm the Unarmed start's figure is drawn without. */
+	static final int LEFT_ARM = 4;
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
 	/** (0.7.286) The MCA job whose clothes the stand-in wears, by answer key ({@code "none"}: everyday clothes). */
@@ -141,9 +153,11 @@ final class StoryFigure {
 		scene("road.timelost", Act.LOOK_DOWN, Items.RECOVERY_COMPASS);
 		scene("road.burned", Act.WALK, Items.CHARCOAL);
 		scene("road.snowed", Act.STAND, Items.LANTERN, null, lh, lc, ll, lb);
-		scene("road.captive", Act.LOOK_DOWN, Items.LEAD);
+		// (0.7.362) Andy: "he should really have nothing at all": no clothes, nothing held
+		SCENES.put("road.captive", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
 		scene("road.whalers", Act.USE, Items.TRIDENT, null, null, lc, null, lb);
-		scene("road.unarmed", Act.STAND, null);
+		// (0.7.362) Andy: "he shouldnt still have his limb"
+		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.IRON_INGOT, null, null, null, null, null);
@@ -195,28 +209,83 @@ final class StoryFigure {
 	}
 
 	/**
-	 * You in the box {@code x0,y0}-{@code x1,y1}, as heritage {@code kind}'s look {@code look} (null: as you are),
-	 * playing {@code scene} ({@code question.answer}; {@code icon} the answer's picture); (0.7.304) a man ({@code gender}
-	 * 0) or a woman (1), or guessed from your id (-1).
+	 * (0.7.362) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page. It
+	 * should culminate with a different look on the end screen every time." The scenes of every answer so far, in
+	 * order, laid one over the other: each one's gear goes on over what came before (a bare one strips it all first),
+	 * lost parts stay lost, and the last one says what the figure does. Only the last falls back to holding its picture.
 	 */
-	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
+	static Scene compose(List<String> scenes, ItemStack icon) {
+		Item[] gear = new Item[6];
+		Act act = Act.WALK;
+		boolean bare = false;
+		int missing = 0;
+		for (int i = 0; i < scenes.size(); i++) {
+			Scene sc = i == scenes.size() - 1 ? of(scenes.get(i), icon) : SCENES.get(scenes.get(i));
+			if (sc == null) {
+				continue;
+			}
+			if (sc.bare()) {
+				java.util.Arrays.fill(gear, null);
+			}
+			bare = sc.bare();
+			Item[] put = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
+			for (int g = 0; g < put.length; g++) {
+				if (put[g] != null) {
+					gear[g] = put[g];
+					bare = false;
+				}
+			}
+			missing |= sc.missing();
+			act = sc.act();
+		}
+		return new Scene(act, gear[0], gear[1], gear[2], gear[3], gear[4], gear[5], bare, missing);
+	}
+
+	/**
+	 * (0.7.362) The clothes job for the stand-in, built up the same way: who raised you, then the trade you learned, then
+	 * where the road starts, each over the last ("none": everyday clothes).
+	 */
+	static String job(List<String> scenes) {
+		String job = "none";
+		for (String scene : scenes) {
+			if ((scene.startsWith("raised.") || scene.startsWith("youth.") || scene.startsWith("road.")) && JOBS.containsKey(scene.substring(scene.indexOf('.') + 1))) {
+				job = job(scene);
+			}
+		}
+		return job;
+	}
+
+	/**
+	 * You in the box {@code x0,y0}-{@code x1,y1}, as heritage {@code kind}'s look {@code look} (null: as you are),
+	 * playing {@code scenes} ({@code question.answer} each, built up in order: {@link #compose}; {@code icon} the last
+	 * answer's picture); (0.7.304) a man ({@code gender} 0) or a woman (1), or guessed from your id (-1).
+	 */
+	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender) {
-		draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, gender, false);
+		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, gender, false);
 	}
 
 	/**
 	 * (0.7.356) You yourself, after MCA's creator: your own body as the creator made it, playing {@code scene}; lent
 	 * heritage {@code kind}'s look {@code look} only for this draw (null: your own).
 	 */
-	static void drawYou(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
+	static void drawYou(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1) {
-		draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, -1, true);
+		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, -1, true);
 	}
 
-	private static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, String scene, ItemStack icon,
+	private static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender, boolean you) {
-		Scene sc = of(scene, icon);
-		LivingEntity target = McaCompat.LOADED && !you ? McaStoryFigure.figure(player, kind, look, job(scene), gender) : null;
+		Scene sc = compose(scenes, icon);
+		// (0.7.362) a different cut of the trade's clothes for each upbringing and trade, so the last page differs life to life
+		StringBuilder life = new StringBuilder();
+		for (String scene : scenes) {
+			if (scene.startsWith("raised.") || scene.startsWith("youth.")) {
+				life.append(scene).append('|');
+			}
+		}
+		int seed = life.toString().hashCode();
+		LivingEntity target = McaCompat.LOADED && !you ? McaStoryFigure.figure(player, kind, look, sc.bare() ? McaStoryFigure.BARE : job(scenes), gender, seed) : null;
 		boolean standIn = target != null;
 		if (target == null) {
 			target = player;
@@ -230,6 +299,14 @@ final class StoryFigure {
 			was[i] = target.getItemBySlot(slots[i]);
 			target.setItemSlot(slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
 		}
+		// (0.7.362) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
+		// for a bare scene
+		AttachmentType<Integer> missingType = sc.missing() != 0 ? missingType() : null;
+		Integer missingWas = missingType == null ? null : target.getAttached(missingType);
+		if (missingType != null) {
+			target.setAttached(missingType, (missingWas == null ? 0 : missingWas) | sc.missing());
+		}
+		Runnable dress = you && sc.bare() && McaCompat.LOADED ? McaStoryFigure.undress(player) : null;
 		if (lent) {
 			HeritageVariants.Variant v = HeritageVariants.at(kind, look);
 			player.setAttached(Heritage.HERITAGE, kind.key());
@@ -271,7 +348,32 @@ final class StoryFigure {
 				restore(player, Heritage.HERITAGE, heritageWas);
 				restore(player, HeritageVariants.VARIANT, variantWas);
 			}
+			if (missingType != null) {
+				restore(target, missingType, missingWas);
+			}
+			if (dress != null) {
+				dress.run();
+			}
 		}
+	}
+
+	private static @Nullable AttachmentType<Integer> missing;
+	private static boolean lookedForMissing;
+
+	/** (0.7.362) Powers' {@code Dismember.MISSING} (lost parts, a bitmask), looked up once; null without Powers. */
+	@SuppressWarnings("unchecked")
+	private static @Nullable AttachmentType<Integer> missingType() {
+		if (!lookedForMissing) {
+			lookedForMissing = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					missing = (AttachmentType<Integer>)Class.forName("com.jaymospowers.core.Dismember").getField("MISSING").get(null);
+				} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+					missing = null;
+				}
+			}
+		}
+		return missing;
 	}
 
 	/** The story closed: a stand-in figure is let go. */
@@ -296,11 +398,11 @@ final class StoryFigure {
 		}
 	}
 
-	private static void restore(LocalPlayer player, AttachmentType<String> type, @Nullable String was) {
+	private static <T> void restore(LivingEntity entity, AttachmentType<T> type, @Nullable T was) {
 		if (was == null) {
-			player.removeAttached(type);
+			entity.removeAttached(type);
 		} else {
-			player.setAttached(type, was);
+			entity.setAttached(type, was);
 		}
 	}
 }

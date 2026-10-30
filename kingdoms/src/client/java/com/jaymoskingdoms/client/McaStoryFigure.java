@@ -51,7 +51,7 @@ final class McaStoryFigure {
 	 * The stand-in for {@code player}, dressed for {@code job}, as heritage {@code kind}'s look {@code look}, (0.7.304) a
 	 * man ({@code gender} 0) or a woman (1) as the story's first page says (-1: guessed from their id); null if it can't be made.
 	 */
-	static @Nullable LivingEntity figure(LocalPlayer player, Heritage.@Nullable Kind kind, int look, String job, int gender) {
+	static @Nullable LivingEntity figure(LocalPlayer player, Heritage.@Nullable Kind kind, int look, String job, int gender, int seed) {
 		ClientLevel level = (ClientLevel)player.level();
 		boolean female = gender < 0 ? (player.getUUID().getLeastSignificantBits() & 1L) != 0L : gender == 1;
 		if (figure == null || figureLevel != level || (figure.getGenetics().getGender() == Gender.FEMALE) != female) {
@@ -63,9 +63,11 @@ final class McaStoryFigure {
 			}
 		}
 		VillagerEntityMCA v = figure;
-		if (!job.equals(dressedFor)) {
-			dressedFor = job;
-			v.setClothes(clothes(v, job));
+		String dress = job + "#" + Math.floorMod(seed, CLOTHES_VARIANTS);
+		if (!dress.equals(dressedFor)) {
+			dressedFor = dress;
+			// (0.7.362) a bare scene wears nothing: MCA draws no clothes for a blank name
+			v.setClothes(BARE.equals(job) ? "" : clothes(v, job, seed));
 		}
 		if (kind != null) {
 			HeritageVariants.Variant variant = HeritageVariants.at(kind, look);
@@ -151,14 +153,35 @@ final class McaStoryFigure {
 		return v;
 	}
 
-	/** MCA job clothes for {@code job} that villagers may wear, falling back to plain jobs' clothes. */
-	private static String clothes(VillagerEntityMCA v, String job) {
+	/** (0.7.362) The job that means no clothes at all (a bare scene). */
+	static final String BARE = "bare";
+
+	/**
+	 * (0.7.362) Takes the clothes off your own MCA body (MCA's client copy of it) while it's drawn; the returned task puts
+	 * them back. Null if there's no MCA body for you yet.
+	 */
+	static @Nullable Runnable undress(LocalPlayer player) {
+		net.conczin.mca.entity.VillagerLike<?> you = net.conczin.mca.MCAClient.getPlayerData(player.getUUID()).orElse(null);
+		if (you == null) {
+			return null;
+		}
+		String was = you.getClothes();
+		you.setClothes("");
+		return () -> you.setClothes(was);
+	}
+
+	/**
+	 * MCA job clothes for {@code job} that villagers may wear, falling back to plain jobs' clothes; (0.7.362) starting
+	 * from cut {@code seed} of the job's, so a different life wears a different one.
+	 */
+	private static String clothes(VillagerEntityMCA v, String job, int seed) {
 		String gender = v.getGenetics().getGender() == Gender.FEMALE ? "female" : "male";
 		java.util.ArrayList<String> jobs = new java.util.ArrayList<>();
 		jobs.add(job);
 		jobs.addAll(FALLBACK_JOBS);
 		for (String j : jobs) {
-			for (int i = 0; i < CLOTHES_VARIANTS; i++) {
+			for (int k = 0; k < CLOTHES_VARIANTS; k++) {
+				int i = Math.floorMod(seed + k, CLOTHES_VARIANTS);
 				String id = "mca:skins/clothing/normal/" + gender + "/" + j + "/" + i + ".png";
 				if (!Wardrobe.banned(id)) {
 					return id;
