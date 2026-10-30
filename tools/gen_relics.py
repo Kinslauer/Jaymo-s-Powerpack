@@ -36,8 +36,14 @@ def draw(name, origin, cls, colours, model="minecraft:item/handheld"):
     save(name, outline(img), model)
 
 
+# relics whose item model a tools/blockbench script writes (the sprite here stays as their particle/fallback texture)
+BLOCKBENCH = {"voidreaver", "tidebreaker", "sunfang"}
+
+
 def save(name, img, model="minecraft:item/handheld"):
     img.save(f"{ROOT}/textures/item/{name}.png")
+    if name in BLOCKBENCH:
+        return
     json.dump({"parent": model, "textures": {"layer0": f"jaymospowers:item/{name}"}},
               open(f"{ROOT}/models/item/{name}.json", "w"), indent=2)
     json.dump({"model": {"type": "minecraft:model", "model": f"jaymospowers:item/{name}"}},
