@@ -4096,5 +4096,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     `sora.py` turns the geometry a quarter about the grip; the reverse grip uses our own display again.
   - Iron rapier and iron dagger (and Tidebreaker's sheet): their blades are flat planes painted on one side, so the back
     face (culled) showed nothing; `bake.show_both_sides` maps the empty face to the painted one.
+  - The Dreaded Blade (Andy: "it sits flat instead of vertical") had the same sideways blade as Sora's Dagger:
+    `dreaded_blade.py` turns it a quarter about the grip too, its 45-degree turns kept exact.
   - Harpoon and rapier keep their exact rotations (26.3 allows any angle and x/y/z rotations) instead of 22.5° snaps.
   - Compile-checked; not seen in game.
