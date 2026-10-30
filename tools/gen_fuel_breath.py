@@ -1,4 +1,4 @@
-"""Writes the assets for fuel grades and breath (0.18.14, power/zfighter/fuel and power/zfighter/breath): the 16x16 icons of
+"""Writes the assets for fuel grades and breath (0.18.15, power/zfighter/fuel and power/zfighter/breath): the 16x16 icons of
 Pod Spirit, the Cinder Ember, the Hide Air Skin and the Sealed Helm, the two 64x32 layers the air skin and the helm are drawn
 with when worn, their item models, item definitions and equipment assets, and the Helm Seal blank (the WeaponParts kind
 helm_seal: stone and iron heads, shown hot while heated). Everything is our own art in the vanilla style: a one-pixel dark

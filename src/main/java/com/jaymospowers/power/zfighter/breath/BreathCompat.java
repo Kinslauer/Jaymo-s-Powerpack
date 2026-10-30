@@ -15,7 +15,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 
 /**
- * (0.18.14, SevTech picks) Glacia's cold. Glacia is a world of snow, so Jaymo's Kitchen's body heat (the winter cold rule: lands
+ * (0.18.15, SevTech picks) Glacia's cold. Glacia is a world of snow, so Jaymo's Kitchen's body heat (the winter cold rule: lands
  * that are cold chill you, shivering burns food, deep cold frostbites; warm clothing, a hot meal and fires keep it off) already
  * reaches it through its biomes. This adds {@link #CHILL} on top there, so no corner of Glacia is mild, by the weather hook Kitchen
  * offers other mods ({@code BodyHeat.addWeather}, read by reflection: a Kitchen without it is simply left alone), less for each

@@ -40,11 +40,11 @@ public final class WeaponParts {
 		ROD_BINDING(PartType.TOOL_HANDLE, PartType.TOOL_BINDING), TOUGH_BINDING(PartType.TOUGH_HANDLE, PartType.TOOL_BINDING),
 		GUARD_ROD(PartType.CROSSGUARD, PartType.TOOL_HANDLE), GUARD_TOUGH(PartType.CROSSGUARD, PartType.TOUGH_HANDLE),
 		BINDING(PartType.TOOL_BINDING), ALONE(),
-		/** (0.18.14) The Sealed Helm: its seal and a plain glass block, nothing else. */
+		/** (0.18.15) The Sealed Helm: its seal and a plain glass block, nothing else. */
 		GLASS(Items.GLASS);
 
 		public final List<PartType> parts;
-		/** (0.18.14) A plain item that goes in beside the head and the parts (a glass block), or null. */
+		/** (0.18.15) A plain item that goes in beside the head and the parts (a glass block), or null. */
 		public final @Nullable Item extra;
 
 		Assembly(PartType... parts) {
@@ -211,11 +211,11 @@ public final class WeaponParts {
 		add(new Kind("pod_plate_blank", "jaymospowers:pod_plate", Scheme.SINGLE, 4 * INGOT, Assembly.ALONE, 1));
 		add(new Kind("pod_mast_blank", "jaymospowers:pod_mast", Scheme.SINGLE, 2 * INGOT, Assembly.ALONE, 1));
 		add(new Kind("pod_tank_blank", "jaymospowers:pod_tank", Scheme.SINGLE_COPPER, 5 * INGOT, Assembly.ALONE, 1));
-		// (0.18.14) the Sealed Helm (power/zfighter/breath/Breath): an iron seal, finished with a glass block at the Tool Station
+		// (0.18.15) the Sealed Helm (power/zfighter/breath/Breath): an iron seal, finished with a glass block at the Tool Station
 		add(new Kind("helm_seal", "jaymospowers:sealed_helm", Scheme.SINGLE, 2 * INGOT, Assembly.GLASS, 1));
 	}
 
-	/** (0.18.14) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
+	/** (0.18.15) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
 	public static boolean isExtra(ItemStack stack) {
 		for (Assembly assembly : Assembly.values()) {
 			if (assembly.extra != null && stack.is(assembly.extra)) {

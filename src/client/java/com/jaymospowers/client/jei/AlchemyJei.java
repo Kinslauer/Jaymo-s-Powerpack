@@ -31,7 +31,7 @@ import net.minecraft.world.item.Items;
  */
 public final class AlchemyJei implements IModPlugin {
 	static final int NOTES = 4;
-	/** (0.18.14) The crucible's catalyst recipes: the catalyst in, the result out, the pot's essences and the research below. */
+	/** (0.18.15) The crucible's catalyst recipes: the catalyst in, the result out, the pot's essences and the research below. */
 	static final int CRUCIBLE_NOTES = 2;
 	static final IRecipeType<SimpleCategory.Recipe> CRUCIBLE = IRecipeType.create(JaymosPowers.MOD_ID, "crucible", SimpleCategory.Recipe.class);
 	static final IRecipeType<SimpleCategory.Recipe> INFUSION = IRecipeType.create(JaymosPowers.MOD_ID, "infusion", SimpleCategory.Recipe.class);
