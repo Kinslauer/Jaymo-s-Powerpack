@@ -442,7 +442,7 @@ public final class Will {
 	 * working, or less than lethal weaponry like fists or clubs". Mobs only.
 	 */
 	public static boolean noMercy(LivingEntity victim, DamageSource source) {
-		// (0.7.360) struck by a King's Valor Coating: the weaker die (its own rule for sneaking, fists and clubs)
+		// (0.7.361) struck by a King's Valor Coating: the weaker die (its own rule for sneaking, fists and clubs)
 		if (ValorKings.killed(victim)) {
 			return true;
 		}
@@ -509,11 +509,11 @@ public final class Will {
 		level.sendParticles(ParticleTypes.ENCHANTED_HIT, caster.getX(), caster.getY(0.7), caster.getZ(), 24, 0.3, 0.4, 0.3, 0.3);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.spellbreak").withStyle(ChatFormatting.AQUA));
-		// (0.7.360) a feat for Valor
+		// (0.7.361) a feat for Valor
 		Valor.spellbroke(sp, caster);
 	}
 
-	/** (0.7.360) {@code caster} can't cast for a while (a Spellbreaker Blow's hush; King's Valor's too). */
+	/** (0.7.361) {@code caster} can't cast for a while (a Spellbreaker Blow's hush; King's Valor's too). */
 	static void hush(ServerLevel level, LivingEntity caster) {
 		long now = level.getGameTime();
 		if (caster instanceof ServerPlayer other) {
@@ -531,7 +531,7 @@ public final class Will {
 		}
 	}
 
-	/** (0.7.360) {@code mob} stands dazed for {@code ticks} (Valor's stun, King's Valor's shaken), as the roar's stunned do. */
+	/** (0.7.361) {@code mob} stands dazed for {@code ticks} (Valor's stun, King's Valor's shaken), as the roar's stunned do. */
 	static void daze(Mob mob, int ticks) {
 		long until = mob.level().getGameTime() + ticks;
 		STUNNED.merge(mob, until, Math::max);
@@ -566,7 +566,7 @@ public final class Will {
 		level.sendParticles(ParticleTypes.ANGRY_VILLAGER, sp.getX(), sp.getY(1.0) + 0.3, sp.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.refuse").withStyle(ChatFormatting.GOLD));
 		roar(level, sp);
-		// (0.7.360) a feat for Valor, or its waking
+		// (0.7.361) a feat for Valor, or its waking
 		Valor.refused(sp);
 		return false;
 	}
@@ -590,7 +590,7 @@ public final class Will {
 		}
 		double reach = ROAR_REACH * surge(sp);
 		AABB box = sp.getBoundingBox().inflate(reach, 4.0, reach);
-		// (0.7.360) a coated Warlord's own stand steady
+		// (0.7.361) a coated Warlord's own stand steady
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> foe(sp, e) || rival(sp, e) && !Valor.steadied(e))) {
 			if (e instanceof ServerPlayer other) {
 				other.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ROAR_STUN_TICKS, 4), sp);

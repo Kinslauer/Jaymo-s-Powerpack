@@ -427,7 +427,7 @@ public final class Skills {
 		CombatArts.register();
 		// (0.7.342) Strength's Will pages
 		Will.register();
-		// (0.7.360) Valor, its folk and King's Valor
+		// (0.7.361) Valor, its folk and King's Valor
 		Valor.register();
 		ValorFolk.register();
 		ValorKings.register();

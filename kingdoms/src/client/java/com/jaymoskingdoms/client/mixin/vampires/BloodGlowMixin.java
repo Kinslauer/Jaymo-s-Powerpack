@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Blood vision: warm-blooded creatures near a vampire player glow through walls, for that player only. (0.7.360) And Valor's Senses. */
+/** Blood vision: warm-blooded creatures near a vampire player glow through walls, for that player only. (0.7.361) And Valor's Senses. */
 @Mixin(Minecraft.class)
 abstract class BloodGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)

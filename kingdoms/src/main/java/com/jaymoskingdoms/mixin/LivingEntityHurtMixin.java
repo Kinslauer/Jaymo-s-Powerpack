@@ -36,7 +36,7 @@ abstract class LivingEntityHurtMixin {
 		float dealt = Careers.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(self, source, amount))))));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
-		// (0.7.360) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
+		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
 		return ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))));
 	}
 }

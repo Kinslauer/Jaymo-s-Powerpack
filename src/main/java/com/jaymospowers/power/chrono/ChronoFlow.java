@@ -600,7 +600,7 @@ public final class ChronoFlow {
 		if (landing || !(entity instanceof ServerPlayer player) || !on(player)) {
 			return true;
 		}
-		// (0.18.7) a Valor-coated blow lands anyway
+		// (0.18.8) a Valor-coated blow lands anyway
 		if (source.getEntity() != null && source.getEntity() != player && !com.jaymospowers.core.wounds.ValorSkill.pierces(source)
 			&& intangible(player, source.getEntity())) {
 			return false; // it passed straight through

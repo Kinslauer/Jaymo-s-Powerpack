@@ -187,14 +187,14 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.ValorFolk.TALE.equals(answer)) {
-			// (0.7.360) asked about the Valor you saw: how it woke, and how long it took
+			// (0.7.361) asked about the Valor you saw: how it woke, and how long it took
 			villager.sendChatMessage(com.jaymoskingdoms.ValorFolk.tale(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.ValorFolk.SPAR.equals(answer)) {
-			// (0.7.360) a spar with a Valor villager who's told you their tale
+			// (0.7.361) a spar with a Valor villager who's told you their tale
 			villager.getInteractions().stopInteracting();
 			com.jaymoskingdoms.ValorFolk.startSpar(player, villager);
 			ci.cancel();

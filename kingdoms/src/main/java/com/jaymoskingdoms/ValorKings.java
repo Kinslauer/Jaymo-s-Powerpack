@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.360) King's Valor, Valor's own crown (Jung's): "only gained and grown from defeating great foes aka bosses and kings",
+ * (0.7.361) King's Valor, Valor's own crown (Jung's): "only gained and grown from defeating great foes aka bosses and kings",
  * and "most kings should spawn with valor and a rare few can have kings valor".
  * <ul>
  * <li><b>Waking it</b> ({@link #felled}): the first great foe (anything with a boss bar) felled at Tempered or past wakes

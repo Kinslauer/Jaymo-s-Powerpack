@@ -462,7 +462,7 @@ public final class Rulers {
 			reign(s, f.id(), mob);
 		}
 		if (ValorKings.standsAndFights(level, mob, f)) {
-			// (0.7.360) one with King's Valor doesn't run: they fight
+			// (0.7.361) one with King's Valor doesn't run: they fight
 			round.stop();
 			return true;
 		}

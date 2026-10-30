@@ -44,7 +44,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.360) Valor folk: villagers with a Valor of their own, who'll tell you how they earned it. Andy: "you should be able
+ * (0.7.361) Valor folk: villagers with a Valor of their own, who'll tell you how they earned it. Andy: "you should be able
  * to come across a villager and notice his, and he tells you about how he developed it and over how long". And his lore:
  * "Valor is more common because so many folk have encountered great danger and survived ... it isnt looked down upon at
  * all, rather the opposite, villagers who know no better will treat you like royalty if you can prove you have it."

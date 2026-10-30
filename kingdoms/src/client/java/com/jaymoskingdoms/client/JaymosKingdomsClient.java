@@ -116,7 +116,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
-		// (0.7.360) Valor: the N key, the pool's bar, Senses
+		// (0.7.361) Valor: the N key, the pool's bar, Senses
 		ValorClient.register();
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();

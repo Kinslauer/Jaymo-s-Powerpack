@@ -157,7 +157,7 @@ public final class Lineage {
 			leaveWith(player, parent);
 		}
 		Elders.start(parent, player);
-		// (0.7.360) Valor is personal: it stays with the elder, and the child must wake their own
+		// (0.7.361) Valor is personal: it stays with the elder, and the child must wake their own
 		Valor.leaveWith(player, parent);
 		level.sendParticles(ParticleTypes.SOUL, parent.getX(), parent.getY() + 1.0, parent.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		player.stopRiding();

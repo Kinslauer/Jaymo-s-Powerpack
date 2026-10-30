@@ -47,6 +47,46 @@
 			}
 		]
 	},
+	"voice.narrator.born.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.childhood.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/childhood_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_sub",
+				"stream": true
+			}
+		]
+	},
 	"voice.narrator.born.plains.tale": {
 		"sounds": [
 			{
@@ -699,14 +739,6 @@
 		"sounds": [
 			{
 				"name": "jaymoskingdoms:voice/narrator/gender_title",
-				"stream": true
-			}
-		]
-	},
-	"voice.narrator.gender.desc": {
-		"sounds": [
-			{
-				"name": "jaymoskingdoms:voice/narrator/gender_desc",
 				"stream": true
 			}
 		]

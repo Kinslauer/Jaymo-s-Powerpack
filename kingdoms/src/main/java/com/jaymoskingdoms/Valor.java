@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.360) Valor: a fighter's own strength, woken in a moment of defiance and grown only by feats, that lets a coated
+ * (0.7.361) Valor: a fighter's own strength, woken in a moment of defiance and grown only by feats, that lets a coated
  * fist or blade reach whatever magic hides behind. Jungxvv's idea and name, merged with Andy's (2026-10-29): "a way to
  * fight magic users", "unique to everyone that possesses one", grown by "the feats they accomplish". Andy ticked the whole
  * design list (Claude Doc "Valor design list"), every suggested answer, and Senses reveal a disguised vampire at Unbroken.

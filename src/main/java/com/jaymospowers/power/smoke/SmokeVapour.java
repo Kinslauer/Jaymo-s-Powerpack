@@ -133,7 +133,7 @@ public final class SmokeVapour {
 				return true;
 			}
 			if (com.jaymospowers.core.wounds.ValorSkill.pierces(source)) {
-				// (0.18.7) a Valor-coated blow or shot finds the body in the smoke
+				// (0.18.8) a Valor-coated blow or shot finds the body in the smoke
 				return true;
 			}
 			if (wholly(player)) {

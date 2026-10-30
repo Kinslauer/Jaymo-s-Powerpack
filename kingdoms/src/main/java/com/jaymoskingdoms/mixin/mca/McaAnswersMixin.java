@@ -76,11 +76,11 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(com.jaymoskingdoms.ManaFolk.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.ValorFolk.canAsk(player, villager)) {
-			// (0.7.360) only a Valor you've seen
+			// (0.7.361) only a Valor you've seen
 			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.TALE);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.ValorFolk.canSpar(player, villager)) {
-			// (0.7.360) only one who's told you their tale, once you have Valor of your own
+			// (0.7.361) only one who's told you their tale, once you have Valor of your own
 			cir.getReturnValue().remove(com.jaymoskingdoms.ValorFolk.SPAR);
 		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {

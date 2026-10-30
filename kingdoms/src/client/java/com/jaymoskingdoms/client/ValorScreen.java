@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.360) The Valor page, from Strength in the K screen: your Valor as a card. Its name, rank and the way to the next;
+ * (0.7.361) The Valor page, from Strength in the K screen: your Valor as a card. Its name, rank and the way to the next;
  * its origin and second quirk, its look and (once King's Valor shows it) its soul colour; five bars (Hardness, Edge, Reach,
  * Sight, Endurance); and the feats that grew it. Before it wakes: what it takes.
  */

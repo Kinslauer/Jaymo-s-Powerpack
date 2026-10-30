@@ -6,7 +6,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.7) Jaymo's Kingdoms' Valor, asked by reflection: a coated blow (Armament, or a shot loosed coated) isn't turned
+ * (0.18.8) Jaymo's Kingdoms' Valor, asked by reflection: a coated blow (Armament, or a shot loosed coated) isn't turned
  * aside by magic. Chrono's intangibility, Darktide's untouchable flurry, Smoke's vapour and a Flame Avatar's flame all let
  * it land ({@code com.jaymoskingdoms.Valor.pierces}). Without Kingdoms (or an older one), nothing pierces.
  */

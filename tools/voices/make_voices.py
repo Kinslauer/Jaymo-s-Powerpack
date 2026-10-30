@@ -100,7 +100,7 @@ SPIRIT_LINES = [f"spirit.jaymoskingdoms.{s}.summon.{n}" for s in ("grimsby", "va
     + ["spirit.jaymoskingdoms.quiet.word.1"]
 STORY_END = "story.jaymoskingdoms.summary.end"
 # (Kingdoms 0.7.352) Voices.INTRO_LINES
-INTRO_LINES = ["story.jaymoskingdoms.gender.title", "story.jaymoskingdoms.gender.desc",
+INTRO_LINES = ["story.jaymoskingdoms.gender.title",
                "gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc"] \
     + ["gui.jaymoskingdoms.story.hold." + k for k in ("title", "realm", "harbour", "future", "arriving")]
 
@@ -113,7 +113,10 @@ def realm_free(text):
 def lines(lang, powers):
     """(voice, lang key, text) for every voiced line, questions first so a short run still voices every page."""
     s = "story.jaymoskingdoms."
-    out = [("narrator", s + q + ".title", lang[s + q + ".title"] + " " + lang[s + q + ".sub"]) for q in QUESTIONS]
+    # (Kingdoms 0.7.360) each question's title alone, and the line under it apart (read only if the page waits; none
+    # for the road)
+    out = [("narrator", s + q + ".title", lang[s + q + ".title"]) for q in QUESTIONS]
+    out += [("narrator", s + q + ".sub", lang[s + q + ".sub"]) for q in QUESTIONS if q != "road"]
     for q in QUESTIONS:
         for key in lang:
             parts = key.split(".")
