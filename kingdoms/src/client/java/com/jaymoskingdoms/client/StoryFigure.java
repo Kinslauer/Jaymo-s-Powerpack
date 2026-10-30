@@ -150,7 +150,8 @@ final class StoryFigure {
 		scene("road.banished", Act.WALK, null);
 		scene("road.cave", Act.WORK, Items.WOODEN_PICKAXE, Items.TORCH, null, null, null, null);
 		scene("road.shipwreck", Act.LOOK_DOWN, null);
-		scene("road.sworn", Act.GUARD, Items.IRON_SWORD, Items.SHIELD, Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS);
+		// (0.7.407) no leggings, so the body you made shows under the iron
+		scene("road.sworn", Act.GUARD, Items.IRON_SWORD, Items.SHIELD, Items.IRON_HELMET, Items.IRON_CHESTPLATE, null, Items.IRON_BOOTS);
 		scene("road.village", Act.WORK, Items.IRON_HOE);
 		scene("road.monolith", Act.LOOK_UP, null);
 		scene("road.wild", Act.WALK, Items.COMPASS);
@@ -316,7 +317,9 @@ final class StoryFigure {
 			target = player;
 		}
 		EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
-		Item[] gear = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
+		// (0.7.407) Andy: "issue in the creator populating the custom skin": the sworn road's full iron hid the body you'd
+		// just made, face and all, so you yourself are never drawn in a helmet
+		Item[] gear = {you ? null : sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
 		// (0.7.402) Andy: "if the origin gives them an item in this hand it should comically be on the floor": a hand whose
 		// arm is gone lets go of what it held, and it lies at the feet on that side
 		boolean rightMain = target.getMainArm() == HumanoidArm.RIGHT;

@@ -7195,3 +7195,14 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   reach (`AIM_REACH` 10, `AIM_SLACK` 0.4), short of your own pets and party members.
 - Two broken arms (Powers' `Breaks.armless`) can't swing a weapon, so they can't do a form any more either
   (`PowersCompat.armless`, message `form.armless`). One broken arm still does forms at the reduced attack damage.
+
+## 0.7.407: the life story's sworn page, and "As you grew up" (pack 0.18.76)
+- Andy: "issue in the creator populating the custom skin". The road page draws you yourself, and the sworn road's full
+  iron hid the body you'd just made. You are never drawn in a helmet there, and the sworn scene drops its leggings.
+- Andy: "dont add the white sworn to text unless you have favor". An answer that names a realm (sworn, banished,
+  minor nobles) shows no short line until its realm is picked on the page after, so no more "Sworn to , at its keep."
+- Andy: "the narrator can stop at 'as you grew up' here, the you sounds off". The youth page's title is "As you grew
+  up..." and the narrator's clip is cut before its "you".
+- Andy: "the story screen seems to be cutting off the mca editor part of the character creation". MCA marks the body
+  made partway through its creator (its editor's sync), so the server asked the road while the creator was still up and
+  the road page replaced it. The client now leaves MCA's creator alone and opens the road once no screen is up.

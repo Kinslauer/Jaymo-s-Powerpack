@@ -148,6 +148,12 @@ final class LifeStoryScreen extends Screen {
 			realms = payload.realms();
 			creatorAhead = payload.creatorAhead();
 			StoryCurtain.raise();
+			// (0.7.407) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
+			// MCA marks the body made partway through its creator, and the road was asked on top of it. While the creator
+			// is up the road waits; it opens on the first tick with no screen ({@code owed})
+			if (payload.forced() && StoryCurtain.isCreator(context.client().gui.screen())) {
+				return;
+			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -1055,7 +1061,10 @@ final class LifeStoryScreen extends Screen {
 		List<Component> lines = new ArrayList<>();
 		// (0.7.360) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
 		// its short line; the whole tale is kept for the story on the last page
-		lines.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".short", realmName(Question.ROAD)));
+		Component line = shortLine(Question.ROAD, a);
+		if (line != null) {
+			lines.add(line);
+		}
 		if (!open) {
 			lines.add(reason(a).withColor(Ui.BAD));
 		}
@@ -1266,20 +1275,33 @@ final class LifeStoryScreen extends Screen {
 			if (!out.getSiblings().isEmpty()) {
 				out.append(" ");
 			}
-			out.append(Component.translatable("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale", realmName(q)));
+			out.append(Component.translatable("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale", java.util.Objects.requireNonNullElse(realmName(q), "")));
 		}
 		return out;
 	}
 
-	/** The realm named for {@code q}'s answer, by name ("" with none). */
-	private static String realmName(Question q) {
+	/** The realm named for {@code q}'s answer, by name (null with none). */
+	private static @Nullable String realmName(Question q) {
 		int id = realmOf(q);
 		for (LifeStory.Realm r : realms) {
 			if (r.id() == id) {
 				return r.name();
 			}
 		}
-		return "";
+		return null;
+	}
+
+	/**
+	 * (0.7.407) {@code a}'s short line, or null for an answer that names a realm before one is named. Andy: "dont add the
+	 * white sworn to text unless you have favor": the realm page after it is where you pick whose favour you have, so
+	 * until then there's no "Sworn to , at its keep."
+	 */
+	private static @Nullable Component shortLine(Question q, Answer a) {
+		String realm = realmName(q);
+		if (a.realm() && realm == null) {
+			return null;
+		}
+		return Component.translatable("story.jaymoskingdoms." + q.key() + "." + a.key() + ".short", realm == null ? "" : realm);
 	}
 
 	/** What the story makes of you, a row each. */
@@ -1413,7 +1435,10 @@ final class LifeStoryScreen extends Screen {
 				icon = new ItemStack(a.icon());
 				name = Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key());
 				// (0.7.360) the option's short line; its whole tale is told on the last page
-				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".short", realmName(s.question)));
+				Component line = shortLine(s.question, a);
+				if (line != null) {
+					lines.add(line);
+				}
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {
 					lines.add(reason(a).withColor(Ui.BAD));
