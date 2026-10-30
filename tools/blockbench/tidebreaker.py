@@ -24,7 +24,7 @@ ASSETS = "src/main/resources/assets/jaymospowers"
 
 bb = load(SRC)
 atlas, _, atlas_uv = build_atlas(texture_images(bb))
-elements, worst = convert_cubes(bb, atlas_uv)
+elements, worst = convert_cubes(bb, atlas_uv, atlas=atlas)
 print(f"{len(elements)} elements, worst tilt error {worst:.1f} degrees")
 atlas.save(f"{ASSETS}/textures/item/tidebreaker_3d.png")
 model = {

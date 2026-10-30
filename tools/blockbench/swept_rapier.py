@@ -13,7 +13,7 @@ draw, and five textures of 64, 64, 64, 128 and 256 pixels (four texels to a UV u
     prism becomes a box of its average height), and each bar, a bent sheet, as a chain of 0.5-thick plates, one per straight
     stretch (BARS below; their lengths, tilts and z spans are measured from the mesh vertices, after the mesh's own turn
     about its origin). Each plate takes the UV rectangle of the mesh face it stands for. The plates' tilts (35, 31, 37.5 degrees
-    and so on) are snapped to legal ones by bake.py (the largest error it made is printed).
+    and so on) are kept exact: 26.3 takes any angle (bake.py, exact=True).
   * display(): the old rapier's values (flip=True, grip in the fist like our other 3D weapons); see the previews.
 
 Run from the repo root: python3 -I tools/blockbench/swept_rapier.py
@@ -22,7 +22,7 @@ import math, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from bake import rot_y, bake_cube, build_atlas, flatten, load, rot_z, texture_images, texture_index, uv_rotation, write_json
+from bake import rot_y, bake_cube, build_atlas, flatten, load, rot_z, texture_images, texture_index, show_both_sides, uv_rotation, write_json
 from display import display
 
 SRC = os.path.join(HERE, "..", "bbmodels", "swept-rapier.bbmodel")
@@ -44,7 +44,7 @@ shift = (8, -8 + 4 * SCALE, 8)  # model y -4 (the pommel) at -8; x, z middle on 
 
 def place(frm, to, chain, faces, worst):
     """faces: {face name: (uv rect [u0, v0, u1, v1], texture id)}; returns the baked element."""
-    new, mapping, err = bake_cube(frm, to, chain, shift=shift, scale=SCALE, spin=SPIN)
+    new, mapping, err = bake_cube(frm, to, chain, shift=shift, scale=SCALE, spin=SPIN, exact=True)
     worst[0] = max(worst[0], err)
     out = {}
     for name, (new_name, k) in mapping.items():
@@ -58,7 +58,7 @@ def place(frm, to, chain, faces, worst):
             entry["rotation"] = uv_rotation(k)
         out[new_name] = entry
     new["faces"] = out
-    return new
+    return show_both_sides(new, atlas)
 
 
 worst = [0.0]

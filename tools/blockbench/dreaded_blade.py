@@ -12,6 +12,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from display import display
+from bake import bake_cube, flatten, rot_y, apply, uv_rotation
 
 SRC = os.path.join(HERE, "..", "bbmodels", "weapon-dreaded-blade-animated.bbmodel")
 ASSETS = "src/main/resources/assets/jaymospowers"
@@ -25,8 +26,14 @@ for name, tex in zip(NAMES, bb["textures"]):
         fh.write("\n")
 
 S = 16 / bb["resolution"]["width"]  # the model's UVs are in 32ths of the texture's width
+# (0.18.63) Andy: "Dreaded blade needs to be rotated in hand, it sits flat instead of vertical". The file draws the
+# blade's wide face to x (as Sora's Dagger's did); a sword sprite, and display(), want it to z. Turn the model a quarter
+# about the vertical through the grip (x 8, z 8), keeping its 45-degree turns exact.
+SPIN = rot_y(90)
+_p = apply(SPIN, (8, 0, 8))
+SHIFT = (8 - _p[0], 0, 8 - _p[2])
 elements = []
-for el in bb["elements"]:
+for el, chain in flatten(bb):
     faces = {}
     for k, face in el["faces"].items():
         u0, v0, u1, v1 = face["uv"]
@@ -35,12 +42,13 @@ for el in bb["elements"]:
         faces[k] = {"uv": [round(v * S, 4) for v in face["uv"]], "texture": f"#{face['texture']}"}
     if not faces:
         continue
-    out = {"from": el["from"], "to": el["to"], "faces": faces}
-    rot = el.get("rotation", [0, 0, 0])
-    for axis, angle in zip("xyz", rot):
-        if angle:
-            out["rotation"] = {"angle": angle, "axis": axis, "origin": el["origin"]}
-    if any(f["texture"] == "#1" for f in faces.values()):
+    out, mapping, _ = bake_cube(el["from"], el["to"], chain, shift=SHIFT, spin=SPIN, exact=True)
+    turned = {}
+    for name, (new_name, k) in mapping.items():
+        if name in faces:
+            turned[new_name] = {**faces[name], **({"rotation": uv_rotation(k)} if k else {})}
+    out["faces"] = turned
+    if any(f["texture"] == "#1" for f in turned.values()):
         out["light_emission"] = 15
     elements.append(out)
 

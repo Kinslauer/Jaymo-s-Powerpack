@@ -174,7 +174,32 @@ def chain_matrix(chain):
 
 # ---- baking ----
 
-def bake_cube(frm, to, chain, shift=(0, 0, 0), scale=1.0, spin=None):
+def euler_zyx(m):
+    """(x, y, z) in degrees with m = Rz(z) Ry(y) Rx(x): the order 26.3's {"x", "y", "z"} element rotation (JOML rotationZYX) and
+    Blockbench both use. m is a proper rotation that is not (nearly) a quarter turn about y."""
+    y = math.asin(max(-1.0, min(1.0, -m[2][0])))
+    assert abs(math.cos(y)) > 1e-6, "gimbal lock"
+    x = math.atan2(m[2][1], m[2][2])
+    z = math.atan2(m[1][0], m[0][0])
+    back = mul(rot_z(math.degrees(z)), mul(rot_y(math.degrees(y)), rot_x(math.degrees(x))))
+    assert all(abs(back[i][j] - m[i][j]) < 1e-6 for i in range(3) for j in range(3)), (m, back)
+    return tuple(round(math.degrees(v), 4) + 0.0 for v in (x, y, z))
+
+
+def exact_rotation(m, origin):
+    """The 26.3 element "rotation" for the rotation matrix m about origin (angles are free there: any one axis, or x, y, z
+    together), or None when m is the identity."""
+    x, y, z = euler_zyx(m)
+    turned = [(a, v) for a, v in zip("xyz", (x, y, z)) if abs(v) > 1e-4]
+    if not turned:
+        return None
+    origin = [round(c, 4) for c in origin]
+    if len(turned) == 1:
+        return {"angle": turned[0][1], "axis": turned[0][0], "origin": origin}
+    return {"origin": origin, "x": x, "y": y, "z": z}
+
+
+def bake_cube(frm, to, chain, shift=(0, 0, 0), scale=1.0, spin=None, exact=False):
     """The legal element standing in for a cube turned by `chain`, moved by `shift` after scaling its position (and size)
     by `scale` about the origin; `spin` (axis-free rotation matrix, applied last, about the origin) turns the whole model.
     Returns (element dict without faces, face map {original face: (new face, uv corner shift k)}, error in degrees)."""
@@ -189,18 +214,32 @@ def bake_cube(frm, to, chain, shift=(0, 0, 0), scale=1.0, spin=None):
     best = None
     for S in OCTA:
         M = mul(R, transpose(S))
+        if exact:
+            # 26.3 takes any angle (and x, y, z together): only the quarter turns are absorbed by swapping the box's
+            # sides, whatever is left over stays exact
+            err = angle_between(M, ((1, 0, 0), (0, 1, 0), (0, 0, 1)))
+            if best is None or err < best[0] - 1e-9:
+                best = (err, S, None, None)
+            continue
         for axis, angle, Q in LEGAL_MATRICES:
             err = angle_between(M, Q)
             if best is None or err < best[0] - 1e-9:
                 best = (err, S, axis, angle)
     err, S, axis, angle = best
+    if exact:
+        residual = mul(R, transpose(S))
+        err = 0.0
     h = apply(S, half)
     new_half = tuple(abs(h[i]) * scale for i in range(3))
     element = {
         "from": [round(world[i] - new_half[i], 4) for i in range(3)],
         "to": [round(world[i] + new_half[i], 4) for i in range(3)],
     }
-    if angle:
+    if exact:
+        rotation = exact_rotation(residual, world)
+        if rotation:
+            element["rotation"] = rotation
+    elif angle:
         element["rotation"] = {"angle": angle, "axis": axis, "origin": [round(c, 4) for c in world]}
     faces = {}
     for name in FACE_NAMES:
@@ -217,6 +256,45 @@ def bake_cube(frm, to, chain, shift=(0, 0, 0), scale=1.0, spin=None):
         assert shift_k is not None, (name, new_name)
         faces[name] = (new_name, shift_k)
     return element, faces, err
+
+
+FLAT_FACES = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}
+
+
+def _region_clear(image, uv):
+    """True when every texel under a face's UV rectangle (sixteenths of `image`) is fully transparent."""
+    w, h = image.size
+    u0, v0, u1, v1 = uv
+    x0, x1 = sorted((u0 * w / 16, u1 * w / 16))
+    y0, y1 = sorted((v0 * h / 16, v1 * h / 16))
+    box = (int(x0 + 1e-6), int(y0 + 1e-6), max(int(x0 + 1e-6) + 1, math.ceil(x1 - 1e-6)), max(int(y0 + 1e-6) + 1, math.ceil(y1 - 1e-6)))
+    return image.crop(box).getchannel("A").getextrema()[1] == 0
+
+
+def show_both_sides(element, image, thin=0.7):
+    """(Andy: the Iron Rapier's and Iron Dagger's blades were not there in game.) A plane or a thin plate (under `thin` units
+    through, on any axis) has a face on each of its two broad sides, and the file paints its picture on one of them only: the
+    other face's UV rectangle sits on empty texels. Culling hides the face turned away from the viewer, so seen from the empty
+    side nothing at all is drawn. Here the empty side takes the picture of the other one (turned about u, so that it reads the
+    right way round from behind). `image` is the atlas the element's UVs (in sixteenths) point into. Edits and returns `element`."""
+    for a in range(3):
+        if element["to"][a] - element["from"][a] > thin:
+            continue
+        pair = [n for n in FLAT_FACES[a] if n in element["faces"]]
+        if len(pair) != 2:
+            continue
+        fa, fb = (element["faces"][n] for n in pair)
+        clear_a, clear_b = _region_clear(image, fa["uv"]), _region_clear(image, fb["uv"])
+        if clear_a == clear_b:
+            continue
+        shown, blank = (fa, fb) if clear_b else (fb, fa)
+        u0, v0, u1, v1 = shown["uv"]
+        blank["uv"] = [u1, v0, u0, v1]
+        blank["texture"] = shown["texture"]
+        blank.pop("rotation", None)
+        if shown.get("rotation"):
+            blank["rotation"] = shown["rotation"]
+    return element
 
 
 def uv_rotation(k):
@@ -276,9 +354,10 @@ def texture_index(bb, texture):
     return int(texture)
 
 
-def convert_cubes(bb, atlas_uv, shift=(0, 0, 0), scale=1.0, spin=None, texture=None):
+def convert_cubes(bb, atlas_uv, shift=(0, 0, 0), scale=1.0, spin=None, texture=None, atlas=None):
     """Every cube of the model as legal elements, its faces' UVs put into the atlas (texture: a texture index to use for every
-    face instead of the face's own). Faces with no texture or no area are left out. Returns (elements, worst tilt error)."""
+    face instead of the face's own; atlas: the merged image, to give a one-side-painted plane its picture on the back too, see
+    show_both_sides). Faces with no texture or no area are left out. Returns (elements, worst tilt error)."""
     elements, worst = [], 0.0
     for el, chain in flatten(bb):
         new, mapping, err = bake_cube(el["from"], el["to"], chain, shift=shift, scale=scale, spin=spin)
@@ -298,7 +377,7 @@ def convert_cubes(bb, atlas_uv, shift=(0, 0, 0), scale=1.0, spin=None, texture=N
             faces[new_name] = entry
         if faces:
             new["faces"] = faces
-            elements.append(new)
+            elements.append(show_both_sides(new, atlas) if atlas is not None else new)
     return elements, worst
 
 

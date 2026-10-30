@@ -9,9 +9,10 @@ and seven 32x32 textures (iron, aeternium, diamond, gold, netherite, ruby, stone
 faces use one texture, aeternium's; here:
   * the seven textures go side by side into one 128x64 atlas (textures/item/armory/harpoon_3d.png, and Kingdoms' copy), so a
     tier is only a different tile; both of ours use IRON (VARIANT) tile.
-  * the group turns are baked into the cubes (bake.py): every cube keeps its exact place and gets the nearest legal turn
-    (one axis, a multiple of 22.5 up to 45, after the quarter turns that swap its sides). The barbs at -62.5 degrees end up
-    as a quarter turn and 27.5 off -> -22.5, and so on; the largest tilt error of any cube is printed.
+  * the group turns are baked into the cubes (bake.py, exact=True): every cube keeps its exact place and its exact turn.
+    26.3 takes any angle about one axis, or x, y and z together, so only the quarter turns are absorbed (by swapping a box's
+    sides) and whatever is left stays as drawn. (0.17.x baked them to the nearest multiple of 22.5 up to 45, which bent the
+    barbs, up to 14 degrees off, and scrambled the head.)
   * the whole model is scaled to SCALE (0.75) of the file's size (the file's is two blocks long) and centred on 8,8,8 along its
     axis, so the thrown harpoon spins and sinks its tip right.
   * display(): the model is a diagonal sprite shape, so display(roll=45) stands it upright for the hand; the grip is a third
@@ -60,7 +61,7 @@ shift = tuple(8 - centre[i] * SCALE for i in range(3))
 elements = []
 worst = 0.0
 for el, chain in cubes:
-    new, faces, err = bake_cube(el["from"], el["to"], chain, shift=shift, scale=SCALE)
+    new, faces, err = bake_cube(el["from"], el["to"], chain, shift=shift, scale=SCALE, exact=True)
     worst = max(worst, err)
     out_faces = {}
     for name, (new_name, k) in faces.items():
