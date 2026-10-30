@@ -373,7 +373,7 @@ public final class Will {
 	}
 
 	/** Whether {@code player} remembers {@code e} casting at them a moment ago. */
-	private static boolean castAt(Player player, Entity e) {
+	static boolean castAt(Player player, Entity e) {
 		Map<UUID, Long> at = CAST_AT.get(player.getUUID());
 		Long when = at == null ? null : at.get(e.getUUID());
 		return when != null && player.level().getGameTime() - when <= CAST_MEMORY;
@@ -442,6 +442,10 @@ public final class Will {
 	 * working, or less than lethal weaponry like fists or clubs". Mobs only.
 	 */
 	public static boolean noMercy(LivingEntity victim, DamageSource source) {
+		// (0.7.361) struck by a King's Valor Coating: the weaker die (its own rule for sneaking, fists and clubs)
+		if (ValorKings.killed(victim)) {
+			return true;
+		}
 		if (victim instanceof Player || !(source.getEntity() instanceof ServerPlayer sp) || rank(sp, Skills.Perk.NO_MERCY) == 0 || sp.isShiftKeyDown()) {
 			return false;
 		}
@@ -500,7 +504,17 @@ public final class Will {
 	}
 
 	/** Spellbreaker Blow: {@code caster}'s spell breaks, and they can't cast for a while. */
-	private static void spellbreak(ServerLevel level, ServerPlayer sp, LivingEntity caster) {
+	static void spellbreak(ServerLevel level, ServerPlayer sp, LivingEntity caster) {
+		hush(level, caster);
+		level.sendParticles(ParticleTypes.ENCHANTED_HIT, caster.getX(), caster.getY(0.7), caster.getZ(), 24, 0.3, 0.4, 0.3, 0.3);
+		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
+		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.spellbreak").withStyle(ChatFormatting.AQUA));
+		// (0.7.361) a feat for Valor
+		Valor.spellbroke(sp, caster);
+	}
+
+	/** (0.7.361) {@code caster} can't cast for a while (a Spellbreaker Blow's hush; King's Valor's too). */
+	static void hush(ServerLevel level, LivingEntity caster) {
 		long now = level.getGameTime();
 		if (caster instanceof ServerPlayer other) {
 			HUSHED_PLAYERS.put(other.getUUID(), now + HUSH_PLAYER_TICKS);
@@ -515,9 +529,13 @@ public final class Will {
 				}
 			}
 		}
-		level.sendParticles(ParticleTypes.ENCHANTED_HIT, caster.getX(), caster.getY(0.7), caster.getZ(), 24, 0.3, 0.4, 0.3, 0.3);
-		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
-		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.spellbreak").withStyle(ChatFormatting.AQUA));
+	}
+
+	/** (0.7.361) {@code mob} stands dazed for {@code ticks} (Valor's stun, King's Valor's shaken), as the roar's stunned do. */
+	static void daze(Mob mob, int ticks) {
+		long until = mob.level().getGameTime() + ticks;
+		STUNNED.merge(mob, until, Math::max);
+		TREMBLING.merge(mob, until, Math::max);
 	}
 
 	/** Whether {@code e} was hushed by a Spellbreaker Blow and can't cast yet (Sorcery, Mana and Arcana ask). */
@@ -548,6 +566,8 @@ public final class Will {
 		level.sendParticles(ParticleTypes.ANGRY_VILLAGER, sp.getX(), sp.getY(1.0) + 0.3, sp.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.refuse").withStyle(ChatFormatting.GOLD));
 		roar(level, sp);
+		// (0.7.361) a feat for Valor, or its waking
+		Valor.refused(sp);
 		return false;
 	}
 
@@ -570,7 +590,8 @@ public final class Will {
 		}
 		double reach = ROAR_REACH * surge(sp);
 		AABB box = sp.getBoundingBox().inflate(reach, 4.0, reach);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> foe(sp, e) || rival(sp, e))) {
+		// (0.7.361) a coated Warlord's own stand steady
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> foe(sp, e) || rival(sp, e) && !Valor.steadied(e))) {
 			if (e instanceof ServerPlayer other) {
 				other.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ROAR_STUN_TICKS, 4), sp);
 				other.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, ROAR_STUN_TICKS, 2), sp);
@@ -695,7 +716,7 @@ public final class Will {
 		if (dread > 0) {
 			double reach = (DREAD_REACH + DREAD_REACH_PER_RANK * dread) * surge;
 			AABB box = sp.getBoundingBox().inflate(reach, 3.0, reach);
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> (foe(sp, e) || rival(sp, e)) && !Downed.isDowned(e)
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> (foe(sp, e) || rival(sp, e) && !Valor.steadied(e)) && !Downed.isDowned(e)
 				&& e.distanceToSqr(sp) <= reach * reach && weaker(sp, e))) {
 				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DREAD_TICKS, 0), sp);
 				e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, DREAD_TICKS, 0), sp);

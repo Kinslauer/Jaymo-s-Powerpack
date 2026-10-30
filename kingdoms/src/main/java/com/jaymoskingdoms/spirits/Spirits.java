@@ -192,7 +192,8 @@ public final class Spirits {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player) {
 				SpiritState state = state(player);
-				if (state != null && state.out() && Mana.canPay(player, 1.0F)
+				// (0.7.361) a coated blow isn't turned aside (Valor)
+				if (state != null && state.out() && Mana.canPay(player, 1.0F) && !com.jaymoskingdoms.Valor.pierces(source)
 					&& (HandMoves.catchIfReady(player, state, source) || of(state.kind()).hurt(player, state, source, amount))) {
 					return false;
 				}

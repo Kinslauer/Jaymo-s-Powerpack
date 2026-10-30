@@ -3884,3 +3884,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     arrests (Rookie to Commander). Leave the world and the criminal escapes. Using the licence shows rank and warrant.
   - Not built with Gradle (the cloud can't reach Fabric's Maven); every changed file compiles against the staged 26.3
     jars. Not seen in game.
+- **0.18.8, Valor pierces magic (Kingdoms 0.7.361):** Kingdoms' new Valor (Jungxvv's idea) lets a coated blow reach what
+  magic hides behind. `core/wounds/ValorSkill` asks Kingdoms' `Valor.pierces` by reflection; a coated blow (Armament up,
+  or a shot loosed coated) now lands through Chrono's intangible counter (`ChronoFlow`), Darktide's untouchable flurry
+  (`DarktideGuard`), Smoke's Vapour Form and wholly-smoke (`SmokeVapour`), and a Flame Avatar's flame (`FlameAvatar.absorb`).
+  Without Kingdoms nothing changes. Compile-checked; not seen in game.

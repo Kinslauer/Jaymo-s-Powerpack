@@ -416,8 +416,8 @@ public final class DarktideGuard {
 				return false;
 			}
 		}
-		if (live.dash != null && live.dash.target >= 0) {
-			// mid-flurry: untouchable, like the sunken
+		if (live.dash != null && live.dash.target >= 0 && !com.jaymospowers.core.wounds.ValorSkill.pierces(source)) {
+			// mid-flurry: untouchable, like the sunken (but not to a Valor-coated blow, 0.18.8)
 			return false;
 		}
 		if (live.rollStart >= 0 && source.getEntity() != null) {

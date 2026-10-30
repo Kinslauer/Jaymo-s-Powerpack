@@ -159,6 +159,11 @@ final class SkillScreen extends Screen {
 		// (0.7.82) the world tiers, beside Done
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
+		if (!stats && !jobs && pillar == Skills.Pillar.STRENGTH) {
+			// (0.7.361) Valor's page, from Strength
+			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)))
+				.bounds(left() + 6 + 92 + 4, fy, 60, 16).build());
+		}
 		int pages = pages();
 		if (stats || jobs || pages < 2) {
 			page = 0;

@@ -8,6 +8,8 @@ import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HiddenBlade;
 import com.jaymoskingdoms.Senses;
 import com.jaymoskingdoms.VillagerHunters;
+import com.jaymoskingdoms.Valor;
+import com.jaymoskingdoms.ValorFolk;
 import com.jaymoskingdoms.Will;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,9 +33,10 @@ abstract class LivingEntityHurtMixin {
 	private float jaymoskingdoms$classDamage(float amount, ServerLevel level, DamageSource source) {
 		LivingEntity self = (LivingEntity) (Object) this;
 		// (0.7.220) and a Master Hunter's on beasts
-		float dealt = Careers.dealt(self, source, Heritage.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(self, source, amount)))));
+		float dealt = Careers.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(self, source, amount))))));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
-		return VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)));
+		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
+		return ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))));
 	}
 }
