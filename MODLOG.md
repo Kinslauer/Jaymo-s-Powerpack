@@ -4171,3 +4171,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   which Auto HUD slides away; now drawn before the chat, morphing part by part between stances). Order is prone, the low
   crouch (our sneak: arms out, sway, and the only stance that kneels when still and steadies shots), vanilla's plain sneak,
   standing. MGSV-smooth: `CrouchPose.bendBody` eases vanilla's crouch in and out over 7 ticks, smootherstep everywhere.
+
+- **0.18.67 (Kingdoms 0.7.401):** the Piglin King's arm; see the Kingdoms MODLOG.

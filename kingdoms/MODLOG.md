@@ -7146,3 +7146,9 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: "all the narrator should say here is your story is being written." `StoryHoldScreen` reads its title once and
   no longer reads what the hold is for (capital, harbour, future, arriving); the hints still cycle as text. The four
   unused hold-reason clips are gone from `Voices.INTRO_LINES`, `sounds.json` and `make_voices.py`.
+
+## 0.7.401: the Piglin King stands straight (pack 0.18.67)
+- Andy: "piglin arm is broken". The model file's idle and walk hold a twisted fighting stance, the left arm thrust out
+  and pushed off its shoulder (made to hold something it doesn't have). It now stands in its rest pose and walks with
+  its legs and arms swinging (`BeastsClient.kingStride`); its claw, volley, cold snap and roar still play as drawn.
+- Compile-checked; not seen in game.
