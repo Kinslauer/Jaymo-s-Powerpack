@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.combat.Guard;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -30,7 +31,8 @@ import net.minecraft.world.phys.Vec3;
  * attacker is knocked back reeling (slowed and weakened), and his next punch within {@link #COUNTER_TICKS} is a
  * counter ({@link #COUNTER_BONUS} harder). Then {@link #PARRY_COOLDOWN} before another parry.</li>
  * </ul>
- * The guard slows him like charging does; everyone sees the crossed arms ({@link #GUARD}).
+ * (0.18.24) The timing bar under the crosshair shows that window (gold), grey while the parry cools down ({@link Guard#showPower}),
+ * and flashes on a parry. The guard slows him like charging does; everyone sees the crossed arms ({@link #GUARD}).
  */
 public final class ZFighterGuard {
 	static final float BLOCK_SHARE = 0.5F;
@@ -67,8 +69,10 @@ public final class ZFighterGuard {
 		if (up) {
 			live.guardStart = player.level().getGameTime();
 			player.setAttached(GUARD, true);
+			Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
 		} else {
 			player.removeAttached(GUARD);
+			Guard.hidePower(player);
 		}
 		ZFighterPower.refresh(player, live);
 	}
@@ -77,6 +81,7 @@ public final class ZFighterGuard {
 	static void drop(ServerPlayer player, ZFighterPower.Live live) {
 		live.guarding = false;
 		player.removeAttached(GUARD);
+		Guard.hidePower(player);
 	}
 
 	/** What's left of {@code damage} after his guard (the victim side of the damage hook). */
@@ -121,6 +126,8 @@ public final class ZFighterGuard {
 		live.counterUntil = now + COUNTER_TICKS;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + PARRY_KI);
 		Mastery.used(player);
+		Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
+		Guard.cue(player, attacker, false);
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 14, 0.2, 0.2, 0.2, 0.4);
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y - 0.3, at.z, 12, 0.25, 0.25, 0.25, 0.1);

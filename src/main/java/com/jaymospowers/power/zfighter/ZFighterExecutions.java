@@ -33,7 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.40) Andy: "z fighter needs at least 3 bare handed executions, maybe more with different forms, for example
+ * (0.18.46) Andy: "z fighter needs at least 3 bare handed executions, maybe more with different forms, for example
  * frostborn should use the beam". A Z Fighter's empty hands are a weapon, as the symbiote suit's are: sneak + attack held
  * on someone downed or crippled ({@link Finishers#HOLD_TICKS}, no Executioner perk, no kneeling at the head) plays one of
  * these instead of the neck snap, picked at random from what's open to him and never the same one twice running
