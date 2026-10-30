@@ -20,7 +20,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
@@ -176,7 +175,14 @@ public final class BioForms {
 
 	/** Render-state extraction (after {@link HeritageLooks#extract}): a Bio-built player's form, and their wear hidden under it. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		if (!(entity instanceof Player) || !bio(entity)) {
+		if (!(entity instanceof Player)) {
+			// (0.7.363) a Bio-built player's corpse: MCA's villager look of them, wearing the tags they died with (Kitchen
+			// puts them on it while it's taken), keeps the form and palette they died in
+			Shape dead = fromTags(entity);
+			state.setData(KEY, dead);
+			return;
+		}
+		if (!bio(entity)) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -190,6 +196,26 @@ public final class BioForms {
 			avatar.showLeftPants = false;
 			avatar.showRightPants = false;
 		}
+	}
+
+	/** (0.7.363) The form an entity's tags give (a corpse's look), or null if it carries no Bio-built's. */
+	private static @Nullable Shape fromTags(Entity entity) {
+		java.util.Set<String> tags = entity.entityTags();
+		if (!tags.contains(Heritage.TAG + Heritage.Kind.BIOBUILT.key())) {
+			return null;
+		}
+		int form = 0, palette = 0;
+		for (int i = 0; i < TAILS.length; i++) {
+			if (tags.contains(BioBuilt.FORM_TAG + i)) {
+				form = i;
+			}
+		}
+		for (int i = 0; i < PALETTES.length; i++) {
+			if (tags.contains(BioBuilt.PALETTE_TAG + i)) {
+				palette = i;
+			}
+		}
+		return new Shape(form, palette, false);
 	}
 
 	/** Right after a model was posed for this state: the first form hunched, the second bulked. */
@@ -224,8 +250,8 @@ public final class BioForms {
 	 * Draws a Bio-built player's form ({@link HeritageLooks#submit}): the form's skin on {@code marks}, its glow on
 	 * {@code glowing}, its parts on the bones, and its tail. False when the state carries no form (not a Bio-built player).
 	 */
-	static boolean submit(PoseStack poseStack, SubmitNodeCollector collector, int light, AvatarRenderState state, PlayerModel marks,
-		PlayerModel glowing, boolean headCovered, boolean bodyCovered) {
+	static <S extends HumanoidRenderState> boolean submit(PoseStack poseStack, SubmitNodeCollector collector, int light, S state, HumanoidModel<S> marks,
+		HumanoidModel<S> glowing, boolean headCovered, boolean bodyCovered) {
 		Shape shape = state.getData(KEY);
 		if (shape == null) {
 			return false;

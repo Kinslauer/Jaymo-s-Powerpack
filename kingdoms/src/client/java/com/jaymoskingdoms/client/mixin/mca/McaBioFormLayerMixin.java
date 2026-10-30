@@ -34,7 +34,7 @@ abstract class McaBioFormLayerMixin {
 	}
 
 	/**
-	 * Whether the body being drawn is a Bio-built player's: the form on the state ({@link BioForms#extract}), or (0.7.362,
+	 * Whether the body being drawn is a Bio-built player's: the form on the state ({@link BioForms#extract}), or (0.7.363,
 	 * Andy's screenshot showed MCA's clothes and hair still on one) the player MCA's visuals were taken from.
 	 */
 	private static boolean jaymoskingdoms$bio(HumanoidRenderState state) {

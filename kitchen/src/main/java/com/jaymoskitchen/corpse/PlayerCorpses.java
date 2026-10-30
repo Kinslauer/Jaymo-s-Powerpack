@@ -69,6 +69,8 @@ public final class PlayerCorpses {
 		Holder holder = (Holder) player;
 		corpse.setUpPlayer(player.getUUID(), player.getGameProfile().name(), holder.jaymoskitchen$hotbar(), holder.jaymoskitchen$selected());
 		corpse.setSlim(slim(player));
+		// (0.5.37) the look they died in (a Bio-built's form), kept for good
+		corpse.keepLookTags(player);
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
 		corpse.markJustDied();

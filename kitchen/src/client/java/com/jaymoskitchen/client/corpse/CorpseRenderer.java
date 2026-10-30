@@ -25,6 +25,8 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -232,7 +234,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			state.x -= Mth.cos(radians) * half;
 			state.z -= Mth.sin(radians) * half;
 		}
-		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
+		EntityRenderState bodyState = lookState(corpse, body, look, renderer, partialTicks);
 		state.sprawled = false;
 		if (bodyState instanceof LivingEntityRenderState living) {
 			living.hasRedOverlay = false;
@@ -335,7 +337,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		state.bodyHeight = body.getBbHeight();
 		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
-		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
+		EntityRenderState bodyState = lookState(corpse, body, look, renderer, partialTicks);
 		if (bodyState instanceof LivingEntityRenderState living) {
 			living.hasRedOverlay = false;
 			living.deathTime = 0.0F;
@@ -355,6 +357,30 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
+	}
+
+	/**
+	 * (0.5.37) {@code body}'s render state; a dead player's look ({@code look}, MCA's villager for them) wears the tags
+	 * they died with while it's taken ({@link CorpseEntity#lookTags}: a Bio-built's form, so whoever draws that look draws
+	 * the form they died in, Andy: "it should always look the way it did when the player died"), and then sheds them,
+	 * since MCA draws the living player from the same villager.
+	 */
+	private static EntityRenderState lookState(CorpseEntity corpse, Entity body, @Nullable Entity look, EntityRenderer<? super Entity, ?> renderer,
+		float partialTicks) {
+		List<String> tags = look != null && body == look ? corpse.lookTags() : List.of();
+		List<String> added = new ArrayList<>();
+		for (String tag : tags) {
+			if (body.addTag(tag)) {
+				added.add(tag);
+			}
+		}
+		try {
+			return renderer.createRenderState(body, partialTicks);
+		} finally {
+			for (String tag : added) {
+				body.removeTag(tag);
+			}
+		}
 	}
 
 	/**
@@ -403,7 +429,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				track.sideUp(), true);
 			state.pose = pose;
 		}
-		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
+		EntityRenderState bodyState = lookState(corpse, body, look, renderer, partialTicks);
 		if (bodyState instanceof LivingEntityRenderState living) {
 			// standing, facing front, nothing flinching: the physics does all the posing
 			living.hasRedOverlay = false;
