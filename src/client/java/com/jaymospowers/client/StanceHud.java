@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
  * small figure in the bottom-left corner shows how you stand (on your feet, crouched, low crouch, prone), with a notched
  * height bar beside it whose marker slides between the stances. It shows while you're below standing and for
  * {@link #LINGER} ticks after you change stance, then fades.
- * <p>(0.18.65) Andy: "the crouching indicator is cut off screen ... use a smoother animation like the one from MGSV". It
+ * <p>(0.18.66) Andy: "the crouching indicator is cut off screen ... use a smoother animation like the one from MGSV". It
  * was drawn with the hotbar, which Auto HUD slides off the bottom; it's drawn before the chat now, clear of the edge. The
  * figure morphs from one stance to the next along with the marker: each body part slides from where it was to where it
  * goes.

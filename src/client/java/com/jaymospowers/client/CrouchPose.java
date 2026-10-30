@@ -35,7 +35,7 @@ import net.minecraft.world.entity.player.Player;
  * down to the foot ({@link KneeBend}); the legs hold that whatever is in the hands, bow, crossbow, gun or thrown.
  * <p>(0.18.57) The low crouch from the stance wheel ({@link Stance}): both thighs forward and both knees bent so the shins
  * stand straight ({@link KneeBend}), the body sunk {@link #LOW_DROP} lower to keep the feet on the ground.
- * <p>(0.18.65) Andy: "the second to last option should be our new sneak, the third option the default vanilla sneak ...
+ * <p>(0.18.66) Andy: "the second to last option should be our new sneak, the third option the default vanilla sneak ...
  * use a smoother animation like the one from MGSV". The arms out and the sway are now the low crouch's alone; a plain
  * sneak is vanilla's, and only the low crouch goes onto one knee when still (the firing stance). And every change eases: vanilla snaps in and out of
  * its crouch, so the body is blended between standing and crouched over {@link #BEND_IN} ticks ({@link #bendBody}),
@@ -115,10 +115,10 @@ public final class CrouchPose {
 		} else if (track.stillSince < 0.0F) {
 			track.stillSince = now;
 		}
-		// (0.18.65) onto the knee only from the low crouch; a plain sneak stays vanilla's
+		// (0.18.66) onto the knee only from the low crouch; a plain sneak stays vanilla's
 		boolean kneel = still && entity instanceof Player p && Stance.low(p) && now - track.stillSince >= Kneel.KNEEL_AFTER;
 		boolean low = crouched && entity instanceof Player player && Stance.low(player);
-		// (0.18.65) arms out and swaying only in the low crouch; a plain sneak is vanilla's
+		// (0.18.66) arms out and swaying only in the low crouch; a plain sneak is vanilla's
 		track.ready = approach(track.ready, low ? 1.0F : 0.0F, dt / READY_IN);
 		track.kneel = approach(track.kneel, kneel ? 1.0F : 0.0F, dt / (kneel ? KNEEL_IN : GET_UP));
 		track.low = approach(track.low, low ? 1.0F : 0.0F, dt / LOW_IN);
@@ -144,7 +144,7 @@ public final class CrouchPose {
 		if (c == null || state.deathTime > 0.0F) {
 			return;
 		}
-		// (0.18.65) vanilla drops a crouching body V_OFFSET at once: eased in and out instead
+		// (0.18.66) vanilla drops a crouching body V_OFFSET at once: eased in and out instead
 		float drop = V_OFFSET * state.scale;
 		if (!state.isCrouching) {
 			poseStack.translate(0.0F, -drop * c.bend(), 0.0F);
@@ -219,7 +219,7 @@ public final class CrouchPose {
 	}
 
 	/**
-	 * (0.18.65) Vanilla lays its crouch on (or takes it off) in one frame; here the body is drawn only {@code bend} of the
+	 * (0.18.66) Vanilla lays its crouch on (or takes it off) in one frame; here the body is drawn only {@code bend} of the
 	 * way into it, so going down and getting up both ease (MGSV's smooth stance changes).
 	 */
 	private static void bendBody(Model<?> model, Object renderState) {
@@ -293,7 +293,7 @@ public final class CrouchPose {
 		return from < to ? Math.min(to, from + step) : Math.max(to, from - step);
 	}
 
-	/** (0.18.65) Smootherstep: starts and settles with no jolt at either end. */
+	/** (0.18.66) Smootherstep: starts and settles with no jolt at either end. */
 	private static float smooth(float t) {
 		t = Mth.clamp(t, 0.0F, 1.0F);
 		return t * t * t * (t * (t * 6.0F - 15.0F) + 10.0F);

@@ -59,7 +59,7 @@ public final class Kneel {
 	}
 
 	/**
-	 * Whether this player could be on one knee at all: crouched on the ground, on their own feet. (0.18.65) Andy: "it only
+	 * Whether this player could be on one knee at all: crouched on the ground, on their own feet. (0.18.66) Andy: "it only
 	 * kneels on the second to last option, vanilla sneak stays": only from the low crouch ({@link Stance}), not a plain sneak.
 	 */
 	public static boolean crouched(Player player) {
