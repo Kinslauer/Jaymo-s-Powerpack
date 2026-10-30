@@ -37,6 +37,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -808,6 +809,7 @@ public final class Valor {
 		live.reinforced = true;
 		live.armed = data.rank() >= KINDLED;
 		sp.level().playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
+		coatSound(sp.level(), sp, data.lookKind(), true);
 		coatBurst(sp.level(), sp, data.lookKind().color, 12);
 		sync(sp, data, live);
 	}
@@ -939,6 +941,10 @@ public final class Valor {
 			if (r.nextInt(3) == 0) {
 				level.sendParticles(grit, x, y - 0.1, z, 1, 0.06, 0.1, 0.06, 0.0);
 			}
+			if (data.lookKind() == Look.ASH) {
+				// (0.7.410, Andy: "a dripping debris effect from the ash like gravel and sand") it crumbles as it goes
+				level.sendParticles(r.nextBoolean() ? ASH_GRAVEL : ASH_SAND, x, y - 0.25, z, 1 + r.nextInt(2), 0.08, 0.15, 0.08, 0.0);
+			}
 		}
 		// the main hand
 		double hx = e.getX() - sx * 0.38 + fx * 0.3, hz = e.getZ() - sz * 0.38 + fz * 0.3, hy = y - 0.15;
@@ -989,6 +995,46 @@ public final class Valor {
 		}
 	}
 
+	private static final BlockParticleOption ASH_GRAVEL = new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.GRAVEL.defaultBlockState());
+	private static final BlockParticleOption ASH_SAND = new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.SAND.defaultBlockState());
+
+	/**
+	 * (0.7.410) Each look's own sound, when its coat goes up ({@code raised}) or takes or lands a blow: Iron's clank, Stone's
+	 * thud, Scale's clacking scutes, Ash crumbling like gravel and sand, Haze's shimmer, Lacquer's ringing shell. Quiet, so
+	 * it sits under the blow's own sound.
+	 */
+	static void coatSound(ServerLevel level, LivingEntity e, Look look, boolean raised) {
+		RandomSource r = e.getRandom();
+		float pitch = 0.9F + r.nextFloat() * 0.2F;
+		switch (look) {
+			case IRON -> play(level, e, raised ? SoundEvents.ARMOR_EQUIP_IRON.value() : SoundEvents.CHAIN_HIT, 0.8F, pitch * (raised ? 0.8F : 0.7F));
+			case STONE -> play(level, e, raised ? SoundEvents.STONE_HIT : SoundEvents.DEEPSLATE_HIT, 0.9F, pitch * 0.6F);
+			case SCALE -> play(level, e, raised ? SoundEvents.ARMOR_EQUIP_TURTLE.value() : SoundEvents.ARMADILLO_HURT_REDUCED, 0.8F, pitch * 1.1F);
+			case ASH -> {
+				play(level, e, raised ? SoundEvents.SAND_BREAK : SoundEvents.GRAVEL_HIT, 0.8F, pitch * 0.8F);
+				if (!raised) {
+					play(level, e, SoundEvents.SAND_HIT, 0.5F, pitch);
+				}
+			}
+			case HAZE -> {
+				play(level, e, raised ? SoundEvents.AMETHYST_BLOCK_RESONATE : SoundEvents.AMETHYST_BLOCK_CHIME, raised ? 0.9F : 1.2F, pitch * 1.5F);
+				if (!raised) {
+					play(level, e, SoundEvents.AMETHYST_CLUSTER_HIT, 0.4F, pitch * 1.8F);
+				}
+			}
+			case LACQUER -> {
+				play(level, e, raised ? SoundEvents.SHULKER_BOX_OPEN : SoundEvents.HEAVY_CORE_HIT, 0.7F, pitch * (raised ? 0.7F : 1.5F));
+				if (!raised) {
+					play(level, e, SoundEvents.ANVIL_LAND, 0.12F, pitch * 1.9F);
+				}
+			}
+		}
+	}
+
+	private static void play(ServerLevel level, LivingEntity e, SoundEvent sound, float volume, float pitch) {
+		level.playSound(null, e.getX(), e.getY(0.6), e.getZ(), sound, e instanceof Player ? SoundSource.PLAYERS : SoundSource.NEUTRAL, volume, pitch);
+	}
+
 	/** Each look's own grit off the coat. */
 	static ParticleOptions grit(Look look) {
 		return switch (look) {
@@ -1035,6 +1081,9 @@ public final class Valor {
 					off = Math.max(off, 1.0F - EMBER_FIRE);
 				}
 				amount *= 1.0F - off;
+				if (covered == target && covered.level() instanceof ServerLevel level) {
+					coatSound(level, covered, data.lookKind(), false);
+				}
 				if (covered instanceof ServerPlayer sp) {
 					live(sp).lastCombat = sp.level().getGameTime();
 				}
@@ -1062,6 +1111,9 @@ public final class Valor {
 		float more = ARMAMENT[rank] + (data.bentKind() == Bent.DUEL ? DUEL_ARMAMENT : 0.0F)
 			+ (data.bentKind() == Bent.MAGEBANE && Will.caster(target) ? MAGEBANE : 0.0F);
 		amount *= 1.0F + more;
+		if (by instanceof LivingEntity striker && target.level() instanceof ServerLevel level) {
+			coatSound(level, striker, data.lookKind(), false);
+		}
 		if (by instanceof Player p && Classes.classOf(p) == Classes.PlayerClass.BRUTE && source.getDirectEntity() == p && p.getMainHandItem().isEmpty()) {
 			amount += BRUTE_FIST;
 		}
@@ -1116,6 +1168,7 @@ public final class Valor {
 				live.blockReady = now + BLOCK_EVERY;
 				live.pool -= BLOCK_COST;
 				level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
+				coatSound(level, sp, data.lookKind(), false);
 				coatBurst(level, sp, data.lookKind().color, 8);
 				attacker.knockback(0.4, sp.getX() - attacker.getX(), sp.getZ() - attacker.getZ(), source, 0.0F);
 				return false;

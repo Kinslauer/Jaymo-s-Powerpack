@@ -249,6 +249,10 @@ public final class ValorFolk {
 				|| holder.getLastHurtByMob() != null && holder.tickCount - holder.getLastHurtByMobTimestamp() < CALM_TICKS);
 			int packed = fighting ? Valor.REINFORCED | (data.rank() >= Valor.KINDLED ? Valor.ARMED : 0) | (ValorKings.coatOpen(data) ? Valor.KINGS : 0) | 0xFF00 : 0;
 			if (holder.getAttachedOrElse(Valor.STATE, 0) != packed) {
+				if (packed != 0 && holder.getAttachedOrElse(Valor.STATE, 0) == 0) {
+					// (0.7.410) coating up: its look's sound
+					Valor.coatSound(level, holder, data.lookKind(), true);
+				}
 				holder.setAttached(Valor.STATE, packed);
 			}
 			if (fighting && now % 4 == 0) {

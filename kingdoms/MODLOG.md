@@ -7233,3 +7233,18 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   - Each look sheds its own grit beside the dust (iron and stone dust, dark prismarine flecks, white ash, smoke, ink),
     the dust takes the soul colour under King's coating, and King's Valor (released or revealed) flashes the soul
     colour with its glow rising off the holder.
+
+## 0.7.410: Valor's growing plates, ash debris and coat sounds
+- Andy: "a growing scale system to the valor modeled off the player like bio built". `ValorPlates` lays raised boxes on
+  the arms the way `BioForms` lays its steel plates, posed with the arm as it's drawn (over armour too, and on your own
+  first-person arm). They reach as far up the arm as the rank's coat (a two-tier pauldron at Unbroken), and when the coat
+  goes up they grow in one after another from the hand (`GROW_TICKS` 16). Scale: staggered rows of overlapping scales,
+  lower edges lifted. Iron: riveted bands. Stone: rough lumps. Ash: curling flakes. Lacquer: overlapping shell segments.
+  Haze has none (a shimmer, not a shell). Under King's coating their rims glint in the soul colour. Textures
+  `plate_<look>.png` from `tools/gen_valor_coats.py`.
+- Andy: "a dripping debris effect from the ash like gravel and sand". An Ash coat crumbles falling gravel and sand dust
+  off the forearms as it's up.
+- Andy: "shimmering and metallic sounds on interactions w haze or laquer". Each look has its own sound when its coat goes
+  up, takes a blow, lands one or blocks bare-armed (`Valor.coatSound`): Iron chain clank, Stone deepslate thud, Scale
+  armadillo scute clack, Ash gravel and sand crumble, Haze amethyst chime and shimmer, Lacquer a ringing shell (heavy
+  core, a faint high anvil ting; a shulker shell opening as it goes up). Valor villagers sound theirs as they coat up.

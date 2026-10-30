@@ -1,4 +1,4 @@
-"""Valor coatings (Kingdoms 0.7.409): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
+"""Valor coatings (Kingdoms 0.7.409; plates 0.7.410): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
 ValorLook over the 64x64 player skin layout (only the base arms, hands and, at Unbroken, the shoulders: the coat model is a
 humanoid mesh grown just past the sleeves, or past armour).
 
@@ -7,6 +7,9 @@ humanoid mesh grown just past the sleeves, or past armour).
   coat/<look>_veins_<rank>.png   the same coat's lines (scale edges, cracks, bands...) in white, drawn emissive in the soul
                             colour while King's Valor Coating is up
   coat/bent_<bent>.png      the second quirk's mark at the wrist (Tempered on), white, tinted by ValorLook
+  coat/plate_<look>.png     (0.7.410) the raised plates' box (ValorPlates: 8x8x2 at 0,0 on 32x16): its two broad faces drawn
+                            as the plate (a rounded scale, a riveted band, a lump of rock, a flake, a shell segment), its
+                            edges darker; plate_<look>_glow.png its rim, white, for King's coating (no plates for haze)
 
   iron     gunmetal plates in bands, rivets          stone    cracked grey-brown rock, flecks
   scale    overlapping dark green scales             ash      grey char, flaking at the edge, ember-dark spots
@@ -271,10 +274,75 @@ def bent(name):
     return img
 
 
+PLATE_LOOKS = ("iron", "stone", "scale", "ash", "lacquer")
+# the box's broad faces (x0, y0) on its 32x16 texture, and its edge strips
+BROAD = ((2, 2), (12, 2))
+EDGES = ((2, 0, 10, 2), (10, 0, 18, 2), (0, 2, 2, 10), (10, 2, 12, 10))
+
+
+def plate_shape(look, x, y, r):
+    """Whether (x, y) of the 8x8 face is part of the plate, and whether it's on its rim."""
+    if look in ("scale", "lacquer"):
+        # rounded at the bottom
+        inside = (x - 3.5) ** 2 + max(0, y - 3.5) ** 2 * (1.6 if look == "scale" else 0.5) <= 17.0
+        rim = inside and not ((x - 3.5) ** 2 + max(0, y - 2.5) ** 2 * (1.6 if look == "scale" else 0.5) <= 10.0 and 0 < x < 7)
+        return inside, rim
+    if look == "stone":
+        inside = (x - 3.5) ** 2 + (y - 3.5) ** 2 <= 16.5 + r.randint(-3, 3)
+        return inside, inside and r.random() < 0.18
+    if look == "ash":
+        inside = y <= 6 - (1 if x in (0, 7) else 0) - r.randint(0, 1)
+        return inside, inside and (y >= 5 or r.random() < 0.1)
+    # iron: a full band, its top edge and rivet line lit
+    return True, y in (0, 1) or y == 5 and x % 3 == 1
+
+
+def plate(look, glow):
+    img = Image.new("RGBA", (32, 16), (0, 0, 0, 0))
+    r = random.Random(5 + LOOKS.index(look))
+    base = {"iron": (0x4A, 0x50, 0x5A), "stone": (0x62, 0x5B, 0x52), "scale": (0x24, 0x44, 0x34), "ash": (0x7A, 0x78, 0x76),
+            "lacquer": (0x12, 0x12, 0x18)}[look]
+    for (x0, y0) in BROAD:
+        for y in range(8):
+            for x in range(8):
+                inside, rim = plate_shape(look, x, y, r)
+                if not inside:
+                    continue
+                if glow:
+                    if rim:
+                        img.putpixel((x0 + x, y0 + y), (255, 255, 255, 255))
+                    continue
+                c = jitter(base, r, 6)
+                if look == "scale":
+                    c = mix(c, (0x4E, 0x84, 0x62), max(0.0, 1.0 - y / 4.0) * (1.0 - abs(x - 3.5) / 4.0))
+                elif look == "lacquer" and (x + y) % 6 == 0:
+                    c = (0x7A, 0x7A, 0xA4)
+                elif look == "iron" and y == 0:
+                    c = shade(base, 1.5)
+                elif look == "iron" and y == 5 and x % 3 == 1:
+                    c = (0x9A, 0xA2, 0xB0)
+                elif look == "stone" and r.random() < 0.15:
+                    c = (0x30, 0x2C, 0x28)
+                elif look == "ash" and r.random() < 0.2:
+                    c = (0x3A, 0x36, 0x36)
+                if rim:
+                    c = shade(c, 0.65)
+                img.putpixel((x0 + x, y0 + y), (*c, 255))
+    if not glow:
+        for (ex0, ey0, ex1, ey1) in EDGES:
+            for x in range(ex0, ex1):
+                for y in range(ey0, ey1):
+                    img.putpixel((x, y), (*shade(base, 0.55), 255))
+    return img
+
+
+for look in PLATE_LOOKS:
+    plate(look, False).save(os.path.join(OUT, f"plate_{look}.png"))
+    plate(look, True).save(os.path.join(OUT, f"plate_{look}_glow.png"))
 for look in LOOKS:
     for rank in range(5):
         coat(look, rank, False).save(os.path.join(OUT, f"{look}_{rank}.png"))
         coat(look, rank, True).save(os.path.join(OUT, f"{look}_veins_{rank}.png"))
 for b in BENTS:
     bent(b).save(os.path.join(OUT, f"bent_{b}.png"))
-print("wrote", len(LOOKS) * 10 + len(BENTS), "textures to", os.path.normpath(OUT))
+print("wrote", len(LOOKS) * 10 + len(BENTS) + len(PLATE_LOOKS) * 2, "textures to", os.path.normpath(OUT))
