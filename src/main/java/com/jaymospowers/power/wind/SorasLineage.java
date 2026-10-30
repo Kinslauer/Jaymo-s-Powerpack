@@ -118,6 +118,28 @@ public final class SorasLineage {
 		return serial == 0 || to.isEmpty() ? to : mark(to, serial);
 	}
 
+	// (Arsenal's quest-item pulls read the line through these four; see ArsenalQuestItems)
+
+	/** Whether the line is out (its blade has reached a player). */
+	public static boolean isOut(MinecraftServer server) {
+		return state(server).out();
+	}
+
+	/** The serial of the line now current: its pieces carry it as their mark. */
+	public static int currentSerial(MinecraftServer server) {
+		return state(server).serial();
+	}
+
+	/** A fresh stone blade of the current line (not placed anywhere: the caller puts it in the world). */
+	public static ItemStack newBlade(MinecraftServer server) {
+		return foundBlade(server);
+	}
+
+	/** The line's blade has been brought into the world by other means: the line is out, and the other finds go away. */
+	public static void claimed(MinecraftServer server) {
+		claim(server);
+	}
+
 	/** A stone blade for the line now waiting to be found. */
 	static ItemStack foundBlade(MinecraftServer server) {
 		return mark(SorasBladeChild.blade(), state(server).serial());
