@@ -1109,6 +1109,23 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.366) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
+	 * builder and the tool), by adding it to Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void onToolBuilt(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> listener) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.tinkering.Tinkering").getField("TOOL_BUILT_LISTENERS").get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack>>)list).add(listener);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' tool station (older Powers?)", e);
+		}
+	}
+
 	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
 	private static boolean lookedForZFighterTalk;

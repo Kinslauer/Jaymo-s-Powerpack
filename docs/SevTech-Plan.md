@@ -245,3 +245,56 @@ filter, client sky renderer; Kingdoms: Hermits trades, a stargazer gift in Gifte
   tell sky Tidings and sell charts the player hasn't read (MCA trade or talk-screen button, the pattern the Z Fighter
   villagers use). **Lights in the Sky**: Tidings lines (a light that fell near a village, a patrolman seen at dusk) fired
   when raiders or patrol pods land near a town the player knows, before the player owns a pod.
+
+## Track briefs for patches 5, 6 and 7 (run after 1+2 ship)
+Same shared rules. Base each on the stacked branch tip.
+
+### Track 5, Far worlds restart the stone age (Powers 0.18.x `power/zfighter/farworld/**`; Kingdoms MonsterGear traits; ZFighterPatrol writ)
+- **Prospecting First**: on the six planets, ore blocks are generated as (or swapped on chunk load to) a `veiled_ore`
+  block that looks like the world's plain stone until a player taps it with any pick (the tap reveals ores within 3
+  blocks: swap back to the real ore with a crack sound) or has read that world's chart (reveals on sight within 8).
+  Per-world stone look; constants for radii.
+- **Gear doesn't answer** (Andy's Landing Light note): far-world ores (`#jaymospowers:far_ore` tag) take 4x as long
+  with home-made tools and give no drop unless the tool's head material was made from that world's own first metal:
+  each world gets a `first metal` item (Moon: pale alloy; Rustfall: rust iron; Glacia: ice iron; Cinder: cinder
+  bronze; Maw: void shard; Verdant: amber bronze) knapped from the world's loose rocks (the thrown-rock item) at a
+  field anvil (a new 1-block `field_anvil`, grid recipe of 3 of that world's stone + 1 iron ingot; furniture) into a
+  Tinkers material (`TinkerMaterial` entries, cast and forged only). You keep your gear; you restart to progress.
+- **Star-Touched Foes** (Kingdoms `MonsterGear`): mobs on the planets get a star-touched look (a tinted overlay via the
+  existing gear/overlay path) and one trait per world: Moon long leaps, Rustfall heavy blows (+knockback), Glacia
+  freezing touch (slow on hit), Cinder fire on hit, Maw pull toward the mob, Verdant regrowth (regen). No new mobs.
+- **Patrol Skip Writ** (Andy's note): a `patrol_writ` item (one per world per player, from the Patrol at rank Sergeant+)
+  used in a mission zone calls down a Commander-rank patrolman (an MCA Z Fighter villager, power far above the player)
+  in a complete pod who fights the captain for you, then leaves; champion and boss stay. Letterbox film via UltimateFilm.
+- Optional **Storm Rage**: Rustfall storms raise foe tiers briefly; the warning is a hermit or patrolman line, never a
+  Tidings bird. Build only if time allows; mark clearly in the MODLOG.
+
+### Track 6, Who flies (Kingdoms 0.7.x `careers/`, `MerchantOrders`, `BountyBoard`, a `LandingYard` structure; Powers: one rank gate)
+- **Ranks Follow Rungs**: Patrol ranks need WorldTier deeds as well as power (Rookie = Borderlands, Patrolman =
+  Wildlands, Sergeant = Dread, Commander = Legend; constants); Powers asks Kingdoms through ZFighterKingdoms.
+- **Landing Yard**: a kingdom build (BuildCommands / Construction pattern): a yard of 4-9 pads around a beacon post;
+  Patrol and raider pods target the yard when one is within 64 blocks (raiders then land outside it); patrol
+  landings there are safe (no guard alarm), trade rises (markup -10% while a pod stands), and the town becomes a named
+  stop in Tidings and patrolmen's travel talk.
+- **Pilot and Prospector Careers** (`Careers`, two new jobs with ranks and dusk wages): Pilot earns per trip flown with
+  a passenger or a parcel aboard (MerchantOrders parcels can ride a pod to another world's yard); Prospector earns per
+  first find on a far world (first reveal of each ore kind per world per player) and per first metal knapped.
+- **Off-World Orders**: MerchantOrders sheets and Bounty board warrants ask for far-world goods (first metals, world
+  parts, Cinder Ember, Glacia salt) and name the world; standing rises faster for them.
+
+### Track 7, Back home (Powers `tinkering/` + alchemy + Kitchen compat; Kingdoms world event)
+- **Falling Stars** (Kingdoms world events): a rare night meteor (1 per N nights near a kingdom) lands within 300
+  blocks of a town: fireball, boom, a small crater of `star_metal_ore` + scorched stone; Tidings gives a bearing
+  ("a light fell toward the hills north of X").
+- **Star-Metal for the Forge**: `star_metal` TinkerMaterial (cast and forged only, never a grid recipe) with trait
+  `Starlit` (light blows: +10% attack speed, no fall damage on the swing's landing); star metal ore melts in the
+  smeltery; 1 ore = 1 ingot worth.
+- **Glacia Quench / Cinder Embers** (Overgeared quench): quenching a hot piece in Glacia ice-glass water (a cauldron
+  with ice-glass in it) gives trait `Cold Edge` (slow on hit); in a cauldron with a Cinder Ember, `Hot Edge` (fire on
+  hit). One edge trait per piece.
+- **Starlight Essence**: new Alchemy `Essence.STARLIGHT` (tier 2, from AIR + LIGHT? follow the Essence enum's pattern),
+  carried by Maw dust (a new item from Maw wreck chests and the black hole's rim) and star metal; used in one new
+  infusion (the Starlit Lens for the pod's beacon mast: shows mission zones on the flight screen). Hermits hint at it
+  and trade Maw dust.
+- **Far-World Pantry** (Kitchen, through OptionalItems): Verdant fruit and Glacia salt items (Powers) used in 4 Kitchen
+  dishes giving trip buffs (breath +1 min, cold/heat resistance 10 min, fuel efficiency: next launch costs 1 less once).

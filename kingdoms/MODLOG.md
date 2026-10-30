@@ -6839,6 +6839,33 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
+## 0.7.366, the ladder (SevTech picks) (pack 0.18.17)
+- Andy picked the SevTech ladder: one system for the world tiers, in four parts.
+- **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED
+  (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
+  a Tool Station; Powers' `Provenance.FORGED_LISTENERS` and the new `Tinkering.TOOL_BUILT_LISTENERS` through
+  `PowersCompat.onForged`/`onToolBuilt`), AETHER_TROPHY (in the Overworld carrying something only the Aether's guardians give:
+  the `#jaymoskingdoms:aether_trophies` tag, the Visage of War's reverent armour and the sentry boss chest's armour (not irradiated holystone: it is also mined from the ground); the Giants give
+  nothing of the sort, and wake only for Wildlands anyway), POD_FLIGHT (a pod trip landed home) and MAW_SALVAGE (a part set taken
+  from a Maw wreck), the last two told by Powers through `WorldTiers.deed(player, key)`. `FEAT_NEEDED` is now a mask per tier:
+  Borderlands FORGED, Wildlands NETHER and AETHER_TROPHY, Dread WITHER and POD_FLIGHT, Legend DRAGON and MAW_SALVAGE (foe counts
+  as before); the tier screen's requirement line lists all of them. A deed gives a murmur and a line in the next Tidings. Players
+  already in a tier when this lands keep it (joining counts the tier you stand in as opened). `/kingdom tier deed <players> <deed>`
+  for ops.
+- **Rung Journal** (`journal/RungJournal`, item `rung_journal`, a book and string): a small book with one page per tier of odd
+  short hints, given the first time a player enters Borderlands. Each line that has a feat behind it shows `[ ]` and ticks to `[x]`
+  when it lands, read from the player's progress each time the book is opened; it opens as a written book. Hints only, no lore.
+  The Wildlands page hints at the Aether test. Icon painted by `tools/gen_rung_journal.py`.
+- **The Ground Changes** (`GroundChanges`): when a tier opens for a player, the chunks already loaded within 8 chunks of them
+  get that tier's veins laid over stone and deepslate: iron and copper (Borderlands), gold and lapis (Wildlands), buried diamond
+  (Dread), ancient debris in the Nether (Legend). Each chunk remembers the highest tier it was seeded for (saved with the chunk),
+  so it happens once; a walk every 4 ticks looks at 12 chunks per player and seeds at most 2. A floor raise lifts everyone's tier,
+  so it seeds round everyone. Every number is a constant at the top of the class.
+- **Hidden Until Reached** (`TierGate`): before a trade screen opens, offers whose item belongs to a higher tier are set aside on
+  the merchant (saved with it) and put back for a player who has reached it; a Tinkering part is read by its material
+  (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
+  Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
+  JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
 ## 0.7.367: stargazers and sky tidings (SevTech picks) (pack 0.18.18)
 - Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
   "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen

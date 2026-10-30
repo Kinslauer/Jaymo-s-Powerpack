@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:neptune_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_boots",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reverent_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reverent_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reverent_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:reverent_boots",
+      "required": false
+    }
+  ]
+}
