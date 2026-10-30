@@ -4020,7 +4020,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
   first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
-- **0.18.53, who flies (SevTech picks; Kingdoms 0.7.383):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
+- **0.18.54, who flies (SevTech picks; Kingdoms 0.7.385):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
   rank needs a world tier open through Kingdoms' deeds as well as its arrests (`ZFighterPatrol.RANK_TIER`: Rookie Borderlands,
   Officer Wildlands, Sergeant and Inspector Dread, Commander Legend): `rank(player, arrests)` holds the rank back, the license and the
   patrolman's report show the held rank, a promotion earned in arrests but not in deeds says so, and a patrolman will not swear in
