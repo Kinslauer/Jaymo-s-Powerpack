@@ -3959,7 +3959,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
   or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
 
-- **0.18.49, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+- **0.18.50, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
   flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
   in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer

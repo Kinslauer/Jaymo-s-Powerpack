@@ -3,7 +3,7 @@
 The pod is built from slots (PodPart): a keel (iron cross at the base), three fins (a slab with a foot), a thruster bell,
 a brass tank with a red band, four bone-white hull plates with rivets (a porthole on the front one, a hatch on the right),
 a stepped glass canopy and a mast with a brass cap. Each cube below belongs to a named part of the model; PodRenderer
-draws the parts whose slots are filled. A damaged plate also draws its gash; a damaged canopy only its lower step. (0.18.49) A finished pod also draws
+draws the parts whose slots are filled. A damaged plate also draws its gash; a damaged canopy only its lower step. (0.18.50) A finished pod also draws
 mast_lit (the beacon lamp), and a mended one a band of brass on its corner posts for each grade (grade_1..3).
 
 Sizes are pixels (16 to the block). Heights are above the pod's feet; x is the pod's right, z its front. The script packs
@@ -57,9 +57,9 @@ CUBES = [
     ("canopy", "glass", -5, 36, -5, 10, 5, 10),
     ("mast", "iron", -1, 41, -1, 2, 7, 2),
     ("mast", "brass", -2, 48, -2, 4, 2, 4),
-    # (0.18.49) the beacon lamp above the mast cap: drawn (full bright) only once a hammer has finished the pod
+    # (0.18.50) the beacon lamp above the mast cap: drawn (full bright) only once a hammer has finished the pod
     ("mast_lit", "beacon", -1, 50, -1, 2, 2, 2),
-    # (0.18.49) a brass band on each corner post for every grade a pod was mended (grade_1 is the lowest); drawn with the keel
+    # (0.18.50) a brass band on each corner post for every grade a pod was mended (grade_1 is the lowest); drawn with the keel
     ("grade_1", "brass", 9, 4, 9, 4, 1, 4), ("grade_1", "brass", -13, 4, 9, 4, 1, 4), ("grade_1", "brass", 9, 4, -13, 4, 1, 4), ("grade_1", "brass", -13, 4, -13, 4, 1, 4),
     ("grade_2", "brass", 9, 6, 9, 4, 1, 4), ("grade_2", "brass", -13, 6, 9, 4, 1, 4), ("grade_2", "brass", 9, 6, -13, 4, 1, 4), ("grade_2", "brass", -13, 6, -13, 4, 1, 4),
     ("grade_3", "brass", 9, 8, 9, 4, 1, 4), ("grade_3", "brass", -13, 8, 9, 4, 1, 4), ("grade_3", "brass", 9, 8, -13, 4, 1, 4), ("grade_3", "brass", -13, 8, -13, 4, 1, 4),
