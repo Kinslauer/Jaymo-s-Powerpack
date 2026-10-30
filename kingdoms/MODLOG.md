@@ -6919,6 +6919,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
   the class. No new text. Compile-checked; not seen in game.
 
+## 0.7.389: keybind names that fit (pack 0.18.58)
+- Andy: the Valor key's name ran under the key button in Controls. Valor, Mana Spirit, Combat Art, Free Rein, the horse
+  Whistle, the Warrior-born tail and the werewolf/vampire change now have short names (30 characters or fewer); their tap
+  and hold details stay in the in-game hints. Lang only; not seen in game.
+
 ## 0.7.388: world-tier progress is the party's (pack 0.18.56)
 - Andy: "progress is per group, if you have someone join your group they jump to your progress." `WorldTiers` progress (great
   foes slain, feats and deeds, tiers opened by an op) is now shared across a party (`Parties`): whatever one member earns
