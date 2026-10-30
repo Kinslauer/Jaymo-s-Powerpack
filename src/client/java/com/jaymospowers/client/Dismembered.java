@@ -150,7 +150,8 @@ public final class Dismembered {
 			walk(root, living, gait, broken == null ? 0 : broken);
 		}
 		Integer missing = renderState.getData(MISSING);
-		if (missing == null) {
+		// (0.18.82) a wooden or iron limb's own model draws exactly the limb that is missing
+		if (missing == null || com.jaymospowers.client.wounds.ProstheticLayer.owns(model)) {
 			return;
 		}
 		for (int part : Dismember.PARTS) {
