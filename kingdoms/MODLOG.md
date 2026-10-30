@@ -7210,3 +7210,6 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 ## 0.7.408: belt slot on Ctrl + scroll
 - Andy: "change the selection to ctrl + scroll instad of alt becasue alt zooms". In the Battle Stance, Ctrl (either one) and
   scroll now pick the belt slot (`FormsClient.scroll`); Alt is left to the zoom.
+- Andy: "If you are not moving and you scroll you shouldnt be able to move with the belt unlocked and equipped. Without it
+  sprint works as normal". In stance, Ctrl pressed while standing still is the belt's key until let go: it no longer starts
+  a sprint, even if you then move (`FormsClient.ctrlNoSprint`). Pressed while moving, or out of stance, it sprints as ever.
