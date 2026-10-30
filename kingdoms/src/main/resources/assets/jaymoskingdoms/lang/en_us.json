@@ -8935,9 +8935,15 @@
 	"gui.jaymoskingdoms.story.switch.hunted": "Hunted",
 	"gui.jaymoskingdoms.story.switch.hunted.fx": "A bounty on you from day one, and a hired blade sent for you.",
 	"gui.jaymoskingdoms.story.switch.rags": "Nothing but rags",
-	"gui.jaymoskingdoms.story.switch.rags.fx": "No road kit at all: no gear, food or coin. Your Journal page still comes.",
+	"gui.jaymoskingdoms.story.switch.rags.fx": "No road kit at all: no gear, food or coin. Your Journal page, and whatever your aim is about (a blade, a mule, a pup, hired hands), still come.",
 	"gui.jaymoskingdoms.story.switch.nothing": "Start from nothing",
 	"gui.jaymoskingdoms.story.switch.nothing.fx": "You give up your story's attribute points. Finishing your aim pays them back x%s.",
 	"message.jaymoskingdoms.flaw.light_sleeper": "Something stirs nearby and wakes you.",
-	"bounty.jaymoskingdoms.crime.story": "charges from before"
+	"bounty.jaymoskingdoms.crime.story": "charges from before",
+	"aim.jaymoskingdoms.lab.page": "Get far from that room, and find a place that takes me in.",
+	"aim.jaymoskingdoms.lab.title": "the Unbottled",
+	"aim.jaymoskingdoms.android.page": "Prove the build: put down fifteen that come for me.",
+	"aim.jaymoskingdoms.android.title": "the Proven",
+	"aim.jaymoskingdoms.moon_cursed.page": "Last ten days with this mark on me.",
+	"aim.jaymoskingdoms.moon_cursed.title": "the Moonmarked"
 }

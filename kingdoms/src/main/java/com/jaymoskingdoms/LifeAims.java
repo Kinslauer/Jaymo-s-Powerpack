@@ -157,6 +157,10 @@ public final class LifeAims {
 		AIMS.put(Start.MAW, new Aim(Kind.SURVIVE, 7, Stats.Stat.MIGHT));
 		AIMS.put(Start.DEMON, new Aim(Kind.SURVIVE, 10, Stats.Stat.FINESSE));
 		AIMS.put(Start.AFTERLIFE, new Aim(Kind.SURVIVE, 7, Stats.Stat.WITS));
+		// (0.7.420) the roads of patch 3 (the lab, the bench, the moon's mark), so every road has an aim to pay back a start from nothing
+		AIMS.put(Start.LAB, new Aim(Kind.SETTLE, 1, Stats.Stat.FINESSE));
+		AIMS.put(Start.ANDROID, new Aim(Kind.MONSTERS, 15, Stats.Stat.MIGHT));
+		AIMS.put(Start.MOON_CURSED, new Aim(Kind.SURVIVE, 10, Stats.Stat.GRIT));
 	}
 
 	// ---- state ---------------------------------------------------------------------------------------------------------

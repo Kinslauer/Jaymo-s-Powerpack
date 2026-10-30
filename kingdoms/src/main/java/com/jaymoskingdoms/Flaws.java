@@ -272,11 +272,13 @@ public final class Flaws {
 
 	/** Light sleeper: a hostile within {@link #SLEEPER_RANGE} wakes them. */
 	private static void lightSleeper(ServerPlayer player) {
-		if (!player.isSleeping()) {
+		if (!player.isSleeping() || player.isCreative() || player.isSpectator()) {
 			return;
 		}
 		ServerLevel level = player.level();
-		List<Monster> near = level.getEntitiesOfClass(Monster.class, player.getBoundingBox().inflate(SLEEPER_RANGE), m -> m.isAlive());
+		// (only one that could come for them: awake, and after them or with a clear line to the bed; not a caged or tame one behind walls)
+		List<Monster> near = level.getEntitiesOfClass(Monster.class, player.getBoundingBox().inflate(SLEEPER_RANGE),
+			m -> m.isAlive() && !m.isNoAi() && (m.getTarget() == player || m.hasLineOfSight(player)));
 		if (!near.isEmpty()) {
 			player.stopSleepInBed(true, true);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.flaw.light_sleeper"));

@@ -7450,3 +7450,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - The choices travel in the story answer (`LifeStory.Live` gains `flaws` and `switches` bit masks); the server rejects unknown
   bits and more than two flaws. Attachments `story_flaws`, `story_given_up` (synced) and `story_hard_switches`; kept through
   death, cleared by `/kingdom story reset` and the Writ of Rebirth.
+- Review fixes: the Lab, Fresh off the bench and the moon's mark now have aims too (settle somewhere; put down fifteen that
+  come for you; last ten days with the mark), so a start from nothing can be paid back on every road; a light sleeper is only
+  woken by a monster that is after them or can see the bed (not caged or no-AI ones behind walls), never in creative; the
+  rags line says what still comes (the Journal and whatever the aim is about).
