@@ -6977,3 +6977,24 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   10+; replaces the old "Combo xN" action-bar line). No parry window or parry HUD.
 - Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
 - Compile-checked. Not seen in game.
+
+
+## 0.7.392: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.59; was 0.7.382)
+- **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
+  foe; the last is a heavy blow with Powers' impact frames (`PowersCompat.impactFrame`, reflection; Powers has no afterimage
+  hook, so the trail is particles) and the whole thing runs under Powers' new hard-cut film (`FILM_CUTS`, witnesses get bars).
+- **Spear Lunge** (`forms/SpearForms`): a lunge of about 4 blocks (the rapier's is 2.8), 9 ticks of reach, that runs the first foe
+  through and goes on into one behind it (75% of the damage).
+- **Couched Lance**: only while you control a mount. The lance stays couched 30 ticks; the first foe is hit for damage that grows
+  with the mount's speed (measured from its movement, smoothed), a foe in the saddle (or the rider of a foe) is knocked out of it.
+  Riders hit 30% harder. A mounted realm guard that carries a spear charges its target the same way (`Cavalry` ticks every 10
+  ticks, `SpearForms.charge`; once per 80 ticks, needs speed and a heading at the foe, moves nothing).
+- **Pinning Throw** (spear masterstroke): throws one spear at a fallen foe (a little damage) and roots it for 4 s (+1 s a rank;
+  foes of 150+ health aren't held). Any press while it holds tugs the spear back to the hand. The spear is never lost: it is kept
+  in `SpearForms` and saved on the player (attachment `pinned_spear`), and it comes back to the hand when tugged, drops at the foe
+  when the pin runs out or the foe dies, and goes to the inventory if the player leaves or the server stops (or is handed back on
+  the next log-in after a crash). The stance holds while the hand is empty of it.
+- `form_spears` now has the trident, Powers' lances (wooden to netherite), Tinkers javelin and primitive spear, all optional ids.
+- **School Swing Trails** (`forms/Trails`): blade = dark ink and smoke, spear/lance = sparks, fist = dust (for patch 3). Sheath Draw
+  and Crescent Sweep got the blade trail.
+- Compile-checked (check.sh, zero errors); not seen in game.
