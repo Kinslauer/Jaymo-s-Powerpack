@@ -208,7 +208,7 @@ public final class CarryBlock {
 	 * mods' chests, like Lootr's, keep each player's loot in them and stay put).
 	 */
 	public static boolean carriable(BlockState state) {
-		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL)) {
+		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL) || com.jaymospowers.power.zfighter.pod.PodParts.partOf(state) != null) {
 			return true;
 		}
 		return state.getBlock() instanceof ChestBlock

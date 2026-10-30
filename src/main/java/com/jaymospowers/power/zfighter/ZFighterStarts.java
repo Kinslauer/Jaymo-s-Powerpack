@@ -2,6 +2,8 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.wounds.MedicineItems;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.List;
@@ -72,8 +74,8 @@ import org.jspecify.annotations.Nullable;
  * six wake you off the overworld, and Kingdoms calls {@link #land} (by reflection) to put you there:
  * <ul>
  * <li><b>Stranded on the Pale Moon</b> ({@code moon}): your miners' pod came down hard, far from the moon's pad. The
- * {@link #WRECK} won't fly till it is mended with what the moon's ore gives (iron, copper, redstone, coal, in that order: the
- * torn pod log in your pack says as much); then it is a pod again.</li>
+ * {@link #WRECK} won't fly as it is. (0.18.9) Right-click it and it comes apart into a pod missing its tank, canopy, mast and two
+ * plates: the parts to mend her are found, not smelted (the torn pod log in your pack says as much).</li>
  * <li><b>Raised under the green sky</b> ({@code verdant}, Verdant-born only): you wake in a village of the Verdant World near
  * where the Lookout floats over it, with a compass the village keyed to the gate back ({@link ZFighterSites#verdantGate}).</li>
  * <li><b>Escaped the Iron-Master's mines</b> ({@code rustfall}): you break out at a mine mouth under Rustfall's weight, the
@@ -93,11 +95,6 @@ public final class ZFighterStarts {
 	static final int WRECK_MIN = 600, WRECK_MAX = 900, SPOT_TRIES = 24;
 	/** The scorched ground round the wreck (radius, blocks) and the bits of hull strewn about. */
 	static final int SCORCH_RADIUS = 4, DEBRIS = 6;
-	/** What the wreck needs, step by step: the item (or {@link #FUEL} for any coal), and how many. At most 8 each. */
-	static final Item[] REPAIR_ITEMS = {Items.IRON_INGOT, Items.COPPER_INGOT, Items.REDSTONE, Items.COAL};
-	static final int[] REPAIR_COUNTS = {6, 4, 8, 4};
-	static final String[] REPAIR_PARTS = {"hull", "wiring", "controls", "fuel"};
-	static final int FUEL = 3;
 	/** The moon start's torches. */
 	static final int MOON_TORCHES = 16;
 	/** The Verdant World: how far the village is looked for from where the Lookout floats over it (chunks), and how far from the village the gate is (blocks). */
@@ -293,8 +290,10 @@ public final class ZFighterStarts {
 	}
 
 	/**
-	 * The wreck of a pod: it can't be broken, and it won't fly. Each step of the mending wants one thing ({@link #REPAIR_ITEMS});
-	 * use it on the wreck to put in what you have. Mended, it is a pod again ({@link ZFighterSpace#POD}).
+	 * The wreck of a pod: it can't be broken. (0.18.9) Right-click it and it comes apart into a wrecked pod you can mend with
+	 * parts ({@link #wreckedPod}): the keel, three fins (one bent), the bell and two plates are still on; the tank, the canopy,
+	 * the mast and the other two plates are missing, and so is the fuel. The chat names what is missing. The block's old
+	 * mending steps are gone (the properties stay so saved worlds load).
 	 */
 	static final class WreckBlock extends Block {
 		static final IntegerProperty STEP = IntegerProperty.create("step", 0, 3);
@@ -316,60 +315,44 @@ public final class ZFighterStarts {
 			return SHAPE;
 		}
 
-		private static boolean wanted(ItemStack stack, int step) {
-			return step == FUEL ? stack.is(ItemTags.COALS) : stack.is(REPAIR_ITEMS[step]);
-		}
-
-		@Override
-		protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-			BlockHitResult hit) {
-			int step = state.getValue(STEP);
-			if (!wanted(stack, step)) {
-				return InteractionResult.TRY_WITH_EMPTY_HAND;
-			}
-			if (level instanceof ServerLevel server) {
-				int fill = state.getValue(FILL);
-				int take = Math.min(stack.getCount(), REPAIR_COUNTS[step] - fill);
-				stack.consume(take, player);
-				fill += take;
-				server.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5F, 1.2F + 0.1F * step);
-				server.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 10, 0.3, 0.3, 0.3, 0.05);
-				if (fill < REPAIR_COUNTS[step]) {
-					server.setBlock(pos, state.setValue(FILL, fill), Block.UPDATE_ALL);
-					needs(player, step, REPAIR_COUNTS[step] - fill);
-				} else if (step + 1 < REPAIR_ITEMS.length) {
-					server.setBlock(pos, state.setValue(STEP, step + 1).setValue(FILL, 0), Block.UPDATE_ALL);
-					needs(player, step + 1, REPAIR_COUNTS[step + 1]);
-				} else {
-					mended(server, pos, player);
-				}
-			}
-			return InteractionResult.SUCCESS;
-		}
-
 		@Override
 		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-			if (!level.isClientSide()) {
-				int step = state.getValue(STEP);
-				needs(player, step, REPAIR_COUNTS[step] - state.getValue(FILL));
-				level.playSound(null, pos, SoundEvents.COPPER_HIT, SoundSource.BLOCKS, 0.8F, 0.7F);
+			if (level instanceof ServerLevel server) {
+				server.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				PodEntity pod = wreckedPod(server, Vec3.atBottomCenterOf(pos), server.getRandom().nextFloat() * 360.0F);
+				server.playSound(null, pos, SoundEvents.COPPER_HIT, SoundSource.BLOCKS, 0.8F, 0.7F);
+				server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 12, 0.4, 0.2, 0.4, 0.01);
+				missing(player, pod);
 			}
 			return InteractionResult.SUCCESS;
 		}
+	}
 
-		private static void needs(Player player, int step, int left) {
-			Component what = step == FUEL ? Component.translatable("message.jaymospowers.pod_wreck.coal") : REPAIR_ITEMS[step].getName(new ItemStack(REPAIR_ITEMS[step]));
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod_wreck.needs", left, what,
-				Component.translatable("message.jaymospowers.pod_wreck.part." + REPAIR_PARTS[step])).withStyle(ChatFormatting.GOLD));
-		}
+	/** The wreck as a pod: keel, three fins (one bent), bell and two plates on; the rest missing; no fuel. */
+	static PodEntity wreckedPod(ServerLevel level, Vec3 at, float yaw) {
+		PodEntity pod = PodEntity.spawn(level, at, false, 0);
+		pod.setParts(PodPart.KEEL.bits() | PodPart.FIN.bits() | PodPart.BELL.bits() | PodPart.PLATE.bit(0) | PodPart.PLATE.bit(2), PodPart.FIN.bit(1));
+		pod.setYRot(yaw);
+		return pod;
+	}
 
-		private static void mended(ServerLevel level, BlockPos pos, Player player) {
-			level.setBlock(pos, ZFighterSpace.withFuel(ZFighterSpace.MENDED_FUEL), Block.UPDATE_ALL);
-			level.playSound(null, pos, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.BLOCKS, 1.0F, 0.5F);
-			level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.8F, 1.4F);
-			level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5, 30, 0.4, 0.1, 0.4, 0.05);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod_wreck.mended").withStyle(ChatFormatting.AQUA));
+	/** Tells {@code player} which parts the pod lacks (named by the parts' blocks), and that its fins want mending. */
+	static void missing(Player player, PodEntity pod) {
+		net.minecraft.network.chat.MutableComponent list = Component.empty();
+		boolean first = true;
+		for (PodPart part : PodPart.ORDER) {
+			int free = part.count - pod.countOf(part);
+			if (free > 0) {
+				if (!first) {
+					list.append(Component.literal(", "));
+				}
+				list.append(free > 1 ? Component.literal(free + " ").append(Component.translatable("block.jaymospowers.pod_" + part.key))
+					: Component.translatable("block.jaymospowers.pod_" + part.key));
+				first = false;
+			}
 		}
+		player.sendOverlayMessage(Component.translatable(first ? "message.jaymospowers.pod_wreck.whole" : "message.jaymospowers.pod_wreck.missing", list)
+			.withStyle(ChatFormatting.GOLD));
 	}
 
 	// ---------------------------------------------------------------- the Verdant World

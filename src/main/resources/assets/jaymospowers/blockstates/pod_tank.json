@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymospowers:block/pod_tank"
+      }
+    }
+  ]
+}

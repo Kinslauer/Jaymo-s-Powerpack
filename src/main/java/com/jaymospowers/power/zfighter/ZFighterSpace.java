@@ -3,6 +3,8 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.chrono.future.Future;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -73,6 +76,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterPodTrip}): a countdown, a lift-off, a flight shown on screen, and a landing on open ground anywhere on the far
  * world; the pod you came in stands there for the way back. A pod holds fuel ({@link #FUEL}, coal or blaze powder used on it) and
  * each trip burns some by distance ({@link #COSTS}). The pads ({@link #PAD}) are now only the life-story starts' ports.
+ * (0.18.9) The pod is now an entity built from parts ({@link PodEntity}); the old pod block stays registered so saved worlds load,
+ * and becomes a complete pod, holding its fuel, the first time anyone uses it.
  * <p>
  * Where you flew from is kept ({@link #HOME}) when it was not one of the far places, so "Home" on any pod brings you down where you
  * left from (or the world spawn if that world is gone). Gravity is an attribute modifier (the moon light, Rustfall heavy); Z Fighters
@@ -91,8 +96,8 @@ public final class ZFighterSpace {
 	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
 	/** What Home burns from anywhere that isn't a far world (the overworld, the Nether...). */
 	public static final int HOME_COST = 1;
-	/** The fuel a mended wreck holds: enough to fly home from the moon. */
-	public static final int MENDED_FUEL = 2;
+	/** (0.18.9) The Maw wrecks' pods: how many of their parts (besides the keel and fins) are there, and how many of those are damaged. */
+	static final int WRECK_POD_EXTRA_MIN = 2, WRECK_POD_EXTRA_MAX = 5, WRECK_POD_DAMAGED_MIN = 1, WRECK_POD_DAMAGED_MAX = 3;
 	/** The landing pad's radius, and how far (blocks) the search for a flat place widens each try; how many tries. */
 	static final int PAD_RADIUS = 3, SEARCH_STEP = 28, SEARCH_TRIES = 36;
 	/** How much the surface may rise and fall across a pad before the spot is passed over. */
@@ -195,8 +200,8 @@ public final class ZFighterSpace {
 	private static final Identifier JUMP_ID = JaymosPowers.id("space_jump");
 	private static final ResourceKey<LootTable> WRECK_LOOT = ResourceKey.create(Registries.LOOT_TABLE, JaymosPowers.id("chests/maw_wreck"));
 
-	/** A star map a player has open: the pod and when. */
-	private record Opened(BlockPos pod, long at) {
+	/** A star map a player has open: the pod (its entity's id) and when. */
+	private record Opened(UUID pod, long at) {
 	}
 
 	private static final Map<UUID, Opened> OPENED = new HashMap<>();
@@ -213,6 +218,7 @@ public final class ZFighterSpace {
 		POD_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(POD, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()
 			.rarity(Rarity.RARE)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(POD_ITEM));
+		PodEntity.init();
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Command.TYPE, Command.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Command.TYPE, (payload, ctx) -> command(ctx.player(), payload));
@@ -223,7 +229,7 @@ public final class ZFighterSpace {
 
 	// ---------------------------------------------------------------- the pod
 
-	/** The pod: right-click for the star map; use coal, charcoal or blaze powder (or a coal block or blaze rod) on it to fuel it. */
+	/** The old pod block (0.18.9: kept so saved worlds load): right-click and it becomes a pod entity; coal or blaze powder still fuels it. */
 	static final class PodBlock extends Block {
 		private static final VoxelShape SHAPE = net.minecraft.world.phys.shapes.Shapes.or(Block.box(3, 0, 3, 13, 9, 13), Block.box(4, 9, 4, 12, 13, 12),
 			Block.box(6, 13, 6, 10, 16, 10), Block.box(1, 0, 7, 3, 5, 9), Block.box(13, 0, 7, 15, 5, 9));
@@ -269,17 +275,25 @@ public final class ZFighterSpace {
 
 		@Override
 		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-			if (player instanceof ServerPlayer server) {
-				OPENED.put(server.getUUID(), new Opened(pos, level.getGameTime()));
-				ServerPlayNetworking.send(server, new Open(state.getValue(FUEL)));
-				level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.6F, 1.6F);
+			if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer server) {
+				// (0.18.9) an old pod block becomes a complete pod standing where it was, with its fuel
+				serverLevel.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+				open(server, PodEntity.spawn(serverLevel, Vec3.atBottomCenterOf(pos), true, state.getValue(FUEL)));
 			}
 			return InteractionResult.SUCCESS;
 		}
 	}
 
+	/** (0.18.9) Opens the star map for {@code player} at {@code pod}. */
+	public static void open(ServerPlayer player, PodEntity pod) {
+		Level level = player.level();
+		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
+		ServerPlayNetworking.send(player, new Open(pod.fuel()));
+		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
+	}
+
 	/** How much fuel one of {@code stack} puts in a pod (0: none). */
-	static int fuelWorth(ItemStack stack) {
+	public static int fuelWorth(ItemStack stack) {
 		if (stack.is(Items.COAL_BLOCK)) {
 			return 9;
 		}
@@ -290,11 +304,6 @@ public final class ZFighterSpace {
 			return 2;
 		}
 		return stack.is(Items.COAL) || stack.is(Items.CHARCOAL) ? 1 : 0;
-	}
-
-	/** A pod block holding {@code fuel}. */
-	public static BlockState withFuel(int fuel) {
-		return POD.defaultBlockState().setValue(FUEL, Mth.clamp(fuel, 0, MAX_FUEL));
 	}
 
 	/** What a trip to {@code index} (or Home) burns from {@code from}. */
@@ -357,8 +366,8 @@ public final class ZFighterSpace {
 		}
 		Opened opened = OPENED.get(id);
 		long now = player.level().getGameTime();
-		if (opened == null || now - opened.at() > OPEN_TICKS || !player.level().getBlockState(opened.pod()).is(POD)
-			|| player.distanceToSqr(Vec3.atCenterOf(opened.pod())) > POD_REACH * POD_REACH) {
+		PodEntity pod = opened != null && player.level().getEntity(opened.pod()) instanceof PodEntity found && found.isAlive() && !found.locked() ? found : null;
+		if (pod == null || now - opened.at() > OPEN_TICKS || player.distanceToSqr(pod) > POD_REACH * POD_REACH) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_pod").withStyle(ChatFormatting.GRAY));
 			return;
 		}
@@ -384,8 +393,13 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unreachable").withStyle(ChatFormatting.RED));
 			return;
 		}
-		BlockState pod = player.level().getBlockState(opened.pod());
-		int fuel = pod.getValue(FUEL);
+		PodPart missing = pod.missingForLaunch();
+		if (missing != null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.missing", Component.translatable("block.jaymospowers.pod_" + missing.key))
+				.withStyle(ChatFormatting.RED));
+			return;
+		}
+		int fuel = pod.fuel();
 		int cost = player.isCreative() ? 0 : cost(index, player.level().dimension());
 		if (fuel < cost) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_fuel", cost, fuel).withStyle(ChatFormatting.RED));
@@ -396,10 +410,10 @@ public final class ZFighterSpace {
 		}
 		ResourceKey<Level> from = player.level().dimension();
 		if (!far(from)) {
-			player.setAttached(HOME, new Home(from.identifier().toString(), opened.pod()));
+			player.setAttached(HOME, new Home(from.identifier().toString(), pod.blockPosition()));
 		}
 		OPENED.remove(id);
-		ZFighterPodTrip.start(player, index, opened.pod(), fuel - cost, fuel);
+		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel);
 	}
 
 	// ---------------------------------------------------------------- every tick
@@ -536,13 +550,13 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern and mast. */
+	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.9) wrecked pod. */
 	static List<BlockPos> mawDecks() {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);
 		// the same draws as building them, so the middles match: each wreck takes its own random draws after its middle
 		wrecks(random, centre -> {
-			decks.add(centre.offset(1, 1, -1));
+			decks.add(centre.offset(1, 1, -2));
 			wreckDraws(random);
 		});
 		if (decks.isEmpty()) {
@@ -586,6 +600,42 @@ public final class ZFighterSpace {
 		for (int up = 1; up <= 3; up++) {
 			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
+		// (0.18.9) and a pod that came down with the ship: spare parts, some of them broken (its own random: the wrecks' draws stay in step)
+		wreckedPod(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), RandomSource.create(MAW_SEED ^ centre.asLong()));
+	}
+
+	/**
+	 * (0.18.9) A wrecked pod at {@code at}: the keel and the three fins, {@link #WRECK_POD_EXTRA_MIN} to {@link #WRECK_POD_EXTRA_MAX}
+	 * of the other parts at random, and {@link #WRECK_POD_DAMAGED_MIN} to {@link #WRECK_POD_DAMAGED_MAX} of its parts damaged.
+	 * No fuel. The Maw is where spare parts come from.
+	 */
+	static PodEntity wreckedPod(ServerLevel level, Vec3 at, RandomSource random) {
+		List<PodPart> pool = new ArrayList<>(List.of(PodPart.BELL, PodPart.TANK, PodPart.CANOPY, PodPart.MAST));
+		for (int i = 0; i < PodPart.PLATE.count; i++) {
+			pool.add(PodPart.PLATE);
+		}
+		int filled = PodPart.KEEL.bits() | PodPart.FIN.bits();
+		int[] used = new int[PodPart.values().length];
+		int extra = WRECK_POD_EXTRA_MIN + random.nextInt(WRECK_POD_EXTRA_MAX - WRECK_POD_EXTRA_MIN + 1);
+		for (int i = 0; i < extra && !pool.isEmpty(); i++) {
+			PodPart part = pool.remove(random.nextInt(pool.size()));
+			filled |= part.bit(used[part.ordinal()]++);
+		}
+		List<Integer> soundBits = new ArrayList<>();
+		for (int bit = 1; bit != 0 && bit <= PodPart.ALL_SLOTS; bit <<= 1) {
+			if ((filled & bit) != 0 && (PodPart.KEEL.bits() & bit) == 0) {
+				soundBits.add(bit);
+			}
+		}
+		int damaged = 0;
+		int count = WRECK_POD_DAMAGED_MIN + random.nextInt(WRECK_POD_DAMAGED_MAX - WRECK_POD_DAMAGED_MIN + 1);
+		for (int i = 0; i < count && !soundBits.isEmpty(); i++) {
+			damaged |= soundBits.remove(random.nextInt(soundBits.size()));
+		}
+		PodEntity pod = PodEntity.spawn(level, at, false, 0);
+		pod.setParts(filled, damaged);
+		pod.setYRot(random.nextFloat() * 360.0F);
+		return pod;
 	}
 
 	// ---------------------------------------------------------------- arriving
@@ -607,7 +657,7 @@ public final class ZFighterSpace {
 		BlockPos saved = level.getAttached(PAD);
 		if (saved != null) {
 			level.getChunk(saved.getX() >> 4, saved.getZ() >> 4);
-			if (level.getBlockState(saved).is(POD)) {
+			if (level.getBlockState(saved).is(POD) || !level.getEntitiesOfClass(PodEntity.class, new AABB(saved).inflate(PAD_RADIUS)).isEmpty()) {
 				return saved;
 			}
 		}
@@ -687,7 +737,7 @@ public final class ZFighterSpace {
 		return true;
 	}
 
-	/** The pad: a floor of {@link Dest#floor}, a lamp at each corner, the air above cleared, and the pod in the middle. */
+	/** The pad: a floor of {@link Dest#floor}, a lamp at each corner, the air above cleared, and a pod (a complete one, no fuel) in the middle. */
 	private static void build(ServerLevel level, Dest dest, BlockPos spot) {
 		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx++) {
 			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz++) {
@@ -707,6 +757,6 @@ public final class ZFighterSpace {
 				}
 			}
 		}
-		level.setBlock(spot, POD.defaultBlockState(), Block.UPDATE_ALL);
+		PodEntity.spawn(level, Vec3.atBottomCenterOf(spot), true, 0);
 	}
 }

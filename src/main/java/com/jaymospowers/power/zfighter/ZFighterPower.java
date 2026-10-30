@@ -447,6 +447,7 @@ public final class ZFighterPower implements Power {
 		ZFighterSagas.init();
 		// (0.17.62) the space pod, the far places and their missions
 		ZFighterSpace.init();
+		com.jaymospowers.power.zfighter.pod.PodParts.init();
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();

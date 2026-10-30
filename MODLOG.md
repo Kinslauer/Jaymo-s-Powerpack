@@ -3889,3 +3889,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   or a shot loosed coated) now lands through Chrono's intangible counter (`ChronoFlow`), Darktide's untouchable flurry
   (`DarktideGuard`), Smoke's Vapour Form and wholly-smoke (`SmokeVapour`), and a Flame Avatar's flame (`FlameAvatar.absorb`).
   Without Kingdoms nothing changes. Compile-checked; not seen in game.
+- **0.18.9, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+  system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
+  onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
+  `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
+  fins, a thruster bell, a fuel tank, four hull plates (porthole on the front, hatch on the right), a glass canopy and a
+  beacon mast. Each part is a block (`PodParts`) you carry in both arms (sneak + right-click, like a crafting table) and set
+  onto a pod you are looking at: it snaps into its slot and the model gains the piece, in order (keel, fins, bell, tank,
+  plates, canopy, mast). A hammer blow (`#jaymospowers:hammers`, or a mace) pops the outermost part off again as its block
+  beside the pod; a bent fin or cracked canopy only gives scrap. A keel set down on the ground is a bare pod. Fuel needs the
+  tank; a launch needs keel, fins, bell, tank and canopy; a pod missing plates or the mast lands hard (explosion, fall
+  damage, one or two parts knocked off). No pod recipe still: keels only come from raider bands (the kept pod complete,
+  the burnt-out ones a keel + 1-3 parts), the Maw (each wreck deck holds a wrecked pod, some parts bent), the Patrol (a
+  complete pod beside you when sworn in) and the life-story wreck (a bare pod missing its tank, canopy, mast and two
+  plates; the four-step mend is gone). Parts are made the pack's way: fins (steel), plates and mast (iron) and the tank
+  (copper) as Tool Station blanks cast like the throwing star (`WeaponParts`); the bell by firing a copper block at the
+  kiln's hottest; the canopy at the infusion altar (glass, amethyst, quartz; research `pod_canopy`); Maw wreck chests
+  also hold spare parts. Old pod blocks stay loadable and become a complete pod when used. Compile-checked against the
+  26.3 jar; not seen in game. Plan: docs/Pod-Parts-Plan.md.

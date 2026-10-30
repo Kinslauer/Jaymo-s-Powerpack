@@ -1,6 +1,8 @@
 package com.jaymospowers.tinkering.kiln;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.pod.PodPart;
+import com.jaymospowers.power.zfighter.pod.PodParts;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.forge.BellowsBlock;
 import java.util.List;
@@ -56,6 +58,8 @@ public final class Kiln {
 	public static final int LOAD_MAX = 8;
 	/** Heat a crucible steel blend needs (a lit forge hearth, soul fire, lava or magma). */
 	public static final int STEEL_HEAT = 2;
+	/** (0.18.9) Heat a copper block needs to be fired into a pod's thruster bell: the best fire there is, with bellows. */
+	public static final int BELL_HEAT = STEEL_HEAT + BellowsBlock.HEAT_BONUS;
 	/** Chance a log gives a second charcoal. */
 	public static final float KILN_CHARCOAL_BONUS = 0.25F;
 	/** (Furnaces) Raw ore and ores (this item tag) take this many times as long in a plain furnace (SlowOreSmeltMixin). */
@@ -105,7 +109,10 @@ public final class Kiln {
 			new Recipe(s -> s.is(ItemTags.LOGS_THAT_BURN), 1, Items.CHARCOAL, KILN_CHARCOAL_BONUS),
 			new Recipe(s -> s.is(Items.NETHERRACK), 2, Items.NETHER_BRICK, 0),
 			new Recipe(s -> s.is(Tinkering.GROUT.asItem()), 2, Tinkering.SEARED_BRICK, 0),
-			new Recipe(s -> s.is(Tinkering.STEEL_BLEND), STEEL_HEAT, Tinkering.STEEL_INGOT, 0));
+			new Recipe(s -> s.is(Tinkering.STEEL_BLEND), STEEL_HEAT, Tinkering.STEEL_INGOT, 0),
+			// (0.18.9) a copper block fired as hot as the kiln gets (a soul fire or hearth with the bellows on it) is a pod's thruster bell
+			new Recipe(s -> s.is(Items.COPPER_BLOCK.weathering().unaffected()) || s.is(Items.COPPER_BLOCK.waxed().unaffected()), BELL_HEAT,
+				PodParts.item(PodPart.BELL), 0));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack stack = player.getItemInHand(hand);
 			if (player.isSpectator() || stack.isEmpty() || recipe(stack) == null || level.getBlockState(hit.getBlockPos()).is(KILN_LOAD)) {
