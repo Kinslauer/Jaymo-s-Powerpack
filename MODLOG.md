@@ -4082,3 +4082,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
   dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
   `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.
+
+- **0.18.57, Blockbench models fixed in game (Kingdoms 0.7.389):** Andy: "the blockbench models are almost all broken".
+  - Baked entity and armour models (Piglin King, Scalebane, Clockwork Golem, Omens, Visage of War, every worn Blockbench
+    armour) drew as boxes in tiled noise: Sodium swaps `ModelPart.Cube.compile` for a box built from the cube's constructor
+    numbers, ignoring the quads we put in. `BbModel.Baked` (both mods) overrides compile and draws its own quads.
+  - Sora's Dagger was drawn with its blade's broad face across x, so the held yaw showed it square to the camera:
+    `sora.py` turns the geometry a quarter about the grip; the reverse grip uses our own display again.
+  - Iron rapier and iron dagger (and Tidebreaker's sheet): their blades are flat planes painted on one side, so the back
+    face (culled) showed nothing; `bake.show_both_sides` maps the empty face to the painted one.
+  - Harpoon and rapier keep their exact rotations (26.3 allows any angle and x/y/z rotations) instead of 22.5° snaps.
+  - Compile-checked; not seen in game.

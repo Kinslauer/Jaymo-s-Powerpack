@@ -6932,3 +6932,8 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
   only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
 - Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.
+
+## 0.7.389: Blockbench models draw under Sodium (pack 0.18.57)
+- `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
+  constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
+  keeps exact rotations. See the Powers MODLOG 0.18.57.
