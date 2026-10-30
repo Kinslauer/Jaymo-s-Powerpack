@@ -2,6 +2,8 @@ package com.jaymospowers.client.jei;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.Essence;
+import com.jaymospowers.alchemy.EssenceList;
+import com.jaymospowers.alchemy.crucible.Crucibles;
 import com.jaymospowers.alchemy.Research;
 import com.jaymospowers.alchemy.infusion.Infusion;
 import java.util.ArrayList;
@@ -29,6 +31,9 @@ import net.minecraft.world.item.Items;
  */
 public final class AlchemyJei implements IModPlugin {
 	static final int NOTES = 4;
+	/** (0.18.50) The crucible's catalyst recipes: the catalyst in, the result out, the pot's essences and the research below. */
+	static final int CRUCIBLE_NOTES = 2;
+	static final IRecipeType<SimpleCategory.Recipe> CRUCIBLE = IRecipeType.create(JaymosPowers.MOD_ID, "crucible", SimpleCategory.Recipe.class);
 	static final IRecipeType<SimpleCategory.Recipe> INFUSION = IRecipeType.create(JaymosPowers.MOD_ID, "infusion", SimpleCategory.Recipe.class);
 
 	@Override
@@ -40,10 +45,13 @@ public final class AlchemyJei implements IModPlugin {
 	public void registerCategories(IRecipeCategoryRegistration registration) {
 		registration.addRecipeCategories(new SimpleCategory(registration.getJeiHelpers().getGuiHelper(), INFUSION,
 			Component.translatable("jei.jaymospowers.infusion"), Infusion.MATRIX, NOTES));
+		registration.addRecipeCategories(new SimpleCategory(registration.getJeiHelpers().getGuiHelper(), CRUCIBLE,
+			Component.translatable("jei.jaymospowers.crucible"), Crucibles.CRUCIBLE, CRUCIBLE_NOTES));
 	}
 
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+		registration.addCraftingStation(CRUCIBLE, Crucibles.CRUCIBLE);
 		registration.addCraftingStation(INFUSION, Infusion.MATRIX);
 		registration.addCraftingStation(INFUSION, Infusion.PEDESTAL);
 	}
@@ -86,6 +94,28 @@ public final class AlchemyJei implements IModPlugin {
 			recipes.add(new SimpleCategory.Recipe(inputs, output, notes));
 		}
 		registration.addRecipes(INFUSION, recipes);
+
+		List<SimpleCategory.Recipe> pot = new ArrayList<>();
+		for (Crucibles.Recipe recipe : Crucibles.recipes()) {
+			ItemStack made = recipe.make();
+			List<ItemStack> catalysts = new ArrayList<>();
+			for (Item item : BuiltInRegistries.ITEM) {
+				ItemStack stack = new ItemStack(item);
+				if (item != Items.AIR && recipe.matches(stack)) {
+					catalysts.add(stack);
+				}
+			}
+			// a catalyst from a mod that isn't loaded, or a result that doesn't exist: nothing to show
+			if (made == null || catalysts.isEmpty()) {
+				continue;
+			}
+			Research.Entry research = Research.get(recipe.research());
+			pot.add(new SimpleCategory.Recipe(List.of(catalysts), List.of(made), List.of(
+				Component.translatable("jei.jaymospowers.crucible.essences", essences(recipe.essences())),
+				Component.translatable("jei.jaymospowers.crucible.research",
+					research == null ? Component.literal(recipe.research()) : Component.translatable(research.key())))));
+		}
+		registration.addRecipes(CRUCIBLE, pot);
 	}
 
 	/** Every item {@code spec} (an id or {@code #tag}) names, {@code count} of each. */
@@ -101,9 +131,13 @@ public final class AlchemyJei implements IModPlugin {
 	}
 
 	private static Component essences(Infusion.Recipe recipe) {
+		return essences(recipe.essences());
+	}
+
+	private static Component essences(EssenceList essences) {
 		Component line = CommonComponents.EMPTY;
 		boolean first = true;
-		for (Map.Entry<Essence, Integer> entry : recipe.essences().amounts().entrySet()) {
+		for (Map.Entry<Essence, Integer> entry : essences.amounts().entrySet()) {
 			Component one = Component.translatable("jei.jaymospowers.infusion.essence", entry.getValue(), Component.translatable(entry.getKey().key()));
 			line = first ? one : line.copy().append(", ").append(one);
 			first = false;

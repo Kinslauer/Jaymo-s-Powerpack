@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.chrono.future.Future;
+import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
@@ -163,11 +164,13 @@ public final class ZFighterSpace {
 	public static final AttachmentType<BlockPos> PAD = AttachmentRegistry.create(JaymosPowers.id("zfighter_space_pad"),
 		builder -> builder.persistent(BlockPos.CODEC));
 
-	/** Server → client: open the star map, for a pod holding {@code fuel}. */
-	public record Open(int fuel) implements CustomPacketPayload {
+	/** Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.50: the tank's grade). */
+	public record Open(int fuel, int grade) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosPowers.id("zfighter_space_open"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec((p, buf) -> buf.writeVarInt(p.fuel),
-			buf -> new Open(buf.readVarInt()));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec((p, buf) -> {
+			buf.writeVarInt(p.fuel);
+			buf.writeVarInt(p.grade);
+		}, buf -> new Open(buf.readVarInt(), buf.readVarInt()));
 
 		@Override
 		public Type<Open> type() {
@@ -288,22 +291,13 @@ public final class ZFighterSpace {
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
-		ServerPlayNetworking.send(player, new Open(pod.fuel()));
+		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod)));
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
 	}
 
-	/** How much fuel one of {@code stack} puts in a pod (0: none). */
+	/** How much fuel one of {@code stack} puts in a pod (0: none). (0.18.50) The numbers and grades are {@link PodFuel}'s. */
 	public static int fuelWorth(ItemStack stack) {
-		if (stack.is(Items.COAL_BLOCK)) {
-			return 9;
-		}
-		if (stack.is(Items.BLAZE_ROD)) {
-			return 3;
-		}
-		if (stack.is(Items.BLAZE_POWDER)) {
-			return 2;
-		}
-		return stack.is(Items.COAL) || stack.is(Items.CHARCOAL) ? 1 : 0;
+		return PodFuel.worth(stack);
 	}
 
 	/** What a trip to {@code index} (or Home) burns from {@code from}. */
@@ -403,6 +397,14 @@ public final class ZFighterSpace {
 		int cost = player.isCreative() ? 0 : cost(index, player.level().dimension());
 		if (fuel < cost) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_fuel", cost, fuel).withStyle(ChatFormatting.RED));
+			return;
+		}
+		// (0.18.50) the tank's fuel must be fine enough for the world
+		int need = PodFuel.needed(index);
+		int grade = PodFuel.effective(pod);
+		if (!player.isCreative() && grade < need) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_grade", PodFuel.roman(need), PodFuel.roman(grade))
+				.withStyle(ChatFormatting.RED));
 			return;
 		}
 		if (player.isPassenger()) {

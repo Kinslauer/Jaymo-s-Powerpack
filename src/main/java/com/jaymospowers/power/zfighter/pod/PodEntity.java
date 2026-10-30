@@ -54,6 +54,8 @@ public class PodEntity extends Entity {
 	static final EntityDataAccessor<Integer> FILLED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> DAMAGED = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	static final EntityDataAccessor<Integer> FUEL = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
+	/** (0.18.50) The grade of the fuel in the tank (0 = put in before grades; see {@code PodFuel}). */
+	static final EntityDataAccessor<Integer> FUEL_GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 
 	// ---- tuning ----
 	/** Its size (blocks), and how far it is tracked. */
@@ -226,6 +228,7 @@ public class PodEntity extends Entity {
 			return;
 		}
 		int now = Math.min(ZFighterSpace.MAX_FUEL, fuel + worth);
+		setFuelGrade(com.jaymospowers.power.zfighter.fuel.PodFuel.mixed(this, held));
 		setFuel(now);
 		held.consume(1, player);
 		level().playSound(null, getX(), getY() + 1.0, getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.5F, 1.4F);
@@ -237,6 +240,7 @@ public class PodEntity extends Entity {
 		builder.define(FILLED, 0);
 		builder.define(DAMAGED, 0);
 		builder.define(FUEL, 0);
+		builder.define(FUEL_GRADE, 0);
 	}
 
 	@Override
@@ -244,6 +248,7 @@ public class PodEntity extends Entity {
 		entityData.set(FILLED, input.getIntOr("filled", 0));
 		entityData.set(DAMAGED, input.getIntOr("damaged", 0));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
+		entityData.set(FUEL_GRADE, input.getIntOr("fuel_grade", 0));
 	}
 
 	@Override
@@ -251,6 +256,7 @@ public class PodEntity extends Entity {
 		output.putInt("filled", entityData.get(FILLED));
 		output.putInt("damaged", entityData.get(DAMAGED));
 		output.putInt("fuel", entityData.get(FUEL));
+		output.putInt("fuel_grade", entityData.get(FUEL_GRADE));
 	}
 
 	// ---------------------------------------------------------------- the contract
@@ -361,6 +367,15 @@ public class PodEntity extends Entity {
 
 	public void setFuel(int fuel) {
 		entityData.set(FUEL, Mth.clamp(fuel, 0, ZFighterSpace.MAX_FUEL));
+	}
+
+	/** (0.18.50) The stored grade of the fuel in the tank; read it through {@code PodFuel.effective}. */
+	public int fuelGrade() {
+		return entityData.get(FUEL_GRADE);
+	}
+
+	public void setFuelGrade(int grade) {
+		entityData.set(FUEL_GRADE, Mth.clamp(grade, 0, 3));
 	}
 
 	/** Fills every slot, sound, as the Patrol's pods and the raiders' kept pod are. */

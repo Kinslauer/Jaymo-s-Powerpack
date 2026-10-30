@@ -3950,3 +3950,27 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
+- **0.18.50, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+  matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
+  blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
+  sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
+  Pale Moon 1, Verdant, Rustfall, Glacia and Cinder 2, the Maw 3; Home only 1 so nobody is stranded); the pod's tank holds
+  the lowest grade put in since it was empty, so a scoop of coal in a grade 2 tank drops it to 1 (`PodEntity` gained one
+  synched `FUEL_GRADE`, carried through trips by `ZFighterPodTrip`; fuel put in before grades counts as 2). The star map
+  writes each world's needed grade on its card, shows the tank's grade beside the fuel gauge and greys the worlds the tank
+  can't reach; `ZFighterSpace.go` refuses with a line on the action bar. **The Fuel Still** is Alchemy: the research
+  `fuel_still` (after the alembic) and three crucible recipes with Fire essence: whale oil (Kingdoms) 1 -> 4 Pod Spirit, the
+  strong input, Kitchen resin or a honey bottle 1 -> 1. The crucible had no JEI page, so it has one now (`AlchemyJei`, fed by
+  `Crucibles.Sync` like the infusion altar), listing every catalyst recipe. **Breath** (`power/zfighter/breath`): the Pale
+  Moon and the Maw have no air; out of the pod with none to draw on, a player is slowed after 20 s and takes a point every
+  5 s. The **Hide Air Skin** (4 leather or Kitchen's wet tanned hide, string, glass bottle: shapeless, shown in JEI by
+  itself; worn in the chest slot, no armour, drawn as a bag on the back by its worn layer) holds 3 minutes of air and tears
+  to a hit of more than 6; the **Sealed Helm** (the `helm_seal` kind in `WeaponParts`, 2 iron ingots, finished at the Tool
+  Station with a glass block, which meant a new `Assembly.GLASS` with a plain-item slot; TinkeringJei lists it) is leather's
+  armour with 8 minutes of air that never tears; worn together the times add. Both show their air as the item bar and refill
+  after 10 s beside a pod. **Cold and heat:** Glacia's cold is Kitchen's body heat (the winter rule: snow lands chill you,
+  shivering burns food, warm clothes and hot meals keep it off) with an extra chill on top through Kitchen's weather hook
+  (`BreathCompat`; without it, hunger instead); Cinder gets the mirrored `breath/Heat`: slowed after 30 s, a point every 8 s
+  after a minute, off while you stand in water, are fire-proof or hold or eat something from `#jaymospowers:cooling_items`,
+  and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
+  or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.

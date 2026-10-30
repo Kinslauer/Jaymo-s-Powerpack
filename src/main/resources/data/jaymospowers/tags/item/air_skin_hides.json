@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather",
+    {
+      "id": "jaymoskitchen:wet_tanned_hide",
+      "required": false
+    }
+  ]
+}
