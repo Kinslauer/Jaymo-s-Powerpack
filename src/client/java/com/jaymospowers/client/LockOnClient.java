@@ -148,7 +148,8 @@ public final class LockOnClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		LivingEntity current = target(minecraft);
-		if (current == null || player == null || yOffset == 0.0 || minecraft.gui.screen() != null) {
+		// (0.18.57) Sneak + the wheel is the stance's (StanceScroll)
+		if (current == null || player == null || yOffset == 0.0 || minecraft.gui.screen() != null || minecraft.options.keyShift.isDown()) {
 			return false;
 		}
 		Camera camera = minecraft.gameRenderer.mainCamera();

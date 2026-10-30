@@ -6919,6 +6919,15 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
   the class. No new text. Compile-checked; not seen in game.
 
+## 0.7.388: world-tier progress is the party's (pack 0.18.56)
+- Andy: "progress is per group, if you have someone join your group they jump to your progress." `WorldTiers` progress (great
+  foes slain, feats and deeds, tiers opened by an op) is now shared across a party (`Parties`): whatever one member earns
+  goes to every member online at once (`update` hands the merged progress on: the most foes, every feat either has, the
+  highest opened tier; nobody ever loses any). Joining a party (handshake or `/party accept`, `WorldTiers.joined`) merges the
+  newcomer's progress with the party's, so the newcomer takes up the party's road (a grey line says so) and steps up to the
+  host's chosen tier if they stood below it (the cooldown is not asked). A member who was offline catches up on logging in
+  (`catchUp`). Leaving a party keeps what you had. Compile-checked; not seen in game.
+
 ## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
 - **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
   time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
@@ -6933,7 +6942,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
 - Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.
 
-## 0.7.389: Blockbench models draw under Sodium (pack 0.18.57)
+## 0.7.389: Blockbench models draw under Sodium (pack 0.18.58)
 - `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
   constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
-  keeps exact rotations. See the Powers MODLOG 0.18.57.
+  keeps exact rotations. See the Powers MODLOG 0.18.58.
