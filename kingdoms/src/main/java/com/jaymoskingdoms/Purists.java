@@ -150,8 +150,11 @@ public final class Purists {
 		return e instanceof Player p ? Heritage.of(p) : VillagerHeritage.of(e);
 	}
 
-	/** {@code e} is of the purist {@code f}'s blood. */
+	/** {@code e} is of the purist {@code f}'s blood ((0.7.381) or a player {@code f} took in on their story's start: {@link StoryHomes}). */
 	static boolean kin(Faction f, Entity e) {
+		if (StoryHomes.of(f, e)) {
+			return true;
+		}
 		Heritage.Kind blood = blood(f);
 		return blood != null && of(e) == blood;
 	}
