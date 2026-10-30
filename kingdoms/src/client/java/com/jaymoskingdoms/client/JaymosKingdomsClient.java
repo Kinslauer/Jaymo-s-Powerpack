@@ -171,6 +171,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.79: every other heritage's look (Heartlander and Warrior-born aside)
 		HeritageLooks.register();
 		ManaClient.register();
+		// 0.7.415: the moon-cursed's red screen under a blood moon
+		MoonCurseClient.register();
 		com.jaymoskingdoms.client.spirits.SpiritKey.register();
 		com.jaymoskingdoms.client.spirits.SpiritArms.register();
 		com.jaymoskingdoms.client.spirits.SpiritHud.register();

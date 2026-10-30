@@ -4237,3 +4237,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   until the wheel takes you up to a sneak or standing (Jump or a Sneak tap stands you too).
 - **0.18.81, Skyward Valor's wings:** Kingdoms 0.7.410 (see its MODLOG): a Valor origin whose wings fly on the Valor pool,
   guard and beat blows back.
+- **0.18.83, three life-story starts (Powers' halves):** Kingdoms 0.7.415 (see its MODLOG) calls these through `PowersCompat`.
+  - *Escaped the alchemist's lab* (`alchemy/LabEscape.start`): a small stone lab (`core/WildRoom`, a new helper for walled rooms
+    in the wild) is raised 60-160 blocks from the player: shelves, a lectern, cauldrons, a brewing stand, a crucible, a chest with
+    honeycomb in it. You wake in it with one of five infusions, each a gift and a price kept for good (`LabEscape.MARK`):
+    night eyes / sun-sick, ox-strength / hollow belly, quicksilver / glass bones, iron skin / leaden limbs, heartfire / water-shy.
+    A Potion of Cleansing (`Cleansing`) or any healing magic (`Mending.easeFever`) washes the mark out. Two clockwork golems
+    (Kingdoms' own; iron golems without it) stir 7 s after you wake and hunt you for 10 minutes (`LabEscape.HUNT`). Messages
+    stay vague. Gated on the Kingdoms side to Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan.
+  - *Fresh off the bench* (`zfighter/ZFighterAndroidStart.start`): a copper-and-andesite workshop in the wild with the Mad Tinkerer
+    at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
+    open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
+  - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.

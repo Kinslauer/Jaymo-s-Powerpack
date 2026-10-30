@@ -7349,3 +7349,15 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   bounty (`BOUNTY` 6 emeralds, and `BOUNTY_REPUTATION` goodwill) is paid when the sentence is carried out (not for a pardon). Any other
   downed outlaw (a raider, an assassin, a masked bandit) is collected: a guard takes them to the cells (out of the world, with a
   word) and the bounty is paid at once, since only looters have a walk to the ruler to be led on.
+
+## 0.7.415: Moon-cursed, and entries for two of Powers' starts
+- `MoonCurse` (new): the moon's curse. `MoonCurse.curse(ServerPlayer)` is the entry for the life story (saved, kept through
+  death, synced: attachment `moon_cursed`). A cursed player is themselves except under a Blood or Super Blood Moon in the
+  Overworld (`Moons.blood`), when they turn feral: Strength II and Speed II, a red throbbing screen (`MoonCurseClient`, a HUD
+  element before the misc overlays), and every 2.5 s they turn on the nearest living thing within 4.5 blocks (friend, villager,
+  horse) and strike it with a lunge. Cure: any healing magic (`PowersCompat.easeFever` and `restore` call `MoonCurse.cure`, so
+  Restoration, clerics and healers all do) or a Potion of Cleansing in the blood (Powers' `jaymospowers:cleansing` effect).
+  Not the werewolf's curse (`Lycans`/`FeralCurse`): no beast shape. Operators: `/kingdom mooncurse curse|cure`.
+- `PowersCompat.labEscape(ServerPlayer)` and `PowersCompat.androidStart(ServerPlayer)` (reflection on Powers 0.18.83's
+  `LabEscape.start` and `ZFighterAndroidStart.start`; false without Powers or if no ground was found). Nothing calls them yet:
+  the life story's roads come in a later patch (the lab road is for Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan).

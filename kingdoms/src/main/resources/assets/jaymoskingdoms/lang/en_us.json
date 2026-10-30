@@ -8782,5 +8782,8 @@
 	"tidings.jaymoskingdoms.bout.walked": "You left the festival bout, and the bracket was called off.",
 	"tidings.jaymoskingdoms.bout.no_show": "Your next fighter was not there to meet you, and the bracket was called off.",
 	"dialogue.main.jaymoskingdoms_duel": "Face an honour duel",
-	"dialogue.main.jaymoskingdoms_bout": "Enter the festival bout"
+	"dialogue.main.jaymoskingdoms_bout": "Enter the festival bout",
+	"message.jaymoskingdoms.moon_curse.cursed": "The moon has found you. You can feel it deciding.",
+	"message.jaymoskingdoms.moon_curse.feral": "The red moon is in your teeth.",
+	"message.jaymoskingdoms.moon_curse.cured": "The moon loosens its grip, and you are only tired."
 }

@@ -52,6 +52,8 @@ public final class Cleansing extends MobEffect {
 
 	@Override
 	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
+		// (0.18.83) it washes out the alchemist's mark too
+		com.jaymospowers.alchemy.LabEscape.cure(entity);
 		int festering = Bleeding.festering(entity);
 		int foul = festering | Bleeding.dirty(entity);
 		if (foul == 0) {

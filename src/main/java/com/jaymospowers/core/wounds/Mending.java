@@ -84,6 +84,8 @@ public final class Mending {
 		if (festering != 0) {
 			entity.removeEffect(MobEffects.WEAKNESS);
 		}
+		// (0.18.83) the alchemist's mark washes out too
+		any |= com.jaymospowers.alchemy.LabEscape.cure(entity);
 		return any;
 	}
 
