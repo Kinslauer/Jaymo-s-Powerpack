@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.389) Stare Down by who you stare at. Andy (2026-10-30): "Will staredown has context sensitive interactions with
+ * (0.7.395) Stare Down by who you stare at. Andy (2026-10-30): "Will staredown has context sensitive interactions with
  * npcs and enemies, like making a captain jump ship, or a weak poor king submit the seat". {@link Will#stare} still
  * finds the gaze and holds it; what breaks, and how, is here.
  *

@@ -182,6 +182,64 @@ final class JobHalls {
 		return s.done();
 	}
 
+	/**
+	 * (0.7.384) A training hall (9 x 9, Weapon Forms): the school's hall in a realm, a school master's post ({@link SchoolHalls}
+	 * puts them at its middle). Plank-and-timber walls with a window either side, a gable roof, a runner of carpet down the
+	 * floor, a pair of training posts (Powers' block if it is loaded; else bales) with a practice butt beside the door side, and
+	 * a tool rack either side of the back wall under wall torches.
+	 */
+	static Blueprint trainingHall(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("training_hall", 9, 9, 12);
+		Palette p = k.p;
+		for (int x = 0; x < 9; x++) {
+			for (int z = 0; z < 9; z++) {
+				boolean edge = x == 0 || x == 8 || z == 0 || z == 8;
+				boolean corner = (x == 0 || x == 8) && (z == 0 || z == 8);
+				s.set(x, 0, z, edge ? p.wall() : p.floor());
+				if (!edge) {
+					continue;
+				}
+				for (int y = 1; y <= 3; y++) {
+					s.set(x, y, z, corner ? p.log() : Buildings.Sketch.weathered(p, x, y, z, k.salt));
+				}
+			}
+		}
+		s.door(4, 1, 0, Direction.NORTH, k.door);
+		for (int z : new int[] {2, 6}) {
+			s.set(0, 2, z, k.pane);
+			s.set(8, 2, z, k.pane);
+		}
+		s.set(2, 2, 8, k.pane);
+		s.set(6, 2, 8, k.pane);
+		s.gable(0, 8, 0, 8, 4, k.roofStairs, k.roofSlab, p.planks());
+		// the runner down the middle, keeping the master's place at the centre open
+		for (int z = 1; z <= 7; z++) {
+			for (int x = 3; x <= 5; x++) {
+				s.set(x, 1, z, k.carpet);
+			}
+		}
+		BlockState post = trainingPost();
+		s.set(1, 1, 7, post);
+		s.set(7, 1, 7, post);
+		// the practice butt: a bale with a target on it
+		s.set(7, 1, 1, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(7, 2, 1, Blocks.TARGET.defaultBlockState());
+		BlockState rack = Displays.rack(Direction.NORTH);
+		for (int x : new int[] {2, 6}) {
+			if (rack != null && k.chance(0.85)) {
+				s.set(x, 2, 7, rack);
+			}
+			s.set(x, 3, 7, Buildings.Sketch.facing(Blocks.WALL_TORCH, Direction.NORTH));
+		}
+		return s.done();
+	}
+
+	/** Powers' training post, where Powers is loaded (the belt can be set at it), else a bale of hay. */
+	private static BlockState trainingPost() {
+		Block post = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse("jaymospowers:training_post"));
+		return (post == Blocks.AIR ? Blocks.HAY_BLOCK : post).defaultBlockState();
+	}
+
 	private static @Nullable BlockState named(String name) {
 		Block b = Townscape.named(name);
 		return b == null ? null : b.defaultBlockState();

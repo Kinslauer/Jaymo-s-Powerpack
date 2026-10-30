@@ -6919,6 +6919,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   alight, the Maw drags its target toward it, the Verdant World's grows back its health. Numbers are `static final` at the top of
   the class. No new text. Compile-checked; not seen in game.
 
+## 0.7.389: keybind names that fit (pack 0.18.58)
+- Andy: the Valor key's name ran under the key button in Controls. Valor, Mana Spirit, Combat Art, Free Rein, the horse
+  Whistle, the Warrior-born tail and the werewolf/vampire change now have short names (30 characters or fewer); their tap
+  and hold details stay in the in-game hints. Lang only; not seen in game.
+
 ## 0.7.388: world-tier progress is the party's (pack 0.18.56)
 - Andy: "progress is per group, if you have someone join your group they jump to your progress." `WorldTiers` progress (great
   foes slain, feats and deeds, tiers opened by an op) is now shared across a party (`Parties`): whatever one member earns
@@ -6928,7 +6933,116 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   host's chosen tier if they stood below it (the cooldown is not asked). A member who was offline catches up on logging in
   (`catchUp`). Leaving a party keeps what you had. Compile-checked; not seen in game.
 
-## 0.7.389: Stare Down by who you stare at (pack 0.18.57)
+## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
+- **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
+  time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
+  `NEAR_MIN` to `NEAR_MAX` (90 to 300) blocks from its seat, in loaded chunks, dry, and never inside any town's claim (up to
+  `TRIES` tries). The fall takes `FALL_TICKS` (90): a streak of flame, sparks and smoke from `FALL_HEIGHT` above, a whistle, then a
+  boom (a blockless explosion, thunder, a burst of sparks) and a bowl of radius `BOWL` dug out of the ground (never bedrock or a
+  block with an inventory), lined with blackstone and basalt, with `ORE_MIN` to `ORE_MAX` lumps of Powers' `star_metal_ore` in its
+  floor. Nothing falls without Jaymo's Powers. Everyone within `TELL_RANGE` (500) reads it in the next Tidings with a bearing from
+  the town: "a light fell out of the sky toward the hills north-east of X". `/kingdom starfall` (gamemasters) drops one now near the
+  sender, whatever the night. Roll state is one saved Overworld attachment (`starfall`).
+- **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
+  only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
+- Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.
+
+## 0.7.390: spell tomes float open while casting; bolts work on the world
+- **Afloat** (`Tomes.AFLOAT`, `client/TomeFloat`): a click, a page cast or a lock taken (Powers' lock-on, read by
+  `PowersCompat.lockTarget`) lifts the tome to float open before you, off the right shoulder (`FLOAT_AHEAD/SIDE/UP`), bobbing
+  and swinging after your aim. It turns a leaf and sheds glyphs as it rises and at each new lock; bolts fly from it toward the
+  crosshair. Back to the hand on letting go of the lock, or `FLOAT_LINGER` (3 s) after the last shot with nothing locked. The
+  hand is drawn empty while it floats (`TomeFloatHandMixin`, `TomeHeldItemMixin`).
+- **Bolts on the world** (`BoltWorks`): any bolt lights (fire) or puts out (water, air, ice) candles, campfires and fire and
+  melts snow; a charged one (`CHARGED` 0.3+) works a patch of radius 1 to 3: ice freezes the water it crosses (frosted ice, real
+  ice at full charge), cools lava, lays snow; fire sets alight and dies in water; water cools lava, soaks farmland; earth topples
+  sand and gravel, cracks stone bricks; air swings doors, trapdoors and gates, scatters items; lightning scrapes copper and shocks
+  swimmers; restoration grows crops; death withers grass, flowers and crops; blood lays Powers' blood stains. Only where the
+  caster may build.
+- Compile-checked against 26.3; not seen in game.
+
+## 0.7.391: Weapon Forms, patch 1 track A: the engine (was 0.7.381; master + 1 at merge)
+- Andy's Ultimate Battle picks (`docs/WeaponForms-Plan.md`; ideas only). `forms/Forms` is the registry and rules: a form has a
+  weapon family (blade, spear, fist, knife, claw; `form_blades` / `form_spears` / `form_claws` item tags, the knife family is
+  `light_blades`; Balkon's katanas are optional entries), a kind (art or masterstroke), cooldown, wind-up, hunger and the
+  practice a rank needs. Per player a saved, synced `Forms.BOOK`: practice per known form (3 ranks), the belt, stance, slot.
+  API for teachers: `teach`, `knows`, `rank`, `practice`, `known`, `STARTER_FORMS`. First form unlocks belt and stance.
+- Five-Art Belt: 5 slots; sneak + use a Powers training post or any mannequin (sparring dummy) empty-handed opens a small
+  belt screen; the server takes changes only within 5 blocks of one.
+- Battle Stance: hold the Combat Art key (side button 1) with a known form's weapon out; tap fires the slot, sneak + tap the
+  next slot, Alt + scroll picks the slot. Out of stance Charge / War Cry / Shield Throw now fire on release of a tap when a
+  form's weapon is in hand (still on press otherwise). Takes Powers' lock-on by reflection (`PowersCompat.lockOnNearest`).
+- Practice on landing (foe 2, dummy or training post 1), masterstroke gate (downed or Powers poise K.O.), Form Cancels
+  (14 ticks after a chain blow skips the wind-up), chain counter right of the crosshair (Good 3+, Fierce 6+, Relentless
+  10+; replaces the old "Combo xN" action-bar line). No parry window or parry HUD.
+- Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
+- Compile-checked. Not seen in game.
+
+## 0.7.393: Weapon Forms, patch 3: fists, knives and claws (pack 0.18.60; was 0.7.383)
+- Andy's Ultimate Battle picks, patch 3 (`docs/WeaponForms-Plan.md`; ideas only), one class per family in `forms/`.
+- **Fist** (`FistForms`; an empty hand, or a weapon in the new `form_fists` tag, counts as a fist): *Ground Stomp* hops and, on
+  landing, throws a small shockwave ring: foes on the ground within 4 blocks are hurt and thrown up, jumping foes aren't.
+  *Falling Fist*, pressed while falling 3+ blocks, drives you down and the first foe your fall meets takes part of the fall's
+  force; you still take your full fall damage. A Brute hits 1.25 times as hard with both.
+- **Knife** (`KnifeForms`, `Bolas`, client `KnifeClient`): *Marked Quarry* marks the foe you look at (outline through walls for you
+  alone: a clientbound `Mark` packet and the client's own glow flag, not the Glowing effect); a second press within 5 s dashes
+  you behind it for a stab (half again on an unaware foe, 1.3 times for a Thief). *Cast-off Cloak* leaves a mannequin in your
+  look that mobs after you swing at for 3 s (5 s for a Thief) while you slip away quicker. *Tangle Cord* throws a new **Bolas** (leather,
+  string, two stone or iron nuggets in the grid; or throw it by hand) that wraps a foe's legs (Slowness II, 4 s) and
+  drops back as the item whether it hits, misses or flies too long.
+- **Claw** (`ClawForms`): *Rending Claw* rakes the front arc and leaves Rend bleeding (`CombatArts.bleed`, new public method);
+  *Feral Pounce* leaps onto the foe ahead, a savage blow, a short bleed, knocked flat.
+- Compile-checked. Not seen in game.
+
+## 0.7.392: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.59; was 0.7.382)
+- **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
+  foe; the last is a heavy blow with Powers' impact frames (`PowersCompat.impactFrame`, reflection; Powers has no afterimage
+  hook, so the trail is particles) and the whole thing runs under Powers' new hard-cut film (`FILM_CUTS`, witnesses get bars).
+- **Spear Lunge** (`forms/SpearForms`): a lunge of about 4 blocks (the rapier's is 2.8), 9 ticks of reach, that runs the first foe
+  through and goes on into one behind it (75% of the damage).
+- **Couched Lance**: only while you control a mount. The lance stays couched 30 ticks; the first foe is hit for damage that grows
+  with the mount's speed (measured from its movement, smoothed), a foe in the saddle (or the rider of a foe) is knocked out of it.
+  Riders hit 30% harder. A mounted realm guard that carries a spear charges its target the same way (`Cavalry` ticks every 10
+  ticks, `SpearForms.charge`; once per 80 ticks, needs speed and a heading at the foe, moves nothing).
+- **Pinning Throw** (spear masterstroke): throws one spear at a fallen foe (a little damage) and roots it for 4 s (+1 s a rank;
+  foes of 150+ health aren't held). Any press while it holds tugs the spear back to the hand. The spear is never lost: it is kept
+  in `SpearForms` and saved on the player (attachment `pinned_spear`), and it comes back to the hand when tugged, drops at the foe
+  when the pin runs out or the foe dies, and goes to the inventory if the player leaves or the server stops (or is handed back on
+  the next log-in after a crash). The stance holds while the hand is empty of it.
+- `form_spears` now has the trident, Powers' lances (wooden to netherite), Tinkers javelin and primitive spear, all optional ids.
+- **School Swing Trails** (`forms/Trails`): blade = dark ink and smoke, spear/lance = sparks, fist = dust (for patch 3). Sheath Draw
+  and Crescent Sweep got the blade trail.
+- Compile-checked (check.sh, zero errors); not seen in game.
+
+## 0.7.394: Weapon Forms, patch 4: schools and teachers (Kingdoms only; Powers unchanged; was 0.7.384)
+- **Schools** (`forms/Schools`): one for each weapon family, our own names: blade the *Quiet Tide*, spear the *Skyward Reach* (the
+  sky school), fist the *Stone Root*, knife the *Low Lantern*, claw the *Ashen Fang*. Attachment `schools` (joined, standing,
+  mastered; saved, kept through death, not synced). Public API for patch 5: `School`, `joined`, `join`, `standing`, `addStanding`,
+  `masterstrokeOpen`, `openMasterstroke`, `localSchool`, `isMaster`, `masterOf`. A realm's school is fixed by its id (`ofRealm`).
+- **Joining**: the first school is free; another only once every school joined is mastered. Joining gives the school's **manual**
+  (a written book of three pages of odd sayings; the sky school's hints at a road that has since come apart) and teaches its first
+  art. Standing grows by the practice of the school's forms (`Forms.practice` calls `Schools.practiced`; 1 per point, +1 for a
+  matching class: Warlord/blade, Brute/fist, Thief/knife, Rider/spear). Each visit teaches the next art once standing reaches
+  its step (0, 20, 45); at 150 standing, with every art known, the master opens the masterstroke (blade Rain of Cuts, spear
+  Pinning Throw; fist, knife and claw have none yet and are only marked mastered), and hands over the school's **mask** and a
+  **Master-grade blueprint** for its signature weapon (blade: katana blade, or the ninjato blade without WeaponMod; spear: spear tip;
+  knife: kunai blade; claw: fang blades; the fist school has none, as no cestus is forged). Patch 5's duel can call `openMasterstroke` too.
+- **Masters and halls** (`SchoolHalls`, `JobHalls.trainingHall`, `McaBridge.master`): a new realm building, the *Training Hall* (9 x 9,
+  needs 34 villagers, after the barracks): carpet runner, two training posts (Powers' block if loaded), a target butt, tool racks.
+  Every realm keeps one **master**, an MCA villager held at the post (role 96, tags `jaymoskingdoms_school_master`, the school and the
+  realm), invulnerable, outside MCA's family tree, in the road master's gi, speaking to anyone. They stand at the middle of the hall; a
+  kingdom with no hall yet has its master at its barracks, and moves them into the hall when it is finished. Kept up every 10 s once the
+  place is loaded and a player is on (none found by the realm's tag: a new one; extras are let go). MCA menu: "Speak of the school".
+- **Wizard trials** (`forms/WizardTrials`): court wizards and a realm's necromancer, "Ask for a trial": the Shade (a stronger practice foe
+  hunts you), the Ward (hold a ring of light for 30 s while weak foes come; any class), the Marked One (four foes, one glows, strike
+  another and it's lost). The practice foes are the drills' (same tags, load sweep and FELL counting) and now count only if you struck
+  them (`jaymoskingdoms_trial_hit`); wizards never fight them (`CourtWizards.foe`). Reward: practice for the two least-ranked forms,
+  standing in the local school, a Mage's or Sorcerer's 40 experience. One per wizard per day.
+- **School masks**: five head-slot items `school_mask_<school>` (art by `tools/gen_school_masks.py`), in the combat tab, given at mastery.
+  Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
+- Compile-checked; not seen in game.
+
+## 0.7.395: Stare Down by who you stare at (pack 0.18.61)
 - Andy: "Will staredown has context sensitive interactions with npcs and enemies, like making a captain jump ship, or a weak
   poor king submit the seat". `Staredowns` decides what a held stare does; `Will.stare` still finds and holds the gaze.
 - **The great** (a crewed ship's captain at her wheel, a ruler on a throne) can be stared at even when they're no foe, for
@@ -6957,17 +7071,3 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Down are off while you're locked in. Never during a spirit clash.
 - Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
   `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
-
-## 0.7.387: falling stars (SevTech picks) (pack 0.18.56)
-- **Falling stars** (`Starfall`): once a night, after the first `Moons.QUIET_NIGHTS`, one night in `ODDS` (8) a star comes down some
-  time in the dark. It is placed near a player: a town (not fallen, not Barbarian) within `PICK_RANGE` (400), then a spot
-  `NEAR_MIN` to `NEAR_MAX` (90 to 300) blocks from its seat, in loaded chunks, dry, and never inside any town's claim (up to
-  `TRIES` tries). The fall takes `FALL_TICKS` (90): a streak of flame, sparks and smoke from `FALL_HEIGHT` above, a whistle, then a
-  boom (a blockless explosion, thunder, a burst of sparks) and a bowl of radius `BOWL` dug out of the ground (never bedrock or a
-  block with an inventory), lined with blackstone and basalt, with `ORE_MIN` to `ORE_MAX` lumps of Powers' `star_metal_ore` in its
-  floor. Nothing falls without Jaymo's Powers. Everyone within `TELL_RANGE` (500) reads it in the next Tidings with a bearing from
-  the town: "a light fell out of the sky toward the hills north-east of X". `/kingdom starfall` (gamemasters) drops one now near the
-  sender, whatever the night. Roll state is one saved Overworld attachment (`starfall`).
-- **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
-  only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
-- Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.

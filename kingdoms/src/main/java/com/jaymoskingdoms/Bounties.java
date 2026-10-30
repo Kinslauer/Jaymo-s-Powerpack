@@ -428,7 +428,7 @@ public final class Bounties {
 		return b != null && !b.dead() ? b : null;
 	}
 
-	/** (0.7.389) {@code body} has a live bounty on them, with any court (Stare Down makes them kneel). */
+	/** (0.7.395) {@code body} has a live bounty on them, with any court (Stare Down makes them kneel). */
 	static boolean wanted(MinecraftServer server, LivingEntity body) {
 		return !onAnywhere(server, body).isEmpty();
 	}

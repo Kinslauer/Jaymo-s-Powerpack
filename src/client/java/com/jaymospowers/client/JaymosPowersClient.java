@@ -86,6 +86,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.enchanting.EnchantSlotTooltip.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
+		// (0.18.47) the clockwork hornets: small brass drones, drawn as their item sprite
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.alchemy.gear.ClockworkHornets.TYPE,
+			context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.55F, true));
 		// (0.13.7) the bomb glider: its renderer, hold screen and drop keys
 		com.jaymospowers.client.armory.BombGliderClient.init();
 		// (0.15.148) the flail's chain and ball, the whip's lash
@@ -140,6 +143,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		StanceScroll.init();
+		StanceHud.init();
 		com.jaymospowers.client.wounds.WoundsHud.init();
 		com.jaymospowers.client.wounds.DownedHud.init();
 		com.jaymospowers.client.wounds.MedicineHud.init();

@@ -152,6 +152,30 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_drill",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_school",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_trial",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }

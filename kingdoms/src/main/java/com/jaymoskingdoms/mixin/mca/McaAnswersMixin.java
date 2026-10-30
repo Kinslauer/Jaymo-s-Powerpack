@@ -109,6 +109,18 @@ abstract class McaAnswersMixin {
 			// (0.7.340) only a guard of a town that owes you for one you brought home
 			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.GuardDrills.canOffer(player, villager)) {
+			// (0.7.381) only a veteran guard sets drills
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.GuardDrills.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.Schools.canTalk(player, villager)) {
+			// (0.7.384) only a school master talks of the school
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Schools.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.WizardTrials.canOffer(player, villager)) {
+			// (0.7.384) only a court wizard (or a realm's necromancer) sets trials
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.WizardTrials.ANSWER);
+		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
 			cir.getReturnValue().removeIf(answer -> !Languages.simpleDialogue(name, answer));

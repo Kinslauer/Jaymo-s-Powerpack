@@ -25,7 +25,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.389) A clash of wills between players. Andy (2026-10-30): Stare Down "can be done between players, and when one
+ * (0.7.395) A clash of wills between players. Andy (2026-10-30): Stare Down "can be done between players, and when one
  * initiates a stare, the other is notified, then it starts a clash". A player with Stare Down who sneaks and holds their
  * gaze on another player warns them at once ({@link #warn}: a line, a heartbeat, a shiver); held for {@link #LOCK_TICKS},
  * the two lock eyes. Both are rooted where they stand, turned to face each other, and press jump as fast as they can for

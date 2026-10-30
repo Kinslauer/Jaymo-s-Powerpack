@@ -4082,6 +4082,37 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
   dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
   `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.
-- **0.18.57 (Kingdoms 0.7.389):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
+- **0.18.57, the stance wheel:** Andy: "shift + scroll should adjust you through stances, from prone to a crouch to a sneak
+  to standing", with a Tarkov-style corner display. Sneak + scroll steps prone / low crouch / sneak / standing, held after
+  Sneak is let go (`core/Stance`, `client/StanceScroll`). The low crouch is 1.25 tall at 0.6x sneak speed, knees bent
+  (`CrouchPose` LOW_*). Jump or a Sneak tap stands you up; rising waits for headroom. `client/StanceHud`: a figure and
+  a sliding height bar, bottom-left, fading 3 s after you're back on your feet. Sneak + scroll never moves the hotbar.
+- **0.18.58, keybind names that fit (Kingdoms 0.7.389):** Andy's screenshot showed "Valor (tap: coatings up or down; hold:
+  King's Valor)" running under the key button in Controls. Every pack key name is now 30 characters or fewer (Symbiote Arm,
+  Arm use, Mantle, Power Skill, Rig, Backpack, Z Fighter wheel, Meditate here; seven in Kingdoms). The tap/hold details live in
+  each feature's in-game hints. Lang only; not seen in game.
+
+- **0.18.59, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.392; was 0.18.46):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
+
+
+- **0.18.60, Fang Gauntlets and the Clockwork Hornet Hive (Weapon Forms patch 3; Kingdoms 0.7.393; was 0.18.47):**
+  - Fang Gauntlets (`jaymospowers:fang_gauntlets`): claws for Kingdoms' Claw forms (in its `form_claws` tag). Forged only,
+    as the pack's iron-tool rule says: a new `WeaponParts` kind (Fang Blades, three ingots, with a Tool Binding at the Tool
+    Station; stone shaped, iron cast), so it shows in JEI with the other forged weapons. Original 16px art
+    (`tools/gen_weapon_forms_art.py`).
+  - Clockwork Hornet Hive: new Artifice research (Clockwork Hornets) and an infusion recipe (no grid recipe). Using the hive
+    looses three `ClockworkHornet` drones for 20 s that sting the owner's lock-on target, else the last thing that hurt them;
+    they pop when struck, go with the owner, and are never saved.
+- **0.18.46, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.382):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
+  - `UltimateFilm.DUTCH` (8): low and close on the subject, the horizon tilted about 17 degrees and settling back as it leans in.
+    `UltimateFilm.CUTS` (9): hard cuts between three angles round the subject (close and low, wide and tilted from the side, high behind).
+    Kingdoms' masterstrokes use them (`PowersCompat.FILM_DUTCH` / `FILM_CUTS`).
+  - Camera roll: 26.3's `Camera` builds its `rotation` quaternion from yaw and pitch only (`setRotation` passes 0 as the third
+    angle) and has no roll hook. `UltimateCinematic.view` now returns a sixth number, the roll in degrees, and
+    `UltimateCinematicCameraMixin` (already in the client mixins json, at `alignWithEntity` TAIL) turns `rotation` about its own
+    forward axis by it, refreshes `up` and `left` and dirties the view matrices again. Other shots return 0, so nothing else changes.
+  - `ZFighterSenses.impactFrame` is public now (Kingdoms' Rain of Cuts calls it by reflection).
+  - Compile-checked; not seen in game.
+- **0.18.61 (Kingdoms 0.7.395):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
   poor ruler in their hall into giving up the crown (a richer one pays you to go), when your Will beats their nerve; crew go
-  over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.389.
+  over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.395.

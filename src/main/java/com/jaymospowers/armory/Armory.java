@@ -185,6 +185,8 @@ public final class Armory {
 				.build()));
 		item("throwing_star", props -> new ThrowingWeaponItem(props, 3.0F, true, false), p -> p.stacksTo(16));
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
+		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
+		item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
 		// (0.15.148) the single-tail leather whip: cracks, wraps and hauls (Lash)
 		item("leather_whip", LeatherWhipItem::new, p -> p.durability(LeatherWhipItem.DURABILITY).repairable(net.minecraft.world.item.Items.LEATHER)
 			.component(DataComponents.LORE, new ItemLore(List.of(

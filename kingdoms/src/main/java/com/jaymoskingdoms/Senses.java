@@ -559,7 +559,7 @@ public final class Senses {
 	 * is searching. A boss only while it is after no one at all (the dragon, which never targets anyone, only while perched);
 	 * a tame pet (a wolf: other pets aren't hostile or neutral) never of its own owner.
 	 */
-	static boolean unaware(LivingEntity target, ServerPlayer player) {
+	public static boolean unaware(LivingEntity target, ServerPlayer player) {
 		if (!(target instanceof Mob mob) || !sensing(mob) || mob instanceof TamableAnimal tame && tame.isOwnedBy(player) || !mob.isAlive()
 			|| mob.getTarget() == player || boss(mob) && mob.getTarget() != null
 			|| mob instanceof EnderDragon dragon && !(dragon.getPhaseManager().getCurrentPhase() instanceof AbstractDragonSittingPhase)) {

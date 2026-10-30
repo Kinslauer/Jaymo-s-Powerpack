@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Presence:</b> Dread Presence (weaker foes and players near you tremble: slowed, weakened, sometimes buckling),
  * No Getting Up (downed foes near you shiver and can't rise; the holding down is Jaymo's Powers' {@code WillSkill}),
- * Stare Down (sneak and hold your gaze on a weaker foe: it drops its weapon or runs; (0.7.389) a captain or a ruler, and
+ * Stare Down (sneak and hold your gaze on a weaker foe: it drops its weapon or runs; (0.7.395) a captain or a ruler, and
  * foes by what they are, break their own ways: {@link Staredowns}), Broken Morale (down or kill one and
  * its kind round it lose heart), Name That Carries (a Warrior's name: weaker foes won't start a fight with you).
  *
@@ -650,7 +650,7 @@ public final class Will {
 				continue;
 			}
 			long now = level.getGameTime();
-			// (0.7.389) locked in a clash of wills: nothing else of Will's keys
+			// (0.7.395) locked in a clash of wills: nothing else of Will's keys
 			if (!WillClash.in(sp)) {
 				stare(level, sp, now);
 				shrug(level, sp, now);
@@ -768,7 +768,7 @@ public final class Will {
 			return;
 		}
 		Object[] was = STARING.get(sp.getUUID());
-		// (0.7.389) another player: they're warned, then the two clash ({@link WillClash})
+		// (0.7.395) another player: they're warned, then the two clash ({@link WillClash})
 		ServerPlayer rival = gazedPlayer(level, sp);
 		if (rival != null && WillClash.may(sp, rival, now)) {
 			if (was == null || was[0] != rival) {
@@ -781,7 +781,7 @@ public final class Will {
 			return;
 		}
 		Mob seen = gazedAt(level, sp);
-		// (0.7.389) the great (a captain, a ruler) weigh your Will against their nerve instead
+		// (0.7.395) the great (a captain, a ruler) weigh your Will against their nerve instead
 		if (seen == null || !Staredowns.great(sp, seen) && !weaker(sp, seen) || FLEEING.containsKey(seen)) {
 			STARING.remove(sp.getUUID());
 			return;
@@ -818,7 +818,7 @@ public final class Will {
 		flee(seen, sp, now, FLEE_TICKS);
 	}
 
-	/** (0.7.389) The player {@code sp} is looking straight at, within reach and in sight, or null. */
+	/** (0.7.395) The player {@code sp} is looking straight at, within reach and in sight, or null. */
 	private static @Nullable ServerPlayer gazedPlayer(ServerLevel level, ServerPlayer sp) {
 		Vec3 eye = sp.getEyePosition(), look = sp.getLookAngle();
 		ServerPlayer best = null;

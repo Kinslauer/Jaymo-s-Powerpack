@@ -105,6 +105,10 @@ public final class Uniforms {
 			// (0.7.319) one of Powers' Z Fighter characters
 			return zfighter;
 		}
+		if (com.jaymoskingdoms.forms.Schools.isMaster(villager)) {
+			// (0.7.384) a school master wears the travelling gi of the road's master (a school colour is in the mask, not the cloth)
+			return zfighter("road_master");
+		}
 		if (Crewmen.tagged(villager)) {
 			Crew.Side side = side(villager);
 			if (role == Pirates.CAPTAIN) {
