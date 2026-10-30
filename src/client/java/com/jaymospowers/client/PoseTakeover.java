@@ -130,6 +130,7 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.freerun.RunPose.SLIDE) != null || s.getData(com.jaymospowers.client.freerun.BalancePose.KEY) != null || s.getData(com.jaymospowers.client.freerun.UpRunPose.KEY) != null || s.getData(com.jaymospowers.client.freerun.BarHangPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null || s.getData(CrouchPose.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.stamina.DodgeRollPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null
+			|| com.jaymospowers.client.wounds.TrippedPose.tripped(s)
 			|| s.getData(CarryPose.CARRIER_KEY) != null || s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| WindPose.posed(s)
 			|| s.getData(GravityWalkPose.KEY) != null || s.getData(GravityBoardPose.KEY) != null || s.getData(GravityKneelPose.KEY) != null

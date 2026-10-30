@@ -4176,3 +4176,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   red". `Downed.blocksRise` reads the wounds doll as it is now: only the head, body or an arm at red (25%), broken or gone
   keeps you down; legs and feet don't. The as-they-fell `TOO_HURT` latch is gone (the downed health refills every part to
   the bruise line, so the doll showed yellow while the latch said red). The give-up prompt names the part keeping you down.
+- **0.18.69 (Kingdoms 0.7.402), bolas trips:** Andy: "bolas should force a cripple on humanoid mobs, and animate wrapping
+  and tripping them". `Tripped` (wounds): Kingdoms' bolas breaks one leg on anything built like a person and trips it.
+  `TrippedPose`: the cord spins in and cinches round both shins (a two-turn cord with two stone weights, drawn on the legs),
+  the legs snap together, it teeters with its arms windmilling, pitches onto its face with a bounce and a thud, kicks its
+  bound legs and paws at the ground, then pushes itself up as the cord drops off. Down, it's stunned and can be finished
+  (`Finishers.helpless`). Not seen in game.

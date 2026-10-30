@@ -159,6 +159,8 @@ public final class Wounds {
 		SelfRevive.register();
 		// (0.15.82) up from the downed, but battered
 		Battered.register();
+		// (0.18.69) tripped by a bolas: a leg broken, face down on the ground a while
+		Tripped.register();
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
