@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.18.19, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
+ * (0.18.47, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
  * heading. A damaged fin is drawn bent out {@link #BEND} degrees about its foot, a damaged canopy as its lower step only,
  * a damaged plate with its dark gash. (Parts are drawn by pose, not by moving the shared model parts, since the draw is
  * queued and made later.)
