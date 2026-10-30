@@ -62,6 +62,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.332) "Accuse someone here" with a priest ({@link com.jaymoskingdoms.Accusations}).
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
+ * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
  * (0.7.380) Opening the menu just after something passed between you (carried out, got up, a monster drawn off, a blow):
  * they open with that ({@link Recollections#opening}).
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
@@ -82,9 +83,10 @@ abstract class McaDialogueMixin {
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
 		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
-			|| McaCompat.outlawOpening(villager, player))) {
+			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
-			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word
+			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
+			// (0.7.405) a Z Fighter character: a line of their own
 			ci.cancel();
 			return;
 		}
