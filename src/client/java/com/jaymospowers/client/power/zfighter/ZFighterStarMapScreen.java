@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
  * gravity, how its mission stands, the fuel the trip burns against what the pod holds, and Launch; on a world with a mission, the
  * card of the world you are on also begins or gives up the mission. The future is not on the map, and a pod in the future shows
  * the map dark. The whole panel shrinks to fit small screens. Escape closes it.
- * (0.18.52) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
+ * (0.18.53) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int MAP = 200;
@@ -52,7 +52,7 @@ public class ZFighterStarMapScreen extends Screen {
 	private final int fuel;
 	/** (0.18.49) The grade of the fuel in the tank (0: empty). */
 	private final int grade;
-	/** (0.18.52) The star charts read: bit w is destination w. */
+	/** (0.18.53) The star charts read: bit w is destination w. */
 	private final int read;
 	private int picked;
 	private float scale = 1.0F;
@@ -100,7 +100,7 @@ public class ZFighterStarMapScreen extends Screen {
 
 	// ---------------------------------------------------------------- where things are (in panel pixels)
 
-	/** (0.18.52) Whether {@code index} is on the map: Home, or a world whose chart is read. */
+	/** (0.18.53) Whether {@code index} is on the map: Home, or a world whose chart is read. */
 	private boolean shown(int index) {
 		return index == ZFighterSpace.HOME_INDEX || (this.read & 1 << index) != 0;
 	}
@@ -304,7 +304,7 @@ public class ZFighterStarMapScreen extends Screen {
 		}
 		graphics.disableScissor();
 		if (this.read == 0) {
-			// (0.18.52) no chart read yet: only Home is on the map
+			// (0.18.53) no chart read yet: only Home is on the map
 			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.uncharted"), x0 + MAP / 2, y0 + MAP - 14, MAP - 12,
 				UiStyle.HINT);
 		}
