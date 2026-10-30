@@ -72,6 +72,12 @@ public final class BioBuilt {
 	static final double[] SIZE = {0.0, 0.15, 0.15};
 	/** (0.7.313) The tag a Bio-built player carries for their form ({@code _0} to {@code _2}), read by Jaymo's Powers. */
 	public static final String FORM_TAG = "jaymoskingdoms_bio_form_";
+	/**
+	 * (0.7.363) The tag for their palette (by variant: 0 the first look, 1 Brassbound, 2 Opaline). With the form's, it
+	 * goes with them onto their corpse (Kitchen keeps a dead player's {@code jaymoskingdoms_bio_} tags), so the body keeps
+	 * the form they died in.
+	 */
+	public static final String PALETTE_TAG = "jaymoskingdoms_bio_palette_";
 	public static final int ABSORB_TICKS = 100;
 	static final int ABSORB_FOOD = 3;
 	static final float ABSORB_HEAL_SHARE = 0.5F, ABSORB_HEAL_MAX = 12.0F;
@@ -164,6 +170,15 @@ public final class BioBuilt {
 				player.addTag(FORM_TAG + i);
 			} else {
 				player.removeTag(FORM_TAG + i);
+			}
+		}
+		HeritageVariants.Variant variant = bio ? HeritageVariants.of(player) : null;
+		int palette = variant == HeritageVariants.Variant.BRASSBOUND ? 1 : variant == HeritageVariants.Variant.OPALINE ? 2 : 0;
+		for (int i = 0; i < 3; i++) {
+			if (bio && i == palette) {
+				player.addTag(PALETTE_TAG + i);
+			} else {
+				player.removeTag(PALETTE_TAG + i);
 			}
 		}
 		if (player.getHealth() > player.getMaxHealth()) {

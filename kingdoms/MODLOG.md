@@ -6794,3 +6794,39 @@ find one living there."
   Strength in the K screen), `mixin/vampires/ValorGlowColorMixin`.
 - Built (Powers 0.18.8 and Kingdoms 0.7.361 compile and jar). Not seen in game.
 
+
+## 0.7.363: Bio-built forms no longer wear MCA's clothes and hair; their corpses keep the form (pack 0.18.10)
+Andy's screenshot: a Bio-built player showed their form's horns, wing cases and tail, but MCA's clothes and hair were
+drawn over the form's body, hiding it. `McaBioFormLayerMixin` left those layers off only when the form was on the render
+state; it now also checks the player MCA's visuals were taken from (`VillagerVisuals.entityId`), as the disguise mixin
+does, so MCA's clothing, hair and face layers stay off a Bio-built player either way.
+- **Corpses** (Andy: "it should always look the way it did when the player died"): a player's corpse is drawn as
+  MCA's villager look of them (Kitchen's `McaLooks`), which showed their clothes and hair. Each Bio-built player now
+  also carries a palette tag (`BioBuilt.PALETTE_TAG`, by variant) beside the form tag; Kitchen 0.5.37 keeps a dead
+  player's heritage and `jaymoskingdoms_bio_` tags on their corpse and puts them on the look while it's drawn, so
+  `BioForms.extract` reads the form and palette they died in from those tags, `VillagerLooks` draws the form (skin,
+  glow, parts and idle tail) on the corpse, and MCA's clothes, hair and face stay off it.
+- Compile-checked against 26.3 with javac (changed files); not seen in game.
+
+## 0.7.364: the story figure builds up; the moon wakes ki; Stoneborn need no air (pack 0.18.11)
+- Andy: "is it possible to have every choice influence the model displayed, so it builds instead of resetting every page?
+  It should culminate with a different look on the end screen every time." `StoryFigure.compose` lays every answer's
+  scene so far over the last (gear stacks slot by slot, the last answer says what the figure does); the stand-in's MCA
+  clothes come from who raised you, then your trade, then the road, in a cut picked by upbringing + trade. The story page
+  and the road after MCA's creator show the whole life.
+- Escaped captors: "he should really have nothing at all": a bare scene (no gear, no clothes; your own MCA clothes are
+  taken off for the draw via `McaStoryFigure.undress`). Unarmed: "he shouldnt still have his limb": drawn without the left
+  arm (Powers' `Dismember.MISSING` lent while drawn).
+- Pale Moon: "this should start you as z fighter, sorcerer, or mage ... stoneborn too". A Mage, Sorcerer or Stoneborn
+  lands as they are (`LifeStory.spaceborn`); anyone else is awakened as a Z Fighter on landing, and the carousel says so.
+- Stoneborn: "can now breath underwater because they dont need air": their air is kept full (`Heritage.tick`); gift line
+  updated.
+- "not everyone needs to be holding something ... the pickaxe or sword or harpoon make sense. not the trident":
+  `StoryFigure.held` lets a figure hold only tools, weapons (shield, bow, crossbow, rod, harpoon) and lights; the
+  whaler holds a harpoon, the moon a stone pickaxe, no picture-in-hand fallback.
+- "should just show a random divine born instead of the totem in hand of your current char": the afterlife road (a road
+  that makes another blood) shows a stand-in of that blood in a random look instead of you.
+- "make this a ki ghost instead of the character, implying what is all within us": the "Let fate decide" road shows
+  `KiGhost`, a flat figure of layered pale-blue ki light (player proportions, legs fading to a tail, bright eyes,
+  breathing, wisps rising). Preview: project files art-overhaul/ki-ghost/ki-ghost-preview.png.
+- Compile-checked. Not seen in game.
