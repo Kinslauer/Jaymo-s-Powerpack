@@ -200,6 +200,18 @@ public final class CrawlTaps {
 		ClientPlayNetworking.send(new Crawl.Key(true));
 	}
 
+	/** (0.18.57) Whether the local player is prone by their own gesture (the key, a held slide or the stance wheel). */
+	public static boolean prone() {
+		return crawling;
+	}
+
+	/** (0.18.57) Up off the belly now, from the stance wheel ({@code StanceScroll}, which has checked there's room). */
+	public static void getUp() {
+		if (crawling) {
+			stop();
+		}
+	}
+
 	private static void stop() {
 		crawling = false;
 		whileSneaking = false;

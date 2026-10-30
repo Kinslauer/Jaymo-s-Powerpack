@@ -1,0 +1,11 @@
+{
+  "catalyst": "minecraft:honey_bottle",
+  "essences": {
+    "fire": 4
+  },
+  "result": {
+    "item": "jaymospowers:pod_spirit",
+    "count": 1
+  },
+  "research": "fuel_still"
+}

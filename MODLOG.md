@@ -3912,3 +3912,182 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
+- **0.18.47, Jung couldn't hit anything (Andy: "jung couldnt attack as a z fighter. he's holding the left click but no damage
+  occurs", "not even breaking blocks", "i think his arm was broken"):** both arms broken (or one broken, the other gone) is
+  `Breaks.armless`, which refuses every attack and dig on purpose, but silently, and the Z Fighter hold combo ignored it
+  and kept throwing punches at fists cut 60% by the breaks. Now:
+  - a refused click says why on the action bar (`message.jaymospowers.wounds.armless`, at most every 3 s): a splint frees
+    the arm.
+  - (Andy picked "Kicks only") with both arms out, a Z Fighter's hold combo throws a kicks-and-knees string for his tier
+    (`ZFighterCombo.KICK_STRINGS`), and kicks always hit at full damage, broken arms or not (`ZFighterCombo.fists`,
+    `Breaks.armDamageShare`).
+  - (found on the way) the hold combo keeps the click from the race's left hold: a Frost-born, Emberborn, Stormborn or
+    Dawnborn Z Fighter's held left click went to the race's move (ice prison, Kindle, Thunderclap, Sunflare) whenever the
+    crosshair wasn't on an entity, though the combo finds its foe in a cone up to reach + 2.8 blocks, and a string going
+    was cut off when the crosshair slipped off the reeling foe. `RaceHoldClient.claims` now gives a Z Fighter's hold to
+    the race only when no foe is in the combo's reach and cone (`ZFighterCombo.inFront`, the server's own scan) and no
+    string is going.
+  - Compile-checked; not seen in game.
+- **0.18.49, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+  system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
+  onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
+  `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
+  fins, a thruster bell, a fuel tank, four hull plates (porthole on the front, hatch on the right), a glass canopy and a
+  beacon mast. Each part is a block (`PodParts`) you carry in both arms (sneak + right-click, like a crafting table) and set
+  onto a pod you are looking at: it snaps into its slot and the model gains the piece, in order (keel, fins, bell, tank,
+  plates, canopy, mast). A hammer blow (`#jaymospowers:hammers`, or a mace) pops the outermost part off again as its block
+  beside the pod; a bent fin or cracked canopy only gives scrap. A keel set down on the ground is a bare pod. Fuel needs the
+  tank; a launch needs keel, fins, bell, tank and canopy; a pod missing plates or the mast lands hard (explosion, fall
+  damage, one or two parts knocked off). No pod recipe still: keels only come from raider bands (the kept pod complete,
+  the burnt-out ones a keel + 1-3 parts), the Maw (each wreck deck holds a wrecked pod, some parts bent), the Patrol (a
+  complete pod beside you when sworn in) and the life-story wreck (a bare pod missing its tank, canopy, mast and two
+  plates; the four-step mend is gone). Parts are made the pack's way: fins (steel), plates and mast (iron) and the tank
+  (copper) as Tool Station blanks cast like the throwing star (`WeaponParts`); the bell by firing a copper block at the
+  kiln's hottest; the canopy at the infusion altar (glass, amethyst, quartz; research `pod_canopy`); Maw wreck chests
+  also hold spare parts. Old pod blocks stay loadable and become a complete pod when used. Compile-checked against the
+  26.3 jar; not seen in game. Plan: docs/Pod-Parts-Plan.md. Andy's rule from the SevTech picks, "make sure all new recipes
+  and routes are also in JEI": the brick kiln (`client/jei/KilnJei`, every firing with the heat it needs) and the
+  infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
+  bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
+  matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
+- **0.18.50, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+  matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
+  blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
+  sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
+  Pale Moon 1, Verdant, Rustfall, Glacia and Cinder 2, the Maw 3; Home only 1 so nobody is stranded); the pod's tank holds
+  the lowest grade put in since it was empty, so a scoop of coal in a grade 2 tank drops it to 1 (`PodEntity` gained one
+  synched `FUEL_GRADE`, carried through trips by `ZFighterPodTrip`; fuel put in before grades counts as 2). The star map
+  writes each world's needed grade on its card, shows the tank's grade beside the fuel gauge and greys the worlds the tank
+  can't reach; `ZFighterSpace.go` refuses with a line on the action bar. **The Fuel Still** is Alchemy: the research
+  `fuel_still` (after the alembic) and three crucible recipes with Fire essence: whale oil (Kingdoms) 1 -> 4 Pod Spirit, the
+  strong input, Kitchen resin or a honey bottle 1 -> 1. The crucible had no JEI page, so it has one now (`AlchemyJei`, fed by
+  `Crucibles.Sync` like the infusion altar), listing every catalyst recipe. **Breath** (`power/zfighter/breath`): the Pale
+  Moon and the Maw have no air; out of the pod with none to draw on, a player is slowed after 20 s and takes a point every
+  5 s. The **Hide Air Skin** (4 leather or Kitchen's wet tanned hide, string, glass bottle: shapeless, shown in JEI by
+  itself; worn in the chest slot, no armour, drawn as a bag on the back by its worn layer) holds 3 minutes of air and tears
+  to a hit of more than 6; the **Sealed Helm** (the `helm_seal` kind in `WeaponParts`, 2 iron ingots, finished at the Tool
+  Station with a glass block, which meant a new `Assembly.GLASS` with a plain-item slot; TinkeringJei lists it) is leather's
+  armour with 8 minutes of air that never tears; worn together the times add. Both show their air as the item bar and refill
+  after 10 s beside a pod. **Cold and heat:** Glacia's cold is Kitchen's body heat (the winter rule: snow lands chill you,
+  shivering burns food, warm clothes and hot meals keep it off) with an extra chill on top through Kitchen's weather hook
+  (`BreathCompat`; without it, hunger instead); Cinder gets the mirrored `breath/Heat`: slowed after 30 s, a point every 8 s
+  after a minute, off while you stand in water, are fire-proof or hold or eat something from `#jaymospowers:cooling_items`,
+  and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
+  or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
+
+- **0.18.51, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+  `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
+  flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
+  in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer
+  on a pod that could fly now needs sneaking to take a part off. Pods the Patrol, the legacy block and the far-world pads
+  give are finished already. **Salvage Rack** (`SalvageRack`, `salvage_rack`: two planks, two sticks and a chain): a worn
+  part (a hammered-off damaged part is no longer scrap but a worn part block/item, `damaged` state, kept in the item's
+  block_state) is carried to the rack and set down looking at it; a hammer in the main hand and the part's metal in the other
+  (iron for frame, plates and mast, steel for fins, copper for tank and bell, glass for the canopy) mend it in three blows, the
+  first taking one of the metal; sneak and strike breaks it to labelled scrap; empty arms take the mended part back into the
+  carry. JEI: the Salvage Rack page and a Pod Mending page (`SalvageJei`). **Wreck Part Sets** (`PodWrecks`): each Maw wreck deck
+  holds a fixed set (the three fins; tank and bell; four plates; canopy and mast), drawn on its wrecked pod, worn in part; a
+  hammer on the wreck salvages it once per player, giving the deck's set or, if they hold it, the next one they lack, and plain
+  scrap once every set is held (a per-player attachment remembers); the chest no longer holds random parts. **Strip the Raider
+  Pod:** raider pods come down with one to three of their plates, canopy and mast missing (visibly, no door or glass) and the
+  pod the band leaves keeps the gaps, its three fuel and no finish: mend it, or strip it for parts with a hammer; a patrolman
+  tells of raiders flying "without the glass". **Mended Better / One Part Per World** (`PodGrades`): pods have grades I to III
+  and a brass band on the keel posts for each; the Rustfall plate, the Glacia ice-glass and the Cinder bell alloy (plain items,
+  the prize of settling that world the first time) grade a finished pod up when used sneaking: I takes 1 off trips that burn 3 or
+  more, II adds a second seat (the passenger rides, lands and wakes with the pilot), III keeps a hard landing from shaking
+  parts off. A pod stripped to its keel keeps its grade in the keel block. Textures are painted by `tools/gen_pod_parts.py`
+  (worn parts, grade bands) and `tools/gen_pod_mending.py` (rack, world parts); `tools/gen_pod.py` gained the lamp and the bands.
+  Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 3.
+- **0.18.52, deed hooks for the ladder (SevTech picks, Kingdoms 0.7.383):** three small hooks so Kingdoms' world tiers can ask
+  for one deed per rung. A pod trip that lands home tells Kingdoms (`ZFighterKingdoms.deed("pod_flight")`, reflection, so Powers
+  still never links it); a wreck salvage that gives a part set tells it `maw_salvage` (through `ZFighterPodTrip.deed`, the public
+  relay the pod package can reach); a Tool Station tool with iron, pig iron or steel in it fires `Tinkering.TOOL_BUILT_LISTENERS`
+  (the Smithing Anvil already had `Provenance.FORGED_LISTENERS`), which Kingdoms listens on for the first forged iron tool. No
+  new items, text or recipes. Compile-checked against the 26.3 jar; not seen in game.
+- **0.18.53, reading the sky (SevTech picks; Kingdoms 0.7.384):** a world is on the star map only once its chart is read. Six
+  picks, all in `power/zfighter/sky`. **Star charts** (`StarChartItem`, `Charts`): one item `star_chart` with a world component
+  (`star_chart_world`; the six worlds from the Pale Moon to the Verdant World); using one marks the world read on the player's
+  `zfighter_sky_charts` attachment (a bitmask, synced to its owner, kept through death) and opens a book page of four odd short
+  sentences (`book.jaymospowers.star_chart.<world>.<n>`, hints only), and the chart is kept, so it can be read again or passed on.
+  **Map Fills as You Read:** the star map shows Home and the read worlds (the `Open` packet carries the read set; a map with
+  nothing read says so), and `ZFighterSpace.go` refuses an unread world (creative pilots see them all). A player seen for the first
+  time counts the worlds he had already reached as read (the one he stands in, any with a mission begun or settled, the Pale Moon
+  if he has flown at all), and a landing marks its world read from now on. **Star-Sight Bench** (`StarBench`; grid: two stone
+  slabs and an amethyst shard): set on the Lookout's platform (`ZFighterLookout.onPlatform`) under open sky on a clear night it
+  wakes (lit lens, light 9, a hum and motes, looking at the sky every 5 s); used awake it gives the Pale Moon chart, once for each
+  player. The Patrol gives the Rustfall chart on joining. **Planets in the Sky** (`client/.../sky/SkyPlanets`): client only, a
+  point of light for each read world at a fixed right ascension and declination (constants) that turns with the night, fading out
+  behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
+  first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
+  Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
+- **0.18.54, who flies (SevTech picks; Kingdoms 0.7.385):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
+  rank needs a world tier open through Kingdoms' deeds as well as its arrests (`ZFighterPatrol.RANK_TIER`: Rookie Borderlands,
+  Officer Wildlands, Sergeant and Inspector Dread, Commander Legend): `rank(player, arrests)` holds the rank back, the license and the
+  patrolman's report show the held rank, a promotion earned in arrests but not in deeds says so, and a patrolman will not swear in
+  someone with no Borderlands behind them. Asked through `ZFighterKingdoms.openTier` by reflection; without Kingdoms the Patrol
+  goes by power and arrests alone. **Landing Yard:** `ZFighterYard` finds Kingdoms' yard within 64 blocks (`ZFighterKingdoms.yardPads`);
+  a patrolman's pod sets down on a free pad (`arrive`), the pod trip home lands on one, a raiders' band comes down just outside
+  the yard (`ZFighterRaiders.land`), and the patrol landing names the town for Tidings; a patrolman tells once of the yard town in his
+  travel talk. **Pilot and Prospector:** a landed trip tells Kingdoms (`ZFighterKingdoms.flown`: pilot, second-seat passenger,
+  spot); first finds go through the public `Prospecting.found(player, world, kind)` (and `Prospecting.FIRST_FIND_LISTENERS`), which
+  Track 5's ore code fires. No new items, blocks or recipes. Compile-checked against the 26.3 jar; not seen in game. Plan:
+  docs/SevTech-Plan.md, Track 6.
+- **0.18.55, far worlds restart the stone age (SevTech picks; Kingdoms 0.7.386):** four picks, in `power/zfighter/farworld`, and
+  the Patrol's writ. **Prospecting First** (`VeiledOreBlock`, `FarWorlds`): the first time a chunk of the Pale Moon, Rustfall,
+  Glacia, Cinder, the Maw or the Verdant World loads (once, kept on the chunk as `farworld_veiled`, so ore a player sets down is
+  left alone), each vanilla or silver ore in it becomes `veiled_ore`, which remembers its ore (`ore`) and wears the stone round it
+  (`host`: stone, deepslate, netherrack for Cinder, blackstone for the Maw); it is named "Stone", drops nothing and is never dug as it
+  is. A pick (anything that bites stone) hit on any block there cracks the veiled ore within 3 blocks into the real thing (a
+  stone-break sound, motes); a player who has read that world's star chart (`Charts.read`) sees the ore in sight (an open face)
+  within 8 shown every second. The Maw is flat void with built wrecks, so the wrecks' decks carry two veiled ores under them and
+  two piles of Maw rock on top (`FarWorlds.mawDeck`, called from `ZFighterSpace.buildMaw`; wrecks already built keep none).
+  **Gear doesn't answer** (`#jaymospowers:far_ore`, `FarOreSpeedMixin`, `PlayerBlockBreakEvents.BEFORE`): far ore takes 4 times as
+  long (`SLOWDOWN`) and gives nothing unless the tool in hand is a Tool Station tool whose head is that world's first metal
+  (`FarWorlds.answers`); home gear only chips it away. Creative is left alone. **First metals**: `pale_alloy` (Moon), `rust_iron`,
+  `ice_iron`, `cinder_bronze`, `void_shard` (the Maw; its ingot is called Void Shard) and `amber_bronze`, each a `TinkerMaterial`
+  (cast only; iron-tier, the Cinder and Maw ones diamond-tier for ancient debris; one existing trait each), a `Molten`, and an ingot
+  in `Tinkering.ALLOY_INGOTS`, so the smeltery, casting, the Smithing Anvil and JEI (`TinkeringJei`, the forging lists) pick them up
+  through the material tables with no list of their own. There is no grid recipe for a metal part or tool. The ingot is a grid recipe,
+  three of the world's rocks in a row and an iron ingot under the middle one (too wide for the pocket grid), made at the **field
+  anvil** (`field_anvil`: a crafting table's grid that stays open beside it; iron and cobblestone make it). The world's rocks
+  (`<world>_rock`, a `LooseStonesBlock.Rocks` each; `FirstTools.rock` counts them, so they are thrown like any rock) are laid down
+  in new chunks of the world (`ROCK_TRIES`, `ROCK_CHANCE`). **Patrol Skip Writ** (`PatrolWrit`): an officer of Sergeant's rank
+  or more (`ZFighterPatrol.WRIT_RANK`, a new option in a patrolman's menu; the rank thresholds are untouched) is given one `patrol_writ`
+  for each world that has a mission (Rustfall, Glacia, Cinder; the other three have none). Read while freeing a world with its
+  captains ahead, it calls down a Commander of the Patrol in a pod of his own (an MCA villager, gifted, through Kingdoms), a film
+  plays (`UltimateFilm.PUSH_IN`), and he fells the four captains for the fighter and his party in turn (a scripted fight: a
+  blow, a flash and a cry every 50 ticks) before climbing back in; the boss stays the fighter's. A conquering fighter's champions are
+  not sold (the writ says so and is kept). If the Commander cannot come or the fighter leaves, the writ is returned. Textures by
+  `tools/gen_farworld.py` (run after `tinkering_assets.py` and `gen_steel.py`). **Storm Rage was not built.** Compile-checked
+  against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 5.
+- **0.18.56, back home (SevTech picks; Kingdoms 0.7.387, Kitchen 0.5.38):** five pieces that bring the far worlds home. All five
+  are compile-checked against the 26.3 jar; none has been seen in game. Plan: docs/SevTech-Plan.md, Track 7.
+  **Star metal:** a new Tinkering material `star_metal` (`TinkerMaterial.STAR_METAL`, trait `Starlit`: +10% swing speed
+  (`ToolStats.STARLIT_SPEED`), and the first fall after an airborne swing with a Starlit tool in hand does no damage, within
+  `Starlit.GUARD_TICKS` (60) of the swing, so it is a landing from a blow and never a free fall). Its ore, `star_metal_ore`, is found
+  only in the craters of Kingdoms' falling stars; 1 ore or 1 ingot melts to 1 ingot (90 mB) of `Molten.STAR_METAL` in the smeltery
+  (`Melting.starMetal`), and it is cast and forged like any metal (the Forging and casting lists pick it up from `TinkerMaterial`
+  and `Molten`). It has no grid recipe, no nugget and no block. The material, molten and registration additions sit in their own
+  `(0.18.56 back home)` blocks for Track 5's merge. **Quench edges** (`smithing/Edges`): a hot piece dipped in a water cauldron that has
+  an item lying in it takes one edge from it: Glacia ice glass gives `Cold Edge` (a hit slows, `COLD_TICKS` 80), a Cinder Ember gives
+  `Hot Edge` (a hit sets alight, `HOT_SECONDS` 4). One edge to a piece, none for a hot ingot; the item is used up. The edge is a
+  component carried from head to tool by `Grades.CARRIERS`, shown in the smithing tooltip, and works on any weapon. **Starlight:**
+  `Essence.STARLIGHT` (tier 2) is carried by Maw dust and star metal ingots. Maw dust (`backhome/BackHome`) comes from Maw wreck
+  chests (`PodWrecks.salvage`, `WRECK_DUST` 2) and from breaking the orange and yellow glass of the black hole's rim
+  (`RIM_CHANCE`), and Kingdoms' hermits trade it. The **Starlit Lens** (research `starlit_lens`, an infusion round a spyglass)
+  is fitted by right-clicking a pod that has a beacon mast (`BackHome.fitLens`); on a trip it shows the mission zones of the
+  world ahead as pips and rings on the flight screen (`ZFighterSpaceMissions.zones`, `ZFighterFlightScreen`), no words. The pod keeps
+  the lens for good. **Far-world pantry:** `Verdant Fruit` (Verdant leaves, `FRUIT_CHANCE`) and `Glacia Salt` (Glacia ice, snow and
+  stone, `SALT_CHANCE`), and three effects (`backhome/FarFood`): `far_breath` (a minute more of breath in airless worlds),
+  `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
+  dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
+  `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.
+- **0.18.57, the stance wheel:** Andy: "shift + scroll should adjust you through stances, from prone to a crouch to a sneak
+  to standing", with a Tarkov-style corner display. Sneak + scroll steps prone / low crouch / sneak / standing, held after
+  Sneak is let go (`core/Stance`, `client/StanceScroll`). The low crouch is 1.25 tall at 0.6x sneak speed, knees bent
+  (`CrouchPose` LOW_*). Jump or a Sneak tap stands you up; rising waits for headroom. `client/StanceHud`: a figure and
+  a sliding height bar, bottom-left, fading 3 s after you're back on your feet. Sneak + scroll never moves the hotbar.
+- **0.18.58, keybind names that fit (Kingdoms 0.7.389):** Andy's screenshot showed "Valor (tap: coatings up or down; hold:
+  King's Valor)" running under the key button in Controls. Every pack key name is now 30 characters or fewer (Symbiote Arm,
+  Arm use, Mantle, Power Skill, Rig, Backpack, Z Fighter wheel, Meditate here; seven in Kingdoms). The tap/hold details live in
+  each feature's in-game hints. Lang only; not seen in game.

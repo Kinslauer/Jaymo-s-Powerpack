@@ -183,6 +183,29 @@ public final class ZFighterSpaceMissions {
 		return data == null ? Data.NONE : data;
 	}
 
+	/**
+	 * (0.18.56) The mission zones of destination {@code dest} as a pod's Starlit Lens shows them on the flight screen: one for each
+	 * captain or champion, then one for the boss or the flag (1 where it is dealt with, 0 where it still waits); empty for a world with
+	 * no mission.
+	 */
+	public static int[] zones(Player player, int dest) {
+		for (int i = 0; i < PLANETS.length; i++) {
+			if (PLANETS[i].dest() != dest) {
+				continue;
+			}
+			Data data = of(player);
+			int value = data.of(i);
+			boolean settled = data.settled(i), begun = mode(value) != 0;
+			int[] zones = new int[CAPTAINS + 1];
+			for (int z = 0; z < CAPTAINS; z++) {
+				zones[z] = settled || begun && (phase(value) == 1 || z < count(value)) ? 1 : 0;
+			}
+			zones[CAPTAINS] = settled ? 1 : 0;
+			return zones;
+		}
+		return new int[0];
+	}
+
 	/** Which planet with a mission {@code level} is, or -1. */
 	public static int planetOf(Level level) {
 		for (int i = 0; i < PLANETS.length; i++) {
@@ -288,6 +311,37 @@ public final class ZFighterSpaceMissions {
 		if (planet >= 0 && !of(player).settled(planet) && mode(of(player).of(planet)) == 0) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.space_mission_here", Component.translatable("space.jaymospowers.dest." + key(planet)))
 				.withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	// ---------------------------------------------------------------- (0.18.55) the patrol's skip writ
+
+	/** Whether {@code player} is freeing the planet he stands on and still has its captains to face (the writ's case). */
+	public static boolean captainsAhead(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		return planet >= 0 && mode(of(player).of(planet)) == FREE && phase(of(player).of(planet)) == 0;
+	}
+
+	/** Whether {@code player} is conquering the planet he stands on (a champion's duel is not for sale). */
+	public static boolean conquering(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		return planet >= 0 && mode(of(player).of(planet)) == CONQUER;
+	}
+
+	/** The patrolman has beaten the captains: for {@code player} and his party on this planet it is on to the boss. */
+	public static void skipCaptains(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		if (planet < 0) {
+			return;
+		}
+		for (ServerPlayer member : ZFighterSagas.neighbours(player)) {
+			if (planetOf(member.level()) != planet || mode(of(member).of(planet)) != FREE || phase(of(member).of(planet)) != 0) {
+				continue;
+			}
+			clearFoes(member);
+			member.setAttached(DATA, of(member).with(planet, pack(FREE, 1, 0)));
+			NEXT_FOE.put(member.getUUID(), member.level().getGameTime() + BOSS_DELAY);
+			member.sendSystemMessage(Component.translatable("message.jaymospowers.space_captains_down").withStyle(ChatFormatting.GOLD));
 		}
 	}
 
@@ -569,6 +623,7 @@ public final class ZFighterSpaceMissions {
 
 	private static void finish(ServerPlayer player, int planet, int mode) {
 		Planet info = PLANETS[planet];
+		boolean firstTime = !of(player).settled(planet);
 		Data data = of(player).with(planet, 0);
 		boolean free = mode == FREE;
 		player.setAttached(DATA, new Data(data.state(), free ? data.freed() | 1 << planet : data.freed(), free ? data.conquered() : data.conquered() | 1 << planet));
@@ -582,6 +637,12 @@ public final class ZFighterSpaceMissions {
 		float ore = free ? 1.0F : CONQUER_ORE;
 		for (int i = 0; i < info.items().length; i++) {
 			ZFighterSagas.give(player, new ItemStack(info.items()[i], Math.max(1, Math.round(info.counts()[i] * ore))));
+		}
+		// (0.18.51) the first time a world is settled it also gives the one part only it has, for mending a pod better
+		Item worldPart = firstTime ? com.jaymospowers.power.zfighter.pod.PodGrades.worldPart(info.key()) : null;
+		if (worldPart != null) {
+			ZFighterSagas.give(player, new ItemStack(worldPart));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.space_part", new ItemStack(worldPart).getHoverName()).withStyle(ChatFormatting.AQUA));
 		}
 		Component title = title(planet, mode);
 		player.sendSystemMessage(Component.translatable("space.jaymospowers." + info.key() + (free ? ".free_done" : ".conquer_done")).withStyle(ChatFormatting.AQUA));

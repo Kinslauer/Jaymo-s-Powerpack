@@ -39,6 +39,7 @@
 	"message.jaymospowers.downed.held_down": "%s won't get up while someone's Will holds them down.",
 	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them).",
 	"message.jaymospowers.wounds.broken": "%s broken: it won't heal right until it's set",
+	"message.jaymospowers.wounds.armless": "Both arms broken: your hands can't hit or dig. Splint one to use it again.",
 	"message.jaymospowers.wounds.sprained": "%s sprained: it'll mend as you heal",
 	"message.jaymospowers.wounds.set": "Your broken bones are set: they can heal now",
 	"message.jaymospowers.wounds.knit": "A broken bone or sprain has healed",

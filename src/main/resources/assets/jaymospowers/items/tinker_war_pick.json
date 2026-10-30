@@ -132,6 +132,55 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/war_pick/body_steel"
             }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_amber_bronze"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/body_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -268,6 +317,55 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/war_pick/limb_steel"
+            }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_amber_bronze"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/war_pick/limb_star_metal"
             }
           }
         ],

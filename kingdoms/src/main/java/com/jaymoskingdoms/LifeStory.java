@@ -101,6 +101,8 @@ public final class LifeStory {
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
 	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
+	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few emeralds. */
+	static final int VILLAGE_BREAD = 4, VILLAGE_EMERALDS = 4;
 	/** (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal guardsman"). */
 	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
 	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
@@ -932,12 +934,28 @@ public final class LifeStory {
 				}
 			}
 			case VILLAGE -> {
-				BlockPos village = level.findNearestMapStructure(villages(heritage), spawn, STRUCTURE_SEARCH, false);
-				if (village == null) {
-					village = level.findNearestMapStructure(StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH, false);
+				// (0.7.381, Andy) a haven of your own people, else one that takes your blood in; never shunned there (StoryHomes)
+				Faction standing = StoryHomes.standing(server, player, heritage, spawn);
+				if (standing != null) {
+					to = ground(level, standing.seat(), 0, STRUCTURE_NEAR, random);
+					if (to != null) {
+						StoryHomes.settleIn(player, standing);
+					}
 				}
-				if (village != null) {
-					to = ground(level, village, 0, STRUCTURE_NEAR, random);
+				if (to == null) {
+					BlockPos village = freshVillage(level, heritage, spawn, random);
+					if (village != null) {
+						to = ground(level, village, 0, STRUCTURE_NEAR, random);
+						if (to != null) {
+							Faction there = Factions.around(server, level, village, StoryHomes.PENDING_RANGE);
+							if (there != null) {
+								// (no village free of a settlement: the one there takes them in as it is)
+								StoryHomes.settleIn(player, there);
+							} else {
+								StoryHomes.await(player, village);
+							}
+						}
+					}
 				}
 			}
 			case MONOLITH -> {
@@ -1093,6 +1111,34 @@ public final class LifeStory {
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ARRIVAL_GRACE_TICKS, 4, false, false));
 	}
 
+	/**
+	 * (0.7.381) A village no settlement holds yet near {@code spawn} (one of the land {@code heritage} comes from first),
+	 * looked past a few that are taken; else the nearest at all (null with none).
+	 */
+	private static @Nullable BlockPos freshVillage(ServerLevel level, Heritage.Kind heritage, BlockPos spawn, RandomSource random) {
+		BlockPos first = null;
+		BlockPos from = spawn;
+		for (int i = 0; i <= StoryHomes.FRESH_TRIES; i++) {
+			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
+			if (village == null) {
+				village = level.findNearestMapStructure(StructureTags.VILLAGE, from, STRUCTURE_SEARCH, false);
+			}
+			if (village == null) {
+				break;
+			}
+			if (!StoryHomes.taken(level, village)) {
+				return village;
+			}
+			if (first == null) {
+				first = village;
+			}
+			// (look again from further off, away from spawn and the taken one)
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			from = spawn.offset((int)(Math.cos(angle) * StoryHomes.FRESH_STEP * (i + 1)), 0, (int)(Math.sin(angle) * StoryHomes.FRESH_STEP * (i + 1)));
+		}
+		return first;
+	}
+
 	/** The villages of the land a heritage comes from. */
 	private static TagKey<Structure> villages(Heritage.Kind heritage) {
 		return switch (heritage) {
@@ -1214,6 +1260,10 @@ public final class LifeStory {
 				give(player, stack);
 			}
 			Careers.storyJob(player, job);
+			// (0.7.381) the easiest start: a bed of your own, more to eat, a little to spend
+			give(player, new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.WHITE)));
+			give(player, new ItemStack(Items.BREAD, VILLAGE_BREAD));
+			give(player, new ItemStack(Items.EMERALD, VILLAGE_EMERALDS));
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
 				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
@@ -1402,6 +1452,7 @@ public final class LifeStory {
 					p.removeAttached(GENDER);
 					p.removeAttached(CALLING);
 					p.removeAttached(STRANDED);
+					StoryHomes.clear(p);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);

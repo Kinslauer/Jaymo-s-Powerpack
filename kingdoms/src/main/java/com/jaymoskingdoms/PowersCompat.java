@@ -1111,6 +1111,14 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * (0.7.383) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
+	 * builder and the tool): Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
+	 */
+	public static void onToolBuilt(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> listener) {
+		listen("com.jaymospowers.tinkering.Tinkering", "TOOL_BUILT_LISTENERS", listener);
+	}
+
+	/**
 	 * (0.7.380) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
 	 * {@code List<BiConsumer<ServerPlayer, ?>>}): {@code Carry.PICKED_UP_LISTENERS} and the like ({@link Rescues}).
 	 * Nothing happens without Powers (or an older one).
@@ -1329,6 +1337,61 @@ public final class PowersCompat {
 			return lockLocked == null ? -1 : lockLocked.getInt(null);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return -1;
+		}
+	}
+
+	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------
+
+	/** Powers' {@code LockOn.target(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle lockTarget;
+	private static boolean lookedForLockTarget;
+
+	/** (0.7.390) Who {@code player} is locked onto with Powers' lock-on (middle mouse), or null (always without Powers). */
+	public static @Nullable LivingEntity lockTarget(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForLockTarget) {
+			lookedForLockTarget = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					lockTarget = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.LockOn"), "target",
+						java.lang.invoke.MethodType.methodType(LivingEntity.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' lock-on (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return lockTarget == null ? null : (LivingEntity)lockTarget.invoke(player);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	/** Powers' {@code BloodTrail.lay(ServerLevel, UUID, int, double, double, double, float, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle layStain;
+	private static boolean lookedForStain;
+
+	/** (0.7.390) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
+	public static void stain(net.minecraft.server.level.ServerLevel level, int colour, double x, double from, double z, float size) {
+		if (!lookedForStain) {
+			lookedForStain = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> trail = Class.forName("com.jaymospowers.core.blood.BloodTrail");
+					layStain = java.lang.invoke.MethodHandles.publicLookup().findStatic(trail, "lay",
+						java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.core.blood.BloodTrail$Mark"), net.minecraft.server.level.ServerLevel.class,
+							java.util.UUID.class, int.class, double.class, double.class, double.class, float.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blood trail (older Powers?)", e);
+				}
+			}
+		}
+		if (layStain == null) {
+			return;
+		}
+		try {
+			layStain.invoke(level, (java.util.UUID) null, colour, x, from, z, size, 0);
+		} catch (Throwable e) {
+			// no stain
 		}
 	}
 }

@@ -307,6 +307,8 @@ public final class Parties {
 		}
 		tellAll(server, team, Component.translatable("message.jaymoskingdoms.party.joined", name(taker)).withStyle(ChatFormatting.GREEN));
 		sync(server, team);
+		// (0.7.388) progress is the party's: the newcomer jumps to it
+		WorldTiers.joined(taker, host);
 		if (old != null) {
 			left(server, old, taker);
 		}
