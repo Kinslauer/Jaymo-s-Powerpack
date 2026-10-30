@@ -22,7 +22,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.370) Weapon Forms on the client: the Combat Art key's hold and tap ({@link #key}), the belt strip above the hotbar
+ * (0.7.371) Weapon Forms on the client: the Combat Art key's hold and tap ({@link #key}), the belt strip above the hotbar
  * while in stance, the chain counter beside the crosshair, Alt and scroll for the belt slot, and Powers' lock-on taken on
  * with the stance ({@link PowersCompat#lockOnNearest}; without Powers the stance works without it).
  * <p>
