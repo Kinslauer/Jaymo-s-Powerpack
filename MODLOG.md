@@ -3912,7 +3912,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
-- **0.18.47, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+- **0.18.47, Jung couldn't hit anything (Andy: "jung couldnt attack as a z fighter. he's holding the left click but no damage
+  occurs", "not even breaking blocks", "i think his arm was broken"):** both arms broken (or one broken, the other gone) is
+  `Breaks.armless`, which refuses every attack and dig on purpose, but silently, and the Z Fighter hold combo ignored it
+  and kept throwing punches at fists cut 60% by the breaks. Now:
+  - a refused click says why on the action bar (`message.jaymospowers.wounds.armless`, at most every 3 s): a splint frees
+    the arm.
+  - (Andy picked "Kicks only") with both arms out, a Z Fighter's hold combo throws a kicks-and-knees string for his tier
+    (`ZFighterCombo.KICK_STRINGS`), and kicks always hit at full damage, broken arms or not (`ZFighterCombo.fists`,
+    `Breaks.armDamageShare`).
+  - (found on the way) the hold combo keeps the click from the race's left hold: a Frost-born, Emberborn, Stormborn or
+    Dawnborn Z Fighter's held left click went to the race's move (ice prison, Kindle, Thunderclap, Sunflare) whenever the
+    crosshair wasn't on an entity, though the combo finds its foe in a cone up to reach + 2.8 blocks, and a string going
+    was cut off when the crosshair slipped off the reeling foe. `RaceHoldClient.claims` now gives a Z Fighter's hold to
+    the race only when no foe is in the combo's reach and cone (`ZFighterCombo.inFront`, the server's own scan) and no
+    string is going.
+  - Compile-checked; not seen in game.
+- **0.18.48, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
