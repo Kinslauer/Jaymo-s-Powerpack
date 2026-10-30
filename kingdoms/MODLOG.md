@@ -6831,7 +6831,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   breathing, wisps rising). Preview: project files art-overhaul/ki-ghost/ki-ghost-preview.png.
 - Compile-checked. Not seen in game.
 
-## 0.7.365: the Mad Tinkerer's coat (pack 0.18.12)
+## 0.7.365: the Mad Tinkerer's coat (pack 0.18.13)
 - Andy picked the darker of three shades of the "sanguine outfit" Blockbench model for the Mad Tinkerer: wide-brim
   feathered hat, long coat with tails, bracers, boots (`TinkererOutfit`, baked by `tools/blockbench/tinkerer_outfit.py`
   with the recolour). It's a render layer on the MCA villager whose clothes are the Tinkerer's, worn like armour; his

@@ -3894,7 +3894,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Kitchen 0.5.37):** Andy's screenshot showed a Bio-built player's horns and tail over MCA's clothes and white hair, and
   their corpse in their human look. Now a player's corpse keeps the look they died in. See the Kingdoms and Kitchen
   MODLOGs.
-- **0.18.12, Arsenal pulls quest items; Sunfang's new look (Kingdoms 0.7.365):** Andy: "arsenal has a chance to pull
+- **0.18.13, Arsenal pulls quest items; Sunfang's new look (Kingdoms 0.7.365):** Andy: "arsenal has a chance to pull
   special quest items out of his portals, like sora's stone blade if it isnt already in the world. and it is also
   possible to pull it from where it is in the world, striaght through the portal."
   - `ArsenalQuestItems`: a full Reach has a 1 in 150 chance to bring out Sora's stone blade (the only one-of-a-kind
