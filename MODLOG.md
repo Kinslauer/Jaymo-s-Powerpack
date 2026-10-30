@@ -3934,7 +3934,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
-- **0.18.48, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+- **0.18.49, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
   matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
   blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
   sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
