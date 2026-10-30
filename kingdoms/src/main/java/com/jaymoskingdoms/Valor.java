@@ -24,7 +24,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -54,6 +56,8 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -168,7 +172,7 @@ public final class Valor {
 		}
 	}
 
-	/** How the coating looks on the forearms (a dark dust in this colour). */
+	/** How the coating looks on the arms (drawn by ValorLook; its dust in this colour). */
 	public enum Look {
 		IRON(0x3A3F47), STONE(0x5A544C), SCALE(0x1F3A2E), ASH(0x6E6E6E), HAZE(0x8A6A4A), LACQUER(0x0D0D12);
 
@@ -898,7 +902,7 @@ public final class Valor {
 					sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.valor.spent").withStyle(ChatFormatting.GRAY));
 				}
 				if (now % 4 == 0) {
-					coatParticles(level, sp, live.armed, data.lookKind().color);
+					coatParticles(level, sp, live.armed, data, live.armed && ValorKings.coatOpen(data));
 				}
 				if (data.originKind() == Origin.ROOTED) {
 					AttributeInstance kb = sp.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
@@ -916,20 +920,85 @@ public final class Valor {
 		}
 	}
 
-	/** The coating's dust on the forearms (and down the weapon when armed). */
-	static void coatParticles(ServerLevel level, LivingEntity e, boolean armed, int color) {
-		DustParticleOptions dust = new DustParticleOptions(color, 0.8F);
+	/**
+	 * The coating's dust on the forearms (and down the weapon when armed), in the soul colour under King's coating; with each
+	 * look's own grit off the coat and each origin's sign (0.7.408, the coat itself is ValorLook's):
+	 * Ember flickers of flame, Rooted grinding the ground underfoot, Bulwark a faint ring as far as it covers, Hollow magic
+	 * drawn in, Undying a soul rising now and then, Duelist sparks off the hand (a Hunter's eyes glint instead).
+	 */
+	static void coatParticles(ServerLevel level, LivingEntity e, boolean armed, Data data, boolean kings) {
+		DustParticleOptions dust = new DustParticleOptions(kings ? data.soulColor() : data.lookKind().color, 0.8F);
 		float yaw = e.yBodyRot * Mth.DEG_TO_RAD;
 		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw), sx = Mth.cos(yaw), sz = Mth.sin(yaw);
 		double y = e.getY() + e.getBbHeight() * 0.5;
+		RandomSource r = e.getRandom();
+		ParticleOptions grit = grit(data.lookKind());
 		for (int side = -1; side <= 1; side += 2) {
 			double x = e.getX() + sx * 0.38 * side + fx * 0.15, z = e.getZ() + sz * 0.38 * side + fz * 0.15;
 			level.sendParticles(dust, x, y, z, 2, 0.06, 0.12, 0.06, 0.0);
+			if (r.nextInt(3) == 0) {
+				level.sendParticles(grit, x, y - 0.1, z, 1, 0.06, 0.1, 0.06, 0.0);
+			}
 		}
+		// the main hand
+		double hx = e.getX() - sx * 0.38 + fx * 0.3, hz = e.getZ() - sz * 0.38 + fz * 0.3, hy = y - 0.15;
 		if (armed) {
 			double x = e.getX() - sx * 0.38 + fx * 0.6, z = e.getZ() - sz * 0.38 + fz * 0.6;
 			level.sendParticles(dust, x, y + 0.2, z, 2, 0.08, 0.25, 0.08, 0.0);
+			level.sendParticles(grit, x, y + 0.3, z, 1, 0.06, 0.2, 0.06, 0.0);
 		}
+		switch (data.originKind()) {
+			case EMBER -> {
+				if (r.nextInt(2) == 0) {
+					level.sendParticles(ParticleTypes.SMALL_FLAME, hx, hy, hz, 1, 0.08, 0.05, 0.08, 0.005);
+				}
+			}
+			case ROOTED -> {
+				BlockState under = level.getBlockState(e.blockPosition().below());
+				if (!under.isAir() && r.nextInt(3) == 0) {
+					level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, under), e.getX(), e.getY() + 0.05, e.getZ(), 3,
+						0.3, 0.02, 0.3, 0.0);
+				}
+			}
+			case BULWARK -> {
+				if (e.tickCount % 20 < 4) {
+					DustParticleOptions ring = new DustParticleOptions(kings ? data.soulColor() : data.lookKind().color, 0.6F);
+					for (int i = 0; i < 6; i++) {
+						double a = r.nextDouble() * Math.PI * 2;
+						level.sendParticles(ring, e.getX() + Math.cos(a) * BULWARK_REACH, e.getY() + 0.1, e.getZ() + Math.sin(a) * BULWARK_REACH, 1, 0.0,
+							0.0, 0.0, 0.0);
+					}
+				}
+			}
+			case HOLLOW -> {
+				// (the enchanting glyphs fly from where they're sent to their point: here, the hands)
+				level.sendParticles(ParticleTypes.ENCHANT, hx, hy, hz, 0, (r.nextDouble() - 0.5) * 2.0, r.nextDouble(), (r.nextDouble() - 0.5) * 2.0, 1.0);
+			}
+			case UNDYING -> {
+				if (r.nextInt(5) == 0) {
+					level.sendParticles(ParticleTypes.SOUL, e.getX(), e.getY(0.6), e.getZ(), 1, 0.25, 0.3, 0.25, 0.01);
+				}
+			}
+			case DUELIST -> {
+				if (r.nextInt(3) == 0) {
+					level.sendParticles(ParticleTypes.CRIT, hx, hy, hz, 2, 0.1, 0.1, 0.1, 0.05);
+				}
+			}
+			case HUNTER -> {
+			}
+		}
+	}
+
+	/** Each look's own grit off the coat. */
+	static ParticleOptions grit(Look look) {
+		return switch (look) {
+			case IRON -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.IRON_BLOCK.defaultBlockState());
+			case STONE -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.COBBLESTONE.defaultBlockState());
+			case SCALE -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.DARK_PRISMARINE.defaultBlockState());
+			case ASH -> ParticleTypes.WHITE_ASH;
+			case HAZE -> ParticleTypes.SMOKE;
+			case LACQUER -> ParticleTypes.SQUID_INK;
+		};
 	}
 
 	/** A burst of the coating round {@code e} (waking, a rank, the coatings going up). */

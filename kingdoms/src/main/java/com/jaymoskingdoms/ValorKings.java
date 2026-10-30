@@ -7,6 +7,7 @@ import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -120,11 +121,19 @@ public final class ValorKings {
 			level.sendParticles(dust, holder.getX() + Math.cos(a) * 3.0, holder.getY(0.2), holder.getZ() + Math.sin(a) * 3.0, 2, 0.1, 0.1, 0.1, 0.0);
 		}
 		level.sendParticles(dust, holder.getX(), holder.getY(0.5), holder.getZ(), 80, 0.3, 1.6, 0.3, 0.0);
+		soulFlare(level, holder, color);
 		level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 1.2F, coat ? 0.8F : 0.6F);
 		level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 0.6F);
 		if (holder instanceof ServerPlayer sp) {
 			PowersCompat.shake(sp, 0.8F);
 		}
+	}
+
+	/** A flash of the soul colour round {@code e} and its glow rising off them. */
+	static void soulFlare(ServerLevel level, LivingEntity e, int color) {
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), e.getX(), e.getY(0.5), e.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color), e.getX(), e.getY(0.5), e.getZ(), 60, 0.4, 1.0, 0.4,
+			0.6);
 	}
 
 	// ---- King's Valor -----------------------------------------------------------------------------------------------
@@ -164,6 +173,8 @@ public final class ValorKings {
 				level.sendParticles(dust, source.getX() + Math.cos(a) * r, source.getY(0.3), source.getZ() + Math.sin(a) * r, 1, 0.05, 0.2, 0.05, 0.0);
 			}
 		}
+		// (0.7.408) a flash and a rising column in the soul colour, so it's seen as theirs and not only as dust
+		soulFlare(level, source, data.soulColor());
 		level.playSound(null, source.getX(), source.getY(), source.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 2.0F, 0.5F);
 		level.playSound(null, source.getX(), source.getY(), source.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 1.5F, 0.7F);
 		level.playSound(null, source.getX(), source.getY(), source.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 0.5F);

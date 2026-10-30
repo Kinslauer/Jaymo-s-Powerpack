@@ -252,7 +252,7 @@ public final class ValorFolk {
 				holder.setAttached(Valor.STATE, packed);
 			}
 			if (fighting && now % 4 == 0) {
-				Valor.coatParticles(level, holder, data.rank() >= Valor.KINDLED, (packed & Valor.KINGS) != 0 ? data.soulColor() : data.lookKind().color);
+				Valor.coatParticles(level, holder, data.rank() >= Valor.KINDLED, data, (packed & Valor.KINGS) != 0);
 			}
 		}
 		sparring(server);
