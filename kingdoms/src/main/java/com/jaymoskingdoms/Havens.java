@@ -14,6 +14,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -120,6 +121,31 @@ public final class Havens {
 		}
 		Heritage.Kind[] four = {Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN};
 		return four[(int)Math.floorMod(mix >>> 23, 4L)].key();
+	}
+
+	/**
+	 * (0.7.381) {@code f} (just founded round a life story's village start, {@link StoryHomes}) is made {@code haven} ("" none,
+	 * {@link #MIXED} or a heritage key), drawn now: its townsfolk already standing are made of its blood, and those who load
+	 * in the next days take it ({@link #settle}).
+	 */
+	static void make(ServerLevel level, Faction f, String haven) {
+		MinecraftServer server = level.getServer();
+		ServerLevel store = Factions.level(server);
+		Map<String, String> next = new HashMap<>(store.getAttachedOrElse(HAVENS, Map.of()));
+		next.put(Integer.toString(f.id()), haven + "|" + store.getGameTime());
+		store.setAttached(HAVENS, Map.copyOf(next));
+		if (haven.isEmpty()) {
+			return;
+		}
+		for (LivingEntity x : level.getEntitiesOfClass(LivingEntity.class, new AABB(f.seat()).inflate(LAND_RANGE),
+			x -> x.isAlive() && VillagerHeritage.eligible(x) && (!(x instanceof Folk folk) || folk.factionId() == f.id()))) {
+			if (!fits(server, f, VillagerHeritage.of(x))) {
+				Heritage.Kind kind = blood(server, f, x.getRandom());
+				if (kind != null) {
+					VillagerHeritage.born(x, kind, null);
+				}
+			}
+		}
 	}
 
 	/** {@code f} is a haven. */
