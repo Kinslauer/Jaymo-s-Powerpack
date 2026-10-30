@@ -52,7 +52,7 @@ import net.minecraft.world.phys.AABB;
  * A lord of the realm (or its player ruler) may call one with {@code /kingdom festival}: it's paid from the treasury
  * and held that day (the next if it's past noon). Ops: {@code /kingdom festival now}.
  */
-final class Festivals {
+public final class Festivals {
 	/** How often festivals are thought about (ticks); how far from the seat townsfolk are drawn in, and players welcomed. */
 	static final int EVERY = 20;
 	static final double DRAWN = 96.0, WELCOME = 24.0;
@@ -148,6 +148,12 @@ final class Festivals {
 	static boolean toasting(Villager v) {
 		Going g = GOING.get(v.getUUID());
 		return g != null && g.part == Part.TOAST;
+	}
+
+	/** (0.7.385) {@code f} is keeping a festival just now (its day, within the hours of it): the festival bouts ({@code forms.Bouts}) read this. */
+	public static boolean keeping(ServerLevel level, Faction f) {
+		long t = Royals.timeOfDay(level);
+		return f.type().isRealm() && !f.fallen() && t >= FROM && t < TILL && festivalDay(level, f, day(level));
 	}
 
 	static long day(ServerLevel level) {

@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -161,6 +162,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.386) Powers' {@code EightSignCircle.sealed(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle sealed;
+	private static boolean lookedForSealed;
+
+	/**
+	 * (0.7.386) Whether {@code entity} stands in a Divine-born's Eight-Sign Circle (Jaymo's Powers) and so can't use powers or
+	 * forms for now; false without Powers (or an older one).
+	 */
+	public static boolean sealed(net.minecraft.world.entity.Entity entity) {
+		if (!lookedForSealed) {
+			lookedForSealed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sealed = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.divine.EightSignCircle"),
+						"sealed", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Eight-Sign Circle (older Powers?)", e);
+				}
+			}
+		}
+		if (sealed == null) {
+			return false;
+		}
+		try {
+			return (boolean)sealed.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
@@ -201,6 +232,8 @@ public final class PowersCompat {
 	private static boolean lookedForFilm;
 	/** Powers' {@code UltimateFilm} shots. */
 	public static final int FILM_ORBIT = 3, FILM_PUSH_IN = 6;
+	/** (0.7.382) Powers' tilted (rolled) shot and its hard-cut shot between three angles (Powers 0.18.46; an older Powers shows nothing for them). */
+	public static final int FILM_DUTCH = 8, FILM_CUTS = 9;
 
 	private static void films() {
 		if (lookedForFilm) {
@@ -240,6 +273,34 @@ public final class PowersCompat {
 			}
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't play a film", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle impactFrame;
+	private static boolean lookedForImpact;
+
+	/**
+	 * (0.7.382) Two frames of black and white for every player within about 24 blocks of {@code at} (Powers'
+	 * {@code ZFighterSenses.impactFrame}; each player's own setting can turn them off). Nothing without Powers 0.18.46 or later.
+	 */
+	public static void impactFrame(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		if (!lookedForImpact) {
+			lookedForImpact = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					impactFrame = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterSenses"),
+						"impactFrame", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no public impact frames (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (impactFrame != null) {
+				impactFrame.invoke(level, at);
+			}
+		} catch (Throwable ignored) {
 		}
 	}
 
@@ -1212,6 +1273,185 @@ public final class PowersCompat {
 			return powerLevel == null ? 0 : (int)powerLevel.invoke(entity);
 		} catch (Throwable e) {
 			return 0;
+		}
+	}
+
+	// ---- (0.7.381) Weapon Forms: poise and lock-on -------------------------------------------------------------------
+
+	/** Powers' {@code ZFighterPoise.wear(LivingEntity, float)} and {@code knockedOut(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle poiseWear, poiseKnockedOut;
+	private static boolean lookedForPoise;
+
+	private static void lookForPoise() {
+		if (lookedForPoise) {
+			return;
+		}
+		lookedForPoise = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> poise = Class.forName("com.jaymospowers.power.zfighter.ZFighterPoise");
+			poiseWear = lookup.findStatic(poise, "wear", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, float.class));
+			poiseKnockedOut = lookup.findStatic(poise, "knockedOut", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no poise (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.381) Wears {@code amount} off {@code target}'s poise (a stagger when it breaks, a K.O. on a second break); false without Powers' poise. */
+	public static boolean wearPoise(LivingEntity target, float amount) {
+		lookForPoise();
+		try {
+			if (poiseWear != null) {
+				poiseWear.invoke(target, amount);
+				return true;
+			}
+		} catch (Throwable ignored) {
+		}
+		return false;
+	}
+
+	/** (0.7.381) Whether {@code target}'s poise is broken to a K.O. just now (it lies open to a masterstroke); false without Powers. */
+	public static boolean poiseBroken(LivingEntity target) {
+		lookForPoise();
+		try {
+			return poiseKnockedOut != null && (boolean)poiseKnockedOut.invoke(target);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code LockOnClient}: its private {@code pick(Minecraft, LocalPlayer)} and {@code locked}/{@code blind} fields, and the {@code LockOn.Packet(int)} record. */
+	private static java.lang.reflect.@Nullable Method lockPick;
+	private static java.lang.reflect.@Nullable Field lockLocked, lockBlind;
+	private static java.lang.reflect.@Nullable Constructor<?> lockPacket;
+	private static boolean lookedForLock;
+
+	private static void lookForLock() {
+		if (lookedForLock) {
+			return;
+		}
+		lookedForLock = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> client = Class.forName("com.jaymospowers.client.LockOnClient");
+			java.lang.reflect.Method pick = client.getDeclaredMethod("pick", Class.forName("net.minecraft.client.Minecraft"),
+				Class.forName("net.minecraft.client.player.LocalPlayer"));
+			java.lang.reflect.Field locked = client.getDeclaredField("locked");
+			java.lang.reflect.Field blind = client.getDeclaredField("blind");
+			java.lang.reflect.Constructor<?> packet = Class.forName("com.jaymospowers.core.LockOn$Packet").getConstructor(int.class);
+			pick.setAccessible(true);
+			locked.setAccessible(true);
+			blind.setAccessible(true);
+			lockPick = pick;
+			lockLocked = locked;
+			lockBlind = blind;
+			lockPacket = packet;
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't reach Jaymo's Powers' lock-on (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.381) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
+	 * locked already. Takes the client ({@code Minecraft}) and its player as plain objects, since this class is common code.
+	 * The packet to send the server ({@code LockOn.Packet}), or null if nothing was locked (no Powers, or nothing in sight).
+	 */
+	public static @Nullable CustomPacketPayload lockOnNearest(Object minecraft, Object player) {
+		lookForLock();
+		try {
+			if (lockPick == null || lockLocked.getInt(null) >= 0 || !(lockPick.invoke(null, minecraft, player) instanceof LivingEntity foe)) {
+				return null;
+			}
+			lockLocked.setInt(null, foe.getId());
+			lockBlind.setInt(null, 0);
+			return (CustomPacketPayload)lockPacket.newInstance(foe.getId());
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/** (0.7.381) Client side: lets go of the lock {@link #lockOnNearest} took on {@code id}. The packet to send, or null if it isn't held any more. */
+	public static @Nullable CustomPacketPayload lockOff(int id) {
+		lookForLock();
+		try {
+			if (lockLocked == null || lockLocked.getInt(null) != id) {
+				return null;
+			}
+			lockLocked.setInt(null, -1);
+			lockBlind.setInt(null, 0);
+			return (CustomPacketPayload)lockPacket.newInstance(-1);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/** (0.7.381) The id of the foe Powers' client has locked, or -1 (none, or without Powers). */
+	public static int lockedId() {
+		lookForLock();
+		try {
+			return lockLocked == null ? -1 : lockLocked.getInt(null);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1;
+		}
+	}
+
+	// ---- (0.7.390) Lock-on ----------------------------------------------------------------------------------------
+
+	/** Powers' {@code LockOn.target(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle lockTarget;
+	private static boolean lookedForLockTarget;
+
+	/** (0.7.390) Who {@code player} is locked onto with Powers' lock-on (middle mouse), or null (always without Powers). */
+	public static @Nullable LivingEntity lockTarget(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForLockTarget) {
+			lookedForLockTarget = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					lockTarget = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.LockOn"), "target",
+						java.lang.invoke.MethodType.methodType(LivingEntity.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' lock-on (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return lockTarget == null ? null : (LivingEntity)lockTarget.invoke(player);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	/** Powers' {@code BloodTrail.lay(ServerLevel, UUID, int, double, double, double, float, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle layStain;
+	private static boolean lookedForStain;
+
+	/** (0.7.390) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
+	public static void stain(net.minecraft.server.level.ServerLevel level, int colour, double x, double from, double z, float size) {
+		if (!lookedForStain) {
+			lookedForStain = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> trail = Class.forName("com.jaymospowers.core.blood.BloodTrail");
+					layStain = java.lang.invoke.MethodHandles.publicLookup().findStatic(trail, "lay",
+						java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.core.blood.BloodTrail$Mark"), net.minecraft.server.level.ServerLevel.class,
+							java.util.UUID.class, int.class, double.class, double.class, double.class, float.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blood trail (older Powers?)", e);
+				}
+			}
+		}
+		if (layStain == null) {
+			return;
+		}
+		try {
+			layStain.invoke(level, (java.util.UUID) null, colour, x, from, z, size, 0);
+		} catch (Throwable e) {
+			// no stain
 		}
 	}
 }

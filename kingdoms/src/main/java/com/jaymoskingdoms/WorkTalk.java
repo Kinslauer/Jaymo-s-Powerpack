@@ -66,6 +66,11 @@ public final class WorkTalk {
 				: Component.translatable("talk.jaymoskingdoms.work.ctx.ruler", f.name());
 		}
 		if (speaker instanceof Worker w && w.role() == Folk.GUARD) {
+			// (0.7.385) a schooled guard looks down on a rival school's student
+			Component rival = com.jaymoskingdoms.forms.Rivals.greeting(player, speaker);
+			if (rival != null) {
+				return rival;
+			}
 			Careers.Post watch = c.post(Careers.Job.WATCH.key);
 			if (watch != null && watch.faction() == f.id()) {
 				return Component.translatable("talk.jaymoskingdoms.work.ctx.guard_watch", titled(c, watch));

@@ -123,6 +123,7 @@ public final class WindPower implements Power {
 		WindStaffSurge.register();
 		WindDagger.register();
 		WindKick.init();
+		WindThunderDive.register();
 		WindCyclone.init();
 		WindJet.init();
 		com.jaymospowers.power.wind.aether.WindAether.init();
@@ -271,10 +272,14 @@ public final class WindPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 2.0F, 0.5F);
 	}
 
-	/** Cyclone Lance (C, ascended only): an instant spear of wind along the look direction. */
+	/** Cyclone Lance (C, ascended only): an instant spear of wind along the look direction. In the Thunderhead, mid-air and looking down, it is the {@link WindThunderDive} instead. */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		if (!down || !Fate.isAscended(player) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		// (patch 6) the Thunderhead, in the air and looking down: the Thunder Dive instead of the Lance
+		if (WindThunderDive.wants(player) && WindThunderDive.start(player)) {
 			return;
 		}
 		State s = this.state(player);

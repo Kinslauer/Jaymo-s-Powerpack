@@ -69,6 +69,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> com.jaymoskingdoms.forms.FormsCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			KingdomEvents.forget(handler.player);
 			McaCompat.forget(handler.player);
@@ -225,8 +226,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Skills.register();
 		// (0.7.353) Might and Packhorse ease hauling bodies in Kitchen
 		KitchenCompat.registerBrawn();
+		// (0.7.381) Weapon Forms: forms learned by practice, the Five-Art Belt, the Battle Stance (and its attachment)
+		com.jaymoskingdoms.forms.Forms.register();
+		LOGGER.debug("forms attachment: {}", com.jaymoskingdoms.forms.Forms.BOOK);
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
-		LOGGER.debug("will attachments: {} {}", Will.ROAR_READY, Will.REFUSE_READY);
+		LOGGER.debug("will attachments: {} {} {}", Will.ROAR_READY, Will.REFUSE_READY, WillClash.READY);
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
@@ -370,6 +374,20 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		// 0.7.381: veteran guards set drills that teach or rank up a Weapon Form (and its attachment)
+		LOGGER.debug("guard drills attachment: {}", com.jaymoskingdoms.forms.GuardDrills.DRILLS);
+		com.jaymoskingdoms.forms.GuardDrills.register();
+		// 0.7.384: the fighting schools (joined, standing, mastery; their masks), their masters in the realms' halls, and the wizards' trials
+		LOGGER.debug("school attachments: {} {}", com.jaymoskingdoms.forms.Schools.SCHOOLS, com.jaymoskingdoms.forms.WizardTrials.TRIALS);
+		com.jaymoskingdoms.forms.Schools.register();
+		com.jaymoskingdoms.forms.WizardTrials.register();
+		SchoolHalls.register();
+		// 0.7.385: schooled guards, honour duels, rival schools, festival bouts (Weapon Forms, patch 5; and the duel days' attachment)
+		LOGGER.debug("duel days attachment: {}", com.jaymoskingdoms.forms.Duels.DAYS);
+		com.jaymoskingdoms.forms.SchooledGuards.register();
+		com.jaymoskingdoms.forms.Duels.register();
+		com.jaymoskingdoms.forms.Rivals.register();
+		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();

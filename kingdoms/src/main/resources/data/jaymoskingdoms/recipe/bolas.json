@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "#jaymoskingdoms:bolas_weights",
+    "S": "#c:strings",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "W W",
+    " S ",
+    " L "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:bolas",
+    "count": 1
+  }
+}

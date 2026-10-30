@@ -26,7 +26,7 @@ for name, tex in zip(NAMES, bb["textures"]):
         fh.write("\n")
 
 S = 16 / bb["resolution"]["width"]  # the model's UVs are in 32ths of the texture's width
-# (0.18.58) Andy: "Dreaded blade needs to be rotated in hand, it sits flat instead of vertical". The file draws the
+# (0.18.63) Andy: "Dreaded blade needs to be rotated in hand, it sits flat instead of vertical". The file draws the
 # blade's wide face to x (as Sora's Dagger's did); a sword sprite, and display(), want it to z. Turn the model a quarter
 # about the vertical through the grip (x 8, z 8), keeping its 45-degree turns exact.
 SPIN = rot_y(90)

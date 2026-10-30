@@ -4,6 +4,6 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": ["ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin", "GoblinHandMixin",
 		"blade.HiddenBladeUseMixin", "blade.HiddenBladeAvatarRendererMixin", "blade.HiddenBladeFirstPersonMixin",
-		"bb.BbBodyLivingEntityRendererMixin"],
+		"bb.BbBodyLivingEntityRendererMixin", "forms.FormsScrollMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
