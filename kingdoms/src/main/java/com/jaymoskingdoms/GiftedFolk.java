@@ -79,6 +79,9 @@ public final class GiftedFolk {
 	static final float OPEN_BRASH = 0.6F, OPEN_BOLD = 0.3F, OPEN_REST = 0.08F, OPEN_MASTER = 0.25F;
 	/** A player this many hearts warm with them is a friend (hidden from); a villager who thinks this well of them too. */
 	static final int FRIEND_HEARTS = 40, FRIEND_REGARD = 40;
+	/** (0.7.367) One villager in this many is a stargazer ({@link StarFolk}): weighed once, tagged {@code STARS_ROLLED}, then {@link StarFolk#STARGAZER}. */
+	static final int STARGAZER_ODDS = 12;
+	static final String STARS_ROLLED = "jaymoskingdoms_stars_rolled";
 	/** Tagged once a gift's ways are weighed (master, open), for the gifted of a world from before them. */
 	static final String WAYS_ROLLED = "jaymoskingdoms_gift_ways";
 
@@ -283,6 +286,7 @@ public final class GiftedFolk {
 	 * storm has taken wakes the Stormborn in them.
 	 */
 	static void step(ServerLevel level, PathfinderMob mob) {
+		stargaze(level, mob);
 		if (!mob.isBaby() && !mob.entityTags().contains(ROLLED)) {
 			cameOfAge(level, mob);
 		}
@@ -296,6 +300,17 @@ public final class GiftedFolk {
 			VillagerHeritage.born(mob, Heritage.Kind.STORMBORN, null);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mob.getX(), mob.getY(0.6), mob.getZ(), 30, 0.4, 0.7, 0.4, 0.3);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 1.2F);
+		}
+	}
+
+	/** (0.7.367) A grown MCA villager is weighed once for stargazing: about one in {@link #STARGAZER_ODDS} watches the sky and sells star charts. */
+	static void stargaze(ServerLevel level, PathfinderMob mob) {
+		if (mob.isBaby() || mob.entityTags().contains(STARS_ROLLED) || !McaCompat.isMca(mob) || ZFighterFolk.is(mob)) {
+			return;
+		}
+		mob.addTag(STARS_ROLLED);
+		if (level.getRandom().nextInt(STARGAZER_ODDS) == 0) {
+			mob.addTag(StarFolk.STARGAZER);
 		}
 	}
 

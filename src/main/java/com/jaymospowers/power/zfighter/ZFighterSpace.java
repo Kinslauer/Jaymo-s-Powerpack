@@ -8,6 +8,7 @@ import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.jaymospowers.power.zfighter.pod.PodGrades;
 import com.jaymospowers.power.zfighter.pod.PodWrecks;
+import com.jaymospowers.power.zfighter.sky.Charts;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -164,13 +165,17 @@ public final class ZFighterSpace {
 	public static final AttachmentType<BlockPos> PAD = AttachmentRegistry.create(JaymosPowers.id("zfighter_space_pad"),
 		builder -> builder.persistent(BlockPos.CODEC));
 
-	/** Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.15: the tank's grade). */
-	public record Open(int fuel, int grade) implements CustomPacketPayload {
+	/**
+	 * Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.15: the tank's grade).
+	 * (0.18.18) {@code read} is the set of star charts the pilot has read (bit w: destination w): only those worlds are on the map.
+	 */
+	public record Open(int fuel, int grade, int read) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosPowers.id("zfighter_space_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec((p, buf) -> {
 			buf.writeVarInt(p.fuel);
 			buf.writeVarInt(p.grade);
-		}, buf -> new Open(buf.readVarInt(), buf.readVarInt()));
+			buf.writeVarInt(p.read);
+		}, buf -> new Open(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()));
 
 		@Override
 		public Type<Open> type() {
@@ -291,8 +296,13 @@ public final class ZFighterSpace {
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
-		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod)));
+		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod), readCharts(player)));
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
+	}
+
+	/** (0.18.18) The worlds {@code player} may fly to: the charts he has read (a creative pilot has them all). */
+	public static int readCharts(ServerPlayer player) {
+		return player.isCreative() ? Charts.ALL : Charts.readMask(player);
 	}
 
 	/** How much fuel one of {@code stack} puts in a pod (0: none). (0.18.15) The numbers and grades are {@link PodFuel}'s. */
@@ -385,6 +395,11 @@ public final class ZFighterSpace {
 			return;
 		} else if (server.getLevel(DESTS[index].level()) == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unreachable").withStyle(ChatFormatting.RED));
+			return;
+		}
+		if (index != HOME_INDEX && index < Charts.WORLDS && (readCharts(player) & 1 << index) == 0) {
+			// (0.18.18) a world whose chart is unread is not on the map: the pod will not fly there
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unread").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		PodPart missing = pod.missingForLaunch();

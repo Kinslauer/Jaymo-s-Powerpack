@@ -3982,3 +3982,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   parts off. A pod stripped to its keel keeps its grade in the keel block. Textures are painted by `tools/gen_pod_parts.py`
   (worn parts, grade bands) and `tools/gen_pod_mending.py` (rack, world parts); `tools/gen_pod.py` gained the lamp and the bands.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 3.
+- **0.18.18, reading the sky (SevTech picks; Kingdoms 0.7.367):** a world is on the star map only once its chart is read. Six
+  picks, all in `power/zfighter/sky`. **Star charts** (`StarChartItem`, `Charts`): one item `star_chart` with a world component
+  (`star_chart_world`; the six worlds from the Pale Moon to the Verdant World); using one marks the world read on the player's
+  `zfighter_sky_charts` attachment (a bitmask, synced to its owner, kept through death) and opens a book page of four odd short
+  sentences (`book.jaymospowers.star_chart.<world>.<n>`, hints only), and the chart is kept, so it can be read again or passed on.
+  **Map Fills as You Read:** the star map shows Home and the read worlds (the `Open` packet carries the read set; a map with
+  nothing read says so), and `ZFighterSpace.go` refuses an unread world (creative pilots see them all). A player seen for the first
+  time counts the worlds he had already reached as read (the one he stands in, any with a mission begun or settled, the Pale Moon
+  if he has flown at all), and a landing marks its world read from now on. **Star-Sight Bench** (`StarBench`; grid: two stone
+  slabs and an amethyst shard): set on the Lookout's platform (`ZFighterLookout.onPlatform`) under open sky on a clear night it
+  wakes (lit lens, light 9, a hum and motes, looking at the sky every 5 s); used awake it gives the Pale Moon chart, once for each
+  player. The Patrol gives the Rustfall chart on joining. **Planets in the Sky** (`client/.../sky/SkyPlanets`): client only, a
+  point of light for each read world at a fixed right ascension and declination (constants) that turns with the night, fading out
+  behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
+  first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
+  Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
