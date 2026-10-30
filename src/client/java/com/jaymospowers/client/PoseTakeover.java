@@ -121,7 +121,8 @@ public final class PoseTakeover {
 	}
 
 	public static boolean posed(AvatarRenderState s) {
-		return posedOtherwise(s) || s.getData(com.jaymospowers.client.wounds.WoundNursePose.KEY) != null;
+		return posedOtherwise(s) || s.getData(com.jaymospowers.client.wounds.WoundNursePose.KEY) != null
+			|| com.jaymospowers.client.armory.FangGauntletsClient.guarding(s);
 	}
 
 	/** (0.16.21) One of our poses other than nursing a wound (which lets go under any of them) is on. */
