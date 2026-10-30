@@ -4252,3 +4252,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
     open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
   - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+
+- **0.18.82, wooden and iron limbs:** New Roads Patch 4. A player missing an arm or a leg can fit a prosthetic by using it
+  on themselves (`core/Prosthetics`; no smith-villager fitting yet). Wooden arm and leg are a carpenter's grid recipe
+  (planks, sticks, leather); the iron ones are forged at the Smithing Anvil (`ProstheticForging`, 4 and 5 iron ingots, a
+  `Forging.PROVIDERS` entry like the armour), never a grid recipe. A fitted limb is the `Prosthetics.FITTED` attachment
+  (synced, listed in `registerAttachments`); the limb stays in `Dismember.MISSING` underneath but `LimbUse.strength` counts
+  it at 0.5 (wooden arm), 0.55 (wooden leg), 0.7 (iron arm) or 0.75 (iron leg), against 0.4 for a broken limb. A fitted arm
+  holds items; wood slows the swing (-25% attack speed an arm); iron is heavy (a little slower, though a smaller leg
+  penalty than a bare stump). When the real limb grows back (respawn, Hermit Bean, a Verdant) the prosthetic pops off and
+  drops (`Prosthetics.sync` from `Dismember.regrow`, also checked each second); a body that dies drops its limbs. Drawn as a
+  plain pegged-plank or riveted-iron box where the limb would be (`client/wounds/ProstheticLayer`, worn like the bandages).
+  Textures from `tools/gen_prosthetics.py`. Compile-checked; not seen in game.

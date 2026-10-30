@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "LP",
+    "PP",
+    " S"
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_arm",
+    "count": 1
+  }
+}

@@ -153,6 +153,8 @@ public final class Dismember {
 
 	public static void init() {
 		SeveredPart.register();
+		// (0.18.82) wooden and iron limbs
+		Prosthetics.init();
 		Fractures.init();
 		BladeBlood.init();
 		// (0.14.2) no blade roll of its own any more: Wounds calls severOnOverkill
@@ -490,6 +492,8 @@ public final class Dismember {
 			target.setAttached(MISSING, mask);
 		}
 		legs(target, mask);
+		// (0.18.82) a wooden or iron limb comes off when the real one is back
+		Prosthetics.sync(target);
 		// (0.14.2) what grew back heals from where it is
 		com.jaymospowers.core.wounds.Breaks.regrown(target, before & ~mask);
 		if (target.level() instanceof ServerLevel level) {
@@ -557,6 +561,8 @@ public final class Dismember {
 
 	/** Slowed by the legs it's lost (none: back to normal). */
 	static void legs(LivingEntity target, int mask) {
+		// (0.18.82) a leg with a prosthetic isn't bare: Prosthetics adds its own, smaller penalty
+		mask &= ~Prosthetics.fitted(target);
 		int legs = ((mask & RIGHT_LEG) != 0 ? 1 : 0) + ((mask & LEFT_LEG) != 0 ? 1 : 0);
 		AttributeInstance speed = target.getAttribute(Attributes.MOVEMENT_SPEED);
 		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
@@ -660,7 +666,8 @@ public final class Dismember {
 					continue;
 				}
 				for (int arm : new int[] {RIGHT_ARM, LEFT_ARM}) {
-					if ((mask & arm) != 0 && !player.getItemInHand(hand(player, arm)).isEmpty()) {
+					// (0.18.82) a wooden or iron arm holds things
+					if ((mask & arm) != 0 && (Prosthetics.fitted(player) & arm) == 0 && !player.getItemInHand(hand(player, arm)).isEmpty()) {
 						// nothing to hold it with
 						emptyHand(player.level(), player, arm);
 					}
