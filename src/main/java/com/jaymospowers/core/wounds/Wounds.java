@@ -138,6 +138,9 @@ public final class Wounds {
 					mendBruises(player, patched);
 				} else {
 					player.removeTag(UNPATCHED_TAG);
+					if (player.isAlive() && player.isCreative()) {
+						creativeHeal(player);
+					}
 				}
 			}
 		});
@@ -434,6 +437,23 @@ public final class Wounds {
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);
 		entity.removeTag(FIGHTS_ON_TAG);
+	}
+
+	/**
+	 * (0.18.73) Creative heals everything: switching into it, and every reconcile while in it. Every part whole,
+	 * every break, cut and fever gone, severed limbs grown back, a bolas trip undone (the downed get up in
+	 * {@link Downed}'s own tick).
+	 */
+	static void creativeHeal(ServerPlayer player) {
+		if (Dismember.missing(player) != 0) {
+			Dismember.regrow(player, true);
+		}
+		Tripped.clear(player);
+		if (player.getAttached(PARTS) != null || Breaks.broken(player) != 0 || Bleeding.bleeding(player) != 0
+			|| Bleeding.festering(player) != 0 || Battered.is(player) || player.entityTags().contains(FIGHTS_ON_TAG)
+			|| player.getHealth() < player.getMaxHealth()) {
+			healAll(player);
+		}
 	}
 
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */

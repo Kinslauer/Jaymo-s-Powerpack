@@ -786,7 +786,12 @@ public final class Downed {
 	private static void tickPlayer(ServerLevel level, ServerPlayer player) {
 		// (0.14.4) Kingdoms' villagers bandaged them
 		Bleeding.tended(player);
-		if (player.isCreative() || player.isSpectator() || player.entityTags().contains(REVIVE_TAG)) {
+		if (player.isCreative() || player.isSpectator()) {
+			// (0.18.73) straight up, not battered, and no Will holds them down (creative heals the rest, Wounds#creativeHeal)
+			getUp(level, player, false);
+			return;
+		}
+		if (player.entityTags().contains(REVIVE_TAG)) {
 			getUp(level, player);
 			return;
 		}

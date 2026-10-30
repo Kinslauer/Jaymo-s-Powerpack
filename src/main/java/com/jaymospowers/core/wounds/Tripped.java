@@ -135,6 +135,14 @@ public final class Tripped {
 		return true;
 	}
 
+	/** (0.18.73) Up at once, nothing left of it (creative). */
+	static void clear(LivingEntity entity) {
+		if (entity.getAttached(TRIP) != null) {
+			entity.removeAttached(TRIP);
+			hobble(entity, false);
+		}
+	}
+
 	private static void hobble(LivingEntity entity, boolean on) {
 		modifier(entity, Attributes.MOVEMENT_SPEED, SPEED_ID, on ? SPEED : 0.0);
 		modifier(entity, Attributes.JUMP_STRENGTH, JUMP_ID, on ? JUMP : 0.0);
