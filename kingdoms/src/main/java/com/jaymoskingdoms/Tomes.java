@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -78,6 +81,12 @@ import org.jspecify.annotations.Nullable;
  * Powers' Tomecraft research. <b>Glyphs</b> (the enchanting table's runes with the element's own particle) stream off the
  * pages in amounts that vary by tome ({@link #GLYPHS}) and by action; a bolt's trail mixes the element's particles with the
  * mana glow. The book opens, and turns its pages, on the client ({@code TomeClient}).</li>
+ * <li><b>Afloat</b> (0.7.383; Andy: "the tome should in front of you float open, bobbing slowly up and down and following
+ * the aim, and pages flipping emitting particles as you click or lock on, and will return to hand if you unlock, or after 3s
+ * and no firing"): a click, a spell cast or a lock taken (Jaymo's Powers' lock-on) lifts the book out of the hand to float
+ * open before you ({@link #floatAt}); bolts fly from it. It turns a leaf and sheds glyphs as it rises and at each new lock,
+ * and goes back to the hand when you let go of the lock, or {@link #FLOAT_LINGER} after the last bolt or spell with nothing
+ * locked. The server decides ({@link #AFLOAT}, synced to everyone); the client draws it ({@code TomeFloat}).</li>
  * </ul>
  */
 public final class Tomes {
@@ -147,17 +156,41 @@ public final class Tomes {
 	static final float CAST_MIN = 1.0F, CAST_PER_TIER = 1.2F;
 	/** The element's own particle, as a share of the glyph count (never fewer than one). */
 	static final float OWN_SHARE = 0.4F;
+	// ---- tuning: the book afloat ----
+	/** Where it floats, in the frame of your aim (blocks): ahead of the eyes, to the right, and up (below, negative). */
+	public static final double FLOAT_AHEAD = 0.85, FLOAT_SIDE = 0.4, FLOAT_UP = -0.3;
+	/** With nothing locked it goes back to the hand this long after the last bolt or spell (ticks). */
+	static final int FLOAT_LINGER = 20 * 3;
+	/** Glyphs off its pages as it rises, and at each new lock: base * this. */
+	static final float RISE_BURST = 2.5F;
+	/** A bolt flown from the floating book heads for what's under the crosshair this far off at most (blocks). */
+	static final double AIM_REACH = 48.0;
+
 	/** Rare loot: a tome from a slain caster, and one in the rarest chests. */
 	static final float CASTER_DROP = 0.06F, CHEST_LOOT = 0.04F;
 
 	public static final Map<String, Item> TOMES = new HashMap<>();
 	/** The spell loaded into a tome (its name, as {@link Arcana#SPELLS}). */
 	public static DataComponentType<String> PAGE;
+	/**
+	 * (0.7.383) Whether a player's book floats before them: 0 (or none) in the hand; afloat, a number that changes each time it
+	 * rises or takes a new lock, so every client turns a leaf. Synced to everyone, not kept.
+	 */
+	public static final AttachmentType<Integer> AFLOAT = AttachmentRegistry.create(JaymosKingdoms.id("tome_afloat"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	/** Who holds the left button on a tome and since when; when each may next loose a bolt (game time). */
 	private static final Map<UUID, Long> HOLDS = new HashMap<>();
 	private static final Map<UUID, Long> READY = new HashMap<>();
 	private static final List<Bolt> BOLTS = new ArrayList<>();
+	/** Whose books float, since when they last shot or cast, and whom they're locked onto. */
+	private static final Map<UUID, Afloat> AFLOATS = new HashMap<>();
+
+	private static final class Afloat {
+		long last;
+		@Nullable UUID lock;
+		int stamp;
+	}
 
 	/** Client to server: the left button on a tome. {@code action}: 1 pressed, 0 let go (fire), 2 dropped (item changed, screen opened). */
 	public record Attack(int action) implements CustomPacketPayload {
@@ -194,6 +227,7 @@ public final class Tomes {
 			HOLDS.clear();
 			READY.clear();
 			BOLTS.clear();
+			AFLOATS.clear();
 		});
 		// a caster's tome, now and then: a necromancer's is death's, a blood witch's blood's, a shaman's fire's, a wizard's any of the rest
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -239,9 +273,84 @@ public final class Tomes {
 
 	// ---- the glyphs off the pages -------------------------------------------------------------------------------------
 
-	/** Where the pages are: the book in the hand. */
+	/** Where the pages are: the book afloat, or in the hand. */
 	private static Vec3 book(ServerPlayer player) {
+		if (AFLOATS.containsKey(player.getUUID())) {
+			return floatAt(player.getEyePosition(), player.getYRot(), player.getXRot());
+		}
 		return player.getEyePosition().add(player.getLookAngle().scale(0.7)).add(0.0, -0.3, 0.0);
+	}
+
+	/** Where a book floats (before its bob) for eyes at {@code eye} aiming {@code yaw}, {@code pitch}. */
+	public static Vec3 floatAt(Vec3 eye, float yaw, float pitch) {
+		Vec3 ahead = Vec3.directionFromRotation(pitch, yaw), up = Vec3.directionFromRotation(pitch - 90.0F, yaw);
+		return eye.add(ahead.scale(FLOAT_AHEAD)).add(ahead.cross(up).scale(FLOAT_SIDE)).add(up.scale(FLOAT_UP));
+	}
+
+	// ---- the book afloat ----------------------------------------------------------------------------------------------
+
+	/** The book in {@code player}'s hand floats up, or stays afloat: a charge begun, a bolt, a spell cast. */
+	private static void rise(ServerPlayer player) {
+		Afloat afloat = AFLOATS.get(player.getUUID());
+		if (afloat == null) {
+			afloat = new Afloat();
+			AFLOATS.put(player.getUUID(), afloat);
+			turn(player, afloat);
+		}
+		afloat.last = player.level().getGameTime();
+	}
+
+	/** A leaf turns afloat and glyphs stream off it: the book has just risen, or taken a new lock. */
+	private static void turn(ServerPlayer player, Afloat afloat) {
+		afloat.stamp = afloat.stamp % 1000 + 1;
+		player.setAttached(AFLOAT, afloat.stamp);
+		if (player.getMainHandItem().getItem() instanceof Tome tome && player.level() instanceof ServerLevel level) {
+			shed(level, book(player), tome.element, glyphs(tome.element) * RISE_BURST);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.7F, 1.2F);
+		}
+	}
+
+	/** The book goes back to the hand ({@code softly}: with a sound, the book still held). */
+	private static void land(ServerPlayer player, boolean softly) {
+		if (AFLOATS.remove(player.getUUID()) == null) {
+			return;
+		}
+		player.removeAttached(AFLOAT);
+		if (softly) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PUT, SoundSource.PLAYERS, 0.5F, 1.1F);
+		}
+	}
+
+	/** Every tick: a lock lifts the book (a new one turns a leaf); letting go of it, or long enough without a shot, lands it. */
+	private static void drift(ServerPlayer player) {
+		Afloat afloat = AFLOATS.get(player.getUUID());
+		if (!player.isAlive() || player.isSpectator() || !(player.getMainHandItem().getItem() instanceof Tome) || !usable(player)) {
+			if (afloat != null) {
+				land(player, false);
+			}
+			return;
+		}
+		long now = player.level().getGameTime();
+		LivingEntity lock = PowersCompat.lockTarget(player);
+		if (lock != null) {
+			if (afloat == null) {
+				afloat = new Afloat();
+				AFLOATS.put(player.getUUID(), afloat);
+			}
+			if (!lock.getUUID().equals(afloat.lock)) {
+				afloat.lock = lock.getUUID();
+				turn(player, afloat);
+			}
+			afloat.last = now;
+			return;
+		}
+		if (afloat == null) {
+			return;
+		}
+		// let go of the lock: straight back to the hand; else once it has gone a while without a shot (a charge held keeps it up)
+		if (afloat.lock != null || !HOLDS.containsKey(player.getUUID()) && now - afloat.last > FLOAT_LINGER) {
+			land(player, true);
+		}
 	}
 
 	/** {@code tome}'s base glyph count. */
@@ -369,6 +478,7 @@ public final class Tomes {
 			Mana.ripple(player, Mana.intent(spell));
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		rise(player);
 		String element = ((Tome) tome.getItem()).element;
 		shed(level, book(player), element, glyphs(element) * (CAST_MIN + tier * CAST_PER_TIER));
 		boolean caster = Mana.natural(player);
@@ -405,6 +515,7 @@ public final class Tomes {
 				return;
 			}
 			HOLDS.put(player.getUUID(), now);
+			rise(player);
 			return;
 		}
 		Long since = HOLDS.remove(player.getUUID());
@@ -433,9 +544,14 @@ public final class Tomes {
 			return;
 		}
 		READY.put(player.getUUID(), level.getGameTime() + Math.round(QUICK_GAP + f * (FULL_GAP - QUICK_GAP)));
+		rise(player);
 		Vec3 look = player.getLookAngle();
-		Vec3 start = player.getEyePosition().add(look.scale(0.6)).add(0.0, -0.25, 0.0);
-		BOLTS.add(new Bolt(level, player.getUUID(), element, start, look.scale(SPEED), f, strength(player), Math.round(QUICK_LIFE + f * (FULL_LIFE - QUICK_LIFE))));
+		// from the floating book, toward what's under the crosshair (so a book off to the side still shoots where you aim)
+		Vec3 eye = player.getEyePosition(), start = book(player);
+		Vec3 aim = level.clip(new ClipContext(eye, eye.add(look.scale(AIM_REACH)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getLocation();
+		Vec3 heading = aim.subtract(start);
+		Vec3 dir = heading.lengthSqr() > 1.0 ? heading.normalize() : look;
+		BOLTS.add(new Bolt(level, player.getUUID(), element, start, dir.scale(SPEED), f, strength(player), Math.round(QUICK_LIFE + f * (FULL_LIFE - QUICK_LIFE))));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		shed(level, book(player), element, glyphs(element) * (SHOT_MIN + f * SHOT_GROWTH));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), Spellcraft.sound(element), SoundSource.PLAYERS, 0.8F, 1.5F - 0.4F * f);
@@ -443,6 +559,11 @@ public final class Tomes {
 	}
 
 	private static void tick(MinecraftServer server) {
+		// the books afloat
+		AFLOATS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			drift(player);
+		}
 		// the holds: the bar, and a drop if the book is gone
 		for (UUID id : new ArrayList<>(HOLDS.keySet())) {
 			ServerPlayer player = server.getPlayerList().getPlayer(id);

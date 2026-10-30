@@ -1206,4 +1206,30 @@ public final class PowersCompat {
 			return 0;
 		}
 	}
+
+	// ---- (0.7.383) Lock-on ----------------------------------------------------------------------------------------
+
+	/** Powers' {@code LockOn.target(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle lockTarget;
+	private static boolean lookedForLock;
+
+	/** (0.7.383) Who {@code player} is locked onto with Powers' lock-on (middle mouse), or null (always without Powers). */
+	public static @Nullable LivingEntity lockTarget(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForLock) {
+			lookedForLock = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					lockTarget = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.LockOn"), "target",
+						java.lang.invoke.MethodType.methodType(LivingEntity.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' lock-on (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return lockTarget == null ? null : (LivingEntity)lockTarget.invoke(player);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
 }

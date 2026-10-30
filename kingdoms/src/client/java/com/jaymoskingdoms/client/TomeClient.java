@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemMode
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
@@ -25,6 +26,9 @@ import org.jspecify.annotations.Nullable;
  * closes again a moment after. The item definitions dispatch on {@link TomePose} ({@code jaymoskingdoms:tome_pose}), which asks
  * {@link #pose}. A page stored is seen as the tome's page component changing, a cast as its cooldown starting. Other players'
  * books open and turn a leaf for as long as their hand swings (the server swings the hand for a shot or a cast).
+ * <p>
+ * (0.7.383) A book afloat ({@link TomeFloat}) stays open the whole time it floats, and turns a leaf as it rises and at each
+ * new lock, yours and everyone else's.
  */
 final class TomeClient {
 	/** The frames {@code tome_pose} counts (see {@code elemental_tomes.py}): closed, half open, open, then the leaf's five angles. */
@@ -47,6 +51,11 @@ final class TomeClient {
 	private static boolean wasCooling;
 
 	private TomeClient() {
+	}
+
+	/** Whether you're charging a bolt now. */
+	static boolean charging() {
+		return down;
 	}
 
 	/** Whether the attack key belongs to the tome in the hand now. */
@@ -114,7 +123,7 @@ final class TomeClient {
 		} else {
 			lastItem = null;
 		}
-		boolean wanted = held && (down || now - Math.max(lastShot, Math.max(lastStore, lastCast)) < LINGER_MS);
+		boolean wanted = held && (down || TomeFloat.afloat(player) || now - Math.max(lastShot, Math.max(lastStore, lastCast)) < LINGER_MS);
 		if (wanted != open) {
 			open = wanted;
 			changedAt = now;
@@ -131,8 +140,15 @@ final class TomeClient {
 		if (living == minecraft.player && Tomes.isTome(minecraft.player.getMainHandItem())) {
 			return mine(Util.getMillis());
 		}
-		// anyone else's: open, a leaf turning, for as long as the hand swings
-		return living.isSwinging() ? flip(living.getSwingAnimation(0.0F)) : CLOSED;
+		// anyone else's: open, a leaf turning, for as long as the hand swings; afloat, open, a leaf turning as it rises or locks
+		if (living.isSwinging()) {
+			return flip(living.getSwingAnimation(0.0F));
+		}
+		if (living instanceof Player player && TomeFloat.afloat(player)) {
+			float turned = TomeFloat.turning(player, Util.getMillis());
+			return turned >= 0.0F ? flip(turned) : OPEN;
+		}
+		return CLOSED;
 	}
 
 	/** The frame of your own book: the cover, then the leaf (a turn for each thing done, a flutter while charging). */
@@ -147,6 +163,11 @@ final class TomeClient {
 		long since = Math.min(now - lastShot, Math.min(now - lastStore, now - lastCast));
 		if (since < FLIP_MS) {
 			return flip(since / (float) FLIP_MS);
+		}
+		LocalPlayer player = Minecraft.getInstance().player;
+		float turned = player == null ? -1.0F : TomeFloat.turning(player, now);
+		if (turned >= 0.0F) {
+			return flip(turned);
 		}
 		if (down) {
 			float charge = Tomes.charge((int) ((now - downSince) / 50L));
