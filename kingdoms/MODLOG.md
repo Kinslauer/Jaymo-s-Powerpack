@@ -7301,8 +7301,8 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (`Speakeasy.cellDoor`, level 3) breaks you out, which makes you a fugitive of the realm like any prisoner who escapes; or
   emeralds held at the door pay the jailer's fine, 3 a day left, and you walk out clean. Respawn is set to the release spot.
 - **Evicted** (`EVICTED`, names a realm): the capital road with 6 emeralds and your class's gear but no bed. Between dusk and
-  dawn, in the realm's land and under a guard's eye (32 blocks), sleeping or standing about for 15 s earns a warning from the
-  guard and for 30 s a night in the cells (`StoryHard.imprison`, 10000 ticks, the same door and fine). It ends the moment you
+  dawn, in the realm's land and under a guard's eye (32 blocks), standing about for a minute (asleep in the open, 8x faster) earns a warning from the
+  guard and two minutes a night in the cells (`StoryHard.imprison`, 10000 ticks, the same door and fine). It ends the moment you
   hold a `Careers` job or a spawn bed you slept in lies in the realm's land. There is no inn system, so a bed is what counts.
 - **The Hideout** (`HIDEOUT`): you wake on the floor of the nearest built `Underworld` speakeasy, its realm hating you at
   `BANISHED_REPUTATION` and the den already found; with no den dug, in a barbarian camp that spares outlaws (a plain camp or a

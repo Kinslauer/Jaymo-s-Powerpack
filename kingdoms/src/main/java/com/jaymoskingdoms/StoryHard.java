@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.world.level.block.Blocks;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
@@ -72,8 +73,11 @@ public final class StoryHard {
 	/** Evicted: how often it is looked at (ticks), how far a realm's streets reach from its seat (blocks), how far a guard sees (blocks). */
 	static final int EVICT_CHECK = 20;
 	static final double EVICT_RANGE = 96.0, WATCH_SIGHT = 32.0;
-	/** Evicted: how long about at night before the warning and before the cells (ticks), and a night in the cells (ticks). */
-	static final int WARN_AFTER = 300, JAIL_AFTER = 600;
+	/**
+	 * Evicted: how long stood about at night before the warning and before the cells (ticks), and a night in the cells
+	 * (ticks). Asleep in the open counts at once; standing still (working a furnace, fishing) only after these minutes.
+	 */
+	static final int WARN_AFTER = 1200, JAIL_AFTER = 2400, SLEEPER_HASTE = 8;
 	static final long EVICT_JAIL_TICKS = 10000L;
 	/** Cast out: how long their own kind turn them away (ticks: three days), and how much they mind (as a Tideborn is minded). */
 	static final long CAST_OUT_TICKS = 3L * DAY_TICKS;
@@ -140,7 +144,8 @@ public final class StoryHard {
 				return InteractionResult.PASS;
 			}
 			BlockPos door = Speakeasy.doorAt(jail.cell());
-			if (!hit.getBlockPos().equals(door) && !hit.getBlockPos().equals(door.above())) {
+			// only a cell with the story's iron door: the plain Busts cells (no door) have no fine or pick
+			if (!hit.getBlockPos().equals(door) && !hit.getBlockPos().equals(door.above()) || !level.getBlockState(door).is(Blocks.IRON_DOOR)) {
 				return InteractionResult.PASS;
 			}
 			cellDoor(sp, jail);
@@ -392,7 +397,7 @@ public final class StoryHard {
 		boolean still = before != null && before.distanceToSqr(player.position()) < 1.0;
 		boolean rough = player.isSleeping() || still;
 		Faction here = Factions.around(server, level, player.blockPosition(), EVICT_RANGE);
-		if (!player.isAlive() || player.level() != level || !level.isDarkOutside() || Busts.jailed(player) || !rough || here == null || here.id() != f.id()) {
+		if (!player.isAlive() || player.level() != level || !Approaches.night(level) || Busts.jailed(player) || !rough || here == null || here.id() != f.id()) {
 			forgetLoiter(id);
 			return;
 		}
@@ -401,7 +406,7 @@ public final class StoryHard {
 			// (unseen is unpunished)
 			return;
 		}
-		int about = LOITERING.merge(id, EVICT_CHECK, Integer::sum);
+		int about = LOITERING.merge(id, player.isSleeping() ? EVICT_CHECK * SLEEPER_HASTE : EVICT_CHECK, Integer::sum);
 		if (about >= JAIL_AFTER) {
 			forgetLoiter(id);
 			Speech.say(level, watch.getFirst().mob(), Component.translatable("message.jaymoskingdoms.hard.evict.take"), Speech.RED, Busts.SPEECH);
