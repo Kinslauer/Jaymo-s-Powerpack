@@ -195,6 +195,11 @@ public final class WeaponParts {
 			Assembly.ROD_BINDING, 1));
 		add(new Kind("steel_smithing_hammer_head", "jaymospowers:steel_smithing_hammer", Scheme.SINGLE_STEEL, 3 * INGOT,
 			Assembly.ROD_BINDING, 1));
+		// (0.18.49) the space pod's metal parts are forged too (power/zfighter/pod/PodParts): no grid recipes, assembled alone
+		add(new Kind("pod_fin_blank", "jaymospowers:pod_fin", Scheme.SINGLE_STEEL, 3 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_plate_blank", "jaymospowers:pod_plate", Scheme.SINGLE, 4 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_mast_blank", "jaymospowers:pod_mast", Scheme.SINGLE, 2 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("pod_tank_blank", "jaymospowers:pod_tank", Scheme.SINGLE_COPPER, 5 * INGOT, Assembly.ALONE, 1));
 	}
 
 	private WeaponParts() {

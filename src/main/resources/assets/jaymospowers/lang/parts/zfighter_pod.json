@@ -1,0 +1,21 @@
+{
+  "block.jaymospowers.pod_keel": "Pod Keel",
+  "block.jaymospowers.pod_fin": "Landing Fin",
+  "block.jaymospowers.pod_bell": "Thruster Bell",
+  "block.jaymospowers.pod_tank": "Fuel Tank",
+  "block.jaymospowers.pod_plate": "Hull Plate",
+  "block.jaymospowers.pod_canopy": "Pod Canopy",
+  "block.jaymospowers.pod_mast": "Beacon Mast",
+  "item.jaymospowers.pod_fin_blank": "Landing Fin Blank",
+  "item.jaymospowers.pod_plate_blank": "Hull Plate Blank",
+  "item.jaymospowers.pod_mast_blank": "Beacon Mast Blank",
+  "item.jaymospowers.pod_tank_blank": "Fuel Tank Blank",
+  "message.jaymospowers.pod.needs_first": "The %1$s must go on first.",
+  "message.jaymospowers.pod.attached": "%1$s fitted.",
+  "message.jaymospowers.pod.detached": "%1$s came away.",
+  "message.jaymospowers.pod.scrap": "The %1$s was too far gone; only scrap comes off.",
+  "message.jaymospowers.pod.keel_last": "The %1$s is set down. Nothing is left of the pod but its frame.",
+  "message.jaymospowers.pod.full": "Every %1$s is already on.",
+  "research.jaymospowers.pod_canopy": "A Dome Without a Seam",
+  "research.jaymospowers.pod_canopy.text": "Glass, drawn up through amethyst and quartz until it holds no seam at all. Whatever wears it will sit under it and look out."
+}

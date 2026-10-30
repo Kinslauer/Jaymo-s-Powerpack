@@ -3,7 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.gifted.Gifted;
-import com.mojang.math.Transformation;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -118,10 +118,10 @@ public final class ZFighterPatrol {
 	static final int DEPART_TICKS = 90;
 
 	public static final String TAG = "jaymospowers.patrolman";
-	static final String POD_TAG = "jaymospowers.patrol_pod";
+	public static final String POD_TAG = "jaymospowers.patrol_pod";
 	static final String WANTED_TAG = "jaymospowers.wanted";
 	/** On a patrol pod while it flies (not while it stands parked). */
-	static final String FLYING_TAG = "jaymospowers.patrol_pod_flying";
+	public static final String FLYING_TAG = "jaymospowers.patrol_pod_flying";
 	static final long DAY = 24000L;
 
 	/** A patrolman's visit: where his pod stands and when he leaves. */
@@ -157,14 +157,14 @@ public final class ZFighterPatrol {
 
 	/** A pod coming down (and what steps out when it lands), or going up with whoever flew it gone. */
 	static final class Flier {
-		final Display.BlockDisplay pod;
+		final PodEntity pod;
 		final BlockPos ground;
 		final boolean arriving;
 		final int name;
 		final java.util.function.@Nullable Consumer<Flier> landed;
 		int ticks;
 
-		Flier(Display.BlockDisplay pod, BlockPos ground, boolean arriving, int name, java.util.function.@Nullable Consumer<Flier> landed) {
+		Flier(PodEntity pod, BlockPos ground, boolean arriving, int name, java.util.function.@Nullable Consumer<Flier> landed) {
 			this.pod = pod;
 			this.ground = ground;
 			this.arriving = arriving;
@@ -299,32 +299,25 @@ public final class ZFighterPatrol {
 
 	/** A pod starts down out of the sky over {@code ground}; {@code landed} runs when it sets down. */
 	static Flier land(ServerLevel level, BlockPos ground, int name, java.util.function.Consumer<Flier> landed) {
-		Display.BlockDisplay pod = pod(level, new Vec3(ground.getX() + 0.5, ground.getY() + ARRIVE_HEIGHT, ground.getZ() + 0.5));
+		PodEntity pod = pod(level, new Vec3(ground.getX() + 0.5, ground.getY() + ARRIVE_HEIGHT, ground.getZ() + 0.5));
 		Flier flier = new Flier(pod, ground, true, name, landed);
 		FLIERS.add(flier);
 		pod.addTag(FLYING_TAG);
+		pod.setHovering(true);
 		return flier;
 	}
 
 	/** A parked pod at {@code at} goes up and away. */
-	static void takeOff(ServerLevel level, Display.BlockDisplay pod) {
+	static void takeOff(ServerLevel level, PodEntity pod) {
 		FLIERS.add(new Flier(pod, pod.blockPosition(), false, 0, null));
 		pod.addTag(FLYING_TAG);
+		pod.setHovering(true);
 		level.playSound(null, pod.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.5F);
 	}
 
-	/** A pod nobody can take: the pod drawn big. */
-	static Display.BlockDisplay pod(ServerLevel level, Vec3 at) {
-		Display.BlockDisplay pod = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
-		pod.setBlockState(ZFighterSpace.POD.defaultBlockState());
-		float scale = ZFighterPodTrip.POD_SCALE;
-		pod.setTransformation(new Transformation(new Vector3f(-scale / 2.0F, 0.0F, -scale / 2.0F), null, new Vector3f(scale), null));
-		pod.setPosRotInterpolationDuration(2);
-		pod.setWidth(scale);
-		pod.setHeight(scale);
-		pod.setViewRange(4.0F);
-		pod.setPos(at.x, at.y, at.z);
-		level.addFreshEntity(pod);
+	/** A pod nobody can take (0.18.49: a complete pod entity, locked by {@link #POD_TAG}). */
+	static PodEntity pod(ServerLevel level, Vec3 at) {
+		PodEntity pod = PodEntity.spawn(level, at, true, ZFighterSpace.MAX_FUEL);
 		pod.addTag(POD_TAG);
 		return pod;
 	}
@@ -349,6 +342,7 @@ public final class ZFighterPatrol {
 					level.sendParticles(ParticleTypes.CLOUD, at.x, f.ground.getY() + 0.2, at.z, 30, 1.4, 0.1, 1.4, 0.1);
 					level.playSound(null, f.ground, SoundEvents.IRON_DOOR_OPEN, SoundSource.NEUTRAL, 1.0F, 0.7F);
 					f.pod.removeTag(FLYING_TAG);
+					f.pod.setHovering(false);
 					if (f.landed != null) {
 						f.landed.accept(f);
 					}
@@ -459,8 +453,8 @@ public final class ZFighterPatrol {
 	/** His stay is over: he climbs in and the pod goes up. */
 	private static void depart(ServerLevel level, PathfinderMob man, Visit visit) {
 		Vec3 at = Vec3.atBottomCenterOf(visit.pod());
-		Display.BlockDisplay pod = null;
-		for (Display.BlockDisplay d : level.getEntitiesOfClass(Display.BlockDisplay.class, new AABB(visit.pod()).inflate(3.0), d -> d.entityTags().contains(POD_TAG))) {
+		PodEntity pod = null;
+		for (PodEntity d : level.getEntitiesOfClass(PodEntity.class, new AABB(visit.pod()).inflate(3.0), d -> d.entityTags().contains(POD_TAG))) {
 			pod = d;
 		}
 		if (pod == null) {
@@ -543,11 +537,10 @@ public final class ZFighterPatrol {
 	/** Sworn in: an officer, with a pod full of fuel and the license. */
 	static void join(ServerPlayer player) {
 		player.setAttached(MEMBER, new Member(0, 0L));
-		ItemStack pod = new ItemStack(ZFighterSpace.POD_ITEM);
-		pod.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(ZFighterSpace.FUEL, ZFighterSpace.MAX_FUEL));
-		ZFighterSagas.give(player, pod);
-		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		ServerLevel level = player.level();
+		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
+		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
+		ZFighterSagas.give(player, new ItemStack(LICENSE));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 

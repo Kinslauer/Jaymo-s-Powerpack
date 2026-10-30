@@ -1,6 +1,8 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,14 +23,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -55,6 +55,8 @@ public final class ZFighterRaiders {
 	static final double RAIDER_HEALTH = 2.5, RAIDER_DAMAGE = 1.6, CHIEF_HEALTH = 0.6, CHIEF_DAMAGE = 0.9, HUNT = 32.0;
 	/** The fuel the pod left behind holds. */
 	static final int PRIZE_FUEL = 3;
+	/** (0.18.49) What a burnt-out pod leaves: its keel and this many sound parts at random. */
+	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
 	static final int NAMES = 8;
 	static final String TAG = "jaymospowers.raider";
 	static final long DAY = 24000L;
@@ -66,7 +68,7 @@ public final class ZFighterRaiders {
 	/** A band on the ground: its pods, its raiders, and when it gives up. */
 	private static final class Band {
 		final ServerLevel level;
-		final List<Display.BlockDisplay> pods = new ArrayList<>();
+		final List<PodEntity> pods = new ArrayList<>();
 		final List<UUID> raiders = new ArrayList<>();
 		final long until;
 		int coming;
@@ -231,7 +233,7 @@ public final class ZFighterRaiders {
 					level.sendParticles(ParticleTypes.CLOUD, raider.getX(), raider.getY() + 1.0, raider.getZ(), 12, 0.3, 0.6, 0.3, 0.05);
 					raider.discard();
 				}
-				for (Display.BlockDisplay pod : band.pods) {
+				for (PodEntity pod : band.pods) {
 					if (!pod.isRemoved()) {
 						ZFighterPatrol.takeOff(level, pod);
 					}
@@ -263,10 +265,10 @@ public final class ZFighterRaiders {
 		}
 	}
 
-	/** The band is beaten: one pod is still sound and stays, a pod of whoever finds it; the others burn out. */
+	/** The band is beaten: one pod is still sound and stays, a pod of whoever finds it; the others burn out, leaving what is sound of them. */
 	private static void beaten(ServerLevel level, Band band) {
-		Display.@Nullable BlockDisplay kept = null;
-		for (Display.BlockDisplay pod : band.pods) {
+		@Nullable PodEntity kept = null;
+		for (PodEntity pod : band.pods) {
 			if (pod.isRemoved()) {
 				continue;
 			}
@@ -277,20 +279,36 @@ public final class ZFighterRaiders {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, pod.getX(), pod.getY() + 1.0, pod.getZ(), 30, 0.6, 0.8, 0.6, 0.04);
 			level.sendParticles(ParticleTypes.FLAME, pod.getX(), pod.getY() + 0.5, pod.getZ(), 20, 0.5, 0.5, 0.5, 0.03);
 			level.playSound(null, pod.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.NEUTRAL, 1.0F, 1.2F);
-			pod.discard();
+			burnt(level, pod);
 		}
 		if (kept == null) {
 			return;
 		}
-		BlockPos at = kept.blockPosition();
-		kept.discard();
-		if (!level.getBlockState(at).canBeReplaced()) {
-			at = at.above();
-		}
-		level.setBlock(at, ZFighterSpace.withFuel(PRIZE_FUEL), Block.UPDATE_ALL);
-		BlockPos prize = at;
+		// (0.18.49) the kept pod is a complete pod of your own, no longer locked to the band
+		kept.removeTag(TAG);
+		kept.removeTag(ZFighterPatrol.POD_TAG);
+		kept.setFuel(PRIZE_FUEL);
+		BlockPos prize = kept.blockPosition();
 		for (ServerPlayer player : level.getPlayers(p -> p.blockPosition().distSqr(prize) < 96 * 96)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.raiders.beaten").withStyle(ChatFormatting.GOLD));
 		}
+	}
+
+	/** (0.18.49) A burnt-out pod is a bare pod: its keel and {@link #SCRAP_MIN} to {@link #SCRAP_MAX} sound parts, left lying. */
+	private static void burnt(ServerLevel level, PodEntity pod) {
+		RandomSource random = level.getRandom();
+		List<PodPart> pool = new ArrayList<>(List.of(PodPart.FIN, PodPart.FIN, PodPart.FIN, PodPart.BELL, PodPart.TANK, PodPart.PLATE, PodPart.PLATE,
+			PodPart.PLATE, PodPart.PLATE, PodPart.CANOPY, PodPart.MAST));
+		int[] used = new int[PodPart.values().length];
+		int filled = PodPart.KEEL.bits();
+		int count = SCRAP_MIN + random.nextInt(SCRAP_MAX - SCRAP_MIN + 1);
+		for (int i = 0; i < count && !pool.isEmpty(); i++) {
+			PodPart part = pool.remove(random.nextInt(pool.size()));
+			filled |= part.bit(used[part.ordinal()]++);
+		}
+		pod.setParts(filled, 0);
+		pod.setFuel(0);
+		pod.removeTag(TAG);
+		pod.removeTag(ZFighterPatrol.POD_TAG);
 	}
 }
