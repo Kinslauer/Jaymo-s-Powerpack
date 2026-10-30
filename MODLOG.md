@@ -4199,3 +4199,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   anyone but a Z Fighter now stands a still **Practice Dummy** (`PracticeDummy`, a tagged mannequin): blows land but never
   hurt it (a thud and a puff), it counts for Weapon Forms practice and the belt (sneak + use, empty-handed), and sneak +
   strike picks it back up. A Z Fighter's use is still the sparring partner. Compile-checked; not seen in game.
+- **0.18.73, creative heals:** Andy: "creative should heal all your limbs and bones". `Wounds.creativeHeal`: within half a
+  second of switching into creative, and every reconcile while in it, every part is made whole, breaks, cuts, festering
+  and the battering are cleared, severed limbs grow back and a bolas trip is undone (`Tripped.clear`). A downed player in
+  creative or spectator gets straight up, not battered and not held down by Will. Not seen in game.
