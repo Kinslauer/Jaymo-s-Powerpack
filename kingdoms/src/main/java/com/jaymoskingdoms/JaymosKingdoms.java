@@ -408,7 +408,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sorcery.register();
 		// 0.5.62: the villager on a floating island is a hermit wizard with a story
 		Hermits.register();
-		// 0.7.367: star charts for sale, and lights in the sky in the Tidings
+		// 0.7.382: star charts for sale, and lights in the sky in the Tidings
 		StarFolk.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();

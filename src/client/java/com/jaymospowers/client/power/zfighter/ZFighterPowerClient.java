@@ -86,7 +86,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterWishScreen.register();
 		// (0.17.62) the space pod's star map
 		ZFighterStarMapScreen.register();
-		// (0.18.23) star charts' book page, and the worlds read as lights in the night sky
+		// (0.18.51) star charts' book page, and the worlds read as lights in the night sky
 		com.jaymospowers.client.power.zfighter.sky.SkyPlanets.init();
 		ZFighterFlightScreen.register();
 		// (0.17.60) the tournament bracket

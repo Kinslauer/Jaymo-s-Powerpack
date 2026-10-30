@@ -1,4 +1,4 @@
-"""Writes the assets for reading the sky (0.18.23, power/zfighter/sky):
+"""Writes the assets for reading the sky (0.18.51, power/zfighter/sky):
 
 * the Star-Sight Bench (block `star_bench`): three 16x16 textures (stone base, a dull lens, a lit lens), two block models (asleep, and
   awake with an emissive lens), the blockstate on its `awake` property, its item definition, loot table and grid recipe
