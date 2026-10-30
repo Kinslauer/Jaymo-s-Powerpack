@@ -113,3 +113,13 @@ tinkerer_sanguine.png (bbmodels/tinkerer_sanguine.json): the Mad Tinkerer's outf
   "Sanguine Outfit", Blockbench Workshop (tools/bbmodels/sanguine-outfit.bbmodel; maker's name not in the file)
   Changes: darkened (value x0.6, its gold and brass x0.75), baked to our loader's format (tools/blockbench/tinkerer_outfit.py)
   and hung on the Tinkerer villager's own head, body, arms and legs by our own layer (TinkererOutfit).
+
+bbmodels/valor_wings_notus.json, textures/entity/valor/wings_notus_*.png: a Skyward Valor's Notus wings
+  "Fire Dragon" by nyxaris, https://blockbenchworkshop.com/model/nyxaris/fire-dragon-minecraft
+  Changes: only its two wings, turned to lie along the shoulders and drawn small on a player's back; its texture
+  recoloured into each Valor look, its dark veins picked out (kingdoms/tools/gen_valor_wing_designs.py).
+
+bbmodels/valor_wings_eurus.json, textures/entity/valor/wings_eurus_*.png: a Skyward Valor's Eurus wings
+  "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
+  Changes: only its two wings, turned to lie along the shoulders and drawn small on a player's back; its texture halved
+  and recoloured into each Valor look, its gold seams picked out (kingdoms/tools/gen_valor_wing_designs.py).

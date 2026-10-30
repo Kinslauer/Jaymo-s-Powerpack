@@ -100,8 +100,13 @@ public final class Valor {
 	static final int UNTRAINED_CAP = STEELED;
 	/** Each repeat of a feat against the same kind of foe pays this much less (1 / (1 + this x times)). */
 	static final float REPEAT_FALLOFF = 0.5F;
-	/** A player with a power grows Valor at this share. */
-	static final float POWERED_GROWTH = 0.5F;
+	/**
+	 * (0.7.410) Andy: "Valor should be severely limited for those with powers, and still unable to bind to ki/magic users".
+	 * A player with any other power grows Valor at this share, no higher than this rank (no King's Valor), with this share
+	 * of the pool; ki users (Z Fighters), mana-attuned players, Mages and Sorcerers can't hold it at all ({@link #unbound}).
+	 */
+	static final float POWERED_GROWTH = 0.25F, POWERED_POOL = 0.5F;
+	static final int POWERED_CAP = KINDLED;
 	/** Valor experience a day lived with it. */
 	static final float DAILY = 1.0F;
 	/** How long after rising from downed a kill still counts as winning that fight (ticks). */
@@ -230,7 +235,7 @@ public final class Valor {
 	 * great foes felled since Tempered.
 	 */
 	public record Data(float exp, int origin, int look, int bent, int soul, String name, boolean renamed, long woke, long day,
-		Map<String, Integer> feats, int greatFoes) {
+		Map<String, Integer> feats, int greatFoes, int wings) {
 		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.FLOAT.fieldOf("exp").forGetter(Data::exp),
 			Codec.INT.fieldOf("origin").forGetter(Data::origin),
@@ -242,7 +247,17 @@ public final class Valor {
 			Codec.LONG.fieldOf("woke").forGetter(Data::woke),
 			Codec.LONG.optionalFieldOf("day", 0L).forGetter(Data::day),
 			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("feats", Map.of()).forGetter(Data::feats),
-			Codec.INT.optionalFieldOf("great_foes", 0).forGetter(Data::greatFoes)).apply(i, Data::new));
+			Codec.INT.optionalFieldOf("great_foes", 0).forGetter(Data::greatFoes),
+			Codec.INT.optionalFieldOf("wings", -1).forGetter(Data::wings)).apply(i, Data::new));
+
+		/** (0.7.410) A Skyward Valor's wing design ({@link ValorWings#DESIGNS}): set by /valor wings, else its own from when it woke. */
+		public int wingDesign() {
+			return wings >= 0 && wings < ValorWings.DESIGNS.length ? wings : Math.floorMod(Long.hashCode(woke) * 31 + soul, ValorWings.DESIGNS.length);
+		}
+
+		Data withWings(int wings) {
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
+		}
 
 		public int rank() {
 			return rankFor(exp);
@@ -279,33 +294,33 @@ public final class Valor {
 		}
 
 		Data withExp(float exp) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 
 		Data withOrigin(int origin) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 
 		Data withBent(int bent) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 
 		Data withName(String name, boolean renamed) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 
 		Data withDay(long day, float exp) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 
 		Data withFeat(String key, float exp) {
 			Map<String, Integer> more = new HashMap<>(feats);
 			more.merge(key, 1, Integer::sum);
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, Map.copyOf(more), greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, Map.copyOf(more), greatFoes, wings);
 		}
 
 		Data withGreatFoes(int greatFoes) {
-			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes);
+			return new Data(exp, origin, look, bent, soul, name, renamed, woke, day, feats, greatFoes, wings);
 		}
 	}
 
@@ -419,6 +434,19 @@ public final class Valor {
 						}
 						return 0;
 					}))))
+			.then(Commands.literal("wings").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.argument("player", EntityArgument.player()).then(Commands.argument("design", StringArgumentType.word())
+					.suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(ValorWings.DESIGNS, b))
+					.executes(c -> {
+						ServerPlayer target = EntityArgument.getPlayer(c, "player");
+						Data data = target.getAttached(VALOR);
+						int design = java.util.Arrays.asList(ValorWings.DESIGNS).indexOf(StringArgumentType.getString(c, "design"));
+						if (data == null || design < 0) {
+							return 0;
+						}
+						target.setAttached(VALOR, data.withWings(design));
+						return 1;
+					}))))
 			.then(Commands.literal("grant").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("player", EntityArgument.player()).then(Commands.argument("exp", FloatArgumentType.floatArg(0.0F))
 					.executes(c -> {
@@ -508,7 +536,7 @@ public final class Valor {
 	/** The rank Senses work at for {@code e} (-1 without Valor); both sides (the client draws them). */
 	public static int sensesRank(Entity e) {
 		Data data = e.getAttached(VALOR);
-		return data == null ? -1 : artRank(e, data, proficientSenses(classOf(e)));
+		return data == null || unbound(e) ? -1 : artRank(e, data, proficientSenses(classOf(e)));
 	}
 
 	/** How far Senses reach (blocks) for {@code e}: by rank, half again for a Hunter's origin or bent. */
@@ -525,6 +553,32 @@ public final class Valor {
 			reach += 6.0;
 		}
 		return reach;
+	}
+
+	/**
+	 * (0.7.410) Whether Valor can't bind to {@code e} (either side): a ki user (Z Fighter), anyone attuned to mana, a Mage or
+	 * Sorcerer; among villagers, casters. A Valor they already had lies dormant: no coatings, wings, Senses or dodges.
+	 */
+	public static boolean unbound(Entity e) {
+		if (e instanceof Player p) {
+			Classes.PlayerClass c = Classes.classOf(p);
+			return c == Classes.PlayerClass.MAGE || c == Classes.PlayerClass.SORCERER || Mana.attuned(p) || "zfighter".equals(PowersCompat.power(p));
+		}
+		return Will.caster(e);
+	}
+
+	/** (0.7.410) {@code e} has some other power: Valor severely limited ({@link #POWERED_GROWTH}). */
+	public static boolean powered(Entity e) {
+		return e instanceof Player p && PowersCompat.power(p) != null;
+	}
+
+	/** The most experience {@code holder}'s Valor can hold: short of Tempered with a power. */
+	static float expCap(LivingEntity holder) {
+		return powered(holder) ? RANKS[POWERED_CAP + 1] - 0.01F : Float.MAX_VALUE;
+	}
+
+	static float poolMax(Entity e, Data data) {
+		return poolMax(data) * (powered(e) ? POWERED_POOL : 1.0F);
 	}
 
 	static float poolMax(Data data) {
@@ -548,8 +602,7 @@ public final class Valor {
 		if (has(sp) || sp.isCreative() || sp.isSpectator()) {
 			return false;
 		}
-		Classes.PlayerClass c = Classes.classOf(sp);
-		if (c == Classes.PlayerClass.MAGE || c == Classes.PlayerClass.SORCERER) {
+		if (unbound(sp)) {
 			return false;
 		}
 		Skills.Progress progress = Skills.of(sp);
@@ -571,10 +624,10 @@ public final class Valor {
 		Look look = favouredLook(origin, r);
 		int soul = r.nextInt(SOUL.length);
 		long now = level.getGameTime();
-		Data data = new Data(0.0F, origin.ordinal(), look.ordinal(), -1, soul, name(origin, look, r), false, now, now / Will.DAY, Map.of(), 0);
+		Data data = new Data(0.0F, origin.ordinal(), look.ordinal(), -1, soul, name(origin, look, r), false, now, now / Will.DAY, Map.of(), 0, -1);
 		sp.setAttached(VALOR, data);
 		Live live = live(sp);
-		live.pool = poolMax(data);
+		live.pool = poolMax(sp, data);
 		level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 0.7F);
 		level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		coatBurst(level, sp, look.color, 40);
@@ -790,6 +843,7 @@ public final class Valor {
 
 	/** Sets {@code holder}'s Valor experience; a new rank is felt (and at Tempered the second quirk grows). */
 	static void grow(LivingEntity holder, Data data, float exp) {
+		exp = Math.min(exp, expCap(holder));
 		int was = data.rank();
 		Data next = data.withExp(exp);
 		int now = next.rank();
@@ -832,6 +886,10 @@ public final class Valor {
 	static void use(ServerPlayer sp, int what) {
 		Data data = sp.getAttached(VALOR);
 		if (data == null || !sp.isAlive() || sp.isSpectator() || Downed.isDowned(sp)) {
+			return;
+		}
+		if (unbound(sp)) {
+			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.valor.unbound").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (what == 1) {
@@ -883,7 +941,7 @@ public final class Valor {
 	/** Packs what's up into {@link #STATE}, setting it only when it changed. */
 	static void sync(ServerPlayer sp, Data data, Live live) {
 		long now = sp.level().getGameTime();
-		int share = Mth.clamp(Math.round(live.pool / poolMax(data) * 255.0F), 0, 255);
+		int share = Mth.clamp(Math.round(live.pool / poolMax(sp, data) * 255.0F), 0, 255);
 		int packed = (live.reinforced ? REINFORCED : 0) | (live.armed ? ARMED : 0) | (live.armed && ValorKings.coatOpen(data) ? KINGS : 0)
 			| (now < live.spentUntil ? SPENT : 0) | (live.flying ? FLYING : 0) | (now < live.flapUntil ? FLAP : 0) | share << 8;
 		if (sp.getAttachedOrElse(STATE, 0) != packed) {
@@ -900,7 +958,21 @@ public final class Valor {
 			ServerLevel level = sp.level();
 			long now = level.getGameTime();
 			Live live = live(sp);
-			float max = poolMax(data);
+			// (0.7.410) ki and magic leave it no hold: dormant; a power holds it short of Tempered
+			if (unbound(sp)) {
+				if (live.reinforced || live.armed) {
+					coatsDown(sp, live);
+				}
+				ValorWings.land(sp, live, true);
+				ValorWings.tick(sp, data, live);
+				sync(sp, data, live);
+				continue;
+			}
+			if (data.exp() > expCap(sp)) {
+				grow(sp, data, data.exp());
+				data = sp.getAttached(VALOR);
+			}
+			float max = poolMax(sp, data);
 			if (live.pool < 0.0F) {
 				live.pool = max;
 			}
@@ -1155,7 +1227,7 @@ public final class Valor {
 			return true;
 		}
 		Data data = sp.getAttached(VALOR);
-		if (data == null || Downed.isDowned(sp)) {
+		if (data == null || Downed.isDowned(sp) || unbound(sp)) {
 			return true;
 		}
 		ServerLevel level = sp.level();

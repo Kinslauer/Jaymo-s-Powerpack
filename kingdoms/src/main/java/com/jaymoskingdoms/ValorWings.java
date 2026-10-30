@@ -28,11 +28,17 @@ import net.minecraft.world.phys.Vec3;
  * the air and they fade out from under you (a slow fall as they go, and Spent like any coating).</li>
  * <li><b>Guarding</b>: with the coating up they wrap round you like Xenoform Wyrm's cloak, armour over armour, and swing out
  * of the way of your own blows.</li>
+ * <li><b>Designs</b>: each Valor's wings take one of the pack's dragons' ({@link #DESIGNS}), from when it woke.</li>
  * <li><b>Beating back</b>: out (guarding or flying), they sometimes catch a blow or a shot on their own, and a flap throws
  * the striker back: as long as there's meter for it.</li>
  * </ul>
  */
 public final class ValorWings {
+	/**
+	 * (0.7.410) The wing designs, each from one of the pack's dragons (Andy): the ender dragon's (Xenoform Wyrm's), Notus and
+	 * Boreas's fire dragon, Zephyrus's short ragged wings, Eurus and Aeolus's Kintsugi wyvern. Each Valor has its own.
+	 */
+	public static final String[] DESIGNS = {"wyrm", "notus", "zephyrus", "eurus"};
 	/** Flight: drain per second, the least pool to take off with. */
 	static final float DRAIN_FLIGHT = 2.0F, FLY_MIN = 6.0F;
 	/** Flight speed by rank (blocks a tick; none at Spark), sprinting this much faster, climbing/dropping this fast. */

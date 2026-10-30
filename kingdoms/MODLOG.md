@@ -7252,3 +7252,13 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   - Coated (guarding): +2/3/4/5/6 armour and 0-2 toughness by rank.
   - Out (coated or flying): 30-55% by rank (every 1.5 s, 5 pool) they catch a blow or a shot on their own; a striker in 4
     blocks is thrown back and takes 1-4 harm, a shot is swatted away.
+- Andy: "Give the valor wings designs stemming from any of the dragon models we have not just the wyrm". Each Skyward
+  Valor's wings take one of four designs (`ValorWings.DESIGNS`, `Valor.Data.wings`, rolled from when it woke;
+  `/valor wings <player> <design>` op): the ender dragon's (Wyrm's), Notus/Boreas's fire dragon wings, Zephyrus's short
+  ragged wings, or Eurus/Aeolus's Kintsugi wyvern wings. `tools/gen_valor_wing_designs.py` bakes the two Blockbench wings
+  (CC BY, credited) into one shared wing layout and recolours all three dragons' textures into the six looks, with each
+  one's own lines glowing under King's coating. The Valor page names your wings.
+- Andy: "Valor should be severely limited for those with powers, and still unable to bind to ki/magic users". `Valor.unbound`:
+  Z Fighters (ki), mana-attuned players, Mages and Sorcerers never wake it, and a Valor they already had lies dormant (no
+  coatings, wings, Senses, dodges; the key says so). Villager casters (court wizards, sorcerers, shamans) never roll it.
+  Any other power: a quarter of the growth (was half), half the pool, capped short of Tempered (no King's Valor).

@@ -175,7 +175,8 @@ public final class ValorFolk {
 			return;
 		}
 		mob.addTag(ROLLED);
-		if (Valor.has(mob)) {
+		// (0.7.410) never in a caster (court wizards, the realm's sorcerers): Valor won't bind to magic
+		if (Valor.has(mob) || Valor.unbound(mob)) {
 			return;
 		}
 		RandomSource r = level.getRandom();
@@ -204,7 +205,7 @@ public final class ValorFolk {
 		Valor.Look look = Valor.favouredLook(origin, r);
 		long now = level.getGameTime();
 		Valor.Data data = new Valor.Data(exp, origin.ordinal(), look.ordinal(), -1, soul(mob, r), Valor.name(origin, look, r), false, now, now / Will.DAY,
-			Map.of(), 0);
+			Map.of(), 0, -1);
 		if (data.rank() >= Valor.TEMPERED) {
 			data = data.withBent(Valor.Bent.values()[r.nextInt(Valor.Bent.values().length)].ordinal());
 		}
@@ -244,7 +245,7 @@ public final class ValorFolk {
 				continue;
 			}
 			long now = level.getGameTime();
-			boolean fighting = !Downed.isDowned(holder) && (now - FOUGHT.getOrDefault(holder, -CALM_TICKS * 2L) < CALM_TICKS
+			boolean fighting = !Downed.isDowned(holder) && !Valor.unbound(holder) && (now - FOUGHT.getOrDefault(holder, -CALM_TICKS * 2L) < CALM_TICKS
 				|| holder instanceof Mob mob && mob.getTarget() != null && mob.getTarget().isAlive()
 				|| holder.getLastHurtByMob() != null && holder.tickCount - holder.getLastHurtByMobTimestamp() < CALM_TICKS);
 			int packed = fighting ? Valor.REINFORCED | (data.rank() >= Valor.KINDLED ? Valor.ARMED : 0) | (ValorKings.coatOpen(data) ? Valor.KINGS : 0) | 0xFF00 : 0;
