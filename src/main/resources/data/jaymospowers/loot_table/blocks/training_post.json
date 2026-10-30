@@ -3,23 +3,20 @@
   "pools": [
     {
       "rolls": 1,
-      "bonus_rolls": 0,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jaymospowers:training_post"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymospowers:training_post",
-          "properties": {
-            "half": "lower"
+          "name": "jaymospowers:training_post",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:training_post",
+            "state": {
+              "half": "lower"
+            }
           }
-        },
-        {
-          "condition": "minecraft:survives_explosion"
         }
       ]
     }

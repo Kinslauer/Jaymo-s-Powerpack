@@ -4203,3 +4203,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   second of switching into creative, and every reconcile while in it, every part is made whole, breaks, cuts, festering
   and the battering are cleared, severed limbs grow back and a bolas trip is undone (`Tripped.clear`). A downed player in
   creative or spectator gets straight up, not battered and not held down by Will. Not seen in game.
+- **0.18.74, the Training Post loot table loads:** the Deck server would not start on 0.18.73 ("Failed to load registries":
+  `blocks/training_post` used the pre-26.3 `block_state_property` condition, which 26.3 dropped for `match_block`; the old
+  layer tables only survive because a pack mod upgrades them on the fly, and it skipped this one). Rewritten in the 26.3
+  form, like `amberoot_door`. Server-checked on the Deck.
