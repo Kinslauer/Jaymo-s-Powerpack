@@ -147,8 +147,9 @@ public final class Duels {
 			OFFERS.remove(id);
 			NEXT_OFFER.remove(id);
 			Duel duel = DUELS.get(id);
-			if (duel != null) {
-				finish(server.overworld(), null, duel, Outcome.OFF);
+			if (duel != null && handler.getPlayer().level() instanceof ServerLevel at) {
+				// (the foe is looked up where the player stood, so it's healed even outside the Overworld)
+				finish(at, null, duel, Outcome.OFF);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -211,7 +212,8 @@ public final class Duels {
 	}
 
 	private static long today(ServerLevel level) {
-		return level.getGameTime() / DAY_TICKS;
+		// (the overworld clock's day, as festivals count it, so sleeping or /time can't open a second one)
+		return Math.floorDiv(level.getOverworldClockTime(), DAY_TICKS);
 	}
 
 	/** Whether the student has fought {@code player} today. */
@@ -274,8 +276,14 @@ public final class Duels {
 			say(level, foe, player, mine.foe.equals(foe.getUUID()) ? "duel.jaymoskingdoms.under_way" : "duel.jaymoskingdoms.elsewhere");
 			return;
 		}
-		if (busy(foe.getUUID())) {
+		if (busy(foe.getUUID()) || Bouts.entered(player.getUUID()) || GuardDrills.busy(player.getUUID())) {
 			say(level, foe, player, "duel.jaymoskingdoms.busy");
+			return;
+		}
+		Faction realm = SchooledGuards.realmOf(level, foe);
+		if (realm != null && Reputation.get(player, realm.id()) <= Reputation.HOSTILE) {
+			// (a realm that hates you won't cross blades for honour)
+			say(level, foe, player, "duel.jaymoskingdoms.not_now");
 			return;
 		}
 		Offer open = OFFERS.get(player.getUUID());
@@ -468,8 +476,12 @@ public final class Duels {
 
 	/** The blow that would take either duellist under the floor is stopped, and the duel is over. */
 	private static boolean allow(LivingEntity entity, DamageSource source, float amount) {
-		if (DUELS.isEmpty() || amount <= 0.0F || source.getEntity() == null) {
+		if (DUELS.isEmpty() || amount <= 0.0F) {
 			return true;
+		}
+		if (source.getEntity() == null) {
+			// fire, poison, a fall: it can't take a duelling student under the floor either (the duel goes on)
+			return !(foeInDuel(entity) && entity.getHealth() - amount <= entity.getMaxHealth() * FLOOR);
 		}
 		Entity by = source.getEntity();
 		if (entity instanceof ServerPlayer player) {
@@ -496,7 +508,14 @@ public final class Duels {
 
 	/** A safety: a death in a duel at its opponent's hand (a damage path the floor didn't see) is stopped, and the duel ended. */
 	private static boolean allowDeath(LivingEntity entity, DamageSource source, float amount) {
-		if (DUELS.isEmpty() || source.getEntity() == null) {
+		if (DUELS.isEmpty()) {
+			return true;
+		}
+		if (source.getEntity() == null) {
+			if (foeInDuel(entity)) {
+				entity.setHealth(Math.max(1.0F, entity.getMaxHealth() * FLOOR));
+				return false;
+			}
 			return true;
 		}
 		Entity by = source.getEntity();
@@ -516,6 +535,15 @@ public final class Duels {
 			}
 		}
 		return true;
+	}
+
+	private static boolean foeInDuel(LivingEntity entity) {
+		for (Duel duel : DUELS.values()) {
+			if (duel.foe.equals(entity.getUUID())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---- endings -----------------------------------------------------------------------------------------------------
@@ -575,7 +603,8 @@ public final class Duels {
 		if (!duel.ranked) {
 			return;
 		}
-		School mine = schoolFor(player, duel.school);
+		// (against a master it's always their school, whatever weapon you hold)
+		School mine = duel.master ? duel.school : schoolFor(player, duel.school);
 		boolean joined = Schools.joined(player).contains(mine);
 		Faction realm = SchooledGuards.realmOf(level, foe);
 		if (outcome == Outcome.WON) {
@@ -587,7 +616,9 @@ public final class Duels {
 			if (realm != null) {
 				Reputation.change(player, realm, duel.master ? WIN_REP * 2 : WIN_REP);
 			}
-			if (duel.master && joined && !Schools.masterstrokeOpen(player, duel.school)) {
+			// (beating the master opens it only once your standing has earned mastery; before that it's a lesson and standing)
+			if (duel.master && joined && !Schools.masterstrokeOpen(player, duel.school)
+				&& Schools.standing(player, duel.school) >= Schools.MASTERY_STANDING) {
 				Schools.openMasterstroke(player, duel.school);
 			}
 			Post.tidings(player.getUUID(), Component.translatable(duel.master ? "tidings.jaymoskingdoms.duel.won_master" : "tidings.jaymoskingdoms.duel.won",

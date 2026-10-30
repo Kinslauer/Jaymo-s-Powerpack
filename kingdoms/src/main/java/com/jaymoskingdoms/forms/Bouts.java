@@ -160,7 +160,7 @@ public final class Bouts {
 		}
 		Faction f = SchooledGuards.realmOf(level, master);
 		School school = SchooledGuards.schoolOf(level, master);
-		if (f == null || school == null) {
+		if (f == null || school == null || Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
 			return;
 		}
 		if (RUNS.containsKey(player.getUUID())) {
