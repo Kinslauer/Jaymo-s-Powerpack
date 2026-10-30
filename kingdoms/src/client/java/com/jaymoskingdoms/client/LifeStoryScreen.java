@@ -937,6 +937,13 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("captive", new int[] {0xFF2A1A12, 0xFF8A5A3A, 0xFF4A3A2A}),
 		java.util.Map.entry("whalers", new int[] {0xFF2A3A4A, 0xFF7A8A9A, 0xFF1A3A5A}),
 		java.util.Map.entry("unarmed", new int[] {0xFF2A2A2A, 0xFF6A6A6A, 0xFF4A4A4A}),
+		// (0.7.412) the hard roads: a camp's firelight, a bare wasteland, a cell's cold stone, a night street, a den's lamplight, a haven's far lights
+		java.util.Map.entry("chained", new int[] {0xFF1A1410, 0xFF5A3A2A, 0xFF3A2E24}),
+		java.util.Map.entry("rock_bottom", new int[] {0xFF1A1A1E, 0xFF4A4A44, 0xFF3A3830}),
+		java.util.Map.entry("sentenced", new int[] {0xFF0C0C10, 0xFF2A2E38, 0xFF4A4A50}),
+		java.util.Map.entry("evicted", new int[] {0xFF1A1A3A, 0xFF6A5A7A, 0xFF4A4448}),
+		java.util.Map.entry("hideout", new int[] {0xFF0A0A12, 0xFF3A2A1A, 0xFF2A1E16}),
+		java.util.Map.entry("cast_out", new int[] {0xFF1A2A2E, 0xFF5A7A6A, 0xFF3A4A3A}),
 		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
 		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
 		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
@@ -945,6 +952,18 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("afterlife", new int[] {0xFFB0C8E8, 0xFFF8F0D0, 0xFFF0F0F0}),
 		java.util.Map.entry("fate", new int[] {0xFF0A0A2A, 0xFF4A2A7A, 0xFF2A2A3A}));
 	static final int[] DUSK = {0xFF2A2A4A, 0xFF8A6A6A, 0xFF4A4A3A};
+
+	/** (0.7.412) The colour of each difficulty mark (by {@link LifeStory.Mark} ordinal): green, gold, orange, red, deep red, grey (fate's). */
+	static final int[] MARK_COLORS = {0xFF6ABF6A, 0xFFD6C25A, 0xFFE0903A, 0xFFD0503A, 0xFFB02A2A, 0xFF9A9AB0};
+
+	/** (0.7.412) A start's card line: its difficulty mark and starting purse. */
+	private static Component terms(LifeStory.Start start) {
+		LifeStory.Terms t = LifeStory.terms(start);
+		Component purse = start == LifeStory.Start.FATE ? Component.translatable("gui.jaymoskingdoms.story.purse.varies")
+			: t.purse() == 0 ? Component.translatable("gui.jaymoskingdoms.story.purse.none")
+			: Component.translatable(t.purse() == 1 ? "gui.jaymoskingdoms.story.purse.one" : "gui.jaymoskingdoms.story.purse", t.purse());
+		return Component.translatable("gui.jaymoskingdoms.story.terms", Component.translatable("gui.jaymoskingdoms.story.mark." + t.mark().key()), purse);
+	}
 
 	/** (0.7.356) Whether page {@code s} is the road's carousel (not the realm it names). */
 	private static boolean carousel(Step s) {
@@ -1058,6 +1077,16 @@ final class LifeStoryScreen extends Screen {
 		} else {
 			Ui.line(graphics, this.font, name, ix + 4, ny, textW - 8, open ? ACCENT : Ui.HINT);
 		}
+		// (0.7.412) how hard the road is and what it starts with, under its name
+		if (a.start() != null) {
+			int markColor = MARK_COLORS[LifeStory.terms(a.start()).mark().ordinal()];
+			Component terms = terms(a.start());
+			if (this.font.width(terms) <= textW - 8) {
+				graphics.centeredText(this.font, terms, ix + textW / 2, ny + 12, open ? markColor : Ui.HINT);
+			} else {
+				Ui.line(graphics, this.font, terms, ix + 4, ny + 12, textW - 8, open ? markColor : Ui.HINT);
+			}
+		}
 		List<Component> lines = new ArrayList<>();
 		// (0.7.360) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
 		// its short line; the whole tale is kept for the story on the last page
@@ -1069,7 +1098,7 @@ final class LifeStoryScreen extends Screen {
 			lines.add(reason(a).withColor(Ui.BAD));
 		}
 		graphics.disableScissor();
-		block(graphics, lines, gives(Question.ROAD, a, false), sx0 - 9 + off, ny + 14, textW + 10, sy1);
+		block(graphics, lines, gives(Question.ROAD, a, false), sx0 - 9 + off, ny + 26, textW + 10, sy1);
 
 		// the strip: every start, the shown one marked, those not open dimmed
 		int stripY = stripY(), x0 = stripStart();
@@ -1083,6 +1112,10 @@ final class LifeStoryScreen extends Screen {
 				graphics.fill(cx + 1, stripY + STRIP_H - 6, cx + CELL_W - 1, stripY + STRIP_H - 4, ACCENT);
 			}
 			graphics.item(new ItemStack(roads.get(i).icon()), cx + (CELL_W - 16) / 2, stripY + 2);
+			if (roads.get(i).start() != null) {
+				// (0.7.412) a thin bar in the difficulty's colour along the cell's top
+				graphics.fill(cx + 1, stripY, cx + CELL_W - 1, stripY + 2, MARK_COLORS[LifeStory.terms(roads.get(i).start()).mark().ordinal()]);
+			}
 			if (!can) {
 				graphics.fill(cx + 1, stripY, cx + CELL_W - 1, stripY + STRIP_H - 4, 0xA0101018);
 			}

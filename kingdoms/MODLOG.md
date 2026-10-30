@@ -7280,3 +7280,39 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   up, takes a blow, lands one or blocks bare-armed (`Valor.coatSound`): Iron chain clank, Stone deepslate thud, Scale
   armadillo scute clack, Ash gravel and sand crumble, Haze amethyst chime and shimmer, Lacquer a ringing shell (heavy
   core, a faint high anvil ting; a shulker shell opening as it goes up). Valor villagers sound theirs as they coat up.
+
+## 0.7.412: Hard roads and a mark on every road
+- Andy's picks from the Kenshi and Streets of Rogue study (`docs/NewRoads-Plan.md`, patch 1): six new starts for the life
+  story's last question, all in the existing pattern (`LifeStory.Start`, a `ROAD` answer with a vanilla icon, a `begin`
+  case, kit lines, `.name`/`.tale`/`.short`/`.wake` lang, a `LifeStoryScreen.BACKDROPS` colour, a `StoryFigure` scene, talk
+  lines for the folk who meet you). The runtime for the ones that ask something of you after you wake is `StoryHard`.
+- **Still in Chains** (`CHAINED`): you wake shackled among a barbarian camp's captives (a camp is raised if the world has
+  none), two lockpicks in your sleeve and nothing else. The chain lets you shuffle `CHAIN_REACH` 2.5 blocks; the camp's
+  raiders leave a shackled player be (`Barbarians.prey`) and Resistance keeps harm off. Hold a lockpick and use it to run the
+  Pin lockpicking game on the shackle (`Lockpicking.pickVirtual`, the same game as a chest's, a lock of level 2), or sneak
+  perfectly still at night for `SLIP_TICKS` (5 s). Free, the camp hunts you for a day (`LifeStory.startHunt`, the escaped
+  captive's `HUNTS`). Wakes Z Fighter a day sooner like the captive. Drawn bare.
+- **Rock Bottom** (`ROCK_BOTTOM`, needs Powers): the Unarmed road at its worst. Wild landing 34-48 blocks from a barbarian
+  camp (in sight, past its raiders' eyes; one is raised if none stands), a random limb gone (`PowersCompat.bornWithout`),
+  food at 3 of 20 and no saturation, no kit at all (no bread). The only Cruel mark.
+- **Sentenced** (`SENTENCED`, names a realm): you wake in that realm's cells (`Speakeasy.cell`, the pit `Busts` throws players
+  in) with `SENTENCE_DAYS` 2 to serve, 4 emeralds, a little bread and a lockpick; the realm starts cold (at most -30). Three
+  ways out: `Busts` lets you out when the days are up; a lockpick used on the new iron door in the cell's east wall
+  (`Speakeasy.cellDoor`, level 3) breaks you out, which makes you a fugitive of the realm like any prisoner who escapes; or
+  emeralds held at the door pay the jailer's fine, 3 a day left, and you walk out clean. Respawn is set to the release spot.
+- **Evicted** (`EVICTED`, names a realm): the capital road with 6 emeralds and your class's gear but no bed. Between dusk and
+  dawn, in the realm's land and under a guard's eye (32 blocks), sleeping or standing about for 15 s earns a warning from the
+  guard and for 30 s a night in the cells (`StoryHard.imprison`, 10000 ticks, the same door and fine). It ends the moment you
+  hold a `Careers` job or a spawn bed you slept in lies in the realm's land. There is no inn system, so a bed is what counts.
+- **The Hideout** (`HIDEOUT`): you wake on the floor of the nearest built `Underworld` speakeasy, its realm hating you at
+  `BANISHED_REPUTATION` and the den already found; with no den dug, in a barbarian camp that spares outlaws (a plain camp or a
+  cove), the settlement nearest it hating you at the same, so `Barbarians.outlaw` holds and the camp's raiders let you be.
+  3 emeralds.
+- **Cast Out by Your Own** (`CAST_OUT`): Andy: "Only bio built can choose this" (`onlyFor`: Bio-built). You wake 40-64 blocks
+  outside a haven that would have taken you (the wild with none). For three days the non-human villagers and a haven's people
+  mind you as a Tideborn is minded (`StoryHard.castOutMinds`, in `Prejudice.minds`: dearer prices, fewer hearts, keener
+  guards), and a haven's good name is won slowly and lost fast (`Prejudice.reputation`). The empty map (Xaero waypoints) is not
+  done: it needs the client's Xaero mixins, not just the server.
+- **Difficulty and purse on every road**: `LifeStory.TERMS` gives every start a mark (Easy, Fair, Hard, Very Hard, Cruel; Fate
+  shows Varies) and a starting purse in emeralds, shown under the name on each carousel card and as a coloured bar on each
+  cell of the strip. The village is Easy; Rock Bottom is Cruel.
