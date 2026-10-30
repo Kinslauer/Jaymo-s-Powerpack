@@ -7138,3 +7138,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   one when a scroll is to hand. The off-hand book floats off the other shoulder (`Tomes.AFLOAT_OFF`), rises on a lock like the
   main one, and lands on its own timer; its charge bar is drawn in `=`/`-` so Powers' held-input lock leaves the main weapon free.
 - Compile-checked against 26.3; not seen in game.
+## 0.7.399: Blockbench models draw under Sodium (pack 0.18.63)
+- `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
+  constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
+  keeps exact rotations. See the Powers MODLOG 0.18.63.

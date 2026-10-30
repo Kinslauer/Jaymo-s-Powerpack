@@ -7,6 +7,7 @@ import base64, copy, io, json, sys
 from PIL import Image
 sys.path.insert(0, sys.argv[1])
 from display import display
+from bake import bake_cube, rot_y, apply, uv_rotation
 
 SRC, REPO, OUT = sys.argv[2], sys.argv[3], sys.argv[4]
 bb = json.load(open(SRC))
@@ -39,6 +40,28 @@ for el in bb["elements"]:
     elif any(rot):
         raise SystemExit(f"unexpected rotation {rot}")
     elements.append(el)
+
+# (0.17.19x) Andy: "sora's dagger is sideways in hand instead of straight on". The friend drew the blade's wide face to
+# the x axis (blade 1.2 thick in x, 6 wide in z); a vanilla sword sprite, and every handheld model's display() here, has
+# its wide face to z (sprite plane z 7.5-8.5, held with a yaw of 90 so that face turns toward the player's side and the
+# edge toward the camera). Turn the whole model a quarter about the vertical axis through the middle of the grip (put back
+# on x 8, z 8) so the blade lies in the same plane as a vanilla sword's: the display() transforms then hold it the way a
+# sword is held, and the inventory slot shows the wide face instead of an edge.
+SPIN = rot_y(90)
+PIVOT = (8.4, 0, 7)  # the middle of the grip's cubes (x 7.6-9.2, z 5-9, one of them to 10)
+_p = apply(SPIN, PIVOT)
+SHIFT = (8 - _p[0], 0, 8 - _p[2])
+turned = []
+for el in elements:
+    new, mapping, err = bake_cube(el["from"], el["to"], [], shift=SHIFT, spin=SPIN)
+    assert err < 1e-6 and "rotation" not in new, err
+    faces = {}
+    for name, (new_name, k) in mapping.items():
+        if name in el["faces"]:
+            faces[new_name] = {**el["faces"][name], **({"rotation": uv_rotation(k)} if k else {})}
+    new["faces"] = faces
+    turned.append(new)
+elements = turned
 
 GOLD = {(173, 143, 34): 0, (231, 192, 49): 1, (123, 99, 26): 2}
 EDGE = (177, 178, 179)
@@ -78,14 +101,8 @@ model_dir = f"{REPO}/src/main/resources/assets/jaymospowers/models/item"
 # straight out of the fist); the second model is <stage>_reverse, picked by the stack's first custom_model_data flag
 HOLD = dict(tp=0.45, fp=0.38, gui=0.5, center_y=16, grip_y=5.5)
 DISPLAY = display(tilt=40, **HOLD)
-# (0.17.186) the friend's own reverse grip (soras_dagger_reverse_original.bbmodel, same cubes, only its hand slots
-# turned) when it's beside the file: his held transforms, our slot/ground/frame
+# the reverse grip: our own transforms again (the friend's, which 0.17.186 used, were tuned for the unturned blade)
 REVERSE = display(tilt=-130, fp_tilt=-60, **HOLD)
-try:
-    HIS = json.load(open(f"{sys.argv[1]}/soras_dagger_reverse_original.bbmodel")).get("display", {})
-    REVERSE = {**REVERSE, **{k: v for k, v in HIS.items() if k.startswith(("thirdperson", "firstperson"))}}
-except FileNotFoundError:
-    pass
 GRIPS = {"": DISPLAY, "_reverse": REVERSE}
 def write_model(name, grip, shown):
     model = {
@@ -100,6 +117,8 @@ def write_model(name, grip, shown):
         for k in FACES:
             if k in el["faces"]:
                 faces[k] = {"uv": [r(v * 16 / 64) for v in el["faces"][k]["uv"]], "texture": "#0"}
+                if el["faces"][k].get("rotation"):
+                    faces[k]["rotation"] = el["faces"][k]["rotation"]
         model["elements"].append({"from": [r(v) for v in el["from"]], "to": [r(v) for v in el["to"]], "faces": faces})
     with open(f"{model_dir}/{name}{grip}.json", "w") as fh:
         json.dump(model, fh, indent="\t")

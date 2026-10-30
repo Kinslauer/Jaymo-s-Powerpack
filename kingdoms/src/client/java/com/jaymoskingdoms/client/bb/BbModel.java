@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +20,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
@@ -140,13 +143,38 @@ public final class BbModel {
 			for (int s = 0; s < n; s++) {
 				faces.add(sides[s]);
 			}
-			ModelPart.Cube cube = new ModelPart.Cube(0, 0, minX, minY, minZ, Math.max(maxX - minX, 0.001F), Math.max(maxY - minY, 0.001F),
-				Math.max(maxZ - minZ, 0.001F), 0.0F, 0.0F, 0.0F, false, 16.0F, 16.0F, faces);
+			ModelPart.Cube cube = new Baked(minX, minY, minZ, Math.max(maxX - minX, 0.001F), Math.max(maxY - minY, 0.001F),
+				Math.max(maxZ - minZ, 0.001F), faces);
 			int fill = Math.min(cube.polygons.length, n);
 			System.arraycopy(polygons, 0, cube.polygons, 0, fill);
 			out.add(cube);
 		}
 		return out;
+	}
+
+	/**
+	 * A cube that draws its own quads. Sodium swaps {@code ModelPart.Cube.compile} for a box it builds from the constructor's
+	 * numbers (a plain box with box UVs on a 16x16 texture), which drew our models as their bounding boxes in tiled noise;
+	 * overriding compile keeps vanilla's drawing of the polygons we put in.
+	 */
+	static final class Baked extends ModelPart.Cube {
+		Baked(float x, float y, float z, float w, float h, float d, EnumSet<Direction> faces) {
+			super(0, 0, x, y, z, w, h, d, 0.0F, 0.0F, 0.0F, false, 16.0F, 16.0F, faces);
+		}
+
+		@Override
+		public void compile(PoseStack.Pose pose, VertexConsumer buffer, int light, int overlay, int color) {
+			Matrix4f matrix = pose.pose();
+			Vector3f scratch = new Vector3f();
+			for (ModelPart.Polygon polygon : this.polygons) {
+				Vector3f normal = pose.transformNormal(polygon.normal(), scratch);
+				float nx = normal.x(), ny = normal.y(), nz = normal.z();
+				for (ModelPart.Vertex vertex : polygon.vertices()) {
+					Vector3f at = matrix.transformPosition(vertex.worldX(), vertex.worldY(), vertex.worldZ(), scratch);
+					buffer.addVertex(at.x(), at.y(), at.z(), color, vertex.u(), vertex.v(), overlay, light, nx, ny, nz);
+				}
+			}
+		}
 	}
 
 	private static float[] floats(JsonArray array) {

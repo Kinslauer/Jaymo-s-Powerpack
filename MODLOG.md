@@ -4148,3 +4148,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.18.61 (Kingdoms 0.7.395):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
   poor ruler in their hall into giving up the crown (a richer one pays you to go), when your Will beats their nerve; crew go
   over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.395.
+
+- **0.18.63, Blockbench models fixed in game (Kingdoms 0.7.399):** Andy: "the blockbench models are almost all broken".
+  - Baked entity and armour models (Piglin King, Scalebane, Clockwork Golem, Omens, Visage of War, every worn Blockbench
+    armour) drew as boxes in tiled noise: Sodium swaps `ModelPart.Cube.compile` for a box built from the cube's constructor
+    numbers, ignoring the quads we put in. `BbModel.Baked` (both mods) overrides compile and draws its own quads.
+  - Sora's Dagger was drawn with its blade's broad face across x, so the held yaw showed it square to the camera:
+    `sora.py` turns the geometry a quarter about the grip; the reverse grip uses our own display again.
+  - Iron rapier and iron dagger (and Tidebreaker's sheet): their blades are flat planes painted on one side, so the back
+    face (culled) showed nothing; `bake.show_both_sides` maps the empty face to the painted one.
+  - The Dreaded Blade (Andy: "it sits flat instead of vertical") had the same sideways blade as Sora's Dagger:
+    `dreaded_blade.py` turns it a quarter about the grip too, its 45-degree turns kept exact.
+  - Harpoon and rapier keep their exact rotations (26.3 allows any angle and x/y/z rotations) instead of 22.5° snaps.
+  - Compile-checked; not seen in game.
