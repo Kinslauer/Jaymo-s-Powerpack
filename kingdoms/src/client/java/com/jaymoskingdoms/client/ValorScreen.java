@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Valor;
-import com.jaymoskingdoms.ValorKings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.361) The Valor page, from Strength in the K screen: your Valor as a card. Its name, rank and the way to the next;
- * its origin and second quirk, its look and (once King's Valor shows it) its soul colour; five bars (Hardness, Edge, Reach,
- * Sight, Endurance); and the feats that grew it. Before it wakes: what it takes.
+ * its origin and its look; five bars (Hardness, Edge, Reach, Sight, Endurance); and the feats that grew it. Before it wakes:
+ * one line saying so.
  */
 final class ValorScreen extends Screen {
 	static final int PANEL_W = 340, PANEL_H = 230, BAR_W = 90;
@@ -66,14 +65,7 @@ final class ValorScreen extends Screen {
 		Ui.panel(graphics, x, y, w, PANEL_H, accent);
 		if (data == null) {
 			Ui.line(graphics, this.font, this.title, x + 9, y + 8, w - 18, ACCENT);
-			int ly = y + 26;
-			for (String k : new String[] {"asleep", "needs", "feats", "class"}) {
-				for (var line : this.font.split(Component.translatable("gui.jaymoskingdoms.valor." + k, 5), w - 18)) {
-					graphics.text(this.font, line, x + 9, ly, Ui.TEXT);
-					ly += Ui.LINE + 1;
-				}
-				ly += 4;
-			}
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.valor.asleep"), x + 9, y + 26, w - 18, Ui.TEXT);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
 		}
@@ -98,20 +90,7 @@ final class ValorScreen extends Screen {
 		List<Component> left = new ArrayList<>();
 		left.add(Component.translatable("gui.jaymoskingdoms.valor.origin", Component.translatable("valor.jaymoskingdoms.origin." + data.originKind().key()))
 			.withColor(accent));
-		left.add(Component.translatable("valor.jaymoskingdoms.origin." + data.originKind().key() + ".desc").withColor(Ui.DIM));
-		Valor.Bent bent = data.bentKind();
-		left.add(bent == null ? Component.translatable("gui.jaymoskingdoms.valor.bent.none").withColor(Ui.DIM)
-			: Component.translatable("gui.jaymoskingdoms.valor.bent", Component.translatable("valor.jaymoskingdoms.bent." + bent.key())).withColor(accent));
-		if (bent != null) {
-			left.add(Component.translatable("valor.jaymoskingdoms.bent." + bent.key() + ".desc").withColor(Ui.DIM));
-		}
 		left.add(Component.translatable("gui.jaymoskingdoms.valor.look", Component.translatable("valor.jaymoskingdoms.look." + data.lookKind().key())));
-		boolean kings = ValorKings.open(data);
-		left.add(kings ? Component.translatable("gui.jaymoskingdoms.valor.soul", Component.translatable("valor.jaymoskingdoms.soul." + Valor.SOUL_KEYS[data.soul()]))
-			.withColor(ARGB.opaque(data.soulColor())) : Component.translatable("gui.jaymoskingdoms.valor.soul.hidden").withColor(Ui.DIM));
-		left.add(Component.translatable(kings ? ValorKings.coatOpen(data) ? "gui.jaymoskingdoms.valor.kings.coat" : "gui.jaymoskingdoms.valor.kings.open"
-			: rank >= Valor.TEMPERED ? "gui.jaymoskingdoms.valor.kings.ready" : "gui.jaymoskingdoms.valor.kings.closed", data.greatFoes(), ValorKings.COAT_FOES)
-			.withColor(kings ? Ui.GOLD : Ui.DIM));
 		for (Component c : left) {
 			for (var line : this.font.split(c, lw)) {
 				graphics.text(this.font, line, lx, ly, c.getStyle().getColor() == null ? Ui.TEXT : ARGB.opaque(c.getStyle().getColor().getValue()));
@@ -137,7 +116,7 @@ final class ValorScreen extends Screen {
 		}
 		// the feats that grew it
 		ry += 4;
-		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.valor.feats"), rx, ry, w / 2 - 14, accent);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.valor.feats.title"), rx, ry, w / 2 - 14, accent);
 		ry += Ui.LINE + 2;
 		List<Map.Entry<Valor.Feat, Integer>> feats = new ArrayList<>(data.featCounts().entrySet());
 		feats.sort((p, q) -> Integer.compare(q.getValue(), p.getValue()));

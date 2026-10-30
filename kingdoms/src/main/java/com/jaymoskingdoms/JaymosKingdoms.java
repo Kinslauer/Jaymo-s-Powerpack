@@ -251,6 +251,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
 		LifeStory.register();
+		// 0.7.381: the village start's village takes you in, whatever your blood (and its attachments)
+		LOGGER.debug("story home attachments: {} {}", StoryHomes.HOME, StoryHomes.PENDING);
+		StoryHomes.register();
 		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
