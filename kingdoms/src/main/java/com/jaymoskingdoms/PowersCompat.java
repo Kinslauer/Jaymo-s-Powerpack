@@ -670,10 +670,35 @@ public final class PowersCompat {
 	/** Eases {@code entity}'s fever (festering cured, its weakness, the dirt in its cuts); false without Powers. */
 	public static boolean easeFever(net.minecraft.world.entity.LivingEntity entity) {
 		mending();
-		// (0.7.415) a healer's hands lift the moon's curse too
-		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && MoonCurse.cure(player);
 		try {
-			return easeFever != null && (boolean)easeFever.invoke(entity) || cured;
+			return easeFever != null && (boolean)easeFever.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle washOut;
+	private static boolean lookedForWashOut;
+
+	/**
+	 * (0.7.415) A deliberate cure (a cast spell, a healer's work; never a passive aura such as Renewal's pulse or a cleric's rounds):
+	 * the moon's curse lets go, and so does the alchemist's mark (Powers 0.18.83). True if either was lifted.
+	 */
+	public static boolean cureCurses(net.minecraft.world.entity.LivingEntity entity) {
+		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && MoonCurse.cure(player);
+		if (!lookedForWashOut) {
+			lookedForWashOut = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					washOut = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mending"), "washOut",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mending.washOut (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return washOut != null && (boolean)washOut.invoke(entity) || cured;
 		} catch (Throwable e) {
 			return cured;
 		}

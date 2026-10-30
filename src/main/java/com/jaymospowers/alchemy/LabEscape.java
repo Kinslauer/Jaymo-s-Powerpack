@@ -3,13 +3,17 @@ package com.jaymospowers.alchemy;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.WildRoom;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -59,7 +63,10 @@ public final class LabEscape {
 	/** The golems: how many, how long they sleep after you wake (ticks), how long they hunt (ticks), how far a tick looks for them (blocks). */
 	static final int GOLEMS = 2, WAKE_DELAY = 140;
 	static final long HUNT_TICKS = 12000L;
-	static final double HUNT_RANGE = 80.0;
+	/** The hunting golems' follow range (blocks): they chase as far as that. */
+	static final double FOLLOW_RANGE = 64.0;
+	/** The golems are looked after this often (ticks), whoever is near. */
+	static final int GOLEM_EVERY = 40;
 	/** The marks work this often (ticks), and the effects they refresh last this long (ticks). */
 	static final int EVERY = 20, PULSE = 70;
 	/** The night-eyed: the sun weakens them (amplifier). The ox-strong: the hunger they burn each pulse. */
@@ -71,6 +78,8 @@ public final class LabEscape {
 	static final float SCALD = 1.0F;
 
 	static final String GOLEM_TAG = "jaymospowers_lab_golem";
+	/** On each golem: the game time it wakes and the game time it is gone (the hunt's end), so it needs no player near to do either. */
+	static final String WAKE_TAG = "jaymospowers_lab_wake_", END_TAG = "jaymospowers_lab_end_";
 	private static final Identifier GOLEM_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "clockwork_golem");
 	private static final Identifier FRAGILE_ID = JaymosPowers.id("lab_mark_fragile");
 
@@ -88,9 +97,16 @@ public final class LabEscape {
 	/** On an escapee: their mark's number plus one. Saved, kept through death; gone when cured. */
 	public static final AttachmentType<Integer> MARK = AttachmentRegistry.create(JaymosPowers.id("lab_mark"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
-	/** On an escapee: the game time the golems give up the hunt. Saved, kept through death. */
-	public static final AttachmentType<Long> HUNT = AttachmentRegistry.create(JaymosPowers.id("lab_hunt"),
-		builder -> builder.persistent(Codec.LONG).copyOnDeath());
+	/** An escapee's hunt: the game time the golems give up, and which golems they are. */
+	public record Hunt(long until, List<UUID> golems) {
+		public static final Codec<Hunt> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.LONG.fieldOf("until").forGetter(Hunt::until),
+			UUIDUtil.CODEC.listOf().fieldOf("golems").forGetter(Hunt::golems)).apply(i, Hunt::new));
+	}
+
+	/** On an escapee: their hunt. Saved, kept through death; gone when it ends. */
+	public static final AttachmentType<Hunt> HUNT = AttachmentRegistry.create(JaymosPowers.id("lab_hunt"),
+		builder -> builder.persistent(Hunt.CODEC).copyOnDeath());
 
 	private LabEscape() {
 	}
@@ -127,8 +143,7 @@ public final class LabEscape {
 			player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
 			Mark mark = Mark.values()[random.nextInt(Mark.values().length)];
 			player.setAttached(MARK, mark.ordinal() + 1);
-			player.setAttached(HUNT, level.getGameTime() + HUNT_TICKS);
-			spawnGolems(level, origin);
+			player.setAttached(HUNT, new Hunt(level.getGameTime() + HUNT_TICKS, spawnGolems(level, origin)));
 			player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, true, false, false));
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.lab_escape.wake").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.lab_mark." + mark.key).withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
@@ -184,9 +199,11 @@ public final class LabEscape {
 		level.playSound(null, o.getX() + 5, o.getY(), o.getZ() + 4, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.6F);
 	}
 
-	/** The alchemist's golems, asleep (no AI) in the north corners: {@link #tick} wakes them. */
-	private static void spawnGolems(ServerLevel level, BlockPos o) {
+	/** The alchemist's golems, asleep (no AI) in the north corners: {@link #golems} wakes them on their own timer. Their ids. */
+	private static List<UUID> spawnGolems(ServerLevel level, BlockPos o) {
 		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(GOLEM_ID).orElse(EntityTypes.IRON_GOLEM);
+		long now = level.getServer().overworld().getGameTime();
+		List<UUID> ids = new ArrayList<>();
 		for (int i = 0; i < GOLEMS; i++) {
 			Entity entity = type.create(level, EntitySpawnReason.EVENT);
 			if (!(entity instanceof Mob golem)) {
@@ -194,16 +211,24 @@ public final class LabEscape {
 			}
 			golem.snapTo(o.getX() + (i == 0 ? 2.5 : 8.5), o.getY(), o.getZ() + 6.5, 180.0F, 0.0F);
 			golem.addTag(GOLEM_TAG);
+			golem.addTag(WAKE_TAG + (now + WAKE_DELAY));
+			golem.addTag(END_TAG + (now + HUNT_TICKS));
 			golem.setPersistenceRequired();
 			golem.setNoAi(true);
 			level.addFreshEntity(golem);
+			ids.add(golem.getUUID());
 		}
+		return ids;
 	}
 
 	// ---------------------------------------------------------------- the hunt and the marks
 
 	private static void tick(MinecraftServer server) {
-		if (server.overworld().getGameTime() % EVERY != 0) {
+		long now = server.overworld().getGameTime();
+		if (now % GOLEM_EVERY == 0) {
+			golems(server, now);
+		}
+		if (now % EVERY != 0) {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -214,32 +239,62 @@ public final class LabEscape {
 			if (mark != null) {
 				pulse(player, mark);
 			}
-			Long until = player.getAttached(HUNT);
-			if (until != null) {
-				hunt(player, until);
+			Hunt hunt = player.getAttached(HUNT);
+			if (hunt != null) {
+				hunt(player, hunt, now);
 			}
 		}
 	}
 
-	private static void hunt(ServerPlayer player, long until) {
-		ServerLevel level = player.level();
-		long now = level.getGameTime();
-		boolean over = now >= until;
-		boolean awake = now >= until - HUNT_TICKS + WAKE_DELAY;
-		List<Mob> golems = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNT_RANGE), e -> e.entityTags().contains(GOLEM_TAG));
-		for (Mob golem : golems) {
-			if (over) {
-				golem.removeTag(GOLEM_TAG);
-				golem.setTarget(null);
-			} else if (awake) {
-				golem.setNoAi(false);
-				if (golem.getTarget() != player) {
-					golem.setTarget(player);
+	/**
+	 * Every loaded lab golem, whoever is near (or online): on its wake time it gets up, with a long follow range; at the hunt's
+	 * end it is removed, never left asleep or standing about for good. (One in an unloaded chunk is dealt with when it loads.)
+	 */
+	private static void golems(MinecraftServer server, long now) {
+		for (ServerLevel level : server.getAllLevels()) {
+			for (Entity entity : level.getAllEntities()) {
+				if (!(entity instanceof Mob golem) || !entity.entityTags().contains(GOLEM_TAG)) {
+					continue;
+				}
+				long end = tagTime(golem, END_TAG);
+				if (end < 0L || now >= end) {
+					golem.discard();
+					continue;
+				}
+				if (golem.isNoAi() && now >= tagTime(golem, WAKE_TAG)) {
+					golem.setNoAi(false);
+					AttributeInstance follow = golem.getAttribute(Attributes.FOLLOW_RANGE);
+					if (follow != null) {
+						follow.setBaseValue(FOLLOW_RANGE);
+					}
 				}
 			}
 		}
-		if (over) {
+	}
+
+	private static long tagTime(Entity entity, String prefix) {
+		for (String tag : entity.entityTags()) {
+			if (tag.startsWith(prefix)) {
+				try {
+					return Long.parseLong(tag.substring(prefix.length()));
+				} catch (NumberFormatException e) {
+					return -1L;
+				}
+			}
+		}
+		return -1L;
+	}
+
+	/** An awake golem of this hunt in the player's world is set on them; at the end the hunt is forgotten (the golems go on their own). */
+	private static void hunt(ServerPlayer player, Hunt hunt, long now) {
+		if (now >= hunt.until()) {
 			player.removeAttached(HUNT);
+			return;
+		}
+		for (UUID id : hunt.golems()) {
+			if (player.level().getEntity(id) instanceof Mob golem && !golem.isNoAi() && golem.getTarget() != player) {
+				golem.setTarget(player);
+			}
 		}
 	}
 

@@ -44,8 +44,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #REACH} blocks (a friend, a villager, a horse) and strike it, full swing, with a lunge. It is not the werewolf's
  * curse ({@link Lycans}): no beast shape, nothing at the full moon.
  * <p>
- * Cures: healing magic of any sort (everything Restoration, clerics and healers cast goes through
- * {@link PowersCompat#easeFever}, which calls {@link #cure}), or drinking a Potion of Cleansing (Jaymo's Powers' effect
+ * Cures: a deliberate healing (the Mend and Mending spells, Restoration, a healer's work: {@link PowersCompat#cureCurses}
+ * and {@link PowersCompat#restore}; never the passive Renewal aura or a cleric's rounds), or drinking a Potion of Cleansing (Jaymo's Powers' effect
  * {@code jaymospowers:cleansing}). Operators: {@code /kingdom mooncurse <curse|cure>} on yourself.
  */
 public final class MoonCurse {
@@ -125,10 +125,18 @@ public final class MoonCurse {
 		player.removeAttached(CURSED);
 		WAS_FERAL.remove(player.getUUID());
 		NEXT_LUNGE.remove(player.getUUID());
-		player.removeEffect(MobEffects.STRENGTH);
-		player.removeEffect(MobEffects.SPEED);
+		removeOurs(player, MobEffects.STRENGTH, STRENGTH);
+		removeOurs(player, MobEffects.SPEED, SPEED);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.moon_curse.cured").withStyle(ChatFormatting.GOLD));
 		return true;
+	}
+
+	/** Takes off only what the curse put on: a hidden, ambient effect of its amplifier and no longer than one refresh. */
+	private static void removeOurs(ServerPlayer player, Holder<MobEffect> effect, int amplifier) {
+		MobEffectInstance instance = player.getEffect(effect);
+		if (instance != null && instance.isAmbient() && !instance.isVisible() && instance.getAmplifier() == amplifier && instance.getDuration() <= BUFF_TICKS) {
+			player.removeEffect(effect);
+		}
 	}
 
 	// ---- the tick ------------------------------------------------------------------------------------------------------
@@ -168,6 +176,9 @@ public final class MoonCurse {
 
 	/** They turn on the nearest living thing in reach and strike it; the swing is the screen's own. */
 	private static void lunge(ServerPlayer player) {
+		if (player.isSleeping()) {
+			return;
+		}
 		LivingEntity prey = nearest(player);
 		if (prey == null) {
 			return;
@@ -184,7 +195,8 @@ public final class MoonCurse {
 	private static @Nullable LivingEntity nearest(ServerPlayer player) {
 		List<LivingEntity> near = player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isInvulnerable() && player.canAttack(e)
-				&& e.distanceToSqr(player) <= REACH * REACH);
+				&& e != player.getVehicle() && !player.hasIndirectPassenger(e) && !e.isPassengerOfSameVehicle(player)
+				&& e.distanceToSqr(player) <= REACH * REACH && player.hasLineOfSight(e));
 		LivingEntity best = null;
 		double bestDistance = Double.MAX_VALUE;
 		for (LivingEntity e : near) {

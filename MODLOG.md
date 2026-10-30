@@ -4242,8 +4242,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     in the wild) is raised 60-160 blocks from the player: shelves, a lectern, cauldrons, a brewing stand, a crucible, a chest with
     honeycomb in it. You wake in it with one of five infusions, each a gift and a price kept for good (`LabEscape.MARK`):
     night eyes / sun-sick, ox-strength / hollow belly, quicksilver / glass bones, iron skin / leaden limbs, heartfire / water-shy.
-    A Potion of Cleansing (`Cleansing`) or any healing magic (`Mending.easeFever`) washes the mark out. Two clockwork golems
-    (Kingdoms' own; iron golems without it) stir 7 s after you wake and hunt you for 10 minutes (`LabEscape.HUNT`). Messages
+    A Potion of Cleansing (`Cleansing`) or a deliberate healing (`Mending.washOut`, `Mending.restore`; not passive auras) washes
+    the mark out. Two clockwork golems (Kingdoms' own; iron golems without it) wake 7 s after you wake, on their own timer
+    whoever is near, with a 64-block follow range, and hunt you for 10 minutes (`LabEscape.HUNT` keeps their ids); at the end
+    they are removed. The lab site is checked column by column (natural ground only, no water, logs, buildings or structures,
+    inside the border). Messages
     stay vague. Gated on the Kingdoms side to Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan.
   - *Fresh off the bench* (`zfighter/ZFighterAndroidStart.start`): a copper-and-andesite workshop in the wild with the Mad Tinkerer
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
