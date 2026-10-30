@@ -309,7 +309,7 @@ public final class Roads {
 	// ---- planning ----------------------------------------------------------------------------------------------------
 
 	/** The settlements roads join: kingdoms, fiefdoms and villages still standing. */
-	private static List<Faction> towns(MinecraftServer server) {
+	static List<Faction> towns(MinecraftServer server) {
 		return Factions.all(server).stream().filter(f -> !f.fallen() && f.type() != FactionType.BARBARIAN).toList();
 	}
 
@@ -900,6 +900,80 @@ public final class Roads {
 			level.sendBlockUpdated(at, state, state, Block.UPDATE_ALL);
 		}
 		return at;
+	}
+
+	// ---- (0.7.414) a milestone to wake beside (the Wandering Trader's road) ---------------------------------------------------
+
+	/** A set-up milestone's sign, and the town its road runs on to (the next capital). */
+	record Stone(BlockPos sign, int next) {
+	}
+
+	/** The set-up milestone nearest {@code from} whose sign still stands (null: none yet). */
+	static @Nullable Stone stoneNear(ServerLevel level, BlockPos from) {
+		MinecraftServer server = level.getServer();
+		Stone best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Road road : network(server).roads()) {
+			for (int end = 0; end < 2; end++) {
+				long packed = end == 0 ? road.stoneA() : road.stoneB();
+				if (packed == NONE) {
+					continue;
+				}
+				BlockPos sign = BlockPos.of(packed);
+				double d = sign.distSqr(from);
+				if (d >= bestD) {
+					continue;
+				}
+				level.getChunk(sign.getX() >> 4, sign.getZ() >> 4);
+				if (level.getBlockState(sign).getBlock() instanceof StandingSignBlock) {
+					best = new Stone(sign, end == 0 ? road.b() : road.a());
+					bestD = d;
+				}
+			}
+		}
+		return best;
+	}
+
+	/** Starts planning the next missing road now, if none is being planned. */
+	static void hurry(MinecraftServer server) {
+		if (planning == null) {
+			plan(server, Factions.level(server), false);
+		}
+	}
+
+	/**
+	 * Loads the chunks where the roads nearest {@code from} still lack a milestone (so paving them sets it up). The first
+	 * position opened, or null if every road has its stones.
+	 */
+	static @Nullable BlockPos openEnds(ServerLevel level, BlockPos from) {
+		MinecraftServer server = level.getServer();
+		List<BlockPos> seats = towns(server).stream().map(Faction::seat).toList();
+		List<Road> bare = new ArrayList<>(network(server).roads().stream().filter(r -> r.stoneA() == NONE || r.stoneB() == NONE).toList());
+		bare.sort(java.util.Comparator.comparingDouble(r -> BlockPos.of(r.points().getFirst()).distSqr(from)));
+		BlockPos first = null;
+		for (Road road : bare.subList(0, Math.min(2, bare.size()))) {
+			List<Long> pts = road.points();
+			int a = -1, b = -1;
+			for (int i = 0; i < pts.size(); i++) {
+				long p = pts.get(i);
+				if (nearest(seats, BlockPos.getX(p), BlockPos.getZ(p)) >= TOWN_CLEAR + 4) {
+					if (a < 0) {
+						a = i;
+					}
+					b = i;
+				}
+			}
+			if (a < 0 || b <= a) {
+				continue;
+			}
+			for (BlockPos at : new BlockPos[] {road.stoneA() == NONE ? beside(pts, a, HALF + 2) : null, road.stoneB() == NONE ? beside(pts, b, -(HALF + 2)) : null}) {
+				if (at != null) {
+					level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+					first = first == null ? at : first;
+				}
+			}
+		}
+		return first;
 	}
 
 	// ---- following -----------------------------------------------------------------------------------------------------

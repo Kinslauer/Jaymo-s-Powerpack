@@ -131,6 +131,10 @@ public final class LifeStory {
 	static final int CAST_OUT_MIN = 40, CAST_OUT_MAX = 64;
 	/** (0.7.412) The purses (emeralds) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
 	static final int SENTENCED_EMERALDS = 4, EVICTED_EMERALDS = 6, HIDEOUT_EMERALDS = 3;
+	/** (0.7.414) The kit roads: a trader's pocket money (emeralds), a pup's bones and a sworn recruit's manacles. */
+	static final int TRADER_EMERALDS = 6, PUP_BONES = 4;
+	/** (0.7.414) A trader wakes this far from the milestone's post (blocks). */
+	static final int TRADER_NEAR_MIN = 2, TRADER_NEAR_MAX = 5;
 	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
 	static final int WHALER_HARPOONS = 8;
 	/** (0.7.349) The starts on Jaymo's Powers' other worlds: the Pale Moon, the Verdant World, Rustfall, the Maw, the Nether's demon biomes, the afterlife. */
@@ -149,6 +153,8 @@ public final class LifeStory {
 		// (0.7.412, Andy's picks from the Kenshi and Streets of Rogue study) the hard roads: chained among a camp's captives, starving and
 		// maimed beside an outlaw camp, in a realm's cells, put out of a realm's streets, in an outlaw hideout, turned away by your own kind
 		CHAINED(false), ROCK_BOTTOM(false), SENTENCED(true), EVICTED(true), HIDEOUT(false), CAST_OUT(false),
+		// (0.7.414, the kit roads) a family blade someone wants back, a pack mule on a King's Road, a pup at heel, three poor hired hands
+		HEIRLOOM(false), TRADER(false), PUP(false), NOBODIES(false),
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
 		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false);
 
@@ -206,6 +212,11 @@ public final class LifeStory {
 		TERMS.put(Start.CHAINED, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.CAST_OUT, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
+		// (0.7.414) the kit roads
+		TERMS.put(Start.HEIRLOOM, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.TRADER, new Terms(Mark.FAIR, TRADER_EMERALDS));
+		TERMS.put(Start.PUP, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.NOBODIES, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.FATE, new Terms(Mark.VARIES, 0));
 	}
 
@@ -253,6 +264,10 @@ public final class LifeStory {
 		 * are always offered (and {@code Set.of} throws on {@code contains(null)}: every life-story page crashed).
 		 */
 		public boolean offered() {
+			// (0.7.414) the Nobodies are MCA's villagers, hired: they need MCA
+			if (this.start == Start.NOBODIES) {
+				return McaCompat.LOADED;
+			}
 			return this.start == null || this.start != Start.UNARMED && this.start != Start.TIMELOST && this.start != Start.ROCK_BOTTOM
 				&& !OTHER_WORLDS.contains(this.start) || powers();
 		}
@@ -380,6 +395,10 @@ public final class LifeStory {
 				Answer.road(Start.EVICTED, Items.OAK_DOOR),
 				Answer.road(Start.HIDEOUT, Items.BARREL),
 				Answer.road(Start.CAST_OUT, Items.SLIME_BALL),
+				Answer.road(Start.HEIRLOOM, Items.IRON_SWORD),
+				Answer.road(Start.TRADER, Items.CHEST),
+				Answer.road(Start.PUP, Items.BONE),
+				Answer.road(Start.NOBODIES, Items.WOODEN_SWORD),
 				Answer.road(Start.MOON, Items.END_STONE),
 				Answer.road(Start.VERDANT, Items.VINE),
 				Answer.road(Start.RUSTFALL, Items.RAW_IRON),
@@ -891,6 +910,9 @@ public final class LifeStory {
 		} else if (road0 == Start.WHALERS) {
 			// (0.7.235) always made ready first, even with a berth in port: her sea must be ticking for her to float
 			StoryGround.harbour(player, () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
+		} else if (road0 == Start.TRADER) {
+			// (0.7.414) a milestone to wake beside: a capital, a second town and the road between them are raised if the world has none
+			StoryGround.milestone(player, () -> go.accept(Start.TRADER), () -> go.accept(Start.WILD));
 		} else {
 			go.accept(road0);
 		}
@@ -1160,6 +1182,20 @@ public final class LifeStory {
 					if (hates != null) {
 						// (an outlaw to the settlement nearest the camp, and the camp spares them: Barbarians.outlaw)
 						atMost(player, hates, BANISHED_REPUTATION);
+					}
+				}
+			}
+			case HEIRLOOM, PUP, NOBODIES -> {
+				// (0.7.414) the kit roads that set out from the wild: a family blade, a pup, three hired hands
+				to = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+			}
+			case TRADER -> {
+				// (0.7.414) beside a King's Road milestone (StoryGround made the road if the world had none), by the stone's own road
+				Roads.Stone stone = StoryGround.stone(player);
+				if (stone != null) {
+					to = ground(level, stone.sign(), TRADER_NEAR_MIN, TRADER_NEAR_MAX, random);
+					if (to != null) {
+						StoryKit.trade(player, stone.next());
 					}
 				}
 			}
@@ -1455,6 +1491,28 @@ public final class LifeStory {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
 				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
+		if (landed == Start.HEIRLOOM) {
+			// (0.7.414) a fine blade named for your family, no armour, bread only: and someone will want it back
+			StoryKit.heirloom(player);
+		}
+		if (landed == Start.TRADER) {
+			// (0.7.414) a pack mule and its goods (StoryKit), and a little money
+			give(player, new ItemStack(Items.EMERALD, TRADER_EMERALDS));
+			StoryKit.pack(player);
+		}
+		if (landed == Start.PUP) {
+			// (0.7.414) a pup at heel, and bones to feed it
+			give(player, new ItemStack(Items.BONE, PUP_BONES));
+			StoryKit.pup(player);
+		}
+		if (landed == Start.NOBODIES) {
+			// (0.7.414) three poor hands, hired to you from the first minute
+			StoryKit.nobodies(player);
+		}
+		if (start == Start.SWORN) {
+			// (0.7.414) a watch recruit's manacles, for walking a downed outlaw to the cells
+			give(player, new ItemStack(Manacles.ITEM, Manacles.RECRUIT_PAIRS));
+		}
 		if (raised.key.equals("merchants")) {
 			give(player, new ItemStack(Items.EMERALD, MERCHANT_EMERALDS));
 		}
@@ -1589,7 +1647,7 @@ public final class LifeStory {
 
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
-		Start.HIDEOUT, Start.CAST_OUT);
+		Start.HIDEOUT, Start.CAST_OUT, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES);
 
 	/** (0.7.223) An escaped captive's camp, out to get them back until {@code until} (server tick). */
 	private record Hunt(int camp, long until) {
@@ -1656,6 +1714,7 @@ public final class LifeStory {
 					p.removeAttached(STRANDED);
 					StoryHomes.clear(p);
 					StoryHard.clear(p);
+					StoryKit.clear(p);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);

@@ -222,6 +222,46 @@ final class McaBridge {
 		return true;
 	}
 
+	/**
+	 * (0.7.414) {@link McaCompat#hireNobodies}: {@code n} poor villagers made MCA's hired mercenaries of {@code player}'s, standing
+	 * near {@code around}: following from the first minute, in {@code outfits} (ours, locked on), thin and weakly armed, hired for
+	 * {@code contract} ticks and liked enough to be kept when it ends. The number made.
+	 */
+	static int hireNobodies(ServerLevel level, ServerPlayer player, BlockPos around, int n, List<String> outfits, double health, double damage, int contract) {
+		int made = 0;
+		for (int i = 0; i < n; i++) {
+			double angle = (i + level.getRandom().nextDouble() * 0.5) * (Math.PI * 2.0 / n);
+			BlockPos at = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+				around.offset((int)Math.round(Math.cos(angle) * 2.5), 0, (int)Math.round(Math.sin(angle) * 2.5)));
+			if (!(visitor(level, Vec3.atBottomCenterOf(at), null, false) instanceof VillagerEntityMCA v)) {
+				continue;
+			}
+			v.makeMercenary();
+			net.minecraft.world.entity.ai.attributes.AttributeInstance life = v.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH),
+				hit = v.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+			if (life != null) {
+				life.setBaseValue(health);
+				v.setHealth((float)health);
+			}
+			if (hit != null) {
+				hit.setBaseValue(damage);
+			}
+			// (making them a mercenary dresses them again: put our poor clothes on after, and keep them on)
+			if (!outfits.isEmpty()) {
+				v.setClothes(outfits.get(level.getRandom().nextInt(outfits.size())));
+				v.setClothingLocked(true);
+			}
+			v.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WOODEN_SWORD));
+			v.setDespawnDelay(contract);
+			v.setPersistenceRequired();
+			// (at the contract's end MCA keeps a mercenary only if nextInt(requirement) < hearts)
+			v.getVillagerBrain().getMemoriesForPlayer(player).setHearts(Math.max(Strangers.TRUSTED_HEARTS, Config.getInstance().marriageHeartsRequirement));
+			v.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+			made++;
+		}
+		return made;
+	}
+
 	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();

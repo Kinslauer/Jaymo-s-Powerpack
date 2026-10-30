@@ -271,6 +271,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.412: the hard roads (still in chains, sentenced, evicted, cast out) and their attachments
 		LOGGER.debug("story hard attachments: {} {} {}", StoryHard.SHACKLE, StoryHard.EVICTED, StoryHard.CAST_OUT);
 		StoryHard.register();
+		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
+		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
+		StoryKit.register();
+		Manacles.register();
 		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();

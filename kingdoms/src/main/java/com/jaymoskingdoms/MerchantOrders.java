@@ -408,6 +408,16 @@ final class MerchantOrders {
 		level.playSound(null, at, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.1F);
 	}
 
+	/**
+	 * (0.7.414) An order already taken and paid for: {@code goods} from the merchants of {@code town}, ready {@code wait}
+	 * ticks from now, sent out to {@code buyer} like any order (a townsman from the town's seat, or the post). The Wandering
+	 * Trader road's two. It counts against no day's buying and earns no standing, and cancelling it refunds {@code paid}.
+	 */
+	static void taken(ServerLevel level, ServerPlayer buyer, Faction town, ItemStack goods, int paid, long wait) {
+		put(level.getServer(), new Order(UUID.randomUUID().toString(), buyer.getUUID(), goods, paid, town.name(), town.name(), town.id(),
+			town.seat(), level.getGameTime() + wait, "", 0));
+	}
+
 	// ---- off-world wants (0.7.385) ---------------------------------------------------------------------------------------
 
 	/** How many of {@code good} the merchants ask for today (the same for everyone). */

@@ -94,6 +94,11 @@ public final class StoryGround {
 	static final int WAIT_RESISTANCE = TRY_EVERY * 3;
 	/** (0.7.235) A whaler's story: the sea kept ticking round her mooring, the misses before a realm is passed over, and how long it all may take. */
 	static final int WHALER_REACH = 32, WHALER_MISSES = 15, WHALER_GIVE_UP_TICKS = 3600;
+	/**
+	 * (0.7.414) A trader's road: how long a milestone is waited for (ticks: a road is planned off the server thread, then paved as
+	 * its ends load), and how far from the first town a second one is raised when the world has only one (blocks).
+	 */
+	static final int ROAD_GIVE_UP_TICKS = 4800, SECOND_TOWN_MIN = 220, SECOND_TOWN_MAX = 320;
 
 	/** Something being made: tried each {@link #TRY_EVERY} ticks till {@code attempt} says it's done, or its time is up. */
 	private static final class Job {
@@ -117,6 +122,9 @@ public final class StoryGround {
 	/** The capital being raised (one for everyone), and each player's harbour being built. */
 	private static @Nullable Job capital;
 	private static final Map<UUID, Job> HARBOURS = new HashMap<>();
+	/** (0.7.414) Each trader's milestone being waited for, and the milestone found for each (taken by {@link #stone}). */
+	private static final Map<UUID, Job> ROADWAYS = new HashMap<>();
+	private static final Map<UUID, Roads.Stone> STONES = new HashMap<>();
 	/** Each player's realm whose whaler was made ready, while they sign on. */
 	private static final Map<UUID, Integer> WHALER_REALMS = new HashMap<>();
 	/** (0.7.236) Player → server tick their arrival's loading screen comes down; and the hold last sent to each. */
@@ -150,6 +158,8 @@ public final class StoryGround {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			capital = null;
 			HARBOURS.clear();
+			ROADWAYS.clear();
+			STONES.clear();
 			WHALER_REALMS.clear();
 			SETTLING.clear();
 			SENT.clear();
@@ -452,6 +462,66 @@ public final class StoryGround {
 		HARBOURS.put(player.getUUID(), job);
 	}
 
+	// ---- roads (0.7.414) ---------------------------------------------------------------------------------------------
+
+	/**
+	 * (0.7.414) A King's Road milestone for {@code player} to wake beside, then {@code then} ({@link #stone} gives it); on giving
+	 * up, {@code fallback}. A capital is raised if there is no realm; a second town (a citadel a few hundred blocks off) if only
+	 * one; the road between them is planned and its ends loaded so the milestones are set up ({@link Roads#hurry},
+	 * {@link Roads#openEnds}).
+	 */
+	static void milestone(ServerPlayer player, Runnable then, Runnable fallback) {
+		MinecraftServer server = player.level().getServer();
+		if (realmless(server)) {
+			capital(server, player, () -> milestone(player, then, fallback));
+			return;
+		}
+		ServerLevel level = Factions.level(server);
+		UUID id = player.getUUID();
+		BlockPos spawn = level.getRespawnData().pos();
+		boolean[] raised = {false};
+		Job job = new Job(spawn, level.getGameTime() + ROAD_GIVE_UP_TICKS, l -> {
+			Roads.Stone stone = Roads.stoneNear(l, spawn);
+			if (stone != null) {
+				STONES.put(id, stone);
+				return true;
+			}
+			if (Roads.towns(l.getServer()).size() < 2) {
+				if (!raised[0]) {
+					raised[0] = true;
+					secondTown(l, spawn);
+				}
+				return false;
+			}
+			Roads.hurry(l.getServer());
+			BlockPos opened = Roads.openEnds(l, spawn);
+			Job mine = ROADWAYS.get(id);
+			if (opened != null && mine != null) {
+				mine.at = opened;
+			}
+			return false;
+		}, l -> fallback.run());
+		job.waiting.add(id);
+		job.then.add(then);
+		ROADWAYS.put(id, job);
+	}
+
+	/** A second kingdom's citadel a few hundred blocks from the first town's seat (so a road can join them). */
+	private static void secondTown(ServerLevel level, BlockPos spawn) {
+		List<Faction> towns = Roads.towns(level.getServer());
+		BlockPos from = towns.isEmpty() ? spawn : towns.getFirst().seat();
+		BlockPos ground = LifeStory.ground(level, from, SECOND_TOWN_MIN, SECOND_TOWN_MAX, level.getRandom());
+		if (ground != null) {
+			JaymosKingdoms.LOGGER.info("No second town for a trader's road: raising one at {}", ground);
+			KingdomEvents.found(level, ground, Castle.Kind.CITADEL);
+		}
+	}
+
+	/** The milestone made ready for {@code player}'s story (taken: null if there is none). */
+	static Roads.@Nullable Stone stone(ServerPlayer player) {
+		return STONES.remove(player.getUUID());
+	}
+
 	/** The realm whose whaler was made ready for {@code player}'s story, while they're signed on (-1: none). */
 	static int whalerRealm(ServerPlayer player) {
 		return WHALER_REALMS.getOrDefault(player.getUUID(), -1);
@@ -636,7 +706,7 @@ public final class StoryGround {
 	/** (0.7.304) Whether {@code player} waits on a capital or a harbour being made for their start. */
 	static boolean waiting(ServerPlayer player) {
 		UUID id = player.getUUID();
-		return capital != null && capital.waiting.contains(id) || HARBOURS.containsKey(id);
+		return capital != null && capital.waiting.contains(id) || HARBOURS.containsKey(id) || ROADWAYS.containsKey(id);
 	}
 
 	/** What {@code player} is held for (the loading screen's line), or null: free to go. */
@@ -647,6 +717,9 @@ public final class StoryGround {
 		}
 		if (HARBOURS.containsKey(id)) {
 			return "gui.jaymoskingdoms.story.hold.harbour";
+		}
+		if (ROADWAYS.containsKey(id)) {
+			return "gui.jaymoskingdoms.story.hold.road";
 		}
 		if (LifeStory.of(player) != null && PowersCompat.waitingForFuture(player)) {
 			return "gui.jaymoskingdoms.story.hold.future";
@@ -683,7 +756,7 @@ public final class StoryGround {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (capital == null && HARBOURS.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
+		if (capital == null && HARBOURS.isEmpty() && ROADWAYS.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
 			return;
 		}
 		ServerLevel level = Factions.level(server);
@@ -698,6 +771,15 @@ public final class StoryGround {
 				HARBOURS.remove(id);
 			} else if (step(level, job, "message.jaymoskingdoms.story.making.harbour")) {
 				HARBOURS.remove(id);
+				job.then.forEach(Runnable::run);
+			}
+		}
+		for (UUID id : List.copyOf(ROADWAYS.keySet())) {
+			Job job = ROADWAYS.get(id);
+			if (server.getPlayerList().getPlayer(id) == null) {
+				ROADWAYS.remove(id);
+			} else if (step(level, job, "message.jaymoskingdoms.story.making.road")) {
+				ROADWAYS.remove(id);
 				job.then.forEach(Runnable::run);
 			}
 		}
