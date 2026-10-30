@@ -210,6 +210,13 @@ public final class Introductions {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
 		}
+		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
+		if (kind != null) {
+			// (0.7.405) Andy: "the judge shouldnt say this" ("Oh! I'm The Judge. And you are?"): one of Powers' Z Fighter
+			// characters answers as who they are
+			learn(player, villager);
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_zfighter." + kind, Component.literal(villager.getName().getString()));
+		}
 		boolean fresh = learn(player, villager);
 		Component name = Component.literal(villager.getName().getString());
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;

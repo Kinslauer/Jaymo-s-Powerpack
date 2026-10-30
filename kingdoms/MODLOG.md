@@ -7176,3 +7176,14 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   rank of Tangle Cord), then gets up limping. The bolas stays on its legs and drops at its feet when it rises
   (`WRAPPED`; on shutdown they all drop). Animals and the rest are tangled with Slowness as before, as is everything
   without Powers. Not seen in game.
+
+## 0.7.405: Z Fighter characters speak as themselves
+- Andy: "the judge shouldnt say this" ("Oh! I'm The Judge. And you are?", then MCA's "What's the reason for your visit to
+  our humble village?" with Exploring / Settling / Spent the night). Opening MCA's menu on any of Powers' Z Fighter
+  characters (Judge, Keeper, Hermit, Tinkerer, road master, teller, demon masters, Omen pilots, patrolmen) now gives one
+  of three lines of their own and goes straight to the main menu (`McaBridge.zfighterOpening`, beside the outlaw
+  opening); you learn their name then. Asked their name, they answer as themselves (`name_zfighter.<kind>`), and they
+  never walk over to introduce themselves or shake hands (`Handshakes`).
+- Their info box no longer says "Jobless" and shows a mood: the trade line shows their part ("Judge of the Dead") and the
+  mood line their bearing ("Bearing: Stern"), from the synced `ZFighterFolk.PART` (`McaZFighterInfoMixin`).
+- Compile-checked; not seen in game.

@@ -49,6 +49,8 @@ final class McaBridge {
 	static final int SEAT_MARGIN = 32;
 	/** (0.7.397) Lines an outlaw opens their menu with ({@link #outlawOpening}). */
 	static final int OUTLAW_OPENINGS = 4;
+	/** (0.7.405) Lines each of Powers' Z Fighter characters opens their menu with ({@link #zfighterOpening}). */
+	static final int ZFIGHTER_OPENINGS = 3;
 
 	/** The villager a player is promoting just now ({@link #promote}): {@link #enlist} takes them, not someone else. */
 	private static @Nullable VillagerEntityMCA chosen;
@@ -899,6 +901,29 @@ final class McaBridge {
 			? Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
+	 * (0.7.405) Andy: "the judge shouldnt say this" (MCA's "What's the deal, stranger? What's the reason for your visit to
+	 * our humble village?"). MCA's menu opening on one of Powers' Z Fighter characters ({@link ZFighterFolk}: the Judge,
+	 * the Keeper, the Hermit...): a line of their own for their part, and on to the main menu, never MCA's stranger's
+	 * welcome or its visitor questions; you know their name from then (they go by their title). True if so.
+	 */
+	static boolean zfighterOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return false;
+		}
+		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (kind == null || main == null) {
+			return false;
+		}
+		Component line = Component.translatable("dialogue.chat.jaymoskingdoms.zfighter_opening." + kind + "." + villager.getRandom().nextInt(ZFIGHTER_OPENINGS));
+		met(villager, player);
+		Introductions.learn(player, villager);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
 		return true;

@@ -542,6 +542,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */
+	public static boolean zfighterOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.zfighterOpening(villager, player);
+	}
+
 	/** (0.7.246) A crewman (one of MCA's villagers) with no armour packed, and a sailor by trade. */
 	static void toSea(PathfinderMob mob) {
 		if (LOADED) {

@@ -6,10 +6,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntConsumer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -61,6 +65,14 @@ public final class ZFighterFolk {
 		// (0.7.348) Andy: an Omen's pilot, out of its mech in Powers' future, a curious villager (Powers moves and talks for them)
 		PILOT_TAG, PILOT_KIND,
 		PATROL_TAG, "patrolman");
+	/**
+	 * (0.7.405) Andy: the Judge's MCA screen said "Jobless" and "Mood: Depressed". Which character they are ({@link #KINDS}),
+	 * synced so MCA's screen shows their part and bearing in place of a trade and a mood ({@code McaZFighterInfoMixin}).
+	 * Set by {@link #step}, so it needs no saving.
+	 */
+	public static final AttachmentType<String> PART = AttachmentRegistry.create(JaymosKingdoms.id("zfighter_part"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+
 	/** A town's (or a camp's) Z Fighter masters: their own villagers, picked by Powers. */
 	static final Set<String> MASTERS = Set.of("jaymospowers_master", "jaymospowers_dark_master");
 
@@ -124,6 +136,10 @@ public final class ZFighterFolk {
 	 */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		String kind = kind(mob);
+		if (kind != null && !kind.equals(mob.getAttached(PART))) {
+			mob.setAttached(PART, kind);
+		}
 		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG)) {
 			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
 			// ((0.7.359) a galactic patrolman: Powers walks them round the town and into fights)
@@ -139,6 +155,16 @@ public final class ZFighterFolk {
 			mob.getLookControl().setLookAt(near, 30.0F, 30.0F);
 		}
 		return true;
+	}
+
+	/** (0.7.405) Their part on MCA's screen, in place of a trade ("The Judge of the Dead"). */
+	public static Component part(String kind) {
+		return Component.translatable("zfighter.jaymoskingdoms.part." + kind);
+	}
+
+	/** (0.7.405) Their bearing on MCA's screen, in place of a mood ("Bearing: Stern"). */
+	public static Component bearing(String kind) {
+		return Component.translatable("zfighter.jaymoskingdoms.bearing", Component.translatable("zfighter.jaymoskingdoms.bearing." + kind));
 	}
 
 	/** Their outfits ({@link Uniforms#zfighter}), or null for anyone else. */
