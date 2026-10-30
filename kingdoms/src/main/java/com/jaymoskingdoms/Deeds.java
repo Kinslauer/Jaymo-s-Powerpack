@@ -547,4 +547,16 @@ public final class Deeds {
 			player.setAttached(DEEDS, Map.copyOf(next));
 		}
 	}
+
+	// ---- road deeds (0.7.418) -------------------------------------------------------------------------------------------
+
+	/** (0.7.418) Records road deed {@code id} as done, for the whole world ({@link RoadDeeds}). True if it is new. */
+	public static boolean done(MinecraftServer server, String id) {
+		return RoadDeeds.done(server, id);
+	}
+
+	/** (0.7.418) Whether road deed {@code id} has been done in this world ({@link RoadDeeds}). */
+	public static boolean has(MinecraftServer server, String id) {
+		return RoadDeeds.has(server, id);
+	}
 }

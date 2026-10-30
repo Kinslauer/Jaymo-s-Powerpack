@@ -237,6 +237,8 @@ final class McaBridge {
 				continue;
 			}
 			v.makeMercenary();
+			// (0.7.418) whose hired hand they are, for a life's aim (LifeAims)
+			v.addTag(LifeAims.NOBODY_TAG + player.getStringUUID());
 			net.minecraft.world.entity.ai.attributes.AttributeInstance life = v.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH),
 				hit = v.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
 			if (life != null) {
@@ -260,6 +262,11 @@ final class McaBridge {
 			made++;
 		}
 		return made;
+	}
+
+	/** (0.7.418) Whether {@code e} is an MCA villager whose hired contract is still running. */
+	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
+		return e instanceof VillagerEntityMCA v && v.getDespawnDelay() > 0;
 	}
 
 	/** (0.5.50) An MCA villager is panicking. */

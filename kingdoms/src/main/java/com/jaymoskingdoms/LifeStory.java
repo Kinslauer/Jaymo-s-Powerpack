@@ -649,6 +649,8 @@ public final class LifeStory {
 		if (stat == RUSTFALL_STAT && startedAs(player, Start.RUSTFALL)) {
 			n++;
 		}
+		// (0.7.418) the free point a finished aim gave
+		n += LifeAims.bonus(player, stat);
 		return n;
 	}
 
@@ -983,6 +985,8 @@ public final class LifeStory {
 		StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
 			: landed == Start.CHAINED ? StoryHard.shackleCamp(player)
 			: (landed == Start.BANISHED || landed == Start.SWORN || landed == Start.SENTENCED || landed == Start.EVICTED) && roadRealm != null ? roadRealm.id() : -1);
+		// (0.7.418) and the one thing they mean to do (a page in their pack, LifeAims)
+		LifeAims.begin(player, landed, roadRealm);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
 		if (start == Start.TIMELOST) {
@@ -1935,6 +1939,7 @@ public final class LifeStory {
 					StoryHomes.clear(p);
 					StoryHard.clear(p);
 					StoryKit.clear(p);
+					LifeAims.clear(p);
 					DEPARTED.remove(p.getUUID());
 					LANDINGS.remove(p.getUUID());
 					Classes.clear(p);

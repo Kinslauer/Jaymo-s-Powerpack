@@ -320,6 +320,11 @@ public final class McaCompat {
 		return LOADED ? McaBridge.hireNobodies(level, player, around, n, outfits, health, damage, contract) : 0;
 	}
 
+	/** (0.7.418) {@code e} is an MCA villager whose hired contract is still running; false without MCA. */
+	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
+		return LOADED && McaBridge.contractRunning(e);
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;

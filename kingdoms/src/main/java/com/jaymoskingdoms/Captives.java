@@ -379,6 +379,8 @@ public final class Captives {
 		}
 		// (0.7.340) they tell you themselves where home is: no chat line
 		Deeds.freed(level, player, captive, f);
+		// (0.7.418) a life's aim: one more freed
+		LifeAims.freed(player);
 	}
 
 	private static void tick(MinecraftServer server) {
