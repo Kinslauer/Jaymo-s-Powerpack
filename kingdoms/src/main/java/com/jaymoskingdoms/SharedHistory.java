@@ -67,16 +67,17 @@ public final class SharedHistory {
 	/** What you did to them, to apologise for. */
 	static final Set<Recollections.Kind> WRONGS = Set.of(Recollections.Kind.STRUCK, Recollections.Kind.RUDE, Recollections.Kind.LIED,
 		Recollections.Kind.THREATENED, Recollections.Kind.CRIME, Recollections.Kind.ROBBED, Recollections.Kind.KILLED_KIN, Recollections.Kind.REBUFFED,
-		Recollections.Kind.QUEST_FAILED);
+		Recollections.Kind.QUEST_FAILED, Recollections.Kind.THREW);
 	/** What they did to you, to have out with them. */
 	static final Set<Recollections.Kind> ROUGH = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU);
 	/** What you did for them, to ask after. */
 	static final Set<Recollections.Kind> HELPED = Set.of(Recollections.Kind.SAVED, Recollections.Kind.FREED, Recollections.Kind.HOME,
-		Recollections.Kind.MENDED);
+		Recollections.Kind.MENDED, Recollections.Kind.CARRIED, Recollections.Kind.GOT_UP, Recollections.Kind.TENDED, Recollections.Kind.SHIELDED);
 	/** A first dealing that colours an introduction. */
 	static final Set<Recollections.Kind> FIRST = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU,
 		Recollections.Kind.REVIVED_YOU, Recollections.Kind.LED_YOU, Recollections.Kind.STRUCK, Recollections.Kind.RUDE, Recollections.Kind.CRIME,
-		Recollections.Kind.ROBBED, Recollections.Kind.SAVED, Recollections.Kind.FREED, Recollections.Kind.HOME, Recollections.Kind.MENDED);
+		Recollections.Kind.ROBBED, Recollections.Kind.SAVED, Recollections.Kind.FREED, Recollections.Kind.HOME, Recollections.Kind.MENDED,
+		Recollections.Kind.CARRIED, Recollections.Kind.GOT_UP, Recollections.Kind.TENDED, Recollections.Kind.SHIELDED);
 
 	private record Linger(UUID player, long until) {
 	}
@@ -146,6 +147,11 @@ public final class SharedHistory {
 		return true;
 	}
 
+	/** (0.7.368) {@code a} happened no earlier than {@code b}: by game time where both have one, else by day. */
+	private static boolean later(Recollections.Recollection a, Recollections.Recollection b) {
+		return a.at() > 0L && b.at() > 0L ? a.at() >= b.at() : a.day() >= b.day();
+	}
+
 	/** The latest of {@code kinds} {@code who} remembers of {@code player} themselves that's still to be answered with {@code answers}. */
 	private static Recollections.@Nullable Recollection latest(LivingEntity who, ServerPlayer player, Set<Recollections.Kind> kinds,
 		Set<Recollections.Kind> answers) {
@@ -153,7 +159,7 @@ public final class SharedHistory {
 		Recollections.Recollection best = null;
 		for (Recollections.Recollection r : all) {
 			Recollections.Kind k = r.type();
-			if (k != null && kinds.contains(k) && !r.heard() && (best == null || r.day() >= best.day()) && open(all, r, answers)) {
+			if (k != null && kinds.contains(k) && !r.heard() && (best == null || later(r, best)) && open(all, r, answers)) {
 				best = r;
 			}
 		}
@@ -174,6 +180,25 @@ public final class SharedHistory {
 
 	private static Recollections.@Nullable Recollection helped(LivingEntity who, ServerPlayer player) {
 		return latest(who, player, HELPED, Set.of(Recollections.Kind.ASKED_AFTER));
+	}
+
+	/**
+	 * (0.7.368) Andy: "the talk options should always relate to the most recent interaction." Of "Thank them",
+	 * "Apologise", "Clear the air" and "Ask how they are", the one MCA's menu shows: whichever answers the latest thing
+	 * still to be taken up between you (null: none). The others wait until that's been seen to.
+	 */
+	public static @Nullable String current(ServerPlayer player, LivingEntity who) {
+		String answer = null;
+		Recollections.Recollection best = null;
+		Recollections.Recollection[] open = {favour(who, player), wrong(who, player), rough(who, player), helped(who, player)};
+		String[] answers = {THANK, APOLOGISE, AIR, ASK_AFTER};
+		for (int i = 0; i < open.length; i++) {
+			if (open[i] != null && (best == null || later(open[i], best))) {
+				best = open[i];
+				answer = answers[i];
+			}
+		}
+		return answer;
 	}
 
 	/** "Thank them" shows: they did something for you you've not thanked them for. */
@@ -199,7 +224,7 @@ public final class SharedHistory {
 	// ---- how they take it ----------------------------------------------------------------------------------------------
 
 	/** Soft (sorry, warm), plain (dutiful), hard (curt), or greedy. */
-	private enum Tone {
+	enum Tone {
 		SOFT, PLAIN, HARD, GREEDY;
 
 		String key() {
@@ -221,7 +246,7 @@ public final class SharedHistory {
 	}
 
 	/** Greedy ones speak as hard ones where they've no lines of their own. */
-	private static Tone toneNoGreed(LivingEntity who) {
+	static Tone toneNoGreed(LivingEntity who) {
 		Tone t = tone(who);
 		return t == Tone.GREEDY ? Tone.HARD : t;
 	}

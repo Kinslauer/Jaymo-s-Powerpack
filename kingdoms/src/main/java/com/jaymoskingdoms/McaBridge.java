@@ -856,6 +856,29 @@ final class McaBridge {
 		return true;
 	}
 
+	/**
+	 * (0.7.368) MCA's menu opening on {@code villager} ("root") just after something passed between you (you carried them
+	 * out, got them up, drew a monster off them, struck them...): they open with that ({@link Recollections#opening}) and
+	 * go to the main menu, whose history option is about the same thing ({@link SharedHistory#current}); true if so.
+	 */
+	static boolean dealingOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Languages.understands(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Recollections.opening(villager, player, villager.getRandom());
+		if (line == null) {
+			return false;
+		}
+		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
 	static void toSea(PathfinderMob mob) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
