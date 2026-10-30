@@ -1,10 +1,13 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -48,8 +51,8 @@ final class WillClash {
 	static final double PUSH = 0.5, DRIFT = 0.15;
 	/** The warning's shiver, and the contest's least and most shake. */
 	static final float WARN_SHAKE = 0.2F, SHAKE_MIN = 0.06F, SHAKE_MAX = 0.3F;
-	/** Two players may lock eyes again this long after a clash (ticks). */
-	static final int COOLDOWN_TICKS = 600;
+	/** Neither player may lock eyes again for this long after a clash (ticks: two in-game days). */
+	static final long COOLDOWN_TICKS = 48000L;
 	/** The bar's length on the action bar (characters). */
 	static final int BAR = 30;
 
@@ -73,8 +76,9 @@ final class WillClash {
 	}
 
 	private static final Map<UUID, Session> SESSIONS = new HashMap<>();
-	/** Player → game time they may clash again. */
-	private static final Map<UUID, Long> READY = new HashMap<>();
+	/** When a player may next clash (game time). Saved, kept through death. */
+	static final AttachmentType<Long> READY = AttachmentRegistry.create(JaymosKingdoms.id("will_clash_ready"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
 	private WillClash() {
 	}
@@ -86,11 +90,9 @@ final class WillClash {
 			if (s != null) {
 				end(s);
 			}
-			READY.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SESSIONS.clear();
-			READY.clear();
 		});
 	}
 
@@ -102,7 +104,7 @@ final class WillClash {
 	static boolean may(ServerPlayer sp, ServerPlayer other, long now) {
 		return other != sp && other.isAlive() && !other.isSpectator() && !other.isCreative() && !Downed.isDowned(other) && !in(sp) && !in(other)
 			&& !com.jaymoskingdoms.spirits.SpiritClash.inClash(sp) && !com.jaymoskingdoms.spirits.SpiritClash.inClash(other)
-			&& READY.getOrDefault(sp.getUUID(), 0L) <= now && READY.getOrDefault(other.getUUID(), 0L) <= now;
+			&& sp.getAttachedOrElse(READY, 0L) <= now && other.getAttachedOrElse(READY, 0L) <= now;
 	}
 
 	/** {@code sp} has begun to stare {@code other} down: they know it. */
@@ -188,8 +190,8 @@ final class WillClash {
 	private static void finish(ServerLevel level, Session s, ServerPlayer a, ServerPlayer b) {
 		end(s);
 		long now = level.getGameTime();
-		READY.put(s.a, now + COOLDOWN_TICKS);
-		READY.put(s.b, now + COOLDOWN_TICKS);
+		a.setAttached(READY, now + COOLDOWN_TICKS);
+		b.setAttached(READY, now + COOLDOWN_TICKS);
 		if (Math.abs(s.score) < 1.0F) {
 			push(a, b);
 			push(b, a);

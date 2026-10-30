@@ -226,7 +226,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.353) Might and Packhorse ease hauling bodies in Kitchen
 		KitchenCompat.registerBrawn();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
-		LOGGER.debug("will attachments: {} {}", Will.ROAR_READY, Will.REFUSE_READY);
+		LOGGER.debug("will attachments: {} {} {}", Will.ROAR_READY, Will.REFUSE_READY, WillClash.READY);
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
