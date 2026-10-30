@@ -24,6 +24,8 @@ import net.minecraft.world.phys.Vec3;
  * pages are the same frames the book has in the hand ({@code tome_pose}, {@link TomeClient#pose}): a leaf turns as it rises,
  * at each new lock and with every bolt or spell. While it floats the hand holding it is drawn empty (first person:
  * {@code TomeFloatHandMixin}; everyone else: {@code TomeHeldItemMixin}).
+ * <p>
+ * (0.7.391) A Mage's or Sorcerer's off-hand book floats the same way off the other shoulder ({@link Tomes#AFLOAT_OFF}).
  */
 public final class TomeFloat {
 	/** How quickly it swings round after the aim (per second: higher follows tighter). */
@@ -55,22 +57,35 @@ public final class TomeFloat {
 				DRIFTS.clear();
 				return;
 			}
-			DRIFTS.keySet().removeIf(id -> !(minecraft.level.getEntity(id) instanceof Player player) || !afloat(player));
+			DRIFTS.keySet().removeIf(key -> !(minecraft.level.getEntity(key >> 1) instanceof Player player) || !afloat(player, (key & 1) == 1));
 		});
 	}
 
-	/** Whether {@code player}'s tome floats (your own as soon as you start to charge, before the server's word comes back). */
-	public static boolean afloat(Player player) {
-		if (!Tomes.isTome(player.getMainHandItem())) {
-			return false;
-		}
-		Integer stamp = player.getAttached(Tomes.AFLOAT);
-		return stamp != null && stamp > 0 || player == Minecraft.getInstance().player && TomeClient.charging();
+	/** The drift's key for {@code player}'s book in that hand. */
+	private static int key(Player player, boolean off) {
+		return player.getId() << 1 | (off ? 1 : 0);
 	}
 
-	/** How far (0 to 1) a leaf has turned since {@code player}'s book rose or took a new lock, or -1 once it has. */
-	static float turning(Player player, long now) {
-		Drift drift = DRIFTS.get(player.getId());
+	/** Whether either of {@code player}'s tomes floats. */
+	public static boolean afloat(Player player) {
+		return afloat(player, false) || afloat(player, true);
+	}
+
+	/**
+	 * Whether {@code player}'s tome in that hand ({@code off}: the off hand) floats (your own as soon as you start to charge,
+	 * before the server's word comes back).
+	 */
+	public static boolean afloat(Player player, boolean off) {
+		if (!Tomes.isTome(off ? player.getOffhandItem() : player.getMainHandItem())) {
+			return false;
+		}
+		Integer stamp = player.getAttached(Tomes.afloatType(off));
+		return stamp != null && stamp > 0 || player == Minecraft.getInstance().player && TomeClient.charging(off);
+	}
+
+	/** How far (0 to 1) a leaf has turned since that book of {@code player}'s rose or took a new lock, or -1 once it has. */
+	static float turning(Player player, boolean off, long now) {
+		Drift drift = DRIFTS.get(key(player, off));
 		if (drift == null || now - drift.turnedAt >= TURN_MS) {
 			return -1.0F;
 		}
@@ -87,52 +102,62 @@ public final class TomeFloat {
 		long now = Util.getMillis();
 		PoseStack pose = context.poseStack();
 		for (Player player : minecraft.level.players()) {
-			if (!afloat(player) || player.isInvisibleTo(minecraft.player)) {
+			if (player.isInvisibleTo(minecraft.player)) {
 				continue;
 			}
-			float yaw = player.getViewYRot(partial), pitch = player.getViewXRot(partial);
-			Integer stamp = player.getAttached(Tomes.AFLOAT);
-			int number = stamp == null ? 0 : stamp;
-			Drift drift = DRIFTS.get(player.getId());
-			if (drift == null) {
-				// just risen: it starts where they aim
-				drift = new Drift();
-				drift.yaw = yaw;
-				drift.pitch = pitch;
-				drift.at = now;
-				drift.turnedAt = now;
-				drift.stamp = number;
-				DRIFTS.put(player.getId(), drift);
+			for (boolean off : new boolean[] {false, true}) {
+				if (afloat(player, off)) {
+					draw(context, minecraft, player, off, partial, camera, now, pose);
+				}
 			}
-			if (number != drift.stamp) {
-				drift.stamp = number;
-				drift.turnedAt = now;
-			}
-			float follow = 1.0F - (float) Math.exp(-FOLLOW * Math.min(now - drift.at, 250L) / 1000.0F);
-			drift.yaw += Mth.wrapDegrees(yaw - drift.yaw) * follow;
-			drift.pitch += (pitch - drift.pitch) * follow;
-			drift.at = now;
-
-			// each book bobs in its own time
-			float time = (now % 100_000L) / 1000.0F + (player.getId() & 31) * 0.37F;
-			float bob = Mth.sin(time * Mth.TWO_PI / BOB_SECONDS) * BOB;
-			Vec3 eye = player.getEyePosition(partial).subtract(camera);
-			ItemStack stack = player.getMainHandItem();
-			minecraft.getItemModelResolver().updateForTopItem(ITEM, stack, ItemDisplayContext.NONE, minecraft.level, player, player.getId());
-			pose.pushPose();
-			pose.translate(eye.x, eye.y, eye.z);
-			// the frame of its aim: +z ahead, +y up, -x to the right (as Tomes.floatAt)
-			pose.rotateDegrees(Axis.YP, -drift.yaw);
-			pose.rotateDegrees(Axis.XP, drift.pitch);
-			pose.translate((float) -Tomes.FLOAT_SIDE, (float) Tomes.FLOAT_UP + bob, (float) Tomes.FLOAT_AHEAD);
-			// the open pages (the model's north) turned toward the eyes, tipped back, swaying a little
-			pose.rotateDegrees(Axis.YP, TURN);
-			pose.rotateDegrees(Axis.XP, TILT);
-			pose.rotateDegrees(Axis.ZP, Mth.sin(time * Mth.TWO_PI / (BOB_SECONDS * 1.7F)) * SWAY);
-			pose.scale(SCALE, SCALE, SCALE);
-			int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(player, partial);
-			ITEM.submit(pose, context.submitNodeCollector(), light, OverlayTexture.NO_OVERLAY, 0);
-			pose.popPose();
 		}
+	}
+
+	/** One floating book: {@code player}'s, from that hand, off that hand's shoulder. */
+	private static void draw(LevelRenderContext context, Minecraft minecraft, Player player, boolean off, float partial, Vec3 camera, long now, PoseStack pose) {
+		float yaw = player.getViewYRot(partial), pitch = player.getViewXRot(partial);
+		Integer stamp = player.getAttached(Tomes.afloatType(off));
+		int number = stamp == null ? 0 : stamp;
+		Drift drift = DRIFTS.get(key(player, off));
+		if (drift == null) {
+			// just risen: it starts where they aim
+			drift = new Drift();
+			drift.yaw = yaw;
+			drift.pitch = pitch;
+			drift.at = now;
+			drift.turnedAt = now;
+			drift.stamp = number;
+			DRIFTS.put(key(player, off), drift);
+		}
+		if (number != drift.stamp) {
+			drift.stamp = number;
+			drift.turnedAt = now;
+		}
+		float follow = 1.0F - (float) Math.exp(-FOLLOW * Math.min(now - drift.at, 250L) / 1000.0F);
+		drift.yaw += Mth.wrapDegrees(yaw - drift.yaw) * follow;
+		drift.pitch += (pitch - drift.pitch) * follow;
+		drift.at = now;
+
+		// each book bobs in its own time (the off hand's out of step with the main's)
+		float time = (now % 100_000L) / 1000.0F + (player.getId() & 31) * 0.37F + (off ? BOB_SECONDS * 0.5F : 0.0F);
+		float bob = Mth.sin(time * Mth.TWO_PI / BOB_SECONDS) * BOB;
+		float side = Tomes.floatsRight(player, off) ? 1.0F : -1.0F;
+		Vec3 eye = player.getEyePosition(partial).subtract(camera);
+		ItemStack stack = off ? player.getOffhandItem() : player.getMainHandItem();
+		minecraft.getItemModelResolver().updateForTopItem(ITEM, stack, ItemDisplayContext.NONE, minecraft.level, player, player.getId());
+		pose.pushPose();
+		pose.translate(eye.x, eye.y, eye.z);
+		// the frame of its aim: +z ahead, +y up, -x to the right (as Tomes.floatAt)
+		pose.rotateDegrees(Axis.YP, -drift.yaw);
+		pose.rotateDegrees(Axis.XP, drift.pitch);
+		pose.translate((float) -Tomes.FLOAT_SIDE * side, (float) Tomes.FLOAT_UP + bob, (float) Tomes.FLOAT_AHEAD);
+		// the open pages (the model's north) turned toward the eyes, tipped back, swaying a little
+		pose.rotateDegrees(Axis.YP, TURN * side);
+		pose.rotateDegrees(Axis.XP, TILT);
+		pose.rotateDegrees(Axis.ZP, Mth.sin(time * Mth.TWO_PI / (BOB_SECONDS * 1.7F)) * SWAY);
+		pose.scale(SCALE, SCALE, SCALE);
+		int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(player, partial);
+		ITEM.submit(pose, context.submitNodeCollector(), light, OverlayTexture.NO_OVERLAY, 0);
+		pose.popPose();
 	}
 }

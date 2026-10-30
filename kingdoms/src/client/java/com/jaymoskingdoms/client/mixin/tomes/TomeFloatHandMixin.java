@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/** (0.7.390) Your own tome afloat ({@code TomeFloat}): in first person the hand that held it is drawn empty. */
+/** (0.7.390) Your own tome afloat ({@code TomeFloat}): in first person the hand that held it is drawn empty (0.7.391: the off hand too). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class TomeFloatHandMixin {
 	@ModifyVariable(method = "submitArmWithItem", at = @At("HEAD"), argsOnly = true)
 	private ItemStack jaymoskingdoms$bookAfloat(ItemStack stack, @Local(argsOnly = true) InteractionHand hand) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		return hand == InteractionHand.MAIN_HAND && player != null && Tomes.isTome(stack) && TomeFloat.afloat(player) ? ItemStack.EMPTY : stack;
+		return player != null && Tomes.isTome(stack) && TomeFloat.afloat(player, hand == InteractionHand.OFF_HAND) ? ItemStack.EMPTY : stack;
 	}
 }

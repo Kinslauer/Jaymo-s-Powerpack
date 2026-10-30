@@ -6960,3 +6960,12 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   swimmers; restoration grows crops; death withers grass, flowers and crops; blood lays Powers' blood stains. Only where the
   caster may build.
 - Compile-checked against 26.3; not seen in game.
+
+## 0.7.391: off-hand tomes for Mages and Sorcerers
+- A Mage or Sorcerer (or anyone in creative) works a spell tome in the off hand beside whatever the main hand wields, by right
+  click (Andy's pick): tap for a bolt, hold to charge (the item's use; `Tome.useOff`, `releaseUsing`), sneak + right click to
+  cast its page. A main-hand weapon gives up its right-click guard to the book (`mixin/ItemGuardTomeMixin`; shields keep
+  theirs). With a tome in each hand, right click works the off-hand one; sneak + right click still loads a page into the main
+  one when a scroll is to hand. The off-hand book floats off the other shoulder (`Tomes.AFLOAT_OFF`), rises on a lock like the
+  main one, and lands on its own timer; its charge bar is drawn in `=`/`-` so Powers' held-input lock leaves the main weapon free.
+- Compile-checked against 26.3; not seen in game.

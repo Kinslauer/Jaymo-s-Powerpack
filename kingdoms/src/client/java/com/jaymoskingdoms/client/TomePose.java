@@ -17,7 +17,7 @@ record TomePose() implements RangeSelectItemModelProperty {
 
 	@Override
 	public float get(ItemStack stack, @Nullable ClientLevel level, @Nullable ItemOwner owner, int seed) {
-		return TomeClient.pose(owner);
+		return TomeClient.pose(stack, owner);
 	}
 
 	@Override
