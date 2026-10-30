@@ -67,7 +67,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link #HIT_TAG}), so one only unloaded, or felled by a golem or a bolt, never counts). The wizard fights none of them
  * ({@link #practiceFoe}). A passed trial practises the two forms you know least by {@link #PRACTICE}, adds
  * {@link #STANDING} to your standing in the school the land teaches ({@link Schools#localSchool}), and gives a Mage or a Sorcerer
- * {@link #CASTER_XP} experience besides. One trial per wizard per in-game day per player (a trial lost doesn't spend it).
+ * {@link #CASTER_XP} experience besides. One trial per in-game day per player, from any wizard (a trial lost doesn't spend it).
  * Hints are the wizard's bubbles and your Tidings, never chat or the screen.
  */
 public final class WizardTrials {
@@ -239,8 +239,8 @@ public final class WizardTrials {
 				return;
 			}
 		}
-		Long last = stateOf(player).done().get(wizard.getUUID().toString());
-		if (last != null && last >= today(level)) {
+		// one trial a day for a player, whichever wizard set it
+		if (stateOf(player).done().values().stream().anyMatch(day -> day >= today(level))) {
 			say(level, wizard, player, "trial.jaymoskingdoms.tomorrow");
 			return;
 		}

@@ -364,6 +364,11 @@ public final class Schools {
 	/** A master's step in place of their brain ({@code Workers.step}): at their post, facing whoever is near. Always true. */
 	public static boolean step(ServerLevel level, PathfinderMob mob) {
 		mob.getNavigation().stop();
+		if (mob.tickCount % 200 == 0 && realmGone(level, mob)) {
+			// the realm fell: its master leaves the ruins
+			mob.discard();
+			return true;
+		}
 		if (mob.hasHome() && mob.distanceToSqr(Vec3.atBottomCenterOf(mob.getHomePosition())) > POST_SLACK * POST_SLACK && !mob.isPassenger()) {
 			Vec3 post = Vec3.atBottomCenterOf(mob.getHomePosition());
 			mob.teleportTo(post.x, post.y, post.z);
@@ -373,6 +378,21 @@ public final class Schools {
 			mob.getLookControl().setLookAt(near, 30.0F, 30.0F);
 		}
 		return true;
+	}
+
+	/** Whether the realm a master was posted by (their {@link #REALM_TAG_PREFIX} tag) is gone or fallen. */
+	private static boolean realmGone(ServerLevel level, PathfinderMob mob) {
+		for (String t : mob.entityTags()) {
+			if (t.startsWith(REALM_TAG_PREFIX)) {
+				try {
+					com.jaymoskingdoms.Faction f = com.jaymoskingdoms.Factions.get(level.getServer(), Integer.parseInt(t.substring(REALM_TAG_PREFIX.length())));
+					return f == null || f.fallen();
+				} catch (NumberFormatException e) {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	// ---- the talk --------------------------------------------------------------------------------------------------------
