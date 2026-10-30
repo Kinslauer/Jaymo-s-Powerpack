@@ -139,7 +139,7 @@
   "item.jaymospowers.sparring_dummy": "Sparring Dummy",
   "block.jaymospowers.training_post": "Training Post",
   "entity.jaymospowers.sparring_partner": "%s's Sparring Partner",
-  "message.jaymospowers.zfighter_spar_not_fighter": "Only a Z Fighter can spar with it.",
+  "entity.jaymospowers.practice_dummy": "Practice Dummy",
   "message.jaymospowers.zfighter_spar_start": "Your shadow stands up to fight you.",
   "message.jaymospowers.zfighter_spar_lost": "You're beaten. Get up and train.",
   "message.jaymospowers.zfighter_spar_won": "Your partner yields. +%s TP",
