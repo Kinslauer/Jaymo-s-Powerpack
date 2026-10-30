@@ -7155,3 +7155,9 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   `TOLL_TICKS` (1 s) a deep boom and a bell sound between the two, the bell climbing in pitch as time runs out and both
   louder the wider the lead, with a ring of dust. The one who breaks gets a sonic boom and a ringing bell; a draw rings too.
   Not seen in game.
+
+## 0.7.402: the Unarmed figure drops what it held (pack 0.18.69)
+- Andy: "if the origin gives them an item in this hand it should comically be on the floor". The road page's Unarmed
+  figure now lacks its sword arm (Powers' right arm), and any hand whose arm is gone lets go: what it held (an earlier
+  answer's bow, sword, pickaxe) lies flat on the floor at the feet on that side, pointing away. Sizes in
+  `StoryFigure.DROPPED_*`.
