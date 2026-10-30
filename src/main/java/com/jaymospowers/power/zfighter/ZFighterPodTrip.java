@@ -101,7 +101,7 @@ public final class ZFighterPodTrip {
 		double speed;
 		@Nullable PodEntity pod;
 		int filled, damaged;
-		/** (0.18.13) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
+		/** (0.18.16) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
 		boolean finished;
 		int grade;
 		@Nullable UUID guest;
@@ -148,7 +148,7 @@ public final class ZFighterPodTrip {
 	}
 
 	private static final Map<UUID, Trip> TRIPS = new HashMap<>();
-	/** (0.18.13) Passengers of a second seat, by who is aboard, to their pilot. */
+	/** (0.18.16) Passengers of a second seat, by who is aboard, to their pilot. */
 	private static final Map<UUID, UUID> GUESTS = new HashMap<>();
 	/** Set while the hard landing hurts the pilot (a trip's pilot is otherwise unhurtable). */
 	private static boolean hurting;
@@ -169,7 +169,7 @@ public final class ZFighterPodTrip {
 		return TRIPS.containsKey(player.getUUID()) || GUESTS.containsKey(player.getUUID());
 	}
 
-	/** (0.18.13) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
+	/** (0.18.16) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
 	private static @Nullable ServerPlayer guest(MinecraftServer server, Trip trip) {
 		if (trip.guest == null) {
 			return null;
@@ -182,7 +182,7 @@ public final class ZFighterPodTrip {
 		return guest;
 	}
 
-	/** (0.18.13) A trip is over: its passenger is no longer a passenger. */
+	/** (0.18.16) A trip is over: its passenger is no longer a passenger. */
 	private static void forget(Trip trip) {
 		if (trip.guest != null) {
 			GUESTS.remove(trip.guest);
@@ -217,7 +217,7 @@ public final class ZFighterPodTrip {
 		trip.pod = pod;
 		trip.finished = pod.finished();
 		trip.grade = pod.grade();
-		// (0.18.13) a second seat: whoever else is aboard comes along
+		// (0.18.16) a second seat: whoever else is aboard comes along
 		ServerPlayer guest = null;
 		for (Entity rider : pod.getPassengers()) {
 			if (guest == null && pod.seats() > 1 && rider instanceof ServerPlayer other && other != player) {
@@ -552,7 +552,7 @@ public final class ZFighterPodTrip {
 			hurting = false;
 		}
 		if (PodGrades.softLanding(pod.grade())) {
-			// (0.18.13) a pod mended to the top grade takes the blow in its hull: nothing shakes loose
+			// (0.18.16) a pod mended to the top grade takes the blow in its hull: nothing shakes loose
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing_soft").withStyle(ChatFormatting.GOLD));
 			return;
 		}
@@ -640,7 +640,7 @@ public final class ZFighterPodTrip {
 		MinecraftServer server = player.level().getServer();
 		UUID pilot = GUESTS.remove(player.getUUID());
 		if (pilot != null) {
-			// (0.18.13) a passenger leaves: they wake where the trip began
+			// (0.18.16) a passenger leaves: they wake where the trip began
 			Trip aboard = TRIPS.get(pilot);
 			player.stopRiding();
 			if (aboard != null) {

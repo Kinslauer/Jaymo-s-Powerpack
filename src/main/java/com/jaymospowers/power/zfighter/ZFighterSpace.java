@@ -604,7 +604,7 @@ public final class ZFighterSpace {
 		for (int up = 1; up <= 3; up++) {
 			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
-		// (0.18.12) and a pod that came down with the ship; (0.18.13) it holds its deck's own set of parts, worn in part, for a hammer to salvage
+		// (0.18.12) and a pod that came down with the ship; (0.18.16) it holds its deck's own set of parts, worn in part, for a hammer to salvage
 		// (its own random: the wrecks' draws stay in step)
 		PodWrecks.build(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), deck, RandomSource.create(MAW_SEED ^ centre.asLong()).nextFloat() * 360.0F);
 	}

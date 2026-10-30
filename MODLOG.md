@@ -3917,7 +3917,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
 
-- **0.18.13, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+- **0.18.16, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
   flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
   in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer
