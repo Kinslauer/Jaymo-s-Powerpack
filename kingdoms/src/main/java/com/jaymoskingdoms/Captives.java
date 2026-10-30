@@ -381,6 +381,8 @@ public final class Captives {
 		Deeds.freed(level, player, captive, f);
 		// (0.7.418) a life's aim: one more freed
 		LifeAims.freed(player);
+		// (0.7.419) a road deed: a captive's chains broken
+		Deeds.done(level.getServer(), "captive.freed");
 	}
 
 	private static void tick(MinecraftServer server) {

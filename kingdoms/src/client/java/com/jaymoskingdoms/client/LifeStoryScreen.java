@@ -5,6 +5,7 @@ import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.LifeStory;
 import com.jaymoskingdoms.McaCompat;
+import com.jaymoskingdoms.RoadLocks;
 import com.jaymoskingdoms.LifeStory.Answer;
 import com.jaymoskingdoms.LifeStory.Question;
 import com.jaymoskingdoms.Voices;
@@ -126,6 +127,8 @@ final class LifeStoryScreen extends Screen {
 	private static List<LifeStory.Mate> mates = List.of();
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
+	/** (0.7.419) The locked roads the server said this player can take whatever their past (a deed, ops, a road they took), and those ops shut (keys). */
+	private static List<String> unlockedRoads = List.of(), shutRoads = List.of();
 	private static Draft draft = new Draft();
 	/** (0.7.251) The page the narrator last began, so it reads each page once; the line being read and those still to read. */
 	private static @Nullable String narrated;
@@ -150,6 +153,8 @@ final class LifeStoryScreen extends Screen {
 			realms = payload.realms();
 			creatorAhead = payload.creatorAhead();
 			mates = payload.mates();
+			unlockedRoads = payload.unlocked();
+			shutRoads = payload.shut();
 			StoryCurtain.raise();
 			// (0.7.407) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
 			// MCA marks the body made partway through its creator, and the road was asked on top of it. While the creator
@@ -174,6 +179,8 @@ final class LifeStoryScreen extends Screen {
 			owed = false;
 			creatorAhead = false;
 			mates = List.of();
+			unlockedRoads = List.of();
+			shutRoads = List.of();
 			draft = new Draft();
 			narrated = null;
 			toRead.clear();
@@ -302,7 +309,24 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
 	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs());
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a);
+	}
+
+	/**
+	 * (0.7.419) Whether a road is earned: a basic road, one a deed (or ops, or a road taken) opened for this player, or one the
+	 * story picked so far opens (a secret past). The server checks again when the answer arrives ({@link RoadLocks#allowed}).
+	 */
+	private static boolean earned(Answer a) {
+		if (RoadLocks.basic(a.start())) {
+			return true;
+		}
+		if (shutRoads.contains(a.key())) {
+			return false;
+		}
+		return unlockedRoads.contains(a.key()) || RoadLocks.pastOpens(a.start(), q -> {
+			Answer answered = picked(q);
+			return answered == null ? null : answered.key();
+		});
 	}
 
 	/** (0.7.417) The heritages a road is only for, as "A, B or C" (in heritage order). */
@@ -1124,15 +1148,17 @@ final class LifeStoryScreen extends Screen {
 		}
 		// (0.7.360) Andy: "For every option it self, shorten the white text to a sentence or two at most": each option shows
 		// its short line; the whole tale is kept for the story on the last page
-		Component line = shortLine(Question.ROAD, a);
+		// (0.7.419) a road not earned yet shows only its one oblique hint, nothing of what it is
+		boolean earned = earned(a);
+		Component line = earned ? shortLine(Question.ROAD, a) : null;
 		if (line != null) {
 			lines.add(line);
 		}
 		if (!open) {
-			lines.add(reason(a).withColor(Ui.BAD));
+			lines.add(reason(a).withColor(earned ? Ui.BAD : Ui.DIM));
 		}
 		graphics.disableScissor();
-		block(graphics, lines, gives(Question.ROAD, a, false), sx0 - 9 + off, ny + 26, textW + 10, sy1);
+		block(graphics, lines, earned ? gives(Question.ROAD, a, false) : List.of(), sx0 - 9 + off, ny + 26, textW + 10, sy1);
 
 		// the strip: every start, the shown one marked, those not open dimmed
 		int stripY = stripY(), x0 = stripStart();
@@ -1162,7 +1188,9 @@ final class LifeStoryScreen extends Screen {
 		return !a.offered() ? Component.translatable(a.start() == LifeStory.Start.NOBODIES ? "gui.jaymoskingdoms.story.needs_mca" : "gui.jaymoskingdoms.story.needs_powers")
 			: !a.fits(bornAs())
 				? Component.translatable("gui.jaymoskingdoms.story.only_for", onlyForNames(a))
-				: Component.translatable("gui.jaymoskingdoms.story.no_realms");
+				: !earned(a)
+					? Component.translatable("story.jaymoskingdoms.road." + a.key() + ".hint")
+					: Component.translatable("gui.jaymoskingdoms.story.no_realms");
 	}
 
 	/** (0.7.275) The skip-the-story ask, over the dimmed page: the question, what skipping does, and the yes and no under it. */

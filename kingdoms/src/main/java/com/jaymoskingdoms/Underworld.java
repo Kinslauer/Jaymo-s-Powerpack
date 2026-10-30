@@ -780,6 +780,8 @@ public final class Underworld {
 		if (!contraband(offer.getResult()) && !contraband(offer.getCostA()) && !contraband(offer.getCostB())) {
 			return;
 		}
+		// (0.7.419) a road deed: something traded that the law forbids
+		Deeds.done(level.getServer(), "market.black");
 		Faction f = Theft.lawAt(level, v.blockPosition());
 		if (f == null || !f.type().isRealm()) {
 			return;

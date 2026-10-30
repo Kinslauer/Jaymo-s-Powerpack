@@ -276,6 +276,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		StoryKit.register();
 		// 0.7.418: a life's aim for every road, and the road deeds record
 		LifeAims.register();
+		// 0.7.419: roads earned by deeds (and the roads a player took)
+		RoadLocks.register();
 		Manacles.register();
 		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it

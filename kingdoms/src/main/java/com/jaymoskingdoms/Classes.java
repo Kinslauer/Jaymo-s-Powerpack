@@ -401,7 +401,7 @@ public final class Classes {
 
 	// ---- the writ ------------------------------------------------------------------------------------------------
 
-	/** The Writ of Rebirth: read (right-click), it unmakes your class and asks you to pick again. */
+	/** The Writ of Rebirth: read (right-click), it unmakes your class (0.7.419: and your whole story) and asks you to tell it again. */
 	static final class Writ extends Item {
 		Writ(Item.Properties properties) {
 			super(properties);
@@ -413,14 +413,19 @@ public final class Classes {
 				return InteractionResult.SUCCESS;
 			}
 			if (classOf(sp) == null) {
-				ask(sp, true);
+				next(sp);
 				return InteractionResult.SUCCESS;
 			}
+			if (!ServerPlayNetworking.canSend(sp, LifeStory.Open.TYPE)) {
+				// (0.7.419) no story screen on their client: the writ would only unmake them
+				return InteractionResult.FAIL;
+			}
 			sp.getItemInHand(hand).consume(1, sp);
-			clear(sp);
+			// (0.7.419) a Writ reopens the whole life story, from the first page to the road (the roads open by then show); it was only the class
+			LifeStory.unmake(sp);
 			level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8F, 1.1F);
 			sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.reborn").withStyle(ChatFormatting.LIGHT_PURPLE));
-			ask(sp, true);
+			next(sp);
 			return InteractionResult.SUCCESS;
 		}
 	}

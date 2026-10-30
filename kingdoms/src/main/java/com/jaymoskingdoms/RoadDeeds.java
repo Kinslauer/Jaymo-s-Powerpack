@@ -9,8 +9,8 @@ import net.minecraft.server.MinecraftServer;
 
 /**
  * (0.7.418) The server-wide record of road deeds: ids of things done (a hard road's aim finished is {@code rise.<road>}),
- * kept on the Overworld with the realms and saved with the world. Anyone doing one does it for everyone. Patch 5 reads it
- * to unlock a richer road; for now it only records. Reached as {@link Deeds#done} and {@link Deeds#has}, which is where
+ * kept on the Overworld with the realms and saved with the world. Anyone doing one does it for everyone. (0.7.419) {@link RoadLocks}
+ * reads it to open the roads the deeds earn. Reached as {@link Deeds#done} and {@link Deeds#has}, which is where
  * the rest of the deeds code looks.
  */
 public final class RoadDeeds {
@@ -35,6 +35,18 @@ public final class RoadDeeds {
 		List<String> more = new ArrayList<>(now);
 		more.add(id);
 		Factions.level(server).setAttached(DONE, List.copyOf(more));
+		return true;
+	}
+
+	/** (0.7.419) Takes deed {@code id} back (ops testing the road locks). True if it was there. */
+	public static boolean undo(MinecraftServer server, String id) {
+		List<String> now = Factions.level(server).getAttachedOrElse(DONE, List.of());
+		if (!now.contains(id)) {
+			return false;
+		}
+		List<String> less = new ArrayList<>(now);
+		less.remove(id);
+		Factions.level(server).setAttached(DONE, List.copyOf(less));
 		return true;
 	}
 

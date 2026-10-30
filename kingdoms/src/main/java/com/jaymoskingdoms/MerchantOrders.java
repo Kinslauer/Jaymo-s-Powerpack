@@ -415,6 +415,8 @@ final class MerchantOrders {
 	 * Trader road's two. It counts against no day's buying and earns no standing, and nothing was paid for it, so cancelling refunds nothing.
 	 */
 	static void taken(ServerLevel level, ServerPlayer buyer, Faction town, ItemStack goods, long wait) {
+		// (0.7.419) a road deed: a merchant's order taken on
+		Deeds.done(level.getServer(), "orders.taken");
 		put(level.getServer(), new Order(UUID.randomUUID().toString(), buyer.getUUID(), goods, 0, town.name(), town.name(), town.id(),
 			town.seat(), level.getGameTime() + wait, "", 0));
 	}

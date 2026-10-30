@@ -483,9 +483,12 @@ public final class LifeStory {
 	/**
 	 * Server → player: tell your story (the screen opens; {@code forced}: it can't be shut), with the realms there are to
 	 * name. (0.7.356) {@code creatorAhead}: MCA's creator comes next, so the story stops short of the road ({@link Road}).
-	 * (0.7.417) {@code mates}: the party members who took a road lately (Start Together).
+	 * (0.7.417) {@code mates}: the party members who took a road lately (Start Together). (0.7.419) {@code unlocked}: the keys of
+	 * the locked roads this player can take whatever their past (a deed, ops, a road they took); {@code shut}: those ops have
+	 * forced shut ({@link RoadLocks}).
 	 */
-	public record Open(boolean forced, List<Realm> realms, boolean creatorAhead, List<Mate> mates) implements CustomPacketPayload {
+	public record Open(boolean forced, List<Realm> realms, boolean creatorAhead, List<Mate> mates, List<String> unlocked, List<String> shut)
+		implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("story_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -502,6 +505,14 @@ public final class LifeStory {
 					buf.writeUtf(m.road());
 					buf.writeUtf(m.realm());
 				}
+				buf.writeVarInt(p.unlocked.size());
+				for (String key : p.unlocked) {
+					buf.writeUtf(key);
+				}
+				buf.writeVarInt(p.shut.size());
+				for (String key : p.shut) {
+					buf.writeUtf(key);
+				}
 			}, buf -> {
 				boolean forced = buf.readBoolean(), creatorAhead = buf.readBoolean();
 				int n = buf.readVarInt();
@@ -514,7 +525,17 @@ public final class LifeStory {
 				for (int i = 0; i < m; i++) {
 					mates.add(new Mate(buf.readUtf(), buf.readUtf(), buf.readUtf()));
 				}
-				return new Open(forced, List.copyOf(realms), creatorAhead, List.copyOf(mates));
+				int u = buf.readVarInt();
+				List<String> unlocked = new ArrayList<>(u);
+				for (int i = 0; i < u; i++) {
+					unlocked.add(buf.readUtf());
+				}
+				int sh = buf.readVarInt();
+				List<String> shut = new ArrayList<>(sh);
+				for (int i = 0; i < sh; i++) {
+					shut.add(buf.readUtf());
+				}
+				return new Open(forced, List.copyOf(realms), creatorAhead, List.copyOf(mates), List.copyOf(unlocked), List.copyOf(shut));
 			});
 
 		@Override
@@ -726,7 +747,8 @@ public final class LifeStory {
 				realms.add(new Realm(f.id(), f.name()));
 			}
 		}
-		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player), mates(player)));
+		ServerPlayNetworking.send(player, new Open(forced, List.copyOf(realms), untold(player) && McaCompat.destinyPending(player), mates(player),
+			RoadLocks.opened(server, player), RoadLocks.shutKeys(server)));
 	}
 
 	/** The answer at {@code index} of {@code q}, or null (out of range, or not asked). */
@@ -793,6 +815,13 @@ public final class LifeStory {
 			|| road != null && !road.offered()) {
 			return;
 		}
+		// (0.7.419) a locked road is only for a deed done in this world or a past that opens it: the client is not trusted with that
+		if (road != null && !RoadLocks.allowed(server, player, road.start, q -> {
+			Answer a = at(q, live.answers());
+			return a == null ? null : a.key;
+		})) {
+			return;
+		}
 		// the heritage and class picked over the story's, if any: a heritage open to them, any class
 		Heritage.Kind heritage = born.heritage;
 		if (live.heritage() >= 0) {
@@ -855,6 +884,8 @@ public final class LifeStory {
 
 	/** (0.7.304) Sets out once MCA's creator is done: till then they're held in stasis over the world (StoryStasis). */
 	private static void setOut(ServerPlayer player, Answer road, @Nullable Faction roadRealm, String power) {
+		// (0.7.419) a road taken stays open to them for good, whatever happens to the deeds
+		RoadLocks.note(player, road.start);
 		player.setAttached(ROAD, road.start.name() + "|" + (roadRealm == null ? -1 : roadRealm.id()) + "|" + power);
 		if (!McaCompat.destinyPending(player)) {
 			depart(player);
@@ -873,6 +904,13 @@ public final class LifeStory {
 		Answer road = payload.road() >= 0 && payload.road() < roads.size() ? roads.get(payload.road()) : null;
 		Heritage.Kind heritage = Heritage.of(player);
 		if (road == null || !road.offered() || !road.fits(heritage)) {
+			return;
+		}
+		// (0.7.419) the same lock check as the whole story's: the past is the story told before the creator
+		if (!RoadLocks.allowed(player.level().getServer(), player, road.start, q -> {
+			Answer a = answer(player, q);
+			return a == null ? null : a.key;
+		})) {
 			return;
 		}
 		Faction roadRealm = road.realm ? realm(player.level().getServer(), payload.roadRealm()) : null;
@@ -938,7 +976,7 @@ public final class LifeStory {
 			return;
 		}
 		RandomSource random = player.getRandom();
-		Start road0 = chosen == Start.FATE ? fated(server, random) : chosen;
+		Start road0 = chosen == Start.FATE ? fated(server, player, random) : chosen;
 		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
 		java.util.function.Consumer<Start> go = start -> {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -947,6 +985,8 @@ public final class LifeStory {
 				DEPARTED.remove(id);
 				return;
 			}
+			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
+			RoadLocks.note(p, start);
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
@@ -1012,14 +1052,16 @@ public final class LifeStory {
 		return heritage == Heritage.Kind.STONEBORN || cls == Classes.PlayerClass.MAGE || cls == Classes.PlayerClass.SORCERER;
 	}
 
-	/** "Let fate decide" on the start: any start that needs no realm named (a capital only if there's one). */
-	private static Start fated(MinecraftServer server, RandomSource random) {
+	/** "Let fate decide" on the start (0.7.419: among the roads {@code player} can take): any start that needs no realm named (a capital only if there's one). */
+	private static Start fated(MinecraftServer server, ServerPlayer player, RandomSource random) {
 		List<Start> open = new ArrayList<>(List.of(Start.CAVE, Start.SHIPWRECK, Start.VILLAGE, Start.WILD, Start.SKYFALL, Start.BURNED, Start.SNOWED));
 		if (capital(server, random) != null) {
 			open.add(Start.CITY);
 		}
 		// (0.7.228: one is raised if the world hasn't any)
 		open.add(Start.MONOLITH);
+		// (0.7.419) only a road this player can take: the locked ones only when a deed or their past has opened them
+		open.removeIf(start -> !RoadLocks.fateMay(server, player, start));
 		return open.get(random.nextInt(open.size()));
 	}
 
@@ -1925,25 +1967,34 @@ public final class LifeStory {
 		}
 	}
 
+	/**
+	 * Unmakes {@code player}'s heritage, class and story (not the roads they took: {@link RoadLocks#TOOK}), so the whole life
+	 * story can be told again. From {@code /kingdom story reset} and (0.7.419) the Writ of Rebirth.
+	 */
+	static void unmake(ServerPlayer p) {
+		p.removeAttached(STORY);
+		p.removeAttached(ROAD);
+		p.removeAttached(GENDER);
+		p.removeAttached(CALLING);
+		p.removeAttached(STRANDED);
+		StoryHomes.clear(p);
+		StoryHard.clear(p);
+		StoryKit.clear(p);
+		LifeAims.clear(p);
+		DEPARTED.remove(p.getUUID());
+		ROAD_ASKED.remove(p.getUUID());
+		LANDINGS.remove(p.getUUID());
+		Classes.clear(p);
+		Heritage.clear(p);
+	}
+
 	/** {@code /kingdom story reset <players>} (ops): unmakes their heritage, class and story, and asks for their story again. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("story").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("reset").then(Commands.argument("players", EntityArgument.players()).executes(c -> {
 				int n = 0;
 				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
-					p.removeAttached(STORY);
-					p.removeAttached(ROAD);
-					p.removeAttached(GENDER);
-					p.removeAttached(CALLING);
-					p.removeAttached(STRANDED);
-					StoryHomes.clear(p);
-					StoryHard.clear(p);
-					StoryKit.clear(p);
-					LifeAims.clear(p);
-					DEPARTED.remove(p.getUUID());
-					LANDINGS.remove(p.getUUID());
-					Classes.clear(p);
-					Heritage.clear(p);
+					unmake(p);
 					ask(p, true);
 					n++;
 				}

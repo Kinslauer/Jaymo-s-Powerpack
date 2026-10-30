@@ -346,6 +346,8 @@ public final class StoryHard {
 	private static void breakOut(ServerPlayer player, Faction f, long jailUntil) {
 		ServerLevel level = Factions.level(player.level().getServer());
 		player.removeAttached(Busts.JAILED);
+		// (0.7.419) a road deed: a cell door picked
+		Deeds.done(level.getServer(), "cells.broke");
 		let(level, player, f);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.cell.picked", f.name()).withStyle(ChatFormatting.DARK_RED));
 		Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));

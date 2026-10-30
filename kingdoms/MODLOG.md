@@ -7422,3 +7422,26 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   back; the spiteful, proud, suspicious, greedy and hotheaded are cold. A nobody dying at your side only loses the aim.
 
 - Review fixes: the heirloom counts as kept while it is in the pack, ender chest or a shulker box in either (five days online out of reach before it is lost); only the assassin sent for you counts; nobodies lose their tag when the contract ends and betray only while it runs with you online in that world (a fall at your side ends the aim with a Tidings line); each villager speaks and forgives once; a reputation or rank aim with no real realm becomes a ten-day survive aim; monsters must have been after you (no slime splits); days count whole days online; a pup dying while you are away still counts; only the story's own cell breaks the sentenced aim.
+
+## 0.7.419: Roads earned by deeds
+- Andy: "The only available starts without this should be basic ones and req ones, like verdant and divine born." Open from the
+  first day: the realm's capital, village, wild, sworn, banished, shipwreck, fate, and the heritage-locked Verdant and afterlife
+  roads. Every other road (old and new) starts locked and opens by a **deed** done by anyone in the world (`RoadDeeds`, for
+  everyone) or by a **secret past** (this player's earlier answers). The whole table is `RoadLocks.LOCKS`, one row a road: the
+  deed ids (any one), the past predicate, and the hint in lang (`story.jaymoskingdoms.road.<road>.hint`).
+- New deed ids (`Deeds.done`): `captive.freed`, `cells.held`, `cells.served`, `cells.broke`, `fire.doused`, `life.saved`,
+  `market.black`, `banned.city`, `pit.won`, `orders.taken`, `orders.sent`, `assassin.killed`, `whalers.signed`, `whale.taken`,
+  `aim.done`, `moon.cured`, `moon.blood` (a blood moon that has come and gone), `star.fell`, `kill.spider`, `kill.stray`, and
+  `world.<name>` for any Jaymo's Powers dimension entered (moon, rustfall, maw, cinder, time_chamber); plus `rise.<road>`.
+- **Locked cards**: dim and unselectable on the road carousel, showing one oblique hint line (never what to do, never lore); the
+  short line and gifts of a locked road are hidden. The server sends the roads open to this player (`LifeStory.Open` now carries
+  `unlocked` and `shut`) and the screen applies the past table to the answers picked so far; the server re-checks when the
+  story or the road answer arrives (`RoadLocks.allowed`). Fate only picks roads this player can take.
+- A road a player took is kept for good (`roads_taken`, plus the road their story names), so existing worlds lose nothing.
+- **A Writ of Rebirth** now reopens the whole life story (unmakes story, heritage and class like `/kingdom story reset`), not
+  only the class page; the road page shows whatever is open then.
+- `/kingdom roads unlock|lock <road|all>` (ops): forces a road open or shut for everyone (deeds `open.<road>`/`shut.<road>`; shut wins).
+- Review fixes: the heritage-only roads (Demon for the Emberborn, the Lab, Cast Out for the Bio-built) are open from the start
+  like Verdant and the afterlife (Andy: basic and "req" roads need no deed); Snowed's past needs a pair like every other row;
+  the road fate picks is remembered as taken; a whale counts as taken only with a traveller by; a sentence counts as served
+  only while its realm stands; a Writ is not spent on a client without the story screen; `/kingdom roads` lines translated.

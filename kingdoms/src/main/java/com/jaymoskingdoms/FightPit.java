@@ -852,6 +852,8 @@ public final class FightPit {
 			}
 			LivingEntity foe = v[1 - i];
 			if (i == winner) {
+				// (0.7.419) a road deed: a bout won in the pit
+				Deeds.done(server, "pit.won");
 				int beatenWins = bout.stats[1 - i].wins();
 				int purse = PURSE + PURSE_PER_WIN * beatenWins;
 				GreatWars.owe(server, p.getUUID(), purse);

@@ -91,6 +91,7 @@ final class KingdomCommands {
 			.then(WarCommands.command())
 			.then(Classes.command())
 			.then(LifeStory.command())
+			.then(RoadLocks.command())
 			.then(Heritage.command())
 			.then(WorldTiers.command())
 			.then(com.jaymoskingdoms.remnants.Monoliths.command())
