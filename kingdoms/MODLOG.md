@@ -7161,3 +7161,9 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   figure now lacks its sword arm (Powers' right arm), and any hand whose arm is gone lets go: what it held (an earlier
   answer's bow, sword, pickaxe) lies flat on the floor at the feet on that side, pointing away. Sizes in
   `StoryFigure.DROPPED_*`.
+
+## 0.7.403: the Piglin King stands straight (pack 0.18.70)
+- Andy: "piglin arm is broken". The model file's idle and walk hold a twisted fighting stance, the left arm thrust out
+  and pushed off its shoulder (made to hold something it doesn't have). It now stands in its rest pose and walks with
+  its legs and arms swinging (`BeastsClient.kingStride`); its claw, volley, cold snap and roar still play as drawn.
+- Compile-checked; not seen in game.

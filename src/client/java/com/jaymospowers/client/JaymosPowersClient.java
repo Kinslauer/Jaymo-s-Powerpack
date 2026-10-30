@@ -140,6 +140,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
+		com.jaymospowers.client.armory.MusketSights.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();

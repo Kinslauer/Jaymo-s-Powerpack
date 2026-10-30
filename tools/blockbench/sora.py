@@ -47,7 +47,9 @@ for el in bb["elements"]:
 # edge toward the camera). Turn the whole model a quarter about the vertical axis through the middle of the grip (put back
 # on x 8, z 8) so the blade lies in the same plane as a vanilla sword's: the display() transforms then hold it the way a
 # sword is held, and the inventory slot shows the wide face instead of an edge.
-SPIN = rot_y(90)
+# (0.18.70) Andy: "sora's dagger turned the wrong way" after the quarter turn: turn it the other quarter, so the edge
+# leads and the serrated spine trails as the friend drew it to be held
+SPIN = rot_y(-90)
 PIVOT = (8.4, 0, 7)  # the middle of the grip's cubes (x 7.6-9.2, z 5-9, one of them to 10)
 _p = apply(SPIN, PIVOT)
 SHIFT = (8 - _p[0], 0, 8 - _p[2])
