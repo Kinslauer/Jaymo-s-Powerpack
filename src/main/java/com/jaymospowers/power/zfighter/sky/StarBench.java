@@ -27,7 +27,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.18.51, Andy's SevTech picks: "Star-Sight Bench") A stone bench with a lens on a post. Set on the Lookout's platform
+ * (0.18.52, Andy's SevTech picks: "Star-Sight Bench") A stone bench with a lens on a post. Set on the Lookout's platform
  * ({@link ZFighterLookout#onPlatform}) under open sky on a clear night it wakes: the lens glows ({@link #AWAKE}), it hums and
  * lets off a mote now and then. Used awake it gives its user the chart of the Pale Moon, once for each player. It makes no pod
  * and does nothing about pods. Asleep it is only a bench. It looks at the sky again every {@link #LOOK_TICKS} ticks.

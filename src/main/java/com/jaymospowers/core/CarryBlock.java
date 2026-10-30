@@ -298,7 +298,7 @@ public final class CarryBlock {
 	}
 
 	/**
-	 * (0.18.49) Puts a block that never stood in the world (a pod part taken off a salvage rack) straight into
+	 * (0.18.50) Puts a block that never stood in the world (a pod part taken off a salvage rack) straight into
 	 * {@code carrier}'s arms, as if they had lifted it.
 	 */
 	public static void carryNew(ServerLevel level, ServerPlayer carrier, BlockState state) {

@@ -55,9 +55,9 @@ public final class ZFighterRaiders {
 	static final double RAIDER_HEALTH = 2.5, RAIDER_DAMAGE = 1.6, CHIEF_HEALTH = 0.6, CHIEF_DAMAGE = 0.9, HUNT = 32.0;
 	/** The fuel the pod left behind holds. */
 	static final int PRIZE_FUEL = 3;
-	/** (0.18.47) What a burnt-out pod leaves: its keel and this many sound parts at random. */
+	/** (0.18.49) What a burnt-out pod leaves: its keel and this many sound parts at random. */
 	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
-	/** (0.18.49) How many of a raider pod's hull plates, canopy and mast are gone when it comes down (it flies stripped, and the one left keeps the gaps). */
+	/** (0.18.50) How many of a raider pod's hull plates, canopy and mast are gone when it comes down (it flies stripped, and the one left keeps the gaps). */
 	static final int STRIP_MIN = 1, STRIP_MAX = 3;
 	static final int NAMES = 8;
 	static final String TAG = "jaymospowers.raider";
@@ -288,7 +288,7 @@ public final class ZFighterRaiders {
 		if (kept == null) {
 			return;
 		}
-		// (0.18.47) the kept pod is a pod of your own, no longer locked to the band; (0.18.49) it keeps the gaps it came down with
+		// (0.18.47) the kept pod is a pod of your own, no longer locked to the band; (0.18.50) it keeps the gaps it came down with
 		// (no hull door, no glass) and, never having been hammered to a finish, is not flight-ready: mend it, or strip it with a hammer
 		kept.removeTag(TAG);
 		kept.removeTag(ZFighterPatrol.POD_TAG);
@@ -300,7 +300,7 @@ public final class ZFighterRaiders {
 	}
 
 	/**
-	 * (0.18.49) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast
+	 * (0.18.50) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast
 	 * are not there, so the pod comes down (and is drawn) without a door or glass, and it is not finished.
 	 */
 	private static void strip(PodEntity pod, RandomSource random) {
