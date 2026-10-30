@@ -93,6 +93,8 @@ public final class GuardDrills {
 	static final int PRACTICE = 10;
 	/** Scoreboard tag on the practice foes (so a stray one left by a crash is swept up on load). */
 	static final String FOE_TAG = "jaymoskingdoms_drill_foe";
+	/** Put on a practice foe the moment it's struck down, so a foe only unloaded (or swept) never counts as beaten. */
+	static final String FELL_TAG = "jaymoskingdoms_drill_fell";
 	/** The MCA {@code main} menu answer (our dialogue data): "Ask for a drill". */
 	public static final String ANSWER = "jaymoskingdoms_drill";
 
@@ -153,6 +155,8 @@ public final class GuardDrills {
 		final long until;
 		final List<Zombie> foes = new ArrayList<>();
 		int defeated, parries;
+		/** A practice foe gone without being struck down (its chunk unloaded): the drill no longer counts. */
+		boolean lost;
 		long nextBlow, lastParry = -1L;
 
 		Run(Kind kind, UUID guard, long until) {
@@ -169,8 +173,9 @@ public final class GuardDrills {
 
 	public static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			// a practice foe left standing by a crash or a save in mid-drill
-			if (entity instanceof Zombie && entity.entityTags().contains(FOE_TAG)) {
+			// a practice foe left standing by a crash or a save in mid-drill (a fresh spawn fires this too, so only one off the disk)
+			if (entity instanceof Zombie && entity.entityTags().contains(FOE_TAG)
+				&& ((net.fabricmc.fabric.api.event.lifecycle.v1.EntityLoadData) entity).isLoadedFromDisk()) {
 				entity.discard();
 			}
 		});
@@ -254,7 +259,9 @@ public final class GuardDrills {
 			say(level, guard, player, "drill.jaymoskingdoms.tomorrow");
 			return;
 		}
-		if (guard.getTarget() != null || player.getHealth() < player.getMaxHealth() * START_HEALTH || Downed.isDowned(player)) {
+		// the veteran must be hale too, or a spar would be won on the first blow
+		if (guard.getTarget() != null || player.getHealth() < player.getMaxHealth() * START_HEALTH || Downed.isDowned(player)
+			|| guard.getHealth() < guard.getMaxHealth() * START_HEALTH) {
 			say(level, guard, player, "drill.jaymoskingdoms.not_now");
 			return;
 		}
@@ -421,11 +428,20 @@ public final class GuardDrills {
 		for (Zombie foe : new ArrayList<>(run.foes)) {
 			if (foe.isRemoved() || !foe.isAlive()) {
 				run.foes.remove(foe);
-				run.defeated++;
+				if (foe.entityTags().contains(FELL_TAG)) {
+					run.defeated++;
+				} else {
+					run.lost = true;
+				}
 			}
 		}
 		if (run.foes.isEmpty()) {
-			complete(level, player, guard, run);
+			// every foe beaten, or some only lost to an unloaded chunk (then the drill doesn't count)
+			if (!run.lost && run.defeated > 0) {
+				complete(level, player, guard, run);
+			} else {
+				abandon(level, player, run, guard, "drill.jaymoskingdoms.gate.lost");
+			}
 			return;
 		}
 		if (guard.tickCount % 20 == 0) {
@@ -528,6 +544,7 @@ public final class GuardDrills {
 		}
 		level.sendParticles(ParticleTypes.POOF, foe.getX(), foe.getY() + 1.0, foe.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 		foe.setHealth(1.0F);
+		foe.addTag(FELL_TAG);
 		foe.discard();
 		return true;
 	}

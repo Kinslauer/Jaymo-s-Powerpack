@@ -97,6 +97,8 @@ public final class Forms {
 	static final double MASTER_REACH = 4.5, MASTER_FACING = 0.5;
 	/** Powers' block and tag for its training post and sparring dummy (read by name: Kingdoms never needs Powers). */
 	static final String TRAINING_POST = "jaymospowers:training_post", SPARRING_TAG = "jaymospowers_sparring";
+	/** Powers' Afterimage decoys are mannequins too: never a dummy to practise on or set the belt at. */
+	static final String AFTERIMAGE_TAG = "jaymospowers_afterimage";
 
 	/** The weapon families; a form works with the weapons its family recognises. */
 	public enum Family {
@@ -339,16 +341,18 @@ public final class Forms {
 			READY.clear();
 			WINDUPS.clear();
 		});
-		// the belt opens on a sneaking use, empty-handed, of a training post or a mannequin (a sparring dummy)
+		// the belt opens on a sneaking use, empty-handed, of a training post or a mannequin (a sparring dummy); a Z Fighter's
+		// use of a post is Powers' drill screen, so a Z Fighter sets the belt at a mannequin
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player instanceof ServerPlayer sp && wantsBelt(sp, hand == net.minecraft.world.InteractionHand.MAIN_HAND)
+				&& !"zfighter".equals(com.jaymoskingdoms.PowersCompat.power(sp))
 				&& BuiltInRegistries.BLOCK.getKey(level.getBlockState(hit.getBlockPos()).getBlock()).toString().equals(TRAINING_POST)) {
 				return openBelt(sp);
 			}
 			return InteractionResult.PASS;
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (player instanceof ServerPlayer sp && entity instanceof Mannequin && wantsBelt(sp, hand == net.minecraft.world.InteractionHand.MAIN_HAND)) {
+			if (player instanceof ServerPlayer sp && entity instanceof Mannequin && dummy(entity) && wantsBelt(sp, hand == net.minecraft.world.InteractionHand.MAIN_HAND)) {
 				return openBelt(sp);
 			}
 			return InteractionResult.PASS;
@@ -493,7 +497,7 @@ public final class Forms {
 	/** The foes a form may hit in {@code box}: the Combat Arts' foes, and the mannequins (sparring dummies) there. */
 	static List<LivingEntity> targets(ServerLevel level, ServerPlayer player, AABB box) {
 		List<LivingEntity> list = new ArrayList<>(CombatArts.foes(level, player, box));
-		for (Mannequin dummy : level.getEntitiesOfClass(Mannequin.class, box, e -> e.isAlive() && !list.contains(e))) {
+		for (Mannequin dummy : level.getEntitiesOfClass(Mannequin.class, box, e -> e.isAlive() && dummy(e) && !list.contains(e))) {
 			list.add(dummy);
 		}
 		return list;
@@ -512,8 +516,13 @@ public final class Forms {
 	}
 
 	/** Whether {@code player} stands near a training post, a sparring dummy or a mannequin: where the belt can be changed. */
+	/** Whether {@code entity} (a mannequin) is a practice dummy, not someone's Afterimage decoy. */
+	static boolean dummy(net.minecraft.world.entity.Entity entity) {
+		return !entity.entityTags().contains(AFTERIMAGE_TAG);
+	}
+
 	public static boolean trainingSpot(ServerPlayer player) {
-		return nearPost(player) || !player.level().getEntitiesOfClass(Mannequin.class, player.getBoundingBox().inflate(TRAIN_RANGE), e -> true).isEmpty();
+		return nearPost(player) || !player.level().getEntitiesOfClass(Mannequin.class, player.getBoundingBox().inflate(TRAIN_RANGE), Forms::dummy).isEmpty();
 	}
 
 	private static boolean nearPost(ServerPlayer player) {
@@ -623,8 +632,8 @@ public final class Forms {
 		if (player.isPassenger() || player.isFallFlying()) {
 			return;
 		}
+		// the cooldown is set now (no second press during the wind-up); the food is spent when the form goes off
 		READY.get(player.getUUID()).put(id, now + form.cooldown());
-		player.causeFoodExhaustion(form.hunger());
 		// Form Cancel: right after a chain blow landed, the wind-up is skipped
 		boolean cancel = CombatArts.sinceLanded(player) <= CANCEL_TICKS;
 		if (cancel || form.windUp() <= 0) {
@@ -639,6 +648,7 @@ public final class Forms {
 	}
 
 	private static void perform(ServerPlayer player, Form form) {
+		player.causeFoodExhaustion(form.hunger());
 		int rank = Math.max(1, rank(player, form.id()));
 		if (form.family() == Family.BLADE) {
 			BladeForms.perform(player, form, rank);
@@ -661,6 +671,11 @@ public final class Forms {
 			ServerPlayer player = server.getPlayerList().getPlayer(w.who());
 			if (player == null || !player.isAlive() || !book(player).stance()) {
 				it.remove();
+				// a wind-up cut short by the stance ending gives its cooldown back
+				Map<String, Long> ready = player == null ? null : READY.get(w.who());
+				if (ready != null) {
+					ready.remove(w.form().id());
+				}
 			} else if (player.level().getGameTime() >= w.at()) {
 				it.remove();
 				perform(player, w.form());
