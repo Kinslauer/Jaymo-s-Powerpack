@@ -80,7 +80,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterPodTrip}): a countdown, a lift-off, a flight shown on screen, and a landing on open ground anywhere on the far
  * world; the pod you came in stands there for the way back. A pod holds fuel ({@link #FUEL}, coal or blaze powder used on it) and
  * each trip burns some by distance ({@link #COSTS}). The pads ({@link #PAD}) are now only the life-story starts' ports.
- * (0.18.19) The pod is now an entity built from parts ({@link PodEntity}); the old pod block stays registered so saved worlds load,
+ * (0.18.47) The pod is now an entity built from parts ({@link PodEntity}); the old pod block stays registered so saved worlds load,
  * and becomes a complete pod, holding its fuel, the first time anyone uses it.
  * <p>
  * Where you flew from is kept ({@link #HOME}) when it was not one of the far places, so "Home" on any pod brings you down where you
@@ -166,7 +166,7 @@ public final class ZFighterSpace {
 		builder -> builder.persistent(BlockPos.CODEC));
 
 	/**
-	 * Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.20: the tank's grade).
+	 * Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.48: the tank's grade).
 	 * (0.18.51) {@code read} is the set of star charts the pilot has read (bit w: destination w): only those worlds are on the map.
 	 */
 	public record Open(int fuel, int grade, int read) implements CustomPacketPayload {
@@ -237,7 +237,7 @@ public final class ZFighterSpace {
 
 	// ---------------------------------------------------------------- the pod
 
-	/** The old pod block (0.18.19: kept so saved worlds load): right-click and it becomes a pod entity; coal or blaze powder still fuels it. */
+	/** The old pod block (0.18.47: kept so saved worlds load): right-click and it becomes a pod entity; coal or blaze powder still fuels it. */
 	static final class PodBlock extends Block {
 		private static final VoxelShape SHAPE = net.minecraft.world.phys.shapes.Shapes.or(Block.box(3, 0, 3, 13, 9, 13), Block.box(4, 9, 4, 12, 13, 12),
 			Block.box(6, 13, 6, 10, 16, 10), Block.box(1, 0, 7, 3, 5, 9), Block.box(13, 0, 7, 15, 5, 9));
@@ -284,7 +284,7 @@ public final class ZFighterSpace {
 		@Override
 		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 			if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer server) {
-				// (0.18.19) an old pod block becomes a complete pod standing where it was, with its fuel
+				// (0.18.47) an old pod block becomes a complete pod standing where it was, with its fuel
 				serverLevel.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				open(server, PodEntity.spawn(serverLevel, Vec3.atBottomCenterOf(pos), true, state.getValue(FUEL)));
 			}
@@ -292,7 +292,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.19) Opens the star map for {@code player} at {@code pod}. */
+	/** (0.18.47) Opens the star map for {@code player} at {@code pod}. */
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
@@ -305,7 +305,7 @@ public final class ZFighterSpace {
 		return player.isCreative() ? Charts.ALL : Charts.readMask(player);
 	}
 
-	/** How much fuel one of {@code stack} puts in a pod (0: none). (0.18.20) The numbers and grades are {@link PodFuel}'s. */
+	/** How much fuel one of {@code stack} puts in a pod (0: none). (0.18.48) The numbers and grades are {@link PodFuel}'s. */
 	public static int fuelWorth(ItemStack stack) {
 		return PodFuel.worth(stack);
 	}
@@ -418,7 +418,7 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_fuel", cost, fuel).withStyle(ChatFormatting.RED));
 			return;
 		}
-		// (0.18.20) the tank's fuel must be fine enough for the world
+		// (0.18.48) the tank's fuel must be fine enough for the world
 		int need = PodFuel.needed(index);
 		int grade = PodFuel.effective(pod);
 		if (!player.isCreative() && grade < need) {
@@ -571,7 +571,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.19) wrecked pod. */
+	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.47) wrecked pod. */
 	static List<BlockPos> mawDecks() {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);
@@ -621,7 +621,7 @@ public final class ZFighterSpace {
 		for (int up = 1; up <= 3; up++) {
 			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
-		// (0.18.19) and a pod that came down with the ship; (0.18.21) it holds its deck's own set of parts, worn in part, for a hammer to salvage
+		// (0.18.47) and a pod that came down with the ship; (0.18.49) it holds its deck's own set of parts, worn in part, for a hammer to salvage
 		// (its own random: the wrecks' draws stay in step)
 		PodWrecks.build(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), deck, RandomSource.create(MAW_SEED ^ centre.asLong()).nextFloat() * 360.0F);
 	}

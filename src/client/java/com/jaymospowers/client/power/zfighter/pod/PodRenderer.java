@@ -17,9 +17,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.18.19, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
+ * (0.18.47, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
  * heading. A damaged fin is drawn bent out {@link #BEND} degrees about its foot, a damaged canopy as its lower step only,
- * a damaged plate with its dark gash. (0.18.21) A finished pod's beacon lamp is drawn full bright, and each mend grade adds a
+ * a damaged plate with its dark gash. (0.18.49) A finished pod's beacon lamp is drawn full bright, and each mend grade adds a
  * brass band to the keel's corner posts. (Parts are drawn by pose, not by moving the shared model parts, since the draw is
  * queued and made later.)
  */
@@ -73,7 +73,7 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		RenderType glass = RenderTypes.entityTranslucent(PodModel.TEXTURE);
 		if ((state.filled & PodPart.KEEL.bit(0)) != 0) {
 			draw(collector, poseStack, state, "keel", solid);
-			// (0.18.21) a band of brass on the corner posts for each grade it was mended
+			// (0.18.49) a band of brass on the corner posts for each grade it was mended
 			for (int grade = 1; grade <= state.grade; grade++) {
 				draw(collector, poseStack, state, "grade_" + grade, solid);
 			}
@@ -115,7 +115,7 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		if ((state.filled & PodPart.MAST.bit(0)) != 0) {
 			draw(collector, poseStack, state, "mast", solid);
 			if (state.finished) {
-				// (0.18.21) the beacon lamp lights once a hammer has finished the pod
+				// (0.18.49) the beacon lamp lights once a hammer has finished the pod
 				ModelPart lamp = PodModel.part("mast_lit");
 				collector.submitModelPart(lamp, poseStack, solid, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null);
 			}

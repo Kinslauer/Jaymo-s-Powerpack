@@ -78,3 +78,21 @@ Andy: "All guns should red glint too, all sailors should have at least one flint
 8. A plain zombie glints before each blow and misses if you step back in time; an iron golem's glint is red.
 9. A pirate or musketeer glints red with a click before each shot; a raised sword blocks the ball but never parries it.
 10. Every ship's crew who fight draw a flintlock; some fire two or three in a row before reloading.
+
+## One timing bar for everything that blocks (Powers 0.18.24)
+Andy (2026-10-30): "make the parry meter consistent across all weapons/ powers that block, including z fighters and
+darktide", then, on their own windows: "yeah keep that but give a bar that represents their timings".
+
+- Weapons and shields keep `Guard` as before (perfect 0-5 / parry 6-12 ticks, lock-on bonus, mashing rule, red blows and
+  shots unparryable). Their bar now also turns grey-only when the raise is too eager to parry.
+- Z Fighter's crossed arms and Darktide's guard keep their own parry: one 8-tick window from the raise, a 20-tick
+  cooldown after a parry, red heavy blows parried too, and their own outcomes (ki/poise; Flow, empowered R, katana
+  riposte, reflect).
+- The same bar under the crosshair now draws for them, from their own timings: their window in gold, grey while the
+  parry is still cooling down, the red notch moving along it. They call `Guard.showPower(player, start, window, readyAt)`
+  when the guard goes up and after a parry, and `Guard.hidePower` when it comes down; the server syncs it to the owner as
+  `Guard.SHOWN`.
+- Every parry flashes the bar the same way (`Guard.cue`), Darktide's Gedan stance included.
+- `Guard.PARRIED` (Fabric event: player, attacker, perfect) fires for every parry of any kind, for drills and quests.
+- Not changed: Chrono's Time Flow counters (a held blow answered by right click, not a guard), mobs' own parries
+  (Kingdoms `MobParry`), Wind/Gravity projectile deflects, mana spirits' parries.

@@ -33,7 +33,7 @@ import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.366, Andy's SevTech picks: "Rung Journal") A small book with one page for each world tier ({@link WorldTiers}), written
+ * (0.7.381, Andy's SevTech picks: "Rung Journal") A small book with one page for each world tier ({@link WorldTiers}), written
  * as a hermit's or a patrolman's odd short hints and never as plain lore. Each page is about the step into its tier; a line
  * with a feat behind it ticks itself when that feat lands (the great foes, the Nether, the Wither, the Dragon, and the four
  * exit deeds), read from the player's own {@link WorldTiers.Progress} each time the book is opened. It is a book to look at:
