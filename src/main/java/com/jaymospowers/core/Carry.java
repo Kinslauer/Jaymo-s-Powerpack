@@ -626,6 +626,18 @@ public final class Carry {
 			return;
 		}
 		if (!toss && CarryBlock.is(entry.carried)) {
+			// (0.18.49) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
+			switch (com.jaymospowers.power.zfighter.pod.PodParts.tryAttach(carrier, entry.carried)) {
+				case DONE -> {
+					end(carrier, entry, Let.SET_DOWN);
+					return;
+				}
+				case REFUSED -> {
+					return;
+				}
+				default -> {
+				}
+			}
 			// (0.13.11) a block goes straight into the free spot looked at; with no room there, it stays in your arms
 			net.minecraft.core.BlockPos spot = CarryBlock.placeSpot(carrier, entry.carried);
 			if (spot == null) {

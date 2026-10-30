@@ -19,9 +19,18 @@ public enum Molten {
 	PIG_IRON("pig_iron", 0xFFEFA9A9, TinkerMaterial.PIG_IRON),
 	SLIMESTEEL("slimesteel", 0xFF74C8C7, TinkerMaterial.SLIMESTEEL),
 	STEEL("steel", 0xFFF2B866, TinkerMaterial.STEEL),
+	// (0.18.55) the far worlds' first metals (power/zfighter/farworld)
+	PALE_ALLOY("pale_alloy", 0xFFD8E4F0, TinkerMaterial.PALE_ALLOY),
+	RUST_IRON("rust_iron", 0xFFB5532A, TinkerMaterial.RUST_IRON),
+	ICE_IRON("ice_iron", 0xFF8FD3F0, TinkerMaterial.ICE_IRON),
+	CINDER_BRONZE("cinder_bronze", 0xFFE0782A, TinkerMaterial.CINDER_BRONZE),
+	VOID_SHARD("void_shard", 0xFF7A3FD0, TinkerMaterial.VOID_SHARD),
+	AMBER_BRONZE("amber_bronze", 0xFFE6A82E, TinkerMaterial.AMBER_BRONZE),
 	SLIME("slime", 0xFF7EBE5A, null),
 	HONEY("honey", 0xFFF9A42C, null),
-	BLOOD("blood", 0xFF6B0000, null);
+	BLOOD("blood", 0xFF6B0000, null),
+	// ---- (0.18.56) back home (keep apart when merging far-world metals) ----
+	STAR_METAL("star_metal", 0xFFC9C2FF, TinkerMaterial.STAR_METAL);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;

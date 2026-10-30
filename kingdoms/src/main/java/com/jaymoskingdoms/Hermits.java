@@ -32,6 +32,7 @@ import org.jspecify.annotations.Nullable;
  * visitor a spell scroll once a day for the climb, tell more of it in MCA's chat, and unmake skills (sneak and use
  * them) as any court wizard does. No kingdom claims them: they're never promoted, drafted or counted.
  * (0.7.215) They also love Jaymo's Powers' alchemy and can't stop talking about it ({@link HermitAlchemy}).
+ * (0.7.384) They watch the sky, and sell the star charts a pod pilot needs, one at a time ({@link StarFolk}).
  * <p>
  * Which structures make hermits is the structure tag {@code jaymoskingdoms:sky_hermitage}. MCA's villagers only (the
  * pack always has MCA; a plain villager is left as it is).
@@ -57,6 +58,8 @@ public final class Hermits {
 	static final int SLOW_FALL_TICKS = 100;
 	/** How often chatting with them (MCA's menu) brings their story up instead of small talk. */
 	public static final float CHAT_CHANCE = 0.7F;
+	/** (0.7.384) How many star charts a hermit has for sale at once, cheapest trip first ({@link StarFolk}). */
+	public static final int CHARTS_OFFERED = 1;
 	/** A purple for their words. */
 	static final int COLOR = 0xC9A0FF;
 

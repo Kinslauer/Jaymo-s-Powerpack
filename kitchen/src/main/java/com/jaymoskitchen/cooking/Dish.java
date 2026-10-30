@@ -2,12 +2,16 @@ package com.jaymoskitchen.cooking;
 
 import static com.jaymoskitchen.cooking.Step.*;
 
+import com.jaymoskitchen.OptionalItems;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -242,7 +246,16 @@ public enum Dish {
 		false, List.of(new Buff(MobEffects.NIGHT_VISION, 300 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
 	RICE_ROLL_MEDLEY(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BOWL, ROLL_COD, ROLL_COD, ROLL_SALMON, ROLL_SALMON, ROLL_SALMON, KELP_ROLL_SLICE,
 		KELP_ROLL_SLICE, KELP_ROLL_SLICE), 8, 0.6F, false,
-		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.DOLPHINS_GRACE, 90 * 20, 0)));
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.DOLPHINS_GRACE, 90 * 20, 0))),
+	// --- (0.5.38) the far-world pantry: Jaymo's Powers' Verdant fruit and Glacia salt; the buffs are for a trip (see FarFood there) ---
+	VERDANT_FRUIT_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(VERDANT_FRUIT, VERDANT_FRUIT, APPLE), 7, 0.6F, false,
+		List.of(Buff.far("far_breath", 60 * 20))),
+	GLACIA_SALT_BROTH(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, GLACIA_SALT, POTATO, CARROT), 9, 0.7F, true,
+		List.of(Buff.far("far_ward", 10 * 60 * 20))),
+	FROSTED_FRUIT_CUP(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BOWL, VERDANT_FRUIT, ICE, SUGAR), 6, 0.5F, true,
+		List.of(Buff.far("far_ward", 10 * 60 * 20), new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0))),
+	SALT_TRAIL_BREAD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, GLACIA_SALT, VERDANT_FRUIT), 9, 0.7F, false,
+		List.of(Buff.far("far_thrift", 10 * 60 * 20)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -264,9 +277,27 @@ public enum Dish {
 		STIR
 	}
 
-	public record Buff(Holder<MobEffect> effect, int ticks, int amplifier) {
+	/**
+	 * A buff a Perfect cook gives. The effect is looked up when it is first needed, so one that another mod registers
+	 * later (the trip effects of Jaymo's Powers) is found by then.
+	 */
+	public record Buff(Supplier<Holder<MobEffect>> source, int ticks, int amplifier) {
+		public Buff(Holder<MobEffect> effect, int ticks, int amplifier) {
+			this(() -> effect, ticks, amplifier);
+		}
+
+		/** (0.5.38) One of Jaymo's Powers' trip effects, by its id there; a plain Luck if that mod isn't loaded. */
+		public static Buff far(String id, int ticks) {
+			Identifier key = Identifier.fromNamespaceAndPath(OptionalItems.POWERS, id);
+			return new Buff(() -> BuiltInRegistries.MOB_EFFECT.get(key).<Holder<MobEffect>>map(h -> h).orElse(MobEffects.LUCK), ticks, 0);
+		}
+
+		public Holder<MobEffect> effect() {
+			return source.get();
+		}
+
 		public MobEffectInstance instance() {
-			return new MobEffectInstance(effect, ticks, amplifier);
+			return new MobEffectInstance(effect(), ticks, amplifier);
 		}
 	}
 
@@ -275,7 +306,7 @@ public enum Dish {
 		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS,
 		LEMON, PEACH, GRAPES, TOMATO, ONION, EGGPLANT, CHILI_PEPPER, STRAWBERRY, TURNIP, PEANUT, VENISON, DUCK, BUSHMEAT, MAMMOTH_MEAT,
 		DRUMSTICK, MORSEL, BASS, CATFISH, PIRANHA, ANGLERFISH, BLOBFISH, CRAB_MEAT, CLAM_MEAT, LIZARD_TAIL, ORANGE, WYNDBERRY, BLUE_BERRY,
-		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, COOKED_COD, COOKED_SALMON,
+		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, VERDANT_FRUIT, GLACIA_SALT, COOKED_COD, COOKED_SALMON,
 		COOKED_PORKCHOP, COOKED_MUTTON, BREAD, CABBAGE, CABBAGE_LEAF, RICE, MINCED_BEEF, RAW_BACON,
 		MELON_SLICE, MILK_BOTTLE, COCOA_BEANS, GLOW_BERRIES, BONE, ROTTEN_FLESH, INK_SAC, GOLDEN_CARROT, BAKED_POTATO, COOKED_BEEF, WHEAT, ICE,
 		PASTA, COD_SLICE, SALMON_SLICE, MUTTON_CHOPS);

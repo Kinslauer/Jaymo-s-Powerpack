@@ -1,0 +1,21 @@
+{
+  "centre": "minecraft:spyglass",
+  "components": [
+    "jaymospowers:star_metal_ingot",
+    "jaymospowers:maw_dust",
+    "jaymospowers:maw_dust",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard"
+  ],
+  "essences": {
+    "starlight": 14,
+    "light": 6
+  },
+  "instability": 5,
+  "result": {
+    "item": "jaymospowers:starlit_lens",
+    "count": 1
+  },
+  "research": "starlit_lens",
+  "flux": 2
+}

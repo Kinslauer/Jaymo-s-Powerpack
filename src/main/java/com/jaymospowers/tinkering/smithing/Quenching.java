@@ -27,7 +27,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (Smithing) Quenching. A freshly hammered head is hot ({@link Smithing#HEATED_AT}) and the Tool Station won't take it:
  * dip it. Use (right-click) a hot item on a water cauldron (it loses a level) or on a water source block and it
- * hisses and goes cold; a Hot Ingot becomes a plain ingot. Our own twist: a graded head left to cool in air instead
+ * hisses and goes cold; a Hot Ingot becomes a plain ingot. (0.18.56) A far world's ice-glass or a Cinder Ember lying in the
+ * cauldron gives the piece a Cold or Hot Edge ({@link Edges}). Our own twist: a graded head left to cool in air instead
  * ({@link HotMetal#COOLERS}) comes out a grade lower.
  */
 public final class Quenching {
@@ -81,7 +82,8 @@ public final class Quenching {
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server) {
-			dip(server, player, hand, stack, pos);
+			// (0.18.56) a far world's ice-glass or a Cinder Ember lying in the cauldron gives the piece an edge
+			dip(server, player, hand, stack, pos, cauldron ? Edges.take(server, pos, stack) : null);
 			if (cauldron) {
 				LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 			}
@@ -102,7 +104,7 @@ public final class Quenching {
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server) {
-			dip(server, player, hand, stack, hit.getBlockPos());
+			dip(server, player, hand, stack, hit.getBlockPos(), null);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -111,8 +113,8 @@ public final class Quenching {
 		return state.getFluidState().is(FluidTags.WATER) && state.getFluidState().isSource();
 	}
 
-	private static void dip(ServerLevel level, Player player, InteractionHand hand, ItemStack stack, BlockPos pos) {
-		player.setItemInHand(hand, quenched(stack));
+	private static void dip(ServerLevel level, Player player, InteractionHand hand, ItemStack stack, BlockPos pos, @Nullable String edge) {
+		player.setItemInHand(hand, Edges.mark(quenched(stack), edge));
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.0F + level.getRandom().nextFloat() * 0.2F);
 		level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 12, 0.25, 0.1, 0.25, 0.05);
 	}

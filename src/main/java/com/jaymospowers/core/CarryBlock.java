@@ -208,7 +208,7 @@ public final class CarryBlock {
 	 * mods' chests, like Lootr's, keep each player's loot in them and stay put).
 	 */
 	public static boolean carriable(BlockState state) {
-		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL)) {
+		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL) || com.jaymospowers.power.zfighter.pod.PodParts.partOf(state) != null) {
 			return true;
 		}
 		return state.getBlock() instanceof ChestBlock
@@ -295,6 +295,25 @@ public final class CarryBlock {
 		display.addTag(TAG);
 		level.playSound(null, pos, held.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.7F, 0.9F);
 		return display;
+	}
+
+	/**
+	 * (0.18.51) Puts a block that never stood in the world (a pod part taken off a salvage rack) straight into
+	 * {@code carrier}'s arms, as if they had lifted it.
+	 */
+	public static void carryNew(ServerLevel level, ServerPlayer carrier, BlockState state) {
+		Display.BlockDisplay block = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
+		block.setBlockState(state);
+		block.setTransformation(new Transformation(new Vector3f(-SCALE / 2.0F, HOLD_UP, HOLD_AHEAD), null, new Vector3f(SCALE), null));
+		block.setAttached(STATE, state);
+		block.setWidth(2.0F);
+		block.setHeight(2.0F);
+		block.setPos(carrier.getX(), carrier.getY(), carrier.getZ());
+		block.setYRot(carrier.getYRot());
+		level.addFreshEntity(block);
+		block.addTag(TAG);
+		level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.7F, 0.9F);
+		Carry.pickUp(carrier, block);
 	}
 
 	/**

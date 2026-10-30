@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:pod_keel",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "jaymospowers:pod_keel",
+              "properties": [
+                "damaged",
+                "grade"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/pod_keel"
+}
