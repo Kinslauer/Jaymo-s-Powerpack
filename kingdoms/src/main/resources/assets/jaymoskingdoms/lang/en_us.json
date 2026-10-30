@@ -8736,5 +8736,17 @@
 	"tidings.jaymoskingdoms.bout.walked": "You left the festival bout, and the bracket was called off.",
 	"tidings.jaymoskingdoms.bout.no_show": "Your next fighter was not there to meet you, and the bracket was called off.",
 	"dialogue.main.jaymoskingdoms_duel": "Face an honour duel",
-	"dialogue.main.jaymoskingdoms_bout": "Enter the festival bout"
+	"dialogue.main.jaymoskingdoms_bout": "Enter the festival bout",
+	"speech.jaymoskingdoms.learner.0": "I've seen worse. I'm better for it.",
+	"speech.jaymoskingdoms.learner.1": "I'm getting the hang of this.",
+	"speech.jaymoskingdoms.learner.2": "That one taught me something.",
+	"speech.jaymoskingdoms.learner.3": "Stronger. I can feel it.",
+	"speech.jaymoskingdoms.drifter.pitch.0": "Spare %s emeralds? I'll fight for you. Hold them out.",
+	"speech.jaymoskingdoms.drifter.pitch.1": "Work's thin. %s emeralds and my sword is yours.",
+	"speech.jaymoskingdoms.drifter.pitch.2": "Hire me for %s emeralds. I'm worth more than I look.",
+	"speech.jaymoskingdoms.drifter.short": "I can't work for less than %s emeralds.",
+	"speech.jaymoskingdoms.drifter.hired.0": "You won't regret it.",
+	"speech.jaymoskingdoms.drifter.hired.1": "Lead on, then.",
+	"speech.jaymoskingdoms.drifter.hired.2": "A hot meal and a fight. Fair enough.",
+	"message.jaymoskingdoms.drifter.hired": "%s signs on for %s emeralds."
 }
