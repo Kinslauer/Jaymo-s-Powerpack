@@ -4230,3 +4230,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   layer casts the avatar to Player, and a 26.3 mannequin (the Practice Dummy, sparring partners, afterimages, or one
   anyone places) is not one. `client/mixin/tacz/TaczMannequinAnimMixin` hands a non-player avatar the plain controller
   instead. Client-side only: the server needs no restart for it. Compile-checked; not seen in game.
+- **0.18.80, the crouch settles into a kneel:** Andy: "we have standing, sneaking, crouching, and prone. sneaking should work
+  like vanilla, but crouching should keep our low stance with arms out, stopping stabilizes into a kneel, and you can still
+  walk but you have to change back to a sneak or stand after kneeling". In the low crouch you walk freely; stood still
+  `Kneel.KNEEL_AFTER` ticks you're on the knee and the walking keys do nothing (`StanceScroll.kneelHeld`, `StanceInputMixin`)
+  until the wheel takes you up to a sneak or standing (Jump or a Sneak tap stands you too).
