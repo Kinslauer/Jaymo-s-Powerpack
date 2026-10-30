@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Valor;
+import com.jaymoskingdoms.ValorWings;
 import com.jaymoskingdoms.Vampires;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -52,6 +54,12 @@ public final class ValorClient {
 	private static final Set<Integer> SENSED = new HashSet<>(), SHOTS = new HashSet<>(), VAMPIRES = new HashSet<>();
 	/** The last rank seen (-1 without Valor), the pulse left (ticks) and its colour. */
 	private static int lastRank = -2;
+	/** (0.7.410) A Skyward Valor's wings: jump held last tick, when it was last tapped in the air. */
+	private static boolean jumpWas;
+	private static int lastTap = -100;
+	/** Two jump taps this close (ticks) spread or fold the wings; how quickly flight answers the keys (0-1). */
+	static final int DOUBLE_TAP = 7;
+	static final float FLY_EASE = 0.3F;
 	private static float pulse;
 	private static int pulseColor;
 
@@ -110,6 +118,45 @@ public final class ValorClient {
 		if (player.tickCount % SENSE_EVERY == 0) {
 			sense(minecraft, player, rank);
 		}
+		fly(minecraft, player);
+	}
+
+	/**
+	 * (0.7.410) A Skyward Valor's wings: jump double-tapped in the air spreads them (or folds them); flying, you go where you
+	 * look, jump climbs, sneak drops, sprint is faster. The server says whether you're flying (it holds the pool).
+	 */
+	private static void fly(Minecraft minecraft, LocalPlayer player) {
+		Valor.Data data = Valor.of(player);
+		boolean jump = player.input.keyPresses.jump();
+		boolean flying = ValorWings.flying(player);
+		if (jump && !jumpWas && minecraft.gui.screen() == null && data != null && ValorWings.canFly(data)) {
+			if ((flying || !player.onGround()) && !player.getAbilities().mayfly && !player.isPassenger() && player.tickCount - lastTap <= DOUBLE_TAP) {
+				send(2);
+				lastTap = -100;
+			} else {
+				lastTap = player.tickCount;
+			}
+		}
+		jumpWas = jump;
+		if (!flying || data == null || player.isPassenger()) {
+			return;
+		}
+		player.resetFallDistance();
+		boolean shift = player.input.keyPresses.shift();
+		if (player.onGround() && !jump) {
+			return;
+		}
+		Vec2 move = player.input.getMoveVector();
+		float speed = ValorWings.FLY_SPEED[Mth.clamp(data.rank(), 0, ValorWings.FLY_SPEED.length - 1)] * (player.isSprinting() ? ValorWings.FLY_SPRINT : 1.0F);
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		Vec3 look = player.getLookAngle();
+		Vec3 strafe = new Vec3(Mth.cos(yaw), 0.0, Mth.sin(yaw));
+		Vec3 want = look.scale(move.y).add(strafe.scale(move.x));
+		if (want.lengthSqr() > 1.0) {
+			want = want.normalize();
+		}
+		want = want.scale(speed).add(0.0, jump ? ValorWings.FLY_CLIMB : shift ? -ValorWings.FLY_CLIMB : 0.0, 0.0);
+		player.setDeltaMovement(player.getDeltaMovement().lerp(want, FLY_EASE));
 	}
 
 	private static void send(int what) {
@@ -195,7 +242,7 @@ public final class ValorClient {
 			return;
 		}
 		float share = Valor.poolShare(player);
-		boolean coated = Valor.reinforced(player) || Valor.armed(player);
+		boolean coated = Valor.reinforced(player) || Valor.armed(player) || ValorWings.flying(player);
 		if (!coated && share >= 0.999F && !Valor.spent(player)) {
 			return;
 		}
