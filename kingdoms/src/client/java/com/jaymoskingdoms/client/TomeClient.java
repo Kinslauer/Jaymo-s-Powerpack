@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.390) A book afloat ({@link TomeFloat}) stays open the whole time it floats, and turns a leaf as it rises and at each
  * new lock, yours and everyone else's.
  * <p>
- * (0.7.391) A Mage's or Sorcerer's off-hand book is held on right click (its use; {@code Tomes.Tome#useOff}), sneaking to
+ * (0.7.396) A Mage's or Sorcerer's off-hand book is held on right click (its use; {@code Tomes.Tome#useOff}), sneaking to
  * cast its page; each hand's book keeps its own state ({@link Book}).
  */
 final class TomeClient {
@@ -42,7 +42,7 @@ final class TomeClient {
 	/** While charging, a leaf turns every this long (ms): slowly for a tap's charge, quickly for a full one. */
 	static final long FLUTTER_SLOW_MS = 560, FLUTTER_FAST_MS = 240;
 
-	/** (0.7.391) What each of your books is doing: the main hand's (left click) and the off hand's (right click). */
+	/** (0.7.396) What each of your books is doing: the main hand's (left click) and the off hand's (right click). */
 	private static final class Book {
 		final boolean off;
 		boolean down, wasKey;

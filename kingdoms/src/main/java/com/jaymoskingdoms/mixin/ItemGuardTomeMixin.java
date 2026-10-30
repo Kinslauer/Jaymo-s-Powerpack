@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.391) A Mage's or Sorcerer's tome in the off hand takes right click from the weapon in the main hand (Andy's pick): a
+ * (0.7.396) A Mage's or Sorcerer's tome in the off hand takes right click from the weapon in the main hand (Andy's pick): a
  * weapon's guard (its {@code blocks_attacks}, which Jaymo's Powers gives every melee weapon) steps aside so the use reaches
  * the book. Shields (no {@code weapon} component) keep their block.
  */

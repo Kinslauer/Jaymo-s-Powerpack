@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.390) A tome afloat ({@code TomeFloat}) isn't in the hand: a player's hand is drawn empty while the book from it floats (0.7.391: either hand). */
+/** (0.7.390) A tome afloat ({@code TomeFloat}) isn't in the hand: a player's hand is drawn empty while the book from it floats (0.7.396: either hand). */
 @Mixin(ArmedEntityRenderState.class)
 abstract class TomeHeldItemMixin {
 	@Inject(method = "extractArmedEntityRenderState", at = @At("TAIL"))

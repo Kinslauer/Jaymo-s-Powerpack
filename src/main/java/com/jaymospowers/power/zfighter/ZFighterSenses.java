@@ -37,9 +37,10 @@ public final class ZFighterSenses {
 
 	/**
 	 * A finisher, a Spirit Bomb's landing or a full ape smash at {@code at}: players within {@link #IMPACT_FRAME_RANGE}
-	 * blocks get two frames of black and white (each player's client setting can turn them off).
+	 * blocks get two frames of black and white (each player's client setting can turn them off). (0.18.46) Public: Jaymo's
+	 * Kingdoms' Rain of Cuts calls it by reflection ({@code PowersCompat.impactFrame}).
 	 */
-	static void impactFrame(ServerLevel level, Vec3 at) {
+	public static void impactFrame(ServerLevel level, Vec3 at) {
 		ZFighterSensesNet.ImpactFrame frame = new ZFighterSensesNet.ImpactFrame();
 		for (ServerPlayer viewer : level.players()) {
 			if (viewer.position().distanceToSqr(at) <= IMPACT_FRAME_RANGE * IMPACT_FRAME_RANGE) {

@@ -1,0 +1,24 @@
+{
+  "centre": "minecraft:beehive",
+  "components": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:redstone",
+    "minecraft:redstone",
+    "minecraft:clock",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "metal": 12,
+    "motion": 10,
+    "spark": 6
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymospowers:clockwork_hornet_hive",
+    "count": 1
+  },
+  "research": "clockwork_hornets",
+  "flux": 4
+}

@@ -208,7 +208,8 @@ public final class Languages {
 	}
 
 	private static @Nullable Tongue look(ServerLevel level, Entity speaker) {
-		if (ZFighterFolk.is(speaker)) {
+		if (ZFighterFolk.is(speaker) || com.jaymoskingdoms.forms.Schools.isMaster(speaker)) {
+			// (0.7.384) so too a school master
 			// (0.7.319) Powers' Z Fighter characters speak to anyone who comes to them
 			return null;
 		}

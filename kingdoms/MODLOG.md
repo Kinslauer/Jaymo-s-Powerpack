@@ -6961,7 +6961,121 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   caster may build.
 - Compile-checked against 26.3; not seen in game.
 
-## 0.7.391: off-hand tomes for Mages and Sorcerers
+## 0.7.391: Weapon Forms, patch 1 track A: the engine (was 0.7.381; master + 1 at merge)
+- Andy's Ultimate Battle picks (`docs/WeaponForms-Plan.md`; ideas only). `forms/Forms` is the registry and rules: a form has a
+  weapon family (blade, spear, fist, knife, claw; `form_blades` / `form_spears` / `form_claws` item tags, the knife family is
+  `light_blades`; Balkon's katanas are optional entries), a kind (art or masterstroke), cooldown, wind-up, hunger and the
+  practice a rank needs. Per player a saved, synced `Forms.BOOK`: practice per known form (3 ranks), the belt, stance, slot.
+  API for teachers: `teach`, `knows`, `rank`, `practice`, `known`, `STARTER_FORMS`. First form unlocks belt and stance.
+- Five-Art Belt: 5 slots; sneak + use a Powers training post or any mannequin (sparring dummy) empty-handed opens a small
+  belt screen; the server takes changes only within 5 blocks of one.
+- Battle Stance: hold the Combat Art key (side button 1) with a known form's weapon out; tap fires the slot, sneak + tap the
+  next slot, Alt + scroll picks the slot. Out of stance Charge / War Cry / Shield Throw now fire on release of a tap when a
+  form's weapon is in hand (still on press otherwise). Takes Powers' lock-on by reflection (`PowersCompat.lockOnNearest`).
+- Practice on landing (foe 2, dummy or training post 1), masterstroke gate (downed or Powers poise K.O.), Form Cancels
+  (14 ticks after a chain blow skips the wind-up), chain counter right of the crosshair (Good 3+, Fierce 6+, Relentless
+  10+; replaces the old "Combo xN" action-bar line). No parry window or parry HUD.
+- Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
+- Compile-checked. Not seen in game.
+
+## 0.7.395: Weapon Forms, patch 5: who fights with forms (was 0.7.385; master + 1 at merge)
+- New classes in `forms/` (Patch 4's `Schools` is the registry they read: `localSchool`, `joined`, `standing`, `addStanding`,
+  `isMaster`/`masterOf`, `openMasterstroke`).
+- **Schooled guards** (`SchooledGuards`): a guard (`Downed.isGuard`) whose post lies in a school's land uses a move of the family of
+  its weapon while it has a combat target 1-5.5 blocks off: blade sweep, spear lunge (dash, runs through two foes), fist stomp
+  (ring that shoves and slows), knife double stab, claw double rake. Simple mob versions written for the purpose, not the player forms'
+  code. A glint and an 8-tick wind-up first, so it can be met. Every 160 ticks (90 for `WeaponForms.experienced`, plus up to 60);
+  a weapon of another family than the school's 40% as often. Hits only the target and monsters near it; capped at 14 damage a blow;
+  dropped if the fight is over before it lands. It runs on its own scan of guards near players, so it works without Better Combat.
+- **Honour duels** (`Duels`): a student (guard of a school's land, or a master) is challenged on the MCA talk menu, "Face an honour
+  duel" (also how you take up a challenge). Students challenge you unasked if you have joined a different school or have standing
+  10 in theirs (4% a look, every 2 s within 7 blocks, one challenge to you per 5 min; 3 times as likely for a rival school); the
+  offer stays open a minute. The duel is non-lethal like the drills' spar: the student strikes every 26 ticks for 3 (4 for a
+  master), now and then with a school move; whoever's health would drop to 35% first has fallen, that blow is stopped and it ends
+  (a death at the opponent's hand is stopped too; a draw at 2 minutes; called off at 24 blocks or if either is downed by another).
+  The student is healed to 80%. Temperament decides the mercy: the warm (kindhearted, cheerful, devout) are gracious, tend a loser
+  and dock no standing; the cold (proud, spiteful, hotheaded) jeer and dock double. Win: 3 standing (+2 against a rival's student, 8
+  for a master) in the school you have joined (the one whose weapon you hold, else the first) and 8 reputation with the realm (16
+  for a master); beating a master opens that school's masterstroke. Loss: 1 standing. One duel per student per day (`duel_days`
+  attachment, also keeps the bout days). Blows are no assault (`Theft`) and leave no memory (`Recollections`). Only one way to accept:
+  the talk menu (no bowing).
+- **Rival schools** (`Rivals`): two schools are rivals when a realm of one and a realm of the other are at odds (`Relation.RIVAL`
+  or `WAR`; the table is rebuilt each minute). A schooled guard opens a work talk with a scornful line to a rival's student
+  (`WorkTalk`), now and then sneers in a bubble when one walks by, and entering a rival school's realm the first time in a day adds a
+  line to your Tidings.
+- **Festival bouts** (`Bouts`; `Festivals` is now public with `keeping`): while a realm keeps its festival, one of its students
+  (the bout master, the lowest UUID of those at the seat, kept for the day) offers "Enter the festival bout". A bracket of up to 3
+  duels against students of the realm, the last against the bout master; unranked duels, a break between rounds with a little
+  regeneration. Each round won pays 2 emeralds and 1 standing; the final 6 emeralds, a golden apple, 4 standing and 12 reputation.
+  Once a festival day per realm. **No bracket screen**: Powers' `ZFighterBracketScreen` is fed by Powers' own tournament packets
+  and can't be reached from Kingdoms cleanly, so the bracket and each result are Tidings lines and the bout master's bubbles.
+- Compile-checked (javac with the stub `Schools`); not seen in game. Tuning constants are at the top of each class.
+
+## 0.7.393: Weapon Forms, patch 3: fists, knives and claws (pack 0.18.60; was 0.7.383)
+- Andy's Ultimate Battle picks, patch 3 (`docs/WeaponForms-Plan.md`; ideas only), one class per family in `forms/`.
+- **Fist** (`FistForms`; an empty hand, or a weapon in the new `form_fists` tag, counts as a fist): *Ground Stomp* hops and, on
+  landing, throws a small shockwave ring: foes on the ground within 4 blocks are hurt and thrown up, jumping foes aren't.
+  *Falling Fist*, pressed while falling 3+ blocks, drives you down and the first foe your fall meets takes part of the fall's
+  force; you still take your full fall damage. A Brute hits 1.25 times as hard with both.
+- **Knife** (`KnifeForms`, `Bolas`, client `KnifeClient`): *Marked Quarry* marks the foe you look at (outline through walls for you
+  alone: a clientbound `Mark` packet and the client's own glow flag, not the Glowing effect); a second press within 5 s dashes
+  you behind it for a stab (half again on an unaware foe, 1.3 times for a Thief). *Cast-off Cloak* leaves a mannequin in your
+  look that mobs after you swing at for 3 s (5 s for a Thief) while you slip away quicker. *Tangle Cord* throws a new **Bolas** (leather,
+  string, two stone or iron nuggets in the grid; or throw it by hand) that wraps a foe's legs (Slowness II, 4 s) and
+  drops back as the item whether it hits, misses or flies too long.
+- **Claw** (`ClawForms`): *Rending Claw* rakes the front arc and leaves Rend bleeding (`CombatArts.bleed`, new public method);
+  *Feral Pounce* leaps onto the foe ahead, a savage blow, a short bleed, knocked flat.
+- Compile-checked. Not seen in game.
+
+## 0.7.392: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.59; was 0.7.382)
+- **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
+  foe; the last is a heavy blow with Powers' impact frames (`PowersCompat.impactFrame`, reflection; Powers has no afterimage
+  hook, so the trail is particles) and the whole thing runs under Powers' new hard-cut film (`FILM_CUTS`, witnesses get bars).
+- **Spear Lunge** (`forms/SpearForms`): a lunge of about 4 blocks (the rapier's is 2.8), 9 ticks of reach, that runs the first foe
+  through and goes on into one behind it (75% of the damage).
+- **Couched Lance**: only while you control a mount. The lance stays couched 30 ticks; the first foe is hit for damage that grows
+  with the mount's speed (measured from its movement, smoothed), a foe in the saddle (or the rider of a foe) is knocked out of it.
+  Riders hit 30% harder. A mounted realm guard that carries a spear charges its target the same way (`Cavalry` ticks every 10
+  ticks, `SpearForms.charge`; once per 80 ticks, needs speed and a heading at the foe, moves nothing).
+- **Pinning Throw** (spear masterstroke): throws one spear at a fallen foe (a little damage) and roots it for 4 s (+1 s a rank;
+  foes of 150+ health aren't held). Any press while it holds tugs the spear back to the hand. The spear is never lost: it is kept
+  in `SpearForms` and saved on the player (attachment `pinned_spear`), and it comes back to the hand when tugged, drops at the foe
+  when the pin runs out or the foe dies, and goes to the inventory if the player leaves or the server stops (or is handed back on
+  the next log-in after a crash). The stance holds while the hand is empty of it.
+- `form_spears` now has the trident, Powers' lances (wooden to netherite), Tinkers javelin and primitive spear, all optional ids.
+- **School Swing Trails** (`forms/Trails`): blade = dark ink and smoke, spear/lance = sparks, fist = dust (for patch 3). Sheath Draw
+  and Crescent Sweep got the blade trail.
+- Compile-checked (check.sh, zero errors); not seen in game.
+
+## 0.7.394: Weapon Forms, patch 4: schools and teachers (Kingdoms only; Powers unchanged; was 0.7.384)
+- **Schools** (`forms/Schools`): one for each weapon family, our own names: blade the *Quiet Tide*, spear the *Skyward Reach* (the
+  sky school), fist the *Stone Root*, knife the *Low Lantern*, claw the *Ashen Fang*. Attachment `schools` (joined, standing,
+  mastered; saved, kept through death, not synced). Public API for patch 5: `School`, `joined`, `join`, `standing`, `addStanding`,
+  `masterstrokeOpen`, `openMasterstroke`, `localSchool`, `isMaster`, `masterOf`. A realm's school is fixed by its id (`ofRealm`).
+- **Joining**: the first school is free; another only once every school joined is mastered. Joining gives the school's **manual**
+  (a written book of three pages of odd sayings; the sky school's hints at a road that has since come apart) and teaches its first
+  art. Standing grows by the practice of the school's forms (`Forms.practice` calls `Schools.practiced`; 1 per point, +1 for a
+  matching class: Warlord/blade, Brute/fist, Thief/knife, Rider/spear). Each visit teaches the next art once standing reaches
+  its step (0, 20, 45); at 150 standing, with every art known, the master opens the masterstroke (blade Rain of Cuts, spear
+  Pinning Throw; fist, knife and claw have none yet and are only marked mastered), and hands over the school's **mask** and a
+  **Master-grade blueprint** for its signature weapon (blade: katana blade, or the ninjato blade without WeaponMod; spear: spear tip;
+  knife: kunai blade; claw: fang blades; the fist school has none, as no cestus is forged). Patch 5's duel can call `openMasterstroke` too.
+- **Masters and halls** (`SchoolHalls`, `JobHalls.trainingHall`, `McaBridge.master`): a new realm building, the *Training Hall* (9 x 9,
+  needs 34 villagers, after the barracks): carpet runner, two training posts (Powers' block if loaded), a target butt, tool racks.
+  Every realm keeps one **master**, an MCA villager held at the post (role 96, tags `jaymoskingdoms_school_master`, the school and the
+  realm), invulnerable, outside MCA's family tree, in the road master's gi, speaking to anyone. They stand at the middle of the hall; a
+  kingdom with no hall yet has its master at its barracks, and moves them into the hall when it is finished. Kept up every 10 s once the
+  place is loaded and a player is on (none found by the realm's tag: a new one; extras are let go). MCA menu: "Speak of the school".
+- **Wizard trials** (`forms/WizardTrials`): court wizards and a realm's necromancer, "Ask for a trial": the Shade (a stronger practice foe
+  hunts you), the Ward (hold a ring of light for 30 s while weak foes come; any class), the Marked One (four foes, one glows, strike
+  another and it's lost). The practice foes are the drills' (same tags, load sweep and FELL counting) and now count only if you struck
+  them (`jaymoskingdoms_trial_hit`); wizards never fight them (`CourtWizards.foe`). Reward: practice for the two least-ranked forms,
+  standing in the local school, a Mage's or Sorcerer's 40 experience. One per wizard per day.
+- **School masks**: five head-slot items `school_mask_<school>` (art by `tools/gen_school_masks.py`), in the combat tab, given at mastery.
+  Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
+- Compile-checked; not seen in game.
+
+## 0.7.396: off-hand tomes for Mages and Sorcerers
 - A Mage or Sorcerer (or anyone in creative) works a spell tome in the off hand beside whatever the main hand wields, by right
   click (Andy's pick): tap for a bolt, hold to charge (the item's use; `Tome.useOff`, `releaseUsing`), sneak + right click to
   cast its page. A main-hand weapon gives up its right-click guard to the book (`mixin/ItemGuardTomeMixin`; shields keep

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/** (0.7.390) Your own tome afloat ({@code TomeFloat}): in first person the hand that held it is drawn empty (0.7.391: the off hand too). */
+/** (0.7.390) Your own tome afloat ({@code TomeFloat}): in first person the hand that held it is drawn empty (0.7.396: the off hand too). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class TomeFloatHandMixin {
 	@ModifyVariable(method = "submitArmWithItem", at = @At("HEAD"), argsOnly = true)

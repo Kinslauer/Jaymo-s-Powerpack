@@ -47,7 +47,7 @@ public final class Finishing {
 	/** Weapon heads ({@link com.jaymospowers.tinkering.WeaponParts} part ids) that come off the anvil rough: swords and axes. */
 	public static final Set<String> ROUGH_WEAPONS = Set.of("dagger_blade", "hatchet_head", "longsword_blade", "glaive_blade", "war_axe_head",
 		"war_scythe_blade", "broadsword_blade", "claymore_blade", "cleaver_blade", "ninjato_blade", "saber_blade", "machete_blade",
-		"rapier_blade", "kunai_blade", "knife_blade", "halberd_head", "battleaxe_head", "katana_blade", "kitchen_knife_blade", "saw_blade");
+		"rapier_blade", "kunai_blade", "knife_blade", "halberd_head", "battleaxe_head", "katana_blade", "kitchen_knife_blade", "saw_blade", "fang_blades");
 	/** Tool heads that come off the anvil rough. */
 	public static final Set<PartType> ROUGH_PARTS = Set.of(PartType.SMALL_AXE_HEAD, PartType.SMALL_BLADE, PartType.BROAD_BLADE,
 		PartType.BROAD_AXE_HEAD);

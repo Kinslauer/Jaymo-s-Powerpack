@@ -103,6 +103,10 @@ public final class Workers {
 			Assassins.act(level, mob);
 			return true;
 		}
+		if (com.jaymoskingdoms.forms.Schools.isMaster(mob)) {
+			// (0.7.384) a school master: held at the post in their hall
+			return com.jaymoskingdoms.forms.Schools.step(level, mob);
+		}
 		if (ZFighterFolk.is(mob)) {
 			// (0.7.319) one of Powers' Z Fighter characters: held at their post
 			return ZFighterFolk.step(level, w);
