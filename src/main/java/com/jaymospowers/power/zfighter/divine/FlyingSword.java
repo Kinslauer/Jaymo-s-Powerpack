@@ -67,6 +67,8 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 	private int lastStrike;
 	private boolean returning;
 	private boolean returned;
+	/** The owner, looked up through the player list so a world change or teleport never loses them. */
+	private @Nullable UUID ownerId;
 
 	public FlyingSword(EntityType<? extends FlyingSword> type, Level level) {
 		super(type, level);
@@ -78,6 +80,7 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 	public static FlyingSword launch(ServerLevel level, ServerPlayer owner, ItemStack blade, int slot, float damage) {
 		FlyingSword sword = new FlyingSword(DivineEntities.FLYING_SWORD, level);
 		sword.setOwner(owner);
+		sword.ownerId = owner.getUUID();
 		sword.blade = blade.copy();
 		sword.entityData.set(DATA_ITEM, blade.copyWithCount(1));
 		sword.slot = slot;
@@ -105,8 +108,23 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 		}
 	}
 
+	/** Server stop: every sword out goes home first (its owner is still online), then the list is emptied. */
 	public static void clear() {
+		for (FlyingSword sword : new java.util.ArrayList<>(OUT.values())) {
+			sword.giveBack(sword.ownerOnline());
+			sword.discard();
+		}
 		OUT.clear();
+	}
+
+	private @Nullable ServerPlayer ownerOnline() {
+		return this.ownerId != null && this.level() instanceof ServerLevel level ? level.getServer().getPlayerList().getPlayer(this.ownerId) : null;
+	}
+
+	/** Never written to the world: a sword out lives only as long as its flight, so a saved copy can't hand the blade back twice. */
+	@Override
+	public boolean shouldBeSaved() {
+		return false;
 	}
 
 	private void face(Vec3 dir) {
@@ -137,7 +155,7 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 			this.discard();
 			return;
 		}
-		if (this.getOwner() instanceof ServerPlayer owner) {
+		if (this.ownerOnline() instanceof ServerPlayer owner) {
 			OUT.putIfAbsent(owner.getUUID(), this);
 			if (!owner.isAlive() || owner.isSpectator() || owner.level() != level || ++this.life > MAX_LIFE) {
 				// dead, gone to another world, or somehow lost: it goes straight back
@@ -269,9 +287,9 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 
 	@Override
 	public void remove(Entity.RemovalReason reason) {
-		// killed or discarded without being handed back (a /kill, a mod): never lose the blade
-		if (!this.returned && reason.shouldDestroy() && this.level() instanceof ServerLevel) {
-			this.giveBack(this.getOwner() instanceof ServerPlayer owner ? owner : null);
+		// killed, discarded or unloaded (the owner went far off) without being handed back: never lose the blade
+		if (!this.returned && this.level() instanceof ServerLevel) {
+			this.giveBack(this.ownerOnline());
 		}
 		super.remove(reason);
 	}

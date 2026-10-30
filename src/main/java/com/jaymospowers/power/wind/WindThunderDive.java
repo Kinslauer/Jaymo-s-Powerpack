@@ -66,7 +66,7 @@ public final class WindThunderDive {
 	}
 
 	private static final Map<UUID, Dive> DIVES = new HashMap<>();
-	private static final Map<UUID, Integer> COOLDOWNS = new HashMap<>();
+	private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
 
 	private WindThunderDive() {
 	}
@@ -95,19 +95,20 @@ public final class WindThunderDive {
 		}
 		ServerLevel level = player.level();
 		int now = player.tickCount;
-		Integer ready = COOLDOWNS.get(player.getUUID());
-		if (ready != null && ready > now) {
-			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.dive_wait", (ready - now + 19) / 20)
-				.withStyle(net.minecraft.ChatFormatting.GRAY));
-			return true;
+		// (the wait runs on the world clock, so a respawn or relog doesn't stretch it)
+		long time = level.getGameTime();
+		Long ready = COOLDOWNS.get(player.getUUID());
+		if (ready != null && ready > time) {
+			// (waiting: C stays the Lance)
+			return false;
 		}
 		Vec3 from = player.position();
 		HitResult floor = level.clip(new ClipContext(from, from.add(0.0, -MIN_HEIGHT, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
 		if (floor.getType() != HitResult.Type.MISS) {
-			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.dive_low").withStyle(net.minecraft.ChatFormatting.GRAY));
-			return true;
+			// (too near the ground: C stays the Lance)
+			return false;
 		}
-		COOLDOWNS.put(player.getUUID(), now + COOLDOWN);
+		COOLDOWNS.put(player.getUUID(), time + COOLDOWN);
 		DIVES.put(player.getUUID(), new Dive(player.getY(), now));
 		WindFumble.onCast(player);
 		WindStorm.onCast(player);

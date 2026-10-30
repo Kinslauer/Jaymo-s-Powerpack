@@ -699,9 +699,9 @@ public final class GravityPower implements Power {
 						int cooldown = GravityGutPunch.COOLDOWN;
 						player.setAttached(COOLDOWNS, cooldowns(player).withCrush(player.level().getGameTime() + cooldown, cooldown));
 						state.crushFrom = -1;
-					} else if (player.isSprinting() && !state.chunkHold && state.ripFrom < 0 && ownWell(player) == null) {
-						// (0.18.48) sprint+B: Comet Ram (wrap yourself in gravity and ram forward, carrying what's in the way); Crush keeps B otherwise, and always inside your own Well
-						GravityCometRam.start(player);
+					} else if (player.isSprinting() && !state.chunkHold && state.ripFrom < 0 && ownWell(player) == null && GravityCometRam.start(player)) {
+						// (0.18.48) sprint+B: Comet Ram (wrap yourself in gravity and ram forward, carrying what's in the way); Crush keeps B
+						// otherwise, always inside your own Well, and whenever the ram can't start (waiting, hungry, in water, riding)
 					} else if (ready(player, CRUSH) || ownWell(player) != null) {
 						state.crushFrom = player.level().getGameTime();
 						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.5F, 1.6F);

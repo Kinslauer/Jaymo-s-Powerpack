@@ -156,7 +156,8 @@ public final class GravityCometRam {
 		}
 		Vec3 front = at.add(run.heading.scale(HOLD_AHEAD * 0.5)).add(0.0, player.getBbHeight() * 0.5, 0.0);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(front, front).inflate(CATCH_RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !run.seen.contains(e.getUUID()))) {
+			e -> e != player && e.isAlive() && !e.isSpectator() && !run.seen.contains(e.getUUID()) && !e.isAlliedTo(player)
+				&& !(e instanceof net.minecraft.world.entity.OwnableEntity pet && player.getUUID().equals(pet.getOwnerReference() == null ? null : pet.getOwnerReference().getUUID())))) {
 			if (run.carried.size() >= MAX_CARRIED) {
 				break;
 			}
