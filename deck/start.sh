@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 
 if [ ! -x jdk/bin/java ]; then
 	echo "Java isn't set up yet: run ./setup.sh first."
-	read -rp "Press Enter to close."
+	read -t 60 -rp "Press Enter to close (it closes itself in a minute)."
 	exit 1
 fi
 # one at a time: a double-click started two at once, and the second (failing on the locked world) took the
@@ -13,12 +13,12 @@ fi
 exec 9>.start.lock
 if ! flock -n 9; then
 	echo "The server is already starting or running."
-	read -rp "Press Enter to close."
+	read -t 60 -rp "Press Enter to close (it closes itself in a minute)."
 	exit 1
 fi
 if ss -ltn 2>/dev/null | grep -q ':25565 '; then
 	echo "The server is already running."
-	read -rp "Press Enter to close."
+	read -t 60 -rp "Press Enter to close (it closes itself in a minute)."
 	exit 1
 fi
 
@@ -47,4 +47,4 @@ $INHIBIT jdk/bin/java -Xms2G -Xmx6G -jar fabric-server-launch.jar nogui
 if [ -n "$PLAYIT_PID" ]; then
 	kill "$PLAYIT_PID" 2>/dev/null
 fi
-read -rp "The server has stopped. Press Enter to close."
+read -t 60 -rp "The server has stopped. Press Enter to close (it closes itself in a minute)."
