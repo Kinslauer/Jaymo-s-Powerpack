@@ -111,7 +111,7 @@ public final class ZFighterPatrol {
 	/** The arrests each rank needs: Rookie, Officer, Sergeant, Inspector, Commander. */
 	static final int[] RANKS = {0, 3, 8, 15, 25};
 	/** How many ways each line is said, and how many travel stories there are. */
-	static final int GREET_LINES = 3, STORIES = 8, NOT_YET_LINES = 3, OFFER_LINES = 2, REST_LINES = 2, NAMES = 10;
+	static final int GREET_LINES = 3, STORIES = 9, NOT_YET_LINES = 3, OFFER_LINES = 2, REST_LINES = 2, NAMES = 10;
 	/** The pod's arrival and departure: how high it starts, how fast it comes down or goes up (blocks a tick). */
 	static final int ARRIVE_HEIGHT = 60;
 	static final double ARRIVE_SPEED = 0.7, DEPART_SPEED = 1.2;

@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
+import com.jaymospowers.power.zfighter.pod.PodGrades;
 import com.jaymospowers.power.zfighter.pod.PodParts;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.serialization.Codec;
@@ -52,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * inside while everyone near watches it go. Up past the clouds the client shows the flight ({@code ZFighterFlightScreen}): the pod
  * crossing space from here to there, longer the farther the world ({@link #flightTicks}); after a first trip it can be skipped.
  * Then the pod comes down out of the sky over open ground anywhere on the far world (no landing pad: {@link #ground}), slowing
- * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.49) It is the real
+ * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.50) It is the real
  * pod with the parts it was launched with: one that isn't whole lands hard ({@link #HARD_LANDING_DAMAGE}) and shakes
  * {@link #SHAKEN_MIN} to {@link #SHAKEN_MAX} parts loose.
  * <p>
@@ -73,7 +74,7 @@ public final class ZFighterPodTrip {
 	/** The descent: how high over the ground it starts, its top and bottom speed, how quickly it slows, and when it gives up. */
 	static final int DESCENT_HEIGHT = 56, DESCENT_MAX_TICKS = 400;
 	static final double DESCENT_FAST = 1.2, DESCENT_SLOW = 0.12, DESCENT_EASE = 0.05;
-	/** (0.18.49) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
+	/** (0.18.50) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
 	static final float HARD_LANDING_DAMAGE = 6.0F;
 	static final int SHAKEN_MIN = 1, SHAKEN_MAX = 2;
 	/** How big a pod is to find room for it (blocks): its width and height. */
@@ -102,6 +103,10 @@ public final class ZFighterPodTrip {
 		double speed;
 		@Nullable PodEntity pod;
 		int filled, damaged;
+		/** (0.18.51) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
+		boolean finished;
+		int grade;
+		@Nullable UUID guest;
 		@Nullable ResourceKey<Level> to;
 		@Nullable BlockPos ground;
 
@@ -145,6 +150,8 @@ public final class ZFighterPodTrip {
 	}
 
 	private static final Map<UUID, Trip> TRIPS = new HashMap<>();
+	/** (0.18.51) Passengers of a second seat, by who is aboard, to their pilot. */
+	private static final Map<UUID, UUID> GUESTS = new HashMap<>();
 	/** Set while the hard landing hurts the pilot (a trip's pilot is otherwise unhurtable). */
 	private static boolean hurting;
 
@@ -161,7 +168,28 @@ public final class ZFighterPodTrip {
 
 	/** Whether {@code player} is on a trip (seated, lifting, flying or coming down). */
 	public static boolean flying(ServerPlayer player) {
-		return TRIPS.containsKey(player.getUUID());
+		return TRIPS.containsKey(player.getUUID()) || GUESTS.containsKey(player.getUUID());
+	}
+
+	/** (0.18.51) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
+	private static @Nullable ServerPlayer guest(MinecraftServer server, Trip trip) {
+		if (trip.guest == null) {
+			return null;
+		}
+		ServerPlayer guest = server.getPlayerList().getPlayer(trip.guest);
+		if (guest == null || !guest.isAlive()) {
+			GUESTS.remove(trip.guest);
+			trip.guest = null;
+		}
+		return guest;
+	}
+
+	/** (0.18.51) A trip is over: its passenger is no longer a passenger. */
+	private static void forget(Trip trip) {
+		if (trip.guest != null) {
+			GUESTS.remove(trip.guest);
+			trip.guest = null;
+		}
 	}
 
 	/** Whether {@code entity} is the pod of a trip under way. */
@@ -190,10 +218,25 @@ public final class ZFighterPodTrip {
 		trip.filled = pod.filled();
 		trip.damaged = pod.damagedMask();
 		trip.pod = pod;
+		trip.finished = pod.finished();
+		trip.grade = pod.grade();
+		// (0.18.51) a second seat: whoever else is aboard comes along
+		ServerPlayer guest = null;
+		for (Entity rider : pod.getPassengers()) {
+			if (guest == null && pod.seats() > 1 && rider instanceof ServerPlayer other && other != player) {
+				guest = other;
+			}
+		}
 		pod.ejectPassengers();
 		pod.setHovering(true);
 		pod.addTag(TAG);
 		player.startRiding(pod, true, true);
+		if (guest != null) {
+			trip.guest = guest.getUUID();
+			GUESTS.put(guest.getUUID(), player.getUUID());
+			guest.startRiding(pod, true, true);
+			guest.sendOverlayMessage(Component.translatable("message.jaymospowers.space_countdown", COUNTDOWN_TICKS / 20).withStyle(ChatFormatting.GOLD));
+		}
 		TRIPS.put(player.getUUID(), trip);
 		level.playSound(null, at, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 0.7F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_countdown", COUNTDOWN_TICKS / 20).withStyle(ChatFormatting.GOLD));
@@ -204,6 +247,8 @@ public final class ZFighterPodTrip {
 		PodEntity pod = PodEntity.spawn(level, at, false, trip.fuelBefore);
 		pod.setFuelGrade(trip.fuelGrade);
 		pod.setParts(trip.filled, trip.damaged);
+		pod.setFinished(trip.finished);
+		pod.setGrade(trip.grade);
 		pod.setYRot(yaw);
 		pod.setHovering(true);
 		// tagged once it is in the world, so the load check doesn't take it for a leftover
@@ -221,10 +266,12 @@ public final class ZFighterPodTrip {
 		for (Map.Entry<UUID, Trip> entry : new ArrayList<>(TRIPS.entrySet())) {
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
 			if (player == null) {
+				forget(entry.getValue());
 				done.add(entry.getKey());
 				continue;
 			}
 			if (step(player, entry.getValue())) {
+				forget(entry.getValue());
 				done.add(entry.getKey());
 			}
 		}
@@ -248,6 +295,18 @@ public final class ZFighterPodTrip {
 			player.startRiding(pod, true, true);
 		}
 		player.resetFallDistance();
+		ServerPlayer guest = guest(level.getServer(), trip);
+		if (guest != null) {
+			if (guest.level() != level) {
+				// taken to another level mid-trip: they are no longer aboard
+				forget(trip);
+			} else {
+				if (guest.getVehicle() != pod) {
+					guest.startRiding(pod, true, true);
+				}
+				guest.resetFallDistance();
+			}
+		}
 		Vec3 at = pod.position();
 		switch (trip.phase) {
 			case COUNTDOWN -> {
@@ -336,6 +395,10 @@ public final class ZFighterPodTrip {
 		trip.phase = Phase.FLIGHT;
 		trip.ticks = flightTicks(cost);
 		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, flown > 0));
+		ServerPlayer guest = guest(player.level().getServer(), trip);
+		if (guest != null) {
+			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false));
+		}
 	}
 
 	/** Where the trip comes down: the world, and open ground on it. */
@@ -419,13 +482,23 @@ public final class ZFighterPodTrip {
 		}
 		double top = Math.min(ground.getY() + DESCENT_HEIGHT, to.getMaxY() + CRUISE_OVER_TOP);
 		Vec3 start = new Vec3(ground.getX() + 0.5, top, ground.getZ() + 0.5);
+		ServerPlayer guest = guest(server, trip);
 		player.stopRiding();
+		if (guest != null) {
+			guest.stopRiding();
+		}
 		if (trip.pod != null) {
 			trip.pod.discard();
 		}
 		player.teleportTo(to, start.x, start.y + 0.5, start.z, Set.of(), player.getYRot(), 0.0F, true);
+		if (guest != null) {
+			guest.teleportTo(to, start.x, start.y + 0.5, start.z, Set.of(), player.getYRot(), 0.0F, true);
+		}
 		trip.pod = pod(to, start, player.getYRot(), trip);
 		player.startRiding(trip.pod, true, true);
+		if (guest != null) {
+			guest.startRiding(trip.pod, true, true);
+		}
 		trip.phase = Phase.DESCENT;
 		trip.ticks = DESCENT_MAX_TICKS;
 		to.playSound(null, start.x, start.y, start.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.BLOCKS, 2.0F, 0.6F);
@@ -435,7 +508,11 @@ public final class ZFighterPodTrip {
 	private static void touchDown(ServerPlayer player, Trip trip) {
 		ServerLevel level = player.level();
 		BlockPos ground = trip.ground == null ? player.blockPosition() : trip.ground;
+		ServerPlayer guest = guest(level.getServer(), trip);
 		player.stopRiding();
+		if (guest != null) {
+			guest.stopRiding();
+		}
 		if (trip.pod != null) {
 			trip.pod.discard();
 			trip.pod = null;
@@ -445,26 +522,43 @@ public final class ZFighterPodTrip {
 		BlockPos feet = beside(level, at);
 		player.teleportTo(level, feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, Set.of(), player.getYRot(), player.getXRot(), true);
 		player.resetFallDistance();
+		if (guest != null) {
+			BlockPos next = standable(level, feet.east()) ? feet.east() : feet;
+			guest.teleportTo(level, next.getX() + 0.5, next.getY(), next.getZ() + 0.5, Set.of(), guest.getYRot(), guest.getXRot(), true);
+			guest.resetFallDistance();
+		}
 		level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 40, 1.6, 0.1, 1.6, 0.1);
 		level.playSound(null, at, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.6F, 0.6F);
 		level.playSound(null, at, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.7F);
 		Shakes.send(player, 0.6F, Vec3.atCenterOf(at));
 		if (!pod.complete()) {
-			hardLanding(level, player, pod);
+			hardLanding(level, player, guest, pod);
 		}
-		ZFighterSpace.arrived(player, trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest]);
+		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
+		ZFighterSpace.arrived(player, dest);
+		if (guest != null) {
+			ZFighterSpace.arrived(guest, dest);
+		}
 	}
 
-	/** (0.18.49) A pod that isn't whole comes down hard: a blast, the pilot hurt, and a part or two shaken off (never the keel). */
-	private static void hardLanding(ServerLevel level, ServerPlayer player, PodEntity pod) {
+	/** (0.18.47) A pod that isn't whole comes down hard: a blast, the pilot hurt, and a part or two shaken off (never the keel). */
+	private static void hardLanding(ServerLevel level, ServerPlayer player, @Nullable ServerPlayer guest, PodEntity pod) {
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 		level.sendParticles(ParticleTypes.EXPLOSION, pod.getX(), pod.getY() + 1.0, pod.getZ(), 2, 0.6, 0.4, 0.6, 0.0);
 		Shakes.send(player, 1.0F, pod.position());
 		hurting = true;
 		try {
 			player.hurtServer(level, level.damageSources().fall(), HARD_LANDING_DAMAGE);
+			if (guest != null) {
+				guest.hurtServer(level, level.damageSources().fall(), HARD_LANDING_DAMAGE);
+			}
 		} finally {
 			hurting = false;
+		}
+		if (PodGrades.softLanding(pod.grade())) {
+			// (0.18.51) a pod mended to the top grade takes the blow in its hull: nothing shakes loose
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing_soft").withStyle(ChatFormatting.GOLD));
+			return;
 		}
 		List<Integer> loose = new ArrayList<>();
 		for (int bit = 1; bit != 0 && bit <= PodPart.ALL_SLOTS; bit <<= 1) {
@@ -491,6 +585,8 @@ public final class ZFighterPodTrip {
 		PodEntity pod = PodEntity.spawn(level, at, false, fuel);
 		pod.setFuelGrade(trip.fuelGrade);
 		pod.setParts(trip.filled, trip.damaged);
+		pod.setFinished(trip.finished);
+		pod.setGrade(trip.grade);
 		pod.setFuel(fuel);
 		return pod;
 	}
@@ -546,12 +642,31 @@ public final class ZFighterPodTrip {
 
 	/** Left the game mid-trip: before the lift the pod stands again where it was; after it, it is set down where it was going. */
 	private static void leave(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		UUID pilot = GUESTS.remove(player.getUUID());
+		if (pilot != null) {
+			// (0.18.51) a passenger leaves: they wake where the trip began
+			Trip aboard = TRIPS.get(pilot);
+			player.stopRiding();
+			if (aboard != null) {
+				aboard.guest = null;
+				ServerLevel home = server.getLevel(aboard.from);
+				if (home != null) {
+					player.setAttached(PENDING, new Pending(home.dimension().identifier().toString(), beside(home, aboard.origin)));
+				}
+			}
+			return;
+		}
 		Trip trip = TRIPS.remove(player.getUUID());
 		if (trip == null) {
 			return;
 		}
-		MinecraftServer server = player.level().getServer();
+		ServerPlayer guest = guest(server, trip);
+		forget(trip);
 		player.stopRiding();
+		if (guest != null) {
+			guest.stopRiding();
+		}
 		if (trip.pod != null) {
 			trip.pod.discard();
 		}
@@ -572,7 +687,12 @@ public final class ZFighterPodTrip {
 			return;
 		}
 		PodEntity stood = stand(level, at, trip, fuel);
-		player.setAttached(PENDING, new Pending(level.dimension().identifier().toString(), beside(level, stood.blockPosition())));
+		BlockPos wakes = beside(level, stood.blockPosition());
+		player.setAttached(PENDING, new Pending(level.dimension().identifier().toString(), wakes));
+		if (guest != null) {
+			guest.teleportTo(level, wakes.getX() + 1.5, wakes.getY(), wakes.getZ() + 0.5, Set.of(), guest.getYRot(), guest.getXRot(), true);
+			guest.resetFallDistance();
+		}
 	}
 
 	/** Back in the game after leaving mid-trip: beside the pod. */

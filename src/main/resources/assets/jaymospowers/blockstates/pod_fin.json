@@ -1,9 +1,10 @@
 {
-  "multipart": [
-    {
-      "apply": {
-        "model": "jaymospowers:block/pod_fin"
-      }
+  "variants": {
+    "damaged=false": {
+      "model": "jaymospowers:block/pod_fin"
+    },
+    "damaged=true": {
+      "model": "jaymospowers:block/pod_fin_worn"
     }
-  ]
+  }
 }

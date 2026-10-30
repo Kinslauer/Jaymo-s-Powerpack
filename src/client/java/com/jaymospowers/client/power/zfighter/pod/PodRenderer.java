@@ -4,6 +4,7 @@ import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -18,7 +19,8 @@ import net.minecraft.world.phys.AABB;
 /**
  * (0.18.49, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
  * heading. A damaged fin is drawn bent out {@link #BEND} degrees about its foot, a damaged canopy as its lower step only,
- * a damaged plate with its dark gash. (Parts are drawn by pose, not by moving the shared model parts, since the draw is
+ * a damaged plate with its dark gash. (0.18.51) A finished pod's beacon lamp is drawn full bright, and each mend grade adds a
+ * brass band to the keel's corner posts. (Parts are drawn by pose, not by moving the shared model parts, since the draw is
  * queued and made later.)
  */
 public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
@@ -32,6 +34,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		float yaw;
 		int filled;
 		int damaged;
+		boolean finished;
+		int grade;
 	}
 
 	public PodRenderer(EntityRendererProvider.Context context) {
@@ -56,6 +60,8 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		state.yaw = entity.getYRot(partialTicks);
 		state.filled = entity.filled();
 		state.damaged = entity.damagedMask();
+		state.finished = entity.finished();
+		state.grade = entity.grade();
 	}
 
 	@Override
@@ -67,6 +73,10 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		RenderType glass = RenderTypes.entityTranslucent(PodModel.TEXTURE);
 		if ((state.filled & PodPart.KEEL.bit(0)) != 0) {
 			draw(collector, poseStack, state, "keel", solid);
+			// (0.18.51) a band of brass on the corner posts for each grade it was mended
+			for (int grade = 1; grade <= state.grade; grade++) {
+				draw(collector, poseStack, state, "grade_" + grade, solid);
+			}
 		}
 		for (int i = 0; i < FINS.length; i++) {
 			int bit = PodPart.FIN.bit(i);
@@ -104,6 +114,11 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		}
 		if ((state.filled & PodPart.MAST.bit(0)) != 0) {
 			draw(collector, poseStack, state, "mast", solid);
+			if (state.finished) {
+				// (0.18.51) the beacon lamp lights once a hammer has finished the pod
+				ModelPart lamp = PodModel.part("mast_lit");
+				collector.submitModelPart(lamp, poseStack, solid, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null);
+			}
 		}
 		poseStack.popPose();
 		super.submit(state, poseStack, collector, camera);

@@ -569,6 +569,7 @@ public final class ZFighterSpaceMissions {
 
 	private static void finish(ServerPlayer player, int planet, int mode) {
 		Planet info = PLANETS[planet];
+		boolean firstTime = !of(player).settled(planet);
 		Data data = of(player).with(planet, 0);
 		boolean free = mode == FREE;
 		player.setAttached(DATA, new Data(data.state(), free ? data.freed() | 1 << planet : data.freed(), free ? data.conquered() : data.conquered() | 1 << planet));
@@ -582,6 +583,12 @@ public final class ZFighterSpaceMissions {
 		float ore = free ? 1.0F : CONQUER_ORE;
 		for (int i = 0; i < info.items().length; i++) {
 			ZFighterSagas.give(player, new ItemStack(info.items()[i], Math.max(1, Math.round(info.counts()[i] * ore))));
+		}
+		// (0.18.51) the first time a world is settled it also gives the one part only it has, for mending a pod better
+		Item worldPart = firstTime ? com.jaymospowers.power.zfighter.pod.PodGrades.worldPart(info.key()) : null;
+		if (worldPart != null) {
+			ZFighterSagas.give(player, new ItemStack(worldPart));
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.space_part", new ItemStack(worldPart).getHoverName()).withStyle(ChatFormatting.AQUA));
 		}
 		Component title = title(planet, mode);
 		player.sendSystemMessage(Component.translatable("space.jaymospowers." + info.key() + (free ? ".free_done" : ".conquer_done")).withStyle(ChatFormatting.AQUA));
