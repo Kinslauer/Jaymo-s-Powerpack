@@ -100,7 +100,7 @@ import org.jspecify.annotations.Nullable;
  * wounded to get up shift will give up. the animation takes longer but animates them rising to their feet, and is
  * interrupted after 2 hits." A blow of {@link #KILL_BLOW} or more on anyone downed is their death ({@link #attack}). A downed
  * player whose head, body and arms are all above red on the wounds screen ({@link #TOO_HURT_FRACTION}, unbroken, there;
- * (0.18.65) as the screen shows them now, legs and feet left out: {@link #blocksRise}) holds sneak for {@link #RISE_TICKS} to get up by themselves
+ * (0.18.68) as the screen shows them now, legs and feet left out: {@link #blocksRise}) holds sneak for {@link #RISE_TICKS} to get up by themselves
  * ({@link #RISING}, drawn by {@code CrawlPose}), at {@link #RISE_HEALTH}; the {@link #HOLD_HITS}th hit meanwhile knocks
  * them back down (Kingdoms' Unflinching: more, {@link WillSkill#holdHits}), as it breaks off a revive or Second Wind's
  * eating. Too wounded, or passed out, sneak gives up as before. The crippled (off their feet, not downed) are as they were.
@@ -136,7 +136,7 @@ public final class Downed {
 	/** (0.18.5) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
 	public static final int RISE_TICKS = 160;
 	public static final float RISE_HEALTH = 0.3F;
-	/** (0.18.5) The head, body or an arm (0.18.65: not legs or feet) this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
+	/** (0.18.5) The head, body or an arm (0.18.68: not legs or feet) this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
 	public static final float TOO_HURT_FRACTION = 0.25F;
 	/** (0.18.5) The hit that breaks off a held action (rising, a revive, Second Wind's eating), before Unflinching. */
 	public static final int HOLD_HITS = 2;
@@ -191,7 +191,7 @@ public final class Downed {
 	public static final AttachmentType<Long> RISING = AttachmentRegistry.create(JaymosPowers.id("downed_rising"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
 	/**
-	 * (0.18.5) Downed with an arm, leg or foot at red or worse as they fell. (0.18.65) No longer set or read (the downed
+	 * (0.18.5) Downed with an arm, leg or foot at red or worse as they fell. (0.18.68) No longer set or read (the downed
 	 * health fills every part back up to the bruise line, so the wounds screen showed yellow while this said red); only
 	 * cleared, off old saves.
 	 */
@@ -402,7 +402,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.18.65) The part that keeps a downed player from rising: the head, body or an arm at red or worse on the wounds
+	 * (0.18.68) The part that keeps a downed player from rising: the head, body or an arm at red or worse on the wounds
 	 * screen ({@link #TOO_HURT_FRACTION}), broken, or gone; null if none does. Andy (2026-10-30): "you should still be able
 	 * to get up if your arms torso and head arent red", so legs and feet don't count, and it's what the screen shows now.
 	 */
@@ -851,7 +851,7 @@ public final class Downed {
 		if (held > 0 ? held % 2 == 0 : now % HINT_TICKS == 0) {
 			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
-			// (0.18.65) why they can't get up: the part at red, or being carried or in the water
+			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
 			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
 				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
