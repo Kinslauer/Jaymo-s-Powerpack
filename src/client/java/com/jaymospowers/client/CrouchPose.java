@@ -35,10 +35,15 @@ import net.minecraft.world.entity.player.Player;
  * down to the foot ({@link KneeBend}); the legs hold that whatever is in the hands, bow, crossbow, gun or thrown.
  * <p>(0.18.57) The low crouch from the stance wheel ({@link Stance}): both thighs forward and both knees bent so the shins
  * stand straight ({@link KneeBend}), the body sunk {@link #LOW_DROP} lower to keep the feet on the ground.
+ * <p>(0.18.65) Andy: "the second to last option should be our new sneak, the third option the default vanilla sneak ...
+ * use a smoother animation like the one from MGSV". The arms out and the sway are now the low crouch's alone; a plain
+ * sneak is vanilla's (still kneeling when still, the firing stance). And every change eases: vanilla snaps in and out of
+ * its crouch, so the body is blended between standing and crouched over {@link #BEND_IN} ticks ({@link #bendBody}),
+ * the low crouch and the arms over {@link #LOW_IN} and {@link #READY_IN}, all on a smootherstep curve.
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
-	static final float READY_IN = 5.0F, KNEEL_IN = 7.0F, GET_UP = 5.0F;
+	static final float READY_IN = 8.0F, KNEEL_IN = 7.0F, GET_UP = 5.0F;
 	/** Moving: how much lower than vanilla's crouch (blocks). On the knee: how far below vanilla's crouch the body sits. */
 	static final float LOW = 0.08F, SINK = 0.3F, HIP = 0.75F;
 	/** The arms out from the sides (radians), and a little forward. */
@@ -55,15 +60,20 @@ public final class CrouchPose {
 	/** The low crouch: both thighs this far forward (radians), and the body sunk to match (blocks: 6 px of thigh, 1 - cos). */
 	static final float LOW_THIGH = 1.2F, LOW_DROP = 0.24F;
 	/** Into and out of the low crouch (ticks). */
-	static final float LOW_IN = 5.0F;
+	static final float LOW_IN = 9.0F;
+	/** Standing into vanilla's crouch and back (ticks). */
+	static final float BEND_IN = 7.0F;
+	/** Vanilla's crouch, as it lays it on the model: body pitch, arms' pitch, legs back, head / body / arms down (pixels), and the
+	 * whole body down (blocks, before scale). */
+	static final float V_BODY = 0.5F, V_ARMS = 0.4F, V_LEGS_Z = 4.0F, V_HEAD_Y = 4.2F, V_BODY_Y = 3.2F, V_OFFSET = 0.125F;
 	/** Under this walking speed (vanilla's 0..1) the body counts as still. */
 	static final float STILL_SPEED = 0.05F;
 
 	/**
 	 * {@code ready}: 0 to 1, arms out; {@code kneel}: 0 to 1, on the knee; {@code pos}, {@code speed}: the stride's;
-	 * {@code low}: 0 to 1, in the low crouch.
+	 * {@code low}: 0 to 1, in the low crouch; {@code bend}: 0 to 1, how far into vanilla's crouch the body is drawn.
 	 */
-	public record Crouch(float ready, float kneel, float pos, float speed, float low) {
+	public record Crouch(float ready, float kneel, float pos, float speed, float low, float bend) {
 	}
 
 	public static final RenderStateDataKey<Crouch> KEY = RenderStateDataKey.create(() -> "jaymospowers:crouch");
@@ -72,6 +82,7 @@ public final class CrouchPose {
 		float ready;
 		float kneel;
 		float low;
+		float bend;
 		float stillSince = -1.0F;
 		float last = -1.0F;
 	}
@@ -85,7 +96,9 @@ public final class CrouchPose {
 		Track track = TRACKS.get(entity.getId());
 		boolean crouched = entity.isCrouching() && entity.onGround() && !entity.isPassenger() && !entity.isSwimming() && !entity.isFallFlying()
 			&& !entity.isSpectator() && !otherwise(entity);
-		if (!crouched && track == null) {
+		boolean bent = entity.isCrouching() && !entity.isPassenger() && !entity.isSwimming() && !entity.isFallFlying() && !entity.isSpectator()
+			&& !otherwise(entity);
+		if (!crouched && !bent && track == null) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -103,17 +116,19 @@ public final class CrouchPose {
 			track.stillSince = now;
 		}
 		boolean kneel = still && now - track.stillSince >= Kneel.KNEEL_AFTER;
-		track.ready = approach(track.ready, crouched ? 1.0F : 0.0F, dt / READY_IN);
-		track.kneel = approach(track.kneel, kneel ? 1.0F : 0.0F, dt / (kneel ? KNEEL_IN : GET_UP));
 		boolean low = crouched && entity instanceof Player player && Stance.low(player);
+		// (0.18.65) arms out and swaying only in the low crouch; a plain sneak is vanilla's
+		track.ready = approach(track.ready, low ? 1.0F : 0.0F, dt / READY_IN);
+		track.kneel = approach(track.kneel, kneel ? 1.0F : 0.0F, dt / (kneel ? KNEEL_IN : GET_UP));
 		track.low = approach(track.low, low ? 1.0F : 0.0F, dt / LOW_IN);
-		if (!crouched && track.ready <= 0.0F && track.kneel <= 0.0F && track.low <= 0.0F || entity.isRemoved()) {
+		track.bend = approach(track.bend, bent ? 1.0F : 0.0F, dt / BEND_IN);
+		if (!crouched && !bent && track.ready <= 0.0F && track.kneel <= 0.0F && track.low <= 0.0F && track.bend <= 0.0F || entity.isRemoved()) {
 			TRACKS.remove(entity.getId());
 			state.setData(KEY, null);
 			return;
 		}
 		state.setData(KEY, new Crouch(smooth(track.ready), smooth(track.kneel), state.walkAnimationPos, state.walkAnimationSpeed,
-			smooth(track.low)));
+			smooth(track.low), smooth(track.bend)));
 	}
 
 	/** Another full-body pose has them: tending, a finisher, carrying or being carried, crawling, downed. */
@@ -125,9 +140,16 @@ public final class CrouchPose {
 	/** After the body faces its way: lower while moving, sunk onto the knee when still. */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		Crouch c = state.getData(KEY);
-		if (c == null || state.deathTime > 0.0F || !state.isCrouching) {
+		if (c == null || state.deathTime > 0.0F) {
 			return;
 		}
+		// (0.18.65) vanilla drops a crouching body V_OFFSET at once: eased in and out instead
+		float drop = V_OFFSET * state.scale;
+		if (!state.isCrouching) {
+			poseStack.translate(0.0F, -drop * c.bend(), 0.0F);
+			return;
+		}
+		poseStack.translate(0.0F, drop * (1.0F - c.bend()), 0.0F);
 		poseStack.translate(0.0F, -(LOW * c.ready() + LOW_DROP * c.low()) * (1.0F - c.kneel()) - SINK * c.kneel(), 0.0F);
 		if (c.kneel() > 0.0F) {
 			poseStack.translate(0.0F, HIP, 0.0F);
@@ -138,6 +160,7 @@ public final class CrouchPose {
 
 	/** After the model animates (crouched by vanilla): arms out and swaying, or up out of the crouch onto one knee. */
 	public static void applyModel(Model<?> model, Object renderState) {
+		bendBody(model, renderState);
 		Crouch c = posed(model, renderState);
 		if (c == null) {
 			return;
@@ -195,6 +218,34 @@ public final class CrouchPose {
 	}
 
 	/**
+	 * (0.18.65) Vanilla lays its crouch on (or takes it off) in one frame; here the body is drawn only {@code bend} of the
+	 * way into it, so going down and getting up both ease (MGSV's smooth stance changes).
+	 */
+	private static void bendBody(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || state.deathTime > 0.0F) {
+			return;
+		}
+		Crouch c = state.getData(KEY);
+		if (c == null || otherPose(state)) {
+			return;
+		}
+		// crouched: back out by what isn't bent yet; standing: in by what's still bent
+		float u = state.isCrouching ? c.bend() - 1.0F : c.bend();
+		if (u == 0.0F) {
+			return;
+		}
+		h.body.xRot += V_BODY * u;
+		h.rightArm.xRot += V_ARMS * u;
+		h.leftArm.xRot += V_ARMS * u;
+		h.rightLeg.z += V_LEGS_Z * u;
+		h.leftLeg.z += V_LEGS_Z * u;
+		h.head.y += V_HEAD_Y * u;
+		h.body.y += V_BODY_Y * u;
+		h.rightArm.y += V_BODY_Y * u;
+		h.leftArm.y += V_BODY_Y * u;
+	}
+
+	/**
 	 * Right before the model is drawn (after {@link #applyModel}): on the knee, the front leg bent at the knee for this one
 	 * draw ({@link KneeBend#restore} once it's drawn).
 	 */
@@ -222,12 +273,14 @@ public final class CrouchPose {
 			return null;
 		}
 		Crouch c = state.getData(KEY);
-		if (c == null || state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
+		return c == null || otherPose(state) ? null : c;
+	}
+
+	/** Whether another full-body pose is drawn on this body (tending, a finisher, carrying, crawling). */
+	private static boolean otherPose(AvatarRenderState state) {
+		return state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
 			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
-			|| state.getData(CrawlPose.KEY) != null) {
-			return null;
-		}
-		return c;
+			|| state.getData(CrawlPose.KEY) != null;
 	}
 
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */
@@ -239,9 +292,10 @@ public final class CrouchPose {
 		return from < to ? Math.min(to, from + step) : Math.max(to, from - step);
 	}
 
+	/** (0.18.65) Smootherstep: starts and settles with no jolt at either end. */
 	private static float smooth(float t) {
 		t = Mth.clamp(t, 0.0F, 1.0F);
-		return t * t * (3.0F - 2.0F * t);
+		return t * t * t * (t * (t * 6.0F - 15.0F) + 10.0F);
 	}
 
 	private static void blend(ModelPart part, float x, float y, float z, float k) {
