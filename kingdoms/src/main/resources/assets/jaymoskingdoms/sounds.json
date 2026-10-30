@@ -767,38 +767,6 @@
 			}
 		]
 	},
-	"voice.narrator.hold.realm": {
-		"sounds": [
-			{
-				"name": "jaymoskingdoms:voice/narrator/hold_realm",
-				"stream": true
-			}
-		]
-	},
-	"voice.narrator.hold.harbour": {
-		"sounds": [
-			{
-				"name": "jaymoskingdoms:voice/narrator/hold_harbour",
-				"stream": true
-			}
-		]
-	},
-	"voice.narrator.hold.future": {
-		"sounds": [
-			{
-				"name": "jaymoskingdoms:voice/narrator/hold_future",
-				"stream": true
-			}
-		]
-	},
-	"voice.narrator.hold.arriving": {
-		"sounds": [
-			{
-				"name": "jaymoskingdoms:voice/narrator/hold_arriving",
-				"stream": true
-			}
-		]
-	},
 	"voice.grimsby.summon.1": {
 		"sounds": [
 			{

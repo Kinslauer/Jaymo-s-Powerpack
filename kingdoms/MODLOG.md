@@ -7142,8 +7142,21 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
   constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
   keeps exact rotations. See the Powers MODLOG 0.18.63.
+## 0.7.400: Hold screen narrator says only its title (pack 0.18.65)
+- Andy: "all the narrator should say here is your story is being written." `StoryHoldScreen` reads its title once and
+  no longer reads what the hold is for (capital, harbour, future, arriving); the hints still cycle as text. The four
+  unused hold-reason clips are gone from `Voices.INTRO_LINES`, `sounds.json` and `make_voices.py`.
 
-## 0.7.400: the Unarmed figure drops what it held (pack 0.18.65)
+## 0.7.401: a Will clash rings out, and its jump doesn't jump (pack 0.18.67)
+- Andy: "the jump should not make you jump". While two players clash (`WillClash`), each has a transient jump-strength
+  modifier of -100% (`ROOTED`), so a press still counts but nobody leaves the ground; it comes off when the clash ends,
+  for any reason.
+- Andy: "there should also be loud ringing or booming effects as the showdown ensues". Locking eyes tolls a bell; every
+  `TOLL_TICKS` (1 s) a deep boom and a bell sound between the two, the bell climbing in pitch as time runs out and both
+  louder the wider the lead, with a ring of dust. The one who breaks gets a sonic boom and a ringing bell; a draw rings too.
+  Not seen in game.
+
+## 0.7.402: the Unarmed figure drops what it held (pack 0.18.69)
 - Andy: "if the origin gives them an item in this hand it should comically be on the floor". The road page's Unarmed
   figure now lacks its sword arm (Powers' right arm), and any hand whose arm is gone lets go: what it held (an earlier
   answer's bow, sword, pickaxe) lies flat on the floor at the feet on that side, pointing away. Sizes in

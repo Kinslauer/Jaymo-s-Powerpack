@@ -76,9 +76,9 @@ final class StoryFigure {
 
 	/** (0.7.364) Powers' arm bits ({@code Dismember.RIGHT_ARM}, {@code LEFT_ARM}). */
 	static final int RIGHT_ARM = 2, LEFT_ARM = 4;
-	/** (0.7.400) How big a dropped item lies on the floor, in blocks (the figure's own scale), and how flat it lies (1: upright). */
+	/** (0.7.402) How big a dropped item lies on the floor, in blocks (the figure's own scale), and how flat it lies (1: upright). */
 	static final float DROPPED_SIZE = 0.75F, DROPPED_FLAT = 0.55F;
-	/** (0.7.400) How far beside the feet a dropped item lies, in blocks. */
+	/** (0.7.402) How far beside the feet a dropped item lies, in blocks. */
 	static final float DROPPED_OUT = 0.55F;
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
@@ -162,7 +162,7 @@ final class StoryFigure {
 		SCENES.put("road.captive", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
 		// (0.7.364) Andy: "the pickaxe or sword or harpoon make sense. not the trident"
 		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
-		// (0.7.364) Andy: "he shouldnt still have his limb"; (0.7.400) the sword arm, so what the hand held lies on the floor
+		// (0.7.364) Andy: "he shouldnt still have his limb"; (0.7.402) the sword arm, so what the hand held lies on the floor
 		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, RIGHT_ARM));
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
@@ -317,7 +317,7 @@ final class StoryFigure {
 		}
 		EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
 		Item[] gear = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
-		// (0.7.400) Andy: "if the origin gives them an item in this hand it should comically be on the floor": a hand whose
+		// (0.7.402) Andy: "if the origin gives them an item in this hand it should comically be on the floor": a hand whose
 		// arm is gone lets go of what it held, and it lies at the feet on that side
 		boolean rightMain = target.getMainArm() == HumanoidArm.RIGHT;
 		Item[] dropped = new Item[2];
@@ -403,7 +403,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * (0.7.400) {@code stack} lying on the floor at {@code x}, its bottom on {@code feet}: turned so its length lies along
+	 * (0.7.402) {@code stack} lying on the floor at {@code x}, its bottom on {@code feet}: turned so its length lies along
 	 * the ground (an item's picture runs corner to corner), flattened as if seen from a little above, pointing away from
 	 * the figure on its {@code right} side or left.
 	 */

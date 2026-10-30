@@ -99,8 +99,8 @@ import org.jspecify.annotations.Nullable;
  * anyone goes down without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too
  * wounded to get up shift will give up. the animation takes longer but animates them rising to their feet, and is
  * interrupted after 2 hits." A blow of {@link #KILL_BLOW} or more on anyone downed is their death ({@link #attack}). A downed
- * player whose arms, legs and feet are all above red on the wounds screen ({@link #TOO_HURT_FRACTION}, unbroken, and
- * none of them that low as they fell: {@link #TOO_HURT}) holds sneak for {@link #RISE_TICKS} to get up by themselves
+ * player whose head, body and arms are all above red on the wounds screen ({@link #TOO_HURT_FRACTION}, unbroken, there;
+ * (0.18.68) as the screen shows them now, legs and feet left out: {@link #blocksRise}) holds sneak for {@link #RISE_TICKS} to get up by themselves
  * ({@link #RISING}, drawn by {@code CrawlPose}), at {@link #RISE_HEALTH}; the {@link #HOLD_HITS}th hit meanwhile knocks
  * them back down (Kingdoms' Unflinching: more, {@link WillSkill#holdHits}), as it breaks off a revive or Second Wind's
  * eating. Too wounded, or passed out, sneak gives up as before. The crippled (off their feet, not downed) are as they were.
@@ -136,7 +136,7 @@ public final class Downed {
 	/** (0.18.5) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
 	public static final int RISE_TICKS = 160;
 	public static final float RISE_HEALTH = 0.3F;
-	/** (0.18.5) An arm, leg or foot this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
+	/** (0.18.5) The head, body or an arm (0.18.68: not legs or feet) this whole or less (the wounds screen's red) leaves a downed player too wounded to rise. */
 	public static final float TOO_HURT_FRACTION = 0.25F;
 	/** (0.18.5) The hit that breaks off a held action (rising, a revive, Second Wind's eating), before Unflinching. */
 	public static final int HOLD_HITS = 2;
@@ -190,7 +190,11 @@ public final class Downed {
 	 */
 	public static final AttachmentType<Long> RISING = AttachmentRegistry.create(JaymosPowers.id("downed_rising"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
-	/** (0.18.5) Downed with an arm, leg or foot at red or worse as they fell: too wounded to rise by themselves. Saved. */
+	/**
+	 * (0.18.5) Downed with an arm, leg or foot at red or worse as they fell. (0.18.68) No longer set or read (the downed
+	 * health fills every part back up to the bruise line, so the wounds screen showed yellow while this said red); only
+	 * cleared, off old saves.
+	 */
 	static final AttachmentType<Boolean> TOO_HURT = AttachmentRegistry.create(JaymosPowers.id("downed_too_hurt"),
 		builder -> builder.persistent(Codec.BOOL));
 
@@ -397,24 +401,29 @@ public final class Downed {
 		return source.getEntity() != null || source.getDirectEntity() != null || source.is(DamageTypeTags.IS_EXPLOSION);
 	}
 
-	/** (0.18.5) An arm, leg or foot at red or worse on the wounds screen ({@link #TOO_HURT_FRACTION}), broken, or gone. */
-	static boolean limbsTooHurt(LivingEntity entity) {
+	/**
+	 * (0.18.68) The part that keeps a downed player from rising: the head, body or an arm at red or worse on the wounds
+	 * screen ({@link #TOO_HURT_FRACTION}), broken, or gone; null if none does. Andy (2026-10-30): "you should still be able
+	 * to get up if your arms torso and head arent red", so legs and feet don't count, and it's what the screen shows now.
+	 */
+	public static @Nullable BodyPart blocksRise(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || plan == BodyPlan.SIMPLE) {
-			return false;
+			return null;
 		}
 		for (int i = 0; i < plan.size(); i++) {
 			BodyPart part = plan.part(i);
-			if (!part.vital() && (Wounds.isBroken(entity, part) || Wounds.fraction(entity, part) <= TOO_HURT_FRACTION)) {
-				return true;
+			boolean counts = part.vital() || part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM;
+			if (counts && (Wounds.isBroken(entity, part) || Wounds.fraction(entity, part) <= TOO_HURT_FRACTION)) {
+				return part;
 			}
 		}
-		return false;
+		return null;
 	}
 
-	/** (0.18.5) Whether this downed player is too wounded to get up by themselves: limbs at red or worse as they fell, or now. */
+	/** (0.18.5) Whether this downed player is too wounded to get up by themselves ({@link #blocksRise}). */
 	public static boolean tooHurt(LivingEntity entity) {
-		return entity.hasAttached(TOO_HURT) || limbsTooHurt(entity);
+		return blocksRise(entity) != null;
 	}
 
 	/**
@@ -455,12 +464,7 @@ public final class Downed {
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
 		boolean crawler = !(entity instanceof Player)
 			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
-		// (0.18.5) the limbs as they fell, before the downed health fills them back to the bruise line
-		if (entity instanceof Player && limbsTooHurt(entity)) {
-			entity.setAttached(TOO_HURT, true);
-		} else {
-			entity.removeAttached(TOO_HURT);
-		}
+		entity.removeAttached(TOO_HURT);
 		entity.removeAttached(RISING);
 		if (!keepHealth) {
 			entity.setHealth(Math.min(entity instanceof Player ? DOWNED_PLAYER_HEALTH : DOWNED_HEALTH, entity.getMaxHealth()));
@@ -847,8 +851,12 @@ public final class Downed {
 		if (held > 0 ? held % 2 == 0 : now % HINT_TICKS == 0) {
 			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
 			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
-			player.sendOverlayMessage(Component.translatable(out ? "message.jaymospowers.downed.give_up_out" : "message.jaymospowers.downed.give_up", bar)
-				.withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
+			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
+			BodyPart blocking = blocksRise(player);
+			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
+				: blocking != null ? Component.translatable("message.jaymospowers.downed.give_up_hurt", blocking.displayName(), bar)
+				: Component.translatable("message.jaymospowers.downed.give_up", bar);
+			player.sendOverlayMessage(message.copy().withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
 	}
 

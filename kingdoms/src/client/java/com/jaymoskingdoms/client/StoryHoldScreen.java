@@ -30,7 +30,7 @@ final class StoryHoldScreen extends Screen {
 	 * (0.7.360) Andy: "i dont like when the narrator reads exactly what's on screen. it can keep the headline, but the white
 	 * text should cycle, with a series of a minimum 40 lines hinting at how different game mechanics work. The narrator can
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
-	 * for HINT_MS each, from a random one on, while the narrator still reads what the hold is for. Widest a hint may run.
+	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
 	private static final int HINTS = 44, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
@@ -38,8 +38,8 @@ final class StoryHoldScreen extends Screen {
 	/** What the server holds this client for (a lang key), or "" for nothing. */
 	private static String holding = "";
 	/**
-	 * (0.7.352) The narrator reads the screen ({@link Voices}): its title once, then each line as the hold moves on. What it
-	 * last began reading, the line being read, those still to read, and when the line began (ms).
+	 * (0.7.352) The narrator reads the screen ({@link Voices}): its title once (0.7.400: only that). What it began
+	 * reading ("" before it has), the line being read, those still to read, and when the line began (ms).
 	 */
 	private static String read = "";
 	private static @Nullable SimpleSoundInstance reading;
@@ -96,14 +96,12 @@ final class StoryHoldScreen extends Screen {
 	}
 
 	private static void narrate() {
-		if (!holding.equals(read)) {
-			// (0.7.360) the life story's narrator never reads over this one
+		// (0.7.400) Andy: "all the narrator should say here is your story is being written." So only the title is read,
+		// once, and not what the hold is for. (0.7.360) the life story's narrator never reads over this one.
+		if (read.isEmpty()) {
 			LifeStoryScreen.hush();
-			if (read.isEmpty()) {
-				toRead.add("gui.jaymoskingdoms.story.hold.title");
-			}
-			read = holding;
-			toRead.add(holding);
+			read = "gui.jaymoskingdoms.story.hold.title";
+			toRead.add(read);
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		if (reading != null) {

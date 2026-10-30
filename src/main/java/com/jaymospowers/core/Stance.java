@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
  * <li>{@link #PRONE}: flat on your belly, the crawl ({@link Crawl});</li>
  * <li>{@link #LOW}: a low crouch, knees deep, {@link #LOW_HEIGHT} blocks tall so it gets under a gap a sneak can't, and
  * slower ({@link #LOW_SPEED} of a sneak);</li>
- * <li>{@link #SNEAK}: the usual sneak, held without the key;</li>
+ * <li>{@link #SNEAK}: vanilla's sneak, held without the key (0.18.66: the arms-out sway and the kneel are the low crouch's now);</li>
  * <li>{@link #STAND}: on your feet.</li>
  * </ol>
  * Only the low crouch is new to the server: the crawl has its own flag, and a sneak is the Sneak key the client sends. Its
