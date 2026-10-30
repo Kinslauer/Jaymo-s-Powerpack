@@ -12,11 +12,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -65,6 +67,11 @@ final class Speakeasy {
 	static AABB room(BlockPos hatch) {
 		int fy = floor(hatch) + 1;
 		return new AABB(hatch.getX() - 2, fy, hatch.getZ(), hatch.getX() - 2 + WIDTH, fy + HEIGHT, hatch.getZ() + LENGTH);
+	}
+
+	/** (0.7.412) Where a hideout's guest wakes: the middle of the floor, clear of the bar, the table and the ladder. */
+	static Vec3 wakeSpot(BlockPos hatch) {
+		return new Vec3(hatch.getX() + 1.5, floor(hatch) + 1, hatch.getZ() + 2.5);
 	}
 
 	/** Where the fence stands, behind his bar. */
@@ -443,6 +450,22 @@ final class Speakeasy {
 		set(level, cx - 1, cy, cz - 1, Blocks.HAY_BLOCK.defaultBlockState());
 		set(level, cx + 1, cy + 2, cz + 1, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
 		return at;
+	}
+
+	/** (0.7.412) The lower half of the cell door at {@code cell} (the story's sentences set one in the east wall): a prisoner's way out. */
+	static BlockPos doorAt(BlockPos cell) {
+		return cell.offset(2, 0, 0);
+	}
+
+	/** (0.7.412) Sets an iron door in the east wall of the cell at {@code cell} (once; locked, a prisoner picks it or pays at it). */
+	static void cellDoor(ServerLevel level, BlockPos cell) {
+		BlockPos low = doorAt(cell);
+		if (level.getBlockState(low).is(Blocks.IRON_DOOR)) {
+			return;
+		}
+		BlockState door = Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.FACING, Direction.WEST).setValue(DoorBlock.OPEN, false);
+		set(level, low.getX(), low.getY(), low.getZ(), door.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER));
+		set(level, low.getX(), low.getY() + 1, low.getZ(), door.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
 	}
 
 	/** Where a prisoner is let out: open ground by the seat. */

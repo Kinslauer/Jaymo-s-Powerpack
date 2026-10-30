@@ -103,8 +103,11 @@ public final class LifeStory {
 	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
 	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few emeralds. */
 	static final int VILLAGE_BREAD = 4, VILLAGE_EMERALDS = 4;
-	/** (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal guardsman"). */
-	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
+	/**
+	 * (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal
+	 * guardsman"). (0.7.412) The evicted keep the tools of their trade.
+	 */
+	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE, Start.EVICTED);
 	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
 	static final int[] LIMBS = {2, 4, 8, 16};
 	/** (0.7.223) Fell from the sky: how high over the crater you wake (blocks), how long you drift (ticks of Slow Falling), the crater's size. */
@@ -115,6 +118,19 @@ public final class LifeStory {
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
+	/**
+	 * (0.7.412) The hard roads. Still in chains: how far from the camp's fire you wake (blocks). Rock bottom: how far from the
+	 * outlaw camp you wake (blocks, in sight but past its raiders' eyes), and the food you wake with (of 20). Sentenced: how cold
+	 * the realm is to you (at most this). Hideout: how far from a camp's fire you wake (blocks). Cast out: how far outside a
+	 * haven's gates you wake (blocks).
+	 */
+	static final int CHAINED_MIN = 3, CHAINED_MAX = 9;
+	static final int ROCK_CAMP_MIN = 34, ROCK_CAMP_MAX = 48, ROCK_BOTTOM_FOOD = 3;
+	static final int SENTENCED_REPUTATION = -30;
+	static final int HIDEOUT_CAMP_MIN = 2, HIDEOUT_CAMP_MAX = 8;
+	static final int CAST_OUT_MIN = 40, CAST_OUT_MAX = 64;
+	/** (0.7.412) The purses (emeralds) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
+	static final int SENTENCED_EMERALDS = 4, EVICTED_EMERALDS = 6, HIDEOUT_EMERALDS = 3;
 	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
 	static final int WHALER_HARPOONS = 8;
 	/** (0.7.349) The starts on Jaymo's Powers' other worlds: the Pale Moon, the Verdant World, Rustfall, the Maw, the Nether's demon biomes, the afterlife. */
@@ -130,6 +146,9 @@ public final class LifeStory {
 	public enum Start {
 		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), SKYFALL(false),
 		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), WHALERS(false), UNARMED(false),
+		// (0.7.412, Andy's picks from the Kenshi and Streets of Rogue study) the hard roads: chained among a camp's captives, starving and
+		// maimed beside an outlaw camp, in a realm's cells, put out of a realm's streets, in an outlaw hideout, turned away by your own kind
+		CHAINED(false), ROCK_BOTTOM(false), SENTENCED(true), EVICTED(true), HIDEOUT(false), CAST_OUT(false),
 		// (0.7.349, Andy: "new starts, involving the other worlds") woken off the overworld by Jaymo's Powers ({@link #OTHER_WORLDS})
 		MOON(false), VERDANT(false), RUSTFALL(false), MAW(false), DEMON(false), AFTERLIFE(false), FATE(false);
 
@@ -138,6 +157,61 @@ public final class LifeStory {
 		Start(boolean realm) {
 			this.realm = realm;
 		}
+	}
+
+	/** (0.7.412) How hard a start is, shown on its card in the carousel. {@code VARIES}: fate's, which could be any. */
+	public enum Mark {
+		EASY, FAIR, HARD, VERY_HARD, CRUEL, VARIES;
+
+		public String key() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+	}
+
+	/** (0.7.412) A start's difficulty mark and the emeralds it starts with (not counting a merchant child's extra purse). */
+	public record Terms(Mark mark, int purse) {
+	}
+
+	/**
+	 * (0.7.412, Andy's picks: "difficulty and purse on every road") Every start's difficulty and starting purse, in one
+	 * table: the village the easiest, rock bottom the hardest. The purse is what {@link #kit} gives in emeralds.
+	 */
+	static final java.util.Map<Start, Terms> TERMS = new java.util.EnumMap<>(Start.class);
+
+	static {
+		TERMS.put(Start.VILLAGE, new Terms(Mark.EASY, VILLAGE_EMERALDS));
+		TERMS.put(Start.SWORN, new Terms(Mark.EASY, 0));
+		TERMS.put(Start.CITY, new Terms(Mark.FAIR, CITY_EMERALDS));
+		TERMS.put(Start.WILD, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.MONOLITH, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.SHIPWRECK, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.SKYFALL, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.WHALERS, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.VERDANT, new Terms(Mark.FAIR, 0));
+		TERMS.put(Start.BANISHED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.CAVE, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.BURNED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.SNOWED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.UNARMED, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.DEMON, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.AFTERLIFE, new Terms(Mark.HARD, 0));
+		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_EMERALDS));
+		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_EMERALDS));
+		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_EMERALDS));
+		TERMS.put(Start.CAPTIVE, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.TIMELOST, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.MOON, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.RUSTFALL, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.MAW, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.CHAINED, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.CAST_OUT, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
+		TERMS.put(Start.FATE, new Terms(Mark.VARIES, 0));
+	}
+
+	/** (0.7.412) {@code start}'s difficulty and purse. */
+	public static Terms terms(Start start) {
+		return TERMS.getOrDefault(start, new Terms(Mark.FAIR, 0));
 	}
 
 	/**
@@ -179,17 +253,20 @@ public final class LifeStory {
 		 * are always offered (and {@code Set.of} throws on {@code contains(null)}: every life-story page crashed).
 		 */
 		public boolean offered() {
-			return this.start == null || this.start != Start.UNARMED && this.start != Start.TIMELOST && !OTHER_WORLDS.contains(this.start) || powers();
+			return this.start == null || this.start != Start.UNARMED && this.start != Start.TIMELOST && this.start != Start.ROCK_BOTTOM
+				&& !OTHER_WORLDS.contains(this.start) || powers();
 		}
 
 		/**
 		 * (0.7.349, Andy: "Verdant only") The heritage a start is only for: the Verdant World's, the Verdant-born's; (0.7.355,
-		 * Andy: "should only be for emberborn") a demon master's hall, the Emberborn's; null for any.
+		 * Andy: "should only be for emberborn") a demon master's hall, the Emberborn's; (0.7.412, Andy: "Only bio built can choose
+		 * this") being cast out by your own, the Bio-built's; null for any.
 		 */
 		public Heritage.@Nullable Kind onlyFor() {
 			return switch (this.start) {
 				case VERDANT -> Heritage.Kind.VERDANT;
 				case DEMON -> Heritage.Kind.EMBERBORN;
+				case CAST_OUT -> Heritage.Kind.BIOBUILT;
 				case null, default -> null;
 			};
 		}
@@ -297,6 +374,12 @@ public final class LifeStory {
 				Answer.road(Start.CAPTIVE, Items.LEAD),
 				Answer.road(Start.WHALERS, Items.TRIDENT),
 				Answer.road(Start.UNARMED, Items.BONE),
+				Answer.road(Start.CHAINED, Items.IRON_CHAIN),
+				Answer.road(Start.ROCK_BOTTOM, Items.DEAD_BUSH),
+				Answer.road(Start.SENTENCED, Items.IRON_BARS),
+				Answer.road(Start.EVICTED, Items.OAK_DOOR),
+				Answer.road(Start.HIDEOUT, Items.BARREL),
+				Answer.road(Start.CAST_OUT, Items.SLIME_BALL),
 				Answer.road(Start.MOON, Items.END_STONE),
 				Answer.road(Start.VERDANT, Items.VINE),
 				Answer.road(Start.RUSTFALL, Items.RAW_IRON),
@@ -619,7 +702,7 @@ public final class LifeStory {
 			case SKYFALL -> "gravity";
 			case BURNED -> "smoke";
 			case SNOWED -> "cryo";
-			case CAPTIVE -> "zfighter";
+			case CAPTIVE, CHAINED -> "zfighter";
 			case WHALERS -> "darktide";
 			// (0.7.349) the other worlds: a fall under the moon's light weight, the Verdant World's warriors, years in Rustfall's
 			// mines, the black hole's pull, a demon master's hall, the dead's own master
@@ -818,7 +901,7 @@ public final class LifeStory {
 		Classes.PlayerClass cls, String option, String calling) {
 		RandomSource random = player.getRandom();
 		Start landed = begin(player, start, roadRealm, bornAs, random);
-		if (landed == Start.UNARMED) {
+		if (landed == Start.UNARMED || landed == Start.ROCK_BOTTOM) {
 			// an old loss, long healed over: one arm or one leg
 			int limb = LIMBS[random.nextInt(LIMBS.length)];
 			if (PowersCompat.bornWithout(player, limb)) {
@@ -830,7 +913,8 @@ public final class LifeStory {
 		// (0.7.246) where it set them down, for the folk about it to talk of (StoryTalk)
 		Hunt hunt = HUNTS.get(player.getUUID());
 		StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
-			: (landed == Start.BANISHED || landed == Start.SWORN) && roadRealm != null ? roadRealm.id() : -1);
+			: landed == Start.CHAINED ? StoryHard.shackleCamp(player)
+			: (landed == Start.BANISHED || landed == Start.SWORN || landed == Start.SENTENCED || landed == Start.EVICTED) && roadRealm != null ? roadRealm.id() : -1);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
 		if (start == Start.TIMELOST) {
@@ -1006,6 +1090,87 @@ public final class LifeStory {
 					}
 				}
 			}
+			case CHAINED -> {
+				// (0.7.412) shackled in a barbarian camp, among its captives (a camp is raised if the world has none, as for the escaped captive)
+				Faction camp = nearestCamp(server, spawn, false);
+				if (camp == null) {
+					camp = StoryGround.camp(level, spawn, random);
+				}
+				if (camp != null) {
+					to = ground(level, camp.seat(), CHAINED_MIN, CHAINED_MAX, random);
+					if (to != null) {
+						StoryHard.shackle(player, to, camp.id());
+					}
+				}
+			}
+			case ROCK_BOTTOM -> {
+				// (0.7.412) in sight of an outlaw camp, past its raiders' eyes (a camp is raised if the world has none)
+				Faction camp = nearestCamp(server, spawn, false);
+				if (camp == null) {
+					camp = StoryGround.camp(level, spawn, random);
+				}
+				if (camp != null) {
+					to = ground(level, camp.seat(), ROCK_CAMP_MIN, ROCK_CAMP_MAX, random);
+				}
+			}
+			case SENTENCED -> {
+				// (0.7.412) in the cells under the named realm's seat, with days to serve; the realm starts cold
+				if (named != null) {
+					atMost(player, named, SENTENCED_REPUTATION);
+					StoryHard.imprison(player, named, StoryHard.SENTENCE_DAYS * StoryHard.DAY_TICKS);
+					// (they respawn by the seat, where they are let out, not down in the pit)
+					home(player, level, BlockPos.containing(Speakeasy.release(level, named)));
+					landSafely(player);
+					return Start.SENTENCED;
+				}
+			}
+			case EVICTED -> {
+				// (0.7.412) the capital road for the named realm, with a fuller purse and no bed; its watch moves them on at night
+				if (named != null) {
+					to = ground(level, named.seat(), CITY_MIN, CITY_MAX, random);
+					if (to != null) {
+						StoryHard.evict(player, named);
+					}
+				}
+			}
+			case HIDEOUT -> {
+				// (0.7.412) a speakeasy's floor (the nearest built den, its realm hates you), else a barbarian camp that spares outlaws
+				Faction denRealm = StoryHard.denRealm(server, spawn);
+				Underworld.Den den = denRealm == null ? null : Underworld.builtDen(server, denRealm);
+				if (den != null) {
+					net.minecraft.world.phys.Vec3 in = Speakeasy.wakeSpot(den.hatch());
+					atMost(player, denRealm, BANISHED_REPUTATION);
+					List<Integer> found = new ArrayList<>(player.getAttachedOrElse(Underworld.FOUND, List.of()));
+					if (!found.contains(denRealm.id())) {
+						found.add(denRealm.id());
+						player.setAttached(Underworld.FOUND, List.copyOf(found));
+					}
+					player.teleportTo(level, in.x, in.y, in.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+					landSafely(player);
+					home(player, level, BlockPos.containing(in));
+					return Start.HIDEOUT;
+				}
+				Faction camp = nearestCamp(server, spawn, true);
+				if (camp == null) {
+					camp = StoryGround.camp(level, spawn, random);
+				}
+				if (camp != null) {
+					to = ground(level, camp.seat(), HIDEOUT_CAMP_MIN, HIDEOUT_CAMP_MAX, random);
+					Faction hates = to == null ? null : StoryHard.nearestSettlement(server, camp.seat());
+					if (hates != null) {
+						// (an outlaw to the settlement nearest the camp, and the camp spares them: Barbarians.outlaw)
+						atMost(player, hates, BANISHED_REPUTATION);
+					}
+				}
+			}
+			case CAST_OUT -> {
+				// (0.7.412) outside the gates of a haven that would have taken them in (the wild without one): their own turn them away for three days
+				Faction haven = StoryHomes.standing(server, player, heritage, spawn);
+				to = haven != null ? ground(level, haven.seat(), CAST_OUT_MIN, CAST_OUT_MAX, random) : ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				if (to != null) {
+					StoryHard.castOut(player);
+				}
+			}
 			case WHALERS -> {
 				// (0.7.228) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
 				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn);
@@ -1061,6 +1226,11 @@ public final class LifeStory {
 			// half-frozen
 			player.setTicksFrozen(player.getTicksRequiredToFreeze());
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SNOWED_SLOW_TICKS, 0));
+		}
+		if (landed == Start.ROCK_BOTTOM) {
+			// (0.7.412) starving: hardly a bite left in you
+			player.getFoodData().setFoodLevel(ROCK_BOTTOM_FOOD);
+			player.getFoodData().setSaturation(0.0F);
 		}
 		if (landed == Start.CAVE) {
 			// the bite you shrugged off, as you always do, and the fall that came after: poisoned, wounded, barely breathing
@@ -1211,12 +1381,24 @@ public final class LifeStory {
 				equip(player, stack.copy());
 			}
 		}
-		if (landed == Start.CAPTIVE || landed == Start.TIMELOST) {
+		if (HARD_MESSAGES.contains(landed)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story." + landed.name().toLowerCase(Locale.ROOT))
 				.withStyle(ChatFormatting.GRAY));
 		}
-		if (landed == Start.CAPTIVE) {
-			// nothing but your fists
+		if (landed == Start.CAPTIVE || landed == Start.ROCK_BOTTOM) {
+			// nothing but your fists (and, at rock bottom, not a crumb)
+			return;
+		}
+		if (landed == Start.CHAINED) {
+			// nothing but what you hid in your sleeve: lockpicks for the shackle
+			give(player, new ItemStack(Lockpicking.LOCKPICK, StoryHard.CHAIN_PICKS));
+			return;
+		}
+		if (landed == Start.SENTENCED) {
+			// bread through the bars, a few coins they let you keep, a pick in your boot
+			give(player, new ItemStack(Items.BREAD, KIT_BREAD / 2));
+			give(player, new ItemStack(Items.EMERALD, SENTENCED_EMERALDS));
+			give(player, new ItemStack(Lockpicking.LOCKPICK, StoryHard.CELL_PICKS));
 			return;
 		}
 		give(player, new ItemStack(Items.BREAD, KIT_BREAD));
@@ -1244,6 +1426,12 @@ public final class LifeStory {
 		}
 		if (landed == Start.CITY) {
 			give(player, new ItemStack(Items.EMERALD, CITY_EMERALDS));
+		}
+		if (landed == Start.EVICTED) {
+			give(player, new ItemStack(Items.EMERALD, EVICTED_EMERALDS));
+		}
+		if (landed == Start.HIDEOUT) {
+			give(player, new ItemStack(Items.EMERALD, HIDEOUT_EMERALDS));
 		}
 		if (landed == Start.CAVE) {
 			give(player, new ItemStack(Items.IRON_PICKAXE));
@@ -1380,10 +1568,15 @@ public final class LifeStory {
 
 	/** The standing barbarian camp nearest {@code from}, or null. */
 	private static @Nullable Faction nearestCamp(MinecraftServer server, BlockPos from) {
+		return nearestCamp(server, from, false);
+	}
+
+	/** (0.7.412) The same; {@code sparing}: only a plain barbarian camp (or a pirate cove) that takes in outlaws ({@link Barbarians#sparingCamp}). */
+	private static @Nullable Faction nearestCamp(MinecraftServer server, BlockPos from, boolean sparing) {
 		Faction best = null;
 		double bestD = Double.MAX_VALUE;
 		for (Faction f : Factions.all(server)) {
-			if (f.is(FactionType.BARBARIAN) && !f.fallen() && f.seat() != null) {
+			if (f.is(FactionType.BARBARIAN) && !f.fallen() && f.seat() != null && (!sparing || Barbarians.sparingCamp(server, f.id()))) {
 				double d = f.seat().distSqr(from);
 				if (d < bestD) {
 					bestD = d;
@@ -1394,12 +1587,21 @@ public final class LifeStory {
 		return best;
 	}
 
+	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
+	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
+		Start.HIDEOUT, Start.CAST_OUT);
+
 	/** (0.7.223) An escaped captive's camp, out to get them back until {@code until} (server tick). */
 	private record Hunt(int camp, long until) {
 	}
 
 	/** Who's being hunted by the camp they escaped (kept only while the server runs: a day is short). */
 	private static final java.util.Map<java.util.UUID, Hunt> HUNTS = new java.util.HashMap<>();
+
+	/** (0.7.412) {@code player} slipped their shackles: camp {@code camp} hunts them from now for the day. */
+	static void startHunt(MinecraftServer server, ServerPlayer player, int camp) {
+		HUNTS.put(player.getUUID(), new Hunt(camp, server.getTickCount() + HUNT_TICKS));
+	}
 
 	/** The camp's raiders near a hunted captive come after them, till the day is out (or the camp spares them). */
 	private static void hunt(MinecraftServer server) {
@@ -1453,6 +1655,7 @@ public final class LifeStory {
 					p.removeAttached(CALLING);
 					p.removeAttached(STRANDED);
 					StoryHomes.clear(p);
+					StoryHard.clear(p);
 					DEPARTED.remove(p.getUUID());
 					Classes.clear(p);
 					Heritage.clear(p);

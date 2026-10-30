@@ -165,6 +165,15 @@ final class StoryFigure {
 		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
 		// (0.7.364) Andy: "he shouldnt still have his limb"; (0.7.402) the sword arm, so what the hand held lies on the floor
 		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, RIGHT_ARM));
+		// (0.7.412) the hard roads: chained is bare like the captive (no chains drawn: a held item would end "bare"), rock bottom is
+		// short a limb with nothing in hand, the sentenced hold the bars, the evicted carry their purse and a bundle, the hideout's
+		// guest wears an outlaw's cap, the cast out walk on with nothing
+		SCENES.put("road.chained", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
+		SCENES.put("road.rock_bottom", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
+		scene("road.sentenced", Act.STAND, Items.IRON_BARS);
+		scene("road.evicted", Act.WALK, Items.EMERALD, Items.BUNDLE, null, null, null, null);
+		scene("road.hideout", Act.STAND, Items.STONE_SWORD, null, lh, null, null, null);
+		scene("road.cast_out", Act.WALK, null);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);
@@ -190,7 +199,7 @@ final class StoryFigure {
 		jobs("guard", "soldiers", "levy", "pits", "sworn", "weapon", "blades", "fights", "fists");
 		jobs("cleric", "healers", "nobles", "bell", "bells", "temple", "shrine");
 		jobs("librarian", "wizard", "apprentice", "books", "clock", "timelost", "hermit", "scholars");
-		jobs("leatherworker", "outlaws", "cutpurses", "captive", "banished");
+		jobs("leatherworker", "outlaws", "cutpurses", "captive", "banished", "chained", "hideout");
 		jobs("miner", "caves", "cave", "monolith", "bite", "mountain", "forge");
 		jobs("shepherd", "winter", "snowed", "blizzard", "snow", "north", "foundling");
 		jobs("toolsmith", "gunsmith");
