@@ -6845,7 +6845,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
   a Tool Station; Powers' `Provenance.FORGED_LISTENERS` and the new `Tinkering.TOOL_BUILT_LISTENERS` through
   `PowersCompat.onForged`/`onToolBuilt`), AETHER_TROPHY (in the Overworld carrying something only the Aether's guardians give:
-  the `#jaymoskingdoms:aether_trophies` tag, the Visage of War's reverent armour and the sentry boss chest's prizes; the Giants give
+  the `#jaymoskingdoms:aether_trophies` tag, the Visage of War's reverent armour and the sentry boss chest's armour (not irradiated holystone: it is also mined from the ground); the Giants give
   nothing of the sort, and wake only for Wildlands anyway), POD_FLIGHT (a pod trip landed home) and MAW_SALVAGE (a part set taken
   from a Maw wreck), the last two told by Powers through `WorldTiers.deed(player, key)`. `FEAT_NEEDED` is now a mask per tier:
   Borderlands FORGED, Wildlands NETHER and AETHER_TROPHY, Dread WITHER and POD_FLIGHT, Legend DRAGON and MAW_SALVAGE (foe counts
