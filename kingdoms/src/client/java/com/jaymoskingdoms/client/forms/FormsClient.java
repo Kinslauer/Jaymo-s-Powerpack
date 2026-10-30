@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 
 /**
  * (0.7.381) Weapon Forms on the client: the Combat Art key's hold and tap ({@link #key}), the belt strip above the hotbar
- * while in stance, the chain counter beside the crosshair, Alt and scroll for the belt slot, and Powers' lock-on taken on
+ * while in stance, the chain counter beside the crosshair, Ctrl and scroll for the belt slot, and Powers' lock-on taken on
  * with the stance ({@link PowersCompat#lockOnNearest}; without Powers the stance works without it).
  * <p>
  * The chain counter sits to the right of the crosshair, clear of Powers' parry timing bar below it. Weapon Forms has no
@@ -45,6 +45,8 @@ public final class FormsClient {
 
 	private static int held;
 	private static boolean holdDone, wasStance;
+	/** (0.7.408) Ctrl went down while standing still in stance: it is the belt's key until let go, not sprint. */
+	private static boolean ctrlForBelt;
 	private static int lockedByUs = -1, lockRetry;
 	private static int chainLinks;
 	private static long chainAt = Long.MIN_VALUE / 2;
@@ -61,6 +63,7 @@ public final class FormsClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("forms_belt"), FormsClient::belt);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosKingdoms.id("forms_chain"), FormsClient::chain);
 		ClientTickEvents.END_CLIENT_TICK.register(FormsClient::lockOn);
+		ClientTickEvents.START_CLIENT_TICK.register(FormsClient::ctrlNoSprint);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			held = 0;
 			wasStance = false;
@@ -118,13 +121,38 @@ public final class FormsClient {
 		}
 	}
 
-	/** Alt and scroll in stance move the selected slot (scroll alone stays Powers' lock-on). True when it took the scroll. */
+	/**
+	 * (0.7.408) Ctrl pressed while standing still in stance is held for the belt (Ctrl and scroll), so it doesn't start a
+	 * sprint, even once you move, until it's let go. Pressed while moving, or out of stance, it sprints as ever.
+	 */
+	private static void ctrlNoSprint(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		boolean ctrl = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(InputConstants.KEY_RCONTROL);
+		if (!ctrl || player == null || !Forms.book(player).stance()) {
+			ctrlForBelt = false;
+			return;
+		}
+		if (!ctrlForBelt) {
+			var o = minecraft.options;
+			boolean moving = o.keyUp.isDown() || o.keyDown.isDown() || o.keyLeft.isDown() || o.keyRight.isDown();
+			if (moving || player.isSprinting()) {
+				return;
+			}
+			ctrlForBelt = true;
+		}
+		minecraft.options.keySprint.setDown(false);
+		if (player.isSprinting()) {
+			player.setSprinting(false);
+		}
+	}
+
+	/** Ctrl and scroll in stance move the selected slot (scroll alone stays Powers' lock-on). True when it took the scroll. */
 	public static boolean scroll(double x, double y) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		double wheel = y != 0.0 ? y : x;
 		if (player == null || wheel == 0.0 || minecraft.gui.screen() != null || !Forms.book(player).stance()
-			|| !(InputConstants.isKeyDown(InputConstants.KEY_LALT) || InputConstants.isKeyDown(InputConstants.KEY_RALT))) {
+			|| !(InputConstants.isKeyDown(InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(InputConstants.KEY_RCONTROL))) {
 			return false;
 		}
 		if (ClientPlayNetworking.canSend(Forms.Pick.TYPE)) {

@@ -33,7 +33,7 @@ wheel swaps targets. Proposal:
   Putting the weapon away drops it too.
 - **In stance, a tap of the same key** fires the form in the current belt slot. **Sneak + tap** fires the second form,
   and the masterstroke fires on a K.O.'d foe.
-- **In stance, Alt + scroll** picks the belt slot, so scrolling stays free for lock-on. The current slot shows as a
+- **In stance, Ctrl + scroll** picks the belt slot, so scrolling stays free for lock-on. The current slot shows as a
   small strip above the hotbar that fades with Auto HUD.
 - Out of stance, the key keeps its current jobs: Charge, War Cry and Shield Throw.
 
@@ -121,6 +121,6 @@ wheel swaps targets. Proposal:
   number.
 
 ## Open questions
-1. The keys above: hold the side button for stance, tap to fire, Alt + scroll for the belt.
+1. The keys above: hold the side button for stance, tap to fire, Ctrl + scroll for the belt.
 2. Can a powered player learn forms too, or are forms only for people with no power? Proposal: everyone can, but a
    power's own keys win, and forms only fire in stance.
