@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.resources.Identifier;
 
 /**
- * (0.18.19, Andy) The space pod's model ({@code textures/entity/space_pod.png}, 128x128), our own, one {@link ModelPart} for
+ * (0.18.47, Andy) The space pod's model ({@code textures/entity/space_pod.png}, 128x128), our own, one {@link ModelPart} for
  * each piece that can come off, so {@link PodRenderer} draws only the slots that are filled: a keel (iron cross at the
  * base), three fins (a slab on a foot), the thruster bell, the brass tank with its red band, four bone-white hull plates
  * (a porthole on the front, a hatch on the right), a stepped glass canopy and the mast. A damaged plate also draws its

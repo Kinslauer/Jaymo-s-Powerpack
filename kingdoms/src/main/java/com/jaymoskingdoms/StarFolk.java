@@ -29,7 +29,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.367, Andy's SevTech picks: "Reading the sky") Star charts, in Kingdoms' hands. Jaymo's Powers' pod flies only to worlds
+ * (0.7.382, Andy's SevTech picks: "Reading the sky") Star charts, in Kingdoms' hands. Jaymo's Powers' pod flies only to worlds
  * whose chart the pilot has read. The floating islands' hermits ({@link Hermits}) and the stargazers (about one villager in
  * {@link GiftedFolk#STARGAZER_ODDS}, tagged {@link #STARGAZER}) sell the charts a player hasn't read, for emeralds: "Ask about
  * the stars" in MCA's menu ({@link #ANSWER}) opens a talk screen ({@link ZFighterFolk#ask}) with a few words about the sky and

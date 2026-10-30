@@ -18,7 +18,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.18.23) A star chart: one item, with a {@link Sky#CHART_WORLD} component naming the world it charts. Using it marks that
+ * (0.18.51) A star chart: one item, with a {@link Sky#CHART_WORLD} component naming the world it charts. Using it marks that
  * world read ({@link Charts}) and opens a book page of a few odd sentences about the world. It is not used up: it can be read
  * again, and passed on.
  */

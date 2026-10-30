@@ -2,6 +2,7 @@ package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.combat.Guard;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
@@ -36,7 +37,8 @@ import org.jspecify.annotations.Nullable;
  * fresh); never falls, fire, magic, explosions or anything from behind. Each blocked hit costs {@link #FLOW_PER_DAMAGE} × its
  * damage in Flow; one that empties Flow breaks the guard.</li>
  * <li>A hit in the first {@link #PARRY_TICKS} of raising it is parried: nothing taken, nothing spent, +{@link #PARRY_FLOW}
- * Flow, the next R empowered. Then {@link #PARRY_COOLDOWN} before the next.</li>
+ * Flow, the next R empowered. Then {@link #PARRY_COOLDOWN} before the next. (0.18.24) The timing bar under the crosshair
+ * shows that window (gold), grey while the parry cools down ({@link Guard#showPower}), and flashes on a parry.</li>
  * <li>Katana parry, R unlocked: humanoids reel and are stunned, and you answer with a slash (the riposte).</li>
  * <li>Katana or knife guard: projectiles fly back at their shooter ({@link #reflectAim} / {@link #reflectSpeed} grow with
  * mastery). Fire charges, shulker bullets and magic only once ascended.</li>
@@ -100,6 +102,7 @@ public final class DarktideGuard {
 		live.guarding = true;
 		live.guardStart = now;
 		player.setAttached(DarktideState.GUARD, now);
+		Guard.showPower(player, now, PARRY_TICKS, live.parryReadyAt);
 		speed(player);
 	}
 
@@ -109,6 +112,7 @@ public final class DarktideGuard {
 			live.guarding = false;
 		}
 		player.removeAttached(DarktideState.GUARD);
+		Guard.hidePower(player);
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (speed != null) {
 			speed.removeModifier(GUARD_SPEED_ID);
@@ -240,6 +244,10 @@ public final class DarktideGuard {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		live.parryReadyAt = now + PARRY_COOLDOWN;
+		if (live.guarding) {
+			Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
+		}
+		Guard.cue(player, attacker, false);
 		DarktidePower.addFlow(player, PARRY_FLOW);
 		live.empoweredUntil = now + EMPOWER_TICKS;
 		Mastery.used(player);
