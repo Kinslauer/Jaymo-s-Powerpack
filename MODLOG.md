@@ -4172,4 +4172,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   crouch (our sneak: arms out, sway, and the only stance that kneels when still and steadies shots), vanilla's plain sneak,
   standing. MGSV-smooth: `CrouchPose.bendBody` eases vanilla's crouch in and out over 7 ticks, smootherstep everywhere.
 
-- **0.18.67 (Kingdoms 0.7.401):** the Piglin King's arm; see the Kingdoms MODLOG.
+- **0.18.67 (Kingdoms 0.7.401):** the Piglin King's arm (see the Kingdoms MODLOG), and Sora's Dagger turned the other
+  quarter (Andy: "turned the wrong way"): the edge leads and the serrated spine trails.
