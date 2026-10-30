@@ -109,6 +109,8 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
+	/** (0.7.364) The look of the stranger shown for a road that makes you another blood (-1: none drawn yet). */
+	private int strangerLook = -1;
 	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
 	private long slidAt;
 	private int slideDir;
@@ -1339,6 +1341,10 @@ final class LifeStoryScreen extends Screen {
 		if (a.start() != null && a.makes() != null && !story) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.heritage", Component.translatable("heritage.jaymoskingdoms." + a.makes().key())));
 		}
+		// (0.7.364) the Pale Moon wakes anyone but a Mage, a Sorcerer or a Stoneborn as a Z Fighter, ki keeping them alive
+		if (a.start() == LifeStory.Start.MOON && !LifeStory.spaceborn(heritage(), youthClass())) {
+			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.moon_ki", power("zfighter")));
+		}
 		if (a.start() == LifeStory.Start.RUSTFALL) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + com.jaymoskingdoms.Stats.Stat.MIGHT.key())));
 		}
@@ -1499,45 +1505,76 @@ final class LifeStoryScreen extends Screen {
 		}
 		Heritage.Kind kind = heritage();
 		int look = lookIndex();
-		String scene = "";
 		ItemStack icon = ItemStack.EMPTY;
 		if (s.gender) {
 			// (0.7.304) the one pointed at, before the story gives you any blood
 			int row = rowAt(s, mouseX, mouseY);
-			StoryFigure.draw(graphics, player, null, 0, "", ItemStack.EMPTY, x0, y0, x1, y1, row >= 0 ? row : draft.gender);
+			StoryFigure.draw(graphics, player, null, 0, List.of(), ItemStack.EMPTY, x0, y0, x1, y1, row >= 0 ? row : draft.gender);
 			return;
 		}
+		// (0.7.364) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page".
+		// Every answer up to this page goes on the figure in turn (the one pointed at here in place of this page's), and the
+		// story page, or the road after MCA's creator, shows the whole life built up
+		Answer here = null;
 		if (s.question != null) {
 			int row = s.realm ? -1 : rowAt(s, mouseX, mouseY);
-			Answer a = row >= 0 ? s.question.answers().get(row) : picked(s.question);
-			if (a != null) {
-				scene = s.question.key() + "." + a.key();
-				icon = new ItemStack(a.icon());
-				if (s.question == Question.BORN && a.heritage() != null) {
-					kind = a.heritage();
+			here = row >= 0 ? s.question.answers().get(row) : picked(s.question);
+			if (here != null) {
+				icon = new ItemStack(here.icon());
+				if (s.question == Question.BORN && here.heritage() != null) {
+					kind = here.heritage();
 					look = LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
 				} else if (s.question == Question.CHILDHOOD && kind != null && draft.look < 0) {
-					look = LifeStory.lookFor(kind, a);
+					look = LifeStory.lookFor(kind, here);
 				}
 			}
-		} else {
-			// (the class's scene, the one picked over the story's too)
-			Classes.PlayerClass cls = youthClass();
-			for (Answer a : Question.YOUTH.answers()) {
-				if (a.cls() == cls) {
-					scene = Question.YOUTH.key() + "." + a.key();
-					icon = new ItemStack(a.icon());
-					break;
+		}
+		// (0.7.364) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
+		// no one in particular, only the ki every one of them holds
+		if (s.question == Question.ROAD && here != null && here.start() == LifeStory.Start.FATE) {
+			KiGhost.draw(graphics, x0, y0, x1, y1);
+			return;
+		}
+		List<String> scenes = new ArrayList<>();
+		for (Question q : Question.values()) {
+			if (!q.asked()) {
+				continue;
+			}
+			if (s.question != null && q.ordinal() > s.question.ordinal()) {
+				break;
+			}
+			Answer a = q == s.question ? here : picked(q);
+			// (the class picked over the story's on its page shows in that class's gear)
+			if (q == Question.YOUTH && q != s.question && youthClass() != null && (a == null || a.cls() != youthClass())) {
+				for (Answer y : Question.YOUTH.answers()) {
+					if (y.cls() == youthClass()) {
+						a = y;
+						break;
+					}
 				}
+			}
+			if (a != null) {
+				scenes.add(q.key() + "." + a.key());
 			}
 		}
 		// (0.7.356) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
 		if (roadOnly()) {
 			Answer road = picked(Question.ROAD);
-			StoryFigure.drawYou(graphics, player, road != null ? road.makes() : null, look, scene, icon, x0, y0, x1, y1);
+			// (0.7.364) Andy: "should just show a random divine born instead of ... your current char": a road that makes you
+			// another blood shows a stranger of it (a look drawn at random each time the road is shown)
+			if (road != null && road.makes() != null) {
+				if (this.strangerLook < 0) {
+					this.strangerLook = player.getRandom().nextInt(HeritageVariants.of(road.makes()).size() + 1);
+				}
+				int gender = LifeStory.FEMALE.equals(player.getAttached(LifeStory.GENDER)) ? 1 : 0;
+				StoryFigure.draw(graphics, player, road.makes(), this.strangerLook, scenes, icon, x0, y0, x1, y1, gender);
+				return;
+			}
+			this.strangerLook = -1;
+			StoryFigure.drawYou(graphics, player, null, look, scenes, icon, x0, y0, x1, y1);
 			return;
 		}
-		StoryFigure.draw(graphics, player, kind, look, scene, icon, x0, y0, x1, y1, draft.gender);
+		StoryFigure.draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, draft.gender);
 	}
 
 	private static String keyOf(@Nullable Answer a) {
