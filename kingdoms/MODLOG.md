@@ -7146,3 +7146,12 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: "all the narrator should say here is your story is being written." `StoryHoldScreen` reads its title once and
   no longer reads what the hold is for (capital, harbour, future, arriving); the hints still cycle as text. The four
   unused hold-reason clips are gone from `Voices.INTRO_LINES`, `sounds.json` and `make_voices.py`.
+
+## 0.7.401: a Will clash rings out, and its jump doesn't jump (pack 0.18.66)
+- Andy: "the jump should not make you jump". While two players clash (`WillClash`), each has a transient jump-strength
+  modifier of -100% (`ROOTED`), so a press still counts but nobody leaves the ground; it comes off when the clash ends,
+  for any reason.
+- Andy: "there should also be loud ringing or booming effects as the showdown ensues". Locking eyes tolls a bell; every
+  `TOLL_TICKS` (1 s) a deep boom and a bell sound between the two, the bell climbing in pitch as time runs out and both
+  louder the wider the lead, with a ring of dust. The one who breaks gets a sonic boom and a ringing bell; a draw rings too.
+  Not seen in game.

@@ -4167,3 +4167,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     throws it (`armory/KnifeGuard`, hooked through `combat/Guard` and `WeaponModMeleeUseMixin`). Armory daggers keep throwing.
   - The knife and Armory dagger of each tier swap held damage (read from their attack modifiers at start).
   - Syntax-checked only; not seen in game.
+- **0.18.66 (Kingdoms 0.7.401):** Will clashes no longer make you jump when you press jump, and they boom and toll a bell as they run.

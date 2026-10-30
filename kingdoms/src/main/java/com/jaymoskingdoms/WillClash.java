@@ -22,6 +22,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -53,6 +55,11 @@ final class WillClash {
 	static final float WARN_SHAKE = 0.2F, SHAKE_MIN = 0.06F, SHAKE_MAX = 0.3F;
 	/** Neither player may lock eyes again for this long after a clash (ticks: two in-game days). */
 	static final long COOLDOWN_TICKS = 48000L;
+	/** (0.7.401) The modifier that takes away a clashing player's jump (Andy: "the jump should not make you jump"). */
+	static final String ROOTED = "will_clash_rooted";
+	/** (0.7.401) How often a boom and a toll sound while the clash runs (ticks), and how loud at the least. */
+	static final int TOLL_TICKS = 20;
+	static final float BOOM_VOLUME = 1.2F, BELL_VOLUME = 2.0F;
 	/** The bar's length on the action bar (characters). */
 	static final int BAR = 30;
 
@@ -88,7 +95,7 @@ final class WillClash {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Session s = SESSIONS.get(handler.player.getUUID());
 			if (s != null) {
-				end(s);
+				end(server, s);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -124,7 +131,12 @@ final class WillClash {
 		face(b, a);
 		Vec3 mid = a.position().add(b.position()).scale(0.5);
 		level.playSound(null, mid.x, mid.y + 1.0, mid.z, SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.6F, 1.4F);
+		// (0.7.401) eyes lock: the bell's first toll
+		level.playSound(null, mid.x, mid.y + 1.0, mid.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, BELL_VOLUME * 1.5F, 0.5F);
+		level.playSound(null, mid.x, mid.y + 1.0, mid.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, BELL_VOLUME, 0.5F);
 		for (ServerPlayer p : new ServerPlayer[] {a, b}) {
+			// (0.7.401) jump is pressed, not jumped: no jump strength while the clash holds them
+			Skills.modifier(p, Attributes.JUMP_STRENGTH, ROOTED, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.will_clash.begin", (p == a ? b : a).getDisplayName()).withStyle(ChatFormatting.GOLD));
 			PowersCompat.shake(p, SHAKE_MAX);
 		}
@@ -144,7 +156,7 @@ final class WillClash {
 			ServerPlayer a = server.getPlayerList().getPlayer(s.a), b = server.getPlayerList().getPlayer(s.b);
 			if (a == null || b == null || !a.isAlive() || !b.isAlive() || a.isSpectator() || b.isSpectator() || a.level() != b.level()
 				|| Downed.isDowned(a) || Downed.isDowned(b) || !(a.level() instanceof ServerLevel level)) {
-				end(s);
+				end(server, s);
 				continue;
 			}
 			long t = level.getGameTime() - s.start;
@@ -171,6 +183,9 @@ final class WillClash {
 				Vec3 mid = a.getEyePosition().add(b.getEyePosition()).scale(0.5);
 				level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 3, 0.2, 0.2, 0.2, 0.05);
 			}
+			if (t > 0 && t % TOLL_TICKS == 0) {
+				toll(level, a, b, t, s.score);
+			}
 			if (Math.abs(s.score) >= DECIDE || t >= TICKS) {
 				finish(level, s, a, b);
 			}
@@ -187,8 +202,25 @@ final class WillClash {
 		return line.append(" ").append(them.getDisplayName().copy().withStyle(ChatFormatting.DARK_RED));
 	}
 
+	/**
+	 * (0.7.401) Andy: "there should also be loud ringing or booming effects as the showdown ensues". Every
+	 * {@link #TOLL_TICKS}, between the two: a deep boom and a bell's toll, the bell climbing as time runs out and both
+	 * louder the wider the lead, with a ring of dust on the ground.
+	 */
+	private static void toll(ServerLevel level, ServerPlayer a, ServerPlayer b, long t, float score) {
+		Vec3 mid = a.position().add(b.position()).scale(0.5);
+		float strain = Math.min(1.0F, Math.abs(score) / DECIDE);
+		float late = Math.min(1.0F, (float) t / TICKS);
+		level.playSound(null, mid.x, mid.y + 1.0, mid.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, BOOM_VOLUME + strain, 0.45F + 0.15F * strain);
+		level.playSound(null, mid.x, mid.y + 1.0, mid.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, BELL_VOLUME + strain, 0.5F + 0.7F * late);
+		for (int i = 0; i < 16; i++) {
+			double angle = Math.PI * 2 * i / 16;
+			level.sendParticles(ParticleTypes.POOF, mid.x + Math.cos(angle) * 1.5, mid.y + 0.1, mid.z + Math.sin(angle) * 1.5, 1, 0.0, 0.0, 0.0, 0.05);
+		}
+	}
+
 	private static void finish(ServerLevel level, Session s, ServerPlayer a, ServerPlayer b) {
-		end(s);
+		end(level.getServer(), s);
 		long now = level.getGameTime();
 		a.setAttached(READY, now + COOLDOWN_TICKS);
 		b.setAttached(READY, now + COOLDOWN_TICKS);
@@ -196,6 +228,7 @@ final class WillClash {
 			push(a, b);
 			push(b, a);
 			level.playSound(null, a.getX(), a.getY(), a.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 0.7F);
+			level.playSound(null, a.getX(), a.getY(), a.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, BELL_VOLUME, 0.8F);
 			for (ServerPlayer p : new ServerPlayer[] {a, b}) {
 				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will_clash.draw").withStyle(ChatFormatting.YELLOW));
 			}
@@ -211,13 +244,23 @@ final class WillClash {
 		Skills.grant(win, Skills.Pillar.STRENGTH, XP_WIN);
 		level.sendParticles(ParticleTypes.FALLING_WATER, lose.getX(), lose.getY(0.9), lose.getZ(), 10, 0.25, 0.1, 0.25, 0.0);
 		level.playSound(null, lose.getX(), lose.getY(), lose.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
+		// (0.7.401) the one who breaks: a thunderclap of a boom and the bell ringing on
+		level.playSound(null, lose.getX(), lose.getY(), lose.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, BOOM_VOLUME * 2.0F, 0.7F);
+		level.playSound(null, lose.getX(), lose.getY(), lose.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, BELL_VOLUME * 1.5F, 0.6F);
+		level.sendParticles(ParticleTypes.SONIC_BOOM, lose.getX(), lose.getY(0.6), lose.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		win.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will_clash.won", lose.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		lose.sendSystemMessage(Component.translatable("message.jaymoskingdoms.will_clash.lost", win.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
 	}
 
-	private static void end(Session s) {
+	private static void end(MinecraftServer server, Session s) {
 		SESSIONS.remove(s.a);
 		SESSIONS.remove(s.b);
+		for (UUID id : new UUID[] {s.a, s.b}) {
+			ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p != null) {
+				Skills.modifier(p, Attributes.JUMP_STRENGTH, ROOTED, 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			}
+		}
 	}
 
 	private static void face(ServerPlayer who, ServerPlayer at) {
