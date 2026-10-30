@@ -565,14 +565,17 @@ public final class WorldTiers {
 		}
 		// a great foe: everyone near shares the kill
 		double range = dragon ? DRAGON_CREDIT_RANGE : CREDIT_RANGE;
+		// (0.7.388) worked out before any is saved: update() spreads to the party, which must not be counted twice
+		java.util.Map<ServerPlayer, Progress> credit = new java.util.LinkedHashMap<>();
 		for (ServerPlayer player : level.players()) {
 			if (player.isSpectator() || (player != killer && player.distanceToSqr(entity) > range * range)) {
 				continue;
 			}
 			Progress p = progress(player);
 			int feats = p.feats() | (dragon ? Progress.DRAGON : 0) | (wither ? Progress.WITHER : 0);
-			update(player, new Progress(p.foes() + 1, feats, p.unlocked()));
+			credit.put(player, new Progress(p.foes() + 1, feats, p.unlocked()));
 		}
+		credit.forEach(WorldTiers::update);
 	}
 
 	private static void feat(ServerPlayer player, int feat) {
