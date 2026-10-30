@@ -118,6 +118,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 					}
 				}
 				access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.6F, 1.2F));
+				Tinkering.toolBuilt(player, carried);
 				super.onTake(player, carried);
 			}
 		});

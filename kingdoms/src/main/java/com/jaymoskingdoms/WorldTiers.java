@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.journal.RungJournal;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -61,6 +62,11 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  * back down at any time, a minute after their last change. (0.7.287, Andy) The monsters of legend (ogres, werewolves,
  * wraiths and the rest) are no longer great foes: one ogre was enough to open Borderlands.
  * <p>
+ * (0.7.383, Andy's SevTech picks) Each step up the ladder ends in one deed beside the great foes ({@link Progress#FORGED},
+ * {@link Progress#AETHER_TROPHY}, {@link Progress#POD_FLIGHT}, {@link Progress#MAW_SALVAGE}); the Rung Journal
+ * ({@code journal/RungJournal}) hints at each and ticks them, {@link GroundChanges} seeds new veins in chunks already loaded
+ * when a tier opens, and {@link TierGate} keeps what's beyond a player's tier out of the offers made to them.
+ * <p>
  * (0.7.145) The world itself has a tier too, its floor: no one plays below it. It starts at Hearth; the first of the
  * Aether's Giants to fall ({@code remnants/Monoliths}) raises it to Borderlands, lifting everyone (and everyone who joins
  * later) up to it.
@@ -86,7 +92,18 @@ public final class WorldTiers {
 	static final double[] DOUBLE_LOOT = {0.0, 0.10, 0.20, 0.35, 0.50};
 	/** Per tier, what unlocks it: great foes slain, and the feat it also needs (0: none). */
 	static final int[] FOES_NEEDED = {0, 1, 5, 12, 25};
-	static final int[] FEAT_NEEDED = {0, 0, Progress.NETHER, Progress.WITHER, Progress.DRAGON};
+	/**
+	 * (0.7.383) Per tier, the feats (bits, all of them) it also needs: Borderlands your first forged iron tool, Wildlands the
+	 * Nether and a trophy from the Aether's guardians, Dread the Wither and a pod flown home, Legend the Dragon and a part set
+	 * salvaged from a Maw wreck.
+	 */
+	static final int[] FEAT_NEEDED = {0, Progress.FORGED, Progress.NETHER | Progress.AETHER_TROPHY, Progress.WITHER | Progress.POD_FLIGHT,
+		Progress.DRAGON | Progress.MAW_SALVAGE};
+	/** (0.7.383) The tag of items only the Aether's guardians give (their trophies). */
+	static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> TROPHIES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ITEM, JaymosKingdoms.id("aether_trophies"));
+	/** (0.7.383) Materials (Jaymo's Tinkering ids) that make a forged part count as iron work for the first deed. */
+	static final java.util.Set<String> IRONWORK = java.util.Set.of("iron", "pig_iron", "steel");
 
 	public enum Tier {
 		HEARTH(Items.CAMPFIRE, 0xFF8FB86A),
@@ -142,9 +159,13 @@ public final class WorldTiers {
 			if (i == 0) {
 				return Component.translatable("tier.jaymoskingdoms.need.none");
 			}
-			Component foes = Component.translatable(FOES_NEEDED[i] == 1 ? "tier.jaymoskingdoms.need.foe" : "tier.jaymoskingdoms.need.foes", FOES_NEEDED[i]);
-			return FEAT_NEEDED[i] == 0 ? foes : Component.translatable("tier.jaymoskingdoms.need.and", foes,
-				Component.translatable("tier.jaymoskingdoms.feat." + Progress.featKey(FEAT_NEEDED[i])));
+			Component text = Component.translatable(FOES_NEEDED[i] == 1 ? "tier.jaymoskingdoms.need.foe" : "tier.jaymoskingdoms.need.foes", FOES_NEEDED[i]);
+			for (int bit : Progress.BITS) {
+				if ((FEAT_NEEDED[i] & bit) != 0) {
+					text = Component.translatable("tier.jaymoskingdoms.need.and", text, Component.translatable("tier.jaymoskingdoms.feat." + Progress.featKey(bit)));
+				}
+			}
+			return text;
 		}
 
 		private static String pct(double share) {
@@ -159,6 +180,10 @@ public final class WorldTiers {
 	/** A player's way up: great foes slain, feats done (bits), and the highest tier opened (by feats or an op). */
 	public record Progress(int foes, int feats, int unlocked) {
 		public static final int NETHER = 1, WITHER = 2, DRAGON = 4;
+		/** (0.7.383) The ladder's exit deeds: a first forged iron tool, a trophy home from the Aether, a pod flown and landed home, a Maw wreck salvaged. */
+		public static final int FORGED = 8, AETHER_TROPHY = 16, POD_FLIGHT = 32, MAW_SALVAGE = 64;
+		/** Every feat bit, in the order they're listed. */
+		static final int[] BITS = {NETHER, WITHER, DRAGON, FORGED, AETHER_TROPHY, POD_FLIGHT, MAW_SALVAGE};
 		public static final Progress NONE = new Progress(0, 0, 0);
 		static final Codec<Progress> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("foes", 0).forGetter(Progress::foes),
@@ -174,7 +199,7 @@ public final class WorldTiers {
 
 		/** Whether its feats alone open tier {@code i}. */
 		public boolean earned(int i) {
-			return this.foes >= FOES_NEEDED[i] && (FEAT_NEEDED[i] == 0 || has(FEAT_NEEDED[i]));
+			return this.foes >= FOES_NEEDED[i] && (this.feats & FEAT_NEEDED[i]) == FEAT_NEEDED[i];
 		}
 
 		/** The highest tier open to it: earned in order, or opened by an op. */
@@ -187,7 +212,25 @@ public final class WorldTiers {
 		}
 
 		static String featKey(int feat) {
-			return feat == NETHER ? "nether" : feat == WITHER ? "wither" : "dragon";
+			return switch (feat) {
+				case NETHER -> "nether";
+				case WITHER -> "wither";
+				case DRAGON -> "dragon";
+				case FORGED -> "forged";
+				case AETHER_TROPHY -> "aether_trophy";
+				case POD_FLIGHT -> "pod_flight";
+				default -> "maw_salvage";
+			};
+		}
+
+		/** The bit of a feat's key (see {@link #featKey}), or 0. */
+		public static int bitOf(String key) {
+			for (int bit : BITS) {
+				if (featKey(bit).equals(key)) {
+					return bit;
+				}
+			}
+			return 0;
 		}
 	}
 
@@ -228,9 +271,17 @@ public final class WorldTiers {
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.tier()));
 		ServerTickEvents.END_SERVER_TICK.register(WorldTiers::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			keepOpened(handler.player);
 			lift(handler.player);
 			luck(handler.player);
 		});
+		// (0.7.383) the first deed: an iron part hammered at a Smithing Anvil, or an iron tool built at a Tool Station
+		PowersCompat.onForged((smith, result) -> {
+			if (ironwork(result)) {
+				feat(smith, Progress.FORGED);
+			}
+		});
+		PowersCompat.onToolBuilt((smith, tool) -> feat(smith, Progress.FORGED));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> luck(newPlayer));
 		ServerLivingEntityEvents.AFTER_DEATH.register(WorldTiers::died);
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
@@ -264,6 +315,47 @@ public final class WorldTiers {
 
 	public static Progress progress(Player player) {
 		return player.getAttachedOrElse(PROGRESS, Progress.NONE);
+	}
+
+	/** (0.7.383) The great foes tier {@code tier} wants slain. */
+	public static int foesNeeded(int tier) {
+		return FOES_NEEDED[Math.clamp(tier, 0, FOES_NEEDED.length - 1)];
+	}
+
+	/** (0.7.383) The feats (bits) tier {@code tier} also wants. */
+	public static int featNeeded(int tier) {
+		return FEAT_NEEDED[Math.clamp(tier, 0, FEAT_NEEDED.length - 1)];
+	}
+
+	/**
+	 * (0.7.383) Marks a deed done for {@code player} by its key ({@code "forged"}, {@code "aether_trophy"}, {@code "pod_flight"},
+	 * {@code "maw_salvage"}): Jaymo's Powers tells of the last two through here. Nothing for a key that isn't a feat.
+	 */
+	public static void deed(ServerPlayer player, String key) {
+		int bit = Progress.bitOf(key);
+		if (bit != 0) {
+			feat(player, bit);
+		}
+	}
+
+	/** Whether a hammered part is iron work: its material (the first custom model string) is iron, pig iron or steel. */
+	private static boolean ironwork(ItemStack part) {
+		var data = part.get(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+		return data != null && !data.strings().isEmpty() && IRONWORK.contains(data.strings().get(0));
+	}
+
+	/** Whether {@code player} carries something only the Aether's guardians give. */
+	public static boolean carriesTrophy(Player player) {
+		return player.getInventory().contains(stack -> !stack.isEmpty() && stack.is(TROPHIES));
+	}
+
+	/** (0.7.383) A player already in a tier keeps it when the ladder gains rungs: what they stand in counts as opened. */
+	private static void keepOpened(ServerPlayer player) {
+		Progress p = progress(player);
+		int chosen = of(player).ordinal();
+		if (p.unlocked() < chosen) {
+			player.setAttached(PROGRESS, new Progress(p.foes(), p.feats(), chosen));
+		}
 	}
 
 	/** Whether {@code player} may enter {@code tier}: it's open to them, or they're in creative. */
@@ -309,6 +401,9 @@ public final class WorldTiers {
 		player.setAttached(CHANGED, player.level().getGameTime());
 		luck(player);
 		boolean up = tier.ordinal() > was.ordinal();
+		if (up && tier.ordinal() >= RungJournal.GIVEN_AT) {
+			RungJournal.give(player);
+		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), up ? SoundEvents.RESPAWN_ANCHOR_CHARGE : SoundEvents.BEACON_DEACTIVATE,
 			SoundSource.PLAYERS, 0.8F, up ? 0.8F + 0.1F * tier.ordinal() : 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.entered", tier.title().copy().withColor(tier.color))
@@ -379,6 +474,10 @@ public final class WorldTiers {
 			}
 			if (player.level().dimension() == Level.NETHER) {
 				feat(player, Progress.NETHER);
+			}
+			// (0.7.383) back in the Overworld with a trophy from the Aether's guardians
+			if (player.level().dimension() == Level.OVERWORLD && !progress(player).has(Progress.AETHER_TROPHY) && carriesTrophy(player)) {
+				feat(player, Progress.AETHER_TROPHY);
 			}
 			int tier = of(player).ordinal();
 			if (tier <= 0) {
@@ -474,6 +573,12 @@ public final class WorldTiers {
 		Progress p = progress(player);
 		if (!p.has(feat)) {
 			update(player, new Progress(p.foes(), p.feats() | feat, p.unlocked()));
+			if (feat >= Progress.FORGED) {
+				// (0.7.383) a deed of the ladder: a murmur, and a line in the next Tidings (hints, never a statement)
+				String key = Progress.featKey(feat);
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.deed." + key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+				Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.deed." + key));
+			}
 		}
 	}
 
@@ -486,6 +591,8 @@ public final class WorldTiers {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.unlocked", tier.title().copy().withColor(tier.color))
 				.withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.6F, 1.0F);
+			// (0.7.383) the ground changes under the rung (GroundChanges): a hint in the next Tidings
+			Post.tidings(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.ground." + tier.key()));
 		}
 	}
 
@@ -520,6 +627,19 @@ public final class WorldTiers {
 				return n;
 			}));
 		}
+		var deed = Commands.argument("players", EntityArgument.players());
+		for (int bit : Progress.BITS) {
+			deed.then(Commands.literal(Progress.featKey(bit)).executes(c -> {
+				int n = 0;
+				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
+					feat(p, bit);
+					n++;
+				}
+				int count = n;
+				c.getSource().sendSuccess(() -> Component.translatable("command.jaymoskingdoms.tier.deed", count, Progress.featKey(bit)), true);
+				return n;
+			}));
+		}
 		var floor = Commands.literal("floor");
 		for (Tier tier : Tier.values()) {
 			floor.then(Commands.literal(tier.key()).executes(c -> {
@@ -532,6 +652,7 @@ public final class WorldTiers {
 			.then(Commands.literal("set").then(set))
 			.then(floor)
 			.then(Commands.literal("unlock").then(unlock))
+			.then(Commands.literal("deed").then(deed))
 			.then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
 				ServerPlayer p = EntityArgument.getPlayer(c, "player");
 				Progress pr = progress(p);

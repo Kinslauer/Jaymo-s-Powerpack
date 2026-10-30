@@ -43,6 +43,8 @@ final class ZFighterKingdoms {
 	private static Method OPEN_ERRANDS;
 	/** (0.17.61) Kingdoms' Monoliths.nearestFoot(ServerLevel, BlockPos): the nearest known monolith, or null. */
 	private static Method NEAREST_MONOLITH;
+	/** (0.18.52) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
+	private static Method DEED;
 	private static Object[] STATS;
 	private static int STAT_MAX;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
@@ -107,6 +109,11 @@ final class ZFighterKingdoms {
 				TIER_OF = null;
 			}
 			try {
+				DEED = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("deed", ServerPlayer.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				DEED = null;
+			}
+			try {
 				TRAINED = Class.forName("com.jaymoskingdoms.ClassPerks").getMethod("trainedWith", ServerPlayer.class, net.minecraft.world.item.ItemStack.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				TRAINED = null;
@@ -160,6 +167,21 @@ final class ZFighterKingdoms {
 			return (BlockPos)NEAREST_MONOLITH.invoke(null, level, from);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return null;
+		}
+	}
+
+	/**
+	 * (0.18.52, Andy's SevTech picks: "One Deed Per Rung") Tells Kingdoms {@code player} did a deed that opens a world tier
+	 * ("pod_flight": a pod trip flown and landed home; "maw_salvage": a part set taken from a Maw wreck). Nothing without Kingdoms.
+	 */
+	static void deed(ServerPlayer player, String deed) {
+		if (DEED == null) {
+			return;
+		}
+		try {
+			DEED.invoke(null, player, deed);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			DEED = null;
 		}
 	}
 

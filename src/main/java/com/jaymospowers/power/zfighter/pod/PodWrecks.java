@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter.pod;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.ZFighterPodTrip;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -135,6 +136,10 @@ public final class PodWrecks {
 			}
 		}
 		player.setAttached(SALVAGED, new Salvaged(set < 0 ? got.sets() : got.sets() | 1 << set, got.wrecks() | 1 << deck));
+		if (set >= 0) {
+			// (0.18.52) a part set taken from a wreck: the deed that opens Legend
+			ZFighterPodTrip.deed(player, "maw_salvage");
+		}
 		for (ItemStack stack : stacks) {
 			player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
 		}
