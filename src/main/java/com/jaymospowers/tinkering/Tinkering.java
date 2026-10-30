@@ -104,12 +104,12 @@ public final class Tinkering {
 	public static Item STEEL_INGOT, STEEL_NUGGET, STEEL_BLEND;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
-	/** (0.18.51) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
+	/** (0.18.52) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
 	public static final List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, ItemStack>> TOOL_BUILT_LISTENERS = new ArrayList<>();
-	/** (0.18.51) The materials that make a tool a forged iron one. */
+	/** (0.18.52) The materials that make a tool a forged iron one. */
 	static final Set<String> IRONWORK = Set.of("iron", "pig_iron", "steel");
 
-	/** (0.18.51) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
+	/** (0.18.52) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
 	public static void toolBuilt(net.minecraft.world.entity.player.Player player, ItemStack tool) {
 		if (!(player instanceof net.minecraft.server.level.ServerPlayer smith) || tool.isEmpty() || TOOL_MATERIALS == null) {
 			return;

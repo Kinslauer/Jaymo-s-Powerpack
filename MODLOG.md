@@ -3998,7 +3998,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   parts off. A pod stripped to its keel keeps its grade in the keel block. Textures are painted by `tools/gen_pod_parts.py`
   (worn parts, grade bands) and `tools/gen_pod_mending.py` (rack, world parts); `tools/gen_pod.py` gained the lamp and the bands.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 3.
-- **0.18.51, deed hooks for the ladder (SevTech picks, Kingdoms 0.7.381):** three small hooks so Kingdoms' world tiers can ask
+- **0.18.52, deed hooks for the ladder (SevTech picks, Kingdoms 0.7.383):** three small hooks so Kingdoms' world tiers can ask
   for one deed per rung. A pod trip that lands home tells Kingdoms (`ZFighterKingdoms.deed("pod_flight")`, reflection, so Powers
   still never links it); a wreck salvage that gives a part set tells it `maw_salvage` (through `ZFighterPodTrip.deed`, the public
   relay the pod package can reach); a Tool Station tool with iron, pig iron or steel in it fires `Tinkering.TOOL_BUILT_LISTENERS`
