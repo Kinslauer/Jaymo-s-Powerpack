@@ -50,3 +50,7 @@ textures/item/flintlock_3d.png (models/item/flintlock_3d): Arsenal's Void Flintl
 textures/item/echo_cleaver_3d.png (models/item/echo_cleaver): the Echo Cleaver relic
   "Mandrake", Blockbench Workshop (tools/bbmodels/mandrake-sword.bbmodel; maker's name not in the file)
   Changes: turned into an item model (tools/blockbench/mandrake.py); our name, not the model's.
+textures/item/sunfang_blade.png, sunfang_fx.png (models/item/sunfang): the Sunfang relic
+  "Ancient Blasting Sword", Blockbench Workshop (tools/bbmodels/ancient-blasting-sword.bbmodel; maker's name not in the file)
+  Changes: turned into an item model (tools/blockbench/sunfang.py), its two animated textures kept (renamed), turned a quarter so
+  it lies like a sprite, its sheet drawn at full light; our name and display, not the model's.
