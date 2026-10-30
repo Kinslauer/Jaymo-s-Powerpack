@@ -6839,7 +6839,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
-## 0.7.366, the ladder (SevTech picks) (pack 0.18.17)
+## 0.7.366, the ladder (SevTech picks) (pack 0.18.22)
 - Andy picked the SevTech ladder: one system for the world tiers, in four parts.
 - **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED
   (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
@@ -6866,7 +6866,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
   Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
   JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
-## 0.7.367: stargazers and sky tidings (SevTech picks) (pack 0.18.18)
+## 0.7.367: stargazers and sky tidings (SevTech picks) (pack 0.18.23)
 - Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
   "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen
   (`ZFighterFolk.ask`): a few words about the sky and the charts the player hasn't read, cheapest trip first, for emeralds (6, and 4
