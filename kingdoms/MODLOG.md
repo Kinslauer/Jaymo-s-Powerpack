@@ -7147,7 +7147,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   no longer reads what the hold is for (capital, harbour, future, arriving); the hints still cycle as text. The four
   unused hold-reason clips are gone from `Voices.INTRO_LINES`, `sounds.json` and `make_voices.py`.
 
-## 0.7.401: a Will clash rings out, and its jump doesn't jump (pack 0.18.66)
+## 0.7.401: a Will clash rings out, and its jump doesn't jump (pack 0.18.67)
 - Andy: "the jump should not make you jump". While two players clash (`WillClash`), each has a transient jump-strength
   modifier of -100% (`ROOTED`), so a press still counts but nobody leaves the ground; it comes off when the clash ends,
   for any reason.
