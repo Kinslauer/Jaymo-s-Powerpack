@@ -46,6 +46,11 @@ public final class ClockworkHornet extends Entity implements ItemSupplier {
 	}
 
 	/** Whose it is, if they are still about. */
+	/** Whether {@code player} let this one loose. */
+	boolean ownedBy(Player player) {
+		return player.getUUID().equals(this.owner);
+	}
+
 	private @Nullable ServerPlayer owner(ServerLevel level) {
 		return this.owner != null && level.getPlayerByUUID(this.owner) instanceof ServerPlayer player && player.isAlive() ? player : null;
 	}

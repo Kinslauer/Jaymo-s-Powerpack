@@ -74,7 +74,7 @@ public final class ClockworkHornets {
 			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer owner)) {
 				return InteractionResult.SUCCESS;
 			}
-			int out = server.getEntitiesOfClass(ClockworkHornet.class, owner.getBoundingBox().inflate(64.0), h -> h.isAlive()).size();
+			int out = server.getEntitiesOfClass(ClockworkHornet.class, owner.getBoundingBox().inflate(64.0), h -> h.isAlive() && h.ownedBy(owner)).size();
 			if (out + COUNT > MAX_OUT) {
 				owner.sendOverlayMessage(Component.translatable("message.jaymospowers.clockwork_hornets.enough").withStyle(ChatFormatting.GRAY));
 				return InteractionResult.FAIL;

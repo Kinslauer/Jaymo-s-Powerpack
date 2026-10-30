@@ -130,6 +130,9 @@ public final class KnifeForms {
 		PayloadTypeRegistry.clientboundPlay().register(Mark.TYPE, Mark.CODEC);
 		Bolas.register();
 		ServerTickEvents.END_SERVER_TICK.register(KnifeForms::tick);
+		// the straw figure takes no harm, so mobs keep swinging at it for its whole time
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(entity instanceof Mannequin && entity.entityTags().contains(DECOY_TAG)));
 		// a figure left over from a restart has no owner to follow: it goes
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mannequin && entity.entityTags().contains(DECOY_TAG) && !isFigure(entity.getUUID())) {
@@ -206,7 +209,8 @@ public final class KnifeForms {
 		LivingEntity best = null;
 		double bestDot = MARK_FACING;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(MARK_RANGE),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof Player) && !(e instanceof Mannequin))) {
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof Player) && !(e instanceof Mannequin)
+				&& (e instanceof net.minecraft.world.entity.monster.Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
 			Vec3 to = e.getBoundingBox().getCenter().subtract(player.getEyePosition());
 			double d = to.length();
 			if (d < 1.0E-3 || d > MARK_RANGE) {
@@ -256,7 +260,6 @@ public final class KnifeForms {
 		}
 		float yaw = Mth.wrapDegrees((float)(Mth.atan2(foe.getZ() - dest.z, foe.getX() - dest.x) * 57.2957763671875) - 90.0F);
 		player.teleportTo(level, dest.x, dest.y, dest.z, Set.of(), yaw, 0.0F, false);
-		player.resetFallDistance();
 		level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.7F);
 		float amount = Forms.damage(player, STAB_DAMAGE, rank);
 		if (Senses.unaware(foe, player)) {
@@ -283,7 +286,7 @@ public final class KnifeForms {
 			// a straw figure in your look
 			figure.getEntityData().set(Profile.key(), ResolvableProfile.createResolved(player.getGameProfile()));
 			figure.addTag(DECOY_TAG);
-			figure.setPermanentlyInvulnerable(true);
+			// (not set invulnerable: mobs never take an invulnerable thing for an enemy; its hurt is cancelled instead)
 			figure.snapTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
 			figure.setYHeadRot(player.getYHeadRot());
 			figure.setYBodyRot(player.yBodyRot);

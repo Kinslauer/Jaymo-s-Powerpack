@@ -131,7 +131,7 @@ final class ClawForms {
 		dir = dir.normalize();
 		player.setDeltaMovement(dir.x * POUNCE_SPEED, dir.y * POUNCE_SPEED + POUNCE_LIFT, dir.z * POUNCE_SPEED);
 		player.needsSync = true;
-		player.resetFallDistance();
+		// (the fall so far is kept: fall damage always applies)
 		POUNCES.put(player.getUUID(), new Pounce(best == null ? null : best.getUUID(), level.getGameTime() + POUNCE_TICKS, rank));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.2, player.getZ(), 6, 0.2, 0.05, 0.2, 0.03);

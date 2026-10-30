@@ -122,7 +122,8 @@ public final class Bolas extends Projectile implements ItemSupplier {
 		Vec3 next = pos.add(move);
 		Entity owner = this.getOwner();
 		EntityHitResult struck = ProjectileUtil.getEntityHitResult(level, this, pos, next, new AABB(pos, next).inflate(0.4),
-			e -> e != owner && e instanceof LivingEntity && !(e instanceof Player) && e.isAlive() && !e.isSpectator(), 0.3F);
+			e -> e != owner && e instanceof LivingEntity && !(e instanceof Player) && e.isAlive() && !e.isSpectator()
+				&& (e instanceof net.minecraft.world.entity.monster.Enemy || e instanceof net.minecraft.world.entity.Mob mob && owner != null && mob.getTarget() == owner), 0.3F);
 		HitResult hit = level.clip(new ClipContext(pos, next, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
 		if (struck != null && struck.getEntity() instanceof LivingEntity foe) {
 			this.wrap(level, foe);
