@@ -115,7 +115,7 @@ public final class Forms {
 			return switch (this) {
 				case BLADE -> main.is(BLADES);
 				case SPEAR -> main.is(SPEARS);
-				case FIST -> main.isEmpty();
+				case FIST -> main.isEmpty() || main.is(FISTS);
 				case KNIFE -> main.is(ClassPerks.LIGHT_BLADES);
 				case CLAW -> main.is(CLAWS);
 			};
@@ -143,7 +143,9 @@ public final class Forms {
 	}
 
 	/** Item tags: the weapons of each family (we add Balkon's katanas and spears, optionally; Powers' pieces are in {@code light_blades}). */
-	public static final TagKey<Item> BLADES = tag("form_blades"), SPEARS = tag("form_spears"), CLAWS = tag("form_claws");
+	public static final TagKey<Item> BLADES = tag("form_blades"), SPEARS = tag("form_spears"), CLAWS = tag("form_claws"),
+		/** (0.7.383) Cestus-like fist weapons: an empty hand is a fist as well. */
+		FISTS = tag("form_fists");
 
 	private static TagKey<Item> tag(String name) {
 		return TagKey.create(Registries.ITEM, JaymosKingdoms.id(name));
@@ -155,6 +157,9 @@ public final class Forms {
 	static {
 		BladeForms.addTo(FORMS);
 		SpearForms.addTo(FORMS);
+		FistForms.addTo(FORMS);
+		KnifeForms.addTo(FORMS);
+		ClawForms.addTo(FORMS);
 	}
 
 	/**
@@ -329,6 +334,9 @@ public final class Forms {
 		ServerTickEvents.END_SERVER_TICK.register(Forms::tick);
 		SpearForms.register();
 		BladeForms.register();
+		FistForms.register();
+		KnifeForms.register();
+		ClawForms.register();
 		// (the stance isn't kept across a log-in)
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			Book book = book(handler.player);
@@ -525,7 +533,7 @@ public final class Forms {
 	/** Whether {@code player} stands near a training post, a sparring dummy or a mannequin: where the belt can be changed. */
 	/** Whether {@code entity} (a mannequin) is a practice dummy, not someone's Afterimage decoy. */
 	static boolean dummy(net.minecraft.world.entity.Entity entity) {
-		return !entity.entityTags().contains(AFTERIMAGE_TAG);
+		return !entity.entityTags().contains(AFTERIMAGE_TAG) && !entity.entityTags().contains(KnifeForms.DECOY_TAG);
 	}
 
 	public static boolean trainingSpot(ServerPlayer player) {
@@ -672,6 +680,15 @@ public final class Forms {
 			BladeForms.perform(player, form, rank);
 		} else if (form.family() == Family.SPEAR) {
 			SpearForms.perform(player, form, rank);
+		}
+		if (form.family() == Family.FIST) {
+			FistForms.perform(player, form, rank);
+		}
+		if (form.family() == Family.KNIFE) {
+			KnifeForms.perform(player, form, rank);
+		}
+		if (form.family() == Family.CLAW) {
+			ClawForms.perform(player, form, rank);
 		}
 	}
 

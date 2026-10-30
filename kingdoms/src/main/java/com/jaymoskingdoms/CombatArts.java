@@ -269,6 +269,20 @@ public final class CombatArts {
 		}
 	}
 
+	/**
+	 * (0.7.383) Sets {@code target} bleeding as Rend does (a claw's rake, say): {@link #REND_DAMAGE} a second for
+	 * {@code seconds}, in {@code sp}'s name, replacing a bleed already on it.
+	 */
+	public static void bleed(ServerLevel level, ServerPlayer sp, LivingEntity target, int seconds) {
+		if (!target.isAlive() || seconds <= 0) {
+			return;
+		}
+		BLEEDS.removeIf(b -> b.target() == target);
+		BLEEDS.add(new Bleed(target, sp.getUUID(), new int[] {seconds * 20}));
+		level.sendParticles(PowersCompat.blood(BLOOD, 1.2F), target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.3, 0.3, 0.0);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.6F);
+	}
+
 	/** Axes, maces, two-handed and blunt weapons. */
 	static boolean heavy(ItemStack weapon) {
 		return weapon.is(ItemTags.AXES) || weapon.is(Items.MACE) || weapon.is(ClassPerks.TWO_HANDED) || weapon.is(ClassPerks.BLUDGEONS);

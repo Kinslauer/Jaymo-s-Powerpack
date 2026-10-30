@@ -1,4 +1,9 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    {
+      "id": "jaymospowers:fang_gauntlets",
+      "required": false
+    }
+  ]
 }

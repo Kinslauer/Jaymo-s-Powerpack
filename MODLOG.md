@@ -4093,6 +4093,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   each feature's in-game hints. Lang only; not seen in game.
 
 - **0.18.59, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.392; was 0.18.46):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
+
+
+- **0.18.60, Fang Gauntlets and the Clockwork Hornet Hive (Weapon Forms patch 3; Kingdoms 0.7.393; was 0.18.47):**
+  - Fang Gauntlets (`jaymospowers:fang_gauntlets`): claws for Kingdoms' Claw forms (in its `form_claws` tag). Forged only,
+    as the pack's iron-tool rule says: a new `WeaponParts` kind (Fang Blades, three ingots, with a Tool Binding at the Tool
+    Station; stone shaped, iron cast), so it shows in JEI with the other forged weapons. Original 16px art
+    (`tools/gen_weapon_forms_art.py`).
+  - Clockwork Hornet Hive: new Artifice research (Clockwork Hornets) and an infusion recipe (no grid recipe). Using the hive
+    looses three `ClockworkHornet` drones for 20 s that sting the owner's lock-on target, else the last thing that hurt them;
+    they pop when struck, go with the owner, and are never saved.
+- **0.18.46, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.382):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
   - `UltimateFilm.DUTCH` (8): low and close on the subject, the horizon tilted about 17 degrees and settling back as it leans in.
     `UltimateFilm.CUTS` (9): hard cuts between three angles round the subject (close and low, wide and tilted from the side, high behind).
     Kingdoms' masterstrokes use them (`PowersCompat.FILM_DUTCH` / `FILM_CUTS`).

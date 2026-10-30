@@ -180,6 +180,8 @@ public final class WeaponParts {
 		// (0.17.110) Andy: "the dagger needs a way to be crafted with tinkers": Wind's Sora's Dagger, iron stage (its
 		// crafting recipe is gone); gilding and the later stages stay as they were (casting table, Tool Station)
 		add(new Kind(SORAS_DAGGER_BLADE, "jaymospowers:soras_dagger", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		// (0.18.47) Weapon Forms: the Fang Gauntlets (claws for the Claw family), iron only, forged like the rest: fangs and a binding
+		add(new Kind("fang_blades", "jaymospowers:fang_gauntlets", Scheme.SINGLE, 3 * INGOT, Assembly.BINDING, 1));
 		// vanilla spears
 		add(new Kind("spear_tip", "minecraft:spear", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
 		// Balkon's WeaponMod (the musket bayonet is still a musket and a knife put together)

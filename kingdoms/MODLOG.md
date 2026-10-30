@@ -6978,6 +6978,21 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
 - Compile-checked. Not seen in game.
 
+## 0.7.393: Weapon Forms, patch 3: fists, knives and claws (pack 0.18.60; was 0.7.383)
+- Andy's Ultimate Battle picks, patch 3 (`docs/WeaponForms-Plan.md`; ideas only), one class per family in `forms/`.
+- **Fist** (`FistForms`; an empty hand, or a weapon in the new `form_fists` tag, counts as a fist): *Ground Stomp* hops and, on
+  landing, throws a small shockwave ring: foes on the ground within 4 blocks are hurt and thrown up, jumping foes aren't.
+  *Falling Fist*, pressed while falling 3+ blocks, drives you down and the first foe your fall meets takes part of the fall's
+  force; you still take your full fall damage. A Brute hits 1.25 times as hard with both.
+- **Knife** (`KnifeForms`, `Bolas`, client `KnifeClient`): *Marked Quarry* marks the foe you look at (outline through walls for you
+  alone: a clientbound `Mark` packet and the client's own glow flag, not the Glowing effect); a second press within 5 s dashes
+  you behind it for a stab (half again on an unaware foe, 1.3 times for a Thief). *Cast-off Cloak* leaves a mannequin in your
+  look that mobs after you swing at for 3 s (5 s for a Thief) while you slip away quicker. *Tangle Cord* throws a new **Bolas** (leather,
+  string, two stone or iron nuggets in the grid; or throw it by hand) that wraps a foe's legs (Slowness II, 4 s) and
+  drops back as the item whether it hits, misses or flies too long.
+- **Claw** (`ClawForms`): *Rending Claw* rakes the front arc and leaves Rend bleeding (`CombatArts.bleed`, new public method);
+  *Feral Pounce* leaps onto the foe ahead, a savage blow, a short bleed, knocked flat.
+- Compile-checked. Not seen in game.
 
 ## 0.7.392: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.59; was 0.7.382)
 - **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
