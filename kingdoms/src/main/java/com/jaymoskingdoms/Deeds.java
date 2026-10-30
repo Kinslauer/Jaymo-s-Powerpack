@@ -175,7 +175,7 @@ public final class Deeds {
 	}
 
 	/** {@code who} is on the villagers' side (a villager, or a settlement's folk): their blows are a quarrel, not an attack to save anyone from. */
-	private static boolean friendly(LivingEntity who) {
+	static boolean friendly(LivingEntity who) {
 		return who instanceof Villager && !Barbarians.isCampVillager(who) || who instanceof Folk folk && folk.style() != FactionType.BARBARIAN;
 	}
 
