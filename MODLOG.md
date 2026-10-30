@@ -4167,3 +4167,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     throws it (`armory/KnifeGuard`, hooked through `combat/Guard` and `WeaponModMeleeUseMixin`). Armory daggers keep throwing.
   - The knife and Armory dagger of each tier swap held damage (read from their attack modifiers at start).
   - Syntax-checked only; not seen in game.
+- **0.18.66, stance wheel follow-ups:** Andy after testing: the corner stance figure was cut off (it rode with the hotbar,
+  which Auto HUD slides away; now drawn before the chat, morphing part by part between stances). Order is prone, the low
+  crouch (our sneak: arms out, sway, and the only stance that kneels when still and steadies shots), vanilla's plain sneak,
+  standing. MGSV-smooth: `CrouchPose.bendBody` eases vanilla's crouch in and out over 7 ticks, smootherstep everywhere.
