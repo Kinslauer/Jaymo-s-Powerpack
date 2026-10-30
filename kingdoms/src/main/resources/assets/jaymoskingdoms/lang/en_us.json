@@ -4638,6 +4638,7 @@
 	"message.jaymoskingdoms.tier.entered": "Your world tier is now %s.",
 	"message.jaymoskingdoms.tier.unlocked": "A harder world tier is open to you: %s. Take it from the skill screen (K), World Tier.",
 	"message.jaymoskingdoms.tier.wait": "You can change your world tier again in %s seconds.",
+	"message.jaymoskingdoms.tier.party_road": "Your party has been further down the road than you. Where they stand, you stand.",
 	"message.jaymoskingdoms.tier.below_floor": "The world has grown too harsh for that: no one plays below %s now.",
 	"command.jaymoskingdoms.tier.set": "Put %s player(s) in world tier %s.",
 	"command.jaymoskingdoms.tier.unlock": "Opened world tiers up to %2$s for %1$s player(s).",

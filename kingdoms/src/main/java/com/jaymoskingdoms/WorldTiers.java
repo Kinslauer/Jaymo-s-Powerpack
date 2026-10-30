@@ -197,6 +197,11 @@ public final class WorldTiers {
 			return (this.feats & feat) != 0;
 		}
 
+		/** (0.7.388) The further of two: every foe and feat either has, and the higher opened tier. */
+		public Progress merge(Progress other) {
+			return new Progress(Math.max(this.foes, other.foes), this.feats | other.feats, Math.max(this.unlocked, other.unlocked));
+		}
+
 		/** Whether its feats alone open tier {@code i}. */
 		public boolean earned(int i) {
 			return this.foes >= FOES_NEEDED[i] && (this.feats & FEAT_NEEDED[i]) == FEAT_NEEDED[i];
@@ -274,6 +279,7 @@ public final class WorldTiers {
 			keepOpened(handler.player);
 			lift(handler.player);
 			luck(handler.player);
+			catchUp(handler.player);
 		});
 		// (0.7.383) the first deed: an iron part hammered at a Smithing Anvil, or an iron tool built at a Tool Station
 		PowersCompat.onForged((smith, result) -> {
@@ -582,8 +588,56 @@ public final class WorldTiers {
 		}
 	}
 
-	/** Saves {@code player}'s progress, and tells them of any tier it opens. */
+	/**
+	 * Saves {@code player}'s progress, tells them of any tier it opens, and (0.7.388, Andy: "progress is per group") hands it
+	 * on to the rest of their party: whatever one member earns, every member online has.
+	 */
 	private static void update(ServerPlayer player, Progress now) {
+		apply(player, now);
+		for (ServerPlayer member : Parties.members(player)) {
+			if (member != player) {
+				Progress theirs = progress(member);
+				Progress merged = theirs.merge(now);
+				if (!merged.equals(theirs)) {
+					apply(member, merged);
+				}
+			}
+		}
+	}
+
+	/**
+	 * (0.7.388, Andy: "if you have someone join your group they jump to your progress") {@code taker} has just joined
+	 * {@code host}'s party: the party's progress (the furthest of everyone in it, the newcomer's included) becomes everyone's, and
+	 * the newcomer steps up to the host's tier if they stood below it.
+	 */
+	public static void joined(ServerPlayer taker, ServerPlayer host) {
+		Progress merged = progress(taker);
+		for (ServerPlayer member : Parties.members(host)) {
+			merged = merged.merge(progress(member));
+		}
+		if (!merged.equals(progress(taker))) {
+			taker.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.party_road").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		}
+		update(taker, merged);
+		Tier hosts = of(host);
+		if (of(taker).ordinal() < hosts.ordinal() && open(taker, hosts)) {
+			set(taker, hosts);
+		}
+	}
+
+	/** (0.7.388) Back online: a party member who was away takes up what the rest earned meanwhile. */
+	private static void catchUp(ServerPlayer player) {
+		Progress mine = progress(player), merged = mine;
+		for (ServerPlayer member : Parties.members(player)) {
+			merged = merged.merge(progress(member));
+		}
+		if (!merged.equals(mine)) {
+			update(player, merged);
+		}
+	}
+
+	/** Saves {@code player}'s own progress, and tells them of any tier it opens. */
+	private static void apply(ServerPlayer player, Progress now) {
 		int before = progress(player).open();
 		player.setAttached(PROGRESS, now);
 		for (int i = before + 1; i <= now.open(); i++) {
