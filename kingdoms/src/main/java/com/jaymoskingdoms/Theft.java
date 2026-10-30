@@ -244,7 +244,7 @@ public final class Theft {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
 			// (0.7.361) a spar with a Valor villager is no assault
 			if (source.getEntity() instanceof ServerPlayer player && !hitBack(player, entity) && !ValorFolk.sparring(player, entity)
-				&& !com.jaymoskingdoms.forms.GuardDrills.sparring(player, entity) && entity.level() instanceof ServerLevel level) {
+				&& !com.jaymoskingdoms.forms.GuardDrills.sparring(player, entity) && !com.jaymoskingdoms.forms.Duels.dueling(player, entity) && entity.level() instanceof ServerLevel level) {
 				// (0.7.121) not one of a crowd after an arsonist: they may fight back
 				Retaliation.struck(player, level, entity);
 			}

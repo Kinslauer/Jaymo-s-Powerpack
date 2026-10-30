@@ -152,6 +152,22 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_duel",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_bout",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }

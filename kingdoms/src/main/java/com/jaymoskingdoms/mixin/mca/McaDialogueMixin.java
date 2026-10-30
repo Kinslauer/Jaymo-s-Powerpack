@@ -259,6 +259,20 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.forms.Duels.ANSWER.equals(answer)) {
+			// (0.7.385) a student (or a master) takes up an honour duel, or is challenged to one
+			com.jaymoskingdoms.forms.Duels.offer(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.forms.Bouts.ANSWER.equals(answer)) {
+			// (0.7.385) the bout master at a festival draws the bracket
+			com.jaymoskingdoms.forms.Bouts.offer(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
 			villager.sendChatMessage(Introductions.askName(player, villager), player);

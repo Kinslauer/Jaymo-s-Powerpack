@@ -6856,6 +6856,39 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
 - Compile-checked. Not seen in game.
 
+## 0.7.385: Weapon Forms, patch 5: who fights with forms (pack number set when the PR opens)
+- New classes in `forms/` (Patch 4's `Schools` is the registry they read: `localSchool`, `joined`, `standing`, `addStanding`,
+  `isMaster`/`masterOf`, `openMasterstroke`).
+- **Schooled guards** (`SchooledGuards`): a guard (`Downed.isGuard`) whose post lies in a school's land uses a move of the family of
+  its weapon while it has a combat target 1-5.5 blocks off: blade sweep, spear lunge (dash, runs through two foes), fist stomp
+  (ring that shoves and slows), knife double stab, claw double rake. Simple mob versions written for the purpose, not the player forms'
+  code. A glint and an 8-tick wind-up first, so it can be met. Every 160 ticks (90 for `WeaponForms.experienced`, plus up to 60);
+  a weapon of another family than the school's 40% as often. Hits only the target and monsters near it; capped at 14 damage a blow;
+  dropped if the fight is over before it lands. It runs on its own scan of guards near players, so it works without Better Combat.
+- **Honour duels** (`Duels`): a student (guard of a school's land, or a master) is challenged on the MCA talk menu, "Face an honour
+  duel" (also how you take up a challenge). Students challenge you unasked if you have joined a different school or have standing
+  10 in theirs (4% a look, every 2 s within 7 blocks, one challenge to you per 5 min; 3 times as likely for a rival school); the
+  offer stays open a minute. The duel is non-lethal like the drills' spar: the student strikes every 26 ticks for 3 (4 for a
+  master), now and then with a school move; whoever's health would drop to 35% first has fallen, that blow is stopped and it ends
+  (a death at the opponent's hand is stopped too; a draw at 2 minutes; called off at 24 blocks or if either is downed by another).
+  The student is healed to 80%. Temperament decides the mercy: the warm (kindhearted, cheerful, devout) are gracious, tend a loser
+  and dock no standing; the cold (proud, spiteful, hotheaded) jeer and dock double. Win: 3 standing (+2 against a rival's student, 8
+  for a master) in the school you have joined (the one whose weapon you hold, else the first) and 8 reputation with the realm (16
+  for a master); beating a master opens that school's masterstroke. Loss: 1 standing. One duel per student per day (`duel_days`
+  attachment, also keeps the bout days). Blows are no assault (`Theft`) and leave no memory (`Recollections`). Only one way to accept:
+  the talk menu (no bowing).
+- **Rival schools** (`Rivals`): two schools are rivals when a realm of one and a realm of the other are at odds (`Relation.RIVAL`
+  or `WAR`; the table is rebuilt each minute). A schooled guard opens a work talk with a scornful line to a rival's student
+  (`WorkTalk`), now and then sneers in a bubble when one walks by, and entering a rival school's realm the first time in a day adds a
+  line to your Tidings.
+- **Festival bouts** (`Bouts`; `Festivals` is now public with `keeping`): while a realm keeps its festival, one of its students
+  (the bout master, the lowest UUID of those at the seat, kept for the day) offers "Enter the festival bout". A bracket of up to 3
+  duels against students of the realm, the last against the bout master; unranked duels, a break between rounds with a little
+  regeneration. Each round won pays 2 emeralds and 1 standing; the final 6 emeralds, a golden apple, 4 standing and 12 reputation.
+  Once a festival day per realm. **No bracket screen**: Powers' `ZFighterBracketScreen` is fed by Powers' own tournament packets
+  and can't be reached from Kingdoms cleanly, so the bracket and each result are Tidings lines and the bout master's bubbles.
+- Compile-checked (javac with the stub `Schools`); not seen in game. Tuning constants are at the top of each class.
+
 ## 0.7.383: Weapon Forms, patch 3: fists, knives and claws (pack 0.18.47)
 - Andy's Ultimate Battle picks, patch 3 (`docs/WeaponForms-Plan.md`; ideas only), one class per family in `forms/`.
 - **Fist** (`FistForms`; an empty hand, or a weapon in the new `form_fists` tag, counts as a fist): *Ground Stomp* hops and, on

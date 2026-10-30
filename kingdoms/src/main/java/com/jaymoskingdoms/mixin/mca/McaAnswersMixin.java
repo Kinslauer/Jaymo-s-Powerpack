@@ -108,6 +108,14 @@ abstract class McaAnswersMixin {
 			// (0.7.381) only a veteran guard sets drills
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.GuardDrills.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.Duels.canOffer(player, villager)) {
+			// (0.7.385) only a student of a school, or its master, fights an honour duel
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Duels.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.forms.Bouts.canOffer(player, villager)) {
+			// (0.7.385) only today's bout master of a realm at its festival
+			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Bouts.ANSWER);
+		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
 			cir.getReturnValue().removeIf(answer -> !Languages.simpleDialogue(name, answer));
