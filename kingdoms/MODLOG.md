@@ -7431,3 +7431,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   like Verdant and the afterlife (Andy: basic and "req" roads need no deed); Snowed's past needs a pair like every other row;
   the road fate picks is remembered as taken; a whale counts as taken only with a traveller by; a sentence counts as served
   only while its realm stands; a Writ is not spent on a client without the story screen; `/kingdom roads` lines translated.
+
+## 0.7.420: Choosing a harder life
+- The last life-story page (the story read back, before the creator and the road) now has **A harder life**, under the heritage
+  and class: pick up to two **flaws**, each paying one free attribute point (`Flaws`, counted in `LifeStory.freePoints`):
+  - *Light sleeper*: a hostile within 16 blocks wakes you from bed (checked every second).
+  - *Glass jaw*: 25% more from every melee blow (`Flaws.dealt`, in the hurt mixin; the downed and limb systems live in Powers
+    and have no hook for this, so the plan's fallback is used).
+  - *Poor swimmer*: 25% slower in water, and the breath runs out 1.5 times as fast under it.
+  - *Afraid of the dark*: in light level 3 or less with no lit block in either hand, Slowness I, the Darkness effect and 25%
+    slower mining.
+- Three **hard-road switches**, applied once as the road lands: *Everyone is wary* (15 reputation lost with every standing
+  realm), *Hunted* (three heavy bounty crimes with the nearest realm's court, 45 emeralds, plus an assassin's contract), and
+  *Nothing but rags* (every `give`/`equip` of the road's kit is skipped; the aim's Journal page and the road's own creatures,
+  the heirloom blade, pack mule, pup and hired nobodies, still come because the aim needs them).
+- **Start from nothing**: the story's attribute points (raised, childhood, Rustfall, a foundling's free point) are given up and
+  the exact amounts stored (`story_given_up`); finishing the life's aim pays them back x2. Flaw points are not given up.
+- The choices travel in the story answer (`LifeStory.Live` gains `flaws` and `switches` bit masks); the server rejects unknown
+  bits and more than two flaws. Attachments `story_flaws`, `story_given_up` (synced) and `story_hard_switches`; kept through
+  death, cleared by `/kingdom story reset` and the Writ of Rebirth.

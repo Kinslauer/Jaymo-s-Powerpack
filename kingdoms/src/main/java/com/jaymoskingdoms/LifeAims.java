@@ -330,6 +330,12 @@ public final class LifeAims {
 		return aim != null && aim.perk() == stat ? 1 : 0;
 	}
 
+	/** (0.7.420) Whether {@code player} has finished their life's aim (what pays back the points a life from nothing gave up). */
+	public static boolean finished(net.minecraft.world.entity.player.Player player) {
+		Life life = player.getAttached(LIFE_AIM);
+		return life != null && life.done();
+	}
+
 	// ---- counting ------------------------------------------------------------------------------------------------------
 
 	/** Adds {@code n} to {@code player}'s count if their aim is of {@code kind}; finishes it at the goal. */
