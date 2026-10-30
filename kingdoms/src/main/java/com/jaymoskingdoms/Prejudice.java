@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * cheerful and devout, and a share of the rest (more of MCA's warm personalities, none of the crabby). A purist ruler's
  * own people ({@link Purists}) always mind, and harder. A full mask hides your blood from them.
  * <p>
- * (0.7.362) Andy (2026-10-29): "the bio built is unable to hide and is actually repulsive to all human kingdoms. It is
+ * (0.7.357) Andy (2026-10-29): "the bio built is unable to hide and is actually repulsive to all human kingdoms. It is
  * near impossible to live or find one living there." The Bio-built are the furthest from human of all
  * ({@link #BIOBUILT}): no mask hides what they are ({@link #shows}), and even the human folk who mind no other blood
  * mind theirs, at {@link #BIO_TOLERANT} of the full weight. Non-humans and the havens take them as any other.
@@ -57,9 +57,9 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
-	/** (0.7.362) The Bio-built: made, not born, and plainly so; worse than any. */
+	/** (0.7.357) The Bio-built: made, not born, and plainly so; worse than any. */
 	static final int BIOBUILT = 6;
-	/** (0.7.362) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
+	/** (0.7.357) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
 	static final float BIO_TOLERANT = 0.5F;
 	/**
 	 * (Havens) The rivalry: how much a non-human minds a human (as a degree), living in a haven, and anywhere else; a
@@ -136,14 +136,14 @@ public final class Prejudice {
 	}
 
 	/**
-	 * (0.7.362) Whether {@code p}'s blood is hidden from townsfolk: a full mask hides it, but never a Bio-built's (their
+	 * (0.7.357) Whether {@code p}'s blood is hidden from townsfolk: a full mask hides it, but never a Bio-built's (their
 	 * whole body shows what they are).
 	 */
 	static boolean masked(Player p) {
 		return Identities.masked(p) && !Heritage.is(p, Heritage.Kind.BIOBUILT);
 	}
 
-	/** (0.7.362) {@code p} shows their blood whatever they wear: the Bio-built. */
+	/** (0.7.357) {@code p} shows their blood whatever they wear: the Bio-built. */
 	public static boolean shows(Player p) {
 		return Heritage.is(p, Heritage.Kind.BIOBUILT);
 	}
@@ -186,7 +186,7 @@ public final class Prejudice {
 			// (not plainly human themselves: they know how it is)
 			return 0.0F;
 		}
-		// (a purist's own: always, and harder; (0.7.362) the tolerant still mind the Bio-built, if less)
+		// (a purist's own: always, and harder; (0.7.357) the tolerant still mind the Bio-built, if less)
 		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
 	}
 
