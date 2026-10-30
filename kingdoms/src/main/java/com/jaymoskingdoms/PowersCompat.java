@@ -483,6 +483,53 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.415) Powers' one-player start entries ({@code start(ServerPlayer)}), by class; null for one that isn't there. */
+	private static final java.util.Map<String, java.lang.invoke.@Nullable MethodHandle> STARTS = new java.util.HashMap<>();
+
+	private static boolean callStart(String className, net.minecraft.server.level.ServerPlayer player) {
+		if (!STARTS.containsKey(className)) {
+			java.lang.invoke.MethodHandle found = null;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					found = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName(className), "start",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find {}.start in Jaymo's Powers (older Powers?)", className, e);
+				}
+			}
+			STARTS.put(className, found);
+		}
+		java.lang.invoke.MethodHandle handle = STARTS.get(className);
+		if (handle == null) {
+			return false;
+		}
+		try {
+			return (boolean)handle.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't run {}.start for {}", className, player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
+	/**
+	 * (0.7.415) Life story road "Escaped the alchemist's lab" (Powers' {@code LabEscape.start}): {@code player} wakes in a hermit
+	 * alchemist's small lab built in the wild, with one infusion (a gift and a price, until a Potion of Cleansing or healing
+	 * magic washes it out), and the alchemist's clockwork golems stir and hunt them. For the Bio-built, Rubber-folk, Emberborn,
+	 * Stoneborn and Sylvan only (the caller gates it). False without Powers, or if no ground could be found.
+	 */
+	public static boolean labEscape(net.minecraft.server.level.ServerPlayer player) {
+		return callStart("com.jaymospowers.alchemy.LabEscape", player);
+	}
+
+	/**
+	 * (0.7.415) Life story road "Fresh off the bench" (Powers' {@code ZFighterAndroidStart.start}): {@code player} wakes on the Mad
+	 * Tinkerer's bench in a small workshop built in the wild, already an android (endless ki, no hunger, metal repairs; given the
+	 * Z Fighter's power if they have none), with a strange note in their pocket. False without Powers, or if no ground could be found.
+	 */
+	public static boolean androidStart(net.minecraft.server.level.ServerPlayer player) {
+		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player);
+	}
+
 	/** (0.7.236) Powers' {@code Future.WAITING}: on a lost-in-time player still waiting for the future to be made. */
 	private static net.fabricmc.fabric.api.attachment.v1.@Nullable AttachmentType<?> futureWaiting;
 	private static boolean lookedForFutureWaiting;
@@ -630,9 +677,40 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle washOut;
+	private static boolean lookedForWashOut;
+
+	/**
+	 * (0.7.415) A deliberate cure (a cast spell, a healer's work; never a passive aura such as Renewal's pulse or a cleric's rounds):
+	 * the moon's curse lets go, and so does the alchemist's mark (Powers 0.18.83). True if either was lifted.
+	 */
+	public static boolean cureCurses(net.minecraft.world.entity.LivingEntity entity) {
+		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && MoonCurse.cure(player);
+		if (!lookedForWashOut) {
+			lookedForWashOut = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					washOut = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mending"), "washOut",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mending.washOut (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return washOut != null && (boolean)washOut.invoke(entity) || cured;
+		} catch (Throwable e) {
+			return cured;
+		}
+	}
+
 	/** Restoration: bones set, festering cured, cuts closed, up if downed, and whole again (without Powers, full health). */
 	public static void restore(net.minecraft.world.entity.LivingEntity entity) {
 		Necromancy.cleanse(entity);
+		// (0.7.415) and the moon's curse
+		if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+			MoonCurse.cure(player);
+		}
 		mending();
 		if (restore != null) {
 			try {

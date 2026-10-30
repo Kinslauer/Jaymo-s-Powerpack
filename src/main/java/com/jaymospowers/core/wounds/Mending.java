@@ -88,6 +88,14 @@ public final class Mending {
 	}
 
 	/**
+	 * (0.18.83) A deliberate cure (a cast spell, a healer's work; not a passive aura): the alchemist's mark is washed out.
+	 * True if there was one.
+	 */
+	public static boolean washOut(LivingEntity entity) {
+		return com.jaymospowers.alchemy.LabEscape.cure(entity);
+	}
+
+	/**
 	 * Restoration: every bone set, every festering part cured, every cut closed (not stumps), a downed one up on their feet,
 	 * and the whole body healed.
 	 */
@@ -95,6 +103,7 @@ public final class Mending {
 		if (!entity.isAlive() || !(entity.level() instanceof ServerLevel level)) {
 			return;
 		}
+		com.jaymospowers.alchemy.LabEscape.cure(entity);
 		Breaks.mendAll(entity);
 		int festering = Bleeding.festering(entity);
 		for (BodyPart part : BodyPart.values()) {

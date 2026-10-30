@@ -4248,3 +4248,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   drops (`Prosthetics.sync` from `Dismember.regrow`, also checked each second); a body that dies drops its limbs. Drawn as a
   plain pegged-plank or riveted-iron box where the limb would be (`client/wounds/ProstheticLayer`, worn like the bandages).
   Textures from `tools/gen_prosthetics.py`. Compile-checked; not seen in game.
+- **0.18.83, three life-story starts (Powers' halves):** Kingdoms 0.7.415 (see its MODLOG) calls these through `PowersCompat`.
+  - *Escaped the alchemist's lab* (`alchemy/LabEscape.start`): a small stone lab (`core/WildRoom`, a new helper for walled rooms
+    in the wild) is raised 60-160 blocks from the player: shelves, a lectern, cauldrons, a brewing stand, a crucible, a chest with
+    honeycomb in it. You wake in it with one of five infusions, each a gift and a price kept for good (`LabEscape.MARK`):
+    night eyes / sun-sick, ox-strength / hollow belly, quicksilver / glass bones, iron skin / leaden limbs, heartfire / water-shy.
+    A Potion of Cleansing (`Cleansing`) or a deliberate healing (`Mending.washOut`, `Mending.restore`; not passive auras) washes
+    the mark out. Two clockwork golems (Kingdoms' own; iron golems without it) wake 7 s after you wake, on their own timer
+    whoever is near, with a 64-block follow range, and hunt you for 10 minutes (`LabEscape.HUNT` keeps their ids); at the end
+    they are removed. The lab site is checked column by column (natural ground only, no water, logs, buildings or structures,
+    inside the border). Messages
+    stay vague. Gated on the Kingdoms side to Bio-built, Rubber-folk, Emberborn, Stoneborn and Sylvan.
+  - *Fresh off the bench* (`zfighter/ZFighterAndroidStart.start`): a copper-and-andesite workshop in the wild with the Mad Tinkerer
+    at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
+    open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
+  - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.

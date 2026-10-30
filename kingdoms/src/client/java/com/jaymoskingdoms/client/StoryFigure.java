@@ -179,6 +179,10 @@ final class StoryFigure {
 		scene("road.trader", Act.WALK, Items.EMERALD, Items.BUNDLE, null, lc, null, lb);
 		scene("road.pup", Act.LOOK_DOWN, Items.BONE);
 		scene("road.nobodies", Act.WALK, Items.WOODEN_SWORD);
+		// (0.7.417) the powered roads: a test subject with a flask in hand, an android with an iron ingot, the cursed looking up at the moon
+		scene("road.lab", Act.LOOK_DOWN, Items.POTION);
+		scene("road.android", Act.STAND, Items.IRON_INGOT);
+		scene("road.moon_cursed", Act.LOOK_UP, null);
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
 		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);
@@ -212,6 +216,10 @@ final class StoryFigure {
 		// (0.7.414) a trader dresses as a cartographer-merchant, the heirloom's heir as a guard, the pup's keeper as a shepherd
 		jobs("cartographer", "trader");
 		jobs("guard", "heirloom");
+		// (0.7.417) the lab's subject as a librarian-scholar's hand, an android as a toolsmith, the cursed as a shepherd (a night watcher)
+		jobs("librarian", "lab");
+		jobs("toolsmith", "android");
+		jobs("shepherd", "moon_cursed");
 		jobs("shepherd", "pup");
 		jobs("butcher", "fire", "smoke", "burned");
 	}

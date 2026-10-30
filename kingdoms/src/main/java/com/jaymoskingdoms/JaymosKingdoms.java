@@ -501,6 +501,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Seizures.register();
 		BloodFever.register();
 		FeralCurse.register();
+		// 0.7.415: the moon's curse (a life story road): feral under a blood moon
+		LOGGER.debug("moon curse attachment: {}", MoonCurse.CURSED);
+		MoonCurse.register();
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();

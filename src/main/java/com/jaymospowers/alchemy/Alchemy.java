@@ -60,6 +60,7 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.infusion.Infusion.init();
 		com.jaymospowers.alchemy.gear.AlchemyGear.init();
 		com.jaymospowers.alchemy.cauldron.CauldronBrewing.init();
+		LabEscape.init();
 	}
 
 	/** Registers an item and adds it to the Alchemy tab. */

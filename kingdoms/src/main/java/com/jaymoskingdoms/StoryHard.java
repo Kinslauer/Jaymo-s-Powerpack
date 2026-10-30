@@ -274,6 +274,14 @@ public final class StoryHard {
 	 * same sentence {@link Busts} serves out and lets them out of at the end. Returns where they were put.
 	 */
 	static Vec3 imprison(ServerPlayer player, Faction f, long ticks) {
+		return imprison(player, f, ticks, false);
+	}
+
+	/**
+	 * (0.7.417, Start Together) The same; {@code beside}: another prisoner already stands in the cell, so this one is put a step
+	 * from the middle of its floor (the cell's room is the 3x3 about its middle; the hay is at one corner, so not there).
+	 */
+	static Vec3 imprison(ServerPlayer player, Faction f, long ticks, boolean beside) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
 		Underworld.Den d = Underworld.den(server, f.id());
@@ -284,6 +292,11 @@ public final class StoryHard {
 		Speakeasy.cellDoor(level, cell);
 		player.setAttached(Busts.JAILED, new Busts.Jail(f.id(), cell, level.getGameTime() + ticks));
 		Vec3 at = Vec3.atBottomCenterOf(cell);
+		if (beside) {
+			int[][] steps = {{1, 0}, {0, 1}, {1, 1}, {-1, 1}, {1, -1}};
+			int[] step = steps[player.getRandom().nextInt(steps.length)];
+			at = at.add(step[0], 0.0, step[1]);
+		}
 		player.teleportTo(level, at.x, at.y, at.z, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), 0.0F, false);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
 		return at;

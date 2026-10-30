@@ -279,6 +279,7 @@ public final class Restoration {
 		PowersCompat.closeCut(target);
 		// (0.7.260) Andy: "restoration magic should clear festering"
 		PowersCompat.easeFever(target);
+		PowersCompat.cureCurses(target);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.4F, 1.3F);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 14, 0.35, 0.5, 0.35, 0.02);
 		Theft.sorcery(player, level, player.blockPosition());
@@ -379,6 +380,7 @@ public final class Restoration {
 		PowersCompat.mend(target, MENDING_HEAL * power * DivineBorn.heal(player));
 		PowersCompat.closeCut(target);
 		PowersCompat.easeFever(target);
+		PowersCompat.cureCurses(target);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 16, 0.35, 0.5, 0.35, 0.02);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.4F, 1.2F);
 		if (player instanceof ServerPlayer sp) {
@@ -699,6 +701,7 @@ public final class Restoration {
 						// (every cut closed)
 					}
 					PowersCompat.easeFever(player);
+					PowersCompat.cureCurses(player);
 				} else {
 					PowersCompat.restore(player);
 				}
