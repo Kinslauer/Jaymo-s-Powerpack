@@ -55,7 +55,7 @@ public final class ZFighterRaiders {
 	static final double RAIDER_HEALTH = 2.5, RAIDER_DAMAGE = 1.6, CHIEF_HEALTH = 0.6, CHIEF_DAMAGE = 0.9, HUNT = 32.0;
 	/** The fuel the pod left behind holds. */
 	static final int PRIZE_FUEL = 3;
-	/** (0.18.19) What a burnt-out pod leaves: its keel and this many sound parts at random. */
+	/** (0.18.47) What a burnt-out pod leaves: its keel and this many sound parts at random. */
 	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
 	static final int NAMES = 8;
 	static final String TAG = "jaymospowers.raider";
@@ -284,7 +284,7 @@ public final class ZFighterRaiders {
 		if (kept == null) {
 			return;
 		}
-		// (0.18.19) the kept pod is a complete pod of your own, no longer locked to the band
+		// (0.18.47) the kept pod is a complete pod of your own, no longer locked to the band
 		kept.removeTag(TAG);
 		kept.removeTag(ZFighterPatrol.POD_TAG);
 		kept.setFuel(PRIZE_FUEL);
@@ -294,7 +294,7 @@ public final class ZFighterRaiders {
 		}
 	}
 
-	/** (0.18.19) A burnt-out pod is a bare pod: its keel and {@link #SCRAP_MIN} to {@link #SCRAP_MAX} sound parts, left lying. */
+	/** (0.18.47) A burnt-out pod is a bare pod: its keel and {@link #SCRAP_MIN} to {@link #SCRAP_MAX} sound parts, left lying. */
 	private static void burnt(ServerLevel level, PodEntity pod) {
 		RandomSource random = level.getRandom();
 		List<PodPart> pool = new ArrayList<>(List.of(PodPart.FIN, PodPart.FIN, PodPart.FIN, PodPart.BELL, PodPart.TANK, PodPart.PLATE, PodPart.PLATE,
