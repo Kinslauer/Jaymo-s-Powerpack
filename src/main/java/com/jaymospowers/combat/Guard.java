@@ -82,7 +82,7 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
  * (0.17.169) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
- * (0.18.61) And Balkon's knife, on a plain right click; sneak + right click still throws it ({@link KnifeGuard}).
+ * (0.18.63) And Balkon's knife, on a plain right click; sneak + right click still throws it ({@link KnifeGuard}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
  * <p>
  * (0.18.24) Andy: "make the parry meter consistent across all weapons/ powers that block, including z fighters and
@@ -265,7 +265,7 @@ public final class Guard {
 			return InteractionResult.PASS;
 		}
 		if (knife && player.isShiftKeyDown()) {
-			// (0.18.61) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use})
+			// (0.18.63) sneak + use throws a WeaponMod knife, as it always did ({@link KnifeGuard#use})
 			return KnifeGuard.use(player, hand);
 		}
 		ItemStack off = player.getOffhandItem();
@@ -276,7 +276,7 @@ public final class Guard {
 			return InteractionResult.FAIL;
 		}
 		if (knife) {
-			// (0.18.61) a WeaponMod knife's own use throws it; here it raises the guard instead
+			// (0.18.63) a WeaponMod knife's own use throws it; here it raises the guard instead
 			return KnifeGuard.use(player, hand);
 		}
 		return InteractionResult.PASS;

@@ -65,7 +65,7 @@
 	"power.jaymospowers.arsenal.key.starter.name": "Rummage",
 	"item.jaymospowers.arsenal_relic.lore": "It hums, as if it remembers being somewhere else.",
 	"message.jaymospowers.arsenal.relic_kept": "%s slips into the Rift Hoard in your pocket. It's yours now.",
-	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at (looking down, it opens your pocket, letting you in at a gate fixed inside); hold %3$s on one of your gates to close it; hold Sneak + %3$s with none to cast one ahead",
+	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at (looking down, it opens your pocket, letting you in at a gate fixed inside); hold %3$s on one of your gates to close it; hold Sneak + %3$s with none to cast one ahead. Gate Ricochet: anything you throw or fire that flies through a gate comes out of the next gate, turned toward your lock-on (else what you last struck, else the nearest foe), and may pass through up to three gates",
 	"power.jaymospowers.arsenal.key.ability_3.corrupted.name": "Void Gates",
 	"message.jaymospowers.arsenal_gate_placed": "Gate fixed (%s/%s).",
 	"message.jaymospowers.arsenal_gate_closed": "Gate closed (%s/%s).",

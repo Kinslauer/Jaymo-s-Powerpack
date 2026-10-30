@@ -184,7 +184,7 @@
 	"power.jaymospowers.xenoform.key.ultimate.duplex.name": "Copper Storm",
 	"xenoform.jaymospowers.nadir": "Nadir",
 	"power.jaymospowers.xenoform.nadir": "Nadir",
-	"xenoform.jaymospowers.nadir.ultimate": "Nadir",
+	"xenoform.jaymospowers.nadir.ultimate": "Three Worlds Film",
 	"power.jaymospowers.xenoform.key.ability_1.nadir": "Beacon: tap to pick a player anywhere in the world (tap again for the next; they show through everything for a moment); hold to phase to them, whatever world they're in",
 	"power.jaymospowers.xenoform.key.ability_1.nadir.name": "Beacon",
 	"power.jaymospowers.xenoform.key.ability_2.nadir": "Rift: tap at a creature for Recursive Drop (a maw under it and one in the sky: it falls through, over and over, 7 times); tap at nothing to blink where you look (16 blocks); hold to Surface, straight up to the highest safe ground; sneak + G opens the Void Pocket (27 slots, kept for the next Nadir)",
@@ -193,8 +193,8 @@
 	"power.jaymospowers.xenoform.key.ability_3.nadir.name": "Graviton",
 	"power.jaymospowers.xenoform.key.ability_4.nadir": "Command: open the Rules screen and write up to three rules (WHO + WHAT + WHEN, such as \"what I hit / burns / while sprinting\"); two can hold at once, while Nadir is out",
 	"power.jaymospowers.xenoform.key.ability_4.nadir.name": "Command",
-	"power.jaymospowers.xenoform.key.ultimate.nadir": "Nadir has no further form",
-	"power.jaymospowers.xenoform.key.ultimate.nadir.name": "None",
+	"power.jaymospowers.xenoform.key.ultimate.nadir": "Three Worlds Film: a short film (any key skips your camera) of the Overworld, the Nether and the Aether flashing up behind what you look at, then a heavy blow that hurts what stands close too (once every 75 s). Only a picture: no portal, no new world",
+	"power.jaymospowers.xenoform.key.ultimate.nadir.name": "Three Worlds Film",
 	"power.jaymospowers.xenoform.key.mode.nadir": "Hold: turn back",
 	"power.jaymospowers.xenoform.key.mode.nadir.name": "Turn Back",
 	"message.jaymospowers.xenoform.beacon_hold": "Phasing to %s %s",
@@ -326,5 +326,7 @@
 	"voice.jaymospowers.xenoform.hush.spent": "And it is gone from you again. We have new questions.",
 	"voice.jaymospowers.xenoform.clamour.spent": "THAT'S YOUR TURN SPENT. Earn the next one.",
 	"voice.jaymospowers.xenoform.hush.unanswered": "You have not answered me.",
-	"voice.jaymospowers.xenoform.clamour.unanswered": "YOU HAVEN'T ANSWERED ME."
+	"voice.jaymospowers.xenoform.clamour.unanswered": "YOU HAVEN'T ANSWERED ME.",
+	"message.jaymospowers.xenoform.nadir.film_no_target": "The film needs someone to show.",
+	"message.jaymospowers.xenoform.nadir.film_wait": "The reel is still rewinding: %s s."
 }

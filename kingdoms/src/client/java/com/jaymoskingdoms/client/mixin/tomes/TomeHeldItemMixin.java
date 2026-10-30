@@ -13,22 +13,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.390) A tome afloat ({@code TomeFloat}) isn't in the hand: a player's main hand is drawn empty while theirs floats. */
+/** (0.7.390) A tome afloat ({@code TomeFloat}) isn't in the hand: a player's hand is drawn empty while the book from it floats (0.7.398: either hand). */
 @Mixin(ArmedEntityRenderState.class)
 abstract class TomeHeldItemMixin {
 	@Inject(method = "extractArmedEntityRenderState", at = @At("TAIL"))
 	private static void jaymoskingdoms$bookAfloat(LivingEntity entity, ArmedEntityRenderState state, ItemModelResolver resolver, float partial, CallbackInfo ci) {
-		if (!(entity instanceof Player player) || !TomeFloat.afloat(player)) {
+		if (!(entity instanceof Player player)) {
 			return;
 		}
-		if (state.mainArm == HumanoidArm.RIGHT) {
-			state.rightHandItemState.clear();
-			state.rightHandItemStack = ItemStack.EMPTY;
-			state.rightArmPose = HumanoidModel.ArmPose.EMPTY;
-		} else {
-			state.leftHandItemState.clear();
-			state.leftHandItemStack = ItemStack.EMPTY;
-			state.leftArmPose = HumanoidModel.ArmPose.EMPTY;
+		for (boolean off : new boolean[] {false, true}) {
+			if (!TomeFloat.afloat(player, off)) {
+				continue;
+			}
+			if ((state.mainArm == HumanoidArm.RIGHT) != off) {
+				state.rightHandItemState.clear();
+				state.rightHandItemStack = ItemStack.EMPTY;
+				state.rightArmPose = HumanoidModel.ArmPose.EMPTY;
+			} else {
+				state.leftHandItemState.clear();
+				state.leftHandItemStack = ItemStack.EMPTY;
+				state.leftArmPose = HumanoidModel.ArmPose.EMPTY;
+			}
 		}
 	}
 }

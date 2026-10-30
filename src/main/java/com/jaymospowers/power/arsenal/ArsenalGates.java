@@ -252,6 +252,8 @@ public final class ArsenalGates {
 	/** Per tick: the gates shimmer for their owner, and a cast-out gate drifts on. */
 	static void tick(ServerPlayer player) {
 		ServerLevel level = player.level();
+		// (0.18.48) Gate Ricochet: your own projectiles through one gate come out of the next
+		ArsenalRicochet.tick(player);
 		Long pressed = PRESSED.get(player.getUUID());
 		if (pressed != null && level.getGameTime() - pressed >= 2) {
 			Gate held = gateAt(player);

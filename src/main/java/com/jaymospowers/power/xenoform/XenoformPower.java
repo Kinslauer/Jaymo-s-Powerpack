@@ -631,6 +631,13 @@ public final class XenoformPower implements Power {
 			hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_human"));
 			return;
 		}
+		if (form.ultimateIsMove()) {
+			// (patch 6) a one-off move (Nadir's Three Worlds Film): no Ultimate form, no flash of its own
+			if (form.onUltimate(player, live)) {
+				Mastery.used(player);
+			}
+			return;
+		}
 		if (live.ultimate) {
 			form.onUltimateAgain(player, live);
 			return;

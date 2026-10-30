@@ -220,6 +220,19 @@ public final class GuardDrills {
 		return isVeteran(who);
 	}
 
+	/** (0.7.385) Whether {@code id} (a player, or a veteran) is in a drill just now: a duel or a bout doesn't begin on them then. */
+	static boolean busy(UUID id) {
+		if (RUNS.containsKey(id)) {
+			return true;
+		}
+		for (Run run : RUNS.values()) {
+			if (run.guard.equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether a blow between {@code a} and {@code b} is a drill's spar (no crime). */
 	public static boolean sparring(net.minecraft.world.entity.Entity a, net.minecraft.world.entity.Entity b) {
 		if (RUNS.isEmpty()) {
@@ -260,7 +273,7 @@ public final class GuardDrills {
 			return;
 		}
 		// the veteran must be hale too, or a spar would be won on the first blow
-		if (guard.getTarget() != null || player.getHealth() < player.getMaxHealth() * START_HEALTH || Downed.isDowned(player)
+		if (guard.getTarget() != null || Duels.busy(guard.getUUID()) || Duels.busy(player.getUUID()) || player.getHealth() < player.getMaxHealth() * START_HEALTH || Downed.isDowned(player)
 			|| guard.getHealth() < guard.getMaxHealth() * START_HEALTH) {
 			say(level, guard, player, "drill.jaymoskingdoms.not_now");
 			return;

@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperties;
 import net.minecraft.util.Util;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +30,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (0.7.390) A book afloat ({@link TomeFloat}) stays open the whole time it floats, and turns a leaf as it rises and at each
  * new lock, yours and everyone else's.
+ * <p>
+ * (0.7.398) A Mage's or Sorcerer's off-hand book is held on right click (its use; {@code Tomes.Tome#useOff}), sneaking to
+ * cast its page; each hand's book keeps its own state ({@link Book}).
  */
 final class TomeClient {
 	/** The frames {@code tome_pose} counts (see {@code elemental_tomes.py}): closed, half open, open, then the leaf's five angles. */
@@ -38,24 +42,38 @@ final class TomeClient {
 	/** While charging, a leaf turns every this long (ms): slowly for a tap's charge, quickly for a full one. */
 	static final long FLUTTER_SLOW_MS = 560, FLUTTER_FAST_MS = 240;
 
-	private static boolean down, wasKey;
-	/** When (ms) the charge began, and when the book last shot, had a page stored, and cast one. */
-	private static long downSince, lastShot, lastStore, lastCast;
-	/** Whether the book is open, and since when (ms). */
-	private static boolean open;
-	private static long changedAt;
-	/** What the main hand held last tick, to tell a page stored from a book just drawn. */
-	private static @Nullable Item lastItem;
-	private static int lastSlot;
-	private static @Nullable String lastPage;
-	private static boolean wasCooling;
+	/** (0.7.398) What each of your books is doing: the main hand's (left click) and the off hand's (right click). */
+	private static final class Book {
+		final boolean off;
+		boolean down, wasKey;
+		/** When (ms) the charge began, and when the book last shot, had a page stored, and cast one. */
+		long downSince, lastShot, lastStore, lastCast;
+		/** Whether the book is open, and since when (ms). */
+		boolean open;
+		long changedAt;
+		/** What the hand held last tick, to tell a page stored from a book just drawn. */
+		@Nullable Item lastItem;
+		int lastSlot;
+		@Nullable String lastPage;
+		boolean wasCooling;
+
+		Book(boolean off) {
+			this.off = off;
+		}
+
+		ItemStack stack(Player player) {
+			return off ? player.getOffhandItem() : player.getMainHandItem();
+		}
+	}
+
+	private static final Book MAIN = new Book(false), OFF = new Book(true);
 
 	private TomeClient() {
 	}
 
-	/** Whether you're charging a bolt now. */
-	static boolean charging() {
-		return down;
+	/** Whether you're charging a bolt now from the book in that hand. */
+	static boolean charging(boolean off) {
+		return (off ? OFF : MAIN).down;
 	}
 
 	/** Whether the attack key belongs to the tome in the hand now. */
@@ -70,109 +88,125 @@ final class TomeClient {
 
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		boolean tome = player != null && holdsAttack(minecraft) && !player.isSpectator() && !player.isUsingItem();
-		boolean key = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && minecraft.mouseHandler.isMouseGrabbed();
+		boolean free = minecraft.gui.screen() == null && minecraft.mouseHandler.isMouseGrabbed();
+		boolean ready = player != null && !player.isSpectator() && !player.isUsingItem();
 		long now = Util.getMillis();
+		// the main hand's book takes left click
+		work(MAIN, ready && holdsAttack(minecraft), minecraft.options.keyAttack.isDown() && free, now);
+		// a Mage's or Sorcerer's off-hand book is held on right click (the server times it as the item's use)
+		boolean using = player != null && player.isUsingItem() && player.getUsedItemHand() == InteractionHand.OFF_HAND
+			&& Tomes.isTome(player.getOffhandItem());
+		if (using && !OFF.down) {
+			OFF.downSince = now;
+		} else if (!using && OFF.down) {
+			OFF.lastShot = now;
+		}
+		OFF.down = using;
+		follow(MAIN, player, now);
+		follow(OFF, player, now);
+	}
+
+	/** The main hand's book's button: pressed starts a charge, let go fires it. */
+	private static void work(Book book, boolean tome, boolean key, long now) {
 		if (!ClientPlayNetworking.canSend(Tomes.Attack.TYPE)) {
-			down = false;
-			wasKey = key;
-			follow(player, now);
+			book.down = false;
+			book.wasKey = key;
 			return;
 		}
-		if (down) {
+		if (book.down) {
 			if (!tome || !key) {
 				// let go: fire; the book changed or a screen opened: drop the charge
-				boolean fire = tome && minecraft.gui.screen() == null;
+				boolean fire = tome && Minecraft.getInstance().gui.screen() == null;
 				ClientPlayNetworking.send(new Tomes.Attack(fire ? 0 : 2));
-				down = false;
+				book.down = false;
 				if (fire) {
-					lastShot = now;
+					book.lastShot = now;
 				}
 			}
-		} else if (tome && key && !wasKey) {
+		} else if (tome && key && !book.wasKey) {
 			// only a fresh press starts one (not a button still down from before the book was drawn)
 			ClientPlayNetworking.send(new Tomes.Attack(1));
-			down = true;
-			downSince = now;
+			book.down = true;
+			book.downSince = now;
 		}
-		wasKey = key;
-		follow(player, now);
+		book.wasKey = key;
 	}
 
-	/** Notes what the book in the hand is doing: a page stored, a page cast, and whether it should be open. */
-	private static void follow(@Nullable LocalPlayer player, long now) {
-		boolean held = player != null && Tomes.isTome(player.getMainHandItem());
+	/** Notes what the book in that hand is doing: a page stored, a page cast, and whether it should be open. */
+	private static void follow(Book book, @Nullable LocalPlayer player, long now) {
+		boolean held = player != null && Tomes.isTome(book.stack(player));
 		if (held) {
-			ItemStack stack = player.getMainHandItem();
+			ItemStack stack = book.stack(player);
 			String page = Tomes.page(stack);
-			int slot = player.getInventory().getSelectedSlot();
+			int slot = book.off ? -1 : player.getInventory().getSelectedSlot();
 			boolean cooling = player.getCooldowns().isOnCooldown(stack);
 			// only the same book as last tick counts: a book just drawn isn't a page stored or a spell cast
-			if (stack.getItem() == lastItem && slot == lastSlot) {
-				if (!Objects.equals(page, lastPage)) {
-					lastStore = now;
+			if (stack.getItem() == book.lastItem && slot == book.lastSlot) {
+				if (!Objects.equals(page, book.lastPage)) {
+					book.lastStore = now;
 				}
-				if (cooling && !wasCooling) {
-					lastCast = now;
+				if (cooling && !book.wasCooling) {
+					book.lastCast = now;
 				}
 			}
-			lastItem = stack.getItem();
-			lastSlot = slot;
-			lastPage = page;
-			wasCooling = cooling;
+			book.lastItem = stack.getItem();
+			book.lastSlot = slot;
+			book.lastPage = page;
+			book.wasCooling = cooling;
 		} else {
-			lastItem = null;
+			book.lastItem = null;
 		}
-		boolean wanted = held && (down || TomeFloat.afloat(player) || now - Math.max(lastShot, Math.max(lastStore, lastCast)) < LINGER_MS);
-		if (wanted != open) {
-			open = wanted;
-			changedAt = now;
+		boolean wanted = held && (book.down || TomeFloat.afloat(player, book.off)
+			|| now - Math.max(book.lastShot, Math.max(book.lastStore, book.lastCast)) < LINGER_MS);
+		if (wanted != book.open) {
+			book.open = wanted;
+			book.changedAt = now;
 		}
 	}
 
-	/** The frame {@code tome_pose} gives the book {@code owner} holds (see {@link TomePose}). */
-	static float pose(@Nullable ItemOwner owner) {
+	/** The frame {@code tome_pose} gives the book {@code stack} that {@code owner} holds (see {@link TomePose}). */
+	static float pose(ItemStack stack, @Nullable ItemOwner owner) {
 		LivingEntity living = owner == null ? null : owner.asLivingEntity();
 		if (living == null) {
 			return CLOSED;
 		}
+		boolean off = stack == living.getOffhandItem() && stack != living.getMainHandItem();
 		Minecraft minecraft = Minecraft.getInstance();
-		if (living == minecraft.player && Tomes.isTome(minecraft.player.getMainHandItem())) {
-			return mine(Util.getMillis());
+		if (living == minecraft.player && Tomes.isTome(stack)) {
+			return mine(off ? OFF : MAIN, minecraft.player, Util.getMillis());
 		}
 		// anyone else's: open, a leaf turning, for as long as the hand swings; afloat, open, a leaf turning as it rises or locks
 		if (living.isSwinging()) {
 			return flip(living.getSwingAnimation(0.0F));
 		}
-		if (living instanceof Player player && TomeFloat.afloat(player)) {
-			float turned = TomeFloat.turning(player, Util.getMillis());
+		if (living instanceof Player player && TomeFloat.afloat(player, off)) {
+			float turned = TomeFloat.turning(player, off, Util.getMillis());
 			return turned >= 0.0F ? flip(turned) : OPEN;
 		}
 		return CLOSED;
 	}
 
 	/** The frame of your own book: the cover, then the leaf (a turn for each thing done, a flutter while charging). */
-	private static float mine(long now) {
-		boolean shut = now - changedAt >= COVER_MS;
-		if (!open) {
+	private static float mine(Book book, LocalPlayer player, long now) {
+		boolean shut = now - book.changedAt >= COVER_MS;
+		if (!book.open) {
 			return shut ? CLOSED : HALF;
 		}
 		if (!shut) {
 			return HALF;
 		}
-		long since = Math.min(now - lastShot, Math.min(now - lastStore, now - lastCast));
+		long since = Math.min(now - book.lastShot, Math.min(now - book.lastStore, now - book.lastCast));
 		if (since < FLIP_MS) {
 			return flip(since / (float) FLIP_MS);
 		}
-		LocalPlayer player = Minecraft.getInstance().player;
-		float turned = player == null ? -1.0F : TomeFloat.turning(player, now);
+		float turned = TomeFloat.turning(player, book.off, now);
 		if (turned >= 0.0F) {
 			return flip(turned);
 		}
-		if (down) {
-			float charge = Tomes.charge((int) ((now - downSince) / 50L));
+		if (book.down) {
+			float charge = Tomes.charge((int) ((now - book.downSince) / 50L));
 			long period = Math.round(FLUTTER_SLOW_MS + (FLUTTER_FAST_MS - FLUTTER_SLOW_MS) * charge);
-			long into = (now - downSince) % period;
+			long into = (now - book.downSince) % period;
 			if (into < FLIP_MS) {
 				return flip(into / (float) FLIP_MS);
 			}

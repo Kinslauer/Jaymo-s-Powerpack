@@ -162,6 +162,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.386) Powers' {@code EightSignCircle.sealed(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle sealed;
+	private static boolean lookedForSealed;
+
+	/**
+	 * (0.7.386) Whether {@code entity} stands in a Divine-born's Eight-Sign Circle (Jaymo's Powers) and so can't use powers or
+	 * forms for now; false without Powers (or an older one).
+	 */
+	public static boolean sealed(net.minecraft.world.entity.Entity entity) {
+		if (!lookedForSealed) {
+			lookedForSealed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					sealed = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.divine.EightSignCircle"),
+						"sealed", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Eight-Sign Circle (older Powers?)", e);
+				}
+			}
+		}
+		if (sealed == null) {
+			return false;
+		}
+		try {
+			return (boolean)sealed.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
