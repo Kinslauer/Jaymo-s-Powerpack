@@ -7,13 +7,16 @@ import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -236,6 +239,12 @@ public final class Downed {
 			this.held = start;
 		}
 	}
+
+	/**
+	 * (0.18.45) Told of every downed body a player gets back up (a revive, or smelling salts). Jaymo's Kingdoms adds one (by
+	 * reflection) so the villager remembers who got them up, and says so.
+	 */
+	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
@@ -1080,6 +1089,9 @@ public final class Downed {
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
+				for (BiConsumer<ServerPlayer, LivingEntity> listener : BROUGHT_ROUND_LISTENERS) {
+					listener.accept(player, body);
+				}
 			} finally {
 				WillSkill.reviver = null;
 			}
