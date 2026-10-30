@@ -65,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  * training post, a sparring dummy or any mannequin, by sneaking and using one with an empty hand (the belt screen opens).
  * <li>Battle Stance: hold the Combat Art key with a known form's weapon out to take it ({@link #stance}); hold again, put the
  * weapon away or switch to something that doesn't match to leave. In stance a tap fires the selected slot's form
- * ({@link #fire}), sneak and tap the next slot's; Alt and scroll picks the slot. Out of stance the key keeps doing what it did
+ * ({@link #fire}), sneak and tap the next slot's; Ctrl and scroll picks the slot. Out of stance the key keeps doing what it did
  * (Charge, War Cry, Shield Throw: {@link CombatArts}).
  * <li>Practice: a form that lands adds practice ({@link #landed}; a real foe counts {@value #FOE_PRACTICE}, a dummy
  * {@value #DUMMY_PRACTICE}) and ranks it up to {@value #RANKS}; each rank hits a little harder and reaches a little further.
@@ -263,7 +263,7 @@ public final class Forms {
 		}
 	}
 
-	/** Player → server: move the selected slot (Alt and scroll); {@code delta} is -1 or 1. */
+	/** Player → server: move the selected slot (Ctrl and scroll); {@code delta} is -1 or 1. */
 	public record Pick(int delta) implements CustomPacketPayload {
 		public static final Type<Pick> TYPE = new Type<>(JaymosKingdoms.id("form_pick"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Pick> CODEC = CustomPacketPayload.codec(

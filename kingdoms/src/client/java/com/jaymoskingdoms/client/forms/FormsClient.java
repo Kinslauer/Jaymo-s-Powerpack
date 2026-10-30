@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 
 /**
  * (0.7.381) Weapon Forms on the client: the Combat Art key's hold and tap ({@link #key}), the belt strip above the hotbar
- * while in stance, the chain counter beside the crosshair, Alt and scroll for the belt slot, and Powers' lock-on taken on
+ * while in stance, the chain counter beside the crosshair, Ctrl and scroll for the belt slot, and Powers' lock-on taken on
  * with the stance ({@link PowersCompat#lockOnNearest}; without Powers the stance works without it).
  * <p>
  * The chain counter sits to the right of the crosshair, clear of Powers' parry timing bar below it. Weapon Forms has no
@@ -118,13 +118,13 @@ public final class FormsClient {
 		}
 	}
 
-	/** Alt and scroll in stance move the selected slot (scroll alone stays Powers' lock-on). True when it took the scroll. */
+	/** Ctrl and scroll in stance move the selected slot (scroll alone stays Powers' lock-on). True when it took the scroll. */
 	public static boolean scroll(double x, double y) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		double wheel = y != 0.0 ? y : x;
 		if (player == null || wheel == 0.0 || minecraft.gui.screen() != null || !Forms.book(player).stance()
-			|| !(InputConstants.isKeyDown(InputConstants.KEY_LALT) || InputConstants.isKeyDown(InputConstants.KEY_RALT))) {
+			|| !(InputConstants.isKeyDown(InputConstants.KEY_LCONTROL) || InputConstants.isKeyDown(InputConstants.KEY_RCONTROL))) {
 			return false;
 		}
 		if (ClientPlayNetworking.canSend(Forms.Pick.TYPE)) {
