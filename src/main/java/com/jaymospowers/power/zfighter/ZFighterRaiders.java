@@ -153,7 +153,7 @@ public final class ZFighterRaiders {
 	/** A band's pods start down a little way off {@code seat}. True if they found ground. */
 	static boolean land(ServerLevel level, BlockPos seat) {
 		RandomSource random = level.getRandom();
-		// (0.18.52) a landing yard within reach: they come down just outside it, never on its pads
+		// (0.18.53) a landing yard within reach: they come down just outside it, never on its pads
 		BlockPos middle = ZFighterYard.outside(level, seat, random);
 		for (int tries = 0; tries < 12 && middle == null; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
