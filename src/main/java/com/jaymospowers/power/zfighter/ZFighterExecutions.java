@@ -123,13 +123,14 @@ public final class ZFighterExecutions {
 	}
 
 	/**
-	 * Andy: "only during a super mode". The Super line only: Super, Super 2, Super 3, Super Primal Super, Primal Super
-	 * and False Super. Not a Verdant's or Frost-born's own forms (Giant, the evolutions), the god form or the legends.
+	 * Andy: "only during a super mode", then the Frost-born's forms, the god form and the legends "count too". So: Super,
+	 * Super 2, Super 3, Super Primal Super, Primal Super, False Super, the Frost-born's evolutions, the god form and the
+	 * three legends. Not a Verdant's own forms (Giant) or the other track's (11 and up).
 	 */
 	static boolean superForm(ZFighterPower.Live live) {
 		int form = live.form;
-		boolean superLine = form >= 1 && form <= ApeRage.SUPER_4 && live.lineage != ZFighterLineage.VERDANT && live.lineage != ZFighterLineage.FROST;
-		return superLine || form == ZFighterForms.FALSE_SUPER || form == ApeRage.PRIMAL_SUPER;
+		boolean line = form >= 1 && form <= ApeRage.SUPER_4 && live.lineage != ZFighterLineage.VERDANT;
+		return line || form >= ZFighterForms.FALSE_SUPER && form <= ZFighterForms.LEGEND_3 || form == ApeRage.PRIMAL_SUPER;
 	}
 
 	/** The moves open to {@code player} now, the lineage's and the form's {@link #OWN_WEIGHT} times over. */
