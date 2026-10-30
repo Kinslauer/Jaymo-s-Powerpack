@@ -1,4 +1,4 @@
-"""Space pod texture and cube table (0.18.19, Andy): the entity's 128x128 skin, and the cubes in PodModel.
+"""Space pod texture and cube table (0.18.47, Andy): the entity's 128x128 skin, and the cubes in PodModel.
 
 The pod is built from slots (PodPart): a keel (iron cross at the base), three fins (a slab with a foot), a thruster bell,
 a brass tank with a red band, four bone-white hull plates with rivets (a porthole on the front one, a hatch on the right),

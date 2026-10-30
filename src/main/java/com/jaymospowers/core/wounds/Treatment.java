@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -107,6 +108,8 @@ public final class Treatment {
 	static final int WORK_TICKS = 15, BAR = 12;
 	/** (0.14.4) The custom-data key a red-hot blade carries (the game time it was heated). */
 	public static final String HEATED_KEY = "jaymospowers:heated";
+	/** (0.18.45) Told of every treatment a player finishes on someone else. Jaymo's Kingdoms adds one (by reflection): a villager remembers who dressed their wounds. */
+	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TENDED_LISTENERS = new ArrayList<>();
 
 	/** (0.14.4) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
 	public enum Remedy {
@@ -847,6 +850,11 @@ public final class Treatment {
 					body.addEffect(new MobEffectInstance(MobEffects.SPEED, SALTS_SPEED_TICKS, 0));
 					body.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SALTS_DAZE_TICKS, 0));
 					MedicineSkill.broughtRound(player, body);
+					if (body != player) {
+						for (BiConsumer<ServerPlayer, LivingEntity> listener : Downed.BROUGHT_ROUND_LISTENERS) {
+							listener.accept(player, body);
+						}
+					}
 				}
 			}
 			case LEECHES -> {
@@ -877,5 +885,10 @@ public final class Treatment {
 		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
 		// (0.15.49) a little Survival experience (Kingdoms)
 		MedicineSkill.treated(player);
+		if (body != player) {
+			for (BiConsumer<ServerPlayer, LivingEntity> listener : TENDED_LISTENERS) {
+				listener.accept(player, body);
+			}
+		}
 	}
 }

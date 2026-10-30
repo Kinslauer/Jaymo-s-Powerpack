@@ -377,7 +377,7 @@ public final class Infusion {
 					recipes = List.copyOf(sorted);
 				}
 			});
-		// (0.18.19) the recipe list goes to every client, so JEI's Infusion page shows what this server's altar makes
+		// (0.18.47) the recipe list goes to every client, so JEI's Infusion page shows what this server's altar makes
 		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
 		ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> {
 			if (joined) {
@@ -400,7 +400,7 @@ public final class Infusion {
 		}
 	}
 
-	/** (0.18.19) Server to client: every infusion recipe with its id, for JEI. */
+	/** (0.18.47) Server to client: every infusion recipe with its id, for JEI. */
 	public record Sync(List<Loaded> recipes) implements CustomPacketPayload {
 		public static final Type<Sync> TYPE = new Type<>(JaymosPowers.id("infusions"));
 		private static final StreamCodec<RegistryFriendlyByteBuf, Recipe> RECIPE = ByteBufCodecs.fromCodecWithRegistries(Recipe.CODEC);
