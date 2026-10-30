@@ -6870,4 +6870,15 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   (`MATERIAL_TIER`), anything else by the `#jaymoskingdoms:tier_gate/<tier>` item tags (blueprints and the large plate cast sit in
   Borderlands'). A smith's gear is also never graded above what the buyer's tier allows (`MAX_GRADE`). Nothing leaves the world and
   JEI is untouched. The bounty board and careers hold no such offers (they pay emeralds and relics), so there was nothing to gate there.
+## 0.7.384: stargazers and sky tidings (SevTech picks) (pack 0.18.53)
+- Jaymo's Powers' pod now flies only to worlds whose star chart the pilot has read; Kingdoms is where the charts are sold.
+  "Ask about the stars" (`StarFolk`, MCA's menu) shows on a floating island's hermit and on a stargazer, and opens the talk screen
+  (`ZFighterFolk.ask`): a few words about the sky and the charts the player hasn't read, cheapest trip first, for emeralds (6, and 4
+  more for each place down the cost order). A hermit sells one at a time (`Hermits.CHARTS_OFFERED`), a stargazer two
+  (`StarFolk.STARGAZER_OFFERED`). Powers is reached by reflection through its `SkyApi` only; without it the question is not asked.
+- **Stargazers** (`GiftedFolk.stargaze`): each grown MCA villager is weighed once, and about one in `STARGAZER_ODDS` (12) is
+  one (the `jaymoskingdoms_stargazer` tag). Talking to one puts a line into the player's next Tidings, once a day for each of them.
+- **Lights in the sky** (`StarFolk.lights`): before a player has flown a pod, a raiders' pod or a patrolman's pod coming down
+  within 96 blocks of the seat of a town he is within 160 of is written up in his Tidings, once for each pod: a light that fell, or
+  a stranger seen at dusk. Read from Powers' pod tags (`jaymospowers.raider`, `jaymospowers.patrol_pod`) on the pod entity.
 - Compile-checked; not seen in game.

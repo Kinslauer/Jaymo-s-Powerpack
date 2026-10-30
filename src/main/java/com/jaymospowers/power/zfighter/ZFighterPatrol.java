@@ -541,6 +541,8 @@ public final class ZFighterPatrol {
 		// (0.18.49) a pod is no longer an item: a complete one, full of fuel, is set down beside the new officer
 		PodEntity.spawn(level, ZFighterPodTrip.roomFor(level, player.blockPosition()), true, ZFighterSpace.MAX_FUEL);
 		ZFighterSagas.give(player, new ItemStack(LICENSE));
+		// (0.18.53) and the chart of Rustfall, where the Patrol's work is
+		ZFighterSagas.give(player, com.jaymospowers.power.zfighter.sky.Charts.stack(ZFighterSpace.RUSTFALL));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
