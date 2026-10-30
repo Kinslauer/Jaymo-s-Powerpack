@@ -3928,7 +3928,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the race only when no foe is in the combo's reach and cone (`ZFighterCombo.inFront`, the server's own scan) and no
     string is going.
   - Compile-checked; not seen in game.
-- **0.18.48, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+- **0.18.49, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing

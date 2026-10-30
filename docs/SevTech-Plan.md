@@ -167,7 +167,7 @@ the Maw part of ZFighterSpace, ZFighterSpaceMissions rewards, loot tables, lang 
   band per grade on the keel posts). A pod stripped to its keel keeps its grade (the keel carries it: the keel block
   item remembers the grade in a component).
 
-### Track 4, Fuel and breath (Powers 0.18.48; files: new `power/zfighter/breath/**`, new `power/zfighter/fuel/**`,
+### Track 4, Fuel and breath (Powers 0.18.49; files: new `power/zfighter/breath/**`, new `power/zfighter/fuel/**`,
 WeaponParts (one new Kind), alchemy crucible or still recipe, ZFighterStarMapScreen (grade shown), lang `zfighter_fuel.json`)
 - **Fuel grades**: `fuel/PodFuel`: grade 1 = coal, charcoal, coal block; grade 2 = blaze powder/rod and Pod Spirit (from
   the still); grade 3 = Cinder Ember (an item found only on Cinder: lava-side loot and mission rewards; our art). Each
