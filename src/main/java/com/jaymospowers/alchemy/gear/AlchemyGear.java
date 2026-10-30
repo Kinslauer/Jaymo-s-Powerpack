@@ -116,6 +116,9 @@ public final class AlchemyGear {
 			CLOTH_PIECES[i] = Alchemy.item("ichorcloth_" + names[i], p -> new Item(p.humanoidArmor(cloth, type).rarity(Rarity.UNCOMMON)));
 		}
 
+		// (0.18.47) Weapon Forms patch 3: the Clockwork Hornet Hive
+		ClockworkHornets.init();
+
 		registerResearch();
 	}
 
@@ -191,6 +194,9 @@ public final class AlchemyGear {
 			EssenceList.of(Essence.SPIRIT, 14, Essence.SALT, 10).plus(Essence.LIGHT, 8), List.of(ICHORIUM), 0, 4, 0));
 		Research.register(new Research.Entry(EVERFLAME_LANTERN, art, () -> EVERFLAME_LANTERN_ITEM,
 			EssenceList.of(Essence.LIGHT, 14, Essence.FIRE, 8).plus(Essence.CRAFT, 6), List.of("everflame", ARTIFICE), 0, 3, 2));
+		// (0.18.47) the Artifice tab's third column: small clockwork drones (no Kingdoms needed)
+		Research.register(new Research.Entry(ClockworkHornets.RESEARCH, art, () -> ClockworkHornets.HIVE,
+			EssenceList.of(Essence.METAL, 14, Essence.MOTION, 12).plus(Essence.SPARK, 8), List.of(ARTIFICE, "ichor"), 0, 2, 2));
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			// the Enchanting tab's third column (spellbinding is the second); the icon is a Kingdoms tome by lookup, the book without it
 			Research.register(new Research.Entry(TOMECRAFT, ench, () -> BuiltInRegistries.ITEM.getOptional(WATER_TOME).orElse(Items.BOOK),

@@ -1,0 +1,34 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:swords",
+    {
+      "id": "weaponmod:katana.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.copper",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:katana.netherite",
+      "required": false
+    }
+  ]
+}

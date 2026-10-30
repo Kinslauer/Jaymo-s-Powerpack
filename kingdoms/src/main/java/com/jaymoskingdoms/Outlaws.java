@@ -3,7 +3,7 @@ package com.jaymoskingdoms;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.7.391) Andy: "looters / bandits should not introduce themselves, nor should villagers / bandits instantly get
+ * (0.7.397) Andy: "looters / bandits should not introduce themselves, nor should villagers / bandits instantly get
  * tombstones". The folk who live outside the law: looters robbing the dead ({@link Looters}), assassins
  * ({@link Assassins}), a camp's people (barbarian raiders and chiefs, a cove's pirates, goblins and orcs, camp casters:
  * {@link Barbarians#isCampVillager}) and anyone in a bandit mask or bandana ({@link Bandits#wears}). They never come up to

@@ -116,8 +116,12 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
+		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
+		com.jaymoskingdoms.client.forms.FormsClient.register();
 		// (0.7.361) Valor: the N key, the pool's bar, Senses
 		ValorClient.register();
+		// (0.7.383) the Knife school's marked quarry and thrown bolas
+		com.jaymoskingdoms.client.forms.KnifeClient.register();
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();
 		TomeFloat.register();

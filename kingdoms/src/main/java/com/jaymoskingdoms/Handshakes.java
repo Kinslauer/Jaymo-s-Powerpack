@@ -730,7 +730,7 @@ public final class Handshakes {
 			return false;
 		}
 		if (Introductions.knows(player, villager) || Rulers.is(villager) || Outlaws.is(villager)) {
-			// ((0.7.391) an outlaw doesn't greet you: their menu opens as it is)
+			// ((0.7.397) an outlaw doesn't greet you: their menu opens as it is)
 			greeted(player, villager);
 			return false;
 		}
@@ -857,7 +857,7 @@ public final class Handshakes {
 	private static int comeWeight(ServerLevel level, ServerPlayer player, Villager v, long today) {
 		if (!McaCompat.isMca(v) || v.isBaby() || v.isTrading() || McaCompat.panicking(v) || busy(v) || !Approaches.free(v)
 			|| Introductions.knows(player, v) || greetedBy(player, v) || Rulers.is(v) || Recollections.refuses(v, player) || Outlaws.is(v)) {
-			// ((0.7.391) looters, bandits and raiders never come over to introduce themselves)
+			// ((0.7.397) looters, bandits and raiders never come over to introduce themselves)
 			return 0;
 		}
 		Long came = CAME.get(v.getUUID() + "/" + player.getUUID());

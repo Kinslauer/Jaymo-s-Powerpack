@@ -111,6 +111,14 @@ public abstract class XenoForm {
 		return false;
 	}
 
+	/**
+	 * (patch 6) True for a form whose C is a single move (a film and a blow) instead of an Ultimate form for the rest of
+	 * the timer: {@link #onUltimate} then does the move and the band doesn't change ({@code live.ultimate} stays off).
+	 */
+	public boolean ultimateIsMove() {
+		return false;
+	}
+
 	/** C again while already the Ultimate (Swarm swaps bodies, Standstill starts again, ...). */
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 	}

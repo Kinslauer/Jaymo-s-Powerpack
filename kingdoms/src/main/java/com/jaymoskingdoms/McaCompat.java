@@ -537,7 +537,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.dealingOpening(villager, player);
 	}
 
-	/** (0.7.391, from MCA's dialogue) Its menu opening on an outlaw ({@link Outlaws}): a curt word, never a stranger's welcome; true if so. */
+	/** (0.7.397, from MCA's dialogue) Its menu opening on an outlaw ({@link Outlaws}): a curt word, never a stranger's welcome; true if so. */
 	public static boolean outlawOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}

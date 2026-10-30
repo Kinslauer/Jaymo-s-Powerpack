@@ -62,7 +62,7 @@ public final class Introductions {
 	static final double FAMILY_RANGE = 24.0;
 	/** How many ways a villager says their name, and a ruler theirs. */
 	static final int LINES = 3, RULER_LINES = 2;
-	/** (0.7.391) Lines an outlaw has for keeping their name to themselves. */
+	/** (0.7.397) Lines an outlaw has for keeping their name to themselves. */
 	static final int OUTLAW_LINES = 3;
 
 	/**
@@ -207,7 +207,7 @@ public final class Introductions {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_refused");
 		}
 		if (Outlaws.is(villager)) {
-			// (0.7.391) a looter, a bandit or a camp's raider keeps their name to themselves
+			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
 		}
 		boolean fresh = learn(player, villager);

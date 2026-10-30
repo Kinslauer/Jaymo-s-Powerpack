@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
 final class McaBridge {
 	/** An MCA village counts as a faction's when its border (plus this) takes in the faction's seat. */
 	static final int SEAT_MARGIN = 32;
-	/** (0.7.391) Lines an outlaw opens their menu with ({@link #outlawOpening}). */
+	/** (0.7.397) Lines an outlaw opens their menu with ({@link #outlawOpening}). */
 	static final int OUTLAW_OPENINGS = 4;
 
 	/** The villager a player is promoting just now ({@link #promote}): {@link #enlist} takes them, not someone else. */
@@ -547,6 +547,30 @@ final class McaBridge {
 		return villager;
 	}
 
+	/**
+	 * (0.7.384) {@link SchoolHalls}: a school master, a grown villager of no settlement (a name and a build of MCA's own), tagged
+	 * with {@code tags}, held at {@code at}, never hurt, out of MCA's family tree, in the master's outfit.
+	 */
+	static @Nullable PathfinderMob master(ServerLevel level, Vec3 at, float yaw, List<String> tags) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(at).withAge(0).build(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		villager.setYHeadRot(yaw);
+		tags.forEach(villager::addTag);
+		villager.setPersistenceRequired();
+		villager.setPermanentlyInvulnerable(true);
+		worker(villager).enlist(com.jaymoskingdoms.forms.Schools.ROLE, -1);
+		villager.setHomeTo(BlockPos.containing(at), 1);
+		if (!level.addFreshEntity(villager)) {
+			return null;
+		}
+		FamilyTree.get(level).remove(villager.getUUID());
+		Uniforms.fit(villager);
+		return villager;
+	}
+
 	/** (0.7.299) {@link McaCompat#visitor}: a grown villager (or a child) in {@code job}, or none, spawned at {@code at}. */
 	static @Nullable Villager visitor(ServerLevel level, Vec3 at, @Nullable VillagerProfession job, boolean child) {
 		VillagerFactory make = VillagerFactory.newVillager(level).withPosition(at).withAge(child ? AgeState.CHILD.toAge() : 0);
@@ -859,7 +883,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.391) MCA's menu opening on {@code villager} ("root") when they're an outlaw ({@link Outlaws}: a looter, a bandit,
+	 * (0.7.397) MCA's menu opening on {@code villager} ("root") when they're an outlaw ({@link Outlaws}: a looter, a bandit,
 	 * a camp's raider): a curt word, or a hard look if you share no tongue, and on to the main menu, never MCA's stranger's
 	 * welcome ("Welcome to the village, stranger!") or its greetings; true if so.
 	 */
@@ -932,7 +956,7 @@ final class McaBridge {
 		List<Worker> found = new ArrayList<>();
 		// (0.7.242) a ship's crew serve her, not any town: never called on for its work, guard calls or escorts
 		// ((0.7.319) nor are Powers' Z Fighter characters, ZFighterFolk)
-		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && !ZFighterFolk.is(v) && test.test(worker(v)))) {
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && !ZFighterFolk.is(v) && !com.jaymoskingdoms.forms.Schools.isMaster(v) && test.test(worker(v)))) {
 			found.add(worker(v));
 		}
 		return found;

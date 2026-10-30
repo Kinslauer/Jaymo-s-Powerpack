@@ -68,6 +68,9 @@ public final class ZFighterPowerClient implements PowerClient {
 
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
+		// (0.18.48) the Divine-born's Flying Sword, drawn as its item
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.divine.DivineEntities.FLYING_SWORD,
+			FlyingSwordRenderer::new);
 		ZFighterInputClient.init();
 		// (0.17.45) lock-on, the throw's click, the combat icons
 		ZFighterCombatClient.init();

@@ -66,7 +66,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Presence:</b> Dread Presence (weaker foes and players near you tremble: slowed, weakened, sometimes buckling),
  * No Getting Up (downed foes near you shiver and can't rise; the holding down is Jaymo's Powers' {@code WillSkill}),
- * Stare Down (sneak and hold your gaze on a weaker foe: it drops its weapon or runs), Broken Morale (down or kill one and
+ * Stare Down (sneak and hold your gaze on a weaker foe: it drops its weapon or runs; (0.7.395) a captain or a ruler, and
+ * foes by what they are, break their own ways: {@link Staredowns}), Broken Morale (down or kill one and
  * its kind round it lose heart), Name That Carries (a Warrior's name: weaker foes won't start a fight with you).
  *
  * <p><b>Iron mind:</b> Grounded (less harm from spells and powers), Spellbreaker Blow (a full-strength hit on a caster
@@ -649,8 +650,11 @@ public final class Will {
 				continue;
 			}
 			long now = level.getGameTime();
-			stare(level, sp, now);
-			shrug(level, sp, now);
+			// (0.7.395) locked in a clash of wills: nothing else of Will's keys
+			if (!WillClash.in(sp)) {
+				stare(level, sp, now);
+				shrug(level, sp, now);
+			}
 			if (tickCount % SCAN_TICKS == 0) {
 				presence(level, sp, now);
 			}
@@ -763,9 +767,22 @@ public final class Will {
 			STARING.remove(sp.getUUID());
 			return;
 		}
-		Mob seen = gazedAt(level, sp);
 		Object[] was = STARING.get(sp.getUUID());
-		if (seen == null || !weaker(sp, seen) || FLEEING.containsKey(seen)) {
+		// (0.7.395) another player: they're warned, then the two clash ({@link WillClash})
+		ServerPlayer rival = gazedPlayer(level, sp);
+		if (rival != null && WillClash.may(sp, rival, now)) {
+			if (was == null || was[0] != rival) {
+				STARING.put(sp.getUUID(), new Object[] {rival, now});
+				WillClash.warn(level, sp, rival);
+			} else if (now - (long) was[1] >= WillClash.LOCK_TICKS / surge(sp)) {
+				STARING.remove(sp.getUUID());
+				WillClash.begin(level, sp, rival, now);
+			}
+			return;
+		}
+		Mob seen = gazedAt(level, sp);
+		// (0.7.395) the great (a captain, a ruler) weigh your Will against their nerve instead
+		if (seen == null || !Staredowns.great(sp, seen) && !weaker(sp, seen) || FLEEING.containsKey(seen)) {
 			STARING.remove(sp.getUUID());
 			return;
 		}
@@ -777,10 +794,19 @@ public final class Will {
 		if (held % 10 == 0) {
 			TREMBLING.put(seen, now + 12);
 		}
-		if (held < STARE_TICKS / surge(sp)) {
+		if (held < Staredowns.ticks(sp, seen) / surge(sp)) {
 			return;
 		}
 		STARING.remove(sp.getUUID());
+		if (Staredowns.broke(level, sp, seen, now)) {
+			return;
+		}
+		cowed(level, sp, seen, now);
+		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.stare", seen.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+	}
+
+	/** A foe stared down: it often drops its weapon, and it runs. */
+	static void cowed(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
 		ItemStack weapon = seen.getMainHandItem();
 		if (!weapon.isEmpty() && level.getRandom().nextFloat() < STARE_DROP_CHANCE) {
 			seen.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -790,7 +816,29 @@ public final class Will {
 			level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.ITEM_BREAK.value(), SoundSource.HOSTILE, 0.4F, 1.4F);
 		}
 		flee(seen, sp, now, FLEE_TICKS);
-		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.will.stare", seen.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+	}
+
+	/** (0.7.395) The player {@code sp} is looking straight at, within reach and in sight, or null. */
+	private static @Nullable ServerPlayer gazedPlayer(ServerLevel level, ServerPlayer sp) {
+		Vec3 eye = sp.getEyePosition(), look = sp.getLookAngle();
+		ServerPlayer best = null;
+		double bestCos = STARE_COS;
+		for (ServerPlayer other : level.players()) {
+			if (other == sp || other.isSpectator()) {
+				continue;
+			}
+			Vec3 to = other.getEyePosition().subtract(eye);
+			double d = to.length();
+			if (d < 1.0E-3 || d > STARE_REACH) {
+				continue;
+			}
+			double cos = to.scale(1.0 / d).dot(look);
+			if (cos > bestCos && sp.hasLineOfSight(other)) {
+				bestCos = cos;
+				best = other;
+			}
+		}
+		return best;
 	}
 
 	/** The foe {@code sp} is looking straight at, within reach and in sight, or null. */
@@ -798,7 +846,7 @@ public final class Will {
 		Vec3 eye = sp.getEyePosition(), look = sp.getLookAngle();
 		Mob best = null;
 		double bestCos = STARE_COS;
-		for (Mob mob : level.getEntitiesOfClass(Mob.class, sp.getBoundingBox().inflate(STARE_REACH), m -> foe(sp, m) && !Downed.isDowned(m))) {
+		for (Mob mob : level.getEntitiesOfClass(Mob.class, sp.getBoundingBox().inflate(STARE_REACH), m -> (foe(sp, m) || Staredowns.great(sp, m)) && !Downed.isDowned(m))) {
 			Vec3 to = mob.getEyePosition().subtract(eye);
 			double d = to.length();
 			if (d < 1.0E-3 || d > STARE_REACH) {

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.391) Andy: "villagers / bandits should not instantly get tombstones". The tick after an MCA villager dies, MCA lays
+ * (0.7.397) Andy: "villagers / bandits should not instantly get tombstones". The tick after an MCA villager dies, MCA lays
  * them in the nearest empty tombstone within 10 blocks, and one with family or a player's hearts gets a fresh tombstone
  * raised where they fell; bandits and raiders too, since MCA doesn't count them hostile. With Kitchen's corpses the body
  * lies there instead, so the stone stood over a corpse. Now, while the dead are seen to ({@link Bearers#seenTo}), MCA
