@@ -6905,7 +6905,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   from the poster that names the world, once anyone on has Dread. Goods: the six first metals (looked for under a few ids until Track
   5 names them), Rustfall plate, Glacia ice glass, Cinder bell alloy, Cinder Ember, Glacia salt (Kitchen's salt).
 - A life story's job lean never draws Pilot or Prospector. Compile-checked; not seen in game.
-## 0.7.384: star-touched foes (SevTech picks) (pack 0.18.53)
+## 0.7.384: star-touched foes (SevTech picks) (pack 0.18.54)
 - On Jaymo's Powers' six far worlds (the Pale Moon, Rustfall, Glacia, Cinder, the Maw, the Verdant World, found by their
   dimension's name; Powers is never compiled against), `StarTouched` marks about three in ten hostile mobs (`STAR_CHANCE`, rolled
   once when the mob first loads, saved as `star_touched`) as star-touched: `MonsterGear.starLook` dyes a leather piece into each

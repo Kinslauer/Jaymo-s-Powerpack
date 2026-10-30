@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.53) Ore on a far world, passing for the plain stone round it (the {@link Host}) until it is tapped with a pick or
+ * (0.18.54) Ore on a far world, passing for the plain stone round it (the {@link Host}) until it is tapped with a pick or
  * its world's chart has been read ({@link FarWorlds#reveal}). It remembers which ore it is ({@link Kind}); deep ore (deepslate
  * hosts) comes back as the deepslate kind. It is never broken as it is: a blow only shows it, and it drops nothing.
  */

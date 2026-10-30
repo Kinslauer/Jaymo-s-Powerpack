@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** (0.18.53) A far world's first metal: knapping it (taking it from a crafting grid, the field anvil's too) is a first find for the Prospector career. */
+/** (0.18.54) A far world's first metal: knapping it (taking it from a crafting grid, the field anvil's too) is a first find for the Prospector career. */
 public final class FirstMetalIngot extends Item {
 	private final FarWorld world;
 

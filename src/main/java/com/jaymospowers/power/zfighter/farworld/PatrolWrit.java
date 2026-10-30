@@ -51,7 +51,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.53, Andy's note) The Patrol's skip writ. An officer of Sergeant's rank or better can ask a patrolman for a writ, once for each
+ * (0.18.54, Andy's note) The Patrol's skip writ. An officer of Sergeant's rank or better can ask a patrolman for a writ, once for each
  * world with a mission (Rustfall, Glacia, Cinder). Used on that world while its captains are still to be faced, it calls down a
  * Commander of the Patrol in a pod of his own, who takes the captain fight for the fighter and his party ({@link #BEATS} blows, one
  * for each captain), then leaves; the champion's duel and the boss stay the fighter's own. A film plays for whoever read the writ

@@ -291,7 +291,7 @@ public final class ZFighterSpaceMissions {
 		}
 	}
 
-	// ---------------------------------------------------------------- (0.18.53) the patrol's skip writ
+	// ---------------------------------------------------------------- (0.18.54) the patrol's skip writ
 
 	/** Whether {@code player} is freeing the planet he stands on and still has its captains to face (the writ's case). */
 	public static boolean captainsAhead(ServerPlayer player) {

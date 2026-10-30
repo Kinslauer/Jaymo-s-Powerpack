@@ -44,7 +44,7 @@ public enum TinkerMaterial {
 	/** (Smithing) Iron and pig iron alloyed, or crucible steel fired in a kiln: netherite-tier, Tempered. */
 	STEEL("steel", Stats.STEEL, Trait.TEMPERED, true),
 	/**
-	 * (0.18.53) The far worlds' first metals, one each (Moon, Rustfall, Glacia, Cinder, Maw, Verdant): knapped from the world's own
+	 * (0.18.54) The far worlds' first metals, one each (Moon, Rustfall, Glacia, Cinder, Maw, Verdant): knapped from the world's own
 	 * rocks at a field anvil, then cast and forged like any metal. Only a tool whose head is a world's first metal answers that
 	 * world's ore ({@code power/zfighter/farworld}).
 	 */
@@ -97,7 +97,7 @@ public enum TinkerMaterial {
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
-		/** (0.18.53) The first metals: iron-tier (the Cinder and Maw ones diamond-tier, for ancient debris), none beyond steel. */
+		/** (0.18.54) The first metals: iron-tier (the Cinder and Maw ones diamond-tier, for ancient debris), none beyond steel. */
 		static final Stats PALE_ALLOY = new Stats(300, 6.5F, 2.0F, Tier.IRON, 0.05F, 0.05F, 0.0F, 0.05F);
 		static final Stats RUST_IRON = new Stats(420, 6.0F, 2.5F, Tier.IRON, 0.1F, 0.0F, 0.05F, 0.0F);
 		static final Stats ICE_IRON = new Stats(380, 7.0F, 2.0F, Tier.IRON, 0.05F, 0.1F, 0.0F, 0.0F);

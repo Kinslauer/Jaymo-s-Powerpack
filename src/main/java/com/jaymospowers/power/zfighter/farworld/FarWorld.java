@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.53, SevTech: far worlds restart the stone age) The six far worlds, in the star map's order, each with the first metal
+ * (0.18.54, SevTech: far worlds restart the stone age) The six far worlds, in the star map's order, each with the first metal
  * that bites its ore, the rock lying about on it, and the stone its veiled ore passes for.
  */
 public enum FarWorld {
