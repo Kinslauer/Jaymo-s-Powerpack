@@ -36,7 +36,7 @@ final class StoryCurtain {
 			}
 			long now = System.currentTimeMillis();
 			Screen screen = minecraft.gui.screen();
-			if (LifeStoryScreen.owed() || StoryHoldScreen.holding() || screen instanceof LifeStoryScreen
+			if (LifeStoryScreen.owed() && !isCreator(screen) || StoryHoldScreen.holding() || screen instanceof LifeStoryScreen
 				|| screen instanceof StoryHoldScreen
 				// (0.7.304) told, still in stasis till they're set down at their start: black, but for MCA's creator
 				|| minecraft.player.hasAttached(LifeStory.ROAD) && !isCreator(screen)
@@ -61,7 +61,8 @@ final class StoryCurtain {
 		return up;
 	}
 
-	private static boolean isCreator(Screen screen) {
+	/** Whether {@code screen} is MCA's creator. */
+	static boolean isCreator(@org.jspecify.annotations.Nullable Screen screen) {
 		return screen != null && screen.getClass().getName().equals(MCA_CREATOR);
 	}
 

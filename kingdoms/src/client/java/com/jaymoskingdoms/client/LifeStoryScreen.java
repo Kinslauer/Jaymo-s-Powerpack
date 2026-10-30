@@ -148,6 +148,12 @@ final class LifeStoryScreen extends Screen {
 			realms = payload.realms();
 			creatorAhead = payload.creatorAhead();
 			StoryCurtain.raise();
+			// (0.7.406) Andy: "the story screen seems to be cutting off the mca editor part of the character creation":
+			// MCA marks the body made partway through its creator, and the road was asked on top of it. While the creator
+			// is up the road waits; it opens on the first tick with no screen ({@code owed})
+			if (payload.forced() && StoryCurtain.isCreator(context.client().gui.screen())) {
+				return;
+			}
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {

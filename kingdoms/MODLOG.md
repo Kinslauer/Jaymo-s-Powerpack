@@ -7195,3 +7195,6 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   minor nobles) shows no short line until its realm is picked on the page after, so no more "Sworn to , at its keep."
 - Andy: "the narrator can stop at 'as you grew up' here, the you sounds off". The youth page's title is "As you grew
   up..." and the narrator's clip is cut before its "you".
+- Andy: "the story screen seems to be cutting off the mca editor part of the character creation". MCA marks the body
+  made partway through its creator (its editor's sync), so the server asked the road while the creator was still up and
+  the road page replaced it. The client now leaves MCA's creator alone and opens the road once no screen is up.
