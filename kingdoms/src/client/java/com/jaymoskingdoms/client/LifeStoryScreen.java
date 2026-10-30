@@ -109,6 +109,8 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
+	/** (0.7.362) The look of the stranger shown for a road that makes you another blood (-1: none drawn yet). */
+	private int strangerLook = -1;
 	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
 	private long slidAt;
 	private int slideDir;
@@ -1552,7 +1554,18 @@ final class LifeStoryScreen extends Screen {
 		// (0.7.356) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
 		if (roadOnly()) {
 			Answer road = picked(Question.ROAD);
-			StoryFigure.drawYou(graphics, player, road != null ? road.makes() : null, look, scenes, icon, x0, y0, x1, y1);
+			// (0.7.362) Andy: "should just show a random divine born instead of ... your current char": a road that makes you
+			// another blood shows a stranger of it (a look drawn at random each time the road is shown)
+			if (road != null && road.makes() != null) {
+				if (this.strangerLook < 0) {
+					this.strangerLook = player.getRandom().nextInt(HeritageVariants.of(road.makes()).size() + 1);
+				}
+				int gender = LifeStory.FEMALE.equals(player.getAttached(LifeStory.GENDER)) ? 1 : 0;
+				StoryFigure.draw(graphics, player, road.makes(), this.strangerLook, scenes, icon, x0, y0, x1, y1, gender);
+				return;
+			}
+			this.strangerLook = -1;
+			StoryFigure.drawYou(graphics, player, null, look, scenes, icon, x0, y0, x1, y1);
 			return;
 		}
 		StoryFigure.draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, draft.gender);

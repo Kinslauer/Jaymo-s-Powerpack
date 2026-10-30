@@ -155,12 +155,13 @@ final class StoryFigure {
 		scene("road.snowed", Act.STAND, Items.LANTERN, null, lh, lc, ll, lb);
 		// (0.7.362) Andy: "he should really have nothing at all": no clothes, nothing held
 		SCENES.put("road.captive", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
-		scene("road.whalers", Act.USE, Items.TRIDENT, null, null, lc, null, lb);
+		// (0.7.362) Andy: "the pickaxe or sword or harpoon make sense. not the trident"
+		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
 		// (0.7.362) Andy: "he shouldnt still have his limb"
 		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
-		scene("road.moon", Act.WORK, Items.IRON_INGOT, null, null, null, null, null);
+		scene("road.moon", Act.WORK, Items.STONE_PICKAXE, null, null, null, null, null);
 		scene("road.verdant", Act.WALK, Items.VINE);
 		scene("road.rustfall", Act.WORK, Items.IRON_PICKAXE, null, null, null, ll, null);
 		scene("road.maw", Act.LOOK_UP, Items.CRYING_OBSIDIAN);
@@ -228,7 +229,7 @@ final class StoryFigure {
 				java.util.Arrays.fill(gear, null);
 			}
 			bare = sc.bare();
-			Item[] put = {sc.head(), sc.chest(), sc.legs(), sc.feet(), sc.main(), sc.off()};
+			Item[] put = {sc.head(), sc.chest(), sc.legs(), sc.feet(), held(sc.main()), held(sc.off())};
 			for (int g = 0; g < put.length; g++) {
 				if (put[g] != null) {
 					gear[g] = put[g];
@@ -263,6 +264,25 @@ final class StoryFigure {
 	static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender) {
 		draw(graphics, player, kind, look, scenes, icon, x0, y0, x1, y1, gender, false);
+	}
+
+	/**
+	 * (0.7.362) Andy: "not everyone needs to be holding something, it wouldnt make sense to just have vines or crying
+	 * obsidian, but the pickaxe or sword or harpoon make sense". What a figure may hold: a tool or a weapon (a shield, a
+	 * bow, a rod), or a light to see by; anything else (a keepsake, a block, the answer's picture) is left out.
+	 */
+	static @Nullable Item held(@Nullable Item item) {
+		if (item == null || item == Items.TRIDENT) {
+			return null;
+		}
+		if (item == Items.TORCH || item == Items.LANTERN || item == Items.SOUL_LANTERN || item == com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM) {
+			return item;
+		}
+		ItemStack stack = new ItemStack(item);
+		boolean gear = stack.has(net.minecraft.core.component.DataComponents.TOOL) || stack.has(net.minecraft.core.component.DataComponents.WEAPON)
+			|| item instanceof net.minecraft.world.item.ShieldItem || item instanceof net.minecraft.world.item.BowItem
+			|| item instanceof net.minecraft.world.item.CrossbowItem || item instanceof net.minecraft.world.item.FishingRodItem;
+		return gear ? item : null;
 	}
 
 	/**

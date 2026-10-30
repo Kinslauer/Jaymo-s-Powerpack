@@ -6808,4 +6808,9 @@ find one living there."
   lands as they are (`LifeStory.spaceborn`); anyone else is awakened as a Z Fighter on landing, and the carousel says so.
 - Stoneborn: "can now breath underwater because they dont need air": their air is kept full (`Heritage.tick`); gift line
   updated.
+- "not everyone needs to be holding something ... the pickaxe or sword or harpoon make sense. not the trident":
+  `StoryFigure.held` lets a figure hold only tools, weapons (shield, bow, crossbow, rod, harpoon) and lights; the
+  whaler holds a harpoon, the moon a stone pickaxe, no picture-in-hand fallback.
+- "should just show a random divine born instead of the totem in hand of your current char": the afterlife road (a road
+  that makes another blood) shows a stand-in of that blood in a random look instead of you.
 - Compile-checked. Not seen in game.
