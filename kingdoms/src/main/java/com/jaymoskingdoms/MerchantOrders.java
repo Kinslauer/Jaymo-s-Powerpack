@@ -99,7 +99,7 @@ final class MerchantOrders {
 	/** A board's sheet: {@code orders|<the board's anchor as a long>}. */
 	static final String SHEET = "orders|";
 	/**
-	 * (0.7.368, Off-World Orders) The sheet also lists what the town's merchants want from the far worlds
+	 * (0.7.383, Off-World Orders) The sheet also lists what the town's merchants want from the far worlds
 	 * ({@link OffWorldGoods}): hand in a good, get its listed price in emeralds at once, and
 	 * {@link #FAR_STANDING_XP} standing, which is faster than ordering wares earns it (one ware earns its trade's 1 to 30,
 	 * mostly under 10). Each want can be answered once a day by each player.
@@ -248,7 +248,7 @@ final class MerchantOrders {
 	/** The wares of the merchants about the board at {@code anchor}, cheapest standing first. */
 	private static List<Ware> wares(ServerLevel level, BlockPos anchor) {
 		List<Ware> out = new ArrayList<>();
-		// (0.7.368) lower while a pod stands in the town's landing yard
+		// (0.7.383) lower while a pod stands in the town's landing yard
 		float factor = LandingYard.tradeFactor(level, town(level, anchor));
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(CATALOG_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !Downed.isDowned(v))) {
@@ -408,7 +408,7 @@ final class MerchantOrders {
 		level.playSound(null, at, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.1F);
 	}
 
-	// ---- off-world wants (0.7.368) ---------------------------------------------------------------------------------------
+	// ---- off-world wants (0.7.383) ---------------------------------------------------------------------------------------
 
 	/** How many of {@code good} the merchants ask for today (the same for everyone). */
 	private static int wanted(OffWorldGoods.Good g, BlockPos anchor, long day) {
@@ -482,12 +482,12 @@ final class MerchantOrders {
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.1F);
 	}
 
-	/** (0.7.368) {@code player} carries a parcel. */
+	/** (0.7.383) {@code player} carries a parcel. */
 	static boolean carriesParcel(ServerPlayer player) {
 		return player.getInventory().contains(MerchantOrders::isParcel);
 	}
 
-	/** (0.7.368) Takes one parcel out of {@code player}'s pack (empty if none). */
+	/** (0.7.383) Takes one parcel out of {@code player}'s pack (empty if none). */
 	static ItemStack takeParcel(ServerPlayer player) {
 		var inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -500,7 +500,7 @@ final class MerchantOrders {
 		return ItemStack.EMPTY;
 	}
 
-	/** (0.7.368) What a parcel holds. */
+	/** (0.7.383) What a parcel holds. */
 	static List<ItemStack> contents(ItemStack parcel) {
 		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}

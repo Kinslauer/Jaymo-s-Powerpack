@@ -50,7 +50,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.18.20, SevTech picks) Breath. The Pale Moon and the Maw ({@link #AIRLESS}) have no air to breathe. Out of the pod, with no
+ * (0.18.49, SevTech picks) Breath. The Pale Moon and the Maw ({@link #AIRLESS}) have no air to breathe. Out of the pod, with no
  * air to draw on, a player takes <b>thin air</b>: slowness after {@link #THIN_AFTER} seconds and a point of damage every
  * {@link #THIN_EVERY} seconds. Two things carry air with them, each a reserve of seconds spent one a second while on an airless
  * world, shown as the item's bar:

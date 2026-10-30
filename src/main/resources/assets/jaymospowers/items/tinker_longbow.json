@@ -96,6 +96,48 @@
               }
             },
             {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_amber_bronze"
+              }
+            },
+            {
               "when": "star_metal",
               "model": {
                 "type": "minecraft:model",
@@ -195,6 +237,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_top_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_amber_bronze"
               }
             },
             {
@@ -332,6 +416,48 @@
               }
             },
             {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_amber_bronze"
+              }
+            },
+            {
               "when": "star_metal",
               "model": {
                 "type": "minecraft:model",
@@ -442,6 +568,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -541,6 +709,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_top_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_amber_bronze"
                 }
               },
               {
@@ -678,6 +888,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -791,6 +1043,48 @@
                       }
                     },
                     {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_amber_bronze"
+                      }
+                    },
+                    {
                       "when": "star_metal",
                       "model": {
                         "type": "minecraft:model",
@@ -890,6 +1184,48 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_2_steel"
+                      }
+                    },
+                    {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_amber_bronze"
                       }
                     },
                     {
@@ -1027,6 +1363,48 @@
                       }
                     },
                     {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_amber_bronze"
+                      }
+                    },
+                    {
                       "when": "star_metal",
                       "model": {
                         "type": "minecraft:model",
@@ -1137,6 +1515,48 @@
                       }
                     },
                     {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_amber_bronze"
+                      }
+                    },
+                    {
                       "when": "star_metal",
                       "model": {
                         "type": "minecraft:model",
@@ -1236,6 +1656,48 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_3_steel"
+                      }
+                    },
+                    {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_amber_bronze"
                       }
                     },
                     {
@@ -1373,6 +1835,48 @@
                       }
                     },
                     {
+                      "when": "pale_alloy",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_pale_alloy"
+                      }
+                    },
+                    {
+                      "when": "rust_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_rust_iron"
+                      }
+                    },
+                    {
+                      "when": "ice_iron",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_ice_iron"
+                      }
+                    },
+                    {
+                      "when": "cinder_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_cinder_bronze"
+                      }
+                    },
+                    {
+                      "when": "void_shard",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_void_shard"
+                      }
+                    },
+                    {
+                      "when": "amber_bronze",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_amber_bronze"
+                      }
+                    },
+                    {
                       "when": "star_metal",
                       "model": {
                         "type": "minecraft:model",
@@ -1482,6 +1986,48 @@
                   }
                 },
                 {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_amber_bronze"
+                  }
+                },
+                {
                   "when": "star_metal",
                   "model": {
                     "type": "minecraft:model",
@@ -1581,6 +2127,48 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_top_1_steel"
+                  }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_amber_bronze"
                   }
                 },
                 {
@@ -1715,6 +2303,48 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/grip_steel"
+                  }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_amber_bronze"
                   }
                 },
                 {

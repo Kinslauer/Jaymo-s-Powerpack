@@ -134,6 +134,48 @@
             }
           },
           {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_amber_bronze"
+            }
+          },
+          {
             "when": "star_metal",
             "model": {
               "type": "minecraft:model",
@@ -282,6 +324,48 @@
               }
             },
             {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_amber_bronze"
+              }
+            },
+            {
               "when": "star_metal",
               "model": {
                 "type": "minecraft:model",
@@ -423,6 +507,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/kama/head_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_amber_bronze"
               }
             },
             {
@@ -589,6 +715,48 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/kama/binding_steel"
+            }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_amber_bronze"
             }
           },
           {

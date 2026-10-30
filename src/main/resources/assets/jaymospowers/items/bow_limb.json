@@ -165,6 +165,84 @@
           }
         },
         {
+          "when": "pale_alloy",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_pale_alloy",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rust_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_rust_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "ice_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_ice_iron",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "cinder_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_cinder_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "void_shard",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_void_shard",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "amber_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_amber_bronze",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
           "when": "star_metal",
           "model": {
             "type": "minecraft:model",
@@ -276,6 +354,48 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/bow_limb_steel"
+          }
+        },
+        {
+          "when": "pale_alloy",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_pale_alloy"
+          }
+        },
+        {
+          "when": "rust_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_rust_iron"
+          }
+        },
+        {
+          "when": "ice_iron",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_ice_iron"
+          }
+        },
+        {
+          "when": "cinder_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_cinder_bronze"
+          }
+        },
+        {
+          "when": "void_shard",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_void_shard"
+          }
+        },
+        {
+          "when": "amber_bronze",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_limb_amber_bronze"
           }
         },
         {

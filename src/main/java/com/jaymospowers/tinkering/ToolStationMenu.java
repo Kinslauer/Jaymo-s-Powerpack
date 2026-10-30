@@ -307,7 +307,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 	private @Nullable ItemStack assembleWeapon() {
 		int head = -1;
 		List<PartType> others = new ArrayList<>();
-		// (0.18.20) the plain items beside the head (a Sealed Helm's glass block)
+		// (0.18.49) the plain items beside the head (a Sealed Helm's glass block)
 		List<Item> loose = new ArrayList<>();
 		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);

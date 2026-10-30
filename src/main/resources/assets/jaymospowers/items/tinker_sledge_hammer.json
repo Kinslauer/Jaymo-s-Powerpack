@@ -144,6 +144,48 @@
                   }
                 },
                 {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_amber_bronze"
+                  }
+                },
+                {
                   "when": "star_metal",
                   "model": {
                     "type": "minecraft:model",
@@ -292,6 +334,48 @@
                     }
                   },
                   {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_amber_bronze"
+                    }
+                  },
+                  {
                     "when": "star_metal",
                     "model": {
                       "type": "minecraft:model",
@@ -433,6 +517,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_amber_bronze"
                     }
                   },
                   {
@@ -585,6 +711,48 @@
                     }
                   },
                   {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_amber_bronze"
+                    }
+                  },
+                  {
                     "when": "star_metal",
                     "model": {
                       "type": "minecraft:model",
@@ -726,6 +894,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_amber_bronze"
                     }
                   },
                   {
@@ -878,6 +1088,48 @@
                     }
                   },
                   {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_amber_bronze"
+                    }
+                  },
+                  {
                     "when": "star_metal",
                     "model": {
                       "type": "minecraft:model",
@@ -1019,6 +1271,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_amber_bronze"
                     }
                   },
                   {
@@ -1174,6 +1468,48 @@
               }
             },
             {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_amber_bronze"
+              }
+            },
+            {
               "when": "star_metal",
               "model": {
                 "type": "minecraft:model",
@@ -1322,6 +1658,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -1463,6 +1841,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_amber_bronze"
                 }
               },
               {
@@ -1615,6 +2035,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -1756,6 +2218,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_amber_bronze"
                 }
               },
               {
@@ -1908,6 +2412,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -2049,6 +2595,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_amber_bronze"
                 }
               },
               {

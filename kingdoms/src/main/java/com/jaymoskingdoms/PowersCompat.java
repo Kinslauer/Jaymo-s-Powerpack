@@ -1110,19 +1110,28 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.366) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
-	 * builder and the tool), by adding it to Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
+	 * (0.7.381) Tells {@code listener} of every tool with iron (or better) in it taken from one of Powers' Tool Stations (the
+	 * builder and the tool): Powers' {@code Tinkering.TOOL_BUILT_LISTENERS}. Nothing happens without Powers (or an older one).
+	 */
+	public static void onToolBuilt(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> listener) {
+		listen("com.jaymospowers.tinkering.Tinkering", "TOOL_BUILT_LISTENERS", listener);
+	}
+
+	/**
+	 * (0.7.380) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
+	 * {@code List<BiConsumer<ServerPlayer, ?>>}): {@code Carry.PICKED_UP_LISTENERS} and the like ({@link Rescues}).
+	 * Nothing happens without Powers (or an older one).
 	 */
 	@SuppressWarnings("unchecked")
-	public static void onToolBuilt(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack> listener) {
+	public static <T> void listen(String owner, String field, java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T> listener) {
 		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
 			return;
 		}
 		try {
-			Object list = Class.forName("com.jaymospowers.tinkering.Tinkering").getField("TOOL_BUILT_LISTENERS").get(null);
-			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, net.minecraft.world.item.ItemStack>>)list).add(listener);
-		} catch (ReflectiveOperationException | LinkageError e) {
-			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' tool station (older Powers?)", e);
+			Object list = Class.forName(owner).getField(field).get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T>>)list).add(listener);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' {}.{} (older Powers?)", owner, field, e);
 		}
 	}
 

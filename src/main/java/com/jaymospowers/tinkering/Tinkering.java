@@ -107,12 +107,12 @@ public final class Tinkering {
 	public static Item STAR_METAL_INGOT;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
-	/** (0.18.22) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
+	/** (0.18.51) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
 	public static final List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, ItemStack>> TOOL_BUILT_LISTENERS = new ArrayList<>();
-	/** (0.18.22) The materials that make a tool a forged iron one. */
+	/** (0.18.51) The materials that make a tool a forged iron one. */
 	static final Set<String> IRONWORK = Set.of("iron", "pig_iron", "steel");
 
-	/** (0.18.22) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
+	/** (0.18.51) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
 	public static void toolBuilt(net.minecraft.world.entity.player.Player player, ItemStack tool) {
 		if (!(player instanceof net.minecraft.server.level.ServerPlayer smith) || tool.isEmpty() || TOOL_MATERIALS == null) {
 			return;
@@ -276,8 +276,13 @@ public final class Tinkering {
 		SEARED_BRICK = item("seared_brick", Item::new, Function.identity());
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
-		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL)) {
-			Item ingot = item(alloy.id + "_ingot", Item::new, Function.identity());
+		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL,
+			// (0.18.54) the six first metals of the far worlds
+			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE)) {
+			com.jaymospowers.power.zfighter.farworld.FarWorld firstOf = com.jaymospowers.power.zfighter.farworld.FarWorld.ofMolten(alloy);
+			// (0.18.54) a far world's first metal tells the Prospecting career when it is first knapped
+			Item ingot = item(alloy.id + "_ingot", firstOf == null ? Item::new : p -> new com.jaymospowers.power.zfighter.farworld.FirstMetalIngot(p, firstOf),
+				Function.identity());
 			ALLOY_INGOTS.put(alloy, ingot);
 			TinkerMaterial.own(alloy.material, 1, ingot);
 		}

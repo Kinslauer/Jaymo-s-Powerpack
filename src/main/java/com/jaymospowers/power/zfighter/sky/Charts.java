@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
 
 /**
- * (0.18.23, Andy's SevTech picks: "Reading the sky") Which star charts a player has read. A world is on the star map, and a
+ * (0.18.52, Andy's SevTech picks: "Reading the sky") Which star charts a player has read. A world is on the star map, and a
  * flight the pod will make, only once its chart is read. One number per player: bit {@code w} is the chart of the pod
  * destination {@code w} ({@link ZFighterSpace#MOON} to {@link ZFighterSpace#VERDANT}; Home needs none and the future is not
  * chartable), {@link #COUNTED} says the worlds a player had reached before charts existed were credited, and {@link #BENCH}

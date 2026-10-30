@@ -1,4 +1,4 @@
-# Pod Parts: the space pod built from carried parts (Powers 0.18.19)
+# Pod Parts: the space pod built from carried parts (Powers 0.18.48)
 
 Andy (2026-10-30), on the SevTech Ages cross-reference: the pod should be a proper capsule "where you can disassemble
 them and see the piece come off the model; parts for the pod are assembled separately with blocks and items like the

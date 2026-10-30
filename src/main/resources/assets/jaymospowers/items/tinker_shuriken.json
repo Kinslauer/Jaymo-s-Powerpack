@@ -134,6 +134,48 @@
             }
           },
           {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_amber_bronze"
+            }
+          },
+          {
             "when": "star_metal",
             "model": {
               "type": "minecraft:model",
@@ -275,6 +317,48 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/shuriken/top_steel"
+            }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_amber_bronze"
             }
           },
           {

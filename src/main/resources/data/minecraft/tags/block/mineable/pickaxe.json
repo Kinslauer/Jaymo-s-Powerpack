@@ -136,6 +136,8 @@
     "#jaymospowers:stone_layers",
     "jaymospowers:smithing_anvil",
     "jaymospowers:stone_anvil",
-    "jaymospowers:star_metal_ore"
+    "jaymospowers:star_metal_ore",
+    "jaymospowers:field_anvil",
+    "jaymospowers:veiled_ore"
   ]
 }

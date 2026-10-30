@@ -43,6 +43,17 @@ public enum TinkerMaterial {
 	SLIMESTEEL("slimesteel", Stats.SLIMESTEEL, Trait.OVERSLIME, true),
 	/** (Smithing) Iron and pig iron alloyed, or crucible steel fired in a kiln: netherite-tier, Tempered. */
 	STEEL("steel", Stats.STEEL, Trait.TEMPERED, true),
+	/**
+	 * (0.18.54) The far worlds' first metals, one each (Moon, Rustfall, Glacia, Cinder, Maw, Verdant): knapped from the world's own
+	 * rocks at a field anvil, then cast and forged like any metal. Only a tool whose head is a world's first metal answers that
+	 * world's ore ({@code power/zfighter/farworld}).
+	 */
+	PALE_ALLOY("pale_alloy", Stats.PALE_ALLOY, Trait.ENHANCED, true),
+	RUST_IRON("rust_iron", Stats.RUST_IRON, Trait.MAGNETIC, true),
+	ICE_IRON("ice_iron", Stats.ICE_IRON, Trait.STONEBOUND, true),
+	CINDER_BRONZE("cinder_bronze", Stats.CINDER_BRONZE, Trait.SEARING, true),
+	VOID_SHARD("void_shard", Stats.VOID_SHARD, Trait.PIERCE, true),
+	AMBER_BRONZE("amber_bronze", Stats.AMBER_BRONZE, Trait.SOLAR_POWERED, true),
 	LEATHER("leather", null, Trait.TANNED),
 	STRING("string", null, Trait.STRINGY),
 	VINE("vine", null, Trait.SOLAR_POWERED),
@@ -91,6 +102,13 @@ public enum TinkerMaterial {
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
 		/** (0.18.55) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
 		static final Stats STAR_METAL = new Stats(640, 7.5F, 2.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.1F);
+		/** (0.18.54) The first metals: iron-tier (the Cinder and Maw ones diamond-tier, for ancient debris), none beyond steel. */
+		static final Stats PALE_ALLOY = new Stats(300, 6.5F, 2.0F, Tier.IRON, 0.05F, 0.05F, 0.0F, 0.05F);
+		static final Stats RUST_IRON = new Stats(420, 6.0F, 2.5F, Tier.IRON, 0.1F, 0.0F, 0.05F, 0.0F);
+		static final Stats ICE_IRON = new Stats(380, 7.0F, 2.0F, Tier.IRON, 0.05F, 0.1F, 0.0F, 0.0F);
+		static final Stats CINDER_BRONZE = new Stats(640, 7.0F, 2.5F, Tier.DIAMOND, 0.1F, 0.05F, 0.05F, 0.0F);
+		static final Stats VOID_SHARD = new Stats(500, 8.0F, 3.0F, Tier.DIAMOND, -0.1F, 0.1F, 0.1F, 0.1F);
+		static final Stats AMBER_BRONZE = new Stats(460, 6.5F, 2.0F, Tier.IRON, 0.15F, 0.0F, 0.0F, 0.05F);
 	}
 
 	/** (0.15.x) A bow limb's stats (Tinkers'): durability, and draw speed, arrow velocity and accuracy it adds (0.1 = +10%). */

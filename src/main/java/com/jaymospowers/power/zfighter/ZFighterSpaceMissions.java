@@ -314,6 +314,37 @@ public final class ZFighterSpaceMissions {
 		}
 	}
 
+	// ---------------------------------------------------------------- (0.18.54) the patrol's skip writ
+
+	/** Whether {@code player} is freeing the planet he stands on and still has its captains to face (the writ's case). */
+	public static boolean captainsAhead(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		return planet >= 0 && mode(of(player).of(planet)) == FREE && phase(of(player).of(planet)) == 0;
+	}
+
+	/** Whether {@code player} is conquering the planet he stands on (a champion's duel is not for sale). */
+	public static boolean conquering(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		return planet >= 0 && mode(of(player).of(planet)) == CONQUER;
+	}
+
+	/** The patrolman has beaten the captains: for {@code player} and his party on this planet it is on to the boss. */
+	public static void skipCaptains(ServerPlayer player) {
+		int planet = planetOf(player.level());
+		if (planet < 0) {
+			return;
+		}
+		for (ServerPlayer member : ZFighterSagas.neighbours(player)) {
+			if (planetOf(member.level()) != planet || mode(of(member).of(planet)) != FREE || phase(of(member).of(planet)) != 0) {
+				continue;
+			}
+			clearFoes(member);
+			member.setAttached(DATA, of(member).with(planet, pack(FREE, 1, 0)));
+			NEXT_FOE.put(member.getUUID(), member.level().getGameTime() + BOSS_DELAY);
+			member.sendSystemMessage(Component.translatable("message.jaymospowers.space_captains_down").withStyle(ChatFormatting.GOLD));
+		}
+	}
+
 	// ---------------------------------------------------------------- watching
 
 	private static void tick(MinecraftServer server) {
@@ -607,7 +638,7 @@ public final class ZFighterSpaceMissions {
 		for (int i = 0; i < info.items().length; i++) {
 			ZFighterSagas.give(player, new ItemStack(info.items()[i], Math.max(1, Math.round(info.counts()[i] * ore))));
 		}
-		// (0.18.21) the first time a world is settled it also gives the one part only it has, for mending a pod better
+		// (0.18.50) the first time a world is settled it also gives the one part only it has, for mending a pod better
 		Item worldPart = firstTime ? com.jaymospowers.power.zfighter.pod.PodGrades.worldPart(info.key()) : null;
 		if (worldPart != null) {
 			ZFighterSagas.give(player, new ItemStack(worldPart));

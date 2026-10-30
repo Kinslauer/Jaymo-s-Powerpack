@@ -144,6 +144,48 @@
                   }
                 },
                 {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/handle_amber_bronze"
+                  }
+                },
+                {
                   "when": "star_metal",
                   "model": {
                     "type": "minecraft:model",
@@ -292,6 +334,48 @@
                     }
                   },
                   {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_broken_amber_bronze"
+                    }
+                  },
+                  {
                     "when": "star_metal",
                     "model": {
                       "type": "minecraft:model",
@@ -433,6 +517,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/head_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/head_amber_bronze"
                     }
                   },
                   {
@@ -585,6 +711,48 @@
                     }
                   },
                   {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_broken_amber_bronze"
+                    }
+                  },
+                  {
                     "when": "star_metal",
                     "model": {
                       "type": "minecraft:model",
@@ -726,6 +894,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/broad_axe/back_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/broad_axe/back_amber_bronze"
                     }
                   },
                   {
@@ -895,6 +1105,48 @@
                   }
                 },
                 {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/broad_axe/binding_amber_bronze"
+                  }
+                },
+                {
                   "when": "star_metal",
                   "model": {
                     "type": "minecraft:model",
@@ -1046,6 +1298,48 @@
               }
             },
             {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/handle_amber_bronze"
+              }
+            },
+            {
               "when": "star_metal",
               "model": {
                 "type": "minecraft:model",
@@ -1194,6 +1488,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_broken_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -1335,6 +1671,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/head_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/head_amber_bronze"
                 }
               },
               {
@@ -1487,6 +1865,48 @@
                 }
               },
               {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_broken_amber_bronze"
+                }
+              },
+              {
                 "when": "star_metal",
                 "model": {
                   "type": "minecraft:model",
@@ -1628,6 +2048,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/broad_axe/large/back_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/broad_axe/large/back_amber_bronze"
                 }
               },
               {
@@ -1794,6 +2256,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/broad_axe/large/binding_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/broad_axe/large/binding_amber_bronze"
               }
             },
             {
