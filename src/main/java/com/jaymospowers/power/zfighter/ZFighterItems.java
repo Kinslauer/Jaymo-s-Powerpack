@@ -111,7 +111,7 @@ public final class ZFighterItems {
 		SPARRING_DUMMY = Registry.register(BuiltInRegistries.ITEM, dummyKey, new ZFighterSparring.DummyItem(new Item.Properties().setId(dummyKey)
 			.stacksTo(1).rarity(Rarity.UNCOMMON)));
 		ResourceKey<Block> postKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("training_post"));
-		TRAINING_POST = Registry.register(BuiltInRegistries.BLOCK, postKey, new Block(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+		TRAINING_POST = Registry.register(BuiltInRegistries.BLOCK, postKey, new TrainingPostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 			.strength(2.0F).sound(SoundType.WOOD).noOcclusion().setId(postKey)));
 		ResourceKey<Item> postItemKey = item("training_post");
 		TRAINING_POST_ITEM = Registry.register(BuiltInRegistries.ITEM, postItemKey, new BlockItem(TRAINING_POST, new Item.Properties().setId(postItemKey)

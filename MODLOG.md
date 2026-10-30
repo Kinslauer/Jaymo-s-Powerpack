@@ -4190,3 +4190,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the legs snap together, it teeters with its arms windmilling, pitches onto its face with a bounce and a thud, kicks its
   bound legs and paws at the ground, then pushes itself up as the cord drops off. Down, it's stunned and can be finished
   (`Finishers.helpless`). Not seen in game.
+
+- **0.18.72, a Training Post shaped like the mannequin, and a Practice Dummy for everyone:** Andy: "training post should
+  be the same proportions as the vanilla dummy", and "i cant seem to place sparring dummy" (he isn't a Z Fighter). The
+  Training Post (`TrainingPostBlock`) now stands two blocks tall with a player's proportions (two log legs, a hay-padded
+  body, log arms, an 8-pixel hay head), facing whoever set it; the top half comes and goes with the post, only the bottom
+  drops it, and a post set by a structure (or one from before) grows its top when there's room. The Sparring Dummy used by
+  anyone but a Z Fighter now stands a still **Practice Dummy** (`PracticeDummy`, a tagged mannequin): blows land but never
+  hurt it (a thud and a puff), it counts for Weapon Forms practice and the belt (sneak + use, empty-handed), and sneak +
+  strike picks it back up. A Z Fighter's use is still the sparring partner. Compile-checked; not seen in game.
