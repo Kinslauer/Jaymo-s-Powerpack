@@ -22,7 +22,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.384, SevTech: far worlds restart the stone age) Star-touched foes. On Jaymo's Powers' six far worlds, a hostile mob now and
+ * (0.7.386, SevTech: far worlds restart the stone age) Star-touched foes. On Jaymo's Powers' six far worlds, a hostile mob now and
  * then comes up touched by the world's stars: it shows it ({@link MonsterGear#starLook}: dyed leather in its world's colour
  * where it wears armour, and motes of light for all of them) and carries one trait for the world. No new mobs, no new text:
  * <ul>

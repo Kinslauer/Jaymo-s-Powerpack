@@ -272,10 +272,10 @@ public final class Tinkering {
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
 		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL,
-			// (0.18.54) the six first metals of the far worlds
+			// (0.18.55) the six first metals of the far worlds
 			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE)) {
 			com.jaymospowers.power.zfighter.farworld.FarWorld firstOf = com.jaymospowers.power.zfighter.farworld.FarWorld.ofMolten(alloy);
-			// (0.18.54) a far world's first metal tells the Prospecting career when it is first knapped
+			// (0.18.55) a far world's first metal tells the Prospecting career when it is first knapped
 			Item ingot = item(alloy.id + "_ingot", firstOf == null ? Item::new : p -> new com.jaymospowers.power.zfighter.farworld.FirstMetalIngot(p, firstOf),
 				Function.identity());
 			ALLOY_INGOTS.put(alloy, ingot);

@@ -19,7 +19,7 @@ public enum Molten {
 	PIG_IRON("pig_iron", 0xFFEFA9A9, TinkerMaterial.PIG_IRON),
 	SLIMESTEEL("slimesteel", 0xFF74C8C7, TinkerMaterial.SLIMESTEEL),
 	STEEL("steel", 0xFFF2B866, TinkerMaterial.STEEL),
-	// (0.18.54) the far worlds' first metals (power/zfighter/farworld)
+	// (0.18.55) the far worlds' first metals (power/zfighter/farworld)
 	PALE_ALLOY("pale_alloy", 0xFFD8E4F0, TinkerMaterial.PALE_ALLOY),
 	RUST_IRON("rust_iron", 0xFFB5532A, TinkerMaterial.RUST_IRON),
 	ICE_IRON("ice_iron", 0xFF8FD3F0, TinkerMaterial.ICE_IRON),

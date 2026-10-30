@@ -762,7 +762,7 @@ public final class ZFighterPatrol {
 		}
 	}
 
-	// ---------------------------------------------------------------- (0.18.54) the skip writ (farworld/PatrolWrit)
+	// ---------------------------------------------------------------- (0.18.55) the skip writ (farworld/PatrolWrit)
 
 	/** The rank an officer needs to be given a skip writ: Sergeant (the index into {@link #RANKS}). */
 	public static final int WRIT_RANK = 2;
