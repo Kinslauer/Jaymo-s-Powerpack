@@ -4178,3 +4178,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   brings it up to the eye with the front sight on the crosshair (Andy: "it should come up for a proper sight picture";
   `client/armory/MusketSights`, `MusketSightsMixin`: no bow pose for it, slid hip to sights over 4 ticks). It's on
   First-person Model's vanilla-hands list like TaCZ's guns, so the body no longer holds it pointed at the ground.
+  Crouched (and not aiming) it drops to a low ready, muzzle down and in, pivoting on the grip (Andy: "it should lower
+  into a low ready as you crouch"); aiming from a crouch still brings it straight up to the sights.
