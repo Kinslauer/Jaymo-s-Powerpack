@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "LP",
+    "PS",
+    "PP"
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_leg",
+    "count": 1
+  }
+}
