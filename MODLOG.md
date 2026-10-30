@@ -4087,3 +4087,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Sneak is let go (`core/Stance`, `client/StanceScroll`). The low crouch is 1.25 tall at 0.6x sneak speed, knees bent
   (`CrouchPose` LOW_*). Jump or a Sneak tap stands you up; rising waits for headroom. `client/StanceHud`: a figure and
   a sliding height bar, bottom-left, fading 3 s after you're back on your feet. Sneak + scroll never moves the hotbar.
+- **0.18.58, keybind names that fit (Kingdoms 0.7.389):** Andy's screenshot showed "Valor (tap: coatings up or down; hold:
+  King's Valor)" running under the key button in Controls. Every pack key name is now 30 characters or fewer (Symbiote Arm,
+  Arm use, Mantle, Power Skill, Rig, Backpack, Z Fighter wheel, Meditate here; seven in Kingdoms). The tap/hold details live in
+  each feature's in-game hints. Lang only; not seen in game.
