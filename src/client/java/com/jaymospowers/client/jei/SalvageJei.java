@@ -19,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.49) JEI's pages for mending a space pod: the Salvage Rack (a worn part, a hammer and the part's metal give a sound part,
+ * (0.18.50) JEI's pages for mending a space pod: the Salvage Rack (a worn part, a hammer and the part's metal give a sound part,
  * {@link SalvageRack}) and Mended Better (a far world's own part grades a finished pod up, {@link PodGrades}). Only loaded by
  * JEI (the {@code jei_mod_plugin} entrypoint), on {@link SimpleCategory}.
  */

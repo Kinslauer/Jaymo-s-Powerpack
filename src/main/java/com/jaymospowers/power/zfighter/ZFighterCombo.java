@@ -5,6 +5,7 @@ import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
+import com.jaymospowers.core.wounds.Breaks;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -65,6 +66,17 @@ public final class ZFighterCombo {
 		{JAB, REVERSE_PUNCH, RISING_KNEE, LEG_SWEEP, AXE_KICK, SPIN_BACK_KICK},
 		{JAB, REVERSE_PUNCH, ELBOW, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, CHI_PALM, SPIN_HOOK_KICK},
 		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, FLYING_DOUBLE_KICK, DRAGON_FIST},
+	};
+	/**
+	 * (0.18.47, Andy: "Kicks only") Each tier's string with both arms broken ({@link Breaks#armless}): the hands can't
+	 * hit, so it's all knees and kicks, the last its finisher. Kicks never lose damage to broken arms ({@link #fists}).
+	 */
+	static final int[][] KICK_STRINGS = {
+		{FRONT_KICK, FRONT_KICK, ROUNDHOUSE},
+		{FRONT_KICK, ROUNDHOUSE, LEG_SWEEP, ROUNDHOUSE},
+		{RISING_KNEE, FRONT_KICK, LEG_SWEEP, AXE_KICK, SPIN_BACK_KICK},
+		{RISING_KNEE, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, LEG_SWEEP, SPIN_HOOK_KICK},
+		{RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, FLYING_KNEE, AXE_KICK, ROUNDHOUSE, FLYING_DOUBLE_KICK},
 	};
 	/**
 	 * Ticks a blow takes, by tier (the finisher takes {@link #FINISHER_LENGTH} times as long). (0.13.34) Twice as slow
@@ -186,6 +198,8 @@ public final class ZFighterCombo {
 	/** A string in progress. */
 	private static final class Run {
 		final int tier;
+		/** The moves this string throws ({@link #STRINGS}, or {@link #KICK_STRINGS} with both arms broken). */
+		final int[] string;
 		int step;
 		long stepAt;
 		int length;
@@ -202,8 +216,9 @@ public final class ZFighterCombo {
 		long rushUntil = -1L;
 		long rushedAt = -1L;
 
-		Run(int tier) {
-			this.tier = tier;
+		Run(ServerPlayer player) {
+			this.tier = tier(player);
+			this.string = (Breaks.armless(player) ? KICK_STRINGS : STRINGS)[this.tier];
 		}
 	}
 
@@ -269,7 +284,7 @@ public final class ZFighterCombo {
 		long now = player.level().getGameTime();
 		if (run == null) {
 			if (held) {
-				run = new Run(tier(player));
+				run = new Run(player);
 				RUNS.put(id, run);
 				begin(player, run, 0, now);
 			}
@@ -295,7 +310,7 @@ public final class ZFighterCombo {
 		if (run.recoverUntil >= 0) {
 			if (now >= run.recoverUntil) {
 				// a breath taken: the string starts over, as strong as he is now
-				Run next = new Run(tier(player));
+				Run next = new Run(player);
 				next.serial = run.serial;
 				next.target = run.target;
 				RUNS.put(id, next);
@@ -322,7 +337,7 @@ public final class ZFighterCombo {
 			ZFighterStretchCombo.snap(player);
 		}
 		if (age >= run.length) {
-			int[] string = STRINGS[run.tier];
+			int[] string = run.string;
 			if (run.step >= string.length - 1) {
 				run.recoverUntil = now + Math.max(MIN_STEP_TICKS, Math.round(RECOVER_TICKS[run.tier] / speed(player)));
 			} else {
@@ -332,7 +347,7 @@ public final class ZFighterCombo {
 	}
 
 	private static void begin(ServerPlayer player, Run run, int step, long now) {
-		int[] string = STRINGS[run.tier];
+		int[] string = run.string;
 		boolean finisher = step == string.length - 1;
 		run.step = step;
 		run.stepAt = now;
@@ -418,7 +433,7 @@ public final class ZFighterCombo {
 	/** The blow lands (or whiffs) halfway through the move. */
 	private static void strike(ServerPlayer player, ZFighterPower.Live live, Run run) {
 		ServerLevel level = player.level();
-		int[] string = STRINGS[run.tier];
+		int[] string = run.string;
 		int move = string[run.step];
 		boolean finisher = run.step == string.length - 1;
 		if (!player.isCreative()) {
@@ -443,7 +458,7 @@ public final class ZFighterCombo {
 			return;
 		}
 		run.target = target.getUUID();
-		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		double fists = fists(player, move);
 		float damage = (float)fists * (finisher ? FINISHER_SHARE[run.tier] : HIT_SHARE[run.tier] * MOVE_WEIGHT[move]);
 		if (stretched && !finisher) {
 			damage *= ZFighterStretchCombo.STRETCH_DAMAGE;
@@ -522,6 +537,13 @@ public final class ZFighterCombo {
 		Shakes.send(player, HIT_SHAKE + HIT_SHAKE_PER_TIER * run.tier, at);
 	}
 
+	/** His fists' damage for {@code move}: a kick never loses any to broken arms (0.18.47). */
+	static double fists(ServerPlayer player, int move) {
+		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		double arms = kick(move) ? Breaks.armDamageShare(player) : 0.0;
+		return arms < 0.0 && arms > -1.0 ? fists / (1.0 + arms) : fists;
+	}
+
 	/** The chi palm's puff of light off the open hand (bigger as a finisher). */
 	private static void chi(ServerLevel level, ZFighterPower.Live live, Vec3 at, Vec3 look, boolean finisher) {
 		Vec3 puff = at.subtract(look.scale(0.4));
@@ -532,9 +554,8 @@ public final class ZFighterCombo {
 
 	/** Who he's hitting: the foe he's been on if it's still in reach, else whatever is nearest in front of him. */
 	private static @Nullable LivingEntity target(ServerPlayer player, Run run) {
-		double reach = player.entityInteractionRange() + REACH_BONUS;
 		double keep = REACH_BONUS + LUNGE_RANGE;
-		double far = reach + LUNGE_RANGE;
+		double far = far(player);
 		// (0.17.45) locked on: he fights the one he locked
 		LivingEntity locked = LockOn.target(player);
 		if (locked != null && valid(player, locked) && player.isWithinEntityInteractionRange(locked, far)) {
@@ -549,6 +570,20 @@ public final class ZFighterCombo {
 			&& player.isWithinEntityInteractionRange(last, keep)) {
 			return last;
 		}
+		return inFront(player, far);
+	}
+
+	/** How far the hold combo reaches for a foe in front of him (plain reach, a little more, and the lunge). */
+	public static double far(Player player) {
+		return player.entityInteractionRange() + REACH_BONUS + LUNGE_RANGE;
+	}
+
+	/**
+	 * (0.18.47) Whatever the hold combo would go after: the nearest foe in front of him within {@code far}, seen. Both
+	 * sides: the client asks it too, so a race's left hold (Frost-born, Emberborn, Stormborn, Dawnborn) doesn't take the
+	 * click from the combo just because the crosshair isn't on the foe.
+	 */
+	public static @Nullable LivingEntity inFront(Player player, double far) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		LivingEntity best = null;
@@ -587,7 +622,7 @@ public final class ZFighterCombo {
 		return foe;
 	}
 
-	private static boolean valid(ServerPlayer player, LivingEntity living) {
+	private static boolean valid(Player player, LivingEntity living) {
 		if (living == player || !living.isAlive() || !living.isAttackable() || living.isSpectator() || living.isPassengerOfSameVehicle(player)) {
 			return false;
 		}
