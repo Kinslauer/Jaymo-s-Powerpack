@@ -213,7 +213,8 @@ public final class Recollections {
 
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
-			if (!blocked && damage > 0.0F && source.getEntity() instanceof ServerPlayer player && rememberer(entity) && entity.isAlive()) {
+			if (!blocked && damage > 0.0F && source.getEntity() instanceof ServerPlayer player && rememberer(entity) && entity.isAlive()
+				&& !com.jaymoskingdoms.forms.Duels.dueling(player, entity)) {
 				remember(entity, player, Kind.STRUCK, Component.empty());
 			}
 		});

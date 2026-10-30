@@ -382,6 +382,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Schools.register();
 		com.jaymoskingdoms.forms.WizardTrials.register();
 		SchoolHalls.register();
+		// 0.7.385: schooled guards, honour duels, rival schools, festival bouts (Weapon Forms, patch 5; and the duel days' attachment)
+		LOGGER.debug("duel days attachment: {}", com.jaymoskingdoms.forms.Duels.DAYS);
+		com.jaymoskingdoms.forms.SchooledGuards.register();
+		com.jaymoskingdoms.forms.Duels.register();
+		com.jaymoskingdoms.forms.Rivals.register();
+		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
