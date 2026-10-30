@@ -167,7 +167,7 @@ public final class ZFighterSpace {
 
 	/**
 	 * Server → client: open the star map, for a pod holding {@code fuel} of grade {@code grade} (0.18.15: the tank's grade).
-	 * (0.18.18) {@code read} is the set of star charts the pilot has read (bit w: destination w): only those worlds are on the map.
+	 * (0.18.23) {@code read} is the set of star charts the pilot has read (bit w: destination w): only those worlds are on the map.
 	 */
 	public record Open(int fuel, int grade, int read) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosPowers.id("zfighter_space_open"));
@@ -300,7 +300,7 @@ public final class ZFighterSpace {
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
 	}
 
-	/** (0.18.18) The worlds {@code player} may fly to: the charts he has read (a creative pilot has them all). */
+	/** (0.18.23) The worlds {@code player} may fly to: the charts he has read (a creative pilot has them all). */
 	public static int readCharts(ServerPlayer player) {
 		return player.isCreative() ? Charts.ALL : Charts.readMask(player);
 	}
@@ -398,7 +398,7 @@ public final class ZFighterSpace {
 			return;
 		}
 		if (index != HOME_INDEX && index < Charts.WORLDS && (readCharts(player) & 1 << index) == 0) {
-			// (0.18.18) a world whose chart is unread is not on the map: the pod will not fly there
+			// (0.18.23) a world whose chart is unread is not on the map: the pod will not fly there
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_unread").withStyle(ChatFormatting.GRAY));
 			return;
 		}

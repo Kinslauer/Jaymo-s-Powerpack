@@ -60,7 +60,7 @@ public class ZFighterFlightScreen extends Screen {
 					from = i;
 				}
 			}
-			// (0.18.18) the world flown to (or from, on the way home) shines brighter in the night sky for a while
+			// (0.18.23) the world flown to (or from, on the way home) shines brighter in the night sky for a while
 			com.jaymospowers.client.power.zfighter.sky.SkyPlanets.glow(payload.to() == ZFighterSpace.HOME_INDEX ? from : payload.to());
 			ctx.client().gui.setScreen(new ZFighterFlightScreen(payload.to(), payload.ticks(), payload.skippable(), from));
 		});
