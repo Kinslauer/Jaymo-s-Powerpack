@@ -588,7 +588,7 @@ public final class Heritage {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Kind kind = of(player);
 			look(player, kind);
-			// (0.7.362) Andy: "stoneborn can now breath underwater because they dont need air"
+			// (0.7.364) Andy: "stoneborn can now breath underwater because they dont need air"
 			if (kind == Kind.STONEBORN && player.getAirSupply() < player.getMaxAirSupply()) {
 				player.setAirSupply(player.getMaxAirSupply());
 			}

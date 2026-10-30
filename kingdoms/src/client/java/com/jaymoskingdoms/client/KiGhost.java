@@ -5,7 +5,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.362) Andy, on the life story's "Let fate decide" road: "make this a ki ghost instead of the character, implying
+ * (0.7.364) Andy, on the life story's "Let fate decide" road: "make this a ki ghost instead of the character, implying
  * what is all within us". A figure of ki in place of you: a body of the player's proportions (head, body, arms, legs)
  * built of layered pale-blue light, a wide faint glow under a brighter core, its legs fading away like a ghost's tail,
  * two bright eyes, breathing slowly while wisps of ki drift up off it. Drawn flat in the screen, so it needs no model.

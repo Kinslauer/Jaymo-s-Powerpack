@@ -835,7 +835,7 @@ public final class LifeStory {
 			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
 			PowersCompat.awaken(player, "chrono");
 		} else if (landed == Start.MOON && !spaceborn(Heritage.of(player), cls)) {
-			// (0.7.362) Andy: "this should start you as z fighter, sorcerer, or mage, as they can hold their breath / use ki long
+			// (0.7.364) Andy: "this should start you as z fighter, sorcerer, or mage, as they can hold their breath / use ki long
 			// enough to survive in space without help ... stoneborn too": anyone else wakes on the moon with ki already
 			PowersCompat.awaken(player, "zfighter");
 		} else if (!calling.isEmpty() && calling.equals(echo(landed))) {
@@ -847,7 +847,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.362) Whether one of {@code heritage} and {@code cls} lives on the Pale Moon unaided: a Mage's or Sorcerer's
+	 * (0.7.364) Whether one of {@code heritage} and {@code cls} lives on the Pale Moon unaided: a Mage's or Sorcerer's
 	 * breath held by magic, a Stoneborn's stone lungs. Anyone else is woken there as a Z Fighter, whose ki keeps them.
 	 */
 	public static boolean spaceborn(Heritage.@Nullable Kind heritage, Classes.@Nullable PlayerClass cls) {

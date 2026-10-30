@@ -116,7 +116,8 @@ public final class VillagerLooks {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Look look = state.getData(KEY);
-			if (look == null || state.isInvisible) {
+			boolean form = state.getData(BioForms.KEY) != null;
+			if (look == null && !form || state.isInvisible) {
 				return;
 			}
 			HumanoidModel<S> model = this.getParentModel();
@@ -129,6 +130,10 @@ public final class VillagerLooks {
 					marks = mcaMarks;
 					glowing = mcaGlow;
 				}
+			}
+			if (form && BioForms.submit(poseStack, collector, lightCoords, state, marks, glowing, false, false)) {
+				// (0.7.363) a Bio-built player's corpse: the form they died in (BioForms.extract)
+				return;
 			}
 			if (look.avatar()) {
 				// (0.7.187) burnt to char, the lava veins glowing through

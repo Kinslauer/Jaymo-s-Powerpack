@@ -109,7 +109,7 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
-	/** (0.7.362) The look of the stranger shown for a road that makes you another blood (-1: none drawn yet). */
+	/** (0.7.364) The look of the stranger shown for a road that makes you another blood (-1: none drawn yet). */
 	private int strangerLook = -1;
 	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
 	private long slidAt;
@@ -1341,7 +1341,7 @@ final class LifeStoryScreen extends Screen {
 		if (a.start() != null && a.makes() != null && !story) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.heritage", Component.translatable("heritage.jaymoskingdoms." + a.makes().key())));
 		}
-		// (0.7.362) the Pale Moon wakes anyone but a Mage, a Sorcerer or a Stoneborn as a Z Fighter, ki keeping them alive
+		// (0.7.364) the Pale Moon wakes anyone but a Mage, a Sorcerer or a Stoneborn as a Z Fighter, ki keeping them alive
 		if (a.start() == LifeStory.Start.MOON && !LifeStory.spaceborn(heritage(), youthClass())) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.moon_ki", power("zfighter")));
 		}
@@ -1512,7 +1512,7 @@ final class LifeStoryScreen extends Screen {
 			StoryFigure.draw(graphics, player, null, 0, List.of(), ItemStack.EMPTY, x0, y0, x1, y1, row >= 0 ? row : draft.gender);
 			return;
 		}
-		// (0.7.362) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page".
+		// (0.7.364) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page".
 		// Every answer up to this page goes on the figure in turn (the one pointed at here in place of this page's), and the
 		// story page, or the road after MCA's creator, shows the whole life built up
 		Answer here = null;
@@ -1529,7 +1529,7 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
-		// (0.7.362) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
+		// (0.7.364) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
 		// no one in particular, only the ki every one of them holds
 		if (s.question == Question.ROAD && here != null && here.start() == LifeStory.Start.FATE) {
 			KiGhost.draw(graphics, x0, y0, x1, y1);
@@ -1560,7 +1560,7 @@ final class LifeStoryScreen extends Screen {
 		// (0.7.356) after MCA's creator it's you, as the creator made you (lent only the heritage a road makes you)
 		if (roadOnly()) {
 			Answer road = picked(Question.ROAD);
-			// (0.7.362) Andy: "should just show a random divine born instead of ... your current char": a road that makes you
+			// (0.7.364) Andy: "should just show a random divine born instead of ... your current char": a road that makes you
 			// another blood shows a stranger of it (a look drawn at random each time the road is shown)
 			if (road != null && road.makes() != null) {
 				if (this.strangerLook < 0) {

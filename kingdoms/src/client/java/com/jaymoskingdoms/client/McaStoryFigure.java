@@ -66,7 +66,7 @@ final class McaStoryFigure {
 		String dress = job + "#" + Math.floorMod(seed, CLOTHES_VARIANTS);
 		if (!dress.equals(dressedFor)) {
 			dressedFor = dress;
-			// (0.7.362) a bare scene wears nothing: MCA draws no clothes for a blank name
+			// (0.7.364) a bare scene wears nothing: MCA draws no clothes for a blank name
 			v.setClothes(BARE.equals(job) ? "" : clothes(v, job, seed));
 		}
 		if (kind != null) {
@@ -153,11 +153,11 @@ final class McaStoryFigure {
 		return v;
 	}
 
-	/** (0.7.362) The job that means no clothes at all (a bare scene). */
+	/** (0.7.364) The job that means no clothes at all (a bare scene). */
 	static final String BARE = "bare";
 
 	/**
-	 * (0.7.362) Takes the clothes off your own MCA body (MCA's client copy of it) while it's drawn; the returned task puts
+	 * (0.7.364) Takes the clothes off your own MCA body (MCA's client copy of it) while it's drawn; the returned task puts
 	 * them back. Null if there's no MCA body for you yet.
 	 */
 	static @Nullable Runnable undress(LocalPlayer player) {
@@ -171,7 +171,7 @@ final class McaStoryFigure {
 	}
 
 	/**
-	 * MCA job clothes for {@code job} that villagers may wear, falling back to plain jobs' clothes; (0.7.362) starting
+	 * MCA job clothes for {@code job} that villagers may wear, falling back to plain jobs' clothes; (0.7.364) starting
 	 * from cut {@code seed} of the job's, so a different life wears a different one.
 	 */
 	private static String clothes(VillagerEntityMCA v, String job, int seed) {

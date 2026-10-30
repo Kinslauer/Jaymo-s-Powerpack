@@ -62,7 +62,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * A scene: the act, and the gear (null slots left bare): head, chest, legs, feet, main hand, off hand. (0.7.362)
+	 * A scene: the act, and the gear (null slots left bare): head, chest, legs, feet, main hand, off hand. (0.7.364)
 	 * {@code bare}: everything worn and held before it is stripped, clothes too; {@code missing}: the Jaymo's Powers parts
 	 * (its {@code Dismember} bits) the figure is drawn without.
 	 */
@@ -73,7 +73,7 @@ final class StoryFigure {
 		}
 	}
 
-	/** (0.7.362) Powers' left-arm bit ({@code Dismember.LEFT_ARM}): the arm the Unarmed start's figure is drawn without. */
+	/** (0.7.364) Powers' left-arm bit ({@code Dismember.LEFT_ARM}): the arm the Unarmed start's figure is drawn without. */
 	static final int LEFT_ARM = 4;
 
 	static final Map<String, Scene> SCENES = new HashMap<>();
@@ -153,11 +153,11 @@ final class StoryFigure {
 		scene("road.timelost", Act.LOOK_DOWN, Items.RECOVERY_COMPASS);
 		scene("road.burned", Act.WALK, Items.CHARCOAL);
 		scene("road.snowed", Act.STAND, Items.LANTERN, null, lh, lc, ll, lb);
-		// (0.7.362) Andy: "he should really have nothing at all": no clothes, nothing held
+		// (0.7.364) Andy: "he should really have nothing at all": no clothes, nothing held
 		SCENES.put("road.captive", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
-		// (0.7.362) Andy: "the pickaxe or sword or harpoon make sense. not the trident"
+		// (0.7.364) Andy: "the pickaxe or sword or harpoon make sense. not the trident"
 		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
-		// (0.7.362) Andy: "he shouldnt still have his limb"
+		// (0.7.364) Andy: "he shouldnt still have his limb"
 		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, LEFT_ARM));
 		scene("road.fate", Act.LOOK_UP, Items.ENDER_EYE);
 		// (0.7.356) the other worlds' starts (0.7.349)
@@ -210,7 +210,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * (0.7.362) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page. It
+	 * (0.7.364) Andy: "have every choice influence the model displayed, so it builds instead of resetting every page. It
 	 * should culminate with a different look on the end screen every time." The scenes of every answer so far, in
 	 * order, laid one over the other: each one's gear goes on over what came before (a bare one strips it all first),
 	 * lost parts stay lost, and the last one says what the figure does. Only the last falls back to holding its picture.
@@ -243,7 +243,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * (0.7.362) The clothes job for the stand-in, built up the same way: who raised you, then the trade you learned, then
+	 * (0.7.364) The clothes job for the stand-in, built up the same way: who raised you, then the trade you learned, then
 	 * where the road starts, each over the last ("none": everyday clothes).
 	 */
 	static String job(List<String> scenes) {
@@ -267,7 +267,7 @@ final class StoryFigure {
 	}
 
 	/**
-	 * (0.7.362) Andy: "not everyone needs to be holding something, it wouldnt make sense to just have vines or crying
+	 * (0.7.364) Andy: "not everyone needs to be holding something, it wouldnt make sense to just have vines or crying
 	 * obsidian, but the pickaxe or sword or harpoon make sense". What a figure may hold: a tool or a weapon (a shield, a
 	 * bow, a rod), or a light to see by; anything else (a keepsake, a block, the answer's picture) is left out.
 	 */
@@ -297,7 +297,7 @@ final class StoryFigure {
 	private static void draw(GuiGraphicsExtractor graphics, LocalPlayer player, Heritage.@Nullable Kind kind, int look, List<String> scenes, ItemStack icon,
 		int x0, int y0, int x1, int y1, int gender, boolean you) {
 		Scene sc = compose(scenes, icon);
-		// (0.7.362) a different cut of the trade's clothes for each upbringing and trade, so the last page differs life to life
+		// (0.7.364) a different cut of the trade's clothes for each upbringing and trade, so the last page differs life to life
 		StringBuilder life = new StringBuilder();
 		for (String scene : scenes) {
 			if (scene.startsWith("raised.") || scene.startsWith("youth.")) {
@@ -319,7 +319,7 @@ final class StoryFigure {
 			was[i] = target.getItemBySlot(slots[i]);
 			target.setItemSlot(slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
 		}
-		// (0.7.362) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
+		// (0.7.364) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
 		// for a bare scene
 		AttachmentType<Integer> missingType = sc.missing() != 0 ? missingType() : null;
 		Integer missingWas = missingType == null ? null : target.getAttached(missingType);
@@ -380,7 +380,7 @@ final class StoryFigure {
 	private static @Nullable AttachmentType<Integer> missing;
 	private static boolean lookedForMissing;
 
-	/** (0.7.362) Powers' {@code Dismember.MISSING} (lost parts, a bitmask), looked up once; null without Powers. */
+	/** (0.7.364) Powers' {@code Dismember.MISSING} (lost parts, a bitmask), looked up once; null without Powers. */
 	@SuppressWarnings("unchecked")
 	private static @Nullable AttachmentType<Integer> missingType() {
 		if (!lookedForMissing) {
