@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 
 /**
- * (0.18.67) WeaponMod's musket in first person: held level at the hip (its first-person display in the held_guns pack),
+ * (0.18.70) WeaponMod's musket in first person: held level at the hip (its first-person display in the held_guns pack),
  * and brought up to the eye while you hold it ready to fire, the front sight on the crosshair. WeaponMod draws a loaded
  * musket held ready like a drawn bow; the first-person hand gets no bow pose for it ({@code MusketSightsMixin}) but
  * slides from the hip to the sights instead. First-person Model would draw it in your body's hand, held like a sword;

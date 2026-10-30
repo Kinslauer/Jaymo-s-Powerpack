@@ -18,7 +18,7 @@ import io
 SRC = "tools/bbmodels/flintlock-musket-rifle-commission.bbmodel"
 PACK = "src/main/resources/resourcepacks/held_guns/assets/jaymospowers"
 DROP = {"gun_flash2", "gunpowder_casing2", "bullet2"}
-# the gun's length on the sprite's diagonal, as a share of the model's own (40.5 long): (0.18.67) a fifth longer than
+# the gun's length on the sprite's diagonal, as a share of the model's own (40.5 long): (0.18.70) a fifth longer than
 # the sprite, Andy: "musket should be a bit larger". Its first-person display (level at the hip) and the sights it's
 # raised to (MusketSights) were worked out for this size; change them with it.
 SCALE = 0.6

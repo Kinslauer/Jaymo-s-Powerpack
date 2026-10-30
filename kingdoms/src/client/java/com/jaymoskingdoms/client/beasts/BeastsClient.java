@@ -26,7 +26,7 @@ public final class BeastsClient {
 
 	public static void register() {
 		look(Beasts.MINOTAUR, new BbMobRenderer.Look("minotaur", 0.85F, 1.2F, "idle", "running", null, null, 0.35F, 1.0F, "head"));
-		// (0.7.401) Andy: "piglin arm is broken". The file's idle and walk hold a twisted fighting stance with the left arm
+		// (0.7.403) Andy: "piglin arm is broken". The file's idle and walk hold a twisted fighting stance with the left arm
 		// thrust out, pushed off its shoulder and missing what it was drawn to hold; it stands and walks in its rest pose
 		// here instead, and its own moves (claw, volley, roar) still play as drawn
 		look(Beasts.PIGLIN_KING, new BbMobRenderer.Look("piglin_king", 0.96F, 1.3F, "none", "none", null, null, 0.5F, 1.0F, "head")

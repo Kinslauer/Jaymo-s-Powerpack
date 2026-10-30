@@ -4171,8 +4171,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   which Auto HUD slides away; now drawn before the chat, morphing part by part between stances). Order is prone, the low
   crouch (our sneak: arms out, sway, and the only stance that kneels when still and steadies shots), vanilla's plain sneak,
   standing. MGSV-smooth: `CrouchPose.bendBody` eases vanilla's crouch in and out over 7 ticks, smootherstep everywhere.
-
-- **0.18.67 (Kingdoms 0.7.401):** the Piglin King's arm (see the Kingdoms MODLOG), and Sora's Dagger turned the other
+- **0.18.67 (Kingdoms 0.7.401):** Will clashes no longer make you jump when you press jump, and they boom and toll a bell as they run.
+- **0.18.68, struggle back up while downed:** Andy: "you should still be able to get up if your arms torso and head arent
+  red". `Downed.blocksRise` reads the wounds doll as it is now: only the head, body or an arm at red (25%), broken or gone
+  keeps you down; legs and feet don't. The as-they-fell `TOO_HURT` latch is gone (the downed health refills every part to
+  the bruise line, so the doll showed yellow while the latch said red). The give-up prompt names the part keeping you down.
+- **0.18.70 (Kingdoms 0.7.403):** the Piglin King's arm (see the Kingdoms MODLOG), and Sora's Dagger turned the other
   quarter (Andy: "turned the wrong way"): the edge leads and the serrated spine trails.
   The musket is a fifth larger and, in first person, held level at the hip, barrel forward; holding it ready to fire
   brings it up to the eye with the front sight on the crosshair (Andy: "it should come up for a proper sight picture";

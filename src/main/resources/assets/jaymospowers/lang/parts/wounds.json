@@ -20,6 +20,7 @@
 	"death.attack.jaymospowers.wounds.player": "%1$s died of wounds dealt by %2$s",
 	"message.jaymospowers.downed.down": "You're down. Crawl to safety, or wait for someone to bring you round.",
 	"message.jaymospowers.downed.give_up": "You're down. Hold sneak to give up [%s]",
+	"message.jaymospowers.downed.give_up_hurt": "%s too hurt to get up. Hold sneak to give up [%s]",
 	"message.jaymospowers.downed.give_up_out": "You've passed out. Hold sneak to give up [%s]",
 	"message.jaymospowers.downed.up": "You're back on your feet.",
 	"message.jaymospowers.downed.rise_hint": "You're down. Hold sneak to get yourself up",

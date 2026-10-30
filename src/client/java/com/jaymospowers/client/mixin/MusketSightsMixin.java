@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.67) The first-person musket: no bow pose while it's held ready, raised to the sights instead ({@link MusketSights}). */
+/** (0.18.70) The first-person musket: no bow pose while it's held ready, raised to the sights instead ({@link MusketSights}). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class MusketSightsMixin {
 	@ModifyExpressionValue(method = "submitArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))
