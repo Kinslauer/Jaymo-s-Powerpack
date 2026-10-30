@@ -37,7 +37,7 @@ import net.minecraft.world.entity.player.Player;
  * stand straight ({@link KneeBend}), the body sunk {@link #LOW_DROP} lower to keep the feet on the ground.
  * <p>(0.18.65) Andy: "the second to last option should be our new sneak, the third option the default vanilla sneak ...
  * use a smoother animation like the one from MGSV". The arms out and the sway are now the low crouch's alone; a plain
- * sneak is vanilla's (still kneeling when still, the firing stance). And every change eases: vanilla snaps in and out of
+ * sneak is vanilla's, and only the low crouch goes onto one knee when still (the firing stance). And every change eases: vanilla snaps in and out of
  * its crouch, so the body is blended between standing and crouched over {@link #BEND_IN} ticks ({@link #bendBody}),
  * the low crouch and the arms over {@link #LOW_IN} and {@link #READY_IN}, all on a smootherstep curve.
  */
@@ -115,7 +115,8 @@ public final class CrouchPose {
 		} else if (track.stillSince < 0.0F) {
 			track.stillSince = now;
 		}
-		boolean kneel = still && now - track.stillSince >= Kneel.KNEEL_AFTER;
+		// (0.18.65) onto the knee only from the low crouch; a plain sneak stays vanilla's
+		boolean kneel = still && entity instanceof Player p && Stance.low(p) && now - track.stillSince >= Kneel.KNEEL_AFTER;
 		boolean low = crouched && entity instanceof Player player && Stance.low(player);
 		// (0.18.65) arms out and swaying only in the low crouch; a plain sneak is vanilla's
 		track.ready = approach(track.ready, low ? 1.0F : 0.0F, dt / READY_IN);

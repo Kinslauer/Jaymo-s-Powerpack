@@ -58,9 +58,12 @@ public final class Kneel {
 		return since != null && player.level().getGameTime() - since >= KNEEL_AFTER;
 	}
 
-	/** Whether this player could be on one knee at all: crouched on the ground, on their own feet. */
+	/**
+	 * Whether this player could be on one knee at all: crouched on the ground, on their own feet. (0.18.65) Andy: "it only
+	 * kneels on the second to last option, vanilla sneak stays": only from the low crouch ({@link Stance}), not a plain sneak.
+	 */
 	public static boolean crouched(Player player) {
-		return player.isShiftKeyDown() && player.onGround() && !player.isPassenger() && !player.isSwimming() && !player.isFallFlying()
+		return player.isShiftKeyDown() && Stance.low(player) && player.onGround() && !player.isPassenger() && !player.isSwimming() && !player.isFallFlying()
 			&& !player.isSpectator() && !Carry.isCarried(player);
 	}
 
