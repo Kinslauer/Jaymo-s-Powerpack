@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "jaymospowers:moon_rock",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "RRR",
+    " I "
+  ],
+  "result": {
+    "id": "jaymospowers:pale_alloy_ingot"
+  }
+}

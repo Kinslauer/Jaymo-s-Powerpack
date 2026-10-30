@@ -124,6 +124,11 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addRecipes(CASTING_BASIN, basin());
 		registration.addRecipes(MELTING, melting);
 		registration.addRecipes(ALLOYING, alloying(melts));
+		// (0.18.55) the far worlds' routes: the field anvil, and each world's first metal
+		registration.addIngredientInfo(com.jaymospowers.power.zfighter.farworld.FarWorlds.FIELD_ANVIL, Component.translatable("jei.jaymospowers.field_anvil"));
+		for (com.jaymospowers.power.zfighter.farworld.FarWorld world : com.jaymospowers.power.zfighter.farworld.FarWorld.values()) {
+			registration.addIngredientInfo(world.ingot(), Component.translatable("jei.jaymospowers.first_metal." + world.molten.id));
+		}
 	}
 
 	/** A pattern and enough of a material: each part of each material that's shaped here (metal parts are cast). */

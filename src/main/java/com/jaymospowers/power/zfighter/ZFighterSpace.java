@@ -555,6 +555,11 @@ public final class ZFighterSpace {
 		}
 		RandomSource random = RandomSource.create(MAW_SEED);
 		wrecks(random, (centre, deck) -> wreck(level, centre, random, deck));
+		// (0.18.55) the decks hold veiled ore under them and the Maw's rocks on top (after the wrecks, so their random draws stay in step)
+		List<BlockPos> decks = mawDecks();
+		for (int i = 0; i < decks.size(); i++) {
+			com.jaymospowers.power.zfighter.farworld.FarWorlds.mawDeck(level, decks.get(i).offset(-1, -1, 2), i);
+		}
 	}
 
 	/** The wrecks' middles, the same every time ({@link #MAW_SEED}), each handed to {@code each} with the random still in step. */

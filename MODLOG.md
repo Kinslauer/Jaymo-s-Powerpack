@@ -4032,3 +4032,31 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   spot); first finds go through the public `Prospecting.found(player, world, kind)` (and `Prospecting.FIRST_FIND_LISTENERS`), which
   Track 5's ore code fires. No new items, blocks or recipes. Compile-checked against the 26.3 jar; not seen in game. Plan:
   docs/SevTech-Plan.md, Track 6.
+- **0.18.55, far worlds restart the stone age (SevTech picks; Kingdoms 0.7.386):** four picks, in `power/zfighter/farworld`, and
+  the Patrol's writ. **Prospecting First** (`VeiledOreBlock`, `FarWorlds`): the first time a chunk of the Pale Moon, Rustfall,
+  Glacia, Cinder, the Maw or the Verdant World loads (once, kept on the chunk as `farworld_veiled`, so ore a player sets down is
+  left alone), each vanilla or silver ore in it becomes `veiled_ore`, which remembers its ore (`ore`) and wears the stone round it
+  (`host`: stone, deepslate, netherrack for Cinder, blackstone for the Maw); it is named "Stone", drops nothing and is never dug as it
+  is. A pick (anything that bites stone) hit on any block there cracks the veiled ore within 3 blocks into the real thing (a
+  stone-break sound, motes); a player who has read that world's star chart (`Charts.read`) sees the ore in sight (an open face)
+  within 8 shown every second. The Maw is flat void with built wrecks, so the wrecks' decks carry two veiled ores under them and
+  two piles of Maw rock on top (`FarWorlds.mawDeck`, called from `ZFighterSpace.buildMaw`; wrecks already built keep none).
+  **Gear doesn't answer** (`#jaymospowers:far_ore`, `FarOreSpeedMixin`, `PlayerBlockBreakEvents.BEFORE`): far ore takes 4 times as
+  long (`SLOWDOWN`) and gives nothing unless the tool in hand is a Tool Station tool whose head is that world's first metal
+  (`FarWorlds.answers`); home gear only chips it away. Creative is left alone. **First metals**: `pale_alloy` (Moon), `rust_iron`,
+  `ice_iron`, `cinder_bronze`, `void_shard` (the Maw; its ingot is called Void Shard) and `amber_bronze`, each a `TinkerMaterial`
+  (cast only; iron-tier, the Cinder and Maw ones diamond-tier for ancient debris; one existing trait each), a `Molten`, and an ingot
+  in `Tinkering.ALLOY_INGOTS`, so the smeltery, casting, the Smithing Anvil and JEI (`TinkeringJei`, the forging lists) pick them up
+  through the material tables with no list of their own. There is no grid recipe for a metal part or tool. The ingot is a grid recipe,
+  three of the world's rocks in a row and an iron ingot under the middle one (too wide for the pocket grid), made at the **field
+  anvil** (`field_anvil`: a crafting table's grid that stays open beside it; iron and cobblestone make it). The world's rocks
+  (`<world>_rock`, a `LooseStonesBlock.Rocks` each; `FirstTools.rock` counts them, so they are thrown like any rock) are laid down
+  in new chunks of the world (`ROCK_TRIES`, `ROCK_CHANCE`). **Patrol Skip Writ** (`PatrolWrit`): an officer of Sergeant's rank
+  or more (`ZFighterPatrol.WRIT_RANK`, a new option in a patrolman's menu; the rank thresholds are untouched) is given one `patrol_writ`
+  for each world that has a mission (Rustfall, Glacia, Cinder; the other three have none). Read while freeing a world with its
+  captains ahead, it calls down a Commander of the Patrol in a pod of his own (an MCA villager, gifted, through Kingdoms), a film
+  plays (`UltimateFilm.PUSH_IN`), and he fells the four captains for the fighter and his party in turn (a scripted fight: a
+  blow, a flash and a cry every 50 ticks) before climbing back in; the boss stays the fighter's. A conquering fighter's champions are
+  not sold (the writ says so and is kept). If the Commander cannot come or the fighter leaves, the writ is returned. Textures by
+  `tools/gen_farworld.py` (run after `tinkering_assets.py` and `gen_steel.py`). **Storm Rage was not built.** Compile-checked
+  against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 5.

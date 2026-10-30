@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "jaymospowers:rustfall_rock",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "RRR",
+    " I "
+  ],
+  "result": {
+    "id": "jaymospowers:rust_iron_ingot"
+  }
+}

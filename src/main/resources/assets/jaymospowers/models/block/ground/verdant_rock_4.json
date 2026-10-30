@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_4",
+  "textures": {
+    "all": "jaymospowers:block/farworld/verdant_rock"
+  }
+}
