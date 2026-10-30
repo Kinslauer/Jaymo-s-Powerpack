@@ -115,7 +115,8 @@ public final class LimbUse {
 	/** One part's strength: 0 severed, {@link #BROKEN} (or splinted, or numbed) broken, else {@link #SOUND}. */
 	public static float strength(LivingEntity entity, BodyPart part) {
 		if (Breaks.missing(entity, part)) {
-			return 0.0F;
+			// (0.18.82) a wooden or iron limb stands in for it, weaker (0 when there's none)
+			return com.jaymospowers.core.Prosthetics.strength(entity, Breaks.limb(part));
 		}
 		if (!Breaks.isBroken(entity, part)) {
 			return SOUND;

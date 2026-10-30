@@ -8918,7 +8918,6 @@
 	"commands.jaymoskingdoms.roads.unlocked_n": "Unlocked %s roads",
 	"commands.jaymoskingdoms.roads.locked_n": "Locked %s roads",
 	"story.jaymoskingdoms.road.demon.hint": "Someone has to have felt a great heat from below first.",
-	"aim.jaymoskingdoms.tidings.lost": "One of your three is gone, and with it what you meant to do.",
 	"gui.jaymoskingdoms.story.harder": "A harder life",
 	"gui.jaymoskingdoms.story.flaws": "Flaws: up to %1$s, +%2$s free attribute point each (taken: +%3$s)",
 	"gui.jaymoskingdoms.story.switches": "Switches",
@@ -8945,5 +8944,17 @@
 	"aim.jaymoskingdoms.android.page": "Prove the build: put down fifteen that come for me.",
 	"aim.jaymoskingdoms.android.title": "the Proven",
 	"aim.jaymoskingdoms.moon_cursed.page": "Last ten days with this mark on me.",
-	"aim.jaymoskingdoms.moon_cursed.title": "the Moonmarked"
+	"aim.jaymoskingdoms.moon_cursed.title": "the Moonmarked",
+	"speech.jaymoskingdoms.learner.0": "I've seen worse. I'm better for it.",
+	"speech.jaymoskingdoms.learner.1": "I'm getting the hang of this.",
+	"speech.jaymoskingdoms.learner.2": "That one taught me something.",
+	"speech.jaymoskingdoms.learner.3": "Stronger. I can feel it.",
+	"speech.jaymoskingdoms.drifter.pitch.0": "Spare %s emeralds? I'll fight for you. Hold them out.",
+	"speech.jaymoskingdoms.drifter.pitch.1": "Work's thin. %s emeralds and my sword is yours.",
+	"speech.jaymoskingdoms.drifter.pitch.2": "Hire me for %s emeralds. I'm worth more than I look.",
+	"speech.jaymoskingdoms.drifter.short": "I can't work for less than %s emeralds.",
+	"speech.jaymoskingdoms.drifter.hired.0": "You won't regret it.",
+	"speech.jaymoskingdoms.drifter.hired.1": "Lead on, then.",
+	"speech.jaymoskingdoms.drifter.hired.2": "A hot meal and a fight. Fair enough.",
+	"message.jaymoskingdoms.drifter.hired": "%s signs on for %s emeralds."
 }
