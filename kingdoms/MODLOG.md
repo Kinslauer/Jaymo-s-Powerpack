@@ -7013,3 +7013,31 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **School Swing Trails** (`forms/Trails`): blade = dark ink and smoke, spear/lance = sparks, fist = dust (for patch 3). Sheath Draw
   and Crescent Sweep got the blade trail.
 - Compile-checked (check.sh, zero errors); not seen in game.
+
+## 0.7.394: Weapon Forms, patch 4: schools and teachers (Kingdoms only; Powers unchanged; was 0.7.384)
+- **Schools** (`forms/Schools`): one for each weapon family, our own names: blade the *Quiet Tide*, spear the *Skyward Reach* (the
+  sky school), fist the *Stone Root*, knife the *Low Lantern*, claw the *Ashen Fang*. Attachment `schools` (joined, standing,
+  mastered; saved, kept through death, not synced). Public API for patch 5: `School`, `joined`, `join`, `standing`, `addStanding`,
+  `masterstrokeOpen`, `openMasterstroke`, `localSchool`, `isMaster`, `masterOf`. A realm's school is fixed by its id (`ofRealm`).
+- **Joining**: the first school is free; another only once every school joined is mastered. Joining gives the school's **manual**
+  (a written book of three pages of odd sayings; the sky school's hints at a road that has since come apart) and teaches its first
+  art. Standing grows by the practice of the school's forms (`Forms.practice` calls `Schools.practiced`; 1 per point, +1 for a
+  matching class: Warlord/blade, Brute/fist, Thief/knife, Rider/spear). Each visit teaches the next art once standing reaches
+  its step (0, 20, 45); at 150 standing, with every art known, the master opens the masterstroke (blade Rain of Cuts, spear
+  Pinning Throw; fist, knife and claw have none yet and are only marked mastered), and hands over the school's **mask** and a
+  **Master-grade blueprint** for its signature weapon (blade: katana blade, or the ninjato blade without WeaponMod; spear: spear tip;
+  knife: kunai blade; claw: fang blades; the fist school has none, as no cestus is forged). Patch 5's duel can call `openMasterstroke` too.
+- **Masters and halls** (`SchoolHalls`, `JobHalls.trainingHall`, `McaBridge.master`): a new realm building, the *Training Hall* (9 x 9,
+  needs 34 villagers, after the barracks): carpet runner, two training posts (Powers' block if loaded), a target butt, tool racks.
+  Every realm keeps one **master**, an MCA villager held at the post (role 96, tags `jaymoskingdoms_school_master`, the school and the
+  realm), invulnerable, outside MCA's family tree, in the road master's gi, speaking to anyone. They stand at the middle of the hall; a
+  kingdom with no hall yet has its master at its barracks, and moves them into the hall when it is finished. Kept up every 10 s once the
+  place is loaded and a player is on (none found by the realm's tag: a new one; extras are let go). MCA menu: "Speak of the school".
+- **Wizard trials** (`forms/WizardTrials`): court wizards and a realm's necromancer, "Ask for a trial": the Shade (a stronger practice foe
+  hunts you), the Ward (hold a ring of light for 30 s while weak foes come; any class), the Marked One (four foes, one glows, strike
+  another and it's lost). The practice foes are the drills' (same tags, load sweep and FELL counting) and now count only if you struck
+  them (`jaymoskingdoms_trial_hit`); wizards never fight them (`CourtWizards.foe`). Reward: practice for the two least-ranked forms,
+  standing in the local school, a Mage's or Sorcerer's 40 experience. One per wizard per day.
+- **School masks**: five head-slot items `school_mask_<school>` (art by `tools/gen_school_masks.py`), in the combat tab, given at mastery.
+  Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
+- Compile-checked; not seen in game.

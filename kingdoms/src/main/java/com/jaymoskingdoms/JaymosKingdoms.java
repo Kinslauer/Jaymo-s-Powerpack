@@ -377,6 +377,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.381: veteran guards set drills that teach or rank up a Weapon Form (and its attachment)
 		LOGGER.debug("guard drills attachment: {}", com.jaymoskingdoms.forms.GuardDrills.DRILLS);
 		com.jaymoskingdoms.forms.GuardDrills.register();
+		// 0.7.384: the fighting schools (joined, standing, mastery; their masks), their masters in the realms' halls, and the wizards' trials
+		LOGGER.debug("school attachments: {} {}", com.jaymoskingdoms.forms.Schools.SCHOOLS, com.jaymoskingdoms.forms.WizardTrials.TRIALS);
+		com.jaymoskingdoms.forms.Schools.register();
+		com.jaymoskingdoms.forms.WizardTrials.register();
+		SchoolHalls.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
