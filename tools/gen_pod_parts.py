@@ -1,4 +1,4 @@
-"""Writes the space pod parts' assets (0.18.48, power/zfighter/pod/PodParts): for each of the seven part blocks
+"""Writes the space pod parts' assets (0.18.49, power/zfighter/pod/PodParts): for each of the seven part blocks
 (pod_keel, pod_fin, pod_bell, pod_tank, pod_plate, pod_canopy, pod_mast) a 16x16 texture, a block model, a blockstate,
 an item definition and a loot table (drops itself); and for the four metal parts that are forged (fin, plate, mast, tank)
 the blank's textures, models and item definition (WeaponParts kinds pod_<part>_blank, shown stone and metal).

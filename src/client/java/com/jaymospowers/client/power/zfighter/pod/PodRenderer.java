@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.18.48, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
+ * (0.18.49, Andy) Draws a {@link PodEntity} from {@link PodModel}: only the pieces whose slots are filled, turned to its
  * heading. A damaged fin is drawn bent out {@link #BEND} degrees about its foot, a damaged canopy as its lower step only,
  * a damaged plate with its dark gash. (0.18.51) A finished pod's beacon lamp is drawn full bright, and each mend grade adds a
  * brass band to the keel's corner posts. (Parts are drawn by pose, not by moving the shared model parts, since the draw is
