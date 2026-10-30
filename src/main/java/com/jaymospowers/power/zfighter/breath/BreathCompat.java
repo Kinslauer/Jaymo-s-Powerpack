@@ -43,7 +43,7 @@ public final class BreathCompat {
 				Class.forName("com.jaymoskitchen.climate.BodyHeat").getMethod("addWeather", ToDoubleFunction.class)
 					.invoke(null, (ToDoubleFunction<ServerPlayer>) BreathCompat::glaciaChill);
 				hooked = true;
-			} catch (ReflectiveOperationException | RuntimeException e) {
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 				JaymosPowers.LOGGER.info("Jaymo's Kitchen has no body heat to hook Glacia's cold on: {}", e.toString());
 			}
 		}

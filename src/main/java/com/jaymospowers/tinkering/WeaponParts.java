@@ -215,6 +215,16 @@ public final class WeaponParts {
 		add(new Kind("helm_seal", "jaymospowers:sealed_helm", Scheme.SINGLE, 2 * INGOT, Assembly.GLASS, 1));
 	}
 
+	/** (0.18.14) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
+	public static boolean isExtra(ItemStack stack) {
+		for (Assembly assembly : Assembly.values()) {
+			if (assembly.extra != null && stack.is(assembly.extra)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private WeaponParts() {
 	}
 

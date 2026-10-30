@@ -98,7 +98,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				@Override
 				public boolean mayPlace(ItemStack stack) {
 					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof WeaponPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
-						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD)
+						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD) || WeaponParts.isExtra(stack)
 						|| Modifier.ingredient(stack);
 				}
 			});
