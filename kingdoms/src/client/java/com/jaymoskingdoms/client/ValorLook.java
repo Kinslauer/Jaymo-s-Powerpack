@@ -41,6 +41,7 @@ import org.jspecify.annotations.Nullable;
  * <li>its rank: the hands at Spark, half the forearm, the forearm, the whole arm, and at Unbroken over the shoulders;</li>
  * <li>its {@link Valor.Bent} (Tempered on): a mark round the wrist, a bracer, crossed slashes, claw stripes, runes or a scar;</li>
  * <li>King's Valor Coating: the coat's own lines (the scales' edges, the cracks, the bands) glow and beat in the soul colour;</li>
+ * <li>(0.7.411) raised plates that grow up the arm with the coat, and grow in when it goes up ({@link ValorPlates});</li>
  * <li>a Hunter's eyes glint amber while coated (the other origins have their own particles, {@code Valor#coatParticles}).</li>
  * </ul>
  * Drawn on a shell just past the sleeves, or just past armour when a chestplate is worn, so armour never hides it; on players,
@@ -59,8 +60,8 @@ public final class ValorLook {
 	/** On a render state: the coating up right now. */
 	public static final RenderStateDataKey<Coat> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:valor_coat");
 
-	/** A coating up: its look, rank, bent (-1 before Tempered), origin, whether King's, its soul colour. */
-	public record Coat(int look, int rank, int bent, int origin, boolean kings, int soul) {
+	/** A coating up: its look, rank, bent (-1 before Tempered), origin, whether King's, its soul colour, how far its plates have grown in (0-1). */
+	public record Coat(int look, int rank, int bent, int origin, boolean kings, int soul, float grow) {
 		Identifier coat() {
 			return texture(look, "_" + rank);
 		}
@@ -112,15 +113,14 @@ public final class ValorLook {
 
 	static @Nullable Coat coatOf(LivingEntity entity) {
 		int bits = Valor.state(entity);
-		if ((bits & (Valor.REINFORCED | Valor.ARMED | Valor.KINGS)) == 0 || entity.isInvisible()) {
-			return null;
-		}
 		Valor.Data data = Valor.of(entity);
-		if (data == null) {
+		boolean up = (bits & (Valor.REINFORCED | Valor.ARMED | Valor.KINGS)) != 0 && !entity.isInvisible() && data != null;
+		float grow = ValorPlates.grow(entity, up);
+		if (!up) {
 			return null;
 		}
 		return new Coat(data.look(), Mth.clamp(data.rank(), 0, 4), data.rank() >= Valor.TEMPERED ? data.bent() : -1, data.origin(),
-			(bits & Valor.KINGS) != 0, data.soulColor());
+			(bits & Valor.KINGS) != 0, data.soulColor(), grow);
 	}
 
 	/** The King's lines' colour now: the soul colour, lifted so a dark one still glows, beating. */
@@ -210,7 +210,8 @@ public final class ValorLook {
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state, Coat coat, boolean slim) {
-			HumanoidModel model = this.shell(!state.chestEquipment.isEmpty(), slim);
+			boolean armoured = !state.chestEquipment.isEmpty();
+			HumanoidModel model = this.shell(armoured, slim);
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucent(coat.coat()), lightCoords, OverlayTexture.NO_OVERLAY, -1,
 				null, state.outlineColor);
 			Identifier bent = coat.bentMark();
@@ -221,6 +222,16 @@ public final class ValorLook {
 			if (coat.kings()) {
 				collector.order(3).submitModel(model, state, poseStack, RenderTypes.eyes(coat.veins()), lightCoords, OverlayTexture.NO_OVERLAY,
 					glow(coat.soul(), state.ageInTicks), null, state.outlineColor);
+			}
+			// the raised plates, over the arms as the body has them posed now (BioForms' way)
+			HumanoidModel<?> wearer = this.wearer.get();
+			float out = armoured ? ValorPlates.OUT_ARMOURED : ValorPlates.OUT_BARE;
+			int glow = coat.kings() ? glow(coat.soul(), state.ageInTicks) : 0;
+			if (wearer.rightArm.visible) {
+				ValorPlates.submit(poseStack, collector, lightCoords, wearer.rightArm, true, slim, coat, out, glow);
+			}
+			if (wearer.leftArm.visible) {
+				ValorPlates.submit(poseStack, collector, lightCoords, wearer.leftArm, false, slim, coat, out, glow);
 			}
 		}
 	}
@@ -257,9 +268,10 @@ public final class ValorLook {
 			collector.order(2).submitModelPart(part, poseStack, RenderTypes.entityTranslucent(bent), light, OverlayTexture.NO_OVERLAY, null,
 				BENT_TINT[Mth.clamp(coat.look(), 0, BENT_TINT.length - 1)]);
 		}
+		int glow = coat.kings() ? glow(coat.soul(), player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) : 0;
 		if (coat.kings()) {
-			collector.order(3).submitModelPart(part, poseStack, RenderTypes.eyes(coat.veins()), light, OverlayTexture.NO_OVERLAY, null,
-				glow(coat.soul(), player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+			collector.order(3).submitModelPart(part, poseStack, RenderTypes.eyes(coat.veins()), light, OverlayTexture.NO_OVERLAY, null, glow);
 		}
+		ValorPlates.submit(poseStack, collector, light, arm, arm == source.rightArm, slim, coat, ValorPlates.OUT_BARE, glow);
 	}
 }
