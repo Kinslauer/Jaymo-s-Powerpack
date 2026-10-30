@@ -87,6 +87,8 @@ import org.jspecify.annotations.Nullable;
  * open before you ({@link #floatAt}); bolts fly from it. It turns a leaf and sheds glyphs as it rises and at each new lock,
  * and goes back to the hand when you let go of the lock, or {@link #FLOAT_LINGER} after the last bolt or spell with nothing
  * locked. The server decides ({@link #AFLOAT}, synced to everyone); the client draws it ({@code TomeFloat}).</li>
+ * <li><b>The world</b> (0.7.389): bolts light, douse, freeze, melt, grow and wither what they cross and land on, more for a
+ * charged one: a charged ice bolt freezes the water it crosses ({@link BoltWorks}).</li>
  * </ul>
  */
 public final class Tomes {
@@ -599,6 +601,8 @@ public final class Tomes {
 		final float charge, strength;
 		Vec3 pos, vel;
 		int life;
+		/** (0.7.389) The water this bolt has frozen on its way ({@link BoltWorks#along}). */
+		final java.util.Set<net.minecraft.core.BlockPos> frozen = new java.util.HashSet<>();
 
 		Bolt(ServerLevel level, UUID owner, String element, Vec3 pos, Vec3 vel, float charge, float strength, int life) {
 			this.level = level;
@@ -644,6 +648,10 @@ public final class Tomes {
 			int n = Math.max(1, (int) (from.distanceTo(stop) / TRAIL_STEP));
 			for (int i = 0; i <= n; i++) {
 				Vec3 p = from.lerp(stop, i / (double) n);
+				// (0.7.389) what it does to the world on its way (ice freezes the water it crosses); fire dies in water
+				if (!BoltWorks.along(level, shooter, element, p, charge, frozen)) {
+					return false;
+				}
 				level.sendParticles(trail, p.x, p.y, p.z, 1 + (charge > 0.5F ? 1 : 0), 0.04, 0.04, 0.04, 0.0);
 				// the mana glow, left loosely behind where the bolt has been
 				level.sendParticles(Mana.MOTE, p.x, p.y, p.z, charge > 0.5F ? TRAIL_MANA_CHARGED : TRAIL_MANA, MANA_DRIFT, MANA_DRIFT, MANA_DRIFT, 0.0);
@@ -651,9 +659,11 @@ public final class Tomes {
 			level.sendParticles(Mana.MOTE, stop.x, stop.y, stop.z, HEAD_MANA, 0.1, 0.1, 0.1, 0.01);
 			if (target != null) {
 				hit(shooter, target);
+				BoltWorks.land(level, shooter, element, stop, null, target, charge);
 				return false;
 			}
 			if (blocked) {
+				BoltWorks.land(level, shooter, element, stop, wall, null, charge);
 				level.sendParticles(trail, stop.x, stop.y, stop.z, 6 + (int) (charge * 10), 0.2, 0.2, 0.2, 0.05);
 				level.playSound(null, stop.x, stop.y, stop.z, Spellcraft.sound(element), SoundSource.PLAYERS, 0.4F, 1.8F);
 				return false;

@@ -1240,4 +1240,33 @@ public final class PowersCompat {
 			return null;
 		}
 	}
+
+	/** Powers' {@code BloodTrail.lay(ServerLevel, UUID, int, double, double, double, float, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle layStain;
+	private static boolean lookedForStain;
+
+	/** (0.7.389) A blood stain of {@code colour}, this big, on the ground under (x, from, z), as Powers' blood trail lays them; nothing without Powers. */
+	public static void stain(net.minecraft.server.level.ServerLevel level, int colour, double x, double from, double z, float size) {
+		if (!lookedForStain) {
+			lookedForStain = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> trail = Class.forName("com.jaymospowers.core.blood.BloodTrail");
+					layStain = java.lang.invoke.MethodHandles.publicLookup().findStatic(trail, "lay",
+						java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.core.blood.BloodTrail$Mark"), net.minecraft.server.level.ServerLevel.class,
+							java.util.UUID.class, int.class, double.class, double.class, double.class, float.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blood trail (older Powers?)", e);
+				}
+			}
+		}
+		if (layStain == null) {
+			return;
+		}
+		try {
+			layStain.invoke(level, (java.util.UUID) null, colour, x, from, z, size, 0);
+		} catch (Throwable e) {
+			// no stain
+		}
+	}
 }
