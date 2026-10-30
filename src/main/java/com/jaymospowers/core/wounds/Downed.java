@@ -787,7 +787,7 @@ public final class Downed {
 		// (0.14.4) Kingdoms' villagers bandaged them
 		Bleeding.tended(player);
 		if (player.isCreative() || player.isSpectator()) {
-			// (0.18.72) straight up, not battered, and no Will holds them down (creative heals the rest, Wounds#creativeHeal)
+			// (0.18.73) straight up, not battered, and no Will holds them down (creative heals the rest, Wounds#creativeHeal)
 			getUp(level, player, false);
 			return;
 		}

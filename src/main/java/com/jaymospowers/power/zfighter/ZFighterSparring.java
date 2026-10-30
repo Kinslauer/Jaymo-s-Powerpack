@@ -99,6 +99,7 @@ final class ZFighterSparring {
 
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterSparring::tick);
+		PracticeDummy.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (Bout bout : BOUTS.values()) {
 				var entity = bout.level.getEntity(bout.partner);
@@ -143,8 +144,8 @@ final class ZFighterSparring {
 			return InteractionResult.SUCCESS;
 		}
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spar_not_fighter").withStyle(ChatFormatting.GRAY));
-			return InteractionResult.FAIL;
+			// (0.18.72) anyone else stands a still practice dummy (Weapon Forms practice, the belt)
+			return PracticeDummy.place(context, player, level);
 		}
 		for (Iterator<Map.Entry<UUID, Bout>> it = BOUTS.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Bout> entry = it.next();
