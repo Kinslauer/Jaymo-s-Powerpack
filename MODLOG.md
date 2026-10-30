@@ -3912,3 +3912,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
+- **0.18.30, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.372):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
+  - `UltimateFilm.DUTCH` (8): low and close on the subject, the horizon tilted about 17 degrees and settling back as it leans in.
+    `UltimateFilm.CUTS` (9): hard cuts between three angles round the subject (close and low, wide and tilted from the side, high behind).
+    Kingdoms' masterstrokes use them (`PowersCompat.FILM_DUTCH` / `FILM_CUTS`).
+  - Camera roll: 26.3's `Camera` builds its `rotation` quaternion from yaw and pitch only (`setRotation` passes 0 as the third
+    angle) and has no roll hook. `UltimateCinematic.view` now returns a sixth number, the roll in degrees, and
+    `UltimateCinematicCameraMixin` (already in the client mixins json, at `alignWithEntity` TAIL) turns `rotation` about its own
+    forward axis by it, refreshes `up` and `left` and dirties the view matrices again. Other shots return 0, so nothing else changes.
+  - `ZFighterSenses.impactFrame` is public now (Kingdoms' Rain of Cuts calls it by reflection).
+  - Compile-checked; not seen in game.

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.item.ItemStack;
@@ -73,6 +74,22 @@ final class Cavalry {
 			ServerLevel level = Factions.level(server);
 			if (level.getGameTime() % CHECK_TICKS == 0) {
 				tick(server, level);
+			}
+		});
+		// (0.7.372) a mounted guard with a spear charges its foe: Couched Lance's lance, damage from the horse's speed (SpearForms.charge,
+		// at most once per SpearForms.NPC_COOLDOWN; it moves nothing, so a guard that can't close on a foe just doesn't strike)
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			ServerLevel level = Factions.level(server);
+			if (level.getGameTime() % com.jaymoskingdoms.forms.SpearForms.NPC_CHECK_TICKS == 0) {
+				for (AbstractHorse horse : level.getEntities(EntityTypeTest.forClass(AbstractHorse.class),
+					h -> h.isAlive() && h.entityTags().contains(TAG) && h.getFirstPassenger() instanceof PathfinderMob)) {
+					if (horse.getFirstPassenger() instanceof PathfinderMob rider && rider instanceof Worker w && w.role() == Folk.GUARD) {
+						LivingEntity foe = Rulers.target(rider);
+						if (foe != null) {
+							com.jaymoskingdoms.forms.SpearForms.charge(level, rider, horse, foe);
+						}
+					}
+				}
 			}
 		});
 		// a realm's horse can't smother in a wall: its head brushes through leaves and eaves, and one set down with its
