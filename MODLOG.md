@@ -4235,3 +4235,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   walk but you have to change back to a sneak or stand after kneeling". In the low crouch you walk freely; stood still
   `Kneel.KNEEL_AFTER` ticks you're on the knee and the walking keys do nothing (`StanceScroll.kneelHeld`, `StanceInputMixin`)
   until the wheel takes you up to a sneak or standing (Jump or a Sneak tap stands you too).
+- **0.18.81, Skyward Valor's wings:** Kingdoms 0.7.410 (see its MODLOG): a Valor origin whose wings fly on the Valor pool,
+  guard and beat blows back.

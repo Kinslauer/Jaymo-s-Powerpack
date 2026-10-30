@@ -152,7 +152,7 @@ public final class ValorKings {
 			return;
 		}
 		Valor.Live live = Valor.live(sp);
-		if (now < live.spentUntil || live.pool < Valor.poolMax(data) * POOL_NEEDED) {
+		if (now < live.spentUntil || live.pool < Valor.poolMax(sp, data) * POOL_NEEDED) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.valor.kings_pool").withStyle(ChatFormatting.GRAY));
 			return;
 		}
@@ -292,6 +292,9 @@ public final class ValorKings {
 			return;
 		}
 		ruler.addTag(RULER_ROLLED);
+		if (Valor.unbound(ruler)) {
+			return;
+		}
 		RandomSource r = level.getRandom();
 		float roll = r.nextFloat();
 		if (roll >= RULER_VALOR) {

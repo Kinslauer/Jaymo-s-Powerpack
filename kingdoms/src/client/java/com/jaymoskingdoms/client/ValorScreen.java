@@ -91,6 +91,16 @@ final class ValorScreen extends Screen {
 		left.add(Component.translatable("gui.jaymoskingdoms.valor.origin", Component.translatable("valor.jaymoskingdoms.origin." + data.originKind().key()))
 			.withColor(accent));
 		left.add(Component.translatable("gui.jaymoskingdoms.valor.look", Component.translatable("valor.jaymoskingdoms.look." + data.lookKind().key())));
+		if (data.originKind() == Valor.Origin.SKYWARD) {
+			left.add(Component.translatable("gui.jaymoskingdoms.valor.wings",
+				Component.translatable("valor.jaymoskingdoms.wings." + com.jaymoskingdoms.ValorWings.DESIGNS[data.wingDesign()])));
+		}
+		// (0.7.410) ki and magic leave it dormant; a power holds it back
+		if (Valor.unbound(player)) {
+			left.add(Component.translatable("gui.jaymoskingdoms.valor.unbound").withColor(Ui.DIM));
+		} else if (Valor.powered(player)) {
+			left.add(Component.translatable("gui.jaymoskingdoms.valor.powered").withColor(Ui.DIM));
+		}
 		for (Component c : left) {
 			for (var line : this.font.split(c, lw)) {
 				graphics.text(this.font, line, lx, ly, c.getStyle().getColor() == null ? Ui.TEXT : ARGB.opaque(c.getStyle().getColor().getValue()));
