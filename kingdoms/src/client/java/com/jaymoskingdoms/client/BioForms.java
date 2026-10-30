@@ -159,7 +159,7 @@ public final class BioForms {
 	}
 
 	/** {@code entity} is Bio-built (a player, or anyone carrying the heritage). */
-	static boolean bio(Entity entity) {
+	public static boolean bio(Entity entity) {
 		return Heritage.Kind.BIOBUILT.key().equals(entity.getAttached(Heritage.HERITAGE));
 	}
 

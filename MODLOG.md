@@ -3889,3 +3889,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   or a shot loosed coated) now lands through Chrono's intangible counter (`ChronoFlow`), Darktide's untouchable flurry
   (`DarktideGuard`), Smoke's Vapour Form and wholly-smoke (`SmokeVapour`), and a Flame Avatar's flame (`FlameAvatar.absorb`).
   Without Kingdoms nothing changes. Compile-checked; not seen in game.
+
+- **0.18.9, Bio-built forms no longer wear MCA's clothes and hair (Kingdoms 0.7.362):** Andy's screenshot showed a
+  Bio-built player's horns and tail over MCA's clothes and white hair. See the Kingdoms MODLOG.
