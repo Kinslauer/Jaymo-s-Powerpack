@@ -4113,3 +4113,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     forward axis by it, refreshes `up` and `left` and dirties the view matrices again. Other shots return 0, so nothing else changes.
   - `ZFighterSenses.impactFrame` is public now (Kingdoms' Rain of Cuts calls it by reflection).
   - Compile-checked; not seen in game.
+- **0.18.61 (Kingdoms 0.7.395):** Stare Down by who you stare at. A ship's captain can be stared into jumping ship, and a weak,
+  poor ruler in their hall into giving up the crown (a richer one pays you to go), when your Will beats their nerve; crew go
+  over the side, riders are thrown, casters are hushed, outlaws kneel. Staring at another player warns them, then the two clash wills (press jump). See kingdoms/MODLOG.md 0.7.395.

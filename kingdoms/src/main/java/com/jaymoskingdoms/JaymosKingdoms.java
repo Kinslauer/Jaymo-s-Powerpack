@@ -230,7 +230,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Forms.register();
 		LOGGER.debug("forms attachment: {}", com.jaymoskingdoms.forms.Forms.BOOK);
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
-		LOGGER.debug("will attachments: {} {}", Will.ROAR_READY, Will.REFUSE_READY);
+		LOGGER.debug("will attachments: {} {} {}", Will.ROAR_READY, Will.REFUSE_READY, WillClash.READY);
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
