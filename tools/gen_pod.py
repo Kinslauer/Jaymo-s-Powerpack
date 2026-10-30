@@ -28,6 +28,11 @@ CUBES = [
     ("keel", "iron", -12, 0, -2, 24, 3, 4),
     ("keel", "iron", -2, 0, -12, 4, 3, 24),
     ("keel", "iron", -4, 3, -4, 8, 3, 8),
+    # (Andy) four corner posts close the gaps between the plates: iron, from the keel up to the plates' top
+    ("keel", "iron", 10, 3, 10, 2, 27, 2),
+    ("keel", "iron", -12, 3, 10, 2, 27, 2),
+    ("keel", "iron", 10, 3, -12, 2, 27, 2),
+    ("keel", "iron", -12, 3, -12, 2, 27, 2),
     ("fin_r", "iron", 11, 3, -4, 2, 16, 8),
     ("fin_r", "iron", 11, 0, -4, 8, 3, 8),
     ("fin_l", "iron", -13, 3, -4, 2, 16, 8),
