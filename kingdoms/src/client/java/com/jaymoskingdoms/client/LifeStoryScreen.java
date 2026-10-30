@@ -1130,7 +1130,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** (0.7.356) Why an answer can't be picked here. */
 	private static net.minecraft.network.chat.MutableComponent reason(Answer a) {
-		return !a.offered() ? Component.translatable("gui.jaymoskingdoms.story.needs_powers")
+		return !a.offered() ? Component.translatable(a.start() == LifeStory.Start.NOBODIES ? "gui.jaymoskingdoms.story.needs_mca" : "gui.jaymoskingdoms.story.needs_powers")
 			: a.onlyFor() != null && bornAs() != a.onlyFor()
 				? Component.translatable("gui.jaymoskingdoms.story.only_for", Component.translatable("heritage.jaymoskingdoms." + a.onlyFor().key()))
 				: Component.translatable("gui.jaymoskingdoms.story.no_realms");

@@ -66,7 +66,7 @@ public final class StoryKit {
 	static final String HEIRLOOM_MOTIVE = "heirloom";
 
 	/** The trader's orders: how many, what each cost, and how long till each is ready to be sent on (ticks). */
-	static final int ORDERS = 2, ORDER_PAID = 4;
+	static final int ORDERS = 2;
 	static final long ORDER_WAIT = 6000L;
 
 	/** The pup: days to grow up, health and damage for each day of its age, the age they stop at (days), and how often it is looked at (ticks). */
@@ -208,7 +208,7 @@ public final class StoryKit {
 		if (town != null) {
 			List<ItemStack> wares = RoamingCaravans.cargo(random, Climate.at(level, town.seat()), RoamingCaravans.Kind.MERCHANT, false);
 			for (int i = 0; i < ORDERS && i < wares.size(); i++) {
-				MerchantOrders.taken(level, player, town, wares.get(i), ORDER_PAID, ORDER_WAIT * (i + 1));
+				MerchantOrders.taken(level, player, town, wares.get(i), ORDER_WAIT * (i + 1));
 			}
 		}
 		player.getInventory().placeItemBackInInventory(new ItemStack(Items.SADDLE), Prediction.SERVER_ONLY);
