@@ -6794,3 +6794,16 @@ find one living there."
   Strength in the K screen), `mixin/vampires/ValorGlowColorMixin`.
 - Built (Powers 0.18.8 and Kingdoms 0.7.361 compile and jar). Not seen in game.
 
+
+## 0.7.363: Bio-built forms no longer wear MCA's clothes and hair; their corpses keep the form (pack 0.18.10)
+Andy's screenshot: a Bio-built player showed their form's horns, wing cases and tail, but MCA's clothes and hair were
+drawn over the form's body, hiding it. `McaBioFormLayerMixin` left those layers off only when the form was on the render
+state; it now also checks the player MCA's visuals were taken from (`VillagerVisuals.entityId`), as the disguise mixin
+does, so MCA's clothing, hair and face layers stay off a Bio-built player either way.
+- **Corpses** (Andy: "it should always look the way it did when the player died"): a player's corpse is drawn as
+  MCA's villager look of them (Kitchen's `McaLooks`), which showed their clothes and hair. Each Bio-built player now
+  also carries a palette tag (`BioBuilt.PALETTE_TAG`, by variant) beside the form tag; Kitchen 0.5.37 keeps a dead
+  player's heritage and `jaymoskingdoms_bio_` tags on their corpse and puts them on the look while it's drawn, so
+  `BioForms.extract` reads the form and palette they died in from those tags, `VillagerLooks` draws the form (skin,
+  glow, parts and idle tail) on the corpse, and MCA's clothes, hair and face stay off it.
+- Compile-checked against 26.3 with javac (changed files); not seen in game.
