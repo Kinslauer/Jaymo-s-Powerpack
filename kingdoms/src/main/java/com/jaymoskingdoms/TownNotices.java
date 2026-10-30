@@ -51,6 +51,8 @@ final class TownNotices {
 	static final int HEARTS = 4, REPUTATION = 6;
 	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
 	static final float HELP_CHANCE = 0.3F;
+	/** (0.7.383, Off-World Orders) The chance a notice asks for a far world's goods ({@link OffWorldGoods}), once a player has the tier for it. */
+	static final float FAR_CHANCE = 0.25F;
 	/** (0.7.220) A Help wanted notice's kind. */
 	static final int HELP = -2;
 
@@ -154,6 +156,11 @@ final class TownNotices {
 		if (p[1].startsWith("help.")) {
 			return Careers.Job.of(p[1].substring(5)) == null ? null : new N(p[1], HELP, "", 0, 0, 0);
 		}
+		if (p[1].startsWith("far.")) {
+			// (0.7.383) a warrant for a far world's goods
+			OffWorldGoods.Good g = OffWorldGoods.byKey(p[1].substring(4));
+			return g == null ? null : N.gather(p[1], g.itemId(), g.min(), g.max(), g.emeralds());
+		}
 		for (List<N> list : NOTICES.values()) {
 			for (N n : list) {
 				if (n.key().equals(p[1])) {
@@ -183,6 +190,13 @@ final class TownNotices {
 	static @Nullable String pick(Villager poster, Set<String> up, long now, RandomSource random) {
 		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
 		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
+		if (random.nextFloat() < FAR_CHANCE && poster.level() instanceof ServerLevel far && OffWorldGoods.anyoneAsked(far.getServer())
+			&& up.stream().noneMatch(k -> is(k) && parts(k)[1].startsWith("far."))) {
+			List<OffWorldGoods.Good> goods = OffWorldGoods.available();
+			if (!goods.isEmpty()) {
+				return "town|far." + goods.get(random.nextInt(goods.size())).key() + "|" + poster.getStringUUID() + "|" + now;
+			}
+		}
 		if (random.nextFloat() < HELP_CHANCE && poster.level() instanceof ServerLevel level && up.stream().noneMatch(k -> is(k) && parts(k)[1].startsWith("help."))) {
 			// (0.7.220) Help wanted: a job their town is short of hands for
 			Faction f = Quests.settlement(level, poster);

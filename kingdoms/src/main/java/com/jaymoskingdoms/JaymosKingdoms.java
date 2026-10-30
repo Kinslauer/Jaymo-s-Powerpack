@@ -198,7 +198,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
 		// the villager screens open, so the trades are there when they do)
 		Remedies.register();
-		// (0.7.366) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
+		// (0.7.381) what is beyond a player's world tier isn't offered to them (before the smiths grade what is left)
 		TierGate.register();
 		// a realm's smiths sell better-forged gear to those it thinks well of (with Jaymo's Powers)
 		GradedTrades.register();
@@ -240,7 +240,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.384) star-touched foes on Jaymo's Powers' far worlds (its attachment)
 		LOGGER.debug("star-touched attachment: {}", StarTouched.STAR);
 		StarTouched.register();
-		// (0.7.366) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
+				// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();
 		FrostPrison.register();
@@ -371,6 +371,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
+		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
@@ -411,7 +412,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sorcery.register();
 		// 0.5.62: the villager on a floating island is a hermit wizard with a story
 		Hermits.register();
-		// 0.7.367: star charts for sale, and lights in the sky in the Tidings
+		// 0.7.382: star charts for sale, and lights in the sky in the Tidings
 		StarFolk.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();

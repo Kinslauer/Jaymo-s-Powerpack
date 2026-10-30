@@ -26,7 +26,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.366, Andy's SevTech picks: "The Ground Changes") Nobody needs fresh land for the next metal. When a player opens a
+ * (0.7.381, Andy's SevTech picks: "The Ground Changes") Nobody needs fresh land for the next metal. When a player opens a
  * world tier, the chunks already loaded round them get that tier's veins, a few pockets of ore laid over deep stone: iron and
  * copper for Borderlands, gold and lapis for Wildlands, diamond for Dread and, in the Nether, ancient debris for Legend.
  * Each chunk remembers the highest tier it has been seeded for ({@link #SEEDED}, saved with the chunk) so a tier is

@@ -267,7 +267,7 @@ public final class TinkeringJei implements IModPlugin {
 				for (PartType part : kind.assembly().parts) {
 					inputs.add(anyMaterial.get(part));
 				}
-				// (0.18.15) a plain item beside the head: the Sealed Helm's glass block
+				// (0.18.48) a plain item beside the head: the Sealed Helm's glass block
 				if (kind.assembly().extra != null) {
 					inputs.add(List.of(new ItemStack(kind.assembly().extra)));
 				}

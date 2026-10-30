@@ -94,7 +94,14 @@ public final class Recollections {
 		APOLOGISED(1, 45, false, false, "%1$s said sorry for %2$s, and you forgave them.", ""),
 		SPURNED(0, 45, false, false, "%1$s said sorry for %2$s, and you would not have it.", ""),
 		AIRED(0, 30, false, false, "%1$s brought up %2$s with you, and you had it out.", ""),
-		ASKED_AFTER(1, 30, false, false, "%1$s asked after you, after %2$s.", "");
+		ASKED_AFTER(1, 30, false, false, "%1$s asked after you, after %2$s.", ""),
+		// (0.7.380) what a player did for them while they lay downed or under attack ({@link Rescues})
+		CARRIED(4, 0, true, true, "You lay downed and %1$s picked you up and carried you out of harm's way.",
+			"%1$s carried %3$s out of harm's way when they lay downed."),
+		GOT_UP(4, 90, true, true, "You lay downed and %1$s knelt by you and got you back on your feet.", "%1$s got %3$s back on their feet when they lay downed."),
+		TENDED(2, 40, true, false, "%1$s dressed your wounds with their own hands.", ""),
+		SHIELDED(3, 60, true, true, "%1$s drew %2$s off you when it came for you.", "%1$s drew %2$s off %3$s when it came for them."),
+		THREW(-1, 20, true, false, "%1$s picked you up while you lay downed, then threw you down.", "");
 
 		final int weight, days;
 		final boolean remark, tellable;
@@ -139,6 +146,8 @@ public final class Recollections {
 	static final float GOSSIP_CHANCE = 0.35F;
 	/** The chance, when two friends meet, that one passes on something weighty they remember (each way). */
 	static final float SHARE_CHANCE = 0.35F;
+	/** (0.7.380) How long what last happened between you stays what they talk of first (ticks: ten minutes). */
+	static final long FRESH_TICKS = 12000L;
 	/** The chance, in an MCA chat, that they bring up something they remember and haven't yet said. */
 	public static final float CHAT_REMARK_CHANCE = 0.5F;
 	/** Ways a villager has of refusing to chat with someone they bear too much ill will. */
@@ -148,15 +157,19 @@ public final class Recollections {
 	/** The least weight (either way) that's worth passing on, or worth talking of to another player. */
 	static final int TELL_WEIGHT = 3;
 
-	/** One memory: what, its detail (an item, a task, a name), who told them (empty: they were there), the day, how many times, said yet. */
-	public record Recollection(String kind, Component detail, String from, long day, int count, boolean told) {
+	/**
+	 * One memory: what, its detail (an item, a task, a name), who told them (empty: they were there), the day, how many times,
+	 * said yet, and (0.7.380) the game time it last happened (0: before that was kept), so the latest dealing can be told apart.
+	 */
+	public record Recollection(String kind, Component detail, String from, long day, int count, boolean told, long at) {
 		public static final Codec<Recollection> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("kind").forGetter(Recollection::kind),
 				ComponentSerialization.CODEC.optionalFieldOf("detail", Component.empty()).forGetter(Recollection::detail),
 				Codec.STRING.optionalFieldOf("from", "").forGetter(Recollection::from),
 				Codec.LONG.optionalFieldOf("day", 0L).forGetter(Recollection::day),
 				Codec.INT.optionalFieldOf("count", 1).forGetter(Recollection::count),
-				Codec.BOOL.optionalFieldOf("told", false).forGetter(Recollection::told))
+				Codec.BOOL.optionalFieldOf("told", false).forGetter(Recollection::told),
+				Codec.LONG.optionalFieldOf("at", 0L).forGetter(Recollection::at))
 			.apply(i, Recollection::new));
 
 		@Nullable Kind type() {
@@ -168,7 +181,7 @@ public final class Recollections {
 		}
 
 		Recollection withTold() {
-			return new Recollection(kind, detail, from, day, count, true);
+			return new Recollection(kind, detail, from, day, count, true, at);
 		}
 
 		/** How much it sways them, counted over and halved for hearsay. */
@@ -240,6 +253,7 @@ public final class Recollections {
 			return;
 		}
 		long day = today(who);
+		long now = who.level().getGameTime();
 		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
 		Person had = all.get(id);
 		List<Recollection> list = new ArrayList<>(had == null ? List.of() : had.memories());
@@ -251,7 +265,7 @@ public final class Recollections {
 			if (r.kind().equals(kind.key()) && r.day() == day && r.from().equals(from) && (kind == Kind.TRADE || kind == Kind.STRUCK
 				|| r.detail().getString().equals(detailText))) {
 				// (the same again that day: it counts the more, and is news again)
-				list.set(i, new Recollection(r.kind(), detail, from, day, r.count() + 1, false));
+				list.set(i, new Recollection(r.kind(), detail, from, day, r.count() + 1, false, now));
 				merged = true;
 				break;
 			}
@@ -264,7 +278,7 @@ public final class Recollections {
 					list.remove(said.get(i));
 				}
 			}
-			list.add(new Recollection(kind.key(), detail, from, day, 1, false));
+			list.add(new Recollection(kind.key(), detail, from, day, 1, false, now));
 		}
 		while (list.size() > PER_PLAYER) {
 			// (the least weighty, the oldest first; what's kept for good is kept)
@@ -349,12 +363,43 @@ public final class Recollections {
 
 	// ---- saying it (no AI) ----------------------------------------------------------------------------------------------
 
-	/** The memory of {@code player} {@code who} would bring up next: the weightiest not yet said, the latest of those; or null. */
-	static @Nullable Recollection unsaid(LivingEntity who, ServerPlayer player) {
+	/** {@code r} is something they'd bring up, and haven't yet. */
+	private static boolean sayable(Recollection r) {
+		Kind k = r.type();
+		return k != null && !r.told() && k.remark && (!r.heard() || k.tellable) && (k != Kind.TRADE || r.count() >= REGULAR_TRADES);
+	}
+
+	/** (0.7.380) {@code r} happened in the last {@link #FRESH_TICKS}. */
+	private static boolean fresh(LivingEntity who, Recollection r) {
+		return r.at() > 0L && who.level().getGameTime() - r.at() <= FRESH_TICKS;
+	}
+
+	/**
+	 * (0.7.380) What {@code who} last had to do with {@code player} themselves (not hearsay), if it was in the last
+	 * {@link #FRESH_TICKS}; or null. Andy: "the talk options should always relate to the most recent interaction."
+	 */
+	static @Nullable Recollection latest(LivingEntity who, ServerPlayer player) {
 		Recollection best = null;
 		for (Recollection r : of(who, player)) {
-			Kind k = r.type();
-			if (k == null || r.told() || !k.remark || r.heard() && !k.tellable || k == Kind.TRADE && r.count() < REGULAR_TRADES) {
+			if (!r.heard() && fresh(who, r) && (best == null || r.at() >= best.at())) {
+				best = r;
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * The memory of {@code player} {@code who} would bring up next: (0.7.380) what just happened between them, if it's worth
+	 * a word and still unsaid; else the weightiest not yet said, the latest of those; or null.
+	 */
+	static @Nullable Recollection unsaid(LivingEntity who, ServerPlayer player) {
+		Recollection last = latest(who, player);
+		if (last != null && sayable(last)) {
+			return last;
+		}
+		Recollection best = null;
+		for (Recollection r : of(who, player)) {
+			if (!sayable(r)) {
 				continue;
 			}
 			if (best == null || Math.abs(r.sway()) > Math.abs(best.sway()) || Math.abs(r.sway()) == Math.abs(best.sway()) && r.day() >= best.day()) {
@@ -362,6 +407,19 @@ public final class Recollections {
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * (0.7.380) MCA's menu opening on {@code who}: what just happened between you, said and now told, if it was the last thing
+	 * between you, is worth a word and hasn't been said; or null for MCA's own greeting.
+	 */
+	public static @Nullable Component opening(LivingEntity who, ServerPlayer player, RandomSource random) {
+		Recollection last = latest(who, player);
+		if (last == null || !sayable(last)) {
+			return null;
+		}
+		markTold(who, player, last);
+		return line(last, nameTo(player, who), random);
 	}
 
 	/** {@code who} has something about {@code player} they've not yet said. */

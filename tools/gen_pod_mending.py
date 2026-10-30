@@ -1,4 +1,4 @@
-"""Writes the assets for mending a space pod (0.18.16, power/zfighter/pod/SalvageRack and PodGrades):
+"""Writes the assets for mending a space pod (0.18.49, power/zfighter/pod/SalvageRack and PodGrades):
 
 * the Salvage Rack: a block model (a low bench of planks on log legs, vanilla textures), one overlay model for each pod part lying
   on it (the part's own boxes at half size, worn or mended: salvage_rack_<part> and salvage_rack_<part>_worn), the blockstate that

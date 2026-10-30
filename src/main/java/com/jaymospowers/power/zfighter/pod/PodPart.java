@@ -3,7 +3,7 @@ package com.jaymospowers.power.zfighter.pod;
 import java.util.List;
 
 /**
- * (0.18.14, Andy) The parts a space pod is built from, in the order they go on (and come off in reverse): the keel is
+ * (0.18.47, Andy) The parts a space pod is built from, in the order they go on (and come off in reverse): the keel is
  * the found piece everything hangs on, then the fins, the thruster bell, the fuel tank, the four hull plates, the
  * canopy and the beacon mast. Each part has {@link #count} slots; slot {@code i} of a part is bit {@link #bit(int)} in
  * the pod's masks (see {@code PodEntity}). Mockup: project files art-overhaul/space-travel/pod-mockup.png.

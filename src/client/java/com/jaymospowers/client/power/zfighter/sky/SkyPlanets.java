@@ -22,7 +22,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.18, Andy's SevTech picks: "Planets in the Sky") A point of light in the night sky for each world whose star chart is
+ * (0.18.51, Andy's SevTech picks: "Planets in the Sky") A point of light in the night sky for each world whose star chart is
  * read, at a fixed place on the sky (right ascension and declination in {@link #SPOTS}) that turns with the stars through the
  * night. Client only: nothing is sent or kept but the charts the player has read. It is drawn over the world as the hud's
  * first layer, in the screen position of the star's direction (behind a ceiling or a hill it fades out: {@link #SEE_TICKS}),

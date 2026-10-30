@@ -83,5 +83,8 @@
   "entity.jaymospowers.raider.chief.5": "Garlek, Raider Chief",
   "entity.jaymospowers.raider.chief.6": "Rhubarra, Raider Chief",
   "entity.jaymospowers.raider.chief.7": "Okrav, Raider Chief",
-  "message.jaymospowers.raiders.beaten": "The raiders are beaten. One of their pods still ticks over where it landed."
+  "message.jaymospowers.raiders.beaten": "The raiders are beaten. One of their pods still ticks over where it landed.",
+  "talk.jaymospowers.patrol.deeds": "\"Strong enough, I'd say. But the Patrol takes nobody who hasn't been out and done something: a forged tool in your hand, at least. Do it, and ask again.\"",
+  "talk.jaymospowers.patrol.yard": "\"Good landing at %s, this last run. They keep a yard of pads there, with a post lit at the middle. Come down on a pad and nobody rings the bell.\"",
+  "message.jaymospowers.patrol.held_back": "Your arrests are enough for Galactic Patrol %1$s, but the Patrol wants more from you than arrests: go further up the ladder first."
 }

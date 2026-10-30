@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * (0.18.15, SevTech picks) Fuel grades. Every fuel the pod's tank takes has a grade: 1 is coal, charcoal and coal blocks; 2 is
+ * (0.18.48, SevTech picks) Fuel grades. Every fuel the pod's tank takes has a grade: 1 is coal, charcoal and coal blocks; 2 is
  * blaze powder and rods and Pod Spirit (the Fuel Still's); 3 is the Cinder Ember, found only on Cinder. Every world needs a grade
  * ({@link #NEEDED}); a tank holds the lowest grade that went into it since it was last empty, so one scoop of coal in a grade 2
  * tank drops it to 1 ({@link #mixed}). {@code PodEntity} keeps the number ({@code fuelGrade}), the star map shows what each world

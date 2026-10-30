@@ -46,7 +46,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.16, Andy's SevTech picks: "Salvage Bench") The Salvage Rack, a low bench for mending worn pod parts instead of
+ * (0.18.49, Andy's SevTech picks: "Salvage Bench") The Salvage Rack, a low bench for mending worn pod parts instead of
  * making new ones. Carry a worn part to it and set it down looking at the rack ({@link PodParts#tryAttach}): it lies on
  * the rack. Strike it with a hammer in the main hand and the part's metal in the other ({@link #metalOf}): the first
  * blow takes one ingot, and {@link #BLOWS} blows in all make the part sound. Sneak and strike a part that isn't mended

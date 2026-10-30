@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -263,6 +264,13 @@ public final class Carry {
 	/** Let go → not before this game time can it be picked up again. Also a failed struggle's cooldown. */
 	private static final Map<UUID, Long> REGRAB = new HashMap<>();
 	private static final Map<UUID, Long> STRUGGLE_READY = new HashMap<>();
+
+	/**
+	 * (0.18.45) Told of every person a player lifts, sets down (dropped, placed or slipped), or throws. Jaymo's Kingdoms adds
+	 * one each (by reflection) so a villager carried out of a fight speaks of it and remembers it.
+	 */
+	public static final List<BiConsumer<ServerPlayer, Entity>> PICKED_UP_LISTENERS = new ArrayList<>(), SET_DOWN_LISTENERS = new ArrayList<>(),
+		THROWN_LISTENERS = new ArrayList<>();
 
 	/** (0.17.7) A lift being held: on whom, since when, and when use last came. */
 	private static final class Lift {
@@ -603,6 +611,11 @@ public final class Carry {
 			level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.6F, 0.6F);
 			level.playSound(null, carrier.getX(), carrier.getY() + 2.0, carrier.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.35F, 1.6F);
 		}
+		if (!block && !part) {
+			for (BiConsumer<ServerPlayer, Entity> listener : PICKED_UP_LISTENERS) {
+				listener.accept(carrier, target);
+			}
+		}
 	}
 
 	// ---- letting go
@@ -613,7 +626,7 @@ public final class Carry {
 			return;
 		}
 		if (!toss && CarryBlock.is(entry.carried)) {
-			// (0.18.14) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
+			// (0.18.47) a space pod part looked at a pod goes onto the pod (the display is gone then, so nothing is put in the world)
 			switch (com.jaymospowers.power.zfighter.pod.PodParts.tryAttach(carrier, entry.carried)) {
 				case DONE -> {
 					end(carrier, entry, Let.SET_DOWN);
@@ -750,6 +763,12 @@ public final class Carry {
 			// a heave: a heavy grunt of a swing, and the weight coming back as it leaves your hands
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.9F, 0.55F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5F, 0.7F);
+		}
+		if (carrier != null && how != Let.ESCAPE && !CarryBlock.is(carried) && !(carried instanceof SeveredPart)) {
+			// (0.18.45) Kingdoms hears of it: a villager set down where it's safe, or flung
+			for (BiConsumer<ServerPlayer, Entity> listener : how == Let.THROW ? THROWN_LISTENERS : SET_DOWN_LISTENERS) {
+				listener.accept(carrier, carried);
+			}
 		}
 		switch (how) {
 			case THROW -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F, 0.8F);

@@ -74,7 +74,7 @@ import org.jspecify.annotations.Nullable;
  * six wake you off the overworld, and Kingdoms calls {@link #land} (by reflection) to put you there:
  * <ul>
  * <li><b>Stranded on the Pale Moon</b> ({@code moon}): your miners' pod came down hard, far from the moon's pad. The
- * {@link #WRECK} won't fly as it is. (0.18.14) Right-click it and it comes apart into a pod missing its tank, canopy, mast and two
+ * {@link #WRECK} won't fly as it is. (0.18.47) Right-click it and it comes apart into a pod missing its tank, canopy, mast and two
  * plates: the parts to mend her are found, not smelted (the torn pod log in your pack says as much).</li>
  * <li><b>Raised under the green sky</b> ({@code verdant}, Verdant-born only): you wake in a village of the Verdant World near
  * where the Lookout floats over it, with a compass the village keyed to the gate back ({@link ZFighterSites#verdantGate}).</li>
@@ -290,7 +290,7 @@ public final class ZFighterStarts {
 	}
 
 	/**
-	 * The wreck of a pod: it can't be broken. (0.18.14) Right-click it and it comes apart into a wrecked pod you can mend with
+	 * The wreck of a pod: it can't be broken. (0.18.47) Right-click it and it comes apart into a wrecked pod you can mend with
 	 * parts ({@link #wreckedPod}): the keel, three fins (one bent), the bell and two plates are still on; the tank, the canopy,
 	 * the mast and the other two plates are missing, and so is the fuel. The chat names what is missing. The block's old
 	 * mending steps are gone (the properties stay so saved worlds load).
