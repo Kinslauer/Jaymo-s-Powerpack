@@ -51,7 +51,7 @@ final class TownNotices {
 	static final int HEARTS = 4, REPUTATION = 6;
 	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
 	static final float HELP_CHANCE = 0.3F;
-	/** (0.7.383, Off-World Orders) The chance a notice asks for a far world's goods ({@link OffWorldGoods}), once a player has the tier for it. */
+	/** (0.7.385, Off-World Orders) The chance a notice asks for a far world's goods ({@link OffWorldGoods}), once a player has the tier for it. */
 	static final float FAR_CHANCE = 0.25F;
 	/** (0.7.220) A Help wanted notice's kind. */
 	static final int HELP = -2;
@@ -157,7 +157,7 @@ final class TownNotices {
 			return Careers.Job.of(p[1].substring(5)) == null ? null : new N(p[1], HELP, "", 0, 0, 0);
 		}
 		if (p[1].startsWith("far.")) {
-			// (0.7.383) a warrant for a far world's goods
+			// (0.7.385) a warrant for a far world's goods
 			OffWorldGoods.Good g = OffWorldGoods.byKey(p[1].substring(4));
 			return g == null ? null : N.gather(p[1], g.itemId(), g.min(), g.max(), g.emeralds());
 		}

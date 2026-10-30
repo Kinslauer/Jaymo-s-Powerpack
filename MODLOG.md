@@ -3928,7 +3928,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the race only when no foe is in the combo's reach and cone (`ZFighterCombo.inFront`, the server's own scan) and no
     string is going.
   - Compile-checked; not seen in game.
-- **0.18.48, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+- **0.18.49, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing
@@ -3950,7 +3950,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   infusion altar (`AlchemyJei`, centre, grouped components, essences, research, instability) now have JEI pages, so the
   bell and the canopy show there; the server sends its infusion recipe list to each client (`Infusion.Sync`) so the page
   matches the altar on a dedicated server. The SevTech plan itself: docs/SevTech-Plan.md.
-- **0.18.49, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
+- **0.18.50, fuel grades and breath (SevTech picks):** Andy's picks from the SevTech page: fuel that matters, air that
   matters, and a world that bites. **Fuel grades** (`power/zfighter/fuel/PodFuel`): coal, charcoal and coal blocks are grade 1;
   blaze powder, rods and Pod Spirit grade 2; the Cinder Ember (found only on Cinder: breaking stone beside its lava
   sometimes turns one up; `PodFuel.reward` is there for a mission to hand them out) grade 3. Every world needs a grade (the
@@ -3975,7 +3975,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and half the damage while a quenched graded piece (a smith's work that has gone cold: `Grades` and no `heated_at`) is worn
   or held. Art by tools/gen_fuel_breath.py. Compile-checked against the 26.3 jar; not seen in game.
 
-- **0.18.50, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
+- **0.18.51, mending the pod (SevTech picks):** the pod is mended, not crafted. Six picks from the SevTech page, all in
   `power/zfighter/pod`. **Finish With a Hammer:** a pod that has what a lift needs (keel, fins, bell, tank, canopy) is not
   flight-ready until one plain hammer blow on its hull finishes it (anvil ring, sparks, the beacon lamp lights full bright
   in the model); only a finished pod launches. Taking a part off or a damaged part going on clears it again, and a hammer
@@ -3998,13 +3998,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   parts off. A pod stripped to its keel keeps its grade in the keel block. Textures are painted by `tools/gen_pod_parts.py`
   (worn parts, grade bands) and `tools/gen_pod_mending.py` (rack, world parts); `tools/gen_pod.py` gained the lamp and the bands.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 3.
-- **0.18.51, deed hooks for the ladder (SevTech picks, Kingdoms 0.7.381):** three small hooks so Kingdoms' world tiers can ask
+- **0.18.52, deed hooks for the ladder (SevTech picks, Kingdoms 0.7.383):** three small hooks so Kingdoms' world tiers can ask
   for one deed per rung. A pod trip that lands home tells Kingdoms (`ZFighterKingdoms.deed("pod_flight")`, reflection, so Powers
   still never links it); a wreck salvage that gives a part set tells it `maw_salvage` (through `ZFighterPodTrip.deed`, the public
   relay the pod package can reach); a Tool Station tool with iron, pig iron or steel in it fires `Tinkering.TOOL_BUILT_LISTENERS`
   (the Smithing Anvil already had `Provenance.FORGED_LISTENERS`), which Kingdoms listens on for the first forged iron tool. No
   new items, text or recipes. Compile-checked against the 26.3 jar; not seen in game.
-- **0.18.52, reading the sky (SevTech picks; Kingdoms 0.7.382):** a world is on the star map only once its chart is read. Six
+- **0.18.53, reading the sky (SevTech picks; Kingdoms 0.7.384):** a world is on the star map only once its chart is read. Six
   picks, all in `power/zfighter/sky`. **Star charts** (`StarChartItem`, `Charts`): one item `star_chart` with a world component
   (`star_chart_world`; the six worlds from the Pale Moon to the Verdant World); using one marks the world read on the player's
   `zfighter_sky_charts` attachment (a bitmask, synced to its owner, kept through death) and opens a book page of four odd short
@@ -4020,7 +4020,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
   first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
-- **0.18.53, who flies (SevTech picks; Kingdoms 0.7.383):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
+- **0.18.54, who flies (SevTech picks; Kingdoms 0.7.385):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
   rank needs a world tier open through Kingdoms' deeds as well as its arrests (`ZFighterPatrol.RANK_TIER`: Rookie Borderlands,
   Officer Wildlands, Sergeant and Inspector Dread, Commander Legend): `rank(player, arrests)` holds the rank back, the license and the
   patrolman's report show the held rank, a promotion earned in arrests but not in deeds says so, and a patrolman will not swear in

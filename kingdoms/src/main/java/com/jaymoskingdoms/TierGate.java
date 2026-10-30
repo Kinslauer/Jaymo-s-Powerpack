@@ -22,7 +22,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 /**
- * (0.7.381, Andy's SevTech picks: "Hidden Until Reached") What is beyond a player's tier isn't offered to them. Smiths, the
+ * (0.7.383, Andy's SevTech picks: "Hidden Until Reached") What is beyond a player's tier isn't offered to them. Smiths, the
  * wandering trader and every other merchant keep casts, blueprints and metal parts that belong to a higher tier out of the
  * offers shown to a player who hasn't reached it, and a smith's gear is never forged above the grade the player's tier
  * allows ({@link #maxGrade}). Nothing is removed from the world: the offers are set aside on the merchant ({@link #STASH})

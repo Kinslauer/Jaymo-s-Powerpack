@@ -153,7 +153,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.StarFolk.ANSWER.equals(answer)) {
-			// (0.7.382) asked about the stars: a few words about the sky, and the star charts for sale on the talk screen
+			// (0.7.384) asked about the stars: a few words about the sky, and the star charts for sale on the talk screen
 			villager.getInteractions().stopInteracting();
 			com.jaymoskingdoms.StarFolk.talk(player, villager);
 			ci.cancel();

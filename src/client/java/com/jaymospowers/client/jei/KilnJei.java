@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.18.48) JEI's Brick Kiln page: everything the kiln fires ({@link Kiln#recipes()}), the heat it needs and the chance
+ * (0.18.49) JEI's Brick Kiln page: everything the kiln fires ({@link Kiln#recipes()}), the heat it needs and the chance
  * of one more. Each recipe's inputs are whatever items its test accepts, so the page follows the kiln's own rules.
  * Only loaded by JEI (the {@code jei_mod_plugin} entrypoint), on {@link SimpleCategory}.
  */
