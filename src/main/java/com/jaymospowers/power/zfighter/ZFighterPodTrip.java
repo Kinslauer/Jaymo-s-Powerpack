@@ -53,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * inside while everyone near watches it go. Up past the clouds the client shows the flight ({@code ZFighterFlightScreen}): the pod
  * crossing space from here to there, longer the farther the world ({@link #flightTicks}); after a first trip it can be skipped.
  * Then the pod comes down out of the sky over open ground anywhere on the far world (no landing pad: {@link #ground}), slowing
- * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.14) It is the real
+ * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.19) It is the real
  * pod with the parts it was launched with: one that isn't whole lands hard ({@link #HARD_LANDING_DAMAGE}) and shakes
  * {@link #SHAKEN_MIN} to {@link #SHAKEN_MAX} parts loose.
  * <p>
@@ -74,7 +74,7 @@ public final class ZFighterPodTrip {
 	/** The descent: how high over the ground it starts, its top and bottom speed, how quickly it slows, and when it gives up. */
 	static final int DESCENT_HEIGHT = 56, DESCENT_MAX_TICKS = 400;
 	static final double DESCENT_FAST = 1.2, DESCENT_SLOW = 0.12, DESCENT_EASE = 0.05;
-	/** (0.18.14) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
+	/** (0.18.19) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
 	static final float HARD_LANDING_DAMAGE = 6.0F;
 	static final int SHAKEN_MIN = 1, SHAKEN_MAX = 2;
 	/** How big a pod is to find room for it (blocks): its width and height. */
@@ -94,7 +94,7 @@ public final class ZFighterPodTrip {
 		final int dest;
 		final int fuelLeft;
 		final int fuelBefore;
-		/** (0.18.15) The grade of the fuel in the tank, carried to the pod that lands. */
+		/** (0.18.20) The grade of the fuel in the tank, carried to the pod that lands. */
 		int fuelGrade;
 		final ResourceKey<Level> from;
 		final BlockPos origin;
@@ -541,7 +541,7 @@ public final class ZFighterPodTrip {
 		}
 	}
 
-	/** (0.18.14) A pod that isn't whole comes down hard: a blast, the pilot hurt, and a part or two shaken off (never the keel). */
+	/** (0.18.19) A pod that isn't whole comes down hard: a blast, the pilot hurt, and a part or two shaken off (never the keel). */
 	private static void hardLanding(ServerLevel level, ServerPlayer player, @Nullable ServerPlayer guest, PodEntity pod) {
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 		level.sendParticles(ParticleTypes.EXPLOSION, pod.getX(), pod.getY() + 1.0, pod.getZ(), 2, 0.6, 0.4, 0.6, 0.0);
