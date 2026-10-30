@@ -139,7 +139,10 @@ public final class ArsenalPower implements Power {
 		builder -> builder.persistent(Cooldowns.CODEC).copyOnDeath().syncWith(Cooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/** A rift being reached into: when it opened, and what's coming out. Server memory only. */
-	private record Pending(long start, List<ItemStack> stacks, int life) {
+	private record Pending(long start, List<ItemStack> stacks, int life, ArsenalQuestItems.@org.jspecify.annotations.Nullable Entry quest) {
+		Pending(long start, List<ItemStack> stacks, int life) {
+			this(start, stacks, life, null);
+		}
 	}
 
 	/** Rifts that are open: player → the reach in progress. */
@@ -344,7 +347,7 @@ public final class ArsenalPower implements Power {
 			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.35F, 1.6F);
 		}
 		if (t == ArsenalReach.PULL_END) {
-			pull(player, rift, pending.stacks(), pending.life());
+			pull(player, rift, pending.stacks(), pending.life(), pending.quest());
 		}
 		if (t >= ArsenalReach.CLOSE_END) {
 			PENDING.remove(player.getUUID());
@@ -387,8 +390,13 @@ public final class ArsenalPower implements Power {
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
 		}
-		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS));
-		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy()));
+		// now and then the rift goes for a special quest item instead (found or made when it arrives; the weapons are the fallback)
+		ArsenalQuestItems.Entry quest = relic.isEmpty() && (!first || ArsenalArmory.pinned(player) == null) && level.getServer() != null
+			? ArsenalQuestItems.roll(player.getRandom()) : null;
+		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS, quest));
+		ItemStack shown = quest != null ? ArsenalQuestItems.preview(quest, level.getServer())
+			: stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy();
+		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, shown));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 0.55F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.15F, 1.8F);
@@ -473,9 +481,28 @@ public final class ArsenalPower implements Power {
 		level.sendParticles(ParticleTypes.PORTAL, center.x, center.y, center.z, 4, 0.1, 0.1, 0.1, 0.6);
 	}
 
-	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks, int life) {
+	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks, int life,
+		ArsenalQuestItems.@org.jspecify.annotations.Nullable Entry quest) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		if (quest != null) {
+			ItemStack special = ArsenalQuestItems.take(player, quest, rift);
+			if (!special.isEmpty()) {
+				// a real item, not a summon: no tag, nothing dissolves it
+				if (player.getMainHandItem().isEmpty()) {
+					player.setItemInHand(InteractionHand.MAIN_HAND, special);
+				} else {
+					player.getInventory().placeItemBackInInventory(special, Prediction.SERVER_ONLY);
+				}
+				level.sendParticles(ParticleTypes.END_ROD, rift.x, rift.y, rift.z, 14, 0.15, 0.15, 0.15, 0.08);
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 30, 0.25, 0.25, 0.25, 0.05);
+				level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 0.9F, 0.8F);
+				level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 0.6F);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pulled", special.getHoverName())
+					.withStyle(ChatFormatting.LIGHT_PURPLE));
+				return;
+			}
+		}
 		makeRoom(player, MAX_HELD - 1);
 
 		Summoned tag = new Summoned(player.getUUID(), now + life, player.getRandom().nextInt());
