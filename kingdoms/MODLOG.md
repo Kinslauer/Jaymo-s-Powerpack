@@ -6946,3 +6946,17 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Hermits:** "Ask about the stars" also trades Maw dust (`StarFolk.DUST_COUNT` 2 for `DUST_PRICE` 10 emeralds; a hermit only, and
   only with Powers), and still shows when every chart is read. The alchemy hints (`HermitAlchemy.PATH`) end with the Starlit Lens.
 - Compile-checked against 26.3 (all but the two client files that need Voice Changer and EMF jars); not seen in game.
+
+## 0.7.390: spell tomes float open while casting; bolts work on the world
+- **Afloat** (`Tomes.AFLOAT`, `client/TomeFloat`): a click, a page cast or a lock taken (Powers' lock-on, read by
+  `PowersCompat.lockTarget`) lifts the tome to float open before you, off the right shoulder (`FLOAT_AHEAD/SIDE/UP`), bobbing
+  and swinging after your aim. It turns a leaf and sheds glyphs as it rises and at each new lock; bolts fly from it toward the
+  crosshair. Back to the hand on letting go of the lock, or `FLOAT_LINGER` (3 s) after the last shot with nothing locked. The
+  hand is drawn empty while it floats (`TomeFloatHandMixin`, `TomeHeldItemMixin`).
+- **Bolts on the world** (`BoltWorks`): any bolt lights (fire) or puts out (water, air, ice) candles, campfires and fire and
+  melts snow; a charged one (`CHARGED` 0.3+) works a patch of radius 1 to 3: ice freezes the water it crosses (frosted ice, real
+  ice at full charge), cools lava, lays snow; fire sets alight and dies in water; water cools lava, soaks farmland; earth topples
+  sand and gravel, cracks stone bricks; air swings doors, trapdoors and gates, scatters items; lightning scrapes copper and shocks
+  swimmers; restoration grows crops; death withers grass, flowers and crops; blood lays Powers' blood stains. Only where the
+  caster may build.
+- Compile-checked against 26.3; not seen in game.
