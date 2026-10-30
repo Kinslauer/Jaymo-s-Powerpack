@@ -1,7 +1,7 @@
 {
-	"key.jaymospowers.web_arm": "Symbiote Arm: stow what you hold, or draw the picked thing (Sneak: next slot)",
-	"key.jaymospowers.web_arm_use": "Symbiote Arm: hold to have the tendril use the picked thing",
-	"key.jaymospowers.web_mantle": "Symbiote Mantle: unfurl or furl the cape",
+	"key.jaymospowers.web_arm": "Symbiote Arm: Stow or Draw",
+	"key.jaymospowers.web_arm_use": "Symbiote Arm: Use (hold)",
+	"key.jaymospowers.web_mantle": "Symbiote Mantle (cape)",
 	"power.jaymospowers.web.key.ultimate.symbiote": "Feed the symbiote meat from your hand, or consume what you hold",
 	"power.jaymospowers.web.key.ultimate.symbiote.name": "Feed / Consume",
 	"power.jaymospowers.web.key.ultimate.symbiote_ascended": "Web Strike, or feed the symbiote meat from your hand, or consume what you hold",
