@@ -146,6 +146,8 @@ public final class LifeStory {
 	 * the one you wake beside; you wake this far (min, max, blocks) from where they woke.
 	 */
 	static final long TOGETHER_WINDOW_TICKS = 12000L;
+	/** (0.7.417) How near a mate's landing must be to a den's floor for you to wake in that den beside them. */
+	static final double DEN_MATE_RANGE = 12.0;
 	static final int TOGETHER_MIN = 2, TOGETHER_MAX = 5, TOGETHER_TRIES = 24;
 	/** (0.7.417) A moon-cursed road's landing: the wild, or the edge of a village (blocks out from it, min and max). */
 	static final int MOON_CURSED_VILLAGE_MIN = 24, MOON_CURSED_VILLAGE_MAX = 40;
@@ -588,10 +590,12 @@ public final class LifeStory {
 			HUNTS.clear();
 			DEPARTED.clear();
 			ROAD_ASKED.clear();
+			LANDINGS.clear();
 		});
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			DEPARTED.remove(handler.player.getUUID());
 			ROAD_ASKED.remove(handler.player.getUUID());
+			LANDINGS.remove(handler.player.getUUID());
 		});
 		// (0.7.304) a death before the story was told shut its screen: it opens again on the new body
 		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
@@ -1093,13 +1097,14 @@ public final class LifeStory {
 			case VILLAGE -> {
 				// (0.7.381, Andy) a haven of your own people, else one that takes your blood in; never shunned there (StoryHomes)
 				Faction standing = StoryHomes.standing(server, player, heritage, spawn);
-				BlockPos by = mate == null ? null : beside(level, mate.pos, random);
+				Faction mates = mate == null ? null : Factions.around(server, level, mate.pos, StoryHomes.PENDING_RANGE);
+				// (a mate's village that would shun your blood is no home: you go where your own would, as alone)
+				BlockPos by = mate == null || mates != null && !StoryHomes.suits(server, mates, heritage, player) ? null : beside(level, mate.pos, random);
 				if (by != null) {
 					// (0.7.417) beside the mate: the village they woke in takes you in as it is, else it waits for you as it did for them
 					to = by;
-					Faction there = Factions.around(server, level, mate.pos, StoryHomes.PENDING_RANGE);
-					if (there != null) {
-						StoryHomes.settleIn(player, there);
+					if (mates != null) {
+						StoryHomes.settleIn(player, mates);
 					} else {
 						StoryHomes.await(player, mate.pos);
 					}
@@ -1163,6 +1168,7 @@ public final class LifeStory {
 			}
 			case CAPTIVE -> {
 				Faction camp = mateCamp(server, mate);
+				Landing campMate = camp == null ? null : mate;
 				if (camp == null) {
 					camp = nearestCamp(server, spawn);
 				}
@@ -1170,7 +1176,7 @@ public final class LifeStory {
 					camp = StoryGround.camp(level, spawn, random);
 				}
 				if (camp != null) {
-					to = spot(level, mate, camp.seat(), CAPTIVE_MIN, CAPTIVE_MAX, random);
+					to = spot(level, campMate, camp.seat(), CAPTIVE_MIN, CAPTIVE_MAX, random);
 					if (to != null) {
 						HUNTS.put(player.getUUID(), new Hunt(camp.id(), server.getTickCount() + HUNT_TICKS));
 					}
@@ -1179,6 +1185,7 @@ public final class LifeStory {
 			case CHAINED -> {
 				// (0.7.412) shackled in a barbarian camp, among its captives (a camp is raised if the world has none, as for the escaped captive)
 				Faction camp = mateCamp(server, mate);
+				Landing campMate = camp == null ? null : mate;
 				if (camp == null) {
 					camp = nearestCamp(server, spawn, false);
 				}
@@ -1187,7 +1194,7 @@ public final class LifeStory {
 				}
 				if (camp != null) {
 					// (0.7.417) with a mate, in the same camp's row of captives, next to theirs
-					to = spot(level, mate, camp.seat(), CHAINED_MIN, CHAINED_MAX, random);
+					to = spot(level, campMate, camp.seat(), CHAINED_MIN, CHAINED_MAX, random);
 					if (to != null) {
 						StoryHard.shackle(player, to, camp.id());
 					}
@@ -1238,7 +1245,16 @@ public final class LifeStory {
 						player.setAttached(Underworld.FOUND, List.copyOf(found));
 					}
 					// (0.7.417) with a mate in the same den, a step from the middle of the floor
-					net.minecraft.world.phys.Vec3 at = mate != null ? in.add(random.nextBoolean() ? 1.0 : -1.0, 0.0, random.nextBoolean() ? 1.0 : 0.0) : in;
+					net.minecraft.world.phys.Vec3 at = in;
+					if (mate != null && mate.dimension == level.dimension() && mate.pos.closerThan(BlockPos.containing(in), DEN_MATE_RANGE)) {
+						for (int i = 0; i < TOGETHER_TRIES; i++) {
+							net.minecraft.world.phys.Vec3 step = in.add(random.nextInt(3) - 1, 0.0, random.nextInt(3) - 1);
+							if (!step.equals(in) && standable(level, BlockPos.containing(step))) {
+								at = step;
+								break;
+							}
+						}
+					}
 					player.teleportTo(level, at.x, at.y, at.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
 					landSafely(player);
 					home(player, level, BlockPos.containing(in));
@@ -1783,7 +1799,7 @@ public final class LifeStory {
 		Landing best = null;
 		for (ServerPlayer other : Parties.members(player)) {
 			Landing l = other == player ? null : LANDINGS.get(other.getUUID());
-			if (l != null && l.start == start && (!start.realm || l.realm == realm) && now - l.tick <= TOGETHER_WINDOW_TICKS
+			if (l != null && l.start == start && (!start.realm || l.realm == realm) && l.tick <= now && now - l.tick <= TOGETHER_WINDOW_TICKS
 				&& server.getLevel(l.dimension) != null && (best == null || l.tick > best.tick)) {
 				best = l;
 			}
@@ -1845,7 +1861,7 @@ public final class LifeStory {
 		List<Mate> out = new ArrayList<>();
 		for (ServerPlayer other : Parties.members(player)) {
 			Landing l = other == player ? null : LANDINGS.get(other.getUUID());
-			if (l != null && now - l.tick <= TOGETHER_WINDOW_TICKS) {
+			if (l != null && l.tick <= now && now - l.tick <= TOGETHER_WINDOW_TICKS) {
 				Faction realm = l.realm >= 0 ? Factions.get(server, l.realm) : null;
 				out.add(new Mate(other.getGameProfile().name(), l.start.name().toLowerCase(Locale.ROOT), realm == null ? "" : realm.name()));
 			}

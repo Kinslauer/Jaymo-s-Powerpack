@@ -67,7 +67,7 @@ public final class StoryHomes {
 	}
 
 	/** {@code f} is what one of {@code kind} wants. */
-	private static boolean suits(MinecraftServer server, Faction f, Heritage.@Nullable Kind kind, Player player) {
+	static boolean suits(MinecraftServer server, Faction f, Heritage.@Nullable Kind kind, Player player) {
 		String haven = Havens.of(server, f), want = want(kind);
 		if (!want.isEmpty()) {
 			// (the Bio-built: any haven's non-humans take them)

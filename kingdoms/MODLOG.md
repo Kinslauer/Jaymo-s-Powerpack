@@ -7383,3 +7383,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Android: stood beside them first so Powers raises your lab or workshop in the same stretch of country (it builds its own room). The
   other worlds' starts: by them if Powers sets you down in their world. Not shared: Lost in Time and the Whalers (Powers' and the
   harbour's own placing). The road page shows "<name> took this road; you'll wake beside them" (`LifeStory.Open.mates`).
+- Review fixes: landings are forgotten when the server stops or the player leaves (and a landing from an earlier world in the
+  same game never counts); a chained or captive player wakes beside the mate only when it is the mate's camp that holds
+  them; in a den, beside the mate only on a standable step of the same floor; a mate's village that would shun your blood
+  is not joined (you go where you would alone).
