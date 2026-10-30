@@ -46,7 +46,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>His lineage's, twice as likely ({@link #pool}): an Earthling (and those who read as one: Divine-born, Bio-built,
  * Rubber-folk) the Cupped Wave from the hip, a Warrior-born the Crimson Cannon, a Verdant the Spiral Lance from the brow,
  * a Frost-born the Frost Needle: unhurried, a leg, an arm, then the head, with his hair-thin beam ({@link FrostBeam}).</li>
- * <li>In any form: Supernova Palm, the hand on their chest and the aura poured through it until nothing's left (no
+ * <li>In a Super form ({@link #superForm}): Supernova Palm, the hand on their chest and the aura poured through it until nothing's left (no
  * corpse), twice as likely too.</li>
  * </ul>
  * The ki moves cost ki ({@link #cost}, paid as they begin; without it only the fists' are open) and are in his ki
@@ -122,6 +122,16 @@ public final class ZFighterExecutions {
 		};
 	}
 
+	/**
+	 * Andy: "only during a super mode". The Super line only: Super, Super 2, Super 3, Super Primal Super, Primal Super
+	 * and False Super. Not a Verdant's or Frost-born's own forms (Giant, the evolutions), the god form or the legends.
+	 */
+	static boolean superForm(ZFighterPower.Live live) {
+		int form = live.form;
+		boolean superLine = form >= 1 && form <= ApeRage.SUPER_4 && live.lineage != ZFighterLineage.VERDANT && live.lineage != ZFighterLineage.FROST;
+		return superLine || form == ZFighterForms.FALSE_SUPER || form == ApeRage.PRIMAL_SUPER;
+	}
+
 	/** The moves open to {@code player} now, the lineage's and the form's {@link #OWN_WEIGHT} times over. */
 	static List<Kind> pool(ServerPlayer player) {
 		ZFighterPower.Live live = ZFighterPower.live(player);
@@ -131,7 +141,7 @@ public final class ZFighterExecutions {
 			if (lineage != ZFighterLineage.NONE) {
 				out.add(lineageMove(lineage));
 			}
-			if (live.form > 0) {
+			if (superForm(live)) {
 				out.add(Kind.Z_NOVA);
 			}
 		}

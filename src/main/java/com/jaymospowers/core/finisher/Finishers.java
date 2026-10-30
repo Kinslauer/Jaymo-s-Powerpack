@@ -227,7 +227,7 @@ public final class Finishers {
 		Z_LANCE(42, new int[] {30}, Strike.KI),
 		/** Frost Needle, a Frost-born's: unhurried, one finger, a hair-thin beam through a leg, an arm, and then the head. */
 		Z_NEEDLE(48, new int[] {12, 22, 36}, Strike.KI),
-		/** Supernova Palm, in any form: on a knee, the palm on their chest, the aura poured through it until nothing's left. */
+		/** Supernova Palm, in a Super form: on a knee, the palm on their chest, the aura poured through it until nothing's left. */
 		Z_NOVA(44, new int[] {30}, Strike.KI);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
