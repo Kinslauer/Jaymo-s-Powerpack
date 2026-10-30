@@ -34,6 +34,10 @@ public final class StanceScroll {
 	/** The wheel turned during this press of Sneak (so letting go isn't a tap). */
 	private static boolean scrolledThisPress;
 	private static boolean jumpWas;
+	/** (0.18.80) Ticks the low crouch has stood still, and whether it has settled onto the knee (then you stay put). */
+	private static int stillTicks;
+	private static boolean knelt;
+	private static double lastX, lastZ;
 
 	private StanceScroll() {
 	}
@@ -165,8 +169,38 @@ public final class StanceScroll {
 		if (held != null && held == Stance.STAND && !shift) {
 			held = null;
 		}
+		tickKneel(player);
 		shiftWas = shift;
 		jumpWas = jump;
+	}
+
+	/**
+	 * (0.18.80) Andy: "crouching should keep our low stance with arms out, stopping stabilizes into a kneel, and you can
+	 * still walk but you have to change back to a sneak or stand after kneeling". Walking in the low crouch is free; stood
+	 * still {@link com.jaymospowers.core.Kneel#KNEEL_AFTER} ticks you settle onto the knee and stay there ({@link #knelt})
+	 * until the wheel takes you up to a sneak or standing (or Jump / a Sneak tap stands you).
+	 */
+	private static void tickKneel(LocalPlayer player) {
+		boolean low = held != null && held == Stance.LOW && Stance.localLow == player.getId() && player.onGround();
+		double dx = player.getX() - lastX, dz = player.getZ() - lastZ;
+		lastX = player.getX();
+		lastZ = player.getZ();
+		if (!low) {
+			stillTicks = 0;
+			knelt = false;
+			return;
+		}
+		if (knelt) {
+			return;
+		}
+		boolean still = dx * dx + dz * dz < com.jaymospowers.core.Kneel.STILL * com.jaymospowers.core.Kneel.STILL;
+		stillTicks = still ? stillTicks + 1 : 0;
+		knelt = stillTicks >= com.jaymospowers.core.Kneel.KNEEL_AFTER;
+	}
+
+	/** (0.18.80) From {@code StanceInputMixin}: on the knee in the low crouch, the walking keys do nothing. */
+	public static boolean kneelHeld() {
+		return knelt;
 	}
 
 	/** Whether the stances can be changed now: on foot, not swimming, flying, riding, downed or hanging from a ledge. */
