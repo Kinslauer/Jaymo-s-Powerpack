@@ -178,9 +178,12 @@ public final class Bearers {
 			return villager() || folk();
 		}
 
-		/** One of {@code f}'s own people: a villager in its land, or its own folk. */
+		/**
+		 * One of {@code f}'s own people: a villager in its land, or its own folk. (0.7.391) Never an outlaw's body (a looter,
+		 * an assassin, a camp's raider, pirate or greenskin, {@link Outlaws}): those are the enemy's, and burned.
+		 */
 		boolean ours(Faction f) {
-			return villager() || folk() && realm == f.id();
+			return !Outlaws.role(role) && (villager() || folk() && realm == f.id());
 		}
 
 		/** A soldier (a fighting folk role). */
@@ -300,6 +303,15 @@ public final class Bearers {
 		return false;
 	}
 
+	/**
+	 * (0.7.391) The dead are seen to here (Kitchen's corpses with its burials): MCA lays no villager in a tombstone the
+	 * moment they die (mixin/mca/McaTombstoneMixin), the body lies where it fell until a bearer buries it (or burns an
+	 * outlaw's).
+	 */
+	public static boolean seenTo() {
+		return KitchenCompat.burials();
+	}
+
 	/** {@code mob} is busy carrying the dead or mourning them. */
 	static boolean busy(Entity mob) {
 		return DUTIES.containsKey(mob.getUUID()) || MOURNERS.containsKey(mob.getUUID());
@@ -379,7 +391,8 @@ public final class Bearers {
 			Component name = tag.read("CustomName", ComponentSerialization.CODEC)
 				.orElse(type != null ? type.getDescription() : corpse.getName());
 			boolean folk = type == JaymosKingdoms.FOLK;
-			dead = new Dead(type, uuid, name, folk ? tag.getIntOr("kingdom", -1) : -1, folk ? tag.getIntOr("role", -1) : -1);
+			// ((0.7.391) and an MCA villager's job too, so a looter or a camp's raider isn't taken for one of their own)
+			dead = new Dead(type, uuid, name, folk ? tag.getIntOr("kingdom", -1) : -1, tag.getIntOr(folk ? "role" : "jaymoskingdoms_role", -1));
 		}
 		WHO.put(corpse.getUUID(), dead);
 		return dead;

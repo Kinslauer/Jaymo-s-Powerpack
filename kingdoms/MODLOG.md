@@ -6960,3 +6960,20 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   swimmers; restoration grows crops; death withers grass, flowers and crops; blood lays Powers' blood stains. Only where the
   caster may build.
 - Compile-checked against 26.3; not seen in game.
+
+## 0.7.391: outlaws don't introduce themselves, and the dead get no instant tombstone
+- Andy: "looters / bandits should not introduce themselves, nor should villagers / bandits instantly get tombstones".
+- **Outlaws** (`Outlaws`): looters, assassins, a camp's people (barbarian raiders and chiefs, pirates, goblins and orcs, camp
+  casters) and anyone in a bandit mask or bandana. They never come over to introduce themselves (`Handshakes.comeWeight`), never
+  put a hand out at a first meeting (`Handshakes.greet`: their menu opens as it is) or take yours (`Introductions.takesHand`), and
+  won't give their name (`name_outlaw` lines). Opening their MCA menu skips MCA's stranger's welcome ("Welcome to the village,
+  stranger!") and its greetings for a curt word (`outlaw_opening`, or a hard look without a shared tongue: `McaBridge.outlawOpening`).
+- **No instant tombstone** (`mixin/mca/McaTombstoneMixin`): MCA laid a dead villager in the nearest empty tombstone, or raised a
+  new one where they fell (one with family or a player's hearts, bandits included), the tick after they died, over the Kitchen
+  corpse. While Kitchen's burials are on (`Bearers.seenTo`), MCA finds and raises no tombstone: the body lies where it fell until a
+  bearer carries it to the graveyard and digs the grave. MCA's mourning still runs. The Staff of Life has no MCA tombstone to raise
+  them from.
+- **Outlaws' bodies are burned** (`Bearers.Dead.ours`): an MCA villager's corpse now carries its Kingdoms job, so a looter's or a
+  camp raider's body in a settlement's land is burned with the enemy's dead instead of buried in its graveyard, and robbing it is
+  no grave robbing. (A body whose saved look was cut down to the basics loses the job and is buried as before.)
+- Compile-checked against 26.3; not seen in game.

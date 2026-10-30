@@ -47,6 +47,8 @@ import org.jspecify.annotations.Nullable;
 final class McaBridge {
 	/** An MCA village counts as a faction's when its border (plus this) takes in the faction's seat. */
 	static final int SEAT_MARGIN = 32;
+	/** (0.7.391) Lines an outlaw opens their menu with ({@link #outlawOpening}). */
+	static final int OUTLAW_OPENINGS = 4;
 
 	/** The villager a player is promoting just now ({@link #promote}): {@link #enlist} takes them, not someone else. */
 	private static @Nullable VillagerEntityMCA chosen;
@@ -851,6 +853,28 @@ final class McaBridge {
 		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager)) {
 			Introductions.learn(player, villager);
 		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
+	 * (0.7.391) MCA's menu opening on {@code villager} ("root") when they're an outlaw ({@link Outlaws}: a looter, a bandit,
+	 * a camp's raider): a curt word, or a hard look if you share no tongue, and on to the main menu, never MCA's stranger's
+	 * welcome ("Welcome to the village, stranger!") or its greetings; true if so.
+	 */
+	static boolean outlawOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Outlaws.is(villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Languages.understands(player, villager)
+			? Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
+			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
+		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
 		return true;
