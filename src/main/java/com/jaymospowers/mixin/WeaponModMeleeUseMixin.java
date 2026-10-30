@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.15.148) Balkon's flail is held in use while it whirls (its melee base class, which the flail doesn't override,
  * decides how long use lasts and what letting go does). (0.17.98) The warhammer charges held overhead
- * ({@link HammerSlam}), and raises a guard while the smash cools down. (0.18.63) The knife's guard lasts while it's held
+ * ({@link HammerSlam}), and raises a guard while the smash cools down. (0.18.64) The knife's guard lasts while it's held
  * and letting go throws nothing ({@link KnifeGuard}; combat/Guard raises it). Every other WeaponMod weapon is left as it was.
  */
 @Mixin(targets = "ckathode.weaponmod.item.ItemMelee")
@@ -56,7 +56,7 @@ abstract class WeaponModMeleeUseMixin {
 			// (0.17.98) a guard let down: no smash
 			cir.setReturnValue(false);
 		} else if (KnifeGuard.isKnife((Item)(Object)this) && KnifeGuard.raisedAsGuard(entity)) {
-			// (0.18.63) a knife's guard let down: no throw
+			// (0.18.64) a knife's guard let down: no throw
 			cir.setReturnValue(false);
 		}
 	}

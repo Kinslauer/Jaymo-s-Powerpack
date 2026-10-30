@@ -19,7 +19,7 @@ abstract class HammerFirstPersonMixin {
 	private ItemUseAnimation jaymospowers$hammerPose(ItemStack stack, Operation<ItemUseAnimation> original) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player != null && KnifeGuard.isKnife(stack.getItem()) && KnifeGuard.pose(player) != null) {
-			// (0.18.63) your WeaponMod knife held up as a guard
+			// (0.18.64) your WeaponMod knife held up as a guard
 			return ItemUseAnimation.BLOCK;
 		}
 		return player != null && HammerSlam.isWarhammer(stack.getItem()) ? HammerSlam.pose(player) : original.call(stack);

@@ -4161,3 +4161,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     `dreaded_blade.py` turns it a quarter about the grip too, its 45-degree turns kept exact.
   - Harpoon and rapier keep their exact rotations (26.3 allows any angle and x/y/z rotations) instead of 22.5° snaps.
   - Compile-checked; not seen in game.
+
+- **0.18.64, knives parry, daggers throw:** Andy: "knife is for parrying and dagger will still throw. just swap their damage".
+  - Right click with a WeaponMod knife raises the weapon guard (block, parry windows, feathers); sneak + right click still
+    throws it (`armory/KnifeGuard`, hooked through `combat/Guard` and `WeaponModMeleeUseMixin`). Armory daggers keep throwing.
+  - The knife and Armory dagger of each tier swap held damage (read from their attack modifiers at start).
+  - Syntax-checked only; not seen in game.

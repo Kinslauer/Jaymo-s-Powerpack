@@ -23,7 +23,7 @@ import net.minecraft.world.item.component.Weapon;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.63) Andy: "daggers and knives should be further differentiated, knife is for parrying and dagger will still
+ * (0.18.64) Andy: "daggers and knives should be further differentiated, knife is for parrying and dagger will still
  * throw", then picked: Balkon's WeaponMod knife parries. Both used to throw on right click.
  * <ul>
  * <li>Right click with a WeaponMod knife ({@code weaponmod:knife.<tier>}) raises the weapon guard ({@code combat/Guard}:

@@ -97,7 +97,7 @@ darktide", then, on their own windows: "yeah keep that but give a bar that repre
 - Not changed: Chrono's Time Flow counters (a held blow answered by right click, not a guard), mobs' own parries
   (Kingdoms `MobParry`), Wind/Gravity projectile deflects, mana spirits' parries.
 
-## Knives parry, daggers throw (Powers 0.18.63)
+## Knives parry, daggers throw (Powers 0.18.64)
 Andy (2026-10-30): "daggers and knives should be further differentiated, knife is for parrying and dagger will still
 throw. just swap their damage and name." Before, Balkon's WeaponMod knife and our Armory dagger both threw on right
 click; only the Stone Age primitive and bone knives parried. Andy picked: the WeaponMod knife parries (`armory/KnifeGuard`).

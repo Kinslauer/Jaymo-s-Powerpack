@@ -24,7 +24,7 @@ abstract class HammerPoseMixin {
 	private static ItemUseAnimation jaymospowers$hammerPose(ItemStack stack, Operation<ItemUseAnimation> original, Avatar avatar, ItemStack held,
 		InteractionHand hand) {
 		if (KnifeGuard.isKnife(stack.getItem()) && KnifeGuard.pose(avatar) != null) {
-			// (0.18.63) a WeaponMod knife held up as a guard rather than drawn back to throw
+			// (0.18.64) a WeaponMod knife held up as a guard rather than drawn back to throw
 			return ItemUseAnimation.BLOCK;
 		}
 		return HammerSlam.isWarhammer(stack.getItem()) ? HammerSlam.pose(avatar) : original.call(stack);
