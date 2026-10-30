@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.370) Alt and scroll in the Battle Stance move the belt's slot. Runs before Powers' lock-on scroll (lower priority
+ * (0.7.381) Alt and scroll in the Battle Stance move the belt's slot. Runs before Powers' lock-on scroll (lower priority
  * number), so a plain scroll is still the lock-on's.
  */
 @Mixin(value = MouseHandler.class, priority = 500)

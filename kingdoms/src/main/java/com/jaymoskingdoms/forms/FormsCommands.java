@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.7.370) {@code /forms}, for ops (permission 2): {@code teach <players> <form>}, {@code forget <players> [form]} (every
+ * (0.7.381) {@code /forms}, for ops (permission 2): {@code teach <players> <form>}, {@code forget <players> [form]} (every
  * form when none is named) and {@code list <players>} (what each knows, and at what rank).
  */
 public final class FormsCommands {

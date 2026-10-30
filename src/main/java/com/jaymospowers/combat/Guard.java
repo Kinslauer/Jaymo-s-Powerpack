@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -77,6 +82,11 @@ import org.jspecify.annotations.Nullable;
  * (0.17.98) Balkon's warhammer carries it too, raised while its smash cools down ({@link HammerSlam}).
  * (0.17.169) And Sora's Dagger, every stage, raised while its Flurry cools down ({@link SorasDagger#use}).
  * The powers' own guards (Darktide's, a Z Fighter's bare hands) stay theirs: the weapon guard stands aside for them.
+ * <p>
+ * (0.18.24) Andy: "make the parry meter consistent across all weapons/ powers that block, including z fighters and
+ * darktide", then "keep [their own windows] but give a bar that represents their timings". The powers' guards keep their
+ * own parry (one window, a cooldown after a parry, red blows parried too), but show the same timing bar
+ * ({@link #showPower}, {@link #SHOWN}) and the same flash ({@link #cue}). Every parry, any kind, fires {@link #PARRIED}.
  */
 public final class Guard {
 	/** A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry. */
@@ -108,6 +118,51 @@ public final class Guard {
 	 * it on a fighter's heavy blows, the ones its red glint warns of).
 	 */
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+
+	/** (0.18.24) What a blow on a raised guard meets. */
+	public enum Timing {
+		/** Too late, too eager, or a blow that can't be parried: the guard only blocks. */
+		BLOCK,
+		PARRY,
+		PERFECT;
+
+		public boolean parried() {
+			return this != BLOCK;
+		}
+	}
+
+	/**
+	 * (0.18.24) Fired on the server for every parry, whatever parried it (a weapon, a shield, a Z Fighter's arms, Darktide's
+	 * guard or Gedan): for drills and quests that count parries. {@code attacker} is null for an arrow.
+	 */
+	@FunctionalInterface
+	public interface Parry {
+		void parried(ServerPlayer player, @Nullable LivingEntity attacker, boolean perfect);
+	}
+
+	public static final Event<Parry> PARRIED = EventFactory.createArrayBacked(Parry.class, listeners -> (player, attacker, perfect) -> {
+		for (Parry listener : listeners) {
+			listener.parried(player, attacker, perfect);
+		}
+	});
+
+	/**
+	 * (0.18.24) The guard's raise, for the owner's timing bar: when it went up and whether it was too eager to parry; for a
+	 * power's own guard, its single parry {@code window} (ticks from the raise; 0 for a weapon or shield, which use this
+	 * class's windows) and when its parry is ready again after the last one ({@code readyAt}, game time).
+	 */
+	public record Shown(long start, boolean eager, int window, long readyAt) {
+		public static final StreamCodec<ByteBuf, Shown> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, Shown::start,
+			ByteBufCodecs.BOOL, Shown::eager,
+			ByteBufCodecs.VAR_INT, Shown::window,
+			ByteBufCodecs.VAR_LONG, Shown::readyAt,
+			Shown::new);
+	}
+
+	/** Set while any guard is up (a weapon's, a shield's or a power's); only its owner gets it. Not saved. */
+	public static final AttachmentType<Shown> SHOWN = AttachmentRegistry.create(JaymosPowers.id("guard_shown"),
+		builder -> builder.syncWith(Shown.CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/** Server → the one who parried: draw the cue ({@code perfect}: the bright one). */
 	public record Parried(boolean perfect) implements CustomPacketPayload {
@@ -153,12 +208,14 @@ public final class Guard {
 				Raise raise = RAISES.get(player.getUUID());
 				if (up && (raise == null || !raise.up)) {
 					raise(player);
-				} else if (!up && raise != null) {
+				} else if (!up && raise != null && raise.up) {
 					raise.up = false;
+					player.removeAttached(SHOWN);
 				}
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			handler.player.removeAttached(SHOWN);
 			RAISES.remove(handler.player.getUUID());
 			RIPOSTES.remove(handler.player.getUUID());
 		});
@@ -226,11 +283,57 @@ public final class Guard {
 		raise.start = now;
 		raise.parried = false;
 		raise.up = true;
+		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L));
 		return raise;
 	}
 
+	/**
+	 * (0.18.24) A power's own guard (a Z Fighter's crossed arms, Darktide's) is up: the owner's bar shows its own timing,
+	 * one parry window of {@code window} ticks from {@code start}, closed until {@code readyAt}. Call again when a parry
+	 * moves {@code readyAt}.
+	 */
+	public static void showPower(ServerPlayer player, long start, int window, long readyAt) {
+		player.setAttached(SHOWN, new Shown(start, false, window, readyAt));
+	}
+
+	/** (0.18.24) A power's own guard came down. */
+	public static void hidePower(ServerPlayer player) {
+		player.removeAttached(SHOWN);
+	}
+
+	/**
+	 * (0.18.24) What a blow from {@code source} meets on {@code player}'s weapon or shield guard, up {@code held} ticks. A perfect parry in the first {@link #PERFECT_TICKS} (arrows too), a parry up to {@link #PARRY_TICKS}
+	 * (melee only), both longer against the one you're locked onto; never for a too-eager raise or an unparryable blow.
+	 */
+	public static Timing timing(ServerPlayer player, DamageSource source, int held) {
+		Entity direct = source.getDirectEntity();
+		boolean projectile = direct instanceof Projectile || source.is(DamageTypeTags.IS_PROJECTILE);
+		LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
+		return timing(player, attacker, projectile, shot(direct), held);
+	}
+
+	/** {@link #timing(ServerPlayer, DamageSource, int)} for a blow known by its parts ({@code shot}: a gun's, never parried). */
+	public static Timing timing(ServerPlayer player, @Nullable LivingEntity attacker, boolean projectile, boolean shot, int held) {
+		Raise raise = RAISES.get(player.getUUID());
+		if (raise == null || !raise.up) {
+			raise = raise(player);
+		}
+		boolean heavy = attacker != null && attacker.entityTags().contains(UNPARRYABLE_TAG) || shot;
+		if (raise.eager || heavy) {
+			return Timing.BLOCK;
+		}
+		boolean watching = attacker != null && LockOn.target(player) == attacker;
+		if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
+			return Timing.PERFECT;
+		}
+		if (!projectile && held <= PARRY_TICKS + (watching ? LOCK_PARRY_BONUS : 0)) {
+			return Timing.PARRY;
+		}
+		return Timing.BLOCK;
+	}
+
 	/** (0.17.67) A gun's ball or bullet (tagged by whoever fired it, or any of TaCZ's): blocked, never parried. */
-	private static boolean shot(@Nullable Entity direct) {
+	public static boolean shot(@Nullable Entity direct) {
 		return direct instanceof Projectile && (direct.entityTags().contains(UNPARRYABLE_TAG)
 			|| "tacz".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(direct.getType()).getNamespace()));
 	}
@@ -251,23 +354,11 @@ public final class Guard {
 		if (from == null || !inFront(player, from, PARRY_ANGLE)) {
 			return false;
 		}
-		Raise raise = RAISES.get(player.getUUID());
-		if (raise == null || !raise.up) {
-			raise = raise(player);
-		}
-		LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
-		boolean watching = attacker != null && LockOn.target(player) == attacker;
-		int held = player.getTicksUsingItem();
-		boolean heavy = attacker != null && attacker.entityTags().contains(UNPARRYABLE_TAG) || shot(direct);
-		if (!raise.eager && !heavy) {
-			if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
-				parry(player, raise, melee ? attacker : null, source, true);
-				return true;
-			}
-			if (melee && held <= PARRY_TICKS + (watching ? LOCK_PARRY_BONUS : 0)) {
-				parry(player, raise, attacker, source, false);
-				return true;
-			}
+		Timing timing = timing(player, source, player.getTicksUsingItem());
+		if (timing.parried()) {
+			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
+			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
+			return true;
 		}
 		ItemStack guard = player.getUseItem();
 		if (melee && weaponGuard(guard) && player.isBlocking() && !Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE)))) {
@@ -286,17 +377,23 @@ public final class Guard {
 		return flat.normalize().dot(look) >= Math.cos(Math.toRadians(degrees));
 	}
 
-	private static void parry(ServerPlayer player, Raise raise, @Nullable LivingEntity attacker, DamageSource source, boolean perfect) {
+	/**
+	 * (0.18.24, public) A parry landed, by any guard: the sparks and ring, the cue on the bar, a perfect one's feathers back,
+	 * and the attacker (null for an arrow) shoved, staggered, a player's weapon knocked out of rhythm on a perfect one,
+	 * and your riposte owed. {@code from}: where the blow came from.
+	 */
+	public static void parried(ServerPlayer player, @Nullable LivingEntity attacker, @Nullable Vec3 from, boolean perfect) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		raise.parried = true;
-		Vec3 from = source.getSourcePosition();
+		if (from == null) {
+			from = attacker != null ? attacker.getEyePosition() : player.getEyePosition().add(player.getLookAngle());
+		}
 		Vec3 at = player.getEyePosition().add(from.subtract(player.getEyePosition()).normalize().scale(0.7)).add(0.0, -0.3, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, perfect ? 18 : 10, 0.15, 0.15, 0.15, 0.45);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, perfect ? 14 : 6, 0.1, 0.1, 0.1, 0.25);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, perfect ? 0.45F : 0.25F, perfect ? 2.0F : 1.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, perfect ? 1.5F : 1.2F);
-		ServerPlayNetworking.send(player, new Parried(perfect));
+		cue(player, attacker, perfect);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
 		if (perfect) {
 			Feathers.refund(player, PERFECT_REFUND);
@@ -317,6 +414,19 @@ public final class Guard {
 		}
 		RIPOSTES.put(player.getUUID(), new Riposte(attacker.getUUID(), now + (perfect ? PERFECT_RIPOSTE_TICKS : PARRY_RIPOSTE_TICKS),
 			perfect ? PERFECT_RIPOSTE : PARRY_RIPOSTE));
+	}
+
+	/**
+	 * (0.18.24) Only the cue of a parry: the flash on the bar and {@link #PARRIED}, and the raise counts as having parried
+	 * (so the next raise isn't too eager). For a parry that answers in its own way (Darktide's Gedan).
+	 */
+	public static void cue(ServerPlayer player, @Nullable LivingEntity attacker, boolean perfect) {
+		Raise raise = RAISES.get(player.getUUID());
+		if (raise != null) {
+			raise.parried = true;
+		}
+		ServerPlayNetworking.send(player, new Parried(perfect));
+		PARRIED.invoker().parried(player, attacker, perfect);
 	}
 
 	private static void guardBreak(ServerPlayer player, ItemStack guard) {

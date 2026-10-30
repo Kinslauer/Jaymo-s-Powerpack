@@ -6839,7 +6839,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
-## 0.7.370: Weapon Forms, patch 1 track A: the engine (pack number set when the PR opens)
+## 0.7.381: Weapon Forms, patch 1 track A: the engine (pack number set when the PR opens)
 - Andy's Ultimate Battle picks (`docs/WeaponForms-Plan.md`; ideas only). `forms/Forms` is the registry and rules: a form has a
   weapon family (blade, spear, fist, knife, claw; `form_blades` / `form_spears` / `form_claws` item tags, the knife family is
   `light_blades`; Balkon's katanas are optional entries), a kind (art or masterstroke), cooldown, wind-up, hunger and the
