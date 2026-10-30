@@ -202,6 +202,8 @@ public final class PowersCompat {
 	private static boolean lookedForFilm;
 	/** Powers' {@code UltimateFilm} shots. */
 	public static final int FILM_ORBIT = 3, FILM_PUSH_IN = 6;
+	/** (0.7.382) Powers' tilted (rolled) shot and its hard-cut shot between three angles (Powers 0.18.30; an older Powers shows nothing for them). */
+	public static final int FILM_DUTCH = 8, FILM_CUTS = 9;
 
 	private static void films() {
 		if (lookedForFilm) {
@@ -241,6 +243,34 @@ public final class PowersCompat {
 			}
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't play a film", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle impactFrame;
+	private static boolean lookedForImpact;
+
+	/**
+	 * (0.7.382) Two frames of black and white for every player within about 24 blocks of {@code at} (Powers'
+	 * {@code ZFighterSenses.impactFrame}; each player's own setting can turn them off). Nothing without Powers 0.18.30 or later.
+	 */
+	public static void impactFrame(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		if (!lookedForImpact) {
+			lookedForImpact = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					impactFrame = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterSenses"),
+						"impactFrame", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no public impact frames (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			if (impactFrame != null) {
+				impactFrame.invoke(level, at);
+			}
+		} catch (Throwable ignored) {
 		}
 	}
 

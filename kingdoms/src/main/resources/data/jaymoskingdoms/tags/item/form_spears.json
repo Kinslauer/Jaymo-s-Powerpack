@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#minecraft:spears",
+    "minecraft:trident",
     {
       "id": "weaponmod:spear.wood",
       "required": false
@@ -32,6 +33,38 @@
     },
     {
       "id": "weaponmod:javelin",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_javelin",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:primitive_spear",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_lance",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_lance",
       "required": false
     }
   ]

@@ -156,6 +156,7 @@ public final class Forms {
 
 	static {
 		BladeForms.addTo(FORMS);
+		SpearForms.addTo(FORMS);
 		FistForms.addTo(FORMS);
 		KnifeForms.addTo(FORMS);
 		ClawForms.addTo(FORMS);
@@ -331,6 +332,8 @@ public final class Forms {
 		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, context) -> pick(context.player(), payload.delta()));
 		ServerPlayNetworking.registerGlobalReceiver(Assign.TYPE, (payload, context) -> assign(context.player(), payload.slot(), payload.form()));
 		ServerTickEvents.END_SERVER_TICK.register(Forms::tick);
+		SpearForms.register();
+		BladeForms.register();
 		FistForms.register();
 		KnifeForms.register();
 		ClawForms.register();
@@ -456,6 +459,10 @@ public final class Forms {
 
 	/** Whether {@code player} holds a weapon any form they know works with: the stance can be taken. */
 	public static boolean canStance(Player player) {
+		if (SpearForms.pinned(player)) {
+			// (0.7.382) a Pinning Throw has the spear out of the hand: the stance holds until it is tugged back
+			return true;
+		}
 		Book book = book(player);
 		ItemStack main = player.getMainHandItem();
 		for (String id : book.known()) {
@@ -613,6 +620,10 @@ public final class Forms {
 		if (!book.stance() || !(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		// (0.7.382) a spear thrown to pin a foe: any press tugs it back
+		if (SpearForms.tug(player)) {
+			return;
+		}
 		String id = book.belt().get(sneaking ? Math.floorMod(book.slot() + 1, BELT_SLOTS) : book.slot());
 		Form form = FORMS.get(id);
 		if (form == null || !book.knows(id)) {
@@ -637,7 +648,14 @@ public final class Forms {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.hungry").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (player.isPassenger() || player.isFallFlying()) {
+		// (0.7.382) Couched Lance is the one form that wants a mount; the others can't be done from a saddle
+		if (form == SpearForms.COUCHED_LANCE ? !SpearForms.mounted(player) : player.isPassenger()) {
+			if (form == SpearForms.COUCHED_LANCE) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.mounted").withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		if (player.isFallFlying()) {
 			return;
 		}
 		// the cooldown is set now (no second press during the wind-up); the food is spent when the form goes off
@@ -660,6 +678,8 @@ public final class Forms {
 		int rank = Math.max(1, rank(player, form.id()));
 		if (form.family() == Family.BLADE) {
 			BladeForms.perform(player, form, rank);
+		} else if (form.family() == Family.SPEAR) {
+			SpearForms.perform(player, form, rank);
 		}
 		if (form.family() == Family.FIST) {
 			FistForms.perform(player, form, rank);
