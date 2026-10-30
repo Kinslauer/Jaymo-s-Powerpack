@@ -241,7 +241,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.18.25) Told of every downed body a player gets back up (a revive, or smelling salts). Jaymo's Kingdoms adds one (by
+	 * (0.18.45) Told of every downed body a player gets back up (a revive, or smelling salts). Jaymo's Kingdoms adds one (by
 	 * reflection) so the villager remembers who got them up, and says so.
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();

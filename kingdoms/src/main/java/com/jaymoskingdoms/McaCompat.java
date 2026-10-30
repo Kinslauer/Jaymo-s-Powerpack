@@ -532,7 +532,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.storyOpening(villager, player);
 	}
 
-	/** (0.7.368, from MCA's dialogue) Its menu opening on {@code villager}: what just passed between you, instead of MCA's own; true if so. */
+	/** (0.7.380, from MCA's dialogue) Its menu opening on {@code villager}: what just passed between you, instead of MCA's own; true if so. */
 	public static boolean dealingOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.dealingOpening(villager, player);
 	}

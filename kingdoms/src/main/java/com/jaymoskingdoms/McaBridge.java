@@ -857,7 +857,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.368) MCA's menu opening on {@code villager} ("root") just after something passed between you (you carried them
+	 * (0.7.380) MCA's menu opening on {@code villager} ("root") just after something passed between you (you carried them
 	 * out, got them up, drew a monster off them, struck them...): they open with that ({@link Recollections#opening}) and
 	 * go to the main menu, whose history option is about the same thing ({@link SharedHistory#current}); true if so.
 	 */

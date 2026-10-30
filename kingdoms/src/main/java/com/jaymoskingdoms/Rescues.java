@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.368) Andy: "villagers should say something about you picking them up if theyre downed, or if you save them from an
+ * (0.7.380) Andy: "villagers should say something about you picking them up if theyre downed, or if you save them from an
  * attack or otherwise prevent them harm." What a player does for one of a settlement's people while they lie downed or
  * are under attack, heard from Jaymo's Powers (its listener lists, {@link PowersCompat#listen}), is said aloud on the spot
  * (a speech bubble, warm, plain or gruff as their temperament is) and remembered ({@link Recollections}), so they bring it

@@ -147,7 +147,7 @@ public final class SharedHistory {
 		return true;
 	}
 
-	/** (0.7.368) {@code a} happened no earlier than {@code b}: by game time where both have one, else by day. */
+	/** (0.7.380) {@code a} happened no earlier than {@code b}: by game time where both have one, else by day. */
 	private static boolean later(Recollections.Recollection a, Recollections.Recollection b) {
 		return a.at() > 0L && b.at() > 0L ? a.at() >= b.at() : a.day() >= b.day();
 	}
@@ -183,7 +183,7 @@ public final class SharedHistory {
 	}
 
 	/**
-	 * (0.7.368) Andy: "the talk options should always relate to the most recent interaction." Of "Thank them",
+	 * (0.7.380) Andy: "the talk options should always relate to the most recent interaction." Of "Thank them",
 	 * "Apologise", "Clear the air" and "Ask how they are", the one MCA's menu shows: whichever answers the latest thing
 	 * still to be taken up between you (null: none). The others wait until that's been seen to.
 	 */

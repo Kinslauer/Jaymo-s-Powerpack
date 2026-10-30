@@ -1110,7 +1110,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.368) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
+	 * (0.7.380) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
 	 * {@code List<BiConsumer<ServerPlayer, ?>>}): {@code Carry.PICKED_UP_LISTENERS} and the like ({@link Rescues}).
 	 * Nothing happens without Powers (or an older one).
 	 */

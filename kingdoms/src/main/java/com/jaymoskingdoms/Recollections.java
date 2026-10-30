@@ -95,7 +95,7 @@ public final class Recollections {
 		SPURNED(0, 45, false, false, "%1$s said sorry for %2$s, and you would not have it.", ""),
 		AIRED(0, 30, false, false, "%1$s brought up %2$s with you, and you had it out.", ""),
 		ASKED_AFTER(1, 30, false, false, "%1$s asked after you, after %2$s.", ""),
-		// (0.7.368) what a player did for them while they lay downed or under attack ({@link Rescues})
+		// (0.7.380) what a player did for them while they lay downed or under attack ({@link Rescues})
 		CARRIED(4, 0, true, true, "You lay downed and %1$s picked you up and carried you out of harm's way.",
 			"%1$s carried %3$s out of harm's way when they lay downed."),
 		GOT_UP(4, 90, true, true, "You lay downed and %1$s knelt by you and got you back on your feet.", "%1$s got %3$s back on their feet when they lay downed."),
@@ -146,7 +146,7 @@ public final class Recollections {
 	static final float GOSSIP_CHANCE = 0.35F;
 	/** The chance, when two friends meet, that one passes on something weighty they remember (each way). */
 	static final float SHARE_CHANCE = 0.35F;
-	/** (0.7.368) How long what last happened between you stays what they talk of first (ticks: ten minutes). */
+	/** (0.7.380) How long what last happened between you stays what they talk of first (ticks: ten minutes). */
 	static final long FRESH_TICKS = 12000L;
 	/** The chance, in an MCA chat, that they bring up something they remember and haven't yet said. */
 	public static final float CHAT_REMARK_CHANCE = 0.5F;
@@ -159,7 +159,7 @@ public final class Recollections {
 
 	/**
 	 * One memory: what, its detail (an item, a task, a name), who told them (empty: they were there), the day, how many times,
-	 * said yet, and (0.7.368) the game time it last happened (0: before that was kept), so the latest dealing can be told apart.
+	 * said yet, and (0.7.380) the game time it last happened (0: before that was kept), so the latest dealing can be told apart.
 	 */
 	public record Recollection(String kind, Component detail, String from, long day, int count, boolean told, long at) {
 		public static final Codec<Recollection> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -369,13 +369,13 @@ public final class Recollections {
 		return k != null && !r.told() && k.remark && (!r.heard() || k.tellable) && (k != Kind.TRADE || r.count() >= REGULAR_TRADES);
 	}
 
-	/** (0.7.368) {@code r} happened in the last {@link #FRESH_TICKS}. */
+	/** (0.7.380) {@code r} happened in the last {@link #FRESH_TICKS}. */
 	private static boolean fresh(LivingEntity who, Recollection r) {
 		return r.at() > 0L && who.level().getGameTime() - r.at() <= FRESH_TICKS;
 	}
 
 	/**
-	 * (0.7.368) What {@code who} last had to do with {@code player} themselves (not hearsay), if it was in the last
+	 * (0.7.380) What {@code who} last had to do with {@code player} themselves (not hearsay), if it was in the last
 	 * {@link #FRESH_TICKS}; or null. Andy: "the talk options should always relate to the most recent interaction."
 	 */
 	static @Nullable Recollection latest(LivingEntity who, ServerPlayer player) {
@@ -389,7 +389,7 @@ public final class Recollections {
 	}
 
 	/**
-	 * The memory of {@code player} {@code who} would bring up next: (0.7.368) what just happened between them, if it's worth
+	 * The memory of {@code player} {@code who} would bring up next: (0.7.380) what just happened between them, if it's worth
 	 * a word and still unsaid; else the weightiest not yet said, the latest of those; or null.
 	 */
 	static @Nullable Recollection unsaid(LivingEntity who, ServerPlayer player) {
@@ -410,7 +410,7 @@ public final class Recollections {
 	}
 
 	/**
-	 * (0.7.368) MCA's menu opening on {@code who}: what just happened between you, said and now told, if it was the last thing
+	 * (0.7.380) MCA's menu opening on {@code who}: what just happened between you, said and now told, if it was the last thing
 	 * between you, is worth a word and hasn't been said; or null for MCA's own greeting.
 	 */
 	public static @Nullable Component opening(LivingEntity who, ServerPlayer player, RandomSource random) {

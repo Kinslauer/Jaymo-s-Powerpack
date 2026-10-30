@@ -266,7 +266,7 @@ public final class Carry {
 	private static final Map<UUID, Long> STRUGGLE_READY = new HashMap<>();
 
 	/**
-	 * (0.18.25) Told of every person a player lifts, sets down (dropped, placed or slipped), or throws. Jaymo's Kingdoms adds
+	 * (0.18.45) Told of every person a player lifts, sets down (dropped, placed or slipped), or throws. Jaymo's Kingdoms adds
 	 * one each (by reflection) so a villager carried out of a fight speaks of it and remembers it.
 	 */
 	public static final List<BiConsumer<ServerPlayer, Entity>> PICKED_UP_LISTENERS = new ArrayList<>(), SET_DOWN_LISTENERS = new ArrayList<>(),
@@ -753,7 +753,7 @@ public final class Carry {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5F, 0.7F);
 		}
 		if (carrier != null && how != Let.ESCAPE && !CarryBlock.is(carried) && !(carried instanceof SeveredPart)) {
-			// (0.18.25) Kingdoms hears of it: a villager set down where it's safe, or flung
+			// (0.18.45) Kingdoms hears of it: a villager set down where it's safe, or flung
 			for (BiConsumer<ServerPlayer, Entity> listener : how == Let.THROW ? THROWN_LISTENERS : SET_DOWN_LISTENERS) {
 				listener.accept(carrier, carried);
 			}

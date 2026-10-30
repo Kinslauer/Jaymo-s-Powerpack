@@ -108,7 +108,7 @@ public final class Treatment {
 	static final int WORK_TICKS = 15, BAR = 12;
 	/** (0.14.4) The custom-data key a red-hot blade carries (the game time it was heated). */
 	public static final String HEATED_KEY = "jaymospowers:heated";
-	/** (0.18.25) Told of every treatment a player finishes on someone else. Jaymo's Kingdoms adds one (by reflection): a villager remembers who dressed their wounds. */
+	/** (0.18.45) Told of every treatment a player finishes on someone else. Jaymo's Kingdoms adds one (by reflection): a villager remembers who dressed their wounds. */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TENDED_LISTENERS = new ArrayList<>();
 
 	/** (0.14.4) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
