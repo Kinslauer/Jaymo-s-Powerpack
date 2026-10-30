@@ -6839,7 +6839,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
-## 0.7.381, the ladder (SevTech picks) (pack 0.18.50)
+## 0.7.381, the ladder (SevTech picks) (pack 0.18.51)
 - Andy picked the SevTech ladder: one system for the world tiers, in four parts.
 - **One Deed Per Rung** (`WorldTiers`): each step up ends in a deed beside the great foes. `Progress` gains the bits FORGED
   (your first iron tool: a part of iron, pig iron or steel hammered at Powers' Smithing Anvil, or a tool with one in it built at
