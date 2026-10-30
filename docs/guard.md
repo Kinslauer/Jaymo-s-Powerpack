@@ -96,3 +96,14 @@ darktide", then, on their own windows: "yeah keep that but give a bar that repre
 - `Guard.PARRIED` (Fabric event: player, attacker, perfect) fires for every parry of any kind, for drills and quests.
 - Not changed: Chrono's Time Flow counters (a held blow answered by right click, not a guard), mobs' own parries
   (Kingdoms `MobParry`), Wind/Gravity projectile deflects, mana spirits' parries.
+
+## Knives parry, daggers throw (Powers 0.18.61)
+Andy (2026-10-30): "daggers and knives should be further differentiated, knife is for parrying and dagger will still
+throw. just swap their damage and name." Before, Balkon's WeaponMod knife and our Armory dagger both threw on right
+click; only the Stone Age primitive and bone knives parried. Andy picked: the WeaponMod knife parries (`armory/KnifeGuard`).
+- Right click with a WeaponMod knife (`weaponmod:knife.<tier>`) raises this weapon guard, drawn as a block; letting go
+  throws nothing. **Sneak + right click** still throws it, WeaponMod's own way (as it already did for Darktide users).
+- The knife and the Armory dagger of each tier (wood, stone, iron, gold, diamond, netherite) swap their held damage,
+  read from their registered attack modifiers at start. Thrown damage and attack speed are unchanged. Copper knives
+  have no Armory dagger and keep theirs.
+- Armory daggers keep their throw, and names are unchanged.

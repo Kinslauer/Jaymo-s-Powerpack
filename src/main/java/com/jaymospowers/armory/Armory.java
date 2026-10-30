@@ -57,7 +57,8 @@ import net.minecraft.world.phys.Vec3;
  * and tags are written by tools/armory_assets.py, which keeps the same ids as {@link #WEAPONS} and the singles below.
  * <ul>
  * <li>Daggers, hatchets, primitive spears, throwing sticks and the harpoon are held back and thrown like a trident
- * ({@link ThrowingWeaponItem}); kunai and throwing stars fly at a flick and stack.</li>
+ * ({@link ThrowingWeaponItem}); kunai and throwing stars fly at a flick and stack. (0.18.61) Knives parry rather than
+ * throw, and Balkon's knife and our dagger swap held damage ({@link KnifeGuard}).</li>
  * <li>The lance, couched on a moving mount, hits harder the faster you ride ({@link #LANCE_CHARGE}).</li>
  * <li>The flanged mace and the war axe knock a raised shield aside, like an axe.</li>
  * <li>The machete cuts through leaves, vines and crops fast.</li>
@@ -149,6 +150,7 @@ public final class Armory {
 
 	public static void init() {
 		ArmoryEntities.init();
+		KnifeGuard.init();
 		for (Weapon weapon : WEAPONS) {
 			for (Tier tier : Tier.values()) {
 				Item item = tiered(weapon, tier);
