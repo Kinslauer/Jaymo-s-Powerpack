@@ -416,6 +416,10 @@ public final class Classes {
 				next(sp);
 				return InteractionResult.SUCCESS;
 			}
+			if (!ServerPlayNetworking.canSend(sp, LifeStory.Open.TYPE)) {
+				// (0.7.419) no story screen on their client: the writ would only unmake them
+				return InteractionResult.FAIL;
+			}
 			sp.getItemInHand(hand).consume(1, sp);
 			// (0.7.419) a Writ reopens the whole life story, from the first page to the road (the roads open by then show); it was only the class
 			LifeStory.unmake(sp);

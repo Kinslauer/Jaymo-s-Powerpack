@@ -7427,3 +7427,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **A Writ of Rebirth** now reopens the whole life story (unmakes story, heritage and class like `/kingdom story reset`), not
   only the class page; the road page shows whatever is open then.
 - `/kingdom roads unlock|lock <road|all>` (ops): forces a road open or shut for everyone (deeds `open.<road>`/`shut.<road>`; shut wins).
+- Review fixes: the heritage-only roads (Demon for the Emberborn, the Lab, Cast Out for the Bio-built) are open from the start
+  like Verdant and the afterlife (Andy: basic and "req" roads need no deed); Snowed's past needs a pair like every other row;
+  the road fate picks is remembered as taken; a whale counts as taken only with a traveller by; a sentence counts as served
+  only while its realm stands; a Writ is not spent on a client without the story screen; `/kingdom roads` lines translated.

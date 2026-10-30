@@ -386,12 +386,16 @@ public final class LifeAims {
 			}
 		}
 		if (entity instanceof GreatWhale) {
-			// (0.7.419) a road deed: a great whale taken
-			Deeds.done(server, "whale.taken");
+			boolean taken = source.getEntity() instanceof ServerPlayer;
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				if (p.level() == level && p.distanceToSqr(entity) <= WHALE_NEAR * WHALE_NEAR) {
+					taken = true;
 					count(p, Kind.WHALE, 1);
 				}
+			}
+			if (taken) {
+				// (0.7.419) a road deed: a great whale taken (by a traveller or their crew)
+				Deeds.done(server, "whale.taken");
 			}
 		}
 		if (entity instanceof Wolf wolf && wolf.isTame()) {

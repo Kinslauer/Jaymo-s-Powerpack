@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
 public final class RoadLocks {
 	/** The roads open from the start: the basic ones (a realm's capital, a village, the wild, sworn, banished, shipwrecked, fate) and the heritage-locked ones. */
 	static final Set<Start> OPEN = Collections.unmodifiableSet(EnumSet.of(Start.CITY, Start.VILLAGE, Start.WILD, Start.SWORN, Start.BANISHED,
-		Start.SHIPWRECK, Start.FATE, Start.VERDANT, Start.AFTERLIFE));
+		Start.SHIPWRECK, Start.FATE, Start.VERDANT, Start.AFTERLIFE, Start.DEMON, Start.LAB, Start.CAST_OUT));
 
 	/** The prefix of the deed ids ops use to force a road open or shut. */
 	static final String FORCE_OPEN = "open.", FORCE_SHUT = "shut.";
@@ -95,7 +95,7 @@ public final class RoadLocks {
 		lock(Start.SKYFALL, p -> is(p, Question.CHILDHOOD, "storms") && is(p, Question.TURN, "storm"), "star.fell");
 		lock(Start.TIMELOST, p -> is(p, Question.CHILDHOOD, "books") && is(p, Question.TURN, "clock"), "world.time_chamber");
 		lock(Start.BURNED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.CHILDHOOD, "fire"), "fire.doused");
-		lock(Start.SNOWED, p -> is(p, Question.BORN, "north") || is(p, Question.CHILDHOOD, "snow") && is(p, Question.YOUTH, "winter"), "kill.stray");
+		lock(Start.SNOWED, p -> is(p, Question.BORN, "north") && is(p, Question.CHILDHOOD, "snow") || is(p, Question.CHILDHOOD, "snow") && is(p, Question.YOUTH, "winter"), "kill.stray");
 		lock(Start.WHALERS, p -> is(p, Question.RAISED, "fisherfolk") && is(p, Question.CHILDHOOD, "swimming"), "whalers.signed", "whale.taken");
 		lock(Start.UNARMED, p -> is(p, Question.CHILDHOOD, "fights") && is(p, Question.YOUTH, "pits"), "pit.won");
 		// the hard roads
@@ -105,21 +105,18 @@ public final class RoadLocks {
 		lock(Start.SENTENCED, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "cutpurses"), "cells.held");
 		lock(Start.EVICTED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.YOUTH, "winter"), "cells.served");
 		lock(Start.HIDEOUT, p -> is(p, Question.RAISED, "outlaws") && is(p, Question.YOUTH, "cutpurses"), "market.black", "cells.broke");
-		lock(Start.CAST_OUT, p -> is(p, Question.BORN, "vats") && is(p, Question.RAISED, "foundling"), "banned.city");
 		// the kit roads
 		lock(Start.HEIRLOOM, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "levy"), "assassin.killed");
 		lock(Start.TRADER, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "messenger"), "orders.sent");
 		lock(Start.PUP, p -> is(p, Question.RAISED, "hunters") && is(p, Question.YOUTH, "winter"), "life.saved");
 		lock(Start.NOBODIES, p -> is(p, Question.RAISED, "foundling") && is(p, Question.YOUTH, "levy"), "orders.taken");
 		// the powered roads
-		lock(Start.LAB, p -> is(p, Question.YOUTH, "apprentice", "hermit") && is(p, Question.CHILDHOOD, "books"), "moon.cured");
 		lock(Start.ANDROID, p -> is(p, Question.RAISED, "smiths") && is(p, Question.YOUTH, "gunsmith"), "rise.lab", "world.rustfall");
 		lock(Start.MOON_CURSED, p -> is(p, Question.BORN, "moors"), "moon.blood");
 		// the other worlds
 		lock(Start.MOON, p -> is(p, Question.CHILDHOOD, "roofs") && is(p, Question.TURN, "fall"), "world.moon");
 		lock(Start.RUSTFALL, p -> is(p, Question.RAISED, "smiths") && is(p, Question.CHILDHOOD, "fire"), "world.rustfall");
 		lock(Start.MAW, p -> is(p, Question.CHILDHOOD, "caves") && is(p, Question.TURN, "bite"), "world.maw");
-		lock(Start.DEMON, p -> is(p, Question.CHILDHOOD, "fire") && is(p, Question.TURN, "smoke"), "world.cinder");
 	}
 
 	private RoadLocks() {
@@ -284,7 +281,7 @@ public final class RoadLocks {
 		} else {
 			Start s = byKey(which.toLowerCase(Locale.ROOT));
 			if (s == null || !LOCKS.containsKey(s)) {
-				source.sendFailure(Component.literal("Not a lockable road: " + which));
+				source.sendFailure(Component.translatable("commands.jaymoskingdoms.roads.unknown", which));
 				return 0;
 			}
 			roads.add(s);
@@ -300,7 +297,8 @@ public final class RoadLocks {
 		}
 		int n = roads.size();
 		String first = key(roads.get(0));
-		source.sendSuccess(() -> Component.literal((open ? "Unlocked " : "Locked ") + (n == 1 ? first : n + " roads")), true);
+		source.sendSuccess(() -> n == 1 ? Component.translatable(open ? "commands.jaymoskingdoms.roads.unlocked" : "commands.jaymoskingdoms.roads.locked", first)
+			: Component.translatable(open ? "commands.jaymoskingdoms.roads.unlocked_n" : "commands.jaymoskingdoms.roads.locked_n", n), true);
 		return n;
 	}
 }

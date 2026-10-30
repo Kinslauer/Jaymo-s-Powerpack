@@ -359,8 +359,10 @@ public final class Busts {
 		Faction f = Factions.get(level.getServer(), jail.realm());
 		if (f == null || now >= jail.until()) {
 			player.removeAttached(JAILED);
-			// (0.7.419) a road deed: a sentence served out
-			Deeds.done(level.getServer(), "cells.served");
+			if (f != null) {
+				// (0.7.419) a road deed: a sentence served out
+				Deeds.done(level.getServer(), "cells.served");
+			}
 			if (f != null && player.isAlive()) {
 				Vec3 out = Speakeasy.release(level, f);
 				player.teleportTo(level, out.x, out.y, out.z, Set.of(), player.getYRot(), 0.0F, false);

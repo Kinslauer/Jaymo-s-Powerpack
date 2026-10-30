@@ -985,6 +985,8 @@ public final class LifeStory {
 				DEPARTED.remove(id);
 				return;
 			}
+			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
+			RoadLocks.note(p, start);
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
