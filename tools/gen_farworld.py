@@ -1,4 +1,4 @@
-"""Writes the assets and data of "far worlds restart the stone age" (com.jaymospowers.power.zfighter.farworld, 0.18.24):
+"""Writes the assets and data of "far worlds restart the stone age" (com.jaymospowers.power.zfighter.farworld, 0.18.53):
 the six first metals (their Tinkering material: every part and tool layer recoloured from the iron ones, molten, ingot, hot
 ingot), the six worlds' loose rocks, the veiled ore, the field anvil, the patrol's skip writ, and their recipes, loot, tags
 and lang. All 16x16 vanilla-style art painted here. Run from the repository root, after tools/tinkering_assets.py and

@@ -6878,7 +6878,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   within 96 blocks of the seat of a town he is within 160 of is written up in his Tidings, once for each pod: a light that fell, or
   a stranger seen at dusk. Read from Powers' pod tags (`jaymospowers.raider`, `jaymospowers.patrol_pod`) on the pod entity.
 - Compile-checked; not seen in game.
-## 0.7.368: star-touched foes (SevTech picks) (pack 0.18.24)
+## 0.7.384: star-touched foes (SevTech picks) (pack 0.18.53)
 - On Jaymo's Powers' six far worlds (the Pale Moon, Rustfall, Glacia, Cinder, the Maw, the Verdant World, found by their
   dimension's name; Powers is never compiled against), `StarTouched` marks about three in ten hostile mobs (`STAR_CHANCE`, rolled
   once when the mob first loads, saved as `star_touched`) as star-touched: `MonsterGear.starLook` dyes a leather piece into each

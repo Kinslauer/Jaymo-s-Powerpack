@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.18.24) The field anvil: a small anvil of stone and iron that a fighter sets down on a far world. Used, it opens a
+ * (0.18.53) The field anvil: a small anvil of stone and iron that a fighter sets down on a far world. Used, it opens a
  * crafting grid (a crafting table's, since planks are not crafted); it is where a world's rocks are knapped into its first metal
  * (three rocks in a row and an iron ingot under the middle one).
  */

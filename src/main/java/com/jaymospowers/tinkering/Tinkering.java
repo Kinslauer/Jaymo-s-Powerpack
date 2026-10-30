@@ -272,7 +272,7 @@ public final class Tinkering {
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
 		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL,
-			// (0.18.24) the six first metals of the far worlds
+			// (0.18.53) the six first metals of the far worlds
 			Molten.PALE_ALLOY, Molten.RUST_IRON, Molten.ICE_IRON, Molten.CINDER_BRONZE, Molten.VOID_SHARD, Molten.AMBER_BRONZE)) {
 			Item ingot = item(alloy.id + "_ingot", Item::new, Function.identity());
 			ALLOY_INGOTS.put(alloy, ingot);

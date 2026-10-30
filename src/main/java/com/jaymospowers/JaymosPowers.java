@@ -79,7 +79,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();
-		// (0.18.24) far worlds restart the stone age: veiled ore, first metals, the field anvil, the patrol's skip writ
+		// (0.18.53) far worlds restart the stone age: veiled ore, first metals, the field anvil, the patrol's skip writ
 		com.jaymospowers.power.zfighter.farworld.FarWorlds.init();
 		// sneak + use a rock to knap a stone head on a 3x3 grid
 		com.jaymospowers.ground.knapping.Knapping.init();

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.24) Ore on a far world takes {@link FarWorlds#SLOWDOWN} times as long unless the tool's head is that world's first metal. */
+/** (0.18.53) Ore on a far world takes {@link FarWorlds#SLOWDOWN} times as long unless the tool's head is that world's first metal. */
 @Mixin(Player.class)
 abstract class FarOreSpeedMixin {
 	@Inject(method = "getDestroySpeed", at = @At("RETURN"), cancellable = true)

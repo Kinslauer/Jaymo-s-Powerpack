@@ -4004,7 +4004,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
   first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
-- **0.18.24, far worlds restart the stone age (SevTech picks; Kingdoms 0.7.368):** four picks, in `power/zfighter/farworld`, and
+- **0.18.53, far worlds restart the stone age (SevTech picks; Kingdoms 0.7.384):** four picks, in `power/zfighter/farworld`, and
   the Patrol's writ. **Prospecting First** (`VeiledOreBlock`, `FarWorlds`): the first time a chunk of the Pale Moon, Rustfall,
   Glacia, Cinder, the Maw or the Verdant World loads (once, kept on the chunk as `farworld_veiled`, so ore a player sets down is
   left alone), each vanilla or silver ore in it becomes `veiled_ore`, which remembers its ore (`ore`) and wears the stone round it
