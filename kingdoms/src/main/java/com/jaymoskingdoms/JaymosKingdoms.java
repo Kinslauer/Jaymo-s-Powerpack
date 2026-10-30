@@ -69,6 +69,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> com.jaymoskingdoms.forms.FormsCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			KingdomEvents.forget(handler.player);
 			McaCompat.forget(handler.player);
@@ -223,6 +224,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Skills.register();
 		// (0.7.353) Might and Packhorse ease hauling bodies in Kitchen
 		KitchenCompat.registerBrawn();
+		// (0.7.366) Weapon Forms: forms learned by practice, the Five-Art Belt, the Battle Stance (and its attachment)
+		com.jaymoskingdoms.forms.Forms.register();
+		LOGGER.debug("forms attachment: {}", com.jaymoskingdoms.forms.Forms.BOOK);
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
 		LOGGER.debug("will attachments: {} {}", Will.ROAR_READY, Will.REFUSE_READY);
 		LOGGER.debug("valor attachments: {} {} {} {} {} {}", Valor.VALOR, Valor.STATE, ValorFolk.SEEN, ValorFolk.TOLD, ValorFolk.LED, ValorFolk.AWED);

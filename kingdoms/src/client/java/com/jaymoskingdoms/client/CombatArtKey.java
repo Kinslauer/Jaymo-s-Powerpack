@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.CombatArts;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.client.forms.FormsClient;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -21,12 +22,11 @@ final class CombatArtKey {
 	static void register() {
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.combat_art", InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_4,
 			KeyMapping.Category.register(JaymosKingdoms.id("combat_arts"))));
-		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-			while (key.consumeClick()) {
-				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(CombatArts.Use.TYPE)) {
-					ClientPlayNetworking.send(new CombatArts.Use(minecraft.player.isShiftKeyDown()));
-				}
+		// (0.7.366) with a form's weapon in hand the key is also the Battle Stance (hold) and the forms (tap): Weapon Forms decides
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> FormsClient.key(minecraft, key, () -> {
+			if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(CombatArts.Use.TYPE)) {
+				ClientPlayNetworking.send(new CombatArts.Use(minecraft.player.isShiftKeyDown()));
 			}
-		});
+		}));
 	}
 }

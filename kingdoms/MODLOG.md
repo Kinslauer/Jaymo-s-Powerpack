@@ -6838,3 +6838,20 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   hair is hidden under the hat. CC BY, credited.
 - Compile-checked; not seen in game.
 
+
+## 0.7.366: Weapon Forms, patch 1 track A: the engine (pack number set when the PR opens)
+- Andy's Ultimate Battle picks (`docs/WeaponForms-Plan.md`; ideas only). `forms/Forms` is the registry and rules: a form has a
+  weapon family (blade, spear, fist, knife, claw; `form_blades` / `form_spears` / `form_claws` item tags, the knife family is
+  `light_blades`; Balkon's katanas are optional entries), a kind (art or masterstroke), cooldown, wind-up, hunger and the
+  practice a rank needs. Per player a saved, synced `Forms.BOOK`: practice per known form (3 ranks), the belt, stance, slot.
+  API for teachers: `teach`, `knows`, `rank`, `practice`, `known`, `STARTER_FORMS`. First form unlocks belt and stance.
+- Five-Art Belt: 5 slots; sneak + use a Powers training post or any mannequin (sparring dummy) empty-handed opens a small
+  belt screen; the server takes changes only within 5 blocks of one.
+- Battle Stance: hold the Combat Art key (side button 1) with a known form's weapon out; tap fires the slot, sneak + tap the
+  next slot, Alt + scroll picks the slot. Out of stance Charge / War Cry / Shield Throw now fire on release of a tap when a
+  form's weapon is in hand (still on press otherwise). Takes Powers' lock-on by reflection (`PowersCompat.lockOnNearest`).
+- Practice on landing (foe 2, dummy or training post 1), masterstroke gate (downed or Powers poise K.O.), Form Cancels
+  (14 ticks after a chain blow skips the wind-up), chain counter right of the crosshair (Good 3+, Fierce 6+, Relentless
+  10+; replaces the old "Combo xN" action-bar line). No parry window or parry HUD.
+- Sheath Draw and Crescent Sweep (`forms/BladeForms`). `/forms teach|forget|list` (ops).
+- Compile-checked. Not seen in game.

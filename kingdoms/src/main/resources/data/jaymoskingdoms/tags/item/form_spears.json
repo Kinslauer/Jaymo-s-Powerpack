@@ -1,0 +1,38 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:spears",
+    {
+      "id": "weaponmod:spear.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.copper",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:spear.netherite",
+      "required": false
+    },
+    {
+      "id": "weaponmod:javelin",
+      "required": false
+    }
+  ]
+}
