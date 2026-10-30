@@ -489,7 +489,7 @@ public final class ZFighterLookout {
 	/** How far above the floor layer the Lookout's buildings reach (blocks): what counts as standing on the platform. */
 	static final int PLATFORM_HEADROOM = 10;
 
-	/** (0.18.51) Whether {@code pos} is on the Lookout's platform: over its disc, from the floor up to the tops of its buildings. */
+	/** (0.18.52) Whether {@code pos} is on the Lookout's platform: over its disc, from the floor up to the tops of its buildings. */
 	public static boolean onPlatform(ServerLevel level, BlockPos pos) {
 		if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
 			return false;

@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.51) What Jaymo's Kingdoms asks of the star charts, by reflection (all static, all public, simple types, so a change
+ * (0.18.52) What Jaymo's Kingdoms asks of the star charts, by reflection (all static, all public, simple types, so a change
  * here shows up as a missing method on Kingdoms' side rather than a crash): who sells which chart, the sale itself, and who
  * has not yet flown.
  */
