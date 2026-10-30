@@ -1,6 +1,7 @@
 package com.jaymospowers.client.mixin;
 
 import com.jaymospowers.client.wounds.DownedPose;
+import com.jaymospowers.client.wounds.TrippedPose;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -12,7 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.14.1) Someone downed is laid on the ground (see DownedPose): onto the render state, the pose stack and the model. */
+/**
+ * (0.14.1) Someone downed is laid on the ground (see DownedPose): onto the render state, the pose stack and the model.
+ * (0.18.71) And one tripped by a bolas (TrippedPose).
+ */
 @Mixin(LivingEntityRenderer.class)
 abstract class DownedLivingEntityRendererMixin {
 	@Inject(
@@ -20,6 +24,7 @@ abstract class DownedLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$downedState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		DownedPose.extract(entity, state, partialTicks);
+		TrippedPose.extract(entity, state, partialTicks);
 	}
 
 	/** (0.15.142) Whatever it held its arms up for is let go before the model is posed (the armour's posing comes later, off the same state). */
@@ -37,10 +42,12 @@ abstract class DownedLivingEntityRendererMixin {
 	private void jaymospowers$downedModel(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 		CameraRenderState camera, CallbackInfo ci) {
 		DownedPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		TrippedPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$downedLying(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		DownedPose.rotate(state, poseStack, entityScale);
+		TrippedPose.rotate(state, poseStack, entityScale);
 	}
 }

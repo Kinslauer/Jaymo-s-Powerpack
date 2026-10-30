@@ -73,7 +73,8 @@ public final class TnmFollow {
 	/** From ModelFeatureRenderer.prepareModel, after every pose and just before the model is drawn. */
 	public static void beforeDraw(Model<?> model, Object state) {
 		if (!LOADED || !(model instanceof HumanoidModel<?> humanoid) || !(state instanceof AvatarRenderState avatar) || avatar.deathTime > 0.0F
-			|| model == avatar.getData(BODY) || PoseTakeover.posed(avatar) || DownedPose.down(avatar)) {
+			|| model == avatar.getData(BODY) || PoseTakeover.posed(avatar) || DownedPose.down(avatar)
+			|| com.jaymospowers.client.wounds.TrippedPose.tripped(avatar)) {
 			return;
 		}
 		float[] pose = avatar.getData(POSE);
