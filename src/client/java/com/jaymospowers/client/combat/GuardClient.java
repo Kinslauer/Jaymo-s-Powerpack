@@ -3,6 +3,8 @@ package com.jaymospowers.client.combat;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.LockOnClient;
 import com.jaymospowers.combat.Guard;
+import com.jaymospowers.power.darktide.DarktideGuard;
+import com.jaymospowers.power.zfighter.ZFighterGuard;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -21,6 +23,9 @@ import net.minecraft.world.phys.Vec3;
  * the perfect parry, gold the parry, grey the plain block; a notch runs along it), its flash when a parry lands, and the
  * lock-on lunge: locked onto a foe a little past your reach, a swing with a weapon steps you in so the blow connects
  * (Epic Fight's attack step, our own).
+ * <p>
+ * (0.18.24) One bar for every guard: a weapon's, a shield's, a Z Fighter's crossed arms and Darktide's guard all draw it
+ * with the same windows, and a raise too eager to parry shows grey only (the server's {@link Guard#SHOWN}).
  */
 public final class GuardClient {
 	/** The bar: half its width and its height (pixels), and how far under the crosshair. */
@@ -106,17 +111,24 @@ public final class GuardClient {
 			graphics.fill(cx - BAR_HALF - grow, y - 1, cx + BAR_HALF + grow + 1, y + BAR_HEIGHT + 1, color);
 			return;
 		}
-		if (!Guard.raised(player)) {
+		Guard.Shown shown = player.getAttached(Guard.SHOWN);
+		float partial = delta.getGameTimeDeltaPartialTick(false);
+		float held;
+		if (Guard.raised(player)) {
+			held = player.getTicksUsingItem() + partial;
+		} else if (shown != null && (ZFighterGuard.guarding(player) || DarktideGuard.guarding(player))) {
+			held = player.level().getGameTime() - shown.start() + partial;
+		} else {
 			return;
 		}
+		boolean eager = shown != null && shown.eager();
 		boolean locked = LockOnClient.locked() != null;
-		int perfect = Guard.PERFECT_TICKS + (locked ? Guard.LOCK_PERFECT_BONUS : 0);
-		int parry = Guard.PARRY_TICKS + (locked ? Guard.LOCK_PARRY_BONUS : 0);
-		float held = player.getTicksUsingItem() + delta.getGameTimeDeltaPartialTick(false);
-		if (held > parry + BAR_LINGER) {
+		int perfect = eager ? 0 : Guard.PERFECT_TICKS + (locked ? Guard.LOCK_PERFECT_BONUS : 0);
+		int parry = eager ? 0 : Guard.PARRY_TICKS + (locked ? Guard.LOCK_PARRY_BONUS : 0);
+		int span = Guard.PARRY_TICKS + (locked ? Guard.LOCK_PARRY_BONUS : 0) + BAR_LINGER;
+		if (held < 0.0F || held > span) {
 			return;
 		}
-		int span = parry + BAR_LINGER;
 		int left = cx - BAR_HALF, width = BAR_HALF * 2;
 		int perfectX = left + width * perfect / span, parryX = left + width * parry / span;
 		graphics.fill(left - 1, y - 1, left + width + 1, y + BAR_HEIGHT + 1, 0x80000000);

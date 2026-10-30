@@ -2,6 +2,7 @@ package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.combat.Guard;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
@@ -35,8 +36,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Blocks {@link #BLOCK_SHARE} of melee and projectile damage from the front {@link #FRONT_DEGREES}° ({@link #STARTER_BLOCK_SHARE}
  * fresh); never falls, fire, magic, explosions or anything from behind. Each blocked hit costs {@link #FLOW_PER_DAMAGE} × its
  * damage in Flow; one that empties Flow breaks the guard.</li>
- * <li>A hit in the first {@link #PARRY_TICKS} of raising it is parried: nothing taken, nothing spent, +{@link #PARRY_FLOW}
- * Flow, the next R empowered. Then {@link #PARRY_COOLDOWN} before the next.</li>
+ * <li>(0.18.24) Parrying is the one parry everything shares ({@link Guard}): the same perfect and parry windows from the
+ * raise, lock-on bonus, mashing rule and unparryable heavy blows (and gunshots), the same stun, shove and riposte, and the
+ * same timing bar under the crosshair. On top: nothing spent, +{@link #PARRY_FLOW} Flow, the next R empowered.</li>
  * <li>Katana parry, R unlocked: humanoids reel and are stunned, and you answer with a slash (the riposte).</li>
  * <li>Katana or knife guard: projectiles fly back at their shooter ({@link #reflectAim} / {@link #reflectSpeed} grow with
  * mastery). Fire charges, shulker bullets and magic only once ascended.</li>
@@ -51,8 +53,6 @@ public final class DarktideGuard {
 	static final float FLOW_PER_DAMAGE = 2.0F;
 	/** A reflected projectile's Flow cost (its damage isn't known before it lands). */
 	static final float REFLECT_FLOW = 6.0F;
-	public static final int PARRY_TICKS = 8;
-	static final int PARRY_COOLDOWN = 20;
 	static final float PARRY_FLOW = 8.0F;
 	/** How long a parry empowers the next R. */
 	static final int EMPOWER_TICKS = 80;
@@ -60,10 +60,9 @@ public final class DarktideGuard {
 	static final double GUARD_SPEED = 0.35, GUARD_SPEED_KATANA = 0.75;
 	/** Guard break: staggered (stunned) for this long, and no guard for this long. */
 	static final int STAGGER_TICKS = 12, BREAK_LOCK_TICKS = 40;
-	/** The riposte: stun on a humanoid, damage on top of the katana's, shove for anything else. */
+	/** The katana's riposte on a humanoid: its stun, and damage on top of the katana's. */
 	static final int RIPOSTE_STUN_TICKS = 24;
 	static final float RIPOSTE_DAMAGE = 6.0F;
-	static final double PARRY_KNOCKBACK = 0.9;
 	/** Reflect at mastery level 1 and 4 (in between, evenly): aim (how tightly at the shooter's chest) and speed kept. */
 	static final double REFLECT_AIM_MIN = 0.2, REFLECT_AIM_MAX = 0.7;
 	static final double REFLECT_SPEED_MIN = 0.3, REFLECT_SPEED_MAX = 0.9;
@@ -100,6 +99,7 @@ public final class DarktideGuard {
 		live.guarding = true;
 		live.guardStart = now;
 		player.setAttached(DarktideState.GUARD, now);
+		Guard.powerRaised(player);
 		speed(player);
 	}
 
@@ -109,6 +109,7 @@ public final class DarktideGuard {
 			live.guarding = false;
 		}
 		player.removeAttached(DarktideState.GUARD);
+		Guard.powerLowered(player);
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (speed != null) {
 			speed.removeModifier(GUARD_SPEED_ID);
@@ -154,9 +155,9 @@ public final class DarktideGuard {
 		return cos >= Math.cos(Math.toRadians(FRONT_DEGREES / 2.0));
 	}
 
-	private static boolean parryWindow(ServerPlayer player, DarktideLive live) {
-		long now = player.level().getGameTime();
-		return now - live.guardStart <= PARRY_TICKS && now >= live.parryReadyAt;
+	/** How long the guard has been up, for {@link Guard#timing}. */
+	private static int held(ServerPlayer player, DarktideLive live) {
+		return (int) (player.level().getGameTime() - live.guardStart);
 	}
 
 	// ---- blocking (DarktideBlockMixin) --------------------------------------------------------------------------------
@@ -184,17 +185,18 @@ public final class DarktideGuard {
 			return -1.0F;
 		}
 		// a blade turns arrows back at their shooter (those that came through the damage path, like WeaponMod's bullets)
+		Guard.Timing timing = Guard.timing(player, source, held(player, live));
 		if (projectile && direct instanceof Projectile shot && blade(player) && reflectable(player, shot)) {
-			if (parryWindow(player, live)) {
-				parry(player, null);
+			if (timing.parried()) {
+				parry(player, null, source.getSourcePosition(), timing == Guard.Timing.PERFECT);
 			} else if (!payOrBreak(player, live, REFLECT_FLOW, damage)) {
 				return 0.0F;
 			}
 			queueReflection(player, shot);
 			return damage;
 		}
-		if (parryWindow(player, live)) {
-			parry(player, melee ? (LivingEntity) direct : null);
+		if (timing.parried()) {
+			parry(player, melee ? (LivingEntity) direct : null, source.getSourcePosition(), timing == Guard.Timing.PERFECT);
 			return damage;
 		}
 		float share = Mastery.starterOnly(player) ? STARTER_BLOCK_SHARE : BLOCK_SHARE;
@@ -234,19 +236,20 @@ public final class DarktideGuard {
 		com.jaymospowers.core.Shakes.send(player, 0.8F);
 	}
 
-	/** A parry: nothing taken or spent, Flow gained, the next R empowered; a katana answers. */
-	private static void parry(ServerPlayer player, @Nullable LivingEntity attacker) {
+	/**
+	 * A parry: the shared one ({@link Guard#parried}: stun, shove, riposte owed, cue), then nothing spent, Flow gained, the
+	 * next R empowered; a katana answers.
+	 */
+	private static void parry(ServerPlayer player, @Nullable LivingEntity attacker, @Nullable Vec3 from, boolean perfect) {
+		Guard.parried(player, attacker, from, perfect);
 		DarktideLive live = DarktidePower.live(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		live.parryReadyAt = now + PARRY_COOLDOWN;
 		DarktidePower.addFlow(player, PARRY_FLOW);
 		live.empoweredUntil = now + EMPOWER_TICKS;
 		Mastery.used(player);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.8F, 1.4F);
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
-		level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 12, 0.2, 0.2, 0.2, 0.3);
 		level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y - 0.3, at.z, 10, 0.25, 0.25, 0.25, 0.05);
 		boolean katana = DarktideWeapons.kit(player) == DarktideWeapons.Kit.KATANA;
 		if (katana) {
@@ -256,17 +259,11 @@ public final class DarktideGuard {
 			DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), -1));
 			return;
 		}
-		if (katana && Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
-			if (DarktideStatus.humanoid(attacker)) {
-				DarktideStatus.stun(attacker, RIPOSTE_STUN_TICKS);
-				DarktideStatus.reel(attacker, player.position());
-				riposte(player, attacker);
-			} else {
-				shove(player, attacker, PARRY_KNOCKBACK * 1.6);
-				DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), attacker.getId()));
-			}
+		if (katana && Mastery.isUnlocked(player, PowerKey.ABILITY_1) && DarktideStatus.humanoid(attacker)) {
+			DarktideStatus.stun(attacker, RIPOSTE_STUN_TICKS);
+			DarktideStatus.reel(attacker, player.position());
+			riposte(player, attacker);
 		} else {
-			shove(player, attacker, PARRY_KNOCKBACK);
 			DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), attacker.getId()));
 		}
 	}
@@ -292,16 +289,6 @@ public final class DarktideGuard {
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
 		DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.RIPOSTE, player.getId(), target.getId()));
-	}
-
-	static void shove(Entity from, LivingEntity target, double strength) {
-		Vec3 away = target.position().subtract(from.position()).multiply(1.0, 0.0, 1.0);
-		if (away.lengthSqr() < 1.0E-4) {
-			return;
-		}
-		away = away.normalize().scale(strength);
-		target.setDeltaMovement(target.getDeltaMovement().add(away.x, 0.25, away.z));
-		target.syncVelocity = true;
 	}
 
 	// ---- reflect (DarktideDeflectMixin) -------------------------------------------------------------------------------
@@ -334,8 +321,10 @@ public final class DarktideGuard {
 		if (!live.guarding || !blade(player) || !reflectable(player, projectile) || !inFront(player, projectile.position())) {
 			return null;
 		}
-		if (parryWindow(player, live)) {
-			parry(player, null);
+		Guard.Timing timing = Guard.timing(player, projectile.getOwner() instanceof LivingEntity shooter ? shooter : null, true,
+			Guard.shot(projectile), held(player, live));
+		if (timing.parried()) {
+			parry(player, null, projectile.position(), timing == Guard.Timing.PERFECT);
 		} else if (!payOrBreak(player, live, REFLECT_FLOW, REFLECT_FLOW)) {
 			return null;
 		}

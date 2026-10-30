@@ -78,3 +78,26 @@ Andy: "All guns should red glint too, all sailors should have at least one flint
 8. A plain zombie glints before each blow and misses if you step back in time; an iron golem's glint is red.
 9. A pirate or musketeer glints red with a click before each shot; a raised sword blocks the ball but never parries it.
 10. Every ship's crew who fight draw a flintlock; some fire two or three in a row before reloading.
+
+## One parry for everything that blocks (Powers 0.18.24)
+Andy (2026-10-30): "make the parry meter consistent across all weapons/ powers that block, including z fighters and
+darktide".
+
+Before: weapons and shields used `Guard` (perfect 0-5 / parry 6-12 ticks, lock-on bonus, mashing rule, unparryable
+red blows, timing bar). Z Fighter's crossed arms and Darktide's guard each had their own single 8-tick window, a 20-tick
+cooldown after a parry, their own stun/shove/counter, no timing bar, and they parried red heavy blows and gunshots.
+
+Now `combat/Guard` is the one parry:
+- A power's guard calls `Guard.powerRaised` / `powerLowered` when it goes up and down, asks `Guard.timing(...)` what a blow
+  meets (BLOCK, PARRY or PERFECT), and answers a parry with `Guard.parried(...)`: the same windows, lock-on bonus,
+  mashing rule, unparryable blows and shots, the same stun, shove, riposte (1.5x / 1.25x on your next blow), perfect-parry
+  feathers and the same sparks, ring and bar flash.
+- Each power adds only its flavour: Z Fighter +10 ki and poise wear; Darktide +8 Flow, the next R empowered, the katana's
+  instant slash on humanoids and the blade's reflect. Blocking (what isn't parried) still costs each its own resource
+  (feathers, ki, Flow) and breaks its own way.
+- `GuardClient`'s timing bar draws for all three, from the server's raise (`Guard.SHOWN`, owner only); a raise too eager
+  to parry shows grey only.
+- Darktide's Gedan stance keeps its own hold-to-parry, but flashes the bar and counts as a parry.
+- `Guard.PARRIED` (Fabric event: player, attacker, perfect) fires for every parry of any kind, for drills and quests.
+- Not changed: Chrono's Time Flow counters (a held blow answered by right click, not a guard), mobs' own parries
+  (Kingdoms `MobParry`), Wind/Gravity projectile deflects, mana spirits' parries.

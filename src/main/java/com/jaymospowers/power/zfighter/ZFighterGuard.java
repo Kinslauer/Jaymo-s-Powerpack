@@ -1,12 +1,12 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.combat.Guard;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,8 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -26,9 +24,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>Melee blows and projectiles from the front {@link #FRONT_DEGREES}° lose {@link #BLOCK_SHARE} of their damage, paid
  * in ki ({@link #KI_PER_DAMAGE} a point blocked); with no ki left the blow goes through whole. Never falls, fire,
  * explosions or anything from behind.</li>
- * <li>A blow in the first {@link #PARRY_TICKS} of raising the guard is parried: nothing taken, +{@link #PARRY_KI} ki, the
- * attacker is knocked back reeling (slowed and weakened), and his next punch within {@link #COUNTER_TICKS} is a
- * counter ({@link #COUNTER_BONUS} harder). Then {@link #PARRY_COOLDOWN} before another parry.</li>
+ * <li>(0.18.24) Parrying is the one parry everything shares ({@link Guard}): the same perfect and parry windows from the
+ * raise, lock-on bonus, mashing rule and unparryable heavy blows, the same stun, shove and riposte (his next punch), and
+ * the same timing bar under the crosshair. A parry takes nothing and gives +{@link #PARRY_KI} ki, and wears the
+ * attacker's poise.</li>
  * </ul>
  * The guard slows him like charging does; everyone sees the crossed arms ({@link #GUARD}).
  */
@@ -36,13 +35,7 @@ public final class ZFighterGuard {
 	static final float BLOCK_SHARE = 0.5F;
 	static final float KI_PER_DAMAGE = 0.5F;
 	static final double FRONT_DEGREES = 150.0;
-	static final int PARRY_TICKS = 8;
-	static final int PARRY_COOLDOWN = 20;
 	static final float PARRY_KI = 10.0F;
-	static final int STAGGER_TICKS = 30;
-	static final double PARRY_KNOCKBACK = 0.9;
-	static final int COUNTER_TICKS = 40;
-	static final float COUNTER_BONUS = 0.6F;
 
 	/** He holds his guard up, for everyone's client (the crossed arms). Not saved. */
 	public static final AttachmentType<Boolean> GUARD = AttachmentRegistry.create(JaymosPowers.id("zfighter_guard"),
@@ -67,8 +60,10 @@ public final class ZFighterGuard {
 		if (up) {
 			live.guardStart = player.level().getGameTime();
 			player.setAttached(GUARD, true);
+			Guard.powerRaised(player);
 		} else {
 			player.removeAttached(GUARD);
+			Guard.powerLowered(player);
 		}
 		ZFighterPower.refresh(player, live);
 	}
@@ -77,6 +72,7 @@ public final class ZFighterGuard {
 	static void drop(ServerPlayer player, ZFighterPower.Live live) {
 		live.guarding = false;
 		player.removeAttached(GUARD);
+		Guard.powerLowered(player);
 	}
 
 	/** What's left of {@code damage} after his guard (the victim side of the damage hook). */
@@ -93,8 +89,9 @@ public final class ZFighterGuard {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (now - live.guardStart <= PARRY_TICKS && now >= live.parryReadyAt) {
-			parry(player, live, melee ? (LivingEntity)direct : null);
+		Guard.Timing timing = Guard.timing(player, source, (int) (now - live.guardStart));
+		if (timing.parried()) {
+			parry(player, live, melee ? (LivingEntity) direct : null, source.getSourcePosition(), timing == Guard.Timing.PERFECT);
 			ZFighterGrowth.guarded(player, true);
 			return 0.0F;
 		}
@@ -114,37 +111,18 @@ public final class ZFighterGuard {
 		return damage - blocked;
 	}
 
-	private static void parry(ServerPlayer player, ZFighterPower.Live live, LivingEntity attacker) {
+	/** The shared parry ({@link Guard#parried}: stun, shove, riposte, cue), then his own: ki back, ki dust, poise worn. */
+	private static void parry(ServerPlayer player, ZFighterPower.Live live, LivingEntity attacker, Vec3 from, boolean perfect) {
+		Guard.parried(player, attacker, from, perfect);
 		ServerLevel level = player.level();
-		long now = level.getGameTime();
-		live.parryReadyAt = now + PARRY_COOLDOWN;
-		live.counterUntil = now + COUNTER_TICKS;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + PARRY_KI);
 		Mastery.used(player);
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
-		level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 14, 0.2, 0.2, 0.2, 0.4);
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y - 0.3, at.z, 12, 0.25, 0.25, 0.25, 0.1);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 1.4F);
 		if (attacker != null && attacker.isAlive()) {
-			ZFighterKi.push(attacker, attacker.position().subtract(player.position()), PARRY_KNOCKBACK, 0.25);
-			attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 3, false, false), player);
-			attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false), player);
 			ZFighterPoise.wear(attacker, ZFighterPoise.PARRY_WEAR);
 		}
-	}
-
-	/** The attacker side: a counter punch after a parry hits harder (once). */
-	static float counter(ServerPlayer player, DamageSource source, float damage) {
-		ZFighterPower.Live live = ZFighterPower.live(player);
-		long now = player.level().getGameTime();
-		if (live.counterUntil < now || source.getDirectEntity() != player) {
-			return damage;
-		}
-		live.counterUntil = 0L;
-		ServerLevel level = player.level();
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.7F);
-		return damage * (1.0F + COUNTER_BONUS);
 	}
 
 	private static boolean inFront(ServerPlayer player, Vec3 from) {

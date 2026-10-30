@@ -98,6 +98,8 @@ final class DarktideGedan {
 		DarktideStatus.reel(attacker, player.position());
 		DarktidePower.addFlow(player, PARRY_FLOW);
 		DarktidePower.countParry(player);
+		// (0.18.24) the same cue on the bar as every other parry
+		com.jaymospowers.combat.Guard.cue(player, attacker, false);
 		DarktideMove.play(player, DarktideMove.STANCE, MAX_HOLD + 40, gedan.stance + 4 * gedan.parries);
 		// the stance keeps its start (the field's growth): only the kamae changes
 		player.setAttached(DarktideState.MOVE, new DarktideState.Move(DarktideMove.STANCE, gedan.start, MAX_HOLD + 40, gedan.stance + 4 * gedan.parries));
