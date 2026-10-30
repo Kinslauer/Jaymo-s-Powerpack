@@ -7187,3 +7187,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Their info box no longer says "Jobless" and shows a mood: the trade line shows their part ("Judge of the Dead") and the
   mood line their bearing ("Bearing: Stern"), from the synced `ZFighterFolk.PART` (`McaZFighterInfoMixin`).
 - Compile-checked; not seen in game.
+
+## 0.7.406: Sheath Draw (and every form) hits what you aim at
+- Andy: "sheath draw didnt seem to do damage when jung used it last on the server". A form only hit monsters and mobs
+  already targeting you, so a dash through a deer, a neutral wolf, a villager or a rival player went straight past
+  them. `Forms.targets` now also takes whatever you're locked onto (Powers' lock-on) or aiming at inside the form's
+  reach (`AIM_REACH` 10, `AIM_SLACK` 0.4), short of your own pets and party members.
+- Two broken arms (Powers' `Breaks.armless`) can't swing a weapon, so they can't do a form any more either
+  (`PowersCompat.armless`, message `form.armless`). One broken arm still does forms at the reduced attack damage.

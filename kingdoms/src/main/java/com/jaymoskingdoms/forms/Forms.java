@@ -4,6 +4,7 @@ import com.jaymoskingdoms.ClassPerks;
 import com.jaymoskingdoms.CombatArts;
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Parties;
 import com.jaymoskingdoms.PowersCompat;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -43,6 +44,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.entity.player.Player;
@@ -95,6 +97,8 @@ public final class Forms {
 	static final int MIN_FOOD = 4;
 	/** How far ahead a masterstroke looks for a fallen foe (blocks), and how straight ahead it must be (cosine). */
 	static final double MASTER_REACH = 4.5, MASTER_FACING = 0.5;
+	/** (0.7.406) How far along the look an aimed-at creature counts as a form's target, and how much the aim may be off. */
+	static final double AIM_REACH = 10.0, AIM_SLACK = 0.4;
 	/** Powers' block and tag for its training post and sparring dummy (read by name: Kingdoms never needs Powers). */
 	static final String TRAINING_POST = "jaymospowers:training_post", SPARRING_TAG = "jaymospowers_sparring";
 	/** Powers' Afterimage decoys are mannequins too: never a dummy to practise on or set the belt at. */
@@ -513,13 +517,34 @@ public final class Forms {
 		return base + RANK_REACH * (rank - 1);
 	}
 
-	/** The foes a form may hit in {@code box}: the Combat Arts' foes, and the mannequins (sparring dummies) there. */
+	/**
+	 * The foes a form may hit in {@code box}: the Combat Arts' foes, the mannequins (sparring dummies) there, and (0.7.406)
+	 * whatever {@code player} is locked onto or aiming at in it, hostile or not (a deer, a wolf, a rival), short of a pet
+	 * of theirs or a party member.
+	 */
 	static List<LivingEntity> targets(ServerLevel level, ServerPlayer player, AABB box) {
 		List<LivingEntity> list = new ArrayList<>(CombatArts.foes(level, player, box));
 		for (Mannequin dummy : level.getEntitiesOfClass(Mannequin.class, box, e -> e.isAlive() && dummy(e) && !list.contains(e))) {
 			list.add(dummy);
 		}
+		LivingEntity lock = PowersCompat.lockTarget(player);
+		Vec3 eye = player.getEyePosition();
+		Vec3 far = eye.add(player.getLookAngle().scale(AIM_REACH));
+		for (LivingEntity aimed : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive() && !list.contains(e)
+			&& !(e instanceof Mannequin) && !friendly(player, e))) {
+			if (aimed == lock || aimed.getBoundingBox().inflate(AIM_SLACK).clip(eye, far).isPresent()) {
+				list.add(aimed);
+			}
+		}
 		return list;
+	}
+
+	/** (0.7.406) Whether a form of {@code player}'s should pass {@code entity} by: their own pet, or a party member. */
+	private static boolean friendly(ServerPlayer player, LivingEntity entity) {
+		if (entity instanceof OwnableEntity pet && player.getUUID().equals(pet.getOwnerReference() == null ? null : pet.getOwnerReference().getUUID())) {
+			return true;
+		}
+		return entity instanceof ServerPlayer other && Parties.allied(player, other);
 	}
 
 	/** Practice from a form that landed on {@code hits} (the best one: a sweep through three foes isn't three lessons). */
@@ -631,6 +656,11 @@ public final class Forms {
 		// (0.7.386) inside a Divine-born's Eight-Sign Circle no form can be used
 		if (PowersCompat.sealed(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.sealed").withStyle(ChatFormatting.GOLD));
+			return;
+		}
+		// (0.7.406) two broken arms can't swing a weapon, so they can't do a form either
+		if (PowersCompat.armless(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.armless").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		String id = book.belt().get(sneaking ? Math.floorMod(book.slot() + 1, BELT_SLOTS) : book.slot());
