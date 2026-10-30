@@ -2,7 +2,7 @@
 
 Andy picked 29 of 34 rows on the pick page (https://claude.ai/artifact/F66nVbuNypWGxh7q1zty4s, copy in project files
 `kenshi-sor-study/starts-picklist.html`). Left out: Raid Gone Wrong, Mech Pilot, Born into a Feud, Hired Blade,
-Barber-Surgeon. His notes: Cast Out and Lab Escapee are Bio-built only; secret roads: "the only available starts
+Barber-Surgeon. His notes: Cast Out is Bio-built only, Lab Escapee is Bio-built, Rubber-folk, Emberborn, Stoneborn or Sylvan; secret roads: "the only available starts
 without this should be basic ones and req ones, like verdant and divine born" (read as: every other road is found by a
 matching past or a deed; basic = capital, village, wild, sworn, banished, shipwreck, fate). Both games are commercial: ideas only. Our own names, own code,
 vanilla-style art, no text or names from either game.
@@ -53,7 +53,7 @@ has none yet (Andy: "generate whatever is required for the player to choose any 
   for a bounty instead of killed.
 
 ### Patch 3, Powered roads (Powers + Kingdoms; picks lab-escapee, fresh-android, moon-cursed)
-- **Lab Escapee** (`LAB`, Bio-built only): wake in a hermit alchemist's lab (Alchemy) as a test subject with one random infusion that
+- **Lab Escapee** (`LAB`, Andy: Bio-built, Rubber-folk, Emberborn, Stoneborn or Sylvan only): wake in a hermit alchemist's lab (Alchemy) as a test subject with one random infusion that
   has a good side and a bad side; the alchemist's golems follow you out.
 - **Fresh Off the Bench** (`ANDROID`): wake on the Mad Tinkerer's bench as a new android (Powers androids: endless ki,
   no food, metal repairs), with a note in your pocket.
