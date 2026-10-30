@@ -1190,7 +1190,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.370) Weapon Forms: poise and lock-on -------------------------------------------------------------------
+	// ---- (0.7.371) Weapon Forms: poise and lock-on -------------------------------------------------------------------
 
 	/** Powers' {@code ZFighterPoise.wear(LivingEntity, float)} and {@code knockedOut(LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle poiseWear, poiseKnockedOut;
@@ -1214,7 +1214,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.370) Wears {@code amount} off {@code target}'s poise (a stagger when it breaks, a K.O. on a second break); false without Powers' poise. */
+	/** (0.7.371) Wears {@code amount} off {@code target}'s poise (a stagger when it breaks, a K.O. on a second break); false without Powers' poise. */
 	public static boolean wearPoise(LivingEntity target, float amount) {
 		lookForPoise();
 		try {
@@ -1227,7 +1227,7 @@ public final class PowersCompat {
 		return false;
 	}
 
-	/** (0.7.370) Whether {@code target}'s poise is broken to a K.O. just now (it lies open to a masterstroke); false without Powers. */
+	/** (0.7.371) Whether {@code target}'s poise is broken to a K.O. just now (it lies open to a masterstroke); false without Powers. */
 	public static boolean poiseBroken(LivingEntity target) {
 		lookForPoise();
 		try {
@@ -1271,7 +1271,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.370) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
+	 * (0.7.371) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
 	 * locked already. Takes the client ({@code Minecraft}) and its player as plain objects, since this class is common code.
 	 * The packet to send the server ({@code LockOn.Packet}), or null if nothing was locked (no Powers, or nothing in sight).
 	 */
@@ -1289,7 +1289,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.370) Client side: lets go of the lock {@link #lockOnNearest} took on {@code id}. The packet to send, or null if it isn't held any more. */
+	/** (0.7.371) Client side: lets go of the lock {@link #lockOnNearest} took on {@code id}. The packet to send, or null if it isn't held any more. */
 	public static @Nullable CustomPacketPayload lockOff(int id) {
 		lookForLock();
 		try {
@@ -1304,7 +1304,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.370) The id of the foe Powers' client has locked, or -1 (none, or without Powers). */
+	/** (0.7.371) The id of the foe Powers' client has locked, or -1 (none, or without Powers). */
 	public static int lockedId() {
 		lookForLock();
 		try {

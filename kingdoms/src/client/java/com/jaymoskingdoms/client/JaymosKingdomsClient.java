@@ -116,7 +116,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
-		// (0.7.370) Weapon Forms: the belt strip, the chain counter, the belt screen
+		// (0.7.371) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
 		// (0.7.361) Valor: the N key, the pool's bar, Senses
 		ValorClient.register();

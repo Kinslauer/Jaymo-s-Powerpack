@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.370) The blade family's forms (swords, and the katana of Balkon's WeaponMod through the {@code form_blades} tag).
+ * (0.7.371) The blade family's forms (swords, and the katana of Balkon's WeaponMod through the {@code form_blades} tag).
  * <ul>
  * <li>Sheath Draw: a fast dash of {@value #DASH} blocks that cuts everything it passes on the draw; half again as hard on a
  * foe that is not after you or cannot see you ({@link Senses#unaware}).

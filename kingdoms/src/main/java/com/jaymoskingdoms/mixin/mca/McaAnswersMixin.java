@@ -111,7 +111,7 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.forms.GuardDrills.canOffer(player, villager)) {
-			// (0.7.370) only a veteran guard sets drills
+			// (0.7.371) only a veteran guard sets drills
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.GuardDrills.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {

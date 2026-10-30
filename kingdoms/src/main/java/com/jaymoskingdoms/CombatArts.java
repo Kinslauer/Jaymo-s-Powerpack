@@ -179,7 +179,7 @@ public final class CombatArts {
 		return now - chain.last <= CHAIN_TICKS ? chain.links : 0;
 	}
 
-	/** (0.7.370) Ticks since {@code player}'s last landed blow kept a chain going, or {@link Long#MAX_VALUE} if they have no chain running (Form Cancels). */
+	/** (0.7.371) Ticks since {@code player}'s last landed blow kept a chain going, or {@link Long#MAX_VALUE} if they have no chain running (Form Cancels). */
 	public static long sinceLanded(ServerPlayer player) {
 		Chain chain = CHAINS.get(player.getUUID());
 		long since = chain == null ? Long.MAX_VALUE : player.level().getGameTime() - chain.last;
@@ -225,7 +225,7 @@ public final class CombatArts {
 			chain.links = links(chain, now) + 1;
 			chain.linkTick = now;
 			chain.last = now;
-			// (0.7.370) the chain counter by the crosshair ({@code forms.Forms}) shows the links now, in place of the old "Combo xN" line
+			// (0.7.371) the chain counter by the crosshair ({@code forms.Forms}) shows the links now, in place of the old "Combo xN" line
 			com.jaymoskingdoms.forms.Forms.chained(sp, chain.links);
 		}
 		boolean full = fullStrength(sp, now);
