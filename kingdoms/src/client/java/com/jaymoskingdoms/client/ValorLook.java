@@ -33,7 +33,7 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.408) What a Valor's coating looks like on whoever has it up (Andy: "we only see particles"; until now the coat was
+ * (0.7.409) What a Valor's coating looks like on whoever has it up (Andy: "we only see particles"; until now the coat was
  * only a dark dust). Every part of a Valor shows:
  * <ul>
  * <li>its {@link Valor.Look}: the coat drawn over the arms, gunmetal bands, cracked stone, scales, flaking ash, a see-through

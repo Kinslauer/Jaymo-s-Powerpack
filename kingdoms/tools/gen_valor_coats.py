@@ -1,4 +1,4 @@
-"""Valor coatings (Kingdoms 0.7.408): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
+"""Valor coatings (Kingdoms 0.7.409): what a Valor's Reinforcement and Armament look like on the arms (Valor.Look), drawn by
 ValorLook over the 64x64 player skin layout (only the base arms, hands and, at Unbroken, the shoulders: the coat model is a
 humanoid mesh grown just past the sleeves, or past armour).
 

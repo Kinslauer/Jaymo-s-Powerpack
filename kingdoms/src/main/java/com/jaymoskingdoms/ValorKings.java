@@ -173,7 +173,7 @@ public final class ValorKings {
 				level.sendParticles(dust, source.getX() + Math.cos(a) * r, source.getY(0.3), source.getZ() + Math.sin(a) * r, 1, 0.05, 0.2, 0.05, 0.0);
 			}
 		}
-		// (0.7.408) a flash and a rising column in the soul colour, so it's seen as theirs and not only as dust
+		// (0.7.409) a flash and a rising column in the soul colour, so it's seen as theirs and not only as dust
 		soulFlare(level, source, data.soulColor());
 		level.playSound(null, source.getX(), source.getY(), source.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 2.0F, 0.5F);
 		level.playSound(null, source.getX(), source.getY(), source.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 1.5F, 0.7F);

@@ -922,7 +922,7 @@ public final class Valor {
 
 	/**
 	 * The coating's dust on the forearms (and down the weapon when armed), in the soul colour under King's coating; with each
-	 * look's own grit off the coat and each origin's sign (0.7.408, the coat itself is ValorLook's):
+	 * look's own grit off the coat and each origin's sign (0.7.409, the coat itself is ValorLook's):
 	 * Ember flickers of flame, Rooted grinding the ground underfoot, Bulwark a faint ring as far as it covers, Hollow magic
 	 * drawn in, Undying a soul rising now and then, Duelist sparks off the hand (a Hunter's eyes glint instead).
 	 */

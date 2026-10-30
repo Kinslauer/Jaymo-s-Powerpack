@@ -7207,7 +7207,14 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   made partway through its creator (its editor's sync), so the server asked the road while the creator was still up and
   the road page replaced it. The client now leaves MCA's creator alone and opens the road once no screen is up.
 
-## 0.7.408: every Valor looks like itself
+## 0.7.408: belt slot on Ctrl + scroll
+- Andy: "change the selection to ctrl + scroll instad of alt becasue alt zooms". In the Battle Stance, Ctrl (either one) and
+  scroll now pick the belt slot (`FormsClient.scroll`); Alt is left to the zoom.
+- Andy: "If you are not moving and you scroll you shouldnt be able to move with the belt unlocked and equipped. Without it
+  sprint works as normal". In stance, Ctrl pressed while standing still is the belt's key until let go: it no longer starts
+  a sprint, even if you then move (`FormsClient.ctrlNoSprint`). Pressed while moving, or out of stance, it sprints as ever.
+
+## 0.7.409: every Valor looks like itself
 - Andy: "we only see particles, for example last night jung got kings valor in dark red and scales". Valor's coat was
   only ever a dark dust; nothing was drawn. `ValorLook` now draws the coat on the arms of whoever has it up (players, MCA
   villagers, our folk, and your own first-person arm), on a shell just past the sleeves, or past armour when a

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.408) Your Valor coat over your own first-person arm (see ValorLook). */
+/** (0.7.409) Your Valor coat over your own first-person arm (see ValorLook). */
 @Mixin(AvatarRenderer.class)
 abstract class ValorHandMixin {
 	@Inject(method = "renderHand", at = @At("TAIL"))
