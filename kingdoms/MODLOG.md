@@ -7280,3 +7280,17 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   up, takes a blow, lands one or blocks bare-armed (`Valor.coatSound`): Iron chain clank, Stone deepslate thud, Scale
   armadillo scute clack, Ash gravel and sand crumble, Haze amethyst chime and shimmer, Lacquer a ringing shell (heavy
   core, a faint high anvil ting; a shulker shell opening as it goes up). Valor villagers sound theirs as they coat up.
+
+## 0.7.413: Companions who learn, and drifters for hire
+- Andy's idea: hired folk should grow. An MCA villager hired as a mercenary gets tougher with each fight they win while
+  hired (`Learners`): a hostile they hit that dies, or a fight against hostiles they come out of alive (`QUIET_TICKS`
+  with nothing hurting them). Every `WINS_PER_STEP` wins is a step, up to `MAX_STEPS` (10), each adding
+  `HEALTH_PER_STEP` health and `DAMAGE_PER_STEP` attack damage as permanent attribute modifiers, so the gains stay if
+  the contract runs out and they're un-hired. Wins are saved per villager. A step up gets a few green sparks and one
+  short line over their head.
+- Down-and-out drifters (`Drifters`) turn up now and then in a settlement's tavern, or on a road a way out of it: MCA
+  villagers in the nitwit's rags, rare (`CHANCE` per `EVERY`) and capped (`AREA_CAP` unhired within `AREA` of a seat);
+  one nobody hires moves along after a day or two with no one near. Hold `HIRE_COST` (2) emeralds and use them on one
+  to hire them as MCA's mercenary (MCA's own Hire is 5 or 10). They start with 8 health and 1 damage, so Companions
+  Who Learn is what makes them worth it. Until hired they have no tie, so MCA's stranger rule refuses them every
+  order; hired, they count as involved. Hiring also gives `HIRE_HEARTS` so they're kept when the contract ends.

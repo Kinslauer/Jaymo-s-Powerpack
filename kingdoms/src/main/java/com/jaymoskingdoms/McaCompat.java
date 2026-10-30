@@ -323,6 +323,9 @@ public final class McaCompat {
 			ClothingLibrary.register();
 			Wardrobe.register();
 			Uniforms.register();
+			// (0.7.413) hired villagers learn from fights; drifters for hire
+			Learners.register();
+			Drifters.register();
 		}
 	}
 
