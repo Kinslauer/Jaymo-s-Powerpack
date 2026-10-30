@@ -12,7 +12,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.25, Andy's SevTech picks: "Landing Yard") Where pods come down near a kingdom's landing yard (Jaymo's Kingdoms, read by
+ * (0.18.52, Andy's SevTech picks: "Landing Yard") Where pods come down near a kingdom's landing yard (Jaymo's Kingdoms, read by
  * reflection through {@link ZFighterKingdoms}): a patrol pod, and a pilot's trip home, sets down on a free pad; a raiders' band
  * lands just outside the yard, never on it. Without Kingdoms, or with no yard within {@link #RANGE}, every answer is null and the
  * pods land where they always did.

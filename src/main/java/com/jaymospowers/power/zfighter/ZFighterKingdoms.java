@@ -45,12 +45,12 @@ final class ZFighterKingdoms {
 	private static Method NEAREST_MONOLITH;
 	/** (0.18.22) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
-	/** (0.18.25) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
+	/** (0.18.52) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
-	/** (0.18.25) Kingdoms' LandingYard: padsNear(level, pos, range), nameNear(level, pos, range), touched(level, pos). */
+	/** (0.18.52) Kingdoms' LandingYard: padsNear(level, pos, range), nameNear(level, pos, range), touched(level, pos). */
 	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED;
-	/** (0.18.25) Kingdoms' Careers.flown(pilot, passenger, level, pos) and Careers.firstFind(player, world, kind). */
+	/** (0.18.52) Kingdoms' Careers.flown(pilot, passenger, level, pos) and Careers.firstFind(player, world, kind). */
 	private static Method FLOWN, FIRST_FIND;
 	private static Object[] STATS;
 	private static int STAT_MAX;
@@ -215,7 +215,7 @@ final class ZFighterKingdoms {
 	}
 
 	/**
-	 * (0.18.25, Andy's SevTech picks: "Ranks Follow Rungs") The highest world tier open to {@code player} through his deeds, from 0
+	 * (0.18.52, Andy's SevTech picks: "Ranks Follow Rungs") The highest world tier open to {@code player} through his deeds, from 0
 	 * (Hearth), or -1 without Kingdoms (the Patrol then goes by power alone).
 	 */
 	static int openTier(net.minecraft.world.entity.player.Player player) {
@@ -237,7 +237,7 @@ final class ZFighterKingdoms {
 	}
 
 	/**
-	 * (0.18.25) A Landing Yard within {@code range} of {@code from}: its beacon post first, then the block to stand a pod on for
+	 * (0.18.52) A Landing Yard within {@code range} of {@code from}: its beacon post first, then the block to stand a pod on for
 	 * each pad. Empty without Kingdoms or a yard.
 	 */
 	@SuppressWarnings("unchecked")
@@ -252,7 +252,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.18.25) The name of the town whose yard is within {@code range} of {@code from}, or "". */
+	/** (0.18.52) The name of the town whose yard is within {@code range} of {@code from}, or "". */
 	static String yardName(ServerLevel level, BlockPos from, double range) {
 		if (YARD_NAME == null) {
 			return "";
@@ -264,7 +264,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.18.25) A patrol pod stood down at {@code at}: the yard's town is named in the next Tidings. */
+	/** (0.18.52) A patrol pod stood down at {@code at}: the yard's town is named in the next Tidings. */
 	static void yardTouched(ServerLevel level, BlockPos at) {
 		if (YARD_TOUCHED == null) {
 			return;
@@ -276,7 +276,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.18.25) {@code pilot} flew a trip and came down at {@code at} (with {@code passenger} in the second seat, or null): a Pilot's work. */
+	/** (0.18.52) {@code pilot} flew a trip and came down at {@code at} (with {@code passenger} in the second seat, or null): a Pilot's work. */
 	static void flown(ServerPlayer pilot, @Nullable ServerPlayer passenger, ServerLevel level, BlockPos at) {
 		if (FLOWN == null) {
 			return;
@@ -288,7 +288,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.18.25) A first find ({@link Prospecting#found}): a Prospector's work. */
+	/** (0.18.52) A first find ({@link Prospecting#found}): a Prospector's work. */
 	static void firstFind(ServerPlayer player, String world, String kind) {
 		if (FIRST_FIND == null) {
 			return;

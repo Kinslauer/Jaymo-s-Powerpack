@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.368, Andy's SevTech picks: "Off-World Orders") The goods the far worlds give and the towns ask for: the first metals,
+ * (0.7.383, Andy's SevTech picks: "Off-World Orders") The goods the far worlds give and the towns ask for: the first metals,
  * the world parts (Rustfall plate, Glacia ice glass, Cinder bell alloy), Cinder Ember and Glacia salt. Each names its world.
  * The merchants' sheet ({@link MerchantOrders}) and the board's notices ({@link TownNotices}) draw on this list. A good whose
  * item isn't in this pack is never asked for (the first metals are Jaymo's Powers' to add: each is looked for under

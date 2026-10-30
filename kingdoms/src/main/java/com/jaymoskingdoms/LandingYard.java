@@ -19,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.368, Andy's SevTech picks: "Landing Yard") A kingdom's yard for the sky-folk's pods: {@link #PADS_MIN} to
+ * (0.7.383, Andy's SevTech picks: "Landing Yard") A kingdom's yard for the sky-folk's pods: {@link #PADS_MIN} to
  * {@link #PADS_MAX} pads of smooth stone cornered in copper around a copper beacon post, built by its builders like any
  * other building ({@link Buildings}' growth order). Nothing to craft: a pad is a build, not a recipe.
  * <ul>
