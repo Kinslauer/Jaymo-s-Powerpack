@@ -37,7 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.74) The Fang Gauntlets worn on the hands, not held: a leather cuff round each wrist, an iron plate over the back
+ * (0.18.75) The Fang Gauntlets worn on the hands, not held: a leather cuff round each wrist, an iron plate over the back
  * of the hand and three fang claws running past the knuckles, always out (modelled on Kingdoms' hidden blade, without the
  * spring). Held in the main hand they're drawn on both arms (the off hand's only while it's empty) and the held item is
  * hidden, in third person ({@link Layer}, {@code FangGauntletsItemInHandLayerMixin}) and first person

@@ -137,7 +137,7 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
-	/** (0.18.74) The Fang Gauntlets: worn on the hands when held (client/armory/FangGauntletsClient). */
+	/** (0.18.75) The Fang Gauntlets: worn on the hands when held (client/armory/FangGauntletsClient). */
 	public static Item FANG_GAUNTLETS;
 	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
 	public static Block MINING_CHARGE;

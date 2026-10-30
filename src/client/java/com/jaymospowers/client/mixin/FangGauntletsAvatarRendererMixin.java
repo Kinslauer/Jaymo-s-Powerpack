@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.74) Fang Gauntlets worn: onto the render state, and onto your own first-person hands (see FangGauntletsClient). */
+/** (0.18.75) Fang Gauntlets worn: onto the render state, and onto your own first-person hands (see FangGauntletsClient). */
 @Mixin(AvatarRenderer.class)
 abstract class FangGauntletsAvatarRendererMixin {
 	@Inject(

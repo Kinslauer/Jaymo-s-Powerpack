@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.74) Fang Gauntlets in the main hand aren't held in third person: they're worn (FangGauntletsClient.Layer). */
+/** (0.18.75) Fang Gauntlets in the main hand aren't held in third person: they're worn (FangGauntletsClient.Layer). */
 @Mixin(ItemInHandLayer.class)
 abstract class FangGauntletsItemInHandLayerMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)

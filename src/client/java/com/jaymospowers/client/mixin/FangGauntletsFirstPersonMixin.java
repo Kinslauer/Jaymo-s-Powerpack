@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.18.74) First person, Fang Gauntlets in the main hand: the item isn't drawn; both bare arms are shown in a guard with
+ * (0.18.75) First person, Fang Gauntlets in the main hand: the item isn't drawn; both bare arms are shown in a guard with
  * the claws on them (the off hand's while empty). A swing (the game's or Better Combat's) leaves the arm to it.
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)

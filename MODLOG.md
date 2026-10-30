@@ -4203,7 +4203,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   second of switching into creative, and every reconcile while in it, every part is made whole, breaks, cuts, festering
   and the battering are cleared, severed limbs grow back and a bolas trip is undone (`Tripped.clear`). A downed player in
   creative or spectator gets straight up, not battered and not held down by Will. Not seen in game.
-- **0.18.74, Fang Gauntlets worn:** Andy: "the fang gauntlets should animate over the hands like the hidden blade, only with no
+- **0.18.74, the Training Post loot table loads:** the Deck server would not start on 0.18.73 ("Failed to load registries":
+  `blocks/training_post` used the pre-26.3 `block_state_property` condition, which 26.3 dropped for `match_block`; the old
+  layer tables only survive because a pack mod upgrades them on the fly, and it skipped this one). Rewritten in the 26.3
+  form, like `amberoot_door`. Server-checked on the Deck.
+
+- **0.18.75, Fang Gauntlets worn:** Andy: "the fang gauntlets should animate over the hands like the hidden blade, only with no
   springing action". Held in the main hand they're no longer drawn as a held sword (third and first person): a leather cuff,
   an iron plate over the back of the hand and three fang claws past the knuckles are drawn on both forearms (the off hand's
   only while it is empty), always out (`client/armory/FangGauntletsClient`, texture from `tools/gen_fang_gauntlets.py`).
