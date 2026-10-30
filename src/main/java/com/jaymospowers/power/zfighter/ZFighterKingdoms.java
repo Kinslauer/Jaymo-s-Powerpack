@@ -43,7 +43,7 @@ final class ZFighterKingdoms {
 	private static Method OPEN_ERRANDS;
 	/** (0.17.61) Kingdoms' Monoliths.nearestFoot(ServerLevel, BlockPos): the nearest known monolith, or null. */
 	private static Method NEAREST_MONOLITH;
-	/** (0.18.50) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
+	/** (0.18.51) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
 	private static Object[] STATS;
 	private static int STAT_MAX;
@@ -171,7 +171,7 @@ final class ZFighterKingdoms {
 	}
 
 	/**
-	 * (0.18.50, Andy's SevTech picks: "One Deed Per Rung") Tells Kingdoms {@code player} did a deed that opens a world tier
+	 * (0.18.51, Andy's SevTech picks: "One Deed Per Rung") Tells Kingdoms {@code player} did a deed that opens a world tier
 	 * ("pod_flight": a pod trip flown and landed home; "maw_salvage": a part set taken from a Maw wreck). Nothing without Kingdoms.
 	 */
 	static void deed(ServerPlayer player, String deed) {
