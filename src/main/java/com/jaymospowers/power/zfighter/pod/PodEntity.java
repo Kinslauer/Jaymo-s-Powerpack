@@ -59,6 +59,8 @@ public class PodEntity extends Entity {
 	static final EntityDataAccessor<Integer> FUEL = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
 	/** (0.18.20) The grade of the fuel in the tank (0 = put in before grades; see {@code PodFuel}). */
 	static final EntityDataAccessor<Integer> FUEL_GRADE = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.INT);
+	/** (0.18.55) A Starlit Lens is fitted to the beacon mast (the flight screen then shows the world's mission zones). */
+	static final EntityDataAccessor<Boolean> LENS = SynchedEntityData.defineId(PodEntity.class, EntityDataSerializers.BOOLEAN);
 
 	// ---- tuning ----
 	/** Its size (blocks), and how far it is tracked. */
@@ -223,6 +225,10 @@ public class PodEntity extends Entity {
 		if (player.isSecondaryUseActive() && PodGrades.tryGrade(server, this, held)) {
 			return InteractionResult.SUCCESS_SERVER;
 		}
+		// (0.18.55) a Starlit Lens set in the beacon mast
+		if (com.jaymospowers.power.zfighter.backhome.BackHome.fitLens(server, this, held)) {
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		int worth = ZFighterSpace.fuelWorth(held);
 		if (worth > 0) {
 			fuelUp(server, held, worth);
@@ -263,6 +269,7 @@ public class PodEntity extends Entity {
 		builder.define(DAMAGED, 0);
 		builder.define(FUEL, 0);
 		builder.define(FUEL_GRADE, 0);
+		builder.define(LENS, false);
 	}
 
 	@Override
@@ -274,6 +281,7 @@ public class PodEntity extends Entity {
 		entityData.set(FINISHED, input.getBooleanOr("finished", complete()));
 		entityData.set(FUEL, input.getIntOr("fuel", 0));
 		entityData.set(FUEL_GRADE, input.getIntOr("fuel_grade", 0));
+		entityData.set(LENS, input.getBooleanOr("lens", false));
 	}
 
 	@Override
@@ -284,6 +292,7 @@ public class PodEntity extends Entity {
 		output.putInt("damaged", entityData.get(DAMAGED));
 		output.putInt("fuel", entityData.get(FUEL));
 		output.putInt("fuel_grade", entityData.get(FUEL_GRADE));
+		output.putBoolean("lens", entityData.get(LENS));
 	}
 
 	// ---------------------------------------------------------------- the contract
@@ -422,6 +431,15 @@ public class PodEntity extends Entity {
 	/** (0.18.21) How many can ride: the pilot, and from grade {@link PodGrades#SECOND_SEAT_GRADE} a passenger. */
 	public int seats() {
 		return grade() >= PodGrades.SECOND_SEAT_GRADE ? 2 : 1;
+	}
+
+	/** (0.18.55) Whether a Starlit Lens is fitted to the mast. */
+	public boolean lens() {
+		return entityData.get(LENS);
+	}
+
+	public void setLens(boolean lens) {
+		entityData.set(LENS, lens);
 	}
 
 	public int fuel() {

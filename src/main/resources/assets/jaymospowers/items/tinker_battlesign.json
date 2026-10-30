@@ -132,6 +132,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/battlesign/handle_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +280,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +423,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_star_metal"
               }
             }
           ],

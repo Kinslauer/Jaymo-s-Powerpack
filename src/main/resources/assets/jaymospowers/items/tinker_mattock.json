@@ -132,6 +132,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/mattock/handle_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +280,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +423,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_star_metal"
               }
             }
           ],
@@ -552,6 +573,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -688,6 +716,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_star_metal"
               }
             }
           ],

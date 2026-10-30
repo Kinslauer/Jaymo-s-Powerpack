@@ -4016,3 +4016,25 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   spot); first finds go through the public `Prospecting.found(player, world, kind)` (and `Prospecting.FIRST_FIND_LISTENERS`), which
   Track 5's ore code fires. No new items, blocks or recipes. Compile-checked against the 26.3 jar; not seen in game. Plan:
   docs/SevTech-Plan.md, Track 6.
+- **0.18.55, back home (SevTech picks; Kingdoms 0.7.385, Kitchen 0.5.38):** five pieces that bring the far worlds home. All five
+  are compile-checked against the 26.3 jar; none has been seen in game. Plan: docs/SevTech-Plan.md, Track 7.
+  **Star metal:** a new Tinkering material `star_metal` (`TinkerMaterial.STAR_METAL`, trait `Starlit`: +10% swing speed
+  (`ToolStats.STARLIT_SPEED`), and the first fall after an airborne swing with a Starlit tool in hand does no damage, within
+  `Starlit.GUARD_TICKS` (60) of the swing, so it is a landing from a blow and never a free fall). Its ore, `star_metal_ore`, is found
+  only in the craters of Kingdoms' falling stars; 1 ore or 1 ingot melts to 1 ingot (90 mB) of `Molten.STAR_METAL` in the smeltery
+  (`Melting.starMetal`), and it is cast and forged like any metal (the Forging and casting lists pick it up from `TinkerMaterial`
+  and `Molten`). It has no grid recipe, no nugget and no block. The material, molten and registration additions sit in their own
+  `(0.18.55 back home)` blocks for Track 5's merge. **Quench edges** (`smithing/Edges`): a hot piece dipped in a water cauldron that has
+  an item lying in it takes one edge from it: Glacia ice glass gives `Cold Edge` (a hit slows, `COLD_TICKS` 80), a Cinder Ember gives
+  `Hot Edge` (a hit sets alight, `HOT_SECONDS` 4). One edge to a piece, none for a hot ingot; the item is used up. The edge is a
+  component carried from head to tool by `Grades.CARRIERS`, shown in the smithing tooltip, and works on any weapon. **Starlight:**
+  `Essence.STARLIGHT` (tier 2) is carried by Maw dust and star metal ingots. Maw dust (`backhome/BackHome`) comes from Maw wreck
+  chests (`PodWrecks.salvage`, `WRECK_DUST` 2) and from breaking the orange and yellow glass of the black hole's rim
+  (`RIM_CHANCE`), and Kingdoms' hermits trade it. The **Starlit Lens** (research `starlit_lens`, an infusion round a spyglass)
+  is fitted by right-clicking a pod that has a beacon mast (`BackHome.fitLens`); on a trip it shows the mission zones of the
+  world ahead as pips and rings on the flight screen (`ZFighterSpaceMissions.zones`, `ZFighterFlightScreen`), no words. The pod keeps
+  the lens for good. **Far-world pantry:** `Verdant Fruit` (Verdant leaves, `FRUIT_CHANCE`) and `Glacia Salt` (Glacia ice, snow and
+  stone, `SALT_CHANCE`), and three effects (`backhome/FarFood`): `far_breath` (a minute more of breath in airless worlds),
+  `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
+  dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
+  `client/jei/BackHomeJei` (quench edges, lens fitting); everything else shows in the Tinkering and Alchemy pages already there.

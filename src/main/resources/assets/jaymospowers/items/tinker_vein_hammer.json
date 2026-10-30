@@ -142,6 +142,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/vein_hammer/handle_steel"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/vein_hammer/handle_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -283,6 +290,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/head_broken_steel"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/head_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -419,6 +433,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/head_steel"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/head_star_metal"
                     }
                   }
                 ],
@@ -579,6 +600,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/vein_hammer/grip_steel"
                   }
+                },
+                {
+                  "when": "star_metal",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/vein_hammer/grip_star_metal"
+                  }
                 }
               ],
               "fallback": {
@@ -720,6 +748,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/front_broken_steel"
                     }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/front_broken_star_metal"
+                    }
                   }
                 ],
                 "fallback": {
@@ -856,6 +891,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/vein_hammer/front_steel"
+                    }
+                  },
+                  {
+                    "when": "star_metal",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/vein_hammer/front_star_metal"
                     }
                   }
                 ],
@@ -1002,6 +1044,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/vein_hammer/large/handle_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/vein_hammer/large/handle_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1143,6 +1192,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/head_broken_steel"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/head_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1279,6 +1335,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/head_steel"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/head_star_metal"
                 }
               }
             ],
@@ -1439,6 +1502,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/vein_hammer/large/grip_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/vein_hammer/large/grip_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -1580,6 +1650,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/front_broken_steel"
                 }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/front_broken_star_metal"
+                }
               }
             ],
             "fallback": {
@@ -1716,6 +1793,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/vein_hammer/large/front_steel"
+                }
+              },
+              {
+                "when": "star_metal",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/vein_hammer/large/front_star_metal"
                 }
               }
             ],

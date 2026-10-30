@@ -132,6 +132,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickaxe/handle_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickaxe/handle_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +280,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickaxe/head_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickaxe/head_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +423,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickaxe/head_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickaxe/head_star_metal"
               }
             }
           ],
@@ -568,6 +589,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickaxe/binding_steel"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickaxe/binding_star_metal"
             }
           }
         ],

@@ -80,7 +80,8 @@ public final class Heat {
 				EXPOSED.remove(id);
 				continue;
 			}
-			if (player.isInWater() || player.hasEffect(MobEffects.FIRE_RESISTANCE) || coolHand(player)) {
+			if (player.isInWater() || player.hasEffect(MobEffects.FIRE_RESISTANCE) || coolHand(player)
+				|| com.jaymospowers.power.zfighter.backhome.FarFood.warded(player)) {
 				COOL_UNTIL.put(id, now + COOL_GRACE * 20L);
 			}
 			if (COOL_UNTIL.getOrDefault(id, 0L) > now) {

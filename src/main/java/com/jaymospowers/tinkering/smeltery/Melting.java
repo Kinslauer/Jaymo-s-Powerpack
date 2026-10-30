@@ -168,6 +168,11 @@ public final class Melting {
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
 	}
 
+	/** (0.18.55) Star metal ore melts in the smeltery, one ore for one ingot's worth. */
+	public static void starMetal(Item ore) {
+		add(Molten.STAR_METAL, Molten.INGOT, ore);
+	}
+
 	/** (Smithing) An alloy's nugget and block (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
 	public static void alloyForms(Molten molten, Item nugget, Item block) {
 		add(molten, Molten.NUGGET, nugget);

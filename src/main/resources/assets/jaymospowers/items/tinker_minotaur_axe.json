@@ -132,6 +132,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/handle_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +280,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +423,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_star_metal"
               }
             }
           ],
@@ -547,6 +568,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/back_steel"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_star_metal"
             }
           }
         ],

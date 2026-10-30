@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.zfighter;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterPodTrip;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
+import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -30,11 +31,15 @@ public class ZFighterFlightScreen extends Screen {
 	private static final int STARS = 160, LAYERS = 3;
 	/** The share of the flight spent getting up to speed, and slowing down at the end. */
 	private static final float RAMP = 0.2F;
+	/** (0.18.55) The share of the world's growth (0 to 1) at which a Starlit Lens starts showing the zones. */
+	private static final float LENS_FROM = 0.45F;
 
 	private final int to;
 	private final int ticks;
 	private final boolean skippable;
 	private final int from;
+	/** (0.18.55) A Starlit Lens on the pod's mast: the world ahead is shown with its mission zones. */
+	private final boolean lens;
 	private int age;
 	private boolean skipped;
 	private @Nullable Entity vehicle;
@@ -42,8 +47,9 @@ public class ZFighterFlightScreen extends Screen {
 	private float travelled;
 	private final ItemStack pod = new ItemStack(ZFighterSpace.POD_ITEM);
 
-	public ZFighterFlightScreen(int to, int ticks, boolean skippable, int from) {
+	public ZFighterFlightScreen(int to, int ticks, boolean skippable, int from, boolean lens) {
 		super(Component.translatable("screen.jaymospowers.zfighter_flight"));
+		this.lens = lens;
 		this.to = to;
 		this.ticks = Math.max(1, ticks);
 		this.skippable = skippable;
@@ -62,7 +68,7 @@ public class ZFighterFlightScreen extends Screen {
 			}
 			// (0.18.23) the world flown to (or from, on the way home) shines brighter in the night sky for a while
 			com.jaymospowers.client.power.zfighter.sky.SkyPlanets.glow(payload.to() == ZFighterSpace.HOME_INDEX ? from : payload.to());
-			ctx.client().gui.setScreen(new ZFighterFlightScreen(payload.to(), payload.ticks(), payload.skippable(), from));
+			ctx.client().gui.setScreen(new ZFighterFlightScreen(payload.to(), payload.ticks(), payload.skippable(), from, payload.lens()));
 		});
 	}
 
@@ -139,6 +145,9 @@ public class ZFighterFlightScreen extends Screen {
 		float toR = 2.0F + come * (h * 0.40F - 2.0F);
 		float toX = w * (0.92F - 0.04F * come) + toR * 0.45F * come;
 		ZFighterSpaceArt.world(graphics, this.to, toX, h * 0.48F, toR, -w * 0.5F, -h);
+		if (this.lens && this.to != ZFighterSpace.HOME_INDEX) {
+			zones(graphics, toX, h * 0.48F, toR, come);
+		}
 		// the pod on its fire, bobbing a little, a touch off the middle
 		float bob = (float)Math.sin((this.age + a) * 0.25F) * 2.0F;
 		float podX = w * (0.38F + 0.08F * ease(p)), podY = h * 0.5F + bob;
@@ -158,6 +167,39 @@ public class ZFighterFlightScreen extends Screen {
 			: this.skippable ? Component.translatable("screen.jaymospowers.zfighter_flight.left_skip", left)
 			: Component.translatable("screen.jaymospowers.zfighter_flight.left", left);
 		UiStyle.lineCentred(graphics, this.font, under, w / 2, h - 22, w - 20, UiStyle.DIM);
+	}
+
+	/**
+	 * (0.18.55) The Starlit Lens: a pip on the world ahead for each mission zone, a ring about one still waiting, a filled pip for
+	 * one dealt with. Pips only, no words; they come up as the world grows.
+	 */
+	private void zones(GuiGraphicsExtractor graphics, float cx, float cy, float r, float come) {
+		LocalPlayer player = this.minecraft.player;
+		if (player == null || come < LENS_FROM || r < 6.0F) {
+			return;
+		}
+		int[] zones = ZFighterSpaceMissions.zones(player, this.to);
+		float fade = Mth.clamp((come - LENS_FROM) / 0.2F, 0.0F, 1.0F);
+		int alpha = Math.round(255 * fade) << 24;
+		for (int k = 0; k < zones.length; k++) {
+			boolean boss = k == zones.length - 1;
+			float angle = (ZFighterSpaceArt.hash(this.to, k, 21) % 360) * Mth.DEG_TO_RAD;
+			float reach = boss ? 0.0F : 0.35F + (ZFighterSpaceArt.hash(this.to, k, 22) % 40) / 100.0F;
+			int x = Math.round(cx + Mth.cos(angle) * r * reach), y = Math.round(cy + Mth.sin(angle) * r * reach);
+			int size = boss ? 3 : 2;
+			boolean done = zones[k] != 0;
+			int colour = alpha | (done ? 0x7CFC9A : boss ? 0xFFD866 : 0xE8F0FF);
+			if (done) {
+				graphics.fill(x - size, y - size, x + size + 1, y + size + 1, colour);
+			} else {
+				int pulse = (this.age / 6 + k) % 4 == 0 ? 1 : 0;
+				int s = size + 1 + pulse;
+				graphics.fill(x - s, y - s, x + s + 1, y - s + 1, colour);
+				graphics.fill(x - s, y + s, x + s + 1, y + s + 1, colour);
+				graphics.fill(x - s, y - s, x - s + 1, y + s + 1, colour);
+				graphics.fill(x + s, y - s, x + s + 1, y + s + 1, colour);
+			}
+		}
 	}
 
 	/** Stars streaming right to left in layers (nearer layers faster and longer), streaks when going fast. */

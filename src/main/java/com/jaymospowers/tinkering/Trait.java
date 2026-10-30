@@ -43,7 +43,11 @@ public enum Trait {
 	TIMBER("timber", ChatFormatting.GREEN),
 	VEIN("vein", ChatFormatting.AQUA),
 	// (0.15.x) feather: arrows and bows fly truer
-	AERODYNAMIC("aerodynamic", ChatFormatting.WHITE);
+	AERODYNAMIC("aerodynamic", ChatFormatting.WHITE),
+	// (0.18.55) back home: star metal's own trait, and the two edges a quench in a far world's cold or ember gives
+	STARLIT("starlit", ChatFormatting.LIGHT_PURPLE),
+	COLD_EDGE("cold_edge", ChatFormatting.AQUA),
+	HOT_EDGE("hot_edge", ChatFormatting.GOLD);
 
 	public final String id;
 	public final ChatFormatting colour;

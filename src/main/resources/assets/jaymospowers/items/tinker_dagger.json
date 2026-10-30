@@ -136,6 +136,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/dagger/head_broken_steel"
               }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/dagger/head_broken_star_metal"
+              }
             }
           ],
           "fallback": {
@@ -272,6 +279,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/dagger/head_steel"
+              }
+            },
+            {
+              "when": "star_metal",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/dagger/head_star_metal"
               }
             }
           ],
@@ -410,6 +424,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/dagger/crossguard_steel"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/dagger/crossguard_star_metal"
             }
           }
         ],

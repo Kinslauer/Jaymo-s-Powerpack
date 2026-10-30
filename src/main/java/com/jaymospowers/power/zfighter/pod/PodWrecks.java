@@ -139,6 +139,8 @@ public final class PodWrecks {
 		if (set >= 0) {
 			// (0.18.22) a part set taken from a wreck: the deed that opens Legend
 			ZFighterPodTrip.deed(player, "maw_salvage");
+			// (0.18.55) and the dust the wreck's hull has gathered
+			stacks.add(new ItemStack(com.jaymospowers.power.zfighter.backhome.BackHome.MAW_DUST, com.jaymospowers.power.zfighter.backhome.BackHome.WRECK_DUST));
 		}
 		for (ItemStack stack : stacks) {
 			player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);

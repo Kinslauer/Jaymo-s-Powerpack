@@ -178,6 +178,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/throwing_axe/head_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_star_metal"
+            }
           }
         ],
         "fallback": {

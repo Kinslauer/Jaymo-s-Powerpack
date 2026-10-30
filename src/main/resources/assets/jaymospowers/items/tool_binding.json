@@ -280,6 +280,19 @@
               }
             ]
           }
+        },
+        {
+          "when": "star_metal",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tool_binding_star_metal",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -443,6 +456,13 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/tool_binding_steel"
+          }
+        },
+        {
+          "when": "star_metal",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/tool_binding_star_metal"
           }
         }
       ],

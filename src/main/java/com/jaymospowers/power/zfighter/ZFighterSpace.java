@@ -414,6 +414,11 @@ public final class ZFighterSpace {
 		}
 		int fuel = pod.fuel();
 		int cost = player.isCreative() ? 0 : PodGrades.discount(pod.grade(), cost(index, player.level().dimension()));
+		// (0.18.55) a thrifty meal: this launch burns one less, once (the meal is used up when the trip starts)
+		boolean thrifty = cost > 0 && com.jaymospowers.power.zfighter.backhome.FarFood.thrifty(player);
+		if (thrifty) {
+			cost--;
+		}
 		if (fuel < cost) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.space_no_fuel", cost, fuel).withStyle(ChatFormatting.RED));
 			return;
@@ -434,6 +439,9 @@ public final class ZFighterSpace {
 			player.setAttached(HOME, new Home(from.identifier().toString(), pod.blockPosition()));
 		}
 		OPENED.remove(id);
+		if (thrifty) {
+			com.jaymospowers.power.zfighter.backhome.FarFood.spendThrift(player);
+		}
 		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel);
 	}
 

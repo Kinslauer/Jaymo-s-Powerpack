@@ -410,6 +410,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Hermits.register();
 		// 0.7.367: star charts for sale, and lights in the sky in the Tidings
 		StarFolk.register();
+		Starfall.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)

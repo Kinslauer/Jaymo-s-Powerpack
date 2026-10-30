@@ -102,6 +102,9 @@ public final class Tinkering {
 	/** (Smithing) Steel: its ingot (in {@link #ALLOY_INGOTS}), nugget and block, and the crucible blend a kiln fires into it. */
 	public static Block STEEL_BLOCK;
 	public static Item STEEL_INGOT, STEEL_NUGGET, STEEL_BLEND;
+	/** (0.18.55) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
+	public static Block STAR_METAL_ORE;
+	public static Item STAR_METAL_INGOT;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
 	/** (0.18.22) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
@@ -214,6 +217,7 @@ public final class Tinkering {
 			output.accept(STEEL_NUGGET);
 			output.accept(STEEL_BLOCK);
 			output.accept(STEEL_BLEND);
+			output.accept(STAR_METAL_ORE);
 			CASTS.forEach((shape, cast) -> {
 				if (shape != CastItem.Shape.WEAPON) {
 					output.accept(cast);
@@ -250,6 +254,7 @@ public final class Tinkering {
 			}
 		});
 		TraitEffects.init();
+		Starlit.init();
 	}
 
 	private static void registerSmeltery() {
@@ -277,6 +282,7 @@ public final class Tinkering {
 			TinkerMaterial.own(alloy.material, 1, ingot);
 		}
 		registerSteel();
+		registerStarMetal();
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}
@@ -302,6 +308,19 @@ public final class Tinkering {
 			Component.translatable("tooltip.jaymospowers.tinkering.steel_blend").withStyle(ChatFormatting.GRAY)))));
 		TinkerMaterial.own(TinkerMaterial.STEEL, 9, STEEL_BLOCK.asItem());
 		Melting.alloyForms(Molten.STEEL, STEEL_NUGGET, STEEL_BLOCK.asItem());
+	}
+
+	/**
+	 * (0.18.55, SevTech picks: star-metal) Star metal. Its ore lies only in the craters of fallen stars; it melts in the smeltery, one
+	 * ore for one ingot's worth, and the ingot casts and forges like any metal. It has no grid recipe and no furnace recipe.
+	 */
+	private static void registerStarMetal() {
+		STAR_METAL_ORE = block("star_metal_ore", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(4.0F, 6.0F).sound(SoundType.AMETHYST).lightLevel(state -> 4).requiresCorrectToolForDrops());
+		STAR_METAL_INGOT = item("star_metal_ingot", Item::new, p -> p.rarity(net.minecraft.world.item.Rarity.UNCOMMON));
+		ALLOY_INGOTS.put(Molten.STAR_METAL, STAR_METAL_INGOT);
+		TinkerMaterial.own(TinkerMaterial.STAR_METAL, 1, STAR_METAL_INGOT);
+		Melting.starMetal(STAR_METAL_ORE.asItem());
 	}
 
 	/** (0.8.111) Silver ore in the Overworld, smelted like iron or melted (doubled) in the smeltery; a metal for parts. */

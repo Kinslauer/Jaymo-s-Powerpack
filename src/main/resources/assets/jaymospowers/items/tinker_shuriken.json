@@ -132,6 +132,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/shuriken/bottom_steel"
             }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/bottom_star_metal"
+            }
           }
         ],
         "fallback": {
@@ -268,6 +275,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/shuriken/top_steel"
+            }
+          },
+          {
+            "when": "star_metal",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/shuriken/top_star_metal"
             }
           }
         ],

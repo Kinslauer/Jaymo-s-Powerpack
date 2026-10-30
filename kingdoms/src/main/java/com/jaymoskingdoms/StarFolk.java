@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -60,6 +62,9 @@ public final class StarFolk {
 	static final int REMEMBERED = 64;
 	/** Powers' tags on pods: a raiders' band, and a patrolman's visit. */
 	static final String RAIDER_TAG = "jaymospowers.raider", PATROL_TAG = "jaymospowers.patrol_pod";
+	/** (0.7.385) A hermit trades Maw dust, the grit off the Maw's rim: this many pieces for this many emeralds (Powers' item, looked up by id). */
+	static final int DUST_COUNT = 2, DUST_PRICE = 10;
+	static final Identifier MAW_DUST = Identifier.fromNamespaceAndPath("jaymospowers", "maw_dust");
 	/** A talk's colour (the stars' pale blue). */
 	static final int COLOR = 0xB8C8FF;
 
@@ -202,11 +207,15 @@ public final class StarFolk {
 		if (!hermit) {
 			tell(level, speaker, player);
 		}
-		if (worlds.isEmpty()) {
+		Item dust = hermit ? dust() : Items.AIR;
+		if (worlds.isEmpty() && dust == Items.AIR) {
 			ZFighterFolk.ask(player, speaker, Component.translatable("talk.jaymoskingdoms.stars.none"), List.of(Component.translatable("talk.jaymoskingdoms.stars.leave")),
 				List.of(true), pick -> {
 				});
 			return;
+		}
+		if (worlds.isEmpty()) {
+			words = Component.translatable("talk.jaymoskingdoms.stars.none");
 		}
 		int have = emeralds(player);
 		List<Component> options = new ArrayList<>();
@@ -215,9 +224,25 @@ public final class StarFolk {
 			options.add(Component.translatable("talk.jaymoskingdoms.stars.buy", name(world), price(world)));
 			enabled.add(have >= price(world));
 		}
+		boolean sellsDust = dust != Items.AIR;
+		if (sellsDust) {
+			options.add(Component.translatable("talk.jaymoskingdoms.stars.dust", DUST_COUNT, DUST_PRICE));
+			enabled.add(have >= DUST_PRICE);
+		}
 		options.add(Component.translatable("talk.jaymoskingdoms.stars.leave"));
 		enabled.add(true);
 		ZFighterFolk.ask(player, speaker, words, options, enabled, pick -> {
+			if (sellsDust && pick == worlds.size()) {
+				if (emeralds(player) < DUST_PRICE) {
+					Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.short"), COLOR);
+					return;
+				}
+				take(player, DUST_PRICE);
+				player.getInventory().placeItemBackInInventory(new ItemStack(dust, DUST_COUNT), net.minecraft.util.Prediction.SERVER_ONLY);
+				level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.dust_sold"), COLOR);
+				return;
+			}
 			if (pick < 0 || pick >= worlds.size()) {
 				return;
 			}
@@ -234,6 +259,11 @@ public final class StarFolk {
 			level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			Speech.tell(level, speaker, player, Component.translatable("talk.jaymoskingdoms.stars.sold", name(world)), COLOR);
 		});
+	}
+
+	/** Powers' Maw dust, or air without Powers. */
+	private static Item dust() {
+		return FabricLoader.getInstance().isModLoaded("jaymospowers") ? BuiltInRegistries.ITEM.getValue(MAW_DUST) : Items.AIR;
 	}
 
 	/** A stargazer's words about the sky go into {@code player}'s next Tidings (once a day for each of them). */
