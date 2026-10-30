@@ -7262,3 +7262,6 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Z Fighters (ki), mana-attuned players, Mages and Sorcerers never wake it, and a Valor they already had lies dormant (no
   coatings, wings, Senses, dodges; the key says so). Villager casters (court wizards, sorcerers, shamans) never roll it.
   Any other power: a quarter of the growth (was half), half the pool, capped short of Tempered (no King's Valor).
+- Andy: "They should all be wispier and wrap around the user like the wyrm". Every wing texture is now see-through,
+  thinning to nothing at its edges in faint streaks (`wisp` in both wing scripts), and all four designs share one wrap:
+  hanging, swung forward round the sides and closed across the chest like Xenoform Wyrm's cloak.

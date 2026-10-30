@@ -127,7 +127,31 @@ def wing(look, veins):
     return img
 
 
+def wisp(img, seed):
+    """Wispy (Andy: "they should all be wispier"): see-through, thinning to nothing at every edge, in faint streaks."""
+    from PIL import ImageFilter
+    alpha = img.getchannel("A")
+    solid = alpha.point(lambda a: 255 if a > 0 else 0)
+    # how deep each pixel lies inside the wing: eroded once, twice, three times
+    depth = [solid]
+    for _ in range(3):
+        depth.append(depth[-1].filter(ImageFilter.MinFilter(3)))
+    px, a = img.load(), alpha.load()
+    layers = [d.load() for d in depth]
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            if a[x, y] == 0:
+                continue
+            inside = sum(1 for d in layers[1:] if d[x, y])
+            streak = 0.5 + 0.5 * math.sin(x * 0.7 + math.sin(y * 0.45 + seed) * 2.2 + seed)
+            k = (0.18 + 0.16 * inside) * (0.7 + 0.3 * streak)
+            r, g, b, _ = px[x, y]
+            px[x, y] = (r, g, b, int(a[x, y] * k))
+    return img
+
+
 for look in LOOKS:
-    wing(look, False).save(os.path.join(OUT, "wings_" + look + ".png"))
+    wisp(wing(look, False), len(look)).save(os.path.join(OUT, "wings_" + look + ".png"))
 wing("iron", True).save(os.path.join(OUT, "wings_veins.png"))
 print("wrote", len(LOOKS) + 1, "wing textures to", os.path.normpath(OUT))

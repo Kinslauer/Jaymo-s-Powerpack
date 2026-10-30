@@ -36,7 +36,7 @@ import net.minecraft.world.entity.LivingEntity;
  * stone, scales, ash feathers, a heat haze, black lacquer; {@code tools/gen_valor_wings.py}), fading as the pool runs down,
  * the King's coating's soul colour beating along their ribs. They move the way Xenoform Wyrm's do: in flight they beat, and
  * fold back at speed; on the ground, coated, they wrap round the body like a cloak, and swing out of the way of your own
- * blows; when they catch a blow they snap open and flap.
+ * blows; when they catch a blow they snap open and flap. All of them wispy: see-through, thinning away at the edges.
  * <p>
  * Each Valor's wings are one of the pack's dragons' ({@link ValorWings#DESIGNS}, {@code tools/gen_valor_wing_designs.py}):
  * the ender dragon's shape (Xenoform Wyrm's), Notus and Boreas's fire dragon wings (nyxaris's "Fire Dragon", CC BY 4.0),
@@ -50,9 +50,11 @@ public final class ValorWingsLook {
 	static final float FLAP_RATE = 0.55F, FLAP_DEPTH = 0.95F, FOLDED_YAW = 1.35F, FOLDED_LIFT = 0.15F, FAST_FROM = 0.3F, FAST_FULL = 0.6F;
 	/** How far the tips bend behind the beat. */
 	static final float TIP_FLEX = 0.6F;
-	/** Wrapped round the body (by design): hanging down, swung forward round the sides, the tips folded in across the chest. */
-	static final float[] WRAP_PITCH = {-Mth.HALF_PI, -Mth.HALF_PI, -Mth.HALF_PI, -0.67F}, WRAP_FOLD = {-2.6F, -2.6F, -2.6F, -2.0F};
-	static final float WRAP_YAW = -0.7F;
+	/**
+	 * Wrapped round the body like Xenoform Wyrm's cloak (every design alike, Andy): hanging down, swung forward round the
+	 * sides, the tips folded in to close across the chest.
+	 */
+	static final float WRAP_PITCH = -Mth.HALF_PI, WRAP_YAW = -0.9F, WRAP_FOLD = -2.4F;
 	/** Each design's size (its wings are drawn from its dragon's at this much). */
 	static final float[] SCALE = {1.0F, 0.36F, 0.6F, 0.115F};
 	/** A swing: how far the wrapped wings open out of its way; a flap's speed and depth. */
@@ -266,9 +268,9 @@ public final class ValorWingsLook {
 			// wrapped: the cloak sways with each step
 			float walk = state.walkAnimationSpeed;
 			float step = Mth.sin(state.walkAnimationPos * 0.6662F) * walk;
-			float wrapX = WRAP_PITCH[this.design] + walk * 0.15F;
+			float wrapX = WRAP_PITCH + walk * 0.15F;
 			float wrapY = WRAP_YAW + Mth.abs(step) * 0.06F;
-			float wrapFold = WRAP_FOLD[this.design] + walk * 0.25F;
+			float wrapFold = WRAP_FOLD + walk * 0.25F;
 
 			this.rightWing.xRot = Mth.lerp(wrap, 0.0F, wrapX);
 			this.leftWing.xRot = Mth.lerp(wrap, 0.0F, wrapX);

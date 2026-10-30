@@ -145,7 +145,7 @@ def paint(design, src_path, uvs, scale_to=None):
             k = k ** 0.8
             rgb = tuple(int(dark[i] + (light[i] - dark[i]) * k) for i in range(3))
             out[x, y] = (*rgb, int(p[3] * alpha))
-        img.save(os.path.join(VALOR, "wings_" + design + "_" + look + ".png"), optimize=True)
+        wisp(img, len(design)).save(os.path.join(VALOR, "wings_" + design + "_" + look + ".png"), optimize=True)
     veins = Image.new("RGBA", src.size, (0, 0, 0, 0))
     out = veins.load()
     for x, y in keep:
@@ -153,6 +153,30 @@ def paint(design, src_path, uvs, scale_to=None):
         if p[3] > 0 and vein(design, p, lum(p)):
             out[x, y] = (255, 255, 255, 255)
     veins.save(os.path.join(VALOR, "wings_" + design + "_veins.png"), optimize=True)
+
+
+def wisp(img, seed):
+    """Wispy (Andy: "they should all be wispier"): see-through, thinning to nothing at every edge, in faint streaks."""
+    from PIL import ImageFilter
+    alpha = img.getchannel("A")
+    solid = alpha.point(lambda a: 255 if a > 0 else 0)
+    # how deep each pixel lies inside the wing: eroded once, twice, three times
+    depth = [solid]
+    for _ in range(3):
+        depth.append(depth[-1].filter(ImageFilter.MinFilter(3)))
+    px, a = img.load(), alpha.load()
+    layers = [d.load() for d in depth]
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            if a[x, y] == 0:
+                continue
+            inside = sum(1 for d in layers[1:] if d[x, y])
+            streak = 0.5 + 0.5 * math.sin(x * 0.7 + math.sin(y * 0.45 + seed) * 2.2 + seed)
+            k = (0.18 + 0.16 * inside) * (0.7 + 0.3 * streak)
+            r, g, b, _ = px[x, y]
+            px[x, y] = (r, g, b, int(a[x, y] * k))
+    return img
 
 
 for design, source, tex, wings, turns in SOURCES:
