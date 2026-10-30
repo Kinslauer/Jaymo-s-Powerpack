@@ -194,3 +194,54 @@ WeaponParts (one new Kind), alchemy crucible or still recipe, ZFighterStarMapScr
   8 s unless standing in water or holding/eating a cooling thing; a quenched Overgeared piece (the existing quench
   component) worn or held cuts heat damage in half; warm Kitchen food (the existing warm-food effect from Seasons) cuts
   cold the same way. Constants at the top.
+
+## Track briefs for patches 1 and 2 (run after 3+4 ship)
+Same shared rules as above. Kingdoms depends on Powers (`kingdoms/.../PowersCompat`); Powers reaches Kingdoms only by
+reflection through `power/zfighter/ZFighterKingdoms` (add a method there for anything new Powers needs from Kingdoms).
+Kingdoms' "Tidings" are the per-player news letters (kingdoms/MODLOG.md around line 4514: "gathered for 20 s and written
+up as a Tidings letter"); grep Tidings in kingdoms/src to find the class that posts a line.
+
+### Track 1, The ladder (Kingdoms 0.7.x; files: `WorldTiers`, a new `journal/` package, `MonsterGear` offer filters,
+Careers/BountyBoard/blueprint sellers' offer filters, lang; Powers: one event hook for "first forged iron tool" if none exists)
+- **One Deed Per Rung**: `WorldTiers.Progress` gains deed bits beside NETHER/WITHER/DRAGON: FORGED (first iron tool
+  finished at the anvil or Tool Station, Powers raises it through PowersCompat or an event Powers already fires),
+  AETHER_TROPHY (back in the Overworld carrying an Aether boss drop: the Giants' or the Aether II bosses' drops, read
+  through a tag), POD_FLIGHT (a pod trip landed and flown home: Powers' ZFighterPodTrip tells Kingdoms), MAW_SALVAGE
+  (took a part set from a Maw wreck). `FEAT_NEEDED` becomes: Borderlands FORGED, Wildlands NETHER + AETHER_TROPHY, Dread
+  WITHER + POD_FLIGHT, Legend DRAGON + MAW_SALVAGE (constants; the great-foe counts stay). The tier screen's requirement
+  line lists them.
+- **Rung Journal**: item `rung_journal` (grid: book + feather + a tier icon? no: book + string), given to each player
+  when they enter Borderlands or found on patrolmen. Opening it shows one page per tier with 3-5 lines written as a
+  hermit's/patrolman's odd hints ("Someone up there wants iron shaped, not found."), each line ticked when its feat lands
+  (reads Progress). No lore statements; hints only. Lang in `lang/parts/journal.json`.
+- **The Ground Changes**: when a player's tier rises, a one-time pass over the chunks that player has loaded (a per-chunk
+  attachment: highest tier seeded) replaces a few deep stone blocks with that tier's ore veins (Borderlands iron+copper
+  pockets, Wildlands gold+lapis, Dread diamond, Legend ancient debris in the Nether); runs lazily as chunks tick, N
+  chunks per tick, constants at the top. Monoliths' floor raise does the same for everyone.
+- **Hidden Until Reached**: smiths, boards and blueprint sellers don't offer Tinkers casts, Overgeared blueprints or
+  grades above the player's tier (a `TierGate.allowed(player, stack)` table: by item tag per tier); JEI still shows the
+  routes. Nothing is removed from the world, only from offers.
+- **Other World as a Test**: the AETHER_TROPHY deed above is the mid-rung test; the journal hints at it on the
+  Wildlands page. No new portal.
+
+### Track 2, Reading the sky (Powers 0.18.x + Kingdoms 0.7.x; files: new Powers `power/zfighter/sky/**`, ZFighterStarMapScreen
+filter, client sky renderer; Kingdoms: Hermits trades, a stargazer gift in GiftedFolk, Tidings lines)
+- **Star-Sight Bench**: block `star_bench` (grid: 2 stone slabs + 1 amethyst shard; furniture, fine), placed on a Lookout
+  platform (`ZFighterLookout` knows its blocks) with open sky; on a clear night (no rain, moon up) it wakes: emissive
+  model state + hum; using an awake bench gives the first chart (Pale Moon) once per player (attachment). It makes no
+  pod and does nothing about pods.
+- **Hermit Star Charts**: items `star_chart` with a component naming the world (6); using one marks the world read on
+  the player's `sky/Charts` attachment and shows a book-style page of 3-4 odd short sentences about that world (hint
+  voice, no lore statements). Sky hermits (`Hermits`, Kingdoms) sell the charts in order of the star map's cost; the
+  Patrol gives the Rustfall chart on joining.
+- **Map Fills as You Read**: `ZFighterStarMapScreen` shows only worlds whose charts are read (plus Home); the
+  server-side `ZFighterSpace.go` refuses unread worlds. Players who already flew somewhere (existing worlds visited:
+  read the FLIGHTS attachment / visited dimensions) have those charts counted as read on first load so nobody loses a
+  world they already reached.
+- **Planets in the Sky**: client-only: a small point of light per read world in the night sky at a fixed
+  right-ascension per world (constants), brighter while the player's pod trip is pending/returning. Drawn in the sky
+  render pass (find how `ZFighterSpaceArt` or the Aether draws into the sky; a `WorldRenderEvents` hook is fine).
+- **Villager Stargazers** (Kingdoms): a new gift in `GiftedFolk` ("stargazer", 1 in N villagers, N a constant): they
+  tell sky Tidings and sell charts the player hasn't read (MCA trade or talk-screen button, the pattern the Z Fighter
+  villagers use). **Lights in the Sky**: Tidings lines (a light that fell near a village, a patrolman seen at dusk) fired
+  when raiders or patrol pods land near a town the player knows, before the player owns a pod.
