@@ -55,7 +55,7 @@ public final class ZFighterRaiders {
 	static final double RAIDER_HEALTH = 2.5, RAIDER_DAMAGE = 1.6, CHIEF_HEALTH = 0.6, CHIEF_DAMAGE = 0.9, HUNT = 32.0;
 	/** The fuel the pod left behind holds. */
 	static final int PRIZE_FUEL = 3;
-	/** (0.18.47) What a burnt-out pod leaves: its keel and this many sound parts at random. */
+	/** (0.18.49) What a burnt-out pod leaves: its keel and this many sound parts at random. */
 	static final int SCRAP_MIN = 1, SCRAP_MAX = 3;
 	/** (0.18.50) How many of a raider pod's hull plates, canopy and mast are gone when it comes down (it flies stripped, and the one left keeps the gaps). */
 	static final int STRIP_MIN = 1, STRIP_MAX = 3;
