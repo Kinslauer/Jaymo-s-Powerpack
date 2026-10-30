@@ -65,5 +65,12 @@
   "research.jaymospowers.ichorcloth": "Ichorcloth",
   "research.jaymospowers.ichorcloth.text": "Leather, wool and ichor, worked at the altar into a hood, a robe, leggings and boots of violet cloth. It turns aside magic, and a wearer of the whole set takes up flux's taint only half as fast.",
   "research.jaymospowers.everflame_lantern": "The Lantern of Everflame",
-  "research.jaymospowers.everflame_lantern.text": "A lantern, an everflame and a rose metal ingot. Used on the face of a block it sets an everflame beside it, taking a little Light from the phials you carry. It needs a moment between flames."
+  "research.jaymospowers.everflame_lantern.text": "A lantern, an everflame and a rose metal ingot. Used on the face of a block it sets an everflame beside it, taking a little Light from the phials you carry. It needs a moment between flames.",
+  "item.jaymospowers.clockwork_hornet_hive": "Clockwork Hornet Hive",
+  "item.jaymospowers.clockwork_hornet": "Clockwork Hornet",
+  "entity.jaymospowers.clockwork_hornet": "Clockwork Hornet",
+  "tooltip.jaymospowers.clockwork_hornet_hive": "Use it to loose three clockwork hornets for twenty seconds. They harry your lock-on target, or the last thing that hurt you.",
+  "message.jaymospowers.clockwork_hornets.enough": "Enough hornets are out already.",
+  "research.jaymospowers.clockwork_hornets": "Clockwork Hornets",
+  "research.jaymospowers.clockwork_hornets.text": "A hive for a body, a clock for a heart, copper for wings and a drop of ichor to wake them. Lay a beehive on the centre pedestal with three copper ingots, two redstone, a clock and a vial of ichor around it, and the altar winds it into a Clockwork Hornet Hive. Use the hive and three small brass hornets leave it: for twenty seconds they harry the foe you have locked onto, or else the last thing that hurt you, and then wind down."
 }

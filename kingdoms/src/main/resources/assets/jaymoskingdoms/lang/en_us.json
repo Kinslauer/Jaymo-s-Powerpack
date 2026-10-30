@@ -8095,5 +8095,20 @@
 	"drill.jaymoskingdoms.spar.draw.2": "Time, %s. No one fell.",
 	"dialogue.main.jaymoskingdoms_drill": "Ask for a drill",
 	"tidings.jaymoskingdoms.drill.taught": "%s drilled you well enough to teach you a first form: %s.",
-	"tidings.jaymoskingdoms.drill.practiced": "%s's drill sharpened your %s."
+	"tidings.jaymoskingdoms.drill.practiced": "%s's drill sharpened your %s.",
+	"item.jaymoskingdoms.bolas": "Bolas",
+	"entity.jaymoskingdoms.bolas": "Bolas",
+	"form.jaymoskingdoms.ground_stomp": "Ground Stomp",
+	"form.jaymoskingdoms.falling_fist": "Falling Fist",
+	"form.jaymoskingdoms.marked_quarry": "Marked Quarry",
+	"form.jaymoskingdoms.cast_off_cloak": "Cast-off Cloak",
+	"form.jaymoskingdoms.tangle_cord": "Tangle Cord",
+	"form.jaymoskingdoms.rending_claw": "Rending Claw",
+	"form.jaymoskingdoms.feral_pounce": "Feral Pounce",
+	"message.jaymoskingdoms.form.falling_fist.need": "Falling Fist needs a fall of three blocks or more.",
+	"message.jaymoskingdoms.form.marked_quarry.none": "No quarry in your sights.",
+	"message.jaymoskingdoms.form.marked_quarry.marked": "Marked: %s. Press again to strike from behind.",
+	"message.jaymoskingdoms.form.marked_quarry.far": "Your quarry is too far to dash to.",
+	"message.jaymoskingdoms.form.marked_quarry.blocked": "There is no room behind your quarry.",
+	"message.jaymoskingdoms.form.tangle_cord.none": "You have no bolas to throw."
 }

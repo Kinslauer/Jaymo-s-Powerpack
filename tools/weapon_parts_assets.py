@@ -62,6 +62,8 @@ PARTS = [
     ("soras_dagger_blade", "Sora's Dagger Blade", "drawn:soras_dagger_blade", ["iron"]),
     # (0.17.116) the layer blocks' saw (layers/SawItem)
     ("saw_blade", "Saw Blade", "drawn:saw_blade", ["iron"]),
+    # (0.18.47) the Fang Gauntlets' fangs (Weapon Forms, the Claw family)
+    ("fang_blades", "Fang Blades", "drawn:fang_blades", ["iron"]),
     # (Smithing) the smith's own tools: tongs and the Smithing Hammer
     ("tongs_jaws", "Tongs Jaws", "drawn:tongs_jaws", ["iron"]),
     ("steel_tongs_jaws", "Steel Tongs Jaws", "drawn:tongs_jaws", ["steel"]),
@@ -154,6 +156,23 @@ DRAWN["saw_blade"] = [
     "...#oxxx#.......",
     "...#ox###.......",
     "....##..........",
+    "................",
+    "................"]
+DRAWN["fang_blades"] = [
+    "................",
+    "................",
+    "..#..#..#.......",
+    ".#x#.#x#.#x#....",
+    ".#x#.#x#.#x#....",
+    ".#x#.#x#.#x#....",
+    ".#xx##xx##xx#...",
+    ".#xxxxxxxxxxx#..",
+    ".#xoxxxoxxxox#..",
+    "..#xxxxxxxxx#...",
+    "...#########....",
+    "................",
+    "................",
+    "................",
     "................",
     "................"]
 DRAWN["tongs_jaws"] = [
