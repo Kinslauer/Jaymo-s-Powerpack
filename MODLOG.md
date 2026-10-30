@@ -4081,4 +4081,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   stone, `SALT_CHANCE`), and three effects (`backhome/FarFood`): `far_breath` (a minute more of breath in airless worlds),
   `far_ward` (10 minutes of no Cinder heat and no Glacia cold) and `far_thrift` (the next launch costs 1 less, once). Kitchen's four
   dishes give them on a Perfect cook. `tools/gen_back_home.py` draws the art and writes the data and lang. New JEI pages:
-  `client/jei/BackHomeJei` (quench edges, lens fitting); everything else shows in the Tinkering and Alchemy pages already there.
+  `client/jei/BackHomeJei` (quench edges, lens fitting, and a line on where Maw dust, Verdant fruit, Glacia salt and star metal ore are found); everything else shows in the Tinkering and Alchemy pages already there.

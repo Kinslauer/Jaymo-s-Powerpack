@@ -100,6 +100,10 @@ LANG = {
     "jei.jaymospowers.star_lens": "Starlit Lens",
     "jei.jaymospowers.star_lens.how": "Use the lens on a pod that has a beacon mast.",
     "jei.jaymospowers.star_lens.shows": "The flight shows the world's mission zones.",
+    "jei.jaymospowers.found.maw_dust": "Taken from a wrecked pod's chest in the Maw, and sometimes shaken from the glass round the black hole. Sky hermits trade it for emeralds.",
+    "jei.jaymospowers.found.verdant_fruit": "Sometimes falls from leaves broken on the Verdant World.",
+    "jei.jaymospowers.found.glacia_salt": "Sometimes chipped from ice, snow and stone broken on Glacia.",
+    "jei.jaymospowers.found.star_metal_ore": "Lies only in the craters fallen stars leave, near the towns. It melts in a smeltery, one ore to one ingot's worth.",
 }
 KITCHEN_LANG = {
     "item.jaymoskitchen.verdant_fruit_salad": "Verdant Fruit Salad",
@@ -452,6 +456,13 @@ def items(jar):
     write(os.path.join(ASSETS, "models", "item", "tinkering", "star_metal_ingot.json"),
           {"parent": "minecraft:item/generated", "textures": {"layer0": NS + ":item/tinkering/star_metal_ingot"}})
     write(os.path.join(ASSETS, "items", "star_metal_ingot.json"), ref(NS + ":item/tinkering/star_metal_ingot"))
+    # the hot ingot of star metal (a case beside the other metals')
+    hot_path = os.path.join(ASSETS, "items", "hot_ingot.json")
+    hot_def = json.load(open(hot_path))
+    hot_cases = hot_def["model"]["cases"]
+    if not any(c["when"] == "star_metal" for c in hot_cases):
+        hot_cases.append({"when": "star_metal", "model": json.loads(json.dumps(hot_cases[-1]["model"]).replace(hot_cases[-1]["when"] + "_ingot", "star_metal_ingot"))})
+        write(hot_path, hot_def)
     write(os.path.join(ASSETS, "models", "block", "tinkering", "star_metal_ore.json"),
           {"parent": "minecraft:block/cube_all", "textures": {"all": NS + ":block/tinkering/star_metal_ore"}})
     write(os.path.join(ASSETS, "blockstates", "star_metal_ore.json"), {"variants": {"": {"model": NS + ":block/tinkering/star_metal_ore"}}})

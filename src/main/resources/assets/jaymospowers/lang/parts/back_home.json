@@ -31,5 +31,9 @@
   "jei.jaymospowers.quench_edge.once": "It is used up; a piece takes one edge only.",
   "jei.jaymospowers.star_lens": "Starlit Lens",
   "jei.jaymospowers.star_lens.how": "Use the lens on a pod that has a beacon mast.",
-  "jei.jaymospowers.star_lens.shows": "The flight shows the world's mission zones."
+  "jei.jaymospowers.star_lens.shows": "The flight shows the world's mission zones.",
+  "jei.jaymospowers.found.maw_dust": "Taken from a wrecked pod's chest in the Maw, and sometimes shaken from the glass round the black hole. Sky hermits trade it for emeralds.",
+  "jei.jaymospowers.found.verdant_fruit": "Sometimes falls from leaves broken on the Verdant World.",
+  "jei.jaymospowers.found.glacia_salt": "Sometimes chipped from ice, snow and stone broken on Glacia.",
+  "jei.jaymospowers.found.star_metal_ore": "Lies only in the craters fallen stars leave, near the towns. It melts in a smeltery, one ore to one ingot's worth."
 }

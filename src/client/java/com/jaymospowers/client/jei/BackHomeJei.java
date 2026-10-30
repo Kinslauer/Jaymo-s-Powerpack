@@ -6,6 +6,7 @@ import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.jaymospowers.power.zfighter.pod.PodParts;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
+import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.smithing.Edges;
 import com.jaymospowers.tinkering.smithing.Smithing;
@@ -64,6 +65,11 @@ public final class BackHomeJei implements IModPlugin {
 				List.of(edged), notes));
 		}
 		registration.addRecipes(QUENCH, quench);
+		// where the finds come from (a short line each, on the item's own page)
+		registration.addIngredientInfo(BackHome.MAW_DUST, Component.translatable("jei.jaymospowers.found.maw_dust"));
+		registration.addIngredientInfo(BackHome.VERDANT_FRUIT, Component.translatable("jei.jaymospowers.found.verdant_fruit"));
+		registration.addIngredientInfo(BackHome.GLACIA_SALT, Component.translatable("jei.jaymospowers.found.glacia_salt"));
+		registration.addIngredientInfo(Tinkering.STAR_METAL_ORE, Component.translatable("jei.jaymospowers.found.star_metal_ore"));
 		registration.addRecipes(LENS, List.of(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(BackHome.STARLIT_LENS)), List.of(PodParts.itemOf(PodPart.MAST, false))),
 			List.of(PodParts.itemOf(PodPart.MAST, false)), List.of(Component.translatable("jei.jaymospowers.star_lens.how"), Component.translatable("jei.jaymospowers.star_lens.shows")))));
 	}
