@@ -7187,3 +7187,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Their info box no longer says "Jobless" and shows a mood: the trade line shows their part ("Judge of the Dead") and the
   mood line their bearing ("Bearing: Stern"), from the synced `ZFighterFolk.PART` (`McaZFighterInfoMixin`).
 - Compile-checked; not seen in game.
+
+## 0.7.406: the life story's sworn page, and "As you grew up" (pack 0.18.75)
+- Andy: "issue in the creator populating the custom skin". The road page draws you yourself, and the sworn road's full
+  iron hid the body you'd just made. You are never drawn in a helmet there, and the sworn scene drops its leggings.
+- Andy: "dont add the white sworn to text unless you have favor". An answer that names a realm (sworn, banished,
+  minor nobles) shows no short line until its realm is picked on the page after, so no more "Sworn to , at its keep."
+- Andy: "the narrator can stop at 'as you grew up' here, the you sounds off". The youth page's title is "As you grew
+  up..." and the narrator's clip is cut before its "you".
