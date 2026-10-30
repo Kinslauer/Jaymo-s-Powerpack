@@ -7213,3 +7213,23 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: "If you are not moving and you scroll you shouldnt be able to move with the belt unlocked and equipped. Without it
   sprint works as normal". In stance, Ctrl pressed while standing still is the belt's key until let go: it no longer starts
   a sprint, even if you then move (`FormsClient.ctrlNoSprint`). Pressed while moving, or out of stance, it sprints as ever.
+
+## 0.7.409: every Valor looks like itself
+- Andy: "we only see particles, for example last night jung got kings valor in dark red and scales". Valor's coat was
+  only ever a dark dust; nothing was drawn. `ValorLook` now draws the coat on the arms of whoever has it up (players, MCA
+  villagers, our folk, and your own first-person arm), on a shell just past the sleeves, or past armour when a
+  chestplate is worn, so armour never hides it. Textures from `tools/gen_valor_coats.py`.
+  - The look: Iron gunmetal bands and rivets, Stone cracked rock, Scale overlapping dark green scales, Ash flaking grey
+    char, Haze a see-through orange shimmer, Lacquer glossy black with a diagonal shine.
+  - The rank: the hands at Spark, half the forearm at Kindled, the forearm at Tempered, the whole arm at Steeled, and
+    over the shoulders at Unbroken.
+  - The bent (Tempered on): a mark round the wrist, a bracer (gate), crossed slashes (duel), claw stripes (hunt), a rune
+    ring (magebane) or a stitched scar (survivor).
+  - King's Valor Coating: the coat's own lines (the scales' edges, the cracks, the bands) glow and beat in the soul
+    colour, lifted so a dark one like black-red still shows.
+  - The origin, while coated: Ember flickers of flame, Rooted grinds the ground underfoot, Bulwark a faint ring as far as
+    it covers, Hollow magic glyphs drawn into the hands, Undying a soul rising now and then, Duelist sparks off the hand,
+    and a Hunter's eyes glint amber.
+  - Each look sheds its own grit beside the dust (iron and stone dust, dark prismarine flecks, white ash, smoke, ink),
+    the dust takes the soul colour under King's coating, and King's Valor (released or revealed) flashes the soul
+    colour with its glow rising off the holder.
