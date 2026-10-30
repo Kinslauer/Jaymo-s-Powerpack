@@ -174,7 +174,7 @@ public final class Crucibles {
 					recipes = List.copyOf(sorted);
 				}
 			});
-		// (0.18.20) the recipe list goes to every client, so JEI's Crucible page shows what this server's pot makes
+		// (0.18.48) the recipe list goes to every client, so JEI's Crucible page shows what this server's pot makes
 		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
 		ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> {
 			if (joined) {
@@ -197,7 +197,7 @@ public final class Crucibles {
 		}
 	}
 
-	/** (0.18.20) Server to client: every crucible recipe, for JEI. */
+	/** (0.18.48) Server to client: every crucible recipe, for JEI. */
 	public record Sync(List<Recipe> recipes) implements CustomPacketPayload {
 		public static final Type<Sync> TYPE = new Type<>(JaymosPowers.id("crucible_recipes"));
 		private static final StreamCodec<RegistryFriendlyByteBuf, Recipe> RECIPE = ByteBufCodecs.fromCodecWithRegistries(Recipe.CODEC);
