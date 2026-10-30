@@ -163,7 +163,7 @@ public final class Careers {
 	static final int STALL_EMERALDS = 12;
 	static final long STALL_FROM = 6000L;
 
-	// (0.7.369, Andy's SevTech picks: the Pilot and Prospector careers)
+	// (0.7.368, Andy's SevTech picks: the Pilot and Prospector careers)
 	/** Pilot: a fare in emeralds (Apprentice, Journeyman, Master) for each trip flown with a passenger or a parcel aboard; trips an order asks for (at most). */
 	static final int[] PILOT_FARE = {0, 1, 3};
 	static final int FLY_ORDERS_MOST = 2;
@@ -194,9 +194,9 @@ public final class Careers {
 		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay"), "hunting_lodge"),
 		COURIER("courier", 0, List.of(), List.of("carry"), "stable"),
 		WATCH("watch", 0, List.of(), List.of("night", "slay"), null),
-		/** (0.7.369) Flies pods out of a kingdom's landing yard: paid per trip with a passenger or a parcel aboard. */
+		/** (0.7.368) Flies pods out of a kingdom's landing yard: paid per trip with a passenger or a parcel aboard. */
 		PILOT("pilot", 0, List.of(), List.of("fly", "ferry"), LandingYard.ENTRY),
-		/** (0.7.369) Works the far worlds for the yard's town: paid per first find (an ore's first reveal on a world, a first metal knapped). */
+		/** (0.7.368) Works the far worlds for the yard's town: paid per first find (an ore's first reveal on a world, a first metal knapped). */
 		PROSPECTOR("prospector", 0, List.of(), List.of("find"), LandingYard.ENTRY);
 
 		public final String key;
@@ -231,7 +231,7 @@ public final class Careers {
 			return Component.translatable("job.jaymoskingdoms." + this.key);
 		}
 
-		/** (0.7.369) A job only a town with a landing yard offers. */
+		/** (0.7.368) A job only a town with a landing yard offers. */
 		boolean yardOnly() {
 			return this == PILOT || this == PROSPECTOR;
 		}
@@ -409,7 +409,7 @@ public final class Careers {
 	public static final AttachmentType<Career> CAREER = AttachmentRegistry.create(JaymosKingdoms.id("career"),
 		builder -> builder.persistent(Career.CODEC).copyOnDeath().syncWith(ByteBufCodecs.fromCodec(Career.CODEC), AttachmentSyncPredicate.targetOnly()));
 
-	/** (0.7.369) On a player: the first finds made ("world|kind"), so each counts once. Saved, kept through death. */
+	/** (0.7.368) On a player: the first finds made ("world|kind"), so each counts once. Saved, kept through death. */
 	public static final AttachmentType<List<String>> FINDS = AttachmentRegistry.create(JaymosKingdoms.id("first_finds"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
@@ -750,7 +750,7 @@ public final class Careers {
 		return new Order(what, count(job, what, random), 0);
 	}
 
-	/** (0.7.369) Another town with a landing yard a pilot's parcel goes to, or null. */
+	/** (0.7.368) Another town with a landing yard a pilot's parcel goes to, or null. */
 	private static @Nullable Faction ferryTo(ServerLevel level, Faction from, RandomSource random) {
 		MinecraftServer server = level.getServer();
 		List<Faction> towns = Factions.all(server).stream().filter(o -> o.id() != from.id() && !o.fallen() && o.type() != FactionType.BARBARIAN)
@@ -1203,7 +1203,7 @@ public final class Careers {
 		refreshTitles(player.level().getServer());
 	}
 
-	// ---- the pilot and the prospector (0.7.369) ----------------------------------------------------------------------
+	// ---- the pilot and the prospector (0.7.368) ----------------------------------------------------------------------
 
 	/** Adds an open order {@code what} to {@code job}'s post for {@code player} if it has none, so a trip or a find is never unpaid. */
 	private static void ensureOrder(ServerPlayer player, String job, String what) {
