@@ -53,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * inside while everyone near watches it go. Up past the clouds the client shows the flight ({@code ZFighterFlightScreen}): the pod
  * crossing space from here to there, longer the farther the world ({@link #flightTicks}); after a first trip it can be skipped.
  * Then the pod comes down out of the sky over open ground anywhere on the far world (no landing pad: {@link #ground}), slowing
- * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.49) It is the real
+ * on its thrusters, and sets down; it stands there holding the fuel left, and you climb out beside it. (0.18.50) It is the real
  * pod with the parts it was launched with: one that isn't whole lands hard ({@link #HARD_LANDING_DAMAGE}) and shakes
  * {@link #SHAKEN_MIN} to {@link #SHAKEN_MAX} parts loose.
  * <p>
@@ -74,7 +74,7 @@ public final class ZFighterPodTrip {
 	/** The descent: how high over the ground it starts, its top and bottom speed, how quickly it slows, and when it gives up. */
 	static final int DESCENT_HEIGHT = 56, DESCENT_MAX_TICKS = 400;
 	static final double DESCENT_FAST = 1.2, DESCENT_SLOW = 0.12, DESCENT_EASE = 0.05;
-	/** (0.18.49) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
+	/** (0.18.50) A pod that isn't whole lands hard: the pilot takes this much fall damage and this many parts (not the keel) come off. */
 	static final float HARD_LANDING_DAMAGE = 6.0F;
 	static final int SHAKEN_MIN = 1, SHAKEN_MAX = 2;
 	/** How big a pod is to find room for it (blocks): its width and height. */
@@ -82,7 +82,7 @@ public final class ZFighterPodTrip {
 	/** Where on a far world the pod may come down: within this many blocks of the middle, tried this many times. */
 	static final int LAND_RANGE = 360, LAND_TRIES = 40;
 
-	/** (0.18.51) For the pod package: tells Kingdoms {@code player} did a deed that opens a world tier (see {@code ZFighterKingdoms.deed}). */
+	/** (0.18.52) For the pod package: tells Kingdoms {@code player} did a deed that opens a world tier (see {@code ZFighterKingdoms.deed}). */
 	public static void deed(ServerPlayer player, String deed) {
 		ZFighterKingdoms.deed(player, deed);
 	}
@@ -99,7 +99,7 @@ public final class ZFighterPodTrip {
 		final int dest;
 		final int fuelLeft;
 		final int fuelBefore;
-		/** (0.18.49) The grade of the fuel in the tank, carried to the pod that lands. */
+		/** (0.18.50) The grade of the fuel in the tank, carried to the pod that lands. */
 		int fuelGrade;
 		final ResourceKey<Level> from;
 		final BlockPos origin;
@@ -108,7 +108,7 @@ public final class ZFighterPodTrip {
 		double speed;
 		@Nullable PodEntity pod;
 		int filled, damaged;
-		/** (0.18.50) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
+		/** (0.18.51) Whether the pod was finished, its mend grade, and the passenger a second seat carries (they ride and land with the pilot). */
 		boolean finished;
 		int grade;
 		@Nullable UUID guest;
@@ -155,7 +155,7 @@ public final class ZFighterPodTrip {
 	}
 
 	private static final Map<UUID, Trip> TRIPS = new HashMap<>();
-	/** (0.18.50) Passengers of a second seat, by who is aboard, to their pilot. */
+	/** (0.18.51) Passengers of a second seat, by who is aboard, to their pilot. */
 	private static final Map<UUID, UUID> GUESTS = new HashMap<>();
 	/** Set while the hard landing hurts the pilot (a trip's pilot is otherwise unhurtable). */
 	private static boolean hurting;
@@ -176,7 +176,7 @@ public final class ZFighterPodTrip {
 		return TRIPS.containsKey(player.getUUID()) || GUESTS.containsKey(player.getUUID());
 	}
 
-	/** (0.18.50) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
+	/** (0.18.51) The passenger of {@code trip}, if they are still aboard and about; otherwise the trip forgets them. */
 	private static @Nullable ServerPlayer guest(MinecraftServer server, Trip trip) {
 		if (trip.guest == null) {
 			return null;
@@ -189,7 +189,7 @@ public final class ZFighterPodTrip {
 		return guest;
 	}
 
-	/** (0.18.50) A trip is over: its passenger is no longer a passenger. */
+	/** (0.18.51) A trip is over: its passenger is no longer a passenger. */
 	private static void forget(Trip trip) {
 		if (trip.guest != null) {
 			GUESTS.remove(trip.guest);
@@ -225,7 +225,7 @@ public final class ZFighterPodTrip {
 		trip.pod = pod;
 		trip.finished = pod.finished();
 		trip.grade = pod.grade();
-		// (0.18.50) a second seat: whoever else is aboard comes along
+		// (0.18.51) a second seat: whoever else is aboard comes along
 		ServerPlayer guest = null;
 		for (Entity rider : pod.getPassengers()) {
 			if (guest == null && pod.seats() > 1 && rider instanceof ServerPlayer other && other != player) {
@@ -541,7 +541,7 @@ public final class ZFighterPodTrip {
 		}
 		ZFighterSpace.Dest dest = trip.dest == ZFighterSpace.HOME_INDEX ? null : ZFighterSpace.DESTS[trip.dest];
 		if (trip.dest == ZFighterSpace.HOME_INDEX) {
-			// (0.18.51) a pod flown out and landed home again: the deed that opens Dread
+			// (0.18.52) a pod flown out and landed home again: the deed that opens Dread
 			ZFighterKingdoms.deed(player, "pod_flight");
 		}
 		ZFighterSpace.arrived(player, dest);
@@ -565,7 +565,7 @@ public final class ZFighterPodTrip {
 			hurting = false;
 		}
 		if (PodGrades.softLanding(pod.grade())) {
-			// (0.18.50) a pod mended to the top grade takes the blow in its hull: nothing shakes loose
+			// (0.18.51) a pod mended to the top grade takes the blow in its hull: nothing shakes loose
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.hard_landing_soft").withStyle(ChatFormatting.GOLD));
 			return;
 		}
@@ -654,7 +654,7 @@ public final class ZFighterPodTrip {
 		MinecraftServer server = player.level().getServer();
 		UUID pilot = GUESTS.remove(player.getUUID());
 		if (pilot != null) {
-			// (0.18.50) a passenger leaves: they wake where the trip began
+			// (0.18.51) a passenger leaves: they wake where the trip began
 			Trip aboard = TRIPS.get(pilot);
 			player.stopRiding();
 			if (aboard != null) {
