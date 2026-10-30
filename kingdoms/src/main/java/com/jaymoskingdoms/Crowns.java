@@ -173,7 +173,7 @@ public final class Crowns {
 	}
 
 	/** Where {@code f}'s ruler sits: its keep's throne, else its seat. */
-	private static BlockPos throne(MinecraftServer server, Faction f) {
+	static BlockPos throne(MinecraftServer server, Faction f) {
 		Castle.Keep keep = Factions.keep(server, f.id());
 		return keep != null ? keep.throne() : f.seat();
 	}

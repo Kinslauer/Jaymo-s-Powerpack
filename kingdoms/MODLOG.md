@@ -7075,7 +7075,37 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Not hooked to Powers' `'` key (it toggles Powers' own costume mask; there is no hook for another mod's head item).
 - Compile-checked; not seen in game.
 
-## 0.7.396: Weapon Forms, patch 6: the Eight-Sign Circle seals forms; Bolt Step and Storm Ring (was 0.7.386; pack 0.18.61)
+## 0.7.395: Stare Down by who you stare at (pack 0.18.61)
+- Andy: "Will staredown has context sensitive interactions with npcs and enemies, like making a captain jump ship, or a weak
+  poor king submit the seat". `Staredowns` decides what a held stare does; `Will.stare` still finds and holds the gaze.
+- **The great** (a crewed ship's captain at her wheel, a ruler on a throne) can be stared at even when they're no foe, for
+  longer (`CAPTAIN_STARE_TICKS` 80, `RULER_STARE_TICKS` 120). Being weaker isn't enough: your **Will** (ranks of Dread
+  Presence, Stare Down, Broken Morale, Name That Carries and Last Look, plus your world tier, +1 aligned to Strength, +2 on
+  Second Breath) must beat their **nerve**. A captain's: 2, +1 per 3 able hands aboard, -3 if she's sinking. A ruler's: 3,
+  +1 per guard within 16, +3 per step of the realm's wealth, -1 for a lord. Both: -1 under half health, temperament
+  (brave/proud/hotheaded +2, dutiful/devout +1, timid -2, gloomy -1). Bosses never break.
+  - **A captain jumps ship:** thrown over the side, discharged from her crew (an MCA villager wherever he swims to), and he
+    runs; she has no hand at her helm. Each weaker hand aboard goes over after him half the time; the rest are weakened. A
+    realm's ship (navy, merchant, whaler) costs 60 reputation with the realm.
+  - **A weak, poor ruler yields the seat:** a POOR realm, stared down within 16 blocks of the throne, no player already
+    wearing its crown and you wearing none: `Crowns.crown` makes you its sovereign, the ruler stays as steward, the realm's
+    allies take -100 (half a usurper's), and the server hears of it. Otherwise a weak ruler pays you to go: a quarter of the
+    treasury, at most 64 emeralds, leaving 10, once a day per realm, -80 with the realm.
+  - Whoever's nerve holds says so and can't be stared at by you again for 5 minutes.
+- **Foes** (weaker, as before) break by what they are: one of a ship's crew goes over the side; a rider is thrown and the
+  mount bolts; a caster is hushed as by a Spellbreaker Blow; a bandit or anyone with a live bounty kneels (knocked out for 10
+  s, with Jaymo's Powers) to be taken in. Everyone else drops their weapon or runs as before.
+- **Between players** (`WillClash`), Andy: "this can be done between players, and when one initiates a stare, the other is
+  notified, then it starts a clash". Sneak-staring at another player warns them at once (a line, a heartbeat, a shiver); held
+  `LOCK_TICKS` (2 s) the two lock eyes: rooted, turned to face each other, pressing jump for `TICKS` (5 s). A press is worth 1
+  plus a quarter of your Will, and the greater Will gains a little every tick; both see a gold/red bar on the action bar. A
+  30-point lead ends it early. The loser looks away: slowed and weakened 10 s, knees buckling 2 s, powers and spells hushed;
+  the winner gets 4 Strength experience. A draw shoves both back. Neither can clash again for two in-game days (`COOLDOWN_TICKS`, saved on the player, kept through death). Shrug It Off and Stare
+  Down are off while you're locked in. Never during a spirit clash.
+- Numbers are `static final` at the top of `Staredowns`. New lines under `message.jaymoskingdoms.stare.*` and
+  `speech.jaymoskingdoms.stare.*`; Stare Down's description updated. Not compile-checked against the jars yet; not seen in game.
+
+## 0.7.396: Weapon Forms, patch 6: the Eight-Sign Circle seals forms; Bolt Step and Storm Ring (was 0.7.386; pack 0.18.62)
 - `PowersCompat.sealed(Entity)` calls Powers' `EightSignCircle.sealed(Entity)` by reflection (false without Powers). `forms/Forms.fire` refuses
   with "The Eight Signs bind your forms." while the player stands in a Divine-born's ring (no cooldown or hunger spent), and
   `Forms.perform` does nothing if a wind-up runs on into a ring. Schooled guards/duels are untouched.
