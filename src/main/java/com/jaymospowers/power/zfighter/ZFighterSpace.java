@@ -76,7 +76,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link ZFighterPodTrip}): a countdown, a lift-off, a flight shown on screen, and a landing on open ground anywhere on the far
  * world; the pod you came in stands there for the way back. A pod holds fuel ({@link #FUEL}, coal or blaze powder used on it) and
  * each trip burns some by distance ({@link #COSTS}). The pads ({@link #PAD}) are now only the life-story starts' ports.
- * (0.18.47) The pod is now an entity built from parts ({@link PodEntity}); the old pod block stays registered so saved worlds load,
+ * (0.18.48) The pod is now an entity built from parts ({@link PodEntity}); the old pod block stays registered so saved worlds load,
  * and becomes a complete pod, holding its fuel, the first time anyone uses it.
  * <p>
  * Where you flew from is kept ({@link #HOME}) when it was not one of the far places, so "Home" on any pod brings you down where you
@@ -96,7 +96,7 @@ public final class ZFighterSpace {
 	public static final int[] COSTS = {1, 3, 3, 4, 6, 2, 0};
 	/** What Home burns from anywhere that isn't a far world (the overworld, the Nether...). */
 	public static final int HOME_COST = 1;
-	/** (0.18.47) The Maw wrecks' pods: how many of their parts (besides the keel and fins) are there, and how many of those are damaged. */
+	/** (0.18.48) The Maw wrecks' pods: how many of their parts (besides the keel and fins) are there, and how many of those are damaged. */
 	static final int WRECK_POD_EXTRA_MIN = 2, WRECK_POD_EXTRA_MAX = 5, WRECK_POD_DAMAGED_MIN = 1, WRECK_POD_DAMAGED_MAX = 3;
 	/** The landing pad's radius, and how far (blocks) the search for a flat place widens each try; how many tries. */
 	static final int PAD_RADIUS = 3, SEARCH_STEP = 28, SEARCH_TRIES = 36;
@@ -229,7 +229,7 @@ public final class ZFighterSpace {
 
 	// ---------------------------------------------------------------- the pod
 
-	/** The old pod block (0.18.47: kept so saved worlds load): right-click and it becomes a pod entity; coal or blaze powder still fuels it. */
+	/** The old pod block (0.18.48: kept so saved worlds load): right-click and it becomes a pod entity; coal or blaze powder still fuels it. */
 	static final class PodBlock extends Block {
 		private static final VoxelShape SHAPE = net.minecraft.world.phys.shapes.Shapes.or(Block.box(3, 0, 3, 13, 9, 13), Block.box(4, 9, 4, 12, 13, 12),
 			Block.box(6, 13, 6, 10, 16, 10), Block.box(1, 0, 7, 3, 5, 9), Block.box(13, 0, 7, 15, 5, 9));
@@ -276,7 +276,7 @@ public final class ZFighterSpace {
 		@Override
 		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 			if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer server) {
-				// (0.18.47) an old pod block becomes a complete pod standing where it was, with its fuel
+				// (0.18.48) an old pod block becomes a complete pod standing where it was, with its fuel
 				serverLevel.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				open(server, PodEntity.spawn(serverLevel, Vec3.atBottomCenterOf(pos), true, state.getValue(FUEL)));
 			}
@@ -284,7 +284,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.47) Opens the star map for {@code player} at {@code pod}. */
+	/** (0.18.48) Opens the star map for {@code player} at {@code pod}. */
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
@@ -550,7 +550,7 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.47) wrecked pod. */
+	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.48) wrecked pod. */
 	static List<BlockPos> mawDecks() {
 		List<BlockPos> decks = new ArrayList<>();
 		RandomSource random = RandomSource.create(MAW_SEED);
@@ -600,12 +600,12 @@ public final class ZFighterSpace {
 		for (int up = 1; up <= 3; up++) {
 			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
-		// (0.18.47) and a pod that came down with the ship: spare parts, some of them broken (its own random: the wrecks' draws stay in step)
+		// (0.18.48) and a pod that came down with the ship: spare parts, some of them broken (its own random: the wrecks' draws stay in step)
 		wreckedPod(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), RandomSource.create(MAW_SEED ^ centre.asLong()));
 	}
 
 	/**
-	 * (0.18.47) A wrecked pod at {@code at}: the keel and the three fins, {@link #WRECK_POD_EXTRA_MIN} to {@link #WRECK_POD_EXTRA_MAX}
+	 * (0.18.48) A wrecked pod at {@code at}: the keel and the three fins, {@link #WRECK_POD_EXTRA_MIN} to {@link #WRECK_POD_EXTRA_MAX}
 	 * of the other parts at random, and {@link #WRECK_POD_DAMAGED_MIN} to {@link #WRECK_POD_DAMAGED_MAX} of its parts damaged.
 	 * No fuel. The Maw is where spare parts come from.
 	 */

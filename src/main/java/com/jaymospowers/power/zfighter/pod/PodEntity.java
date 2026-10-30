@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.47, Andy) The space pod itself: an entity built from {@link PodPart}s. Which slots are filled is {@link #FILLED},
+ * (0.18.48, Andy) The space pod itself: an entity built from {@link PodPart}s. Which slots are filled is {@link #FILLED},
  * which of those are damaged (a bent fin, a cracked canopy) is {@link #DAMAGED}; both are synced so the model draws
  * exactly the parts that are on. Fuel ({@link #FUEL}, 0 to {@code ZFighterSpace.MAX_FUEL}) needs a tank.
  * <p>
