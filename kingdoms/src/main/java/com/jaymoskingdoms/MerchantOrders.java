@@ -444,6 +444,9 @@ final class MerchantOrders {
 		if (ledger.boughtToday(WANT + key, today) > 0) {
 			return;
 		}
+		if (!Storage.loaded(Factions.level(level.getServer()), town)) {
+			return;
+		}
 		int count = wanted(g, at, today);
 		var inv = player.getInventory();
 		int have = 0;
@@ -465,7 +468,11 @@ final class MerchantOrders {
 			}
 		}
 		inv.setChanged();
-		Storage.put(Factions.level(level.getServer()), town, new ItemStack(g.item(), count));
+		ItemStack left = Storage.put(Factions.level(level.getServer()), town, new ItemStack(g.item(), count));
+		if (!left.isEmpty() && !player.getInventory().add(left) && !left.isEmpty()) {
+			// a full storehouse hands the rest back rather than losing it
+			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
 		ItemStack pay = new ItemStack(Items.EMERALD, g.emeralds());
 		if (!player.getInventory().add(pay) && !pay.isEmpty()) {
 			player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);

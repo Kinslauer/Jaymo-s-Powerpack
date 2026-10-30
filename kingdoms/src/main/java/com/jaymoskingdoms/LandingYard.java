@@ -129,17 +129,32 @@ public final class LandingYard {
 
 	/** Every standing yard of the settlements' world (their pads read off the ground). */
 	static List<Yard> yards(ServerLevel level) {
+		return yards(level, null, 0.0, -1);
+	}
+
+	/**
+	 * Standing yards, read off the ground only when they could matter: within {@code range} (plus the footprint) of {@code from}
+	 * if it is given, and of town {@code only} if that is not -1. Keeps a far town's chunks from being loaded to answer a near one.
+	 */
+	static List<Yard> yards(ServerLevel level, @Nullable BlockPos from, double range, int only) {
 		List<Yard> out = new ArrayList<>();
 		MinecraftServer server = level.getServer();
 		if (level != Factions.level(server)) {
 			return out;
 		}
 		for (Faction f : Factions.all(server)) {
-			if (f.fallen()) {
+			if (f.fallen() || only != -1 && f.id() != only) {
 				continue;
 			}
 			for (Works.Built b : Works.of(server, f.id()).built()) {
 				if (b.entry().equals(ENTRY) && b.ruined() == 0L) {
+					if (from != null) {
+						double dx = (b.min().getX() + b.max().getX()) / 2.0 - from.getX(), dz = (b.min().getZ() + b.max().getZ()) / 2.0 - from.getZ();
+						double reach = range + WIDTH + DEPTH;
+						if (dx * dx + dz * dz > reach * reach) {
+							continue;
+						}
+					}
 					Yard yard = read(level, f, b);
 					if (yard != null) {
 						out.add(yard);
@@ -180,7 +195,7 @@ public final class LandingYard {
 	static @Nullable Yard near(ServerLevel level, BlockPos from, double range) {
 		Yard best = null;
 		double bestD = range * range;
-		for (Yard y : yards(level)) {
+		for (Yard y : yards(level, from, range, -1)) {
 			double dx = y.post().getX() - from.getX(), dz = y.post().getZ() - from.getZ();
 			double d = dx * dx + dz * dz;
 			if (d <= bestD) {
@@ -258,7 +273,7 @@ public final class LandingYard {
 		if (town == null) {
 			return 1.0F;
 		}
-		for (Yard y : yards(level)) {
+		for (Yard y : yards(level, null, 0.0, town.id())) {
 			if (y.faction().id() == town.id() && podStands(level, y)) {
 				return 1.0F - DISCOUNT;
 			}

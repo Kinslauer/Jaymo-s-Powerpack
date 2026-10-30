@@ -1251,14 +1251,20 @@ public final class Careers {
 			if (!o.what().startsWith("ferry:") || o.done() || yard.faction().id() != parse(o.what().substring(6))) {
 				continue;
 			}
+			ServerLevel store = Factions.level(server);
+			if (!Storage.loaded(store, yard.faction())) {
+				// no storehouse to unpack into: the parcel stays in the pack for another try
+				return;
+			}
 			ItemStack taken = MerchantOrders.takeParcel(pilot);
 			if (taken.isEmpty()) {
 				return;
 			}
-			ServerLevel store = Factions.level(server);
-			if (Storage.loaded(store, yard.faction())) {
-				for (ItemStack g : MerchantOrders.contents(taken)) {
-					Storage.put(store, yard.faction(), g);
+			for (ItemStack g : MerchantOrders.contents(taken)) {
+				ItemStack left = Storage.put(store, yard.faction(), g);
+				if (!left.isEmpty()) {
+					// a full storehouse hands the rest back rather than losing it
+					give(pilot, left);
 				}
 			}
 			com.jaymoskingdoms.Post.tidings(pilot.getUUID(), Component.translatable("message.jaymoskingdoms.job.ferried", yard.faction().name()));

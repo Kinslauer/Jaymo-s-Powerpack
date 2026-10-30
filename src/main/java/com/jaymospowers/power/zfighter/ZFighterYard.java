@@ -38,6 +38,10 @@ final class ZFighterYard {
 		List<BlockPos> order = new ArrayList<>(pads.subList(1, pads.size()));
 		Collections.shuffle(order, new java.util.Random(level.getRandom().nextLong()));
 		for (BlockPos pad : order) {
+			// a pad built over or griefed shut is no landing place
+			if (!level.getBlockState(pad).getCollisionShape(level, pad).isEmpty() || !level.getBlockState(pad.above()).getCollisionShape(level, pad.above()).isEmpty()) {
+				continue;
+			}
 			AABB box = new AABB(pad).inflate(PAD_TAKEN, 3.0, PAD_TAKEN);
 			if (level.getEntitiesOfClass(PodEntity.class, box, e -> true).isEmpty()) {
 				return pad;
