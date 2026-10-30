@@ -63,7 +63,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class CombatArts {
 	/** A blow landing within this many ticks of the last keeps the chain going. */
-	static final long CHAIN_TICKS = 40L;
+	public static final long CHAIN_TICKS = 40L;
 	/** A blow at least this charged is a full-strength one. */
 	static final float FULL_STRENGTH = 0.9F;
 	/** Momentum: per rank, each link adds this share to the next blow, counting at most this many links. */
@@ -179,6 +179,13 @@ public final class CombatArts {
 		return now - chain.last <= CHAIN_TICKS ? chain.links : 0;
 	}
 
+	/** (0.7.381) Ticks since {@code player}'s last landed blow kept a chain going, or {@link Long#MAX_VALUE} if they have no chain running (Form Cancels). */
+	public static long sinceLanded(ServerPlayer player) {
+		Chain chain = CHAINS.get(player.getUUID());
+		long since = chain == null ? Long.MAX_VALUE : player.level().getGameTime() - chain.last;
+		return since > CHAIN_TICKS ? Long.MAX_VALUE : since;
+	}
+
 	/** What a blow deals, from {@code amount} (from LivingEntity.hurtServer): Momentum. */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		ServerPlayer sp = melee(source);
@@ -218,9 +225,8 @@ public final class CombatArts {
 			chain.links = links(chain, now) + 1;
 			chain.linkTick = now;
 			chain.last = now;
-			if (chain.links >= 2 && hasChainPerk(p)) {
-				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.combo", chain.links).withStyle(ChatFormatting.GOLD));
-			}
+			// (0.7.381) the chain counter by the crosshair ({@code forms.Forms}) shows the links now, in place of the old "Combo xN" line
+			com.jaymoskingdoms.forms.Forms.chained(sp, chain.links);
 		}
 		boolean full = fullStrength(sp, now);
 		if (newLink && full && p.rank(Skills.Perk.CLEAVE) > 0) {
@@ -240,11 +246,6 @@ public final class CombatArts {
 		if (newLink && full && p.rank(Skills.Perk.BLADESTORM) > 0 && chain.links % BLADESTORM_LINK == 0) {
 			bladestorm(level, sp, target, damageTaken);
 		}
-	}
-
-	private static boolean hasChainPerk(Skills.Progress p) {
-		return p.rank(Skills.Perk.MOMENTUM) > 0 || p.rank(Skills.Perk.EARTHSPLITTER) > 0 || p.rank(Skills.Perk.REND) > 0
-			|| p.rank(Skills.Perk.BLADESTORM) > 0;
 	}
 
 	/** The finisher for the weapon in hand. */
@@ -317,13 +318,13 @@ public final class CombatArts {
 	 * The foes in {@code box}: monsters, and anything whose target is {@code player}. Never another player, and never a
 	 * bystander, so area blows don't drag townsfolk or friends into it.
 	 */
-	static List<LivingEntity> foes(ServerLevel level, ServerPlayer player, AABB box) {
+	public static List<LivingEntity> foes(ServerLevel level, ServerPlayer player, AABB box) {
 		return level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive() && !(e instanceof Player)
 			&& (e instanceof Enemy || e instanceof Mob mob && mob.getTarget() == player));
 	}
 
 	/** One of our own blows: counted as {@code player}'s, but not as a link in their chain, and through the hurt cooldown. */
-	static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, float amount) {
+	public static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, float amount) {
 		if (amount <= 0.0F || !target.isAlive()) {
 			return;
 		}
