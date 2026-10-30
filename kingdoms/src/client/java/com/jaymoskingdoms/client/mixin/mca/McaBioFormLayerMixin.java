@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
 import com.jaymoskingdoms.client.BioForms;
+import com.jaymoskingdoms.client.TinkererOutfit;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.conczin.mca.client.render.VillagerVisuals;
 import net.conczin.mca.client.render.layer.ClothingLayer;
@@ -29,6 +30,10 @@ abstract class McaBioFormLayerMixin {
 		float yRot, float xRot, CallbackInfo ci) {
 		Object layer = this;
 		if ((layer instanceof ClothingLayer<?, ?> || layer instanceof HairLayer<?, ?> || layer instanceof FaceLayer<?, ?>) && jaymoskingdoms$bio(state)) {
+			ci.cancel();
+		}
+		// (Andy, 2026-10-29) the Mad Tinkerer's hat takes his hair's place ({@link TinkererOutfit})
+		if (layer instanceof HairLayer<?, ?> && state.getData(TinkererOutfit.KEY) != null) {
 			ci.cancel();
 		}
 	}

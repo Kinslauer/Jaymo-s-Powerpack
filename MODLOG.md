@@ -3900,3 +3900,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   First-person Model drew your own body into them. `FirstPersonCompat.hideInPanoramas` registers a First-person Model
   `ActivationHandler` (by reflection, as before) that turns it off while the camera is panoramic. Compile-checked against
   the 26.3 jar; not seen in game.
+- **0.18.13, Arsenal pulls quest items; Sunfang's new look (Kingdoms 0.7.365):** Andy: "arsenal has a chance to pull
+  special quest items out of his portals, like sora's stone blade if it isnt already in the world. and it is also
+  possible to pull it from where it is in the world, striaght through the portal."
+  - `ArsenalQuestItems`: a full Reach has a 1 in 150 chance to bring out Sora's stone blade (the only one-of-a-kind
+    quest item so far; the table takes more). If the Sora's line isn't out, a new marked blade comes through. If it is,
+    the copy is found (other online players, ender chests, dropped items, frames, mobs, villagers, container entities,
+    containers in loaded chunks within 6 chunks of a player; nothing is loaded) and pulled out of there with a portal
+    flash and a thread of motes; a later stage of the dagger comes less often (half per step). Unreachable: a normal
+    weapon.
+  - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
+    textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
+  - Compile-checked; not seen in game.

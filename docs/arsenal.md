@@ -547,3 +547,14 @@ and `ArsenalStanding` (the portal pairs); client: `ArsenalPlacesScreen` (the rad
 - **Check first in game:** that Sneak + G opens the menu and letting go picks; that a thrown item or a falling mob goes
   through and comes out the right way; that a pair survives a restart; that the far portal lands somewhere sensible in the
   Nether and the Aether.
+
+## Quest items through the rift (`ArsenalQuestItems`)
+- About 1 in 150 full Reaches (not Rummage; not the stash relic or a pinned first pull) goes for a special quest item
+  instead of a weapon (`CHANCE`, times the entry's weight). Table at the top of the class; today: Sora's stone blade
+  (the dagger line, `SorasLineage`: one line out at a time).
+- Decided at the pull (22 ticks in), so a cut-short Reach loses nothing. A copy found in loaded ground is pulled out of
+  where it lies (dropped item, item frame, container in a chunk within 6 chunks of an online player, mob hands/armour/
+  pockets, minecart, another online player's pack or ender chest) with a portal flash and a thread of motes; each stage
+  further along the line is half as likely to let go. If no copy is out (the line isn't), a new blade comes out and the
+  line counts as out. A copy out of reach (unloaded, offline player, inside a shulker/bundle) gives a normal weapon.
+- The item is never a Summoned tag, so it stays. No new text: the usual "pulled" overlay with the item's name.
