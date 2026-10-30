@@ -60,6 +60,16 @@ public enum FarWorld {
 		return null;
 	}
 
+	/** The world whose first metal is {@code molten}, or null. */
+	public static @Nullable FarWorld ofMolten(Molten molten) {
+		for (FarWorld world : values()) {
+			if (world.molten == molten) {
+				return world;
+			}
+		}
+		return null;
+	}
+
 	public static @Nullable FarWorld byKey(String key) {
 		for (FarWorld world : values()) {
 			if (world.key.equals(key)) {

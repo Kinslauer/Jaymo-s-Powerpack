@@ -51,6 +51,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.18.53, SevTech: far worlds restart the stone age) On the six far worlds the ground starts again from the flint days.
@@ -162,7 +163,7 @@ public final class FarWorlds {
 		}
 		if (state.is(VEILED_ORE)) {
 			// it is never dug as it is: the blow shows it (and what lies beside it)
-			tap(server, pos);
+			tap(server, pos, player instanceof ServerPlayer sp ? sp : null);
 			return false;
 		}
 		if (answers(player, world)) {
@@ -185,12 +186,12 @@ public final class FarWorlds {
 			return InteractionResult.PASS;
 		}
 		NEXT_TAP.put(player.getUUID(), now + TAP_COOLDOWN);
-		tap(server, pos);
+		tap(server, pos, player instanceof ServerPlayer sp ? sp : null);
 		return InteractionResult.PASS;
 	}
 
 	/** A pick has struck at {@code pos}: veiled ore within {@link #TAP_RADIUS} cracks and shows. */
-	static void tap(ServerLevel level, BlockPos pos) {
+	static void tap(ServerLevel level, BlockPos pos, @Nullable ServerPlayer player) {
 		int shown = 0;
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		for (int dx = -TAP_RADIUS; dx <= TAP_RADIUS; dx++) {
@@ -198,7 +199,7 @@ public final class FarWorlds {
 				for (int dz = -TAP_RADIUS; dz <= TAP_RADIUS; dz++) {
 					if (dx * dx + dy * dy + dz * dz <= TAP_RADIUS * TAP_RADIUS + 1) {
 						at.set(pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz);
-						if (reveal(level, at)) {
+						if (reveal(level, at, player)) {
 							shown++;
 						}
 					}
@@ -230,7 +231,7 @@ public final class FarWorlds {
 					for (Direction side : Direction.values()) {
 						open |= !level.getBlockState(near.setWithOffset(at, side)).isSolidRender();
 					}
-					if (open && reveal(level, at)) {
+					if (open && reveal(level, at, player)) {
 						shown++;
 					}
 				}
@@ -239,12 +240,18 @@ public final class FarWorlds {
 	}
 
 	/** Veiled ore at {@code pos} becomes the ore it is; true if there was any. */
-	static boolean reveal(ServerLevel level, BlockPos pos) {
+	static boolean reveal(ServerLevel level, BlockPos pos, @Nullable ServerPlayer player) {
 		BlockState state = level.getBlockState(pos);
 		if (!state.is(VEILED_ORE)) {
 			return false;
 		}
-		level.setBlock(pos, VeiledOreBlock.revealed(state), Block.UPDATE_ALL);
+		BlockState real = VeiledOreBlock.revealed(state);
+		level.setBlock(pos, real, Block.UPDATE_ALL);
+		FarWorld world = FarWorld.of(level);
+		if (player != null && world != null) {
+			// (Prospector career) the first reveal of each ore kind on a world; the listeners count each kind once
+			com.jaymospowers.power.zfighter.Prospecting.found(player, world.key, BuiltInRegistries.BLOCK.getKey(real.getBlock()).toString());
+		}
 		level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3, 0.35, 0.35, 0.35, 0.01);
 		return true;
 	}

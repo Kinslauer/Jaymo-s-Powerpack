@@ -48,5 +48,12 @@
   "block.jaymospowers.verdant_rock": "Verdant Rock",
   "item.jaymospowers.amber_bronze_ingot": "Amber Bronze Ingot",
   "material.jaymospowers.amber_bronze": "Amber Bronze",
-  "molten.jaymospowers.amber_bronze": "Molten Amber Bronze"
+  "molten.jaymospowers.amber_bronze": "Molten Amber Bronze",
+  "jei.jaymospowers.field_anvil": "Built from iron and cobblestone. Knap a far world's first metal here: three of its loose rocks in a row, an iron ingot under the middle one.",
+  "jei.jaymospowers.first_metal.pale_alloy": "Tap the stone of the Pale Moon with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged.",
+  "jei.jaymospowers.first_metal.rust_iron": "Tap the stone of Rustfall with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged.",
+  "jei.jaymospowers.first_metal.ice_iron": "Tap the stone of Glacia with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged.",
+  "jei.jaymospowers.first_metal.cinder_bronze": "Tap the stone of Cinder with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged.",
+  "jei.jaymospowers.first_metal.void_shard": "Tap the stone of the Maw with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged.",
+  "jei.jaymospowers.first_metal.amber_bronze": "Tap the stone of the Verdant World with a pick, or read its chart, to show the ore. Knap this from three of its loose rocks and an iron ingot; it melts in the smeltery and is cast and forged."
 }

@@ -98,6 +98,8 @@ public final class PatrolWrit {
 	}
 
 	private static final List<Skip> SKIPS = new ArrayList<>();
+	/** Writs owed to a fighter who was gone or dead when the visit ended: handed back when he is next about (kept until the server stops). */
+	private static final List<Skip> OWED = new ArrayList<>();
 
 	private PatrolWrit() {
 	}
@@ -113,7 +115,10 @@ public final class PatrolWrit {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(PatrolWrit::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SKIPS.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			SKIPS.clear();
+			OWED.clear();
+		});
 	}
 
 	/** The writ of {@code world} as an item. */
@@ -246,6 +251,16 @@ public final class PatrolWrit {
 	// ---------------------------------------------------------------- the fight
 
 	private static void tick(MinecraftServer server) {
+		if (!OWED.isEmpty()) {
+			OWED.removeIf(owed -> {
+				ServerPlayer back = server.getPlayerList().getPlayer(owed.player);
+				if (back == null || !back.isAlive()) {
+					return false;
+				}
+				giveBack(back.level(), owed);
+				return true;
+			});
+		}
 		if (SKIPS.isEmpty()) {
 			return;
 		}
@@ -327,8 +342,11 @@ public final class PatrolWrit {
 		if (skip.pod != null && !skip.pod.isRemoved() && skip.pod.level() instanceof ServerLevel level) {
 			ZFighterPatrol.writLeave(level, skip.pod);
 		}
-		if (player != null) {
+		if (player != null && player.isAlive()) {
 			giveBack(player.level(), skip);
+		} else {
+			// gone or dead: the writ cannot be handed over now, so it is owed (else the world's writ could never be asked for again)
+			OWED.add(skip);
 		}
 	}
 
