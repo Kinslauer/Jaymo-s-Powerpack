@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.7.366) The Five-Art Belt screen: one button a slot, each click moving on to the next form you know (and a bare slot).
+ * (0.7.370) The Five-Art Belt screen: one button a slot, each click moving on to the next form you know (and a bare slot).
  * It opens when you sneak and use a training post or a sparring dummy empty-handed; the server only takes the change while
  * you still stand by one.
  */
