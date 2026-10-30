@@ -16,15 +16,14 @@ pick page). Nobody has a belt or a stance at first. Learning your **first form**
 teachers are a school master, a veteran guard or a wizard.
 
 ## Where the code goes
-- **Powers** `combat/forms/` holds the engine: the form registry, the belt, the stance, practice, the moves, the HUD
-  bits and the films. It sits next to `combat/Guard`, `core/LockOn`, `core/finisher/Finishers` and `UltimateFilm`.
-  Each weapon family gets its own class (`BladeForms`, `SpearForms`, `FistForms`, `KnifeForms`, `ClawForms`), so
-  tracks never edit the same file.
-- **Kingdoms** holds the teachers and the people: schools, halls, masters, guard drills, wizard trials, duels, bouts
-  and schooled guards. It tells Powers "teach form X" through `PowersCompat`, by reflection and only when Powers is
-  loaded, the way Powers already reads `Skills.rank`.
-- Every new attachment class goes into `JaymosPowers.registerAttachments()`. Each patch gets its own
-  `lang/parts/forms_*.json`. Tuning numbers are `static final` constants at the top of each class.
+- **Kingdoms** `forms/` holds the engine: the form registry, the belt, the stance, practice and the moves. It sits
+  next to `CombatArts` (the chain), `Classes` and `Skills`. The Combat Art key (`client/CombatArtKey`) belongs to
+  Kingdoms, and so do all the teachers: schools, halls, masters, guard drills, wizard trials, duels, bouts and
+  schooled guards. Each weapon family gets its own class (`BladeForms`, `SpearForms`, `FistForms`, `KnifeForms`,
+  `ClawForms`), so tracks never edit the same file.
+- **Powers** pieces are reached through `PowersCompat` by reflection, and only when Powers is loaded. Those are
+  lock-on (`core/LockOn`), finishers, `UltimateFilm` shots and Tinkers kinds. Kingdoms runs fine without Powers.
+- Tuning numbers are `static final` constants at the top of each class.
 - Every new recipe and route shows in JEI. Forged items take Tinkers routes, never grid recipes.
 
 ## Keys (open question 1)
@@ -38,8 +37,8 @@ wheel swaps targets. Proposal:
   small strip above the hotbar that fades with Auto HUD.
 - Out of stance, the key keeps its current jobs: Charge, War Cry and Shield Throw.
 
-## Patch 1: Weapon Forms core + veteran guard drills (Powers, small Kingdoms part)
-- **Form registry** (`combat/forms/Forms`): id, weapon family (item tags, Tinkers kinds and WeaponMod through its
+## Patch 1: Weapon Forms core + veteran guard drills (Kingdoms)
+- **Form registry** (`forms/Forms`): id, weapon family (item tags, Tinkers kinds and WeaponMod through its
   compat class), kind (art or masterstroke), cooldown, stamina cost, practice needed.
 - **Learned by practice**: each form has a practice count. It grows when the form lands on Sparring Dummies, Training
   Posts or real foes, and each rank makes the form stronger.
