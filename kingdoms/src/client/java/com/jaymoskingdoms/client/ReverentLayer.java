@@ -74,7 +74,7 @@ public final class ReverentLayer<S extends HumanoidRenderState> extends RenderLa
 	}
 
 	/** The humanoid's bones at their usual places, with {@code pieces} hung on them. */
-	private static ModelPart skeleton(BbModel model, Map<String, String> pieces) {
+	static ModelPart skeleton(BbModel model, Map<String, String> pieces) {
 		Map<String, ModelPart> bones = new LinkedHashMap<>();
 		bones.put("head", bone(model, pieces, "head", PartPose.ZERO, Map.of("hat", new ModelPart(List.of(), Map.of()))));
 		bones.put("body", bone(model, pieces, "body", PartPose.ZERO, Map.of()));

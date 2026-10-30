@@ -108,3 +108,8 @@ skeleton_lord.png (bbmodels/skeleton_lord.json): the Skeleton Lord
   "Skeleton Lord", Blockbench Workshop (tools/bbmodels/skeleton-lord.bbmodel; maker's name not in the file)
   Changes: baked to our loader's format, its five textures stacked on one sheet; drawn at 0.55 size; its crystals shown
   only while he sleeps; its laugh pose given a working jaw by our own code.
+
+tinkerer_sanguine.png (bbmodels/tinkerer_sanguine.json): the Mad Tinkerer's outfit
+  "Sanguine Outfit", Blockbench Workshop (tools/bbmodels/sanguine-outfit.bbmodel; maker's name not in the file)
+  Changes: darkened (value x0.6, its gold and brass x0.75), baked to our loader's format (tools/blockbench/tinkerer_outfit.py)
+  and hung on the Tinkerer villager's own head, body, arms and legs by our own layer (TinkererOutfit).
