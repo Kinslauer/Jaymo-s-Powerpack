@@ -51,13 +51,13 @@ public final class UltimateCinematic {
 	static final double PUSH_SHARE = 0.45;
 	/** {@link UltimateFilm#CHASE}: how far to the side and up it keeps (blocks). */
 	static final double CHASE_SIDE = 4.0, CHASE_UP = 1.2;
-	/** (0.18.30) {@link UltimateFilm#DUTCH}: the tilt (degrees, at its fullest), how far out it sits (from, to; blocks) and how low. */
+	/** (0.18.46) {@link UltimateFilm#DUTCH}: the tilt (degrees, at its fullest), how far out it sits (from, to; blocks) and how low. */
 	static final float DUTCH_ROLL = 17.0F;
 	static final double DUTCH_FROM = 3.6, DUTCH_TO = 2.4, DUTCH_LOW = 0.5;
-	/** (0.18.30) {@link UltimateFilm#CUTS}: how many angles the film jumps between, and how far out each sits (blocks). */
+	/** (0.18.46) {@link UltimateFilm#CUTS}: how many angles the film jumps between, and how far out each sits (blocks). */
 	static final int CUT_ANGLES = 3;
 	static final double CUT_CLOSE = 2.2, CUT_WIDE = 5.5, CUT_HIGH = 3.2;
-	/** (0.18.30) {@link UltimateFilm#CUTS}: the tilt of the sideways cut (degrees). */
+	/** (0.18.46) {@link UltimateFilm#CUTS}: the tilt of the sideways cut (degrees). */
 	static final float CUT_ROLL = 11.0F;
 	/** The vanilla HUD hidden while your own film runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
@@ -253,7 +253,7 @@ public final class UltimateCinematic {
 				look = feet.add(toward.scale(2.0)).add(0.0, 1.0, 0.0);
 			}
 			case UltimateFilm.DUTCH -> {
-				// (0.18.30) a low, close shot at an angle: it leans in on the subject while the horizon tilts and settles back
+				// (0.18.46) a low, close shot at an angle: it leans in on the subject while the horizon tilts and settles back
 				Vec3 on = subject != null ? subject.getPosition(partialTicks).add(0.0, subject.getBbHeight() * 0.55, 0.0) : at.add(0.0, 1.0, 0.0);
 				Vec3 toward = on.subtract(eyes).horizontal();
 				toward = toward.lengthSqr() < 1.0E-4 ? facing : toward.normalize();
@@ -265,7 +265,7 @@ public final class UltimateCinematic {
 				roll = side * DUTCH_ROLL * Mth.clamp(Mth.sin(t * Mth.PI) * 2.5F, 0.0F, 1.0F);
 			}
 			case UltimateFilm.CUTS -> {
-				// (0.18.30) hard cuts between angles round the subject: close and low, wide from the side (tilted), high behind
+				// (0.18.46) hard cuts between angles round the subject: close and low, wide from the side (tilted), high behind
 				Vec3 on = subject != null ? subject.getPosition(partialTicks).add(0.0, subject.getBbHeight() * 0.55, 0.0) : at.add(0.0, 1.0, 0.0);
 				Vec3 toward = on.subtract(eyes).horizontal();
 				toward = toward.lengthSqr() < 1.0E-4 ? facing : toward.normalize();

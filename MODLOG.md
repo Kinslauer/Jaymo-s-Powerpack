@@ -3912,7 +3912,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
-- **0.18.30, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.372):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
+- **0.18.46, Dutch angles and hard cuts in the ultimate films (Kingdoms 0.7.372):** Weapon Forms patch 2 (`docs/WeaponForms-Plan.md`).
   - `UltimateFilm.DUTCH` (8): low and close on the subject, the horizon tilted about 17 degrees and settling back as it leans in.
     `UltimateFilm.CUTS` (9): hard cuts between three angles round the subject (close and low, wide and tilted from the side, high behind).
     Kingdoms' masterstrokes use them (`PowersCompat.FILM_DUTCH` / `FILM_CUTS`).

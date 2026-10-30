@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.371) Weapon Forms, the engine (Andy's picks from Ultimate Battle, ideas only: docs/WeaponForms-Plan.md). A <i>form</i>
+ * (0.7.381) Weapon Forms, the engine (Andy's picks from Ultimate Battle, ideas only: docs/WeaponForms-Plan.md). A <i>form</i>
  * is one learned fighting move, tied to a weapon family ({@link Family}), an art or a masterstroke ({@link Kind}).
  * Nobody has a belt or a stance at first: learning your first form ({@link #teach}, from a teacher or {@code /forms teach})
  * unlocks both.
@@ -452,7 +452,7 @@ public final class Forms {
 	/** Whether {@code player} holds a weapon any form they know works with: the stance can be taken. */
 	public static boolean canStance(Player player) {
 		if (SpearForms.pinned(player)) {
-			// (0.7.372) a Pinning Throw has the spear out of the hand: the stance holds until it is tugged back
+			// (0.7.382) a Pinning Throw has the spear out of the hand: the stance holds until it is tugged back
 			return true;
 		}
 		Book book = book(player);
@@ -612,7 +612,7 @@ public final class Forms {
 		if (!book.stance() || !(player.level() instanceof ServerLevel level) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
-		// (0.7.372) a spear thrown to pin a foe: any press tugs it back
+		// (0.7.382) a spear thrown to pin a foe: any press tugs it back
 		if (SpearForms.tug(player)) {
 			return;
 		}
@@ -640,7 +640,7 @@ public final class Forms {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.hungry").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		// (0.7.372) Couched Lance is the one form that wants a mount; the others can't be done from a saddle
+		// (0.7.382) Couched Lance is the one form that wants a mount; the others can't be done from a saddle
 		if (form == SpearForms.COUCHED_LANCE ? !SpearForms.mounted(player) : player.isPassenger()) {
 			if (form == SpearForms.COUCHED_LANCE) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.mounted").withStyle(ChatFormatting.GRAY));

@@ -45,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.372) The spear family's forms (the {@code form_spears} tag: vanilla spears and tridents, Powers' lances and Tinkers
+ * (0.7.382) The spear family's forms (the {@code form_spears} tag: vanilla spears and tridents, Powers' lances and Tinkers
  * javelin, WeaponMod's spears and javelin).
  * <ul>
  * <li>Spear Lunge: a long lunge (longer than the rapier's) that runs the first foe in the way through, and goes on into a
@@ -352,7 +352,7 @@ public final class SpearForms {
 	}
 
 	/**
-	 * (0.7.372) A mounted guard's charge, from {@code Cavalry}: if {@code rider} sits on {@code mount} going fast enough, holds
+	 * (0.7.382) A mounted guard's charge, from {@code Cavalry}: if {@code rider} sits on {@code mount} going fast enough, holds
 	 * a spear and {@code target} is within {@link #NPC_REACH}, the lance goes home (damage by the mount's speed, capped, no class
 	 * bonus) and a foe in the saddle is knocked out of it. At most once every {@link #NPC_COOLDOWN} ticks, so a guard that can't
 	 * close on its foe doesn't loop. True if it struck.

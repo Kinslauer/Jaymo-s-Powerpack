@@ -76,7 +76,7 @@ final class Cavalry {
 				tick(server, level);
 			}
 		});
-		// (0.7.372) a mounted guard with a spear charges its foe: Couched Lance's lance, damage from the horse's speed (SpearForms.charge,
+		// (0.7.382) a mounted guard with a spear charges its foe: Couched Lance's lance, damage from the horse's speed (SpearForms.charge,
 		// at most once per SpearForms.NPC_COOLDOWN; it moves nothing, so a guard that can't close on a foe just doesn't strike)
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			ServerLevel level = Factions.level(server);

@@ -6839,7 +6839,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked; not seen in game.
 
 
-## 0.7.371: Weapon Forms, patch 1 track A: the engine (pack number set when the PR opens)
+## 0.7.381: Weapon Forms, patch 1 track A: the engine (pack number set when the PR opens)
 - Andy's Ultimate Battle picks (`docs/WeaponForms-Plan.md`; ideas only). `forms/Forms` is the registry and rules: a form has a
   weapon family (blade, spear, fist, knife, claw; `form_blades` / `form_spears` / `form_claws` item tags, the knife family is
   `light_blades`; Balkon's katanas are optional entries), a kind (art or masterstroke), cooldown, wind-up, hunger and the
@@ -6857,7 +6857,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Compile-checked. Not seen in game.
 
 
-## 0.7.372: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.30)
+## 0.7.382: Weapon Forms, patch 2: blade masterstroke, spear forms, swing trails (pack 0.18.30)
 - **Rain of Cuts** (blade masterstroke, `BladeForms`): on a fallen foe, 9 cuts two ticks apart, each a dark ink streak across the
   foe; the last is a heavy blow with Powers' impact frames (`PowersCompat.impactFrame`, reflection; Powers has no afterimage
   hook, so the trail is particles) and the whole thing runs under Powers' new hard-cut film (`FILM_CUTS`, witnesses get bars).

@@ -48,7 +48,7 @@ abstract class UltimateCinematicCameraMixin {
 		if (view != null) {
 			this.setRotation((float)view[3], (float)view[4]);
 			if (view.length > 5 && view[5] != 0.0) {
-				// (0.18.30) roll: vanilla's rotation is yaw and pitch only (its third angle is 0), so turn the camera about its own
+				// (0.18.46) roll: vanilla's rotation is yaw and pitch only (its third angle is 0), so turn the camera about its own
 				// forward axis and refresh the up and left vectors (forwards is unchanged); the view matrices are dirtied again
 				this.rotation.rotateZ((float)Math.toRadians(view[5]));
 				new Vector3f(0.0F, 1.0F, 0.0F).rotate(this.rotation, this.up);

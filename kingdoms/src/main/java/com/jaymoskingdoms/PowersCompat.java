@@ -202,7 +202,7 @@ public final class PowersCompat {
 	private static boolean lookedForFilm;
 	/** Powers' {@code UltimateFilm} shots. */
 	public static final int FILM_ORBIT = 3, FILM_PUSH_IN = 6;
-	/** (0.7.372) Powers' tilted (rolled) shot and its hard-cut shot between three angles (Powers 0.18.30; an older Powers shows nothing for them). */
+	/** (0.7.382) Powers' tilted (rolled) shot and its hard-cut shot between three angles (Powers 0.18.30; an older Powers shows nothing for them). */
 	public static final int FILM_DUTCH = 8, FILM_CUTS = 9;
 
 	private static void films() {
@@ -250,7 +250,7 @@ public final class PowersCompat {
 	private static boolean lookedForImpact;
 
 	/**
-	 * (0.7.372) Two frames of black and white for every player within about 24 blocks of {@code at} (Powers'
+	 * (0.7.382) Two frames of black and white for every player within about 24 blocks of {@code at} (Powers'
 	 * {@code ZFighterSenses.impactFrame}; each player's own setting can turn them off). Nothing without Powers 0.18.30 or later.
 	 */
 	public static void impactFrame(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
@@ -1140,6 +1140,24 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.380) Adds {@code listener} to one of Powers' public listener lists ({@code owner}'s static {@code field}, a
+	 * {@code List<BiConsumer<ServerPlayer, ?>>}): {@code Carry.PICKED_UP_LISTENERS} and the like ({@link Rescues}).
+	 * Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void listen(String owner, String field, java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T> listener) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName(owner).getField(field).get(null);
+			((java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, T>>)list).add(listener);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' {}.{} (older Powers?)", owner, field, e);
+		}
+	}
+
 	/** (0.7.319) Powers' {@code ZFighterNpcs.talk(ServerPlayer, LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle zfighterTalk;
 	private static boolean lookedForZFighterTalk;
@@ -1220,7 +1238,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.371) Weapon Forms: poise and lock-on -------------------------------------------------------------------
+	// ---- (0.7.381) Weapon Forms: poise and lock-on -------------------------------------------------------------------
 
 	/** Powers' {@code ZFighterPoise.wear(LivingEntity, float)} and {@code knockedOut(LivingEntity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle poiseWear, poiseKnockedOut;
@@ -1244,7 +1262,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.371) Wears {@code amount} off {@code target}'s poise (a stagger when it breaks, a K.O. on a second break); false without Powers' poise. */
+	/** (0.7.381) Wears {@code amount} off {@code target}'s poise (a stagger when it breaks, a K.O. on a second break); false without Powers' poise. */
 	public static boolean wearPoise(LivingEntity target, float amount) {
 		lookForPoise();
 		try {
@@ -1257,7 +1275,7 @@ public final class PowersCompat {
 		return false;
 	}
 
-	/** (0.7.371) Whether {@code target}'s poise is broken to a K.O. just now (it lies open to a masterstroke); false without Powers. */
+	/** (0.7.381) Whether {@code target}'s poise is broken to a K.O. just now (it lies open to a masterstroke); false without Powers. */
 	public static boolean poiseBroken(LivingEntity target) {
 		lookForPoise();
 		try {
@@ -1301,7 +1319,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.371) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
+	 * (0.7.381) Client side, for the Battle Stance: locks Powers' lock-on onto the foe nearest the crosshair, if it isn't
 	 * locked already. Takes the client ({@code Minecraft}) and its player as plain objects, since this class is common code.
 	 * The packet to send the server ({@code LockOn.Packet}), or null if nothing was locked (no Powers, or nothing in sight).
 	 */
@@ -1319,7 +1337,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.371) Client side: lets go of the lock {@link #lockOnNearest} took on {@code id}. The packet to send, or null if it isn't held any more. */
+	/** (0.7.381) Client side: lets go of the lock {@link #lockOnNearest} took on {@code id}. The packet to send, or null if it isn't held any more. */
 	public static @Nullable CustomPacketPayload lockOff(int id) {
 		lookForLock();
 		try {
@@ -1334,7 +1352,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.371) The id of the foe Powers' client has locked, or -1 (none, or without Powers). */
+	/** (0.7.381) The id of the foe Powers' client has locked, or -1 (none, or without Powers). */
 	public static int lockedId() {
 		lookForLock();
 		try {

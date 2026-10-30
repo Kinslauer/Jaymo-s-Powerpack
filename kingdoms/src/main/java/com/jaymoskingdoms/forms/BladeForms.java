@@ -30,13 +30,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.371) The blade family's forms (swords, and the katana of Balkon's WeaponMod through the {@code form_blades} tag).
+ * (0.7.381) The blade family's forms (swords, and the katana of Balkon's WeaponMod through the {@code form_blades} tag).
  * <ul>
  * <li>Sheath Draw: a fast dash of {@value #DASH} blocks that cuts everything it passes on the draw; half again as hard on a
  * foe that is not after you or cannot see you ({@link Senses#unaware}).
  * <li>Crescent Sweep: a low, wide arc in front that trips: foes are slowed, knocked off their feet and, with Powers, have
  * their poise worn down hard (without it, they are thrown back further instead).
- * <li>(0.7.372) Rain of Cuts (masterstroke): on a fallen foe, a flurry of {@value #CUTS} cuts in ink-dark trails across it,
+ * <li>(0.7.382) Rain of Cuts (masterstroke): on a fallen foe, a flurry of {@value #CUTS} cuts in ink-dark trails across it,
  * the last one a heavy blow with Powers' impact frames, under a hard-cut film ({@link PowersCompat#FILM_CUTS}).
  * </ul>
  */
@@ -202,7 +202,7 @@ final class BladeForms {
 		Forms.landed(player, form, hits);
 	}
 
-	// ---- Rain of Cuts (0.7.372) ----------------------------------------------------------------------------------------
+	// ---- Rain of Cuts (0.7.382) ----------------------------------------------------------------------------------------
 
 	private static void rainOfCuts(ServerLevel level, ServerPlayer player, int rank) {
 		LivingEntity foe = Forms.masterTarget(player);

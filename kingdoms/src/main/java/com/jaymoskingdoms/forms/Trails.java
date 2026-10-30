@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.372) School Swing Trails: each family's forms leave their own vanilla-style particle trail along a swing, a lunge or a
+ * (0.7.382) School Swing Trails: each family's forms leave their own vanilla-style particle trail along a swing, a lunge or a
  * throw. Blades leave dark ink streaks, spears and lances leave sparks, fists leave dust. The fist forms (a later patch)
  * call {@link #fist}; {@link #of} picks by {@link Family}. Particles only: no entity, nothing to clean up.
  */

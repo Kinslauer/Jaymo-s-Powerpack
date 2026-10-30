@@ -36,9 +36,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link #TRACK}: behind your shoulder, following {@code target} as it comes down (the Meteor).</li>
  * <li>{@link #PUSH_IN}: over your shoulder, pushing in on {@code target} or {@code at} (a shadow rising, a well).</li>
  * <li>{@link #CHASE}: alongside you, keeping pace as you go for {@code target} (the web strike).</li>
- * <li>(0.18.30) {@link #DUTCH}: low and close on {@code target} or {@code at}, the horizon tilted (rolled) and settling
+ * <li>(0.18.46) {@link #DUTCH}: low and close on {@code target} or {@code at}, the horizon tilted (rolled) and settling
  * back as it leans in (a masterstroke, a reveal).</li>
- * <li>(0.18.30) {@link #CUTS}: hard cuts between three angles round {@code target} or {@code at}: close and low, wide and
+ * <li>(0.18.46) {@link #CUTS}: hard cuts between three angles round {@code target} or {@code at}: close and low, wide and
  * tilted from the side, high behind (a flurry of blows).</li>
  * </ul>
  */
