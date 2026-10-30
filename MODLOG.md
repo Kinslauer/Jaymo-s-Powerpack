@@ -4004,3 +4004,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   behind ceilings and hills, brighter and bigger for 5 minutes after a pod flight to the world or home from it. Drawn as the hud's
   first layer by projecting the star's direction (not into the sky pass itself). Textures and models by `tools/gen_star_sky.py`.
   Compile-checked against the 26.3 jar; not seen in game. Plan: docs/SevTech-Plan.md, Track 2.
+- **0.18.25, who flies (SevTech picks; Kingdoms 0.7.369):** four small things on the Powers side. **Ranks Follow Rungs:** a Patrol
+  rank needs a world tier open through Kingdoms' deeds as well as its arrests (`ZFighterPatrol.RANK_TIER`: Rookie Borderlands,
+  Officer Wildlands, Sergeant and Inspector Dread, Commander Legend): `rank(player, arrests)` holds the rank back, the license and the
+  patrolman's report show the held rank, a promotion earned in arrests but not in deeds says so, and a patrolman will not swear in
+  someone with no Borderlands behind them. Asked through `ZFighterKingdoms.openTier` by reflection; without Kingdoms the Patrol
+  goes by power and arrests alone. **Landing Yard:** `ZFighterYard` finds Kingdoms' yard within 64 blocks (`ZFighterKingdoms.yardPads`);
+  a patrolman's pod sets down on a free pad (`arrive`), the pod trip home lands on one, a raiders' band comes down just outside
+  the yard (`ZFighterRaiders.land`), and the patrol landing names the town for Tidings; a patrolman tells once of the yard town in his
+  travel talk. **Pilot and Prospector:** a landed trip tells Kingdoms (`ZFighterKingdoms.flown`: pilot, second-seat passenger,
+  spot); first finds go through the public `Prospecting.found(player, world, kind)` (and `Prospecting.FIRST_FIND_LISTENERS`), which
+  Track 5's ore code fires. No new items, blocks or recipes. Compile-checked against the 26.3 jar; not seen in game. Plan:
+  docs/SevTech-Plan.md, Track 6.

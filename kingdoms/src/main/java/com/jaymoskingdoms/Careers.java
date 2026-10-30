@@ -163,6 +163,16 @@ public final class Careers {
 	static final int STALL_EMERALDS = 12;
 	static final long STALL_FROM = 6000L;
 
+	// (0.7.369, Andy's SevTech picks: the Pilot and Prospector careers)
+	/** Pilot: a fare in emeralds (Apprentice, Journeyman, Master) for each trip flown with a passenger or a parcel aboard; trips an order asks for (at most). */
+	static final int[] PILOT_FARE = {0, 1, 3};
+	static final int FLY_ORDERS_MOST = 2;
+	/** Pilot: a ferried parcel must come down within this of the yard it is for (blocks); a ferry order counts as this many orders. */
+	static final double FERRY_AT = LandingYard.RANGE;
+	static final int FERRY_ORDERS = 3;
+	/** Prospector: a bonus in emeralds (Apprentice, Journeyman, Master) for each first find. */
+	static final int[] FIND_BONUS = {0, 2, 5};
+
 	public static final int APPRENTICE = 0, JOURNEYMAN = 1, MASTER = 2;
 
 	/** What a smith's furnace work counts. */
@@ -183,7 +193,11 @@ public final class Careers {
 		SMITH("smith", 2, List.of("minecraft:iron_ingot", "minecraft:copper_ingot", "minecraft:gold_ingot"), List.of("smelt", "forge"), "smithy"),
 		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay"), "hunting_lodge"),
 		COURIER("courier", 0, List.of(), List.of("carry"), "stable"),
-		WATCH("watch", 0, List.of(), List.of("night", "slay"), null);
+		WATCH("watch", 0, List.of(), List.of("night", "slay"), null),
+		/** (0.7.369) Flies pods out of a kingdom's landing yard: paid per trip with a passenger or a parcel aboard. */
+		PILOT("pilot", 0, List.of(), List.of("fly", "ferry"), LandingYard.ENTRY),
+		/** (0.7.369) Works the far worlds for the yard's town: paid per first find (an ore's first reveal on a world, a first metal knapped). */
+		PROSPECTOR("prospector", 0, List.of(), List.of("find"), LandingYard.ENTRY);
 
 		public final String key;
 		/** How many of its goods a stall sells for an emerald (0: it has nothing to sell). */
@@ -215,6 +229,11 @@ public final class Careers {
 
 		public Component title() {
 			return Component.translatable("job.jaymoskingdoms." + this.key);
+		}
+
+		/** (0.7.369) A job only a town with a landing yard offers. */
+		boolean yardOnly() {
+			return this == PILOT || this == PROSPECTOR;
 		}
 	}
 
@@ -390,6 +409,10 @@ public final class Careers {
 	public static final AttachmentType<Career> CAREER = AttachmentRegistry.create(JaymosKingdoms.id("career"),
 		builder -> builder.persistent(Career.CODEC).copyOnDeath().syncWith(ByteBufCodecs.fromCodec(Career.CODEC), AttachmentSyncPredicate.targetOnly()));
 
+	/** (0.7.369) On a player: the first finds made ("world|kind"), so each counts once. Saved, kept through death. */
+	public static final AttachmentType<List<String>> FINDS = AttachmentRegistry.create(JaymosKingdoms.id("first_finds"),
+		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+
 	/** Server → everyone: each player's job title ("Master Woodcutter"), for over their head and the tab list (shown only once introduced). */
 	public record Titles(Map<UUID, Component> titles) implements CustomPacketPayload {
 		public static final Type<Titles> TYPE = new Type<>(JaymosKingdoms.id("job_titles"));
@@ -440,7 +463,7 @@ public final class Careers {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("career attachment: {}", CAREER);
+		JaymosKingdoms.LOGGER.debug("career attachments: {} {}", CAREER, FINDS);
 		PayloadTypeRegistry.clientboundPlay().register(Titles.TYPE, Titles.CODEC);
 		ServerTickEvents.END_SERVER_TICK.register(Careers::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -693,7 +716,8 @@ public final class Careers {
 			kinds.add("give:" + g);
 		}
 		kinds.addAll(job.works);
-		kinds.removeIf(k -> open.stream().anyMatch(o -> o.what().equals(k) || k.equals("carry") && o.what().startsWith("carry:")));
+		kinds.removeIf(k -> open.stream().anyMatch(o -> o.what().equals(k) || k.equals("carry") && o.what().startsWith("carry:")
+			|| k.equals("ferry") && o.what().startsWith("ferry:")));
 		if (job == Job.BUILDER && Storage.loaded(level, f)) {
 			// what the next building is short of first
 			Map<Item, Integer> missing = Storage.missing(level, f, Planner.needs(level, f));
@@ -719,7 +743,19 @@ public final class Careers {
 			Faction to = carryTo(level.getServer(), f, random);
 			return to == null ? null : new Order("carry:" + to.id(), 1, 0);
 		}
+		if (what.equals("ferry")) {
+			Faction to = ferryTo(level, f, random);
+			return to == null ? null : new Order("ferry:" + to.id(), 1, 0);
+		}
 		return new Order(what, count(job, what, random), 0);
+	}
+
+	/** (0.7.369) Another town with a landing yard a pilot's parcel goes to, or null. */
+	private static @Nullable Faction ferryTo(ServerLevel level, Faction from, RandomSource random) {
+		MinecraftServer server = level.getServer();
+		List<Faction> towns = Factions.all(server).stream().filter(o -> o.id() != from.id() && !o.fallen() && o.type() != FactionType.BARBARIAN)
+			.filter(o -> LandingYard.has(server, o)).toList();
+		return towns.isEmpty() ? null : towns.get(random.nextInt(towns.size()));
 	}
 
 	/** How many an order asks for. */
@@ -732,7 +768,8 @@ public final class Careers {
 			case "smelt" -> Mth.nextInt(random, 16, 32);
 			case "forge" -> Mth.nextInt(random, 3, 6);
 			case "slay" -> job == Job.WATCH ? Mth.nextInt(random, 4, 8) : Mth.nextInt(random, 6, 12);
-			case "night" -> 1;
+			case "night", "find" -> 1;
+			case "fly" -> Mth.nextInt(random, 1, FLY_ORDERS_MOST);
 			default -> {
 				String good = what.substring(5);
 				yield good.startsWith("#") ? Mth.nextInt(random, 24, 48) : job == Job.SMITH ? Mth.nextInt(random, 8, 16)
@@ -917,7 +954,7 @@ public final class Careers {
 			n -= take;
 			orders.set(i, next);
 			if (next.done()) {
-				finished += what.startsWith("carry:") ? CARRY_ORDERS : 1;
+				finished += what.startsWith("carry:") ? CARRY_ORDERS : what.startsWith("ferry:") ? FERRY_ORDERS : 1;
 			}
 		}
 		orders.removeIf(Order::done);
@@ -1166,6 +1203,92 @@ public final class Careers {
 		refreshTitles(player.level().getServer());
 	}
 
+	// ---- the pilot and the prospector (0.7.369) ----------------------------------------------------------------------
+
+	/** Adds an open order {@code what} to {@code job}'s post for {@code player} if it has none, so a trip or a find is never unpaid. */
+	private static void ensureOrder(ServerPlayer player, String job, String what) {
+		Post p = of(player).post(job);
+		if (p != null && p.orders().stream().noneMatch(o -> o.what().equals(what) && !o.done())) {
+			List<Order> orders = new ArrayList<>(p.orders());
+			orders.add(new Order(what, 1, 0));
+			edit(player, k -> k.withPost(p.withOrders(orders)));
+		}
+	}
+
+	private static void fare(ServerPlayer player, int emeralds, String message) {
+		if (emeralds > 0) {
+			give(player, new ItemStack(Items.EMERALD, emeralds));
+		}
+		player.sendOverlayMessage(Component.translatable(message, emeralds).withStyle(ChatFormatting.GREEN));
+	}
+
+	/**
+	 * (for Jaymo's Powers, by reflection; {@code ZFighterPodTrip}) {@code pilot} flew a pod trip and came down at {@code at} in
+	 * {@code landedIn}, with {@code passenger} in the second seat (or null). A Pilot is paid for a trip with a passenger or
+	 * a parcel aboard; a parcel carried down to the yard of the town an order named is handed over to it.
+	 */
+	public static void flown(ServerPlayer pilot, @Nullable ServerPlayer passenger, ServerLevel landedIn, BlockPos at) {
+		Post p = of(pilot).post(Job.PILOT.key);
+		if (p == null) {
+			return;
+		}
+		boolean parcel = MerchantOrders.carriesParcel(pilot);
+		if (passenger != null || parcel) {
+			ensureOrder(pilot, Job.PILOT.key, "fly");
+			progress(pilot.level(), pilot, Job.PILOT.key, "fly", 1);
+			fare(pilot, PILOT_FARE[Mth.clamp(of(pilot).rank(Job.PILOT.key), 0, 2)], "message.jaymoskingdoms.job.fare");
+		}
+		if (!parcel) {
+			return;
+		}
+		MinecraftServer server = landedIn.getServer();
+		LandingYard.Yard yard = LandingYard.near(landedIn, at, FERRY_AT);
+		Post now = of(pilot).post(Job.PILOT.key);
+		if (yard == null || now == null) {
+			return;
+		}
+		for (Order o : now.orders()) {
+			if (!o.what().startsWith("ferry:") || o.done() || yard.faction().id() != parse(o.what().substring(6))) {
+				continue;
+			}
+			ItemStack taken = MerchantOrders.takeParcel(pilot);
+			if (taken.isEmpty()) {
+				return;
+			}
+			ServerLevel store = Factions.level(server);
+			if (Storage.loaded(store, yard.faction())) {
+				for (ItemStack g : MerchantOrders.contents(taken)) {
+					Storage.put(store, yard.faction(), g);
+				}
+			}
+			com.jaymoskingdoms.Post.tidings(pilot.getUUID(), Component.translatable("message.jaymoskingdoms.job.ferried", yard.faction().name()));
+			progress(pilot.level(), pilot, Job.PILOT.key, o.what(), 1);
+			return;
+		}
+	}
+
+	/**
+	 * (for Jaymo's Powers, by reflection; {@code Prospecting}) {@code player} made a find on {@code world} (a world key such as
+	 * {@code rustfall}): {@code kind} is the ore revealed, or {@code metal:<id>} for a first metal knapped. Only the first of
+	 * each kind on each world counts, and only a Prospector is paid for it (at dusk, by the order it fills, and a bonus at once).
+	 */
+	public static void firstFind(ServerPlayer player, String world, String kind) {
+		String key = world + "|" + kind;
+		List<String> seen = player.getAttachedOrElse(FINDS, List.of());
+		if (seen.contains(key)) {
+			return;
+		}
+		List<String> next = new ArrayList<>(seen);
+		next.add(key);
+		player.setAttached(FINDS, List.copyOf(next));
+		if (of(player).post(Job.PROSPECTOR.key) == null) {
+			return;
+		}
+		ensureOrder(player, Job.PROSPECTOR.key, "find");
+		progress(player.level(), player, Job.PROSPECTOR.key, "find", 1);
+		fare(player, FIND_BONUS[Mth.clamp(of(player).rank(Job.PROSPECTOR.key), 0, 2)], "message.jaymoskingdoms.job.find");
+	}
+
 	// ---- perks that work as you go ---------------------------------------------------------------------------------------
 
 	private static void perks(ServerLevel level, ServerPlayer player, Career c, int t) {
@@ -1263,6 +1386,10 @@ public final class Careers {
 			player.sendSystemMessage(Component.translatable(why, f.name()).withStyle(ChatFormatting.GRAY));
 			return false;
 		}
+		if (job.yardOnly() && !LandingYard.has(level.getServer(), f)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.no_yard", f.name(), job.title()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
 		Career c = of(player);
 		Post old = c.post(job.key);
 		if (old != null && old.faction() == f.id()) {
@@ -1309,7 +1436,7 @@ public final class Careers {
 			case "fisherfolk" -> Job.FISHER.key;
 			case "hunters" -> Job.HUNTER.key;
 			case "soldiers" -> Job.WATCH.key;
-			default -> Job.values()[random.nextInt(Job.values().length)].key;
+			default -> Job.values()[random.nextInt(Job.PILOT.ordinal())].key;
 		};
 	}
 
@@ -1326,6 +1453,8 @@ public final class Careers {
 			case HUNTER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 24));
 			case COURIER -> List.of(new ItemStack(Items.SADDLE), new ItemStack(Items.BREAD, 8));
 			case WATCH -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.SHIELD));
+			case PILOT -> List.of(new ItemStack(Items.COMPASS), new ItemStack(Items.CLOCK), new ItemStack(Items.BREAD, 8));
+			case PROSPECTOR -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 16), new ItemStack(Items.COMPASS));
 		};
 	}
 
@@ -1413,7 +1542,8 @@ public final class Careers {
 		List<Job> out = new ArrayList<>();
 		for (Job j : Job.values()) {
 			Post p = c.post(j.key);
-			if ((p == null || p.faction() != f.id()) && (j != Job.WATCH || f.type().isRealm() || f.type() == FactionType.VILLAGE)) {
+			if ((p == null || p.faction() != f.id()) && (j != Job.WATCH || f.type().isRealm() || f.type() == FactionType.VILLAGE)
+				&& (!j.yardOnly() || LandingYard.has(level.getServer(), f))) {
 				out.add(j);
 			}
 		}
@@ -1749,7 +1879,8 @@ public final class Careers {
 				continue;
 			}
 			for (Order o : p.orders()) {
-				Optional<BlockPos> target = o.what().startsWith("carry:") ? Optional.ofNullable(Factions.get(server, parse(o.what().substring(6))))
+				Optional<BlockPos> target = o.what().startsWith("carry:") || o.what().startsWith("ferry:")
+					? Optional.ofNullable(Factions.get(server, parse(o.what().substring(6))))
 					.map(Faction::seat) : Optional.of(f.seat());
 				out.add(new Journal.Entry(false, false, Component.translatable("journal.jaymoskingdoms.order.title", job.title(), describe(server, o)),
 					Component.translatable("journal.jaymoskingdoms.order.by", f.name()), Component.translatable("journal.jaymoskingdoms.order.text", job.title(),
@@ -1765,6 +1896,10 @@ public final class Careers {
 		String what = o.what();
 		if (what.startsWith("give:")) {
 			return Component.translatable("order.jaymoskingdoms.give", o.count(), goodName(what.substring(5)));
+		}
+		if (what.startsWith("ferry:")) {
+			Faction to = server == null ? null : Factions.get(server, parse(what.substring(6)));
+			return Component.translatable("order.jaymoskingdoms.ferry", to == null ? Component.translatable("order.jaymoskingdoms.carry.far") : Component.literal(to.name()));
 		}
 		if (what.startsWith("carry:")) {
 			Faction to = server == null ? null : Factions.get(server, parse(what.substring(6)));

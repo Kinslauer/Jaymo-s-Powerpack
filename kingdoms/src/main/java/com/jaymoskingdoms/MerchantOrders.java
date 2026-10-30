@@ -98,6 +98,15 @@ final class MerchantOrders {
 	static final int ORDERS = QuestNet.ORDERS;
 	/** A board's sheet: {@code orders|<the board's anchor as a long>}. */
 	static final String SHEET = "orders|";
+	/**
+	 * (0.7.369, Off-World Orders) The sheet also lists what the town's merchants want from the far worlds
+	 * ({@link OffWorldGoods}): hand in a good, get its listed price in emeralds at once, and
+	 * {@link #FAR_STANDING_XP} standing, which is faster than ordering wares earns it (one ware earns its trade's 1 to 30,
+	 * mostly under 10). Each want can be answered once a day by each player.
+	 */
+	static final int FAR_STANDING_XP = 25;
+	/** The prefix of a want's id on the screen. */
+	static final String WANT = "want:";
 	/** The custom data key on a parcel (the town it came from). */
 	static final String PARCEL_KEY = "jaymoskingdoms_parcel";
 
@@ -226,6 +235,10 @@ final class MerchantOrders {
 	}
 
 	/** What an offer costs on the board: its price with the merchant's demand, but no one player's discount or mark-up. */
+	private static int price(MerchantOffer offer, float factor) {
+		return Math.max(1, Math.round(price(offer) * factor));
+	}
+
 	private static int price(MerchantOffer offer) {
 		int base = offer.getBaseCostA().getCount();
 		int demand = Math.max(0, Mth.floor(base * offer.getDemand() * offer.getPriceMultiplier()));
@@ -235,6 +248,8 @@ final class MerchantOrders {
 	/** The wares of the merchants about the board at {@code anchor}, cheapest standing first. */
 	private static List<Ware> wares(ServerLevel level, BlockPos anchor) {
 		List<Ware> out = new ArrayList<>();
+		// (0.7.369) lower while a pod stands in the town's landing yard
+		float factor = LandingYard.tradeFactor(level, town(level, anchor));
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(CATALOG_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !Downed.isDowned(v))) {
 			if (v.getVillagerData().profession().is(VillagerProfession.NONE) || v.getVillagerData().profession().is(VillagerProfession.NITWIT)) {
@@ -247,7 +262,7 @@ final class MerchantOrders {
 				if (result.isEmpty() || result.is(Items.EMERALD) || !o.getBaseCostA().is(Items.EMERALD) || o.getItemCostB().isPresent()) {
 					continue;
 				}
-				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price(o), Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1)));
+				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price(o, factor), Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1)));
 			}
 		}
 		out.sort(Comparator.comparingInt(Ware::tier).thenComparing(w -> w.merchant().getStringUUID()).thenComparingInt(Ware::index));
@@ -295,6 +310,11 @@ final class MerchantOrders {
 					Component.translatable("orders.jaymoskingdoms.text.ordered", o.merchant(), o.paid()),
 					Component.translatable(level.getGameTime() < o.ready() ? "orders.jaymoskingdoms.objective.making" : "orders.jaymoskingdoms.objective.courier"),
 					List.of(o.goods().copy()), List.of()));
+			}
+		}
+		if (OffWorldGoods.asks(player)) {
+			for (OffWorldGoods.Good g : OffWorldGoods.today(anchor, today)) {
+				views.add(wantView(player, g, ledger, today));
 			}
 		}
 		int locked = 0;
@@ -348,7 +368,9 @@ final class MerchantOrders {
 			|| player.distanceToSqr(Vec3.atCenterOf(at)) > 64.0) {
 			return;
 		}
-		if (act.action() == QuestNet.ACCEPT) {
+		if (act.action() == QuestNet.ACCEPT && act.questId().startsWith(WANT)) {
+			want(level, player, at, act.questId().substring(WANT.length()));
+		} else if (act.action() == QuestNet.ACCEPT) {
 			order(level, player, at, act.questId());
 		} else if (act.action() == QuestNet.ABANDON && act.questId().startsWith("order:")) {
 			cancel(level, player, act.questId().substring(6));
@@ -384,6 +406,96 @@ final class MerchantOrders {
 		player.setAttached(LEDGER, ledger.bought(w.id(), today, 1, w.offer().getXp()));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.0F);
 		level.playSound(null, at, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.1F);
+	}
+
+	// ---- off-world wants (0.7.369) ---------------------------------------------------------------------------------------
+
+	/** How many of {@code good} the merchants ask for today (the same for everyone). */
+	private static int wanted(OffWorldGoods.Good g, BlockPos anchor, long day) {
+		return g.min() + new java.util.Random(anchor.asLong() ^ day ^ g.key().hashCode()).nextInt(g.max() - g.min() + 1);
+	}
+
+	private static Component worldName(OffWorldGoods.Good g) {
+		return Component.translatable("order.jaymoskingdoms.world." + g.world());
+	}
+
+	private static QuestNet.View wantView(ServerPlayer player, OffWorldGoods.Good g, Ledger ledger, long today) {
+		BlockPos anchor = READING.getOrDefault(player.getUUID(), BlockPos.ZERO);
+		int count = wanted(g, anchor, today);
+		ItemStack goods = new ItemStack(g.item(), count);
+		boolean done = ledger.boughtToday(WANT + g.key(), today) > 0;
+		return new QuestNet.View(WANT + g.key(), QuestNet.OFFER, done,
+			Component.translatable("orders.jaymoskingdoms.want.title", goods.getHoverName(), count, worldName(g)),
+			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), g.emeralds()),
+			done ? Component.translatable("orders.jaymoskingdoms.want.done") : Component.translatable("orders.jaymoskingdoms.want.objective", count),
+			List.of(goods.copy(), new ItemStack(Items.EMERALD, g.emeralds())),
+			List.of(Component.translatable("orders.jaymoskingdoms.want.standing", FAR_STANDING_XP)));
+	}
+
+	/** {@code player} hands in the far-world good {@code key} the board wants today: it goes to the town's storehouse, and they get paid. */
+	private static void want(ServerLevel level, ServerPlayer player, BlockPos at, String key) {
+		Faction town = town(level, at);
+		OffWorldGoods.Good g = town == null || !OffWorldGoods.asks(player) ? null : OffWorldGoods.byKey(key);
+		long today = Quests.day(level);
+		if (g == null || OffWorldGoods.today(at, today).stream().noneMatch(w -> w.key().equals(key)) || Reputation.get(player, town.id()) < LEAST_REP) {
+			return;
+		}
+		Ledger ledger = ledger(player);
+		if (ledger.boughtToday(WANT + key, today) > 0) {
+			return;
+		}
+		int count = wanted(g, at, today);
+		var inv = player.getInventory();
+		int have = 0;
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			if (inv.getItem(i).is(g.item())) {
+				have += inv.getItem(i).getCount();
+			}
+		}
+		if (have < count) {
+			player.sendSystemMessage(Component.translatable("orders.jaymoskingdoms.want.short", count, new ItemStack(g.item()).getHoverName()).withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		for (int i = 0, left = count; i < inv.getContainerSize() && left > 0; i++) {
+			ItemStack s = inv.getItem(i);
+			if (s.is(g.item())) {
+				int n = Math.min(left, s.getCount());
+				s.shrink(n);
+				left -= n;
+			}
+		}
+		inv.setChanged();
+		Storage.put(Factions.level(level.getServer()), town, new ItemStack(g.item(), count));
+		ItemStack pay = new ItemStack(Items.EMERALD, g.emeralds());
+		if (!player.getInventory().add(pay) && !pay.isEmpty()) {
+			player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
+		Post.tidings(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
+		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.1F);
+	}
+
+	/** (0.7.369) {@code player} carries a parcel. */
+	static boolean carriesParcel(ServerPlayer player) {
+		return player.getInventory().contains(MerchantOrders::isParcel);
+	}
+
+	/** (0.7.369) Takes one parcel out of {@code player}'s pack (empty if none). */
+	static ItemStack takeParcel(ServerPlayer player) {
+		var inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			if (isParcel(inv.getItem(i))) {
+				ItemStack taken = inv.getItem(i).split(1);
+				inv.setChanged();
+				return taken;
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
+	/** (0.7.369) What a parcel holds. */
+	static List<ItemStack> contents(ItemStack parcel) {
+		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}
 
 	/** Takes {@code price} emeralds out of {@code player}'s pack, if they have that many. */

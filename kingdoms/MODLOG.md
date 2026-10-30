@@ -6878,3 +6878,30 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   within 96 blocks of the seat of a town he is within 160 of is written up in his Tidings, once for each pod: a light that fell, or
   a stranger seen at dusk. Read from Powers' pod tags (`jaymospowers.raider`, `jaymospowers.patrol_pod`) on the pod entity.
 - Compile-checked; not seen in game.
+
+## 0.7.369: who flies (SevTech picks) (pack 0.18.25)
+- **Landing Yard** (`LandingYard`): a kingdom's or fiefdom's builders put up a yard (15 x 19; a settlement of 34 or more) of
+  stone-brick paving round a copper beacon post, with 4 to 9 pads (`PADS_MIN`/`PADS_MAX`, by the variant) of smooth stone cornered
+  in waxed cut copper. No recipe and no new block: a build, in the growth order (`Blueprint.register`). The pads are found again
+  from the finished building (a pad's middle is waxed copper, the post's foot waxed chiseled copper). Powers asks through
+  reflection: `padsNear(level, pos, 64)` (post first, then each pad), `nameNear`, `touched`. While a pod stands on one of a town's
+  pads, `MerchantOrders` prices there are `DISCOUNT` (10%) lower (`tradeFactor`). A patrol pod standing down puts the town in the
+  next Tidings (`news.jaymoskingdoms.landing_yard.*`, at most once a day for a yard).
+- **Pilot and Prospector** (`Careers.Job.PILOT`, `PROSPECTOR`): two more jobs with the usual three ranks and dusk wages. Only a town
+  with a landing yard offers them (`Job.yardOnly`, and the yard is their `hall`, so the town is always hiring and pays the hall
+  bonus). Pilot: `Careers.flown(pilot, passenger, level, pos)` (called by Powers when a pod trip lands) counts a trip with a
+  passenger in the second seat or a MerchantOrders parcel in the pack as a `fly` order done (an order is made on the spot if none
+  is open) and pays a fare at once (`PILOT_FARE`, 0/1/3 emeralds). A `ferry:<town>` order names another town with a yard: come
+  down within `FERRY_AT` of its yard with a parcel and the parcel is unpacked into that town's storehouse (counts
+  `FERRY_ORDERS`). Prospector: `Careers.firstFind(player, world, kind)` records each "world|kind" once per player (the `first_finds`
+  attachment) and, for a Prospector, fills a `find` order and pays `FIND_BONUS` (0/2/5) at once.
+  **Hook for Track 5's ore code:** call `com.jaymospowers.power.zfighter.Prospecting.found(player, worldKey, kind)` where a player
+  first reveals an ore kind on a world (`kind` = the ore's block id) and where they knap a world's first metal (`kind` =
+  `"metal:" + item id`); worldKey is moon, rustfall, glacia, cinder, maw or verdant. `Prospecting.FIRST_FIND_LISTENERS` takes more
+  listeners. Kingdoms is one, by reflection; repeated finds do nothing.
+- **Off-World Orders**: a Merchant Orders sheet shows (to a player with Dread open) two wants a day (`OffWorldGoods`): a far-world
+  good, how many, the world named, a price in emeralds, and `FAR_STANDING_XP` (25) standing, which is faster than a ware ordered
+  earns it. The Bounty board's town notices (`TownNotices.FAR_CHANCE`) may be a warrant for the same goods, a gather errand
+  from the poster that names the world, once anyone on has Dread. Goods: the six first metals (looked for under a few ids until Track
+  5 names them), Rustfall plate, Glacia ice glass, Cinder bell alloy, Cinder Ember, Glacia salt (Kitchen's salt).
+- A life story's job lean never draws Pilot or Prospector. Compile-checked; not seen in game.

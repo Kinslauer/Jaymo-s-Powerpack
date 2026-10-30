@@ -110,6 +110,14 @@ public final class ZFighterPatrol {
 	static final double RANK_PAYS = 0.5;
 	/** The arrests each rank needs: Rookie, Officer, Sergeant, Inspector, Commander. */
 	static final int[] RANKS = {0, 3, 8, 15, 25};
+	/**
+	 * (0.18.25, "Ranks Follow Rungs") The world tier (0 Hearth ... 4 Legend) each rank needs open through Kingdoms' deeds as well as
+	 * its arrests: Rookie Borderlands, Officer (the Patrolman) Wildlands, Sergeant and Inspector Dread, Commander Legend. Without
+	 * Kingdoms the Patrol goes by power and arrests alone.
+	 */
+	static final int[] RANK_TIER = {1, 2, 3, 3, 4};
+	/** A travel story about the landing yard, told once: its bit in {@link #TOLD}. */
+	static final int YARD_STORY_BIT = 1 << 30;
 	/** How many ways each line is said, and how many travel stories there are. */
 	static final int GREET_LINES = 3, STORIES = 9, NOT_YET_LINES = 3, OFFER_LINES = 2, REST_LINES = 2, NAMES = 10;
 	/** The pod's arrival and departure: how high it starts, how fast it comes down or goes up (blocks a tick). */
@@ -220,6 +228,16 @@ public final class ZFighterPatrol {
 		return rank;
 	}
 
+	/** The rank an officer with {@code arrests} holds, held back to what the world tiers open to {@code player} allow. */
+	static int rank(Player player, int arrests) {
+		int rank = rank(arrests);
+		int tier = ZFighterKingdoms.openTier(player);
+		while (tier >= 0 && rank > 0 && RANK_TIER[rank] > tier) {
+			rank--;
+		}
+		return rank;
+	}
+
 	static Component rankName(int rank) {
 		return Component.translatable("patrol.jaymospowers.rank." + rank);
 	}
@@ -281,6 +299,16 @@ public final class ZFighterPatrol {
 	/** A patrolman's pod starts down over open ground by {@code seat}; true if a spot was found. */
 	static boolean arrive(ServerLevel level, BlockPos seat, int name) {
 		RandomSource random = level.getRandom();
+		// (0.18.25) a landing yard within reach: down on a free pad, and the town named for it
+		BlockPos pad = ZFighterYard.freePad(level, seat);
+		if (pad != null) {
+			land(level, pad, name, f -> {
+				stepOut((ServerLevel)f.pod.level(), f);
+				ZFighterKingdoms.yardTouched((ServerLevel)f.pod.level(), f.ground);
+			});
+			level.playSound(null, pad.getX(), pad.getY() + 20, pad.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
+			return true;
+		}
 		for (int tries = 0; tries < 12; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = LAND_MIN + random.nextDouble() * (LAND_MAX - LAND_MIN);
@@ -489,6 +517,13 @@ public final class ZFighterPatrol {
 					ZFighterNpcs.ask(player, man, line("not_yet", NOT_YET_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 					return;
 				}
+				// (0.18.25) power is not enough: a Rookie has the first deed (Borderlands) behind them
+				int tier = ZFighterKingdoms.openTier(player);
+				if (tier >= 0 && tier < RANK_TIER[0]) {
+					ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.deeds"),
+						List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+					return;
+				}
 				ZFighterNpcs.ask(player, man, line("offer", OFFER_LINES, man), List.of(
 					ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.swear", true, () -> {
 						join(player);
@@ -507,7 +542,7 @@ public final class ZFighterPatrol {
 				ZFighterNpcs.ask(player, man, line("fuel", REST_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 			}));
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
-				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(member.arrests())), member.arrests()),
+				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(player, member.arrests())), member.arrests()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);
@@ -516,6 +551,14 @@ public final class ZFighterPatrol {
 	/** The next of his travel stories, or that he has told them all. */
 	private static Component story(LivingEntity man) {
 		int told = man.getAttachedOrElse(TOLD, 0);
+		if ((told & YARD_STORY_BIT) == 0 && man.level() instanceof ServerLevel here) {
+			// (0.18.25) a landing yard near: the town is a stop he names
+			String town = ZFighterKingdoms.yardName(here, man.blockPosition(), ZFighterYard.RANGE);
+			if (!town.isEmpty()) {
+				man.setAttached(TOLD, told | YARD_STORY_BIT);
+				return Component.translatable("talk.jaymospowers.patrol.yard", town);
+			}
+		}
 		List<Integer> left = new ArrayList<>();
 		for (int i = 0; i < STORIES; i++) {
 			if ((told & (1 << i)) == 0) {
@@ -609,7 +652,7 @@ public final class ZFighterPatrol {
 		}
 		NEXT_WARRANT.put(key, now + WARRANT_GAP);
 		WARRANTS.add(new Warrant(player.getUUID(), criminal.getUUID(), level.dimension(), planet));
-		int rank = rank(player.getAttached(MEMBER).arrests());
+		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.warrant", criminal.getDisplayName(),
 			Component.translatable("space.jaymospowers.dest." + dest.key()), bounty(rank)).withStyle(ChatFormatting.GOLD));
 	}
@@ -640,7 +683,7 @@ public final class ZFighterPatrol {
 		if (fighter == null) {
 			return null;
 		}
-		int rank = rank(player.getAttached(MEMBER).arrests());
+		int rank = rank(player, player.getAttached(MEMBER).arrests());
 		double tougher = 1.0 + RANK_TOUGHER * rank;
 		fighter.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 		fighter.become(ZFighterRogue.TYRANT, Component.translatable("entity.jaymospowers.wanted." + random.nextInt(NAMES)));
@@ -696,7 +739,7 @@ public final class ZFighterPatrol {
 			return;
 		}
 		Member member = owner.getAttachedOrElse(MEMBER, new Member(0, 0L));
-		int was = rank(member.arrests());
+		int was = rank(owner, member.arrests());
 		Member now = new Member(member.arrests() + 1, member.fuelled());
 		owner.setAttached(MEMBER, now);
 		ZFighterSagas.give(owner, new ItemStack(Items.EMERALD, bounty(was)));
@@ -706,7 +749,11 @@ public final class ZFighterPatrol {
 		}
 		owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", dead.getDisplayName(), bounty(was), now.arrests())
 			.withStyle(ChatFormatting.AQUA));
-		int rank = rank(now.arrests());
+		int rank = rank(owner, now.arrests());
+		if (rank(now.arrests()) > rank(member.arrests()) && rank <= was) {
+			// (0.18.25) the arrests are enough for the next rank; the deeds are not
+			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.held_back", rankName(rank(now.arrests()))).withStyle(ChatFormatting.GRAY));
+		}
 		if (rank > was) {
 			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.promoted", rankName(rank)).withStyle(ChatFormatting.GOLD));
 			level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -736,7 +783,7 @@ public final class ZFighterPatrol {
 						held = Component.translatable("message.jaymospowers.patrol.holding", criminal.getDisplayName(), (int)Math.round(server.distanceTo(criminal)));
 					}
 				}
-				server.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.license", rankName(rank(member.arrests())), member.arrests(), held)
+				server.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.license", rankName(rank(server, member.arrests())), member.arrests(), held)
 					.withStyle(ChatFormatting.GOLD));
 			}
 			return InteractionResult.SUCCESS;
