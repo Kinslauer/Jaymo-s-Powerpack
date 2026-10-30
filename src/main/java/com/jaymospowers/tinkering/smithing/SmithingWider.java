@@ -14,5 +14,6 @@ public final class SmithingWider {
 		Provenance.register();
 		GradedLoot.register();
 		ArmourForging.register();
+		ProstheticForging.register();
 	}
 }
