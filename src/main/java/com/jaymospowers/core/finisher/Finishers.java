@@ -124,7 +124,7 @@ import org.jspecify.annotations.Nullable;
  * {@link Kind#ROCK}, everyone's (no Executioner: anyone can pick up a rock): down on a knee at their head, the off hand
  * pinning them, the rock brought down again and again, the last with both hands, which breaks it (one rock is used up).
  * <p>
- * (0.18.25) Andy: "z fighter needs at least 3 bare handed executions, maybe more with different forms, for example
+ * (0.18.40) Andy: "z fighter needs at least 3 bare handed executions, maybe more with different forms, for example
  * frostborn should use the beam". A Z Fighter's empty hands play one of the {@code Z_*} kinds ({@link Strike#KI}) instead
  * of the neck snap, as the suit's play its own: no Executioner, anywhere round the body. What they pick, cost and look like
  * is {@code ZFighterExecutions}'; the hold, roots and poses are the same as every finisher's.
@@ -212,7 +212,7 @@ public final class Finishers {
 		 * brought down three times, then lifted high in both hands and dropped onto the skull with everything behind it.
 		 */
 		ROCK(52, new int[] {12, 20, 28, 40}, Strike.CRUSH),
-		// ---- (0.18.25) a Z Fighter's bare hands (ZFighterExecutions) ----------------------------------------------------
+		// ---- (0.18.40) a Z Fighter's bare hands (ZFighterExecutions) ----------------------------------------------------
 		/** Point-Blank: stood over them, a palm thrust down at the chest, the ki gathered in it, and let go. */
 		Z_PALM(34, new int[] {22}, Strike.KI),
 		/** Flurry: down on a knee, both fists into them too fast to count, and the last one, with ki, into the ground. */
@@ -350,7 +350,7 @@ public final class Finishers {
 	public static void register() {
 		// (0.16.8) the symbiote's own executions play out on their own loop, begun from the hold below
 		com.jaymospowers.power.web.WebExecutions.register();
-		// (0.18.25) and a Z Fighter's bare hands
+		// (0.18.40) and a Z Fighter's bare hands
 		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
@@ -687,7 +687,7 @@ public final class Finishers {
 			ItemStack stack = player.getMainHandItem();
 			// (0.16.8) with the symbiote suit showing, empty hands are its own: no neck snap, one of WebExecutions' moves
 			boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
-			// (0.18.25) and a Z Fighter's are his own: no neck snap, one of ZFighterExecutions' moves, from anywhere round them
+			// (0.18.40) and a Z Fighter's are his own: no neck snap, one of ZFighterExecutions' moves, from anywhere round them
 			boolean fighter = stack.isEmpty() && !suit && com.jaymospowers.power.zfighter.ZFighterExecutions.applies(player);
 			boolean bare = stack.isEmpty() && !suit && !fighter;
 			if (!suit && move(player, stack) == null) {
@@ -748,7 +748,7 @@ public final class Finishers {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
 			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
 		if (kind.strike == Strike.KI) {
-			// (0.18.25) a Z Fighter's: the ki paid, and his own opening
+			// (0.18.40) a Z Fighter's: the ki paid, and his own opening
 			com.jaymospowers.power.zfighter.ZFighterExecutions.begin(level, player, body, kind);
 			return;
 		}
@@ -801,7 +801,7 @@ public final class Finishers {
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.1F);
 			}
 			if (kind.strike == Strike.KI) {
-				// (0.18.25) the ki gathering, the film, the beam held on them
+				// (0.18.40) the ki gathering, the film, the beam held on them
 				com.jaymospowers.power.zfighter.ZFighterExecutions.tick(level, player, body, kind, t, present);
 			}
 			for (int beat : kind.beats) {
@@ -894,7 +894,7 @@ public final class Finishers {
 				BladeBlood.splash(body, 10.0F);
 				Shakes.around(level, muzzle, AROUND_RANGE, SHOT_AROUND_SHAKE);
 			}
-			// (0.18.25) a Z Fighter's: his ki, his fists
+			// (0.18.40) a Z Fighter's: his ki, his fists
 			case KI -> com.jaymospowers.power.zfighter.ZFighterExecutions.blow(level, player, body, kind, kill);
 			case SNAP -> {
 				if (kill) {

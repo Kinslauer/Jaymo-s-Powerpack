@@ -260,7 +260,7 @@ public final class FinisherPose {
 	}
 
 	/**
-	 * (0.18.25) A Z Fighter's bare hands ({@code ZFighterExecutions}): the ki in them is the server's (particles, beams,
+	 * (0.18.40) A Z Fighter's bare hands ({@code ZFighterExecutions}): the ki in them is the server's (particles, beams,
 	 * the film); these are the bodies under it.
 	 */
 	private static void zfighter() {
