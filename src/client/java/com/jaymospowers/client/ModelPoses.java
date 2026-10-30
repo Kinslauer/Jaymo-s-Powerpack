@@ -76,5 +76,7 @@ public final class ModelPoses {
 		com.jaymospowers.client.power.smoke.SmokeMovePose.applyModel(model, state);
 		com.jaymospowers.client.power.cryo.CryoPose.applyModel(model, state);
 		com.jaymospowers.client.rig.RigPose.applyModel(model, state);
+		// last, and only when none of the above has the arms: the Fang Gauntlets' guard
+		com.jaymospowers.client.armory.FangGauntletsClient.applyModel(model, state);
 	}
 }
