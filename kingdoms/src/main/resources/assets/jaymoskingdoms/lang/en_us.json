@@ -8917,7 +8917,6 @@
 	"commands.jaymoskingdoms.roads.locked": "Locked the road %s",
 	"commands.jaymoskingdoms.roads.unlocked_n": "Unlocked %s roads",
 	"commands.jaymoskingdoms.roads.locked_n": "Locked %s roads",
-	"aim.jaymoskingdoms.tidings.lost": "One of your three is gone, and with it what you meant to do.",
 	"speech.jaymoskingdoms.learner.0": "I've seen worse. I'm better for it.",
 	"speech.jaymoskingdoms.learner.1": "I'm getting the hang of this.",
 	"speech.jaymoskingdoms.learner.2": "That one taught me something.",
