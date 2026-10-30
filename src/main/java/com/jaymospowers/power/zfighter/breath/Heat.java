@@ -26,7 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.15, SevTech picks) Cinder's heat, the mirror of Glacia's cold ({@link BreathCompat}). Out in the forge-world's air a
+ * (0.18.20, SevTech picks) Cinder's heat, the mirror of Glacia's cold ({@link BreathCompat}). Out in the forge-world's air a
  * player is slowed after {@link #SLOW_AFTER} seconds and takes {@link #HURT} a point every {@link #HURT_EVERY} seconds once
  * {@link #HURT_AFTER} have gone. It lets up while they stand in water, are fire-proof, or hold or eat something cool
  * ({@code #jaymospowers:cooling_items}, with {@link #COOL_GRACE} seconds' grace after the last bite); a quenched, graded piece
