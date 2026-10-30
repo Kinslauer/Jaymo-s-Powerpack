@@ -146,6 +146,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -240,6 +282,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_amber_bronze"
                     }
                   }
                 ],
@@ -378,6 +462,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_broken_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -472,6 +598,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_amber_bronze"
                     }
                   }
                 ],
@@ -615,6 +783,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/handle_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -709,6 +919,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/grip_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_amber_bronze"
                     }
                   }
                 ],
@@ -847,6 +1099,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/head_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -941,6 +1235,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/javelin/guard_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_amber_bronze"
                     }
                   }
                 ],
@@ -1091,6 +1427,48 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_amber_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1185,6 +1563,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_amber_bronze"
                 }
               }
             ],
@@ -1323,6 +1743,48 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_broken_large_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_amber_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1417,6 +1879,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_amber_bronze"
                 }
               }
             ],
@@ -1560,6 +2064,48 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/handle_large_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_amber_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1654,6 +2200,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/grip_large_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_amber_bronze"
                 }
               }
             ],
@@ -1792,6 +2380,48 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/head_large_steel"
                 }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_amber_bronze"
+                }
               }
             ],
             "fallback": {
@@ -1886,6 +2516,48 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/javelin/guard_large_steel"
+                }
+              },
+              {
+                "when": "pale_alloy",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_pale_alloy"
+                }
+              },
+              {
+                "when": "rust_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_rust_iron"
+                }
+              },
+              {
+                "when": "ice_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_ice_iron"
+                }
+              },
+              {
+                "when": "cinder_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_cinder_bronze"
+                }
+              },
+              {
+                "when": "void_shard",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_void_shard"
+                }
+              },
+              {
+                "when": "amber_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_amber_bronze"
                 }
               }
             ],

@@ -132,6 +132,48 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/mattock/handle_steel"
             }
+          },
+          {
+            "when": "pale_alloy",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_pale_alloy"
+            }
+          },
+          {
+            "when": "rust_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_rust_iron"
+            }
+          },
+          {
+            "when": "ice_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_ice_iron"
+            }
+          },
+          {
+            "when": "cinder_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_cinder_bronze"
+            }
+          },
+          {
+            "when": "void_shard",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_void_shard"
+            }
+          },
+          {
+            "when": "amber_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_amber_bronze"
+            }
           }
         ],
         "fallback": {
@@ -273,6 +315,48 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_broken_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_amber_bronze"
+              }
             }
           ],
           "fallback": {
@@ -409,6 +493,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_amber_bronze"
               }
             }
           ],
@@ -552,6 +678,48 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_broken_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_amber_bronze"
+              }
             }
           ],
           "fallback": {
@@ -688,6 +856,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_amber_bronze"
               }
             }
           ],

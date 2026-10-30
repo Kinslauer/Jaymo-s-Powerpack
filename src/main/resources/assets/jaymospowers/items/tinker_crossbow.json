@@ -94,6 +94,48 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
               }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+              }
             }
           ],
           "fallback": {
@@ -188,6 +230,48 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+              }
+            },
+            {
+              "when": "pale_alloy",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+              }
+            },
+            {
+              "when": "rust_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+              }
+            },
+            {
+              "when": "ice_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+              }
+            },
+            {
+              "when": "cinder_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+              }
+            },
+            {
+              "when": "void_shard",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+              }
+            },
+            {
+              "when": "amber_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
               }
             }
           ],
@@ -327,6 +411,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -421,6 +547,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                     }
                   }
                 ],
@@ -561,6 +729,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -655,6 +865,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                     }
                   }
                 ],
@@ -797,6 +1049,48 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                   }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                  }
                 }
               ],
               "fallback": {
@@ -891,6 +1185,48 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                  }
+                },
+                {
+                  "when": "pale_alloy",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                  }
+                },
+                {
+                  "when": "rust_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                  }
+                },
+                {
+                  "when": "ice_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                  }
+                },
+                {
+                  "when": "cinder_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                  }
+                },
+                {
+                  "when": "void_shard",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                  }
+                },
+                {
+                  "when": "amber_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                   }
                 }
               ],
@@ -1030,6 +1366,48 @@
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                         }
+                      },
+                      {
+                        "when": "pale_alloy",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                        }
+                      },
+                      {
+                        "when": "rust_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                        }
+                      },
+                      {
+                        "when": "ice_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                        }
+                      },
+                      {
+                        "when": "cinder_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                        }
+                      },
+                      {
+                        "when": "void_shard",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                        }
+                      },
+                      {
+                        "when": "amber_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                        }
                       }
                     ],
                     "fallback": {
@@ -1124,6 +1502,48 @@
                         "model": {
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                        }
+                      },
+                      {
+                        "when": "pale_alloy",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                        }
+                      },
+                      {
+                        "when": "rust_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                        }
+                      },
+                      {
+                        "when": "ice_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                        }
+                      },
+                      {
+                        "when": "cinder_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                        }
+                      },
+                      {
+                        "when": "void_shard",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                        }
+                      },
+                      {
+                        "when": "amber_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                         }
                       }
                     ],
@@ -1260,6 +1680,48 @@
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                         }
+                      },
+                      {
+                        "when": "pale_alloy",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                        }
+                      },
+                      {
+                        "when": "rust_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                        }
+                      },
+                      {
+                        "when": "ice_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                        }
+                      },
+                      {
+                        "when": "cinder_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                        }
+                      },
+                      {
+                        "when": "void_shard",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                        }
+                      },
+                      {
+                        "when": "amber_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                        }
                       }
                     ],
                     "fallback": {
@@ -1354,6 +1816,48 @@
                         "model": {
                           "type": "minecraft:model",
                           "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                        }
+                      },
+                      {
+                        "when": "pale_alloy",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                        }
+                      },
+                      {
+                        "when": "rust_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                        }
+                      },
+                      {
+                        "when": "ice_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                        }
+                      },
+                      {
+                        "when": "cinder_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                        }
+                      },
+                      {
+                        "when": "void_shard",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                        }
+                      },
+                      {
+                        "when": "amber_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                         }
                       }
                     ],
@@ -1489,6 +1993,48 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
                     }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amber_bronze"
+                    }
                   }
                 ],
                 "fallback": {
@@ -1583,6 +2129,48 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  },
+                  {
+                    "when": "pale_alloy",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pale_alloy"
+                    }
+                  },
+                  {
+                    "when": "rust_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rust_iron"
+                    }
+                  },
+                  {
+                    "when": "ice_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_ice_iron"
+                    }
+                  },
+                  {
+                    "when": "cinder_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_cinder_bronze"
+                    }
+                  },
+                  {
+                    "when": "void_shard",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_void_shard"
+                    }
+                  },
+                  {
+                    "when": "amber_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amber_bronze"
                     }
                   }
                 ],

@@ -135,6 +135,8 @@
     "jaymospowers:brittle_ice",
     "#jaymospowers:stone_layers",
     "jaymospowers:smithing_anvil",
-    "jaymospowers:stone_anvil"
+    "jaymospowers:stone_anvil",
+    "jaymospowers:field_anvil",
+    "jaymospowers:veiled_ore"
   ]
 }

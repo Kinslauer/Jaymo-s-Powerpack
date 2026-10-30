@@ -506,6 +506,8 @@ public final class ZFighterPatrol {
 				ZFighterSagas.give(player, new ItemStack(Items.BLAZE_POWDER, FUEL_GIFT));
 				ZFighterNpcs.ask(player, man, line("fuel", REST_LINES, man), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 			}));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.writ", officerRank(player) >= WRIT_RANK,
+				() -> com.jaymospowers.power.zfighter.farworld.PatrolWrit.ask(player, man, back)));
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
 				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(member.arrests())), member.arrests()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
@@ -711,6 +713,58 @@ public final class ZFighterPatrol {
 			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.promoted", rankName(rank)).withStyle(ChatFormatting.GOLD));
 			level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
 		}
+	}
+
+	// ---------------------------------------------------------------- (0.18.24) the skip writ (farworld/PatrolWrit)
+
+	/** The rank an officer needs to be given a skip writ: Sergeant (the index into {@link #RANKS}). */
+	public static final int WRIT_RANK = 2;
+
+	/** The rank (0 Rookie to 4 Commander) of {@code player}, or -1 if he is no officer. */
+	public static int officerRank(Player player) {
+		Member member = player.getAttached(MEMBER);
+		return member == null ? -1 : rank(member.arrests());
+	}
+
+	/** Whether a patrolman can be called down at all (they are MCA villagers, through Kingdoms). */
+	public static boolean writCanLand() {
+		return ZFighterNpcs.villagers() && ZFighterKingdoms.present();
+	}
+
+	/** Open ground for a called patrolman's pod near {@code player} on the far world he stands on, or null. */
+	public static @Nullable BlockPos writGround(ServerLevel level, ServerPlayer player, ZFighterSpace.Kind kind) {
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < 16; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double distance = 12.0 + random.nextDouble() * 10.0;
+			int x = Mth.floor(player.getX() + Math.cos(angle) * distance), z = Mth.floor(player.getZ() + Math.sin(angle) * distance);
+			level.getChunk(x >> 4, z >> 4);
+			BlockPos ground = kind == ZFighterSpace.Kind.FORGE ? ZFighterSpace.forgeFloor(level, x, z) : ZFighterSpace.surface(level, x, z);
+			if (ground != null) {
+				return ground;
+			}
+		}
+		return null;
+	}
+
+	/** A pod (nobody can take it) comes down over {@code ground}; {@code landed} runs when it sets down. */
+	public static void writLand(ServerLevel level, BlockPos ground, java.util.function.Consumer<PodEntity> landed) {
+		land(level, ground, 0, f -> landed.accept(f.pod));
+		level.playSound(null, ground.getX(), ground.getY() + 20, ground.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
+	}
+
+	/** The called patrolman's pod goes up and away. */
+	public static void writLeave(ServerLevel level, PodEntity pod) {
+		takeOff(level, pod);
+	}
+
+	/** The called patrolman as an MCA villager (null without MCA); {@code tag} keeps him out of the visiting patrolmen's roaming. */
+	public static @Nullable LivingEntity writMan(ServerLevel level, Vec3 feet, String tag, String nameKey, boolean female) {
+		LivingEntity man = ZFighterNpcs.villager(level, feet, level.getRandom().nextFloat() * 360.0F, tag, nameKey, female);
+		if (man != null) {
+			Gifted.give(man, "zfighter", Gifted.BOLD, true, true);
+		}
+		return man;
 	}
 
 	// ---------------------------------------------------------------- the license
