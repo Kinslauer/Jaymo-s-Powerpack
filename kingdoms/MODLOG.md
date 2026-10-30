@@ -7142,3 +7142,9 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - `BbModel.Baked` overrides `ModelPart.Cube.compile`: Sodium was drawing every baked cube as a plain box from its
   constructor numbers (Piglin King, Scalebane, Clockwork Golem, Blockbench armour came out as noise). The harpoon item
   keeps exact rotations. See the Powers MODLOG 0.18.63.
+
+## 0.7.400: the Unarmed figure drops what it held (pack 0.18.65)
+- Andy: "if the origin gives them an item in this hand it should comically be on the floor". The road page's Unarmed
+  figure now lacks its sword arm (Powers' right arm), and any hand whose arm is gone lets go: what it held (an earlier
+  answer's bow, sword, pickaxe) lies flat on the floor at the feet on that side, pointing away. Sizes in
+  `StoryFigure.DROPPED_*`.
