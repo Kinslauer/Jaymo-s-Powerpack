@@ -275,7 +275,7 @@ public final class Prosthetics {
 			}
 			ItemStack stack = player.getItemInHand(hand);
 			if (fit(server, this.iron, this.arm)) {
-				stack.shrink(1);
+				stack.consume(1, player);
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			server.sendOverlayMessage(Component.translatable("message.jaymospowers.prosthetic.nothing_to_fit." + (this.arm ? "arm" : "leg")));
