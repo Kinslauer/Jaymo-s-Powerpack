@@ -102,7 +102,7 @@ STORY_END = "story.jaymoskingdoms.summary.end"
 # (Kingdoms 0.7.352) Voices.INTRO_LINES
 INTRO_LINES = ["story.jaymoskingdoms.gender.title",
                "gui.jaymoskingdoms.story.skip.ask", "gui.jaymoskingdoms.story.skip.desc"] \
-    + ["gui.jaymoskingdoms.story.hold." + k for k in ("title", "realm", "harbour", "future", "arriving")]
+    + ["gui.jaymoskingdoms.story.hold.title"]
 
 
 def realm_free(text):
