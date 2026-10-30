@@ -58,7 +58,7 @@ public final class Kiln {
 	public static final int LOAD_MAX = 8;
 	/** Heat a crucible steel blend needs (a lit forge hearth, soul fire, lava or magma). */
 	public static final int STEEL_HEAT = 2;
-	/** (0.18.12) Heat a copper block needs to be fired into a pod's thruster bell: the best fire there is, with bellows. */
+	/** (0.18.14) Heat a copper block needs to be fired into a pod's thruster bell: the best fire there is, with bellows. */
 	public static final int BELL_HEAT = STEEL_HEAT + BellowsBlock.HEAT_BONUS;
 	/** Chance a log gives a second charcoal. */
 	public static final float KILN_CHARCOAL_BONUS = 0.25F;
@@ -110,7 +110,7 @@ public final class Kiln {
 			new Recipe(s -> s.is(Items.NETHERRACK), 2, Items.NETHER_BRICK, 0),
 			new Recipe(s -> s.is(Tinkering.GROUT.asItem()), 2, Tinkering.SEARED_BRICK, 0),
 			new Recipe(s -> s.is(Tinkering.STEEL_BLEND), STEEL_HEAT, Tinkering.STEEL_INGOT, 0),
-			// (0.18.12) a copper block fired as hot as the kiln gets (a soul fire or hearth with the bellows on it) is a pod's thruster bell
+			// (0.18.14) a copper block fired as hot as the kiln gets (a soul fire or hearth with the bellows on it) is a pod's thruster bell
 			new Recipe(s -> s.is(Items.COPPER_BLOCK.weathering().unaffected()) || s.is(Items.COPPER_BLOCK.waxed().unaffected()), BELL_HEAT,
 				PodParts.item(PodPart.BELL), 0));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -134,7 +134,7 @@ public final class Kiln {
 		CreativeModeTabEvents.modifyOutputEvent(tab()).register(output -> output.accept(UNFIRED_POT));
 	}
 
-	/** (0.18.12) Every firing, for JEI. */
+	/** (0.18.14) Every firing, for JEI. */
 	public static List<Recipe> recipes() {
 		return recipes;
 	}
