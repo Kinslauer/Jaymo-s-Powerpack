@@ -440,7 +440,7 @@ public final class Wounds {
 	}
 
 	/**
-	 * (Andy, 2026-10-30) Creative heals everything: switching into it, and every reconcile while in it. Every part whole,
+	 * (0.18.72) Creative heals everything: switching into it, and every reconcile while in it. Every part whole,
 	 * every break, cut and fever gone, severed limbs grown back, a bolas trip undone (the downed get up in
 	 * {@link Downed}'s own tick).
 	 */

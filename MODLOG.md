@@ -4190,3 +4190,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the legs snap together, it teeters with its arms windmilling, pitches onto its face with a bounce and a thud, kicks its
   bound legs and paws at the ground, then pushes itself up as the cord drops off. Down, it's stunned and can be finished
   (`Finishers.helpless`). Not seen in game.
+- **0.18.72, creative heals:** Andy: "creative should heal all your limbs and bones". `Wounds.creativeHeal`: within half a
+  second of switching into creative, and every reconcile while in it, every part is made whole, breaks, cuts, festering
+  and the battering are cleared, severed limbs grow back and a bolas trip is undone (`Tripped.clear`). A downed player in
+  creative or spectator gets straight up, not battered and not held down by Will. Not seen in game.

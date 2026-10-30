@@ -135,7 +135,7 @@ public final class Tripped {
 		return true;
 	}
 
-	/** (Andy, 2026-10-30) Up at once, nothing left of it (creative). */
+	/** (0.18.72) Up at once, nothing left of it (creative). */
 	static void clear(LivingEntity entity) {
 		if (entity.getAttached(TRIP) != null) {
 			entity.removeAttached(TRIP);
