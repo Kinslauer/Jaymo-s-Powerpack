@@ -3912,7 +3912,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Sunfang wears Andy's "ancient blasting sword" Blockbench model (`tools/blockbench/sunfang.py`, two animated
     textures); `gen_relics.py` no longer overwrites Blockbench relics' item models.
   - Compile-checked; not seen in game.
-- **0.18.14, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
+- **0.18.19, the pod is built from parts (Andy, after the SevTech Ages cross-reference):** "a destruction / construction
   system [...] parts for the pod are assembled separately with blocks and items like the ships, then carried and placed
   onto the pod". The pod is now an entity (`power/zfighter/pod/PodEntity`, about 2 x 3.5 blocks, our own `PodModel` in
   `client/power/zfighter/pod`, sheet painted by tools/gen_pod.py) made of eleven slots (`PodPart`): a keel, three landing

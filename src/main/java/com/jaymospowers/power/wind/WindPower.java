@@ -434,7 +434,7 @@ public final class WindPower implements Power {
 	 * A wind can't keep hold of a shield: its own wind tears it out of the hand, into the pack (or onto the ground),
 	 * every time. (0.17.99) Every weapon blocks now ({@link com.jaymospowers.combat.Guard}), so a weapon guard is no
 	 * shield: other weapons are only torn away now and then ({@link #WEAPON_TEAR_CHANCE_PER_SECOND}), and daggers,
-	 * quarterstaffs and spears never are.
+	 * quarterstaffs, spears and axes never are.
 	 */
 	private static void blowShieldAway(ServerPlayer player, ServerLevel level) {
 		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
@@ -468,13 +468,22 @@ public final class WindPower implements Power {
 		}
 	}
 
-	/** Weapons a wind always keeps hold of: daggers (and knives, kunai), quarterstaffs and spears. */
+	/** Weapons a wind always keeps hold of: daggers (and knives, kunai), quarterstaffs, spears and axes. */
 	static boolean windHeld(net.minecraft.world.item.ItemStack stack) {
-		if (WindDagger.isDagger(stack) || WindStaff.isStaff(stack) || stack.is(net.minecraft.tags.ItemTags.SPEARS)) {
+		if (WindDagger.isDagger(stack) || WindStaff.isStaff(stack) || stack.is(net.minecraft.tags.ItemTags.SPEARS) || isAxe(stack)) {
 			return true;
 		}
 		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 		return path.contains("spear") || path.contains("quarterstaff");
+	}
+
+	/** Any axe: the vanilla tag, or an id naming one (hatchet, battleaxe, war_axe, poleaxe; never a pickaxe). (0.18.18) */
+	static boolean isAxe(net.minecraft.world.item.ItemStack stack) {
+		if (stack.is(net.minecraft.tags.ItemTags.AXES)) {
+			return true;
+		}
+		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return !path.contains("pickaxe") && (path.contains("hatchet") || path.matches(".*axe(_.*)?"));
 	}
 
 	@Override
