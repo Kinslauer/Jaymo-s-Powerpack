@@ -258,7 +258,29 @@ public final class LifeStory {
 	 * first that is the born heritage's is pre-picked); {@code start}: question 6's; {@code realm}: you name a realm for it.
 	 */
 	public record Answer(String key, Item icon, Heritage.@Nullable Kind heritage, Stats.@Nullable Stat stat, boolean freePoint,
-		Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm) {
+		Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm,
+		Set<Heritage.Kind> only, Set<Heritage.Kind> never) {
+
+		Answer(String key, Item icon, Heritage.@Nullable Kind heritage, Stats.@Nullable Stat stat, boolean freePoint,
+			Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm) {
+			this(key, icon, heritage, stat, freePoint, cls, power, looks, start, realm, Set.of(), Set.of());
+		}
+
+		/**
+		 * (0.7.448) Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have
+		 * anyone who raised them". An answer only those born to {@code kinds} are asked (the vat-born's Tinkerer, the fair's
+		 * acrobats).
+		 */
+		Answer onlyBorn(Heritage.Kind... kinds) {
+			return new Answer(this.key, this.icon, this.heritage, this.stat, this.freePoint, this.cls, this.power, this.looks, this.start, this.realm,
+				Set.of(kinds), this.never);
+		}
+
+		/** (0.7.448) An answer that makes no sense for those born to {@code kinds} (a vat-born's noble family): not asked of them. */
+		Answer notBorn(Heritage.Kind... kinds) {
+			return new Answer(this.key, this.icon, this.heritage, this.stat, this.freePoint, this.cls, this.power, this.looks, this.start, this.realm,
+				this.only, Set.of(kinds));
+		}
 
 		static Answer born(Heritage.Kind kind, String key) {
 			return new Answer(key, kind.icon, kind, null, false, null, "", List.of(), null, false);
@@ -305,6 +327,9 @@ public final class LifeStory {
 		 * Emberborn, Stoneborn or Sylvan. Empty for any.
 		 */
 		public Set<Heritage.Kind> onlyFor() {
+			if (!this.only.isEmpty()) {
+				return this.only;
+			}
 			return switch (this.start) {
 				case VERDANT -> Set.of(Heritage.Kind.VERDANT);
 				case DEMON -> Set.of(Heritage.Kind.EMBERBORN);
@@ -318,6 +343,9 @@ public final class LifeStory {
 
 		/** (0.7.417) Whether {@code kind} may take this start: any (the start is for no one heritage alone), or one of {@link #onlyFor}. */
 		public boolean fits(Heritage.@Nullable Kind kind) {
+			if (kind != null && this.never.contains(kind)) {
+				return false;
+			}
 			Set<Heritage.Kind> only = this.onlyFor();
 			return only.isEmpty() || kind != null && only.contains(kind);
 		}
@@ -374,7 +402,24 @@ public final class LifeStory {
 				Answer.raised("healers", Items.GLISTERING_MELON_SLICE, Stats.Stat.WITS, false),
 				Answer.raised("wizard", Items.ENCHANTED_BOOK, Stats.Stat.WITS, false),
 				Answer.raised("outlaws", Items.TRIPWIRE_HOOK, Stats.Stat.AGILITY, false),
-				Answer.raised("nobles", Items.GOLDEN_HELMET, Stats.Stat.WITS, true),
+				// (0.7.448) no noble house claims a vat-born, and the warband has no titles to give
+				Answer.raised("nobles", Items.GOLDEN_HELMET, Stats.Stat.WITS, true).notBorn(Heritage.Kind.BIOBUILT, Heritage.Kind.WARRIORBORN,
+					Heritage.Kind.VERDANT),
+				// (0.7.448) who only some bloods could have been raised by (the rest of the answers are told their way: lang
+				// story.jaymoskingdoms.as.<heritage>.<question>...)
+				Answer.raised("tinkerer", Items.REDSTONE, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.BIOBUILT),
+				Answer.raised("vatkin", Items.GLASS_BOTTLE, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.BIOBUILT),
+				Answer.raised("acrobats", Items.FEATHER, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.RUBBERFOLK),
+				Answer.raised("ringmaster", Items.NAME_TAG, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.RUBBERFOLK),
+				Answer.raised("keepers", Items.PRISMARINE_SHARD, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.TIDEBORN),
+				Answer.raised("grovekeepers", Items.FERN, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.SYLVAN),
+				Answer.raised("elders", Items.GLOW_BERRIES, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.VERDANT),
+				Answer.raised("hornkin", Items.GOLD_INGOT, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.EMBERBORN),
+				Answer.raised("wolves", Items.BONE, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.FROSTBORN),
+				Answer.raised("barrows", Items.SOUL_LANTERN, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.NIGHTBORN),
+				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
+				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
+				Answer.raised("sunpriests", Items.GLOWSTONE_DUST, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.DAWNBORN),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(
 				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit"),
@@ -860,6 +905,12 @@ public final class LifeStory {
 				return;
 			}
 			heritage = kinds[live.heritage()];
+		}
+		// (0.7.448) the questions asked were the birthplace's: an answer for another blood (a vat-born's Tinkerer) is refused
+		for (Answer a : new Answer[] {raised, child, youth, turn}) {
+			if (a != null && !a.fits(born.heritage)) {
+				return;
+			}
 		}
 		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
 		if (road != null && !road.fits(heritage)) {
