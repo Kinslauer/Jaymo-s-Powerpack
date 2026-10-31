@@ -30,8 +30,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * invisible so the alien could stand in for it, so the flag is lifted for the hands and put back after;</li>
  * <li>the slam of the band (see XenoformSlap, and XenoformSlamView for the placements): the left forearm swings up across
  * the view with the band's face turned up at you, the right hand hovers above it and comes down on the dial. While it
- * plays, the usual hands are replaced. With First-person Model drawing your body, the slam plays on the body's own arms
- * instead and no hands are drawn.</li>
+ * plays, the usual hands are replaced. (0.18.84) With First-person Model drawing your body these hands are drawn too,
+ * and the body's own arms are hidden meanwhile (XenoformLivingEntityRendererMixin): posed on the body, the raised
+ * forearm came up through the camera and the band never showed (Andy).</li>
  * </ul>
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
@@ -62,12 +63,6 @@ abstract class XenoformFirstPersonMixin {
 		// the impact is felt at the landing whether or not the hands are drawn
 		XenoformSlap.landed(pose, self);
 		if (hands.isScoping || self.getAttached(Carry.CARRYING) != null) {
-			return;
-		}
-		if (XenoformSlap.ownBody(avatar)) {
-			// First-person Model is drawing your body: the slam plays on its own arms (XenoformSlap.apply), so no hands
-			this.jaymospowers$restoreInvisible(player);
-			ci.cancel();
 			return;
 		}
 		float time = self.tickCount + partialTicks;

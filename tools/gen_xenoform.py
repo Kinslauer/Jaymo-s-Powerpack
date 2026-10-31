@@ -231,7 +231,7 @@ def band():
     write_json(ROOT / "items" / "xeno_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/xeno_band"}})
 
 
-# ---- the band on the wrist (entity, 32x32): a 5x3x5 box; the dial on its outer face, glowing in a second texture ----
+# ---- the band on the wrist (entity, 32x32): a 5x3x5 box and a 1x5x5 face plate on its outer face, glowing in a second texture ----
 # Close up in first person every texel shows, so it's kept plain: no outlines or grain, just a lit top row and a
 # shaded bottom row on each side, and one small round dial.
 def band_worn():
@@ -253,6 +253,18 @@ def band_worn():
     for cx, cy in ((x0 + 2, y0), (x0 + 1, y0 + 1), (x0 + 3, y0 + 1), (x0 + 2, y0 + 2)):
         glow.putpixel((cx, cy), (60, 200, 90, 255))
     glow.putpixel((x0 + 2, y0 + 1), PALE_GREEN)
+    # the face plate (a 1x5x5 box at 0,10, proud of the band's outer face): the watch face you look at. A dark rim with
+    # bright metal studs at the corners round a 3x3 green face; the face glows, and while the band is raised the dialled
+    # alien's silhouette stands on it (XenoBand)
+    for name, box in faces(0, 10, 1, 5, 5).items():
+        rect(img, box, shade(metal, LIGHT[name]))
+    x0, y0, x1, y1 = faces(0, 10, 1, 5, 5)["left"]
+    rect(img, (x0, y0, x1, y1), rim)
+    for cx, cy in ((x0, y0), (x1 - 1, y0), (x0, y1 - 1), (x1 - 1, y1 - 1)):
+        img.putpixel((cx, cy), shade(metal, 1.3))
+    rect(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (40, 150, 70, 255))
+    rect(glow, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (92, 240, 122, 255))
+    glow.putpixel((x0 + 2, y0 + 2), PALE_GREEN)
     save(img, "entity/xeno_band.png")
     save(glow, "entity/xeno_band_glow.png")
 

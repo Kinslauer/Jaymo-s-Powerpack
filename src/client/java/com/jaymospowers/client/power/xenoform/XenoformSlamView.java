@@ -10,8 +10,8 @@ import net.minecraft.util.Mth;
  * <ol>
  * <li><b>raise</b>: the left forearm swings up from below into a bar across the lower middle of the view, the wrist
  * turned so the band's face looks up at you (it overshoots a little, then settles);</li>
- * <li><b>held</b>: it breathes, the band's dial pops up out of the band as a small glowing cap with the dialled alien's
- * hologram over it ({@link XenoHologram}), and the right hand waits up and off to the right, clear of it;</li>
+ * <li><b>held</b>: it breathes, the band's face plate lifts and grows, the dialled alien's silhouette dark on its glowing
+ * face and its hologram over it ({@link XenoHologram}), and the right hand waits up and off to the right, clear of it;</li>
  * <li><b>strike</b>: the hand comes straight down (fast, accelerating) and covers the dial; on contact the left forearm
  * dips and springs back;</li>
  * <li>then both arms drop away.</li>
@@ -20,10 +20,10 @@ import net.minecraft.util.Mth;
  * here were tuned against pictures: change them together.
  */
 public final class XenoformSlamView {
-	/** The raise overshoots by this much (ease-out-back), and the dial's cap pops in over the last of it. */
+	/** The raise overshoots by this much (ease-out-back), and the face plate lifts over the last of it. */
 	static final float OVERSHOOT = 1.4F, POP_FROM = 0.6F;
-	/** The cap's height over the band's face, in model pixels, and how fast its glow pulses (radians a tick). */
-	static final float POP_PX = 1.5F, PULSE_SPEED = 0.5F;
+	/** How fast the raised face's glow pulses (radians a tick). */
+	static final float PULSE_SPEED = 0.5F;
 	/** The dip on contact: how fast it dies away and how fast it swings (per tick), and its size at the peak. */
 	static final float DIP_DAMP = 0.45F, DIP_FREQ = 1.4F, DIP_GAIN = 1.6F;
 	/** The breathing while held: radians a tick. */
@@ -51,7 +51,7 @@ public final class XenoformSlamView {
 	static final float R_ROLL_DOWN = 0.0F, R_ROLL = 0.0F, R_ROLL_STRUCK = 0.0F;
 	static final float R_BOB_Y = 0.01F, R_BOB_ROLL = 2.0F;
 
-	/** While the left arm is drawn: how far the dial's cap stands (0-1) and the pulse of its glow (0-1), for {@link XenoBand}. */
+	/** While the left arm is drawn: how far the face plate is lifted (0-1) and the pulse of its glow (0-1), for {@link XenoBand}. */
 	static float pop, glow;
 
 	private XenoformSlamView() {
@@ -110,7 +110,7 @@ public final class XenoformSlamView {
 		poseStack.translate(-pivotX / 16.0F, -PIVOT_Y / 16.0F, 0.0F);
 	}
 
-	/** Before the left arm is drawn: the dial's cap and its glow for this moment ({@link XenoBand} reads them). */
+	/** Before the left arm is drawn: the face plate's lift and its glow for this moment ({@link XenoBand} reads them). */
 	public static void dial(XenoformSlap.Pose pose, float time) {
 		Phase p = phase(pose, time);
 		float up = smooth((p.u - POP_FROM) / (1.0F - POP_FROM));

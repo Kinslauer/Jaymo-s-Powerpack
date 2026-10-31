@@ -4263,3 +4263,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
     open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
   - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+- **0.18.84, the band shows like a watch, and an alien carries no gear:** Andy: in first person the raised band
+  wasn't visible at all, and it should read like a watch face held up to you; and none of your weapons should show on
+  the alien.
+  - The band gets a 5x5 face plate on its outer side (`XenoBand.plate`, texels 0,10 of `xeno_band.png`, from
+    `tools/gen_xenoform.py`): dark rim, metal studs at the corners, a glowing green face. Held up with Z the plate lifts
+    a pixel and grows by half (`PLATE_LIFT_PX`, `PLATE_GROW`), and the dialled alien's silhouette stands dark on the
+    face (`XenoBand.silhouette`: the alien's own model squashed flat onto the face, upright as you see it). The hologram
+    over it stays. The old pop-up cap is gone.
+  - With First-person Model drawing your body, the slam used to play on the body's own arms; the raised forearm came
+    up through the camera and the band never showed. Now the slam's own first-person hands (`XenoformSlamView`) are
+    drawn with it too, and the body's arms are hidden meanwhile (`FirstPersonCompat.hideArms`;
+    `XenoformSlap.FP_BODY_ARMS` turns the old way back on).
+  - As an alien, only the game's own render layers and Xenoform's run on the player
+    (`XenoformLivingEntityRendererMixin.alienLayers`): Weapon Master's holstered weapons, Traveler's Tool Belt, quivers,
+    backpacks, costumes and heritage looks no longer hang off the invisible body. Compile-checked; not seen in game.

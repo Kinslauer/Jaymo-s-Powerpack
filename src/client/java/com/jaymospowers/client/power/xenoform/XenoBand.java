@@ -17,14 +17,17 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 /**
- * The Xeno-Band on a wearer's left wrist: a 5x3x5 box round the forearm ({@code textures/entity/xeno_band.png}, drawn
- * by {@code tools/gen_xenoform.py}) whose dial glows ({@code xeno_band_glow.png}, an emissive pass). {@link Layer}
+ * The Xeno-Band on a wearer's left wrist: a 5x3x5 box round the forearm with a 5x5 face plate on its outer side
+ * ({@code textures/entity/xeno_band.png}, drawn by {@code tools/gen_xenoform.py}) whose face glows
+ * ({@code xeno_band_glow.png}, an emissive pass). {@link Layer}
  * draws it on everyone whose power is Xenoform while they're themselves (the alien has the insignia instead), over
  * any costume, suit or chestplate sleeve;
- * {@link #submitFirstPerson} is the same band on your first-person left arm. While you hold Z the dial pops up and the
- * dialled alien stands over it as a {@link XenoHologram}.
+ * {@link #submitFirstPerson} is the same band on your first-person left arm. While you hold Z the face plate lifts
+ * and grows, the dialled alien's silhouette shows dark on its green face, and the alien stands over it as a
+ * {@link XenoHologram}.
  */
 public final class XenoBand {
 	/** Whether this player wears the band (and is in their own shape), on the render state. */
@@ -33,7 +36,7 @@ public final class XenoBand {
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_band_glow.png");
 
 	private static ModelPart worn;
-	private static ModelPart cap;
+	private static ModelPart plate;
 	/** A slim (3-pixel) arm: the band, made for the 4-pixel one, is narrowed to it, about the arm's middle. */
 	static final float SLIM_WIDTH = 0.8F;
 	/**
@@ -41,6 +44,15 @@ public final class XenoBand {
 	 * pixels, over a costume's or the symbiote's sleeve), and this much more over a chestplate's sleeve (6 pixels).
 	 */
 	static final float GROW = 1.1F, ARMOUR_GROW = 1.25F;
+	/**
+	 * (0.18.84) The face plate (Andy: the band should show like a watch, its face big and lit): how far it lifts out of the
+	 * band while raised (model pixels) and how much it grows then, about its middle; the silhouette's share of the green
+	 * face's height, how far off the face it stands (blocks) and its colour.
+	 */
+	static final float PLATE_LIFT_PX = 1.0F, PLATE_GROW = 0.5F, SILHOUETTE_FILL = 0.9F, SILHOUETTE_OFF = 0.002F;
+	static final int SILHOUETTE = 0xFF0C1410;
+	/** The plate's outer face, in the arm's pixels: its x, and its middle (y, z); the green face is 3 pixels square. */
+	static final float FACE_X = 4.5F, FACE_Y = 7.5F, FACE_Z = 0.0F, FACE_PX = 3.0F;
 
 	private XenoBand() {
 	}
@@ -52,17 +64,14 @@ public final class XenoBand {
 		return LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("band");
 	}
 
-	/**
-	 * The dial's cap: the dial's 3x3 face lifted out of the band (a 1-pixel slab on the band's outer face, its face sampling
-	 * the dial's texels, 11-14 x 5-8), scaled out to its height as it stands.
-	 */
-	private static ModelPart cap() {
-		if (cap == null) {
+	/** The face plate: a 1x5x5 slab on the band's outer face (x 3.5-4.5), round the dial's middle. */
+	private static ModelPart plate() {
+		if (plate == null) {
 			MeshDefinition mesh = new MeshDefinition();
-			mesh.getRoot().addOrReplaceChild("cap", CubeListBuilder.create().texOffs(7, 2).addBox(3.5F, 6.0F, -1.5F, 1.0F, 3.0F, 3.0F), PartPose.ZERO);
-			cap = LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("cap");
+			mesh.getRoot().addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 10).addBox(3.5F, 5.0F, -2.5F, 1.0F, 5.0F, 5.0F), PartPose.ZERO);
+			plate = LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("plate");
 		}
-		return cap;
+		return plate;
 	}
 
 	/** For a layer: placed after the arm's own translateAndRotate. */
@@ -99,15 +108,71 @@ public final class XenoBand {
 		if (pop > 0.02F) {
 			// the dialled alien, a hologram over the dial
 			XenoHologram.submit(poseStack, collector, pop);
-			// the slam's raised dial: a small cap, glowing and pulsing
-			poseStack.translate(3.5F / 16.0F, 0.0F, 0.0F);
-			poseStack.scale(pop * XenoformSlamView.POP_PX, 1.0F, 1.0F);
-			poseStack.translate(-3.5F / 16.0F, 0.0F, 0.0F);
-			ModelPart cap = cap();
-			collector.submitModelPart(cap, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
-			int alpha = Mth.clamp((int)(XenoformSlamView.glow * 255.0F), 0, 255);
-			collector.submitModelPart(cap, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+			// raised: the plate lifts out of the band and grows about its middle
+			poseStack.translate(PLATE_LIFT_PX * pop / 16.0F, FACE_Y / 16.0F, FACE_Z / 16.0F);
+			float g = 1.0F + PLATE_GROW * pop;
+			poseStack.scale(1.0F, g, g);
+			poseStack.translate(0.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
 		}
+		ModelPart plate = plate();
+		collector.submitModelPart(plate, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+		int alpha = pop > 0.02F ? Mth.clamp((int)(XenoformSlamView.glow * 255.0F), 0, 255) : 255;
+		collector.submitModelPart(plate, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+		if (pop > 0.02F) {
+			silhouette(poseStack, collector, light);
+		}
+		poseStack.popPose();
+	}
+
+	/**
+	 * The dialled alien, flat and dark on the plate's green face: its own model, squashed onto the face and stood upright
+	 * as you see it (its head toward the world's up, or away from you when the face looks straight up). The pose stack is
+	 * in the arm's space, the plate placed.
+	 */
+	private static void silhouette(PoseStack poseStack, SubmitNodeCollector collector, int light) {
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		if (player == null) {
+			return;
+		}
+		com.jaymospowers.power.xenoform.XenoForm dialled = com.jaymospowers.power.xenoform.XenoForms.get(
+			com.jaymospowers.power.xenoform.XenoformState.band(player).dialled());
+		XenoFormModels.FormModel model = dialled == null ? null : XenoFormModels.of(dialled.id);
+		if (model == null) {
+			return;
+		}
+		org.joml.Matrix4f pose = poseStack.last().pose();
+		Vector3f at = pose.transformPosition(FACE_X / 16.0F, FACE_Y / 16.0F, FACE_Z / 16.0F, new Vector3f());
+		Vector3f normal = pose.transformDirection(1.0F, 0.0F, 0.0F, new Vector3f());
+		// how big the face is now (the plate may be grown), in blocks
+		float face = pose.transformDirection(0.0F, FACE_PX / 16.0F, 0.0F, new Vector3f()).length();
+		if (normal.lengthSquared() < 1.0E-8F || face < 1.0E-5F) {
+			return;
+		}
+		normal.normalize();
+		// up on the face: the world's up laid onto it; a face looking straight up takes "away from you" instead
+		Vector3f up = new Vector3f(0.0F, 1.0F, 0.0F);
+		up.sub(new Vector3f(normal).mul(up.dot(normal)));
+		if (up.lengthSquared() < 0.04F) {
+			up.set(at).sub(new Vector3f(normal).mul(at.dot(normal)));
+		}
+		if (up.lengthSquared() < 1.0E-8F) {
+			return;
+		}
+		up.normalize();
+		// the model's x to the face's right, its y (down) to -up, its z (its back) into the face
+		Vector3f right = new Vector3f(up).cross(normal);
+		Vector3f down = new Vector3f(up).negate();
+		Vector3f back = new Vector3f(normal).negate();
+		poseStack.pushPose();
+		poseStack.setIdentity();
+		poseStack.translate(at.x + normal.x * SILHOUETTE_OFF, at.y + normal.y * SILHOUETTE_OFF, at.z + normal.z * SILHOUETTE_OFF);
+		poseStack.mulPose(new org.joml.Matrix4f(right.x, right.y, right.z, 0.0F, down.x, down.y, down.z, 0.0F, back.x, back.y, back.z, 0.0F,
+			0.0F, 0.0F, 0.0F, 1.0F));
+		// a humanoid model stands 2 blocks (head top -8 to feet 24 pixels) over its render scale; fit it to the face
+		float scale = face * SILHOUETTE_FILL * model.renderScale / 2.0F;
+		poseStack.scale(scale, scale, 0.001F);
+		poseStack.translate(0.0F, -0.5F, 0.0F);
+		collector.submitModelPart(model.root(), poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null, SILHOUETTE);
 		poseStack.popPose();
 	}
 
@@ -144,9 +209,13 @@ public final class XenoBand {
 			}
 			// the slam pose is laid over the model after it animates; the arm here is before that, so lay it over again
 			XenoformSlap.applyModel(model, state);
-			// your own body in first person: the band's dial pops up and glows through the slam, as the drawn hands' did
+			// your own body in first person: through the slam its arms are hidden and the slam's own hands carry the band
 			XenoformSlap.Pose pose = state.getData(XenoformSlap.KEY);
-			boolean dial = pose != null && XenoformSlap.ownBody(state);
+			boolean own = pose != null && XenoformSlap.ownBody(state);
+			if (own && !XenoformSlap.FP_BODY_ARMS) {
+				return;
+			}
+			boolean dial = own;
 			if (dial) {
 				XenoformSlamView.dial(pose, state.ageInTicks);
 			}

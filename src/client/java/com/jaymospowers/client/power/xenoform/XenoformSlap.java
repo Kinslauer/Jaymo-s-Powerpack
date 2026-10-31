@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * hand lands as the hold turns you back (the server's {@link XenoformPower#HOLD_TICKS}). Everyone else sees the slap when a player changes shape. The pose is worked
  * out here from the time ({@link #extract}, onto the render state), laid over the model after it animates
  * ({@link #applyModel}, through the model-feature mixin: the human body and the alien alike), and mirrored in first
- * person by {@code XenoformFirstPersonMixin}.
+ * person by {@code XenoformFirstPersonMixin} (also with First-person Model, whose body arms are hidden for it).
  */
 public final class XenoformSlap {
 	/**
@@ -66,6 +66,11 @@ public final class XenoformSlap {
 	 * it and comes down onto the dial. The left arm's turn is {@link #FP_WRIST} (ZYX radians: a big roll, so it is slerped
 	 * from the arm's own pose rather than lerped angle by angle); the right arm's are angles (radians).
 	 */
+	/**
+	 * (0.18.84) Off: posed on First-person Model's body the raised forearm came up through the camera and the band never
+	 * showed (Andy), so the slam's own first-person hands play instead. Kept to turn back on.
+	 */
+	static final boolean FP_BODY_ARMS = false;
 	static final Quaternionf FP_WRIST = new Quaternionf().rotationZYX(1.536F, -2.897F, 0.977F);
 	static final float FP_POISED_X = -2.57F, FP_POISED_Y = -0.85F, FP_STRUCK_X = -2.22F, FP_STRUCK_Y = -0.85F;
 	/** First person: the camera kick when the hand lands (degrees, ticks). */
@@ -279,6 +284,10 @@ public final class XenoformSlap {
 
 	public static void apply(HumanoidModel<?> h, Pose pose, boolean firstPerson) {
 		float raise = pose.raise(), strike = pose.strike();
+		if (firstPerson && !FP_BODY_ARMS) {
+			// your own body in first person: its arms are hidden and the slam's own hands drawn (XenoformFirstPersonMixin)
+			return;
+		}
 		if (firstPerson) {
 			Quaternionf from = new Quaternionf().rotationZYX(h.leftArm.zRot, h.leftArm.yRot, h.leftArm.xRot);
 			Vector3f euler = from.slerp(FP_WRIST, raise).getEulerAnglesZYX(new Vector3f());
