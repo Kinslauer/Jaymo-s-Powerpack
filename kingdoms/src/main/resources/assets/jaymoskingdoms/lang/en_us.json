@@ -9910,5 +9910,10 @@
 	"story.jaymoskingdoms.as.dawnborn.raised.merchants.short": "Caravans across the sands.",
 	"story.jaymoskingdoms.as.dawnborn.childhood.snow": "Climbing the far peaks to touch the snow",
 	"story.jaymoskingdoms.as.dawnborn.childhood.snow.tale": "As a child you were always climbing the far peaks to build forts in the only snow you'd ever seen, long after your fingers went numb.",
-	"story.jaymoskingdoms.as.dawnborn.childhood.snow.short": "Chasing the only snow you'd seen."
+	"story.jaymoskingdoms.as.dawnborn.childhood.snow.short": "Chasing the only snow you'd seen.",
+	"gui.jaymoskingdoms.story.locked": "Locked (%s)",
+	"gui.jaymoskingdoms.story.open_starts": "Open starts (%s)",
+	"gui.jaymoskingdoms.story.locked_title": "Locked starts",
+	"message.jaymoskingdoms.story.fated": "Fate chose your start: %s.",
+	"message.jaymoskingdoms.story.fated.title": "Fate chose: %s"
 }

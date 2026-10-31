@@ -80,6 +80,8 @@ final class LifeStoryScreen extends Screen {
 	 * and how far (pixels).
 	 */
 	static final int ARROW_W = 16, STRIP_H = 24, CELL_W = 22, ICON_WELL = 64, ICON_SCALE = 3;
+	/** (0.7.449) The Locked / Open starts button's width, in the road's header. */
+	static final int LOCKED_W = 96;
 	static final float TEXT_SHARE = 0.44F;
 	static final long SLIDE_MS = 220L;
 	static final int SLIDE_PX = 36;
@@ -113,7 +115,12 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private final boolean forced;
-	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after;
+	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
+	/**
+	 * (0.7.449) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
+	 * Whether the carousel shows the locked starts instead of the open ones.
+	 */
+	private boolean showLocked;
 	/** (0.7.364) The look of the stranger shown for a road that makes you another blood (-1: none drawn yet). */
 	private int strangerLook = -1;
 	/** (0.7.356) The carousel's last turn: when, and which way (-1 back, 1 on). */
@@ -579,6 +586,9 @@ final class LifeStoryScreen extends Screen {
 		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
 		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
 		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
+		// (0.7.449) the locked starts, in a menu of their own
+		this.lockedButton = addRenderableWidget(Button.builder(Component.empty(), b -> flipLocked())
+			.bounds(left() + panelW() - 8 - LOCKED_W - 64, top() + 4, LOCKED_W, 14).build());
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
 		this.skipYes = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
 			randomize();
@@ -931,6 +941,12 @@ final class LifeStoryScreen extends Screen {
 				b.visible = wheel && !this.asking;
 			}
 		}
+		if (this.lockedButton != null) {
+			int locked = roadView(true).size();
+			this.lockedButton.visible = wheel && !this.asking && (this.showLocked || locked > 0);
+			this.lockedButton.setMessage(this.showLocked ? Component.translatable("gui.jaymoskingdoms.story.open_starts", roadView(false).size())
+				: Component.translatable("gui.jaymoskingdoms.story.locked", locked));
+		}
 
 		if (this.next != null) {
 			// (0.7.356) with MCA's creator to come the story's page leads on to it; after it, the road's last page sets out
@@ -1082,10 +1098,45 @@ final class LifeStoryScreen extends Screen {
 		return s.question == Question.ROAD && !s.realm;
 	}
 
-	/** (0.7.356) Turns the carousel one start back ({@code -1}) or on ({@code 1}), wrapping. */
+	/**
+	 * (0.7.449) The starts the carousel goes through, as indices into the road's answers: those open to this story, or
+	 * ({@code locked}) the rest, each in the road's order.
+	 */
+	private static List<Integer> roadView(boolean locked) {
+		List<Answer> roads = Question.ROAD.answers();
+		List<Integer> out = new ArrayList<>();
+		for (int i = 0; i < roads.size(); i++) {
+			if (open(roads.get(i)) != locked) {
+				out.add(i);
+			}
+		}
+		return out;
+	}
+
+	private List<Integer> roadView() {
+		return roadView(this.showLocked);
+	}
+
+	/** (0.7.449) Over to the locked starts, or back to the open ones (the first of them shown, unless one already is). */
+	private void flipLocked() {
+		this.showLocked = !this.showLocked;
+		List<Integer> view = roadView();
+		int ri = Question.ROAD.ordinal();
+		if (!view.contains(draft.answers[ri])) {
+			draft.answers[ri] = view.isEmpty() ? -1 : view.get(0);
+		}
+		this.slidAt = System.currentTimeMillis();
+		this.slideDir = this.showLocked ? 1 : -1;
+	}
+
+	/** (0.7.356) Turns the carousel one start back ({@code -1}) or on ({@code 1}), wrapping (through the starts in view). */
 	private void turn(int dir) {
-		int n = Question.ROAD.answers().size(), cur = draft.answers[Question.ROAD.ordinal()];
-		pickRoad(cur < 0 ? (dir > 0 ? 0 : n - 1) : Math.floorMod(cur + dir, n), dir);
+		List<Integer> view = roadView();
+		if (view.isEmpty()) {
+			return;
+		}
+		int at = view.indexOf(draft.answers[Question.ROAD.ordinal()]), n = view.size();
+		pickRoad(view.get(at < 0 ? (dir > 0 ? 0 : n - 1) : Math.floorMod(at + dir, n)), dir);
 	}
 
 	/** (0.7.356) Shows (and picks, if it's open) road {@code i}, sliding in from {@code dir}'s side. */
@@ -1104,11 +1155,12 @@ final class LifeStoryScreen extends Screen {
 
 	/** (0.7.356) The strip's first cell's left edge: centred when it fits, else scrolled to keep the shown start in the middle. */
 	private int stripStart() {
-		int n = Question.ROAD.answers().size(), view = panelW() - 16, total = n * CELL_W;
+		List<Integer> shown = roadView();
+		int n = shown.size(), view = panelW() - 16, total = n * CELL_W;
 		if (total <= view) {
 			return left() + 8 + (view - total) / 2;
 		}
-		int cur = Math.max(0, draft.answers[Question.ROAD.ordinal()]);
+		int cur = Math.max(0, shown.indexOf(draft.answers[Question.ROAD.ordinal()]));
 		return left() + 8 - Math.clamp(cur * CELL_W + CELL_W / 2 - view / 2, 0, total - view);
 	}
 
@@ -1123,7 +1175,8 @@ final class LifeStoryScreen extends Screen {
 			return -1;
 		}
 		int i = Math.floorDiv(mx - stripStart(), CELL_W);
-		return i >= 0 && i < Question.ROAD.answers().size() ? i : -1;
+		List<Integer> view = roadView();
+		return i >= 0 && i < view.size() ? view.get(i) : -1;
 	}
 
 	/**
@@ -1133,20 +1186,22 @@ final class LifeStoryScreen extends Screen {
 	private void carouselPage(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		List<Answer> roads = Question.ROAD.answers();
 		int ri = Question.ROAD.ordinal();
-		// (the first open start is shown when none is picked yet)
-		if (draft.answers[ri] < 0 || draft.answers[ri] >= roads.size()) {
-			for (int i = 0; i < roads.size(); i++) {
-				if (open(roads.get(i))) {
-					draft.answers[ri] = i;
-					break;
-				}
-			}
+		// (0.7.449) the open starts, or the locked ones; the locked menu with none left in it goes back to the open
+		List<Integer> view = roadView();
+		if (this.showLocked && view.isEmpty()) {
+			this.showLocked = false;
+			view = roadView();
+		}
+		// (the first start in view is shown when none in it is picked yet)
+		if (!view.contains(draft.answers[ri])) {
+			draft.answers[ri] = view.isEmpty() ? -1 : view.get(0);
 		}
 		int cur = Math.max(0, draft.answers[ri]);
 		Answer a = roads.get(cur);
 		int x = left(), y = top(), w = panelW();
-		Ui.line(graphics, this.font, Component.translatable("story.jaymoskingdoms.road.title"), x + 8, y + 7, w - 70, Ui.TEXT);
-		Ui.lineRight(graphics, this.font, Component.literal((cur + 1) + " / " + roads.size()), x + w - 8, y + 7, 60, Ui.DIM);
+		Ui.line(graphics, this.font, Component.translatable(this.showLocked ? "gui.jaymoskingdoms.story.locked_title" : "story.jaymoskingdoms.road.title"),
+			x + 8, y + 7, w - 80 - LOCKED_W, this.showLocked ? Ui.DIM : Ui.TEXT);
+		Ui.lineRight(graphics, this.font, Component.literal((view.indexOf(cur) + 1) + " / " + view.size()), x + w - 8, y + 7, 60, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
 
 		int sx0 = x + ARROW_W + 8, sx1 = x + w - ARROW_W - 8, sy0 = y + HEADER, sy1 = stripY() - 4;
@@ -1225,8 +1280,8 @@ final class LifeStoryScreen extends Screen {
 		int stripY = stripY(), x0 = stripStart();
 		int hover = cellAt(mouseX, mouseY);
 		graphics.enableScissor(x + 8, stripY, x + w - 8, stripY + STRIP_H - 4);
-		for (int i = 0; i < roads.size(); i++) {
-			int cx = x0 + i * CELL_W;
+		for (int k = 0; k < view.size(); k++) {
+			int i = view.get(k), cx = x0 + k * CELL_W;
 			boolean shown = i == cur, can = open(roads.get(i));
 			graphics.fill(cx + 1, stripY, cx + CELL_W - 1, stripY + STRIP_H - 4, shown ? Ui.ROW_PICKED : i == hover ? Ui.ROW_HOVER : Ui.ROW_ALT);
 			if (shown) {

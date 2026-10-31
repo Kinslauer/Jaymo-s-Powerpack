@@ -7841,3 +7841,16 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
   till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
 - Compile-checked; not seen in game.
+
+## 0.7.449: story screen fixes (pack 0.19.1)
+- Andy: "there is a problem with the way the character is drawn". A Bio-built's form parts (beak head, horns, bracers,
+  tail) were placed on the marks model's bones at submit time, but that shared model still held a pose from another draw
+  (the world's, another player's); the body itself is posed from the state only when drawn. So on the story screen the
+  head and parts sat askew of the body and armour. `BioForms.submit` now poses the bones from the state first
+  (`ModelPoses.now`: `setupAnim` plus the same after-pose list the `prepareModel` mixin runs, now kept in `ModelPoses.after`).
+- Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'". The road
+  carousel goes through the open starts only; a "Locked (n)" button in its header switches to the locked ones (with
+  their hints and reasons, as before) and "Open starts (n)" back.
+- Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
+  title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Compile-checked; not seen in game.
