@@ -39,6 +39,7 @@ abstract class LivingEntityHurtMixin {
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
 		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
 		// (0.7.431) last, a tribe's captain takes it as his traits have it (Captains)
-		return com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))));
+		// (0.7.433) a tribe's king, while his captains stand (SwornCaptains)
+		return com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))))));
 	}
 }

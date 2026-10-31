@@ -26,7 +26,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.112, Scan E) Skitter, the eight-legged: a squat black-brown body, a round hairy abdomen, four long jointed legs
+ * (0.18.113, Scan E) Skitter, the eight-legged: a squat black-brown body, a round hairy abdomen, four long jointed legs
  * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It runs up
  * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there upside down and
  * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).

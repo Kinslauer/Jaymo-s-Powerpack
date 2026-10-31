@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.112, Scan E) Skitter on a ceiling, its view rolled over: left and right strafe the way the screen shows. */
+/** (0.18.113, Scan E) Skitter on a ceiling, its view rolled over: left and right strafe the way the screen shows. */
 @Mixin(KeyboardInput.class)
 abstract class SkitterCeilingInputMixin extends ClientInput {
 	@Inject(method = "tick", at = @At("TAIL"))

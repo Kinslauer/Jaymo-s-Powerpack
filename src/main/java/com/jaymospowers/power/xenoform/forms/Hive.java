@@ -21,7 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.112, Scan E of {@code docs/ScanGaps-Plan.md}) Hive, the swarm: a small, striped amber-and-black body, a
+ * (0.18.113, Scan E of {@code docs/ScanGaps-Plan.md}) Hive, the swarm: a small, striped amber-and-black body, a
  * bulbous abdomen, two pairs of clear wings on its back, antennae and big compound eyes. 16 health, fists of 3. Falls
  * never hurt it. Scanned from a bee, or Naturalist's ant, butterfly, caterpillar or dragonfly ({@code XenoDna}).
  * <ul>

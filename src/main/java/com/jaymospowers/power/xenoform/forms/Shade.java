@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.112, Scan E) Shade, the stealer: very tall and thin, a black body with long arms and legs, a narrow head and
+ * (0.18.113, Scan E) Shade, the stealer: very tall and thin, a black body with long arms and legs, a narrow head and
  * glowing violet eyes. 30 health, fists of 6. Water and rain burn it. Scanned from an enderman, or Enderscape's drifter
  * ({@code XenoDna}).
  * <ul>

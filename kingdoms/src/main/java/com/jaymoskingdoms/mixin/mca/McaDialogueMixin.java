@@ -116,6 +116,14 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && (com.jaymoskingdoms.SwornCaptains.SPY_ANSWER.equals(answer) || com.jaymoskingdoms.SwornCaptains.RAID_ANSWER.equals(answer))
+			&& com.jaymoskingdoms.SwornCaptains.takesOrders(player, villager)) {
+			// (0.7.433) a sworn captain sent off spying on his old tribe, or to raid it
+			villager.sendChatMessage(com.jaymoskingdoms.SwornCaptains.order(player, villager, answer), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Captains.PEDLAR_ANSWER.equals(answer) && Languages.understands(player, villager)) {
 			// (0.7.431) what the pedlar's heard of the tribe's captains, for a few emeralds
 			villager.sendChatMessage(com.jaymoskingdoms.Captains.pedlarTells(player, villager), player);

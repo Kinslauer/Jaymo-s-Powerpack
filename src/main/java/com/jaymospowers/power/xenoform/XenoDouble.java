@@ -83,9 +83,9 @@ public class XenoDouble extends PathfinderMob {
 
 	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(XenoDouble.class,
 		EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
-	/** (0.18.112) Whose form it's drawn as: "duplex" for a true double, another form's id for a false copy (Mirage's). */
+	/** (0.18.113) Whose form it's drawn as: "duplex" for a true double, another form's id for a false copy (Mirage's). */
 	private static final EntityDataAccessor<String> DATA_LOOK = SynchedEntityData.defineId(XenoDouble.class, EntityDataSerializers.STRING);
-	/** (0.18.112) A false copy's ticks left (server side; unused by a true double). */
+	/** (0.18.113) A false copy's ticks left (server side; unused by a true double). */
 	private int life;
 
 	public XenoDouble(EntityType<? extends XenoDouble> type, Level level) {
@@ -151,7 +151,7 @@ public class XenoDouble extends PathfinderMob {
 	}
 
 	/**
-	 * (0.18.112, Scan E) Makes this a false copy (Mirage's): drawn as {@code look} at {@code scale}, gone after {@code ticks},
+	 * (0.18.113, Scan E) Makes this a false copy (Mirage's): drawn as {@code look} at {@code scale}, gone after {@code ticks},
 	 * at the first blow, or when its owner leaves that form; it never fights.
 	 */
 	public void makeFake(ServerPlayer player, String look, float scale, int ticks) {
@@ -247,7 +247,7 @@ public class XenoDouble extends PathfinderMob {
 	/** Gone in a puff of copper (merged back, or its owner stopped being Duplex); whatever it carried falls. */
 	public void pop(ServerLevel level) {
 		if (this.fake()) {
-			// (0.18.112) a false copy: a shimmer, and nothing there
+			// (0.18.113) a false copy: a shimmer, and nothing there
 			level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
 			level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.NEUTRAL, 0.6F, 1.4F);
@@ -309,7 +309,7 @@ public class XenoDouble extends PathfinderMob {
 			return false;
 		}
 		if (this.fake()) {
-			// (0.18.112) a false copy vanishes at the first blow
+			// (0.18.113) a false copy vanishes at the first blow
 			this.pop(level);
 			return false;
 		}

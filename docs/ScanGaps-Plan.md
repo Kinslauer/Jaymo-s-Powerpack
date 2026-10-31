@@ -157,7 +157,7 @@ leaves it standing; Keen's sonar outline is particles only you are sent, not a g
 
 ### Scan E, swarm, web and tricks (Powers, large)
 
-**Built (0.18.112):** all four, with these changes: Skitter clings to a ceiling while jump is held and crawls along,
+**Built (0.18.113):** all four, with these changes: Skitter clings to a ceiling while jump is held and crawls along,
 drawn upside down for everyone and with its own camera rolled over (Andy's ask; mouse and strafe are flipped to match
 the rolled view); Shade's blink-away when hit is B arming it for 10 s (the next blow only), so B has a
 key; Mirage's copies follow you like Duplex's doubles rather than wander, and last 15 s.

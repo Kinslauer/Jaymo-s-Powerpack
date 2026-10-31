@@ -1911,7 +1911,7 @@ def keen():
 
 
 def hive():
-    """(0.18.112, Scan E) Hive, the swarm: amber and black bands, a fuzzy black head with big dark compound eyes, black
+    """(0.18.113, Scan E) Hive, the swarm: amber and black bands, a fuzzy black head with big dark compound eyes, black
     antennae, pale veined wings and a striped abdomen."""
     img = new_skin()
     amber = (224, 164, 40)
@@ -1951,7 +1951,7 @@ def hive():
 
 
 def skitter():
-    """(0.18.112, Scan E) Skitter, the eight-legged: black-brown and hairy, a paler hourglass on the abdomen, a cluster
+    """(0.18.113, Scan E) Skitter, the eight-legged: black-brown and hairy, a paler hourglass on the abdomen, a cluster
     of red eyes, banded legs."""
     img = new_skin()
     hide = (58, 42, 34)
@@ -1985,7 +1985,7 @@ def skitter():
 
 
 def shade_form():
-    """(0.18.112, Scan E) Shade, the stealer: near-black with a faint violet sheen, and long narrow glowing violet eyes."""
+    """(0.18.113, Scan E) Shade, the stealer: near-black with a faint violet sheen, and long narrow glowing violet eyes."""
     img = new_skin()
     dark = (26, 20, 32)
     parts(img, dark, 0.08)
@@ -2003,7 +2003,7 @@ def shade_form():
 
 
 def mirage():
-    """(0.18.112, Scan E) Mirage, the illusionist: a deep blue robe trimmed in gold, a pale grey face with bright blue
+    """(0.18.113, Scan E) Mirage, the illusionist: a deep blue robe trimmed in gold, a pale grey face with bright blue
     eyes in the hood's shadow."""
     img = new_skin()
     robe = (46, 74, 160)
@@ -2221,7 +2221,7 @@ if __name__ == "__main__":
     keen()
     for form in SCAN_D:
         ultimate(form)
-    # (0.18.112) Scan E, last again
+    # (0.18.113) Scan E, last again
     hive()
     skitter()
     shade_form()

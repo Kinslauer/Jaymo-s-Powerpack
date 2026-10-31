@@ -293,7 +293,7 @@ public final class XenoformPower implements Power {
 		public final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap lights = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
 		public boolean perched;
 		/**
-		 * (0.18.112, Scan E) Hive: ticks left of the scatter. Skitter: where its web line is fixed and the line's length;
+		 * (0.18.113, Scan E) Hive: ticks left of the scatter. Skitter: where its web line is fixed and the line's length;
 		 * ticks left of its brood.
 		 */
 		public int scatter, brood;

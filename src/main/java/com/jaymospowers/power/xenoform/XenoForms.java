@@ -62,7 +62,7 @@ public final class XenoForms {
 	public static final XenoForm GNASHER = register(new com.jaymospowers.power.xenoform.forms.Gnasher());
 	public static final XenoForm LUMEN = register(new com.jaymospowers.power.xenoform.forms.Lumen());
 	public static final XenoForm KEEN = register(new com.jaymospowers.power.xenoform.forms.Keen());
-	/** (0.18.112, Scan E) Hive (a bee), Skitter (a spider), Shade (an enderman), Mirage (an illusioner). */
+	/** (0.18.113, Scan E) Hive (a bee), Skitter (a spider), Shade (an enderman), Mirage (an illusioner). */
 	public static final XenoForm HIVE = register(new com.jaymospowers.power.xenoform.forms.Hive());
 	public static final XenoForm SKITTER = register(new com.jaymospowers.power.xenoform.forms.Skitter());
 	public static final XenoForm SHADE = register(new com.jaymospowers.power.xenoform.forms.Shade());

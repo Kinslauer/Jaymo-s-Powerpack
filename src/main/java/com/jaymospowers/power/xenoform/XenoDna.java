@@ -65,7 +65,7 @@ public final class XenoDna {
 		Map.entry("naturalist:piranha", "gnasher"), Map.entry("friendsandfoes:mauler", "gnasher"),
 		Map.entry("naturalist:firefly", "lumen"), Map.entry("friendsandfoes:glare", "lumen"),
 		Map.entry("jaymoskingdoms:vampire_bat", "keen"), Map.entry("jaymoskingdoms:blightwing", "keen"),
-		// (0.18.112, Scan E)
+		// (0.18.113, Scan E)
 		Map.entry("naturalist:ant", "hive"), Map.entry("naturalist:butterfly", "hive"), Map.entry("naturalist:caterpillar", "hive"),
 		Map.entry("naturalist:dragonfly", "hive"), Map.entry("jaymoskingdoms:tarantula", "skitter"), Map.entry("enderscape:drifter", "shade"),
 		Map.entry("friendsandfoes:illusioner", "mirage"),

@@ -21,7 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.112, Scan E) Mirage, the illusionist: lean, in a deep blue hooded robe trimmed in gold, a pale grey face and
+ * (0.18.113, Scan E) Mirage, the illusionist: lean, in a deep blue hooded robe trimmed in gold, a pale grey face and
  * bright eyes, a shimmer about it. 20 health, fists of 3. Scanned from an illusioner (vanilla's, or the Friends &amp;
  * Foes one) ({@code XenoDna}).
  * <ul>

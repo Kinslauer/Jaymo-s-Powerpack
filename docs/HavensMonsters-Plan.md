@@ -140,3 +140,9 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   fight and avengers who swear on your head; a Will stare on a downed captain spares him (empty hand) or shames him.
   (Andy) 6% of captains who would stay dead are raised anyway (necromancer or corrupted magic) as Deathless: no fears,
   +1 rank, 1.5x health, +3 damage.
+- Patch 4, second half (Kingdoms 0.7.433): challenges nailed to camps with paper (fought alone, coward on the post),
+  death threats on the town boards; turning a downed captain by a Valor stare or Ambrose's In-balming, sworn
+  captains follow, spy and raid, proud/spiteful ones turn back; a king takes a fifth of every blow while his captains
+  stand, and killing him then with a sworn captain of his brood crowns that captain (the tribe is yours).
+  (Andy) In-balming: each spirit binds orcs and goblins its own way (Varro's ki mark and battle cry, Ambrose's gentle hand
+  on brutes, Grimsby's steel oath, Thessaly's borrowed eyes, the Quiet One's silent shadow).

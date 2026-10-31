@@ -177,7 +177,7 @@ public final class XenoformState {
 	 */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** (0.18.112) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
+	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;

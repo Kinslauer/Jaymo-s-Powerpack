@@ -844,7 +844,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.112, Scan E) Hive: antennae, a striped abdomen behind, and two clear wings that buzz. */
+	/** (0.18.113, Scan E) Hive: antennae, a striped abdomen behind, and two clear wings that buzz. */
 	static final class Hive extends FormModel {
 		private final ModelPart rightWing, leftWing;
 
@@ -882,7 +882,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.112, Scan E) Skitter: a round abdomen behind and two more jointless legs down each side that step as it walks. */
+	/** (0.18.113, Scan E) Skitter: a round abdomen behind and two more jointless legs down each side that step as it walks. */
 	static final class Skitter extends FormModel {
 		private final ModelPart[] legs = new ModelPart[4];
 
@@ -929,7 +929,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.112, Scan E) Shade: very tall and thin; nothing but the body, its eyes do the rest. */
+	/** (0.18.113, Scan E) Shade: very tall and thin; nothing but the body, its eyes do the rest. */
 	static final class Shade extends FormModel {
 		Shade() {
 			super(bake(HumanoidModel.createMesh(new CubeDeformation(-0.4F), 0.0F)), "shade");
@@ -937,7 +937,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.112, Scan E) Mirage: a deep hood over the head and a robe skirt from the waist. */
+	/** (0.18.113, Scan E) Mirage: a deep hood over the head and a robe skirt from the waist. */
 	static final class Mirage extends FormModel {
 		Mirage() {
 			super(bake(mesh()), "mirage");

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.18.112, Scan E) Skitter on a ceiling: the view rolls over with the body ({@link SkitterCeiling}), and in first
+ * (0.18.113, Scan E) Skitter on a ceiling: the view rolls over with the body ({@link SkitterCeiling}), and in first
  * person the eyes drop to where its upside-down head hangs.
  */
 @Mixin(Camera.class)

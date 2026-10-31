@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.112, Scan E) Skitter clinging to a ceiling ({@link XenoformState#CEILING}): every client turns its body over
+ * (0.18.113, Scan E) Skitter clinging to a ceiling ({@link XenoformState#CEILING}): every client turns its body over
  * (feet to the ceiling, head down) and the clinging player's own camera rolls over with it, its eyes moved down to
  * where the upside-down head is. Both ease in and out over {@link #TURN_TICKS} ticks.
  */
