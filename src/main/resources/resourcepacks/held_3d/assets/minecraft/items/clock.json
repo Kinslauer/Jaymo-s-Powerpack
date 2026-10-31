@@ -1,0 +1,3277 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_00"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_00"
+                }
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_01"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_01"
+                }
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_02"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_02"
+                }
+              },
+              "threshold": 1.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_03"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_03"
+                }
+              },
+              "threshold": 2.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_04"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_04"
+                }
+              },
+              "threshold": 3.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_05"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_05"
+                }
+              },
+              "threshold": 4.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_06"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_06"
+                }
+              },
+              "threshold": 5.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_07"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_07"
+                }
+              },
+              "threshold": 6.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_08"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_08"
+                }
+              },
+              "threshold": 7.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_09"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_09"
+                }
+              },
+              "threshold": 8.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_10"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_10"
+                }
+              },
+              "threshold": 9.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_11"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_11"
+                }
+              },
+              "threshold": 10.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_12"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_12"
+                }
+              },
+              "threshold": 11.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_13"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_13"
+                }
+              },
+              "threshold": 12.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_14"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_14"
+                }
+              },
+              "threshold": 13.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_15"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_15"
+                }
+              },
+              "threshold": 14.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_16"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_16"
+                }
+              },
+              "threshold": 15.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_17"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_17"
+                }
+              },
+              "threshold": 16.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_18"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_18"
+                }
+              },
+              "threshold": 17.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_19"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_19"
+                }
+              },
+              "threshold": 18.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_20"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_20"
+                }
+              },
+              "threshold": 19.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_21"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_21"
+                }
+              },
+              "threshold": 20.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_22"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_22"
+                }
+              },
+              "threshold": 21.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_23"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_23"
+                }
+              },
+              "threshold": 22.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_24"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_24"
+                }
+              },
+              "threshold": 23.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_25"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_25"
+                }
+              },
+              "threshold": 24.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_26"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_26"
+                }
+              },
+              "threshold": 25.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_27"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_27"
+                }
+              },
+              "threshold": 26.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_28"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_28"
+                }
+              },
+              "threshold": 27.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_29"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_29"
+                }
+              },
+              "threshold": 28.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_30"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_30"
+                }
+              },
+              "threshold": 29.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_31"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_31"
+                }
+              },
+              "threshold": 30.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_32"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_32"
+                }
+              },
+              "threshold": 31.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_33"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_33"
+                }
+              },
+              "threshold": 32.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_34"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_34"
+                }
+              },
+              "threshold": 33.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_35"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_35"
+                }
+              },
+              "threshold": 34.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_36"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_36"
+                }
+              },
+              "threshold": 35.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_37"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_37"
+                }
+              },
+              "threshold": 36.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_38"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_38"
+                }
+              },
+              "threshold": 37.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_39"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_39"
+                }
+              },
+              "threshold": 38.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_40"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_40"
+                }
+              },
+              "threshold": 39.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_41"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_41"
+                }
+              },
+              "threshold": 40.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_42"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_42"
+                }
+              },
+              "threshold": 41.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_43"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_43"
+                }
+              },
+              "threshold": 42.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_44"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_44"
+                }
+              },
+              "threshold": 43.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_45"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_45"
+                }
+              },
+              "threshold": 44.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_46"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_46"
+                }
+              },
+              "threshold": 45.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_47"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_47"
+                }
+              },
+              "threshold": 46.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_48"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_48"
+                }
+              },
+              "threshold": 47.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_49"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_49"
+                }
+              },
+              "threshold": 48.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_50"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_50"
+                }
+              },
+              "threshold": 49.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_51"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_51"
+                }
+              },
+              "threshold": 50.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_52"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_52"
+                }
+              },
+              "threshold": 51.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_53"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_53"
+                }
+              },
+              "threshold": 52.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_54"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_54"
+                }
+              },
+              "threshold": 53.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_55"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_55"
+                }
+              },
+              "threshold": 54.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_56"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_56"
+                }
+              },
+              "threshold": 55.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_57"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_57"
+                }
+              },
+              "threshold": 56.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_58"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_58"
+                }
+              },
+              "threshold": 57.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_59"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_59"
+                }
+              },
+              "threshold": 58.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_60"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_60"
+                }
+              },
+              "threshold": 59.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_61"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_61"
+                }
+              },
+              "threshold": 60.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_62"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_62"
+                }
+              },
+              "threshold": 61.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_63"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_63"
+                }
+              },
+              "threshold": 62.5
+            },
+            {
+              "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:display_context",
+                "cases": [
+                  {
+                    "when": [
+                      "gui",
+                      "ground",
+                      "fixed",
+                      "on_shelf"
+                    ],
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "minecraft:item/clock_00"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/held_3d/minecraft/clock_00"
+                }
+              },
+              "threshold": 63.5
+            }
+          ],
+          "property": "minecraft:time",
+          "scale": 64.0,
+          "source": "daytime"
+        },
+        "when": "minecraft:overworld"
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:range_dispatch",
+      "entries": [
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_00"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_00"
+            }
+          },
+          "threshold": 0.0
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_01"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_01"
+            }
+          },
+          "threshold": 0.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_02"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_02"
+            }
+          },
+          "threshold": 1.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_03"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_03"
+            }
+          },
+          "threshold": 2.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_04"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_04"
+            }
+          },
+          "threshold": 3.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_05"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_05"
+            }
+          },
+          "threshold": 4.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_06"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_06"
+            }
+          },
+          "threshold": 5.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_07"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_07"
+            }
+          },
+          "threshold": 6.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_08"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_08"
+            }
+          },
+          "threshold": 7.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_09"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_09"
+            }
+          },
+          "threshold": 8.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_10"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_10"
+            }
+          },
+          "threshold": 9.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_11"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_11"
+            }
+          },
+          "threshold": 10.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_12"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_12"
+            }
+          },
+          "threshold": 11.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_13"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_13"
+            }
+          },
+          "threshold": 12.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_14"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_14"
+            }
+          },
+          "threshold": 13.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_15"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_15"
+            }
+          },
+          "threshold": 14.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_16"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_16"
+            }
+          },
+          "threshold": 15.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_17"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_17"
+            }
+          },
+          "threshold": 16.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_18"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_18"
+            }
+          },
+          "threshold": 17.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_19"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_19"
+            }
+          },
+          "threshold": 18.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_20"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_20"
+            }
+          },
+          "threshold": 19.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_21"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_21"
+            }
+          },
+          "threshold": 20.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_22"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_22"
+            }
+          },
+          "threshold": 21.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_23"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_23"
+            }
+          },
+          "threshold": 22.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_24"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_24"
+            }
+          },
+          "threshold": 23.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_25"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_25"
+            }
+          },
+          "threshold": 24.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_26"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_26"
+            }
+          },
+          "threshold": 25.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_27"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_27"
+            }
+          },
+          "threshold": 26.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_28"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_28"
+            }
+          },
+          "threshold": 27.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_29"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_29"
+            }
+          },
+          "threshold": 28.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_30"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_30"
+            }
+          },
+          "threshold": 29.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_31"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_31"
+            }
+          },
+          "threshold": 30.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_32"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_32"
+            }
+          },
+          "threshold": 31.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_33"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_33"
+            }
+          },
+          "threshold": 32.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_34"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_34"
+            }
+          },
+          "threshold": 33.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_35"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_35"
+            }
+          },
+          "threshold": 34.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_36"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_36"
+            }
+          },
+          "threshold": 35.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_37"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_37"
+            }
+          },
+          "threshold": 36.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_38"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_38"
+            }
+          },
+          "threshold": 37.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_39"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_39"
+            }
+          },
+          "threshold": 38.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_40"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_40"
+            }
+          },
+          "threshold": 39.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_41"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_41"
+            }
+          },
+          "threshold": 40.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_42"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_42"
+            }
+          },
+          "threshold": 41.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_43"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_43"
+            }
+          },
+          "threshold": 42.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_44"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_44"
+            }
+          },
+          "threshold": 43.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_45"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_45"
+            }
+          },
+          "threshold": 44.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_46"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_46"
+            }
+          },
+          "threshold": 45.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_47"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_47"
+            }
+          },
+          "threshold": 46.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_48"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_48"
+            }
+          },
+          "threshold": 47.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_49"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_49"
+            }
+          },
+          "threshold": 48.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_50"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_50"
+            }
+          },
+          "threshold": 49.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_51"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_51"
+            }
+          },
+          "threshold": 50.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_52"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_52"
+            }
+          },
+          "threshold": 51.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_53"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_53"
+            }
+          },
+          "threshold": 52.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_54"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_54"
+            }
+          },
+          "threshold": 53.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_55"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_55"
+            }
+          },
+          "threshold": 54.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_56"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_56"
+            }
+          },
+          "threshold": 55.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_57"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_57"
+            }
+          },
+          "threshold": 56.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_58"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_58"
+            }
+          },
+          "threshold": 57.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_59"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_59"
+            }
+          },
+          "threshold": 58.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_60"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_60"
+            }
+          },
+          "threshold": 59.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_61"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_61"
+            }
+          },
+          "threshold": 60.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_62"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_62"
+            }
+          },
+          "threshold": 61.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_63"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_63"
+            }
+          },
+          "threshold": 62.5
+        },
+        {
+          "model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [
+              {
+                "when": [
+                  "gui",
+                  "ground",
+                  "fixed",
+                  "on_shelf"
+                ],
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/clock_00"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/held_3d/minecraft/clock_00"
+            }
+          },
+          "threshold": 63.5
+        }
+      ],
+      "property": "minecraft:time",
+      "scale": 64.0,
+      "source": "random"
+    },
+    "property": "minecraft:context_dimension"
+  }
+}

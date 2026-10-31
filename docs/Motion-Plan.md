@@ -111,11 +111,15 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - **Worn lanterns** (Andy, added to the patch): any lantern in the belt bauble slot hangs at the hip; a Lantern Pole
   in the body slot is worn on the back with its lantern over the head; both swing, and glow with LambDynamicLights.
 
-### Patch 5, 3D models (art; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
-- 3D held models for the vanilla tool set and bow (inventory icons stay flat), with a pack toggle.
-- 3D held compass, clock, totem, brush, spyglass and saddle; bottles that show their colour and glow, ours included.
-- Glowing trims from glowing materials (amethyst, redstone, diamond, emerald) and iron golem eyes.
-- 3D mushrooms and pointed dripstone; one-block textures for doubled vanilla slabs; carved details per wood on canoes.
+### Patch 5, 3D models (Powers 0.18.109; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
+- **Built-in pack "Jaymo's Powers: 3D items and plants"** (`resourcepacks/held_3d`, `tools/gen_held_3d.py`), on by
+  default: held models voxelised from each item's own sprite for every vanilla tool tier, bow, crossbow, fishing rod,
+  shears, mace, compass, recovery compass, clock, totem, brush, saddle and bottles (ours too); flat in the inventory.
+  The spyglass already has a 3D model in hand.
+- Bottles: potion contents keep their colour and glow a little (model `light_emission`); experience bottles glow.
+- Glow: iron golem eyes (`client/glow/GolemEyes`); amethyst, redstone, diamond and emerald trims (`GlowingTrimMixin`).
+- 3D red and brown mushrooms and pointed dripstone. Java only seams one double slab (smooth stone): now one block.
+- Canoes left out: Canoe Boats is CC BY-NC and fetched at install, so we can't ship carved versions of it.
 
 ### Patch 6, Mob animation (Powers/Kingdoms client; picks mob-anims, pet-wolves, pet-cats, wet-wolves, golem-idle)
 - First check whether base Fresh Animations (FreshLX) allows modpacks and has 26.3; if so ship it unchanged through EMF

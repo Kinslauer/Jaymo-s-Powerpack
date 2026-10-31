@@ -126,6 +126,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) vanilla tools, bow, compass, clock, totem, brush, saddle and bottles solid in hand, 3D mushrooms
+		// and dripstone (tools/gen_held_3d.py); on by default, switched off in Resource Packs for the flat look
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_3d"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) the iron golem's eyes glow
+		com.jaymospowers.client.glow.GolemEyes.init();
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
