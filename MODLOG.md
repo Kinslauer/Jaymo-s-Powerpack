@@ -4671,8 +4671,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.2, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
   storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
   "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
+- **0.19.3, Kingdoms 0.7.450:** taking a bout in the fight pit no longer teleports you in: the bell waits for you to walk
+  into the ring, and both fighters square up for a breath before the first blow. A bookie met in town leads you to the
+  den instead of dealing in the street; a guard overhearing it starts a crackdown. Villagers no longer pile up on the
+  speakeasy ladder.
 
-- **0.19.3, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+- **0.19.4, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
   your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
   first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,

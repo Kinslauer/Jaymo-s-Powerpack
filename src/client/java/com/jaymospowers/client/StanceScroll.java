@@ -76,7 +76,7 @@ public final class StanceScroll {
 		int from = current(player);
 		int to = Mth.clamp(from + step, Stance.PRONE, Stance.STAND);
 		if (from == Stance.PRONE && step < 0) {
-			// (0.19.3) Andy: "sliding into prone and scrolling down doesnt lock you into the prone toggle like it should".
+			// (0.19.4) Andy: "sliding into prone and scrolling down doesnt lock you into the prone toggle like it should".
 			// Already down from a slide with Sneak held, a turn down locks it: letting go of Sneak no longer gets you up
 			CrawlTaps.lockProne();
 			held = Stance.PRONE;

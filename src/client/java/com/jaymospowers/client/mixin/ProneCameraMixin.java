@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.19.3) Prone, in first person: the view goes down (and up) with the head as you crouch into the crawl or get up from
+ * (0.19.4) Prone, in first person: the view goes down (and up) with the head as you crouch into the crawl or get up from
  * it ({@link ProneTransition}), and follows the head round when you turn over onto your back ({@link CrawlPose}).
  */
 @Mixin(Camera.class)

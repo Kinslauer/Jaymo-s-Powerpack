@@ -124,6 +124,23 @@ public final class Underworld {
 	/** Lines each (lang {@code underworld.jaymoskingdoms.<key>.<n>}). */
 	static final int LINES = 3;
 
+	/**
+	 * (0.7.450) Andy (2026-10-31): "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the
+	 * open are frowned upon and rare." A guard who overhears it (a bookie asked about his book in the street, a street
+	 * deal seen) has the watch crack down on the city for this long: no crook whispers the way, the street won't buy
+	 * ({@link #CRACKDOWN_WARY} off how receptive they are), and no bookie will be seen leading anyone to the den.
+	 */
+	static final long CRACKDOWN_TICKS = 24000L;
+	static final int CRACKDOWN_WARY = 25;
+	/**
+	 * (0.7.450) Andy: "so many villagers stuck on the speakeasy ladder". The den's hands are kept at home (checked this
+	 * often, ticks): one found outside his room is put back at his spot; anyone stuck in the shaft this many checks
+	 * running is put out at its nearer end. The bookie alone may go up into town by day ({@link Bookies}).
+	 */
+	static final int HOME_CHECK = 40, SHAFT_STUCK = 2;
+	/** How far round a den its hands are looked for. */
+	static final double HANDS_RANGE = 64.0;
+
 	/** The den's people (scoreboard tags). */
 	static final String FENCE_TAG = "jaymoskingdoms.fence", DICER_TAG = "jaymoskingdoms.dicer";
 	/** What a den makes. */
@@ -210,6 +227,9 @@ public final class Underworld {
 	/** Every realm's den (realm id → it), kept on the Overworld. */
 	static final AttachmentType<Map<String, Den>> DENS = AttachmentRegistry.create(JaymosKingdoms.id("dens"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Den.CODEC)));
+	/** (0.7.450) Realm id → the game time the watch's crackdown there ends. Kept on the Overworld. */
+	static final AttachmentType<Map<String, Long>> CRACKDOWNS = AttachmentRegistry.create(JaymosKingdoms.id("den_crackdowns"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
 	/** Per player: the realms whose den they've found (ids). Saved. */
 	static final AttachmentType<List<Integer>> FOUND = AttachmentRegistry.create(JaymosKingdoms.id("dens_found"),
 		builder -> builder.persistent(Codec.INT.listOf()).copyOnDeath());
@@ -225,6 +245,8 @@ public final class Underworld {
 	private static int games;
 	/** Realm → the day a site for its den was last looked for and none found (looked for once a day after that). */
 	private static final Map<String, Long> NO_SITE = new HashMap<>();
+	/** (0.7.450) Villager → how many checks running it's been found in a den's shaft. */
+	private static final Map<UUID, Integer> IN_SHAFT = new HashMap<>();
 
 	private Underworld() {
 	}
@@ -273,6 +295,7 @@ public final class Underworld {
 			PITCHED.clear();
 			DICE_NEXT.clear();
 			NO_SITE.clear();
+			IN_SHAFT.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(Commands.literal("underworld")
 			.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -384,6 +407,9 @@ public final class Underworld {
 				openCarry(level, player, now);
 			}
 		}
+		if (now % HOME_CHECK == 0) {
+			keepHome(level, now);
+		}
 		if (now % CHECK_TICKS != 0) {
 			return;
 		}
@@ -467,7 +493,9 @@ public final class Underworld {
 			MISSING_FENCE.remove(key);
 		}
 		// (0.7.224) the bookie, from the first: the den's the only place a war is bet on; and the pit off the den
-		if (level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && v.entityTags().contains(Bookies.TAG)).isEmpty()) {
+		// (0.7.450) he may be up in town by day: only missing if he's nowhere about
+		if (level.getEntitiesOfClass(Villager.class, box.inflate(HANDS_RANGE, HANDS_RANGE, HANDS_RANGE),
+			v -> v.isAlive() && v.entityTags().contains(Bookies.TAG)).isEmpty()) {
 			Long since = MISSING_BOOKIE.get(key);
 			if (since == null) {
 				MISSING_BOOKIE.put(key, now - REPLACE_TICKS);
@@ -493,6 +521,141 @@ public final class Underworld {
 		} else {
 			MISSING_DICER.remove(key);
 		}
+	}
+
+	// ---- (0.7.450) crackdowns, and the den's hands kept at home ---------------------------------------------------------
+
+	/** Whether the watch is cracking down on talk of {@code realm}'s den just now. */
+	static boolean crackdown(MinecraftServer server, int realm) {
+		Long until = Factions.level(server).getAttachedOrElse(CRACKDOWNS, Map.of()).get(Integer.toString(realm));
+		return until != null && Factions.level(server).getGameTime() < until;
+	}
+
+	/** A guard among {@code heard} overheard talk of the den ({@code player}'s): the watch cracks down. False if no guard heard. */
+	static boolean overheard(ServerLevel level, Faction f, List<? extends LivingEntity> heard, @Nullable ServerPlayer player) {
+		LivingEntity guard = null;
+		for (LivingEntity e : heard) {
+			if (!guards(level, f, e.getBoundingBox().inflate(0.5)).stream().filter(w -> w.mob() == e).toList().isEmpty()) {
+				guard = e;
+				break;
+			}
+		}
+		if (guard == null) {
+			return false;
+		}
+		crackDown(level, f, guard, player);
+		return true;
+	}
+
+	/** {@code guard} heard talk of the den: the watch cracks down on the city for {@link #CRACKDOWN_TICKS}. */
+	static void crackDown(ServerLevel level, Faction f, LivingEntity guard, @Nullable ServerPlayer player) {
+		MinecraftServer server = level.getServer();
+		boolean already = crackdown(server, f.id());
+		Map<String, Long> all = new HashMap<>(level.getAttachedOrElse(CRACKDOWNS, Map.of()));
+		all.put(Integer.toString(f.id()), level.getGameTime() + CRACKDOWN_TICKS);
+		level.setAttached(CRACKDOWNS, Map.copyOf(all));
+		Speech.say(level, guard, Component.translatable("underworld.jaymoskingdoms.crackdown.guard." + level.getRandom().nextInt(LINES)), Speech.RED, DEN_SPEECH);
+		if (player != null && !already) {
+			player.sendSystemMessage(Component.translatable("underworld.jaymoskingdoms.crackdown", f.name()).withStyle(ChatFormatting.RED));
+		}
+	}
+
+	/** Which of the den's hands {@code v} is (his tag), or null. */
+	private static @Nullable String hand(Villager v) {
+		for (String tag : new String[] {FENCE_TAG, DICER_TAG, Bookies.TAG, FightPit.ATTENDANT_TAG, FightPit.FIGHTER_TAG}) {
+			if (v.entityTags().contains(tag)) {
+				return tag;
+			}
+		}
+		return null;
+	}
+
+	/** The way down: the ladder's column under the hatch. */
+	static AABB shaft(BlockPos hatch) {
+		return new AABB(hatch.getX(), hatch.getY() - Speakeasy.DEPTH + 1, hatch.getZ(), hatch.getX() + 1, hatch.getY() + 1, hatch.getZ() + 1);
+	}
+
+	/** Every den nearby: its hands kept at home, one of each; nobody left stuck on its ladder. */
+	private static void keepHome(ServerLevel level, long now) {
+		MinecraftServer server = level.getServer();
+		java.util.Set<UUID> stuck = new java.util.HashSet<>();
+		for (Faction f : Factions.all(server)) {
+			if (!f.type().isRealm() || f.fallen()) {
+				continue;
+			}
+			Den d = builtDen(server, f);
+			if (d == null || !level.isPositionEntityTicking(d.hatch())) {
+				continue;
+			}
+			BlockPos hatch = d.hatch();
+			AABB room = Speakeasy.room(hatch).inflate(1.0), shaft = shaft(hatch);
+			Speakeasy.Pit pit = FightPit.pit(server, f.id());
+			AABB pitRoom = pit == null ? null : pit.room().inflate(1.0);
+			Map<String, Villager> kept = new HashMap<>();
+			AABB around = room.inflate(HANDS_RANGE, HANDS_RANGE, HANDS_RANGE);
+			for (Villager v : level.getEntitiesOfClass(Villager.class, around, v -> v.isAlive() && !v.isPassenger())) {
+				boolean inShaft = shaft.intersects(v.getBoundingBox()) && !room.contains(v.position());
+				String tag = hand(v);
+				if (tag == null) {
+					if (inShaft) {
+						// anyone else on the ladder this long is stuck there: out at whichever end is nearer
+						int n = IN_SHAFT.merge(v.getUUID(), 1, Integer::sum);
+						stuck.add(v.getUUID());
+						if (n >= SHAFT_STUCK) {
+							Vec3 out = v.getY() - room.minY < hatch.getY() - v.getY() ? Speakeasy.wakeSpot(hatch) : topside(level, hatch);
+							v.snapTo(out.x, out.y, out.z, v.getYRot(), 0.0F);
+							v.getNavigation().stop();
+							IN_SHAFT.remove(v.getUUID());
+						}
+					}
+					continue;
+				}
+				if (tag.equals(FightPit.FIGHTER_TAG) && (FightPit.onCard(v.getUUID()) || pitRoom == null)) {
+					continue;
+				}
+				AABB home = tag.equals(FightPit.FIGHTER_TAG) || tag.equals(FightPit.ATTENDANT_TAG) && pitRoom != null ? pitRoom : room;
+				boolean atHome = home.contains(v.position()) || tag.equals(FightPit.ATTENDANT_TAG) && room.contains(v.position());
+				if (tag.equals(Bookies.TAG) && (Bookies.walking(v.getUUID()) || !atHome && !inShaft && Bookies.outAndAbout(level, v, d))) {
+					// the bookie, up in town on his own business, or leading someone down
+					if (!kept.containsKey(tag)) {
+						kept.put(tag, v);
+					}
+					continue;
+				}
+				if (!tag.equals(FightPit.FIGHTER_TAG)) {
+					Villager first = kept.get(tag);
+					if (first != null && first != v) {
+						// one of each: a second hand hired while the first was off wandering goes back to town, an ordinary man
+						v.removeTag(tag);
+						Vec3 out = Speakeasy.release(level, f);
+						v.snapTo(out.x, out.y, out.z, v.getYRot(), 0.0F);
+						continue;
+					}
+					kept.put(tag, v);
+				}
+				if (!atHome) {
+					Vec3 spot = switch (tag) {
+						case FENCE_TAG -> Speakeasy.fenceSpot(hatch);
+						case DICER_TAG -> Speakeasy.diceSpot(hatch);
+						case Bookies.TAG -> Speakeasy.bookieSpot(hatch);
+						default -> pit != null ? Vec3.atBottomCenterOf(pit.center()) : Speakeasy.wakeSpot(hatch);
+					};
+					if (tag.equals(FightPit.ATTENDANT_TAG) && pit != null) {
+						spot = FightPit.ringside(level, d, pit);
+					}
+					v.snapTo(spot.x, spot.y, spot.z, v.getYRot(), 0.0F);
+					v.getNavigation().stop();
+					v.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.WALK_TARGET);
+				}
+			}
+		}
+		IN_SHAFT.keySet().retainAll(stuck);
+	}
+
+	/** Standing room up top, beside the hatch (never on it). */
+	static Vec3 topside(ServerLevel level, BlockPos hatch) {
+		BlockPos at = Construction.standable(level, hatch.offset(-2, 1, 0), 2);
+		return Vec3.atBottomCenterOf(at);
 	}
 
 	static @Nullable Villager hire(ServerLevel level, Vec3 at, String tag) {
@@ -541,6 +704,7 @@ public final class Underworld {
 	private static void whispers(ServerLevel level, ServerPlayer player, Faction f, Den d, long now) {
 		Long last = WHISPERED.get(player.getUUID());
 		if (last != null && now - last < WHISPER_GAP || level.getRandom().nextFloat() >= WHISPER_CHANCE || Theft.wanted(player, f.id())
+			|| crackdown(level.getServer(), f.id())
 			|| !guards(level, f, player.getBoundingBox().inflate(GUARD_EARSHOT)).isEmpty()) {
 			return;
 		}
@@ -700,7 +864,7 @@ public final class Underworld {
 		PITCHED.put(v.getUUID(), day);
 		Den d = realm ? den(level.getServer(), f.id()) : null;
 		int score = law ? Integer.MIN_VALUE : McaCompat.heartsOf(v, player) + McaCompat.mood(v) * PITCH_MOOD + leaning(McaCompat.personality(v))
-			+ (d != null && d.known() ? PITCH_HOTBED : 0);
+			+ (d != null && d.known() ? PITCH_HOTBED : 0) - (realm && crackdown(level.getServer(), f.id()) ? CRACKDOWN_WARY : 0);
 		if (score >= PITCH_LISTEN) {
 			ItemStack stack = player.getMainHandItem();
 			int price = streetPrice(stack);
@@ -720,6 +884,7 @@ public final class Underworld {
 				if (!seen.isEmpty()) {
 					Theft.commit(player, level, f, Theft.Crime.DEALING, null, false, seen);
 					Busts.charge(player, f, "dealing");
+					overheard(level, f, seen, player);
 				}
 			}
 			return;
