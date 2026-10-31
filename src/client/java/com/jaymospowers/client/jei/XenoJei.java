@@ -69,5 +69,10 @@ public final class XenoJei implements IModPlugin {
 		registration.addIngredientInfo(XenoFinds.TABLET, Component.translatable("jei.jaymospowers.found.star_tablet"));
 		registration.addIngredientInfo(XenoFinds.CIRCUIT, Component.translatable("jei.jaymospowers.found.probe_circuit"));
 		registration.addIngredientInfo(XenoFinds.WRECK_CORE, Component.translatable("jei.jaymospowers.found.wreck_core"));
+		// (0.18.123, patch 7) module plans and the forge
+		for (Item plan : com.jaymospowers.power.xenoform.BandUpgrades.PLANS.values()) {
+			registration.addIngredientInfo(plan, Component.translatable("jei.jaymospowers.found.band_plan"));
+		}
+		registration.addIngredientInfo(com.jaymospowers.power.xenoform.BandForge.FORGE_ITEM, Component.translatable("jei.jaymospowers.found.star_forge"));
 	}
 }

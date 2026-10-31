@@ -31,6 +31,7 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. While
   changed, hold Z 0.5 s and let go to turn back; hold Z and **scroll**, then let go, for a **quick change** into the
   dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.92).
+  (0.18.123) Quick change must be bought with band points first (see "Upgrading the band").
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
@@ -46,7 +47,7 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 - **The band saves you** (0.18.92): a killing blow as yourself (not the void or `/kill`, not jammed or locked) slams the
   band for you, before Downed: a fall gives Wyrm or Wisp, drowning Slipfin (once it exists) or Wisp, fire Pyre or Prism,
   anything else Bulwark, Knell or Prism, else the dialled alien. At least 30 s of charge, and you turn back at 1 health.
-  Once every 10 minutes.
+  Once every 10 minutes. (0.18.123) Only once Death Save is bought with band points.
 - **Wild dial** (0.18.92): C while holding Z as yourself turns it on or off (a player tag, kept). The band changes you
   into a random known alien as soon as it can, and again every 1 to 60 s while changed (no cost); Z can't turn you back
   or quick-change. Each move counts double toward mastery.
@@ -192,6 +193,29 @@ Scanning stays the main way in. Beside it:
   hint about the sky (wrecks and probes, hunters, the smith on a moon, glitches, fishing, remnant hollows, tablets).
   Module plans join the trade with patch 7.
 - Tuning: constants at the top of `XenoFinds`, `StarWreckBlock` and `StarReaders`. Art: `tools/gen_xeno_finds.py`.
+
+## Upgrading the band [BandUpgrades, BandForge] (0.18.123, Xeno-Band patch 7)
+
+- **The band screen**: B as yourself (not holding Z). Three tabs: Modules, Skills, Aliens. Every button goes to the
+  server (`BandUpgrades.Action`), which reopens the screen.
+- **The Star Forge** (`BandForge`): each save picks one far world for it (`BandForge.CHOICES`: the Pale Moon, Rustfall,
+  Glacia, Cinder or Verdant; kept on the overworld as `band_forge_world`). The first time a band wearer walks that world, a
+  9x9 smithy is raised 40-64 blocks from them, with the forge, a blast furnace, an anvil and soul lanterns, and (with
+  Kingdoms and MCA) the star smith, tag `jaymospowers_star_smith`. While you're on that world, an unforged band hums
+  toward the forge every 20 s (8 ways, near/mid/far). Using the forge, or asking the smith, reforges your band for 4 star
+  metal, a wreck core and 4 metal dust (any mix of Bulwark's three). It can't be broken or moved. Star-readers'
+  sky talk names the forge's world obliquely about a third of the time.
+- **Modules**: learned by using a module plan (sold by star-readers for 4 star metal, two unknown ones at a time; a
+  quarter of mined wrecks drop one). A reforged band fits up to 3:
+  - Cell: twice the charge, filled in the same time.
+  - Breather: water breathing, and the Pale Moon's and the Maw's thin air (`Breath`), human or alien.
+  - Plating: +8 armour, +10% speed, no freezing, only while no armour is worn.
+  - Steady: a corrupted band never glitches. Wild: the band glitches as if corrupted. Fitting one removes the other.
+- **Skills** (band points: one per 30 mastery points, at most 8, plus one once ascended; spent points stay spent):
+  Quick Change (1), Death Save (2), Scan Reach (1 per rank, 2 ranks: +8 blocks each), Bigger Charge (1 per rank, 2
+  ranks: +25% each), Faster Recharge (1 per rank, 2 ranks: refill time x0.75 each).
+- **Aliens**: forget one alien (it comes back by scanning or a tablet), or wipe the band clean. Both ask twice.
+- Tuning: constants at the top of `BandUpgrades` and `BandForge`. Art: `tools/gen_xeno_finds.py`.
 
 ## Rendering [client/power/xenoform]
 

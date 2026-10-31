@@ -15,6 +15,8 @@ Four of each, all original:
   gloves and boots, the patrol's gold badge on the chest.
 - star_reader: (0.7.442) a star-reader from Powers' fallen-star craters, a long night-blue robe pricked with silver stars,
   a deep hood, a rope belt and a lens on a chain.
+- star_smith: (0.7.444) the star forge's smith, a dark fitted suit with green-lit seams under a heavy scorched leather
+  apron, thick gloves to the elbow and a welding visor pushed up on the brow.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""
 import os
@@ -430,6 +432,59 @@ def star_readers():
             star_reader((18, 48, 66), (14, 36, 50), (140, 110, 70), 9903), star_reader((36, 38, 48), (24, 26, 34), (120, 96, 60), 9904)]
 
 
+# ---- the star smith ------------------------------------------------------------------------------------------------
+
+def star_smith(suit, apron, glove, glow, seed):
+    def draw(img, rnd, tone):
+        sea.box(img, BODY, suit, 4, rnd)
+        for arm in ARMS:
+            sea.box(img, arm, suit, 4, rnd)
+        sea.hands(img, rnd, tone)
+        sea.legs(img, rnd, suit, (30, 28, 30))
+        # green-lit seams down the suit's sides and arms
+        for part in [BODY] + ARMS + LEGS:
+            for side in ("right", "left"):
+                x, y, w, h = part[side]
+                for yy in range(y, y + h, 2):
+                    sea.px(img, x + w // 2, yy, glow)
+        # thick gloves to the elbow
+        for arm in ARMS:
+            for side in SIDES:
+                x, y, w, h = arm[side]
+                sea.paint(img, (x, y + h - 6, w, 6), glove, 5, rnd)
+            sea.paint(img, arm["bottom"], glove, 5, rnd)
+        # a heavy apron over the front (the jacket layer), strapped round the back, scorched here and there
+        fx, fy, fw, fh = JACKET["front"]
+        sea.paint(img, (fx, fy, fw, fh), apron, 6, rnd)
+        for x in (fx, fx + fw - 1):
+            img.putpixel((x, fy), (0, 0, 0, 0))
+            img.putpixel((x, fy + 1), (0, 0, 0, 0))
+        for _ in range(5):
+            sea.px(img, fx + rnd.randrange(fw), fy + 3 + rnd.randrange(fh - 3), sea.shade(apron, -40))
+        bx, by, bw, bh = JACKET["back"]
+        sea.paint(img, (bx, by + 6, bw, 1), sea.shade(apron, -20), 3, rnd)
+        for x in (bx + 1, bx + bw - 2):
+            sea.paint(img, (x, by, 1, 6), sea.shade(apron, -20), 3, rnd)
+        # a welding visor pushed up on the brow: a band round the head, a dark glass plate in front
+        for side in SIDES:
+            x, y, w, h = HAT[side]
+            sea.paint(img, (x, y + 1, w, 1), (54, 56, 62), 3, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx + 1, hx + hw - 1):
+            sea.px(img, x, hy, (70, 72, 80))
+            sea.px(img, x, hy + 1, (26, 60, 40))
+            sea.px(img, x, hy + 2, (70, 72, 80))
+        sea.px(img, hx + 2, hy + 1, glow)
+    return drawn(draw, seed)
+
+
+def star_smiths():
+    return [star_smith((36, 38, 46), (110, 74, 44), (60, 44, 32), (92, 240, 122), 9951),
+            star_smith((44, 30, 40), (96, 62, 40), (40, 40, 44), (92, 240, 122), 9952),
+            star_smith((28, 44, 44), (120, 84, 50), (70, 50, 34), (120, 220, 240), 9953),
+            star_smith((50, 50, 54), (86, 58, 36), (34, 34, 36), (92, 240, 122), 9954)]
+
+
 def all_outfits():
     out = {}
     uni.numbered(out, "zfighter/keeper", keepers())
@@ -441,6 +496,7 @@ def all_outfits():
     uni.numbered(out, "zfighter/demon_master", demon_masters())
     uni.numbered(out, "zfighter/patrolman", patrolmen())
     uni.numbered(out, "zfighter/star_reader", star_readers())
+    uni.numbered(out, "zfighter/star_smith", star_smiths())
     return out
 
 
