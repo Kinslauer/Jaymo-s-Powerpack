@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -72,7 +73,19 @@ public final class Baubles {
 	public static final AttachmentType<List<ItemStack>> WORN = AttachmentRegistry.create(JaymosPowers.id("baubles"),
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath());
 
+	/**
+	 * (Motion patch 4) On a player: the worn things others see, synced to everyone for drawing them: the lantern hung
+	 * at the hip (a lantern in the belt slot) and the lantern pole on the back, each empty when not worn.
+	 */
+	public static final AttachmentType<List<ItemStack>> SHOWN = AttachmentRegistry.create(JaymosPowers.id("baubles_shown"),
+		builder -> builder.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Vanilla's lanterns tag (plain, soul, every copper one): what hangs at the hip from the belt slot. */
+	static final TagKey<Item> LANTERNS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("minecraft", "lanterns"));
+	/** The belt and body slots, for {@link #SHOWN}. */
+	static final int BELT_SLOT = 3, BODY_SLOT = 5;
+
 	public static MenuType<BaublesMenu> MENU;
+	public static Item LANTERN_POLE;
 	public static Item HEARTSTONE_AMULET, SWIFTFOOT_RING, DELVERS_RING, BRAWLERS_BELT, DIVERS_CIRCLET, FEATHERFALL_CLOAK, RABBIT_FOOT_CHARM;
 	/** Every attribute any bauble touches, so stale bonuses can be taken off. */
 	private static final Set<Holder<Attribute>> TOUCHED = new LinkedHashSet<>();
@@ -98,6 +111,8 @@ public final class Baubles {
 			new BaubleItem.Bonus(Attributes.SAFE_FALL_DISTANCE, 2.0, AttributeModifier.Operation.ADD_VALUE));
 		RABBIT_FOOT_CHARM = bauble("rabbit_foot_charm", Kind.CHARM, Rarity.COMMON,
 			new BaubleItem.Bonus(Attributes.LUCK, 1.0, AttributeModifier.Operation.ADD_VALUE));
+		// (Motion patch 4) a lantern on a stick, worn on the back with the lantern hung out over the head
+		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -200,6 +215,35 @@ public final class Baubles {
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
 		}
+		show(player, worn);
+	}
+
+	/** A hip lantern: any lantern ({@code #minecraft:lanterns}) in the belt slot. */
+	public static boolean hipLantern(ItemStack stack) {
+		return stack.is(LANTERNS);
+	}
+
+	/** Syncs the hip lantern and lantern pole others should see, only when they change. */
+	private static void show(ServerPlayer player, List<ItemStack> worn) {
+		ItemStack hip = hipLantern(worn.get(BELT_SLOT)) ? worn.get(BELT_SLOT).copyWithCount(1) : ItemStack.EMPTY;
+		ItemStack back = worn.get(BODY_SLOT).is(LANTERN_POLE) ? worn.get(BODY_SLOT).copyWithCount(1) : ItemStack.EMPTY;
+		List<ItemStack> now = player.getAttached(SHOWN);
+		if (hip.isEmpty() && back.isEmpty()) {
+			if (now != null) {
+				player.removeAttached(SHOWN);
+			}
+			return;
+		}
+		if (now == null || now.size() != 2 || !ItemStack.isSameItem(now.get(0), hip) || !ItemStack.isSameItem(now.get(1), back)
+			|| now.get(0).isEmpty() != hip.isEmpty() || now.get(1).isEmpty() != back.isEmpty()) {
+			player.setAttached(SHOWN, List.of(hip, back));
+		}
+	}
+
+	/** What a player shows hung on them: {hip lantern, lantern pole}, either empty (client and server). */
+	public static ItemStack shown(Player player, int which) {
+		List<ItemStack> now = player.getAttached(SHOWN);
+		return now != null && which < now.size() ? now.get(which) : ItemStack.EMPTY;
 	}
 
 	/**

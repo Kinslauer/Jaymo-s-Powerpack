@@ -4508,4 +4508,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **`client/armory/HeldItems`:** flint and steel (and flint and rock) struck two-handed in third person, a chop in
     first person, sparks off flint and steel; shears brought in to the middle and snipping; compass and clock held up
     to read (third person: the arm comes up when you look down); any lantern held out and swinging with your step.
+  - **Worn lanterns** (Andy; `baubles/Baubles`, `client/baubles/WornLanterns`): any lantern fits the belt bauble slot
+    and hangs at your off-hand hip; the new **Lantern Pole** (sticks, chain, lantern, string) fits the body slot and is
+    worn on your back with its lantern hung out over your head. Everyone sees them (`Baubles.SHOWN`, synced); they hang
+    straight down and swing on a spring as you move. With LambDynamicLights they light up around you
+    (`LdlWornLanternMixin`, optional).
   - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.

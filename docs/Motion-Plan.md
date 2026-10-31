@@ -108,6 +108,8 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - **Held lantern:** held out a little, swinging with your step (first and third person).
 - **Flintlock:** held ready, raised to the eye line at its own side, not onto the crosshair (`MusketSights`); dual
   wielding (`armory/DualFlintlocks`): one in each hand fires main then off, then reloads main then off.
+- **Worn lanterns** (Andy, added to the patch): any lantern in the belt bauble slot hangs at the hip; a Lantern Pole
+  in the body slot is worn on the back with its lantern over the head; both swing, and glow with LambDynamicLights.
 
 ### Patch 5, 3D models (art; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
 - 3D held models for the vanilla tool set and bow (inventory icons stay flat), with a pack toggle.

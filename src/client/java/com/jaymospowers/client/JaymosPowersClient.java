@@ -165,6 +165,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
+		// (Motion patch 4) lanterns worn at the hip (belt slot) and on a pole on the back (body slot)
+		com.jaymospowers.client.baubles.WornLanterns.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
