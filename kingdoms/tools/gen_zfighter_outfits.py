@@ -17,6 +17,8 @@ Four of each, all original:
   a deep hood, a rope belt and a lens on a chain.
 - star_smith: (0.7.444) the star forge's smith, a dark fitted suit with green-lit seams under a heavy scorched leather
   apron, thick gloves to the elbow and a welding visor pushed up on the brow.
+- band_hunter: (0.7.446) Powers' band hunter, an outcast in a long ragged dark coat over patched clothes, a torn hood,
+  wrapped shins, and the rival band dark red on his left wrist with a red-lit face.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""
 import os
@@ -485,6 +487,70 @@ def star_smiths():
             star_smith((50, 50, 54), (86, 58, 36), (34, 34, 36), (92, 240, 122), 9954)]
 
 
+# ---- the band hunter -----------------------------------------------------------------------------------------------
+
+RIVAL_BAND, RIVAL_GLOW = (70, 18, 20), (255, 60, 50)
+
+
+def band_hunter(coat, under, hood, wrap, seed):
+    def draw(img, rnd, tone):
+        sea.box(img, BODY, under, 6, rnd)
+        for arm in ARMS:
+            sea.box(img, arm, under, 6, rnd)
+        sea.hands(img, rnd, tone)
+        sea.legs(img, rnd, sea.shade(under, -10), (34, 28, 24))
+        # patches on the clothes underneath
+        for _ in range(4):
+            part = rnd.choice([BODY] + LEGS)
+            x, y, w, h = part[rnd.choice(("front", "back"))]
+            sea.paint(img, (x + rnd.randrange(max(1, w - 2)), y + rnd.randrange(max(1, h - 2)), 2, 2), sea.shade(under, 22), 4, rnd)
+        # a long coat (the jacket and sleeve layers), its hem torn ragged
+        for part in [JACKET] + SLEEVES:
+            for side in SIDES:
+                x, y, w, h = part[side]
+                sea.paint(img, (x, y, w, h), coat, 7, rnd)
+                if part is JACKET:
+                    for xx in range(x, x + w):
+                        for yy in range(y + h - rnd.randrange(0, 3), y + h):
+                            img.putpixel((xx, yy), (0, 0, 0, 0))
+        fx, fy, fw, fh = JACKET["front"]
+        for y in range(fy, fy + fh - 2):
+            img.putpixel((fx + fw // 2, y), (0, 0, 0, 0)) if rnd.random() < 0.85 else None
+        # shins wrapped in strips
+        for leg in LEGS:
+            for side in SIDES:
+                x, y, w, h = leg[side]
+                for yy in range(y + h - 5, y + h - 1, 2):
+                    sea.paint(img, (x, yy, w, 1), wrap, 5, rnd)
+        # the rival band on the left wrist (the sleeve layer, over any coat), its face lit red
+        left_sleeve = SLEEVES[1]
+        for side in SIDES:
+            x, y, w, h = left_sleeve[side]
+            sea.paint(img, (x, y + h - 4, w, 2), RIVAL_BAND, 4, rnd)
+        x, y, w, h = left_sleeve["right"]
+        sea.px(img, x + w // 2, y + h - 4, RIVAL_GLOW)
+        sea.px(img, x + w // 2 - 1, y + h - 3, sea.shade(RIVAL_GLOW, -60))
+        # a torn hood: over the top, sides and back, a ragged rim round the face
+        for side in ("back", "right", "left", "top"):
+            sea.paint(img, HAT[side], hood, 7, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx, hx + hw):
+            sea.px(img, x, hy, sea.shade(hood, -18))
+            if rnd.random() < 0.5:
+                sea.px(img, x, hy + 1, sea.shade(hood, -10))
+        for y in range(hy, hy + hh - 1):
+            sea.px(img, hx, y, sea.shade(hood, -18))
+            sea.px(img, hx + hw - 1, y, sea.shade(hood, -18))
+    return drawn(draw, seed)
+
+
+def band_hunters():
+    return [band_hunter((34, 30, 30), (62, 52, 42), (28, 24, 24), (110, 96, 76), 9971),
+            band_hunter((40, 28, 26), (54, 56, 50), (34, 24, 22), (96, 86, 70), 9972),
+            band_hunter((26, 28, 32), (70, 58, 44), (22, 24, 28), (120, 104, 80), 9973),
+            band_hunter((44, 36, 30), (48, 46, 52), (38, 30, 26), (100, 90, 74), 9974)]
+
+
 def all_outfits():
     out = {}
     uni.numbered(out, "zfighter/keeper", keepers())
@@ -497,6 +563,7 @@ def all_outfits():
     uni.numbered(out, "zfighter/patrolman", patrolmen())
     uni.numbered(out, "zfighter/star_reader", star_readers())
     uni.numbered(out, "zfighter/star_smith", star_smiths())
+    uni.numbered(out, "zfighter/band_hunter", band_hunters())
     return out
 
 

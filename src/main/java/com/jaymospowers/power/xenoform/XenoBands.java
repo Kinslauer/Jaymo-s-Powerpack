@@ -48,6 +48,10 @@ public final class XenoBands {
 
 	public static final AttachmentType<Count> COUNT = AttachmentRegistry.create(JaymosPowers.id("xeno_bands"),
 		builder -> builder.persistent(Count.CODEC));
+	/** (0.18.125, patch 8) The rival band's own count: its wearers, and its loose items (the hunter's wrist counts as loose). */
+	public static final AttachmentType<Count> RIVAL_COUNT = AttachmentRegistry.create(JaymosPowers.id("rival_bands"),
+		builder -> builder.persistent(Count.CODEC));
+	private static final String UPGRADES_KEY = "xeno_upgrades";
 
 	private static final String ALIENS_KEY = "xeno_aliens";
 
@@ -70,19 +74,29 @@ public final class XenoBands {
 		// a loose band destroyed goes back to the stars (one picked up leaves an emptied stack behind: not destroyed)
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof ItemEntity item && entity.getRemovalReason() != null && entity.getRemovalReason().shouldDestroy()
-				&& item.getItem().is(XenoBandItem.BAND) && !item.getItem().isEmpty()) {
-				destroyed(level.getServer());
+				&& XenoBandItem.isBand(item.getItem()) && !item.getItem().isEmpty()) {
+				destroyed(level.getServer(), item.getItem().is(XenoBandItem.RIVAL));
 			}
 		});
 	}
 
 	public static Count count(MinecraftServer server) {
-		Count count = server.overworld().getAttached(COUNT);
+		return count(server, false);
+	}
+
+	public static Count count(MinecraftServer server, boolean rival) {
+		Count count = server.overworld().getAttached(rival ? RIVAL_COUNT : COUNT);
 		return count == null ? Count.NONE : count;
 	}
 
-	private static void set(MinecraftServer server, Count count) {
-		server.overworld().setAttached(COUNT, count);
+	private static void set(MinecraftServer server, boolean rival, Count count) {
+		server.overworld().setAttached(rival ? RIVAL_COUNT : COUNT, count);
+	}
+
+	/** (0.18.125) Whether the rival band is out of the world entirely (no wearer, none loose): a new hunter may come with it. */
+	public static boolean rivalFree(MinecraftServer server) {
+		Count count = count(server, true);
+		return count.wearers().isEmpty() && count.loose() <= 0;
 	}
 
 	/** Whether a fallen star may hold the band: nobody wears it and none is loose. */
@@ -93,49 +107,59 @@ public final class XenoBands {
 
 	/** A band came out of a star (or was handed out): one more loose. */
 	static void loosed(MinecraftServer server) {
-		Count count = count(server);
-		set(server, new Count(count.wearers(), count.loose() + 1));
+		loosed(server, false);
+	}
+
+	static void loosed(MinecraftServer server, boolean rival) {
+		Count count = count(server, rival);
+		set(server, rival, new Count(count.wearers(), count.loose() + 1));
 	}
 
 	/** {@code player} wears it now ({@code fromItem}: a loose band was used to put it on). */
 	static void worn(ServerPlayer player, boolean fromItem) {
 		MinecraftServer server = player.level().getServer();
-		Count count = count(server);
+		boolean rival = XenoformState.rival(player);
+		Count count = count(server, rival);
 		String id = player.getUUID().toString();
 		List<String> wearers = new ArrayList<>(count.wearers());
 		if (!wearers.contains(id)) {
 			wearers.add(id);
 		}
-		set(server, new Count(List.copyOf(wearers), fromItem ? Math.max(0, count.loose() - 1) : count.loose()));
+		set(server, rival, new Count(List.copyOf(wearers), fromItem ? Math.max(0, count.loose() - 1) : count.loose()));
 	}
 
 	/** {@code player} no longer wears it (the power ended). */
 	static void unworn(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
-		Count count = count(server);
 		String id = player.getUUID().toString();
-		if (count.wearers().contains(id)) {
-			List<String> wearers = new ArrayList<>(count.wearers());
-			wearers.remove(id);
-			set(server, new Count(List.copyOf(wearers), count.loose()));
+		for (boolean rival : new boolean[] {false, true}) {
+			Count count = count(server, rival);
+			if (count.wearers().contains(id)) {
+				List<String> wearers = new ArrayList<>(count.wearers());
+				wearers.remove(id);
+				set(server, rival, new Count(List.copyOf(wearers), count.loose()));
+			}
 		}
 	}
 
-	private static void destroyed(MinecraftServer server) {
-		Count count = count(server);
+	static void destroyed(MinecraftServer server, boolean rival) {
+		Count count = count(server, rival);
 		if (count.loose() > 0) {
-			set(server, new Count(count.wearers(), count.loose() - 1));
+			set(server, rival, new Count(count.wearers(), count.loose() - 1));
 		}
 	}
 
 	/** The band is torn off {@code player}'s wrist by {@code killer}, with every alien it held. */
 	private static void takenBy(ServerPlayer player, ServerPlayer killer) {
 		List<String> aliens = XenoformState.band(player).unlocked();
+		boolean rival = XenoformState.rival(player);
+		BandUpgrades.Upgrades upgrades = player.getAttached(BandUpgrades.UPGRADES);
 		Powers.set(player, null);
 		player.removeAttached(XenoformState.BAND);
-		loosed(killer.level().getServer());
+		player.removeAttached(BandUpgrades.UPGRADES);
+		loosed(killer.level().getServer(), rival);
 		killer.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		killer.getInventory().placeItemBackInInventory(item(aliens), net.minecraft.util.Prediction.SERVER_ONLY);
+		killer.getInventory().placeItemBackInInventory(item(aliens, rival, upgrades), net.minecraft.util.Prediction.SERVER_ONLY);
 		killer.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_won", player.getDisplayName()).withStyle(ChatFormatting.GREEN));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_lost", killer.getDisplayName()).withStyle(ChatFormatting.RED));
 		ServerLevel level = killer.level();
@@ -145,13 +169,33 @@ public final class XenoBands {
 
 	/** A band item that still holds {@code aliens} (a band taken off a wearer keeps what it learned). */
 	static ItemStack item(List<String> aliens) {
-		ItemStack stack = new ItemStack(XenoBandItem.BAND);
+		return item(aliens, false, null);
+	}
+
+	/** (0.18.125) Either band, holding its aliens and (patch 7) its reforge, modules and skills. */
+	static ItemStack item(List<String> aliens, boolean rival, BandUpgrades.@org.jspecify.annotations.Nullable Upgrades upgrades) {
+		ItemStack stack = new ItemStack(rival ? XenoBandItem.RIVAL : XenoBandItem.BAND);
+		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
 		if (!aliens.isEmpty()) {
-			net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
 			tag.putString(ALIENS_KEY, String.join(",", aliens));
+		}
+		if (upgrades != null) {
+			BandUpgrades.Upgrades.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, upgrades).result().ifPresent(t -> tag.put(UPGRADES_KEY, t));
+		}
+		if (!tag.isEmpty()) {
 			stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
 		}
 		return stack;
+	}
+
+	/** (0.18.125) The reforge, modules and skills a band item carries, or null for none. */
+	static BandUpgrades.@org.jspecify.annotations.Nullable Upgrades upgradesOf(ItemStack stack) {
+		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		if (data == null) {
+			return null;
+		}
+		net.minecraft.nbt.Tag tag = data.copyTag().get(UPGRADES_KEY);
+		return tag == null ? null : BandUpgrades.Upgrades.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, tag).result().orElse(null);
 	}
 
 	/** The aliens a band item holds (none for one fresh from a star). */
@@ -163,6 +207,7 @@ public final class XenoBands {
 
 	/** For the debug command: forget every wearer and loose band, so the next star may carry it. */
 	static void reset(MinecraftServer server) {
-		set(server, Count.NONE);
+		set(server, false, Count.NONE);
+		set(server, true, Count.NONE);
 	}
 }

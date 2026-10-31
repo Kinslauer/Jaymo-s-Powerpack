@@ -19,6 +19,8 @@ import net.minecraft.util.Mth;
 final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/** (0.18.90) How brightly the chest's insignia lights as the hand comes up to it; it's full once the hand is on it. */
 	static final float INSIGNIA_HELD = 0.3F;
+	/** (0.18.125, patch 8) How a rival band's alien is darkened (a multiply on its skin). */
+	static final int DARK_TINT = 0xFF6E4646;
 
 	XenoformLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -58,7 +60,9 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		} else {
 			// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
 			// (0.18.93) the Ultimate wears its armoured skin instead
-			renderColoredCutoutModel(model, ultimate ? model.ultimateTexture : model.texture, poseStack, collector, lightCoords, state, -1, 1);
+			// (0.18.125, patch 8) the rival band's aliens are darkened
+			renderColoredCutoutModel(model, ultimate ? model.ultimateTexture : model.texture, poseStack, collector, lightCoords, state,
+				Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, 1);
 		}
 		if (ultimate) {
 			ultimate(model, poseStack, collector, lightCoords, state);
@@ -73,7 +77,9 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// (0.18.90) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
 			model.setupAnim(state);
 			XenoformFlightPose.applyModel(model, state);
+			XenoBand.rival = Boolean.TRUE.equals(state.getData(XenoformClient.DARK));
 			XenoBand.submitInsignia(poseStack, collector, lightCoords, model, Math.max(INSIGNIA_HELD * slap.raise(), slap.strike()));
+			XenoBand.rival = false;
 		}
 		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
 		if (ending) {

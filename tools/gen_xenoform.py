@@ -231,6 +231,21 @@ def band():
     write_json(ROOT / "items" / "xeno_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/xeno_band"}})
 
 
+# (0.18.125, Xeno-Band patch 8) the rival band: the same band, its metal blackened red and its dial lit red
+RIVAL_PALETTE = dict(BAND_PALETTE, d=(30, 12, 14, 255), m=(96, 36, 38, 255), g=(140, 60, 60, 255), l=(70, 16, 16, 255), G=(255, 60, 50, 255))
+
+
+def rival_band():
+    img = Image.new("RGBA", (16, 16))
+    for y, row in enumerate(BAND):
+        for x, ch in enumerate(row):
+            img.putpixel((x, y), RIVAL_PALETTE[ch])
+    save(img, "item/rival_band.png")
+    write_json(ROOT / "models" / "item" / "rival_band.json",
+               {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymospowers:item/rival_band"}})
+    write_json(ROOT / "items" / "rival_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/rival_band"}})
+
+
 # ---- the band on the wrist (entity, 32x32): a 5x3x5 box and a 1x5x5 face plate on its outer face, glowing in a second texture ----
 # Close up in first person every texel shows, so it's kept plain: no outlines or grain, just a lit top row and a
 # shaded bottom row on each side, and one small round dial.
@@ -2326,6 +2341,7 @@ def preview(out):
 
 if __name__ == "__main__":
     band()
+    rival_band()
     fallen_star()
     bulwark()
     pyre()

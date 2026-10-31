@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>{@code /powerdebug xenoform band}: a Xeno-Band in your hand;</li>
  * <li>{@code /powerdebug xenoform bands reset}: the world forgets every worn and loose band (0.18.92);</li>
+ * <li>{@code /powerdebug xenoform hunter}: a band hunter comes for you now, if the rival band is out of the world (0.18.125);</li>
  * <li>{@code /powerdebug xenoform star}: a star falls where you're looking (about 30 blocks off);</li>
  * <li>{@code /powerdebug xenoform unlock <alien|all>}: the band takes in that alien;</li>
  * <li>{@code /powerdebug xenoform form <alien>}: become it now, recharge or not; {@code revert}: back to yourself;</li>
@@ -44,6 +45,20 @@ final class XenoformDebugCommand {
 							c.getSource().sendSuccess(() -> Component.literal("The world forgets every band: the next star may carry one."), true);
 							return 1;
 						})))
+				.then(Commands.literal("hunter")
+					.executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						if (!XenoBands.rivalFree(player.level().getServer())) {
+							c.getSource().sendFailure(Component.literal("The rival band is already out (worn, loose or on a hunter). Try bands reset."));
+							return 0;
+						}
+						if (RivalHunter.arrive(player.level(), player) == null) {
+							c.getSource().sendFailure(Component.literal("Nowhere for him to stand (or no Kingdoms and MCA)."));
+							return 0;
+						}
+						c.getSource().sendSuccess(() -> Component.literal("A band hunter is coming."), false);
+						return 1;
+					}))
 				.then(Commands.literal("star")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();

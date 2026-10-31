@@ -421,6 +421,29 @@ R Watch (64 blocks: Glowing 20 s, and it loses you; 3 s), G Behind (to the watch
 Slowness II, Weakness 6 s and a moment's Blindness; 15 s), B Fade (invisible, hunters forget you, until you strike or
 B again; 10 s after).
 
+## The rival band [XenoBandItem.RIVAL, RivalHunter, RivalAlien] (0.18.125, Xeno-Band patch 8)
+
+Only two bands exist: the Xeno-Band and the rival band, dark red. The rival band never falls from the stars; it has its
+own count (`XenoBands.RIVAL_COUNT`: wearers and loose items, the hunter's wrist counting as loose). While it's out of the
+world, every 30 s at night in the Overworld there's a 12% chance a Xeno-Band wearer (not in creative) draws the band
+hunter, at most one every 3 days (`RivalHunter.NEXT`). Needs Kingdoms and MCA: he's an MCA villager (Kingdoms'
+`band_hunter`, its own outfits and lines), arriving 30-40 blocks off with a cold warning on your band.
+
+He walks the nearest wearer down (96 blocks). Within 12, seeing you and his change ready, he becomes one of Gyre, Cortex,
+Locust or Croaker darkened (`RivalAlien`: the alien's scale, 1.2x its life, its fists, its pace and step) for 30 s, and
+goes unseen and untouchable inside it. When it falls or its time runs out he's back, dazed for 15 s (stars over his
+head): tap him (use) to tear the band off. He runs and is gone 12 s later. Kill him outright and it drops. 45 s after
+the daze ends he may change again. Gone any other way (despawned, /kill's discard), the band goes with him.
+
+Worn (use the item), it's a band like the other: its own dial (a fresh one holds the four), scans, mastery, the band
+screen and the reforge all work on whichever band you wear, and a downed wearer's is torn off by a tap. Its aliens are
+drawn darkened (`XenoformLayer.DARK_TINT`) and the band and insignia red (`XenoBand.RIVAL_BODY/RIVAL_GLOW`), synced from
+`XenoformState.RIVAL`. The wearer is tagged `jaymospowers_rival_band`: in Kingdoms a realm that has seen anyone change
+into the alien calls wearing it a heavy crime where its people see it (`Aliens.rivalBand`).
+
+Band items now carry their reforge, modules and skills (CUSTOM_DATA `xeno_upgrades`), so a band taken off keeps them.
+Test: `/powerdebug xenoform hunter` (after `bands reset` if the rival band is out).
+
 ## Duplex's eyes
 
 (0.18.96) Sneak + V as Duplex: your camera moves into the aimed double (or the farthest within 48) and you see what it

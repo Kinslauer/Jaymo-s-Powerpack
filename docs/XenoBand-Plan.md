@@ -147,6 +147,11 @@ fitted on the band screen (B as yourself). Quick change and the death save are n
 - **Forget an alien:** take one alien off the dial, or wipe the band clean.
 
 ### Patch 8, The rival band (Kingdoms + Powers, large; pick rival-band)
+
+**Built (0.18.125, Kingdoms 0.7.446):** as in `docs/xenoform.md` ("The rival band"). Choices: only the four darkened aliens
+(no Dud). The hunter comes at night for one wearer, at most once every 3 days, while the rival band is out of the world;
+beaten means his alien fell, and a tap then takes the band (killing him drops it). "Realms that know about aliens" are
+those whose people have seen anyone change into the alien. Band items now carry their upgrades.
 - **The hunter:** a band hunter, an outcast MCA villager wearing a dark-red rival band, hunts band wearers. He changes
   into his own aliens to fight.
 - **Taking it:** beat him and you can take his band.

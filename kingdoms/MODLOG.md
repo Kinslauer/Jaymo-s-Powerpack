@@ -7805,3 +7805,14 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   dished face; never over 4 wide, so the bridle fits) and longer manes (a forelock, and the mane falling over the neck
   on all but the steppe pony). Set FULLER = False and rerun `tools/gen_horses.py` for the plain horse again.
 - Compile-checked; not played.
+
+## 0.7.446: the band hunter and the red band (Xeno-Band patch 8; pack 0.18.125)
+- **Band hunter** (`ZFighterFolk.KINDS`, `band_hunter`): Powers' outcast who wears the rival band and hunts Xeno-Band
+  wearers. An MCA villager with his own opening lines, name line, part ("Band Hunter") and bearing ("Hungry"); Powers
+  walks him (like the patrol), so `step` leaves him be, and the same once he's bandless and running. 4 new outfits
+  (`tools/gen_zfighter_outfits.py`): a long ragged coat over patched clothes, a torn hood, wrapped shins and the red band
+  on his left wrist.
+- **Wearing the red band is a crime** (`Theft.Crime.RIVAL_BAND`, heavy) where a realm that knows the bands holds the law
+  and its people see it (`Aliens.rivalBand`). A realm knows the bands once its people have seen anyone change into the
+  alien (`Aliens.AWARE`, from now on). Once per realm every 2 minutes; nobody notices it later.
+- Compile-checked; not played.

@@ -187,6 +187,11 @@ public final class ZFighterNpcs {
 				// (0.17.192) an Omen's pilot, in the future
 				return com.jaymospowers.power.chrono.future.FutureOmenPilots.talk(player, npc);
 			}
+			if (npc.entityTags().contains(com.jaymospowers.power.xenoform.RivalHunter.TAG) || npc.entityTags().contains(com.jaymospowers.power.xenoform.RivalHunter.FLED_TAG)) {
+				// (0.18.125) the band hunter
+				com.jaymospowers.power.xenoform.RivalHunter.talk(player, npc);
+				return true;
+			}
 			if (npc.entityTags().contains(com.jaymospowers.power.xenoform.BandForge.SMITH_TAG)) {
 				// (0.18.123) the star forge's smith
 				com.jaymospowers.power.xenoform.BandForge.talk(player, npc);
