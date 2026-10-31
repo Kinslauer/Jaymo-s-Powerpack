@@ -148,6 +148,10 @@ abstract class McaAnswersMixin {
 				// (0.7.429) only a king's guard, to see the king
 				cir.getReturnValue().remove(com.jaymoskingdoms.Trials.ANSWER);
 			}
+			if (!com.jaymoskingdoms.HavenGates.offers(player, villager)) {
+				// (0.7.438) only a haven's grown folk, to a human, are asked to vouch at its gate
+				cir.getReturnValue().remove(com.jaymoskingdoms.HavenGates.VOUCH_ANSWER);
+			}
 			if (!com.jaymoskingdoms.Tribes.takesTribute(player, villager)) {
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER);
 			}

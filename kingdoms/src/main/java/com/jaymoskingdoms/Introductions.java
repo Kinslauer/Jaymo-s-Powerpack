@@ -221,7 +221,7 @@ public final class Introductions {
 		Component name = Component.literal(villager.getName().getString());
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;
 		if (f != null) {
-			Component title = Rulers.title(Rulers.role(villager), McaCompat.female(villager));
+			Component title = Rulers.title(player.level().getServer(), f, Rulers.role(villager), McaCompat.female(villager));
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
 		// (0.7.254) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
