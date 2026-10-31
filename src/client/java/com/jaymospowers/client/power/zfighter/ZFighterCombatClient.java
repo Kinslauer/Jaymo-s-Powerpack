@@ -54,7 +54,8 @@ public final class ZFighterCombatClient {
 			case ZFighterTraining.RAGE_SCREAM -> Items.GOAT_HORN;
 			case ZFighterTraining.AFTERIMAGE -> Items.PHANTOM_MEMBRANE;
 			case ZFighterTraining.SONIC_SWAY -> Items.BREEZE_ROD;
-			default -> Items.FIRE_CHARGE;
+			case ZFighterTraining.SELF_DESTRUCT -> Items.CREEPER_HEAD;
+			default -> com.jaymospowers.power.zfighter.ZFighterCreator.custom(technique) ? Items.GLOWSTONE_DUST : Items.FIRE_CHARGE;
 		};
 	}
 }

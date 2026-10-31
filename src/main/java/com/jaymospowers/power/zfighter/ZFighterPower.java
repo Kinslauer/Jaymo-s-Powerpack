@@ -528,13 +528,13 @@ public final class ZFighterPower implements Power {
 		}
 		if (key == PowerKey.ABILITY_2) {
 			int quick = ZFighterTraining.of(player).quick();
-			return quick != ZFighterTraining.KI_BLAST && ZFighterTraining.of(player).knows(quick);
+			return quick != ZFighterTraining.KI_BLAST && ZFighterTraining.owns(player, quick);
 		}
 		if (key != PowerKey.ABILITY_3) {
 			return false;
 		}
 		int charged = ZFighterTraining.of(player).charged();
-		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.of(player).knows(charged);
+		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.owns(player, charged);
 		return bought && (player.isShiftKeyDown() || state(player).waveFrom() >= 0);
 	}
 
@@ -663,6 +663,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		ZFighterSelfDestruct.tick(player, live);
 		// (0.17.56) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
 		ZFighterRaces.tick(player, live, max);
 		ZFighterCorruption.tick(player, live);

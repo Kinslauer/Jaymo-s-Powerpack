@@ -7478,3 +7478,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   view space and carried into the world at the same spot on screen through the world's own field of view (the hand is
   drawn at a fixed 70), so it lines up at any FOV. Third person and other players are unchanged.
 - Compile-checked only; not played.
+
+## 0.7.423: Rubber-folk melt onto a self-destruct's target (pack 0.18.94)
+- Andy: "rubber uses the skin colored blob animation to kind of melt onto the grab target". While a Rubber-folk gathers
+  Jaymo's Powers' Self-Destruct, `RubberEngulf` reads Powers' `ZFighterSelfDestruct.HOLDING` (by reflection) and draws the
+  swallow's rope and skin on the held foe, run up to sealed (`MELT`, 0.58 of the way) and held there wobbling, never
+  gulped and with no swell after. The first-person reaching arm follows it too.
+- Compile-checked only; not played.

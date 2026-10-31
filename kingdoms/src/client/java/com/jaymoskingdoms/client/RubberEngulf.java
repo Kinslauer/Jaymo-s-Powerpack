@@ -104,6 +104,38 @@ public final class RubberEngulf {
 		LevelRenderEvents.COLLECT_SUBMITS.register(RubberEngulf::render);
 	}
 
+	/**
+	 * (0.7.423, Andy: "rubber uses the skin colored blob animation to kind of melt onto the grab target") A Rubber-folk
+	 * gathering Jaymo's Powers' Self-Destruct melts onto the one they grabbed: the swallow's rope and skin, run up to
+	 * sealed ({@link #MELT}) and held there, wobbling, never gulped.
+	 */
+	static final float MELT = 0.58F;
+	private static net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> holding;
+	private static boolean lookedForHolding;
+
+	/** Powers' {@code ZFighterSelfDestruct.HOLDING}, looked up once; null without Powers. */
+	@SuppressWarnings("unchecked")
+	private static net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> holdingType() {
+		if (!lookedForHolding) {
+			lookedForHolding = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					holding = (net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer>)Class.forName("com.jaymospowers.power.zfighter.ZFighterSelfDestruct")
+						.getField("HOLDING").get(null);
+				} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+					holding = null;
+				}
+			}
+		}
+		return holding;
+	}
+
+	/** Who {@code player} is melting onto for a self-destruct (an entity id), or null. */
+	private static Integer melting(Player player) {
+		var type = holdingType();
+		return type == null ? null : player.getAttached(type);
+	}
+
 	/** {@code entity} is a Rubber-folk. */
 	static boolean rubber(Entity entity) {
 		return Heritage.Kind.RUBBERFOLK.key().equals(entity.getAttached(Heritage.HERITAGE));
@@ -139,6 +171,7 @@ public final class RubberEngulf {
 		for (Player player : level.players()) {
 			float clock = player.tickCount + partialTick;
 			Integer id = player.getAttached(HeritageHold.ABSORBING);
+			boolean melt = id == null && (id = melting(player)) != null;
 			Entity foe = id == null || !rubber(player) ? null : level.getEntity(id);
 			if (!(foe instanceof LivingEntity)) {
 				if (STARTED.containsKey(player.getId())) {
@@ -150,6 +183,10 @@ public final class RubberEngulf {
 				continue;
 			}
 			float t = progress(player, clock);
+			if (melt) {
+				t = Math.min(t, MELT);
+				REACHED.put(player.getId(), t);
+			}
 			Vec3 fist = player == minecraft.player && cameraState.isFirstPerson ? firstPersonFist(cameraState, clock) : null;
 			draw(context, level, camera, player, foe, t, clock, partialTick, fist);
 		}
@@ -181,7 +218,7 @@ public final class RubberEngulf {
 			return 0.0F;
 		}
 		Float started = STARTED.get(player.getId());
-		if (started == null || player.getAttached(HeritageHold.ABSORBING) == null) {
+		if (started == null || player.getAttached(HeritageHold.ABSORBING) == null && melting(player) == null) {
 			return 0.0F;
 		}
 		float clock = player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);

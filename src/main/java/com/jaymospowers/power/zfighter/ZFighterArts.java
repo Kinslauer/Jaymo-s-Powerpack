@@ -40,6 +40,7 @@ public final class ZFighterArts {
 		ZFighterKiRain.init();
 		ZFighterAfterimage.init();
 		ZFighterSonicSway.init();
+		ZFighterCreator.init();
 	}
 
 	public static void clear() {
@@ -48,18 +49,20 @@ public final class ZFighterArts {
 		ZFighterKiRain.clear();
 		ZFighterAfterimage.clear();
 		ZFighterSonicSway.clear();
+		ZFighterSelfDestruct.clear();
 	}
 
 	// ---------------------------------------------------------------- the dispatch
 
 	/** Whether {@code index} is one of this patch's techniques. */
 	public static boolean art(int index) {
-		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.SONIC_SWAY;
+		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.SELF_DESTRUCT || ZFighterCreator.custom(index);
 	}
 
 	/** Whether {@code index} is one of this patch's techniques that is held and let go on V. */
 	public static boolean charged(int index) {
-		return index == ZFighterTraining.DRILL_BEAM || index == ZFighterTraining.TRIANGLE_CANNON || index == ZFighterTraining.NOVA_SPHERE;
+		return index == ZFighterTraining.DRILL_BEAM || index == ZFighterTraining.TRIANGLE_CANNON || index == ZFighterTraining.NOVA_SPHERE
+			|| index == ZFighterTraining.SELF_DESTRUCT || ZFighterCreator.chargedPlace(index);
 	}
 
 	/**
@@ -74,7 +77,7 @@ public final class ZFighterArts {
 		if (ZFighterPoise.stunned(player) || live.guarding || live.charging || ZFighterLineage.ape(player)) {
 			return true;
 		}
-		int cooldown = switch (index) {
+		int cooldown = ZFighterCreator.custom(index) ? ZFighterCreator.quick(player, live, index) : switch (index) {
 			case ZFighterTraining.RING_OF_ORBS -> ZFighterRingOfOrbs.start(player, live);
 			case ZFighterTraining.RISING_DOME -> ZFighterRisingDome.start(player, live);
 			case ZFighterTraining.KI_RAIN -> ZFighterKiRain.start(player, live);
@@ -89,18 +92,26 @@ public final class ZFighterArts {
 	}
 
 	/** Ki to begin gathering charged technique {@code index}, and the most a full charge costs. */
-	static float min(int index) {
+	static float min(ServerPlayer player, int index) {
+		if (ZFighterCreator.custom(index)) {
+			return ZFighterCreator.min(player, index);
+		}
 		return switch (index) {
 			case ZFighterTraining.DRILL_BEAM -> ZFighterDrillBeam.MIN_KI;
 			case ZFighterTraining.TRIANGLE_CANNON -> ZFighterTriangleCannon.MIN_KI;
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.MIN_KI;
 			default -> ZFighterNovaSphere.MIN_KI;
 		};
 	}
 
-	static float max(int index) {
+	static float max(ServerPlayer player, int index) {
+		if (ZFighterCreator.custom(index)) {
+			return ZFighterCreator.max(player, index);
+		}
 		return switch (index) {
 			case ZFighterTraining.DRILL_BEAM -> ZFighterDrillBeam.MAX_KI;
 			case ZFighterTraining.TRIANGLE_CANNON -> ZFighterTriangleCannon.MAX_KI;
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.MAX_KI;
 			default -> ZFighterNovaSphere.MAX_KI;
 		};
 	}
@@ -111,7 +122,8 @@ public final class ZFighterArts {
 			case ZFighterTraining.DRILL_BEAM -> ZFighterDrillBeam.FULL_TICKS;
 			case ZFighterTraining.TRIANGLE_CANNON -> ZFighterTriangleCannon.FULL_TICKS;
 			case ZFighterTraining.NOVA_SPHERE -> ZFighterNovaSphere.FULL_TICKS;
-			default -> fallback;
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.FULL_TICKS;
+			default -> ZFighterCreator.custom(index) ? ZFighterCreator.FULL_TICKS : fallback;
 		};
 	}
 
@@ -121,13 +133,19 @@ public final class ZFighterArts {
 			case ZFighterTraining.DRILL_BEAM -> DRILL_COOLDOWN;
 			case ZFighterTraining.TRIANGLE_CANNON -> TRIANGLE_COOLDOWN;
 			case ZFighterTraining.NOVA_SPHERE -> NOVA_COOLDOWN;
-			default -> ZFighterKi.WAVE_COOLDOWN;
+			case ZFighterTraining.SELF_DESTRUCT -> NOVA_COOLDOWN;
+			default -> ZFighterCreator.custom(ZFighterTraining.of(player).charged())
+				? ZFighterCreator.cooldown(player, ZFighterTraining.of(player).charged()) : ZFighterKi.WAVE_COOLDOWN;
 		};
 	}
 
 	/** A lang key saying why charged technique {@code index} can't be used now, or null when it can. */
 	static @Nullable String blocker(ServerPlayer player, ZFighterPower.Live live, int index) {
-		return index == ZFighterTraining.NOVA_SPHERE ? ZFighterNovaSphere.blocker(live) : null;
+		return switch (index) {
+			case ZFighterTraining.NOVA_SPHERE -> ZFighterNovaSphere.blocker(live);
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.blocker(player);
+			default -> ZFighterCreator.custom(index) ? ZFighterCreator.blocker(player, index) : null;
+		};
 	}
 
 	/** Sneak+V down: whether gathering may begin (otherwise it says why). */
@@ -137,7 +155,8 @@ public final class ZFighterArts {
 			player.sendOverlayMessage(Component.translatable(blocker).withStyle(ChatFormatting.GRAY));
 			return false;
 		}
-		return true;
+		// (0.18.94) the self-destruct needs someone in reach to grab and hold while it builds
+		return index != ZFighterTraining.SELF_DESTRUCT || ZFighterSelfDestruct.start(player);
 	}
 
 	/** While V is held: the technique's gathering, drawn and heard ({@code charge} is 0-1). */
@@ -145,7 +164,14 @@ public final class ZFighterArts {
 		switch (index) {
 			case ZFighterTraining.DRILL_BEAM -> ZFighterDrillBeam.gather(player, live, charge);
 			case ZFighterTraining.TRIANGLE_CANNON -> ZFighterTriangleCannon.gather(player, live, charge);
-			default -> ZFighterNovaSphere.gather(player, live, charge);
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.gather(player, live, charge);
+			default -> {
+				if (ZFighterCreator.custom(index)) {
+					ZFighterCreator.gather(player, live, index, charge);
+				} else {
+					ZFighterNovaSphere.gather(player, live, charge);
+				}
+			}
 		}
 	}
 
@@ -154,7 +180,14 @@ public final class ZFighterArts {
 		switch (index) {
 			case ZFighterTraining.DRILL_BEAM -> ZFighterDrillBeam.fire(player, live, charge);
 			case ZFighterTraining.TRIANGLE_CANNON -> ZFighterTriangleCannon.fire(player, live, charge);
-			default -> ZFighterNovaSphere.fire(player, live, charge);
+			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.fire(player, live, charge);
+			default -> {
+				if (ZFighterCreator.custom(index)) {
+					ZFighterCreator.fire(player, live, index, charge);
+				} else {
+					ZFighterNovaSphere.fire(player, live, charge);
+				}
+			}
 		}
 	}
 
