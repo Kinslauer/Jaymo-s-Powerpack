@@ -7841,3 +7841,19 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
   till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
 - Compile-checked; not seen in game.
+
+## 0.7.449: villagers come over for a reason, and you can ask why; accuse whoever robbed you (pack 0.19.1)
+Andy: "when villagers run up to you, you should be able to ask them why or whats going on. they should also have a
+reason other than just introducing themselves." / "you should be able to confront who you think stole from you in the
+talk or interact screen. accusing the wrong person loses you hearts w them".
+- `ComingOver`: a stranger only hurries over (`Handshakes`) with a reason, picked by weight and temperament: you're
+  hurt (they hand you bread), a monster's near you (they point it out, it glows a few seconds), rain or a storm, thanks
+  they owe you (their memory of you), your deeds here, your rare heritage is theirs, you're a foreigner or in armour
+  they've not seen, word of a beast, or (rarely) they took you for someone else. No reason, nobody comes. The hail
+  says why, the arrival line says it fully, and they still wave or shake and give their name.
+- "Ask what's going on" in MCA's menu for a day after (also after an `Approaches` visit: what more they had to say).
+  Without a shared tongue it's gestures.
+- "Accuse them of theft" in MCA's menu for a day after you notice you were robbed or cheated (`Crooks`): the thief is
+  confronted as by a right-click, however long ago it was; anyone else loses 8 hearts with you, says so, and remembers
+  it (`Recollections.Kind.ACCUSED`, which you can apologise for). One accusation per villager per theft.
+- Compile-checked; not seen in game.

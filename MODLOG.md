@@ -4662,3 +4662,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
+  storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
+  "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
