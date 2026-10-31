@@ -18,7 +18,7 @@ import net.minecraft.world.entity.monster.skeleton.Stray;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.18.105, Scan B of {@code docs/ScanGaps-Plan.md}) Rime, the frost alien: tall and angular, pale blue ice for skin,
+ * (0.18.107, Scan B of {@code docs/ScanGaps-Plan.md}) Rime, the frost alien: tall and angular, pale blue ice for skin,
  * icicle spines down its back and a crown of frost. 30 health, fists of 5. Scanned from a stray, a snow golem or the
  * Friends & Foes Iceologer ({@code XenoDna}). Per Andy, it has the whole Cryokinesis kit, lent through
  * {@link CryoLent}, so every move works (and looks) as the Cryo power's:

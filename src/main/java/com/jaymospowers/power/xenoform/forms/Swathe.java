@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.105, Scan B) Swathe, the wrapped one: a tall figure bound head to foot in old grey-brown wrappings, loose ends
+ * (0.18.107, Scan B) Swathe, the wrapped one: a tall figure bound head to foot in old grey-brown wrappings, loose ends
  * trailing, two pale eyes in the gap. 26 health, fists of 4. Scanned from a husk. While it's out it can't drown or
  * starve.
  * <ul>

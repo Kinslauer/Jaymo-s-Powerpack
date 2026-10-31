@@ -48,7 +48,7 @@ public final class XenoForms {
 	public static final XenoForm CORTEX = register(new com.jaymospowers.power.xenoform.forms.Cortex());
 	public static final XenoForm LOCUST = register(new com.jaymospowers.power.xenoform.forms.Locust());
 	public static final XenoForm CROAKER = register(new com.jaymospowers.power.xenoform.forms.Croaker());
-	/** (0.18.105, Scan B) Rime (a stray or snow golem), Marrow (a skeleton), Swathe (a husk). */
+	/** (0.18.107, Scan B) Rime (a stray or snow golem), Marrow (a skeleton), Swathe (a husk). */
 	public static final XenoForm RIME = register(new com.jaymospowers.power.xenoform.forms.Rime());
 	public static final XenoForm MARROW = register(new com.jaymospowers.power.xenoform.forms.Marrow());
 	public static final XenoForm SWATHE = register(new com.jaymospowers.power.xenoform.forms.Swathe());
@@ -56,7 +56,7 @@ public final class XenoForms {
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 	/** (0.18.103, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */
 	public static final XenoForm DUD = register(new com.jaymospowers.power.xenoform.forms.Dud());
-	/** (0.18.105, Scan B) Blight, scanned from the Wither; hidden. */
+	/** (0.18.107, Scan B) Blight, scanned from the Wither; hidden. */
 	public static final XenoForm BLIGHT = register(new com.jaymospowers.power.xenoform.forms.Blight());
 
 	private XenoForms() {

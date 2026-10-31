@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.18.105) Cryokinesis's moves lent to someone without the power: the Xeno-Band's Rime (Scan B of
+ * (0.18.107) Cryokinesis's moves lent to someone without the power: the Xeno-Band's Rime (Scan B of
  * {@code docs/ScanGaps-Plan.md}, Andy: "it also gets all the cryo powers worked in"). The moves run as they do for a
  * Cryokinesis user (the same breath, shards, Flash Freeze, Ice Wall, Ice Slide and Blizzard, and their poses), but the
  * lender keeps its own cooldowns and calls {@link #tick} itself.

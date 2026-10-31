@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.105, Scan B) Marrow, the bone alien: a tall skeleton of white bone in an open ribcage, horned skull, a spine
+ * (0.18.107, Scan B) Marrow, the bone alien: a tall skeleton of white bone in an open ribcage, horned skull, a spine
  * that juts out of its back. 24 health, fists of 4, a little quick. Scanned from a skeleton (or Kingdoms' silver
  * skeleton and Skeleton Lord, {@code XenoDna}).
  * <ul>

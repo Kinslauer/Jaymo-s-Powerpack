@@ -953,6 +953,15 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.431) {@code e}, one of MCA's villagers, goes by {@code name} from now on. False if it's no MCA villager. */
+	static boolean rename(net.minecraft.world.entity.Entity e, String name) {
+		if (e instanceof VillagerEntityMCA villager) {
+			villager.setName(name);
+			return true;
+		}
+		return false;
+	}
+
 	/** (0.7.424) {@code body} can be questioned on the execution hold ({@link Questioning}): one of MCA's grown villagers. */
 	static boolean questionable(LivingEntity body) {
 		return body instanceof VillagerEntityMCA villager && !villager.isBaby() && villager.isAlive();

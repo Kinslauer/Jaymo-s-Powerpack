@@ -259,7 +259,7 @@ public final class XenoformPower implements Power {
 		public boolean crashing;
 		public int swallowed = -1;
 		/**
-		 * (0.18.105, Scan B) Rime: ticks since it last sprinted while skating. Marrow: it has fallen apart and stood back up
+		 * (0.18.107, Scan B) Rime: ticks since it last sprinted while skating. Marrow: it has fallen apart and stood back up
 		 * this change; the bone shield's last tick; lying in a heap until this tick. Swathe: ticks left of the sandstorm.
 		 * Blight: the dark shield is up.
 		 */
@@ -357,7 +357,7 @@ public final class XenoformPower implements Power {
 		XenoNet.register();
 		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
 		XenoDouble.init();
-		// (0.18.105, Scan B) Rime has Cryokinesis's moves lent
+		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
 		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
 		XenoStalker.init();
 		XenoBandItem.init();

@@ -505,6 +505,13 @@ public final class McaCompat {
 		return Greenskins.brood(folk.role()) != null ? McaBridge.greenskinOf(level, folk) : McaBridge.raiderOf(level, folk);
 	}
 
+	/** (0.7.431) {@code mob} goes by {@code name}: an MCA villager's own name, or else a name of its own (a captain, {@link Captains}). */
+	static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
+		if (!LOADED || !McaBridge.rename(mob, name)) {
+			mob.setCustomName(net.minecraft.network.chat.Component.literal(name));
+		}
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);

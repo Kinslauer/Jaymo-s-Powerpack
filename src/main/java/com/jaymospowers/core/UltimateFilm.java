@@ -54,9 +54,9 @@ public final class UltimateFilm {
 
 	/**
 	 * Server → client: play a film. {@code caster} is whose ultimate it is; {@code witness} says this player is only near
-	 * it (bars, no camera).
+	 * it (bars, no camera); (0.18.106) {@code afterDeath}: they've just died, and it plays before their death screen.
 	 */
-	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness) implements CustomPacketPayload {
+	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath) implements CustomPacketPayload {
 		public static final Type<Play> TYPE = new Type<>(JaymosPowers.id("ultimate_film"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -66,8 +66,10 @@ public final class UltimateFilm {
 				Vec3.STREAM_CODEC.encode(buf, p.at);
 				buf.writeVarInt(p.target);
 				buf.writeBoolean(p.witness);
+				buf.writeBoolean(p.afterDeath);
 			},
-			buf -> new Play(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), Vec3.STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readBoolean()));
+			buf -> new Play(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), Vec3.STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readBoolean(),
+				buf.readBoolean()));
 
 		@Override
 		public Type<Play> type() {
@@ -93,13 +95,13 @@ public final class UltimateFilm {
 	public static void play(ServerPlayer caster, int shot, int ticks, Vec3 at, @Nullable Entity target, double witnesses) {
 		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
 		int targetId = target == null ? -1 : target.getId();
-		ServerPlayNetworking.send(caster, new Play(caster.getId(), shot, length, at, targetId, false));
+		ServerPlayNetworking.send(caster, new Play(caster.getId(), shot, length, at, targetId, false, false));
 		if (witnesses <= 0.0) {
 			return;
 		}
 		for (ServerPlayer other : caster.level().players()) {
 			if (other != caster && other.distanceToSqr(caster) <= witnesses * witnesses) {
-				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true));
+				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true, false));
 			}
 		}
 	}
@@ -116,9 +118,19 @@ public final class UltimateFilm {
 		int targetId = target == null ? -1 : target.getId();
 		for (ServerPlayer other : level.players()) {
 			if (other.distanceToSqr(caster) <= witnesses * witnesses) {
-				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true));
+				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true, false));
 			}
 		}
+	}
+
+	/**
+	 * (0.18.106) A film for {@code dead}, who has just died: their camera on {@code at} (and {@code target}) for
+	 * {@code ticks}, with the death screen held back until it ends (or they skip it). Kingdoms' captains use it for the
+	 * killer's moment over the body.
+	 */
+	public static void afterDeath(ServerPlayer dead, int shot, int ticks, Vec3 at, @Nullable Entity target) {
+		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
+		ServerPlayNetworking.send(dead, new Play(dead.getId(), shot, length, at, target == null ? -1 : target.getId(), false, true));
 	}
 
 	/** Runs {@code what} on {@code player} once {@code ticks} have passed (if they're still on the server), e.g. a sound after the film. */

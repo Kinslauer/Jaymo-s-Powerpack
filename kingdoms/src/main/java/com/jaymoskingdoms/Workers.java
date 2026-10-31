@@ -180,6 +180,12 @@ public final class Workers {
 			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally; (0.7.296) a cove's captain ashore too
 			CampChiefs.step(level, w);
 		}
+		if (Captains.is(mob)) {
+			// (0.7.431) one of a tribe's captains: his fears, rage and rally, the players he meets (on a band, the trail)
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Captains.step(level, w);
+		}
 		if (Pedlars.party(mob)) {
 			// (0.7.425) a tribe's pedlar on his road, or one of his guards at his back
 			Greenskins.step(level, w);

@@ -435,7 +435,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.105, Scan B) Rime: angular ice, a crown of three icicles and two icicle spines down its back that shiver. */
+	/** (0.18.107, Scan B) Rime: angular ice, a crown of three icicles and two icicle spines down its back that shiver. */
 	static final class Rime extends FormModel {
 		private final ModelPart rightSpine, leftSpine;
 
@@ -473,7 +473,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.105, Scan B) Marrow: bare bone, two horns curling back off the skull, an open ribcage that breathes, a spine out its back. */
+	/** (0.18.107, Scan B) Marrow: bare bone, two horns curling back off the skull, an open ribcage that breathes, a spine out its back. */
 	static final class Marrow extends FormModel {
 		private final ModelPart ribs;
 
@@ -507,7 +507,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.105, Scan B) Swathe: wrapped head to foot, a loose end trailing from each arm and a long one down its back, all swaying. */
+	/** (0.18.107, Scan B) Swathe: wrapped head to foot, a loose end trailing from each arm and a long one down its back, all swaying. */
 	static final class Swathe extends FormModel {
 		private final ModelPart rightEnd, leftEnd, tail;
 
@@ -543,7 +543,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.105, Scan B) Blight: coal-black bone, a skull on each shoulder beside the big middle one, a ribbed tail that swings. */
+	/** (0.18.107, Scan B) Blight: coal-black bone, a skull on each shoulder beside the big middle one, a ribbed tail that swings. */
 	static final class Blight extends FormModel {
 		private final ModelPart rightSkull, leftSkull, tail;
 

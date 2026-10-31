@@ -1524,7 +1524,7 @@ def dud():
 
 
 def rime():
-    """(0.18.105, Scan B) Rime, the frost alien: pale blue ice, whiter on top, frost cracks in deeper blue, cold
+    """(0.18.107, Scan B) Rime, the frost alien: pale blue ice, whiter on top, frost cracks in deeper blue, cold
     white eyes, an icicle crown and two icicle spines down its back."""
     img = new_skin()
     ice = (158, 216, 240)
@@ -1550,7 +1550,7 @@ def rime():
 
 
 def marrow():
-    """(0.18.105, Scan B) Marrow, the bone alien: old white bone with grey-brown hollows, a skull face (dark sockets
+    """(0.18.107, Scan B) Marrow, the bone alien: old white bone with grey-brown hollows, a skull face (dark sockets
     with a faint green light), horns, a jutting spine and an open ribcage with dark gaps between the ribs."""
     img = new_skin()
     bone = (230, 224, 204)
@@ -1592,7 +1592,7 @@ def marrow():
 
 
 def swathe():
-    """(0.18.105, Scan B) Swathe, the wrapped one: grey-brown wrappings wound in slanting bands, stained here and
+    """(0.18.107, Scan B) Swathe, the wrapped one: grey-brown wrappings wound in slanting bands, stained here and
     there, a dark gap at the face with two pale eyes, loose trailing ends."""
     img = new_skin()
     cloth = (184, 168, 140)
@@ -1625,7 +1625,7 @@ def swathe():
 
 
 def blight():
-    """(0.18.105, Scan B) Blight, the wither alien: coal-black bone with grey ash on top, a ribbed chest, three
+    """(0.18.107, Scan B) Blight, the wither alien: coal-black bone with grey ash on top, a ribbed chest, three
     skulls (the side ones on the shoulders) with pale glowing eyes, a ribbed tail."""
     img = new_skin()
     coal = (58, 52, 64)
@@ -1815,7 +1815,7 @@ if __name__ == "__main__":
     dud()
     for form in PATCH5:
         ultimate(form)
-    # (0.18.105) Scan B, last again so nothing older changes
+    # (0.18.107) Scan B, last again so nothing older changes
     rime()
     marrow()
     swathe()

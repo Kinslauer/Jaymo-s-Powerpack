@@ -61,7 +61,7 @@ the mod isn't loaded.
 
 ### Scan B, cold and bone (Powers, large)
 
-**Built (0.18.105):** all four, with these changes: Rime doesn't stand on powder snow yet (that needs a mixin);
+**Built (0.18.107):** all four, with these changes: Rime doesn't stand on powder snow yet (that needs a mixin);
 Blight's shield comes on by itself at half health, so its B is a Dark Pulse instead, and Rot Touch withers without a
 bleed.
 

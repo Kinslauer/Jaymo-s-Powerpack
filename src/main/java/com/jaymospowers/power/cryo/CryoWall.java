@@ -53,7 +53,7 @@ public final class CryoWall {
 		raise(player);
 	}
 
-	/** (0.18.105) The wall itself, without the Cryokinesis checks (Rime lends it, {@link CryoLent}). */
+	/** (0.18.107) The wall itself, without the Cryokinesis checks (Rime lends it, {@link CryoLent}). */
 	static void raise(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();

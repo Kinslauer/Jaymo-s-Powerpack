@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.105, Scan B) Blight, the wither alien, boss tier: big, coal-black bone, a ribbed spine that ends in a tail, and
+ * (0.18.107, Scan B) Blight, the wither alien, boss tier: big, coal-black bone, a ribbed spine that ends in a tail, and
  * three skulls on its shoulders, the middle one largest. 60 health, fists of 7, heavy. Scanned from the Wither only;
  * hidden (not needed for a complete band). The Wither effect can't touch it.
  * <ul>

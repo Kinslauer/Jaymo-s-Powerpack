@@ -266,6 +266,14 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_q_captain",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_pedlar_wares",
       "results": [
         {
@@ -275,6 +283,14 @@
     },
     {
       "name": "jaymoskingdoms_tribe_mood",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_pedlar_captains",
       "results": [
         {
           "actions": {}
