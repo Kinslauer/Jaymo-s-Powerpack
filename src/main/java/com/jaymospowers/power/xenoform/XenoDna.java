@@ -59,6 +59,12 @@ public final class XenoDna {
 		Map.entry("naturalist:vulture", "talon"), Map.entry("naturalist:bluejay", "talon"), Map.entry("naturalist:canary", "talon"),
 		Map.entry("naturalist:cardinal", "talon"), Map.entry("naturalist:robin", "talon"), Map.entry("naturalist:finch", "talon"),
 		Map.entry("naturalist:sparrow", "talon"),
+		// (0.18.111, Scan D) water and light (ids of mods not loaded simply never match)
+		Map.entry("naturalist:anglerfish", "murk"), Map.entry("friendsandfoes:barnacle", "murk"),
+		Map.entry("naturalist:shark", "gnasher"), Map.entry("naturalist:great_white_shark", "gnasher"), Map.entry("naturalist:alligator", "gnasher"),
+		Map.entry("naturalist:piranha", "gnasher"), Map.entry("friendsandfoes:mauler", "gnasher"),
+		Map.entry("naturalist:firefly", "lumen"), Map.entry("friendsandfoes:glare", "lumen"),
+		Map.entry("jaymoskingdoms:vampire_bat", "keen"), Map.entry("jaymoskingdoms:blightwing", "keen"),
 		// Rivet: machines
 		Map.entry("jaymoskingdoms:redstone_golem", "rivet"), Map.entry("jaymoskingdoms:mimic", "rivet"),
 		Map.entry("jaymospowers:android_mech", "rivet"), Map.entry("jaymospowers:future_mech", "rivet"),

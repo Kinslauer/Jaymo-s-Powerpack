@@ -283,6 +283,15 @@ public final class XenoformPower implements Power {
 		public int sniff;
 		public int stalked = -1;
 		public long stalkUntil, hideUntil;
+		/**
+		 * (0.18.111, Scan D) Murk: the creatures held in its tentacles (and ticks left); ticks left of the lure. Gnasher:
+		 * ticks left of the frenzy and the death roll. Lumen: its lights (packed block positions, each with the tick it
+		 * goes out); ticks left of the fetch. Keen: ticks left of the sonar; hanging from a ceiling.
+		 */
+		public final java.util.List<Integer> grips = new java.util.ArrayList<>();
+		public int gripTicks, lure, frenzy, rolls, fetch, sonar;
+		public final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap lights = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
+		public boolean perched;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -343,6 +352,10 @@ public final class XenoformPower implements Power {
 			latched = stalked = -1;
 			pack.clear();
 			stalkUntil = hideUntil = 0L;
+			grips.clear();
+			gripTicks = lure = frenzy = rolls = fetch = sonar = 0;
+			lights.clear();
+			perched = false;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;

@@ -126,6 +126,10 @@ II within 6) rather than adding damage to each blow; Root Out's "truffles" are v
 
 ### Scan D, water and light (Powers, large)
 
+**Built (0.18.111):** all four, with these changes: no vanilla shark exists, so Gnasher is scanned from a dolphin
+(and the mod mobs by id); Lumen's lights are vanilla light blocks it puts out itself, so a crash while one burns
+leaves it standing; Keen's sonar outline is particles only you are sent, not a glow.
+
 - **Murk, the ink squid:** scanned from a squid, a Naturalist anglerfish or a Friends & Foes barnacle. It's the
   second swimmer.
   - R is an ink cloud that blinds.
