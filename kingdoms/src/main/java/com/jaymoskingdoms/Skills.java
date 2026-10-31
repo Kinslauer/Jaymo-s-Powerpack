@@ -225,7 +225,14 @@ public final class Skills {
 		UNBROKEN_ROAR(Pillar.STRENGTH, 1, 3, 22, 15, 1, SECOND_BREATH),
 		// (0.7.358) Andy: "lets you withstand more hits during charged interactions": rising by yourself, a revive, Second
 		// Wind's eating each take one more hit a rank before they're broken off (Jaymo's Powers' WillSkill.holdHits); last, so no ordinal moves
-		UNFLINCHING(Pillar.STRENGTH, 2, 1, 10, 12, 1, NO_GETTING_UP);
+		UNFLINCHING(Pillar.STRENGTH, 2, 1, 10, 12, 1, NO_GETTING_UP),
+		// (0.7.424) Andy: "you can question downed humanoids, unlocked in the tree": the execution hold offers question or
+		// kill (Jaymo's Powers' Finishers reads this rank by key), and the talk menu opens with the questions ({@link Questioning})
+		INTERROGATION(Pillar.STRENGTH, 1, 1, 2, 8, 1),
+		// (0.7.424) Andy: "it should be early on the tree, and available in stealth and strength as well": the same choice,
+		// each with its own edge ({@link Questioning})
+		ROUGH_QUESTIONS(Pillar.STRENGTH, 1, 1, 0, 1, 1, HEAVY_BLOWS),
+		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

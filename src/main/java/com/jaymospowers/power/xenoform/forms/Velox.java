@@ -78,7 +78,7 @@ public final class Velox extends XenoForm {
 
 	@Override
 	public boolean scans(Entity creature) {
-		// (0.18.97) Kingdoms' wind dragons and war elephants are built on the horse, but they're no horses
+		// (0.18.98) Kingdoms' wind dragons and war elephants are built on the horse, but they're no horses
 		return creature instanceof AbstractHorse && !"jaymoskingdoms".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(creature.getType()).getNamespace());
 	}
 

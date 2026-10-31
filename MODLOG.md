@@ -4398,6 +4398,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Rivet fix:** its C did nothing (no `onUltimate`) and it had no Ultimate skin; now it becomes Ironclad like the rest.
   - Models in `XenoFormModels`, skins and Ultimate skins from `tools/gen_xenoform.py` (the new skins drawn last so the
     old ones don't change), spikes in `UltimateSpikes`, HUD icons, lang. Compile-checked; not seen in game.
-- **0.18.97, Scans fixed:** Kingdoms' clockwork golem is built on the iron golem, so scanning it gave Bulwark and Rivet
+- **0.18.97, question or kill (havens patch 0, Kingdoms 0.7.424):** Andy: "you can question downed humanoids, unlocked
+  in the tree, holding [the execution] now has you select either question or kill dragging either left or right". With
+  any of Kingdoms' Rough Questions (Strength), Quiet Word (Stealth) or Interrogation (Will), a full execution hold sends
+  `Finishers.Choose`; the client (`FinisherClient.choose`) shows a slider and sends `Pick` once the view turns 14 degrees
+  (left questions). Questioning plays a hold per weapon (`Kind.Q_BLADE/Q_BLUNT/Q_AIM/Q_GRIP`, 60 s, no blow; poses in
+  `FinisherPose`) and opens Kingdoms' questioning talk (`KingdomsQuestioning`, by reflection); use lets them go, a blow
+  finishes them. Quiet Word: sneak + hold on an unaware humanoid from behind takes them standing (`Kind.Q_CHOKE`,
+  `Finishers.chokeable/unaware`). A held player gets `QuestionScreen` (truth, lie, silence, own words) and the asker one
+  to put questions (`PlayerQuestioning`); Interrogation flags a lie, Rough Questions' threat costs 2 health.
+  Compile-checked; not seen in game.
+- **0.18.98, Scans fixed:** Kingdoms' clockwork golem is built on the iron golem, so scanning it gave Bulwark and Rivet
   could never be found; Kingdoms' wind dragons and war elephants are built on the horse and scanned as Velox. Bulwark and
   Velox now skip Kingdoms' creatures (`Bulwark.scans`, `Velox.scans`).

@@ -953,6 +953,49 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.424) {@code body} can be questioned on the execution hold ({@link Questioning}): one of MCA's grown villagers. */
+	static boolean questionable(LivingEntity body) {
+		return body instanceof VillagerEntityMCA villager && !villager.isBaby() && villager.isAlive();
+	}
+
+	/** (0.7.424) MCA's talk screen on {@code body}, held down by {@code player} ({@link #questioningOpening} opens it). */
+	static void openQuestioning(ServerPlayer player, LivingEntity body) {
+		if (body instanceof VillagerEntityMCA villager) {
+			villager.getInteractions().interactAt(player, villager.position(), net.minecraft.world.InteractionHand.MAIN_HAND);
+		}
+	}
+
+	/** (0.7.424) The questioning's over: {@code player}'s talk screen on {@code body} closes. */
+	static void closeQuestioning(ServerPlayer player, LivingEntity body) {
+		if (body instanceof VillagerEntityMCA villager && villager.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent()) {
+			villager.getInteractions().stopInteracting();
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.OpenGuiRequest(net.conczin.mca.network.s2c.OpenGuiRequest.Type.CLOSE), player);
+	}
+
+	/**
+	 * (0.7.424) MCA's menu opening ("root") on one {@code player} holds down to question ({@link Questioning}): they beg or
+	 * glare, and the main menu shows only the questions. True if so.
+	 */
+	static boolean questioningOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Questioning.active(player, villager)) {
+			return false;
+		}
+		questioningSay(player, villager, Questioning.opening(player, villager));
+		return true;
+	}
+
+	/** (0.7.424) {@code line} from {@code villager} on the questioning screen, the questions still shown (those left). */
+	static void questioningSay(ServerPlayer player, LivingEntity mob, Component line) {
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (!(mob instanceof VillagerEntityMCA villager) || main == null) {
+			return;
+		}
+		Component heard = Languages.understands(player, villager) ? line : Component.translatable("dialogue.chat.jaymoskingdoms.question.wordless");
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(heard, false), player);
+	}
+
 	/**
 	 * (0.7.405) Andy: "the judge shouldnt say this" (MCA's "What's the deal, stranger? What's the reason for your visit to
 	 * our humble village?"). MCA's menu opening on one of Powers' Z Fighter characters ({@link ZFighterFolk}: the Judge,
