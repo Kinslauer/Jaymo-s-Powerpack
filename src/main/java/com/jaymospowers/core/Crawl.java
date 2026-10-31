@@ -31,6 +31,9 @@ import org.jspecify.annotations.Nullable;
  * other way. Rolling back (reversing) is what puts out the fire on you; any fire you roll through is smothered either way.
  * The client moves the player (movement is the client's); the server puts the fire out and syncs the roll so everyone
  * sees the body turn over.
+ * <p>(0.18.85) Andy: "while laying in prone, pressing shift again will toggle an animation of you moving to your back, and
+ * vice versa. kind of like metal gear solid V". Prone is on the belly or, {@link #SUPINE}, on the back, feet toward where you
+ * look: the better view down a weapon, and the only way to draw a bow lying down ({@code ProneBowMixin}).
  */
 public final class Crawl {
 	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
@@ -100,6 +103,24 @@ public final class Crawl {
 		}
 	}
 
+	/** (0.18.85) On a prone player lying on their back (synced to everyone). Gone whenever the crawl ends or starts afresh. */
+	public static final AttachmentType<Boolean> SUPINE = AttachmentRegistry.create(JaymosPowers.id("crawl_supine"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
+	/** (0.18.85) Client only: the local player's entity id while they lie on their back (ahead of the server's say). */
+	public static volatile int localSupine = -1;
+
+	/** (0.18.85) Client → server: the prone player turned onto their back ({@code true}) or belly. */
+	public record Supine(boolean back) implements CustomPacketPayload {
+		public static final Type<Supine> TYPE = new Type<>(JaymosPowers.id("crawl_supine"));
+		public static final StreamCodec<ByteBuf, Supine> CODEC = ByteBufCodecs.BOOL.map(Supine::new, Supine::back);
+
+		@Override
+		public Type<Supine> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: the crawling player rolls left or right ({@code right}). */
 	public record Roll(boolean right) implements CustomPacketPayload {
 		public static final Type<Roll> TYPE = new Type<>(JaymosPowers.id("crawl_roll"));
@@ -119,6 +140,15 @@ public final class Crawl {
 		PayloadTypeRegistry.serverboundPlay().register(Roll.TYPE, Roll.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, ctx) -> set(ctx.player(), payload.down()));
 		ServerPlayNetworking.registerGlobalReceiver(Roll.TYPE, (payload, ctx) -> roll(ctx.player(), payload.right()));
+		PayloadTypeRegistry.serverboundPlay().register(Supine.TYPE, Supine.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Supine.TYPE, (payload, ctx) -> {
+			ServerPlayer player = ctx.player();
+			if (payload.back() && player.hasAttached(CRAWLING) && !com.jaymospowers.core.wounds.Downed.isDowned(player)) {
+				player.setAttached(SUPINE, true);
+			} else {
+				player.removeAttached(SUPINE);
+			}
+		});
 	}
 
 	private static void set(ServerPlayer player, boolean down) {
@@ -130,6 +160,8 @@ public final class Crawl {
 			// (0.14.2) two broken legs don't stand: crawling is all that's left
 			return;
 		}
+		// (0.18.85) a fresh crawl starts on the belly (a Supine packet right after turns it over)
+		player.removeAttached(SUPINE);
 		if (down && canCrawl(player)) {
 			player.setAttached(CRAWLING, true);
 		} else {
@@ -193,6 +225,18 @@ public final class Crawl {
 	public static boolean canCrawl(Player player) {
 		return !player.isSpectator() && !player.isPassenger() && !player.isFallFlying() && !player.getAbilities().flying
 			&& !player.isInWater() && !player.isSleeping();
+	}
+
+	/** (0.18.85) Whether this player lies prone on their back (on either side). */
+	public static boolean supine(Player player) {
+		if (!crawling(player)) {
+			return false;
+		}
+		if (player.level().isClientSide() && player.getId() == localCrawler) {
+			// the local player's own crawl: their turn over shows at once
+			return player.getId() == localSupine;
+		}
+		return player.hasAttached(SUPINE);
 	}
 
 	/** Whether this player is crawling by the gesture (on either side). */

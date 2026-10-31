@@ -4279,3 +4279,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   snowball's hit event; `RockSnowballMixin` keeps any snowball wearing a rock (ours or Kingdoms' cobblestone) from sending it.
   A broken rock cracks the block it hit (break stage 3, fading a stage every 12 ticks) and throws 12 stone specks that fall and
   settle; one that stays lying sheds 3. Compile-checked; not seen in game.
+- **0.18.85, MGSV-style prone, belly slides, a stepping crouch:** Andy: "the crouch above prone, it doesnt animate the legs
+  moving like it used to. it should look like a sneak from a skyrim character", plus slides into prone and a back/belly toggle.
+  - *The crouch's stride* (`client/CrouchPose`): each thigh swings `LOW_STRIDE` either side of `LOW_THIGH`, full stride at a
+    sneak's pace (`STRIDE_GAIN`), and the knee bends `LOW_LIFT` more as the leg comes through so the foot lifts.
+  - *Belly slide* (`freerun/Slide.BELLY`, `client/freerun/RunPose.belly`): a slide out of the fast run is a head-first dive on
+    your stomach, arms out overhead. A slide out of a regular sprint (or within `SPRINT_GRACE_TICKS` of one) is the feet-first
+    slide on your back as before.
+  - *Slide into prone* (`FreerunClient`): hold Sneak through the slide, or scroll down during it (`slideScroll`), and it ends
+    in prone instead of getting up: on your belly from the belly slide, on your back from the back slide. Scrolling holds it
+    as the wheel's stance.
+  - *Back and belly* (`core/Crawl.SUPINE`, synced; `CrawlTaps.turnOver`; `client/CrawlPose` `back`): prone, a tap of Sneak
+    (no scroll) rolls you over onto your back over `BACK_TURN_TICKS`, and again onto your belly. On your back you lie feet
+    toward where you look, head raised, one knee up, arms up to aim. A bow only draws on your back (`mixin/ProneBowMixin`).
+  - Compile-checked (javac against the 26.3 jars); not built with Gradle or played.
