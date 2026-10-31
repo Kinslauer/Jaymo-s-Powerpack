@@ -49,6 +49,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -163,8 +164,13 @@ public final class Finishers {
 	/** (0.18.96) How long you may hold someone for questioning (ticks), and when their talk opens (once the pose has settled). */
 	public static final int QUESTION_TICKS = 20 * 60;
 	static final int QUESTION_OPEN = 10;
-	/** (0.18.96) Kingdoms' Will perk that lets you question the downed. */
-	static final String QUESTION_PERK = "interrogation";
+	/**
+	 * (0.18.96) Kingdoms' perks that let you question the downed (any one): Strength's Rough Questions, Stealth's Quiet Word,
+	 * Will's Interrogation. Andy: "it should be early on the tree, and available in stealth and strength as well".
+	 */
+	static final String ROUGH_PERK = "rough_questions", QUIET_PERK = "quiet_word", WILL_PERK = "interrogation";
+	/** (0.18.96) Quiet Word's choke hold: how far round behind them you must be (degrees off the way they face). */
+	static final float BEHIND_DEGREES = 110.0F;
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI,
@@ -250,7 +256,9 @@ public final class Finishers {
 		/** At Their Face: the bow drawn, the crossbow or gun levelled at their face from a pace off. */
 		Q_AIM(QUESTION_TICKS, new int[0], Strike.HOLD),
 		/** By the Collar: down on a knee, both fists in their collar, their head hauled up off the ground. */
-		Q_GRIP(QUESTION_TICKS, new int[0], Strike.HOLD);
+		Q_GRIP(QUESTION_TICKS, new int[0], Strike.HOLD),
+		/** (Quiet Word) The Choke Hold: taken from behind on their feet, an arm round the throat, the blade or fist at their ribs. */
+		Q_CHOKE(QUESTION_TICKS, new int[0], Strike.HOLD);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -411,6 +419,7 @@ public final class Finishers {
 		PayloadTypeRegistry.clientboundPlay().register(Choose.TYPE, Choose.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, ctx) -> picked(ctx.player(), payload.target(), payload.question()));
+		PlayerQuestioning.register();
 		// (busy: a use still held from before does nothing to them either)
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && questioning(sp)) {
@@ -753,9 +762,22 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body)) {
+			// (0.18.96) Quiet Word: one on their feet who hasn't noticed you, taken from behind
+			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
+			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
 				hold.start = now;
+				continue;
+			}
+			if (choke) {
+				if (now - hold.start >= HOLD_TICKS) {
+					it.remove();
+					begin(level, player, hold.body, Kind.Q_CHOKE);
+				} else if (now - hold.start >= BAR_AFTER) {
+					int filled = Math.round(HOLD_BAR * (now - hold.start) / (float) HOLD_TICKS);
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
+						"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_GRAY));
+				}
 				continue;
 			}
 			ItemStack stack = player.getMainHandItem();
@@ -835,14 +857,46 @@ public final class Finishers {
 		if (!KINGDOMS || KINGDOMS_RANK == null || player.isSpectator()) {
 			return false;
 		}
-		try {
-			if (!player.isCreative() && (int) KINGDOMS_RANK.invoke(null, player, QUESTION_PERK) <= 0) {
-				return false;
-			}
-		} catch (ReflectiveOperationException | RuntimeException e) {
+		if (!player.isCreative() && !questionPerk(player, ROUGH_PERK) && !questionPerk(player, QUIET_PERK) && !questionPerk(player, WILL_PERK)) {
 			return false;
 		}
 		return body instanceof Player || KingdomsQuestioning.questionable(body);
+	}
+
+	/** (0.18.96) {@code player} has the Kingdoms perk {@code key} (one of the questioning perks). */
+	public static boolean questionPerk(Player player, String key) {
+		if (KINGDOMS_RANK == null) {
+			return false;
+		}
+		try {
+			return (int) KINGDOMS_RANK.invoke(null, player, key) > 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * (0.18.96) Quiet Word: {@code body} is one who talks, on their feet, and {@code player} has Quiet Word and stands behind
+	 * them. (Also asked on the client, so the hold doesn't swing at them.)
+	 */
+	public static boolean chokeable(Player player, Entity entity) {
+		if (!(entity instanceof LivingEntity body) || body instanceof Player || !body.isAlive() || helpless(body) || targeted(body) || Carry.isCarried(body)
+			|| !KingdomsQuestioning.questionable(body) || !questionPerk(player, QUIET_PERK)) {
+			return false;
+		}
+		float toPlayer = (float) (Mth.atan2(player.getZ() - body.getZ(), player.getX() - body.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+		return Math.abs(Mth.wrapDegrees(toPlayer - body.getYHeadRot())) >= BEHIND_DEGREES;
+	}
+
+	/** (0.18.96) {@code body} hasn't noticed {@code player}: not after them, and not hurt by them lately. */
+	static boolean unaware(Player player, LivingEntity body) {
+		return !(body instanceof Mob mob && mob.getTarget() == player) && body.getLastHurtByMob() != player;
+	}
+
+	/** (0.18.96) A questioning is over, however it ended: Kingdoms remembers it, and a player's screens close. */
+	private static void questionEnded(ServerPlayer player, LivingEntity body, boolean spared) {
+		KingdomsQuestioning.ended(player, body, spared);
+		PlayerQuestioning.ended(player, body);
 	}
 
 	/** (0.18.96) The client's pick for the body it was asked about: question or kill. */
@@ -890,7 +944,7 @@ public final class Finishers {
 		}
 		PLAYING.remove(player.getUUID());
 		end(player, p.body());
-		KingdomsQuestioning.ended(player, p.body(), !kill);
+		questionEnded(player, p.body(), !kill);
 		if (kill && p.body().isAlive() && finishable(player, p.body())) {
 			kill(level, player, p.body());
 		}
@@ -953,7 +1007,7 @@ public final class Finishers {
 				it.remove();
 				end(player, body);
 				if (kind.questioning()) {
-					KingdomsQuestioning.ended(player, body, true);
+					questionEnded(player, body, true);
 				}
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
@@ -978,16 +1032,23 @@ public final class Finishers {
 			if (kind.questioning() && t == QUESTION_OPEN && present) {
 				// (0.18.96) Andy: "it opens the talk menu with the relevant options"; a player held so hears it from you
 				if (body instanceof ServerPlayer held) {
+					// (0.18.96) Andy: "can you make one?": their own screen to answer from, and yours to ask
 					held.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.questioned", player.getDisplayName()).withStyle(ChatFormatting.RED));
+					PlayerQuestioning.open(player, held);
 				} else {
-					KingdomsQuestioning.open(player, body);
+					KingdomsQuestioning.open(player, body, kind == Kind.Q_CHOKE);
 				}
+			}
+			if (kind.questioning() && body instanceof Mob mob) {
+				// (held: they stop what they were about)
+				mob.setTarget(null);
+				mob.getNavigation().stop();
 			}
 			if (kind.questioning() && t >= kind.length - 1 && present) {
 				// (held as long as you may: you let them go)
 				it.remove();
 				end(player, body);
-				KingdomsQuestioning.ended(player, body, true);
+				questionEnded(player, body, true);
 				continue;
 			}
 			for (int beat : kind.beats) {

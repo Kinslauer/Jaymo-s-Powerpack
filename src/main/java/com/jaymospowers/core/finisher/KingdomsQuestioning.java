@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
@@ -14,24 +15,27 @@ import org.jspecify.annotations.Nullable;
  * Kingdoms (and then nobody is questioned: {@link Finishers#mayQuestion}).
  */
 final class KingdomsQuestioning {
-	private static final @Nullable MethodHandle QUESTIONABLE, OPEN, ENDED;
+	private static final @Nullable MethodHandle QUESTIONABLE, OPEN, ENDED, PLAYER_ANSWER;
 
 	static {
-		MethodHandle questionable = null, open = null, ended = null;
+		MethodHandle questionable = null, open = null, ended = null, playerAnswer = null;
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			try {
 				Class<?> c = Class.forName("com.jaymoskingdoms.Questioning");
 				MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 				questionable = lookup.findStatic(c, "questionable", MethodType.methodType(boolean.class, LivingEntity.class));
-				open = lookup.findStatic(c, "open", MethodType.methodType(void.class, ServerPlayer.class, LivingEntity.class));
+				open = lookup.findStatic(c, "open", MethodType.methodType(void.class, ServerPlayer.class, LivingEntity.class, boolean.class));
 				ended = lookup.findStatic(c, "ended", MethodType.methodType(void.class, ServerPlayer.class, LivingEntity.class, boolean.class));
+				playerAnswer = lookup.findStatic(c, "playerAnswer", MethodType.methodType(Component.class, ServerPlayer.class, ServerPlayer.class,
+					String.class, boolean.class));
 			} catch (ReflectiveOperationException | LinkageError e) {
-				questionable = open = ended = null;
+				questionable = open = ended = playerAnswer = null;
 			}
 		}
 		QUESTIONABLE = questionable;
 		OPEN = open;
 		ENDED = ended;
+		PLAYER_ANSWER = playerAnswer;
 	}
 
 	private KingdomsQuestioning() {
@@ -49,11 +53,11 @@ final class KingdomsQuestioning {
 		}
 	}
 
-	/** Their talk opens for {@code player}: the questions to put to them. */
-	static void open(ServerPlayer player, LivingEntity body) {
+	/** Their talk opens for {@code player}: the questions to put to them ({@code unseen}: taken from behind, Quiet Word). */
+	static void open(ServerPlayer player, LivingEntity body, boolean unseen) {
 		if (OPEN != null) {
 			try {
-				OPEN.invokeExact(player, body);
+				OPEN.invokeExact(player, body, unseen);
 			} catch (Throwable ignored) {
 				// (no talk: the hold goes on, and a blow or use still ends it)
 			}
@@ -68,6 +72,18 @@ final class KingdomsQuestioning {
 			} catch (Throwable ignored) {
 				// (nothing to remember it by)
 			}
+		}
+	}
+
+	/** (0.18.96) A held player's answer to {@code what} ("leader", "home"), true or ({@code lie}) not; null without Kingdoms. */
+	static @Nullable Component playerAnswer(ServerPlayer asker, ServerPlayer held, String what, boolean lie) {
+		if (PLAYER_ANSWER == null) {
+			return null;
+		}
+		try {
+			return (Component) PLAYER_ANSWER.invokeExact(asker, held, what, lie);
+		} catch (Throwable e) {
+			return null;
 		}
 	}
 }

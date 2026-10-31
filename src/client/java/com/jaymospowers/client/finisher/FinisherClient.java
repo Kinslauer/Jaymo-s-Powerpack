@@ -41,6 +41,8 @@ public final class FinisherClient {
 			choosing = payload.target();
 			choiceYaw = context.player().getYRot();
 		});
+		// (0.18.96) a player held down for questioning, and the one asking: their screens
+		QuestionScreen.register();
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -93,7 +95,9 @@ public final class FinisherClient {
 	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
 	 */
 	public static boolean aimingAtHelpless(Minecraft minecraft) {
-		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body && Finishers.helpless(body);
+		// ((0.18.96) or, with Quiet Word, someone on their feet to take from behind for questioning)
+		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
+			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body));
 	}
 
 	/**

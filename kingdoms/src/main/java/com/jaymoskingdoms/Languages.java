@@ -106,7 +106,7 @@ public final class Languages {
 	/** MCA's talk menu: what can be done without words (a hug, a kiss, rock-paper-scissors, (0.7.204) a handshake), and the greetings that lead to it. */
 	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE,
 		// (0.7.424) a blade pressed closer, a hand let go, the blow: no words needed
-		Questioning.THREATEN, Questioning.SPARE, Questioning.FINISH,
+		Questioning.THREATEN, Questioning.STARE, Questioning.SPARE, Questioning.FINISH,
 		// (0.7.254) thanks need no words
 		SharedHistory.THANK);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");

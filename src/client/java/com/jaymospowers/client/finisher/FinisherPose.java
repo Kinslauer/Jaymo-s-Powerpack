@@ -358,6 +358,9 @@ public final class FinisherPose {
 		// A fist in the collar: on a knee, the head pulled up by the collar, the other fist drawn back
 		Key collar = k(0, 0.45F, 32, 6, -1.4F, 0.2F, 0.3F, -0.6F, 0.1F, 0.1F, -1.15F, 1.35F, 0.65F, 0);
 		KEYS.put(Finishers.Kind.Q_GRIP, new Key[] {rest(0, 0), at(collar, 8), turned(collar, q * 0.5F, 2), at(collar, q - 8), rest(q, 0)});
+		// (Quiet Word) The choke hold: stood close behind them, the right arm hooked round the throat, the left at their ribs
+		Key choke = k(0, 0.05F, 6, 0, -1.55F, 0.75F, 0.2F, -1.0F, -0.2F, -0.1F, -0.1F, 0.1F, 0.25F, 0);
+		KEYS.put(Finishers.Kind.Q_CHOKE, new Key[] {rest(0, 0), at(choke, 6), turned(choke, q * 0.5F, 3), at(choke, q - 8), rest(q, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */

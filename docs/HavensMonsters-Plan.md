@@ -114,4 +114,10 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   to kill; Kingdoms' Interrogation perk, Will page), four questioning holds by weapon, MCA's talk menu with Who leads
   you / Where is your home / Press the threat / Let them go / Finish them, memories of being questioned or spared; the
   world's news posted on town boards ("Word from abroad"), each town hearing about 70% of it, and a bird bringing a piece
-  only when it names you or your realm. Players held down only see who holds them (their own answer screen is still to do).
+  only when it names you or your realm.
+- Patch 0 follow-up (Andy: "early on the tree, and available in stealth and strength as well"; "can you make one?"):
+  any of three tier-1 perks unlocks it. Strength's Rough Questions (threats hurt, break twice as often, one more try),
+  Stealth's Quiet Word (take the unaware from behind in a choke hold without downing them; they keep no memory of you;
+  "Who else is about?"), Will's Interrogation (no lies get past you, a stare once threats fail, "Swear you'll never raise
+  a hand to me"). A player held down gets an answer screen (truth, lie, silence or their own words), and the asker a
+  question screen.

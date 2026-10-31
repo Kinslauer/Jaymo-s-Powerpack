@@ -104,7 +104,9 @@ public final class Recollections {
 		THREW(-1, 20, true, false, "%1$s picked you up while you lay downed, then threw you down.", ""),
 		// (0.7.424) held down on the execution hold and questioned ({@link Questioning}), and let go after
 		QUESTIONED(-3, 60, true, true, "%1$s held you down with a weapon at you and made you talk.", "%1$s held %3$s down and made them talk."),
-		SPARED(3, 60, true, true, "%1$s had you at their mercy and let you live.", "%1$s had %3$s at their mercy and let them live.");
+		SPARED(3, 60, true, true, "%1$s had you at their mercy and let you live.", "%1$s had %3$s at their mercy and let them live."),
+		/** (0.7.424) Interrogation's oath, sworn while held down. */
+		SWORE(1, 120, true, false, "You swore to %1$s, under their weapon, that you'd never raise a hand to them.", "");
 
 		final int weight, days;
 		final boolean remark, tellable;

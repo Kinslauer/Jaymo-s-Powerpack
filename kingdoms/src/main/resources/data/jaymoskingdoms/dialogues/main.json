@@ -232,6 +232,30 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_q_nearby",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_q_stare",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_q_swear",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }
