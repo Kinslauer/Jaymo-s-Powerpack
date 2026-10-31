@@ -118,6 +118,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Fuse** | creeper | 1x, 20 hp, fists 4; every hit pops (a shove and a puff); its own blasts never hurt it | Blast Pod: on the aimed creature or block (8), power 2 after 2 s (5 s) | Fuse Dash: 1.3 dash; first creature met takes 5 and pops (3 s) | Self-Destruct: hold 1.5 s, let go to blow (power 3.5) then four power-1.5 blasts one a tick round you; unseen 1 s; costs 300 ticks of band charge (20 s) | Defuse: primed TNT within 10 is put out (dropped as TNT), swelling creepers stop, your pod is cancelled; +2 hp each; blasts can't hurt you 5 s (15 s) |
 | **Thornwild** | creaking; Enderscape rustle | 1.1x, 28 hp, fists 5, 40% knockback resist; heals 1 every 2 s in sunlight | Roots: the aimed creature (16) held 4 s, 1 a second (10 s) | Thorn Volley: five thorns, 2.5 each (3 s) | Hedge: a 5x2 wall of leaves two blocks ahead; withers after 30 s; needs build rights (15 s) | Bloom: 10 s, three bone-meal tries every half second round your feet (30 s) |
 | **Billow** | happy ghast; Aether aerwhale | 1.6x, 40 hp, fists 2, slow, 50% knockback resist; floats (jump rises, sneak sinks); no fall damage; up to 3 players ride on its back (right-click it, sneak off) | Downpour: 6 s, fire blocks within 4 (and 8 below) and burning creatures put out (15 s) | Thunderhead: a bolt (no fire) and 8 on the aimed creature (32) (8 s) | Gust: everything within 8 in front blown 1.6 back (3 s) | Fog: 10 s, creatures within 8 (not players or riders) blinded and lose you and your riders (25 s) |
+| **Towerback** | Kingdoms Highfield, Arctic and Irradiated Giants, war elephant | 5x (about 9 blocks), 120 hp, fists 12, slow, full knockback resist; Z tap: monolith size 16x (open sky only; +80 hp, +8 fists, 60% faster, step 4; walks through what it meets, never block entities or unbreakables); every step stomps (cracks, a shockwave 1.6 per scale for 5, jump it); falls land as stomps, no fall damage | Grab: the aimed creature no taller than half you, the Giants' grab (1.5 s wind-up, squeeze 4 every 0.5 s, slam 30; x1.6 at monolith size), with the film (15 s) | Stomp: a shockwave twice a step's, 10, thrown up (6 s) | Swat: 12 to everything in front, flung aside 2.4 (4 s) | Roar: monsters (and mobs after you) within 3 per scale get Weakness II, Slowness III 8 s and lose you (20 s) |
 
 ### More DNA [XenoDna] (0.18.100)
 
@@ -155,6 +156,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Ooze | sulfur cube, Aether blue and golden swet, Kingdoms mud golem |
 | Thornwild | Enderscape rustle |
 | Billow | Aether aerwhale |
+| Towerback | Kingdoms Highfield, Arctic and Irradiated Giants, war elephant (only by these) |
 | Rivet | Kingdoms redstone golem and mimic, android mech, war mech, Omen mechs, android, worky drone, test unit |
 
 **No DNA:** cow, pig, sheep, rabbit, turkey, duck, capybara; zombies, drowned, zombie villagers, zombified piglins and

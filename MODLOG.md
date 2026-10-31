@@ -4606,3 +4606,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - Andy: dropped weapons. Going down, players and mobs let go of the weapons in their hands, which land a little way off
   (`core/wounds/DroppedArms`); 1 in 10 hang on and crawl with them, and die still holding them. A mob killed outright
   drops its weapons too, except for 1 in 5 that die clutching them. Players dying outright drop everything as before.
+- **0.18.119, Scan G (`docs/ScanGaps-Plan.md`), the true giant:** Towerback (Highfield, Arctic and Irradiated
+  Giants, Kingdoms war elephant): a stone giant with a broken watchtower on its back, five times your size. Tap Z to
+  rise to monolith-giant size (16x, about 29 blocks, under open sky only; tap again to come down); up there it walks
+  through what's in its way (never chests or unbreakable blocks). Every step stomps like the Giants' (cracks, a
+  shockwave along the ground, jump it to dodge); falls land as stomps. R Grab (the Giants' wind-up, squeeze and slam,
+  with the letterbox film), G Stomp, V Swat, B Roar. Powers has its own copy of the stomp and grab, so Kingdoms only
+  supplies the mobs. Z tapped as any alien now goes to the form (`XenoForm.onModeTap`). Own model, skin, Ultimate skin
+  and spikes. Compile-checked; not seen in game.

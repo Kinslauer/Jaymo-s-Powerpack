@@ -98,6 +98,7 @@ public final class XenoFormModels {
 			MODELS.put("fuse", new Fuse());
 			MODELS.put("thornwild", new Thornwild());
 			MODELS.put("billow", new Billow());
+			MODELS.put("towerback", new Towerback());
 		}
 		return MODELS.get(form);
 	}
@@ -1049,6 +1050,87 @@ public final class XenoFormModels {
 			float breath = Mth.sin(state.ageInTicks * 0.08F);
 			this.puff.y = 2.0F + breath * 0.5F;
 			this.cap.y = -8.0F - breath * 0.4F;
+		}
+	}
+
+	/**
+	 * (0.18.119, Scan G) Towerback: a hulk of stone, a heavy brow, mossy boulders for pauldrons, and a broken watchtower
+	 * grown out of its back, its battlements on top. It walks with the Giants' slow sway ({@link #SWAY}) and plays its
+	 * grab ({@link com.jaymospowers.power.xenoform.forms.Towerback#grabPhase}): the right hand rears back, comes down,
+	 * holds its catch at its chest and hurls it into the ground.
+	 */
+	static final class Towerback extends FormModel {
+		/** Its legs swing this many times slower than a player's (a Giant's long, heavy stride). */
+		static final float SWAY = 2.5F;
+		/** The grab's arm (radians, x): reared back, reaching down, held at the chest, slammed down. */
+		static final float REAR = -2.9F, REACH = -1.1F, HOLD_UP = -1.45F, SLAMMED = -0.35F;
+		private final ModelPart tower;
+
+		Towerback() {
+			super(bake(mesh()), "towerback");
+			this.insigniaZ = -2.8F;
+			this.tower = this.body.getChild("tower");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.6F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -9.0F, -5.5F, 10.0F, 2.0F, 3.0F),
+				PartPose.ZERO);
+			root.getChild("right_arm").addOrReplaceChild("boulder", CubeListBuilder.create().texOffs(28, 64).addBox(-4.5F, -3.5F, -2.5F, 5.0F, 4.0F, 5.0F,
+				new CubeDeformation(0.5F)), PartPose.ZERO);
+			root.getChild("left_arm").addOrReplaceChild("boulder", CubeListBuilder.create().texOffs(28, 64).mirror().addBox(-0.5F, -3.5F, -2.5F, 5.0F, 4.0F,
+				5.0F, new CubeDeformation(0.5F)), PartPose.ZERO);
+			PartDefinition tower = root.getChild("body").addOrReplaceChild("tower", CubeListBuilder.create().texOffs(0, 74).addBox(-3.0F, -5.0F, 0.0F, 6.0F,
+				11.0F, 5.0F), PartPose.offsetAndRotation(0.0F, 0.0F, 2.4F, 0.08F, 0.0F, 0.06F));
+			float[][] merlons = {{-3.0F, 0.0F}, {1.0F, 0.0F}, {-3.0F, 3.0F}, {1.0F, 3.0F}};
+			for (int i = 0; i < merlons.length; i++) {
+				tower.addOrReplaceChild("merlon" + i, CubeListBuilder.create().texOffs(24, 74).addBox(0.0F, -2.0F, 0.0F, 2.0F, 2.0F, 2.0F),
+					PartPose.offset(merlons[i][0], -5.0F, merlons[i][1]));
+			}
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			// the Giants' slow sway: the same pace over the ground, a slower, heavier swing
+			float pos = state.walkAnimationPos;
+			state.walkAnimationPos = pos / SWAY;
+			super.setupAnim(state);
+			state.walkAnimationPos = pos;
+			float breath = Mth.sin(state.ageInTicks * 0.05F);
+			this.tower.xRot = 0.08F + breath * 0.02F;
+			Float phase = state.getData(XenoformClient.TOWER_GRAB);
+			if (phase == null || phase < 0.0F) {
+				return;
+			}
+			int windup = com.jaymospowers.power.xenoform.forms.Towerback.WINDUP, snatch = com.jaymospowers.power.xenoform.forms.Towerback.SNATCH;
+			int hold = com.jaymospowers.power.xenoform.forms.Towerback.HOLD, slam = com.jaymospowers.power.xenoform.forms.Towerback.SLAM;
+			int recover = com.jaymospowers.power.xenoform.forms.Towerback.RECOVER;
+			float t = phase, arm;
+			float weight = 1.0F;
+			if (t < windup) {
+				arm = Mth.lerp(ease(t / windup), this.rightArm.xRot, REAR);
+			} else if ((t -= windup) < snatch) {
+				arm = Mth.lerp(ease(t / snatch), REAR, REACH);
+			} else if ((t -= snatch) < hold) {
+				arm = Mth.lerp(ease(Math.min(1.0F, t / 10.0F)), REACH, HOLD_UP) + Mth.sin(t * 0.8F) * 0.04F;
+			} else if ((t -= hold) < slam) {
+				arm = Mth.lerp(ease(t / slam), HOLD_UP, SLAMMED);
+			} else {
+				t -= slam;
+				arm = SLAMMED;
+				weight = 1.0F - ease(Math.min(1.0F, t / recover));
+			}
+			this.rightArm.xRot = Mth.lerp(weight, this.rightArm.xRot, arm);
+			this.rightArm.zRot = Mth.lerp(weight, this.rightArm.zRot, 0.15F);
+			// it leans into the throw
+			this.body.xRot = Mth.lerp(weight, this.body.xRot, arm < -2.0F ? -0.15F : 0.2F);
+		}
+
+		private static float ease(float x) {
+			x = Mth.clamp(x, 0.0F, 1.0F);
+			return x * x * (3.0F - 2.0F * x);
 		}
 	}
 
