@@ -191,6 +191,10 @@ public final class Armory {
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
 		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
+		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only
+		KingWeapons.GUTTING_HOOK = item("gutting_hook", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.HOOK), KingWeapons::hook);
+		KingWeapons.WARCHIEF_CLEAVER = item("warchief_cleaver", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.CLEAVER), KingWeapons::cleaver);
+		KingWeapons.OGRE_KINGS_MAUL = item("ogre_kings_maul", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.MAUL), KingWeapons::maul);
 		// (0.15.148) the single-tail leather whip: cracks, wraps and hauls (Lash)
 		item("leather_whip", LeatherWhipItem::new, p -> p.durability(LeatherWhipItem.DURABILITY).repairable(net.minecraft.world.item.Items.LEATHER)
 			.component(DataComponents.LORE, new ItemLore(List.of(
