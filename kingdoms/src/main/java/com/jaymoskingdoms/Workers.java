@@ -211,7 +211,7 @@ public final class Workers {
 			return Trials.guardStep(level, w);
 		}
 		if (TribePacts.ally(mob)) {
-			// (0.7.442) one of a tribe's war band, called to a friend's aid
+			// (0.7.443) one of a tribe's war band, called to a friend's aid
 			Greenskins.step(level, w);
 			Javelins.tick(level, w);
 			return TribePacts.allyStep(level, w);

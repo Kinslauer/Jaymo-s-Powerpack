@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.442) Havens patch 7a, havens and the tribes (ideas from King's Monsters, ARR: our own names and code).
+ * (0.7.443) Havens patch 7a, havens and the tribes (ideas from King's Monsters, ARR: our own names and code).
  * <ul>
  * <li><b>Tribes who spare non-humans.</b> Every haven near a goblin or orc tribe pays it {@link #HAVEN_TRIBUTE} emeralds a
  * day out of its treasury, and the tribe's war bands leave it be while it's paid up ({@link #spared}); human realms pay

@@ -131,7 +131,7 @@ final class Raids {
 		return ACTIVE.containsKey(camp);
 	}
 
-	/** (0.7.442) Settlement {@code target} has a raid on it just now. */
+	/** (0.7.443) Settlement {@code target} has a raid on it just now. */
 	static boolean raided(int target) {
 		return ACTIVE.values().stream().anyMatch(r -> r.target == target);
 	}
@@ -214,7 +214,7 @@ final class Raids {
 				continue;
 			}
 			if ((Camps.orc(server, camp.id()) || Camps.goblin(server, camp.id())) && TribePacts.spared(server, camp, f)) {
-				// (0.7.441) a haven that lives alongside the tribes isn't raided by them; (0.7.442) nor one that pays them
+				// (0.7.441) a haven that lives alongside the tribes isn't raided by them; (0.7.443) nor one that pays them
 				continue;
 			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
@@ -254,7 +254,7 @@ final class Raids {
 		Raid raid = new Raid(camp.id(), target.id(), now);
 		ACTIVE.put(camp.id(), raid);
 		RAIDED.put(target.id(), now);
-		// (0.7.442) a tribe that favours one of the raided realm's own may send them a war band
+		// (0.7.443) a tribe that favours one of the raided realm's own may send them a war band
 		TribePacts.called(level, target, camp);
 		Camps.noteRaid(server, camp.id(), now);
 		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id());

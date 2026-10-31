@@ -143,7 +143,7 @@ public final class BorderClashes {
 		return partyOf(entity.getUUID()) != null;
 	}
 
-	/** (0.7.442) Settlement {@code target} has a clash party on it just now. */
+	/** (0.7.443) Settlement {@code target} has a clash party on it just now. */
 	static boolean under(int target) {
 		return ACTIVE.containsKey(target);
 	}
@@ -258,7 +258,7 @@ public final class BorderClashes {
 		}
 		ACTIVE.put(target.id(), party);
 		if (!militia) {
-			// (0.7.442) a tribe that favours one of the haven's own may send them a war band
+			// (0.7.443) a tribe that favours one of the haven's own may send them a war band
 			TribePacts.called(level, target, from);
 		}
 		LAST.put(militia ? from.id() : target.id(), now);

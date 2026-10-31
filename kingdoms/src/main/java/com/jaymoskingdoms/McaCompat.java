@@ -648,7 +648,7 @@ public final class McaCompat {
 		}
 		Boolean pact = TribePacts.foe(guard, target);
 		if (pact != null) {
-			// (0.7.442) a tribe's war band called to a friend's aid, or the guards of the place it came to
+			// (0.7.443) a tribe's war band called to a friend's aid, or the guards of the place it came to
 			return pact;
 		}
 		if (Tribes.of(guard) != null && (Pedlars.party(target) || Tribes.spares(guard, target))) {

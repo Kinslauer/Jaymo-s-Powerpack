@@ -7744,7 +7744,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
 - Compile-checked; not played.
 
-## 0.7.442: havens and the tribes, first half (Havens patch 7a)
+## 0.7.443: havens and the tribes, first half (Havens patch 7a)
 - **Havens pay the tribes** (`TribePacts`): once a day every haven pays 4 emeralds from its treasury to each goblin or
   orc tribe with a camp within 1200 blocks (into the king's seat). The tribe's war bands leave a paid-up haven alone
   for 2 days; a haven that can't pay is raided like anyone. Human realms never pay. Havens that live alongside the
