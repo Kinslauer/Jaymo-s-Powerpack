@@ -4618,3 +4618,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   gets a scarecrow that sends birds and rabbits off crops, a gravestone, a lamp post, an iron candle stand, four squeaky
   plushies that MCA children (and the married) love as gifts, and a window box and pot planter that grow small flowers.
   Kitchen has no herbs, so the planters grow the nine small vanilla flowers.
+
+- **0.18.121, coming back from the afterlife no longer freezes the server:** Andy: "crash on startup". When the Other World
+  let a Z Fighter go (the long wait, the fortune teller, the dragon's wish) and the spot he was sent home to had never been
+  generated, the server built that ground on its main thread. On the Deck that froze it for 52 seconds and every client
+  timed out. Now the ground loads in the background (`ZFighterAfterlife.returnHome`, a loading ticket of our own,
+  `HOME_RADIUS` chunks round the spot) while "The way back is opening" shows, and he is sent the moment it is ready.
