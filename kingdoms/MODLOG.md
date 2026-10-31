@@ -7591,4 +7591,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Spared or shamed:** stare a downed captain down (Stare Down). With an empty hand you spare him: he gets up and runs,
   and remembers it. With anything in hand you shame him before his own: down a rank, a strength lost, a new fear, "the
   Shamed" for a byname, and he gets up and runs. The post hears of it.
+- **Raised (Andy):** a captain who would have stayed dead (finished, burned, anything but a chief) still comes back 6% of
+  the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
+  health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
 - Compile-checked only; not played.

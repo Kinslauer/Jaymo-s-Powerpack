@@ -123,6 +123,12 @@ public final class Captains {
 	static final double CHEER_RANGE = 20.0;
 	/** (Patch 4) A fallen captain not finished or burned comes back at this chance, after this many days. */
 	static final float RETURN_CHANCE = 0.75F;
+	/**
+	 * (Andy) Raised: a captain who'd otherwise stay dead (finished, burned, or out of luck) comes back anyway at this
+	 * chance, by corrupted magic or a necromancer, Deathless: a rank more, no fears, health times this, blows this much harder.
+	 */
+	static final float RAISED_CHANCE = 0.06F;
+	static final double DEATHLESS_HEALTH = 1.5, DEATHLESS_DAMAGE = 3.0, DEATHLESS_SCALE = 1.06;
 	static final int RETURN_DAYS_MIN = 1, RETURN_DAYS_MAX = 3;
 	/** A captain's chance of a blood brother when he rises; without one, the chance another of his tribe avenges him. */
 	static final float BROTHER_CHANCE = 0.25F, AVENGER_CHANCE = 0.3F;
@@ -179,7 +185,12 @@ public final class Captains {
 		/** A wolf, a bear, a ravager or a rider near: he runs. */
 		FEARS_BEASTS(Sort.FEAR),
 		/** Bleeding and hurt: he runs. */
-		FEARS_BLOOD(Sort.FEAR);
+		FEARS_BLOOD(Sort.FEAR),
+		/**
+		 * (Andy) Raised from a death nothing else comes back from, by corrupted magic or a necromancer: no fear left in
+		 * him, tougher and harder-hitting ({@link #DEATHLESS_HEALTH}, {@link #DEATHLESS_DAMAGE}). Never rolled; only the raised have it.
+		 */
+		DEATHLESS(Sort.STRENGTH);
 
 		final Sort sort;
 
@@ -485,7 +496,7 @@ public final class Captains {
 		for (int n = 0; n < 40 && (strengths > 0 || flaws > 0); n++) {
 			Trait t = Trait.values()[random.nextInt(Trait.values().length)];
 			boolean strong = t.sort == Sort.STRENGTH;
-			if ((strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
+			if (t == Trait.DEATHLESS || (strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
 				continue;
 			}
 			picked.add(t);
@@ -502,7 +513,7 @@ public final class Captains {
 	private static @Nullable Trait newStrength(Captain c, RandomSource random) {
 		List<Trait> have = traits(c), open = new ArrayList<>();
 		for (Trait t : Trait.values()) {
-			if (t.sort == Sort.STRENGTH && !have.contains(t) && have.stream().noneMatch(t::clashes)) {
+			if (t.sort == Sort.STRENGTH && t != Trait.DEATHLESS && !have.contains(t) && have.stream().noneMatch(t::clashes)) {
 				open.add(t);
 			}
 		}
@@ -659,6 +670,9 @@ public final class Captains {
 			mob = folk;
 		}
 		build(mob, c.rank());
+		if (c.has(Trait.DEATHLESS)) {
+			deathless(mob);
+		}
 		mob.setPersistenceRequired();
 		bind(level, c, mob);
 	}
@@ -688,6 +702,27 @@ public final class Captains {
 		AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (damage != null) {
 			damage.setBaseValue(damage.getBaseValue() + DAMAGE_PER_RANK * rank);
+		}
+		mob.setHealth(mob.getMaxHealth());
+	}
+
+	/** (Andy) A raised captain's build: tougher, harder-hitting, a little bigger. */
+	private static void deathless(PathfinderMob mob) {
+		AttributeInstance size = mob.getAttribute(Attributes.SCALE);
+		if (size != null) {
+			size.setBaseValue(size.getBaseValue() * DEATHLESS_SCALE);
+		}
+		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.setBaseValue(health.getBaseValue() * DEATHLESS_HEALTH);
+		}
+		AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
+		if (damage != null) {
+			damage.setBaseValue(damage.getBaseValue() + DEATHLESS_DAMAGE);
+		}
+		AttributeInstance shove = mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+		if (shove != null) {
+			shove.setBaseValue(Math.max(shove.getBaseValue(), 0.6));
 		}
 		mob.setHealth(mob.getMaxHealth());
 	}
@@ -904,6 +939,11 @@ public final class Captains {
 		} else if (target == null && mob.tickCount % 200 == 0) {
 			RALLIED.remove(mob.getUUID());
 		}
+		if (has(mob, Trait.DEATHLESS) && mob.tickCount % 8 == 0) {
+			// (raised: the corruption that holds him together)
+			level.sendParticles(mob.getRandom().nextBoolean() ? ParticleTypes.SOUL : ParticleTypes.SMOKE, mob.getRandomX(0.6), mob.getRandomY(), mob.getRandomZ(0.6),
+				1, 0.0, 0.03, 0.0, 0.01);
+		}
 		if (mob.tickCount % 20 == 0) {
 			meet(level, c, mob, now);
 			fights(level, c, mob, now);
@@ -1017,7 +1057,8 @@ public final class Captains {
 				line = Component.translatable("talk.jaymoskingdoms.captain.first." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
 					Component.literal(c.name()), Tribes.name(c.tribe()));
 			} else {
-				line = Component.translatable("talk.jaymoskingdoms.captain.again." + m.last() + "." + mob.getRandom().nextInt(LINES),
+				String last = "slain".equals(m.last()) && c.has(Trait.DEATHLESS) ? "raised" : m.last();
+				line = Component.translatable("talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
 					Recollections.nameTo(p, mob), Component.literal(c.name()));
 			}
 			Speech.say(level, mob, line, Speech.RED, SAY_RANGE);
@@ -1169,6 +1210,18 @@ public final class Captains {
 		boolean finished = Downed.isDowned(entity) || lost.contains("head");
 		boolean burned = source.is(DamageTypeTags.IS_FIRE) || entity.isOnFire();
 		boolean returns = !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
+		boolean raised = !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
+		if (raised) {
+			// (Andy) back from anything, by corrupted magic or a necromancer: no fear left in him
+			returns = true;
+			List<String> traits = new ArrayList<>(c.traits());
+			traits.removeIf(k -> {
+				Trait t = Trait.parse(k);
+				return t != null && t.sort == Sort.FEAR;
+			});
+			traits.add(Trait.DEATHLESS.key());
+			c = c.climbed(Math.min(RANK_MAX, c.rank() + 1), List.copyOf(traits), c.trophy(), c.slain());
+		}
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
@@ -1254,7 +1307,8 @@ public final class Captains {
 				continue;
 			}
 			put(server, c.returned(quietest(server, c.tribe(), camps)));
-			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.returned", c.name(), Tribes.name(c.tribe())));
+			Post.news(server, Component.translatable(c.has(Trait.DEATHLESS) ? "news.jaymoskingdoms.captain.raised." + level.getRandom().nextInt(2)
+				: "news.jaymoskingdoms.captain.returned", c.name(), Tribes.name(c.tribe())));
 		}
 	}
 
