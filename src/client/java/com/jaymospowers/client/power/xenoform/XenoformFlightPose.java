@@ -72,6 +72,11 @@ public final class XenoformFlightPose {
 		return speed(player) >= CRUISE_SPEED;
 	}
 
+	/** (0.18.87) Nadir off the ground and not cruising: he floats in Wind's hover pose (WindHoverSway asks). */
+	public static boolean floating(Player player) {
+		return XenoformState.flight(player) == XenoformState.FLY_VOID && speed(player) < CRUISE_SPEED;
+	}
+
 	private static double speed(Player player) {
 		double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);

@@ -69,8 +69,16 @@ public final class XenoformPower implements Power {
 	public static final int FORM_MIN = 1200, FORM_MAX = 6000;
 	/** The band's recharge after turning back, and after being knocked out of a form. */
 	public static final int RECHARGE = 1200, RECHARGE_KNOCKOUT = 2400;
-	/** The band beeps once a second through the last of a form. */
-	public static final int BEEP_TICKS = 200;
+	/**
+	 * (0.18.87) The band beeps and the screen flashes through the last 5 seconds of a form (Andy): once a second, then
+	 * twice a second over the last {@link #BEEP_FAST_TICKS}.
+	 */
+	public static final int BEEP_TICKS = 100, BEEP_FAST_TICKS = 40;
+
+	/** Whether the band beeps (and the wearer's screen flashes) with this many ticks of the form left. */
+	public static boolean beepsAt(int ticksLeft) {
+		return ticksLeft > 0 && ticksLeft <= BEEP_TICKS && ticksLeft % (ticksLeft <= BEEP_FAST_TICKS ? 10 : 20) == 0;
+	}
 	/** X held this long at a creature scans it, from this far (blocks). */
 	public static final int SCAN_TICKS = 60;
 	public static final double SCAN_REACH = 12.0;
@@ -387,8 +395,8 @@ public final class XenoformPower implements Power {
 			if (live.ticksLeft == BEEP_TICKS) {
 				player.setAttached(XenoformState.ENDING, true);
 			}
-			if (live.ticksLeft <= BEEP_TICKS && live.ticksLeft > 0 && live.ticksLeft % 20 == 0) {
-				float pitch = live.ticksLeft <= 60 ? 1.8F : 1.4F;
+			if (beepsAt(live.ticksLeft)) {
+				float pitch = live.ticksLeft <= BEEP_FAST_TICKS ? 1.8F : 1.4F;
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6F, pitch);
 				player.level().sendParticles(player, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFFFF4040), true, false,
 					player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.3, 0.3, 0.0);

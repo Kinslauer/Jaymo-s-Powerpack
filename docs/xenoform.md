@@ -34,7 +34,8 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
 - **The timer**: a form lasts a random 1–5 minutes until the power is fully mastered (4 abilities), then always 5. The
-  band beeps once a second through the last 10 s, with red motes. Then you turn back where you stand.
+  band beeps once a second through the last 5 s (twice a second for the last 2), with red motes, and each beep flashes
+  your screen's edge red (0.18.87). Then you turn back where you stand.
 - **A second life bar**: your max health becomes the alien's and you start it full. When it hits zero you're knocked
   back into your own body (`ALLOW_DEATH` cancels the death) at the health you had before, dizzy for 5 s, and the band
   recharges for 2 minutes (1 minute after turning back by hand; none in creative). `/kill` and the void still kill you.
@@ -117,7 +118,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   boxes at a fifth of the size, drawn from the game's own dragon texture, never copied); Wisp's glide tips the body 38° forward with a
   slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
   out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
-  speed 0.16), put back on the way out (creative and spectator keep theirs).
+  speed 0.16, kept every tick; off the ground he floats in Wind's hover pose, 0.18.87), put back on the way out (creative and spectator keep theirs).
 - **Aliens tap the insignia (0.18.86):** an alien wears no band, so changing back (hold Z) no longer raises a wrist:
   the right hand comes up and taps the insignia on its chest, which lights under it (the band's face glow laid on the
   chest, `XenoBand.submitInsignia`, placed per form by `FormModel.insigniaY/Z/Size`); in first person only the right hand

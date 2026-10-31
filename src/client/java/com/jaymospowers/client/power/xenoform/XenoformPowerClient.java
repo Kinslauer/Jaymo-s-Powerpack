@@ -41,6 +41,11 @@ public final class XenoformPowerClient implements PowerClient {
 	static int flashColor;
 	/** Ticks left of the slam's burst of light. */
 	static int burst;
+	/** (0.18.87) Each beep of a form's last seconds flashes the screen's edge this colour for this long (the flash fades over FLASH_TICKS). */
+	static final int BEEP_FLASH_COLOR = 0xFF3030, BEEP_FLASH_TICKS = 8;
+	/** The form's ticks left as this client counts them through its end, and whether it was ending last tick. */
+	private static int endingTicks;
+	private static boolean endingWas;
 
 	private XenoformPowerClient() {
 	}
@@ -123,6 +128,19 @@ public final class XenoformPowerClient implements PowerClient {
 			var shape = XenoformState.form(player);
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
+		}
+		// (0.18.87) the last 5 seconds: the screen's edge flashes red on each beep, the server's clock kept from the moment the end began
+		boolean ending = XenoformState.ending(player);
+		if (ending && !endingWas) {
+			endingTicks = XenoformPower.BEEP_TICKS;
+		}
+		endingWas = ending;
+		if (ending && endingTicks > 0) {
+			if (XenoformPower.beepsAt(endingTicks)) {
+				flash = BEEP_FLASH_TICKS;
+				flashColor = BEEP_FLASH_COLOR;
+			}
+			endingTicks--;
 		}
 		if (flash > 0) {
 			flash--;

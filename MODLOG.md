@@ -4300,3 +4300,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     (`XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
     texture, scrolling), its own body puffed out (`WispKi`, `XenoFormModels.Wisp.shells`), first-person arm too.
     Compile-checked; not seen in game.
+- **0.18.87, The last 5 seconds flash; Nadir floats like Wind; the band plan:** Andy's notes on the alien pick page:
+  "the last 5 secs should beep and flash" and "Nadir needs a flight akin to creative on double tap space. he needs the
+  float that wind has on it as well ... Can Fly, In air".
+  - `XenoformPower.BEEP_TICKS` 200 -> 100; beeps quicken to twice a second over the last 2 s (`beepsAt`), and each
+    beep flashes your screen's edge red (`XenoformPowerClient`, counting from `XenoformState.ENDING`).
+  - Nadir's `mayfly` and flying speed are put back every tick while he's Nadir, so double-tap Jump always flies. Off
+    the ground (flying or not) his flight kind is `FLY_VOID`, and `WindHoverSway` gives him Wind's hover float below
+    cruising speed (`XenoformFlightPose.floating`).
+  - `docs/XenoBand-Plan.md`: Andy's 41 picks from the four add-ons as patches 0-9. Compile-checked; not seen in game.
