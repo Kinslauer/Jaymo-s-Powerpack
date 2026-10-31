@@ -135,6 +135,11 @@ abstract class McaAnswersMixin {
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.WARES_ANSWER);
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.MOOD_ANSWER);
 			}
+			if (!com.jaymoskingdoms.SwornCaptains.takesOrders(player, villager)) {
+				// (0.7.433) only a captain sworn to you, at your side, is sent spying or raiding
+				cir.getReturnValue().remove(com.jaymoskingdoms.SwornCaptains.SPY_ANSWER);
+				cir.getReturnValue().remove(com.jaymoskingdoms.SwornCaptains.RAID_ANSWER);
+			}
 			if (!com.jaymoskingdoms.Captains.pedlarHears(villager)) {
 				// (0.7.431) only a tribe's pedlar has heard of its captains
 				cir.getReturnValue().remove(com.jaymoskingdoms.Captains.PEDLAR_ANSWER);

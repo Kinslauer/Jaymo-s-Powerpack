@@ -650,6 +650,10 @@ public final class Spirits {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spirit.level", Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name"), level)
 			.withStyle(ChatFormatting.AQUA));
 		SpiritVoice.sayNow(player, state.kind(), "level");
+		if (state.kind() == VARRO && state.level() < Varro.BINDING_LEVEL && level >= Varro.BINDING_LEVEL) {
+			// (0.7.433) Varro remembers the leagues of orcs he led, and teaches the Binding
+			SpiritVoice.sayNow(player, VARRO, "teach");
+		}
 	}
 
 	/** {@code player} killed {@code victim}: with the spirit out, a fight won together. */

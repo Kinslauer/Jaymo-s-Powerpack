@@ -264,6 +264,51 @@ final class McaBridge {
 		return made;
 	}
 
+	/**
+	 * (0.7.433) {@link McaCompat#swear}: {@code mob} (a tribe's captain, held down and turned) leaves his camp and follows
+	 * {@code player}: off its roster, at home nowhere, and liked enough never to leave of MCA's own accord. False if he's
+	 * no MCA villager.
+	 */
+	static boolean swear(net.minecraft.world.entity.Entity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA v)) {
+			return false;
+		}
+		Enlisted e = worker(v);
+		if (e.role() >= 0) {
+			e.discharge();
+		}
+		v.clearHome();
+		v.getVillagerBrain().getMemoriesForPlayer(player).setHearts(Math.max(Strangers.TRUSTED_HEARTS, Config.getInstance().marriageHeartsRequirement));
+		v.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+		v.setPersistenceRequired();
+		return true;
+	}
+
+	/**
+	 * (0.7.433) {@link McaCompat#swornGreenskin}: a sworn captain back at {@code player}'s side (from spying or a raid): a
+	 * goblin or an orc ({@code kind}) named {@code name} at {@code at}, a guard in {@code gear}, following them. Null without
+	 * a body made.
+	 */
+	static @Nullable PathfinderMob swornGreenskin(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, ServerPlayer player,
+		List<net.minecraft.world.item.ItemStack> gear) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withName(name).withPosition(at).withAge(0)
+			.withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		broodBorn(villager, kind, false);
+		EquipmentSlot[] slots = {EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS};
+		for (int i = 0; i < slots.length && i < gear.size(); i++) {
+			if (!gear.get(i).isEmpty()) {
+				villager.setItemSlot(slots[i], gear.get(i).copy());
+				villager.getInventory().addItem(gear.get(i).copy());
+				villager.setDropChance(slots[i], 0.0F);
+			}
+		}
+		swear(villager, player);
+		return villager;
+	}
+
 	/** (0.7.418) Whether {@code e} is an MCA villager whose hired contract is still running. */
 	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
 		return e instanceof VillagerEntityMCA v && v.getDespawnDelay() > 0;
