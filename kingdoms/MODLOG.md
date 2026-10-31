@@ -7898,3 +7898,25 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
   land round them in the background: every chunk from just past their view (8) out to 20 chunks, nearest first, two at
   a time, and none while the server's average tick is over 40 ms. Each is let go once made. One arrival's land at a time.
   Tuning at the top of `ArrivalGround`. Built; not yet watched on the Deck.
+## 0.7.454: ask a villager the way; action options on the Interact page (pack 0.19.8)
+- Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if you need a
+  doctor, or a butcher"; then "move some of these options to the interact menu". MCA's Interact page has Ask the
+  Way (row 9, `McaScreensMixin`), opening its own page (`McaWayPageMixin`; its back arrow returns to Interact): a healer
+  (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern, the
+  stables, whoever rules here. Each sends MCA command `way.<place>`, answered by `Directions` (`McaCommandMixin`).
+- They find the nearest in their town (folk within 128 blocks, at their workstation if it's near them; the faction's
+  standing tavern or stable; the ruler, or the seat while they're away) and turn to face it for a moment, telling you
+  who and where in MCA's chat ("Bram the butcher? That way: about 40 paces to the north-east."), and if they're abed.
+- One with 10+ hearts for you, or any child, walks you there if it's 10-96 blocks off: waits when you fall 7 blocks
+  behind and calls you on, gives up past 32, points out the rest after 2 minutes or 12 seconds of getting no nearer,
+  and says so when you've arrived. Guards, archers, a realm's workers and rulers keep their posts and only point; their
+  routines leave a guide be (`Routines.idle`). Below -15 hearts: "Find it yourself." Asking needs a shared tongue (a
+  foreigner shrugs); a ship's crew says nothing. Tuning at the top of `Directions`.
+- Andy picked "Ask the way plus action options": Seek an audience, a pedlar's wares, Offer tribute and a sworn
+  captain's Send to Spy / Send to Raid are Interact buttons now (`InteractActions`), gone from the talk menu
+  (`McaAnswersMixin`). Which apply is worked out as you right-click a villager and sent ahead of MCA's screen
+  (`InteractActions.Offered`); the client shows only those, stacked under Ask the Way (`McaActionButtonsMixin`). Each
+  comes back as MCA command `act.<action>` and is checked again before it's done. Wares and tribute need no words.
+- "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
+  Interact button (only Introduce, Gift, Trade).
+- Compile-checked; not seen in game.

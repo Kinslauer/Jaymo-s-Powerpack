@@ -4686,3 +4686,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
 
 - **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.
+- **0.19.8, Kingdoms 0.7.454:** "Ask the Way" on a villager's Interact page: a healer, butcher, smith, tailor, the
+  tavern, the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"),
+  or, if they like you (or they're a child), walk you there. Seeking an audience, a pedlar's wares, offering tribute and
+  a sworn captain's orders moved from the talk menu to the Interact page too, each shown only when it applies.

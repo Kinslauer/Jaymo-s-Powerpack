@@ -327,6 +327,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// (0.7.454) the Interact page's actions, sent ahead of MCA's screen
+		InteractActions.register();
 		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
 		ProximityChat.register();
 		VoiceMasks.register();
@@ -433,6 +435,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
+		// (0.7.454) asking the way in town
+		Directions.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
