@@ -81,6 +81,10 @@ public final class XenoFormModels {
 			MODELS.put("marrow", new Marrow());
 			MODELS.put("swathe", new Swathe());
 			MODELS.put("blight", new Blight());
+			MODELS.put("howl", new Howl());
+			MODELS.put("prowl", new Prowl());
+			MODELS.put("tusk", new Tusk());
+			MODELS.put("talon", new Talon());
 		}
 		return MODELS.get(form);
 	}
@@ -577,6 +581,128 @@ public final class XenoFormModels {
 			this.leftSkull.yRot = -0.25F + this.head.yRot * 0.3F;
 			this.tail.yRot = Mth.sin(state.ageInTicks * 0.06F) * 0.3F;
 			this.tail.xRot = 0.6F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.15F * state.walkAnimationSpeed;
+		}
+	}
+
+	/** (0.18.108, Scan C) Howl: a wolf's muzzle and tall ears, a bushy tail that swings as it runs. */
+	static final class Howl extends FormModel {
+		private final ModelPart tail;
+
+		Howl() {
+			super(bake(mesh()), "howl");
+			this.insigniaZ = -2.1F;
+			this.tail = this.body.getChild("tail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, -3.0F, -4.0F, 3.0F, 3.0F, 4.0F),
+				PartPose.offset(0.0F, -0.5F, -4.0F));
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(16, 64).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(-2.5F, -8.0F, -1.0F, 0.0F, 0.0F, -0.15F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(16, 64).mirror().addBox(-1.0F, -3.0F, -0.5F, 2.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(2.5F, -8.0F, -1.0F, 0.0F, 0.0F, 0.15F));
+			root.getChild("body").addOrReplaceChild("tail", CubeListBuilder.create().texOffs(24, 64).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
+				PartPose.offsetAndRotation(0.0F, 10.5F, 2.0F, -0.9F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.tail.yRot = Mth.sin(state.walkAnimationPos * 0.6662F) * 0.4F * state.walkAnimationSpeed;
+			this.tail.xRot = -0.9F + Math.min(0.5F, state.walkAnimationSpeed * 0.5F);
+		}
+	}
+
+	/** (0.18.108, Scan C) Prowl: round ears and a long tail that curls up at the tip and twitches. */
+	static final class Prowl extends FormModel {
+		private final ModelPart tail;
+
+		Prowl() {
+			super(bake(mesh()), "prowl");
+			this.insigniaZ = -2.0F;
+			this.tail = this.body.getChild("tail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
+				PartPose.offset(-2.8F, -8.0F, -0.5F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
+				PartPose.offset(2.8F, -8.0F, -0.5F));
+			root.getChild("body").addOrReplaceChild("tail", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 10.0F),
+				PartPose.offsetAndRotation(0.0F, 10.5F, 2.0F, -0.5F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.07F) * 0.25F;
+			this.tail.xRot = -0.5F + Mth.sin(state.ageInTicks * 0.13F) * 0.08F;
+		}
+	}
+
+	/** (0.18.108, Scan C) Tusk: a flat snout with two curved tusks, and a stiff mane down its back. */
+	static final class Tusk extends FormModel {
+		Tusk() {
+			super(bake(mesh()), "tusk");
+			this.insigniaZ = -2.6F;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.6F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(0, 64).addBox(-2.0F, -3.0F, -2.0F, 4.0F, 3.0F, 2.0F),
+				PartPose.offset(0.0F, -0.5F, -4.6F));
+			head.addOrReplaceChild("right_tusk", CubeListBuilder.create().texOffs(14, 64).addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(-2.6F, -1.5F, -5.2F, -0.3F, 0.0F, -0.3F));
+			head.addOrReplaceChild("left_tusk", CubeListBuilder.create().texOffs(14, 64).mirror().addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(2.6F, -1.5F, -5.2F, -0.3F, 0.0F, 0.3F));
+			root.getChild("body").addOrReplaceChild("mane", CubeListBuilder.create().texOffs(20, 64).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 12.0F, 3.0F),
+				PartPose.offsetAndRotation(0.0F, -1.0F, 2.2F, 0.08F, 0.0F, 0.0F));
+			return mesh;
+		}
+	}
+
+	/** (0.18.108, Scan C) Talon: a hooked beak, broad feathered wings down its arms that spread when it lifts them, a tail fan. */
+	static final class Talon extends FormModel {
+		private final ModelPart rightWing, leftWing;
+
+		Talon() {
+			super(bake(mesh()), "talon");
+			this.insigniaZ = -1.9F;
+			this.rightWing = this.rightArm.getChild("wing");
+			this.leftWing = this.leftArm.getChild("wing");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("beak", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -2.0F, -3.0F, 2.0F, 2.0F, 3.0F),
+				PartPose.offsetAndRotation(0.0F, -2.5F, -4.0F, 0.25F, 0.0F, 0.0F));
+			root.getChild("right_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(12, 64).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 6.0F),
+				PartPose.offset(-1.5F, 0.0F, 1.0F));
+			root.getChild("left_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(12, 64).mirror().addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 6.0F),
+				PartPose.offset(1.5F, 0.0F, 1.0F));
+			root.getChild("body").addOrReplaceChild("tail_fan", CubeListBuilder.create().texOffs(0, 82).addBox(-3.0F, 0.0F, 0.0F, 6.0F, 1.0F, 5.0F),
+				PartPose.offsetAndRotation(0.0F, 11.0F, 1.5F, -0.5F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			// the feathers fan out as the arm lifts away from the side
+			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
+			this.rightWing.yRot = -spread * 0.6F;
+			this.leftWing.yRot = spread * 0.6F;
 		}
 	}
 

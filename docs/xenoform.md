@@ -101,6 +101,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Marrow** | skeleton; Kingdoms silver skeleton, Skeleton Lord | 1x, 24 hp, fists 4, a little quick; once each change (and again after each Ultimate) a killing blow drops it in a heap, untouchable for 3 s, then up at half health | Bone Spikes: a 9-block line, 6 and a toss (3 s) | Rib Throw: a boomerang out 10 ticks and back, 4 each way (2 s) | Bone Shield: 5 s, shots glance off, Resistance II (15 s) | Fall Apart: 3 s in a heap, hunters lose you, can't move (12 s) |
 | **Swathe** | husk | 1x, 26 hp, fists 4; can't drown or starve | Lash Bind: the aimed creature (9) is tripped like a bolas (`Tripped.bind`), or held (Slowness X, Weakness) 4 s (6 s) | Lash Pull: drags the aimed creature (12) to you (2 s) | Sandstorm: 6 s, radius 6 (9 in desert or badlands), 1 (2) a second, Blindness (20 s) | Wrap: bleeding stops, Regeneration II 5 s (30 s) |
 | **Blight** | the Wither; hidden | 1.4x, 60 hp, fists 7, slower, heavy; the Wither effect and its own skulls can't touch it; at half health or less the dark shield rises and shots can't touch it | Skull: one wither skull (1 s) | Volley: three fanned, the middle one blue (4 s) | Rot Touch: 6 and Wither II 6 s on the creature in reach (4); grass, leaves, flowers and crops round it rot (mob griefing on) (3 s) | Dark Pulse: 4, Wither 4 s and a throw to all within 6 (10 s) |
+| **Howl** | wolf; Kingdoms werewolf, feral wolf, coyote | 1x, 26 hp, fists 5, quick; Strength and Speed at night | Pounce: a 1.2 leap; the first creature landed on takes 6 and is tripped 2 s (3 s) | Howl: untamed wolves, feral wolves and coyotes within 32 hunt what you hit (or what hit you) for 60 s, never you (90 s) | Scent: 10 s, blood stains within 48 shown only to you, bleeders glow (20 s) | Lockjaw: 4 and a dirty cut, then held 4 s: dragged, Slowness IV, 2 a second; B again lets go (8 s) |
+| **Prowl** | ocelot; Naturalist tiger, lion | 1x, 24 hp, fists 5, quickest; silent; Invisibility while sneaking; falls under 12 blocks don't hurt | Long Pounce: a 1.7 low leap; first creature landed on takes 6 and is pinned 3 s (5 s) | Rake: 5 and a dirty cut (2 s) | Stalk: the aimed creature (32) glows 20 s; within 6 of it you get Strength II (15 s) | Roar: mobs within 12 drop their target and run (20 s) |
+| **Tusk** | hoglin; Naturalist boar, rhino; Kingdoms wild boar, minotaur; Aether burrukai, kirrid, taegore | 1.15x, 34 hp, fists 6, a little slow, 60% knockback resist | Charge: 25 ticks at 0.7 where you face; first creature met takes 7 and is tossed (5 s) | Gore: 6, a dirty cut, a shove (2.5 s) | Root Out: grass, dirt, podzol, mycelium, rooted dirt or mud at your feet or aimed (4) turns to coarse dirt and gives 1-2 potatoes, carrots, beetroots, brown mushrooms or sweet berries, 40% also a seed or bone meal (10 s) | Thick Hide: 10 s of full knockback resistance and Resistance I (25 s) |
+| **Talon** | parrot; Naturalist vulture, bluejay, canary, cardinal, robin, finch, sparrow | 0.9x, 20 hp, fists 4; flies (jump held in the air beats up and where you look, let go glides, sneak drops); no fall damage | Stoop: a 1.4 dive; the first creature met takes 4, and a mob no wider than 1.4 and no taller than 2.2 is carried under you up to 8 s (6 s) | Drop what you carry; with nothing held, a talon strike of 5 (1.5 s) | Far Sight: monsters within 96 glow 10 s, Night Vision (30 s) | Feather Darts: five fanned quills, 2.5 each (4 s) |
 
 ### More DNA [XenoDna] (0.18.100)
 
@@ -123,6 +127,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Croaker | tadpole |
 | Rime | Friends & Foes Iceologer |
 | Marrow | Kingdoms silver skeleton, Skeleton Lord |
+| Howl | Kingdoms werewolf, feral wolf, coyote |
+| Prowl | Naturalist tiger, lion |
+| Tusk | Naturalist boar, rhino; Kingdoms wild boar, minotaur; Aether burrukai, kirrid, taegore |
+| Talon | Naturalist vulture and songbirds (bluejay, canary, cardinal, robin, finch, sparrow) |
 | Rivet | Kingdoms redstone golem and mimic, android mech, war mech, Omen mechs, android, worky drone, test unit |
 
 **No DNA:** cow, pig, sheep, rabbit, turkey, duck, capybara; zombies, drowned, zombie villagers, zombified piglins and

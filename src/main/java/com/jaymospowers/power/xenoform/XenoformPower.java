@@ -271,6 +271,18 @@ public final class XenoformPower implements Power {
 		public boolean darkShield;
 		/** Marrow: the thrown rib's heading (its place is {@link #whirl}, its ticks {@link #spin}, who it hit {@link #spun}). */
 		public net.minecraft.world.phys.@Nullable Vec3 ribDir;
+		/**
+		 * (0.18.108, Scan C) Howl, Prowl, Tusk, Talon: ticks left of a pounce, charge or dive; the creature held in the jaws or
+		 * talons (and ticks left); the wild wolves answering the howl (and ticks left); ticks left of the scent; the stalked
+		 * creature (and until when); Thick Hide until this tick.
+		 */
+		public int rush;
+		public int latched = -1, latchTicks;
+		public final java.util.List<Integer> pack = new java.util.ArrayList<>();
+		public int packTicks;
+		public int sniff;
+		public int stalked = -1;
+		public long stalkUntil, hideUntil;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -327,6 +339,10 @@ public final class XenoformPower implements Power {
 			risen = darkShield = breathWas = false;
 			shieldUntil = heapUntil = 0L;
 			ribDir = null;
+			rush = latchTicks = packTicks = sniff = 0;
+			latched = stalked = -1;
+			pack.clear();
+			stalkUntil = hideUntil = 0L;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;

@@ -52,6 +52,11 @@ public final class XenoForms {
 	public static final XenoForm RIME = register(new com.jaymospowers.power.xenoform.forms.Rime());
 	public static final XenoForm MARROW = register(new com.jaymospowers.power.xenoform.forms.Marrow());
 	public static final XenoForm SWATHE = register(new com.jaymospowers.power.xenoform.forms.Swathe());
+	/** (0.18.108, Scan C) Howl (a wolf), Prowl (an ocelot), Tusk (a hoglin), Talon (a parrot). */
+	public static final XenoForm HOWL = register(new com.jaymospowers.power.xenoform.forms.Howl());
+	public static final XenoForm PROWL = register(new com.jaymospowers.power.xenoform.forms.Prowl());
+	public static final XenoForm TUSK = register(new com.jaymospowers.power.xenoform.forms.Tusk());
+	public static final XenoForm TALON = register(new com.jaymospowers.power.xenoform.forms.Talon());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 	/** (0.18.103, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */
