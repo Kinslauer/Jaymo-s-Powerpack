@@ -25,6 +25,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<Boolean> SHED = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shed");
 	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
+	/** (0.18.118) How far into Towerback's grab (ticks; -1: not grabbing). */
+	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
 
 	private XenoformClient() {
 	}
@@ -39,6 +41,7 @@ public final class XenoformClient {
 		state.setData(ENDING, form != null && XenoformState.ending(player));
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
+		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {

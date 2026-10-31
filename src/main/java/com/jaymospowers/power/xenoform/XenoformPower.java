@@ -305,6 +305,17 @@ public final class XenoformPower implements Power {
 		 */
 		public boolean squeeze;
 		public int splits, swell, blasts, rain, fog;
+		/**
+		 * (0.18.118, Scan G) Towerback: risen to monolith size, and when it may change size again; the moveDist at its last
+		 * step, which foot came down last, its shockwaves running out; its grab (since when, -1: none; whom it went for;
+		 * holding them; where it snatched them from and where it slams them).
+		 */
+		public boolean towering, leftFoot, grabHolding;
+		public long sizeNext, grabStart = -1L;
+		public float strideAt;
+		public int grabPrey = -1;
+		public net.minecraft.world.phys.@Nullable Vec3 grabFrom, grabTo;
+		public final java.util.List<com.jaymospowers.power.xenoform.forms.Towerback.Wave> waves = new java.util.ArrayList<>();
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -374,6 +385,13 @@ public final class XenoformPower implements Power {
 			rope = 0.0;
 			squeeze = false;
 			splits = swell = blasts = rain = fog = 0;
+			towering = leftFoot = grabHolding = false;
+			sizeNext = 0L;
+			grabStart = -1L;
+			strideAt = 0.0F;
+			grabPrey = -1;
+			grabFrom = grabTo = null;
+			waves.clear();
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;
@@ -547,6 +565,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.GRAB);
 	}
 
 	@Override
@@ -839,6 +858,9 @@ public final class XenoformPower implements Power {
 					live.slammed = true;
 					revert(player, false, true);
 				}
+			} else if (slam) {
+				// (0.18.118) a tap: the form's own use for Z (Towerback's size)
+				live.form.onModeTap(player, live);
 			}
 			return;
 		}

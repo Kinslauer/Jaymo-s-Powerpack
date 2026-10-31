@@ -925,5 +925,21 @@
 	"power.jaymospowers.xenoform.key.mode.billow.name": "Turn Back",
 	"power.jaymospowers.xenoform.key.ultimate.billow": "Stormfront: half again as much health and hitting power, a little bigger, and every move back twice as fast. Billow floats (jump to rise, sneak to sink), and up to three friends can ride on its back: right-click it, sneak to get off",
 	"power.jaymospowers.xenoform.key.ultimate.billow.name": "Stormfront",
-	"message.jaymospowers.xenoform.ooze.no_room": "No room here to fill back out."
+	"message.jaymospowers.xenoform.ooze.no_room": "No room here to fill back out.",
+	"xenoform.jaymospowers.towerback": "Towerback",
+	"power.jaymospowers.xenoform.towerback": "Xenoform: Towerback",
+	"xenoform.jaymospowers.towerback.ultimate": "Colossus",
+	"power.jaymospowers.xenoform.key.ability_1.towerback": "Grab: rear back, snatch the creature you aim at, squeeze it and slam it into the ground. Get out of reach while you rear back and it's missed",
+	"power.jaymospowers.xenoform.key.ability_1.towerback.name": "Grab",
+	"power.jaymospowers.xenoform.key.ability_2.towerback": "Stomp: a shockwave twice as far as a step's runs along the ground and throws everything up",
+	"power.jaymospowers.xenoform.key.ability_2.towerback.name": "Stomp",
+	"power.jaymospowers.xenoform.key.ability_3.towerback": "Swat: a backhand flings everything in front of you aside",
+	"power.jaymospowers.xenoform.key.ability_3.towerback.name": "Swat",
+	"power.jaymospowers.xenoform.key.ability_4.towerback": "Roar: monsters round you are weakened, slowed and lose you",
+	"power.jaymospowers.xenoform.key.ability_4.towerback.name": "Roar",
+	"power.jaymospowers.xenoform.key.mode.towerback": "Tap: rise to monolith-giant size (open sky only), or come back down. Hold and let go: turn back into yourself. Hold and scroll, then let go: quick change, a quarter of the charge",
+	"power.jaymospowers.xenoform.key.mode.towerback.name": "Monolith Size",
+	"power.jaymospowers.xenoform.key.ultimate.towerback": "Colossus: half again as much health and hitting power, a little bigger, and every move back twice as fast. Every step Towerback takes stomps; jump the shockwave to dodge it",
+	"power.jaymospowers.xenoform.key.ultimate.towerback.name": "Colossus",
+	"message.jaymospowers.xenoform.towerback.no_room": "Not under open sky: no room to rise."
 }

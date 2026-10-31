@@ -76,6 +76,7 @@ final class XenoformHud {
 		Map.entry("fuse", new Item[] {Items.TNT, Items.GUNPOWDER, Items.CREEPER_HEAD, Items.WATER_BUCKET}),
 		Map.entry("thornwild", new Item[] {Items.HANGING_ROOTS, Items.SWEET_BERRIES, Items.OAK_LEAVES, Items.BONE_MEAL}),
 		Map.entry("billow", new Item[] {Items.WATER_BUCKET, Items.LIGHTNING_ROD.asList().get(0), Items.WIND_CHARGE, Items.GHAST_TEAR}),
+		Map.entry("towerback", new Item[] {Items.LEAD, Items.MACE, Items.PISTON, Items.GOAT_HORN}),
 		Map.entry("rivet", new Item[] {Items.COPPER_INGOT, Items.IRON_CHAIN, Items.WATER_BUCKET, Items.MINECART}),
 		Map.entry("rivet_furnace", new Item[] {Items.BLAZE_POWDER, Items.FIRE_CHARGE, Items.FURNACE, Items.CAMPFIRE}),
 		Map.entry("rivet_piston", new Item[] {Items.PISTON, Items.OBSIDIAN, Items.STICKY_PISTON, Items.SLIME_BLOCK}),

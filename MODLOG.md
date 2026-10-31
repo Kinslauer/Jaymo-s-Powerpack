@@ -4594,3 +4594,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (creaking, rustle): heals in sunlight; Roots, Thorn Volley, Hedge (withers after 30 s), Bloom. Billow (happy ghast,
   aerwhale): floats and carries up to three friends on its back; Downpour, Thunderhead, Gust, Fog. Each has its own
   model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.118, Scan G (`docs/ScanGaps-Plan.md`), the true giant:** Towerback (Highfield, Arctic and Irradiated
+  Giants, Kingdoms war elephant): a stone giant with a broken watchtower on its back, five times your size. Tap Z to
+  rise to monolith-giant size (16x, about 29 blocks, under open sky only; tap again to come down); up there it walks
+  through what's in its way (never chests or unbreakable blocks). Every step stomps like the Giants' (cracks, a
+  shockwave along the ground, jump it to dodge); falls land as stomps. R Grab (the Giants' wind-up, squeeze and slam,
+  with the letterbox film), G Stomp, V Swat, B Roar. Powers has its own copy of the stomp and grab, so Kingdoms only
+  supplies the mobs. Z tapped as any alien now goes to the form (`XenoForm.onModeTap`). Own model, skin, Ultimate skin
+  and spikes. Compile-checked; not seen in game.

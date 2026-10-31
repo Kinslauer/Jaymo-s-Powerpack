@@ -180,6 +180,9 @@ public final class XenoformState {
 	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.118, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */
+	public static final AttachmentType<Long> GRAB = AttachmentRegistry.create(JaymosPowers.id("xenoform_grab"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
 
 	/** Pyre's jet, plain or Sunheart's. */

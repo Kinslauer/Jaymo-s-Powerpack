@@ -2143,6 +2143,59 @@ def billow():
     save(img, "entity/xenoform_billow.png")
 
 
+def towerback():
+    """(0.18.118, Scan G) Towerback: grey stone in rough courses, cracks, moss on the shoulders and boulders, a heavy brow
+    over pale glowing eyes, and a broken watchtower on its back with dark arrow slits."""
+    img = new_skin()
+    stone = (128, 132, 138)
+    parts(img, stone, 0.14)
+    moss = (86, 124, 58, 255)
+    for part in BASE_PARTS:
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm in ("top", "bottom"):
+                continue
+            # rough courses of stone
+            for y in range(y0 + 3, y1, 4):
+                rect(img, (x0, y, x1, y + 1), (96, 100, 106, 255))
+            speckle(img, (x0, y0, x1, y1), (80, 84, 90, 255), 3)
+    veins(img, faces(*BODY)["front"], (70, 74, 80), (70, 74, 80), 3)
+    for part in ARMS + (BODY,):
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm == "top":
+                noise_fill(img, moss, 0.2, (x0, y0, x1, y1))
+            elif nm in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 1), moss)
+    # brow shadow, eyes
+    rect(img, (8, 10, 16, 11), (70, 74, 80, 255))
+    rect(img, (9, 11, 11, 12), (200, 240, 255, 255))
+    rect(img, (13, 11, 15, 12), (200, 240, 255, 255))
+    rect(img, (10, 14, 14, 15), (60, 62, 66, 255))
+    claws(img, (90, 94, 100, 255))
+    chest_insignia(img, rim=(70, 74, 80, 255))
+    # extras: brow 10x2x3 at (0,64); boulder 5x4x5 at (28,64); tower 6x11x5 at (0,74); merlon 2x2x2 at (24,74)
+    box(img, (0, 64, 10, 2, 3), (112, 116, 122), 0.1)
+    boulder = (28, 64, 5, 4, 5)
+    box(img, boulder, (118, 122, 126), 0.18)
+    for nm, (x0, y0, x1, y1) in faces(*boulder).items():
+        if nm == "top":
+            noise_fill(img, moss, 0.25, (x0, y0, x1, y1))
+        elif nm != "bottom":
+            rect(img, (x0, y0, x1, y0 + 1), moss)
+    tower = (0, 74, 6, 11, 5)
+    box(img, tower, (150, 146, 136), 0.1)
+    for nm, (x0, y0, x1, y1) in faces(*tower).items():
+        if nm in ("top", "bottom"):
+            continue
+        for y in range(y0 + 2, y1, 3):
+            rect(img, (x0, y, x1, y + 1), (118, 114, 106, 255))
+        cx = (x0 + x1) // 2
+        rect(img, (cx, y0 + 3, cx + 1, y0 + 6), (30, 30, 34, 255))
+        noise_fill(img, moss, 0.2, (x0, y1 - 2, x1, y1))
+    box(img, (24, 74, 2, 2, 2), (150, 146, 136), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_towerback.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -2157,6 +2210,7 @@ ULTIMATE_COLORS = {
     "murk": (150, 120, 190), "gnasher": (110, 150, 180), "lumen": (200, 240, 255), "keen": (200, 60, 70),
     "hive": (240, 180, 50), "skitter": (200, 40, 40), "shade": (200, 110, 255), "mirage": (110, 170, 255),
     "ooze": (120, 230, 100), "magma_ooze": (255, 140, 40), "fuse": (140, 230, 110), "thornwild": (240, 180, 60), "billow": (150, 200, 255),
+    "towerback": (200, 240, 255),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
@@ -2166,6 +2220,7 @@ SCAN_C = ("howl", "prowl", "tusk", "talon")
 SCAN_D = ("murk", "gnasher", "lumen", "keen")
 SCAN_E = ("hive", "skitter", "shade", "mirage")
 SCAN_F = ("ooze", "magma_ooze", "fuse", "thornwild", "billow")
+SCAN_G = ("towerback",)
 
 
 def ultimate(form):
@@ -2214,7 +2269,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage", "ooze", "magma_ooze", "fuse", "thornwild", "billow")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage", "ooze", "magma_ooze", "fuse", "thornwild", "billow", "towerback")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -2286,7 +2341,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F + SCAN_G:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -2339,6 +2394,10 @@ if __name__ == "__main__":
     thornwild()
     billow()
     for form in SCAN_F:
+        ultimate(form)
+    # (0.18.118) Scan G, last again
+    towerback()
+    for form in SCAN_G:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
