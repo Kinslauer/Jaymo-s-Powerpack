@@ -180,6 +180,17 @@ public final class Workers {
 			// (0.7.293) a camp's chief, king or warchief: his boss bar and his rally; (0.7.296) a cove's captain ashore too
 			CampChiefs.step(level, w);
 		}
+		if (Pedlars.party(mob)) {
+			// (0.7.425) a tribe's pedlar on his road, or one of his guards at his back
+			Greenskins.step(level, w);
+			return Pedlars.step(level, w);
+		}
+		if (Tribes.hunter(mob)) {
+			// (0.7.425) one of a tribe's hunting band on a hated player's trail
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Tribes.hunterStep(level, w);
+		}
 		if (!(mob instanceof Folk) && Raids.isRaider(mob)) {
 			// (0.7.295) a camp's villager out on a raid: its march and plunder; its ways in a fight as at home
 			if (Greenskins.isRole(w.role())) {

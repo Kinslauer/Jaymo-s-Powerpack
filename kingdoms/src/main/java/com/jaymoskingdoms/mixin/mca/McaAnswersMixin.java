@@ -130,6 +130,16 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Bouts.ANSWER);
 		}
 		if ("main".equals(name)) {
+			// (0.7.425) a tribe's pedlar: his wares and the tribe's mood; tribute to a chief or the pedlar, owing a grudge
+			if (!com.jaymoskingdoms.Pedlars.pedlar(villager)) {
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.WARES_ANSWER);
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.MOOD_ANSWER);
+			}
+			if (!com.jaymoskingdoms.Tribes.takesTribute(player, villager)) {
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER);
+			}
+		}
+		if ("main".equals(name)) {
 			// (0.7.424) held down for questioning: only the questions (those not yet asked); otherwise never them
 			if (com.jaymoskingdoms.Questioning.active(player, villager)) {
 				cir.getReturnValue().removeIf(answer -> !com.jaymoskingdoms.Questioning.offers(player, villager, answer));
