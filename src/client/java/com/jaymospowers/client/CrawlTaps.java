@@ -234,6 +234,11 @@ public final class CrawlTaps {
 		ClientPlayNetworking.send(new Crawl.Key(true));
 	}
 
+	/** (0.19.1) Prone from a held slide: stay down once Sneak is let go (the stance wheel turned down), as the key does. */
+	static void lockProne() {
+		whileSneaking = false;
+	}
+
 	/** (0.18.57) Whether the local player is prone by their own gesture (the key, a held slide or the stance wheel). */
 	public static boolean prone() {
 		return crawling;

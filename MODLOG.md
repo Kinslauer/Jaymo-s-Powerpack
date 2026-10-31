@@ -4667,4 +4667,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
   first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
-  `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Compile-checked; not seen in game.
+  `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
+  down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
