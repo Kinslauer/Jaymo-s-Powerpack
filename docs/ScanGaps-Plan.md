@@ -12,7 +12,7 @@ lettered (Scan A to Scan G) so they don't clash with those numbers.
   unscannable. Andy's notes add some back: Rime also comes from a snow golem, and Ooze takes every source listed.
 - **Andy's "No scan" notes win over the suggestion.** That covers hornkin/brute/hurler/warlord, the aerbunny, and
   demon soldiers/captains.
-- **Scanning a no-scan mob** gives the same "no alien DNA" message as today. Nothing new is unlocked.
+- **Scanning a no-scan mob** does nothing, as today: the band never starts a scan on it.
 
 ## Already done
 
@@ -30,6 +30,8 @@ lettered (Scan A to Scan G) so they don't clash with those numbers.
 ## Patches
 
 ### Scan A, more DNA for the aliens we have (Powers, small)
+
+**Built (0.18.99):** all of the below, in `XenoDna`.
 
 Each line below is a new scan for an existing alien. Mobs from other mods are matched by id, so nothing breaks when
 the mod isn't loaded.
