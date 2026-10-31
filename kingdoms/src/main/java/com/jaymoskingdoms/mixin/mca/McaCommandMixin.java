@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.109) A gift is remembered ({@link com.jaymoskingdoms.Recollections}): what it was, and whether it was welcome.
  * (0.7.203) Following, staying, being picked up or ridden, their armour and their home are only for folk they're
  * involved with ({@link com.jaymoskingdoms.Strangers}).
+ * (0.7.449) And Interact's Ask the Way page asks after a place ({@link com.jaymoskingdoms.Directions}).
  * (0.7.281) Any button pressed holds them where they are for 30 seconds ({@link com.jaymoskingdoms.Attention}).
  * (0.7.20) A villager whose tongue you don't speak ({@link Languages}) only does what needs no words ({@link Languages#SIMPLE_COMMANDS}).
  */
@@ -63,6 +64,17 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 		}
 		if (command.equals(com.jaymoskingdoms.TailorCostumes.SEW_COMMAND)) {
 			com.jaymoskingdoms.TailorCostumes.sew(player, this.entity);
+			cir.setReturnValue(true);
+			return;
+		}
+		// (0.7.449) Interact's Ask the Way: a place asked after
+		if (command.startsWith(com.jaymoskingdoms.Directions.COMMAND)) {
+			net.minecraft.network.chat.Component said = com.jaymoskingdoms.Directions.offers(this.entity)
+				? com.jaymoskingdoms.Directions.answer(player, this.entity, command.substring(com.jaymoskingdoms.Directions.COMMAND.length())) : null;
+			if (said != null) {
+				this.entity.sendChatMessage(said, player);
+				this.stopInteracting();
+			}
 			cir.setReturnValue(true);
 			return;
 		}

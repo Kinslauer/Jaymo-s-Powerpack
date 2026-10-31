@@ -30,7 +30,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.449) Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if
- * you need a doctor, or a butcher". "Ask the way" in MCA's menu ({@link #ANSWER}) opens a short list ({@link #QUESTION}):
+ * you need a doctor, or a butcher"; "move some of these options to the interact menu". MCA's Interact page has Ask the Way,
+ * which opens a page of places (client {@code McaScreensMixin}/{@code McaWayPageMixin}; each sends {@link #COMMAND}):
  * a healer (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern,
  * the stables, and whoever rules here. The villager finds the nearest in their town and:
  * <ul>
@@ -40,11 +41,11 @@ import org.jspecify.annotations.Nullable;
  * keep their posts and only point.</li>
  * </ul>
  * One who bears you real ill will ({@link #REFUSE_HEARTS}) tells you to find it yourself. Asking needs a shared tongue
- * (MCA's menu hides it from a foreigner, {@link Languages}).
+ * (a foreigner gets a shrug, {@link Languages}).
  */
 public final class Directions {
-	/** The MCA {@code main} menu answer, and the question it opens (our dialogue data). */
-	public static final String ANSWER = "jaymoskingdoms_way", QUESTION = "jaymoskingdoms_way";
+	/** MCA's command from a place on Interact's Ask the Way page ({@code way.<place>}). */
+	public static final String COMMAND = "way.";
 
 	/** How far from the one you ask they know the town's folk and buildings (blocks). */
 	static final double FIND_RANGE = 128.0;
@@ -141,7 +142,7 @@ public final class Directions {
 		});
 	}
 
-	/** "Ask the way" shows on any villager but a ship's crew. */
+	/** Any villager but a ship's crew can be asked the way. */
 	public static boolean offers(Villager v) {
 		return v.isAlive() && !Crewmen.tagged(v);
 	}
@@ -154,8 +155,8 @@ public final class Directions {
 	// ---- the asking ---------------------------------------------------------------------------------------------------
 
 	/**
-	 * {@code player} picked {@code answer} from the list on {@code v}: what they say (in MCA's chat, so it stays to be read
-	 * back), or null if it wasn't one of ours.
+	 * {@code player} picked {@code answer} from Ask the Way on {@code v}: what they say (in MCA's chat, so it stays to be
+	 * read back), or null if it wasn't one of ours.
 	 */
 	public static @Nullable Component answer(ServerPlayer player, Villager v, String answer) {
 		Place place = Place.of(answer);
