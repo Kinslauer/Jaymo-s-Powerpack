@@ -7595,3 +7595,37 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
   health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
 - Compile-checked only; not played.
+
+## 0.7.433: captains challenged, turned and crowned (Havens patch 4, second half)
+- **Challenges:** sneak and use a sheet of paper on anything within 32 blocks of a tribe's goblin village or orc camp to
+  nail up a challenge for its strongest captain there (the post hears of it). Come within 24 blocks in the next day and he
+  steps out to fight you alone while his camp stands back. Kill him and he stays dead (bar the raised), and the tribe's
+  grudge falls by 15. Run (56 blocks) or fall and he climbs a rank. Never come and he calls you a coward on the post.
+- **Death threats:** a captain who swears to have your head (a coward's challenger, a turncoat, one back from the dead you
+  killed) has his threat nailed up for the town boards, and it's in your own Tidings.
+- **Turning captains:** stare a downed captain down with Valor's coating up (Tempered or better, his rank at most two past
+  your Valor rank; a Deathless one never bends), or calm one with Ambrose's In-balming (below). He gets up, leaves his tribe (its grudge rises 20) and follows you as an MCA follower, fighting
+  what's after you and never you. In talk, send him **spying** (back in 2 days with up to 2 of his old tribe's secrets in
+  your Tidings) or to **lead a raid** on its nearest camp (settled at dawn: odds 55% plus 10% a rank over the rival he
+  meets; a win fells that rival and brings you 6 to 11 emeralds by messenger, a loss kills him). Proud captains turn back
+  8% of dawns, spiteful 12% (half if bound), going home and swearing to kill you. A sworn captain who dies doesn't come
+  back (unless he's raised, and then he's his tribe's again). Left behind in another dimension or far off, he catches up.
+- **Taking a king's seat:** a tribe's king takes a fifth of every blow from a player or a sworn captain while any of its
+  captains still stand, and says how many. Kill him with none left standing and a sworn captain of his brood at your
+  call, and that captain is crowned instead of the camp falling: the tribe is yours (no grudge, it never rises, they
+  spare you). Lose the captain or the seat and it's over.
+- **In-balming (Andy):** every spirit binds orcs and goblins its own way, a move at spirit level 4 (each spirit teaches it
+  in a few lines), cast on a downed one in reach (never a chief), 40 mana, a 2-minute wait:
+  - **Varro, Ki Mark** (up to 5): a mark of ki on his brow that only ki users (Z Fighters) see. He goes home as before,
+    but half the time when you're in a fight within 64 blocks (once in 5 minutes) he joins it: a short film for those near,
+    "FOR <you>!!", and he fights your foe for a minute.
+  - **Ambrose, Gentle Hand** (one at a time): only the big ones, a downed orc or an ogre under a quarter of its health
+    (never the Ogre King). He follows you and fights your foes. A captain he calms is sworn to you (spy, raid, all of it).
+  - **Grimsby, Steel Oath** (up to 3): an iron sword in his hand, and when you fight within 24 blocks of him he turns it on
+    his own.
+  - **Thessaly, Borrowed Eyes** (up to 3): each day she tells you what he saw: a captain's secret, or that his tribe is
+    out to hunt you.
+  - **The Quiet One, Silent Shadow** (one): he follows you unseen and silent, and once in 2 minutes steps out of nothing
+    to end a foe of yours under 30% health.
+  Past a spirit's limit the oldest one is let go.
+- Compile-checked only; not played.
