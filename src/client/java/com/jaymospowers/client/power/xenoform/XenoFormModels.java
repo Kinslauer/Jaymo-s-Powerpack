@@ -267,7 +267,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.102, patch 5) Gyre: broad and scaly, a domed shell over its back that rocks as it walks, a hooked beak. */
+	/** (0.18.103, patch 5) Gyre: broad and scaly, a domed shell over its back that rocks as it walks, a hooked beak. */
 	static final class Gyre extends FormModel {
 		private final ModelPart shell;
 
@@ -295,7 +295,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.102, patch 5) Cortex: plated, one big claw on the right hand and a small one on the left that open and shut,
+	 * (0.18.103, patch 5) Cortex: plated, one big claw on the right hand and a small one on the left that open and shut,
 	 * and an open skull with the brain showing, pulsing a little.
 	 */
 	static final class Cortex extends FormModel {
@@ -332,7 +332,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.102, patch 5) Locust: lean, wing cases folded down its back, long feelers that twitch, spurs on its legs. */
+	/** (0.18.103, patch 5) Locust: lean, wing cases folded down its back, long feelers that twitch, spurs on its legs. */
 	static final class Locust extends FormModel {
 		private final ModelPart rightFeeler, leftFeeler;
 
@@ -369,7 +369,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.102, patch 5) Croaker: bulky, eyes on top of its head, a throat sac that swells and sinks, webbed feet. */
+	/** (0.18.103, patch 5) Croaker: bulky, eyes on top of its head, a throat sac that swells and sinks, webbed feet. */
 	static final class Croaker extends FormModel {
 		private final ModelPart sac;
 
@@ -405,7 +405,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.102, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes. */
+	/** (0.18.103, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes. */
 	static final class Dud extends FormModel {
 		Dud() {
 			super(bake(mesh()), "dud");

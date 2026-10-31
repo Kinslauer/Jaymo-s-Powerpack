@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.102, Xeno-Band patch 5) Gyre, the wind-shell turtle: broad, a domed shell on its back with vents that hum, 28
+ * (0.18.103, Xeno-Band patch 5) Gyre, the wind-shell turtle: broad, a domed shell on its back with vents that hum, 28
  * health, fists of 4, a little slow. Scanned from a turtle (or a breeze, {@code XenoDna}). It swims well.
  * <ul>
  * <li>R, Shell Spin: tuck in and spin, bowling forward for {@link #SPIN_TICKS} ticks; every creature met takes

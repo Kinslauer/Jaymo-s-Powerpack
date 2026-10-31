@@ -1381,7 +1381,7 @@ def lurk():
 
 
 def gyre():
-    """(0.18.102) Gyre, the wind-shell turtle: sea-green hide with pale scales, a domed shell of dark plates edged in
+    """(0.18.103) Gyre, the wind-shell turtle: sea-green hide with pale scales, a domed shell of dark plates edged in
     moss, wind vents (pale slots) along its rim, a hooked beak, the insignia on the shell's crown."""
     img = new_skin()
     hide = (94, 150, 112)
@@ -1417,7 +1417,7 @@ def gyre():
 
 
 def cortex():
-    """(0.18.102) Cortex, the thinking crab: coral-red plates edged dark, a cream belly, small black eyes, one big claw
+    """(0.18.103) Cortex, the thinking crab: coral-red plates edged dark, a cream belly, small black eyes, one big claw
     and one small (pale-tipped), and an open skull where a pink brain shows, laced with glowing teal."""
     img = new_skin()
     shell = (196, 78, 62)
@@ -1443,7 +1443,7 @@ def cortex():
 
 
 def locust():
-    """(0.18.102) Locust, the crashing hopper: grass-green with yellow belly segments, darker green wing cases veined
+    """(0.18.103) Locust, the crashing hopper: grass-green with yellow belly segments, darker green wing cases veined
     lighter, long feelers, red-brown hind spurs, big amber compound eyes."""
     img = new_skin()
     green = (120, 176, 58)
@@ -1472,7 +1472,7 @@ def locust():
 
 
 def croaker():
-    """(0.18.102) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow belly and throat sac,
+    """(0.18.103) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow belly and throat sac,
     gold eyes with black slits on top of the head, webbed feet."""
     img = new_skin()
     green = (84, 132, 52)
@@ -1500,7 +1500,7 @@ def croaker():
 
 
 def dud():
-    """(0.18.102) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
+    """(0.18.103) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
     brows, a wobbly little mouth, two nubs on top of its head."""
     img = new_skin()
     pink = (232, 176, 204)
@@ -1666,7 +1666,7 @@ if __name__ == "__main__":
     lurk()
     for form in PATCH4:
         ultimate(form)
-    # (0.18.102) patch 5, after patch 4 for the same reason; Dud has no Ultimate
+    # (0.18.103) patch 5, after patch 4 for the same reason; Dud has no Ultimate
     gyre()
     cortex()
     locust()

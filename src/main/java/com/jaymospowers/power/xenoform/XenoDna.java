@@ -45,7 +45,7 @@ public final class XenoDna {
 		Map.entry("jaymoskingdoms:haunted_stand", "wisp"),
 		// Knell: the deep dark's golem
 		Map.entry("jaymoskingdoms:skulk_golem", "knell"),
-		// (0.18.102, patch 5) Gyre: the breeze; Croaker: the tadpole
+		// (0.18.103, patch 5) Gyre: the breeze; Croaker: the tadpole
 		Map.entry("minecraft:breeze", "gyre"), Map.entry("minecraft:tadpole", "croaker"),
 		// Rivet: machines
 		Map.entry("jaymoskingdoms:redstone_golem", "rivet"), Map.entry("jaymoskingdoms:mimic", "rivet"),

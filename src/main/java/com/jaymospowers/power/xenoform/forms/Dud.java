@@ -16,7 +16,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.102, Xeno-Band patch 5) Dud, the one that can't be hurt: small, soft and round, stubby limbs, a worried face.
+ * (0.18.103, Xeno-Band patch 5) Dud, the one that can't be hurt: small, soft and round, stubby limbs, a worried face.
  * Never scanned; a corrupted band's glitch teaches it (patch 6), and {@code /powerdebug xenoform unlock dud} until then.
  * Hidden, like Nadir: not needed for a complete band. Nothing hurts it (but the void), and it can't hurt anything either
  * (its blows are stopped in {@code XenoformPower}). Every hit sends it flying, and every monster near goes for it. Bait, while friends fight.

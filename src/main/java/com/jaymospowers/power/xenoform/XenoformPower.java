@@ -246,7 +246,7 @@ public final class XenoformPower implements Power {
 		public boolean faded;
 		public int eyes = -1;
 		/**
-		 * (0.18.102, patch 5) Gyre: ticks left of the shell spin and who it has already bowled; the whirlwind's eye and its
+		 * (0.18.103, patch 5) Gyre: ticks left of the shell spin and who it has already bowled; the whirlwind's eye and its
 		 * ticks left. Cortex: the bubble's last tick. Locust: ticks R has been held; mid a crash leap. Croaker: the creature
 		 * in its gullet (entity id, -1 none).
 		 */
@@ -364,7 +364,7 @@ public final class XenoformPower implements Power {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			// (0.18.102) Dud can't hurt anything
+			// (0.18.103) Dud can't hurt anything
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).form == XenoForms.DUD) {
 				return false;
 			}

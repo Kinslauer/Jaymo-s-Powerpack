@@ -30,6 +30,10 @@ public final class ArmourForging {
 		add(out, Molten.IRON, new Item[] {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS});
 		add(out, Molten.GOLD, new Item[] {Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS});
 		add(out, Molten.COPPER, new Item[] {Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS});
+		// (0.18.102) bog iron, only once Kingdoms' bog iron has been mined and melted
+		if (com.jaymospowers.tinkering.Tinkering.BOG_IRON_ARMOUR[0] != null) {
+			add(out, Molten.BOG_IRON, com.jaymospowers.tinkering.Tinkering.BOG_IRON_ARMOUR);
+		}
 		return out;
 	}
 

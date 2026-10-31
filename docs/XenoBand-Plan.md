@@ -106,7 +106,7 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **Croaker:** scanned from a frog. It has a tongue grab and swallows small mobs.
 - **Dud:** never scanned, only learned from a corrupted band's glitch (patch 6). Nothing hurts it, it can't attack,
   and every mob nearby goes for it.
-- **Built (0.18.102):** all five, plus the breeze for Gyre and the tadpole for Croaker (from the scan-gap picks). Cortex
+- **Built (0.18.103):** all five, plus the breeze for Gyre and the tadpole for Croaker (from the scan-gap picks). Cortex
   reads health and Kingdoms temperaments. Dud is hidden and has no Ultimate; until patch 6 it's only
   `/powerdebug xenoform unlock dud`. See `docs/xenoform.md`.
 

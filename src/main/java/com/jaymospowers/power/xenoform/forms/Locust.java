@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.102, Xeno-Band patch 5) Locust, the crashing hopper: lean and green, long folded hind legs, feelers, wing cases
+ * (0.18.103, Xeno-Band patch 5) Locust, the crashing hopper: lean and green, long folded hind legs, feelers, wing cases
  * on its back. 22 health, fists of 4, quick. Scanned from a goat. It never takes fall damage.
  * <ul>
  * <li>R (hold, let go), Crash Leap: the longer you hold (up to {@link #CHARGE_MAX} ticks) the farther you go; where you

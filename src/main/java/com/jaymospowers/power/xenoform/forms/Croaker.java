@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.102, Xeno-Band patch 5) Croaker, the war frog: big, wide-mouthed, bulging eyes on top of its head, a throat
+ * (0.18.103, Xeno-Band patch 5) Croaker, the war frog: big, wide-mouthed, bulging eyes on top of its head, a throat
  * sac that swells when it croaks, webbed feet. 26 health, fists of 5. Scanned from a frog (or a tadpole,
  * {@code XenoDna}). It swims well and lands every jump soft.
  * <ul>
