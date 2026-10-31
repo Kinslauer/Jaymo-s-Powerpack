@@ -121,6 +121,16 @@ public final class Captains {
 	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
 	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
 	static final double CHEER_RANGE = 20.0;
+	/** (Patch 4) A fallen captain not finished or burned comes back at this chance, after this many days. */
+	static final float RETURN_CHANCE = 0.75F;
+	static final int RETURN_DAYS_MIN = 1, RETURN_DAYS_MAX = 3;
+	/** A captain's chance of a blood brother when he rises; without one, the chance another of his tribe avenges him. */
+	static final float BROTHER_CHANCE = 0.25F, AVENGER_CHANCE = 0.3F;
+	/** How far a blood brother comes to his brother's fight. */
+	static final double BROTHER_REACH = 40.0;
+	/** A day's chance of a doing in a tribe (a duel, an ambush, a feast) while a player is this near its seat; an ambush's odds. */
+	static final float DOING_CHANCE = 0.5F, AMBUSH_WINS = 0.6F;
+	static final double DOING_REACH = 2000.0;
 	/** Lines for each (lang {@code talk.jaymoskingdoms.captain.<what>.<n>}). */
 	static final int LINES = 3;
 	// ================================================================================================================
@@ -129,6 +139,8 @@ public final class Captains {
 	public static final String PEDLAR_ANSWER = "jaymoskingdoms_pedlar_captains";
 	/** Tags: a captain's body; his id (after the {@code =}); each of his traits (after the last dot). */
 	static final String TAG = "jaymoskingdoms.captain", ID_TAG = TAG + "=", TRAIT_TAG = TAG + ".trait.";
+	/** Powers' (Kitchen's) tag on a body missing a part, before the part's name. */
+	static final String MISSING_TAG = "jaymoskitchen.missing.";
 	/** A chief's orders: the captain and the trait they give away (custom data). */
 	static final String ORDERS_CAPTAIN = "jaymoskingdoms_orders_captain", ORDERS_TRAIT = "jaymoskingdoms_orders_trait";
 
@@ -214,10 +226,11 @@ public final class Captains {
 	/**
 	 * A captain: his id, tribe, name (with his byname), rank, traits, the camp he's posted to (−1 none), his body in the
 	 * world, whether he's a camp's chief (his body is the chief's), whether he's fallen, the head he wears (a player's id,
-	 * or empty), the players he's killed, and his meetings by player id.
+	 * or empty), the players he's killed, and his meetings by player id; (patch 4) when a fallen captain comes back (game
+	 * time, −1 never), the parts he came back without (Powers' part names), and his blood brother (a captain id, or empty).
 	 */
 	record Captain(String id, String tribe, String name, int rank, List<String> traits, int post, Optional<UUID> body, boolean chief, boolean fallen,
-		String trophy, List<String> slain, Map<String, Meeting> met) {
+		String trophy, List<String> slain, Map<String, Meeting> met, long back, List<String> scars, String brother) {
 		static final Codec<Captain> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("id").forGetter(Captain::id),
 				Codec.STRING.fieldOf("tribe").forGetter(Captain::tribe),
@@ -230,33 +243,61 @@ public final class Captains {
 				Codec.BOOL.optionalFieldOf("fallen", false).forGetter(Captain::fallen),
 				Codec.STRING.optionalFieldOf("trophy", "").forGetter(Captain::trophy),
 				Codec.STRING.listOf().optionalFieldOf("slain", List.of()).forGetter(Captain::slain),
-				Codec.unboundedMap(Codec.STRING, Meeting.CODEC).optionalFieldOf("met", Map.of()).forGetter(Captain::met))
+				Codec.unboundedMap(Codec.STRING, Meeting.CODEC).optionalFieldOf("met", Map.of()).forGetter(Captain::met),
+				Codec.LONG.optionalFieldOf("back", -1L).forGetter(Captain::back),
+				Codec.STRING.listOf().optionalFieldOf("scars", List.of()).forGetter(Captain::scars),
+				Codec.STRING.optionalFieldOf("brother", "").forGetter(Captain::brother))
 			.apply(i, Captain::new));
+
+		/** A new captain, standing. */
+		static Captain of(String id, String tribe, String name, int rank, List<String> traits, int post, @Nullable UUID body, boolean chief) {
+			return new Captain(id, tribe, name, rank, traits, post, Optional.ofNullable(body), chief, false, "", List.of(), Map.of(), -1L, List.of(), "");
+		}
 
 		boolean has(Trait t) {
 			return traits.contains(t.key());
 		}
 
 		Captain withBody(@Nullable UUID uuid) {
-			return new Captain(id, tribe, name, rank, traits, post, Optional.ofNullable(uuid), chief, fallen, trophy, slain, met);
+			return new Captain(id, tribe, name, rank, traits, post, Optional.ofNullable(uuid), chief, fallen, trophy, slain, met, back, scars, brother);
 		}
 
 		Captain withPost(int camp, boolean asChief) {
-			return new Captain(id, tribe, name, rank, traits, camp, body, asChief, fallen, trophy, slain, met);
+			return new Captain(id, tribe, name, rank, traits, camp, body, asChief, fallen, trophy, slain, met, back, scars, brother);
 		}
 
-		Captain fell() {
-			return new Captain(id, tribe, name, rank, traits, post, Optional.empty(), chief, true, trophy, slain, met);
+		/** Fallen; back at {@code when} (−1: for good), without {@code lost} parts besides those he'd lost before. */
+		Captain fell(long when, List<String> lost) {
+			List<String> all = new ArrayList<>(scars);
+			for (String part : lost) {
+				if (!all.contains(part)) {
+					all.add(part);
+				}
+			}
+			return new Captain(id, tribe, name, rank, traits, post, Optional.empty(), chief && when < 0, true, trophy, slain, met, when, List.copyOf(all), brother);
+		}
+
+		/** Back from the dead, posted to {@code camp}. */
+		Captain returned(int camp) {
+			return new Captain(id, tribe, name, rank, traits, camp, Optional.empty(), false, false, trophy, slain, met, -1L, scars, brother);
 		}
 
 		Captain met(UUID player, Meeting m) {
 			Map<String, Meeting> all = new HashMap<>(met);
 			all.put(player.toString(), m);
-			return new Captain(id, tribe, name, rank, traits, post, body, chief, fallen, trophy, slain, Map.copyOf(all));
+			return new Captain(id, tribe, name, rank, traits, post, body, chief, fallen, trophy, slain, Map.copyOf(all), back, scars, brother);
 		}
 
 		Captain climbed(int newRank, List<String> newTraits, String head, List<String> newSlain) {
-			return new Captain(id, tribe, name, newRank, newTraits, post, body, chief, fallen, head, newSlain, met);
+			return new Captain(id, tribe, name, newRank, newTraits, post, body, chief, fallen, head, newSlain, met, back, scars, brother);
+		}
+
+		Captain renamed(String newName) {
+			return new Captain(id, tribe, newName, rank, traits, post, body, chief, fallen, trophy, slain, met, back, scars, brother);
+		}
+
+		Captain brothered(String other) {
+			return new Captain(id, tribe, name, rank, traits, post, body, chief, fallen, trophy, slain, met, back, scars, other);
 		}
 	}
 
@@ -498,6 +539,8 @@ public final class Captains {
 		for (String tribe : tribes) {
 			fill(level, tribe);
 		}
+		returns(level);
+		days(level);
 		seats(level);
 		for (Captain c : List.copyOf(all(server).values())) {
 			Faction camp = c.fallen() ? null : near.get(c.post());
@@ -535,8 +578,15 @@ public final class Captains {
 		RandomSource random = level.getRandom();
 		int count = last == null ? LADDER - standing.size() : 1;
 		for (int i = 0; i < count; i++) {
-			Captain c = new Captain(newId(random), tribe, rollName(tribe, random), 1 + random.nextInt(3), roll(random), quietest(server, tribe, camps),
-				Optional.empty(), false, false, "", List.of(), Map.of());
+			Captain c = Captain.of(newId(random), tribe, rollName(tribe, random), 1 + random.nextInt(3), roll(random), quietest(server, tribe, camps),
+				null, false);
+			// (patch 4) now and then a blood brother among those already standing
+			List<Captain> free = of(server, tribe).stream().filter(x -> x.brother().isEmpty() && !x.chief()).toList();
+			if (!free.isEmpty() && random.nextFloat() < BROTHER_CHANCE) {
+				Captain other = free.get(random.nextInt(free.size()));
+				put(server, other.brothered(c.id()));
+				c = c.brothered(other.id());
+			}
 			put(server, c);
 		}
 		Map<String, Long> fresh = new HashMap<>(risen);
@@ -679,6 +729,19 @@ public final class Captains {
 		}
 		if (dress) {
 			trophy(mob, c);
+		}
+		// (patch 4) back from the dead without what he lost
+		for (String part : c.scars()) {
+			int bit = switch (part) {
+				case "right_arm" -> 2;
+				case "left_arm" -> 4;
+				case "right_leg" -> 8;
+				case "left_leg" -> 16;
+				default -> 0;
+			};
+			if (bit != 0 && !mob.entityTags().contains(MISSING_TAG + part)) {
+				PowersCompat.bornWithout(mob, bit);
+			}
 		}
 		put(level.getServer(), c.withBody(mob.getUUID()));
 	}
@@ -1062,6 +1125,7 @@ public final class Captains {
 			Captain c = of(victim);
 			if (c != null && by instanceof ServerPlayer player) {
 				fought(c, player.getUUID(), now);
+				brotherComes(level, c, victim, player);
 			}
 			if (victim.isAlive() && has(victim, Trait.HARD_TO_KILL) && victim.getHealth() < victim.getMaxHealth() * HARD_AT && GOT_UP.add(victim.getUUID())) {
 				victim.setHealth(victim.getMaxHealth() * HARD_TO);
@@ -1093,7 +1157,20 @@ public final class Captains {
 			return;
 		}
 		MinecraftServer server = level.getServer();
-		put(server, c.fell());
+		long now = level.getGameTime();
+		RandomSource random = level.getRandom();
+		// (patch 4) he comes back, scarred, unless he was finished (downed, or his head off) or burned
+		List<String> lost = new ArrayList<>();
+		for (String tag : entity.entityTags()) {
+			if (tag.startsWith(MISSING_TAG)) {
+				lost.add(tag.substring(MISSING_TAG.length()));
+			}
+		}
+		boolean finished = Downed.isDowned(entity) || lost.contains("head");
+		boolean burned = source.is(DamageTypeTags.IS_FIRE) || entity.isOnFire();
+		boolean returns = !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
+		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
+		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
 		UUID id = entity.getUUID();
 		FEARED.remove(id);
@@ -1101,15 +1178,83 @@ public final class Captains {
 		FEARED_FROM.remove(id);
 		RALLIED.remove(id);
 		GOT_UP.remove(id);
+		SCENE.remove(id);
+		SCENE_AT.remove(id);
 		if (source.getEntity() instanceof ServerPlayer player) {
+			// (he remembers who did it, if he comes back)
+			outcome(server, c.id(), player.getUUID(), "slain", now);
 			List<String> sworn = player.getAttachedOrElse(SWORN, List.of());
 			if (sworn.contains(c.id())) {
-				List<String> left = new ArrayList<>(sworn);
-				left.remove(c.id());
-				player.setAttached(SWORN, List.copyOf(left));
+				if (!returns) {
+					List<String> left = new ArrayList<>(sworn);
+					left.remove(c.id());
+					player.setAttached(SWORN, List.copyOf(left));
+				}
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.captain.sworn_fallen", c.name()));
+			} else if (returns) {
+				// (one who comes back comes back for you; you'll know when you meet him)
+				List<String> more = new ArrayList<>(sworn);
+				more.add(c.id());
+				player.setAttached(SWORN, List.copyOf(more));
 			}
 			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.fallen", c.name(), Tribes.name(c.tribe()), player.getDisplayName()));
+			avenge(level, c, player);
+		}
+	}
+
+	/** {@code c} fell to {@code player}: his blood brother (or, now and then, another of his tribe) swears to avenge him. */
+	private static void avenge(ServerLevel level, Captain c, ServerPlayer player) {
+		MinecraftServer server = level.getServer();
+		Captain avenger = c.brother().isEmpty() ? null : get(server, c.brother());
+		boolean brother = avenger != null && !avenger.fallen();
+		if (!brother) {
+			List<Captain> others = of(server, c.tribe()).stream().filter(x -> !x.id().equals(c.id()) && !x.chief()).toList();
+			avenger = others.isEmpty() || level.getRandom().nextFloat() >= AVENGER_CHANCE ? null : others.get(level.getRandom().nextInt(others.size()));
+		}
+		if (avenger == null) {
+			return;
+		}
+		List<String> traits = new ArrayList<>(avenger.traits());
+		Trait gained = brother ? newStrength(avenger, level.getRandom()) : null;
+		if (gained != null) {
+			traits.add(gained.key());
+		}
+		int rank = Math.min(RANK_MAX, avenger.rank() + (brother ? 1 : 0));
+		Captain after = avenger.climbed(rank, List.copyOf(traits), avenger.trophy(), avenger.slain());
+		after = after.met(player.getUUID(), new Meeting(1, brother ? "avenger_brother" : "avenger", level.getGameTime()));
+		put(server, after);
+		Entity body = after.body().map(level::getEntity).orElse(null);
+		if (body instanceof LivingEntity living) {
+			bind(level, after, living);
+			if (rank > avenger.rank()) {
+				climb(living);
+			}
+		}
+		List<String> sworn = new ArrayList<>(player.getAttachedOrElse(SWORN, List.of()));
+		if (!sworn.contains(after.id())) {
+			sworn.add(after.id());
+			player.setAttached(SWORN, List.copyOf(sworn));
+		}
+		Post.news(server, Component.translatable(brother ? "news.jaymoskingdoms.captain.avenger_brother" : "news.jaymoskingdoms.captain.avenger",
+			after.name(), c.name(), player.getDisplayName()));
+	}
+
+	/** Fallen captains whose day has come: back, scarred, at one of the tribe's camps. */
+	private static void returns(ServerLevel level) {
+		MinecraftServer server = level.getServer();
+		long now = level.getGameTime();
+		for (Captain c : List.copyOf(all(server).values())) {
+			if (!c.fallen() || c.back() < 0 || now < c.back()) {
+				continue;
+			}
+			List<Faction> camps = Tribes.camps(server, c.tribe());
+			if (camps.isEmpty()) {
+				// (his tribe is gone: so is he)
+				put(server, c.fell(-1L, List.of()));
+				continue;
+			}
+			put(server, c.returned(quietest(server, c.tribe(), camps)));
+			Post.news(server, Component.translatable("news.jaymoskingdoms.captain.returned", c.name(), Tribes.name(c.tribe())));
 		}
 	}
 
@@ -1131,7 +1276,7 @@ public final class Captains {
 			boolean chief = Greenskins.chief(w.role());
 			String[] bynames = tribe.startsWith(Tribes.ORC + "@") ? ORC_BYNAMES : GOBLIN_BYNAMES;
 			String name = chief ? killer.getName().getString() : killer.getName().getString() + " " + bynames[random.nextInt(bynames.length)];
-			c = new Captain(newId(random), tribe, name, 1, roll(random), w.factionId(), Optional.of(killer.getUUID()), chief, false, "", List.of(), Map.of());
+			c = Captain.of(newId(random), tribe, name, 1, roll(random), w.factionId(), killer.getUUID(), chief);
 			risen = true;
 		} else {
 			List<String> traits = new ArrayList<>(c.traits());
@@ -1206,6 +1351,241 @@ public final class Captains {
 			Speech.say(level, w.mob(), Component.translatable("talk.jaymoskingdoms.captain.cheer." + w.mob().getRandom().nextInt(LINES), Component.literal(c.name())),
 				Speech.RED, SAY_RANGE);
 		}
+	}
+
+	/** (Patch 4) {@code c} is in a fight with {@code player}: his blood brother, if he's near, comes for them. */
+	private static void brotherComes(ServerLevel level, Captain c, LivingEntity victim, ServerPlayer player) {
+		Captain b = c.brother().isEmpty() ? null : get(level.getServer(), c.brother());
+		Entity body = b == null || b.fallen() ? null : b.body().map(level::getEntity).orElse(null);
+		if (!(body instanceof Mob brother) || !brother.isAlive() || Downed.isDowned(brother) || brother.distanceTo(victim) > BROTHER_REACH
+			|| Rulers.target(brother) == player) {
+			return;
+		}
+		brother.setTarget(player);
+		Speech.say(level, brother, Component.translatable("talk.jaymoskingdoms.captain.brother." + brother.getRandom().nextInt(LINES), Component.literal(c.name())),
+			Speech.RED, SAY_RANGE);
+	}
+
+	// ---- (patch 4) their days: duels, feasts, ambushes ------------------------------------------------------------------
+
+	/** Something among a tribe's captains, settled at dawn ({@code until}): a duel (a calls out b), a feast (a's), an ambush (a on b). */
+	record Doing(String kind, String a, String b, int camp, long until) {
+		static final Codec<Doing> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.fieldOf("kind").forGetter(Doing::kind),
+				Codec.STRING.fieldOf("a").forGetter(Doing::a),
+				Codec.STRING.optionalFieldOf("b", "").forGetter(Doing::b),
+				Codec.INT.optionalFieldOf("camp", -1).forGetter(Doing::camp),
+				Codec.LONG.fieldOf("until").forGetter(Doing::until))
+			.apply(i, Doing::new));
+	}
+
+	/** On the Overworld: what's under way among the captains; the last day they were seen to. Saved. */
+	static final AttachmentType<List<Doing>> DOINGS = AttachmentRegistry.create(JaymosKingdoms.id("captains_doings"),
+		builder -> builder.persistent(Doing.CODEC.listOf()));
+	static final AttachmentType<Long> DOINGS_DAY = AttachmentRegistry.create(JaymosKingdoms.id("captains_doings_day"), builder -> builder.persistent(Codec.LONG));
+
+	/** Once a day: yesterday's doings settled, and new ones set in tribes near players (you hear of both on the post). */
+	private static void days(ServerLevel level) {
+		long now = level.getGameTime(), day = now / 24000L;
+		Long last = level.getAttached(DOINGS_DAY);
+		if (last != null && last >= day) {
+			return;
+		}
+		level.setAttached(DOINGS_DAY, day);
+		MinecraftServer server = level.getServer();
+		List<Doing> left = new ArrayList<>();
+		for (Doing d : level.getAttachedOrElse(DOINGS, List.of())) {
+			if (now >= d.until()) {
+				settle(level, d);
+			} else {
+				left.add(d);
+			}
+		}
+		RandomSource random = level.getRandom();
+		Set<String> busy = new HashSet<>();
+		for (Doing d : left) {
+			Captain a = get(server, d.a());
+			if (a != null) {
+				busy.add(a.tribe());
+			}
+		}
+		Set<String> tribes = new HashSet<>();
+		for (Captain c : all(server).values()) {
+			if (!c.fallen()) {
+				tribes.add(c.tribe());
+			}
+		}
+		for (String tribe : tribes) {
+			if (busy.contains(tribe) || random.nextFloat() >= DOING_CHANCE || !watched(level, tribe)) {
+				continue;
+			}
+			List<Captain> free = new ArrayList<>(of(server, tribe).stream().filter(c -> !c.chief() && c.post() >= 0).toList());
+			if (free.isEmpty()) {
+				continue;
+			}
+			java.util.Collections.shuffle(free, new java.util.Random(random.nextLong()));
+			Captain a = free.get(0), b = free.size() > 1 ? free.get(1) : null;
+			int roll = random.nextInt(3);
+			Faction camp = Factions.get(server, a.post());
+			Component where = Component.literal(camp == null ? "?" : camp.name());
+			long until = (day + 1) * 24000L;
+			if (roll == 0 && b != null) {
+				left.add(new Doing("duel", a.id(), b.id(), a.post(), until));
+				put(server, b.withPost(a.post(), false));
+				Post.news(server, Component.translatable("news.jaymoskingdoms.captain.duel.set", a.name(), b.name(), where));
+			} else if (roll == 1 && b != null) {
+				left.add(new Doing("ambush", a.id(), b.id(), b.post(), until));
+				Post.news(server, Component.translatable("news.jaymoskingdoms.captain.ambush.set", a.name(), b.name()));
+			} else {
+				left.add(new Doing("feast", a.id(), "", a.post(), until));
+				Post.news(server, Component.translatable("news.jaymoskingdoms.captain.feast.set", a.name(), where));
+			}
+		}
+		level.setAttached(DOINGS, List.copyOf(left));
+	}
+
+	/** A player is within {@link #DOING_REACH} of {@code tribe}'s king's seat. */
+	private static boolean watched(ServerLevel level, String tribe) {
+		Faction seat = Tribes.seat(level.getServer(), tribe);
+		if (seat == null) {
+			return false;
+		}
+		for (ServerPlayer p : level.players()) {
+			if (seat.seat().distToCenterSqr(p.position()) < DOING_REACH * DOING_REACH) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Dawn: how it went (if a player hasn't settled it first by killing one of them). */
+	private static void settle(ServerLevel level, Doing d) {
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		Captain a = get(server, d.a()), b = d.b().isEmpty() ? null : get(server, d.b());
+		if (a == null || a.fallen() || !d.b().isEmpty() && (b == null || b.fallen())) {
+			return;
+		}
+		switch (d.kind()) {
+			case "feast" -> {
+				raise(level, a, random);
+				Post.news(server, Component.translatable("news.jaymoskingdoms.captain.feast.done", a.name()));
+			}
+			case "duel" -> {
+				boolean aWins = random.nextInt(a.rank() + b.rank() + 2) < a.rank() + 1;
+				Captain won = aWins ? a : b, lost = aWins ? b : a;
+				raise(level, won, random);
+				fall(level, lost, random.nextBoolean());
+				Post.news(server, Component.translatable("news.jaymoskingdoms.captain.duel.won", won.name(), lost.name()));
+			}
+			case "ambush" -> {
+				if (random.nextFloat() < AMBUSH_WINS) {
+					raise(level, a, random);
+					fall(level, b, random.nextFloat() < 0.3F);
+					Post.news(server, Component.translatable("news.jaymoskingdoms.captain.ambush.won", a.name(), b.name()));
+				} else {
+					raise(level, b, random);
+					fall(level, a, random.nextFloat() < 0.3F);
+					Post.news(server, Component.translatable("news.jaymoskingdoms.captain.ambush.failed", a.name(), b.name()));
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
+	/** {@code c} up a rank, and maybe a strength more. */
+	private static void raise(ServerLevel level, Captain c, RandomSource random) {
+		Captain now = get(level.getServer(), c.id());
+		if (now == null || now.fallen()) {
+			return;
+		}
+		List<String> traits = new ArrayList<>(now.traits());
+		Trait gained = random.nextBoolean() ? newStrength(now, random) : null;
+		if (gained != null) {
+			traits.add(gained.key());
+		}
+		int rank = Math.min(RANK_MAX, now.rank() + 1);
+		Captain after = now.climbed(rank, List.copyOf(traits), now.trophy(), now.slain());
+		put(level.getServer(), after);
+		if (after.body().map(level::getEntity).orElse(null) instanceof LivingEntity body && body.isAlive()) {
+			bind(level, after, body);
+			if (rank > now.rank()) {
+				climb(body);
+			}
+		}
+	}
+
+	/** {@code c} falls to one of his own ({@code returns}: he'll be back in a few days). */
+	private static void fall(ServerLevel level, Captain c, boolean returns) {
+		Captain now = get(level.getServer(), c.id());
+		if (now == null || now.fallen()) {
+			return;
+		}
+		long back = returns ? level.getGameTime() + 24000L * (RETURN_DAYS_MIN + level.getRandom().nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
+		Entity body = now.body().map(level::getEntity).orElse(null);
+		put(level.getServer(), now.fell(back, List.of()));
+		if (body instanceof LivingEntity living && living.isAlive()) {
+			living.kill(level);
+		}
+	}
+
+	// ---- (patch 4) shamed or spared --------------------------------------------------------------------------------------
+
+	/** (Staredowns) {@code seen} is a downed captain {@code sp} may stare at: to spare (an empty hand) or to shame. */
+	static boolean starable(Mob seen) {
+		return is(seen) && Downed.isDowned(seen);
+	}
+
+	/**
+	 * (Staredowns) {@code sp}'s stare broke downed captain {@code seen}. An empty hand: spared, he's let up and runs. Anything
+	 * in it: shamed, before his own: down a rank, a strength gone, a new fear, "the Shamed" for a byname; he's let up and runs.
+	 */
+	static void stared(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
+		Captain c = of(seen);
+		if (c == null) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		seen.addTag(Downed.REVIVE_TAG);
+		Map<UUID, Fight> fights = FIGHTS.get(c.id());
+		if (fights != null) {
+			fights.remove(sp.getUUID());
+		}
+		if (sp.getMainHandItem().isEmpty()) {
+			outcome(server, c.id(), sp.getUUID(), "spared", now);
+			Speech.say(level, seen, Component.translatable("talk.jaymoskingdoms.captain.let_up." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
+			Will.flee(seen, sp, now, Will.FLEE_TICKS);
+			return;
+		}
+		List<String> traits = new ArrayList<>(c.traits());
+		List<Trait> strengths = traits(c).stream().filter(t -> t.sort == Sort.STRENGTH).toList();
+		if (!strengths.isEmpty()) {
+			traits.remove(strengths.get(random.nextInt(strengths.size())).key());
+		}
+		List<Trait> fears = new ArrayList<>();
+		for (Trait t : Trait.values()) {
+			if (t.sort == Sort.FEAR && !traits.contains(t.key()) && traits.stream().map(Trait::parse).noneMatch(x -> x != null && x.clashes(t))) {
+				fears.add(t);
+			}
+		}
+		if (!fears.isEmpty()) {
+			traits.add(fears.get(random.nextInt(fears.size())).key());
+		}
+		String first = c.name().split(" ")[0];
+		Captain after = c.climbed(Math.max(1, c.rank() - 1), List.copyOf(traits), c.trophy(), c.slain()).renamed(first + " the Shamed");
+		put(server, after);
+		bind(level, after, seen);
+		outcome(server, c.id(), sp.getUUID(), "shamed", now);
+		AttributeInstance damage = seen.getAttribute(Attributes.ATTACK_DAMAGE);
+		if (damage != null && c.rank() > 1) {
+			damage.setBaseValue(Math.max(1.0, damage.getBaseValue() - DAMAGE_PER_RANK));
+		}
+		level.playSound(null, seen.getX(), seen.getY(), seen.getZ(), SoundEvents.VILLAGER_NO, SoundSource.HOSTILE, 1.2F, 0.6F);
+		Speech.say(level, seen, Component.translatable("talk.jaymoskingdoms.captain.shamed." + random.nextInt(LINES), Recollections.nameTo(sp, seen)), Speech.RED, SAY_RANGE);
+		Will.flee(seen, sp, now, Will.FLEE_TICKS * 2);
+		Post.news(server, Component.translatable("news.jaymoskingdoms.captain.shamed", c.name(), sp.getDisplayName(), Tribes.name(c.tribe())));
 	}
 
 	// ---- what you know of them -------------------------------------------------------------------------------------------

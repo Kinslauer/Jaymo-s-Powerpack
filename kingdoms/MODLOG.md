@@ -7577,3 +7577,18 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - When a king's camp falls and another becomes the seat, the strongest captain takes it as its chief. Fallen captains
   stay fallen for now (patch 4 brings some back). Captains' deaths, rises and crownings go on the post.
 - Compile-checked only; not played.
+## 0.7.432: captains living their lives (Havens patch 4, first half)
+- **They come back:** a captain killed without being finished (killed while downed, or beheaded) or burned comes back
+  75% of the time, 1 to 3 days later, at one of his tribe's camps. He's missing whatever parts he lost (Powers'
+  limbs), he's your sworn foe if you killed him, and the post says he's been seen again. His first words are about it.
+- **Duels, ambushes and feasts:** once a day, in a tribe whose seat is within 2000 blocks of a player, two of its captains
+  may duel at a camp, one may ambush another, or one holds a feast. You hear of it on the post when it's set and when it's
+  settled at dawn (the winner or feaster climbs a rank; the loser falls, sometimes to come back). Kill one of them first
+  and it never happens.
+- **Blood brothers and avengers:** a new captain has a blood brother among the standing ones a quarter of the time. A
+  brother within 40 blocks joins his brother's fight with you, and when one falls to a player, the other climbs a rank,
+  gains a strength and swears to avenge him (with no brother, another of the tribe may, 30%).
+- **Spared or shamed:** stare a downed captain down (Stare Down). With an empty hand you spare him: he gets up and runs,
+  and remembers it. With anything in hand you shame him before his own: down a rank, a strength lost, a new fear, "the
+  Shamed" for a byname, and he gets up and runs. The post hears of it.
+- Compile-checked only; not played.

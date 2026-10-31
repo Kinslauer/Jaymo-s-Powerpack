@@ -846,7 +846,7 @@ public final class Will {
 		Vec3 eye = sp.getEyePosition(), look = sp.getLookAngle();
 		Mob best = null;
 		double bestCos = STARE_COS;
-		for (Mob mob : level.getEntitiesOfClass(Mob.class, sp.getBoundingBox().inflate(STARE_REACH), m -> (foe(sp, m) || Staredowns.great(sp, m)) && !Downed.isDowned(m))) {
+		for (Mob mob : level.getEntitiesOfClass(Mob.class, sp.getBoundingBox().inflate(STARE_REACH), m -> (foe(sp, m) || Staredowns.great(sp, m)) && (!Downed.isDowned(m) || Captains.starable(m)))) {
 			Vec3 to = mob.getEyePosition().subtract(eye);
 			double d = to.length();
 			if (d < 1.0E-3 || d > STARE_REACH) {
