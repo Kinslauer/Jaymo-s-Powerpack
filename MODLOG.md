@@ -4484,3 +4484,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Breaking under water** (`TerrainParticleWaterMixin`): block bits drift down slowly, last twice as long, and some
     trail a bubble.
   - Compile-checked; not seen in game.
+- **0.18.105, Faces (Motion patch 3, `docs/Motion-Plan.md`):** an idea from Actions & Stuff.
+  - `client/face/PlayerFaces` + `FaceLivingEntityRendererMixin`: players blink every 3-6 s (Kitchen's closed eyes held 3
+    ticks), their pupils shift towards the nearest living thing within 8 blocks once it's well off to one side, and
+    the inner ends of their brows come down while hurt or swinging. Done by painting copies of the skin, only when its
+    head front has a plain two-pixel eye pair (white beside pupil, same row both sides); any other skin is left as it
+    is (the blink still comes from Kitchen's own eye finder). HD skins scale. Knocked out and dead keep their shut eyes.
+  - Compile-checked; not seen in game.
