@@ -40,6 +40,8 @@ public final class StarWreckBlock extends Block {
 	public static final double WAKE_RANGE = 32.0, PROBE_COUNT_RANGE = 48.0;
 	public static final int EVERY = 100, MAX_PROBES = 3;
 	public static final int CIRCUITS_MIN = 2, CIRCUITS_MAX = 4;
+	/** (0.18.123) A mined wreck holds a module plan this often. */
+	public static final float PLAN_CHANCE = 0.25F;
 	/** Bits of hull strewn round the crater when a wreck lands. */
 	public static final int DEBRIS = 8;
 	public static final double DEBRIS_SPREAD = 5.0;
@@ -105,6 +107,11 @@ public final class StarWreckBlock extends Block {
 		RandomSource random = server.getRandom();
 		popResource(server, pos, new ItemStack(XenoFinds.WRECK_CORE));
 		popResource(server, pos, new ItemStack(XenoFinds.CIRCUIT, CIRCUITS_MIN + random.nextInt(CIRCUITS_MAX - CIRCUITS_MIN + 1)));
+		if (random.nextFloat() < PLAN_CHANCE) {
+			// (0.18.123, patch 7) now and then a module plan, still readable
+			BandUpgrades.Module[] modules = BandUpgrades.Module.values();
+			popResource(server, pos, new ItemStack(BandUpgrades.PLANS.get(modules[random.nextInt(modules.length)])));
+		}
 		server.playSound(null, pos, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 1.0F, 0.6F);
 	}
 

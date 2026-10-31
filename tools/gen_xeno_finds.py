@@ -177,6 +177,79 @@ def recipes():
                 "ingredient": f"jaymospowers:{metal}_dust", "result": {"id": ingot}, "experience": 0.35, "cookingtime": time})
 
 
+# ---- (0.18.123, Xeno-Band patch 7) module plans and the star forge -------------------------------------------------
+
+PLAN_GLOWS = {"cell": (240, 220, 80, 255), "breather": (110, 200, 250, 255), "plating": (200, 205, 215, 255),
+              "steady": (92, 240, 122, 255), "wild": (230, 90, 220, 255)}
+
+
+def plan(module, glow):
+    """A thin sheet of grey star metal, one corner bent, etched with a module's mark in its own colour."""
+    r = random.Random("plan-" + module)
+    img = Image.new("RGBA", (16, 16), CLEAR)
+    for y in range(3, 14):
+        for x in range(2, 14):
+            if (x, y) == (13, 3):
+                continue
+            put(img, x, y, shade((150, 156, 166, 255), 0.9 + r.random() * 0.15))
+    put(img, 12, 3, (110, 116, 126, 255))
+    put(img, 13, 4, (110, 116, 126, 255))
+    for x in range(2, 14):
+        put(img, x, 13, (100, 104, 112, 255))
+    for y in range(3, 14):
+        put(img, 2, y, (176, 182, 190, 255))
+    # the mark: a ring and a line through it, differently for each
+    marks = {
+        "cell": [(6, 6), (7, 6), (8, 6), (9, 6), (6, 7), (9, 7), (6, 8), (9, 8), (6, 9), (7, 9), (8, 9), (9, 9), (7, 5), (8, 5)],
+        "breather": [(5, 7), (6, 6), (7, 7), (8, 6), (9, 7), (10, 6), (5, 9), (6, 8), (7, 9), (8, 8), (9, 9), (10, 8)],
+        "plating": [(5, 5), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5), (5, 6), (10, 6), (5, 7), (10, 7), (6, 8), (9, 8), (7, 9), (8, 9)],
+        "steady": [(7, 4), (8, 4), (7, 5), (8, 5), (7, 6), (8, 6), (7, 7), (8, 7), (5, 9), (6, 9), (7, 9), (8, 9), (9, 9), (10, 9)],
+        "wild": [(5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (10, 5), (9, 6), (6, 9), (5, 10), (8, 5), (5, 8)],
+    }
+    for x, y in marks[module]:
+        put(img, x, y, glow)
+    for x in range(4, 12, 2):
+        put(img, x, 11, shade(glow, 0.6))
+    save(img, f"item/band_plan_{module}.png")
+    item_json(f"band_plan_{module}")
+
+
+def star_forge():
+    """The Star Forge: a block of black hull metal, a glowing green mouth on its sides, a worn anvil-top."""
+    r = random.Random("star-forge")
+    side = Image.new("RGBA", (16, 16), CLEAR)
+    top = Image.new("RGBA", (16, 16), CLEAR)
+    for y in range(16):
+        for x in range(16):
+            side.putpixel((x, y), shade((44, 46, 54, 255), 0.85 + r.random() * 0.2))
+            top.putpixel((x, y), shade((70, 72, 80, 255), 0.85 + r.random() * 0.25))
+    for i in range(16):
+        side.putpixel((i, 0), (90, 94, 104, 255))
+        side.putpixel((i, 15), (28, 30, 34, 255))
+        top.putpixel((i, 0), (40, 42, 48, 255))
+        top.putpixel((i, 15), (40, 42, 48, 255))
+        top.putpixel((0, i), (40, 42, 48, 255))
+        top.putpixel((15, i), (40, 42, 48, 255))
+    for y in range(7, 13):
+        for x in range(4, 12):
+            hot = 1.0 - abs(x - 7.5) / 6.0
+            side.putpixel((x, y), shade((92, 240, 122, 255), 0.6 + hot * 0.5) if y > 7 else (30, 30, 34, 255))
+    for x in range(4, 12):
+        side.putpixel((x, 12), (200, 255, 210, 255))
+    for x, y in ((2, 3), (13, 3), (2, 13), (13, 13)):
+        side.putpixel((x, y), (130, 134, 142, 255))
+    for x in range(4, 12):
+        top.putpixel((x, 7), shade((92, 240, 122, 255), 0.8))
+        top.putpixel((x, 8), shade((92, 240, 122, 255), 0.6))
+    save(side, "block/star_forge_side.png")
+    save(top, "block/star_forge_top.png")
+    write(ASSETS / "blockstates" / "star_forge.json", {"variants": {"": {"model": "jaymospowers:block/star_forge"}}})
+    write(ASSETS / "models" / "block" / "star_forge.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": "jaymospowers:block/star_forge_top", "bottom": "jaymospowers:block/star_forge_top", "side": "jaymospowers:block/star_forge_side"}})
+    write(ASSETS / "items" / "star_forge.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/star_forge"}})
+    write(ASSETS / "models" / "item" / "star_forge.json", {"parent": "jaymospowers:block/star_forge"})
+
+
 if __name__ == "__main__":
     tablet()
     circuit()
@@ -187,4 +260,7 @@ if __name__ == "__main__":
     wreck_block()
     probe()
     recipes()
+    for name, glow in PLAN_GLOWS.items():
+        plan(name, glow)
+    star_forge()
     print("xeno finds written under", ROOT)

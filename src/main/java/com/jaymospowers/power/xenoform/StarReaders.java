@@ -51,8 +51,10 @@ public final class StarReaders {
 	public static final double READER_SPACING = 96.0;
 	/** How far out from the star they stand: the crater's rim. */
 	public static final double RIM_MIN = 7.0, RIM_MAX = 10.0;
-	/** Star metal ingots for one tablet. */
-	public static final int TABLET_PRICE = 3;
+	/** Star metal ingots for one tablet, and for one module plan (0.18.123); how many plans they offer at once. */
+	public static final int TABLET_PRICE = 3, PLAN_PRICE = 4, PLANS_OFFERED = 2;
+	/** (0.18.123) How often their word about the sky is about the forge's world. */
+	public static final float FORGE_HINT = 0.35F;
 	/** Craters remembered per level at most (the oldest go first). */
 	public static final int MAX_WAITING = 32;
 	/** Lines in the lang file for each of their talks. */
@@ -175,10 +177,33 @@ public final class StarReaders {
 			player.level().playSound(null, reader.getX(), reader.getY(), reader.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			ZFighterNpcs.ask(player, reader, line("sold", SOLD_LINES, reader), backOnly);
 		}, TABLET_PRICE));
+		// (0.18.123, patch 7) module plans the band hasn't learned, a couple at a time
+		BandUpgrades.Upgrades up = BandUpgrades.get(player);
+		List<BandUpgrades.Module> plans = new ArrayList<>();
+		for (BandUpgrades.Module m : BandUpgrades.Module.values()) {
+			if (!up.knows(m) && plans.size() < PLANS_OFFERED) {
+				plans.add(m);
+			}
+		}
+		for (BandUpgrades.Module m : plans) {
+			options.add(new ZFighterNpcs.Option(Component.translatable("talk.jaymospowers.star_reader.opt.plan", m.title(), PLAN_PRICE),
+				metal != null && count(player, metal) >= PLAN_PRICE, () -> {
+				if (count(player, metal) < PLAN_PRICE) {
+					ZFighterNpcs.ask(player, reader, Component.translatable("talk.jaymospowers.star_reader.short"), backOnly);
+					return;
+				}
+				take(player, metal, PLAN_PRICE);
+				player.getInventory().placeItemBackInInventory(new ItemStack(BandUpgrades.PLANS.get(m)), net.minecraft.util.Prediction.SERVER_ONLY);
+				player.level().playSound(null, reader.getX(), reader.getY(), reader.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				ZFighterNpcs.ask(player, reader, Component.translatable("talk.jaymospowers.star_reader.plan_sold"), backOnly);
+			}));
+		}
 		boolean band = XenoformPower.has(player);
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.star_reader.opt.band", band, () -> ZFighterNpcs.ask(player, reader, reading(player), backOnly)));
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.star_reader.opt.sky", true,
-			() -> ZFighterNpcs.ask(player, reader, line("hint", HINT_LINES, reader), backOnly)));
+			() -> ZFighterNpcs.ask(player, reader, reader.getRandom().nextFloat() < FORGE_HINT
+				? Component.translatable("talk.jaymospowers.star_reader.forge." + BandForge.worldKey(player.level().getServer()))
+				: line("hint", HINT_LINES, reader), backOnly)));
 		ZFighterNpcs.ask(player, reader, words, options);
 	}
 

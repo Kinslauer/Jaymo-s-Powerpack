@@ -190,8 +190,9 @@ public final class Breath {
 				EXPOSED.remove(id);
 				continue;
 			}
-			if (player.getVehicle() instanceof PodEntity || com.jaymospowers.power.zfighter.backhome.FarFood.breathing(player)) {
-				// inside the pod, or (0.18.56) on a far-world meal's breath
+			if (player.getVehicle() instanceof PodEntity || com.jaymospowers.power.zfighter.backhome.FarFood.breathing(player)
+				|| com.jaymospowers.power.xenoform.BandUpgrades.breathes(player)) {
+				// inside the pod, or (0.18.56) on a far-world meal's breath, or (0.18.123) a band with the Breather fitted
 				EXPOSED.remove(id);
 				continue;
 			}

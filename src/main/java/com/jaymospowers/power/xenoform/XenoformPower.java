@@ -430,6 +430,8 @@ public final class XenoformPower implements Power {
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		XenoFinds.init();
+		// (0.18.123, patch 7) the band's reforge, modules and skills
+		BandUpgrades.init();
 		FallingStars.init();
 		XenoBands.init();
 		XenoJam.register();
@@ -569,6 +571,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.GRAB);
+		BandUpgrades.clear(player);
 	}
 
 	@Override
@@ -589,6 +592,7 @@ public final class XenoformPower implements Power {
 		if (!player.isAlive()) {
 			return;
 		}
+		BandUpgrades.tick(player);
 		long now = player.level().getGameTime();
 		if (live.form != null && XenoJam.jammed(player)) {
 			revert(player, false, true);
@@ -649,7 +653,7 @@ public final class XenoformPower implements Power {
 			if (live.recharge > 0) {
 				live.recharge--;
 			} else if (live.charge < capacity) {
-				live.charge = Math.min(capacity, live.charge + capacity / (float)REFILL_TICKS);
+				live.charge = Math.min(capacity, live.charge + capacity / (float)refillTicks(player));
 			}
 			if (!wasReady && live.recharge <= 0 && live.charge >= SLAM_MIN) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.recharged").withStyle(ChatFormatting.GREEN));
@@ -668,7 +672,7 @@ public final class XenoformPower implements Power {
 			tickAscension(player);
 			XenoVoices.tick(player);
 			// corrupted: now and then the band changes you without being asked
-			if (live.recharge <= 0 && !player.isCreative() && com.jaymospowers.core.Fate.isCorrupted(player)
+			if (live.recharge <= 0 && !player.isCreative() && glitchy(player)
 				&& player.getRandom().nextInt(GLITCH_SELF_TICKS) == 0) {
 				XenoForm any = glitch(player, null);
 				if (any != null && transform(player, any, false)) {
@@ -685,8 +689,8 @@ public final class XenoformPower implements Power {
 			int formTicks = live.form != null ? live.ticksLeft : (int)charge(player, live);
 			int formTotal = live.form != null ? live.total : capacity(player);
 			int wait = live.form != null ? 0 : untilReady(player, live);
-			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal)
-				: Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal));
+			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal)
+				: Mth.ceil(SLAM_MIN * refillTicks(player) / (float)formTotal));
 			XenoformState.Hud hud = new XenoformState.Hud(formTicks, formTotal, wait, waitTotal, live.cooldownUntil.clone(),
 				live.cooldownLength.clone(), live.scanTicks, SCAN_TICKS, live.scanForm == null ? "" : live.scanForm);
 			if (!hud.same(XenoformState.hud(player))) {
@@ -750,8 +754,9 @@ public final class XenoformPower implements Power {
 	/** What the crosshair rests on within {@link #SCAN_REACH}: a creature, or a piece of the Ender Dragon (its body). */
 	private static @Nullable Entity scanTarget(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
-		Vec3 end = eye.add(player.getLookAngle().scale(SCAN_REACH));
-		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(SCAN_REACH)).inflate(1.0);
+		double reach = BandUpgrades.scanReach(player);
+		Vec3 end = eye.add(player.getLookAngle().scale(reach));
+		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach)).inflate(1.0);
 		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
 			e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof LivingEntity || e instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragonPart), 0.3F);
 		if (hit == null) {
@@ -783,7 +788,7 @@ public final class XenoformPower implements Power {
 	 */
 	private static @Nullable XenoForm glitch(ServerPlayer player, @Nullable XenoForm wanted) {
 		List<String> unlocked = XenoformState.band(player).unlocked();
-		if (wanted != null && (!com.jaymospowers.core.Fate.isCorrupted(player) || unlocked.size() < 2
+		if (wanted != null && (!glitchy(player) || unlocked.size() < 2
 			|| player.getRandom().nextFloat() >= GLITCH_WRONG_CHANCE)) {
 			return wanted;
 		}
@@ -809,6 +814,11 @@ public final class XenoformPower implements Power {
 			}
 		}
 		return others.isEmpty() ? wanted : others.get(player.getRandom().nextInt(others.size()));
+	}
+
+	/** (0.18.123) Whether the band glitches: corrupted (unless the Steady module holds it), or the Wild module forcing it. */
+	static boolean glitchy(Player player) {
+		return BandUpgrades.wild(player) || com.jaymospowers.core.Fate.isCorrupted(player) && !BandUpgrades.steady(player);
 	}
 
 	/** A glitch always shows: static on the screen, a sour note, and a line saying what the band did. */
@@ -837,6 +847,11 @@ public final class XenoformPower implements Power {
 				return;
 			}
 			live.form.onKey(player, live, key, down);
+			return;
+		}
+		if (down && key == PowerKey.ABILITY_4 && live.modeDownAt < 0L) {
+			// (0.18.123, patch 7) B as yourself: the band screen
+			BandUpgrades.open(player);
 			return;
 		}
 		if (down) {
@@ -1248,7 +1263,13 @@ public final class XenoformPower implements Power {
 			return CHARGE_MAX;
 		}
 		float mastery = Mth.clamp(Mastery.unlocked(player) / (float)Mastery.ALL, 0.0F, 1.0F);
-		return CHARGE_MIN + Math.round((CHARGE_MAX - CHARGE_MIN) * mastery);
+		// (0.18.123) the Cell module and Bigger Charge
+		return Math.round((CHARGE_MIN + (CHARGE_MAX - CHARGE_MIN) * mastery) * BandUpgrades.capacityFactor(player));
+	}
+
+	/** (0.18.123) How long an empty band takes to fill as yourself: {@link #REFILL_TICKS}, cut by Faster Recharge. */
+	static int refillTicks(Player player) {
+		return Math.max(1, Math.round(REFILL_TICKS * BandUpgrades.refillFactor(player)));
 	}
 
 	/** The charge as yourself (full the first time it's asked). */
@@ -1265,7 +1286,7 @@ public final class XenoformPower implements Power {
 			return 0;
 		}
 		float charge = charge(player, live);
-		int refill = charge >= SLAM_MIN ? 0 : Mth.ceil((SLAM_MIN - charge) * REFILL_TICKS / (float)capacity(player));
+		int refill = charge >= SLAM_MIN ? 0 : Mth.ceil((SLAM_MIN - charge) * refillTicks(player) / (float)capacity(player));
 		return Math.max(0, live.recharge) + refill;
 	}
 
@@ -1280,6 +1301,11 @@ public final class XenoformPower implements Power {
 
 	/** Quick change: {@link #QUICK_SHARE} of the full charge for another alien, then a moment's dizziness. */
 	private static void quickChange(ServerPlayer player, Live live, XenoForm target) {
+		if (!player.isCreative() && BandUpgrades.rank(player, BandUpgrades.Skill.QUICK) == 0) {
+			// (0.18.123, patch 7) quick change is bought with band points
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.band.need_skill", BandUpgrades.Skill.QUICK.title()).withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		int cost = Math.round(live.total * QUICK_SHARE);
 		if (!player.isCreative() && live.ticksLeft - cost < SLAM_MIN) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.quick_low").withStyle(ChatFormatting.RED));
@@ -1317,7 +1343,7 @@ public final class XenoformPower implements Power {
 	private static boolean save(ServerPlayer player, DamageSource source) {
 		Live live = live(player);
 		long now = player.level().getGameTime();
-		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || XenoJam.jammed(player) || live.recharge > 0
+		if (BandUpgrades.rank(player, BandUpgrades.Skill.SAVE) == 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || XenoJam.jammed(player) || live.recharge > 0
 			|| live.lastSave != 0L && now - live.lastSave < SAVE_COOLDOWN) {
 			return false;
 		}

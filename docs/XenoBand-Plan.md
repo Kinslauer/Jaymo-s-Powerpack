@@ -130,6 +130,10 @@ join their trade once patch 7 makes them.
   gives oblique hints.
 
 ### Patch 7, Upgrading the band (Powers, large; picks band-reforge, modules, mod-*, skill-tree, band-wipe)
+
+**Built (0.18.123, Kingdoms 0.7.444):** as in `docs/xenoform.md` ("Upgrading the band"). Choices: there is only one moon,
+so the forge's world is picked at random per save from the five surface far worlds. Modules are learned from plans and
+fitted on the band screen (B as yourself). Quick change and the death save are now bought with band points.
 - **Reforge:** done on a moon, in a structure generated on a random moon of the pod's worlds. An alien smith keeps
   the forge there. Bring the material (star metal, a wreck core and Bulwark's dust) and it reforges your own band
   (Andy's note).
