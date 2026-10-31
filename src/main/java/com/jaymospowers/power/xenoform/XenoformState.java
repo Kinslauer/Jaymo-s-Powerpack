@@ -190,6 +190,12 @@ public final class XenoformState {
 	/** (0.18.95) Rivet's shell: the block it has melded into (furnace, piston, ...), drawn as that block. */
 	public static final AttachmentType<String> SHELL = AttachmentRegistry.create(JaymosPowers.id("xenoform_shell"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+	/** (0.18.96) How many times this player has caught the stalker's eye (three, and it sheds its skin). Kept, not synced. */
+	public static final AttachmentType<Integer> SIGHTINGS = AttachmentRegistry.create(JaymosPowers.id("xenoform_sightings"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+	/** (0.18.96) Duplex looking out through a double's eyes: the double's entity id. Synced to that player only. */
+	public static final AttachmentType<Integer> EYES = AttachmentRegistry.create(JaymosPowers.id("xenoform_eyes"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 	/** (0.18.93) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
 	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));

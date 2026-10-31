@@ -21,6 +21,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<Boolean> ENDING = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ending");
 	/** (0.18.95) Rivet's shell: the block it's melded into (null: none). */
 	public static final RenderStateDataKey<String> SHELL = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shell");
+	/** (0.18.96) The stalker's shed skin: drawn as a pale, see-through husk. */
+	public static final RenderStateDataKey<Boolean> SHED = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shed");
 	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
 

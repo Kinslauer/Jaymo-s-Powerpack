@@ -30,6 +30,12 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		if (model == null) {
 			return;
 		}
+		if (Boolean.TRUE.equals(state.getData(XenoformClient.SHED))) {
+			// (0.18.96) the stalker's shed skin: pale and see-through
+			XenoformClient.submitGhost(state, poseStack, collector, lightCoords, SHED_TINT);
+			state.isInvisible = false;
+			return;
+		}
 		boolean ultimate = Boolean.TRUE.equals(state.getData(XenoformClient.ULTIMATE));
 		String shell = state.getData(XenoformClient.SHELL);
 		if (shell != null) {
@@ -106,6 +112,9 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				| Math.min(255, b), 1);
 		}
 	}
+
+	/** (0.18.96) The shed skin's tint: a grey, two-thirds see-through. */
+	private static final int SHED_TINT = 0x60C8C4D0;
 
 	/** (0.18.95) How big Rivet's shell is drawn, in the body's own space (Rivet is drawn at its 0.6 scale): about a block. */
 	private static final float SHELL_SIZE = 1.6F;

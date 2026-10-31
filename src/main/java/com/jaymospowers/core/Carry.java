@@ -386,6 +386,10 @@ public final class Carry {
 	 * work on them).
 	 */
 	public static boolean canBeCarriedBy(Player player, Entity entity) {
+		if (com.jaymospowers.power.xenoform.forms.Slipfin.slippery(entity)) {
+			// (0.18.96) Slipfin slides out of any grip
+			return false;
+		}
 		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
 			|| windCarries(player, entity);
 	}

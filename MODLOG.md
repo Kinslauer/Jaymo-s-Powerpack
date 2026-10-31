@@ -4381,3 +4381,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   follow; sneak + R pours you out. Base kit: Lash, Pour, and Ride, which drives a minecart, iron or clockwork golem or
   android mech where you look, sped up, stronger and glowing. Riding a ship's cannon is left for later. As with Duplex,
   a band now needs Rivet to be complete; anyone already ascended stays so. Compile-checked; not seen in game.
+- **0.18.96, New aliens A (Xeno-Band patch 4):**
+  - **Gorger** (`forms/Gorger`, from an armadillo): Gulp eats blocks into its gut (up to 12), Gut Blast spits them back
+    as a cone of rubble, Horn Charge gores what's ahead and turns into a slam if it runs off a ledge, Roll Up (hold)
+    makes shots glance off.
+  - **Slipfin** (`forms/Slipfin`, from an axolotl): the first swimmer (Dolphin's Grace, water breathing, never drowns),
+    dries out after 30 s on land unless it rains, can't be carried or grabbed by tendrils and slides out of carries and
+    trips (`Slipfin.slippery`, checked in `Carry.canBeCarriedBy` and `WebTendrils.grabbable`). Bubble Jet, Slip, Dart,
+    and Regrow (a lost limb back, breaks knit; `Breaks.clearAll` is public now).
+  - **Polestar** (`forms/Polestar`, from Kingdoms' Magnetic Giant): Pull and Repel go by the iron a creature wears,
+    Lift tears iron blocks out and throws them, Field (hold) turns arrows back at their shooter.
+  - **The stalker** (`XenoStalker`, entity `xeno_stalker`): at night near a monolith it watches band wearers; catch it
+    with your eyes three times and it leaves a shed skin to scan for **Lurk** (`forms/Lurk`, hidden like Nadir but kept:
+    `XenoForm.lent()` now marks what the voices lend, only Nadir). Watch, Behind, Dread, Fade.
+  - **Duplex:** sneak + V looks out through a double's eyes (`XenoformState.EYES`, `client/XenoEyes`).
+  - **Rivet fix:** its C did nothing (no `onUltimate`) and it had no Ultimate skin; now it becomes Ironclad like the rest.
+  - Models in `XenoFormModels`, skins and Ultimate skins from `tools/gen_xenoform.py` (the new skins drawn last so the
+    old ones don't change), spikes in `UltimateSpikes`, HUD icons, lang. Compile-checked; not seen in game.

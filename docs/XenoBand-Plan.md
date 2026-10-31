@@ -96,6 +96,8 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 - **The stalker:** near a monolith, something watches band wearers at night. Look straight at it three times and it
   leaves a shed skin to scan. It's a hidden alien, like Nadir.
 - **Duplex:** sneak + V looks through the aimed double's eyes.
+- **Built (0.18.96):** all of the above; the stalker's alien is called Lurk. Also Rivet's missing Ultimate (its C
+  did nothing and it had no Ultimate skin). See `docs/xenoform.md`.
 
 ### Patch 5, New aliens B (Powers, large; picks gyre, cortex, locust, croaker, dud)
 - **Gyre:** scanned from a turtle, a wind-shell turtle.

@@ -1211,15 +1211,186 @@ def rivet():
     save(img, "entity/xenoform_rivet.png")
 
 
+def gorger():
+    """(0.18.96) Gorger, the armadillo alien: dusky pink-brown hide, a banded shell of scutes over the back (each band
+    edged dark), a bone horn on the snout, little round ears, beady black eyes, the insignia on its chest."""
+    img = new_skin()
+    hide = (176, 112, 92)
+    scute = (150, 96, 84)
+    dark = (70, 40, 36, 255)
+    parts(img, hide, 0.16)
+    # banded plates on the arms, legs and back: a dark rule every third row
+    for part in LIMBS + (BODY,):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for y in range(y0 + 2, y1, 3):
+                    for x in range(x0, x1):
+                        img.putpixel((x, y), shade(hide + (255,), 0.72))
+    # a softer belly
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (214, 168, 150), (192, 146, 128), 0.08)
+    claws(img, (54, 36, 30, 255))
+    # the face: a long pale snout, beady eyes
+    rect(img, (10, 12, 14, 16), (206, 156, 138, 255))
+    rect(img, (11, 14, 13, 15), dark)
+    img.putpixel((9, 11), (20, 14, 14, 255))
+    img.putpixel((14, 11), (20, 14, 14, 255))
+    chest_insignia(img, rim=(60, 36, 32, 255))
+    # extras: horn 2x4x2 at (0,64); ears 2x3x1 at (8,64); shell 10x10x4 at (0,72)
+    box(img, (0, 64, 2, 4, 2), (226, 214, 190), 0.1)
+    for name, (x0, y0, x1, y1) in faces(0, 64, 2, 4, 2).items():
+        if name not in ("top", "bottom"):
+            img.putpixel((x0, y0), (250, 244, 230, 255))
+    box(img, (8, 64, 2, 3, 1), hide, 0.12)
+    ex0, ey0, ex1, ey1 = front((8, 64, 2, 3, 1))
+    rect(img, (ex0, ey0 + 1, ex1, ey1), (214, 150, 140, 255))
+    shell = (0, 72, 10, 10, 4)
+    box(img, shell, scute, 0.14)
+    for name, (x0, y0, x1, y1) in faces(*shell).items():
+        # scute bands across the shell, each with a pale top edge and a dark seam
+        for y in range(y0, y1, 3):
+            for x in range(x0, x1):
+                img.putpixel((x, y), dark if (y - y0) % 3 == 0 else img.getpixel((x, y)))
+                if y + 1 < y1:
+                    img.putpixel((x, y + 1), shade(scute + (255,), 1.2))
+    sx0, sy0, sx1, sy1 = faces(*shell)["back"]
+    insignia(img, (sx0 + sx1) // 2, sy0 + 2, small=True, rim=dark)
+    clear_hat(img)
+    save(img, "entity/xenoform_gorger.png")
+
+
+def slipfin():
+    """(0.18.96) Slipfin, the axolotl alien: smooth pink skin with a wet sheen, darker spots, a pale belly, feathery
+    magenta gills, a fin down its back, a flat tail, small black eyes and a little smile."""
+    img = new_skin()
+    pink = (238, 150, 186)
+    spot = shade(pink + (255,), 0.78)
+    gill = (214, 56, 132)
+    parts(img, pink, 0.08)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), shade(pink + (255,), LIGHT[name] * 1.08), shade(pink + (255,), LIGHT[name] * 0.9), 0.06)
+            speckle(img, (x0, y0, x1, y1), spot, (x1 - x0) * (y1 - y0) // 14)
+            # a wet shine near the top of each face
+            if name in ("front", "back", "left", "right") and y1 - y0 > 3:
+                rect(img, (x0 + 1, y0 + 1, min(x1, x0 + 2), y0 + 2), (255, 236, 244, 255))
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 2, bx1 - 1, by1), (252, 210, 222), (240, 186, 204), 0.05)
+    # the face: wide-set black eyes, a small smile, pink cheeks
+    img.putpixel((9, 11), (16, 12, 20, 255))
+    img.putpixel((14, 11), (16, 12, 20, 255))
+    rect(img, (11, 14, 13, 15), (150, 60, 96, 255))
+    img.putpixel((10, 13), (150, 60, 96, 255))
+    img.putpixel((13, 13), (150, 60, 96, 255))
+    chest_insignia(img, rim=(120, 40, 80, 255))
+    # extras: gills 4x1x1 at (0,64); fin 1x10x3 at (12,64); tail 3x1x7 at (24,64)
+    box(img, (0, 64, 4, 1, 1), gill, 0.18)
+    for name, (x0, y0, x1, y1) in faces(0, 64, 4, 1, 1).items():
+        for x in range(x0, x1, 2):
+            img.putpixel((x, y0), shade(gill + (255,), 1.3))
+    box(img, (12, 64, 1, 10, 3), shade(pink + (255,), 1.05)[:3], 0.08)
+    for name, (x0, y0, x1, y1) in faces(12, 64, 1, 10, 3).items():
+        if name in ("left", "right"):
+            for y in range(y0, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (250, 196, 216, 255))
+    box(img, (24, 64, 3, 1, 7), pink, 0.08)
+    for name, (x0, y0, x1, y1) in faces(24, 64, 3, 1, 7).items():
+        speckle(img, (x0, y0, x1, y1), spot, 3)
+    clear_hat(img)
+    save(img, "entity/xenoform_slipfin.png")
+
+
+def polestar():
+    """(0.18.96) Polestar, the lodestone alien: dark lodestone grey with a sheen of iron, a magnet's red and white bands
+    on the shoulders and forearms, the prongs of its horseshoe red and silver-tipped, eyes like sparks."""
+    img = new_skin()
+    stone = (78, 80, 88)
+    red = (204, 58, 58, 255)
+    silver = (214, 220, 228, 255)
+    parts(img, stone, 0.2)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, shade(stone + (255,), 1.35), (b[2] - b[0]) * (b[3] - b[1]) // 12)
+    # the magnet's bands: red on the upper arms and thighs, silver at the wrists and ankles
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 4), red)
+                rect(img, (x0, y1 - 3, x1, y1 - 1), silver)
+    # field lines across the chest
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1 - 1, 3):
+        for x in range(bx0, bx1):
+            if (x + y) % 4 == 0:
+                img.putpixel((x, y), (150, 160, 190, 255))
+    # the face: two spark eyes, a hard jaw line
+    rect(img, (9, 11, 11, 12), (170, 220, 255, 255))
+    rect(img, (13, 11, 15, 12), (170, 220, 255, 255))
+    rect(img, (9, 14, 15, 15), (40, 42, 48, 255))
+    chest_insignia(img, rim=(30, 30, 36, 255))
+    # extras: prongs 2x6x2 at (0,64), red with silver tips; shoulder plates 12x3x6 at (0,74)
+    prong = (0, 64, 2, 6, 2)
+    box(img, prong, red[:3], 0.1)
+    for name, (x0, y0, x1, y1) in faces(*prong).items():
+        if name == "top":
+            rect(img, (x0, y0, x1, y1), silver)
+        elif name != "bottom":
+            rect(img, (x0, y0, x1, y0 + 2), silver)
+    plates = (0, 74, 12, 3, 6)
+    box(img, plates, stone, 0.14, edge=0.7)
+    for name, (x0, y0, x1, y1) in faces(*plates).items():
+        if name in ("front", "back"):
+            rect(img, (x0, y0, x0 + (x1 - x0) // 2, y1), red)
+            rect(img, (x0 + (x1 - x0) // 2, y0, x1, y1), silver)
+    clear_hat(img)
+    save(img, "entity/xenoform_polestar.png")
+
+
+def lurk():
+    """(0.18.96) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins, long grey fingers,
+    and a face that is almost all eyes: six pale ones, the two largest ringed in violet."""
+    img = new_skin()
+    dark = (40, 32, 56)
+    vein = (110, 82, 176)
+    parts(img, dark, 0.18)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            veins(img, b, shade(dark + (255,), 0.7), (vein[0], vein[1], vein[2], 255), (b[2] - b[0]) // 3 + 1)
+    # the face: six eyes, two big ones ringed in violet, four small ones round them
+    head = faces(*HEAD)["front"]
+    hx0, hy0 = head[0], head[1]
+    rect(img, (hx0, hy0, hx0 + 8, hy0 + 8), shade(dark + (255,), 0.8))
+    for ex in (hx0 + 1, hx0 + 5):
+        rect(img, (ex, hy0 + 3, ex + 2, hy0 + 5), (110, 82, 176, 255))
+        img.putpixel((ex, hy0 + 3), (236, 232, 248, 255))
+        img.putpixel((ex + 1, hy0 + 4), (236, 232, 248, 255))
+    for ex, ey in ((hx0 + 1, hy0 + 1), (hx0 + 6, hy0 + 1), (hx0 + 3, hy0 + 2), (hx0 + 4, hy0 + 6)):
+        img.putpixel((ex, ey), (214, 206, 236, 255))
+    chest_insignia(img, rim=(24, 18, 34, 255))
+    # extras: the long hands 3x6x3 at (0,64), grey fingers with dark tips
+    hand = (0, 64, 3, 6, 3)
+    box(img, hand, (96, 92, 108), 0.12)
+    for name, (x0, y0, x1, y1) in faces(*hand).items():
+        if name in ("front", "back", "left", "right"):
+            for x in range(x0, x1):
+                img.putpixel((x, y1 - 1), (20, 16, 26, 255))
+                if x % 2 == 0:
+                    rect(img, (x, y0 + 2, x + 1, y1 - 1), (72, 68, 84, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_lurk.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
 ULTIMATE_COLORS = {
     "bulwark": (184, 196, 208), "pyre": (255, 138, 42), "blur": (76, 141, 255), "prism": (196, 139, 240),
     "wisp": (184, 232, 248), "gremlin": (154, 220, 90), "knell": (31, 184, 200), "wyrm": (192, 96, 224),
-    "duplex": (224, 123, 74),
+    "duplex": (224, 123, 74), "rivet": (159, 180, 192), "gorger": (176, 106, 84), "slipfin": (240, 140, 184),
+    "polestar": (216, 74, 74), "lurk": (110, 82, 176),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
+PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 
 
 def ultimate(form):
@@ -1268,7 +1439,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1340,8 +1511,16 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        ultimate(form)
+        if form not in PATCH4:
+            ultimate(form)
     ultimate_spikes()
+    # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
+    gorger()
+    slipfin()
+    polestar()
+    lurk()
+    for form in PATCH4:
+        ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
         preview(sys.argv[1])

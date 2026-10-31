@@ -68,6 +68,10 @@ public final class XenoFormModels {
 			MODELS.put("nadir", new Nadir());
 			MODELS.put("duplex", new Duplex());
 			MODELS.put("rivet", new Rivet());
+			MODELS.put("gorger", new Gorger());
+			MODELS.put("slipfin", new Slipfin());
+			MODELS.put("polestar", new Polestar());
+			MODELS.put("lurk", new Lurk());
 		}
 		return MODELS.get(form);
 	}
@@ -113,6 +117,148 @@ public final class XenoFormModels {
 			float sway = Mth.sin(state.ageInTicks * 0.2F) * 0.08F;
 			this.rightDrip.xRot = -this.rightArm.xRot + sway;
 			this.leftDrip.xRot = -this.leftArm.xRot - sway;
+		}
+	}
+
+	/**
+	 * (0.18.96) Gorger: squat and plated, a horn on its snout, little ears, a banded shell over its back that bobs as it
+	 * walks; rolled up (B) it tucks its head and limbs in.
+	 */
+	static final class Gorger extends FormModel {
+		private final ModelPart shell;
+
+		Gorger() {
+			super(bake(mesh()), "gorger");
+			this.insigniaZ = -2.6F;
+			this.shell = this.body.getChild("shell");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.6F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, -5.0F, -4.6F, -0.5F, 0.0F, 0.0F));
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(-3.5F, -8.5F, 1.0F, 0.0F, 0.0F, -0.35F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(8, 64).mirror().addBox(-1.0F, -3.0F, -0.5F, 2.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(3.5F, -8.5F, 1.0F, 0.0F, 0.0F, 0.35F));
+			root.getChild("body").addOrReplaceChild("shell", CubeListBuilder.create().texOffs(0, 72).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 10.0F, 4.0F, new CubeDeformation(0.6F)),
+				PartPose.offset(0.0F, -0.5F, 1.6F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			// the shell rides up and down with each step
+			this.shell.y = -0.5F + Mth.abs(Mth.cos(state.walkAnimationPos * 0.6662F)) * 0.6F * state.walkAnimationSpeed;
+		}
+	}
+
+	/**
+	 * (0.18.96) Slipfin: slim and smooth, three feathery gills each side of its head that wave as it breathes and stream
+	 * back as it swims, a fin down its back and a flat tail that sways.
+	 */
+	static final class Slipfin extends FormModel {
+		private final ModelPart[] gills = new ModelPart[6];
+		private final ModelPart tail;
+
+		Slipfin() {
+			super(bake(mesh()), "slipfin");
+			this.insigniaZ = -1.9F;
+			for (int i = 0; i < 6; i++) {
+				this.gills[i] = this.head.getChild("gill_" + i);
+			}
+			this.tail = this.body.getChild("tail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			for (int i = 0; i < 6; i++) {
+				boolean left = i >= 3;
+				int row = i % 3;
+				head.addOrReplaceChild("gill_" + i, (left ? CubeListBuilder.create().texOffs(0, 64).mirror() : CubeListBuilder.create().texOffs(0, 64))
+					.addBox(left ? 0.0F : -4.0F, -0.5F, 0.0F, 4.0F, 1.0F, 1.0F),
+					PartPose.offsetAndRotation(left ? 4.0F : -4.0F, -7.0F + row * 2.0F, 0.5F, 0.0F, 0.0F, (left ? -1.0F : 1.0F) * (0.5F - row * 0.4F)));
+			}
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(12, 64).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 10.0F, 3.0F), PartPose.offset(0.0F, 1.0F, 2.0F));
+			body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(24, 64).addBox(-1.5F, -0.5F, 0.0F, 3.0F, 1.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, 11.0F, 1.5F, 0.4F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			XenoMotion.Read m = XenoMotion.read(state);
+			float wave = Mth.sin(state.ageInTicks * 0.25F) * 0.15F;
+			for (int i = 0; i < 6; i++) {
+				// the gills flutter, and stream back as it swims or falls
+				this.gills[i].yRot = (i >= 3 ? -1.0F : 1.0F) * (wave * (1 + i % 3) * 0.6F + state.swimAmount * 0.9F + m.speed() * 0.3F);
+			}
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.2F + state.walkAnimationPos * 0.5F) * (0.3F + 0.5F * state.swimAmount) - m.trail() * 0.6F;
+			this.tail.xRot = 0.4F * (1.0F - state.swimAmount) + tailLift(m);
+		}
+	}
+
+	/** (0.18.96) Polestar: broad, banded like a magnet, a horseshoe of two prongs rising off its head, plates on its shoulders. */
+	static final class Polestar extends FormModel {
+		Polestar() {
+			super(bake(mesh()), "polestar");
+			this.insigniaZ = -2.7F;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.7F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_prong", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+				PartPose.offsetAndRotation(-3.5F, -8.5F, 0.0F, 0.0F, 0.0F, -0.12F));
+			head.addOrReplaceChild("left_prong", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -6.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+				PartPose.offsetAndRotation(3.5F, -8.5F, 0.0F, 0.0F, 0.0F, 0.12F));
+			root.getChild("body").addOrReplaceChild("plates", CubeListBuilder.create().texOffs(0, 74).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 3.0F, 6.0F, new CubeDeformation(0.7F)),
+				PartPose.ZERO);
+			return mesh;
+		}
+	}
+
+	/**
+	 * (0.18.96) Lurk, the stalker: tall and thin, arms that hang past its knees ending in long fingers, a face that's
+	 * mostly eyes. It holds its head a little forward and tilted, as if listening.
+	 */
+	static final class Lurk extends FormModel {
+		private final ModelPart rightHand, leftHand;
+
+		Lurk() {
+			super(bake(mesh()), "lurk");
+			this.insigniaZ = -1.7F;
+			this.rightHand = this.rightArm.getChild("hand");
+			this.leftHand = this.leftArm.getChild("hand");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.3F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("right_arm").addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+				PartPose.offset(-1.0F, 9.5F, 0.0F));
+			root.getChild("left_arm").addOrReplaceChild("hand", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+				PartPose.offset(1.0F, 9.5F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			// the head tips forward and to one side, slowly, as if it's listening
+			this.head.zRot += 0.18F + Mth.sin(state.ageInTicks * 0.03F) * 0.06F;
+			this.head.z -= 1.0F;
+			// the long fingers trail a little behind the arm's swing
+			this.rightHand.xRot = -this.rightArm.xRot * 0.2F;
+			this.leftHand.xRot = -this.leftArm.xRot * 0.2F;
 		}
 	}
 
