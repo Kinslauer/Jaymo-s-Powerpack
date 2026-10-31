@@ -35,6 +35,8 @@ public final class XenoForms {
 	public static final XenoForm KNELL = register(new Knell());
 	public static final XenoForm WYRM = register(new Wyrm());
 	public static final XenoForm DUPLEX = register(new Duplex());
+	/** (0.18.95) Rivet, the living metal (from a clockwork golem). */
+	public static final XenoForm RIVET = register(new com.jaymospowers.power.xenoform.forms.Rivet());
 	/** The void alien: no creature carries it; the two voices give it ({@link XenoVoices}). */
 	public static final XenoForm NADIR = register(new Nadir());
 

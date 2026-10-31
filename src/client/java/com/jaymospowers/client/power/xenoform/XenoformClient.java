@@ -19,6 +19,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> FORM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_form");
 	/** True while the player's form is in its last seconds (the alien glows red). */
 	public static final RenderStateDataKey<Boolean> ENDING = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ending");
+	/** (0.18.95) Rivet's shell: the block it's melded into (null: none). */
+	public static final RenderStateDataKey<String> SHELL = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shell");
 	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
 
@@ -34,6 +36,7 @@ public final class XenoformClient {
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
+		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;

@@ -4373,3 +4373,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     show their own name on the HUD and wheel. Forget frees the place (no refund). `Data.knows` now only reads the 32
     learned bits; `ZFighterTraining.owns` covers both.
   - Compile-checked; not seen in game.
+- **0.18.95, Rivet and the block shells (Xeno-Band patch 3):** the tenth alien, `forms/Rivet`, scanned from Kingdoms'
+  clockwork golem: small (0.6x), liquid metal (falls never hurt it), chrome skin with green lines and drips
+  (`gen_xenoform.rivet`, `XenoFormModels.Rivet`). R melds into a furnace, piston, anvil, stonecutter, smithing table,
+  dispenser or note block you look at; while melded you are drawn as that block (`XenoformLayer.shell`, synced
+  `XenoformState.SHELL`), R G V B are its own moves (28 in all, table in `docs/xenoform.md`) and the HUD and key guide
+  follow; sneak + R pours you out. Base kit: Lash, Pour, and Ride, which drives a minecart, iron or clockwork golem or
+  android mech where you look, sped up, stronger and glowing. Riding a ship's cannon is left for later. As with Duplex,
+  a band now needs Rivet to be complete; anyone already ascended stays so. Compile-checked; not seen in game.

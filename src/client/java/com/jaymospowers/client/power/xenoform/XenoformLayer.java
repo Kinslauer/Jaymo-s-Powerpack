@@ -31,6 +31,13 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			return;
 		}
 		boolean ultimate = Boolean.TRUE.equals(state.getData(XenoformClient.ULTIMATE));
+		String shell = state.getData(XenoformClient.SHELL);
+		if (shell != null) {
+			// (0.18.95) Rivet melded into a shell: drawn as that block, filling its body
+			shell(poseStack, collector, state, shell);
+			state.isInvisible = false;
+			return;
+		}
 		poseStack.pushPose();
 		if (model.renderScale != 1.0F) {
 			// a form built smaller than the player (Duplex) is drawn up from the feet (model y 24, 1.501 below here)
@@ -98,6 +105,33 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			renderColoredCutoutModel(spikes, UltimateSpikes.TEXTURE, poseStack, collector, lightCoords, state, 0xFF000000 | Math.min(255, r) << 16 | Math.min(255, g) << 8
 				| Math.min(255, b), 1);
 		}
+	}
+
+	/** (0.18.95) How big Rivet's shell is drawn, in the body's own space (Rivet is drawn at its 0.6 scale): about a block. */
+	private static final float SHELL_SIZE = 1.6F;
+
+	/** Rivet as a block: from its feet, the block's front facing the way the body faces, turned to stand upright. */
+	private static void shell(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, String shell) {
+		net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+		if (level == null) {
+			return;
+		}
+		net.minecraft.client.renderer.block.MovingBlockRenderState block = new net.minecraft.client.renderer.block.MovingBlockRenderState();
+		net.minecraft.core.BlockPos at = net.minecraft.core.BlockPos.containing(state.x, state.y + 0.5, state.z);
+		block.blockState = com.jaymospowers.power.xenoform.forms.Rivet.look(shell);
+		block.blockPos = at;
+		block.randomSeedPos = at;
+		block.biome = level.getBiome(at);
+		block.cardinalLighting = level.cardinalLighting();
+		block.lightEngine = level.getLightEngine();
+		poseStack.pushPose();
+		// the layer's space is the model's (y down, origin 1.501 over the feet): back to the feet, upright
+		poseStack.translate(0.0F, 1.501F, 0.0F);
+		poseStack.scale(-SHELL_SIZE, -SHELL_SIZE, SHELL_SIZE);
+		// a slight bob as it shuffles along
+		poseStack.translate(-0.5F, Math.abs(Mth.sin(state.walkAnimationPos * 0.6F)) * 0.05F * Math.min(1.0F, state.walkAnimationSpeed), -0.5F);
+		collector.submitMovingBlock(poseStack, block, 0);
+		poseStack.popPose();
 	}
 
 	/** The Ultimate's seams pulse this fast (radians a tick); fullbright light. */
