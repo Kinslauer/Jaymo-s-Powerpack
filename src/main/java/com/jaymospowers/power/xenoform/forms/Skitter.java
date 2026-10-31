@@ -28,7 +28,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.18.112, Scan E) Skitter, the eight-legged: a squat black-brown body, a round hairy abdomen, four long jointed legs
  * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It runs up
- * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there and crawls along.
+ * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there upside down and
+ * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).
  * Scanned from a spider or cave spider, or Kingdoms' tarantula ({@code XenoDna}).
  * <ul>
  * <li>R, Web Line: a line shot to the block you look at to swing on; R again lets go (keeping the swing).</li>
@@ -64,6 +65,7 @@ public final class Skitter extends XenoForm {
 		live.anchor = null;
 		live.perched = false;
 		live.brood = 0;
+		player.removeAttached(XenoformState.CEILING);
 		dismiss(player.level(), live.minions);
 	}
 
@@ -186,6 +188,14 @@ public final class Skitter extends XenoForm {
 			player.resetFallDistance();
 			if (player.tickCount % 5 == 0) {
 				sound(player, SoundEvents.SPIDER_STEP, 0.5F, 1.3F);
+			}
+		}
+		// every client draws it upside down while it clings (and its own camera turns over)
+		if (live.perched != Boolean.TRUE.equals(player.getAttached(XenoformState.CEILING))) {
+			if (live.perched) {
+				player.setAttached(XenoformState.CEILING, true);
+			} else {
+				player.removeAttached(XenoformState.CEILING);
 			}
 		}
 		if (live.anchor != null) {

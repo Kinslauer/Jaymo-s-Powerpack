@@ -158,7 +158,8 @@ leaves it standing; Keen's sonar outline is particles only you are sent, not a g
 ### Scan E, swarm, web and tricks (Powers, large)
 
 **Built (0.18.112):** all four, with these changes: Skitter clings to a ceiling while jump is held and crawls along,
-but it isn't drawn upside down; Shade's blink-away when hit is B arming it for 10 s (the next blow only), so B has a
+drawn upside down for everyone and with its own camera rolled over (Andy's ask; mouse and strafe aren't flipped, so
+on the ceiling they feel mirrored); Shade's blink-away when hit is B arming it for 10 s (the next blow only), so B has a
 key; Mirage's copies follow you like Duplex's doubles rather than wander, and last 15 s.
 
 - **Hive, the swarm:** scanned from a bee, a Naturalist ant, or a butterfly, caterpillar or dragonfly.

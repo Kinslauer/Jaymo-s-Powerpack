@@ -60,6 +60,7 @@ public final class XenoformPowerClient implements PowerClient {
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(SkitterCeiling::tick);
 		PyreComet.init();
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
