@@ -7821,3 +7821,23 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: "what just happened to the server?" The Deck server crashed when a roaming caravan's pack donkey spawned. Since
   0.7.445 donkeys and mules are breeds with a single coat, and rolling a coat for one asked for a random pick out of zero
   ordinary coats (`Equine.coat`, `nextInt(0)`), which throws. A one-coat breed now just takes its coat.
+
+## 0.7.448: the life story fits the heritage you were born to (pack 0.19.0)
+- Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have anyone who
+  raised them for example. switch all applicably and add wherever you see fit". The story's pages after "Where were you
+  born?" now read in that blood's words: `LifeStoryScreen.story` takes `story.jaymoskingdoms.as.<heritage>.<rest>` over
+  the plain key where the lang has one (titles, lines, answers, tales, short lines).
+- Bio-built: "Who took you in, after the vats?" (bought as a field hand, a sideshow exhibit, broken out of a cage by
+  outlaws, "Nobody: you raised yourself"); "In your first months..." and "Once you were full grown..." with every answer
+  and tale rewritten. Rubber-folk are raised on the fair's road, Tideborn are found, Warrior-born grow up in the camp,
+  Stoneborn in the hold, and the rest get their land's farmers, hunters, fishers and so on.
+- One raiser of their own per blood (`Answer.onlyBorn`): the Mad Tinkerer and sewer vat-kin (Bio-built), the acrobats and
+  the ringmaster (Rubber-folk), the water temple's keepers (Tideborn), the grove-keepers (Sylvan), a Verdant elder, Hornkin
+  under the truce (Emberborn), snow wolves (Frostborn), barrow-keepers (Nightborn), the warband's chief (Warrior-born), an
+  old martial master (Earthling), the dawn priests (Dawnborn). Each gives an attribute point, a temperament, a figure's
+  clothes and a village job lean like the others.
+- "Minor nobles of a realm" isn't asked of the Bio-built, Warrior-born or Verdant (`Answer.notBorn`). A new birthplace
+  drops answers its blood isn't asked; the server refuses them too.
+- The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
+  till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
+- Compile-checked; not seen in game.

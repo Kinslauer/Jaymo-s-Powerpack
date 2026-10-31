@@ -28,6 +28,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -408,6 +409,43 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
+	 * (0.7.448) Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have anyone
+	 * who raised them". The lang key for {@code rest} ("raised.title", "raised.farmers.tale") as the birthplace's blood
+	 * tells it, {@code story.jaymoskingdoms.as.<heritage>.<rest>}, where it tells it its own way; else the plain one.
+	 */
+	static String story(String rest) {
+		Heritage.Kind kind = bornAs();
+		if (kind != null) {
+			String key = "story.jaymoskingdoms.as." + kind.key() + "." + rest;
+			if (Language.getInstance().has(key)) {
+				return key;
+			}
+		}
+		return "story.jaymoskingdoms." + rest;
+	}
+
+	/**
+	 * (0.7.448) The answers a page lists, as indices into its question's: every road (the carousel shows the shut ones
+	 * too), and of the rest only those asked of the birthplace's blood (no noble house for a vat-born; the Tinkerer for
+	 * them alone).
+	 */
+	private static List<Integer> listed(Question q) {
+		List<Integer> out = new ArrayList<>();
+		Heritage.Kind kind = bornAs();
+		for (int i = 0; i < q.answers().size(); i++) {
+			if (q == Question.ROAD || q == Question.BORN || q.answers().get(i).fits(kind)) {
+				out.add(i);
+			}
+		}
+		return out;
+	}
+
+	/** (0.7.448) The answer on row {@code row} of {@code q}'s page. */
+	private static Answer listedAt(Question q, int row) {
+		return q.answers().get(listed(q).get(row));
+	}
+
+	/**
 	 * The next heritage open to them after the one shown (wrapping), or (0.7.282, a right click) the one before; back at
 	 * the story's, the override is dropped.
 	 */
@@ -486,7 +524,7 @@ final class LifeStoryScreen extends Screen {
 
 	/** The rows the page lists: a question's answers, or the realms. */
 	private int rowCount(Step s) {
-		return s.gender ? GENDERS.length : s.question == null ? 0 : s.realm ? realms.size() : s.question.answers().size();
+		return s.gender ? GENDERS.length : s.question == null ? 0 : s.realm ? realms.size() : listed(s.question).size();
 	}
 
 	private int rowH(Step s) {
@@ -628,7 +666,7 @@ final class LifeStoryScreen extends Screen {
 		if (!asking && !subRead && toRead.isEmpty() && !s.gender && !s.realm && s.question != null && s.question != Question.ROAD
 			&& picked(s.question) == null && now - pageSince >= SUB_DELAY_MS) {
 			subRead = true;
-			toRead.add("story.jaymoskingdoms." + s.question.key() + ".sub");
+			toRead.add(story(s.question.key() + ".sub"));
 		}
 		while (!toRead.isEmpty()) {
 			Holder<SoundEvent> voice = Voices.of(toRead.poll());
@@ -652,7 +690,7 @@ final class LifeStoryScreen extends Screen {
 			for (Question q : Question.values()) {
 				Answer a = q.asked() ? picked(q) : null;
 				if (a != null) {
-					out.add("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale");
+					out.add(story(q.key() + "." + a.key() + ".tale"));
 				}
 			}
 			out.add(Voices.STORY_END);
@@ -662,7 +700,7 @@ final class LifeStoryScreen extends Screen {
 			Answer a = picked(s.question);
 			return List.of("story.jaymoskingdoms.realm." + (a == null ? "raised" : a.key()));
 		}
-		return List.of("story.jaymoskingdoms." + s.question.key() + ".title");
+		return List.of(story(s.question.key() + ".title"));
 	}
 
 	/** Next: on to the next page, or on the last, live this life. */
@@ -753,12 +791,22 @@ final class LifeStoryScreen extends Screen {
 				if (s.realm) {
 					setRealm(s.question, realms.get(row).id());
 				} else {
-					Answer a = s.question.answers().get(row);
+					int index = listed(s.question).get(row);
+					Answer a = s.question.answers().get(index);
 					if (!open(a)) {
 						return true;
 					}
-					if (draft.answers[s.question.ordinal()] != row) {
-						draft.answers[s.question.ordinal()] = row;
+					if (draft.answers[s.question.ordinal()] != index) {
+						draft.answers[s.question.ordinal()] = index;
+						// (0.7.448) a new birthplace drops what its blood was never asked (a vat-born's Tinkerer, a noble house)
+						if (s.question == Question.BORN) {
+							for (Question q : Question.values()) {
+								Answer had = q == Question.BORN || q == Question.ROAD ? null : picked(q);
+								if (had != null && !had.fits(bornAs())) {
+									draft.answers[q.ordinal()] = -1;
+								}
+							}
+						}
 						// a new answer drops what was picked over it
 						if (s.question == Question.BORN) {
 							draft.heritage = -1;
@@ -1229,7 +1277,7 @@ final class LifeStoryScreen extends Screen {
 		if (s.question == null) {
 			return Component.translatable("gui.jaymoskingdoms.story.summary");
 		}
-		return s.realm ? Component.translatable("story.jaymoskingdoms.realm.title") : Component.translatable("story.jaymoskingdoms." + s.question.key() + ".title");
+		return s.realm ? Component.translatable("story.jaymoskingdoms.realm.title") : Component.translatable(story(s.question.key() + ".title"));
 	}
 
 	/** A question's answers (or the realms) down the right, the picked one marked. */
@@ -1253,10 +1301,11 @@ final class LifeStoryScreen extends Screen {
 				picked = realm.id() == realmOf(s.question);
 				label = Component.literal(realm.name());
 			} else {
-				Answer a = s.question.answers().get(i);
-				picked = draft.answers[s.question.ordinal()] == i;
+				int index = listed(s.question).get(i);
+				Answer a = s.question.answers().get(index);
+				picked = draft.answers[s.question.ordinal()] == index;
 				open = open(a);
-				label = Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key());
+				label = Component.translatable(story(s.question.key() + "." + a.key()));
 				icon = new ItemStack(a.icon());
 			}
 			graphics.fill(x0, ry, x1, ry + rh - 2, picked ? Ui.ROW_PICKED : i == hover && open ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW_ALT : 0x0CFFFFFF);
@@ -1482,7 +1531,7 @@ final class LifeStoryScreen extends Screen {
 			if (!out.getSiblings().isEmpty()) {
 				out.append(" ");
 			}
-			out.append(Component.translatable("story.jaymoskingdoms." + q.key() + "." + a.key() + ".tale", java.util.Objects.requireNonNullElse(realmName(q), "")));
+			out.append(Component.translatable(story(q.key() + "." + a.key() + ".tale"), java.util.Objects.requireNonNullElse(realmName(q), "")));
 		}
 		return out;
 	}
@@ -1508,7 +1557,7 @@ final class LifeStoryScreen extends Screen {
 		if (a.realm() && realm == null) {
 			return null;
 		}
-		return Component.translatable("story.jaymoskingdoms." + q.key() + "." + a.key() + ".short", realm == null ? "" : realm);
+		return Component.translatable(story(q.key() + "." + a.key() + ".short"), realm == null ? "" : realm);
 	}
 
 	/** What the story makes of you, a row each. */
@@ -1634,13 +1683,13 @@ final class LifeStoryScreen extends Screen {
 			lines.add(Component.translatable("story.jaymoskingdoms.realm." + keyOf(picked(s.question)) + ".desc"));
 		} else {
 			int row = rowAt(s, mouseX, mouseY);
-			Answer a = row >= 0 ? s.question.answers().get(row) : picked(s.question);
+			Answer a = row >= 0 ? listedAt(s.question, row) : picked(s.question);
 			if (a == null) {
-				name = Component.translatable("story.jaymoskingdoms." + s.question.key() + ".title");
+				name = Component.translatable(story(s.question.key() + ".title"));
 				lines.add(Component.translatable("gui.jaymoskingdoms.story.lead").withColor(Ui.DIM));
 			} else {
 				icon = new ItemStack(a.icon());
-				name = Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key());
+				name = Component.translatable(story(s.question.key() + "." + a.key()));
 				// (0.7.360) the option's short line; its whole tale is told on the last page
 				Component line = shortLine(s.question, a);
 				if (line != null) {
@@ -1750,7 +1799,7 @@ final class LifeStoryScreen extends Screen {
 		Answer here = null;
 		if (s.question != null) {
 			int row = s.realm ? -1 : rowAt(s, mouseX, mouseY);
-			here = row >= 0 ? s.question.answers().get(row) : picked(s.question);
+			here = row >= 0 ? listedAt(s.question, row) : picked(s.question);
 			if (here != null) {
 				icon = new ItemStack(here.icon());
 				if (s.question == Question.BORN && here.heritage() != null) {

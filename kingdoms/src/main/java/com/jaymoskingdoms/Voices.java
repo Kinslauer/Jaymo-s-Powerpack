@@ -111,9 +111,40 @@ public final class Voices {
 		return out;
 	}
 
+	/**
+	 * (0.7.448) The life story's lines as a blood tells them its own way ({@code story.jaymoskingdoms.as.<heritage>.<rest>}:
+	 * a vat-born is asked who took them in, not who raised them): each question's title and line, and each answer's tale.
+	 * Only those already recorded are voiced (the rest are read in silence), so these are registered once their clip is there.
+	 */
+	static List<String> heritageVoiced() {
+		List<String> out = new ArrayList<>();
+		for (Heritage.Kind kind : Heritage.Kind.values()) {
+			String as = "story.jaymoskingdoms.as." + kind.key() + ".";
+			for (LifeStory.Question q : LifeStory.Question.values()) {
+				if (q == LifeStory.Question.BORN || q == LifeStory.Question.ROAD) {
+					continue;
+				}
+				out.add(as + q.key() + ".title");
+				out.add(as + q.key() + ".sub");
+				for (LifeStory.Answer a : q.answers()) {
+					out.add(as + q.key() + "." + a.key() + ".tale");
+				}
+			}
+		}
+		return out;
+	}
+
 	public static void register() {
 		for (String key : voiced()) {
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, soundPath(key));
+			SOUNDS.put(key, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
+		}
+		for (String key : heritageVoiced()) {
+			String path = soundPath(key);
+			if (Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/narrator/" + path.substring("voice.narrator.".length()).replace('.', '_') + ".ogg") == null) {
+				continue;
+			}
+			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, path);
 			SOUNDS.put(key, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
 		}
 		for (Languages.Tongue t : Languages.Tongue.values()) {

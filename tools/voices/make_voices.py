@@ -126,6 +126,12 @@ def lines(lang, powers):
                 realm = s + "realm." + parts[3]
                 if realm in lang:
                     out.append(("narrator", realm, lang[s + "realm.title"] + " " + lang[realm]))
+    # (Kingdoms 0.7.448) a blood's own telling of the story (story.jaymoskingdoms.as.<heritage>.<question>...): its pages'
+    # titles and lines and its answers' tales. Kingdoms only voices these once their clip is made (`Voices.heritageVoiced`).
+    for key in lang:
+        parts = key.split(".")
+        if key.startswith(s + "as.") and (len(parts) == 6 and parts[5] in ("title", "sub") or len(parts) == 7 and parts[6] == "tale"):
+            out.append(("narrator", key, realm_free(lang[key])))
     out.append(("narrator", STORY_END, lang["gui.jaymoskingdoms.story.summary_sub"]))
     for key in INTRO_LINES:
         out.append(("narrator", key, lang[key]))
@@ -174,8 +180,9 @@ def write_sounds(all_lines):
         for voice, key, _ in all_lines:
             if NAMESPACE.get(voice, "jaymoskingdoms") != ns:
                 continue
-            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {})) and not os.path.exists(clip_path(voice, key)):
-                # (Kingdoms registers a tongue's line only once its clip exists)
+            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {}) or key.startswith("story.jaymoskingdoms.as.")) \
+                    and not os.path.exists(clip_path(voice, key)):
+                # (Kingdoms registers a tongue's line, and a blood's own telling, only once its clip exists)
                 continue
             sid, file = sound_name(key)
             entry = {"name": ns + ":voice/" + file}

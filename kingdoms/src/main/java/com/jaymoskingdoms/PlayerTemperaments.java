@@ -36,7 +36,21 @@ public final class PlayerTemperaments {
 		Map.entry("wizard", Temperaments.Temperament.DEVOUT),
 		Map.entry("outlaws", Temperaments.Temperament.SPITEFUL),
 		Map.entry("nobles", Temperaments.Temperament.PROUD),
-		Map.entry("foundling", Temperaments.Temperament.TIMID));
+		Map.entry("foundling", Temperaments.Temperament.TIMID),
+		// (0.7.448) the heritages' own
+		Map.entry("tinkerer", Temperaments.Temperament.GLOOMY),
+		Map.entry("vatkin", Temperaments.Temperament.SUSPICIOUS),
+		Map.entry("acrobats", Temperaments.Temperament.CHEERFUL),
+		Map.entry("ringmaster", Temperaments.Temperament.PROUD),
+		Map.entry("keepers", Temperaments.Temperament.DEVOUT),
+		Map.entry("grovekeepers", Temperaments.Temperament.KINDHEARTED),
+		Map.entry("elders", Temperaments.Temperament.KINDHEARTED),
+		Map.entry("hornkin", Temperaments.Temperament.PROUD),
+		Map.entry("wolves", Temperaments.Temperament.SUSPICIOUS),
+		Map.entry("barrows", Temperaments.Temperament.GLOOMY),
+		Map.entry("chieftain", Temperaments.Temperament.PROUD),
+		Map.entry("master", Temperaments.Temperament.DUTIFUL),
+		Map.entry("sunpriests", Temperaments.Temperament.DEVOUT));
 	/** What you did as a child. */
 	static final Map<String, Temperaments.Temperament> CHILD = Map.ofEntries(
 		Map.entry("roofs", Temperaments.Temperament.BRAVE),

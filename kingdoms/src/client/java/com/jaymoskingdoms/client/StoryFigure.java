@@ -224,6 +224,15 @@ final class StoryFigure {
 		jobs("shepherd", "moon_cursed");
 		jobs("shepherd", "pup");
 		jobs("butcher", "fire", "smoke", "burned");
+		// (0.7.448) the heritages' own raisers
+		jobs("toolsmith", "tinkerer");
+		jobs("leatherworker", "vatkin");
+		jobs("fletcher", "acrobats");
+		jobs("cartographer", "ringmaster");
+		jobs("cleric", "keepers", "grovekeepers", "elders", "barrows", "sunpriests");
+		jobs("armorer", "hornkin");
+		jobs("shepherd", "wolves");
+		jobs("guard", "chieftain", "master");
 	}
 
 	/** The job clothes for {@code scene} ({@code question.answer}). */

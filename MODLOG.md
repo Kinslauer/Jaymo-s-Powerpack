@@ -4658,3 +4658,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   choices; a band taken off keeps them. A preview of you turns beside the rows. Compile-checked; not seen in game.
 
 - **0.18.127, Kingdoms 0.7.447:** a donkey or mule spawning (a caravan's pack animal, say) no longer crashes the server.
+
+- **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
+  after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
+  grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.

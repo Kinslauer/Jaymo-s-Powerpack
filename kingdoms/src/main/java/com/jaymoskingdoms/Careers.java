@@ -1445,6 +1445,11 @@ public final class Careers {
 			case "fisherfolk" -> Job.FISHER.key;
 			case "hunters" -> Job.HUNTER.key;
 			case "soldiers" -> Job.WATCH.key;
+			// (0.7.448) the heritages' own
+			case "tinkerer", "hornkin" -> Job.SMITH.key;
+			case "wolves" -> Job.HUNTER.key;
+			case "chieftain" -> Job.WATCH.key;
+			case "keepers" -> Job.FISHER.key;
 			default -> Job.values()[random.nextInt(Job.PILOT.ordinal())].key;
 		};
 	}

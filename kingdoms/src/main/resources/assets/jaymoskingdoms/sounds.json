@@ -1137,5 +1137,109 @@
 				"name": "jaymoskingdoms:voice/tongue/blossom_female_scream"
 			}
 		]
+	},
+	"voice.narrator.raised.tinkerer.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_tinkerer_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.vatkin.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_vatkin_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.acrobats.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_acrobats_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.ringmaster.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_ringmaster_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.keepers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_keepers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.grovekeepers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_grovekeepers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.elders.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_elders_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.hornkin.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_hornkin_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.wolves.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_wolves_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.barrows.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_barrows_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.chieftain.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_chieftain_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.master.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_master_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.sunpriests.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_sunpriests_tale",
+				"stream": true
+			}
+		]
 	}
 }
