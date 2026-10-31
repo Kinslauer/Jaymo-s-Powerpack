@@ -26,9 +26,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.73) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers puts them
@@ -49,12 +51,19 @@ import net.minecraft.world.item.ItemStack;
  * <p>
  * (0.7.102) Andy (2026-10-20): "I dont want any modern medicine". The tending is a bandaging now: when it's done the body
  * is tagged {@link #BANDAGED_TAG} as well, and Powers stops its bleeding and gives it a bandage's heal.
+ * <p>
+ * (0.7.450) Andy (2026-10-31): "mounted guards should dismount to revive, right now they just walk into you perpetually".
+ * A rider may come to help: he rides over, gets down {@link #DISMOUNT_REACH} off, tends them on foot while his horse
+ * waits, and climbs back up when he's done (or called away). The horse he left is kept for him meanwhile: no other
+ * rider takes it and a lent one doesn't vanish ({@link #waiting}).
  */
 public final class Downed {
 	/** (0.7.84) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
 	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
 	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
 	static final float HELP_SPEED = 0.8F;
+	/** (0.7.450) A mounted helper gets down this near the downed one (blocks), and climbs back on a horse no farther off than this. */
+	static final double DISMOUNT_REACH = 4.0, REMOUNT_REACH = 10.0;
 	/** (0.7.181) A downed player is tended where their reputation is above this. */
 	static final int HELP_PLAYER_REP = 0;
 	/** (0.7.98) How far round each player the downed are looked for, to be tended (blocks). */
@@ -74,6 +83,8 @@ public final class Downed {
 	private static final class Tending {
 		final Villager helper;
 		int ticks;
+		/** (0.7.450) The horse they got down from to tend them, waiting to be ridden again. */
+		@Nullable AbstractHorse horse;
 
 		Tending(Villager helper) {
 			this.helper = helper;
@@ -83,6 +94,8 @@ public final class Downed {
 	private static final Map<LivingEntity, Tending> TENDED = new WeakHashMap<>();
 	/** The villagers tending someone just now. */
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
+	/** (0.7.450) Horses waiting while their riders tend someone downed. */
+	private static final Map<AbstractHorse, Villager> WAITING = new WeakHashMap<>();
 
 	private Downed() {
 	}
@@ -310,9 +323,22 @@ public final class Downed {
 			return false;
 		}
 		Villager helper = tending.helper;
+		AbstractHorse ridden = Cavalry.horse(helper);
+		boolean gotDown = ridden != null && helper.distanceToSqr(body) <= DISMOUNT_REACH * DISMOUNT_REACH;
+		if (gotDown) {
+			// (0.7.450) a rider gets down to see to them; his horse waits
+			helper.stopRiding();
+			ridden.getNavigation().stop();
+			tending.horse = ridden;
+			WAITING.put(ridden, helper);
+			helper.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		}
+		if (tending.horse != null && tending.horse.isAlive() && !tending.horse.isVehicle()) {
+			tending.horse.getNavigation().stop();
+		}
 		if (helper.distanceToSqr(body) > TEND_REACH * TEND_REACH) {
 			helper.setShiftKeyDown(false);
-			if (body.tickCount % 10 == 0) {
+			if (body.tickCount % 10 == 0 || gotDown) {
 				BehaviorUtils.setWalkAndLookTargetMemories(helper, body.blockPosition(), HELP_SPEED, 1);
 			}
 			return false;
@@ -339,7 +365,8 @@ public final class Downed {
 	}
 
 	private static boolean canHelp(Villager v, LivingEntity body) {
-		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && !v.isPassenger() && !v.isNoAi() && v.getTarget() == null
+		// ((0.7.450) a rider may come too: he gets down at their side)
+		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && (!v.isPassenger() || Cavalry.mounted(v)) && !v.isNoAi() && v.getTarget() == null
 			&& (!Frights.afraid(v.getUUID()) || Temperaments.fearless(v)) && !McaCompat.panicking(v) && v.level() == body.level()
 			&& v.distanceToSqr(body) < Temperaments.helpRange(v) * Temperaments.helpRange(v) * 1.5;
 	}
@@ -347,9 +374,36 @@ public final class Downed {
 	private static void untend(LivingEntity body) {
 		Tending tending = TENDED.remove(body);
 		if (tending != null) {
-			HELPING.remove(tending.helper);
-			tending.helper.setShiftKeyDown(false);
+			Villager helper = tending.helper;
+			HELPING.remove(helper);
+			helper.setShiftKeyDown(false);
+			// (0.7.450) no longer bound for them (a rider left steering into them forever, before)
+			helper.getBrain().getMemory(MemoryModuleType.WALK_TARGET).ifPresent(walk -> {
+				if (walk.getTarget().currentBlockPosition().closerThan(body.blockPosition(), 2.0)) {
+					helper.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+					helper.getNavigation().stop();
+				}
+			});
+			remount(helper, tending.horse);
 		}
+	}
+
+	/** (0.7.450) A rider who got down to tend someone climbs back on his horse, if it's still there and free. */
+	private static void remount(Villager helper, @Nullable AbstractHorse horse) {
+		if (horse == null) {
+			return;
+		}
+		WAITING.remove(horse);
+		if (helper.isAlive() && !isDowned(helper) && !helper.isSleeping() && !helper.isPassenger() && horse.isAlive() && !horse.isRemoved()
+			&& !horse.isVehicle() && horse.level() == helper.level() && helper.distanceToSqr(horse) <= REMOUNT_REACH * REMOUNT_REACH) {
+			helper.getNavigation().stop();
+			helper.startRiding(horse);
+		}
+	}
+
+	/** (0.7.450) {@code horse} waits for its rider, who got down to tend someone downed: keep it for him. */
+	static boolean waiting(Entity horse) {
+		return horse instanceof AbstractHorse h && WAITING.containsKey(h);
 	}
 
 	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */

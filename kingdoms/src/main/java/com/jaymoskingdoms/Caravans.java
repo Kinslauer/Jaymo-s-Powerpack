@@ -589,9 +589,10 @@ final class Caravans {
 			}
 		}
 		for (PathfinderMob g : guards) {
-			if (c.mounted() && !g.isPassenger()) {
+			// ((0.7.450) not one off his horse to tend someone downed: he climbs back on himself)
+			if (c.mounted() && !g.isPassenger() && !Downed.helping(g)) {
 				AbstractHorse spare = level.getEntitiesOfClass(AbstractHorse.class, g.getBoundingBox().inflate(12.0),
-					h -> h.isAlive() && !h.isVehicle() && h.entityTags().contains(live.stamp)).stream().findFirst().orElse(null);
+					h -> h.isAlive() && !h.isVehicle() && h.entityTags().contains(live.stamp) && !Downed.waiting(h)).stream().findFirst().orElse(null);
 				if (spare != null) {
 					remount(g, spare);
 				}
