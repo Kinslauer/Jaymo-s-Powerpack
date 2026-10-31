@@ -584,7 +584,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.108, Scan C) Howl: a wolf's muzzle and tall ears, a bushy tail that swings as it runs. */
+	/** (0.18.109, Scan C) Howl: a wolf's muzzle and tall ears, a bushy tail that swings as it runs. */
 	static final class Howl extends FormModel {
 		private final ModelPart tail;
 
@@ -617,7 +617,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.108, Scan C) Prowl: round ears and a long tail that curls up at the tip and twitches. */
+	/** (0.18.109, Scan C) Prowl: round ears and a long tail that curls up at the tip and twitches. */
 	static final class Prowl extends FormModel {
 		private final ModelPart tail;
 
@@ -648,7 +648,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.108, Scan C) Tusk: a flat snout with two curved tusks, and a stiff mane down its back. */
+	/** (0.18.109, Scan C) Tusk: a flat snout with two curved tusks, and a stiff mane down its back. */
 	static final class Tusk extends FormModel {
 		Tusk() {
 			super(bake(mesh()), "tusk");
@@ -671,7 +671,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.108, Scan C) Talon: a hooked beak, broad feathered wings down its arms that spread when it lifts them, a tail fan. */
+	/** (0.18.109, Scan C) Talon: a hooked beak, broad feathered wings down its arms that spread when it lifts them, a tail fan. */
 	static final class Talon extends FormModel {
 		private final ModelPart rightWing, leftWing;
 

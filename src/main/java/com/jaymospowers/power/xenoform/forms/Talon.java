@@ -24,7 +24,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.108, Scan C) Talon, the raptor: light and long-armed, brown feathers barred paler, a white-feathered head with a
+ * (0.18.109, Scan C) Talon, the raptor: light and long-armed, brown feathers barred paler, a white-feathered head with a
  * hooked yellow beak, broad wings folded down its arms, hooked talons. 20 health, fists of 4. Scanned from a parrot, or
  * Naturalist's vulture or songbirds ({@code XenoDna}). It flies: hold jump in the air to beat up and where you look;
  * let go and it glides; sneak and it drops. Falls never hurt it.

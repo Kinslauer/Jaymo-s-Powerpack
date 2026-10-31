@@ -272,7 +272,7 @@ public final class XenoformPower implements Power {
 		/** Marrow: the thrown rib's heading (its place is {@link #whirl}, its ticks {@link #spin}, who it hit {@link #spun}). */
 		public net.minecraft.world.phys.@Nullable Vec3 ribDir;
 		/**
-		 * (0.18.108, Scan C) Howl, Prowl, Tusk, Talon: ticks left of a pounce, charge or dive; the creature held in the jaws or
+		 * (0.18.109, Scan C) Howl, Prowl, Tusk, Talon: ticks left of a pounce, charge or dive; the creature held in the jaws or
 		 * talons (and ticks left); the wild wolves answering the howl (and ticks left); ticks left of the scent; the stalked
 		 * creature (and until when); Thick Hide until this tick.
 		 */

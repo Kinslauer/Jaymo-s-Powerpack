@@ -148,6 +148,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		com.jaymospowers.client.armory.MusketSights.init();
+		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
@@ -164,6 +165,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
+		// (Motion patch 4) lanterns worn at the hip (belt slot) and on a pole on the back (body slot)
+		com.jaymospowers.client.baubles.WornLanterns.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();

@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.108, Scan C) Tusk, the war boar: broad and heavy, bristly dark-brown hide, a ridge of stiff mane down its
+ * (0.18.109, Scan C) Tusk, the war boar: broad and heavy, bristly dark-brown hide, a ridge of stiff mane down its
  * back, a flat snout and two curved tusks. 34 health, fists of 6, a little slow, hard to knock about. Scanned from a
  * hoglin, Naturalist's boar or rhino, Kingdoms' wild boar or minotaur, or the Aether's burrukai, kirrid or taegore
  * ({@code XenoDna}).

@@ -4505,7 +4505,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   change. Swathe (husk): Lash Bind (bolas trip), Lash Pull, Sandstorm (stronger in deserts), Wrap; can't drown or
   starve. Blight (the Wither, hidden): skulls, a three-skull volley, Rot Touch, Dark Pulse, dark shield at half health.
   Each has its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
-- **0.18.108, Scan C (`docs/ScanGaps-Plan.md`), beasts:** four new aliens. Howl (wolf, werewolf, feral wolf, coyote):
+- **0.18.108, Holding and using items (Motion patch 4, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **Dual flintlocks** (`armory/DualFlintlocks`, `WeaponModDualFlintlockMixin`): a WeaponMod flintlock in each hand
+    fire in turn, main hand first, and each reloads on its own (fire, fire, reload main, reload off). One alone is
+    unchanged.
+  - **Pistol sights** (`client/armory/MusketSights`): the flintlock held ready comes up to the eye line out at its own
+    side, not onto the crosshair (smooth barrel, Andy); no bow pose. Each hand rises on its own. Added to First-person
+    Model's vanilla-hands list like the musket.
+  - **`client/armory/HeldItems`:** flint and steel (and flint and rock) struck two-handed in third person, a chop in
+    first person, sparks off flint and steel; shears brought in to the middle and snipping; compass and clock held up
+    to read (third person: the arm comes up when you look down); any lantern held out and swinging with your step.
+  - **Worn lanterns** (Andy; `baubles/Baubles`, `client/baubles/WornLanterns`): any lantern fits the belt bauble slot
+    and hangs at your off-hand hip; the new **Lantern Pole** (sticks, chain, lantern, string) fits the body slot and is
+    worn on your back with its lantern hung out over your head. Everyone sees them (`Baubles.SHOWN`, synced); they hang
+    straight down and swing on a spring as you move. With LambDynamicLights they light up around you
+    (`LdlWornLanternMixin`, optional).
+  - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.
+- **0.18.109, Scan C (`docs/ScanGaps-Plan.md`), beasts:** four new aliens. Howl (wolf, werewolf, feral wolf, coyote):
   Pounce, a Howl that brings wild wolves to hunt beside you, Scent (blood stains and bleeders show), Lockjaw; stronger
   at night. Prowl (ocelot, tiger, lion): silent, unseen while sneaking, no fall damage under 12 blocks; Long Pounce
   that pins, Rake, Stalk, Roar. Tusk (hoglin, boar, rhino, wild boar, minotaur, burrukai, kirrid, taegore): Charge,

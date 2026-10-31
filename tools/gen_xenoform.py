@@ -1670,7 +1670,7 @@ def fur(img, part_list, base, dark, n_div=6):
 
 
 def howl():
-    """(0.18.108, Scan C) Howl, the pack hunter: grey-brown fur, darker saddle down the back, a pale chest and muzzle,
+    """(0.18.109, Scan C) Howl, the pack hunter: grey-brown fur, darker saddle down the back, a pale chest and muzzle,
     amber eyes, tall ears dark at the tips, a bushy tail."""
     img = new_skin()
     coat = (138, 122, 102)
@@ -1702,7 +1702,7 @@ def howl():
 
 
 def prowl():
-    """(0.18.108, Scan C) Prowl, the great cat: tawny orange with dark stripes, a cream belly and muzzle, green eyes with
+    """(0.18.109, Scan C) Prowl, the great cat: tawny orange with dark stripes, a cream belly and muzzle, green eyes with
     slit pupils, round ears, a long striped tail."""
     img = new_skin()
     tawny = (204, 138, 60)
@@ -1739,7 +1739,7 @@ def prowl():
 
 
 def tusk():
-    """(0.18.108, Scan C) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane, a pink-grey snout, small red
+    """(0.18.109, Scan C) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane, a pink-grey snout, small red
     eyes, ivory tusks, hooves."""
     img = new_skin()
     hide = (107, 74, 50)
@@ -1764,7 +1764,7 @@ def tusk():
 
 
 def talon():
-    """(0.18.108, Scan C) Talon, the raptor: brown feathers barred paler, a white-feathered head, fierce yellow eyes,
+    """(0.18.109, Scan C) Talon, the raptor: brown feathers barred paler, a white-feathered head, fierce yellow eyes,
     a hooked yellow beak dark at the tip, broad barred wings, a fanned tail, yellow scaled legs with black talons."""
     img = new_skin()
     brown = (130, 88, 52)
@@ -1962,7 +1962,7 @@ if __name__ == "__main__":
     blight()
     for form in SCAN_B:
         ultimate(form)
-    # (0.18.108) Scan C, last again
+    # (0.18.109) Scan C, last again
     howl()
     prowl()
     tusk()

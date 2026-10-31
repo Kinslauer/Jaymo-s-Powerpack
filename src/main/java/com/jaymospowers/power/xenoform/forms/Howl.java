@@ -25,7 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.108, Scan C of {@code docs/ScanGaps-Plan.md}) Howl, the pack hunter: lean and long-legged, grey-brown fur
+ * (0.18.109, Scan C of {@code docs/ScanGaps-Plan.md}) Howl, the pack hunter: lean and long-legged, grey-brown fur
  * darker down the back, a wolf's muzzle and tall ears, a bushy tail. 26 health, fists of 5, quick. Scanned from a
  * wolf, or Kingdoms' werewolf, feral wolf or coyote ({@code XenoDna}). It isn't the werewolf curse: nothing spreads.
  * <ul>

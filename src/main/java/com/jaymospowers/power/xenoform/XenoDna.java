@@ -50,7 +50,7 @@ public final class XenoDna {
 		// (0.18.107, Scan B) Rime: the Iceologer; Marrow: Kingdoms' silver skeleton and Skeleton Lord
 		Map.entry("friendsandfoes:iceologer", "rime"), Map.entry("jaymoskingdoms:silver_skeleton", "marrow"),
 		Map.entry("jaymoskingdoms:skeleton_lord", "marrow"),
-		// (0.18.108, Scan C) the beasts
+		// (0.18.109, Scan C) the beasts
 		Map.entry("jaymoskingdoms:werewolf", "howl"), Map.entry("jaymoskingdoms:feral_wolf", "howl"), Map.entry("jaymoskingdoms:coyote", "howl"),
 		Map.entry("naturalist:tiger", "prowl"), Map.entry("naturalist:lion", "prowl"),
 		Map.entry("naturalist:boar", "tusk"), Map.entry("naturalist:rhino", "tusk"), Map.entry("jaymoskingdoms:wild_boar", "tusk"),

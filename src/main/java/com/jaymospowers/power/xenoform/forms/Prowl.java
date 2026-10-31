@@ -22,7 +22,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.108, Scan C) Prowl, the great cat: long and low, tawny with dark stripes, a heavy jaw, round ears, a long tail
+ * (0.18.109, Scan C) Prowl, the great cat: long and low, tawny with dark stripes, a heavy jaw, round ears, a long tail
  * that twitches. 24 health, fists of 5, the quickest of the beasts. Scanned from an ocelot, or Naturalist's tiger or
  * lion ({@code XenoDna}).
  * <ul>
