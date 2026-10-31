@@ -4408,3 +4408,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Finishers.chokeable/unaware`). A held player gets `QuestionScreen` (truth, lie, silence, own words) and the asker one
   to put questions (`PlayerQuestioning`); Interrogation flags a lie, Rough Questions' threat costs 2 health.
   Compile-checked; not seen in game.
+- **0.18.98, Scans fixed:** Kingdoms' clockwork golem is built on the iron golem, so scanning it gave Bulwark and Rivet
+  could never be found; Kingdoms' wind dragons and war elephants are built on the horse and scanned as Velox. Bulwark and
+  Velox now skip Kingdoms' creatures (`Bulwark.scans`, `Velox.scans`).
