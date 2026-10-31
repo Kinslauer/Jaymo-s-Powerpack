@@ -70,6 +70,10 @@ public final class RagdollPose {
 	public final RagdollRig.Shape shape;
 	/** (0.5.19) How far its legs are curled up as a dead spider's (0 to 1), see {@link #curl}. */
 	private final float curl;
+	/** (0.5.40) A corpse's parts the ragdoll doesn't drive, hung loose (see {@link LooseParts}); null for none. */
+	private LooseParts.Motion loose;
+	private float looseTime, looseScale = 1.0F;
+	private boolean looseGrounded;
 
 	private RagdollPose(Matrix4f body, Limb[] limbs, float[] angles, RagdollRig.Shape shape, float curl) {
 		this.body = body;
@@ -179,6 +183,19 @@ public final class RagdollPose {
 		return new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
 	}
 
+	/**
+	 * (0.5.40) Hangs every part of the body the ragdoll doesn't drive (wings, tails, necks, a modded mob's legs) loose,
+	 * swinging with {@code motion} ({@link LooseParts#motion}); {@code time} in ticks, {@code grounded} lying on the
+	 * ground, {@code scale} the body's drawn size. Not on humanoids whose limbs it all drives.
+	 */
+	public RagdollPose loosen(LooseParts.Motion motion, float time, boolean grounded, float scale) {
+		this.loose = motion;
+		this.looseTime = time;
+		this.looseGrounded = grounded;
+		this.looseScale = scale;
+		return this;
+	}
+
 	/** R = now^T * rest (frames as rows): rest-world vectors to world vectors. Rows of a 3x3 matrix. */
 	private static float[] rotation(float[] now, float[] rest) {
 		float[] r = new float[9];
@@ -264,6 +281,8 @@ public final class RagdollPose {
 		RagdollPose pose = renderState.getData(KEY);
 		if (pose != null) {
 			pose.pose(model.root());
+		} else {
+			LooseParts.apply(model, renderState);
 		}
 	}
 
@@ -293,6 +312,17 @@ public final class RagdollPose {
 		}
 		if (curl > 0.0F) {
 			curl(root);
+		}
+		// (humanoids only when their arms aren't the ones the ragdoll knows: a modded brute's, a villager's folded arms)
+		if (loose != null && (shape != RagdollRig.Shape.HUMANOID || find(root, "right_arm") == null)) {
+			java.util.Set<String> skip = new java.util.HashSet<>();
+			for (Limb limb : limbs) {
+				skip.add(limb.part);
+			}
+			if (curl > 0.0F) {
+				java.util.Collections.addAll(skip, SPIDER_LEGS);
+			}
+			LooseParts.apply(root, body, looseScale, loose, looseTime, looseGrounded, skip);
 		}
 		for (String[] overlay : OVERLAYS) {
 			if (root.hasChild(overlay[0]) && root.hasChild(overlay[1])) {
