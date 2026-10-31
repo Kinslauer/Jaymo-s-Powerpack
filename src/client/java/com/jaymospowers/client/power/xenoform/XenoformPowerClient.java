@@ -68,14 +68,14 @@ public final class XenoformPowerClient implements PowerClient {
 	}
 
 	/**
-	 * From the scroll mixin: while a band wearer holds Z as themselves, the wheel turns the dial (down: the next alien,
-	 * like the hotbar) and the hotbar stays put. True if the scroll was taken.
+	 * From the scroll mixin: while a band wearer holds Z, the wheel turns the dial (down: the next alien, like the hotbar)
+	 * and the hotbar stays put; as an alien, letting Z go then quick-changes (0.18.88). True if the scroll was taken.
 	 */
 	public static boolean scroll(double amount) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || player.isSpectator() || !XenoformPower.has(player)
-			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown() || player.getAttached(XenoformState.FORM) != null) {
+			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown()) {
 			return false;
 		}
 		ClientPlayNetworking.send(new XenoNet.Dial(amount < 0.0 ? 1 : -1));
@@ -182,7 +182,8 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
 	static boolean refused(LocalPlayer player) {
 		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
-		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
+		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0
+			|| com.jaymospowers.power.xenoform.XenoJam.jammed(player);
 	}
 
 	@Override

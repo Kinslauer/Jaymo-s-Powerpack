@@ -208,6 +208,11 @@ public abstract class XenoForm {
 		live.cooldownLength[slot] = ticks;
 		live.hudDirty = true;
 		Mastery.used(player);
+		// (0.18.88) a move spends the band's charge; on the wild dial it counts double toward mastery
+		XenoformPower.drain(player, live, XenoformPower.MOVE_DRAIN);
+		if (XenoformPower.wild(player)) {
+			Mastery.practice(player, 1);
+		}
 	}
 
 	/** The creature under the crosshair within {@code reach} blocks (scaled with the form), or null. */

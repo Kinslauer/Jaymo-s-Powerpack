@@ -1,0 +1,168 @@
+package com.jaymospowers.power.xenoform;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Powers;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+
+/**
+ * (0.18.88) Andy: "only these two bands will exist in the world, either player killing the other, will remove the band
+ * and give it to them. they can then do whatever they want with it." The world keeps count of its one Xeno-Band (the
+ * rival band, patch 8, will keep its own): who wears it, and how many band items are loose (in an inventory, a chest,
+ * or lying on the ground). A fallen star holds the band only while nobody wears it and none is loose.
+ * <ul>
+ * <li>Put on (the item used): worn; one loose item fewer.</li>
+ * <li>A wearer killed by another player: the band comes off (the power ends) and goes to the killer, an item, theirs
+ * to wear, keep, trade or throw away.</li>
+ * <li>A loose band destroyed (lava, fire, the void, despawned, killed): back among the stars.</li>
+ * <li>The power taken away by hand (the powers screen, {@code /power}): back among the stars.</li>
+ * </ul>
+ * Kept on the overworld as a saved attachment. Players who already wore a band before this are counted as wearers
+ * when they next join, so older worlds with more than one keep theirs, and no new one falls while any is out.
+ */
+public final class XenoBands {
+	/** The world's band: everyone wearing one, and how many band items are loose. */
+	public record Count(List<String> wearers, int loose) {
+		public static final Count NONE = new Count(List.of(), 0);
+		public static final Codec<Count> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.listOf().optionalFieldOf("wearers", List.of()).forGetter(Count::wearers),
+				Codec.INT.optionalFieldOf("loose", 0).forGetter(Count::loose))
+			.apply(i, Count::new));
+	}
+
+	public static final AttachmentType<Count> COUNT = AttachmentRegistry.create(JaymosPowers.id("xeno_bands"),
+		builder -> builder.persistent(Count.CODEC));
+
+	private static final String ALIENS_KEY = "xeno_aliens";
+
+	private XenoBands() {
+	}
+
+	static void init() {
+		// a wearer from before the count: counted now
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			if (XenoformPower.has(handler.player)) {
+				worn(handler.player, false);
+			}
+		});
+		// killed by another player: the band is theirs
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player && XenoformPower.has(player) && source.getEntity() instanceof ServerPlayer killer
+				&& killer != player) {
+				takenBy(player, killer);
+			}
+		});
+		// a loose band destroyed goes back to the stars (one picked up leaves an emptied stack behind: not destroyed)
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity instanceof ItemEntity item && entity.getRemovalReason() != null && entity.getRemovalReason().shouldDestroy()
+				&& item.getItem().is(XenoBandItem.BAND) && !item.getItem().isEmpty()) {
+				destroyed(level.getServer());
+			}
+		});
+	}
+
+	public static Count count(MinecraftServer server) {
+		Count count = server.overworld().getAttached(COUNT);
+		return count == null ? Count.NONE : count;
+	}
+
+	private static void set(MinecraftServer server, Count count) {
+		server.overworld().setAttached(COUNT, count);
+	}
+
+	/** Whether a fallen star may hold the band: nobody wears it and none is loose. */
+	public static boolean available(MinecraftServer server) {
+		Count count = count(server);
+		return count.wearers().isEmpty() && count.loose() <= 0;
+	}
+
+	/** A band came out of a star (or was handed out): one more loose. */
+	static void loosed(MinecraftServer server) {
+		Count count = count(server);
+		set(server, new Count(count.wearers(), count.loose() + 1));
+	}
+
+	/** {@code player} wears it now ({@code fromItem}: a loose band was used to put it on). */
+	static void worn(ServerPlayer player, boolean fromItem) {
+		MinecraftServer server = player.level().getServer();
+		Count count = count(server);
+		String id = player.getUUID().toString();
+		List<String> wearers = new ArrayList<>(count.wearers());
+		if (!wearers.contains(id)) {
+			wearers.add(id);
+		}
+		set(server, new Count(List.copyOf(wearers), fromItem ? Math.max(0, count.loose() - 1) : count.loose()));
+	}
+
+	/** {@code player} no longer wears it (the power ended). */
+	static void unworn(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		Count count = count(server);
+		String id = player.getUUID().toString();
+		if (count.wearers().contains(id)) {
+			List<String> wearers = new ArrayList<>(count.wearers());
+			wearers.remove(id);
+			set(server, new Count(List.copyOf(wearers), count.loose()));
+		}
+	}
+
+	private static void destroyed(MinecraftServer server) {
+		Count count = count(server);
+		if (count.loose() > 0) {
+			set(server, new Count(count.wearers(), count.loose() - 1));
+		}
+	}
+
+	/** The band comes off {@code player}'s wrist and goes to {@code killer}, with every alien it held. */
+	private static void takenBy(ServerPlayer player, ServerPlayer killer) {
+		List<String> aliens = XenoformState.band(player).unlocked();
+		Powers.set(player, null);
+		player.removeAttached(XenoformState.BAND);
+		loosed(killer.level().getServer());
+		killer.getInventory().placeItemBackInInventory(item(aliens), net.minecraft.util.Prediction.SERVER_ONLY);
+		killer.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_won", player.getDisplayName()).withStyle(ChatFormatting.GREEN));
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_lost", killer.getDisplayName()).withStyle(ChatFormatting.RED));
+		ServerLevel level = killer.level();
+		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/** A band item that still holds {@code aliens} (a band taken off a wearer keeps what it learned). */
+	static ItemStack item(List<String> aliens) {
+		ItemStack stack = new ItemStack(XenoBandItem.BAND);
+		if (!aliens.isEmpty()) {
+			net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+			tag.putString(ALIENS_KEY, String.join(",", aliens));
+			stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		}
+		return stack;
+	}
+
+	/** The aliens a band item holds (none for one fresh from a star). */
+	static List<String> aliensOf(ItemStack stack) {
+		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		String held = data == null ? "" : data.copyTag().getStringOr(ALIENS_KEY, "");
+		return held.isEmpty() ? List.of() : List.of(held.split(","));
+	}
+
+	/** For the debug command: forget every wearer and loose band, so the next star may carry it. */
+	static void reset(MinecraftServer server) {
+		set(server, Count.NONE);
+	}
+}

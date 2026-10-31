@@ -59,6 +59,11 @@ public final class XenoBandItem extends Item {
 			serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			return InteractionResult.FAIL;
 		}
+		// (0.18.88) a band taken off someone still holds their aliens
+		java.util.List<String> aliens = XenoBands.aliensOf(stack);
+		if (!aliens.isEmpty()) {
+			server.setAttached(XenoformState.BAND, new XenoformState.Band(aliens, 0));
+		}
 		if (server.isCreative()) {
 			Powers.set(server, XenoformPower.INSTANCE);
 		} else {
@@ -68,6 +73,7 @@ public final class XenoBandItem extends Item {
 			return InteractionResult.FAIL;
 		}
 		stack.shrink(1);
+		XenoBands.worn(server, true);
 		server.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_closes").withStyle(ChatFormatting.GREEN));
 		serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);

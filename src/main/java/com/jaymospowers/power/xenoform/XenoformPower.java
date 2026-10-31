@@ -48,10 +48,16 @@ import org.jspecify.annotations.Nullable;
  * and you become the dialled alien. As an alien, Z held {@link #HOLD_TICKS} turns you back early.</li>
  * <li>R G V B: the alien's moves ({@link XenoForm#onKey}). As a human they do nothing.</li>
  * <li>X held {@link #SCAN_TICKS} at a creature: scan it; if it carries an alien's DNA, the band unlocks that alien.</li>
- * <li>A form lasts a random {@link #FORM_MIN}-{@link #FORM_MAX} until the power is fully mastered, then always
- * {@link #FORM_MAX}. The band beeps through the last {@link #BEEP_TICKS}. Then, when the alien's health is gone, or when you
- * hold Z, you turn back at the health you had before, and the band recharges ({@link #RECHARGE}, {@link #RECHARGE_KNOCKOUT}
- * after a knockout).</li>
+ * <li>(0.18.88) The band's charge: a form spends it a point a tick, more when you're hit ({@link #HURT_DRAIN}) or a move
+ * goes on cooldown ({@link #MOVE_DRAIN}); as yourself it refills over {@link #REFILL_TICKS}. Mastery grows it from
+ * {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. The band beeps through the last {@link #BEEP_TICKS}. When it's spent, when the
+ * alien's health is gone, or when you hold Z and let go, you turn back at the health you had before; a knockout empties it
+ * and locks the band for {@link #RECHARGE_KNOCKOUT}. A slam needs {@link #SLAM_MIN}.</li>
+ * <li>Quick change: as an alien, hold Z and scroll, then let go: another alien for {@link #QUICK_SHARE} of the charge.</li>
+ * <li>The band saves you: a killing blow as yourself slams it for you, every {@link #SAVE_COOLDOWN}.</li>
+ * <li>Wild dial (C while Z is held as yourself): a random alien you know every {@link #WILD_MIN}-{@link #WILD_MAX}, no
+ * turning back, moves count double toward mastery.</li>
+ * <li>Jammed ({@link XenoJam}): turned back, and no slam until it wears off.</li>
  * <li>Fists only: while transformed your hands read as empty ({@code XenoformHandsMixin}), so items can't be used and
  * punches hit for the alien's strength.</li>
  * </ul>
@@ -65,10 +71,23 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
-	/** A form lasts a random time in this range, until full mastery (then always the most). */
-	public static final int FORM_MIN = 1200, FORM_MAX = 6000;
-	/** The band's recharge after turning back, and after being knocked out of a form. */
-	public static final int RECHARGE = 1200, RECHARGE_KNOCKOUT = 2400;
+	/** (0.18.88) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
+	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
+	/** An empty band refills in this long as yourself; a slam needs at least this much. */
+	public static final int REFILL_TICKS = 1200, SLAM_MIN = 200;
+	/** Charge lost per point of damage taken as an alien, and per move put on cooldown. */
+	public static final int HURT_DRAIN = 10, MOVE_DRAIN = 20;
+	/** After a knockout the band is empty and locked this long (no refill, no slam). */
+	public static final int RECHARGE_KNOCKOUT = 1200;
+	/** Quick change: its cost (share of the full charge) and the dizziness after (ticks). */
+	public static final float QUICK_SHARE = 0.25F;
+	public static final int QUICK_DIZZY = 20;
+	/** The band saves you from a killing blow no more often than this; it leaves at least this much charge. */
+	public static final int SAVE_COOLDOWN = 12000, SAVE_CHARGE = 600;
+	/** Wild dial: the next random change comes after this many ticks, at random. */
+	public static final int WILD_MIN = 20, WILD_MAX = 1200;
+	/** The player tag that keeps the wild dial on (kept through relogs). */
+	public static final String WILD_TAG = "jaymospowers_xeno_wild";
 	/**
 	 * (0.18.87) The band beeps and the screen flashes through the last 5 seconds of a form (Andy): once a second, then
 	 * twice a second over the last {@link #BEEP_FAST_TICKS}.
@@ -113,6 +132,13 @@ public final class XenoformPower implements Power {
 		/** The health they had as a human, given back when they turn back. */
 		float humanHealth;
 		int recharge, rechargeTotal;
+		/** (0.18.88) The band's charge as yourself (-1: not yet known, full). In a form it is {@link #ticksLeft}. */
+		float charge = -1.0F;
+		/** When the band last saved you from a killing blow (game time, 0: never); ticks to the wild dial's next change. */
+		long lastSave;
+		int wildNext;
+		/** Quick change: the wheel turned while Z was held as an alien. */
+		boolean quickDial;
 		long modeDownAt = -1L;
 		boolean slammed;
 		boolean scanning;
@@ -253,10 +279,16 @@ public final class XenoformPower implements Power {
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		FallingStars.init();
+		XenoBands.init();
+		XenoJam.register();
 		// the alien's health is a second life bar: at zero you're knocked back into your own body instead of dying
+		// (0.18.88) as yourself, the band may slam itself to save you (default phase: before Downed takes the blow)
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			if (!(entity instanceof ServerPlayer player) || !has(player) || live(player).form == null) {
+			if (!(entity instanceof ServerPlayer player) || !has(player)) {
 				return true;
+			}
+			if (live(player).form == null) {
+				return !save(player, source);
 			}
 			if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				// the void, /kill: the form can't save you, but it lets go so you respawn whole
@@ -272,6 +304,15 @@ public final class XenoformPower implements Power {
 			}
 			Live live = live(player);
 			return live.form == null || live.form.allowDamage(player, live, source, amount);
+		});
+		// (0.18.88) hits drain the charge
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && has(player) && damageTaken > 0.0F) {
+				Live live = live(player);
+				if (live.form != null) {
+					drain(player, live, Mth.ceil(damageTaken * HURT_DRAIN));
+				}
+			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer player && player != entity && has(player)) {
@@ -349,6 +390,7 @@ public final class XenoformPower implements Power {
 			XenoForm first = starters.get(player.getRandom().nextInt(starters.size()));
 			player.setAttached(XenoformState.BAND, XenoformState.Band.NONE.plus(first.id));
 		}
+		XenoBands.worn(player, false);
 		live(player).hudDirty = true;
 	}
 
@@ -359,6 +401,7 @@ public final class XenoformPower implements Power {
 			revert(player, false, false);
 		}
 		LIVES.remove(player.getUUID());
+		XenoBands.unworn(player);
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
@@ -384,15 +427,13 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		long now = player.level().getGameTime();
-		// as an alien, Z held long enough turns you back (as yourself the slam comes when Z is let go: onMode)
-		if (live.modeDownAt >= 0L && !live.slammed && live.form != null && now - live.modeDownAt >= HOLD_TICKS) {
-			live.slammed = true;
+		if (live.form != null && XenoJam.jammed(player)) {
 			revert(player, false, true);
 		}
 		if (live.form != null) {
-			// in a form: the clock runs
+			// in a form: the charge runs down
 			live.ticksLeft--;
-			if (live.ticksLeft == BEEP_TICKS) {
+			if (live.ticksLeft <= BEEP_TICKS && !XenoformState.ending(player)) {
 				player.setAttached(XenoformState.ENDING, true);
 			}
 			if (beepsAt(live.ticksLeft)) {
@@ -422,6 +463,14 @@ public final class XenoformPower implements Power {
 				if (live.ultimate && live.form != null) {
 					live.form.tickUltimate(player, live);
 				}
+				// the wild dial: now and then another alien, whether you like it or not
+				if (live.form != null && wild(player) && --live.wildNext <= 0) {
+					live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
+					XenoForm next = randomKnown(player, live.form);
+					if (next != null) {
+						swap(player, live, next, 0);
+					}
+				}
 				// a grabbed creature that got away
 				if (live.grabbed >= 0) {
 					Entity held = player.level().getEntity(live.grabbed);
@@ -431,10 +480,26 @@ public final class XenoformPower implements Power {
 				}
 			}
 		} else {
-			if (live.recharge > 0 && --live.recharge == 0) {
+			// as yourself the charge refills (not while a knockout has the band locked)
+			int capacity = capacity(player);
+			boolean wasReady = live.recharge <= 0 && charge(player, live) >= SLAM_MIN;
+			if (live.recharge > 0) {
+				live.recharge--;
+			} else if (live.charge < capacity) {
+				live.charge = Math.min(capacity, live.charge + capacity / (float)REFILL_TICKS);
+			}
+			if (!wasReady && live.recharge <= 0 && live.charge >= SLAM_MIN) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.recharged").withStyle(ChatFormatting.GREEN));
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 1.5F);
 				live.hudDirty = true;
+			}
+			// the wild dial: the band changes you as soon as it can
+			if (wild(player) && live.recharge <= 0 && live.charge >= SLAM_MIN && !XenoJam.jammed(player) && --live.wildNext <= 0) {
+				live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
+				XenoForm next = randomKnown(player, null);
+				if (next != null) {
+					transform(player, next, false);
+				}
 			}
 			tickScan(player, live);
 			tickAscension(player);
@@ -449,11 +514,17 @@ public final class XenoformPower implements Power {
 			}
 		}
 		// the HUD: on change, and every so often while a clock runs
-		boolean ticking = live.form != null || live.recharge > 0 || live.scanTicks > 0;
+		// (as yourself: the charge and its capacity, and how long until a slam is possible)
+		boolean ticking = live.form != null || live.recharge > 0 || live.scanTicks > 0 || live.charge < capacity(player);
 		if (live.hudDirty || ticking && ++live.hudTick >= HUD_EVERY) {
 			live.hudDirty = false;
 			live.hudTick = 0;
-			XenoformState.Hud hud = new XenoformState.Hud(live.ticksLeft, live.total, live.recharge, live.rechargeTotal, live.cooldownUntil.clone(),
+			int formTicks = live.form != null ? live.ticksLeft : (int)charge(player, live);
+			int formTotal = live.form != null ? live.total : capacity(player);
+			int wait = live.form != null ? 0 : untilReady(player, live);
+			int waitTotal = live.form != null ? 0 : Math.max(wait, live.recharge > 0 ? live.rechargeTotal + Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal)
+				: Mth.ceil(SLAM_MIN * REFILL_TICKS / (float)formTotal));
+			XenoformState.Hud hud = new XenoformState.Hud(formTicks, formTotal, wait, waitTotal, live.cooldownUntil.clone(),
 				live.cooldownLength.clone(), live.scanTicks, SCAN_TICKS, live.scanForm == null ? "" : live.scanForm);
 			if (!hud.same(XenoformState.hud(player))) {
 				player.setAttached(XenoformState.HUD, hud);
@@ -599,11 +670,31 @@ public final class XenoformPower implements Power {
 		if (down) {
 			live.modeDownAt = player.level().getGameTime();
 			live.slammed = false;
+			live.quickDial = false;
 			return;
 		}
 		boolean slam = live.modeDownAt >= 0L && !live.slammed;
+		long held = live.modeDownAt < 0L ? 0L : player.level().getGameTime() - live.modeDownAt;
 		live.modeDownAt = -1L;
-		if (slam && live.form == null) {
+		if (live.form != null) {
+			// as an alien: a turned wheel is a quick change; held long enough, back to yourself (not on the wild dial)
+			if (live.quickDial) {
+				live.quickDial = false;
+				XenoForm target = XenoForms.get(XenoformState.band(player).dialled());
+				if (target != null && target != live.form) {
+					quickChange(player, live, target);
+				}
+			} else if (slam && held >= HOLD_TICKS) {
+				if (wild(player)) {
+					hint(player, live, Component.translatable("message.jaymospowers.xenoform.wild_stuck"));
+				} else {
+					live.slammed = true;
+					revert(player, false, true);
+				}
+			}
+			return;
+		}
+		if (slam) {
 			live.slammed = true;
 			XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 			if (dialled != null) {
@@ -618,8 +709,15 @@ public final class XenoformPower implements Power {
 	/** The scroll wheel while Z is held (from the client): turns the dial, as yourself only. */
 	static void scrollDial(ServerPlayer player, int by) {
 		Live live = live(player);
-		if (!has(player) || live.form != null || live.modeDownAt < 0L || by == 0) {
+		if (!has(player) || live.modeDownAt < 0L || by == 0) {
 			return;
+		}
+		if (live.form != null) {
+			// (0.18.88) quick change: the wheel picks the next alien, letting go of Z changes into it
+			if (wild(player)) {
+				return;
+			}
+			live.quickDial = true;
 		}
 		dial(player, Integer.signum(by));
 	}
@@ -635,6 +733,12 @@ public final class XenoformPower implements Power {
 		}
 		Live live = live(player);
 		XenoForm form = live.form;
+		if (form == null && live.modeDownAt >= 0L) {
+			// (0.18.88) C while Z is held as yourself: the wild dial on or off (letting Z go then doesn't slam)
+			live.slammed = true;
+			toggleWild(player, live);
+			return;
+		}
 		if (form == null) {
 			hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_human"));
 			return;
@@ -736,8 +840,13 @@ public final class XenoformPower implements Power {
 		if (live.form != null || !player.isAlive()) {
 			return false;
 		}
-		if (!force && live.recharge > 0) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.recharging", Mth.ceil(live.recharge / 20.0F))
+		if (!force && XenoJam.jammed(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.jammed").withStyle(ChatFormatting.RED));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.PLAYERS, 0.8F, 0.5F);
+			return false;
+		}
+		if (!force && untilReady(player, live) > 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.recharging", Mth.ceil(untilReady(player, live) / 20.0F))
 				.withStyle(ChatFormatting.RED));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			return false;
@@ -748,12 +857,13 @@ public final class XenoformPower implements Power {
 		if (player.isSleeping()) {
 			player.stopSleeping();
 		}
+		float charge = charge(player, live);
 		live.clearForm();
 		live.form = form;
 		live.humanHealth = player.getHealth();
-		boolean mastered = Mastery.unlocked(player) >= Mastery.ALL || player.isCreative();
-		live.total = mastered ? FORM_MAX : FORM_MIN + player.getRandom().nextInt(FORM_MAX - FORM_MIN + 1);
-		live.ticksLeft = live.total;
+		live.total = capacity(player);
+		live.ticksLeft = Math.max(1, player.isCreative() ? live.total : (int)charge);
+		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		player.setAttached(XenoformState.FORM, form.id);
 		player.removeAttached(XenoformState.ENDING);
 		player.addTag(XenoformState.TAG);
@@ -806,10 +916,15 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FLIGHT);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
+		int left = Math.max(0, live.ticksLeft);
 		live.clearForm();
-		live.recharge = live.rechargeTotal = knockout ? RECHARGE_KNOCKOUT : RECHARGE;
+		// what's left of the charge stays in the band; a knockout empties and locks it
+		live.charge = knockout ? 0.0F : left;
+		live.recharge = live.rechargeTotal = knockout ? RECHARGE_KNOCKOUT : 0;
+		live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
 		if (player.isCreative()) {
 			live.recharge = live.rechargeTotal = 0;
+			live.charge = capacity(player);
 		}
 		if (fx) {
 			ServerLevel level = player.level();
@@ -874,11 +989,162 @@ public final class XenoformPower implements Power {
 		return has(player) ? live(player).form : null;
 	}
 
-	/** Clears every cooldown and the recharge (the debug command). */
+	/** Clears every cooldown and the recharge, and fills the band (the debug command). */
 	static void ready(ServerPlayer player) {
 		Live live = live(player);
 		java.util.Arrays.fill(live.cooldownUntil, 0L);
 		live.recharge = 0;
+		live.charge = capacity(player);
+		live.lastSave = 0L;
+		if (live.form != null) {
+			live.ticksLeft = live.total;
+			player.removeAttached(XenoformState.ENDING);
+		}
 		live.hudDirty = true;
+	}
+
+	// ---------------------------------------------------------------- (0.18.88) the band's charge
+
+	/** The band's full charge: mastery grows it from {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. */
+	public static int capacity(Player player) {
+		if (player.isCreative()) {
+			return CHARGE_MAX;
+		}
+		float mastery = Mth.clamp(Mastery.unlocked(player) / (float)Mastery.ALL, 0.0F, 1.0F);
+		return CHARGE_MIN + Math.round((CHARGE_MAX - CHARGE_MIN) * mastery);
+	}
+
+	/** The charge as yourself (full the first time it's asked). */
+	static float charge(ServerPlayer player, Live live) {
+		if (live.charge < 0.0F) {
+			live.charge = capacity(player);
+		}
+		return live.charge;
+	}
+
+	/** Ticks until a slam is possible as yourself: the knockout lock, then the refill up to {@link #SLAM_MIN}. */
+	static int untilReady(ServerPlayer player, Live live) {
+		if (player.isCreative()) {
+			return 0;
+		}
+		float charge = charge(player, live);
+		int refill = charge >= SLAM_MIN ? 0 : Mth.ceil((SLAM_MIN - charge) * REFILL_TICKS / (float)capacity(player));
+		return Math.max(0, live.recharge) + refill;
+	}
+
+	/** Takes {@code amount} off a form's charge (hits, moves). Never in creative. */
+	public static void drain(ServerPlayer player, Live live, int amount) {
+		if (live.form == null || amount <= 0 || player.isCreative()) {
+			return;
+		}
+		live.ticksLeft = Math.max(1, live.ticksLeft - amount);
+		live.hudDirty = true;
+	}
+
+	/** Quick change: {@link #QUICK_SHARE} of the full charge for another alien, then a moment's dizziness. */
+	private static void quickChange(ServerPlayer player, Live live, XenoForm target) {
+		int cost = Math.round(live.total * QUICK_SHARE);
+		if (!player.isCreative() && live.ticksLeft - cost < SLAM_MIN) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.quick_low").withStyle(ChatFormatting.RED));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
+			return;
+		}
+		if (target.hidden() && !XenoVoices.content(player)) {
+			XenoVoices.refuse(player);
+			return;
+		}
+		if (swap(player, live, target, cost)) {
+			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, QUICK_DIZZY * 3, 0, false, false));
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, QUICK_DIZZY, 1, false, false));
+		}
+	}
+
+	/** From one alien straight into another, {@code cost} off the charge, keeping the health you'll turn back at. */
+	private static boolean swap(ServerPlayer player, Live live, XenoForm target, int cost) {
+		float human = live.humanHealth;
+		int left = Math.max(SLAM_MIN, live.ticksLeft - (player.isCreative() ? 0 : cost));
+		revert(player, false, false);
+		live.charge = left;
+		live.recharge = 0;
+		if (!transform(player, target, true)) {
+			return false;
+		}
+		live.humanHealth = human;
+		return true;
+	}
+
+	/**
+	 * A killing blow as yourself: the band slams itself, into an alien that fits the death, at 1 health to turn back
+	 * at. Not against the void or /kill, not while jammed or locked, and only every {@link #SAVE_COOLDOWN}.
+	 */
+	private static boolean save(ServerPlayer player, DamageSource source) {
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || XenoJam.jammed(player) || live.recharge > 0
+			|| live.lastSave != 0L && now - live.lastSave < SAVE_COOLDOWN) {
+			return false;
+		}
+		XenoForm form = saviour(player, source);
+		if (form == null) {
+			return false;
+		}
+		live.charge = Math.max(charge(player, live), SAVE_CHARGE);
+		player.setHealth(1.0F);
+		if (!transform(player, form, true)) {
+			return false;
+		}
+		live.lastSave = now;
+		live.humanHealth = 1.0F;
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.8F, 1.3F);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.saved", form.name()).withStyle(ChatFormatting.GREEN));
+		return true;
+	}
+
+	/** The alien that fits the blow: a fall gives wings, drowning gills, fire a fire-born, anything else armour. */
+	private static @Nullable XenoForm saviour(ServerPlayer player, DamageSource source) {
+		String[] wanted = source.is(DamageTypeTags.IS_FALL) ? new String[] {"wyrm", "wisp"}
+			: source.is(DamageTypeTags.IS_DROWNING) ? new String[] {"slipfin", "wisp"}
+			: source.is(DamageTypeTags.IS_FIRE) ? new String[] {"pyre", "prism"}
+			: new String[] {"bulwark", "knell", "prism"};
+		XenoformState.Band band = XenoformState.band(player);
+		for (String id : wanted) {
+			XenoForm form = XenoForms.get(id);
+			if (form != null && band.has(id)) {
+				return form;
+			}
+		}
+		XenoForm dialled = XenoForms.get(band.dialled());
+		return dialled != null && !dialled.hidden() ? dialled : randomKnown(player, null);
+	}
+
+	/** A random alien the band holds (never the hidden one unless the voices are content), other than {@code not}. */
+	private static @Nullable XenoForm randomKnown(ServerPlayer player, @Nullable XenoForm not) {
+		List<XenoForm> known = new ArrayList<>();
+		for (String id : XenoformState.band(player).unlocked()) {
+			XenoForm form = XenoForms.get(id);
+			if (form != null && form != not && (!form.hidden() || XenoVoices.content(player))) {
+				known.add(form);
+			}
+		}
+		return known.isEmpty() ? null : known.get(player.getRandom().nextInt(known.size()));
+	}
+
+	/** Whether the wild dial is on. */
+	public static boolean wild(Player player) {
+		return player.entityTags().contains(WILD_TAG);
+	}
+
+	private static void toggleWild(ServerPlayer player, Live live) {
+		boolean on = !wild(player);
+		if (on) {
+			player.addTag(WILD_TAG);
+			live.wildNext = WILD_MIN + player.getRandom().nextInt(WILD_MAX - WILD_MIN + 1);
+		} else {
+			player.removeTag(WILD_TAG);
+		}
+		player.sendOverlayMessage(Component.translatable(on ? "message.jaymospowers.xenoform.wild_on" : "message.jaymospowers.xenoform.wild_off")
+			.withStyle(on ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.GRAY));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.8F, on ? 1.8F : 0.9F);
 	}
 }

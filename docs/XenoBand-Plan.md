@@ -12,8 +12,10 @@ Standing rules that bind every patch:
 - Iron tools and parts are forged, never made at the crafting grid.
 - Every new recipe or route shows in JEI.
 - Optional mods only through compat classes.
-- **There is only ever one band per wearer** (Andy's note on Share). Nothing copies a band. Reforging upgrades the
-  band you already have. The rival band is a different device, and a wrist wears only one band at a time.
+- **Only two bands exist in the whole world** (Andy, 2026-10-31): the Xeno-Band and the rival band. Nothing copies
+  either one. Reforging upgrades the band itself. Kill a wearer and their band comes off and goes to you (into your
+  inventory, or dropped at your feet if it's full), and from then on it's yours to wear, keep, trade or throw away. A
+  wrist wears one band at a time.
 
 Andy's notes from the page, folded in below:
 - **Nadir:** "needs a flight akin to creative on double tap space. he needs the float that wind has on it as well, but
@@ -40,6 +42,12 @@ patches 6 (Kingdoms side) and 9 (art) can run beside another.
   lean keeps its 0.25 a tick threshold.
 
 ### Patch 1, The band's charge (Powers, medium; picks battery, quick-change, failsafe, randomizer, band-jammer)
+- **One band in the world:** the world keeps a record of the Xeno-Band (`XenoBands`, saved data): who wears it, or
+  where it lies as an item. A fallen star only holds the band while no one has it and no band item exists. Taking it off
+  (dying to another player or a mob that killed you on purpose, see below) ends the power and makes the band an item
+  again. A wearer killed by another player loses it to the killer. A band item that's destroyed (lava, the void,
+  despawning) goes back to the stars, and the next fallen star carries it. The rival band follows the same rules
+  (patch 8).
 - **Charge:** a band charge replaces the random 1 to 5 minute timer. Changed, it drains one point a tick, and faster
   when you're hit or when a move goes on cooldown. As a human it refills. Mastery makes it bigger, from 2 minutes up to
   5 at full mastery. The HUD bar becomes the charge, and the last 5 seconds beep and flash (patch 0).

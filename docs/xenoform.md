@@ -28,17 +28,36 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 ## The band [XenoformPower, XenoformState]
 
 - **Z held**: the wrist comes up; **scroll** while holding it to turn the dial through the aliens the band holds
-  (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. Held
-  0.5 s while changed, turn back early.
+  (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. While
+  changed, hold Z 0.5 s and let go to turn back; hold Z and **scroll**, then let go, for a **quick change** into the
+  dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.88).
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
-- **The timer**: a form lasts a random 1–5 minutes until the power is fully mastered (4 abilities), then always 5. The
-  band beeps once a second through the last 5 s (twice a second for the last 2), with red motes, and each beep flashes
+- **The charge** (0.18.88, replaces the random timer): the band holds 2 minutes of form unmastered, growing with
+  each mastered ability to 5 at full mastery (`capacity`). Changed, it spends a point a tick, 10 more per point of
+  damage taken and 20 more per move put on cooldown. What's left stays in the band when you turn back, and as yourself it
+  refills from empty in a minute; a slam needs 10 s of it. The HUD shows it as a thin bar over the dial (grey while too
+  low, purple when jammed, shimmering on the wild dial). The band beeps once a second through the last 5 s (twice a second for the last 2), with red motes, and each beep flashes
   your screen's edge red (0.18.87). Then you turn back where you stand.
 - **A second life bar**: your max health becomes the alien's and you start it full. When it hits zero you're knocked
   back into your own body (`ALLOW_DEATH` cancels the death) at the health you had before, dizzy for 5 s, and the band
-  recharges for 2 minutes (1 minute after turning back by hand; none in creative). `/kill` and the void still kill you.
+  is emptied and locked for a minute before it refills (none in creative). `/kill` and the void still kill you.
+- **The band saves you** (0.18.88): a killing blow as yourself (not the void or `/kill`, not jammed or locked) slams the
+  band for you, before Downed: a fall gives Wyrm or Wisp, drowning Slipfin (once it exists) or Wisp, fire Pyre or Prism,
+  anything else Bulwark, Knell or Prism, else the dialled alien. At least 30 s of charge, and you turn back at 1 health.
+  Once every 10 minutes.
+- **Wild dial** (0.18.88): C while holding Z as yourself turns it on or off (a player tag, kept). The band changes you
+  into a random known alien as soon as it can, and again every 1 to 60 s while changed (no cost); Z can't turn you back
+  or quick-change. Each move counts double toward mastery.
+- **Jammed** (0.18.88, `XenoJam`): an effect. An alien who has it turns back, and the band won't slam or save you until
+  it ends. Potion of Jamming: awkward + echo shard (20 s; redstone 40 s; gunpowder splash, dragon's breath lingering),
+  tipped arrows from the game's own recipe.
+- **One band in the world** (0.18.88, `XenoBands`, Andy): the overworld keeps who wears it and how many band items are
+  loose. A fallen star holds the band only while nobody wears it and none is loose. Killed by another player, a wearer
+  loses it: the power ends and the killer gets the band as an item that keeps every alien it learned. A loose band
+  destroyed (lava, void, despawn) or a power removed by hand returns it to the stars. `/powerdebug xenoform bands reset`
+  forgets the count.
 - **Fists only**: while changed both hands read as empty to everything that asks the entity (`XenoformHandsMixin` on
   `LivingEntity.getItemBySlot`), so no item can be used, mined with or shown, and punches hit for the alien's attack
   damage. The inventory itself is untouched.
