@@ -7,7 +7,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -51,6 +54,15 @@ public final class LooseParts {
 		float dirZ, float length) {
 	}
 
+	/**
+	 * (0.5.40) Set on a body drawn without the physics ragdoll (carried, falling from someone's arms, slung over a
+	 * horse): where it's placed, as {@link RagdollPose#body} is, and what {@link #apply} needs besides.
+	 */
+	public static final RenderStateDataKey<Frame> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:loose_parts");
+
+	public record Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale) {
+	}
+
 	private static final Map<ModelPart, List<Node>> PLANS = new WeakHashMap<>();
 	private static final Map<Object, Motion> MOTIONS = new WeakHashMap<>();
 
@@ -65,6 +77,22 @@ public final class LooseParts {
 	/** The swinging parts of the body {@code owner} (a corpse's ragdoll track), kept while it's alive. */
 	public static Motion motion(Object owner) {
 		return MOTIONS.computeIfAbsent(owner, o -> new Motion());
+	}
+
+	/**
+	 * (0.5.40) On a just-animated model of a body drawn without the ragdoll (see {@link #KEY}): its loose parts hang
+	 * from however its limp pose left them. Not humanoids, whose limbs that pose already hangs.
+	 */
+	static void apply(Model<?> model, EntityRenderState state) {
+		Frame frame = state.getData(KEY);
+		if (frame == null) {
+			return;
+		}
+		ModelPart root = model.root();
+		if (root.hasChild("right_arm") || root.hasChild("body") && root.getChild("body").hasChild("right_arm")) {
+			return;
+		}
+		apply(root, frame.body, frame.scale, frame.motion, frame.time, frame.grounded, Set.of());
 	}
 
 	/**

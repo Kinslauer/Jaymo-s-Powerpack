@@ -281,6 +281,8 @@ public final class RagdollPose {
 		RagdollPose pose = renderState.getData(KEY);
 		if (pose != null) {
 			pose.pose(model.root());
+		} else {
+			LooseParts.apply(model, renderState);
 		}
 	}
 

@@ -449,7 +449,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose
-		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(track), state.age, !corpse.isTumbling(),
+		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), state.age, !corpse.isTumbling(),
 			bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F);
 		bodyState.setData(RagdollPose.KEY, pose);
 		state.body = bodyState;
@@ -476,6 +476,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		flop.placed(placement, baseX, baseY, baseZ, partialTicks, state.tilt, state.move, state.turn, state.lift);
 		bodyState.setData(Flop.KEY, new Flop.Frame(flop, partialTicks));
+		// (0.5.40) and whatever its limp pose doesn't hang (a vulture's wings and neck, a modded mob's legs) hangs loose,
+		// placed as the body's own renderer would stand it (it turns it half round itself)
+		bodyState.setData(com.jaymoskitchen.client.ragdoll.LooseParts.KEY, new com.jaymoskitchen.client.ragdoll.LooseParts.Frame(
+			com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), new Matrix4f(placement).rotateY(-Mth.PI), state.age,
+			layout == Flop.Layout.LYING, bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F));
 	}
 
 	/** Where the body is placed (its feet, facing as drawn), relative to the corpse's own spot. */
