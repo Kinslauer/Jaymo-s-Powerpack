@@ -91,6 +91,11 @@ public class Ogre extends LegendMonster {
 		return this.entityData.get(TWO_HEADS);
 	}
 
+	/** (0.7.426) Gives it two heads (and a club) or one: an outpost's brute, the king's guard. */
+	public void setTwoHeads(boolean two) {
+		this.entityData.set(TWO_HEADS, two);
+	}
+
 	@Override
 	protected int pickVariant(ServerLevelAccessor level) {
 		this.entityData.set(TWO_HEADS, this.random.nextInt(TWO_HEAD_ODDS) == 0);
