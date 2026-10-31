@@ -77,6 +77,10 @@ final class CampChiefs {
 		if (w.role() == Orcs.WARCHIEF) {
 			Bodies.wear(mob, Bodies.WARCHIEF);
 		}
+		if (w.role() == Orcs.WARCHIEF || w.role() == Goblins.KING) {
+			// (0.7.434) a tribe's king holds his own weapon
+			Spoils.arm(level, mob, w.role(), w.factionId());
+		}
 		if (mob.isSleeping() || Downed.isDowned(mob)) {
 			return;
 		}

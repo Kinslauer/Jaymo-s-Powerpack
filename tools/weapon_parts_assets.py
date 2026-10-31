@@ -69,6 +69,10 @@ PARTS = [
     ("steel_tongs_jaws", "Steel Tongs Jaws", "drawn:tongs_jaws", ["steel"]),
     ("copper_smithing_hammer_head", "Smithing Hammer Head", "drawn:smithing_hammer_head", ["copper"]),
     ("steel_smithing_hammer_head", "Steel Smithing Hammer Head", "drawn:smithing_hammer_head", ["steel"]),
+    # (Havens patch 5) the kings' weapons' heads: taken from fallen kings, iron only (tools/king_spoils_assets.py)
+    ("gutting_hook_blade", "Gutting Hook Blade", "drawn:gutting_hook_blade", ["iron"]),
+    ("warchief_cleaver_blade", "Warchief's Cleaver Blade", "drawn:warchief_cleaver_blade", ["iron"]),
+    ("ogre_maul_head", "Ogre King's Maul Head", "drawn:ogre_maul_head", ["iron"]),
 ]
 # our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
 DRAWN = {
@@ -207,6 +211,57 @@ DRAWN["smithing_hammer_head"] = [
     "......####......",
     "................",
     "................",
+    "................",
+    "................"]
+DRAWN["gutting_hook_blade"] = [
+    "................",
+    "........#####...",
+    ".......#xoooo#..",
+    "......#xx####x#.",
+    "......#x#...#x#.",
+    ".....#ox#..#xx#.",
+    ".....#ox#...##..",
+    "....#ox#........",
+    "....#ox#........",
+    "...#ox#.........",
+    "...#ox#.........",
+    "..#ox#..........",
+    "..#xx#..........",
+    "...##...........",
+    "................",
+    "................"]
+DRAWN["warchief_cleaver_blade"] = [
+    "................",
+    "...#..#..#......",
+    "..#x##x##x####..",
+    "..#xxxxxxxxxxx#.",
+    "..#oxxxxxxxxxx#.",
+    "..#oxxxxxxxxxx#.",
+    "..#oxxxxxxxxxx#.",
+    "..#oxxxxxxxxx#..",
+    "..#oxxxxxxx##...",
+    "..#oxxxxx##.....",
+    "...####x#.......",
+    "......#x#.......",
+    "......###.......",
+    "................",
+    "................",
+    "................"]
+DRAWN["ogre_maul_head"] = [
+    "................",
+    "................",
+    "..############..",
+    ".#oooooooooooo#.",
+    ".#xx#xxxxxx#xx#.",
+    ".#xx#xxxxxx#xx#.",
+    ".#xx#xxxxxx#xx#.",
+    ".#xx#xxxxxx#xx#.",
+    ".#xx#xxxxxx#xx#.",
+    "..############..",
+    "......#xx#......",
+    "......#xx#......",
+    "......#xx#......",
+    "......####......",
     "................",
     "................"]
 # outline, metal, shine

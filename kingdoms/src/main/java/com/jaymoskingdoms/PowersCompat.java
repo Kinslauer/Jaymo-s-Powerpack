@@ -108,6 +108,37 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
+	/** (Havens patch 5) Powers' {@code Baubles.worn(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle wornBaubles;
+	private static boolean lookedForBaubles;
+
+	/**
+	 * (Havens patch 5) What {@code player} wears in Jaymo's Powers' bauble slots (server), empty stacks and all; an empty
+	 * list without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static java.util.List<net.minecraft.world.item.ItemStack> baubles(Player player) {
+		if (!lookedForBaubles) {
+			lookedForBaubles = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					wornBaubles = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.baubles.Baubles"), "worn",
+						java.lang.invoke.MethodType.methodType(java.util.List.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' baubles (older Powers?)", e);
+				}
+			}
+		}
+		if (wornBaubles == null) {
+			return java.util.List.of();
+		}
+		try {
+			return (java.util.List<net.minecraft.world.item.ItemStack>)wornBaubles.invoke(player);
+		} catch (Throwable e) {
+			return java.util.List.of();
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;

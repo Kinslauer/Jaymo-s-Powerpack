@@ -1237,6 +1237,10 @@ public final class Captains {
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
+		if (!returns) {
+			// (0.7.434) one who stays dead leaves his tusk to the player who felled him
+			Spoils.captainFell(level, entity, c.rank(), source);
+		}
 		UUID id = entity.getUUID();
 		FEARED.remove(id);
 		FEAR_READY.remove(id);

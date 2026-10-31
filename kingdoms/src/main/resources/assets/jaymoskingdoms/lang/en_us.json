@@ -9431,5 +9431,19 @@
 	"news.jaymoskingdoms.captain.challenge.won": "%1$s beat %2$s in a fair challenge. Even %3$s are talking of it.",
 	"news.jaymoskingdoms.captain.seat_taken": "The king of %2$s is dead, and %1$s sits his seat. They say he kneels to %3$s.",
 	"news.jaymoskingdoms.captain.seat_lost": "%1$s answers to %2$s no longer.",
-	"message.jaymoskingdoms.captain.challenge.out": "You already have a challenge nailed up."
+	"message.jaymoskingdoms.captain.challenge.out": "You already have a challenge nailed up.",
+	"item.jaymoskingdoms.captains_tusk": "Captain's Tusk",
+	"item.jaymoskingdoms.captains_tusk.of": "Tusk of %s",
+	"item.jaymoskingdoms.captains_tusk.worn": "Worn as a charm",
+	"item.jaymoskingdoms.goblin_kings_ring": "Goblin King's Ring",
+	"item.jaymoskingdoms.goblin_kings_ring.worn": "Worn as a ring: +1 Luck, +5% speed",
+	"item.jaymoskingdoms.necklace_of_tusks": "Necklace of Tusks",
+	"item.jaymoskingdoms.necklace_of_tusks.worn": "Worn as an amulet: +1.5 attack damage",
+	"item.jaymoskingdoms.ogre_kings_hide": "Ogre King's Hide",
+	"item.jaymoskingdoms.ogre_kings_hide.worn": "Worn as a cloak (body): +3 armour, steadier footing",
+	"item.jaymoskingdoms.trophy.will": "Adds to your Will while worn",
+	"item.jaymoskingdoms.monster_crown.hint": "Right-click the air to wear it (adds to your Will), or place it",
+	"block.jaymoskingdoms.goblin_kings_crown": "Goblin King's Crown",
+	"block.jaymoskingdoms.orc_kings_crown": "Orc King's Crown",
+	"block.jaymoskingdoms.ogre_kings_crown": "Ogre King's Crown"
 }

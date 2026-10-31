@@ -144,5 +144,14 @@
   "item.jaymospowers.leather_whip": "Leather Whip",
   "item.jaymospowers.leather_whip.hint": "Right-click: crack it. Hold to wrap what it hits, let go to haul it over your head (or off its feet)",
   "item.jaymospowers.flail.whirl": "Hold right-click to whirl the ball overhead; let go to bring it down where you look",
-  "item.jaymospowers.fang_gauntlets": "Fang Gauntlets"
+  "item.jaymospowers.fang_gauntlets": "Fang Gauntlets",
+  "item.jaymospowers.gutting_hook": "Gutting Hook",
+  "item.jaymospowers.warchief_cleaver": "Warchief's Cleaver",
+  "item.jaymospowers.ogre_kings_maul": "Ogre King's Maul",
+  "item.jaymospowers.king_weapon.hook": "Each hit hooks the foe a step toward you",
+  "item.jaymospowers.king_weapon.cleaver": "Knocks a raised shield aside for a while",
+  "item.jaymospowers.king_weapon.maul": "Throws the struck back, reeling",
+  "jei.jaymospowers.king_head.gutting_hook_blade": "Taken from a tribe's goblin king when he falls (the king at its oldest village). It can't be cast or forged: put it together at the Tool Station with a Tool Handle and a Tool Binding.",
+  "jei.jaymospowers.king_head.warchief_cleaver_blade": "Taken from a tribe's orc king when he falls (the warchief at its oldest camp). It can't be cast or forged: put it together at the Tool Station with a Tough Handle and a Tool Binding.",
+  "jei.jaymospowers.king_head.ogre_maul_head": "Taken from an Ogre King when he falls in his hold. It can't be cast or forged: put it together at the Tool Station with a Tough Handle and a Tool Binding."
 }
