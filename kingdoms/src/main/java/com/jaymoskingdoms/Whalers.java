@@ -155,6 +155,8 @@ public final class Whalers {
 		long launched, seen, huntFrom;
 		BlockPos ground;
 		int whales;
+		/** (0.7.437) How many steps out her ground lies ({@link FarGrounds}), and the sea rovers that have come after her there. */
+		int far, rovers;
 		final Map<String, Integer> hold = new HashMap<>();
 		final List<UUID> hands = new ArrayList<>();
 		/** (0.7.270) Each signed player's berth ({@link #HARPOONER}, {@link #DECKHAND}, {@link #MONKEY}). */
@@ -177,7 +179,7 @@ public final class Whalers {
 		}
 
 		private record Saved(UUID ship, long launched, long seen, long huntFrom, BlockPos ground, int whales, Map<String, Integer> hold,
-			List<UUID> hands, Map<String, String> berths) {
+			List<UUID> hands, Map<String, String> berths, int far, int rovers) {
 		}
 
 		static final Codec<Voyage> CODEC = RecordCodecBuilder.<Saved>create(i -> i.group(
@@ -189,7 +191,9 @@ public final class Whalers {
 				Codec.INT.optionalFieldOf("whales", 0).forGetter(Saved::whales),
 				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("hold", Map.of()).forGetter(Saved::hold),
 				UUIDUtil.CODEC.listOf().optionalFieldOf("hands", List.of()).forGetter(Saved::hands),
-				Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("berths", Map.of()).forGetter(Saved::berths))
+				Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("berths", Map.of()).forGetter(Saved::berths),
+				Codec.INT.optionalFieldOf("far", 0).forGetter(Saved::far),
+				Codec.INT.optionalFieldOf("rovers", 0).forGetter(Saved::rovers))
 			.apply(i, Saved::new)).xmap(s -> {
 				Voyage v = new Voyage(s.ship(), s.launched(), s.ground());
 				v.seen = s.seen();
@@ -198,11 +202,13 @@ public final class Whalers {
 				v.hold.putAll(s.hold());
 				v.hands.addAll(s.hands());
 				s.berths().forEach((who, berth) -> v.berths.put(UUID.fromString(who), berth));
+				v.far = s.far();
+				v.rovers = s.rovers();
 				return v;
 			}, v -> {
 				Map<String, String> berths = new HashMap<>();
 				v.berths.forEach((who, berth) -> berths.put(who.toString(), berth));
-				return new Saved(v.ship, v.launched, v.seen, v.huntFrom, v.ground, v.whales, Map.copyOf(v.hold), List.copyOf(v.hands), berths);
+				return new Saved(v.ship, v.launched, v.seen, v.huntFrom, v.ground, v.whales, Map.copyOf(v.hold), List.copyOf(v.hands), berths, v.far, v.rovers);
 			});
 	}
 
@@ -348,6 +354,7 @@ public final class Whalers {
 						unseen(level, f, v);
 					} else if (now - v.launched > FORGET) {
 						put(server, f.id(), null);
+						FarGrounds.lost(server, f.id());
 					}
 				}
 				continue;
@@ -365,7 +372,9 @@ public final class Whalers {
 	/** {@code f}'s whaler put in at its harbour to fit out for a voyage. */
 	static @Nullable Ship fitOut(ServerLevel level, Faction f, Navies.Harbour h) {
 		RandomSource random = level.getRandom();
-		BlockPos ground = ground(level, h, random);
+		// (0.7.437) the further out the more voyages it's had home with whales
+		int far = FarGrounds.far(level.getServer(), f.id());
+		BlockPos ground = ground(level, h, random, far);
 		if (ground == null) {
 			return null;
 		}
@@ -377,7 +386,11 @@ public final class Whalers {
 		if (ship == null) {
 			return null;
 		}
-		put(level.getServer(), f.id(), new Voyage(ship.getUUID(), level.getGameTime(), ground));
+		// (0.7.437) her far ground's rovers need a cove to sail out of: founded now if there's none
+		FarGrounds.coveFor(level, h, far);
+		Voyage voyage = new Voyage(ship.getUUID(), level.getGameTime(), ground);
+		voyage.far = far;
+		put(level.getServer(), f.id(), voyage);
 		Raids.tell(level, h.shore(), Component.translatable("message.jaymoskingdoms.whaler.fitting", crew.name, f.name()).withStyle(ChatFormatting.AQUA));
 		JaymosKingdoms.LOGGER.info("{} fits out the whaler {} for a ground at {}", f.name(), crew.name, ground);
 		return ship;
@@ -462,12 +475,12 @@ public final class Whalers {
 	}
 
 	/** Open deep water far out from {@code h}, for a whaling ground (null: none found). */
-	private static @Nullable BlockPos ground(ServerLevel level, Navies.Harbour h, RandomSource random) {
+	private static @Nullable BlockPos ground(ServerLevel level, Navies.Harbour h, RandomSource random, int far) {
 		Vec3 out = Vec3.atCenterOf(h.mooring()).subtract(Vec3.atCenterOf(h.shore()));
 		float seaward = out.lengthSqr() > 0.01 ? (float) Mth.atan2(out.z, out.x) : random.nextFloat() * Mth.TWO_PI;
 		for (int tries = 0; tries < 8; tries++) {
 			float angle = seaward + (random.nextFloat() - 0.5F) * 1.6F;
-			double d = Mth.nextDouble(random, GROUND_MIN, GROUND_MAX);
+			double d = Mth.nextDouble(random, GROUND_MIN, GROUND_MAX) + far * FarGrounds.STEP;
 			BlockPos at = BlockPos.containing(h.mooring().getX() + Mth.cos(angle) * d, level.getSeaLevel() - 1, h.mooring().getZ() + Mth.sin(angle) * d);
 			// (unloaded is fine: it's taken on trust, and she'll cruise for open water when she's there)
 			if (!level.isLoaded(at) || level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(8)).is(FluidTags.WATER)) {
@@ -480,6 +493,17 @@ public final class Whalers {
 	/** {@code f}'s whaler made her voyage out of anyone's reach: a catch for its stores and purse, and she's forgotten (stowed if seen again). */
 	private static void unseen(ServerLevel level, Faction f, Voyage v) {
 		RandomSource random = level.getRandom();
+		if (FarGrounds.lostUnseen(v, random)) {
+			// (0.7.437) the far grounds took her: never heard of again
+			put(level.getServer(), f.id(), null);
+			FarGrounds.lost(level.getServer(), f.id());
+			Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
+			if (h != null) {
+				Raids.tell(level, h.shore(), Component.translatable("message.jaymoskingdoms.whaler.never_home", f.name()).withStyle(ChatFormatting.GRAY));
+			}
+			JaymosKingdoms.LOGGER.info("{}'s whaler was lost unseen {} steps out", f.name(), v.far);
+			return;
+		}
 		int whales = Math.max(v.whales, 1 + random.nextInt(WHALES));
 		v.add("oil", UNSEEN_OIL * whales);
 		v.add("meat", UNSEEN_MEAT * whales);
@@ -489,8 +513,12 @@ public final class Whalers {
 				v.add("ambergris", 1);
 			}
 		}
+		v.whales = whales;
+		FarGrounds.richer(v, random);
 		unload(level, f, v);
 		put(level.getServer(), f.id(), null);
+		Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
+		FarGrounds.homeWithWhales(level, f, v, h != null ? h.shore() : f.seat());
 		JaymosKingdoms.LOGGER.info("{}'s whaler came home unseen with {} whales", f.name(), whales);
 	}
 
@@ -575,6 +603,10 @@ public final class Whalers {
 			case "cutting" -> cutting(level, ship, crew, v, boats);
 			default -> homeward(level, ship, crew, v, f, boats);
 		};
+		if (plan != null && ("hunting".equals(crew.mode) || "cutting".equals(crew.mode))) {
+			// (0.7.437) out on a far ground: pirates, and sharks under her boats
+			FarGrounds.dangers(level, ship, crew, v, boats, now);
+		}
 		if (plan != null) {
 			put(server, crew.faction, v);
 			boatwork(level, ship, crew, boats, orders);
@@ -613,7 +645,10 @@ public final class Whalers {
 		crew.bound = v.ground;
 		LivingEntity captain = captain(level, ship, crew);
 		if (captain != null) {
-			Speech.say(level, captain, Component.translatable("message.jaymoskingdoms.whaler.sails"), Speech.YELLOW, 32.0);
+			// (0.7.437) the nearer grounds fished out: further out this time
+			int out = (int) Math.round(Math.sqrt(Raids.horizontal(crew.home, v.ground)));
+			Speech.say(level, captain, v.far > 0 ? Component.translatable("message.jaymoskingdoms.whaler.sails_far", out)
+				: Component.translatable("message.jaymoskingdoms.whaler.sails"), Speech.YELLOW, 32.0);
 		}
 		return toward(crew, ship, v.ground, 1.0);
 	}
@@ -638,6 +673,8 @@ public final class Whalers {
 	private static float[] hunting(ServerLevel level, Ship ship, Crew crew, Voyage v, long now, List<AbstractBoat> boats, List<Order> orders) {
 		WhaleCarcass carcass = ours(level, ship, boats);
 		if (carcass != null) {
+			// (0.7.437) more sharks come to it the further out she is
+			carcass.wildness = v.far;
 			if (!fastTo(level, carcass, ship) && !boats.isEmpty()) {
 				// her boats tow it back on their lines while she closes with it
 				if (ship.getBoundingBox().inflate(TOW_IN, 4.0, TOW_IN).intersects(carcass.getBoundingBox())) {
@@ -665,7 +702,7 @@ public final class Whalers {
 				return toward(crew, ship, crew.home, 1.0);
 			}
 			if ((now - v.huntFrom) % POD_AFTER < Corsairs.THINK && now - v.huntFrom >= POD_AFTER) {
-				pod(level, ship);
+				pod(level, ship, v.far);
 			}
 			if (crew.waypoint == null || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.waypoint)) < GROUND_REACH) {
 				BlockPos next = Fleet.openSea(level, v.ground, GROUND_CRUISE, 6, level.getRandom());
@@ -715,6 +752,7 @@ public final class Whalers {
 			done(level, ship, crew, v);
 			return hold(ship);
 		}
+		carcass.wildness = v.far;
 		if (work == null || !work.carcass.equals(carcass.getUUID())) {
 			// (taken up again after a restart, or another carcass come alongside)
 			done(level, ship, crew, v);
@@ -757,6 +795,8 @@ public final class Whalers {
 		v.add("blubber", emptyWorks(ship, crew));
 		v.add("oil", v.get("blubber") / TRY_BLUBBER);
 		v.hold.remove("blubber");
+		// (0.7.437) the far grounds' old bulls are fatter
+		FarGrounds.richer(v, level.getRandom());
 		int worth = unload(level, f, v);
 		Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
 		// (0.7.242) her crew paid their lay ashore, each to sign on again or leave the sea with it
@@ -776,6 +816,7 @@ public final class Whalers {
 			.withStyle(ChatFormatting.AQUA));
 		JaymosKingdoms.LOGGER.info("{}'s whaler {} came home with {} whales ({} emeralds)", f.name(), crew.name, v.whales, worth);
 		put(level.getServer(), f.id(), null);
+		FarGrounds.homeWithWhales(level, f, v, ship.blockPosition());
 		stow(ship, List.of());
 	}
 
@@ -1186,6 +1227,8 @@ public final class Whalers {
 		Voyage v = voyage(level.getServer(), crew.faction);
 		if (v != null) {
 			put(level.getServer(), crew.faction, null);
+			// (0.7.437) the grounds that took her are shunned
+			FarGrounds.lost(level.getServer(), crew.faction);
 		}
 	}
 
@@ -1226,16 +1269,20 @@ public final class Whalers {
 	}
 
 	/** A pod comes by, out where nobody sees them arrive. */
-	private static void pod(ServerLevel level, Ship ship) {
+	private static void pod(ServerLevel level, Ship ship, int far) {
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < 6; tries++) {
 			float angle = random.nextFloat() * Mth.TWO_PI;
 			BlockPos at = BlockPos.containing(ship.getX() + Mth.cos(angle) * POD_OFF, level.getSeaLevel() - 8, ship.getZ() + Mth.sin(angle) * POD_OFF);
 			if (level.isLoaded(at) && level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(3)).is(FluidTags.WATER)
 				&& !Raids.playerNear(level, at, POD_HIDE)) {
-				int n = 1 + random.nextInt(2);
+				// (0.7.437) bigger pods on the far grounds, sperm whales and the white whale among them
+				int n = FarGrounds.pod(1 + random.nextInt(2), far);
 				for (int i = 0; i < n; i++) {
-					Whaling.GREAT_WHALE.spawn(level, at.offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4), EntitySpawnReason.EVENT);
+					GreatWhale whale = Whaling.GREAT_WHALE.spawn(level, at.offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4), EntitySpawnReason.EVENT);
+					if (whale != null) {
+						FarGrounds.breed(whale, far, random);
+					}
 				}
 				return;
 			}
