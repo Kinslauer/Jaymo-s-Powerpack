@@ -54,7 +54,7 @@ public final class UltimateFilm {
 
 	/**
 	 * Server → client: play a film. {@code caster} is whose ultimate it is; {@code witness} says this player is only near
-	 * it (bars, no camera); (0.18.105) {@code afterDeath}: they've just died, and it plays before their death screen.
+	 * it (bars, no camera); (0.18.106) {@code afterDeath}: they've just died, and it plays before their death screen.
 	 */
 	public record Play(int caster, int shot, int ticks, Vec3 at, int target, boolean witness, boolean afterDeath) implements CustomPacketPayload {
 		public static final Type<Play> TYPE = new Type<>(JaymosPowers.id("ultimate_film"));
@@ -124,7 +124,7 @@ public final class UltimateFilm {
 	}
 
 	/**
-	 * (0.18.105) A film for {@code dead}, who has just died: their camera on {@code at} (and {@code target}) for
+	 * (0.18.106) A film for {@code dead}, who has just died: their camera on {@code at} (and {@code target}) for
 	 * {@code ticks}, with the death screen held back until it ends (or they skip it). Kingdoms' captains use it for the
 	 * killer's moment over the body.
 	 */

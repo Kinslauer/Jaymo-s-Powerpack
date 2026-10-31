@@ -7557,7 +7557,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
   Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.
 - Compile-checked only; not played.
-## 0.7.431: captains (Havens patch 3; pack 0.18.105)
+## 0.7.431: captains (Havens patch 3; pack 0.18.106)
 - `Captains`: every goblin and orc tribe keeps a ladder of 4 named captains under its king (up to 7; ranks 1 to 5), each
   with a byname, gear and size by rank, posted to one of its camps (shown when a player comes within 80 blocks), or at
   the head of a hunting band. A new one rises a day to fill the ladder.
@@ -7571,7 +7571,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   about how it went last time (you ran, beat him, spared or questioned him, or he killed you).
 - A captain who kills a player climbs a rank, gains a strength and wears their head (it drops when he dies); one of the
   tribe's common folk who does it becomes a captain. He's that player's sworn foe in their journal until he falls.
-- Andy: a short scene before you respawn. Your camera cuts round your killer (Powers 0.18.105's film after death, the
+- Andy: a short scene before you respawn. Your camera cuts round your killer (Powers 0.18.106's film after death, the
   death screen waiting) as he stands over your body and gloats; halfway, he roars, puts your head on, and his own
   cheer his name.
 - When a king's camp falls and another becomes the seat, the strongest captain takes it as its chief. Fallen captains

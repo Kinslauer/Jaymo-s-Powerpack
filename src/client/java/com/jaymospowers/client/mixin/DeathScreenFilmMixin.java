@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.18.105) While a film plays after your death ({@link UltimateCinematic#deathFilm}: a Kingdoms captain's moment over
+ * (0.18.106) While a film plays after your death ({@link UltimateCinematic#deathFilm}: a Kingdoms captain's moment over
  * your body), the death screen waits: not drawn, its clock and buttons held, so the scene plays before you can respawn.
  */
 @Mixin(DeathScreen.class)

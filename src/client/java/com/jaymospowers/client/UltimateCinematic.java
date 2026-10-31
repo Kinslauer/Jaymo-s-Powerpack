@@ -67,7 +67,7 @@ public final class UltimateCinematic {
 	private static @Nullable KeyMapping skipKey;
 	/** Your own film (camera and HUD), or someone else's near you (bars only). */
 	private static boolean running, witness;
-	/** (0.18.105) Your own film plays after you died, before the death screen (it waits, {@code DeathScreenFilmMixin}). */
+	/** (0.18.106) Your own film plays after you died, before the death screen (it waits, {@code DeathScreenFilmMixin}). */
 	private static boolean afterDeath;
 	private static @Nullable CameraType viewBefore;
 	private static int shot, length, age, target = -1, hurtBefore;
@@ -104,7 +104,7 @@ public final class UltimateCinematic {
 		return running && !witness;
 	}
 
-	/** (0.18.105) Your own film is playing after your death: the death screen waits. */
+	/** (0.18.106) Your own film is playing after your death: the death screen waits. */
 	public static boolean deathFilm() {
 		return running && !witness && afterDeath;
 	}
@@ -147,12 +147,12 @@ public final class UltimateCinematic {
 			if (!witness && self != null) {
 				// acting, or being hit, takes the view back at once
 				boolean hands = minecraft.options.keyAttack.isDown() || minecraft.options.keyUse.isDown();
-				// (0.18.105) after your death, only a fresh press (the death blow's hurt doesn't count)
+				// (0.18.106) after your death, only a fresh press (the death blow's hurt doesn't count)
 				skipped |= hands && !handsBefore || !afterDeath && self.hurtTime > hurtBefore;
 				handsBefore = hands;
 				hurtBefore = self.hurtTime;
 			}
-			// (0.18.105) one after your death plays on while you're dead, and ends once you're back
+			// (0.18.106) one after your death plays on while you're dead, and ends once you're back
 			boolean gone = afterDeath ? age > 20 && self != null && self.isAlive() : self == null || !self.isAlive();
 			if (self == null || gone || skipped || ++age >= length || !witness && BeamCinematic.running()) {
 				stop(minecraft);

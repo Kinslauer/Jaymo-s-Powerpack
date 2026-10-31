@@ -94,10 +94,11 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   and whales.
 - **Breaking under water** (`TerrainParticleWaterMixin`): break bits sink slowly with bubbles.
 
-### Patch 3, Faces (Powers client; pick face-anim)
-- A face layer on players: blink every 3-6 s, pupils shift towards the look target, brows frown when hurt or angry.
-  Reads the skin's eye pixels (rows 3-4 of the head front) and only draws when it finds a two-pixel eye pair, so odd
-  skins stay as they are. MCA-faced players use MCA's own face. Knocked out and dead keep the closed eyes we have.
+### Patch 3, Faces (Powers 0.18.105; pick face-anim)
+- `client/face/PlayerFaces`: blink every 3-6 s (Kitchen's `ClosedEyes` held a few ticks), pupils shift towards the
+  nearest living thing within 8 blocks once it's 18+ degrees off the face, brows frown (inner ends down) when hurt or
+  swinging. Painted on copies of the skin, only when the head front has a plain two-pixel eye pair on one row (rows
+  3-6); other skins stay as they are. Knocked out and dead keep the closed eyes we have. MCA-drawn faces aren't touched.
 
 ### Patch 4, Holding and using items (Powers; picks flint-steel, shears, held-tools, held-lantern, + flintlock note)
 - **Flint and steel / flint and rock:** two-handed strike in first and third person, spark, then flame.
