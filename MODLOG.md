@@ -4596,3 +4596,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - A finisher's killing stroke can leave your weapon standing in the body until you go and take it: Run Through 5%,
   Stabbed Through 8%, Executioner (axes) 12%. The chance halves after 12 bladed finisher kills, thirds after 24, and so
   on. Never in creative.
+- Andy: dropped weapons. Going down, players and mobs let go of the weapons in their hands, which land a little way off
+  (`core/wounds/DroppedArms`); 1 in 10 hang on and crawl with them, and die still holding them. A mob killed outright
+  drops its weapons too, except for 1 in 5 that die clutching them. Players dying outright drop everything as before.
