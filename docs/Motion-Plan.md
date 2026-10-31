@@ -121,7 +121,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - 3D red and brown mushrooms and pointed dripstone. Java only seams one double slab (smooth stone): now one block.
 - Canoes left out: Canoe Boats is CC BY-NC and fetched at install, so we can't ship carved versions of it.
 
-### Patch 6, Mob animation (Powers/Kingdoms client; picks mob-anims, pet-wolves, pet-cats, wet-wolves, golem-idle)
+### Patch 6, Mob animation (Powers/Kingdoms client; picks mob-anims, pet-wolves, pet-cats, wet-wolves, golem-idle) (built: Powers 0.18.112, Kingdoms 0.7.433)
 - First check whether base Fresh Animations (FreshLX) allows modpacks and has 26.3; if so ship it unchanged through EMF
   for vanilla mob motion. Otherwise our own walk cycles for farm animals, zombies and spiders.
 - Pet wolves: greet the owner coming back, play bow, lying poses, dozing off and waking at sounds (feral wolves too).
