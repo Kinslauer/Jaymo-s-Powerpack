@@ -111,6 +111,12 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -360.0F * ease(p / 0.85F));
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.BACK_FLIP -> {
+				// tucked, over backwards in the air (Motion patch 0's air flip)
+				poseStack.translate(0.0F, middle + 0.3F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 360.0F * ease(p / 0.85F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.CORKSCREW -> {
 				// laid out flat ahead like a dive, twisting a full turn along the body
 				float lay = Mth.sin(p * Mth.PI);
@@ -228,7 +234,7 @@ public final class WebBodyPose {
 				set(h.leftArm, -1.4F, 0.4F, -0.2F, e);
 				set(h.rightLeg, -0.4F, 0.0F, 0.1F, e);
 			}
-			case WebPose.FRONT_FLIP, WebPose.LAND_ROLL -> {
+			case WebPose.FRONT_FLIP, WebPose.BACK_FLIP, WebPose.LAND_ROLL -> {
 				set(h.rightLeg, -1.9F, 0.0F, 0.1F, e);
 				set(h.leftLeg, -1.9F, 0.0F, -0.1F, e);
 				set(h.rightArm, -1.6F, -0.3F, 0.2F, e);

@@ -50,22 +50,23 @@ Each patch is its own PR; versions are set to master + 1 right before merging. P
 touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (different files): 0 with 5, 1 with 6,
 2 with 7, 3 with 9, 4 with 8.
 
-### Patch 0, Landings, flips and sitting (Powers; picks roll-landing, hero-landing, air-flip, balance, sit-anywhere)
-- **Landing roll for everyone:** `LandingRoll` no longer checks `Freerun.Perk.SURE_FOOTING`. The trigger is a
-  double tap of sneak (two presses within `DOUBLE_TAP_TICKS`) up to `EARLY_TICKS` before touchdown or within
-  `LATE_TICKS` after; the dodge key still works. Sure Footing leaves the Freerun tree; its slot's points are refunded.
-- **Hero landing:** a fall that would deal 6+ damage (or a flier diving into the ground faster than `HERO_SPEED`) and
-  isn't rolled lands in the three-point crouch, one fist down, with a dust ring (the Giants' stomp ring, smaller) and a
-  short camera dip. Held `HERO_TICKS`; moving or jumping breaks it. Every Web glide landing uses it too.
-- **Air flips:** tap sneak in the air to flip in the way you're moving (front, back or side, from your input). Freerun
-  players with the Freerunner rank and Web (beside his jump flip, same `WebPose.BACKFLIP` look). Costs
-  `FLIP_STAMINA`; a flip within `FLIP_LAND_TICKS` of landing still counts for the landing roll window.
-- **Balance:** `BalancePose` for everyone on narrow tops, with a smaller wobble for those without Sure Footing ranks,
-  and chains and end rods count as narrow tops.
-- **Sit anywhere:** sneak still and looking down past `SIT_PITCH` for `SIT_TICKS` (5 s) sits you on the ground (knees
-  up, or legs over an edge when the block in front is air). Moving, jumping or being hit stands you up. With the
-  Meditation perk, sitting is meditating (`Meditate` counts it). The Meditate key (I) becomes Shadowbox, only bound for
-  those who shadowbox; lang `key.jaymospowers.meditate` renamed.
+### Patch 0, Landings, flips and sitting (Powers 0.18.97 + Kingdoms 0.7.424; picks roll-landing, hero-landing, air-flip, balance, sit-anywhere)
+- **Landing roll for everyone:** `LandingRoll` and `DodgeClient` no longer check Sure Footing. The skill check stays:
+  Sneak tapped twice (or the dodge key) up to `EARLY_TICKS` before touchdown or within `LATE_TICKS` after. Sure
+  Footing leaves the Freerun tree; its points come back (ranks are saved by key) and Bar Swing moves up into its slot.
+- **Hero landing:** fall damage of `HERO_DAMAGE` (6) or more that you'd live through lands you in the three-point
+  `WebPose.HERO_LAND`, with a thud and a ring of dust (`LandingRoll.dust`). Rolling in the late window takes it away.
+  Every Web glide (wings) landing is a hero landing, and Web's hero landings get the dust too.
+- **Air flips:** one tap of Sneak in the air, `AirFlip.MIN_HEIGHT` (2) blocks or more off the ground: forward (Forward
+  or nothing held), backward (Back, new `WebPose.BACK_FLIP`) or a cartwheel (a strafe key). The client waits out the
+  double-tap window so two taps stay the dodge and landing roll. Web slingers and Freerunner 1+; `AirFlip.COST` (2)
+  Feathers.
+- **Balance:** already done: `BalancePose` is everyone's and `freerun_narrow` already lists chains and end rods.
+- **Sit anywhere:** standing still, sneaking and looking down past `SIT_PITCH` (65) for `SIT_TICKS` (5 s) sits you
+  down cross-legged (the meditation pose); you stay sat after letting go until you move, jump or are hurt. Swinging
+  or using an item resets the count, so bridging doesn't sit you down. With the Meditation perk, sitting is
+  meditating. The I key is renamed Shadowbox and only does something for Z Fighters and Gravity users; anyone else
+  pressing it gets a hint on how to sit.
 
 ### Patch 1, Body motion and temperaments (Powers + Kingdoms; picks torso-lag, strafe-lean, hurt-flinch, scared-idle, scared-flee)
 - **Torso lag:** the body turns towards the head over `TORSO_EASE` ticks, capped at `TORSO_MAX` degrees, all players.

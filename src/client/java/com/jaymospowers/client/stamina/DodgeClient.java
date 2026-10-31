@@ -44,7 +44,7 @@ public final class DodgeClient {
 	private static int groundedAfterCling;
 	/** Ticks until the next dodge (the server's {@link Dodge#COOLDOWN}, kept here too so the hop isn't spent twice). */
 	private static int cooldown;
-	/** (0.15.67) Sure Footing: ticks left in which a dodge pressed in the air still rolls you as you land ({@link LandingRoll}). */
+	/** (0.15.67) Ticks left in which a dodge pressed in the air still rolls you as you land ({@link LandingRoll}; everyone's since Motion patch 0). */
 	private static int landingRoll;
 	/** Ticks since this player last dodged (the HUD flashes the row). */
 	public static int sinceDodge = Integer.MAX_VALUE;
@@ -82,7 +82,7 @@ public final class DodgeClient {
 		if (sneakDoubleTap(minecraft, player)) {
 			wanted = true;
 		}
-		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0 && Freerun.perk(player, Freerun.Perk.SURE_FOOTING) > 0) {
+		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
 			landingRoll = LandingRoll.EARLY_TICKS;
 		} else if (wanted) {

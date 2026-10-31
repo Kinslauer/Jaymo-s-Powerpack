@@ -7485,3 +7485,8 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   swallow's rope and skin on the held foe, run up to sealed (`MELT`, 0.58 of the way) and held there wobbling, never
   gulped and with no swell after. The first-person reaching arm follows it too.
 - Compile-checked only; not played.
+## 0.7.424: Sure Footing leaves the tree (pack 0.18.97)
+- Andy: give everyone the landing roll. Sure Footing is gone from Stealth's Freerun page; ranks saved under
+  `sure_footing` count for nothing, so their points come back. Bar Swing moved up into its slot (needs Climber now).
+  Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
+- Compile-checked only; not played.

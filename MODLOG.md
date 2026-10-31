@@ -4398,3 +4398,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Rivet fix:** its C did nothing (no `onUltimate`) and it had no Ultimate skin; now it becomes Ironclad like the rest.
   - Models in `XenoFormModels`, skins and Ultimate skins from `tools/gen_xenoform.py` (the new skins drawn last so the
     old ones don't change), spikes in `UltimateSpikes`, HUD icons, lang. Compile-checked; not seen in game.
+- **0.18.97, Landings, flips and sitting (Motion patch 0, `docs/Motion-Plan.md`):** ideas from Actions & Stuff (paid
+  Bedrock pack, nothing copied).
+  - **Landing roll for everyone:** `LandingRoll` and `DodgeClient` no longer ask for Sure Footing (Andy: "remove it from
+    the tree, but keep the skillcheck"): double-tap Sneak (or the dodge key) just before or just as you land. Sure
+    Footing left `Freerun.Perk` and Kingdoms' tree (Kingdoms 0.7.424).
+  - **Hero landing:** fall damage of 6+ that you'd live through, not rolled, lands you in the three-point
+    `WebPose.HERO_LAND` (drawn for anyone by `WebBodyPose`) with a thud and a ring of dust (`LandingRoll.dust`); rolling
+    in the late window takes it away. Web's own hero landings kick up the dust too, and every glide (wings) landing is
+    a hero landing now (`WebTrickClient`).
+  - **Air flips** (`freerun/AirFlip`, `client/freerun/AirFlipClient`): one tap of Sneak in the air, 2+ blocks up,
+    flips you: forward (Forward or nothing), backward (Back, new `WebPose.BACK_FLIP`) or a cartwheel (a strafe key).
+    The client waits out the double-tap window so two taps stay the dodge/landing roll. Web slingers and Freerunner 1+;
+    2 Feathers; a little Stealth experience.
+  - **Sit anywhere** (`Meditate`): stand still, sneak and look down past 65 degrees for 5 s and you sit cross-legged,
+    staying sat after letting go until you move, jump or are hurt. With the Meditation perk the sit is meditating; the
+    I key is Shadowbox now, for Z Fighters and Gravity users only (others get a hint on how to sit).
+  - Balancing on chains and end rods was already everyone's (`freerun_narrow`); nothing changed there.
+  - Compile-checked; not seen in game.

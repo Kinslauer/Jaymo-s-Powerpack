@@ -184,9 +184,10 @@ public final class Skills {
 		// (0.7.102) Stealth's second page, freerunning (the moves are Jaymo's Powers' Freerun); last, so no ordinal moves
 		CLIMBER(Pillar.STEALTH, 3, 1, 3, 4, 0),
 		FREERUNNER(Pillar.STEALTH, 2, 1, 3, 4, 2),
-		SURE_FOOTING(Pillar.STEALTH, 1, 1, 8, 5, 0, CLIMBER),
+		// (Powers' Motion patch 0) Sure Footing left the tree: the landing roll is everyone's now (Andy). Ranks saved under
+		// sure_footing count for nothing, so their points come back; Bar Swing moved up into its place
 		LEAP_OF_FAITH(Pillar.STEALTH, 1, 2, 8, 5, 2, FREERUNNER),
-		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 6, 0, SURE_FOOTING),
+		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 5, 0, CLIMBER),
 		WALL_RUNNER(Pillar.STEALTH, 2, 1, 12, 6, 2, LEAP_OF_FAITH),
 		// (0.7.111) Stealth's third page, Shadows: how far mobs see you, how fast they lose you, and what an unaware blow does (Senses)
 		SHADOWED(Pillar.STEALTH, 3, 1, 5, 8, 0),
