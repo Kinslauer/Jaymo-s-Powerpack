@@ -47,7 +47,9 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Mule;
 import net.minecraft.world.entity.animal.equine.SkeletonHorse;
 import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import net.minecraft.world.entity.monster.Enemy;
@@ -235,7 +237,9 @@ public final class Equestrian {
 
 	/** One of the mounts it upgrades: horses, skeleton and zombie horses, war elephants (not donkeys, mules, llamas or camels). */
 	public static boolean covered(Entity e) {
-		return e instanceof Horse || e instanceof SkeletonHorse || e instanceof ZombieHorse || e instanceof WarElephant;
+		// (0.7.445, Havens patch 8) donkeys and mules too: bond, roster, gaits and wheel, drawn as vanilla's (Better Horses')
+		return e instanceof Horse || e instanceof SkeletonHorse || e instanceof ZombieHorse || e instanceof WarElephant || e instanceof Donkey
+			|| e instanceof Mule;
 	}
 
 	public static boolean undead(Entity e) {
@@ -272,7 +276,8 @@ public final class Equestrian {
 		} else if (undead(horse)) {
 			e = Equine.roll(Breed.HORSES[random.nextInt(Breed.HORSES.length)], random);
 		} else {
-			e = Equine.roll(breedAt(level, horse.blockPosition(), random), random);
+			e = Equine.roll(horse instanceof Donkey ? Breed.DONKEY : horse instanceof Mule ? Breed.MULE : breedAt(level, horse.blockPosition(), random),
+				random);
 			float speed = (float)clamp01((horse.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) - 0.1125) / 0.225);
 			float jump = (float)clamp01((horse.getAttributeBaseValue(Attributes.JUMP_STRENGTH) - 0.4) / 0.6);
 			e = new Equine(e.breed(), e.coat(), speed, e.stamina(), jump, e.courage(), e.temper());
@@ -333,7 +338,8 @@ public final class Equestrian {
 
 	/** A new mount of {@code breed} (a war elephant or a horse), not yet in the world. */
 	public static @Nullable AbstractHorse create(ServerLevel level, Breed breed, BlockPos at, EntitySpawnReason reason) {
-		AbstractHorse horse = breed.elephant() ? WAR_ELEPHANT.create(level, reason) : EntityTypes.HORSE.create(level, reason);
+		AbstractHorse horse = breed.elephant() ? WAR_ELEPHANT.create(level, reason) : breed == Breed.DONKEY ? EntityTypes.DONKEY.create(level, reason)
+			: breed == Breed.MULE ? EntityTypes.MULE.create(level, reason) : EntityTypes.HORSE.create(level, reason);
 		if (horse == null) {
 			return null;
 		}
@@ -357,7 +363,13 @@ public final class Equestrian {
 		if (!covered(baby) || !covered(partner) || !(partner instanceof AbstractHorse other)) {
 			return;
 		}
-		apply(baby, Equine.foal(equine(parent), equine(other), baby.getRandom()), true);
+		Equine e = Equine.foal(equine(parent), equine(other), baby.getRandom());
+		// (0.7.445) a horse and a donkey make a mule (and two donkeys a donkey, whichever parent's breed it took)
+		Breed kind = baby instanceof Mule ? Breed.MULE : baby instanceof Donkey ? Breed.DONKEY : null;
+		if (kind != null && e.breed() != kind) {
+			e = new Equine(kind, 0, e.speed(), e.stamina(), e.jump(), e.courage(), e.temper());
+		}
+		apply(baby, e, true);
 		// (0.7.305) a filly or a colt
 		Herding.born(baby, baby.getRandom());
 	}

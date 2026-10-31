@@ -7995,11 +7995,11 @@
 	"handbook.jaymoskingdoms.5.title": "Riding further",
 	"handbook.jaymoskingdoms.5.body": "A ridden horse steps up a block and a half (an elephant two), pushes through leaves, and swims with you instead of throwing you in deep water. A friend can climb up behind you on a saddled horse. Gallop to build a charge (the thin bar under stamina): once it glows, the horse runs down monsters in its way, harder the faster it goes and the heavier its barding.",
 	"handbook.jaymoskingdoms.6.title": "Mares and stallions",
-	"handbook.jaymoskingdoms.6.body": "Every horse is a mare or a stallion (the symbol by its name), and a foal is a filly or a colt. Breeding takes one of each. A foal takes after both its parents.",
+	"handbook.jaymoskingdoms.6.body": "Every horse is a mare or a stallion (the symbol by its name), and a foal is a filly or a colt. Breeding takes one of each. A foal takes after both its parents. Donkeys (jennies and jacks) are kept the same way: a horse and a donkey make a mule, hardy and sure-footed, and a mule never has a foal of its own.",
 	"handbook.jaymoskingdoms.7.title": "Your horse fights for you",
 	"handbook.jaymoskingdoms.7.body": "When something hurts you, horses of yours close by that trust you at 50 or more turn on it: they rear, kick and trample until it's dead or gone. A timid horse shies away instead. War training makes them hit harder.",
 	"handbook.jaymoskingdoms.8.title": "For Riders",
-	"handbook.jaymoskingdoms.8.body": "Riders read a wild horse at a glance: hold a saddle and look at it to see its breed, sex and stats. Each breed also gives its Rider a gift, which grows at trust 40 and 100: the destrier shields you from a killing blow, the courser bursts, the palfrey keeps road pace, the desert horse starts quick, the draft horse herds, the steppe pony snorts monsters away, the nightmare sees in the dark, the bat horse lands softly, the elephant calms angry beasts, and the mammoth walks on powder snow.",
+	"handbook.jaymoskingdoms.8.body": "Riders read a wild horse at a glance: hold a saddle and look at it to see its breed, sex, coat and stats. Each breed also gives its Rider a gift, which grows at trust 40 and 100: the destrier shields you from a killing blow, the courser bursts, the palfrey keeps road pace, the desert horse starts quick, the draft horse herds, the steppe pony snorts monsters away, the nightmare sees in the dark, the bat horse lands softly, the elephant calms angry beasts, the mammoth walks on powder snow, the donkey keeps its pace under a pack, and the mule is quickest on bare stone.",
 	"handbook.jaymoskingdoms.9.title": "Wagons and coaches",
 	"handbook.jaymoskingdoms.9.body": "With Jaymo's Kitchen, horses pull carts. A wagon carries goods and picks up animals and villagers it passes. The six-seat coach is too heavy for anything but a draft horse. Sneak and use a cart to let its passengers out.",
 	"talk.jaymoskingdoms.gossip.suspect.vampire.0": "I saw %1$s at the well last night, pale as milk.",
@@ -9619,5 +9619,13 @@
 	"tail.jaymoskingdoms.smelled.hunter.2": "You're not what you look like, are you?",
 	"tail.jaymoskingdoms.smelled.tribe.0": "Sniff sniff. Tail-man! Hiding it, ha!",
 	"tail.jaymoskingdoms.smelled.tribe.1": "You stink of tail, %s. Why tie it? Nobody cares here.",
-	"tail.jaymoskingdoms.smelled.tribe.2": "Something with a tail. Under the coat. We smell it."
+	"tail.jaymoskingdoms.smelled.tribe.2": "Something with a tail. Under the coat. We smell it.",
+	"handbook.jaymoskingdoms.10.title": "Coats",
+	"handbook.jaymoskingdoms.10.body": "Every horse's coat is named after its breed on its screen, on your roster and at a Rider's glance. A foal nearly always takes one parent's coat, so two of a coat breed true; now and then one comes out new. The last coat of each breed, in gold, is rare.",
+	"handbook.jaymoskingdoms.11.title": "Coats, continued",
+	"handbook.jaymoskingdoms.11.body": "",
+	"breed.jaymoskingdoms.donkey": "Donkey",
+	"breed.jaymoskingdoms.mule": "Mule",
+	"coat.jaymoskingdoms.donkey": "Donkey",
+	"coat.jaymoskingdoms.mule": "Mule"
 }

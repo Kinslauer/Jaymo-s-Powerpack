@@ -64,7 +64,15 @@ final class PackResourcePacks {
 		// (downed, tripped, carried, pets) pause it for that mob while they play (PoseTakeover#mobPosed).
 		new Pack("Fresh Animations", "jaymospowers-fresh-animations-v1", "FreshAnimations", "FreshAnimations_v1.11.1_26.1+.zip",
 			"https://cdn.modrinth.com/data/50dA9Sha/versions/tvGVYMD4/FreshAnimations_v1.11.1_26.1%2B.zip",
-			"ae9175983c5109162c86daae1acff34ccf623faf", false));
+			"ae9175983c5109162c86daae1acff34ccf623faf", false),
+		// (0.18.124, Havens patch 8) "Better Horses" (by CanineGray, CC BY-NC 4.0: shipped unchanged, credit to its author,
+		// never edited or copied from): redrawn donkeys and mules through Entity Model Features and Entity Texture
+		// Features, with coat variants. Version 4.3 for 1.21.11 (formats 22-94, older than 26.3's), fetched from Modrinth
+		// (project alMAK8J4). Horses, skeleton horses and zombie horses are Jaymo's Kingdoms' breed horses
+		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
+		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
+			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
+			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
 
 	private PackResourcePacks() {
 	}
