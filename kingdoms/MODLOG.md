@@ -7553,4 +7553,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Passing wipes the tribe's grudge with a 3-day truce (for ogres: the region's ogres leave you be for 3 days,
   `OgreHolds.TRUCE`), and the king sends 8 emeralds. A tribe sets no other trial for 3 days.
 - Bog iron no longer smelts to iron: it melts into Powers' bog iron (`tinkering_melting/bog_iron.json`).
+## 0.7.430: Tideborn swim with a dolphin's grace (pack 0.18.104)
+- Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
+  Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.
 - Compile-checked only; not played.

@@ -4468,3 +4468,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Bound, Croak), and Dud (hidden, never scanned: can't be hurt, can't hurt, thrown by every blow, draws monsters; no
   Ultimate). Each has its own model and skin (`gen_xenoform.py`), and the four with Ultimates armoured skins and spikes.
   Compile-checked; not seen in game.
+- **0.18.104, Water (Motion patch 2, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **Strokes** (`client/water/SwimStrokePose`): in water over half your height, off the bottom and not
+    sprint-swimming, the body takes the stroke for the way you move against the way you face: breaststroke leaning in
+    going forward, backstroke laid back going backward, side stroke rolled over going sideways, treading water (sculling
+    hands, cycling legs, a little bob) when hardly moving. From positions, so everyone sees it; pauses Fresh Animations.
+  - **The faster kick** only for Tideborn (Dolphin's Grace while sprint-swimming, Kingdoms 0.7.430) and Slipfin (had
+    it already). Nobody else's swimming changed.
+  - **Dives** (`water/Dives`): 4+ blocks into water 2+ deep. Sneak held from well before (8+ ticks) is a cannonball (big
+    splash, a boom, fish within 8 blocks scatter); Sneak pressed just before is a clean dive (small splash, pushed
+    deeper); neither is a belly flop (slap and splash, 1-2 damage from 12+ blocks).
+  - **Wakes** (`client/water/BoatWakes`): a V of foam from the stern and spray off the bow behind any moving boat or
+    raft, and anything whose id names a ship, whale, canoe or raft (Kingdoms' ships and great whales), sized by width
+    and speed; none for a whale deep under.
+  - **Breaking under water** (`TerrainParticleWaterMixin`): block bits drift down slowly, last twice as long, and some
+    trail a bubble.
+  - Compile-checked; not seen in game.
