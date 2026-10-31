@@ -47,6 +47,9 @@ public final class XenoDna {
 		Map.entry("jaymoskingdoms:skulk_golem", "knell"),
 		// (0.18.103, patch 5) Gyre: the breeze; Croaker: the tadpole
 		Map.entry("minecraft:breeze", "gyre"), Map.entry("minecraft:tadpole", "croaker"),
+		// (0.18.107, Scan B) Rime: the Iceologer; Marrow: Kingdoms' silver skeleton and Skeleton Lord
+		Map.entry("friendsandfoes:iceologer", "rime"), Map.entry("jaymoskingdoms:silver_skeleton", "marrow"),
+		Map.entry("jaymoskingdoms:skeleton_lord", "marrow"),
 		// Rivet: machines
 		Map.entry("jaymoskingdoms:redstone_golem", "rivet"), Map.entry("jaymoskingdoms:mimic", "rivet"),
 		Map.entry("jaymospowers:android_mech", "rivet"), Map.entry("jaymospowers:future_mech", "rivet"),
