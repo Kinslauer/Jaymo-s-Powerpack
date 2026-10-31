@@ -4678,15 +4678,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.4, Kingdoms 0.7.451:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
   only the starts open to you, with the rest under "Locked"; "Let fate decide" tells you the start it picked.
 
-- **0.19.7, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+- **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.
+
+- **0.19.8, Kingdoms 0.7.454:** "Ask the Way" on a villager's Interact page: a healer, butcher, smith, tailor, the
+  tavern, the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"),
+  or, if they like you (or they're a child), walk you there. Seeking an audience, a pedlar's wares, offering tribute and
+  a sworn captain's orders moved from the talk menu to the Interact page too, each shown only when it applies.
+
+- **0.19.9, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
   your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
   first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
-
-- **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.
-- **0.19.8, Kingdoms 0.7.454:** "Ask the Way" on a villager's Interact page: a healer, butcher, smith, tailor, the
-  tavern, the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"),
-  or, if they like you (or they're a child), walk you there. Seeking an audience, a pedlar's wares, offering tribute and
-  a sworn captain's orders moved from the talk menu to the Interact page too, each shown only when it applies.
