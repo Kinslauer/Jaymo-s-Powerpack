@@ -4662,3 +4662,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1:** a tournament ring only ever goes on proper ground: flat, plain, clear land near the kingdom's seat. If
+  there's none, no tournament is held there (another kingdom near a player is tried, else it waits a quarter day); it
+  used to fall back to any spot at all, a hillside, a roof or the river. Each kingdom's ring is kept and used again (the
+  floor mended, what grew on it cleared) while it stands, so its tournaments are always held in the same place.
