@@ -7743,3 +7743,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue
   robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
 - Compile-checked; not played.
+
+## 0.7.443: the star smith (Xeno-Band patch 7; pack 0.18.123)
+- **Star smith** (`ZFighterFolk.KINDS`, `star_smith`): Powers' smith who keeps the Star Forge on a far world. They are an
+  MCA villager like the other Z Fighter characters, with their own opening lines, name line, part ("Star Smith") and
+  bearing ("Gruff"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a dark suit with green-lit seams, a
+  scorched leather apron, elbow gloves and a welding visor. `KINDS` is now `Map.ofEntries` (it outgrew `Map.of`).
+- Compile-checked; not played.

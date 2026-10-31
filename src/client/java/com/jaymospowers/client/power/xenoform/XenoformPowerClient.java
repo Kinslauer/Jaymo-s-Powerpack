@@ -58,6 +58,8 @@ public final class XenoformPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoFinds.PROBE, StarProbeRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
 		NadirRulesScreen.register();
+		// (0.18.123, patch 7) the band screen
+		BandScreen.register();
 		XenoEyes.init();
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)

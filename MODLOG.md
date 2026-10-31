@@ -4633,3 +4633,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Star-readers (`StarReaders`): one fallen star in three draws an MCA villager to its rim a day or so later; their talk
   trades a tablet for 3 star metal, reads your band, and drops hints about the sky.
   New art from `tools/gen_xeno_finds.py`. Compile-checked (the JEI page by hand: JEI isn't in the cloud jars); not seen in game.
+- **0.18.123, Upgrading the band (Xeno-Band patch 7, `docs/XenoBand-Plan.md`; Kingdoms 0.7.443):** each save has a Star
+  Forge in a smithy on one far world, picked at random (moon, Rustfall, Glacia, Cinder or Verdant). It is raised the first
+  time a band wearer walks that world, and an unforged band hums toward it there. With MCA a star smith keeps it. 4 star
+  metal, a wreck core and 4 metal dust reforge the band, which gives it 3 module slots. Module plans (from star-readers,
+  and a quarter of mined wrecks) teach the band Cell, Breather, Plating, Steady and Wild. Band points from mastery buy
+  Quick Change, Death Save, Scan Reach, Bigger Charge and Faster Recharge; **quick change and the death save are now bought,
+  not free**. B as yourself opens the band screen: fit modules, buy skills, forget an alien or wipe the band. Star-readers
+  now hint at the forge's world. Art from `tools/gen_xeno_finds.py`. Compile-checked; not seen in game.
