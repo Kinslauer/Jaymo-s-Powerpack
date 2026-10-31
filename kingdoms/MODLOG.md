@@ -7816,3 +7816,8 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   and its people see it (`Aliens.rivalBand`). A realm knows the bands once its people have seen anyone change into the
   alien (`Aliens.AWARE`, from now on). Once per realm every 2 minutes; nobody notices it later.
 - Compile-checked; not played.
+
+## 0.7.447: donkeys and mules no longer crash the server (pack 0.18.127)
+- Andy: "what just happened to the server?" The Deck server crashed when a roaming caravan's pack donkey spawned. Since
+  0.7.445 donkeys and mules are breeds with a single coat, and rolling a coat for one asked for a random pick out of zero
+  ordinary coats (`Equine.coat`, `nextInt(0)`), which throws. A one-coat breed now just takes its coat.
