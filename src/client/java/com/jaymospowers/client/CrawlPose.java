@@ -14,6 +14,9 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
@@ -107,6 +110,8 @@ public final class CrawlPose {
 	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
 	/** On the back: one knee up, the other leg out straight (radians). */
 	static final float BACK_KNEE_UP = -0.55F, BACK_LEG_OUT = 0.12F;
+	/** (0.19.7) The neck up the body from the feet, and the eyes out from it (up and ahead, blocks). */
+	static final float NECK = 1.5F, EYE_FROM_NECK = 0.25F;
 	/** (0.18.85) Player id → how far over onto the back (0 to 1), and when it was last stepped (game time). */
 	private static final Map<Integer, float[]> TURNED = new HashMap<>();
 
@@ -122,6 +127,12 @@ public final class CrawlPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		// (0.19.7) going down into the crawl or getting up from it
+		if (entity instanceof Player p) {
+			ProneTransition.extract(p, state, partialTicks);
+		} else {
+			state.setData(ProneTransition.KEY, null);
+		}
 		// (0.15.108) climbing in onto the belly from a ledge, LedgePose draws it until the climb is done
 		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
 			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
@@ -154,6 +165,40 @@ public final class CrawlPose {
 		state.isCrouching = false;
 	}
 
+	/**
+	 * (0.19.7) Andy: "the swap from belly down to belly up prone should move your fov with your head so you can see your
+	 * body correctly". First person, turning over: how far the eyes have moved from where they are lying on the belly
+	 * (world blocks), following the head round the twist ({@link #rotate}) to where it lies face up behind the hips; or
+	 * null lying on the belly. The view keeps where it sits on the belly and moves by this.
+	 */
+	public static @Nullable Vec3 supineEyeShift(Player player, float partialTicks) {
+		if (!Crawl.crawling(player) || player.isInWater() || Downed.isDowned(player)) {
+			return null;
+		}
+		float back = turned(player, player.level().getGameTime() + partialTicks);
+		if (back <= 0.0F) {
+			return null;
+		}
+		Vector3f shift = bodyEye(back).sub(bodyEye(0.0F));
+		// the body's frame turns with its yaw (as setupRotations does), and with the player's size
+		float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+		shift.rotateY((180.0F - bodyRot) * Mth.DEG_TO_RAD).mul(player.getScale());
+		return new Vec3(shift.x, shift.y, shift.z);
+	}
+
+	/**
+	 * (0.19.7) Where the eyes are, {@code back} over onto the back, from the feet in the body's own frame (-Z ahead): up
+	 * the body to the neck and out from it as the head is pitched, then through vanilla's crawl tilt and the twist.
+	 */
+	private static Vector3f bodyEye(float back) {
+		float pitch = Mth.lerp(back, HEAD_REST, BACK_HEAD);
+		float s = Mth.sin(pitch), c = Mth.cos(pitch);
+		Vector3f eye = new Vector3f(0.0F, NECK + EYE_FROM_NECK * (c - s), -EYE_FROM_NECK * (s + c));
+		Matrix4f m = new Matrix4f().rotateX(-Mth.HALF_PI).translate(0.0F, -1.0F, 0.3F)
+			.translate(0.0F, BACK_PIVOT, 0.0F).rotateZ(Mth.PI * back).rotateY(Mth.PI * back).translate(0.0F, -BACK_PIVOT, 0.0F);
+		return m.transformPosition(eye);
+	}
+
 	/** (0.18.85) How far over onto the back this player is drawn (0 to 1, eased), stepped toward where they lie. */
 	private static float turned(Player player, float now) {
 		boolean back = Crawl.supine(player);
@@ -180,6 +225,12 @@ public final class CrawlPose {
 	 */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack) {
 		State crawl = state.getData(KEY);
+		Float move = state.getData(ProneTransition.KEY);
+		if (move != null && (crawl == null || crawl.rise() < 0.0F && crawl.downed() < 0.0F)) {
+			// (0.19.7) crouching down into it (or getting up), in place of vanilla's tilt
+			ProneTransition.rotate(state, poseStack, move);
+			return;
+		}
 		if (crawl == null && state.getData(RISEN_KEY) != null && state.swimAmount > 0.0F) {
 			// (0.18.5) up on their feet: vanilla's tilt (and its shift, while the pose lasts) undone as it eases out
 			if (state.isVisuallySwimming) {
@@ -253,9 +304,20 @@ public final class CrawlPose {
 			return;
 		}
 		State crawl = state.getData(KEY);
-		boolean on = crawl != null && state.isVisuallySwimming;
+		Float move = state.getData(ProneTransition.KEY);
+		if (crawl != null && (crawl.rise() >= 0.0F || crawl.downed() >= 0.0F)) {
+			move = null;
+		}
+		boolean on = crawl != null && state.isVisuallySwimming || move != null;
 		PoseBlend.Track track = BLEND.track(state.id, on);
 		if (track == null) {
+			return;
+		}
+		if (move != null) {
+			// (0.19.7) going down into the crawl or getting up: crouched, then onto the hands
+			PoseBlend.Frame f = new PoseBlend.Frame(h);
+			ProneTransition.pose(f, move);
+			track.apply(h, f, 1.6F);
 			return;
 		}
 		if (!on) {

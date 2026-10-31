@@ -201,7 +201,7 @@ final class Cavalry {
 		// lent horses whose riders are gone (a war party's, a caravan's)
 		// (a caravan sees to its own: its riders get back in the saddle after a river)
 		for (AbstractHorse horse : level.getEntities(EntityTypeTest.forClass(AbstractHorse.class), h -> h.entityTags().contains(LENT) && !h.isVehicle()
-			&& !h.entityTags().contains(Caravans.TAG))) {
+			&& !h.entityTags().contains(Caravans.TAG) && !Downed.waiting(h))) {
 			strayed(level, horse);
 		}
 		for (Faction f : Factions.all(server, FactionType.KINGDOM)) {
@@ -220,7 +220,7 @@ final class Cavalry {
 			long riding = folk.stream().filter(x -> x.role() == Folk.GUARD && mounted(x.mob()) && !soldier(x)).count();
 			if (riding < wantGuards) {
 				List<PathfinderMob> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x.mob()) && !x.mob().isPassenger()
-					&& Rulers.target(x.mob()) == null && !escorting(x) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
+					&& Rulers.target(x.mob()) == null && !escorting(x) && !Downed.helping(x.mob()) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
 					&& !x.mob().isSleeping() && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
 						&& !x.mob().getHomePosition().closerThan(keep.throne(), POST_ON_FOOT))).map(Worker::mob).toList());
 				walkers.sort(Comparator.comparingDouble(x -> x.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat()))));
@@ -228,7 +228,7 @@ final class Cavalry {
 					PathfinderMob rider = walkers.getFirst();
 					// a horse whose rider fell first, else a new one bought
 					AbstractHorse spare = level.getEntitiesOfClass(AbstractHorse.class, rider.getBoundingBox().inflate(48.0),
-						h -> ours(h, f.id()) && !h.isVehicle() && !h.entityTags().contains(LENT) && h.isAlive()).stream().findFirst().orElse(null);
+						h -> ours(h, f.id()) && !h.isVehicle() && !h.entityTags().contains(LENT) && h.isAlive() && !Downed.waiting(h)).stream().findFirst().orElse(null);
 					if (spare != null) {
 						Cavalry.teleport(rider, spare.getX(), spare.getY(), spare.getZ());
 						rider.startRiding(spare);

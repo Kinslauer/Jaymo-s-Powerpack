@@ -455,6 +455,11 @@ public final class Deeds {
 		return Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player));
 	}
 
+	/** (0.7.449, {@link ComingOver}) What one of {@code f} who's heard of {@code player}'s deeds hails them with, or null if they know of nothing. */
+	static @Nullable Component greeting(ServerLevel level, ServerPlayer player, Faction f) {
+		return line(level, player, f, "greet");
+	}
+
 	/** (Approaches) A gossip of {@code f}'s talk about what {@code player} did, or null if they know of nothing (or don't feel like it). */
 	static @Nullable Component gossip(ServerLevel level, ServerPlayer player, @Nullable Faction f) {
 		if (f == null || level.getRandom().nextFloat() >= GOSSIP_CHANCE) {

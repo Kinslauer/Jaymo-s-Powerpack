@@ -70,6 +70,8 @@ public final class ZFighterRaiders {
 	/** A band on the ground: its pods, its raiders, and when it gives up. */
 	private static final class Band {
 		final ServerLevel level;
+		/** (0.19.1) Who the Patrol is chasing, when it follows the band down. */
+		final UUID id = UUID.randomUUID();
 		final List<PodEntity> pods = new ArrayList<>();
 		final List<UUID> raiders = new ArrayList<>();
 		final long until;
@@ -96,6 +98,22 @@ public final class ZFighterRaiders {
 				entity.discard();
 			}
 		});
+	}
+
+	/** (0.19.1) The living raiders of band {@code id} (none once it is beaten or gone); a band still coming down counts as its pods. */
+	static List<LivingEntity> raiders(UUID id) {
+		List<LivingEntity> alive = new ArrayList<>();
+		for (Band band : BANDS) {
+			if (!band.id.equals(id)) {
+				continue;
+			}
+			for (UUID raider : band.raiders) {
+				if (band.level.getEntity(raider) instanceof ZFighterRogue r && r.isAlive()) {
+					alive.add(r);
+				}
+			}
+		}
+		return alive;
 	}
 
 	private static boolean tracked(Entity e) {
@@ -185,6 +203,8 @@ public final class ZFighterRaiders {
 			band.pods.add(flier.pod);
 		}
 		level.playSound(null, middle.getX(), middle.getY() + 30, middle.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
+		// (0.19.1) the Patrol may be on their tail
+		ZFighterPatrol.pursue(level, band.id, middle);
 		return true;
 	}
 

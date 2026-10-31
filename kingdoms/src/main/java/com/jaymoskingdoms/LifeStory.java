@@ -160,6 +160,8 @@ public final class LifeStory {
 		Heritage.Kind.ORC)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
+	/** (0.7.451) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
+	static final int FATE_TITLE_IN = 20, FATE_TITLE_STAY = 200, FATE_TITLE_OUT = 40;
 
 	public static final String FATE = "fate";
 
@@ -1066,7 +1068,8 @@ public final class LifeStory {
 			return;
 		}
 		RandomSource random = player.getRandom();
-		Start road0 = chosen == Start.FATE ? fated(server, player, random) : chosen;
+		boolean byFate = chosen == Start.FATE;
+		Start road0 = byFate ? fated(server, player, random) : chosen;
 		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
 		java.util.function.Consumer<Start> go = start -> {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -1080,7 +1083,7 @@ public final class LifeStory {
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
-			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling);
+			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling, byFate);
 		};
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
@@ -1098,7 +1101,7 @@ public final class LifeStory {
 
 	/** Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. */
 	private static void arrive(ServerPlayer player, Start start, @Nullable Faction roadRealm, Heritage.Kind bornAs, Answer raised,
-		Classes.PlayerClass cls, String option, String calling) {
+		Classes.PlayerClass cls, String option, String calling, boolean fated) {
 		RandomSource random = player.getRandom();
 		Start landed = begin(player, start, roadRealm, bornAs, random);
 		if (landed == Start.UNARMED || landed == Start.ROCK_BOTTOM) {
@@ -1127,6 +1130,8 @@ public final class LifeStory {
 		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
+		// (0.7.452) and the land round them made ahead in the background, wherever the start put them (ArrivalGround)
+		ArrivalGround.around(player);
 		if (start == Start.TIMELOST) {
 			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
 			PowersCompat.awaken(player, "chrono");
@@ -1138,8 +1143,18 @@ public final class LifeStory {
 			PowersCompat.call(player, calling, ECHO_TICKS);
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
-			Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
+		String road = "story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT);
+		player.sendSystemMessage(Component.translatable(fated ? "message.jaymoskingdoms.story.fated" : "message.jaymoskingdoms.story.begun",
+			Component.translatable(road)).withStyle(ChatFormatting.GOLD));
+		if (fated) {
+			// (0.7.451) Andy: "there is nothing that tells you the start you got if you choose the random start": fate's pick
+			// across the screen as they wake, held past the few seconds the land takes to load
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(FATE_TITLE_IN, FATE_TITLE_STAY, FATE_TITLE_OUT));
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+				Component.translatable(road + ".short", "").withStyle(ChatFormatting.GRAY)));
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+				Component.translatable("message.jaymoskingdoms.story.fated.title", Component.translatable(road)).withStyle(ChatFormatting.GOLD)));
+		}
 	}
 
 	/**

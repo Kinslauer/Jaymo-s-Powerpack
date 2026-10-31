@@ -4662,3 +4662,31 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1:** a tournament ring only ever goes on proper ground: flat, plain, clear land near the kingdom's seat. If
+  there's none, no tournament is held there (another kingdom near a player is tried, else it waits a quarter day); it
+  used to fall back to any spot at all, a hillside, a roof or the river. Each kingdom's ring is kept and used again (the
+  floor mended, what grew on it cleared) while it stands, so its tournaments are always held in the same place.
+
+- **0.19.2, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
+  storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
+  "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
+- **0.19.3, Kingdoms 0.7.450:** taking a bout in the fight pit no longer teleports you in: the bell waits for you to walk
+  into the ring, and both fighters square up for a breath before the first blow. A bookie met in town leads you to the
+  den instead of dealing in the street; a guard overhearing it starts a crackdown. Villagers no longer pile up on the
+  speakeasy ladder.
+- **0.19.4, Kingdoms 0.7.451:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
+  only the starts open to you, with the rest under "Locked"; "Let fate decide" tells you the start it picked.
+
+- **0.19.7, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+  your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
+  first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
+  with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
+  `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
+  down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
+
+- **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.
+- **0.19.8, Kingdoms 0.7.454:** "Ask the Way" on a villager's Interact page: a healer, butcher, smith, tailor, the
+  tavern, the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"),
+  or, if they like you (or they're a child), walk you there. Seeking an audience, a pedlar's wares, offering tribute and
+  a sworn captain's orders moved from the talk menu to the Interact page too, each shown only when it applies.

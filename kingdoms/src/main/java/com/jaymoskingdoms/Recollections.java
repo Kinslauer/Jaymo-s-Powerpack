@@ -106,7 +106,10 @@ public final class Recollections {
 		QUESTIONED(-3, 60, true, true, "%1$s held you down with a weapon at you and made you talk.", "%1$s held %3$s down and made them talk."),
 		SPARED(3, 60, true, true, "%1$s had you at their mercy and let you live.", "%1$s had %3$s at their mercy and let them live."),
 		/** (0.7.424) Interrogation's oath, sworn while held down. */
-		SWORE(1, 120, true, false, "You swore to %1$s, under their weapon, that you'd never raise a hand to them.", "");
+		SWORE(1, 120, true, false, "You swore to %1$s, under their weapon, that you'd never raise a hand to them.", ""),
+		/** (0.7.449) Accused of a theft they didn't do ({@link Crooks#accuse}). */
+		ACCUSED(-3, 45, true, true, "%1$s accused you of stealing from them, and you'd done nothing of the kind.",
+			"%1$s accused %3$s of theft, and wrongly.");
 
 		final int weight, days;
 		final boolean remark, tellable;
