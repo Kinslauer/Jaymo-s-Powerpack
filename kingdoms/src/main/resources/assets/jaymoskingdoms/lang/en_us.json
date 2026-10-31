@@ -10033,5 +10033,10 @@
 	"recall.jaymoskingdoms.heard.accused.1": "You're the one who went round accusing %3$s. Don't try it with me, %1$s.",
 	"recall.jaymoskingdoms.about.accused.0": "%1$s called me a thief in front of everyone. Me!",
 	"recall.jaymoskingdoms.about.accused.1": "Watch your purse? No, watch %1$s. They'll blame you for anything.",
-	"history.jaymoskingdoms.for.accused": "calling them a thief"
+	"history.jaymoskingdoms.for.accused": "calling them a thief",
+	"gui.jaymoskingdoms.story.locked": "Locked (%s)",
+	"gui.jaymoskingdoms.story.open_starts": "Open starts (%s)",
+	"gui.jaymoskingdoms.story.locked_title": "Locked starts",
+	"message.jaymoskingdoms.story.fated": "Fate chose your start: %s.",
+	"message.jaymoskingdoms.story.fated.title": "Fate chose: %s"
 }

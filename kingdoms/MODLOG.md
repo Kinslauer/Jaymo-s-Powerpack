@@ -7876,4 +7876,18 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
   (`Underworld.keepHome`): the fence, dice-thrower, attendant and fighters found out of their rooms are put back at
   their spots, a second hand with the same job goes back to town as an ordinary villager, the bookie counts as present
   anywhere within 64 blocks, and anyone else stuck in the shaft 2 checks running is put out at its nearer end.
+## 0.7.451: story screen fixes (pack 0.19.4)
+- Andy: "there is a problem with the way the character is drawn". A Bio-built's form parts (beak head, horns, bracers,
+  tail) were placed on the marks model's bones at submit time, but that shared model still held a pose from another draw
+  (the world's, another player's); the body itself is posed from the state only when drawn. So on the story screen the
+  head and parts sat askew of the body and armour. `BioForms.submit` now poses the bones from the state first
+  (`ModelPoses.now`: `setupAnim` plus the same after-pose list the `prepareModel` mixin runs, now kept in `ModelPoses.after`).
+- Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'". The road
+  carousel goes through the open starts only; a "Locked (n)" button in its header switches to the locked ones (with
+  their hints and reasons, as before) and "Open starts (n)" back.
+- Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
+  title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Andy: "i seem unable to select any of these" (the harder life's flaws and switches). Nothing in the click path drops
+  the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
+  same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
 - Compile-checked; not seen in game.
