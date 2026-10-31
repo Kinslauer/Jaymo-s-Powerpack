@@ -98,7 +98,7 @@ public final class FightPit {
 	/** A punch charged less than this counts for nothing. */
 	static final float WEAK_PUNCH = 0.3F;
 	/**
-	 * (0.7.449) A player must have at least this much wind (health over {@link #YIELD_HEALTH}) to take a place on the card;
+	 * (0.7.450) A player must have at least this much wind (health over {@link #YIELD_HEALTH}) to take a place on the card;
 	 * at the bell's time the bell waits up to {@link #CALL_TICKS} for them to walk into the ring (called every
 	 * {@link #CALL_EVERY}), and after the bell both stand in their corners {@link #GRACE_TICKS} before the first blow.
 	 */
@@ -614,7 +614,7 @@ public final class FightPit {
 				if (now - bout.at < BETTING_TICKS) {
 					break;
 				}
-				// (0.7.449) Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in."
+				// (0.7.450) Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in."
 				// Nobody's put in the ring any more: the bell waits until a player on the card walks in themselves
 				boolean ready = true;
 				for (int i = 0; i < 2; i++) {
@@ -681,7 +681,7 @@ public final class FightPit {
 					}
 				}
 				if (now - bout.at < GRACE_TICKS) {
-					// (0.7.449) a breath after the bell: both square up in their corners before the first blow
+					// (0.7.450) a breath after the bell: both square up in their corners before the first blow
 					hold(v, pit, bout);
 					break;
 				}
@@ -814,7 +814,7 @@ public final class FightPit {
 			float hurt = Math.min(blow, p.getHealth() - YIELD_HEALTH);
 			if (hurt > 0.0F) {
 				p.hurtServer(level, level.damageSources().mobAttack(v[i]), hurt);
-				// (0.7.449) whatever else made more of the blow, a bout never takes them past the point they're done at
+				// (0.7.450) whatever else made more of the blow, a bout never takes them past the point they're done at
 				if (p.isAlive() && p.getHealth() < YIELD_HEALTH) {
 					p.setHealth(YIELD_HEALTH);
 				}
@@ -976,7 +976,7 @@ public final class FightPit {
 			return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.enter.already"), 0);
 		}
 		if (wind(player) < MIN_WIND) {
-			// (0.7.449) half dead already: he won't take their money
+			// (0.7.450) half dead already: he won't take their money
 			return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.enter.hurt"), 0);
 		}
 		if (bout == null) {

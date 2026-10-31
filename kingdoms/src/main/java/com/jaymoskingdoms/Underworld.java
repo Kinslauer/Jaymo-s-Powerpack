@@ -125,7 +125,7 @@ public final class Underworld {
 	static final int LINES = 3;
 
 	/**
-	 * (0.7.449) Andy (2026-10-31): "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the
+	 * (0.7.450) Andy (2026-10-31): "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the
 	 * open are frowned upon and rare." A guard who overhears it (a bookie asked about his book in the street, a street
 	 * deal seen) has the watch crack down on the city for this long: no crook whispers the way, the street won't buy
 	 * ({@link #CRACKDOWN_WARY} off how receptive they are), and no bookie will be seen leading anyone to the den.
@@ -133,7 +133,7 @@ public final class Underworld {
 	static final long CRACKDOWN_TICKS = 24000L;
 	static final int CRACKDOWN_WARY = 25;
 	/**
-	 * (0.7.449) Andy: "so many villagers stuck on the speakeasy ladder". The den's hands are kept at home (checked this
+	 * (0.7.450) Andy: "so many villagers stuck on the speakeasy ladder". The den's hands are kept at home (checked this
 	 * often, ticks): one found outside his room is put back at his spot; anyone stuck in the shaft this many checks
 	 * running is put out at its nearer end. The bookie alone may go up into town by day ({@link Bookies}).
 	 */
@@ -227,7 +227,7 @@ public final class Underworld {
 	/** Every realm's den (realm id → it), kept on the Overworld. */
 	static final AttachmentType<Map<String, Den>> DENS = AttachmentRegistry.create(JaymosKingdoms.id("dens"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Den.CODEC)));
-	/** (0.7.449) Realm id → the game time the watch's crackdown there ends. Kept on the Overworld. */
+	/** (0.7.450) Realm id → the game time the watch's crackdown there ends. Kept on the Overworld. */
 	static final AttachmentType<Map<String, Long>> CRACKDOWNS = AttachmentRegistry.create(JaymosKingdoms.id("den_crackdowns"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
 	/** Per player: the realms whose den they've found (ids). Saved. */
@@ -245,7 +245,7 @@ public final class Underworld {
 	private static int games;
 	/** Realm → the day a site for its den was last looked for and none found (looked for once a day after that). */
 	private static final Map<String, Long> NO_SITE = new HashMap<>();
-	/** (0.7.449) Villager → how many checks running it's been found in a den's shaft. */
+	/** (0.7.450) Villager → how many checks running it's been found in a den's shaft. */
 	private static final Map<UUID, Integer> IN_SHAFT = new HashMap<>();
 
 	private Underworld() {
@@ -493,7 +493,7 @@ public final class Underworld {
 			MISSING_FENCE.remove(key);
 		}
 		// (0.7.224) the bookie, from the first: the den's the only place a war is bet on; and the pit off the den
-		// (0.7.449) he may be up in town by day: only missing if he's nowhere about
+		// (0.7.450) he may be up in town by day: only missing if he's nowhere about
 		if (level.getEntitiesOfClass(Villager.class, box.inflate(HANDS_RANGE, HANDS_RANGE, HANDS_RANGE),
 			v -> v.isAlive() && v.entityTags().contains(Bookies.TAG)).isEmpty()) {
 			Long since = MISSING_BOOKIE.get(key);
@@ -523,7 +523,7 @@ public final class Underworld {
 		}
 	}
 
-	// ---- (0.7.449) crackdowns, and the den's hands kept at home ---------------------------------------------------------
+	// ---- (0.7.450) crackdowns, and the den's hands kept at home ---------------------------------------------------------
 
 	/** Whether the watch is cracking down on talk of {@code realm}'s den just now. */
 	static boolean crackdown(MinecraftServer server, int realm) {

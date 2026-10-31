@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * the emeralds you mean to stake and click a line. Winnings come to you when the war or the bout is decided
  * ({@link GreatWars#owe}).
  *
- * <p>(0.7.449) Andy (2026-10-31): "if you pay the bookie outside of the speakeasy, he should lead you to it." Now and
+ * <p>(0.7.450) Andy (2026-10-31): "if you pay the bookie outside of the speakeasy, he should lead you to it." Now and
  * then, by day, the bookie goes up into town. Out there he won't open his book or take a coin: he says to follow him
  * and walks you to the hatch, waiting when you fall behind, and goes down first. But "guards overhearing talk of the
  * speakeasy will begin to crackdown, so deals out in the open are frowned upon and rare": asked with a guard in earshot,
@@ -59,16 +59,16 @@ final class Bookies {
 	static final double LEAST_CHANCE = 0.15, CHANCE_SPAN = 0.7;
 	static final double WAR_SHORTEST = 1.2, WAR_LONGEST = 5.0;
 
-	/** (0.7.449) Out in town: from this time of day until this; then home. */
+	/** (0.7.450) Out in town: from this time of day until this; then home. */
 	static final long OUT_FROM = 1000L, OUT_UNTIL = 11000L;
-	/** (0.7.449) Leading: his pace; he waits for one this far behind; gives up on one this far off, or after this long (ticks). */
+	/** (0.7.450) Leading: his pace; he waits for one this far behind; gives up on one this far off, or after this long (ticks). */
 	static final float PACE = 0.6F;
 	static final double WAIT_RANGE = 7.0, LOST_RANGE = 32.0, HATCH_REACH = 1.8;
 	static final long WALK_TICKS = 4800L, NAG_TICKS = 100L;
-	/** (0.7.449) Someone this close sees him go home (he walks it); with nobody about, he's simply home. */
+	/** (0.7.450) Someone this close sees him go home (he walks it); with nobody about, he's simply home. */
 	static final double SEEN_RANGE = 32.0;
 
-	/** (0.7.449) A bookie's walk back to the den: leading {@code player} (or on his own). */
+	/** (0.7.450) A bookie's walk back to the den: leading {@code player} (or on his own). */
 	static final class Walk {
 		@Nullable UUID player;
 		final BlockPos hatch;
@@ -82,7 +82,7 @@ final class Bookies {
 		}
 	}
 
-	/** (0.7.449) Bookie → his walk to the den. */
+	/** (0.7.450) Bookie → his walk to the den. */
 	private static final Map<UUID, Walk> WALKS = new HashMap<>();
 
 	private Bookies() {
@@ -174,7 +174,7 @@ final class Bookies {
 			c.getSource().sendFailure(Component.translatable("bookie.jaymoskingdoms.none"));
 			return null;
 		}
-		// (0.7.449) no money changes hands in the street
+		// (0.7.450) no money changes hands in the street
 		return outside(player.level(), player, bookie) ? null : bookie;
 	}
 
@@ -263,7 +263,7 @@ final class Bookies {
 		return taken.kept() > 0 ? 1 : 0;
 	}
 
-	// ---- (0.7.449) out in town -----------------------------------------------------------------------------------------
+	// ---- (0.7.450) out in town -----------------------------------------------------------------------------------------
 
 	/** The den {@code bookie} keeps the book in, if he's out of it (null if he's home, or has none). */
 	private static Underworld.@Nullable Den away(ServerLevel level, Villager bookie) {
