@@ -22,11 +22,39 @@ Paths below: `REPO` = this checkout (the session's working directory), `SRV` = `
 ```bash
 cd "$REPO"
 git restore libs/ 2>/dev/null; git clean -fq -- 'libs/jaymos-kitchen-*.jar'   # undo step 2's local Kitchen swap
-git checkout master && git pull --ff-only origin master
+git checkout master
+OLD=$(git rev-parse HEAD)              # for the patch notes (step 1b)
+git pull --ff-only origin master
 ```
 
 If the checkout has other local changes, stop and tell Andy what they are instead of discarding them. Report the
 versions: `version` in `gradle.properties` (pack / Powers), `kingdoms/gradle.properties`, `kitchen/gradle.properties`.
+
+## 1b. Patch notes (every pull, also "PB" and a PC pbdr)
+
+Write patch notes for what this pull brought in, `OLD..HEAD`. If the pull brought nothing new, say "no changes since
+the last pull" and skip the rest of this step. Sources, newest-first:
+
+```bash
+git log --no-merges --format='%s' "$OLD..HEAD"
+git diff "$OLD..HEAD" -- MODLOG.md kingdoms/MODLOG.md kitchen/MODLOG.md   # the added "+" lines are the entries
+```
+
+Write them for the players, not the coders, in the style of game patch notes:
+
+- A title line with the versions, e.g. `Jaymo's Powers 0.18.84 (Kingdoms 0.7.421, Kitchen 0.5.38)`. Name the old
+  versions too ("from 0.18.83").
+- Sections, each only if it has something: **New**, **Changes and balance**, **Fixes**, and per-mod headings
+  (Powers / Kingdoms / Kitchen) inside them when a pull touches more than one mod.
+- One short line per change, saying what a player sees or does: name the power, item, key ("press G, then B") or
+  place. Leave out class names, file paths, mixins, refactors, build and tooling changes, and lang-only fixes.
+- Group the many small commits of one feature into one line. Note anything players must do: "everyone needs the new
+  zip" when client mods changed (every update, in practice), and "new world" when this pbdr starts one.
+- Keep it under about 25 lines; if a pull is huge, keep the biggest items and end with "plus N smaller fixes".
+
+Save the notes to `modpack/patch-notes-<pack>.md` (the folder is git-ignored, beside the friends' zip) and put the
+full text in the final report so Andy can paste it to his friends. Send the file with SendUserFile if that tool is
+there.
 
 ## 2. Build (the server keeps running meanwhile)
 
@@ -114,6 +142,7 @@ line if it's missing), and start it again as in step 5. Don't touch the rest of 
 - Tell Andy: pack / Kingdoms / Kitchen versions, same world or new world (and the backup's name), tunnel and voice
   status, whether anyone was kicked, and that friends need `modpack/Jaymos-Powers-Modpack-<pack>.zip` from the Deck
   checkout (the PC makes the same zip when it builds).
+- End with the patch notes from step 1b, in full.
 
 ## Don'ts
 
