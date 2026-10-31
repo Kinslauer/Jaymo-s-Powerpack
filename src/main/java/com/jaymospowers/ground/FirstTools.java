@@ -143,7 +143,7 @@ public final class FirstTools {
 	}
 
 	/** A rock in one hand and flint in the other. */
-	static boolean striking(Player player) {
+	public static boolean striking(Player player) {
 		ItemStack main = player.getMainHandItem(), off = player.getOffhandItem();
 		return main.is(Items.FLINT) && rock(off) || rock(main) && off.is(Items.FLINT);
 	}

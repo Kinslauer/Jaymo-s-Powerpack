@@ -17,5 +17,7 @@ abstract class BackpackAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$backpack(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		BackpackClient.extract(entity, state, partialTicks);
+		// (Motion patch 4) after the backpack, so a lantern pole stands clear of it
+		com.jaymospowers.client.baubles.WornLanterns.extract(entity, state, partialTicks);
 	}
 }

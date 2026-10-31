@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:brawlers_belt"
+    "jaymospowers:brawlers_belt",
+    "#minecraft:lanterns"
   ]
 }

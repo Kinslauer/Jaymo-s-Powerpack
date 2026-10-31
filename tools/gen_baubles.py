@@ -222,10 +222,40 @@ def rabbit_foot_charm():
     return img
 
 
+WOOD = ((176, 136, 84, 255), (132, 98, 56, 255), (86, 62, 34, 255))
+FLAME = ((255, 246, 190, 255), (255, 206, 92, 255), (230, 140, 40, 255))
+LANTERN_IRON = ((110, 110, 122, 255), (72, 72, 84, 255), (44, 44, 54, 255))
+
+
+def lantern_pole():
+    """(Motion patch 4) A stick slanting up to the right, a lantern hanging on a short chain from its tip."""
+    img = blank()
+    # the stick, from the bottom left up to the top right, two pixels thick
+    for i in range(12):
+        x, y = 1 + i, 14 - i
+        put(img, x, y, WOOD[1])
+        put(img, x + 1, y, WOOD[0] if i % 3 else WOOD[2])
+    # a chain link down from the tip
+    put(img, 12, 3, LANTERN_IRON[0])
+    put(img, 12, 4, LANTERN_IRON[1])
+    # the lantern: cap, glowing glass in an iron frame, base
+    for x in range(10, 15):
+        put(img, x, 5, LANTERN_IRON[1])
+    for y in range(6, 10):
+        put(img, 10, y, LANTERN_IRON[2])
+        put(img, 14, y, LANTERN_IRON[2])
+        for x in range(11, 14):
+            put(img, x, y, FLAME[0] if (x, y) in ((12, 7), (12, 8)) else FLAME[1] if y < 9 else FLAME[2])
+    for x in range(10, 15):
+        put(img, x, 10, LANTERN_IRON[1])
+    outline(img)
+    return img
+
+
 PAINTERS = (
     ("heartstone_amulet", heartstone_amulet), ("swiftfoot_ring", swiftfoot_ring), ("delvers_ring", delvers_ring),
     ("brawlers_belt", brawlers_belt), ("divers_circlet", divers_circlet), ("featherfall_cloak", featherfall_cloak),
-    ("rabbit_foot_charm", rabbit_foot_charm),
+    ("rabbit_foot_charm", rabbit_foot_charm), ("lantern_pole", lantern_pole),
 )
 
 

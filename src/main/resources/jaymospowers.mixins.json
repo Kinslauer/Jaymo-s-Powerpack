@@ -41,6 +41,7 @@
 		"ServerGamePacketListenerImplMixin",
 		"SplashWaterDouseMixin",
 		"WorldGenReadMixin",
+		"WeaponModDualFlintlockMixin",
 		"WeaponModFlailMixin",
 		"WeaponModMeleeUseMixin",
 		"WeaponModWarhammerMixin",
