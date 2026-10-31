@@ -83,6 +83,11 @@ import org.jspecify.annotations.Nullable;
  * them (the shake, and their name), or give you a wave and tell you their name. Leave a hand hanging and they let it
  * drop; they don't come again that day. Not at night, not mid-fight, not to someone masked, riding, or with a screen
  * open, and never one of {@link Approaches}' at the same time.
+ * <p>
+ * (0.7.449) Andy: "they should also have a reason other than just introducing themselves. people wouldnt usually break
+ * routine for that unless there was a good reason". Only someone with a reason to ({@link ComingOver}: you're hurt, a
+ * monster's at your back, a storm, thanks they owe you...) comes over: they call it out as they set off, tell you on
+ * arriving, and give their name in passing. "Ask what's going on" in their menu has them explain.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -123,8 +128,7 @@ public final class Handshakes {
 	static final int[] COME_WEIGHTS = {5, 6, 3, 2, 3, 1, 2, 0, 0, 1, 0, 1};
 	/** (0.7.337) Keenness with no temperament, and what a warm memory of you adds. */
 	static final int COME_PLAIN = 2, COME_WARM = 2;
-	/** (0.7.337) How many ways they hail you on setting off, and how far it carries (blocks). */
-	static final int HAILS = 4;
+	/** (0.7.337) How far their hail on setting off carries (blocks); (0.7.449) what they call depends on why they come ({@link ComingOver}). */
 	static final double HAIL_RANGE = 16.0;
 
 	/** (0.7.289) On a player: the villagers who've greeted them, whose menu opens straight away from then (saved, kept through death). */
@@ -173,12 +177,15 @@ public final class Handshakes {
 	private static final class Comer {
 		final Villager villager;
 		final boolean takes;
+		/** (0.7.449) Why they're coming over ({@link ComingOver}). */
+		final ComingOver.Pick why;
 		long until;
 		boolean offering;
 
-		Comer(Villager villager, boolean takes, long until) {
+		Comer(Villager villager, boolean takes, ComingOver.Pick why, long until) {
 			this.villager = villager;
 			this.takes = takes;
+			this.why = why;
 			this.until = until;
 		}
 	}
@@ -837,19 +844,28 @@ public final class Handshakes {
 		}
 		long today = Deeds.today(level.getServer());
 		Villager best = null;
+		ComingOver.Pick bestWhy = null;
 		int total = 0;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(COME_RANGE))) {
 			int w = comeWeight(level, player, v, today);
+			if (w <= 0) {
+				continue;
+			}
+			// (0.7.449) Andy: "people wouldnt usually break routine for that unless there was a good reason": no reason, they stay put
+			ComingOver.Pick why = ComingOver.reason(level, player, v, Approaches.home(level, v), today);
+			if (why == null) {
+				continue;
+			}
+			w *= ComingOver.weight(why);
 			// (a weighted draw over everyone who'd come)
-			if (w > 0) {
-				total += w;
-				if (level.getRandom().nextInt(total) < w) {
-					best = v;
-				}
+			total += w;
+			if (level.getRandom().nextInt(total) < w) {
+				best = v;
+				bestWhy = why;
 			}
 		}
-		if (best != null) {
-			comeOver(player, best, now, today);
+		if (best != null && bestWhy != null) {
+			comeOver(player, best, bestWhy, now, today);
 		}
 	}
 
@@ -879,12 +895,13 @@ public final class Handshakes {
 	}
 
 	/** (0.7.337) {@code villager} hails {@code player} and hurries over; whether they'll offer a hand is settled now. */
-	private static void comeOver(ServerPlayer player, Villager villager, long now, long today) {
+	private static void comeOver(ServerPlayer player, Villager villager, ComingOver.Pick why, long now, long today) {
 		boolean takes = Introductions.takesHand(player, villager) && (!McaCompat.female(villager) || villager.getRandom().nextFloat() < WOMAN_SHAKES);
-		COMERS.put(player.getUUID(), new Comer(villager, takes, now + COME_WALK_TICKS));
+		COMERS.put(player.getUUID(), new Comer(villager, takes, why, now + COME_WALK_TICKS));
 		CAME.put(villager.getUUID() + "/" + player.getUUID(), today);
 		COME_NEXT.put(player.getUUID(), now + COME_GAP + villager.getRandom().nextInt(COME_GAP_SPREAD));
-		Speech.say(player.level(), villager, Component.translatable("greet.jaymoskingdoms.hail." + villager.getRandom().nextInt(HAILS)), Speech.WHITE, HAIL_RANGE);
+		// (0.7.449) what they call out says why they're coming
+		Speech.say(player.level(), villager, ComingOver.hail(villager, why), Speech.WHITE, HAIL_RANGE);
 		comeWalk(villager, player);
 	}
 
@@ -935,6 +952,8 @@ public final class Handshakes {
 	private static boolean arrive(ServerPlayer player, Comer c, long now) {
 		Villager villager = c.villager;
 		stand(villager, player);
+		// (0.7.449) first, what they came to say
+		ComingOver.arrived(player, villager, c.why);
 		if (c.takes) {
 			c.offering = true;
 			c.until = now + COME_OFFER_TICKS;
@@ -949,8 +968,7 @@ public final class Handshakes {
 		send(villager, player.getId(), Hand.WAVE);
 		WAVES.add(new Wave(player.getUUID(), villager, now, false));
 		Component name = Component.literal(villager.getName().getString());
-		Speech.say(player.level(), villager, Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(Introductions.LINES), name),
-			Speech.WHITE, 12.0);
+		// ((0.7.449) the bubble holds why they came; the name's given in passing, below)
 		player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		player.sendSystemMessage(Component.translatable(Languages.understands(player, villager) ? "message.jaymoskingdoms.greet.came_waved"
 			: "message.jaymoskingdoms.greet.came_waved_foreign", name).withStyle(ChatFormatting.GREEN), true);

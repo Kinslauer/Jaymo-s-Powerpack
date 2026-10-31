@@ -4667,3 +4667,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   there's none, no tournament is held there (another kingdom near a player is tried, else it waits a quarter day); it
   used to fall back to any spot at all, a hillside, a roof or the river. Each kingdom's ring is kept and used again (the
   floor mended, what grew on it cleared) while it stands, so its tournaments are always held in the same place.
+
+- **0.19.2, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
+  storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
+  "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
