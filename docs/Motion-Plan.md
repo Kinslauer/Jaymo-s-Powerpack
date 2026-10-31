@@ -140,7 +140,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - Run Through can leave your sword stuck in the body: low chance, higher for axes, shrinking with weapon experience.
   Stuck in a living foe, you pull it free with use; in a corpse, it stays until you take it.
 
-### Patch 9, Props (Kingdoms/Kitchen; picks props, plushies, planters)
+### Patch 9, Props (Kingdoms/Kitchen; picks props, plushies, planters) (built: Kingdoms 0.7.440, Powers 0.18.120; all patches done)
 - Placeable blocks: scarecrow (keeps crows off crops), gravestone, lamp post, candle stand.
 - Plushies as gifts for MCA children and spouses; squeak on right click.
 - Window box and pot planters that grow small flowers and Kitchen herbs.
