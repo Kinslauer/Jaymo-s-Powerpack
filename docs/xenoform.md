@@ -165,6 +165,34 @@ villagers, wandering traders, every MCA villager and Kingdoms folk (ids ending `
 and their brutes, hurlers and warlords, the Night Bleeder; our people (Judge, Keeper, Hermit, raiders and so on), demon
 soldiers and captains, the aerbunny.
 
+## Earning aliens [XenoFinds, StarWreckBlock] (0.18.122, Xeno-Band patch 6)
+
+Scanning stays the main way in. Beside it:
+- **Star tablets:** 25% of mined fallen stars, 15% of fishing treasure catches and 20% of Ancient Remnants chests hold one;
+  band hunters drop one; Gremlin makes them. Hold one in either hand as you slam the band: it reads a random alien the
+  band doesn't hold yet (never a hidden one) and the tablet crumbles. With nothing left to learn it stays whole.
+- **Alien-only crafting** (sneak + use, as the alien; JEI pages "Gremlin's Tablets", "Bulwark's Grinding", "Pyre's
+  Smelting"):
+  - Gremlin at a crafting table: 4 probe circuits and an amethyst shard make a tablet.
+  - Bulwark at a grindstone, ore in hand: one raw iron, copper or gold (or its ore block; not nether gold ore) grinds into
+    two dusts, which smelt or blast into ingots.
+  - Pyre, holding anything a furnace smelts: up to 8 smelted in its hands, once a second.
+- **Star wrecks:** one fallen star in 10 lands with a Star Wreck block beside it and bits of hull (waxed cut copper, iron
+  bars, tinted glass) strewn round the crater. While a band wearer is within 32, the wreck sends out a probe every 5 s, up to 3
+  at once. Probes are vex-built flying machines (8 hp, ram for 3, pass through walls like a vex) and drop 1-2 probe
+  circuits. Mined with an iron pickaxe, the wreck gives a wreck core (for the band's reforging, patch 7) and 2-4 circuits.
+- **Band hunters:** every minute at night in the overworld each band wearer has a 12% chance, at most once every half day,
+  that an android mech comes for them from 28-44 blocks off. It drops a tablet and 2-4 circuits.
+- **A glitch can teach:** when a corrupted band's slam glitches to the wrong alien, 20% of the time it lands on an alien
+  the band never held (Dud included) and keeps it. Dud comes only this way (`XenoformPower.GLITCH_TEACH_CHANCE`).
+- **Star-readers** (`StarReaders`, with Kingdoms and MCA): one fallen star in 3 is remembered on its level, and a day to
+  a day and a half later, once a player is within 96, a star-reader (an MCA villager, tag `jaymospowers_star_reader`)
+  comes to stand 7-10 blocks out on the crater's rim, facing in. None comes within 96 of another. "Talk about work" opens
+  their screen: a star tablet for 3 star metal ingots, a reading of your band (how many aliens it has yet to hold), and a
+  hint about the sky (wrecks and probes, hunters, the smith on a moon, glitches, fishing, remnant hollows, tablets).
+  Module plans join the trade with patch 7.
+- Tuning: constants at the top of `XenoFinds`, `StarWreckBlock` and `StarReaders`. Art: `tools/gen_xeno_finds.py`.
+
 ## Rendering [client/power/xenoform]
 
 - `XenoformClient.extract` (AvatarRenderer `extractRenderState`, tail) marks the render state with the form and makes

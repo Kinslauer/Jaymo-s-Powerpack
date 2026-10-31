@@ -4624,3 +4624,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   generated, the server built that ground on its main thread. On the Deck that froze it for 52 seconds and every client
   timed out. Now the ground loads in the background (`ZFighterAfterlife.returnHome`, a loading ticket of our own,
   `HOME_RADIUS` chunks round the spot) while "The way back is opening" shows, and he is sent the moment it is ready.
+- **0.18.122, Earning aliens (Xeno-Band patch 6, `docs/XenoBand-Plan.md`; Kingdoms 0.7.442):** star tablets (fallen stars,
+  fishing treasure, Ancient Remnants chests, band hunters, Gremlin): hold one as you slam the band and it learns an alien
+  it didn't hold. Alien-only crafting with JEI pages: Gremlin makes tablets at a crafting table, Bulwark grinds ore into
+  two dusts at a grindstone, Pyre smelts what it holds. One fallen star in ten comes down a wreck that sends out probes
+  while a band wearer is near; probes drop circuits, the wreck a wreck core. Android mechs hunt band wearers on some
+  nights and drop tablets. A corrupted band's wrong-alien glitch can teach an alien it never held (Dud only so).
+  Star-readers (`StarReaders`): one fallen star in three draws an MCA villager to its rim a day or so later; their talk
+  trades a tablet for 3 star metal, reads your band, and drops hints about the sky.
+  New art from `tools/gen_xeno_finds.py`. Compile-checked (the JEI page by hand: JEI isn't in the cloud jars); not seen in game.
