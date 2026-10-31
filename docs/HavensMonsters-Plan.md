@@ -121,3 +121,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   "Who else is about?"), Will's Interrogation (no lies get past you, a stare once threats fail, "Swear you'll never raise
   a hand to me"). A player held down gets an answer screen (truth, lie, silence or their own words), and the asker a
   question screen.
+- Patch 1 (Kingdoms 0.7.425): tribes per brood and region with the oldest camp as the king's seat, one grudge per tribe
+  per player (kills, chiefs, the pedlar up; tribute, truce tokens, the rival brood's dead and time down), hunting bands
+  at 60, the pedlar under orc escort (wares, mask, seat map, truce token, bestiary, the tribe's mood), seat maps in
+  chiefs' stores, the Greasy Bestiary, and "What does your king think of me?" when questioning.

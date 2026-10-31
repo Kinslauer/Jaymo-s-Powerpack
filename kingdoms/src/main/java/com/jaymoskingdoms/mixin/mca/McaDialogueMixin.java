@@ -102,6 +102,27 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.WARES_ANSWER.equals(answer)) {
+			// (0.7.425) a pedlar's wares
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Pedlars.trade(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.MOOD_ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.425) how his tribe takes to you, as the pedlar puts it
+			villager.sendChatMessage(com.jaymoskingdoms.Pedlars.mood(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER.equals(answer)) {
+			// (0.7.425) emeralds toward the tribe's grudge
+			villager.sendChatMessage(com.jaymoskingdoms.Tribes.tribute(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.INTRODUCE.equals(answer)) {
 			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
 			// open, and fills in once you know them)

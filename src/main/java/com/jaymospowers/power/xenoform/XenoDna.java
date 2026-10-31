@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.99, Scan A of {@code docs/ScanGaps-Plan.md}) Who carries which alien's DNA beyond what each form's own
+ * (0.18.100, Scan A of {@code docs/ScanGaps-Plan.md}) Who carries which alien's DNA beyond what each form's own
  * {@link XenoForm#scans} knows, and who carries none. Mobs from other mods (Naturalist, Friends & Foes, Enderscape, MCA)
  * and from Kingdoms are matched by entity id, so a mod that isn't loaded simply never matches. Checked before the forms,
  * so a mob built on another mob's class (a Kingdoms redstone golem is an iron golem underneath) can't hand out the wrong

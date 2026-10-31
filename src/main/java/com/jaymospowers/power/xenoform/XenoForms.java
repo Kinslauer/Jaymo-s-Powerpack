@@ -69,7 +69,7 @@ public final class XenoForms {
 
 	/** The alien whose DNA {@code creature} carries, or null. */
 	public static @Nullable XenoForm scanOf(Entity creature) {
-		// (0.18.99) the DNA table first: extra carriers by id, and those who carry none
+		// (0.18.100) the DNA table first: extra carriers by id, and those who carry none
 		String listed = XenoDna.lookup(creature);
 		if (listed != null) {
 			return listed.isEmpty() ? null : get(listed);

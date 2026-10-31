@@ -93,7 +93,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Slipfin** | axolotl | 0.8x, 22 hp, fists 4, 10% faster; in water Dolphin's Grace II, water breathing, night vision; never drowns; out of water and rain 30 s it dries (1 hp and Slowness every 2 s); can't be carried or taken by tendrils, slips out of carries and trips on its own | Bubble Jet: a 12-block jet, 3 (6 under water), pushes, puts out fire (1 s) | Slip: out of any carry, ride on a monster, trip; Slowness gone; Speed II 3 s (5 s) | Dart: a lunge (2.0 in water, 0.9 on land) that bites the first creature for 6 (1.5 s) | Regrow: one lost limb back, every break knit, Regeneration II 5 s (45 s) |
 | **Polestar** | Magnetic Giant (Kingdoms) | 1.2x, 36 hp, fists 6, a little slower, 70% knockback resist | Pull: things wearing iron or chainmail (an iron golem counts 4) in a cone ahead within 16 are dragged to you, 0.4 + 0.25 a piece; iron items on the ground fly to you (2 s) | Repel: all iron-wearers within 8 take 1.5 a piece and a throw; arrows in the air turn back (4 s) | Lift: tear an iron, raw iron, bars, trapdoor, anvil, cauldron, chain or heavy pressure plate block out (6 blocks) and hold it; V again throws it as a falling block (2 a block fallen, max 30) (0.5 s / 3 s) | Field (hold): arrows heading at you within 6 turn back at their shooter |
 
-### More DNA [XenoDna] (0.18.99)
+### More DNA [XenoDna] (0.18.100)
 
 `XenoDna` is checked before every form's own `scans`, by entity id. Mod mobs that aren't loaded never match.
 

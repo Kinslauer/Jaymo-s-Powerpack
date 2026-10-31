@@ -31,7 +31,7 @@ lettered (Scan A to Scan G) so they don't clash with those numbers.
 
 ### Scan A, more DNA for the aliens we have (Powers, small)
 
-**Built (0.18.99):** all of the below, in `XenoDna`.
+**Built (0.18.100):** all of the below, in `XenoDna`.
 
 Each line below is a new scan for an existing alien. Mobs from other mods are matched by id, so nothing breaks when
 the mod isn't loaded.
