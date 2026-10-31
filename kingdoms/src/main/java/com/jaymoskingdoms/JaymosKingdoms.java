@@ -180,6 +180,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();
+		// (0.7.449) strangers come over only for a reason, and say why when asked
+		ComingOver.register();
 		// (0.7.264, Andy's NOEA picks) parties: invites, no friendly fire, shared slay quests, members' stats (and its attachment)
 		LOGGER.debug("party attachment: {}", Parties.META);
 		Parties.register();

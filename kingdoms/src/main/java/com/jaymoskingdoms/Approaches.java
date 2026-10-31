@@ -966,6 +966,8 @@ public final class Approaches {
 		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == UNMASK || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
 		tell(level, a, a.line, a.color);
+		// (0.7.449) later, "what's going on?" in their menu gets what more they had to say
+		ComingOver.approached(a.mob, player, a.more);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		if (a.foreign) {
