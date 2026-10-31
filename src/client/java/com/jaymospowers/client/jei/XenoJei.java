@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.18.121, Xeno-Band patch 6) JEI's pages for the aliens' own crafting ({@link XenoFinds}): Gremlin's tablets at a crafting
+ * (0.18.122, Xeno-Band patch 6) JEI's pages for the aliens' own crafting ({@link XenoFinds}): Gremlin's tablets at a crafting
  * table, Bulwark's dusts at a grindstone, Pyre's smelting in its hands; and where tablets, circuits and wreck cores come from.
  * Only loaded by JEI (the {@code jei_mod_plugin} entrypoint), on {@link SimpleCategory}.
  */

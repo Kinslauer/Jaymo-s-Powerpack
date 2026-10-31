@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.entity.VexRenderer;
 import net.minecraft.client.renderer.entity.state.VexRenderState;
 import net.minecraft.resources.Identifier;
 
-/** (0.18.121, Xeno-Band patch 6) A star wreck's probe: the vex's body and flight, in our own grey metal skin with a green visor. */
+/** (0.18.122, Xeno-Band patch 6) A star wreck's probe: the vex's body and flight, in our own grey metal skin with a green visor. */
 public final class StarProbeRenderer extends VexRenderer {
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/star_probe.png");
 

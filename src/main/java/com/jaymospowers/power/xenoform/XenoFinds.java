@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.121, Xeno-Band patch 6) Earning aliens, beyond scanning:
+ * (0.18.122, Xeno-Band patch 6) Earning aliens, beyond scanning:
  * <ul>
  * <li><b>Star tablets</b> ({@link #TABLET}): found in fallen stars, fishing treasure and the remnants' chests, assembled by
  * Gremlin, and dropped by band hunters. Hold one when you slam the band and the band reads it: a random alien it doesn't

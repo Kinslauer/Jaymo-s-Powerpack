@@ -29,7 +29,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.121, Xeno-Band patch 6) The star-readers: one fallen star in {@link #ONE_IN} draws one, a day or so after it came
+ * (0.18.122, Xeno-Band patch 6) The star-readers: one fallen star in {@link #ONE_IN} draws one, a day or so after it came
  * down ({@link #DELAY}, {@link #DELAY_SPREAD}). They come as one of Kingdoms' MCA characters (via {@link ZFighterNpcs#villager},
  * tagged {@link #TAG}), standing on the crater's rim and keeping to it. "Talk about work" opens their talk screen
  * ({@link #talk}): a star tablet for {@link #TABLET_PRICE} star metal, a reading of your band, and a few words about the sky
