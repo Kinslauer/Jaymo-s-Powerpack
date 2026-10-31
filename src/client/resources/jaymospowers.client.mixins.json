@@ -5,6 +5,7 @@
 	"client": [
 		"FaceLivingEntityRendererMixin",
 		"TerrainParticleWaterMixin",
+		"DeathScreenFilmMixin",
 		"GuardFirstPersonMixin",
 		"HammerFirstPersonMixin",
 		"HammerPoseMixin",

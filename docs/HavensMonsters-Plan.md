@@ -131,3 +131,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
 - Patch 2, second half (Kingdoms 0.7.429, Powers 0.18.102): goblin and orc kings' guards at the door, the three trials
   (pit fight, trap hall, stone-lifting brawl) that win a truce and a gift, and bog iron as its own Tinkers material with
   forged armour.
+- Patch 3 (Kingdoms 0.7.431): captains. A ladder of 4 per tribe (ranks 1-5, bynames, gear and size by rank) posted to
+  camps or leading hunting bands; 15 traits (8 strengths, 4 weaknesses, 3 fears); learned by questioning, chiefs'
+  orders and the pedlar, kept in the journal; a film at the first meeting and lines about the last one; a player's
+  killer climbs (or rises) and becomes their sworn foe, wearing their head; the strongest takes a fallen king's seat.

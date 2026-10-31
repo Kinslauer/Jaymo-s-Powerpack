@@ -4491,3 +4491,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     head front has a plain two-pixel eye pair (white beside pupil, same row both sides); any other skin is left as it
     is (the blink still comes from Kitchen's own eye finder). HD skins scale. Knocked out and dead keep their shut eyes.
   - Compile-checked; not seen in game.
+
+## 0.18.106: a film after your death (Kingdoms' captains)
+- `UltimateFilm.afterDeath`: a film for a player who's just died, their camera on someone (the `Play` packet carries
+  `afterDeath`). It plays on while they're dead, and `DeathScreenFilmMixin` holds the death screen back (not drawn, its
+  clock and buttons waiting) until it ends. Kingdoms 0.7.431 uses it for the captain who killed you: a short scene of him
+  over your body, raised to captain or up a rank, before you can respawn (Andy).
+- Compile-checked; not seen in game.

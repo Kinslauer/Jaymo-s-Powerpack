@@ -135,6 +135,10 @@ abstract class McaAnswersMixin {
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.WARES_ANSWER);
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.MOOD_ANSWER);
 			}
+			if (!com.jaymoskingdoms.Captains.pedlarHears(villager)) {
+				// (0.7.431) only a tribe's pedlar has heard of its captains
+				cir.getReturnValue().remove(com.jaymoskingdoms.Captains.PEDLAR_ANSWER);
+			}
 			if (!com.jaymoskingdoms.Trials.offers(player, villager)) {
 				// (0.7.429) only a king's guard, to see the king
 				cir.getReturnValue().remove(com.jaymoskingdoms.Trials.ANSWER);
