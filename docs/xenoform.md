@@ -97,6 +97,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Locust** | goat | 0.95x, 22 hp, fists 4, 12% faster; no fall damage | Crash Leap (hold, let go): up to 30 ticks of charge, 0.9-2.4 out; landing hits everything on the ground within 3-6 for 4-9 (3 s) | Kick: 6 and a 1.8 shove within 3.5, you spring back (1.5 s) | Wall Bounce: off a wall you touch, 0.9 out and 0.85 up; chains (0.4 s) | Hops: three quick hops (3 s) |
 | **Croaker** | frog; tadpole | 1x, 26 hp, fists 5, 30% knockback resist, steps up a block; no fall damage; Dolphin's Grace and water breathing in water | Tongue: hauls the aimed creature (10) to you for 2, or snatches the dropped item on the line (1.5 s) | Gulp: swallows a mob no wider than 1 and no taller than 1.5 within 3 (it rides you hidden, AI off, 1 every 2 s); G again spits it 1.6 for 4 (2 s) | Bound: 1.3 out, 0.8 up (2 s) | Croak: 2, Slowness IV 2.5 s to all within 6; players sick, mobs forget you (10 s) |
 | **Dud** | never scanned (patch 6's glitch; `/powerdebug xenoform unlock dud`); hidden | 0.7x, 20 hp, fists 0: its blows are stopped (`XenoformPower`, ALLOW_DAMAGE); nothing hurts it but the void, every blow throws it; monsters within 12 that see it target it every second | Taunt: monsters within 24 come for you (5 s) | Boing: a hop of 1.0 (1 s) | Play Dead: 3 s where nothing targets you (10 s) | Roll: a 1.1 dash (2 s) |
+| **Rime** | stray, snow golem; Friends & Foes Iceologer | 1.05x, 30 hp, fists 5; Cryokinesis's moves lent through `cryo/CryoLent` with Rime's own cooldowns; sprinting on the ground skates (Ice Slide, off 15 ticks after you stop); frost armour: whatever hits it within 4 is frozen and slowed (3 s); cold never hurts it. Ultimate (Hoarfrost) B: the Blizzard | Frost Breath (hold), as Cryo's; the wait (3 s) starts when it ends | Ice Shards (3 s) | Flash Freeze (10 s) | Ice Wall (12 s) |
+| **Marrow** | skeleton; Kingdoms silver skeleton, Skeleton Lord | 1x, 24 hp, fists 4, a little quick; once each change (and again after each Ultimate) a killing blow drops it in a heap, untouchable for 3 s, then up at half health | Bone Spikes: a 9-block line, 6 and a toss (3 s) | Rib Throw: a boomerang out 10 ticks and back, 4 each way (2 s) | Bone Shield: 5 s, shots glance off, Resistance II (15 s) | Fall Apart: 3 s in a heap, hunters lose you, can't move (12 s) |
+| **Swathe** | husk | 1x, 26 hp, fists 4; can't drown or starve | Lash Bind: the aimed creature (9) is tripped like a bolas (`Tripped.bind`), or held (Slowness X, Weakness) 4 s (6 s) | Lash Pull: drags the aimed creature (12) to you (2 s) | Sandstorm: 6 s, radius 6 (9 in desert or badlands), 1 (2) a second, Blindness (20 s) | Wrap: bleeding stops, Regeneration II 5 s (30 s) |
+| **Blight** | the Wither; hidden | 1.4x, 60 hp, fists 7, slower, heavy; the Wither effect and its own skulls can't touch it; at half health or less the dark shield rises and shots can't touch it | Skull: one wither skull (1 s) | Volley: three fanned, the middle one blue (4 s) | Rot Touch: 6 and Wither II 6 s on the creature in reach (4); grass, leaves, flowers and crops round it rot (mob griefing on) (3 s) | Dark Pulse: 4, Wither 4 s and a throw to all within 6 (10 s) |
 
 ### More DNA [XenoDna] (0.18.100)
 
@@ -117,6 +121,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Knell | Kingdoms skulk golem |
 | Gyre | breeze |
 | Croaker | tadpole |
+| Rime | Friends & Foes Iceologer |
+| Marrow | Kingdoms silver skeleton, Skeleton Lord |
 | Rivet | Kingdoms redstone golem and mimic, android mech, war mech, Omen mechs, android, worky drone, test unit |
 
 **No DNA:** cow, pig, sheep, rabbit, turkey, duck, capybara; zombies, drowned, zombie villagers, zombified piglins and

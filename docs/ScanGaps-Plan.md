@@ -61,6 +61,10 @@ the mod isn't loaded.
 
 ### Scan B, cold and bone (Powers, large)
 
+**Built (0.18.107):** all four, with these changes: Rime doesn't stand on powder snow yet (that needs a mixin);
+Blight's shield comes on by itself at half health, so its B is a Dark Pulse instead, and Rot Touch withers without a
+bleed.
+
 - **Rime, the frost alien:** scanned from a stray, a snow golem or the Friends & Foes Iceologer. Per Andy's note, it
   has the whole Cryokinesis kit. It reuses the Cryo classes, so it fights like the Cryo power:
   - R is Frost Breath (held).

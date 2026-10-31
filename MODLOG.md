@@ -4498,7 +4498,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   clock and buttons waiting) until it ends. Kingdoms 0.7.431 uses it for the captain who killed you: a short scene of him
   over your body, raised to captain or up a rank, before you can respawn (Andy).
 - Compile-checked; not seen in game.
-- **0.18.107, Holding and using items (Motion patch 4, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+- **0.18.107, Scan B (`docs/ScanGaps-Plan.md`), cold and bone:** four new aliens. Rime (stray, snow golem or
+  Iceologer) has the whole Cryokinesis kit lent through `cryo/CryoLent` (breath, shards, Flash Freeze, Ice Wall, Ice
+  Slide while sprinting, the Blizzard as its Ultimate's B) plus frost armour. Marrow (skeleton, silver skeleton,
+  Skeleton Lord): Bone Spikes, boomerang Rib Throw, Bone Shield, Fall Apart, and one rise from a killing blow each
+  change. Swathe (husk): Lash Bind (bolas trip), Lash Pull, Sandstorm (stronger in deserts), Wrap; can't drown or
+  starve. Blight (the Wither, hidden): skulls, a three-skull volley, Rot Touch, Dark Pulse, dark shield at half health.
+  Each has its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.108, Holding and using items (Motion patch 4, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
   - **Dual flintlocks** (`armory/DualFlintlocks`, `WeaponModDualFlintlockMixin`): a WeaponMod flintlock in each hand
     fire in turn, main hand first, and each reloads on its own (fire, fire, reload main, reload off). One alone is
     unchanged.

@@ -100,7 +100,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   swinging. Painted on copies of the skin, only when the head front has a plain two-pixel eye pair on one row (rows
   3-6); other skins stay as they are. Knocked out and dead keep the closed eyes we have. MCA-drawn faces aren't touched.
 
-### Patch 4, Holding and using items (Powers 0.18.107; picks flint-steel, shears, held-tools, held-lantern, + flintlock note)
+### Patch 4, Holding and using items (Powers 0.18.108; picks flint-steel, shears, held-tools, held-lantern, + flintlock note)
 - **Flint and steel / flint and rock** (`client/armory/HeldItems`): two-handed strike in third person, a chop in first
   person, sparks off flint and steel (the rock strike already sparks); the fire comes as before.
 - **Shears:** brought in towards the centre of the screen, snipping on use.
