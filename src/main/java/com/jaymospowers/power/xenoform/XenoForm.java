@@ -119,8 +119,16 @@ public abstract class XenoForm {
 		return false;
 	}
 
-	/** C again while already the Ultimate (Swarm swaps bodies, Standstill starts again, ...). */
+	/**
+	 * The Ultimate's own move (Swarm swaps bodies, Standstill starts again, ...). (0.18.89, patch 2) It sits on B while you're
+	 * the Ultimate, where {@link #ultimateHasMove} says there is one; C again drops back to the base alien.
+	 */
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+	}
+
+	/** (0.18.89) Whether {@link #onUltimateAgain} is a move of its own, taking B's place in the Ultimate's kit. */
+	public boolean ultimateHasMove() {
+		return false;
 	}
 
 	/** Every server tick while the Ultimate holds (after {@link #tick}). */
@@ -204,6 +212,10 @@ public abstract class XenoForm {
 
 	/** Starts {@code slot}'s cooldown, and counts the use toward mastery. */
 	protected static void cooldown(ServerPlayer player, XenoformPower.Live live, int slot, int ticks) {
+		if (live.ultimate) {
+			// (0.18.89) the Ultimate's stronger kit: every move comes back sooner
+			ticks = Math.max(1, Math.round(ticks * XenoformPower.ULT_COOLDOWN));
+		}
 		live.cooldownUntil[slot] = player.level().getGameTime() + ticks;
 		live.cooldownLength[slot] = ticks;
 		live.hudDirty = true;

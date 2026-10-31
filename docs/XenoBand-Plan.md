@@ -72,6 +72,10 @@ Each of the nine Ultimates becomes its own evolved alien, not a buff on the same
 - **Health:** the Ultimate keeps its own health on top of the base alien's.
 - **New Ultimates:** Nadir gets none. The aliens added in patches 3 to 5 get theirs later.
 
+Built (0.18.89): the body as planned (armoured skin from the base one, glowing seams, per-alien spikes, health on
+top, bigger). The kit so far: R G V are the base moves with halved cooldowns and harder fists, B is the Ultimate's own
+move, C again drops back. Brand-new R G V moves per Ultimate are left for a follow-up once Andy has seen these in game.
+
 ### Patch 3, Rivet and the block shells (Powers, large; picks rivet, shell-*, machine-merge)
 - **Rivet:** the tenth alien, small and made of liquid metal, scanned from a clockwork golem.
 - **Shells:** R melds Rivet into the block you're looking at. While melded, R G V B are that block's moves. There are

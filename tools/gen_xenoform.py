@@ -1158,6 +1158,63 @@ def duplex():
     save(img, "entity/xenoform_duplex.png")
 
 
+# (0.18.89, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
+# glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
+# Nadir has no Ultimate form (its C is a film).
+ULTIMATE_COLORS = {
+    "bulwark": (184, 196, 208), "pyre": (255, 138, 42), "blur": (76, 141, 255), "prism": (196, 139, 240),
+    "wisp": (184, 232, 248), "gremlin": (154, 220, 90), "knell": (31, 184, 200), "wyrm": (192, 96, 224),
+    "duplex": (224, 123, 74),
+}
+ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
+
+
+def ultimate(form):
+    base = Image.open(ROOT / "textures" / "entity" / f"xenoform_{form}.png").convert("RGBA")
+    color = ULTIMATE_COLORS[form]
+    metal = tuple(int(c * 0.28) + 18 for c in color)
+    skin = Image.new("RGBA", base.size, CLEAR)
+    glow = Image.new("RGBA", base.size, CLEAR)
+    src, out, lit = base.load(), skin.load(), glow.load()
+    seam = lerp(color, (255, 255, 255), 0.35)
+    for y in range(base.size[1]):
+        for x in range(base.size[0]):
+            r, g, b, a = src[x, y]
+            if a == 0:
+                continue
+            bright = max(r, g, b)
+            # plates: the hide darkened toward the alien's metal, a little of the old marks showing through
+            mixed = tuple(int(metal[i] * 0.5 + (r, g, b)[i] * 0.5) for i in range(3))
+            # a bevel on each plate: lighter on its top-left rows, darker on its bottom-right
+            # laid like bricks: a seam along every fourth row, and across each row every sixth pixel, staggered
+            py = y % ULTIMATE_PLATE
+            px = (x + (y // ULTIMATE_PLATE) % 2 * 4) % ULTIMATE_WIDTH
+            if bright > 225:
+                # eyes, insignia, the brightest marks: they burn through
+                out[x, y] = (r, g, b, 255)
+                lit[x, y] = lerp((r, g, b), color, 0.3)
+                continue
+            if py == 0 or px == 0:
+                out[x, y] = seam
+                if (x // ULTIMATE_WIDTH + y // ULTIMATE_PLATE) % 3 != 0:
+                    # most seams glow; every third plate's edge lies dark, so it reads as armour, not a grid
+                    lit[x, y] = seam
+                else:
+                    out[x, y] = shade(metal + (255,), 0.55)
+                continue
+            k = 1.15 if py == 1 else 0.82 if py == ULTIMATE_PLATE - 1 else 1.0
+            out[x, y] = shade(mixed + (255,), k)
+    save(skin, f"entity/xenoform_{form}_ultimate.png")
+    save(glow, f"entity/xenoform_{form}_ultimate_glow.png")
+
+
+def ultimate_spikes():
+    """The Ultimates' spikes and crests: one plain bone-and-metal strip, tinted per alien when drawn."""
+    img = Image.new("RGBA", (64, 32), CLEAR)
+    vgrad(img, (0, 0, 64, 32), (255, 255, 255, 255), (150, 150, 160, 255))
+    save(img, "entity/xenoform_ultimate_spikes.png")
+
+
 FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
@@ -1228,6 +1285,9 @@ if __name__ == "__main__":
     duplex()
     band_worn()
     holo_glow()
+    for form in ULTIMATE_COLORS:
+        ultimate(form)
+    ultimate_spikes()
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
         preview(sys.argv[1])

@@ -26,6 +26,10 @@ public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
 	public abstract static class FormModel extends HumanoidModel<AvatarRenderState> {
 		public final Identifier texture;
+		/** (0.18.89) The Ultimate's skin (armoured, plated) and its glowing seams, drawn fullbright over it. */
+		public final Identifier ultimateTexture, ultimateGlow;
+		/** The model's id (its form's). */
+		public final String id;
 		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
 		float renderScale = 1.0F;
 		/**
@@ -37,6 +41,9 @@ public final class XenoFormModels {
 		FormModel(ModelPart root, String id) {
 			super(root);
 			this.texture = JaymosPowers.id("textures/entity/xenoform_" + id + ".png");
+			this.ultimateTexture = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate.png");
+			this.ultimateGlow = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate_glow.png");
+			this.id = id;
 		}
 	}
 

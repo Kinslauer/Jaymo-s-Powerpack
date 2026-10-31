@@ -4318,3 +4318,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   it a minute). Quick change (Z held + scroll as an alien, a quarter of the charge, dizzy), the band saving you from a
   killing blow with a fitting alien (10 min), the wild dial (C while Z held), and the Jammed effect with the Potion of
   Jamming (awkward + echo shard; recipes are data so JEI shows them). HUD charge bar over the dial.
+- **0.18.89, Real Ultimate forms (Xeno-Band patch 2):** Andy: "I'd also like to see real ultimate forms, all we have are
+  a few special attacks". C as an ascended alien now makes it a body of its own: an armoured skin made from its base
+  skin (plates, seams glowing in its colour, fullbright and pulsing), its own spikes, horns, crests and forearm blades
+  (`UltimateSpikes`, a pose-following humanoid model), half again its health on top, fists +50%, 15% bigger, every move's
+  cooldown halved. The Ultimate's own move (Standstill, Geode, Revenant, Swarm's swap, the Tolling, Copper Storm) is on
+  B; C again drops back to the base alien. Lasts until the charge runs out. Textures from `tools/gen_xenoform.py`.
+  Compile-checked; not seen in game.

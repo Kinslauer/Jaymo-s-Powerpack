@@ -159,9 +159,19 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - **Ascension.** The power ascends on its own once the band is complete (all nine aliens scanned; Duplex, added in 0.15.51, made it nine, and anyone already ascended stays ascended) and the power fully
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
-- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form for the rest of the timer
-  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateAgain` for C again; `onUltimateEnd` before `onExit`).
-  The Ultimate's own move has a cooldown of its own (`live.ultimateNext`). As yourself C only says to slam first.
+- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form until the charge runs out
+  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateEnd` before `onExit`). (0.18.89, patch 2, Andy: "real
+  ultimate forms, all we have are a few special attacks") It is its own body:
+  - **Look:** an armoured skin made from the alien's own (darker plates, seams glowing in its colour, eyes and
+    insignia burning through; `xenoform_<id>_ultimate.png` + `_ultimate_glow.png` drawn fullbright, pulsing), and its
+    own spikes, horns, crests and forearm blades (`UltimateSpikes.Style`, one bone strip tinted per alien). Synced as
+    `XenoformState.ULTIMATE`.
+  - **Body:** half again the alien's health on top of its own (healed in full as it comes on, gone when it ends), fists
+    +50%, 15% bigger (`ULT_HEALTH`, `ULT_DAMAGE`, `ULT_SCALE`).
+  - **Kit:** R G V are the base moves with every cooldown halved (`ULT_COOLDOWN`, in `XenoForm.cooldown`). The
+    Ultimate's own move (`onUltimateAgain`, where `ultimateHasMove`) moves to B; its cooldown is its own
+    (`live.ultimateNext`). C again drops back to the base alien (`dropUltimate`), the charge running on.
+  - As yourself C only says to slam first (or, with Z held, flips the wild dial).
 
 | Alien | Ultimate | What it does |
 |---|---|---|

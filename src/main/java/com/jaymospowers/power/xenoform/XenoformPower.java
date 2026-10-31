@@ -114,6 +114,12 @@ public final class XenoformPower implements Power {
 	public static final int ASCEND_CHECK_EVERY = 40;
 	/** (0.16.24) An Ultimate's film (ticks): low and close, sweeping round the alien. */
 	static final int ULTIMATE_FILM_TICKS = 36;
+	/**
+	 * (0.18.89, patch 2: Andy wants "real ultimate forms") The Ultimate is its own body on top of the base alien's: this
+	 * much more health (share of the alien's, its own bar on top, healed in full as it comes on), more fist damage (share),
+	 * bigger (scale added), and every move's cooldown times {@link #ULT_COOLDOWN}.
+	 */
+	public static final float ULT_HEALTH = 0.5F, ULT_DAMAGE = 0.5F, ULT_SCALE = 0.15F, ULT_COOLDOWN = 0.5F;
 
 	private static final Identifier SCALE_ID = JaymosPowers.id("xenoform_scale");
 	private static final Identifier HEALTH_ID = JaymosPowers.id("xenoform_health");
@@ -121,6 +127,9 @@ public final class XenoformPower implements Power {
 	private static final Identifier SPEED_ID = JaymosPowers.id("xenoform_speed");
 	private static final Identifier KNOCKBACK_ID = JaymosPowers.id("xenoform_knockback");
 	private static final Identifier STEP_ID = JaymosPowers.id("xenoform_step");
+	private static final Identifier ULT_HEALTH_ID = JaymosPowers.id("xenoform_ultimate_health");
+	private static final Identifier ULT_DAMAGE_ID = JaymosPowers.id("xenoform_ultimate_damage");
+	private static final Identifier ULT_SCALE_ID = JaymosPowers.id("xenoform_ultimate_scale");
 
 	/** Server-side bookkeeping for one player (not saved: a relog turns them back first). */
 	/** A projectile Standstill holds (kept by reference, so it is let go in whichever dimension it is in) and its caught state. */
@@ -405,6 +414,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
+		player.removeAttached(XenoformState.ULTIMATE);
 		player.removeAttached(XenoformState.FLIGHT);
 	}
 
@@ -652,6 +662,13 @@ public final class XenoformPower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
 		if (live.form != null) {
+			if (live.ultimate && key == PowerKey.ABILITY_4 && live.form.ultimateHasMove()) {
+				// (0.18.89) the Ultimate's own move takes B
+				if (down) {
+					live.form.onUltimateAgain(player, live);
+				}
+				return;
+			}
 			live.form.onKey(player, live, key, down);
 			return;
 		}
@@ -751,7 +768,8 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		if (live.ultimate) {
-			form.onUltimateAgain(player, live);
+			// (0.18.89) C again: back to the base alien
+			dropUltimate(player, live, true);
 			return;
 		}
 		if (!form.onUltimate(player, live)) {
@@ -760,6 +778,7 @@ public final class XenoformPower implements Power {
 		}
 		live.ultimate = true;
 		live.hudDirty = true;
+		ultimateBody(player, form, true);
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -899,6 +918,7 @@ public final class XenoformPower implements Power {
 		}
 		if (live.ultimate) {
 			form.onUltimateEnd(player, live);
+			ultimateBody(player, form, false);
 		}
 		if (fx) {
 			XenoVoices.formEnded(player, form, knockout, live.ticksLeft <= 0, live.hurt);
@@ -943,6 +963,50 @@ public final class XenoformPower implements Power {
 			}
 		}
 		live.hudDirty = true;
+	}
+
+	/**
+	 * (0.18.89) C again as the Ultimate: back to the base alien, its own extras undone, the Ultimate's health gone with it.
+	 * The charge runs on.
+	 */
+	private static void dropUltimate(ServerPlayer player, Live live, boolean fx) {
+		XenoForm form = live.form;
+		if (form == null || !live.ultimate) {
+			return;
+		}
+		form.onUltimateEnd(player, live);
+		live.ultimate = false;
+		ultimateBody(player, form, false);
+		live.hudDirty = true;
+		if (fx) {
+			ServerLevel level = player.level();
+			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.5, 0.8, 0.5, 0.08);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
+			player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color))));
+		}
+	}
+
+	/** (0.18.89) The Ultimate's body on ({@code on}) or off: its health on top (healed in full), fists, size, and the look everyone sees. */
+	private static void ultimateBody(ServerPlayer player, XenoForm form, boolean on) {
+		if (on) {
+			float extra = form.health * ULT_HEALTH;
+			modify(player, Attributes.MAX_HEALTH, ULT_HEALTH_ID, extra, AttributeModifier.Operation.ADD_VALUE);
+			modify(player, Attributes.ATTACK_DAMAGE, ULT_DAMAGE_ID, ULT_DAMAGE, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			modify(player, Attributes.SCALE, ULT_SCALE_ID, ULT_SCALE, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+			player.heal(extra);
+			player.setAttached(XenoformState.ULTIMATE, true);
+		} else {
+			remove(player, Attributes.MAX_HEALTH, ULT_HEALTH_ID);
+			remove(player, Attributes.ATTACK_DAMAGE, ULT_DAMAGE_ID);
+			remove(player, Attributes.SCALE, ULT_SCALE_ID);
+			if (player.getHealth() > player.getMaxHealth()) {
+				player.setHealth(player.getMaxHealth());
+			}
+			player.removeAttached(XenoformState.ULTIMATE);
+		}
+		player.refreshDimensions();
 	}
 
 	/** The alien's body, as attribute modifiers on the player. */
