@@ -18,5 +18,11 @@
 	"message.jaymospowers.finisher.flail": "Ball and chain: %s",
 	"message.jaymospowers.finisher.whip": "Garrotte: %s",
 	"message.jaymospowers.finisher.rock": "Stoned: %s",
-	"message.jaymospowers.finisher.head": "Kneel at %s's head to snap the neck"
+	"message.jaymospowers.finisher.head": "Kneel at %s's head to snap the neck",
+	"message.jaymospowers.finisher.choose": "Question  %s  Kill",
+	"message.jaymospowers.finisher.questioned": "%s holds you down for questioning",
+	"message.jaymospowers.finisher.q_blade": "Blade at the throat: %s",
+	"message.jaymospowers.finisher.q_blunt": "Club raised over %s",
+	"message.jaymospowers.finisher.q_aim": "%s at your mercy",
+	"message.jaymospowers.finisher.q_grip": "By the collar: %s"
 }

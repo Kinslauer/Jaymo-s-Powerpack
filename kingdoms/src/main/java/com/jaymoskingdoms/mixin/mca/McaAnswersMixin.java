@@ -129,6 +129,14 @@ abstract class McaAnswersMixin {
 			// (0.7.385) only today's bout master of a realm at its festival
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Bouts.ANSWER);
 		}
+		if ("main".equals(name)) {
+			// (0.7.424) held down for questioning: only the questions (those not yet asked); otherwise never them
+			if (com.jaymoskingdoms.Questioning.active(player, villager)) {
+				cir.getReturnValue().removeIf(answer -> !com.jaymoskingdoms.Questioning.offers(player, villager, answer));
+			} else {
+				cir.getReturnValue().removeAll(com.jaymoskingdoms.Questioning.ANSWERS);
+			}
+		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
 			cir.getReturnValue().removeIf(answer -> !Languages.simpleDialogue(name, answer));

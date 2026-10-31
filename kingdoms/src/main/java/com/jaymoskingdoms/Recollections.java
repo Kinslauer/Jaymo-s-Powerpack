@@ -101,7 +101,10 @@ public final class Recollections {
 		GOT_UP(4, 90, true, true, "You lay downed and %1$s knelt by you and got you back on your feet.", "%1$s got %3$s back on their feet when they lay downed."),
 		TENDED(2, 40, true, false, "%1$s dressed your wounds with their own hands.", ""),
 		SHIELDED(3, 60, true, true, "%1$s drew %2$s off you when it came for you.", "%1$s drew %2$s off %3$s when it came for them."),
-		THREW(-1, 20, true, false, "%1$s picked you up while you lay downed, then threw you down.", "");
+		THREW(-1, 20, true, false, "%1$s picked you up while you lay downed, then threw you down.", ""),
+		// (0.7.424) held down on the execution hold and questioned ({@link Questioning}), and let go after
+		QUESTIONED(-3, 60, true, true, "%1$s held you down with a weapon at you and made you talk.", "%1$s held %3$s down and made them talk."),
+		SPARED(3, 60, true, true, "%1$s had you at their mercy and let you live.", "%1$s had %3$s at their mercy and let them live.");
 
 		final int weight, days;
 		final boolean remark, tellable;

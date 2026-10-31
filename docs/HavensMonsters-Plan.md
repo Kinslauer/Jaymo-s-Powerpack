@@ -103,10 +103,15 @@ files and can run beside them, two tracks at a time.
 ### Patch 8, horses (Kingdoms + pack, can run beside any)
 - **Ship Better Horses** unchanged with credit (packResourcePacks). Check that 26.3 loads it.
 - **Donkeys and mules join our breeds** (bond, roster, handbook, wheel) but keep vanilla's renderer, so Better Horses
-  draws them. (Open question, see below.)
+  draws them (Andy's choice, 2026-10-31).
 - **A fuller breed horse of our own**, **coat names you can read**, **smoother rearing and grazing**.
 
-## Open question
-Both "Ship Better Horses" and "Donkeys and mules join our breeds" were picked. My plan keeps both by giving donkeys and
-mules our breed systems while leaving their look to Better Horses. The other way is to draw our own donkey and mule
-builds and not ship the pack.
+## Decided
+Donkeys and mules join our breed systems but keep vanilla's renderer, so Better Horses draws them (Andy, 2026-10-31).
+
+## Done
+- Patch 0 (Powers 0.18.96, Kingdoms 0.7.424): question or kill on the full execution hold (turn left to question, right
+  to kill; Kingdoms' Interrogation perk, Will page), four questioning holds by weapon, MCA's talk menu with Who leads
+  you / Where is your home / Press the threat / Let them go / Finish them, memories of being questioned or spared; the
+  world's news posted on town boards ("Word from abroad"), each town hearing about 70% of it, and a bird bringing a piece
+  only when it names you or your realm. Players held down only see who holds them (their own answer screen is still to do).

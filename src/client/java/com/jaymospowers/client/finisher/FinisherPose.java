@@ -344,6 +344,20 @@ public final class FinisherPose {
 			k(30, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
 			k(36, 0.4F, 28, 0, -0.75F, 0, 0.05F, 0.1F, 0, -0.3F, -1.15F, 1.35F, 0.5F, 0),
 			rest(44, 0)});
+		// Questioning holds (Andy, 2026-10-31): held still for as long as the talk lasts, one hold per weapon kind
+		float q = Finishers.QUESTION_TICKS;
+		// The blade at the throat: on a knee at their head, the edge laid across the neck, the off hand on the chest
+		Key throat = k(0, 0.45F, 34, 0, -0.55F, -0.2F, 0.1F, -0.35F, 0.25F, -0.1F, -1.15F, 1.35F, 0.65F, 100);
+		KEYS.put(Finishers.Kind.Q_BLADE, new Key[] {rest(0, 0), at(throat, 8), turned(throat, q * 0.5F, 2), at(throat, q - 8), rest(q, 0)});
+		// The club raised: standing over them, the weapon up and ready to come down
+		Key raised = k(0, 0.0F, 6, -8, -2.6F, -0.1F, 0.25F, -0.5F, 0.2F, -0.2F, -0.2F, 0.2F, 0.55F, 0);
+		KEYS.put(Finishers.Kind.Q_BLUNT, new Key[] {rest(0, 0), at(raised, 8), turned(raised, q * 0.5F, -4), at(raised, q - 8), rest(q, 0)});
+		// The shot levelled at the face from a step off
+		Key levelled = k(0, 0.05F, 18, 0, -1.15F, -0.1F, 0, -1.1F, 0.6F, 0, -0.2F, 0.2F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Q_AIM, new Key[] {rest(0, 0), at(levelled, 8), at(levelled, q - 8), rest(q, 0)});
+		// A fist in the collar: on a knee, the head pulled up by the collar, the other fist drawn back
+		Key collar = k(0, 0.45F, 32, 6, -1.4F, 0.2F, 0.3F, -0.6F, 0.1F, 0.1F, -1.15F, 1.35F, 0.65F, 0);
+		KEYS.put(Finishers.Kind.Q_GRIP, new Key[] {rest(0, 0), at(collar, 8), turned(collar, q * 0.5F, 2), at(collar, q - 8), rest(q, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
@@ -419,7 +433,8 @@ public final class FinisherPose {
 		Entity body = entity.level().getEntity(finish.target());
 		if (body != null) {
 			// (0.15.146) the neck snap kneels to the head, not the middle; (0.17.181) so does the rock
-			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK) && body instanceof net.minecraft.world.entity.LivingEntity living
+			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK || kind == Finishers.Kind.Q_BLADE
+				|| kind == Finishers.Kind.Q_GRIP) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();
 			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
 			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;

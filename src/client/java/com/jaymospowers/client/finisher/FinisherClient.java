@@ -3,8 +3,11 @@ package com.jaymospowers.client.finisher;
 import com.jaymospowers.core.finisher.Finishers;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
@@ -22,20 +25,41 @@ import net.minecraft.world.phys.EntityHitResult;
 public final class FinisherClient {
 	/** Who attack was last said to be held on (entity id), or -1. */
 	private static int sent = -1;
+	/** (0.18.96) The body the choice is put about (question or kill), or -1; and which way you faced when it was. */
+	private static int choosing = -1;
+	private static float choiceYaw;
+	/** (0.18.96) The choice's slider: this many marks a side. */
+	private static final int CHOICE_MARKS = 6;
 
 	private FinisherClient() {
 	}
 
 	public static void register() {
 		ClientTickEvents.END_CLIENT_TICK.register(FinisherClient::tick);
+		// (0.18.96) the hold's full and the choice is yours: turn left to question, right to kill
+		ClientPlayNetworking.registerGlobalReceiver(Finishers.Choose.TYPE, (payload, context) -> {
+			choosing = payload.target();
+			choiceYaw = context.player().getYRot();
+		});
 	}
 
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		int target = -1;
-		if (player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
-			&& minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
+		boolean held = player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null
+			&& !player.isSpectator();
+		if (held && choosing >= 0) {
+			// (0.18.96) turning to choose takes the crosshair off them: the hold stays on whom it was
+			target = choosing;
+		} else if (held && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
 			target = body.getId();
+		}
+		if (choosing >= 0 && (player == null || target != choosing)) {
+			// (let go: no choice)
+			choosing = -1;
+		}
+		if (choosing >= 0) {
+			choose(player);
 		}
 		if (target != sent && (player != null || target < 0)) {
 			sent = target;
@@ -43,6 +67,25 @@ public final class FinisherClient {
 				ClientPlayNetworking.send(new Finishers.Execute(target));
 			}
 		}
+	}
+
+	/**
+	 * (0.18.96) Andy: "select either question or kill dragging either left or right". How far you've turned since the choice
+	 * came: past {@link Finishers#CHOOSE_DEGREES} to the left it's question, to the right kill; till then a slider shows it.
+	 */
+	private static void choose(LocalPlayer player) {
+		float turned = Mth.wrapDegrees(player.getYRot() - choiceYaw);
+		if (Math.abs(turned) >= Finishers.CHOOSE_DEGREES) {
+			ClientPlayNetworking.send(new Finishers.Pick(choosing, turned < 0.0F));
+			choosing = -1;
+			return;
+		}
+		int at = Math.round(turned / Finishers.CHOOSE_DEGREES * CHOICE_MARKS);
+		StringBuilder slider = new StringBuilder();
+		for (int i = -CHOICE_MARKS; i <= CHOICE_MARKS; i++) {
+			slider.append(i == at ? '\u25C6' : '\u2500');
+		}
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.choose", slider.toString()).withStyle(ChatFormatting.GOLD));
 	}
 
 	/**

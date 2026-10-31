@@ -154,9 +154,22 @@ public final class Finishers {
 	/** (0.15.146) A basic move's wear on a tool that isn't made for it (share of its durability a blow, at least the minimum), and on a weapon. */
 	static final float IMPROVISED_WEAR = 0.12F;
 	static final int IMPROVISED_WEAR_MIN = 4, WEAPON_WEAR = 1;
+	/**
+	 * (0.18.96) Question or kill: once the hold is full, how far you turn your view to choose (degrees: left questions,
+	 * right kills), and how long the choice waits before you're taken to have thought better of it (ticks).
+	 */
+	public static final float CHOOSE_DEGREES = 14.0F;
+	static final int CHOOSE_TICKS = 100;
+	/** (0.18.96) How long you may hold someone for questioning (ticks), and when their talk opens (once the pose has settled). */
+	public static final int QUESTION_TICKS = 20 * 60;
+	static final int QUESTION_OPEN = 10;
+	/** (0.18.96) Kingdoms' Will perk that lets you question the downed. */
+	static final String QUESTION_PERK = "interrogation";
 
 	/** How a blow lands: what it sounds and looks like. */
-	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI }
+	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI,
+		/** (0.18.96) No blow at all: they're held where they lie and questioned ({@link Kind#questioning}). */
+		HOLD }
 
 	/**
 	 * One finisher per kind of weapon: how long it plays (ticks), the beats its blows land on (the last is the kill), how
@@ -228,7 +241,16 @@ public final class Finishers {
 		/** Frost Needle, a Frost-born's: unhurried, one finger, a hair-thin beam through a leg, an arm, and then the head. */
 		Z_NEEDLE(48, new int[] {12, 22, 36}, Strike.KI),
 		/** Supernova Palm, in a Super form: on a knee, the palm on their chest, the aura poured through it until nothing's left. */
-		Z_NOVA(44, new int[] {30}, Strike.KI);
+		Z_NOVA(44, new int[] {30}, Strike.KI),
+		// ---- (0.18.96) questioning (Andy: "different animations for each weapon"): held over them, no blow, till it's over ------
+		/** At Their Throat: down on a knee at their head, the edge laid against the throat, the off hand in their collar. */
+		Q_BLADE(QUESTION_TICKS, new int[0], Strike.HOLD),
+		/** Raised Over Them: stood over them, the weapon held high and ready to come down. */
+		Q_BLUNT(QUESTION_TICKS, new int[0], Strike.HOLD),
+		/** At Their Face: the bow drawn, the crossbow or gun levelled at their face from a pace off. */
+		Q_AIM(QUESTION_TICKS, new int[0], Strike.HOLD),
+		/** By the Collar: down on a knee, both fists in their collar, their head hauled up off the ground. */
+		Q_GRIP(QUESTION_TICKS, new int[0], Strike.HOLD);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -250,9 +272,14 @@ public final class Finishers {
 			this.after = after;
 		}
 
-		/** The beat its kill lands on. */
+		/** The beat its kill lands on (a questioning has none: its whole length). */
 		public int kill() {
-			return this.beats[this.beats.length - 1];
+			return this.beats.length == 0 ? this.length : this.beats[this.beats.length - 1];
+		}
+
+		/** (0.18.96) One of the questioning holds: nobody dies of it. */
+		public boolean questioning() {
+			return this.strike == Strike.HOLD;
 		}
 
 		public static Kind of(int ordinal) {
@@ -302,6 +329,8 @@ public final class Finishers {
 	private static final class Hold {
 		final LivingEntity body;
 		long start;
+		/** (0.18.96) When the choice (question or kill) was put to them, or -1 while the hold still fills. */
+		long choosing = -1L;
 
 		Hold(LivingEntity body, long start) {
 			this.body = body;
@@ -316,6 +345,29 @@ public final class Finishers {
 
 		@Override
 		public Type<Execute> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.18.96) Server → client: the hold on this body is full; question (turn left) or kill (turn right). -1: the choice is gone. */
+	public record Choose(int target) implements CustomPacketPayload {
+		public static final Type<Choose> TYPE = new Type<>(JaymosPowers.id("finisher_choose"));
+		public static final StreamCodec<ByteBuf, Choose> CODEC = ByteBufCodecs.VAR_INT.map(Choose::new, Choose::target);
+
+		@Override
+		public Type<Choose> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.18.96) Client → server: what was chosen for the body (entity id): question them, or kill them. */
+	public record Pick(int target, boolean question) implements CustomPacketPayload {
+		public static final Type<Pick> TYPE = new Type<>(JaymosPowers.id("finisher_pick"));
+		public static final StreamCodec<ByteBuf, Pick> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Pick::target, ByteBufCodecs.BOOL,
+			Pick::question, Pick::new);
+
+		@Override
+		public Type<Pick> type() {
 			return TYPE;
 		}
 	}
@@ -355,13 +407,34 @@ public final class Finishers {
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
+		// (0.18.96) question or kill
+		PayloadTypeRegistry.clientboundPlay().register(Choose.TYPE, Choose.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, ctx) -> picked(ctx.player(), payload.target(), payload.question()));
 		// (busy: a use still held from before does nothing to them either)
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> busy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && questioning(sp)) {
+				// (0.18.96) use while you hold them for questioning: you let them go
+				questionDone(sp, false);
+			}
+			return busy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		});
 		// rooted and busy: nothing else from your hands while it plays
-		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (player instanceof ServerPlayer sp && questioning(sp)) {
+				// (0.18.96) a blow while you hold them for questioning: you've heard enough, and finish them
+				questionDone(sp, true);
+			}
+			return busy(player) ? InteractionResult.FAIL : InteractionResult.PASS;
+		});
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseItemCallback.EVENT.register((player, level, hand) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && questioning(sp)) {
+				questionDone(sp, false);
+			}
+			return busy(player) ? InteractionResult.FAIL : InteractionResult.PASS;
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			holds(server);
 			plays(server);
@@ -704,21 +777,24 @@ public final class Finishers {
 				continue;
 			}
 			long held = now - hold.start;
+			if (held >= HOLD_TICKS && hold.choosing < 0L && mayQuestion(player, hold.body)) {
+				// (0.18.96) Andy: "holding right click for the execution now has you select either question or kill dragging
+				// either left or right": the hold's full; the client shows the choice and says which way you turned
+				hold.choosing = now;
+				ServerPlayNetworking.send(player, new Choose(hold.body.getId()));
+				continue;
+			}
+			if (hold.choosing >= 0L) {
+				if (now - hold.choosing > CHOOSE_TICKS) {
+					// (you thought better of it)
+					it.remove();
+					ServerPlayNetworking.send(player, new Choose(-1));
+				}
+				continue;
+			}
 			if (held >= HOLD_TICKS) {
 				it.remove();
-				if (suit) {
-					com.jaymospowers.power.web.WebExecutions.begin(level, player, hold.body);
-					continue;
-				}
-				if (fighter) {
-					begin(level, player, hold.body, com.jaymospowers.power.zfighter.ZFighterExecutions.pick(player));
-					continue;
-				}
-				// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
-				Kind kind = move(player, stack);
-				if (kind != null) {
-					begin(level, player, hold.body, kind);
-				}
+				kill(level, player, hold.body);
 				continue;
 			}
 			if (held >= BAR_AFTER) {
@@ -726,6 +802,97 @@ public final class Finishers {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
 					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));
 			}
+		}
+	}
+
+	/** The kill the hold was for: the suit's, a Z Fighter's, or the move for what's in hand. */
+	private static void kill(ServerLevel level, ServerPlayer player, LivingEntity body) {
+		ItemStack stack = player.getMainHandItem();
+		boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
+		if (suit) {
+			com.jaymospowers.power.web.WebExecutions.begin(level, player, body);
+			return;
+		}
+		if (stack.isEmpty() && com.jaymospowers.power.zfighter.ZFighterExecutions.applies(player)) {
+			begin(level, player, body, com.jaymospowers.power.zfighter.ZFighterExecutions.pick(player));
+			return;
+		}
+		// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
+		Kind kind = move(player, stack);
+		if (kind != null) {
+			begin(level, player, body, kind);
+		}
+	}
+
+	// ---- (0.18.96) question or kill ---------------------------------------------------------------------------------------
+
+	/**
+	 * (0.18.96) Whether the full hold on {@code body} puts the choice to {@code player}: Andy, "you can question downed
+	 * humanoids, unlocked in the tree ... goblins, orcs and players count". Kingdoms' Interrogation perk (Will); a player
+	 * always can be questioned, and the rest only if Kingdoms says they can talk ({@code Questioning.questionable}).
+	 */
+	static boolean mayQuestion(ServerPlayer player, LivingEntity body) {
+		if (!KINGDOMS || KINGDOMS_RANK == null || player.isSpectator()) {
+			return false;
+		}
+		try {
+			if (!player.isCreative() && (int) KINGDOMS_RANK.invoke(null, player, QUESTION_PERK) <= 0) {
+				return false;
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+		return body instanceof Player || KingdomsQuestioning.questionable(body);
+	}
+
+	/** (0.18.96) The client's pick for the body it was asked about: question or kill. */
+	private static void picked(ServerPlayer player, int target, boolean question) {
+		Hold hold = HOLDING.get(player.getUUID());
+		if (hold == null || hold.choosing < 0L || hold.body.getId() != target || !(player.level() instanceof ServerLevel level)
+			|| !hold.body.isAlive() || !finishable(player, hold.body)) {
+			return;
+		}
+		HOLDING.remove(player.getUUID());
+		if (question) {
+			begin(level, player, hold.body, questioner(player));
+		} else {
+			kill(level, player, hold.body);
+		}
+	}
+
+	/** (0.18.96) How {@code player} holds someone for questioning, by what's in hand. */
+	static Kind questioner(Player player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty() || com.jaymospowers.armory.Lash.isWhip(stack)) {
+			return Kind.Q_GRIP;
+		}
+		return switch (kind(stack)) {
+			case BOW, CROSSBOW, GUN -> Kind.Q_AIM;
+			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.Q_BLADE;
+			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
+		};
+	}
+
+	/** (0.18.96) Whether {@code player} is holding someone for questioning just now. */
+	public static boolean questioning(Entity player) {
+		Finish finish = of(player);
+		return finish != null && finish.type().questioning();
+	}
+
+	/**
+	 * (0.18.96) The questioning is over (Kingdoms' "Finish them" or "Let them go", a blow, or use): {@code kill} plays the
+	 * move for what's in hand; else they're let go where they lie.
+	 */
+	public static void questionDone(ServerPlayer player, boolean kill) {
+		Playing p = PLAYING.get(player.getUUID());
+		if (p == null || !questioning(player) || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		PLAYING.remove(player.getUUID());
+		end(player, p.body());
+		KingdomsQuestioning.ended(player, p.body(), !kill);
+		if (kill && p.body().isAlive() && finishable(player, p.body())) {
+			kill(level, player, p.body());
 		}
 	}
 
@@ -785,6 +952,9 @@ public final class Finishers {
 				// (up, carried off or gone: spared)
 				it.remove();
 				end(player, body);
+				if (kind.questioning()) {
+					KingdomsQuestioning.ended(player, body, true);
+				}
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
@@ -804,6 +974,21 @@ public final class Finishers {
 			if (kind.strike == Strike.KI) {
 				// (0.18.46) the ki gathering, the film, the beam held on them
 				com.jaymospowers.power.zfighter.ZFighterExecutions.tick(level, player, body, kind, t, present);
+			}
+			if (kind.questioning() && t == QUESTION_OPEN && present) {
+				// (0.18.96) Andy: "it opens the talk menu with the relevant options"; a player held so hears it from you
+				if (body instanceof ServerPlayer held) {
+					held.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.questioned", player.getDisplayName()).withStyle(ChatFormatting.RED));
+				} else {
+					KingdomsQuestioning.open(player, body);
+				}
+			}
+			if (kind.questioning() && t >= kind.length - 1 && present) {
+				// (held as long as you may: you let them go)
+				it.remove();
+				end(player, body);
+				KingdomsQuestioning.ended(player, body, true);
+				continue;
 			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
