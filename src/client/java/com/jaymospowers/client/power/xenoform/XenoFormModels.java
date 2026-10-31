@@ -89,6 +89,10 @@ public final class XenoFormModels {
 			MODELS.put("gnasher", new Gnasher());
 			MODELS.put("lumen", new Lumen());
 			MODELS.put("keen", new Keen());
+			MODELS.put("hive", new Hive());
+			MODELS.put("skitter", new Skitter());
+			MODELS.put("shade", new Shade());
+			MODELS.put("mirage", new Mirage());
 		}
 		return MODELS.get(form);
 	}
@@ -837,6 +841,117 @@ public final class XenoFormModels {
 			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
 			this.rightWing.yRot = -spread * 0.7F;
 			this.leftWing.yRot = spread * 0.7F;
+		}
+	}
+
+	/** (0.18.112, Scan E) Hive: antennae, a striped abdomen behind, and two clear wings that buzz. */
+	static final class Hive extends FormModel {
+		private final ModelPart rightWing, leftWing;
+
+		Hive() {
+			super(bake(mesh()), "hive");
+			this.insigniaZ = -1.8F;
+			this.rightWing = this.body.getChild("right_wing");
+			this.leftWing = this.body.getChild("left_wing");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_antenna", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(-1.5F, -8.0F, -3.0F, -0.4F, 0.0F, -0.3F));
+			head.addOrReplaceChild("left_antenna", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(1.5F, -8.0F, -3.0F, -0.4F, 0.0F, 0.3F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(20, 64).addBox(-3.0F, -3.0F, 0.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, 10.0F, 1.5F, 0.5F, 0.0F, 0.0F));
+			body.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(6, 64).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 7.0F, 5.0F),
+				PartPose.offsetAndRotation(-1.5F, 1.0F, 1.8F, 0.0F, -0.6F, 0.0F));
+			body.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(6, 64).mirror().addBox(-0.5F, 0.0F, 0.0F, 1.0F, 7.0F, 5.0F),
+				PartPose.offsetAndRotation(1.5F, 1.0F, 1.8F, 0.0F, 0.6F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float buzz = Mth.sin(state.ageInTicks * 2.6F) * 0.3F;
+			this.rightWing.yRot = -0.7F - buzz;
+			this.leftWing.yRot = 0.7F + buzz;
+		}
+	}
+
+	/** (0.18.112, Scan E) Skitter: a round abdomen behind and two more jointless legs down each side that step as it walks. */
+	static final class Skitter extends FormModel {
+		private final ModelPart[] legs = new ModelPart[4];
+
+		Skitter() {
+			super(bake(mesh()), "skitter");
+			this.insigniaZ = -2.0F;
+			for (int i = 0; i < 4; i++) {
+				this.legs[i] = this.body.getChild("leg" + i);
+			}
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition body = mesh.getRoot().getChild("body");
+			body.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(20, 64).addBox(-3.5F, -3.0F, 0.0F, 7.0F, 6.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, 9.0F, 1.5F, 0.3F, 0.0F, 0.0F));
+			// legs 0 and 1 on its right, 2 and 3 on its left, the front pair higher
+			for (int i = 0; i < 4; i++) {
+				boolean left = i >= 2;
+				float y = (i % 2 == 0) ? 3.0F : 6.5F;
+				CubeListBuilder leg = CubeListBuilder.create().texOffs(0, 64);
+				if (left) {
+					leg.mirror().addBox(0.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
+				} else {
+					leg.addBox(-8.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
+				}
+				body.addOrReplaceChild("leg" + i, leg, PartPose.offsetAndRotation(left ? 3.5F : -3.5F, y, 0.0F, 0.0F, 0.0F, left ? 0.6F : -0.6F));
+			}
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float walk = state.walkAnimationPos * 0.9F;
+			float amount = state.walkAnimationSpeed;
+			for (int i = 0; i < 4; i++) {
+				boolean left = i >= 2;
+				float spread = (i % 2 == 0) ? 0.45F : -0.45F;
+				float step = Mth.cos(walk + i * (float)Math.PI * 0.5F) * 0.4F * amount;
+				this.legs[i].yRot = (left ? -spread : spread) + step;
+				this.legs[i].zRot = (left ? 0.6F : -0.6F) + Mth.abs(Mth.sin(walk + i)) * 0.25F * amount * (left ? -1.0F : 1.0F);
+			}
+		}
+	}
+
+	/** (0.18.112, Scan E) Shade: very tall and thin; nothing but the body, its eyes do the rest. */
+	static final class Shade extends FormModel {
+		Shade() {
+			super(bake(HumanoidModel.createMesh(new CubeDeformation(-0.4F), 0.0F)), "shade");
+			this.insigniaZ = -1.6F;
+		}
+	}
+
+	/** (0.18.112, Scan E) Mirage: a deep hood over the head and a robe skirt from the waist. */
+	static final class Mirage extends FormModel {
+		Mirage() {
+			super(bake(mesh()), "mirage");
+			this.insigniaZ = -1.9F;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F,
+				new CubeDeformation(0.6F)), PartPose.ZERO);
+			root.getChild("body").addOrReplaceChild("robe", CubeListBuilder.create().texOffs(0, 82).addBox(-4.0F, 12.0F, -2.0F, 8.0F, 8.0F, 4.0F,
+				new CubeDeformation(0.5F)), PartPose.ZERO);
+			return mesh;
 		}
 	}
 

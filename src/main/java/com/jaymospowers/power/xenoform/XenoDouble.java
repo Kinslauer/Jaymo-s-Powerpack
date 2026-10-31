@@ -83,6 +83,10 @@ public class XenoDouble extends PathfinderMob {
 
 	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(XenoDouble.class,
 		EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
+	/** (0.18.112) Whose form it's drawn as: "duplex" for a true double, another form's id for a false copy (Mirage's). */
+	private static final EntityDataAccessor<String> DATA_LOOK = SynchedEntityData.defineId(XenoDouble.class, EntityDataSerializers.STRING);
+	/** (0.18.112) A false copy's ticks left (server side; unused by a true double). */
+	private int life;
 
 	public XenoDouble(EntityType<? extends XenoDouble> type, Level level) {
 		super(type, level);
@@ -124,6 +128,7 @@ public class XenoDouble extends PathfinderMob {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_OWNER, Optional.empty());
+		builder.define(DATA_LOOK, "duplex");
 	}
 
 	@Override
@@ -143,6 +148,31 @@ public class XenoDouble extends PathfinderMob {
 		this.entityData.set(DATA_OWNER, Optional.of(EntityReference.of(player.getUUID())));
 		this.setCustomName(player.getDisplayName());
 		this.setCustomNameVisible(false);
+	}
+
+	/**
+	 * (0.18.112, Scan E) Makes this a false copy (Mirage's): drawn as {@code look} at {@code scale}, gone after {@code ticks},
+	 * at the first blow, or when its owner leaves that form; it never fights.
+	 */
+	public void makeFake(ServerPlayer player, String look, float scale, int ticks) {
+		this.bindTo(player);
+		this.entityData.set(DATA_LOOK, look);
+		var attribute = this.getAttribute(Attributes.SCALE);
+		if (attribute != null) {
+			attribute.setBaseValue(scale);
+		}
+		this.life = ticks;
+		this.refreshDimensions();
+	}
+
+	/** The form it's drawn as. */
+	public String look() {
+		return this.entityData.get(DATA_LOOK);
+	}
+
+	/** A false copy (Mirage's), not a true double. */
+	public boolean fake() {
+		return !"duplex".equals(this.look());
 	}
 
 	public @Nullable UUID owner() {
@@ -184,11 +214,21 @@ public class XenoDouble extends PathfinderMob {
 			// the block on its head turns with it
 			carried.setYRot(this.yBodyRot);
 		}
+		if (this.fake()) {
+			// a false copy can't fight, and fades in time
+			if (this.getTarget() != null) {
+				this.setTarget(null);
+			}
+			if (--this.life <= 0) {
+				this.pop(level);
+				return;
+			}
+		}
 		if (this.tickCount % OWNER_CHECK != 0) {
 			return;
 		}
 		ServerPlayer player = this.ownerPlayer();
-		if (player == null || !player.isAlive() || XenoformState.form(player) != XenoForms.DUPLEX) {
+		if (player == null || !player.isAlive() || XenoformState.form(player) != (this.fake() ? XenoForms.MIRAGE : XenoForms.DUPLEX)) {
 			this.pop(level);
 			return;
 		}
@@ -206,6 +246,14 @@ public class XenoDouble extends PathfinderMob {
 
 	/** Gone in a puff of copper (merged back, or its owner stopped being Duplex); whatever it carried falls. */
 	public void pop(ServerLevel level) {
+		if (this.fake()) {
+			// (0.18.112) a false copy: a shimmer, and nothing there
+			level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
+			level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.NEUTRAL, 0.6F, 1.4F);
+			this.discard();
+			return;
+		}
 		level.sendParticles(ParticleTypes.WAX_OFF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 10, 0.3, 0.5, 0.3, 0.05);
 		level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
 		this.discard();
@@ -260,6 +308,11 @@ public class XenoDouble extends PathfinderMob {
 		if (source.getEntity() != null && this.isDoubleOf(source.getEntity())) {
 			return false;
 		}
+		if (this.fake()) {
+			// (0.18.112) a false copy vanishes at the first blow
+			this.pop(level);
+			return false;
+		}
 		return super.hurtServer(level, source, damage);
 	}
 
@@ -268,7 +321,7 @@ public class XenoDouble extends PathfinderMob {
 	public void die(DamageSource source) {
 		this.dropBlock();
 		super.die(source);
-		if (this.level() instanceof ServerLevel level) {
+		if (this.level() instanceof ServerLevel level && !this.fake()) {
 			ServerPlayer player = this.ownerPlayer();
 			if (player != null) {
 				com.jaymospowers.power.xenoform.forms.Duplex.doubleDied(player, level);

@@ -62,6 +62,11 @@ public final class XenoForms {
 	public static final XenoForm GNASHER = register(new com.jaymospowers.power.xenoform.forms.Gnasher());
 	public static final XenoForm LUMEN = register(new com.jaymospowers.power.xenoform.forms.Lumen());
 	public static final XenoForm KEEN = register(new com.jaymospowers.power.xenoform.forms.Keen());
+	/** (0.18.112, Scan E) Hive (a bee), Skitter (a spider), Shade (an enderman), Mirage (an illusioner). */
+	public static final XenoForm HIVE = register(new com.jaymospowers.power.xenoform.forms.Hive());
+	public static final XenoForm SKITTER = register(new com.jaymospowers.power.xenoform.forms.Skitter());
+	public static final XenoForm SHADE = register(new com.jaymospowers.power.xenoform.forms.Shade());
+	public static final XenoForm MIRAGE = register(new com.jaymospowers.power.xenoform.forms.Mirage());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 	/** (0.18.103, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */
