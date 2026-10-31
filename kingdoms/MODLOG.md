@@ -7514,12 +7514,26 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   talking under questioning writes their ways. Hints only.
 - Questioning a greenskin: "What does your king think of me?" (`Questioning.MOOD`).
 - Compile-checked only; not played.
+
 ## 0.7.426: Sure Footing leaves the tree (pack 0.18.99)
 - Andy: give everyone the landing roll. Sure Footing is gone from Stealth's Freerun page; ranks saved under
   `sure_footing` count for nothing, so their points come back. Bar Swing moved up into its slot (needs Climber now).
   Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
 - Compile-checked only; not played.
 
+## 0.7.427: the ogre tribe, bog iron and crippling blows (Havens patch 2, first half)
+- `OgreHolds`: up to 3 ogre outposts per region (1536 blocks) in plains and swamps, rising 64-96 blocks from a player
+  away from settlements: a broken ring of mossy stones, a log lean-to, a bone pile, a fire and a chest of scraps; led by a
+  two-headed brute (plains) or a cave ogre (swamps) with two ogres. Once a region has had an outpost, its ogre hold may
+  rise: a stone-walled yard with a throne and a hoard chest, the Ogre King on it (320 health, 1.7x size) and two
+  two-headed King's Guards (1.3x) at the gate. Saved as `ogre_sites`.
+- The king in three phases: fists and smash; at two thirds a roar, two ogres called from the hold, Speed and Strength;
+  at a third he hurls boulders (10 damage) every 2.5 s at a foe out of reach. His fall clears his region's outposts
+  (their ogres go), goes on the news, and the first king to fall frees bog iron.
+- `BogIron`: lumps of bog iron ore in the mud and clay under new swamp chunks. Until an Ogre King has fallen it crumbles
+  to rust when mined; after, it drops raw bog iron (1-2), which smelts to iron and counts as raw iron for Tinkers.
+- `CripplingBlows`: a hit of 6+ from an ogre (18%, the king 30%), a warchief (22%) or a raging grunt (10%) may break a
+  leg (Powers' `Wounds.breakPart`, through `PowersCompat.breakLeg`).
 ## 0.7.427: Player temperaments (pack 0.18.100)
 - Andy: the starting questionnaire gives players a temperament they can't change. `PlayerTemperaments` works it out
   from the life story (who raised you and the childhood weigh 2, some roads 1; ties go to the childhood), sets it in

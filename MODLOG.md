@@ -4429,6 +4429,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     I key is Shadowbox now, for Z Fighters and Gravity users only (others get a hint on how to sit).
   - Balancing on chains and end rods was already everyone's (`freerun_narrow`); nothing changed there.
   - Compile-checked; not seen in game.
+- **0.18.100, Scan A (more DNA):** the first patch of `docs/ScanGaps-Plan.md` (Andy's scan-gap picks). `XenoDna` is a
+  table checked before the forms' own `scans` (`XenoForms.scanOf`): extra carriers by entity id (Wyrm from the Kingdoms
+  wind dragons, the komodo dragon and the Visage of War; Bulwark from bears; Velox from the ostrich; Gremlin from the
+  lizard, rascal and loot goblin; Duplex from Friends & Foes' copper golem; Prism from the tuff golem and gorgon; Pyre
+  from the wildfire; Gorger from the rubblemite and giant isopod; Slipfin from bass, catfish and blobfish; Wisp from the
+  Grim Reaper, ancient cultist, wraiths and haunted stand; Knell from the skulk golem; Rivet from the redstone golem,
+  mimic and our machines), and those who carry no DNA (farm animals, the walking dead, illagers, piglins, villagers and
+  every MCA/Kingdoms folk, hornkin, the Piglin King, our named people, demons, the aerbunny). Mod mobs match by id, so a
+  missing mod never matches. Compile-checked; not seen in game.
 - **0.18.100, Body motion and temperaments (Motion patch 1, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
   - **`client/BodyMotion`**, laid over every player's model (Fresh Animations not paused) only while none of our poses
     is on: the chest turns about a third of the way after the head (max 22 degrees, shoulders carried round); locked on
