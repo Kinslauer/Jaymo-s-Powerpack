@@ -913,7 +913,7 @@ public final class ZFighterKi {
 	// ---------------------------------------------------------------- Ki Disc, Homing Volley
 
 	/** Where his palm is: the eye, a little ahead, right and down. */
-	private static Vec3 palm(ServerPlayer player, Vec3 look) {
+	static Vec3 palm(ServerPlayer player, Vec3 look) {
 		return palm(player, look, false);
 	}
 
@@ -972,6 +972,11 @@ public final class ZFighterKi {
 		return true;
 	}
 
+	/** (0.18.94) One plain or seeking bolt (the technique creator's quick shapes, {@link ZFighterCreator}). */
+	static void shoot(ServerPlayer player, Vec3 from, Vec3 velocity, float damage, int color, boolean homing, int life) {
+		BOLTS.add(new Bolt(player.level(), player.getUUID(), from, velocity, damage, color, homing ? HOMING : BOLT, life));
+	}
+
 	/** The Spirit Bomb, thrown from where it gathered. */
 	static void throwSpirit(ServerPlayer player, Vec3 from, Vec3 velocity, float damage, double size, double radius, float burst) {
 		Bolt bolt = new Bolt(player.level(), player.getUUID(), from, velocity, damage, ZFighterTechniques.SPIRIT_COLOR, SPIRIT, 200);
@@ -1014,7 +1019,7 @@ public final class ZFighterKi {
 		if (ZFighterArts.charged(type) && !ZFighterArts.canGather(player, live, type)) {
 			return;
 		}
-		float min = ZFighterArts.charged(type) ? ZFighterArts.min(type) : type == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI * signature(live).ki();
+		float min = ZFighterArts.charged(type) ? ZFighterArts.min(player, type) : type == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI * signature(live).ki();
 		if (live.ki < min && !player.isCreative() && !live.raging()) {
 			ZFighterPower.spend(player, live, min);
 			return;
@@ -1031,8 +1036,8 @@ public final class ZFighterKi {
 		Signature sig = signature(live);
 		float charge = Mth.clamp((now - live.waveFrom) / (float)(art ? ZFighterArts.full(type, WAVE_FULL) : bomb ? WAVE_FULL : sig.full()), 0.0F, 1.0F);
 		if (!player.isCreative() && !live.raging()) {
-			float min = art ? ZFighterArts.min(type) : bomb ? BOMB_MIN_KI : WAVE_MIN_KI * sig.ki();
-			float affordable = (live.ki - min) / ((art ? ZFighterArts.max(type) : bomb ? BOMB_MAX_KI : WAVE_MAX_KI * sig.ki()) - min);
+			float min = art ? ZFighterArts.min(player, type) : bomb ? BOMB_MIN_KI : WAVE_MIN_KI * sig.ki();
+			float affordable = (live.ki - min) / ((art ? ZFighterArts.max(player, type) : bomb ? BOMB_MAX_KI : WAVE_MAX_KI * sig.ki()) - min);
 			charge = Math.min(charge, Mth.clamp(affordable, 0.0F, 1.0F));
 		}
 		return charge;
@@ -1094,7 +1099,7 @@ public final class ZFighterKi {
 		if (art && ZFighterArts.blocker(player, live, type) != null) {
 			return false;
 		}
-		float cost = art ? Mth.lerp(charge, ZFighterArts.min(type), ZFighterArts.max(type))
+		float cost = art ? Mth.lerp(charge, ZFighterArts.min(player, type), ZFighterArts.max(player, type))
 			: bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI) * signature(live).ki();
 		if (!ZFighterPower.spend(player, live, cost)) {
 			return false;

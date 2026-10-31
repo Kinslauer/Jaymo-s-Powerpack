@@ -323,8 +323,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 4, 0x90000000);
 		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 3, 0xFF000000 | (fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color));
 		// (0.13.31) named for what's on V: the lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb
-		String name = ZFighterLineage.techniqueKey(player, ZFighterTraining.of(player).charged());
-		graphics.centeredText(font, Component.translatable(name).copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		Component name = ZFighterLineage.techniqueName(player, ZFighterTraining.of(player).charged());
+		graphics.centeredText(font, name.copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
 		ZFighterHudLayout.end(graphics);
 	}
 

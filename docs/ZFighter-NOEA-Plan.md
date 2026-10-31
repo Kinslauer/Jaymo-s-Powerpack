@@ -5,7 +5,7 @@ lookout structure is nice, but needs more". Dragon Block NOEA is All Rights Rese
 GPL-3.0, and our mods are MIT. So both are ideas only: our own code, our own names (no Dragon Ball names), our own art,
 like the first build (`docs/ZFighter-Plan.md`).
 
-Not picked: Ki dash, ki cloak, technique creator, finger laser, self-destruct, turn-to-sweets beam, form creator, bulked
+Not picked: Ki dash, ki cloak, finger laser, turn-to-sweets beam, form creator, bulked
 grades, Sphinx-like race, healing tank, more bean kinds, flying cloud, punch meter, hair editor, and the power level
 number as its own feature (the scouter still reads one). Andy can still add any of them later.
 
@@ -107,3 +107,6 @@ patch the work runs as two agent tracks at a time that don't touch the same file
 ## Open questions for Andy
 1. Patch order: the list above, or something else first?
 2. Lock-on key: which key? (R/G/V/B/C/Z/H/' are taken.)
+
+Added 2026-10-31 (Andy picked them later): Self-Destruct (android/Bio-built/Rubber-folk, grab and blow up both) and the
+technique creator (make your own G and V techniques), both in pack 0.18.94.

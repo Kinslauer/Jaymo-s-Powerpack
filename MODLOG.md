@@ -4355,3 +4355,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   cooldown halved. The Ultimate's own move (Standstill, Geode, Revenant, Swarm's swap, the Tolling, Copper Storm) is on
   B; C again drops back to the base alien. Lasts until the charge runs out. Textures from `tools/gen_xenoform.py`.
   Compile-checked; not seen in game.
+- **0.18.94, Self-Destruct and the technique creator (Andy's NOEA picks):**
+  - **Self-Destruct** (`ZFighterSelfDestruct`, technique 23, 3000 TP, charged on sneak+V). Andy: "bio built, android,
+    and rubber should be able to learn the self destruct" and "the self destruct should involve grabbing and tethering
+    to another player or mob, for a large explosion that usually kills both and deals extreme terrain damage depending
+    on power". Only an android, Bio-built or Rubber-folk body can learn it (synced `FIT`, so the training screen knows).
+    Sneak+V grabs the nearest foe within 3.5 blocks (no foe, no start) and pulls them in front of you on a cord of ki
+    while your body glows; letting go blows up everything round you (5-11 blocks, 24-60 damage times ki power, the held
+    one takes 1.6x), spends all your ki, tears up the ground (explosion power 4-10 times ki power, up to 18) and kills
+    you through totems and being downed (not in creative). Andy: "rubber uses the skin colored blob animation to kind of
+    melt onto the grab target": the held foe is synced (`HOLDING`), and for a Rubber-folk Kingdoms draws the pink swallow
+    rope and skin sealing them in, in place of the ki cord.
+  - **Technique creator** (`ZFighterCreator`, `ZFighterCreatorScreen`, the Create button on the training screen): make
+    up to three quick techniques for G and three charged ones for sneak+V. Each has a name (up to 20 letters), a shape
+    (G: bolt, spread, seekers, burst; V: beam, lance, needle, great ball), one of 8 colours and a strength of 1-5, which
+    sets ki, damage and cooldown and costs 1000 TP a point. They use indexes 100-105, go on their key and the wheel, and
+    show their own name on the HUD and wheel. Forget frees the place (no refund). `Data.knows` now only reads the 32
+    learned bits; `ZFighterTraining.owns` covers both.
+  - Compile-checked; not seen in game.
