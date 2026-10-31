@@ -54,6 +54,8 @@ public final class XenoformPowerClient implements PowerClient {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoDouble.TYPE, XenoDoubleRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoStalker.TYPE, XenoStalkerRenderer::new);
+		// (0.18.122) the star wrecks' probes
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoFinds.PROBE, StarProbeRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
 		NadirRulesScreen.register();
 		XenoEyes.init();

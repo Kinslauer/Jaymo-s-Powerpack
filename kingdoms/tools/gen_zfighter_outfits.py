@@ -13,6 +13,8 @@ Four of each, all original:
 - demon_master: a demon master, a dark gi with a sash and spiked pauldrons.
 - patrolman: (0.7.358) a galactic patrolman, a dark fitted bodysuit under a hard chest plate with shoulder guards, white
   gloves and boots, the patrol's gold badge on the chest.
+- star_reader: (0.7.442) a star-reader from Powers' fallen-star craters, a long night-blue robe pricked with silver stars,
+  a deep hood, a rope belt and a lens on a chain.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""
 import os
@@ -384,6 +386,50 @@ def patrolmen():
             patrolman((56, 22, 28), (232, 226, 220), (200, 60, 50), 9803), patrolman((36, 26, 54), (226, 226, 236), (150, 100, 220), 9804)]
 
 
+# ---- a star-reader -------------------------------------------------------------------------------------------------
+
+SILVER = (214, 220, 232)
+
+
+def star_reader(cloth, hood, rope, seed):
+    def draw(img, rnd, tone):
+        robe(img, rnd, cloth, 4)
+        sea.hands(img, rnd, tone)
+        skirt_layer(img, rnd, cloth)
+        # silver stars pricked over the robe and the sleeves
+        for part in [BODY, JACKET] + ARMS + SLEEVES + LEGS:
+            for side in SIDES:
+                x, y, w, h = part[side]
+                for _ in range(max(1, w * h // 14)):
+                    if rnd.random() < 0.7:
+                        sx, sy = x + rnd.randrange(w), y + rnd.randrange(h)
+                        if img.getpixel((sx, sy))[3]:
+                            sea.px(img, sx, sy, SILVER if rnd.random() < 0.6 else (150, 170, 220))
+        # a rope belt, and a lens on a chain at the chest
+        bx, by, bw, bh = BODY["front"]
+        sea.rows(img, BODY, 7, 1, rope, 8, rnd)
+        for y in range(by, by + 4):
+            sea.px(img, bx + 2 + (y - by) // 2, y, SILVER)
+            sea.px(img, bx + 5 - (y - by) // 2, y, SILVER)
+        sea.px(img, bx + 3, by + 4, (120, 200, 230))
+        sea.px(img, bx + 4, by + 4, (190, 240, 255))
+        # a deep hood: over the top, sides and back, and a rim round the face
+        for side in ("back", "right", "left", "top"):
+            sea.paint(img, HAT[side], hood, 5, rnd)
+        hx, hy, hw, hh = HAT["front"]
+        for x in range(hx, hx + hw):
+            sea.px(img, x, hy, sea.shade(hood, -18))
+        for y in range(hy, hy + hh - 2):
+            sea.px(img, hx, y, sea.shade(hood, -18))
+            sea.px(img, hx + hw - 1, y, sea.shade(hood, -18))
+    return drawn(draw, seed)
+
+
+def star_readers():
+    return [star_reader((26, 34, 74), (20, 26, 58), (150, 120, 80), 9901), star_reader((44, 30, 74), (34, 22, 58), (170, 140, 90), 9902),
+            star_reader((18, 48, 66), (14, 36, 50), (140, 110, 70), 9903), star_reader((36, 38, 48), (24, 26, 34), (120, 96, 60), 9904)]
+
+
 def all_outfits():
     out = {}
     uni.numbered(out, "zfighter/keeper", keepers())
@@ -394,6 +440,7 @@ def all_outfits():
     uni.numbered(out, "zfighter/teller", tellers())
     uni.numbered(out, "zfighter/demon_master", demon_masters())
     uni.numbered(out, "zfighter/patrolman", patrolmen())
+    uni.numbered(out, "zfighter/star_reader", star_readers())
     return out
 
 

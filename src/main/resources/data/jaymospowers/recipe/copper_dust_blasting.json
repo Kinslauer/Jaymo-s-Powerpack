@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": "jaymospowers:copper_dust",
+  "result": {
+    "id": "minecraft:copper_ingot"
+  },
+  "experience": 0.35,
+  "cookingtime": 100
+}

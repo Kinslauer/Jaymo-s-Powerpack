@@ -71,6 +71,8 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
+	/** (0.18.122, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
+	public static final float GLITCH_TEACH_CHANCE = 0.2F;
 	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
 	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
 	/** An empty band refills in this long as yourself; a slam needs at least this much. */
@@ -427,6 +429,7 @@ public final class XenoformPower implements Power {
 		XenoStalker.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
+		XenoFinds.init();
 		FallingStars.init();
 		XenoBands.init();
 		XenoJam.register();
@@ -784,6 +787,20 @@ public final class XenoformPower implements Power {
 			|| player.getRandom().nextFloat() >= GLITCH_WRONG_CHANCE)) {
 			return wanted;
 		}
+		// (0.18.122) now and then the glitch lands on an alien the band never held, and it keeps it (Dud comes only so)
+		if (player.getRandom().nextFloat() < GLITCH_TEACH_CHANCE) {
+			List<XenoForm> unknown = new ArrayList<>();
+			for (XenoForm form : XenoForms.all()) {
+				if ((!form.hidden() || form == XenoForms.DUD) && !unlocked.contains(form.id)) {
+					unknown.add(form);
+				}
+			}
+			if (!unknown.isEmpty()) {
+				XenoForm taught = unknown.get(player.getRandom().nextInt(unknown.size()));
+				unlock(player, taught);
+				return taught;
+			}
+		}
 		List<XenoForm> others = new ArrayList<>();
 		for (String id : unlocked) {
 			XenoForm form = XenoForms.get(id);
@@ -866,6 +883,8 @@ public final class XenoformPower implements Power {
 		}
 		if (slam) {
 			live.slammed = true;
+			// (0.18.122) a star tablet in hand is read first
+			XenoFinds.readTablet(player);
 			XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 			if (dialled != null) {
 				XenoForm glitched = glitch(player, dialled);

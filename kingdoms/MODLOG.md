@@ -7737,6 +7737,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Havens alongside goblins and orcs:** a quarter of havens have goblins and orcs among their folk (a quarter of
   those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
   of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
+## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.122)
+- **Star-readers** (`ZFighterFolk.KINDS`, `star_reader`): Powers' new characters who come to a fallen star's crater and
+  keep to its rim. They are MCA villagers like the other Z Fighter characters, with their own opening lines, name line,
+  part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue
+  robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
 - Compile-checked; not played.
 
 ## 0.7.442: havens and the tribes, first half (Havens patch 7a)
