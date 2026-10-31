@@ -299,6 +299,12 @@ public final class XenoformPower implements Power {
 		public int scatter, brood;
 		public net.minecraft.world.phys.@Nullable Vec3 anchor;
 		public double rope;
+		/**
+		 * (0.18.115, Scan F) Ooze: squeezed small; blobs split off for the hurt taken. Fuse: ticks Self-Destruct has swelled ({@code swell});
+		 * the ring blasts still to go off. Billow: ticks left of the downpour and of the fog.
+		 */
+		public boolean squeeze;
+		public int splits, swell, blasts, rain, fog;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -366,6 +372,8 @@ public final class XenoformPower implements Power {
 			scatter = brood = 0;
 			anchor = null;
 			rope = 0.0;
+			squeeze = false;
+			splits = swell = blasts = rain = fog = 0;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;

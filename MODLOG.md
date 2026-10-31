@@ -4573,3 +4573,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   heavy; throws the struck back and slows them). Their iron heads (`tinkering/WeaponParts.KINGS`) drop only off kings
   in Kingdoms and are never shaped, cast or forged; they go together at the Tool Station, and JEI shows that route and
   where each head comes from. Art: `tools/king_spoils_assets.py`. Compile-checked; not played.
+- **0.18.115, Scan F (`docs/ScanGaps-Plan.md`), odd bodies:** five new aliens. Ooze (slime, sulfur cube, swets, mud
+  golem): bounces off falls, splits into fighting blobs as it's hurt that rejoin it after; Engulf, Spit, Squeeze
+  (shrinks for one-block gaps), Split. Magma Ooze (magma cube): the same, burning and fireproof. Fuse (creeper):
+  punches pop; Blast Pod, Fuse Dash, Self-Destruct (hold, blow up, re-form; costs band charge), Defuse. Thornwild
+  (creaking, rustle): heals in sunlight; Roots, Thorn Volley, Hedge (withers after 30 s), Bloom. Billow (happy ghast,
+  aerwhale): floats and carries up to three friends on its back; Downpour, Thunderhead, Gust, Fog. Each has its own
+  model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.

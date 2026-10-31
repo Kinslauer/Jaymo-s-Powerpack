@@ -93,6 +93,11 @@ public final class XenoFormModels {
 			MODELS.put("skitter", new Skitter());
 			MODELS.put("shade", new Shade());
 			MODELS.put("mirage", new Mirage());
+			MODELS.put("ooze", new Ooze("ooze"));
+			MODELS.put("magma_ooze", new Ooze("magma_ooze"));
+			MODELS.put("fuse", new Fuse());
+			MODELS.put("thornwild", new Thornwild());
+			MODELS.put("billow", new Billow());
 		}
 		return MODELS.get(form);
 	}
@@ -952,6 +957,98 @@ public final class XenoFormModels {
 			root.getChild("body").addOrReplaceChild("robe", CubeListBuilder.create().texOffs(0, 82).addBox(-4.0F, 12.0F, -2.0F, 8.0F, 8.0F, 4.0F,
 				new CubeDeformation(0.5F)), PartPose.ZERO);
 			return mesh;
+		}
+	}
+
+	/** (0.18.115, Scan F) Ooze (and Magma Ooze): a soft, swollen body with a blob on its head that wobbles as it moves. */
+	static final class Ooze extends FormModel {
+		private final ModelPart blob;
+
+		Ooze(String id) {
+			super(bake(mesh()), id);
+			this.insigniaZ = -2.5F;
+			this.blob = this.head.getChild("blob");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
+			mesh.getRoot().getChild("head").addOrReplaceChild("blob", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 3.0F, 6.0F),
+				PartPose.offset(0.0F, -8.5F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float wobble = Mth.sin(state.ageInTicks * 0.3F + state.walkAnimationPos * 0.8F);
+			this.blob.y = -8.5F + wobble * 0.4F;
+			this.blob.zRot = wobble * 0.08F;
+		}
+	}
+
+	/** (0.18.115, Scan F) Fuse: nothing but the body; its face does the rest. */
+	static final class Fuse extends FormModel {
+		Fuse() {
+			super(bake(HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F)), "fuse");
+			this.insigniaZ = -2.0F;
+		}
+	}
+
+	/** (0.18.115, Scan F) Thornwild: a crown of twigs, and thorns along its arms. */
+	static final class Thornwild extends FormModel {
+		Thornwild() {
+			super(bake(mesh()), "thornwild");
+			this.insigniaZ = -2.2F;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			float[][] twigs = {{-3.0F, -0.4F, -0.3F}, {0.0F, -0.2F, 0.0F}, {3.0F, -0.4F, 0.3F}};
+			for (int i = 0; i < twigs.length; i++) {
+				head.addOrReplaceChild("twig" + i, CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -5.0F, -0.5F, 1.0F, 5.0F, 1.0F),
+					PartPose.offsetAndRotation(twigs[i][0], -8.0F, 1.0F, twigs[i][1], 0.0F, twigs[i][2]));
+			}
+			for (String arm : new String[] {"right_arm", "left_arm"}) {
+				PartDefinition limb = root.getChild(arm);
+				float side = arm.startsWith("right") ? -1.0F : 1.0F;
+				for (int i = 0; i < 3; i++) {
+					limb.addOrReplaceChild("thorn" + i, CubeListBuilder.create().texOffs(6, 64).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 2.0F),
+						PartPose.offsetAndRotation(side * (1.0F + 0.3F * i), 1.0F + i * 3.0F, 2.0F, 0.4F, side * 0.3F, 0.0F));
+				}
+			}
+			return mesh;
+		}
+	}
+
+	/** (0.18.115, Scan F) Billow: big soft puffs of cloud round its body and head that drift as it breathes. */
+	static final class Billow extends FormModel {
+		private final ModelPart puff, cap;
+
+		Billow() {
+			super(bake(mesh()), "billow");
+			this.insigniaZ = -4.2F;
+			this.puff = this.body.getChild("puff");
+			this.cap = this.head.getChild("cap");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("body").addOrReplaceChild("puff", CubeListBuilder.create().texOffs(0, 64).addBox(-6.0F, 0.0F, -4.0F, 12.0F, 8.0F, 8.0F,
+				new CubeDeformation(0.4F)), PartPose.offset(0.0F, 2.0F, 0.0F));
+			root.getChild("head").addOrReplaceChild("cap", CubeListBuilder.create().texOffs(0, 82).addBox(-5.0F, -3.0F, -5.0F, 10.0F, 6.0F, 10.0F),
+				PartPose.offset(0.0F, -8.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float breath = Mth.sin(state.ageInTicks * 0.08F);
+			this.puff.y = 2.0F + breath * 0.5F;
+			this.cap.y = -8.0F - breath * 0.4F;
 		}
 	}
 

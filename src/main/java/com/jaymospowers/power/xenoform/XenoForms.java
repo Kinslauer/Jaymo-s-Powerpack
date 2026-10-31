@@ -67,6 +67,12 @@ public final class XenoForms {
 	public static final XenoForm SKITTER = register(new com.jaymospowers.power.xenoform.forms.Skitter());
 	public static final XenoForm SHADE = register(new com.jaymospowers.power.xenoform.forms.Shade());
 	public static final XenoForm MIRAGE = register(new com.jaymospowers.power.xenoform.forms.Mirage());
+	/** (0.18.115, Scan F) Ooze (a slime; Magma Ooze from a magma cube), Fuse (a creeper), Thornwild (a creaking), Billow (a happy ghast). */
+	public static final XenoForm OOZE = register(new com.jaymospowers.power.xenoform.forms.Ooze(false));
+	public static final XenoForm MAGMA_OOZE = register(new com.jaymospowers.power.xenoform.forms.Ooze(true));
+	public static final XenoForm FUSE = register(new com.jaymospowers.power.xenoform.forms.Fuse());
+	public static final XenoForm THORNWILD = register(new com.jaymospowers.power.xenoform.forms.Thornwild());
+	public static final XenoForm BILLOW = register(new com.jaymospowers.power.xenoform.forms.Billow());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 	/** (0.18.103, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */

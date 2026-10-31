@@ -69,6 +69,9 @@ public final class XenoDna {
 		Map.entry("naturalist:ant", "hive"), Map.entry("naturalist:butterfly", "hive"), Map.entry("naturalist:caterpillar", "hive"),
 		Map.entry("naturalist:dragonfly", "hive"), Map.entry("jaymoskingdoms:tarantula", "skitter"), Map.entry("enderscape:drifter", "shade"),
 		Map.entry("friendsandfoes:illusioner", "mirage"),
+		// (0.18.115, Scan F)
+		Map.entry("minecraft:sulfur_cube", "ooze"), Map.entry("jaymospowers:blue_swet", "ooze"), Map.entry("jaymospowers:golden_swet", "ooze"),
+		Map.entry("jaymoskingdoms:mud_golem", "ooze"), Map.entry("enderscape:rustle", "thornwild"), Map.entry("jaymospowers:aerwhale", "billow"),
 		// Rivet: machines
 		Map.entry("jaymoskingdoms:redstone_golem", "rivet"), Map.entry("jaymoskingdoms:mimic", "rivet"),
 		Map.entry("jaymospowers:android_mech", "rivet"), Map.entry("jaymospowers:future_mech", "rivet"),

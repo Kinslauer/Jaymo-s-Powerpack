@@ -189,6 +189,12 @@ key; Mirage's copies follow you like Duplex's doubles rather than wander, and la
 
 ### Scan F, odd bodies (Powers, large)
 
+**Built (0.18.115):** all four, with these changes: the magma cube scan is its own alien, Magma Ooze (same kit,
+burning look, fire immunity, magma-cube blobs), since a scan gives an alien rather than a variant; Ooze's blobs are
+small vanilla slimes (magma cubes) that fight for it, not copies of the alien; V Squeeze shrinks Ooze 60% rather than
+forcing the crawl (everyone can crawl already); Fuse's Self-Destruct is one blast and then four small ones a tick apart
+(not the meteor code itself); Billow's riders sit on its back as passengers of the player, set side by side by a mixin.
+
 - **Ooze, the living slime:** scanned from a slime, a magma cube, a sulfur cube, the blue or golden swet, or the
   Kingdoms mud golem. Andy's note: all of these work.
   - It splits into smaller copies of itself as it takes damage. They join back up when you stop.
