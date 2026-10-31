@@ -328,6 +328,14 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_haven_vouch",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }

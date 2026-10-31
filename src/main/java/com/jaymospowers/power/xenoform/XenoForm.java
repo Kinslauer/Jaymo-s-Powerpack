@@ -101,7 +101,7 @@ public abstract class XenoForm {
 	}
 
 	/** The player, as this alien, just hurt {@code target} (a punch or a move). */
-	/** (0.18.118, Scan G) Z tapped as this alien (let go before the hold turns you back): its own use for it, if any. */
+	/** (0.18.119, Scan G) Z tapped as this alien (let go before the hold turns you back): its own use for it, if any. */
 	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
 		return false;
 	}

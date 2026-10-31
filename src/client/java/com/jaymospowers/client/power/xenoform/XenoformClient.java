@@ -25,7 +25,7 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<Boolean> SHED = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shed");
 	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
-	/** (0.18.118) How far into Towerback's grab (ticks; -1: not grabbing). */
+	/** (0.18.119) How far into Towerback's grab (ticks; -1: not grabbing). */
 	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
 
 	private XenoformClient() {

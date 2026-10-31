@@ -1054,7 +1054,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.118, Scan G) Towerback: a hulk of stone, a heavy brow, mossy boulders for pauldrons, and a broken watchtower
+	 * (0.18.119, Scan G) Towerback: a hulk of stone, a heavy brow, mossy boulders for pauldrons, and a broken watchtower
 	 * grown out of its back, its battlements on top. It walks with the Giants' slow sway ({@link #SWAY}) and plays its
 	 * grab ({@link com.jaymospowers.power.xenoform.forms.Towerback#grabPhase}): the right hand rears back, comes down,
 	 * holds its catch at its chest and hurls it into the ground.

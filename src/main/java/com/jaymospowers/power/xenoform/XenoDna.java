@@ -72,7 +72,7 @@ public final class XenoDna {
 		// (0.18.117, Scan F)
 		Map.entry("minecraft:sulfur_cube", "ooze"), Map.entry("jaymospowers:blue_swet", "ooze"), Map.entry("jaymospowers:golden_swet", "ooze"),
 		Map.entry("jaymoskingdoms:mud_golem", "ooze"), Map.entry("enderscape:rustle", "thornwild"), Map.entry("jaymospowers:aerwhale", "billow"),
-		// (0.18.118, Scan G) the true giants
+		// (0.18.119, Scan G) the true giants
 		Map.entry("jaymoskingdoms:highfield_giant", "towerback"), Map.entry("jaymoskingdoms:arctic_giant", "towerback"),
 		Map.entry("jaymoskingdoms:irradiated_giant", "towerback"), Map.entry("jaymoskingdoms:war_elephant", "towerback"),
 		// Rivet: machines

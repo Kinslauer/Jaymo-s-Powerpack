@@ -225,7 +225,7 @@ forcing the crawl (everyone can crawl already); Fuse's Self-Destruct is one blas
 
 ### Scan G, Towerback (Powers + Kingdoms, large; one alien on its own)
 
-**Built (0.18.118):** as planned, with these changes: Kingdoms needed no change (the Giants and the war elephant are
+**Built (0.18.119):** as planned, with these changes: Kingdoms needed no change (the Giants and the war elephant are
 scanned by id from Powers' `XenoDna`); the size is a Z tap (Z held still turns you back, Z held with scroll still
 quick-changes); monolith size needs open sky over your head to rise; at monolith size it walks through everything above
 the ground it stands on (chest height and up alone would leave low walls stopping it), but never chests or other

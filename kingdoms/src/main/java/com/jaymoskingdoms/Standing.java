@@ -53,7 +53,7 @@ public final class Standing {
 		Lines lines = crew ? Crewmen.lines(level, mob, w) : f == null || f.fallen() ? null : Rulers.leaderRole(w.role()) ? ruler(level, mob, w, f)
 			: w.role() == Folk.GUARD ? guard(level, mob, w, f) : null;
 		// (0.7.180) a ruler's title, for their nametag once you know their name; (0.7.242) a ship's captain's
-		Component title = crew ? Crewmen.title(mob) : lines != null && Rulers.leaderRole(w.role()) ? Rulers.title(w.role(), McaCompat.female(mob)) : null;
+		Component title = crew ? Crewmen.title(mob) : lines != null && Rulers.leaderRole(w.role()) ? Rulers.title(level.getServer(), f, w.role(), McaCompat.female(mob)) : null;
 		if (title == null) {
 			if (mob.hasAttached(Introductions.TITLE)) {
 				mob.removeAttached(Introductions.TITLE);
@@ -77,7 +77,7 @@ public final class Standing {
 		List<Component> lines = new ArrayList<>(), hovers = new ArrayList<>();
 		boolean female = McaCompat.female(mob);
 		int guards = Rulers.guards(level, f, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE));
-		lines.add(Component.translatable("standing.jaymoskingdoms.ruler", Rulers.title(w.role(), female), f.name()).withStyle(ChatFormatting.GOLD));
+		lines.add(Component.translatable("standing.jaymoskingdoms.ruler", Rulers.title(level.getServer(), f, w.role(), female), f.name()).withStyle(ChatFormatting.GOLD));
 		hovers.add(Component.translatable("standing.jaymoskingdoms.realm.hover", guards, f.treasury()));
 		Tempers.Temper t = Tempers.of(f);
 		if (t != null) {
@@ -131,7 +131,7 @@ public final class Standing {
 		hovers.add(Component.translatable("standing.jaymoskingdoms.guard.hover", Rulers.guards(level, f, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE))));
 		if (f.leader().isPresent()) {
 			int role = f.type() == FactionType.FIEFDOM ? Folk.LORD : Folk.KING;
-			Component title = Rulers.title(role, Rulers.queen(f));
+			Component title = Rulers.title(level.getServer(), f, role, Rulers.queen(f));
 			PathfinderMob ruler = Rulers.of(level, f);
 			lines.add(ruler != null ? Component.translatable("standing.jaymoskingdoms.sworn", title, ruler.getDisplayName())
 				: Component.translatable("standing.jaymoskingdoms.sworn.away", title));

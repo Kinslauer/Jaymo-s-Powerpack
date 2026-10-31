@@ -508,6 +508,8 @@ public final class Downed {
 		// head and body hold on to a little (the rest is spread as Wounds keeps it)
 		Wounds.settle(entity);
 		entity.stopUsingItem();
+		// (0.18.118) most let go of their weapons as they fall
+		DroppedArms.fell(level, entity);
 		if (entity.isSleeping()) {
 			entity.stopSleeping();
 		}

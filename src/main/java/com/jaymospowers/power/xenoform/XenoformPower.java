@@ -306,7 +306,7 @@ public final class XenoformPower implements Power {
 		public boolean squeeze;
 		public int splits, swell, blasts, rain, fog;
 		/**
-		 * (0.18.118, Scan G) Towerback: risen to monolith size, and when it may change size again; the moveDist at its last
+		 * (0.18.119, Scan G) Towerback: risen to monolith size, and when it may change size again; the moveDist at its last
 		 * step, which foot came down last, its shockwaves running out; its grab (since when, -1: none; whom it went for;
 		 * holding them; where it snatched them from and where it slams them).
 		 */
@@ -859,7 +859,7 @@ public final class XenoformPower implements Power {
 					revert(player, false, true);
 				}
 			} else if (slam) {
-				// (0.18.118) a tap: the form's own use for Z (Towerback's size)
+				// (0.18.119) a tap: the form's own use for Z (Towerback's size)
 				live.form.onModeTap(player, live);
 			}
 			return;

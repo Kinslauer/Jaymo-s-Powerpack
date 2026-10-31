@@ -150,3 +150,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   ring, the warchief's necklace of tusks, the Ogre King's hide), each adding to Will; a tribe's king and the Ogre King
   carry their own weapon and drop its iron head (Gutting Hook, Warchief's Cleaver, Ogre King's Maul; Tool Station only,
   never cast or forged); and their crowns, worn on the head (+Will) or placed.
+- Patch 6, first half (Kingdoms 0.7.438): haven rulers' blood titles (Tide-Mother, Stone-Elder, Grove-Warden,
+  War-Chief, High Elder), each blood's arms on a banner by the seat and the guards' shields, 32 haven outfits in the
+  blood's style, and strangers at the gate (warned, shoved out, set on; let by with a token from a haven friend, an
+  escort or a good name). Bounties, wares, border clashes and the builds follow in 6b.

@@ -41,7 +41,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.118, Scan G) Towerback, the true giant: a hulk of grey stone, moss on its shoulders and boulders for pauldrons, a
+ * (0.18.119, Scan G) Towerback, the true giant: a hulk of grey stone, moss on its shoulders and boulders for pauldrons, a
  * heavy brow over two pale glowing eyes, and a broken watchtower grown out of its back. 120 health, fists of 12, slow and
  * huge: five times your size (about 9 blocks). Tap Z to rise to monolith-giant size, {@link #MONOLITH}x (about 29
  * blocks, the scale attribute's limit; the Aether Giants are 30.6), under open sky only; tap again to come back down.

@@ -2144,7 +2144,7 @@ def billow():
 
 
 def towerback():
-    """(0.18.118, Scan G) Towerback: grey stone in rough courses, cracks, moss on the shoulders and boulders, a heavy brow
+    """(0.18.119, Scan G) Towerback: grey stone in rough courses, cracks, moss on the shoulders and boulders, a heavy brow
     over pale glowing eyes, and a broken watchtower on its back with dark arrow slits."""
     img = new_skin()
     stone = (128, 132, 138)
@@ -2395,7 +2395,7 @@ if __name__ == "__main__":
     billow()
     for form in SCAN_F:
         ultimate(form)
-    # (0.18.118) Scan G, last again
+    # (0.18.119) Scan G, last again
     towerback()
     for form in SCAN_G:
         ultimate(form)

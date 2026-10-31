@@ -73,7 +73,7 @@ public final class XenoForms {
 	public static final XenoForm FUSE = register(new com.jaymospowers.power.xenoform.forms.Fuse());
 	public static final XenoForm THORNWILD = register(new com.jaymospowers.power.xenoform.forms.Thornwild());
 	public static final XenoForm BILLOW = register(new com.jaymospowers.power.xenoform.forms.Billow());
-	// (0.18.118, Scan G)
+	// (0.18.119, Scan G)
 	public static final XenoForm TOWERBACK = register(new com.jaymospowers.power.xenoform.forms.Towerback());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());

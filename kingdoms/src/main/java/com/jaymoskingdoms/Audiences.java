@@ -265,7 +265,7 @@ public final class Audiences {
 		guard.getLookControl().setLookAt(ruler, 30.0F, 30.0F);
 		ruler.getNavigation().stop();
 		ruler.getLookControl().setLookAt(player, 30.0F, 30.0F);
-		Speech.say(level, guard, Component.translatable("speech.jaymoskingdoms.audience.announce", Rulers.title(Rulers.role(ruler), Rulers.queen(f)),
+		Speech.say(level, guard, Component.translatable("speech.jaymoskingdoms.audience.announce", Rulers.title(level.getServer(), f, Rulers.role(ruler), Rulers.queen(f)),
 			Identities.shownName(player)), Speech.GOLD, SPEECH_RANGE);
 		Tempers.Temper t = Tempers.of(f);
 		Speech.say(level, ruler, Component.translatable("speech.jaymoskingdoms.audience.receive." + (t == null ? "plain" : t.key()), Identities.shownName(player)),
@@ -288,7 +288,8 @@ public final class Audiences {
 	}
 
 	private static void say(ServerLevel level, PathfinderMob guard, String what, Faction f, @Nullable PathfinderMob ruler) {
-		Component title = Rulers.title(ruler != null ? Rulers.role(ruler) : f.type() == FactionType.KINGDOM ? Folk.KING : Folk.LORD, Rulers.queen(f));
+		Component title = Rulers.title(level.getServer(), f, ruler != null ? Rulers.role(ruler) : f.type() == FactionType.KINGDOM ? Folk.KING : Folk.LORD,
+			Rulers.queen(f));
 		boolean good = List.of("follow", "here", "keep_up", "already", "point").contains(what);
 		Speech.say(level, guard, Component.translatable("speech.jaymoskingdoms.audience." + what, title), good ? Speech.WHITE : Speech.YELLOW, SPEECH_RANGE);
 	}

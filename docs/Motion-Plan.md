@@ -134,7 +134,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   plains) by their home, and brag about it in talk as an accomplishment.
 - A few hidden name-tag looks; no screen text, villagers may hint.
 
-### Patch 8, Stuck weapons (Powers; pick zombie-weapon)
+### Patch 8, Stuck weapons (Powers; pick zombie-weapon) (built: Powers 0.18.118)
 - Some zombies spawn with a weapon stuck in them and pull it out on first sight of you (you can then pick it up when
   they die). Throw a dagger at a zombie and it stays in.
 - Run Through can leave your sword stuck in the body: low chance, higher for axes, shrinking with weapon experience.
