@@ -52,7 +52,9 @@ import net.minecraft.world.phys.Vec3;
  * little life back into them ({@link #DRAIN}). In the third form the heritage key, pressed on no foe, buds up to
  * {@link #BUDS} small copies ({@link #bud}): weak, short-lived allies (risen through {@link Thralls}, so they follow
  * and fight for their maker and crumble when their time is up). Not the Symbiote: no tendrils, no goo; they
- * take only what is already downed or crippled. Flaw: frail at first, and lightning
+ * take only what is already downed or crippled. (0.7.422, Andy: "bio built have a bit of dna from all the other
+ * heritages, so it can regenerate too") A lost limb grows back on its own, one at a time ({@link #REGROW_EVERY}), as a
+ * Verdant's does. Flaw: frail at first, and lightning
  * and magic hurt them half again ({@link Heritage#dealt}).
  */
 public final class BioBuilt {
@@ -101,6 +103,8 @@ public final class BioBuilt {
 	 */
 	static final int BUDS = 2, BUD_LIFE = 20 * 45, BUD_COOLDOWN = 20 * 20, CHARGES_MAX = 4;
 	static final float BUD_HEALTH = 6.0F, BUD_DAMAGE = 2.0F;
+	/** (0.7.422) A lost limb grows back this often (ticks), one at a time. */
+	static final int REGROW_EVERY = 600;
 	/** An amber mote of the made body, and the bud's. */
 	private static final DustParticleOptions NODE = new DustParticleOptions(0xE8A23C, 0.8F);
 
@@ -196,6 +200,12 @@ public final class BioBuilt {
 				continue;
 			}
 			if (player.level() instanceof ServerLevel level) {
+				// (0.7.422) the blood of every heritage in them: a lost limb grows back, one at a time
+				if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && PowersCompat.regrow(player, false)) {
+					level.sendParticles(NODE, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 0.8F);
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.regrown"));
+				}
 				LivingEntity foe = HeritageHold.step(level, player, BioBuilt::helpless, ABSORB_REACH, ABSORB_TICKS, NODE,
 					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing", ABSORB_TOUCH);
 				if (foe != null) {
