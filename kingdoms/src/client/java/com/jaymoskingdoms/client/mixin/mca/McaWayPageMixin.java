@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.449) The Interact page's Ask the Way ({@code McaScreensMixin}) opens its own page of places, and that page's back
+ * (0.7.454) The Interact page's Ask the Way ({@code McaScreensMixin}) opens its own page of places, and that page's back
  * arrow returns to Interact. The places themselves go to the server ({@code McaCommandMixin}, {@code Directions}).
  */
 @Mixin(InteractScreen.class)

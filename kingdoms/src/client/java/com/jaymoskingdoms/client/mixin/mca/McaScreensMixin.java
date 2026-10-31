@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
  * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.29) The main page
- * offers Quests. (0.7.449) The Interact page offers Ask the Way, which opens a page of places ({@code McaWayPageMixin}).
+ * offers Quests. (0.7.454) The Interact page offers Ask the Way, which opens a page of places ({@code McaWayPageMixin}).
  */
 @Mixin(MCAScreens.class)
 abstract class McaScreensMixin {
@@ -39,7 +39,7 @@ abstract class McaScreensMixin {
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
 
-	/** (0.7.449) Interact's Ask the Way, the page it opens, and the places on it ({@code Directions.Place}). */
+	/** (0.7.454) Interact's Ask the Way, the page it opens, and the places on it ({@code Directions.Place}). */
 	private static final String WAY = "gui.button.way", WAY_PAGE = "way";
 	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler"};
 	/** The Interact row Ask the Way goes on: under MCA's own (gift ... professions on row 8). */
@@ -95,7 +95,7 @@ abstract class McaScreensMixin {
 		this.buttons.put("main", all.toArray(MCAButton[]::new));
 	}
 
-	/** (0.7.449) Interact's Ask the Way, and its page: a back arrow and one row for each place. */
+	/** (0.7.454) Interact's Ask the Way, and its page: a back arrow and one row for each place. */
 	private void jaymoskingdoms$way() {
 		MCAButton[] interact = this.buttons.get("interact");
 		if (interact == null || Arrays.stream(interact).anyMatch(b -> b.identifier().equals(WAY))) {
@@ -104,7 +104,7 @@ abstract class McaScreensMixin {
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(interact));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson("[{\"identifier\":\"" + WAY + "\",\"x\":-90,\"y\":10,\"row\":" + WAY_ROW
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}]", MCAButton[].class)));
-		// (0.7.449) and the actions moved off the talk menu under it (InteractActions; McaActionButtonsMixin shows only those
+		// (0.7.454) and the actions moved off the talk menu under it (InteractActions; McaActionButtonsMixin shows only those
 		// that apply, stacked under Ask the Way)
 		StringBuilder acts = new StringBuilder("[");
 		for (int i = 0; i < com.jaymoskingdoms.InteractActions.ALL.size(); i++) {

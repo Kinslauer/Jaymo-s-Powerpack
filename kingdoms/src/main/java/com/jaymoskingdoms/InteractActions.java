@@ -19,7 +19,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.449) Andy: "move some of these options to the interact menu" (Ask the way plus the action options). What used to
+ * (0.7.454) Andy: "move some of these options to the interact menu" (Ask the way plus the action options). What used to
  * be talk-menu answers that do something rather than say something are buttons on MCA's Interact page now, each shown
  * only when it applies: seek an audience (a ruler, or a realm's guard who walks you there, {@link Audiences}), a
  * pedlar's wares and tribute to a tribe ({@link Pedlars}, {@link Tribes}), and a sworn captain sent spying or raiding

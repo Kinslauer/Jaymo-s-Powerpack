@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.449) Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if
+ * (0.7.454) Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if
  * you need a doctor, or a butcher"; "move some of these options to the interact menu". MCA's Interact page has Ask the Way,
  * which opens a page of places (client {@code McaScreensMixin}/{@code McaWayPageMixin}; each sends {@link #COMMAND}):
  * a healer (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern,

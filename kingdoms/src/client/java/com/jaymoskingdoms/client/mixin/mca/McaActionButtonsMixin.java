@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.449) The Interact page's actions ({@code InteractActions}, added by {@code McaScreensMixin}): only those this
+ * (0.7.454) The Interact page's actions ({@code InteractActions}, added by {@code McaScreensMixin}): only those this
  * villager offers you show, stacked one under another below Ask the Way, with no gaps for the hidden ones.
  */
 @Mixin(AbstractDynamicScreen.class)

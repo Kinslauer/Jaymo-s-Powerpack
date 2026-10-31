@@ -5,7 +5,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 /**
- * (0.7.449) Which of the Interact page's actions ({@link InteractActions}) the villager you last right-clicked offers
+ * (0.7.454) Which of the Interact page's actions ({@link InteractActions}) the villager you last right-clicked offers
  * you, as the server sent them ahead of MCA's screen; {@code McaActionButtonsMixin} hides the rest.
  */
 public final class InteractActionsClient {

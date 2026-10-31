@@ -180,6 +180,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();
+		// (0.7.449) strangers come over only for a reason, and say why when asked
+		ComingOver.register();
 		// (0.7.264, Andy's NOEA picks) parties: invites, no friendly fire, shared slay quests, members' stats (and its attachment)
 		LOGGER.debug("party attachment: {}", Parties.META);
 		Parties.register();
@@ -302,6 +304,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoadLocks.register();
 		Manacles.register();
 		StoryGround.register();
+		// 0.7.452: the land round a new arrival made ahead in the background
+		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
@@ -323,7 +327,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
-		// (0.7.449) the Interact page's actions, sent ahead of MCA's screen
+		// (0.7.454) the Interact page's actions, sent ahead of MCA's screen
 		InteractActions.register();
 		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
 		ProximityChat.register();
@@ -431,7 +435,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
-		// (0.7.449) asking the way in town
+		// (0.7.454) asking the way in town
 		Directions.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
