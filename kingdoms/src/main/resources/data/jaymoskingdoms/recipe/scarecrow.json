@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " P ",
+    "SHS",
+    " S "
+  ],
+  "key": {
+    "P": "minecraft:carved_pumpkin",
+    "H": "minecraft:hay_block",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:scarecrow"
+  }
+}

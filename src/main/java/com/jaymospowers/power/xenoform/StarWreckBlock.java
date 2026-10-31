@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.120, Xeno-Band patch 6) A star wreck's core: the broken heart of a ship that came down as a falling star. While a
+ * (0.18.121, Xeno-Band patch 6) A star wreck's core: the broken heart of a ship that came down as a falling star. While a
  * band wearer is within {@link #WAKE_RANGE} it sends out a probe ({@link XenoFinds.StarProbe}) every {@link #EVERY} ticks,
  * up to {@link #MAX_PROBES} at once. Mined (iron pickaxe), it gives a wreck core and a few circuits.
  */

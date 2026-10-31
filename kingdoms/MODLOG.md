@@ -7695,7 +7695,49 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
 - Compile-checked; not played.
 
-## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.120)
+## 0.7.439: havens with their own life, second half (Havens patch 6b)
+- **Wares only havens make** (`HavenWares`): a haven's traders also sell their blood's wares. Tideborn sell Tide Pearls
+  and Deep Fish (good food), Stoneborn sell Cut Gems and Stoneborn picks/axes (stone, Efficiency II, Unbreaking II),
+  Sylvan sell Sylvan Herbs and Sylvan Bows (Power II), and Warrior-born sell War Hides and War Jerkins (dark-red
+  leather, Protection II). A mixed haven's trader sells one blood's. Traders in human towns buy the five goods a
+  player carries, when their trade has a use for them, at about twice the haven's price.
+- **Border clashes** (`BorderClashes`): now and then the nearest human purist realm (within 1500 blocks) sends 3-6 of
+  its guards against a haven a player is near. They muster on the road, march on the seat, fight its guards for two
+  minutes, then go home. A raided haven owes them one: once a player is near that realm's seat, the haven's militia
+  march on it the same way. Cutting down a raider (or militiaman) earns +8 with the side being raided, and cutting
+  down a defender earns +8 with the raiders, on top of the usual price for killing a realm's guard.
+- **Kidnapped children:** raiders who aren't all cut down may carry off one of the haven's children, left bound at
+  their muster on the road. A villager there cries out and has a rescue quest ready: free the child and they follow
+  you home (the usual captive rewards, plus the quest's).
+- **Haven bounties** (`QuestBoard.haven`): a haven villager with work asks for one of the haven's own troubles 40% of
+  the time: bring the carried-off child home, cut down 3-5 purist raiders (while a purist realm is near), or kill the
+  chief of the nearest camp that preys on them.
+- Compile-checked; not played.
+
+## 0.7.440: props (Motion patch 9; pack 0.18.120)
+- `props/Props`: scarecrow (birds and rabbits within 10 blocks are sent off, every 2 s), gravestone, lamp post (light
+  15), iron candle stand (flint and steel or a fire charge lights it, a bare hand snuffs it; light 12), four plushies
+  (bear, bunny, cat, frog) that squeak when pressed or squeezed in hand, window box and pot planter (plant a small flower,
+  it grows over random ticks, a bare hand picks 1-2 at full bloom).
+- Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
+- Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
+## 0.7.441: havens built their own way (Havens patch 6c)
+- **Haven houses** (`HavenBuildings`): a haven's houses are drawn in its blood's way, and a mixed haven's take a bit of
+  each, house by house.
+  - Tideborn: stilt houses three blocks up, with steps to a railed front deck, a fish rack and a barrel, plank walls
+    and a dried-kelp roof.
+  - Stoneborn: low stone-brick houses with a turf-and-moss mound for a roof and the door set in a stone arch (a
+    furnace and a stonecutter inside).
+  - Sylvan: tree houses, a platform on a trunk and four posts five blocks up, a ladder, rope rails, and a small house
+    under a leafy crown.
+  - Warrior-born: longhouses, 7 by 13-15, log walls under a steep spruce roof, a hearth down the middle and beds
+    along both sides.
+- **Fighting ring:** a Warrior-born or mixed haven also builds one: a round of posts and rails 13 across round a
+  sand floor.
+- **Havens alongside goblins and orcs:** a quarter of havens have goblins and orcs among their folk (a quarter of
+  those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
+  of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
+## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.121)
 - **Star-readers** (`ZFighterFolk.KINDS`, `star_reader`): Powers' new characters who come to a fallen star's crater and
   keep to its rim. They are MCA villagers like the other Z Fighter characters, with their own opening lines, name line,
   part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue

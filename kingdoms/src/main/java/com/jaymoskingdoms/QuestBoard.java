@@ -57,6 +57,16 @@ final class QuestBoard {
 	static final float ESCORT_CHANCE = 0.2F;
 	/** How far off the realm he sends you against may be. */
 	static final double RIVAL_RANGE = 2500.0;
+	/**
+	 * (0.7.439) A haven's villager with work asks a haven's bounty this often: raiders driven off (while a purist realm is
+	 * near), a camp that preys on them cleared, or (asked at once, {@link BorderClashes}) a child carried off brought home.
+	 */
+	static final float HAVEN_QUEST_CHANCE = 0.4F, HAVEN_RAIDERS_SHARE = 0.5F;
+	/** Raiders to drive off (least, most); what each haven bounty pays (emeralds, least then the spread), and its hearts on top. */
+	static final int HAVEN_RAIDERS_MIN = 3, HAVEN_RAIDERS_MAX = 5;
+	static final int HAVEN_RAIDERS_EMERALDS = 8, HAVEN_CAMP_EMERALDS = 14, HAVEN_CHILD_EMERALDS = 12, HAVEN_SPREAD = 7, HAVEN_HEARTS = 10;
+	/** A haven asks after a preying camp this near it. */
+	static final double HAVEN_CAMP_RANGE = 600.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
 	static final float SMITH_RELIC = 0.35F, ARMS_RELIC = 0.2F, OTHER_RELIC = 0.04F;
 
@@ -260,6 +270,13 @@ final class QuestBoard {
 		// a letter a third of the time (more for the jobless and cartographers), else one of the trade's own
 		float mail = job.equals("none") || job.equals("cartographer") ? 0.45F : 0.25F;
 		List<T> options = new ArrayList<>(trade.quests());
+		if (Havens.is(level.getServer(), f) && random.nextFloat() < HAVEN_QUEST_CHANCE) {
+			// (0.7.439) a haven's own trouble
+			Quest q = haven(level, giver, f, who, trade, random);
+			if (q != null) {
+				return q;
+			}
+		}
 		if (job.equals("stablehand") && random.nextFloat() < Stables.STABLEHAND_HORSE_QUEST) {
 			// (0.5.47) a stablehand's horse quests
 			return Stables.stablehandQuest(level, f, who, random);
@@ -285,6 +302,57 @@ final class QuestBoard {
 			}
 		}
 		return mail(level, giver, f, who, random, trade);
+	}
+
+	/** (0.7.439) A haven's bounty: its carried-off child brought home, purist raiders driven off, or a preying camp cleared. */
+	private static @Nullable Quest haven(ServerLevel level, LivingEntity giver, Faction f, Quest.Giver who, Trade trade, RandomSource random) {
+		Quest q = havenRescue(level, giver, f, random);
+		if (q != null) {
+			return q;
+		}
+		if (BorderClashes.foe(level.getServer(), f) != null && random.nextFloat() < HAVEN_RAIDERS_SHARE) {
+			int count = HAVEN_RAIDERS_MIN + random.nextInt(HAVEN_RAIDERS_MAX - HAVEN_RAIDERS_MIN + 1);
+			Quest.Objective o = new Quest.Objective("*purist_raider", count, 0, Optional.empty(), Optional.empty(), "", "", false);
+			return new Quest(UUID.randomUUID().toString(), Quest.SLAY, "haven.raiders", who, o,
+				reward(level, who.job(), Quest.SLAY, HAVEN_RAIDERS_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+		}
+		Faction best = null;
+		double bestD = HAVEN_CAMP_RANGE * HAVEN_CAMP_RANGE;
+		for (Faction camp : Factions.all(level.getServer(), FactionType.BARBARIAN)) {
+			double d = camp.seat().distSqr(f.seat());
+			if (!camp.fallen() && camp.leader().isPresent() && d < bestD) {
+				best = camp;
+				bestD = d;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		Quest.Objective o = new Quest.Objective("camp:" + best.id(), 1, 0, Optional.of(best.seat()), best.leader(), "", best.name(), false);
+		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, "haven.camp", who, o,
+			reward(level, who.job(), Quest.CHIEF, HAVEN_CAMP_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+	}
+
+	/** (0.7.439) {@code giver} of haven {@code f} asks for its carried-off child back; null if none is held. */
+	static @Nullable Quest havenRescue(ServerLevel level, LivingEntity giver, Faction f, RandomSource random) {
+		String[] taken = BorderClashes.taken(level.getServer(), f);
+		if (taken == null) {
+			return null;
+		}
+		String job = job(giver);
+		Trade trade = TRADES.getOrDefault(job, TRADES.get("none"));
+		Quest.Giver who = new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job);
+		UUID child;
+		BlockPos at;
+		try {
+			child = UUID.fromString(taken[0]);
+			at = new BlockPos(Integer.parseInt(taken[2]), Integer.parseInt(taken[3]), Integer.parseInt(taken[4]));
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+		Quest.Objective o = new Quest.Objective("captive:" + child, 1, 0, Optional.of(at), Optional.of(child), taken[1], taken[5], false);
+		return new Quest(UUID.randomUUID().toString(), Quest.RESCUE, "haven.child", who, o,
+			reward(level, job, Quest.RESCUE, HAVEN_CHILD_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
 	}
 
 	/** (Testing) A villager's fetch quest at the nearest trail ruins: a dig. Null if their trade has no fetch, or none are near. */

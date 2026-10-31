@@ -1,0 +1,270 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/hay_block_side",
+    "log": "minecraft:block/oak_log",
+    "log_top": "minecraft:block/oak_log_top",
+    "hay": "minecraft:block/hay_block_side",
+    "hay_top": "minecraft:block/hay_block_top",
+    "face": "minecraft:block/carved_pumpkin",
+    "pumpkin": "minecraft:block/pumpkin_side",
+    "pumpkin_top": "minecraft:block/pumpkin_top"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        24,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#log",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#log",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#log",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#log",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#log_top"
+        },
+        "down": {
+          "texture": "#log_top"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        18,
+        7.5
+      ],
+      "to": [
+        15,
+        19.5,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        },
+        "south": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        },
+        "east": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        },
+        "west": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        },
+        "up": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        },
+        "down": {
+          "texture": "#log",
+          "uv": [
+            1,
+            7,
+            15,
+            8.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        4.5,
+        11,
+        5.5
+      ],
+      "to": [
+        11.5,
+        21,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hay"
+        },
+        "south": {
+          "texture": "#hay"
+        },
+        "east": {
+          "texture": "#hay"
+        },
+        "west": {
+          "texture": "#hay"
+        },
+        "up": {
+          "texture": "#hay_top"
+        },
+        "down": {
+          "texture": "#hay_top"
+        }
+      }
+    },
+    {
+      "from": [
+        4.5,
+        21,
+        4.5
+      ],
+      "to": [
+        11.5,
+        28,
+        11.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#face"
+        },
+        "south": {
+          "texture": "#pumpkin"
+        },
+        "east": {
+          "texture": "#pumpkin"
+        },
+        "west": {
+          "texture": "#pumpkin"
+        },
+        "up": {
+          "texture": "#pumpkin_top"
+        },
+        "down": {
+          "texture": "#pumpkin_top"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        -2.5,
+        0
+      ],
+      "scale": [
+        0.42,
+        0.42,
+        0.42
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ]
+    }
+  }
+}

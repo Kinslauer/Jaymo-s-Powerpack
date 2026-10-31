@@ -50,6 +50,11 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * giver on a lead.
 	 */
 	public static final int LEAD = 16;
+	/**
+	 * (0.7.439) A haven's child carried off by purist raiders ({@link BorderClashes}): bring them home. target
+	 * {@code captive:<uuid>}, other: the child, otherName: their name, pos: where they're held, place: the raiders' realm.
+	 */
+	public static final int RESCUE = 17;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

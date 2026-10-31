@@ -154,3 +154,11 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   War-Chief, High Elder), each blood's arms on a banner by the seat and the guards' shields, 32 haven outfits in the
   blood's style, and strangers at the gate (warned, shoved out, set on; let by with a token from a haven friend, an
   escort or a good name). Bounties, wares, border clashes and the builds follow in 6b.
+- Patch 6, second half (Kingdoms 0.7.439): wares only havens make (5 goods + made tools, bows and jerkins; human towns
+  pay about double), border clashes (purist raids, militia striking back, reputation for the side you take), kidnapped
+  children held on the raiders' road, and haven bounties (raiders, the child, a preying camp). The havens' own builds
+  follow in 6c.
+- Patch 6c (Kingdoms 0.7.441): havens built their own way (Tideborn stilt houses with kelp roofs and fish racks,
+  Stoneborn hillside mounds with stone arches, Sylvan tree houses with rope rails, Warrior-born longhouses and a
+  fighting ring, mixed havens taking each in turn); a quarter of havens live alongside goblins and orcs (not raided by
+  the tribes) and a third of those sit under an orc king.

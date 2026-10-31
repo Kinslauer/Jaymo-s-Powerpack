@@ -4614,7 +4614,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with the letterbox film), G Stomp, V Swat, B Roar. Powers has its own copy of the stomp and grab, so Kingdoms only
   supplies the mobs. Z tapped as any alien now goes to the form (`XenoForm.onModeTap`). Own model, skin, Ultimate skin
   and spikes. Compile-checked; not seen in game.
-- **0.18.120, Earning aliens (Xeno-Band patch 6, `docs/XenoBand-Plan.md`; Kingdoms 0.7.442):** star tablets (fallen stars,
+- **0.18.120, Props (Motion patch 9, `docs/Motion-Plan.md`; Kingdoms 0.7.440):** the last Actions & Stuff patch. Kingdoms
+  gets a scarecrow that sends birds and rabbits off crops, a gravestone, a lamp post, an iron candle stand, four squeaky
+  plushies that MCA children (and the married) love as gifts, and a window box and pot planter that grow small flowers.
+  Kitchen has no herbs, so the planters grow the nine small vanilla flowers.
+- **0.18.121, Earning aliens (Xeno-Band patch 6, `docs/XenoBand-Plan.md`; Kingdoms 0.7.442):** star tablets (fallen stars,
   fishing treasure, Ancient Remnants chests, band hunters, Gremlin): hold one as you slam the band and it learns an alien
   it didn't hold. Alien-only crafting with JEI pages: Gremlin makes tablets at a crafting table, Bulwark grinds ore into
   two dusts at a grindstone, Pyre smelts what it holds. One fallen star in ten comes down a wreck that sends out probes

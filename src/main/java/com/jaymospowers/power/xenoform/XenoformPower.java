@@ -71,7 +71,7 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
-	/** (0.18.120, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
+	/** (0.18.121, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
 	public static final float GLITCH_TEACH_CHANCE = 0.2F;
 	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
 	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
@@ -787,7 +787,7 @@ public final class XenoformPower implements Power {
 			|| player.getRandom().nextFloat() >= GLITCH_WRONG_CHANCE)) {
 			return wanted;
 		}
-		// (0.18.120) now and then the glitch lands on an alien the band never held, and it keeps it (Dud comes only so)
+		// (0.18.121) now and then the glitch lands on an alien the band never held, and it keeps it (Dud comes only so)
 		if (player.getRandom().nextFloat() < GLITCH_TEACH_CHANCE) {
 			List<XenoForm> unknown = new ArrayList<>();
 			for (XenoForm form : XenoForms.all()) {
@@ -883,7 +883,7 @@ public final class XenoformPower implements Power {
 		}
 		if (slam) {
 			live.slammed = true;
-			// (0.18.120) a star tablet in hand is read first
+			// (0.18.121) a star tablet in hand is read first
 			XenoFinds.readTablet(player);
 			XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 			if (dialled != null) {

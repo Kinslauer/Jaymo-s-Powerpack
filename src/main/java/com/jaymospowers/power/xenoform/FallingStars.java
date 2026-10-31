@@ -236,7 +236,7 @@ public final class FallingStars {
 		starAt(level, ground);
 	}
 
-	/** (0.18.120) The star set in its crater; one in {@link XenoFinds#WRECK_ONE_IN} came down a wreck. */
+	/** (0.18.121) The star set in its crater; one in {@link XenoFinds#WRECK_ONE_IN} came down a wreck. */
 	private static void starAt(ServerLevel level, BlockPos pos) {
 		BlockPos at = pos.immutable();
 		level.setBlock(at, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);

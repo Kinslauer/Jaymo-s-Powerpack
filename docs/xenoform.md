@@ -165,7 +165,7 @@ villagers, wandering traders, every MCA villager and Kingdoms folk (ids ending `
 and their brutes, hurlers and warlords, the Night Bleeder; our people (Judge, Keeper, Hermit, raiders and so on), demon
 soldiers and captains, the aerbunny.
 
-## Earning aliens [XenoFinds, StarWreckBlock] (0.18.120, Xeno-Band patch 6)
+## Earning aliens [XenoFinds, StarWreckBlock] (0.18.121, Xeno-Band patch 6)
 
 Scanning stays the main way in. Beside it:
 - **Star tablets:** 25% of mined fallen stars, 15% of fishing treasure catches and 20% of Ancient Remnants chests hold one;

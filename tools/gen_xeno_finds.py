@@ -1,4 +1,4 @@
-"""(0.18.120, Xeno-Band patch 6) Art and data for earning aliens: star tablets, probe circuits, the wreck core, Bulwark's
+"""(0.18.121, Xeno-Band patch 6) Art and data for earning aliens: star tablets, probe circuits, the wreck core, Bulwark's
 dusts, the star wreck block, the probe's skin, their models, and the dusts' smelting and blasting recipes.
 
 The probe's skin uses only the shape (alpha) of the vanilla vex texture as its layout, from the 26.3 client jar; every
