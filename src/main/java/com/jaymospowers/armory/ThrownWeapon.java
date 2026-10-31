@@ -117,10 +117,21 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 				}
 			}
 		}
+		// (0.18.117) a dagger that leaves a zombie standing stays in it (Lodged)
+		if (hurt && entity instanceof LivingEntity living && Lodged.thrownIn(living, this.getPickupItemStackOrigin())) {
+			this.playSound(SoundEvents.TRIDENT_HIT, 0.8F, 0.9F);
+			this.discard();
+			return;
+		}
 		if (entity.projectileReceivesSideEffectsOnHit(hurt)) {
 			this.playSound(SoundEvents.TRIDENT_HIT, 0.8F, 1.2F);
 			this.deflect(ProjectileDeflection.REVERSE, entity, this.owner, false, new Vec3(0.02, 0.2, 0.02));
 		}
+	}
+
+	/** (0.18.117) It strikes nothing more: a blade left standing in a body (Lodged). */
+	void spent() {
+		this.dealtDamage = true;
 	}
 
 	@Override

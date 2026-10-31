@@ -4587,3 +4587,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   neighbour takes it in if the keeper dies; a keeper mourns a rare pet that dies.
 - Hidden name-tag looks (`client/pets/NameLooks`), hinted at only in those tales: five names that change how a mob is
   drawn (size or tint). The game doesn't say which.
+- **0.18.117, Stuck weapons (Motion patch 8, `docs/Motion-Plan.md`):**
+- Some zombies rise with a weapon stuck in them: a worn sword, axe, dagger or hatchet, shown standing out of the body.
+  On first sight of a player they wrench it out and fight with it. It always drops when they die. (`armory/Lodged`, 7%
+  of natural zombie spawns.)
+- A thrown dagger that hits a zombie without killing it stays in. Anything stuck in a living body is pulled free with an
+  empty hand's use, which hurts them, and drops where they die. Up to three show on a humanoid (`client/armory/LodgedLayer`).
+- A finisher's killing stroke can leave your weapon standing in the body until you go and take it: Run Through 5%,
+  Stabbed Through 8%, Executioner (axes) 12%. The chance halves after 12 bladed finisher kills, thirds after 24, and so
+  on. Never in creative.
