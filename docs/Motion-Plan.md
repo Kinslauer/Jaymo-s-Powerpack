@@ -50,7 +50,7 @@ Each patch is its own PR; versions are set to master + 1 right before merging. P
 touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (different files): 0 with 5, 1 with 6,
 2 with 7, 3 with 9, 4 with 8.
 
-### Patch 0, Landings, flips and sitting (Powers 0.18.97 + Kingdoms 0.7.424; picks roll-landing, hero-landing, air-flip, balance, sit-anywhere)
+### Patch 0, Landings, flips and sitting (Powers 0.18.99 + Kingdoms 0.7.425; picks roll-landing, hero-landing, air-flip, balance, sit-anywhere)
 - **Landing roll for everyone:** `LandingRoll` and `DodgeClient` no longer check Sure Footing. The skill check stays:
   Sneak tapped twice (or the dodge key) up to `EARLY_TICKS` before touchdown or within `LATE_TICKS` after. Sure
   Footing leaves the Freerun tree; its points come back (ranks are saved by key) and Bar Swing moves up into its slot.

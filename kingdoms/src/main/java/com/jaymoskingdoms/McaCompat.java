@@ -559,6 +559,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
+	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
 	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */
 	public static boolean zfighterOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.zfighterOpening(villager, player);
