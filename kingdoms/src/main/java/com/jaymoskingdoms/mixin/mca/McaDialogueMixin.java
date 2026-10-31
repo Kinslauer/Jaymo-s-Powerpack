@@ -312,6 +312,26 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Crooks.ACCUSE_ANSWER.equals(answer)) {
+			// (0.7.449) the one you think robbed you: the thief is confronted, anyone else takes it badly
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Crooks.accuse(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.ComingOver.ANSWER.equals(answer)) {
+			// (0.7.449) why they came over to you: in their words, or (no shared tongue) their hands
+			Component why = com.jaymoskingdoms.ComingOver.ask(player, villager);
+			if (Languages.understands(player, villager)) {
+				villager.sendChatMessage(why, player);
+			} else {
+				player.sendSystemMessage(why.copy().withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+			}
+			com.jaymoskingdoms.ComingOver.answered(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
 			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);
