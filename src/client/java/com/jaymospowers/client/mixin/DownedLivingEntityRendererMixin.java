@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.14.1) Someone downed is laid on the ground (see DownedPose): onto the render state, the pose stack and the model.
- * (0.18.71) And one tripped by a bolas (TrippedPose).
+ * (0.18.71) And one tripped by a bolas (TrippedPose). (0.18.84) One out cold has its eyes shut (Kitchen's ClosedEyes).
  */
 @Mixin(LivingEntityRenderer.class)
 abstract class DownedLivingEntityRendererMixin {
@@ -25,6 +25,10 @@ abstract class DownedLivingEntityRendererMixin {
 	private void jaymospowers$downedState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		DownedPose.extract(entity, state, partialTicks);
 		TrippedPose.extract(entity, state, partialTicks);
+		// (0.18.84) out cold (a rock to the head, too much poppy, bled out): eyes shut, as Kitchen shuts a corpse's
+		if (com.jaymospowers.core.wounds.Downed.passedOut(entity)) {
+			com.jaymoskitchen.client.corpse.ClosedEyes.mark(state);
+		}
 	}
 
 	/** (0.15.142) Whatever it held its arms up for is let go before the model is posed (the armour's posing comes later, off the same state). */

@@ -12,6 +12,7 @@
 		"CarryLivingEntityMixin",
 		"CarryPacketListenerMixin",
 		"CarryPlayerMixin",
+		"RockSnowballMixin",
 		"CostumeNameMixin",
 		"CostumeTabListMixin",
 		"IchorclothMagicMixin",
