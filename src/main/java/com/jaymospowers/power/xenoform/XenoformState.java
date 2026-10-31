@@ -206,6 +206,20 @@ public final class XenoformState {
 	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.18.125, Xeno-Band patch 8) The band worn is the rival band (dark red; its aliens drawn darkened). Saved, kept
+	 * through death, synced to everyone so every client draws it. The player also carries {@link #RIVAL_TAG} while it's on.
+	 */
+	public static final AttachmentType<Boolean> RIVAL = AttachmentRegistry.create(JaymosPowers.id("xenoform_rival"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.125) The player tag for the rival band's wearer, for mods that read players without our classes (Kingdoms' law). */
+	public static final String RIVAL_TAG = "jaymospowers_rival_band";
+
+	/** Whether {@code player} wears the rival band (both sides). */
+	public static boolean rival(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(RIVAL));
+	}
+
 	private XenoformState() {
 	}
 

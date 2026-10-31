@@ -74,5 +74,7 @@ public final class XenoJei implements IModPlugin {
 			registration.addIngredientInfo(plan, Component.translatable("jei.jaymospowers.found.band_plan"));
 		}
 		registration.addIngredientInfo(com.jaymospowers.power.xenoform.BandForge.FORGE_ITEM, Component.translatable("jei.jaymospowers.found.star_forge"));
+		// (0.18.125, patch 8) the rival band: only ever off the band hunter's wrist
+		registration.addIngredientInfo(com.jaymospowers.power.xenoform.XenoBandItem.RIVAL, Component.translatable("jei.jaymospowers.found.rival_band"));
 	}
 }

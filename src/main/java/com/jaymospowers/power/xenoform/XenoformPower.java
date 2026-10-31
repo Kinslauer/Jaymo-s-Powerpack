@@ -427,6 +427,8 @@ public final class XenoformPower implements Power {
 		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
 		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
 		XenoStalker.init();
+		// (0.18.125, patch 8) the band hunter and the rival band's aliens
+		RivalHunter.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		XenoFinds.init();
@@ -562,6 +564,8 @@ public final class XenoformPower implements Power {
 		}
 		LIVES.remove(player.getUUID());
 		XenoBands.unworn(player);
+		player.removeAttached(XenoformState.RIVAL);
+		player.removeTag(XenoformState.RIVAL_TAG);
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);

@@ -26,6 +26,8 @@ public final class XenoformClient {
 	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
 	/** (0.18.119) How far into Towerback's grab (ticks; -1: not grabbing). */
+	/** (0.18.125, patch 8) A rival band's alien (or wearer): darkened, its band and insignia red. */
+	public static final RenderStateDataKey<Boolean> DARK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_dark");
 	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
 
 	private XenoformClient() {
@@ -39,6 +41,7 @@ public final class XenoformClient {
 		state.setData(XenoformSlap.KEY, XenoformSlap.extract(entity, form, partialTicks));
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
+		state.setData(DARK, player != null && XenoformState.rival(player));
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);

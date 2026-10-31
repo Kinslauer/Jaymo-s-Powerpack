@@ -4641,3 +4641,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Quick Change, Death Save, Scan Reach, Bigger Charge and Faster Recharge; **quick change and the death save are now bought,
   not free**. B as yourself opens the band screen: fit modules, buy skills, forget an alien or wipe the band. Star-readers
   now hint at the forge's world. Art from `tools/gen_xeno_finds.py`. Compile-checked; not seen in game.
+- **0.18.125, The rival band (Xeno-Band patch 8, `docs/XenoBand-Plan.md`; Kingdoms 0.7.446):** the world's only other
+  band, dark red (`XenoBandItem.RIVAL`). It never falls from the stars. While it's out of the world, some night a Xeno-Band
+  wearer in the overworld may draw the band hunter (`RivalHunter`, an MCA villager): he walks them down and, within 12
+  blocks, changes into one of his four darkened aliens (`RivalAlien`: Gyre, Cortex, Locust or Croaker, with that alien's
+  size, life, fists and pace) for 30 s. When it falls he's back, dazed for 15 s: tap him to tear the band off (he runs),
+  or kill him and it drops. Worn, it's a band like the other (its own dial, starting with those four; scans and upgrades
+  go to whichever band you wear; a downed wearer's is torn off with a tap) and counted on its own (`XenoBands.RIVAL_COUNT`).
+  Its aliens are drawn darkened and its band and insignia red (`XenoformClient.DARK`). Band items now carry their
+  reforge, modules and skills. Test: `/powerdebug xenoform hunter`. Art from `tools/gen_xenoform.py` (`rival_band`).
+  Compile-checked (the JEI line by hand); not seen in game.

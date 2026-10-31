@@ -51,6 +51,10 @@ public final class XenoBand {
 	 */
 	static final float PLATE_LIFT_PX = 1.0F, PLATE_GROW = 0.5F, SILHOUETTE_FILL = 0.9F, SILHOUETTE_OFF = 0.002F;
 	static final int SILHOUETTE = 0xFF0C1410;
+	/** (0.18.125, patch 8) The rival band: its body darkened red, its glow red. */
+	static final int RIVAL_BODY = 0xFF8A3A3A, RIVAL_GLOW = 0xFF3030;
+	/** Set by whoever draws the band next (the wearer's, from {@link XenoformClient#DARK}): draw it as the rival band. */
+	static boolean rival;
 	/** The plate's outer face, in the arm's pixels: its x, and its middle (y, z); the green face is 3 pixels square. */
 	static final float FACE_X = 4.5F, FACE_Y = 7.5F, FACE_Z = 0.0F, FACE_PX = 3.0F;
 
@@ -102,8 +106,8 @@ public final class XenoBand {
 			poseStack.translate(-1.0F / 16.0F, 0.0F, 0.0F);
 		}
 		ModelPart part = worn();
-		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
-		collector.submitModelPart(part, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null);
+		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
+		collector.submitModelPart(part, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(255));
 		float pop = XenoformSlamView.pop;
 		if (pop > 0.02F) {
 			// the dialled alien, a hologram over the dial
@@ -115,9 +119,9 @@ public final class XenoBand {
 			poseStack.translate(0.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
 		}
 		ModelPart plate = plate();
-		collector.submitModelPart(plate, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+		collector.submitModelPart(plate, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
 		int alpha = pop > 0.02F ? Mth.clamp((int)(XenoformSlamView.glow * 255.0F), 0, 255) : 255;
-		collector.submitModelPart(plate, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+		collector.submitModelPart(plate, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(alpha));
 		if (pop > 0.02F) {
 			silhouette(poseStack, collector, light);
 		}
@@ -193,8 +197,13 @@ public final class XenoBand {
 		poseStack.rotateDegrees(com.mojang.math.Axis.YP, 90.0F);
 		poseStack.scale(1.0F, model.insigniaSize, model.insigniaSize);
 		poseStack.translate(-FACE_X / 16.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
-		collector.submitModelPart(plate(), poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+		collector.submitModelPart(plate(), poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(alpha));
 		poseStack.popPose();
+	}
+
+	/** The glow's colour at {@code alpha}: white (the green texture as it is), or red on the rival band. */
+	private static int glow(int alpha) {
+		return alpha << 24 | (rival ? RIVAL_GLOW : 0xFFFFFF);
 	}
 
 	/**
@@ -209,7 +218,9 @@ public final class XenoBand {
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
+		rival = com.jaymospowers.power.xenoform.XenoformState.rival(player);
 		submitOnArm(poseStack, collector, light, player.getSkin().model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
+		rival = false;
 		poseStack.popPose();
 	}
 
@@ -242,8 +253,10 @@ public final class XenoBand {
 			}
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
+			rival = Boolean.TRUE.equals(state.getData(XenoformClient.DARK));
 			XenoBand.submitOnArm(poseStack, collector, lightCoords, state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM,
 				state.chestEquipment != null && !state.chestEquipment.isEmpty());
+			rival = false;
 			poseStack.popPose();
 			if (dial) {
 				XenoformSlamView.dialDone();
