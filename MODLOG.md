@@ -4678,7 +4678,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.4, Kingdoms 0.7.451:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
   only the starts open to you, with the rest under "Locked"; "Let fate decide" tells you the start it picked.
 
-- **0.19.5, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+- **0.19.6, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
   your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
   first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
