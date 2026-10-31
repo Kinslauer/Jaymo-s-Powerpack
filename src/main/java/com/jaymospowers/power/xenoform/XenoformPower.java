@@ -230,6 +230,21 @@ public final class XenoformPower implements Power {
 		public boolean brace, spray, rebound, anvilDrop;
 		public double dropFrom, fallSpeed;
 		public int song;
+		/**
+		 * (0.18.96, patch 4) Gorger: blocks eaten toward the blast; ticks left of the horn charge, whether it ran off a ledge
+		 * (now a slam) and from what height; rolled up. Slipfin: ticks out of water. Polestar: the iron block held
+		 * overhead (null: none); the field is held. Lurk: the creature it watches (entity id, -1 none); faded. Duplex:
+		 * the double whose eyes you look through (entity id, -1 none).
+		 */
+		public int gorge, horn;
+		public boolean hornSlam, rolled;
+		public double hornFrom;
+		public int dry;
+		public net.minecraft.world.level.block.state.@Nullable BlockState lifted;
+		public boolean field;
+		public int watched = -1;
+		public boolean faded;
+		public int eyes = -1;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -282,6 +297,15 @@ public final class XenoformPower implements Power {
 			brace = spray = rebound = anvilDrop = false;
 			dropFrom = fallSpeed = 0.0;
 			song = 0;
+			gorge = horn = 0;
+			hornSlam = rolled = false;
+			hornFrom = 0.0;
+			dry = 0;
+			lifted = null;
+			field = false;
+			watched = -1;
+			faded = false;
+			eyes = -1;
 			hudDirty = true;
 		}
 	}
@@ -297,6 +321,7 @@ public final class XenoformPower implements Power {
 		XenoNet.register();
 		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
 		XenoDouble.init();
+		XenoStalker.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		FallingStars.init();
@@ -430,6 +455,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.ULTIMATE);
 		player.removeAttached(XenoformState.SHELL);
+		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
 	}
 
@@ -865,7 +891,7 @@ public final class XenoformPower implements Power {
 
 	/** Becomes {@code form}. {@code force} skips the recharge (commands). */
 	public static boolean transform(ServerPlayer player, XenoForm form, boolean force) {
-		if (form.hidden() && !force && !XenoVoices.content(player)) {
+		if (form.lent() && !force && !XenoVoices.content(player)) {
 			// the void alien is lent, never owned: the voices must be content first
 			XenoVoices.refuse(player);
 			return false;
@@ -1128,7 +1154,7 @@ public final class XenoformPower implements Power {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			return;
 		}
-		if (target.hidden() && !XenoVoices.content(player)) {
+		if (target.lent() && !XenoVoices.content(player)) {
 			XenoVoices.refuse(player);
 			return;
 		}
@@ -1194,7 +1220,7 @@ public final class XenoformPower implements Power {
 			}
 		}
 		XenoForm dialled = XenoForms.get(band.dialled());
-		return dialled != null && !dialled.hidden() ? dialled : randomKnown(player, null);
+		return dialled != null && !dialled.lent() ? dialled : randomKnown(player, null);
 	}
 
 	/** A random alien the band holds (never the hidden one unless the voices are content), other than {@code not}. */
@@ -1202,7 +1228,7 @@ public final class XenoformPower implements Power {
 		List<XenoForm> known = new ArrayList<>();
 		for (String id : XenoformState.band(player).unlocked()) {
 			XenoForm form = XenoForms.get(id);
-			if (form != null && form != not && (!form.hidden() || XenoVoices.content(player))) {
+			if (form != null && form != not && (!form.lent() || XenoVoices.content(player))) {
 				known.add(form);
 			}
 		}

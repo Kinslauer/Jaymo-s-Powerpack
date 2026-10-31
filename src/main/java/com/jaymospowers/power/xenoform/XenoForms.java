@@ -37,8 +37,14 @@ public final class XenoForms {
 	public static final XenoForm DUPLEX = register(new Duplex());
 	/** (0.18.95) Rivet, the living metal (from a clockwork golem). */
 	public static final XenoForm RIVET = register(new com.jaymospowers.power.xenoform.forms.Rivet());
+	/** (0.18.96, patch 4) Gorger (an armadillo), Slipfin (an axolotl), Polestar (the Magnetic Giant). */
+	public static final XenoForm GORGER = register(new com.jaymospowers.power.xenoform.forms.Gorger());
+	public static final XenoForm SLIPFIN = register(new com.jaymospowers.power.xenoform.forms.Slipfin());
+	public static final XenoForm POLESTAR = register(new com.jaymospowers.power.xenoform.forms.Polestar());
 	/** The void alien: no creature carries it; the two voices give it ({@link XenoVoices}). */
 	public static final XenoForm NADIR = register(new Nadir());
+	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
+	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 
 	private XenoForms() {
 	}

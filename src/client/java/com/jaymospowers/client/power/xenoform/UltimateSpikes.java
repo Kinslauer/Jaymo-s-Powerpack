@@ -31,16 +31,21 @@ final class UltimateSpikes extends HumanoidModel<AvatarRenderState> {
 	 */
 	record Style(int crown, float crownLength, int ridge, float ridgeLength, int shoulder, int blade, float bulk) {}
 
-	private static final Map<String, Style> STYLES = Map.of(
-		"bulwark", new Style(0, 0.0F, 3, 5.0F, 2, 0, 1.0F),
-		"pyre", new Style(5, 5.0F, 2, 3.0F, 1, 0, 0.0F),
-		"blur", new Style(2, 4.0F, 0, 0.0F, 0, 1, 0.0F),
-		"prism", new Style(3, 4.0F, 3, 4.0F, 2, 1, 0.3F),
-		"wisp", new Style(3, 3.0F, 0, 0.0F, 1, 0, 0.0F),
-		"gremlin", new Style(2, 3.0F, 3, 2.5F, 0, 1, 0.0F),
-		"knell", new Style(0, 0.0F, 4, 4.5F, 2, 0, 0.6F),
-		"wyrm", new Style(2, 6.0F, 4, 3.5F, 1, 0, 0.3F),
-		"duplex", new Style(1, 4.0F, 0, 0.0F, 2, 0, 0.0F));
+	private static final Map<String, Style> STYLES = Map.ofEntries(
+		Map.entry("bulwark", new Style(0, 0.0F, 3, 5.0F, 2, 0, 1.0F)),
+		Map.entry("pyre", new Style(5, 5.0F, 2, 3.0F, 1, 0, 0.0F)),
+		Map.entry("blur", new Style(2, 4.0F, 0, 0.0F, 0, 1, 0.0F)),
+		Map.entry("prism", new Style(3, 4.0F, 3, 4.0F, 2, 1, 0.3F)),
+		Map.entry("wisp", new Style(3, 3.0F, 0, 0.0F, 1, 0, 0.0F)),
+		Map.entry("gremlin", new Style(2, 3.0F, 3, 2.5F, 0, 1, 0.0F)),
+		Map.entry("knell", new Style(0, 0.0F, 4, 4.5F, 2, 0, 0.6F)),
+		Map.entry("wyrm", new Style(2, 6.0F, 4, 3.5F, 1, 0, 0.3F)),
+		Map.entry("duplex", new Style(1, 4.0F, 0, 0.0F, 2, 0, 0.0F)),
+		Map.entry("rivet", new Style(1, 3.0F, 3, 2.5F, 2, 1, 0.0F)),
+		Map.entry("gorger", new Style(0, 0.0F, 5, 3.0F, 2, 0, 0.6F)),
+		Map.entry("slipfin", new Style(4, 3.5F, 3, 3.0F, 0, 1, 0.0F)),
+		Map.entry("polestar", new Style(2, 5.0F, 2, 4.0F, 2, 0, 0.7F)),
+		Map.entry("lurk", new Style(3, 6.0F, 4, 3.0F, 1, 1, 0.0F)));
 
 	private static final Map<String, UltimateSpikes> MODELS = new HashMap<>();
 

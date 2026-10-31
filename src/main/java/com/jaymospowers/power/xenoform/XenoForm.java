@@ -72,6 +72,14 @@ public abstract class XenoForm {
 		return false;
 	}
 
+	/**
+	 * (0.18.96) A form the two voices lend ({@link XenoVoices}: Nadir): slammed only while they're content, and spent when
+	 * it ends. A hidden form found in the world (the stalker's Lurk) is the band's to keep, like any other.
+	 */
+	public boolean lent() {
+		return false;
+	}
+
 	public Component name() {
 		return Component.translatable("xenoform.jaymospowers." + id);
 	}
@@ -264,6 +272,21 @@ public abstract class XenoForm {
 
 	protected static void burst(ServerLevel level, ParticleOptions particle, Vec3 at, int count, double spread, double speed) {
 		level.sendParticles(particle, at.x, at.y, at.z, count, spread, spread * 0.5, spread, speed);
+	}
+
+	/** (0.18.96) The block under the crosshair within {@code reach}, or null. */
+	protected static net.minecraft.core.@Nullable BlockPos aimBlock(ServerPlayer player, double reach) {
+		net.minecraft.world.phys.HitResult hit = player.pick(reach, 0.0F, false);
+		return hit instanceof net.minecraft.world.phys.BlockHitResult block && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK ? block.getBlockPos() : null;
+	}
+
+	/** (0.18.96) A line of {@code points} particles from {@code from} to {@code to}. */
+	protected static void beam(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions particle, int points) {
+		Vec3 step = to.subtract(from).scale(1.0 / points);
+		for (int i = 1; i <= points; i++) {
+			Vec3 p = from.add(step.scale(i));
+			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+		}
 	}
 
 	/** A ring of particles on the ground round {@code at}. */

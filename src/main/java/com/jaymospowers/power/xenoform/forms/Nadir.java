@@ -101,6 +101,11 @@ public final class Nadir extends XenoForm {
 	}
 
 	@Override
+	public boolean lent() {
+		return true;
+	}
+
+	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.beaconHeld = 0;
 		live.beaconTarget = null;
