@@ -2041,6 +2041,108 @@ def mirage():
     save(img, "entity/xenoform_mirage.png")
 
 
+def ooze_skin(name, base, core, dark, eye):
+    """(0.18.114, Scan F) Ooze: soft jelly lighter at the edges, a darker core in the chest, two dark eyes, a blob on top."""
+    img = new_skin()
+    parts(img, base, 0.08, edge=1.12)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 8), core + (255,))
+    rect(img, (9, 10, 11, 12), eye)
+    rect(img, (13, 10, 15, 12), eye)
+    rect(img, (10, 14, 14, 15), shade(dark + (255,), 1.0))
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            speckle(img, b, shade(dark + (255,), 1.0), (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
+    chest_insignia(img, rim=shade(dark + (255,), 0.8))
+    # extras: head blob 6x3x6 at (0,64)
+    box(img, (0, 64, 6, 3, 6), base, 0.08, edge=1.12)
+    clear_hat(img)
+    save(img, f"entity/xenoform_{name}.png")
+
+
+def ooze():
+    ooze_skin("ooze", (108, 192, 96), (60, 130, 56), (40, 90, 40), (20, 40, 20, 255))
+
+
+def magma_ooze():
+    ooze_skin("magma_ooze", (70, 30, 24), (250, 150, 40), (30, 12, 10), (255, 200, 60, 255))
+    img = Image.open(ROOT / "textures" / "entity" / "xenoform_magma_ooze.png").convert("RGBA")
+    # glowing cracks across the dark crust
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            if nm in ("front", "back", "left", "right"):
+                for y in range(b[1] + 2, b[3], 4):
+                    rect(img, (b[0], y, b[2], y + 1), (240, 120, 30, 255))
+    chest_insignia(img, rim=(60, 20, 10, 255))
+    save(img, "entity/xenoform_magma_ooze.png")
+
+
+def fuse():
+    """(0.18.114, Scan F) Fuse: mottled creeper greens, a paler chest, the dark hollow eyes and frown."""
+    img = new_skin()
+    green = (88, 160, 72)
+    parts(img, green, 0.1)
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            speckle(img, b, (60, 120, 52, 255), (b[2] - b[0]) * (b[3] - b[1]) // 5 + 1)
+            speckle(img, b, (150, 210, 130, 255), (b[2] - b[0]) * (b[3] - b[1]) // 12 + 1)
+    rect(img, (9, 10, 11, 12), (16, 20, 16, 255))
+    rect(img, (13, 10, 15, 12), (16, 20, 16, 255))
+    rect(img, (11, 12, 13, 15), (16, 20, 16, 255))
+    rect(img, (10, 13, 11, 16), (16, 20, 16, 255))
+    rect(img, (13, 13, 14, 16), (16, 20, 16, 255))
+    claws(img, (40, 70, 36, 255))
+    chest_insignia(img, rim=(30, 60, 26, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_fuse.png")
+
+
+def thornwild():
+    """(0.18.114, Scan F) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns."""
+    img = new_skin()
+    bark = (92, 72, 52)
+    parts(img, bark, 0.12)
+    for part in BASE_PARTS:
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm in ("top", "bottom"):
+                continue
+            for x in range(x0, x1, 3):
+                rect(img, (x, y0, x + 1, y1), (66, 50, 36, 255))
+    for part in ARMS + (BODY,):
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm == "top":
+                noise_fill(img, (80, 120, 50, 255), 0.2, (x0, y0, x1, y1))
+            elif nm in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 2), (84, 124, 54, 255))
+    rect(img, (9, 11, 11, 12), (250, 170, 40, 255))
+    rect(img, (13, 11, 15, 12), (250, 170, 40, 255))
+    rect(img, (10, 14, 14, 15), (40, 30, 22, 255))
+    claws(img, (50, 38, 28, 255))
+    chest_insignia(img, rim=(50, 38, 26, 255))
+    # extras: twig 1x5x1 at (0,64); thorn 1x1x2 at (6,64)
+    box(img, (0, 64, 1, 5, 1), (80, 62, 44), 0.1)
+    box(img, (6, 64, 1, 1, 2), (220, 210, 170), 0.05)
+    clear_hat(img)
+    save(img, "entity/xenoform_thornwild.png")
+
+
+def billow():
+    """(0.18.114, Scan F) Billow: soft white cloud, grey underneath, a calm face of dark round eyes and a small smile."""
+    img = new_skin()
+    white = (236, 240, 246)
+    parts(img, white, 0.05, light={"top": 1.05, "bottom": 0.72, "right": 0.92, "left": 0.92, "front": 1.0, "back": 0.86})
+    rect(img, (9, 11, 11, 13), (60, 70, 90, 255))
+    rect(img, (13, 11, 15, 13), (60, 70, 90, 255))
+    rect(img, (11, 14, 13, 15), (150, 160, 180, 255))
+    chest_insignia(img, rim=(150, 160, 180, 255))
+    # extras: body puff 12x8x8 at (0,64); head cap 10x6x10 at (0,82)
+    soft = {"top": 1.05, "bottom": 0.7, "right": 0.9, "left": 0.9, "front": 0.98, "back": 0.86}
+    box(img, (0, 64, 12, 8, 8), white, 0.05, light=soft)
+    box(img, (0, 82, 10, 6, 10), white, 0.05, light=soft)
+    clear_hat(img)
+    save(img, "entity/xenoform_billow.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -2054,6 +2156,7 @@ ULTIMATE_COLORS = {
     "howl": (176, 160, 140), "prowl": (224, 150, 60), "tusk": (150, 100, 70), "talon": (214, 180, 60),
     "murk": (150, 120, 190), "gnasher": (110, 150, 180), "lumen": (200, 240, 255), "keen": (200, 60, 70),
     "hive": (240, 180, 50), "skitter": (200, 40, 40), "shade": (200, 110, 255), "mirage": (110, 170, 255),
+    "ooze": (120, 230, 100), "magma_ooze": (255, 140, 40), "fuse": (140, 230, 110), "thornwild": (240, 180, 60), "billow": (150, 200, 255),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
@@ -2062,6 +2165,7 @@ SCAN_B = ("rime", "marrow", "swathe", "blight")
 SCAN_C = ("howl", "prowl", "tusk", "talon")
 SCAN_D = ("murk", "gnasher", "lumen", "keen")
 SCAN_E = ("hive", "skitter", "shade", "mirage")
+SCAN_F = ("ooze", "magma_ooze", "fuse", "thornwild", "billow")
 
 
 def ultimate(form):
@@ -2110,7 +2214,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage", "ooze", "magma_ooze", "fuse", "thornwild", "billow")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -2182,7 +2286,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -2227,6 +2331,14 @@ if __name__ == "__main__":
     shade_form()
     mirage()
     for form in SCAN_E:
+        ultimate(form)
+    # (0.18.114) Scan F, last again
+    ooze()
+    magma_ooze()
+    fuse()
+    thornwild()
+    billow()
+    for form in SCAN_F:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
