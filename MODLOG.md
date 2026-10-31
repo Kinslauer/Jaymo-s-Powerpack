@@ -4311,8 +4311,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - `docs/XenoBand-Plan.md`: Andy's 41 picks from the four add-ons as patches 0-9. Compile-checked; not seen in game.
 - **0.18.88, The band's charge; one band in the world (Xeno-Band patch 1):** Andy picked the charge patch first, and
   ruled "only these two bands will exist in the world, either player killing the other, will remove the band and give it
-  to them". `XenoBands` counts wearers and loose band items on the overworld; stars drop it only when none is out; a
-  player kill moves it to the killer as an item that keeps its aliens. The random 1-5 minute timer is now a charge
+  to them", then "you have to tear it off yourself, with a tap". `XenoBands` counts wearers and loose band items on the
+  overworld; stars drop it only when none is out; tapping a downed wearer tears it off into your inventory as an item
+  that keeps its aliens (`Downed.TAPPED_LISTENERS`, fired when use is let go before a revive starts). The random 1-5 minute timer is now a charge
   (2-5 min by mastery, drained by hits and moves, refills as yourself, kept between changes; knockout empties and locks
   it a minute). Quick change (Z held + scroll as an alien, a quarter of the charge, dizzy), the band saving you from a
   killing blow with a fitting alien (10 min), the wild dial (C while Z held), and the Jammed effect with the Potion of

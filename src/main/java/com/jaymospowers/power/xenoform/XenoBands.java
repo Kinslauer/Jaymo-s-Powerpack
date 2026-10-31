@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
@@ -28,8 +27,9 @@ import net.minecraft.world.item.ItemStack;
  * or lying on the ground). A fallen star holds the band only while nobody wears it and none is loose.
  * <ul>
  * <li>Put on (the item used): worn; one loose item fewer.</li>
- * <li>A wearer killed by another player: the band comes off (the power ends) and goes to the killer, an item, theirs
- * to wear, keep, trade or throw away.</li>
+ * <li>A downed wearer: another player taps them (use, let go at once; holding is a revive) and tears the band off
+ * themselves (Andy: "you have to tear it off yourself, with a tap"). The power ends and the band is the taker's, an item,
+ * theirs to wear, keep, trade or throw away. Killed outright, the wearer keeps it.</li>
  * <li>A loose band destroyed (lava, fire, the void, despawned, killed): back among the stars.</li>
  * <li>The power taken away by hand (the powers screen, {@code /power}): back among the stars.</li>
  * </ul>
@@ -61,11 +61,10 @@ public final class XenoBands {
 				worn(handler.player, false);
 			}
 		});
-		// killed by another player: the band is theirs
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof ServerPlayer player && XenoformPower.has(player) && source.getEntity() instanceof ServerPlayer killer
-				&& killer != player) {
-				takenBy(player, killer);
+		// a tap on a downed wearer tears the band off
+		com.jaymospowers.core.wounds.Downed.TAPPED_LISTENERS.add((taker, body) -> {
+			if (body instanceof ServerPlayer player && player != taker && XenoformPower.has(player)) {
+				takenBy(player, taker);
 			}
 		});
 		// a loose band destroyed goes back to the stars (one picked up leaves an emptied stack behind: not destroyed)
@@ -129,12 +128,13 @@ public final class XenoBands {
 		}
 	}
 
-	/** The band comes off {@code player}'s wrist and goes to {@code killer}, with every alien it held. */
+	/** The band is torn off {@code player}'s wrist by {@code killer}, with every alien it held. */
 	private static void takenBy(ServerPlayer player, ServerPlayer killer) {
 		List<String> aliens = XenoformState.band(player).unlocked();
 		Powers.set(player, null);
 		player.removeAttached(XenoformState.BAND);
 		loosed(killer.level().getServer());
+		killer.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		killer.getInventory().placeItemBackInInventory(item(aliens), net.minecraft.util.Prediction.SERVER_ONLY);
 		killer.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_won", player.getDisplayName()).withStyle(ChatFormatting.GREEN));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_lost", killer.getDisplayName()).withStyle(ChatFormatting.RED));

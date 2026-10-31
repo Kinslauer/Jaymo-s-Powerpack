@@ -329,7 +329,7 @@
 	"voice.jaymospowers.xenoform.clamour.unanswered": "YOU HAVEN'T ANSWERED ME.",
 	"message.jaymospowers.xenoform.nadir.film_no_target": "The film needs someone to show.",
 	"message.jaymospowers.xenoform.nadir.film_wait": "The reel is still rewinding: %s s.",
-	"message.jaymospowers.xenoform.band_won": "The band comes off %s's wrist. It's yours now.",
+	"message.jaymospowers.xenoform.band_won": "You tear the band off %s's wrist. It's yours now.",
 	"message.jaymospowers.xenoform.band_lost": "%s tore the band from your wrist.",
 	"message.jaymospowers.xenoform.saved": "The band slammed itself: %s took the blow.",
 	"message.jaymospowers.xenoform.quick_low": "Not enough charge to change.",

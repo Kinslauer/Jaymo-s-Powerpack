@@ -13,7 +13,7 @@ Standing rules that bind every patch:
 - Every new recipe or route shows in JEI.
 - Optional mods only through compat classes.
 - **Only two bands exist in the whole world** (Andy, 2026-10-31): the Xeno-Band and the rival band. Nothing copies
-  either one. Reforging upgrades the band itself. Kill a wearer and their band comes off and goes to you (into your
+  either one. Reforging upgrades the band itself. Down a wearer and tap them to tear their band off yourself (into your
   inventory, or dropped at your feet if it's full), and from then on it's yours to wear, keep, trade or throw away. A
   wrist wears one band at a time.
 

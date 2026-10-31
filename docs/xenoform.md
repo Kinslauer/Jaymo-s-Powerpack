@@ -54,8 +54,9 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   it ends. Potion of Jamming: awkward + echo shard (20 s; redstone 40 s; gunpowder splash, dragon's breath lingering),
   tipped arrows from the game's own recipe.
 - **One band in the world** (0.18.88, `XenoBands`, Andy): the overworld keeps who wears it and how many band items are
-  loose. A fallen star holds the band only while nobody wears it and none is loose. Killed by another player, a wearer
-  loses it: the power ends and the killer gets the band as an item that keeps every alien it learned. A loose band
+  loose. A fallen star holds the band only while nobody wears it and none is loose. A downed wearer can have it torn
+  off: another player taps them (use let go at once; holding is a revive, `Downed.TAPPED_LISTENERS`), the power ends and
+  the taker gets the band as an item that keeps every alien it learned. Killed outright, the wearer keeps it. A loose band
   destroyed (lava, void, despawn) or a power removed by hand returns it to the stars. `/powerdebug xenoform bands reset`
   forgets the count.
 - **Fists only**: while changed both hands read as empty to everything that asks the entity (`XenoformHandsMixin` on
