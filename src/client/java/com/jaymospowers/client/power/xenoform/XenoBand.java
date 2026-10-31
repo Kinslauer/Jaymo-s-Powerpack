@@ -177,6 +177,27 @@ public final class XenoBand {
 	}
 
 	/**
+	 * (0.18.86) The insignia on an alien's chest, lit as it taps it to change back (Andy: "the insignia ... should move
+	 * from the watch to their chest"): the band's face plate laid flat on the chest's front, only its glow drawn, over the
+	 * insignia the skin already wears. The pose stack is the layer's, before the body's own placement.
+	 */
+	static void submitInsignia(PoseStack poseStack, SubmitNodeCollector collector, int light, XenoFormModels.FormModel model, float lit) {
+		int alpha = Mth.clamp((int)(lit * 255.0F), 0, 255);
+		if (alpha < 4) {
+			return;
+		}
+		poseStack.pushPose();
+		model.body.translateAndRotate(poseStack);
+		// a hair proud of the chest, its face (the plate's +x) turned to the front (-z)
+		poseStack.translate(0.0F, model.insigniaY / 16.0F, (model.insigniaZ - 0.05F) / 16.0F);
+		poseStack.rotateDegrees(com.mojang.math.Axis.YP, 90.0F);
+		poseStack.scale(1.0F, model.insigniaSize, model.insigniaSize);
+		poseStack.translate(-FACE_X / 16.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
+		collector.submitModelPart(plate(), poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+		poseStack.popPose();
+	}
+
+	/**
 	 * In first person, after the hand renderer has drawn your left arm (AvatarRenderer.renderHand: the arm is reset to
 	 * its rest pose with its slight outward lean): the band on its wrist, whenever that arm is in view, the slam too.
 	 */

@@ -51,6 +51,13 @@ public final class XenoformSlamView {
 	static final float R_ROLL_DOWN = 0.0F, R_ROLL = 0.0F, R_ROLL_STRUCK = 0.0F;
 	static final float R_BOB_Y = 0.01F, R_BOB_ROLL = 2.0F;
 
+	/**
+	 * (0.18.86) An alien's tap on the insignia on its chest (it wears no band): no wrist comes up; the right hand rises
+	 * into the lower right of the view, then presses down and in toward you, onto the chest just under the view.
+	 */
+	static final float[] C_POS_POISED = {0.38F, -0.42F, -0.8F}, C_POS_STRUCK = {0.06F, -0.78F, -0.42F};
+	static final float C_TILT = -35.0F, C_TILT_STRUCK = -10.0F, C_YAW = -55.0F, C_YAW_STRUCK = -75.0F;
+
 	/** While the left arm is drawn: how far the face plate is lifted (0-1) and the pulse of its glow (0-1), for {@link XenoBand}. */
 	static float pop, glow;
 
@@ -95,6 +102,21 @@ public final class XenoformSlamView {
 		poseStack.rotateDegrees(Axis.YP, Mth.lerp(p.u, R_YAW_DOWN, Mth.lerp(p.e, R_YAW, R_YAW_STRUCK)));
 		poseStack.rotateDegrees(Axis.XP, Mth.lerp(p.u, R_ROLL_DOWN, Mth.lerp(p.e, R_ROLL, R_ROLL_STRUCK)) + p.bob * R_BOB_ROLL);
 		// the arm's length toward the hand runs along the view's -x
+		poseStack.rotateDegrees(Axis.ZP, 90.0F);
+		anchorArm(poseStack, -PIVOT_X, LEAN_DEGREES, R_ANCHOR);
+	}
+
+	/** An alien's right hand, tapping its chest: the pose stack is left carrying its placement. */
+	public static void chest(PoseStack poseStack, XenoformSlap.Pose pose, float time) {
+		Phase p = phase(pose, time);
+		float x = Mth.lerp(p.u, R_POS_DOWN[0], Mth.lerp(p.e, C_POS_POISED[0], C_POS_STRUCK[0]));
+		float y = Mth.lerp(p.u, R_POS_DOWN[1], Mth.lerp(p.e, C_POS_POISED[1], C_POS_STRUCK[1]));
+		float z = Mth.lerp(p.u, R_POS_DOWN[2], Mth.lerp(p.e, C_POS_POISED[2], C_POS_STRUCK[2]));
+		// on contact it jolts with the same dip the wrist would have taken
+		poseStack.translate(x, y + p.bob * R_BOB_Y - L_DIP_Y * p.dip * p.e, z);
+		poseStack.rotateDegrees(Axis.ZP, Mth.lerp(p.u, R_TILT_DOWN, Mth.lerp(p.e, C_TILT, C_TILT_STRUCK)));
+		poseStack.rotateDegrees(Axis.YP, Mth.lerp(p.u, R_YAW_DOWN, Mth.lerp(p.e, C_YAW, C_YAW_STRUCK)));
+		poseStack.rotateDegrees(Axis.XP, p.bob * R_BOB_ROLL);
 		poseStack.rotateDegrees(Axis.ZP, 90.0F);
 		anchorArm(poseStack, -PIVOT_X, LEAN_DEGREES, R_ANCHOR);
 	}

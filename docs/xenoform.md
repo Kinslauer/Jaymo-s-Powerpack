@@ -118,6 +118,14 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
   out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
   speed 0.16), put back on the way out (creative and spectator keep theirs).
+- **Aliens tap the insignia (0.18.86):** an alien wears no band, so changing back (hold Z) no longer raises a wrist:
+  the right hand comes up and taps the insignia on its chest, which lights under it (the band's face glow laid on the
+  chest, `XenoBand.submitInsignia`, placed per form by `FormModel.insigniaY/Z/Size`); in first person only the right hand
+  comes up and presses in under the view (`XenoformSlamView.chest`). Others see the same tap when a player becomes an
+  alien. `XenoformSlap.Pose.chest` marks it; your own tap keeps its kind through the change so the arm doesn't jump.
+- **Wisp is ki (0.18.86):** it floats 0.3 blocks up and bobs instead of walking (no step swing, no footsteps,
+  `XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
+  texture, scrolling) that are its own body puffed out (`XenoFormModels.Wisp.shells`, `WispKi`), first-person arm too.
 - The ending glow: the server sets the synced `XenoformState.ENDING` through a form's last `BEEP_TICKS`; everyone's
   client then draws the alien a second time with the emissive `eyes` render type in pulsing red (`XenoformLayer.glow`),
   the first-person arm too.

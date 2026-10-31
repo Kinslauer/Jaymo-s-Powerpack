@@ -13,10 +13,13 @@ import net.minecraft.util.Mth;
 /**
  * Draws the alien in a transformed player's place. {@link XenoformClient#extract} has already hidden the player's own
  * body (invisible, no armour, no held items), so only the form's model shows, in the player's pose and at the player's
- * (scaled) size, times the form's own {@code renderScale}. Pyre is drawn a second time, fullbright, from its glow skin. Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
+ * (scaled) size, times the form's own {@code renderScale}. Pyre is drawn a second time, fullbright, from its glow skin; Wisp floats, made of ki ({@link WispKi}). Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
  * pass over the body ({@link #glow}).
  */
 final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
+	/** (0.18.86) How brightly the chest's insignia lights as the hand comes up to it; it's full once the hand is on it. */
+	static final float INSIGNIA_HELD = 0.3F;
+
 	XenoformLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
 	}
@@ -34,12 +37,25 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			poseStack.scale(model.renderScale, model.renderScale, model.renderScale);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
-		// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
-		renderColoredCutoutModel(model, model.texture, poseStack, collector, lightCoords, state, -1, 1);
+		if (model instanceof XenoFormModels.Wisp wisp) {
+			// (0.18.86) Wisp floats, a body of ki under its skin
+			WispKi.lift(poseStack, state);
+			WispKi.submit(wisp, state, poseStack, collector);
+		} else {
+			// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
+			renderColoredCutoutModel(model, model.texture, poseStack, collector, lightCoords, state, -1, 1);
+		}
 		if (model instanceof XenoFormModels.Pyre) {
 			// Pyre is fire: its glow skin again, fullbright, so it shines in the dark
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, 0);
+		}
+		XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
+		if (slap != null && slap.chest()) {
+			// (0.18.86) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
+			model.setupAnim(state);
+			XenoformFlightPose.applyModel(model, state);
+			XenoBand.submitInsignia(poseStack, collector, lightCoords, model, Math.max(INSIGNIA_HELD * slap.raise(), slap.strike()));
 		}
 		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
 		if (ending) {

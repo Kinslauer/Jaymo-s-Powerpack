@@ -30,7 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * invisible so the alien could stand in for it, so the flag is lifted for the hands and put back after;</li>
  * <li>the slam of the band (see XenoformSlap, and XenoformSlamView for the placements): the left forearm swings up across
  * the view with the band's face turned up at you, the right hand hovers above it and comes down on the dial. While it
- * plays, the usual hands are replaced. (0.18.84) With First-person Model drawing your body these hands are drawn too,
+ * plays, the usual hands are replaced. (0.18.86) An alien has no band: only its right hand comes up, tapping the
+ * insignia on its chest. (0.18.84) With First-person Model drawing your body these hands are drawn too,
  * and the body's own arms are hidden meanwhile (XenoformLivingEntityRendererMixin): posed on the body, the raised
  * forearm came up through the camera and the band never showed (Andy).</li>
  * </ul>
@@ -72,19 +73,27 @@ abstract class XenoformFirstPersonMixin {
 		poseStack.rotateDegrees(Axis.YP, (hands.viewYRot - hands.yBob) * 0.1F);
 		int light = avatar.lightCoords;
 		XenoformArmInvoker arms = (XenoformArmInvoker)this;
-		// the band's wrist: up from below into a bar across the lower view, the band's face turned up at you
-		// (the band goes on with the arm: XenoformAvatarRendererMixin, after renderHand, with the dial's cap)
-		poseStack.pushPose();
-		XenoformSlamView.dial(pose, time);
-		XenoformSlamView.left(poseStack, pose, time);
-		arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.LEFT, player);
-		XenoformSlamView.dialDone();
-		poseStack.popPose();
-		// the striking hand: poised above and to the right, then down flat on the dial
-		poseStack.pushPose();
-		XenoformSlamView.right(poseStack, pose, time);
-		arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.RIGHT, player);
-		poseStack.popPose();
+		if (pose.chest()) {
+			// (0.18.86) an alien wears no band: only the right hand comes up, to tap the insignia on its chest
+			poseStack.pushPose();
+			XenoformSlamView.chest(poseStack, pose, time);
+			arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.RIGHT, player);
+			poseStack.popPose();
+		} else {
+			// the band's wrist: up from below into a bar across the lower view, the band's face turned up at you
+			// (the band goes on with the arm: XenoformAvatarRendererMixin, after renderHand, with the dial's cap)
+			poseStack.pushPose();
+			XenoformSlamView.dial(pose, time);
+			XenoformSlamView.left(poseStack, pose, time);
+			arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.LEFT, player);
+			XenoformSlamView.dialDone();
+			poseStack.popPose();
+			// the striking hand: poised above and to the right, then down flat on the dial
+			poseStack.pushPose();
+			XenoformSlamView.right(poseStack, pose, time);
+			arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.RIGHT, player);
+			poseStack.popPose();
+		}
 		poseStack.popPose();
 		this.jaymospowers$restoreInvisible(player);
 		ci.cancel();

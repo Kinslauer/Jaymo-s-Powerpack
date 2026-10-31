@@ -4289,3 +4289,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     ribbons (red glow, orange flame, white-hot core) along the last 14 ticks of path (20 under Sunheart), tapering and
     flickering, with a round glowing head round the body and one ember every 3 ticks. It draws in behind you when you
     stop. Hand and foot jets now only spurt while hovering. Compile-checked; not seen in game.
+- **0.18.86, Aliens tap the insignia on their chest; Wisp floats, made of ki:** Andy: "the aliens should tap the
+  insignia, it should move from the watch to their chest, and they tap that instead of their wrist. they arent wearing a
+  watch" and "wisp should float instead of walk and be made of ki with the current texture overlaid".
+  - As an alien the slap is a tap on the chest (`XenoformSlap.Pose.chest`, `CHEST_*` angles): no wrist comes up, the
+    right hand rises and taps the insignia, which lights with the band's face glow (`XenoBand.submitInsignia`, per-form
+    `FormModel.insigniaY/Z/Size`). First person shows only the right hand pressing in under the view
+    (`XenoformSlamView.chest`). Others see the tap when a player turns alien.
+  - Wisp hovers 0.3 blocks up with a slow bob, its arms drift and trail instead of swinging, no footsteps
+    (`XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
+    texture, scrolling), its own body puffed out (`WispKi`, `XenoFormModels.Wisp.shells`), first-person arm too.
+    Compile-checked; not seen in game.
