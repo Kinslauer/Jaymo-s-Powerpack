@@ -61,7 +61,8 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
 			// (0.18.93) the Ultimate wears its armoured skin instead
 			// (0.18.125, patch 8) the rival band's aliens are darkened
-			renderColoredCutoutModel(model, ultimate ? model.ultimateTexture : model.texture, poseStack, collector, lightCoords, state,
+			// (0.18.126, patch 9) in its look, its lines in the band's glow
+			renderColoredCutoutModel(model, skin(model, state, ultimate), poseStack, collector, lightCoords, state,
 				Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, 1);
 		}
 		if (ultimate) {
@@ -77,13 +78,13 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// (0.18.90) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
 			model.setupAnim(state);
 			XenoformFlightPose.applyModel(model, state);
-			XenoBand.rival = Boolean.TRUE.equals(state.getData(XenoformClient.DARK));
+			XenoBand.dress(state);
 			XenoBand.submitInsignia(poseStack, collector, lightCoords, model, Math.max(INSIGNIA_HELD * slap.raise(), slap.strike()));
-			XenoBand.rival = false;
+			XenoBand.undress();
 		}
 		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
 		if (ending) {
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(model.texture), lightCoords, OverlayTexture.NO_OVERLAY,
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, false)), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow(state.ageInTicks), null, 0);
 		}
 		if (model instanceof XenoFormModels.Wyrm) {
@@ -158,5 +159,15 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		float pulse = 0.5F + 0.5F * Mth.sin(time * 0.6F);
 		int alpha = (int)((0.25F + 0.45F * pulse) * 255.0F);
 		return alpha << 24 | 0xFF3828;
+	}
+
+	/** (0.18.126, patch 9) The skin {@code model} is drawn in on {@code state}: its look (the Ultimate's armour has none), its lines in the band's glow. */
+	static net.minecraft.resources.Identifier skin(XenoFormModels.FormModel model, AvatarRenderState state, boolean ultimate) {
+		Integer glow = state.getData(XenoformClient.GLOW);
+		int g = glow == null ? com.jaymospowers.power.xenoform.BandStyle.GREEN : glow;
+		if (ultimate) {
+			return XenoLooks.skin(model.ultimateTexture, com.jaymospowers.power.xenoform.BandStyle.Look.PLAIN, g);
+		}
+		return XenoLooks.skin(model.texture, com.jaymospowers.power.xenoform.BandStyle.Look.of(state.getData(XenoformClient.LOOK)), g);
 	}
 }

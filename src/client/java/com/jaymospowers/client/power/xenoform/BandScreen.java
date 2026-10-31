@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.xenoform;
 
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.power.xenoform.BandStyle;
 import com.jaymospowers.power.xenoform.BandUpgrades;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoForms;
@@ -22,7 +23,9 @@ import org.jspecify.annotations.Nullable;
  * (0.18.123, Xeno-Band patch 7) The band screen (B as yourself): three tabs. <b>Modules</b>: the modules the band has learned
  * from plans, fitted into its {@link BandUpgrades#SLOTS} slots once reforged. <b>Skills</b>: band points (from mastery) spent
  * on quick change, the death save, scan reach, a bigger charge and a faster recharge. <b>Aliens</b>: forget one, or wipe the
- * band clean (each asks twice). Every button goes to the server ({@link BandUpgrades.Action}), which reopens the screen.
+ * band clean (each asks twice). (0.18.126, patch 9) <b>Looks</b>: the band's glow, its face plate and spikes, and each
+ * alien's look ({@link BandStyle}), beside a turning preview of you. Every button goes to the server
+ * ({@link BandUpgrades.Action}), which reopens the screen.
  */
 public class BandScreen extends Screen {
 	private static final int MAX_W = 360;
@@ -30,7 +33,10 @@ public class BandScreen extends Screen {
 	private static final int TABS = 22;
 	private static final int DETAIL_LINES = 4;
 	private static final int ACCENT = 0xFF5CF07A;
-	private static final String[] TAB_KEYS = {"modules", "skills", "aliens"};
+	private static final String[] TAB_KEYS = {"modules", "skills", "aliens", "looks"};
+	/** The Looks tab: its band rows before the aliens', the preview's width and size, and how fast it turns (radians a tick). */
+	private static final int BAND_ROWS = 3, PREVIEW_W = 64, PREVIEW_SCALE = 28;
+	private static final float PREVIEW_TURN = 0.04F;
 
 	/** The tab and alien page, kept across the server's reopening. */
 	private static int tab, page;
@@ -40,7 +46,7 @@ public class BandScreen extends Screen {
 	private @Nullable String armed;
 	private final List<Component[]> details = new ArrayList<>();
 	/** What the buttons were built from: rebuilt when the synced band or upgrades change (they may land after the reopening). */
-	private @Nullable Object builtUp, builtBand;
+	private @Nullable Object builtUp, builtBand, builtStyle;
 
 	public BandScreen(int points) {
 		super(Component.translatable("screen.jaymospowers.band"));
@@ -89,9 +95,10 @@ public class BandScreen extends Screen {
 		details.clear();
 		builtUp = player().getAttached(BandUpgrades.UPGRADES);
 		builtBand = player().getAttached(XenoformState.BAND);
+		builtStyle = player().getAttached(BandStyle.STYLE);
 		int x = left(), w = panelW();
-		int tabW = (w - 12 - 8) / 3;
-		for (int i = 0; i < 3; i++) {
+		int tabW = (w - 12 - 4 * (TAB_KEYS.length - 1)) / TAB_KEYS.length;
+		for (int i = 0; i < TAB_KEYS.length; i++) {
 			int t = i;
 			Button b = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.band.tab." + TAB_KEYS[i]), btn -> {
 				tab = t;
@@ -104,7 +111,8 @@ public class BandScreen extends Screen {
 		switch (tab) {
 			case 0 -> modules(bx);
 			case 1 -> skills(bx);
-			default -> aliens(bx);
+			case 2 -> aliens(bx);
+			default -> looks(bx);
 		}
 	}
 
@@ -189,6 +197,71 @@ public class BandScreen extends Screen {
 		}).bounds(x + panelW() - 6 - 120, fy, 120, 16).build());
 	}
 
+	/** (0.18.126) The Looks tab: the glow, the plate, the spikes, then a page of the band's aliens and their looks. */
+	private void looks(int bx) {
+		BandStyle.Style style = BandStyle.get(player());
+		int glow = BandStyle.glow(player());
+		details.add(new Component[] {Component.translatable("screen.jaymospowers.band.glow", Component.literal("\u25A0").withColor(glow)),
+			Component.translatable("screen.jaymospowers.band.glow.desc")});
+		lookButton(bx, 0, Component.translatable("screen.jaymospowers.band.change"), "glow", "");
+		details.add(new Component[] {Component.translatable("screen.jaymospowers.band.plate", Component.translatable("band.jaymospowers.plate." + style.plate())),
+			Component.translatable("screen.jaymospowers.band.plate.desc")});
+		lookButton(bx, 1, Component.translatable("screen.jaymospowers.band.change"), "plate", "");
+		details.add(new Component[] {Component.translatable("screen.jaymospowers.band.spikes",
+			Component.translatable(style.spikes() ? "screen.jaymospowers.band.on" : "screen.jaymospowers.band.off")),
+			Component.translatable("screen.jaymospowers.band.spikes.desc")});
+		lookButton(bx, 2, Component.translatable(style.spikes() ? "screen.jaymospowers.band.take_off" : "screen.jaymospowers.band.put_on"), "spikes", "");
+		List<String> held = aliensHeld();
+		int per = Math.max(1, rows() - BAND_ROWS);
+		int pages = Math.max(1, (held.size() + per - 1) / per);
+		page = Math.min(page, pages - 1);
+		for (int i = 0; i < per; i++) {
+			int n = page * per + i;
+			if (n >= held.size()) {
+				break;
+			}
+			String id = held.get(n);
+			XenoForm form = XenoForms.get(id);
+			Component name = form == null ? Component.literal(id) : form.name();
+			BandStyle.Look look = style.look(id);
+			details.add(new Component[] {Component.translatable("screen.jaymospowers.band.look", name, Component.translatable("band.jaymospowers.look." + look.id)),
+				Component.translatable("screen.jaymospowers.band.look.desc")});
+			lookButton(bx, BAND_ROWS + i, Component.translatable("screen.jaymospowers.band.change"), "look", id);
+		}
+		pager(pages);
+	}
+
+	private void lookButton(int bx, int row, Component label, String what, String arg) {
+		addRenderableWidget(Button.builder(label, btn -> send(what, arg)).bounds(bx, rowY(row) + 2, 80, 16).build());
+	}
+
+	/** The page buttons under the rows. */
+	private void pager(int pages) {
+		int fy = rowY(rows()) + 2, x = left();
+		Button prev = addRenderableWidget(Button.builder(Component.literal("<"), btn -> {
+			page--;
+			rebuildWidgets();
+		}).bounds(x + 6, fy, 20, 16).build());
+		prev.active = page > 0;
+		Button next = addRenderableWidget(Button.builder(Component.literal(">"), btn -> {
+			page++;
+			rebuildWidgets();
+		}).bounds(x + 30, fy, 20, 16).build());
+		next.active = page < pages - 1;
+	}
+
+	/** (0.18.126) The Looks tab's preview: you, turning slowly, between the rows' names and their buttons. */
+	private void preview(GuiGraphicsExtractor graphics, float a) {
+		int x1 = left() + panelW() - 6 - 80 - 8, x0 = x1 - PREVIEW_W;
+		int y0 = rowY(0), y1 = rowY(rows()) - 2;
+		graphics.fill(x0, y0, x1, y1, 0x60000000);
+		// a mouse that circles the box: the body follows it round
+		float t = (player().tickCount + a) * PREVIEW_TURN;
+		float mx = (x0 + x1) / 2.0F + net.minecraft.util.Mth.sin(t) * PREVIEW_W, my = y0 + (y1 - y0) * 0.35F;
+		net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, PREVIEW_SCALE, 0.0625F,
+			mx, my, player());
+	}
+
 	@Override
 	public boolean isPauseScreen() {
 		return false;
@@ -196,7 +269,8 @@ public class BandScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (builtUp != player().getAttached(BandUpgrades.UPGRADES) || builtBand != player().getAttached(XenoformState.BAND)) {
+		if (builtUp != player().getAttached(BandUpgrades.UPGRADES) || builtBand != player().getAttached(XenoformState.BAND)
+			|| builtStyle != player().getAttached(BandStyle.STYLE)) {
 			rebuildWidgets();
 		}
 		int x = left(), y = top(), w = panelW();
@@ -206,11 +280,12 @@ public class BandScreen extends Screen {
 			case 0 -> up.reforged() ? Component.translatable("screen.jaymospowers.band.sub.slots", up.fitted().size(), BandUpgrades.SLOTS)
 				: Component.translatable("screen.jaymospowers.band.sub.unforged");
 			case 1 -> Component.translatable("screen.jaymospowers.band.sub.points", points, BandUpgrades.earned(player()));
-			default -> Component.translatable("screen.jaymospowers.band.sub.aliens", aliensHeld().size());
+			case 2 -> Component.translatable("screen.jaymospowers.band.sub.aliens", aliensHeld().size());
+			default -> Component.translatable("screen.jaymospowers.band.sub.looks");
 		};
 		UiStyle.header(graphics, this.font, x, y, w, new ItemStack(com.jaymospowers.power.xenoform.XenoBandItem.BAND), this.title, sub, ACCENT, 0);
 		int hovered = -1;
-		int textW = w - 12 - 80 - 12;
+		int textW = tab == 3 ? w - 12 - 80 - 12 - PREVIEW_W - 8 : w - 12 - 80 - 12;
 		for (int i = 0; i < details.size(); i++) {
 			int ry = rowY(i);
 			boolean hover = UiStyle.over(mouseX, mouseY, x + 6, ry, w - 12, ROW - 2);
@@ -228,11 +303,16 @@ public class BandScreen extends Screen {
 				int rank = up.rank(s);
 				label = Component.translatable("screen.jaymospowers.band.rank", label, rank, s.ranks);
 				color = rank > 0 ? ACCENT : UiStyle.TEXT;
+			} else if (tab == 3) {
+				color = i < BAND_ROWS ? ACCENT : UiStyle.TEXT;
 			} else if (page * rows() + i < aliensHeld().size()) {
 				XenoForm form = XenoForms.get(aliensHeld().get(page * rows() + i));
 				color = form == null ? UiStyle.TEXT : 0xFF000000 | form.color;
 			}
 			UiStyle.line(graphics, this.font, label, x + 10, ry + 6, textW, color);
+		}
+		if (tab == 3) {
+			preview(graphics, a);
 		}
 		int dy = y + panelH() - UiStyle.detailHeight(DETAIL_LINES);
 		if (hovered >= 0) {

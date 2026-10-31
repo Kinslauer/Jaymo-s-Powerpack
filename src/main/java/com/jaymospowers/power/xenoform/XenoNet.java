@@ -34,9 +34,11 @@ public final class XenoNet {
 	}
 
 	/** Server → client: a band flashed green at {@code at} (a change of shape) in your sight ({@link BandFlash}). */
-	public record Flash(Vec3 at) implements CustomPacketPayload {
+	public record Flash(Vec3 at, int glow) implements CustomPacketPayload {
 		public static final Type<Flash> TYPE = new Type<>(JaymosPowers.id("xenoform_flash"));
-		public static final StreamCodec<ByteBuf, Flash> CODEC = Vec3.STREAM_CODEC.map(Flash::new, Flash::at);
+		/** (0.18.126) with the band's glow colour (RGB) */
+		public static final StreamCodec<ByteBuf, Flash> CODEC = StreamCodec.composite(Vec3.STREAM_CODEC, Flash::at,
+			net.minecraft.network.codec.ByteBufCodecs.INT, Flash::glow, Flash::new);
 
 		@Override
 		public Type<Flash> type() {

@@ -33,6 +33,8 @@ public class RivalAlienRenderer extends MobRenderer<RivalAlien, AvatarRenderStat
 		state.setData(XenoformClient.FORM, entity.look());
 		state.setData(XenoformClient.ENDING, false);
 		state.setData(XenoformClient.DARK, true);
+		// (0.18.126) its lines in the rival band's red
+		state.setData(XenoformClient.GLOW, com.jaymospowers.power.xenoform.BandStyle.RIVAL_RED);
 		XenoformClient.hideBody(state);
 	}
 

@@ -62,6 +62,8 @@ public final class XenoformPowerClient implements PowerClient {
 		NadirRulesScreen.register();
 		// (0.18.123, patch 7) the band screen
 		BandScreen.register();
+		// (0.18.126, patch 9) the band's looks, painted from the skins
+		XenoLooks.init();
 		XenoEyes.init();
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)

@@ -51,10 +51,97 @@ public final class XenoBand {
 	 */
 	static final float PLATE_LIFT_PX = 1.0F, PLATE_GROW = 0.5F, SILHOUETTE_FILL = 0.9F, SILHOUETTE_OFF = 0.002F;
 	static final int SILHOUETTE = 0xFF0C1410;
-	/** (0.18.125, patch 8) The rival band: its body darkened red, its glow red. */
-	static final int RIVAL_BODY = 0xFF8A3A3A, RIVAL_GLOW = 0xFF3030;
+	/** (0.18.125, patch 8) The rival band: its body darkened red. */
+	static final int RIVAL_BODY = 0xFF8A3A3A;
 	/** Set by whoever draws the band next (the wearer's, from {@link XenoformClient#DARK}): draw it as the rival band. */
 	static boolean rival;
+	/** (0.18.126, patch 9) How the band being drawn is dressed (set by its drawer, {@link #dress}): its glow, plate shape, spikes. */
+	static int glow = com.jaymospowers.power.xenoform.BandStyle.GREEN;
+	static String plateShape = "square";
+	static boolean spikes;
+	/** The plate shapes: wide's and tall's stretch, diamond's (and round's) turn and size. */
+	static final float WIDE_Z = 1.4F, TALL_Y = 1.3F, TALL_Z = 0.8F, DIAMOND_SIZE = 0.85F, ROUND_SQUARE = 0.88F, ROUND_DIAMOND = 0.95F;
+	private static ModelPart spikesPart;
+
+	/** The next band drawn is dressed so (the rival band's body darkened). */
+	static void dress(boolean rivalBand, int glowColour, String plate, boolean spiked) {
+		rival = rivalBand;
+		glow = glowColour;
+		plateShape = plate;
+		spikes = spiked;
+	}
+
+	/** Back to the plain band. */
+	static void undress() {
+		dress(false, com.jaymospowers.power.xenoform.BandStyle.GREEN, "square", false);
+	}
+
+	/** {@code player}'s band, dressed for drawing. */
+	static void dress(net.minecraft.world.entity.player.Player player) {
+		com.jaymospowers.power.xenoform.BandStyle.Style style = com.jaymospowers.power.xenoform.BandStyle.get(player);
+		dress(com.jaymospowers.power.xenoform.XenoformState.rival(player), com.jaymospowers.power.xenoform.BandStyle.glow(player), style.plate(),
+			style.spikes());
+	}
+
+	/** The band on {@code state}, dressed for drawing (from {@link XenoformClient#extract}). */
+	static void dress(AvatarRenderState state) {
+		Integer g = state.getData(XenoformClient.GLOW);
+		String plate = state.getData(XenoformClient.PLATE);
+		dress(Boolean.TRUE.equals(state.getData(XenoformClient.DARK)), g == null ? com.jaymospowers.power.xenoform.BandStyle.GREEN : g,
+			plate == null ? "square" : plate, Boolean.TRUE.equals(state.getData(XenoformClient.SPIKES)));
+	}
+
+	/** Four small spikes standing out of the band's sides (its own metal). */
+	private static ModelPart spikes() {
+		if (spikesPart == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("spikes", CubeListBuilder.create().texOffs(0, 0)
+				.addBox(-0.5F, 7.0F, -3.5F, 1.0F, 1.0F, 1.0F).addBox(1.5F, 7.0F, -3.5F, 1.0F, 1.0F, 1.0F)
+				.addBox(-0.5F, 7.0F, 2.5F, 1.0F, 1.0F, 1.0F).addBox(1.5F, 7.0F, 2.5F, 1.0F, 1.0F, 1.0F)
+				.addBox(-2.5F, 7.0F, -0.5F, 1.0F, 1.0F, 1.0F), PartPose.ZERO);
+			spikesPart = LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("spikes");
+		}
+		return spikesPart;
+	}
+
+	private static Identifier texture() {
+		return XenoLooks.band(TEXTURE, glow);
+	}
+
+	private static Identifier glowTexture() {
+		return XenoLooks.band(GLOW, glow);
+	}
+
+	/**
+	 * The face plate in its shape, {@code type} and {@code colour}: the pose stack in the arm's space. Round is a square
+	 * and a diamond laid together (the diamond a hair behind).
+	 */
+	private static void submitPlate(PoseStack poseStack, SubmitNodeCollector collector, int light, net.minecraft.client.renderer.rendertype.RenderType type,
+		int colour) {
+		switch (plateShape) {
+			case "wide" -> shaped(poseStack, collector, light, type, colour, 0.0F, 1.0F, WIDE_Z, 0.0F);
+			case "tall" -> shaped(poseStack, collector, light, type, colour, 0.0F, TALL_Y, TALL_Z, 0.0F);
+			case "diamond" -> shaped(poseStack, collector, light, type, colour, 0.0F, DIAMOND_SIZE, DIAMOND_SIZE, 45.0F);
+			case "round" -> {
+				shaped(poseStack, collector, light, type, colour, 0.0F, ROUND_SQUARE, ROUND_SQUARE, 0.0F);
+				shaped(poseStack, collector, light, type, colour, -0.02F, ROUND_DIAMOND, ROUND_DIAMOND, 45.0F);
+			}
+			default -> collector.submitModelPart(plate(), poseStack, type, light, OverlayTexture.NO_OVERLAY, null, colour);
+		}
+	}
+
+	private static void shaped(PoseStack poseStack, SubmitNodeCollector collector, int light, net.minecraft.client.renderer.rendertype.RenderType type,
+		int colour, float back, float sy, float sz, float turn) {
+		poseStack.pushPose();
+		poseStack.translate(back / 16.0F, FACE_Y / 16.0F, FACE_Z / 16.0F);
+		if (turn != 0.0F) {
+			poseStack.rotateDegrees(com.mojang.math.Axis.XP, turn);
+		}
+		poseStack.scale(1.0F, sy, sz);
+		poseStack.translate(0.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
+		collector.submitModelPart(plate(), poseStack, type, light, OverlayTexture.NO_OVERLAY, null, colour);
+		poseStack.popPose();
+	}
 	/** The plate's outer face, in the arm's pixels: its x, and its middle (y, z); the green face is 3 pixels square. */
 	static final float FACE_X = 4.5F, FACE_Y = 7.5F, FACE_Z = 0.0F, FACE_PX = 3.0F;
 
@@ -106,8 +193,11 @@ public final class XenoBand {
 			poseStack.translate(-1.0F / 16.0F, 0.0F, 0.0F);
 		}
 		ModelPart part = worn();
-		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
-		collector.submitModelPart(part, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(255));
+		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(texture()), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
+		collector.submitModelPart(part, poseStack, RenderTypes.eyes(glowTexture()), light, OverlayTexture.NO_OVERLAY, null, glow(255));
+		if (spikes) {
+			collector.submitModelPart(spikes(), poseStack, RenderTypes.entityCutout(texture()), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
+		}
 		float pop = XenoformSlamView.pop;
 		if (pop > 0.02F) {
 			// the dialled alien, a hologram over the dial
@@ -118,10 +208,9 @@ public final class XenoBand {
 			poseStack.scale(1.0F, g, g);
 			poseStack.translate(0.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
 		}
-		ModelPart plate = plate();
-		collector.submitModelPart(plate, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null, rival ? RIVAL_BODY : -1);
+		submitPlate(poseStack, collector, light, RenderTypes.entityCutout(texture()), rival ? RIVAL_BODY : -1);
 		int alpha = pop > 0.02F ? Mth.clamp((int)(XenoformSlamView.glow * 255.0F), 0, 255) : 255;
-		collector.submitModelPart(plate, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(alpha));
+		submitPlate(poseStack, collector, light, RenderTypes.eyes(glowTexture()), glow(alpha));
 		if (pop > 0.02F) {
 			silhouette(poseStack, collector, light);
 		}
@@ -197,13 +286,13 @@ public final class XenoBand {
 		poseStack.rotateDegrees(com.mojang.math.Axis.YP, 90.0F);
 		poseStack.scale(1.0F, model.insigniaSize, model.insigniaSize);
 		poseStack.translate(-FACE_X / 16.0F, -FACE_Y / 16.0F, -FACE_Z / 16.0F);
-		collector.submitModelPart(plate(), poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, glow(alpha));
+		submitPlate(poseStack, collector, light, RenderTypes.eyes(glowTexture()), glow(alpha));
 		poseStack.popPose();
 	}
 
-	/** The glow's colour at {@code alpha}: white (the green texture as it is), or red on the rival band. */
+	/** The glow pass's colour at {@code alpha} (the texture already painted in the band's glow). */
 	private static int glow(int alpha) {
-		return alpha << 24 | (rival ? RIVAL_GLOW : 0xFFFFFF);
+		return alpha << 24 | 0xFFFFFF;
 	}
 
 	/**
@@ -218,9 +307,9 @@ public final class XenoBand {
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
-		rival = com.jaymospowers.power.xenoform.XenoformState.rival(player);
+		dress(player);
 		submitOnArm(poseStack, collector, light, player.getSkin().model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
-		rival = false;
+		undress();
 		poseStack.popPose();
 	}
 
@@ -253,10 +342,10 @@ public final class XenoBand {
 			}
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
-			rival = Boolean.TRUE.equals(state.getData(XenoformClient.DARK));
+			dress(state);
 			XenoBand.submitOnArm(poseStack, collector, lightCoords, state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM,
 				state.chestEquipment != null && !state.chestEquipment.isEmpty());
-			rival = false;
+			undress();
 			poseStack.popPose();
 			if (dial) {
 				XenoformSlamView.dialDone();

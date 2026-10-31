@@ -444,6 +444,23 @@ into the alien calls wearing it a heavy crime where its people see it (`Aliens.r
 Band items now carry their reforge, modules and skills (CUSTOM_DATA `xeno_upgrades`), so a band taken off keeps them.
 Test: `/powerdebug xenoform hunter` (after `bands reset` if the rival band is out).
 
+## Looks [BandStyle, client XenoLooks] (0.18.126, Xeno-Band patch 9)
+
+The band screen's fourth tab, **Looks**, dresses the band (all for show; `BandStyle.STYLE`, synced to everyone, carried on
+a band item like the upgrades):
+- **Glow:** 9 colours (`BandStyle.GLOWS`; 0 = the band's own, green or the rival band's red). It paints the band's face
+  and glow, every alien's green lines and insignia (the exact greens of `tools/gen_xenoform.py`, the pale heart and dark
+  rim with them), the slam's whiteout on others' screens (`XenoNet.Flash` carries it) and the dial's hologram.
+- **Face plate:** square, round, diamond, wide or tall (the same plate stretched or turned, `XenoBand.submitPlate`).
+- **Spikes:** five small spikes on the band's sides.
+- **Each alien's look:** plain, armoured (plates every 4 rows, lit edges, rivets, pulled toward steel) or weathered
+  (faded, dusty, grime, slanting scratches). Painted on the client from the alien's own skin the first time it's drawn
+  (`XenoLooks`, a dynamic texture each), so every alien has them with no new art. The Ultimate keeps its armour (only
+  its lines take the glow).
+
+A preview of you turns slowly beside the rows (the band on your wrist; an alien's look shows when you change). The
+rival band's aliens (the hunter's) are drawn with red lines.
+
 ## Duplex's eyes
 
 (0.18.96) Sneak + V as Duplex: your camera moves into the aimed double (or the farthest within 48) and you see what it
