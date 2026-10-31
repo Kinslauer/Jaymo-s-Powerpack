@@ -3,6 +3,8 @@
 	"package": "com.jaymospowers.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"YoungLivingMixin",
+		"YoungSpawnMixin",
 		"AttackTellBrainMixin",
 		"AttackTellGoalMixin",
 		"BackpackExplosionMixin",

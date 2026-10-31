@@ -28,6 +28,7 @@ abstract class DownedLivingEntityRendererMixin {
 		// (Motion patch 6) pets' own poses, wet coats, and the mob's id so Fresh Animations can step aside for our poses
 		com.jaymospowers.client.pets.PetPoses.extract(entity, state, partialTicks);
 		com.jaymospowers.client.pets.WetCoats.extract(entity, state, partialTicks);
+		com.jaymospowers.client.pets.NameLooks.extract(entity, state);
 		com.jaymospowers.client.PoseTakeover.markMob(entity, state);
 		// (0.18.84) out cold (a rock to the head, too much poppy, bled out): eyes shut, as Kitchen shuts a corpse's
 		if (com.jaymospowers.core.wounds.Downed.passedOut(entity)) {
