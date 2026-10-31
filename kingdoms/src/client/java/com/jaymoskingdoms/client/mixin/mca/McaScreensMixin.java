@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
  * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.29) The main page
- * offers Quests.
+ * offers Quests. (0.7.454) The Interact page offers Ask the Way, which opens a page of places ({@code McaWayPageMixin}).
  */
 @Mixin(MCAScreens.class)
 abstract class McaScreensMixin {
@@ -39,12 +39,19 @@ abstract class McaScreensMixin {
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
 
+	/** (0.7.454) Interact's Ask the Way, the page it opens, and the places on it ({@code Directions.Place}). */
+	private static final String WAY = "gui.button.way", WAY_PAGE = "way";
+	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler"};
+	/** The Interact row Ask the Way goes on: under MCA's own (gift ... professions on row 8). */
+	private static final int WAY_ROW = 9;
+
 	/** How many rows of buttons MCA's own Professions page has. */
 	private static final int MCA_ROWS = 3;
 
 	@Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("TAIL"))
 	private void jaymoskingdoms$jobs(Map<Identifier, JsonElement> data, ResourceManager manager, ProfilerFiller profiler, CallbackInfo ci) {
 		jaymoskingdoms$quests();
+		jaymoskingdoms$way();
 		MCAButton[] page = this.buttons.get("professions");
 		if (page == null) {
 			return;
@@ -86,5 +93,33 @@ abstract class McaScreensMixin {
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(page));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson(json, MCAButton[].class)));
 		this.buttons.put("main", all.toArray(MCAButton[]::new));
+	}
+
+	/** (0.7.454) Interact's Ask the Way, and its page: a back arrow and one row for each place. */
+	private void jaymoskingdoms$way() {
+		MCAButton[] interact = this.buttons.get("interact");
+		if (interact == null || Arrays.stream(interact).anyMatch(b -> b.identifier().equals(WAY))) {
+			return;
+		}
+		List<MCAButton> all = new ArrayList<>(Arrays.asList(interact));
+		all.addAll(Arrays.asList(Resources.GSON.fromJson("[{\"identifier\":\"" + WAY + "\",\"x\":-90,\"y\":10,\"row\":" + WAY_ROW
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}]", MCAButton[].class)));
+		// (0.7.454) and the actions moved off the talk menu under it (InteractActions; McaActionButtonsMixin shows only those
+		// that apply, stacked under Ask the Way)
+		StringBuilder acts = new StringBuilder("[");
+		for (int i = 0; i < com.jaymoskingdoms.InteractActions.ALL.size(); i++) {
+			acts.append(i > 0 ? "," : "").append("{\"identifier\":\"gui.button.act.").append(com.jaymoskingdoms.InteractActions.ALL.get(i))
+				.append("\",\"x\":-90,\"y\":10,\"row\":").append(WAY_ROW + 1 + i)
+				.append(",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"\"}");
+		}
+		all.addAll(Arrays.asList(Resources.GSON.fromJson(acts.append("]").toString(), MCAButton[].class)));
+		this.buttons.put("interact", all.toArray(MCAButton[]::new));
+		StringBuilder json = new StringBuilder("[{\"identifier\":\"gui.button.backarrow\",\"x\":-113,\"y\":10,\"row\":0,\"width\":20,\"height\":20,"
+			+ "\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}");
+		for (int i = 0; i < PLACES.length; i++) {
+			json.append(",{\"identifier\":\"").append(WAY).append('.').append(PLACES[i]).append("\",\"x\":-90,\"y\":10,\"row\":").append(i)
+				.append(",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"\"}");
+		}
+		this.buttons.put(WAY_PAGE, Resources.GSON.fromJson(json.append("]").toString(), MCAButton[].class));
 	}
 }
