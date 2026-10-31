@@ -83,6 +83,8 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
   page. Sneak + R pours you back out.
 - **Ride a machine:** Rivet climbs into an android mech, a golem, a ship's cannon or a minecart and drives it. While
   you're inside it has green lines, more speed and more damage.
+- **Built (0.18.95):** everything above but the ship's cannon (Kingdoms' cannons are blocks, not something to climb into),
+  left for later. See `docs/xenoform.md`, "Rivet's shells".
 
 ### Patch 4, New aliens A (Powers, large; picks gorger, slipfin, polestar, watcher-alien, duplex-senses)
 - **Gorger:** scanned from an armadillo. It eats blocks to charge a blast, and has a horn charge that turns into a

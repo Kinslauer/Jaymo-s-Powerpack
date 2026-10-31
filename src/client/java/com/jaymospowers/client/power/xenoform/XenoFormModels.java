@@ -67,6 +67,7 @@ public final class XenoFormModels {
 			MODELS.put("wyrm", new Wyrm());
 			MODELS.put("nadir", new Nadir());
 			MODELS.put("duplex", new Duplex());
+			MODELS.put("rivet", new Rivet());
 		}
 		return MODELS.get(form);
 	}
@@ -78,6 +79,41 @@ public final class XenoFormModels {
 
 	private static ModelPart bake(MeshDefinition mesh) {
 		return LayerDefinition.create(mesh, 64, 128).bakeRoot();
+	}
+
+	/**
+	 * (0.18.95) Rivet: small and smooth, living metal: slim limbs, a fin of a crest down its head, drips hanging off its
+	 * forearms that sway with it. Melded into a shell it's drawn as that block instead ({@code XenoformLayer}).
+	 */
+	static final class Rivet extends FormModel {
+		private final ModelPart rightDrip, leftDrip;
+
+		Rivet() {
+			super(bake(mesh()), "rivet");
+			this.insigniaZ = -1.8F;
+			this.rightDrip = this.rightArm.getChild("drip");
+			this.leftDrip = this.leftArm.getChild("drip");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -10.0F, -3.0F, 1.0F, 2.0F, 6.0F), PartPose.ZERO);
+			root.getChild("right_arm").addOrReplaceChild("drip", CubeListBuilder.create().texOffs(16, 64).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F),
+				PartPose.offset(-1.0F, 9.5F, 0.0F));
+			root.getChild("left_arm").addOrReplaceChild("drip", CubeListBuilder.create().texOffs(16, 64).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F),
+				PartPose.offset(1.0F, 9.5F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			// the drips hang straight down whatever the arm does, swaying a little
+			float sway = Mth.sin(state.ageInTicks * 0.2F) * 0.08F;
+			this.rightDrip.xRot = -this.rightArm.xRot + sway;
+			this.leftDrip.xRot = -this.leftArm.xRot - sway;
+		}
 	}
 
 	/** Bulwark: thick-set, a heavy brow, pauldrons, and a second pair of arms under the first. */

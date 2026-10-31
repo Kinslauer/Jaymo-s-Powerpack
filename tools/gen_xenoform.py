@@ -1158,6 +1158,59 @@ def duplex():
     save(img, "entity/xenoform_duplex.png")
 
 
+def rivet():
+    """(0.18.95) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every face, a blue-grey
+    sheen), green circuit lines down the limbs, a smooth face with two green slit eyes, the insignia on the chest."""
+    img = new_skin()
+    metal = (158, 176, 190)
+    green = GREEN
+    dark_line = (40, 70, 52, 255)
+    parts(img, metal, 0.08)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), (188, 204, 216), shade(metal, LIGHT[name] * 0.6), 0.08)
+            # quicksilver runs: bright drips down the face
+            if name in ("front", "back", "left", "right"):
+                for _ in range(max(1, (x1 - x0) // 3)):
+                    x = rng.randrange(x0, x1)
+                    top = rng.randrange(y0, max(y0 + 1, y1 - 3))
+                    for y in range(top, min(y1, top + rng.randint(2, 5))):
+                        img.putpixel((x, y), (240, 248, 255, 255))
+    # green circuit lines down the outside of each limb, a ring at the wrist and ankle
+    for part in LIMBS:
+        f = faces(*part)
+        for name in ("left", "right"):
+            x0, y0, x1, y1 = f[name]
+            cx = (x0 + x1) // 2
+            for y in range(y0 + 1, y1 - 1):
+                img.putpixel((cx, y), green)
+            for x in range(x0, x1):
+                img.putpixel((x, y1 - 3), dark_line)
+        x0, y0, x1, y1 = f["front"]
+        for x in range(x0, x1):
+            img.putpixel((x, y1 - 3), green)
+    # the body: a dark seam down each side
+    x0, y0, x1, y1 = faces(*BODY)["front"]
+    for y in range(y0, y1):
+        img.putpixel((x0, y), dark_line)
+        img.putpixel((x1 - 1, y), dark_line)
+    # the face: smooth, two slit eyes, no mouth
+    rect(img, (9, 11, 11, 12), green)
+    rect(img, (13, 11, 15, 12), green)
+    img.putpixel((9, 11), PALE_GREEN)
+    img.putpixel((14, 11), PALE_GREEN)
+    chest_insignia(img, rim=(30, 40, 52, 255))
+    # extras: crest 1x2x6 at (0,64); drips 2x3x2 at (16,64)
+    for part in ((0, 64, 1, 2, 6), (16, 64, 2, 3, 2)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), (236, 244, 250), shade(metal, LIGHT[name]), 0.05)
+    x0, y0, x1, y1 = faces(0, 64, 1, 2, 6)["right"]
+    for x in range(x0, x1):
+        img.putpixel((x, y0), green)
+    clear_hat(img)
+    save(img, "entity/xenoform_rivet.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -1215,7 +1268,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1283,6 +1336,7 @@ if __name__ == "__main__":
     wyrm()
     nadir()
     duplex()
+    rivet()
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:

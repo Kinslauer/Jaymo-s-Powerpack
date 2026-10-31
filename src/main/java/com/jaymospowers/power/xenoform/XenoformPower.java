@@ -155,7 +155,7 @@ public final class XenoformPower implements Power {
 		@Nullable String scanForm;
 		final long[] cooldownUntil = new long[XenoformState.Hud.SLOTS];
 		final int[] cooldownLength = new int[XenoformState.Hud.SLOTS];
-		boolean hudDirty = true;
+		public boolean hudDirty = true;
 		int hudTick;
 		long lastHint;
 		// ---- scratch the forms use (see each form) ----
@@ -222,6 +222,14 @@ public final class XenoformPower implements Power {
 		/** Duplex: its doubles (entity ids), and when Copper Storm's charge wears off. */
 		public final List<Integer> doubles = new ArrayList<>();
 		public long chargedUntil;
+		/**
+		 * (0.18.95) Rivet: the shell it's melded into (null: none); holding Brace, the water spray; Rebound on; mid Drop and
+		 * the height it fell from; last tick's fall speed; the Chord's tick (0: not playing).
+		 */
+		public @Nullable String shell;
+		public boolean brace, spray, rebound, anvilDrop;
+		public double dropFrom, fallSpeed;
+		public int song;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -270,6 +278,10 @@ public final class XenoformPower implements Power {
 			doubles.clear();
 			chargedUntil = 0L;
 			nadir.clear();
+			shell = null;
+			brace = spray = rebound = anvilDrop = false;
+			dropFrom = fallSpeed = 0.0;
+			song = 0;
 			hudDirty = true;
 		}
 	}
@@ -381,7 +393,9 @@ public final class XenoformPower implements Power {
 	@Override
 	public @Nullable String statusSuffix(Player player) {
 		XenoForm form = XenoformState.form(player);
-		return form == null ? null : "." + form.id;
+		String shell = player.getAttached(XenoformState.SHELL);
+		// (0.18.95) Rivet melded into a shell: that shell's keys
+		return form == null ? null : shell != null ? "." + form.id + "_" + shell : "." + form.id;
 	}
 
 	/** The moves belong to the alien, not to mastery: every key works from the first slam. Mastery stretches the timer. */
@@ -415,6 +429,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.ULTIMATE);
+		player.removeAttached(XenoformState.SHELL);
 		player.removeAttached(XenoformState.FLIGHT);
 	}
 

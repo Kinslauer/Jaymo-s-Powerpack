@@ -88,6 +88,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Wyrm** | Ender Dragon (any part) | 1.2x, 36 hp, fists 5, 40% knockback resist; water and rain 1 hp/s; its own breath can't hurt it | Dragon's Breath: an `AreaEffectCloud` 5 blocks ahead on the ground, radius 3, 5 s, Instant Damage II (10 s) | Wings (hold): fly toward where you look at 0.9/tick, free; slow falling on release | Wing Gust: 3 damage, shove 1.6 out to all within 6, you recoil (6 s) | Rift: teleport up to 12 blocks where you look (4 s) |
 | **Velox** | horse (any) | 0.9x, 20 hp, fists 4, 80% faster, 4 blocks of extra safe fall; runs on water while sprinting | Velocity (toggle, after Chrono's Overclock): +100% speed and Overclock's sprint boost, steps up whole blocks, runs up walls holding forward, runs on water and lava, no fall damage, Shift walks, a light blue speed-force streak; R again to stop (2 s) | Rapid Punches: 6 double hits, one every 2 ticks, on the creature you aim at within 3.5; the last shoves (5 s) | Cyclone: 1.5 s, sweeps everything within 6 round you and lifts it up to 3.5 blocks, 3 damage once (10 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
 | **Duplex** | copper golem | 0.55x (a copper golem's size and build, its doubles too), 18 hp, fists 3, 10% faster, 20% knockback resist; the name counts you all (`Duplex.title`, also on the HUD): Duplex, Triplex, Quadruplex, up to Septuplex | Split: a double steps out beside you (`XenoDouble`: 6 hp, fists 3, never saved), up to 3; doubles go for what you hit, what hits or hunts you or them, and visible hostiles within 12, and swarm it (`SwarmGoal`: a turning ring, blows in turn every 3-6 ticks, +35% damage per extra double); a loyal double's death costs you 2 (2 s) | Rally: doubles target what you aim at within 16; at nothing, they come back (1 s). Sneak: Fetch, the nearest free double picks up the aimed solid block (`CarryBlock.liftableAny`, where you may break it) and carries it on its head; sneak + G again sets it down where you aim; dropped as a falling block if the double goes | Switch: trade places with the aimed double, or the farthest within 32 (2 s) | Merge: doubles within 24 pop back into you, healing 3 each (8 s) |
+| **Rivet** | clockwork golem (Kingdoms) | 0.6x, 20 hp, fists 4, 15% faster, 20% knockback resist; liquid metal, so falls never hurt it | Meld: flow into the furnace (or blast furnace, smoker), piston, anvil, stonecutter, smithing table, dispenser (or dropper) or note block you look at within 5 and take its shape (the block stays); R G V B become the shell's moves, sneak + R pours you out (1 s) | Lash: 5 damage and a drag to you, 7 blocks (2 s) | Pour: a 1.4 dash where you look, half a second where nothing can land on you (2 s) | Ride: climb into the aimed minecart, iron golem, clockwork golem or android mech (4 blocks) and drive it where you look; it's sped up, strengthened and glows green, and goes for what you hit; B again climbs out (1 s) |
 
 ## Rendering [client/power/xenoform]
 
@@ -255,6 +256,26 @@ insignia on its chest (`XenoFormModels.Nadir`, `gen_xenoform.nadir`). Moves:
   reserved: ideas only, nothing of its code or art). Left out: its Domain Expansion, Mass Control weights, Dense, and
   swallowing mobs into a pocket dimension.
 - No Ultimate; corruption doesn't trouble it.
+
+## Rivet's shells [forms/Rivet]
+
+Rivet (0.18.95, Xeno-Band patch 3) melds into one of seven shells. The shell is synced (`XenoformState.SHELL`) and
+drawn for everyone as the block itself, 1.6x the body's own space, bobbing as it walks (`XenoformLayer.shell`, a
+`MovingBlockRenderState`); the HUD swaps to the shell's icons (`XenoformHud.ICONS`, `rivet_<shell>`), and the key
+guide reads `key.<slot>.rivet_<shell>` (`XenoformPower.statusSuffix`). Hands are empty while changed, so ammunition and
+fuel come out of the inventory. Sneak + R pours out of any shell. All numbers are constants at the top of `Rivet`.
+
+| Shell | R | G | V | B |
+|---|---|---|---|---|
+| Furnace | Fire Breath, 3 and 4 s of fire to all in a 5-block cone (2 s) | Fire Shot, a small fireball (1.5 s) | Smelt: the first smeltable stack carried, up to 16, burning carried coal/charcoal (8 each, coal blocks 72) (5 s) | Smoke: a 3.5 cloud of Blindness for 7 s (10 s) |
+| Piston | Leap, 1.4 out and 0.7 up (2 s) | Brace (hold): Resistance III, Slowness III | Shove: 4 and a throw to all in front of you within 4 (2 s) | Rebound (toggle): landings faster than 0.5 spring you back at 85% (sneak to land still) |
+| Anvil | High Leap, 1.5 up (3 s) | Drop: plunge at 2.5; landing hits all within 3 for 4 + 1 a block fallen, up to 20 (2 s) | Eye Beam, 6 at 12 blocks (3 s) | Iron Skin, Resistance II 5 s (20 s) |
+| Stonecutter | Saw, a 16-block hitscan for 6 and Slowness (1.5 s) | Burrow: up again 6 ahead where you fit (4 s) | Climb (hold): run up walls | Spin: 5 to all within 2.5 (3 s) |
+| Smithing table | Brace (hold), as the piston's | Temper: fully mends damaged items lying within 2 (30 s) | Hammer, 8 at 3.5 (2 s) | Plate, Absorption II 30 s (30 s) |
+| Dispenser (or dropper) | Volley: 3 carried arrows (picked up again) (1.5 s) | Potion: throws the first carried splash or lingering potion (2 s) | Fire Charges: up to 3 carried ones (2 s) | Water Spray (hold): a 4-block jet that pushes creatures, puts out fires and burning creatures |
+| Note block | Stun Pulse: 2, Slowness IV and Nausea 3 s to all within 6 (6 s) | Lure: mobs within 16 walk to the aimed spot (24 blocks) (10 s) | Chord: plays the band's theme; you and friends within 12 get Regeneration 5 s (10 s) | Bass Drop: 4 and a throw within 5 (4 s) |
+
+Not done yet: riding a ship's cannon (Kingdoms' cannons aren't entities to climb into; left for later).
 
 ## Later
 
