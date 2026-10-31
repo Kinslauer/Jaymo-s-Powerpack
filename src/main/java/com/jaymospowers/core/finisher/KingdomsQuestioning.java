@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.96) The questioning's talk is Jaymo's Kingdoms' ({@code com.jaymoskingdoms.Questioning}): who can be questioned,
+ * (0.18.97) The questioning's talk is Jaymo's Kingdoms' ({@code com.jaymoskingdoms.Questioning}): who can be questioned,
  * the talk screen it opens on them, and what's remembered when it's over. Reached by reflection, so Powers runs without
  * Kingdoms (and then nobody is questioned: {@link Finishers#mayQuestion}).
  */
@@ -75,7 +75,7 @@ final class KingdomsQuestioning {
 		}
 	}
 
-	/** (0.18.96) A held player's answer to {@code what} ("leader", "home"), true or ({@code lie}) not; null without Kingdoms. */
+	/** (0.18.97) A held player's answer to {@code what} ("leader", "home"), true or ({@code lie}) not; null without Kingdoms. */
 	static @Nullable Component playerAnswer(ServerPlayer asker, ServerPlayer held, String what, boolean lie) {
 		if (PLAYER_ANSWER == null) {
 			return null;

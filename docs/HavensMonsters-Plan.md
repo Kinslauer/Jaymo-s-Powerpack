@@ -110,7 +110,7 @@ files and can run beside them, two tracks at a time.
 Donkeys and mules join our breed systems but keep vanilla's renderer, so Better Horses draws them (Andy, 2026-10-31).
 
 ## Done
-- Patch 0 (Powers 0.18.96, Kingdoms 0.7.424): question or kill on the full execution hold (turn left to question, right
+- Patch 0 (Powers 0.18.97, Kingdoms 0.7.424): question or kill on the full execution hold (turn left to question, right
   to kill; Kingdoms' Interrogation perk, Will page), four questioning holds by weapon, MCA's talk menu with Who leads
   you / Where is your home / Press the threat / Let them go / Finish them, memories of being questioned or spared; the
   world's news posted on town boards ("Word from abroad"), each town hearing about 70% of it, and a bird bringing a piece

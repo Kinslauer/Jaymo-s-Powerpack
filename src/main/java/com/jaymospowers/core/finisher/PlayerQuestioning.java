@@ -21,7 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.96) Andy: "can you make one?" (a screen for a player held down for questioning). When the one held down
+ * (0.18.97) Andy: "can you make one?" (a screen for a player held down for questioning). When the one held down
  * ({@link Finishers}' questioning holds) is a player, the asker gets a screen of questions and the replies, and the one held
  * gets a screen to answer from: the truth, a lie, silence, or words of their own. Their realm's truths come from Jaymo's
  * Kingdoms ({@link KingdomsQuestioning#playerAnswer}). The asker's perks: Will's Interrogation sees through a lie,

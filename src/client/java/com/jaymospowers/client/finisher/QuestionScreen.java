@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.96) Andy: "can you make one?": a player held down for questioning ({@link PlayerQuestioning}) answers from this
+ * (0.18.97) Andy: "can you make one?": a player held down for questioning ({@link PlayerQuestioning}) answers from this
  * screen: the truth, a lie, silence, or words of their own, once a question's put. The one holding them asks from it:
  * who leads you, where's home, a threat, (Will) swear, let them go, finish them. Both see what's been said.
  */

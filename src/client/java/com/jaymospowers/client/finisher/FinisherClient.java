@@ -25,10 +25,10 @@ import net.minecraft.world.phys.EntityHitResult;
 public final class FinisherClient {
 	/** Who attack was last said to be held on (entity id), or -1. */
 	private static int sent = -1;
-	/** (0.18.96) The body the choice is put about (question or kill), or -1; and which way you faced when it was. */
+	/** (0.18.97) The body the choice is put about (question or kill), or -1; and which way you faced when it was. */
 	private static int choosing = -1;
 	private static float choiceYaw;
-	/** (0.18.96) The choice's slider: this many marks a side. */
+	/** (0.18.97) The choice's slider: this many marks a side. */
 	private static final int CHOICE_MARKS = 6;
 
 	private FinisherClient() {
@@ -36,12 +36,12 @@ public final class FinisherClient {
 
 	public static void register() {
 		ClientTickEvents.END_CLIENT_TICK.register(FinisherClient::tick);
-		// (0.18.96) the hold's full and the choice is yours: turn left to question, right to kill
+		// (0.18.97) the hold's full and the choice is yours: turn left to question, right to kill
 		ClientPlayNetworking.registerGlobalReceiver(Finishers.Choose.TYPE, (payload, context) -> {
 			choosing = payload.target();
 			choiceYaw = context.player().getYRot();
 		});
-		// (0.18.96) a player held down for questioning, and the one asking: their screens
+		// (0.18.97) a player held down for questioning, and the one asking: their screens
 		QuestionScreen.register();
 	}
 
@@ -51,7 +51,7 @@ public final class FinisherClient {
 		boolean held = player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null
 			&& !player.isSpectator();
 		if (held && choosing >= 0) {
-			// (0.18.96) turning to choose takes the crosshair off them: the hold stays on whom it was
+			// (0.18.97) turning to choose takes the crosshair off them: the hold stays on whom it was
 			target = choosing;
 		} else if (held && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
 			target = body.getId();
@@ -72,7 +72,7 @@ public final class FinisherClient {
 	}
 
 	/**
-	 * (0.18.96) Andy: "select either question or kill dragging either left or right". How far you've turned since the choice
+	 * (0.18.97) Andy: "select either question or kill dragging either left or right". How far you've turned since the choice
 	 * came: past {@link Finishers#CHOOSE_DEGREES} to the left it's question, to the right kill; till then a slider shows it.
 	 */
 	private static void choose(LocalPlayer player) {
@@ -95,7 +95,7 @@ public final class FinisherClient {
 	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
 	 */
 	public static boolean aimingAtHelpless(Minecraft minecraft) {
-		// ((0.18.96) or, with Quiet Word, someone on their feet to take from behind for questioning)
+		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning)
 		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
 			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body));
 	}

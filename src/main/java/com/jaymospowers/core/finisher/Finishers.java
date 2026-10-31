@@ -156,25 +156,25 @@ public final class Finishers {
 	static final float IMPROVISED_WEAR = 0.12F;
 	static final int IMPROVISED_WEAR_MIN = 4, WEAPON_WEAR = 1;
 	/**
-	 * (0.18.96) Question or kill: once the hold is full, how far you turn your view to choose (degrees: left questions,
+	 * (0.18.97) Question or kill: once the hold is full, how far you turn your view to choose (degrees: left questions,
 	 * right kills), and how long the choice waits before you're taken to have thought better of it (ticks).
 	 */
 	public static final float CHOOSE_DEGREES = 14.0F;
 	static final int CHOOSE_TICKS = 100;
-	/** (0.18.96) How long you may hold someone for questioning (ticks), and when their talk opens (once the pose has settled). */
+	/** (0.18.97) How long you may hold someone for questioning (ticks), and when their talk opens (once the pose has settled). */
 	public static final int QUESTION_TICKS = 20 * 60;
 	static final int QUESTION_OPEN = 10;
 	/**
-	 * (0.18.96) Kingdoms' perks that let you question the downed (any one): Strength's Rough Questions, Stealth's Quiet Word,
+	 * (0.18.97) Kingdoms' perks that let you question the downed (any one): Strength's Rough Questions, Stealth's Quiet Word,
 	 * Will's Interrogation. Andy: "it should be early on the tree, and available in stealth and strength as well".
 	 */
 	static final String ROUGH_PERK = "rough_questions", QUIET_PERK = "quiet_word", WILL_PERK = "interrogation";
-	/** (0.18.96) Quiet Word's choke hold: how far round behind them you must be (degrees off the way they face). */
+	/** (0.18.97) Quiet Word's choke hold: how far round behind them you must be (degrees off the way they face). */
 	static final float BEHIND_DEGREES = 110.0F;
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI,
-		/** (0.18.96) No blow at all: they're held where they lie and questioned ({@link Kind#questioning}). */
+		/** (0.18.97) No blow at all: they're held where they lie and questioned ({@link Kind#questioning}). */
 		HOLD }
 
 	/**
@@ -248,7 +248,7 @@ public final class Finishers {
 		Z_NEEDLE(48, new int[] {12, 22, 36}, Strike.KI),
 		/** Supernova Palm, in a Super form: on a knee, the palm on their chest, the aura poured through it until nothing's left. */
 		Z_NOVA(44, new int[] {30}, Strike.KI),
-		// ---- (0.18.96) questioning (Andy: "different animations for each weapon"): held over them, no blow, till it's over ------
+		// ---- (0.18.97) questioning (Andy: "different animations for each weapon"): held over them, no blow, till it's over ------
 		/** At Their Throat: down on a knee at their head, the edge laid against the throat, the off hand in their collar. */
 		Q_BLADE(QUESTION_TICKS, new int[0], Strike.HOLD),
 		/** Raised Over Them: stood over them, the weapon held high and ready to come down. */
@@ -285,7 +285,7 @@ public final class Finishers {
 			return this.beats.length == 0 ? this.length : this.beats[this.beats.length - 1];
 		}
 
-		/** (0.18.96) One of the questioning holds: nobody dies of it. */
+		/** (0.18.97) One of the questioning holds: nobody dies of it. */
 		public boolean questioning() {
 			return this.strike == Strike.HOLD;
 		}
@@ -337,7 +337,7 @@ public final class Finishers {
 	private static final class Hold {
 		final LivingEntity body;
 		long start;
-		/** (0.18.96) When the choice (question or kill) was put to them, or -1 while the hold still fills. */
+		/** (0.18.97) When the choice (question or kill) was put to them, or -1 while the hold still fills. */
 		long choosing = -1L;
 
 		Hold(LivingEntity body, long start) {
@@ -357,7 +357,7 @@ public final class Finishers {
 		}
 	}
 
-	/** (0.18.96) Server → client: the hold on this body is full; question (turn left) or kill (turn right). -1: the choice is gone. */
+	/** (0.18.97) Server → client: the hold on this body is full; question (turn left) or kill (turn right). -1: the choice is gone. */
 	public record Choose(int target) implements CustomPacketPayload {
 		public static final Type<Choose> TYPE = new Type<>(JaymosPowers.id("finisher_choose"));
 		public static final StreamCodec<ByteBuf, Choose> CODEC = ByteBufCodecs.VAR_INT.map(Choose::new, Choose::target);
@@ -368,7 +368,7 @@ public final class Finishers {
 		}
 	}
 
-	/** (0.18.96) Client → server: what was chosen for the body (entity id): question them, or kill them. */
+	/** (0.18.97) Client → server: what was chosen for the body (entity id): question them, or kill them. */
 	public record Pick(int target, boolean question) implements CustomPacketPayload {
 		public static final Type<Pick> TYPE = new Type<>(JaymosPowers.id("finisher_pick"));
 		public static final StreamCodec<ByteBuf, Pick> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Pick::target, ByteBufCodecs.BOOL,
@@ -415,7 +415,7 @@ public final class Finishers {
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
-		// (0.18.96) question or kill
+		// (0.18.97) question or kill
 		PayloadTypeRegistry.clientboundPlay().register(Choose.TYPE, Choose.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, ctx) -> picked(ctx.player(), payload.target(), payload.question()));
@@ -423,7 +423,7 @@ public final class Finishers {
 		// (busy: a use still held from before does nothing to them either)
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && questioning(sp)) {
-				// (0.18.96) use while you hold them for questioning: you let them go
+				// (0.18.97) use while you hold them for questioning: you let them go
 				questionDone(sp, false);
 			}
 			return busy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
@@ -431,7 +431,7 @@ public final class Finishers {
 		// rooted and busy: nothing else from your hands while it plays
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (player instanceof ServerPlayer sp && questioning(sp)) {
-				// (0.18.96) a blow while you hold them for questioning: you've heard enough, and finish them
+				// (0.18.97) a blow while you hold them for questioning: you've heard enough, and finish them
 				questionDone(sp, true);
 			}
 			return busy(player) ? InteractionResult.FAIL : InteractionResult.PASS;
@@ -762,7 +762,7 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			// (0.18.96) Quiet Word: one on their feet who hasn't noticed you, taken from behind
+			// (0.18.97) Quiet Word: one on their feet who hasn't noticed you, taken from behind
 			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
 			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
@@ -800,7 +800,7 @@ public final class Finishers {
 			}
 			long held = now - hold.start;
 			if (held >= HOLD_TICKS && hold.choosing < 0L && mayQuestion(player, hold.body)) {
-				// (0.18.96) Andy: "holding right click for the execution now has you select either question or kill dragging
+				// (0.18.97) Andy: "holding right click for the execution now has you select either question or kill dragging
 				// either left or right": the hold's full; the client shows the choice and says which way you turned
 				hold.choosing = now;
 				ServerPlayNetworking.send(player, new Choose(hold.body.getId()));
@@ -846,10 +846,10 @@ public final class Finishers {
 		}
 	}
 
-	// ---- (0.18.96) question or kill ---------------------------------------------------------------------------------------
+	// ---- (0.18.97) question or kill ---------------------------------------------------------------------------------------
 
 	/**
-	 * (0.18.96) Whether the full hold on {@code body} puts the choice to {@code player}: Andy, "you can question downed
+	 * (0.18.97) Whether the full hold on {@code body} puts the choice to {@code player}: Andy, "you can question downed
 	 * humanoids, unlocked in the tree ... goblins, orcs and players count". Kingdoms' Interrogation perk (Will); a player
 	 * always can be questioned, and the rest only if Kingdoms says they can talk ({@code Questioning.questionable}).
 	 */
@@ -863,7 +863,7 @@ public final class Finishers {
 		return body instanceof Player || KingdomsQuestioning.questionable(body);
 	}
 
-	/** (0.18.96) {@code player} has the Kingdoms perk {@code key} (one of the questioning perks). */
+	/** (0.18.97) {@code player} has the Kingdoms perk {@code key} (one of the questioning perks). */
 	public static boolean questionPerk(Player player, String key) {
 		if (KINGDOMS_RANK == null) {
 			return false;
@@ -876,7 +876,7 @@ public final class Finishers {
 	}
 
 	/**
-	 * (0.18.96) Quiet Word: {@code body} is one who talks, on their feet, and {@code player} has Quiet Word and stands behind
+	 * (0.18.97) Quiet Word: {@code body} is one who talks, on their feet, and {@code player} has Quiet Word and stands behind
 	 * them. (Also asked on the client, so the hold doesn't swing at them.)
 	 */
 	public static boolean chokeable(Player player, Entity entity) {
@@ -888,18 +888,18 @@ public final class Finishers {
 		return Math.abs(Mth.wrapDegrees(toPlayer - body.getYHeadRot())) >= BEHIND_DEGREES;
 	}
 
-	/** (0.18.96) {@code body} hasn't noticed {@code player}: not after them, and not hurt by them lately. */
+	/** (0.18.97) {@code body} hasn't noticed {@code player}: not after them, and not hurt by them lately. */
 	static boolean unaware(Player player, LivingEntity body) {
 		return !(body instanceof Mob mob && mob.getTarget() == player) && body.getLastHurtByMob() != player;
 	}
 
-	/** (0.18.96) A questioning is over, however it ended: Kingdoms remembers it, and a player's screens close. */
+	/** (0.18.97) A questioning is over, however it ended: Kingdoms remembers it, and a player's screens close. */
 	private static void questionEnded(ServerPlayer player, LivingEntity body, boolean spared) {
 		KingdomsQuestioning.ended(player, body, spared);
 		PlayerQuestioning.ended(player, body);
 	}
 
-	/** (0.18.96) The client's pick for the body it was asked about: question or kill. */
+	/** (0.18.97) The client's pick for the body it was asked about: question or kill. */
 	private static void picked(ServerPlayer player, int target, boolean question) {
 		Hold hold = HOLDING.get(player.getUUID());
 		if (hold == null || hold.choosing < 0L || hold.body.getId() != target || !(player.level() instanceof ServerLevel level)
@@ -914,7 +914,7 @@ public final class Finishers {
 		}
 	}
 
-	/** (0.18.96) How {@code player} holds someone for questioning, by what's in hand. */
+	/** (0.18.97) How {@code player} holds someone for questioning, by what's in hand. */
 	static Kind questioner(Player player) {
 		ItemStack stack = player.getMainHandItem();
 		if (stack.isEmpty() || com.jaymospowers.armory.Lash.isWhip(stack)) {
@@ -927,14 +927,14 @@ public final class Finishers {
 		};
 	}
 
-	/** (0.18.96) Whether {@code player} is holding someone for questioning just now. */
+	/** (0.18.97) Whether {@code player} is holding someone for questioning just now. */
 	public static boolean questioning(Entity player) {
 		Finish finish = of(player);
 		return finish != null && finish.type().questioning();
 	}
 
 	/**
-	 * (0.18.96) The questioning is over (Kingdoms' "Finish them" or "Let them go", a blow, or use): {@code kill} plays the
+	 * (0.18.97) The questioning is over (Kingdoms' "Finish them" or "Let them go", a blow, or use): {@code kill} plays the
 	 * move for what's in hand; else they're let go where they lie.
 	 */
 	public static void questionDone(ServerPlayer player, boolean kill) {
@@ -1030,9 +1030,9 @@ public final class Finishers {
 				com.jaymospowers.power.zfighter.ZFighterExecutions.tick(level, player, body, kind, t, present);
 			}
 			if (kind.questioning() && t == QUESTION_OPEN && present) {
-				// (0.18.96) Andy: "it opens the talk menu with the relevant options"; a player held so hears it from you
+				// (0.18.97) Andy: "it opens the talk menu with the relevant options"; a player held so hears it from you
 				if (body instanceof ServerPlayer held) {
-					// (0.18.96) Andy: "can you make one?": their own screen to answer from, and yours to ask
+					// (0.18.97) Andy: "can you make one?": their own screen to answer from, and yours to ask
 					held.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.questioned", player.getDisplayName()).withStyle(ChatFormatting.RED));
 					PlayerQuestioning.open(player, held);
 				} else {
