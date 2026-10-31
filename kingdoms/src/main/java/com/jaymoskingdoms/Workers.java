@@ -185,6 +185,12 @@ public final class Workers {
 			Greenskins.step(level, w);
 			return Pedlars.step(level, w);
 		}
+		if (Trials.kingsGuard(mob)) {
+			// (0.7.429) one of a king's guard, at their post by his door
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return Trials.guardStep(level, w);
+		}
 		if (Tribes.hunter(mob)) {
 			// (0.7.425) one of a tribe's hunting band on a hated player's trail
 			Greenskins.step(level, w);

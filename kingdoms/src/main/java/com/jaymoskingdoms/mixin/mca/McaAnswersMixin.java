@@ -135,6 +135,10 @@ abstract class McaAnswersMixin {
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.WARES_ANSWER);
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.MOOD_ANSWER);
 			}
+			if (!com.jaymoskingdoms.Trials.offers(player, villager)) {
+				// (0.7.429) only a king's guard, to see the king
+				cir.getReturnValue().remove(com.jaymoskingdoms.Trials.ANSWER);
+			}
 			if (!com.jaymoskingdoms.Tribes.takesTribute(player, villager)) {
 				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER);
 			}

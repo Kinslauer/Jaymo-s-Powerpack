@@ -94,7 +94,8 @@ public final class OgreHolds {
 	static final float BOULDER_DAMAGE = 10.0F;
 	// ================================================================================================================
 
-	static final String OGRE_TAG = "jaymoskingdoms.ogre_site", KING_TAG = "jaymoskingdoms.ogre_king", SITE_PREFIX = "jaymoskingdoms.ogre_site.";
+	static final String OGRE_TAG = "jaymoskingdoms.ogre_site", KING_TAG = "jaymoskingdoms.ogre_king", SITE_PREFIX = "jaymoskingdoms.ogre_site.",
+		GUARD_TAG = "jaymoskingdoms.ogre_guard";
 
 	/** An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. */
 	record Site(int id, boolean hold, BlockPos at, String region, UUID leader, boolean cleared) {
@@ -108,6 +109,10 @@ public final class OgreHolds {
 			return new Site(id, hold, at, region, leader, true);
 		}
 	}
+
+	/** (0.7.429) On a player: ogre region → game time their truce with its ogres ends (a stone-lifting brawl won, {@link Trials}). Saved. */
+	static final AttachmentType<Map<String, Long>> TRUCE = AttachmentRegistry.create(JaymosKingdoms.id("ogre_truce"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)).copyOnDeath());
 
 	/** On the Overworld: every ogre site. Saved. */
 	static final AttachmentType<List<Site>> SITES = AttachmentRegistry.create(JaymosKingdoms.id("ogre_sites"), builder -> builder.persistent(Site.CODEC.listOf()));
@@ -195,6 +200,24 @@ public final class OgreHolds {
 			}
 		}
 		return null;
+	}
+
+	/** (0.7.429) {@code e} is one of an Ogre King's guard. */
+	public static boolean guard(Entity e) {
+		return e.entityTags().contains(GUARD_TAG);
+	}
+
+	/** (0.7.429) {@code player} won a brawl in {@code region}: its ogres leave them be for {@link Trials#AGAIN_DAYS} days. */
+	static void truce(ServerPlayer player, String region) {
+		Map<String, Long> truce = new HashMap<>(player.getAttachedOrElse(TRUCE, Map.of()));
+		truce.put(region, player.level().getGameTime() + 24000L * Trials.AGAIN_DAYS);
+		player.setAttached(TRUCE, Map.copyOf(truce));
+	}
+
+	/** (0.7.429) The ogres of {@code ogre}'s region are under truce with {@code player}. */
+	static boolean truce(Player player, Entity ogre) {
+		Long until = player.getAttachedOrElse(TRUCE, Map.of()).get(region(ogre.blockPosition()));
+		return until != null && player.level().getGameTime() < until;
 	}
 
 	/** {@code e} is an Ogre King. */
@@ -433,6 +456,7 @@ public final class OgreHolds {
 			Ogre guard = ogre(level, Monsters.CAVE_OGRE, door.relative(side, s), door.relative(side, s), GUARD_HOME, id);
 			if (guard != null) {
 				guard.setTwoHeads(true);
+				guard.addTag(GUARD_TAG);
 				build(guard, GUARD_HEALTH, GUARD_DAMAGE, GUARD_SCALE);
 				guard.setCustomName(Component.translatable("entity.jaymoskingdoms.ogre_kings_guard"));
 			}
@@ -499,6 +523,10 @@ public final class OgreHolds {
 	private static void tend(ServerLevel level) {
 		for (Player p : level.players()) {
 			for (Ogre ogre : level.getEntitiesOfClass(Ogre.class, p.getBoundingBox().inflate(96.0), o -> o.entityTags().contains(OGRE_TAG) && o.isAlive())) {
+				if (ogre.getTarget() instanceof Player foe && truce(foe, ogre) && ogre.getLastHurtByMob() != foe && !Trials.brawling(foe, ogre)) {
+					// (0.7.429) under truce: they leave you be unless you strike them
+					ogre.setTarget(null);
+				}
 				if (king(ogre)) {
 					step(level, ogre);
 				} else if (ogre.getTarget() == null && ogre.hasHome() && !ogre.isWithinHome() && ogre.getNavigation().isDone()) {
