@@ -7856,4 +7856,38 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - "Accuse them of theft" in MCA's menu for a day after you notice you were robbed or cheated (`Crooks`): the thief is
   confronted as by a right-click, however long ago it was; anyone else loses 8 hearts with you, says so, and remembers
   it (`Recollections.Kind.ACCUSED`, which you can apologise for). One accusation per villager per theft.
+## 0.7.450: fair bouts, the bookie leads you down, crackdowns, a clear ladder (pack 0.19.3)
+- Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in." Nobody is teleported into
+  the ring any more (`FightPit.run`). At the bell's time the bell waits up to a minute (`CALL_TICKS`) for a player on
+  the card to walk into the ring, the bookie calling them in; if they never come the bout's called off and every stake,
+  their entry too, goes back. After the bell both stand in their corners 3 seconds (`GRACE_TICKS`) before anyone
+  swings or a punch counts. A player needs 8 wind (12 health) to take a place (`MIN_WIND`), checked again at the bell,
+  and a blow made bigger by anything else is still never let take them under the yield point.
+- Andy: "if you pay the bookie outside of the speakeasy, he should lead you to it." By day the bookie may be up in town
+  (`Bookies.outAndAbout`). There he won't open his book or take a coin: he says to follow and walks you to the hatch
+  (`Bookies.Walk`), waiting when you fall behind and giving up if you wander 32 blocks off, then goes down first.
+  Come evening he walks home himself.
+- Andy: "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the open are frowned upon and
+  rare." Asking a bookie in the street with a guard within 12 blocks: he's never heard of a den, and the guard has
+  (`Underworld.crackDown`, attachment `den_crackdowns`). A street sale of contraband seen by a guard does the same.
+  For a day: no crook whispers the way, street buyers are 25 less receptive, bookies lead nobody and stay home.
+- Andy: "bug where there are so many villagers stuck on the speakeasy ladder" (video: an unemployed villager wedged in
+  the shaft). The den's hands wandered up the ladder, a replacement was hired a day later, and so on. Now every 2 seconds
+  (`Underworld.keepHome`): the fence, dice-thrower, attendant and fighters found out of their rooms are put back at
+  their spots, a second hand with the same job goes back to town as an ordinary villager, the bookie counts as present
+  anywhere within 64 blocks, and anyone else stuck in the shaft 2 checks running is put out at its nearer end.
+## 0.7.451: story screen fixes (pack 0.19.4)
+- Andy: "there is a problem with the way the character is drawn". A Bio-built's form parts (beak head, horns, bracers,
+  tail) were placed on the marks model's bones at submit time, but that shared model still held a pose from another draw
+  (the world's, another player's); the body itself is posed from the state only when drawn. So on the story screen the
+  head and parts sat askew of the body and armour. `BioForms.submit` now poses the bones from the state first
+  (`ModelPoses.now`: `setupAnim` plus the same after-pose list the `prepareModel` mixin runs, now kept in `ModelPoses.after`).
+- Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'". The road
+  carousel goes through the open starts only; a "Locked (n)" button in its header switches to the locked ones (with
+  their hints and reasons, as before) and "Open starts (n)" back.
+- Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
+  title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Andy: "i seem unable to select any of these" (the harder life's flaws and switches). Nothing in the click path drops
+  the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
+  same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
 - Compile-checked; not seen in game.
