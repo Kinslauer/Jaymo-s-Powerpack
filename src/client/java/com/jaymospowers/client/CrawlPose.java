@@ -92,11 +92,23 @@ public final class CrawlPose {
 	 * {@code roll}: progress through a roll (signed by direction), or null; {@code stride}/{@code speed}: the crawl's walk
 	 * cycle; {@code downed}: ticks since they went down, or -1; {@code out}: passed out; {@code broken}: the broken limbs
 	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id; {@code sneak}:
-	 * (0.15.86) downed and holding Sneak to give up.
+	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back.
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
-		boolean sneak, float rise) {
+		boolean sneak, float rise, float back) {
 	}
+
+	/**
+	 * (0.18.85) On the back ({@code Crawl.SUPINE}): turning over takes this long (ticks), twisting about the middle of the
+	 * body ({@link #BACK_PIVOT} blocks up it) so you end face up with your feet toward where you look, MGSV-style.
+	 */
+	static final float BACK_TURN_TICKS = 10.0F, BACK_PIVOT = 0.9F;
+	/** On the back: the head up off the ground looking down past the feet; the arms at rest, or brought up to aim (radians). */
+	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
+	/** On the back: one knee up, the other leg out straight (radians). */
+	static final float BACK_KNEE_UP = -0.55F, BACK_LEG_OUT = 0.12F;
+	/** (0.18.85) Player id → how far over onto the back (0 to 1), and when it was last stepped (game time). */
+	private static final Map<Integer, float[]> TURNED = new HashMap<>();
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
 	/** (0.18.5) Just risen by themselves: vanilla's swimming tilt, still easing out, is cancelled. */
@@ -136,9 +148,30 @@ public final class CrawlPose {
 			RISEN.remove(player.getId());
 		}
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
-			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise));
+			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise,
+			turned(player, time + partialTicks)));
 		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
 		state.isCrouching = false;
+	}
+
+	/** (0.18.85) How far over onto the back this player is drawn (0 to 1, eased), stepped toward where they lie. */
+	private static float turned(Player player, float now) {
+		boolean back = Crawl.supine(player);
+		float[] t = TURNED.get(player.getId());
+		if (t == null) {
+			if (!back) {
+				return 0.0F;
+			}
+			t = new float[] {0.0F, now};
+			TURNED.put(player.getId(), t);
+		}
+		float dt = Mth.clamp(now - t[1], 0.0F, 5.0F);
+		t[1] = now;
+		t[0] = back ? Math.min(1.0F, t[0] + dt / BACK_TURN_TICKS) : Math.max(0.0F, t[0] - dt / BACK_TURN_TICKS);
+		if (t[0] <= 0.0F && !back) {
+			TURNED.remove(player.getId());
+		}
+		return PoseBlend.smooth(t[0]);
 	}
 
 	/**
@@ -164,6 +197,13 @@ public final class CrawlPose {
 			poseStack.translate(0.0F, up, -0.3F * up);
 			poseStack.rotateDegrees(Axis.XP, riseDegrees(crawl.rise()) + Mth.sin(crawl.age() * 2.3F) * 0.6F * (1.0F - crawl.rise()));
 			return;
+		}
+		if (crawl.back() > 0.0F) {
+			// (0.18.85) over onto the back: a twist about the middle, head and feet trading ends as the body rolls face up
+			poseStack.translate(0.0F, BACK_PIVOT, 0.0F);
+			poseStack.rotateDegrees(Axis.ZP, 180.0F * crawl.back());
+			poseStack.rotateDegrees(Axis.YP, 180.0F * crawl.back());
+			poseStack.translate(0.0F, -BACK_PIVOT, 0.0F);
 		}
 		if (crawl.roll() != null) {
 			float t = Math.abs(crawl.roll());
@@ -196,6 +236,9 @@ public final class CrawlPose {
 				rock *= LIMP_ROCK;
 			}
 		}
+		// (0.18.85) on the back there's no chest to heave up or shoulders to rock
+		rock *= 1.0F - crawl.back();
+		lift *= 1.0F - crawl.back();
 		if (Math.abs(rock) > 1.0E-3F) {
 			poseStack.rotateDegrees(Axis.YP, rock);
 		}
@@ -267,7 +310,25 @@ public final class CrawlPose {
 			f.shake(PoseBlend.RIGHT_ARM, shake);
 			f.shake(PoseBlend.LEFT_ARM, -shake);
 		}
+		float back = crawl.back();
+		if (back > 0.0F) {
+			// (0.18.85) on the back: head up looking down past the feet, one knee raised; the arms at the sides, or up
+			// and out toward the feet to aim (a drawn bow, a crossbow or gun held ready)
+			boolean aiming = state.isUsingItem || aims(state.rightArmPose) || aims(state.leftArmPose);
+			float arms = aiming ? BACK_ARMS_AIM : BACK_ARMS_REST;
+			f.mix(PoseBlend.HEAD, BACK_HEAD, f.vanilla(PoseBlend.HEAD + 1) * 0.3F, 0.0F, back);
+			f.mix(PoseBlend.RIGHT_ARM, arms, aiming ? -0.1F : 0.0F, aiming ? 0.05F : BACK_ARMS_OUT, back);
+			f.mix(PoseBlend.LEFT_ARM, arms, aiming ? 0.25F : 0.0F, aiming ? -0.05F : -BACK_ARMS_OUT, back);
+			f.mix(PoseBlend.RIGHT_LEG, BACK_KNEE_UP, 0.0F, BACK_LEG_OUT, back);
+			f.mix(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -BACK_LEG_OUT, back);
+		}
 		track.apply(h, f, crawl.downed() >= 0.0F ? 0.7F : 1.0F);
+	}
+
+	/** (0.18.85) An arm pose that points a weapon. */
+	private static boolean aims(HumanoidModel.ArmPose pose) {
+		return pose == HumanoidModel.ArmPose.BOW_AND_ARROW || pose == HumanoidModel.ArmPose.CROSSBOW_CHARGE
+			|| pose == HumanoidModel.ArmPose.CROSSBOW_HOLD || pose == HumanoidModel.ArmPose.SPYGLASS;
 	}
 
 	/**

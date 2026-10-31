@@ -7469,7 +7469,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   woken by a monster that is after them or can see the bed (not caged or no-AI ones behind walls), never in creative; the
   rags line says what still comes (the Journal and whatever the aim is about).
 
-## 0.7.421: the rubber swallow reaches from your own hand (pack 0.18.84)
+## 0.7.421: the rubber swallow reaches from your own hand (pack 0.18.86)
 - Andy: "the rubber swallow should animate from the outstretched hand in first person". While a Rubber-folk swallows a
   foe, their first-person main arm reaches out ahead over 6 ticks (bare, the held item hidden; no swing), turned about the
   shoulder so the fist sits a little right of and below the middle of the screen, trembling with the pulses
