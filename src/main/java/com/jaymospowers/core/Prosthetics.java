@@ -43,7 +43,8 @@ import org.jspecify.annotations.Nullable;
  * ({@code ProstheticForging}). A fitted limb counts as present for {@link com.jaymospowers.core.wounds.LimbUse}, but
  * weaker ({@link #strength}): wood grips and climbs poorly and swings slowly, iron is sturdier but heavy (a little
  * slower on its own). It stays {@link Dismember#MISSING} underneath, so the wound is still there, and when the real
- * limb grows back (a respawn, a Hermit Bean, a Verdant) the prosthetic pops off and drops as an item ({@link #sync}).
+ * limb grows back (a Hermit Bean, a Verdant) the prosthetic pops off and drops as an item ({@link #sync}). On death it
+ * drops with the body and the stump respawns bare (0.18.84: lost limbs stay lost), ready to be fitted again.
  * A smith villager does not fit them yet: self-fitting only.
  */
 public final class Prosthetics {

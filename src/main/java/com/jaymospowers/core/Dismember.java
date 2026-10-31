@@ -65,8 +65,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Arm</b>: whatever that hand held falls, and it holds nothing more.</li>
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
  * </ul>
- * A player's lost limbs never grow back by themselves: only when they respawn, eat a Hermit Bean, or are Verdant
- * ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
+ * A player's lost limbs never grow back by themselves, not even by dying (Andy, 0.18.84: a respawn keeps every lost arm
+ * and leg, only a lost head comes back): only a Hermit Bean or being Verdant regrows them ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
  * <p>
  * (0.14.2) Wounds phase 3: no more flat random sever. A part comes off on <b>overkill</b> ({@link #severOnOverkill},
  * called by {@code Wounds}): a blade's blow on a limb that's already broken, or one that takes the head past zero, for more
@@ -105,7 +105,7 @@ public final class Dismember {
 
 	/** The parts this creature has lost (a {@link #HEAD}... bitmask). Saved, synced to everyone, not kept through death. */
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
-		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	/** Who can lose parts: people and things built like them. */
 	public static final TagKey<EntityType<?>> DISMEMBERABLE = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("dismemberable"));
@@ -168,12 +168,32 @@ public final class Dismember {
 			}
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-			// whole again
+			// (Andy: lost limbs don't grow back on death) the stumps come along; only a lost head is back
+			int mask = missing(newPlayer) & ~HEAD;
 			for (int part : PARTS) {
-				newPlayer.removeTag(tag(part));
+				if ((mask & part) != 0) {
+					newPlayer.addTag(tag(part));
+				} else {
+					newPlayer.removeTag(tag(part));
+				}
 			}
-			newPlayer.removeAttached(MISSING);
-			legs(newPlayer, 0);
+			if (mask == 0) {
+				newPlayer.removeAttached(MISSING);
+				legs(newPlayer, 0);
+				return;
+			}
+			newPlayer.setAttached(MISSING, mask);
+			track(newPlayer);
+			legs(newPlayer, mask);
+			if (!alive) {
+				// a severed limb stays broken and at zero in Wounds, as a born-without one does
+				for (int part : PARTS) {
+					com.jaymospowers.core.wounds.BodyPart lost = (mask & part) != 0 ? com.jaymospowers.core.wounds.Breaks.part(part) : null;
+					if (lost != null) {
+						com.jaymospowers.core.wounds.Wounds.breakPart(newPlayer, lost, null);
+					}
+				}
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dismember::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -468,8 +488,8 @@ public final class Dismember {
 	}
 
 	/**
-	 * Lost parts grown back (Andy: a living player only ever regrows them as a Verdant, with a Hermit Bean, or by
-	 * respawning): every one, or just the first still missing. True if anything grew back.
+	 * Lost parts grown back (Andy: a living player only ever regrows them as a Verdant or with a Hermit Bean; dying
+	 * doesn't, 0.18.84): every one, or just the first still missing. True if anything grew back.
 	 */
 	public static boolean regrow(LivingEntity target, boolean all) {
 		int mask = missing(target);
