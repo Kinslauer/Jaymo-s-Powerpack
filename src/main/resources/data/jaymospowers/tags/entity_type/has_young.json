@@ -1,0 +1,16 @@
+{
+  "values": [
+    "minecraft:spider",
+    "minecraft:cave_spider",
+    "minecraft:parrot",
+    "jaymospowers:aerwhale",
+    "jaymospowers:skyroot_lizard",
+    {"id": "jaymoskingdoms:tarantula", "required": false},
+    {"id": "jaymoskingdoms:coyote", "required": false},
+    {"id": "jaymoskingdoms:feral_wolf", "required": false},
+    {"id": "jaymoskingdoms:moose", "required": false},
+    {"id": "jaymoskingdoms:wild_boar", "required": false},
+    {"id": "jaymoskingdoms:great_whale", "required": false},
+    {"id": "jaymoskingdoms:pigeon", "required": false}
+  ]
+}
