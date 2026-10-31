@@ -7633,3 +7633,12 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 ## 0.7.434: clockwork golem idle fidgets (Motion patch 6; pack 0.18.112)
 - Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
 - Compile-checked only; not played.
+
+## 0.7.435: rare pets (Motion patch 7; pack 0.18.114)
+- `RarePets`: settlements of 8+ grown get one villager keeping an animal from a far climate (13 kinds by vanilla
+  variants), tamed dogs/parrots trail them, others keep near their spot. The keeper brags to players who come near (once a
+  day each, `rarepet.jaymoskingdoms.brag.N`) or tells an old tale hinting at Powers' hidden name-tag looks (`.hint.N`).
+  Orphaned rare pets go to a neighbour; a dead one is mourned.
+- Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons get young via Powers'
+  `jaymospowers:has_young` tag.
+- Compile-checked only; not played.

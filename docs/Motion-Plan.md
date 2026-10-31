@@ -128,7 +128,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - Cats: loaf, knead, stretch, groom. Iron and clockwork golem idle fidgets.
 - Wet look for every furry mob (wolves, cats, foxes, horses, sheep, llamas, our own furred mobs), dried by a shake.
 
-### Patch 7, Babies and rare pets (Kingdoms + Powers; picks baby-variants, biome-variants, name-variants)
+### Patch 7, Babies and rare pets (Kingdoms + Powers; picks baby-variants, biome-variants, name-variants) (built: Powers 0.18.114, Kingdoms 0.7.435)
 - Babies for spiders and every wild/farm animal without one, ours included where it fits.
 - Rare pets: some villagers keep an animal from a far biome (a snow fox in the desert, a cherry-blossomed one in the
   plains) by their home, and brag about it in talk as an accomplishment.

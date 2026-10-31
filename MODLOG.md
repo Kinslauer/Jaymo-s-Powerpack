@@ -4568,3 +4568,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   mob still, Blink, Wary (the next blow blinks you away); water burns it. Mirage (illusioner): Mirror Images (false
   copies that draw mobs off and vanish at a blow, Duplex's doubles with a fake flag), Blind, Unseen, Swap. Each has
   its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.114, Babies and rare pets (Motion patch 7, `docs/Motion-Plan.md`; Kingdoms 0.7.435):**
+- Younglings (`young/Younglings`, tag `jaymospowers:has_young`): spiders, cave spiders, parrots, aerwhales, skyroot
+  lizards and Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons now have young.
+  One natural spawn in four brings a brood (spiders: 2-4) or a calf or two. Young are the same creature drawn small
+  through the scale attribute (45%, big ones 30%), with health and bite to match. They squeak higher, drop nothing and
+  trail their elders, and grow to full size over a game day.
+- Rare pets (Kingdoms `RarePets`): a realm settlement of 8+ grown comes, in time, to have one villager keeping an
+  animal from far off. That's a snow fox, snow wolf, snow hare, frost frog or woolly pig where it's warm; a sand hare,
+  armadillo, spotted or rust-coat dog, parrot, marsh frog or southern hen where it's cold; a brown mooshroom
+  anywhere. Dogs and parrots are tamed to their keeper; the rest keep about the keeper's spot. Come near the keeper
+  with the animal about and they brag (a bubble, once a day each), and now and then tell an old tale instead. A
+  neighbour takes it in if the keeper dies; a keeper mourns a rare pet that dies.
+- Hidden name-tag looks (`client/pets/NameLooks`), hinted at only in those tales: five names that change how a mob is
+  drawn (size or tint). The game doesn't say which.
