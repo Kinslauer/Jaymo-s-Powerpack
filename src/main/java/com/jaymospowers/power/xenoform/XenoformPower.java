@@ -271,6 +271,27 @@ public final class XenoformPower implements Power {
 		public boolean darkShield;
 		/** Marrow: the thrown rib's heading (its place is {@link #whirl}, its ticks {@link #spin}, who it hit {@link #spun}). */
 		public net.minecraft.world.phys.@Nullable Vec3 ribDir;
+		/**
+		 * (0.18.109, Scan C) Howl, Prowl, Tusk, Talon: ticks left of a pounce, charge or dive; the creature held in the jaws or
+		 * talons (and ticks left); the wild wolves answering the howl (and ticks left); ticks left of the scent; the stalked
+		 * creature (and until when); Thick Hide until this tick.
+		 */
+		public int rush;
+		public int latched = -1, latchTicks;
+		public final java.util.List<Integer> pack = new java.util.ArrayList<>();
+		public int packTicks;
+		public int sniff;
+		public int stalked = -1;
+		public long stalkUntil, hideUntil;
+		/**
+		 * (0.18.111, Scan D) Murk: the creatures held in its tentacles (and ticks left); ticks left of the lure. Gnasher:
+		 * ticks left of the frenzy and the death roll. Lumen: its lights (packed block positions, each with the tick it
+		 * goes out); ticks left of the fetch. Keen: ticks left of the sonar; hanging from a ceiling.
+		 */
+		public final java.util.List<Integer> grips = new java.util.ArrayList<>();
+		public int gripTicks, lure, frenzy, rolls, fetch, sonar;
+		public final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap lights = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
+		public boolean perched;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -327,6 +348,14 @@ public final class XenoformPower implements Power {
 			risen = darkShield = breathWas = false;
 			shieldUntil = heapUntil = 0L;
 			ribDir = null;
+			rush = latchTicks = packTicks = sniff = 0;
+			latched = stalked = -1;
+			pack.clear();
+			stalkUntil = hideUntil = 0L;
+			grips.clear();
+			gripTicks = lure = frenzy = rolls = fetch = sonar = 0;
+			lights.clear();
+			perched = false;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;

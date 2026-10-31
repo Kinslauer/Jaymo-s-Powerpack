@@ -4521,3 +4521,31 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     straight down and swing on a spring as you move. With LambDynamicLights they light up around you
     (`LdlWornLanternMixin`, optional).
   - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.
+- **0.18.109, Scan C (`docs/ScanGaps-Plan.md`), beasts:** four new aliens. Howl (wolf, werewolf, feral wolf, coyote):
+  Pounce, a Howl that brings wild wolves to hunt beside you, Scent (blood stains and bleeders show), Lockjaw; stronger
+  at night. Prowl (ocelot, tiger, lion): silent, unseen while sneaking, no fall damage under 12 blocks; Long Pounce
+  that pins, Rake, Stalk, Roar. Tusk (hoglin, boar, rhino, wild boar, minotaur, burrukai, kirrid, taegore): Charge,
+  Gore, Root Out (food from the ground), Thick Hide. Talon (parrot, vulture, songbirds): flies and glides, Stoop that
+  snatches and carries a mob, Far Sight, Feather Darts. Each has its own model, skin, Ultimate skin and spikes.
+  Compile-checked; not seen in game.
+- **0.18.110, 3D models (Motion patch 5, `docs/Motion-Plan.md`):** ideas from Actions & Stuff, our own models.
+  - **Built-in pack "Jaymo's Powers: 3D items and plants"** (`resourcepacks/held_3d`, from `tools/gen_held_3d.py`), on
+    by default, switch it off in Resource Packs for the flat look. Held items are voxelised from their own sprites
+    (handles and heavy parts thicker than blades and strings); the inventory, frames, shelves and dropped items keep
+    the flat icon. Repainted sprites from any resource pack still show through.
+    - Every tier of sword, pickaxe, axe, shovel and hoe; bow, crossbow, fishing rod, shears, mace.
+    - Compass, recovery compass, clock (every frame), totem of undying, brush, saddle.
+    - Bottles (potions, splash, lingering, experience, honey, ominous, dragon's breath, glass bottle; our essence
+      phial, phial, purifying draught, milk bottle): potion contents keep their colour and glow a little, an
+      experience bottle glows.
+    - 3D red and brown mushrooms, pointed dripstone as narrowing cuboids, the doubled smooth stone slab as one block.
+  - **Glow:** iron golem eyes (`client/glow/GolemEyes`, our own glow texture); amethyst, redstone, diamond and emerald
+    armour trims at full block light (`GlowingTrimMixin`).
+  - Not done: per-wood carved canoes (Canoe Boats is CC BY-NC and downloaded at install, so we can't ship edits to it).
+  - Compile-checked; not seen in game.
+- **0.18.111, Scan D (`docs/ScanGaps-Plan.md`), water and light:** four new aliens. Murk (squid, anglerfish,
+  barnacle): Ink, Tentacles that hold four, Jet, Lure; a fast swimmer. Gnasher (dolphin, sharks, alligator, piranha,
+  mauler): smells bleeders in water; Clamp, Lunge, Frenzy, Death Roll. Lumen (allay, firefly, glare), the support
+  alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
+  from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
+  skin and spikes. Compile-checked; not seen in game.

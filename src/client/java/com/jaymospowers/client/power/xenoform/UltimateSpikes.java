@@ -53,7 +53,15 @@ final class UltimateSpikes extends HumanoidModel<AvatarRenderState> {
 		Map.entry("rime", new Style(5, 5.0F, 4, 4.0F, 2, 1, 0.5F)),
 		Map.entry("marrow", new Style(2, 4.5F, 5, 3.0F, 2, 1, 0.0F)),
 		Map.entry("swathe", new Style(0, 0.0F, 3, 2.5F, 1, 1, 0.2F)),
-		Map.entry("blight", new Style(3, 4.0F, 5, 4.5F, 2, 0, 0.4F)));
+		Map.entry("blight", new Style(3, 4.0F, 5, 4.5F, 2, 0, 0.4F)),
+		Map.entry("howl", new Style(2, 3.5F, 5, 3.0F, 1, 1, 0.1F)),
+		Map.entry("prowl", new Style(0, 0.0F, 4, 2.5F, 0, 1, 0.0F)),
+		Map.entry("tusk", new Style(1, 3.0F, 5, 4.0F, 2, 0, 0.6F)),
+		Map.entry("talon", new Style(3, 4.5F, 2, 3.0F, 1, 1, 0.0F)),
+		Map.entry("murk", new Style(4, 3.0F, 0, 0.0F, 1, 0, 0.2F)),
+		Map.entry("gnasher", new Style(0, 0.0F, 5, 4.0F, 1, 1, 0.5F)),
+		Map.entry("lumen", new Style(5, 2.5F, 0, 0.0F, 0, 0, 0.0F)),
+		Map.entry("keen", new Style(2, 4.0F, 3, 2.0F, 1, 1, 0.0F)));
 
 	private static final Map<String, UltimateSpikes> MODELS = new HashMap<>();
 
