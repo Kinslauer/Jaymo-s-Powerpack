@@ -227,6 +227,8 @@ public final class Heritage {
 	public static final String TAG = "jaymoskingdoms_heritage_";
 	/** How often the heritages that change with the light and the frost are looked at (ticks). */
 	static final int TICK_EVERY = 20;
+	/** (Motion patch 2) A swimming Tideborn's Dolphin's Grace outlasts each check by this many ticks, so it never flickers. */
+	static final int TIDE_KICK_SLACK = 10;
 	/**
 	 * (0.7.87) Andy: "max height should only be accessible to verdant". (0.7.290) Every heritage's MCA Size and Width
 	 * are kept to its body ({@link BodySizes}), checked this often (ticks) and whenever they save their MCA look.
@@ -674,6 +676,12 @@ public final class Heritage {
 			boolean wet = left > 0;
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", wet ? TIDE_WET_DAMAGE : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			look = wet ? LOOK_WET : 0;
+			// (Powers' Motion patch 2) the faster kick: only Tideborn (and Jaymo's Powers' swimming Xeno forms)
+			// swim with a dolphin's grace (Andy: "only tideborn or swimming xeno get the boost")
+			if (player.isSwimming()) {
+				player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DOLPHINS_GRACE,
+					TICK_EVERY + TIDE_KICK_SLACK, 0, true, false));
+			}
 		} else if (kind == Kind.SYLVAN && unseen(player)) {
 			look = LOOK_UNSEEN;
 		}

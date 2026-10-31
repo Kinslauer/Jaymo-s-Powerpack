@@ -134,6 +134,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 		ScreenShake.init();
 		PanicCam.init();
+		com.jaymospowers.client.water.BoatWakes.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();

@@ -7541,3 +7541,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
   of the villagers' temperament rules touch them.
 - Compile-checked only; not played.
+## 0.7.429: Tideborn swim with a dolphin's grace (pack 0.18.102)
+- Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
+  Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.
+- Compile-checked only; not played.

@@ -82,14 +82,17 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   the shoulder for about a second. Brave shows a third of the flinch, hotheaded stands with arms tense, gloomy slumps,
   cheerful bounces as they walk.
 
-### Patch 2, Water (Powers; picks swim-direction, dives, wakes, underwater-break)
-- **Directional swimming:** side stroke and backstroke picked from input against look. Only Tideborn and a swimming
-  Xeno form get the faster kick (plus Dolphin's Grace).
-- **Dives:** falling into water 2+ deep from 4+ blocks: sneak held early is a cannonball (big splash, fish scatter),
-  sneak late is a clean dive (deeper, faster), neither is a belly flop (slap sound, 1-2 damage from 12+ blocks). Our own
-  splash, sized by speed and body size.
-- **Boat wakes:** a V of foam behind moving boats/canoes, larger behind Kingdoms ships and whales.
-- **Breaking under water:** break bits sink slowly with bubbles.
+### Patch 2, Water (Powers 0.18.102 + Kingdoms 0.7.429; picks swim-direction, dives, wakes, underwater-break)
+- **Directional swimming** (`client/water/SwimStrokePose`): in water over half your height, off the bottom, not
+  sprint-swimming: breaststroke going forward, backstroke going backward, side stroke going sideways, treading water
+  when still. Vanilla's sprint-swim crawl is kept. Only Tideborn (Dolphin's Grace while sprint-swimming) and Slipfin
+  (already had it) get a faster kick.
+- **Dives** (`water/Dives`): falling into water 2+ deep from 4+ blocks: Sneak held 8+ ticks before is a cannonball (big
+  splash, fish scatter), Sneak pressed later is a clean dive (deeper, faster), neither is a belly flop (slap sound, 1-2
+  damage from 12+ blocks). Our own splash, sized by fall and body size.
+- **Boat wakes** (`client/water/BoatWakes`): a V of foam behind moving boats/canoes/rafts, larger behind Kingdoms ships
+  and whales.
+- **Breaking under water** (`TerrainParticleWaterMixin`): break bits sink slowly with bubbles.
 
 ### Patch 3, Faces (Powers client; pick face-anim)
 - A face layer on players: blink every 3-6 s, pupils shift towards the look target, brows frown when hurt or angry.
