@@ -4278,3 +4278,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - As an alien, only the game's own render layers and Xenoform's run on the player
     (`XenoformLivingEntityRendererMixin.alienLayers`): Weapon Master's holstered weapons, Traveler's Tool Belt, quivers,
     backpacks, costumes and heritage looks no longer hang off the invisible body. Compile-checked; not seen in game.
+- **0.18.85, Pyre flies like a Z Fighter and leaves a comet:** Andy: "pyre needs a more controllable flight like the z
+  fighters, and the trail should be more like a comet of flame and less repeat particles".
+  - The Flame Jet is a toggle on G, flown on the client (`client/power/xenoform/PyreFlightClient`, after
+    `ZFighterFlightClient`): G lifts you into a hover, WASD moves, Jump rises, Sneak sinks and lands; Sprint streaks along
+    your look, speeding up to 1.4 blocks a tick (Sunheart 2.0, the new flight kind `XenoformState.FLY_SUN`) and turning
+    slower the faster you go; let go to coast back to a hover, S brakes. G again ends it with slow falling. The server
+    (`Pyre`) no longer pushes your velocity; it keeps the jet on, ends it on Sneak on the ground, and syncs the kind.
+  - The jet's server particle spray is gone. `PyreComet` draws one tail of fire on every client: three camera-facing
+    ribbons (red glow, orange flame, white-hot core) along the last 14 ticks of path (20 under Sunheart), tapering and
+    flickering, with a round glowing head round the body and one ember every 3 ticks. It draws in behind you when you
+    stop. Hand and foot jets now only spurt while hovering. Compile-checked; not seen in game.

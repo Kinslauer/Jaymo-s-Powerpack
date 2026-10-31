@@ -31,10 +31,12 @@ import net.minecraft.world.phys.Vec3;
  * and rain do.
  * <ul>
  * <li>R, Fire Bolt: a small fireball where you look.</li>
- * <li>G (hold), Flame Jet: jets of fire from your feet carry you where you look, for free; let go and you drift down.</li>
+ * <li>G, Flame Jet (0.18.85, a toggle, steered like a Z Fighter's flight on the client: {@code PyreFlightClient}): hover
+ * with WASD, Jump and Sneak, Sprint to streak along your look; G again (or Sneak on the ground) ends it, and you drift
+ * down. Free. It leaves a comet's tail of flame ({@code PyreComet}).</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
  * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
- * <li>C (ascended), Sunheart: the jet goes faster ({@link #FLIGHT_SPEED}), and R becomes a held beam of fire
+ * <li>C (ascended), Sunheart: the jet goes faster (flight {@link XenoformState#FLY_SUN}), and R becomes a held beam of fire
  * {@link #BEAM_RANGE} blocks long that burns whatever it touches.</li>
  * </ul>
  */
@@ -42,8 +44,7 @@ public final class Pyre extends XenoForm {
 	// ---- tuning ----
 	public static final int BOLT_COOLDOWN = 20;
 	public static final double BOLT_SPEED = 1.6;
-	/** The jet: this fast (blocks/tick), easing toward where you look; slow fall for this long after letting go. Free. */
-	public static final double JET_SPEED = 0.55, JET_EASE = 0.2;
+	/** The jet: slow fall for this long after it ends in the air. Free; its speeds are the client's ({@code PyreFlightClient}). */
 	public static final int JET_SLOW_FALL_TICKS = 50;
 	public static final int NOVA_COOLDOWN = 200;
 	public static final double NOVA_RADIUS = 5.0;
@@ -56,8 +57,7 @@ public final class Pyre extends XenoForm {
 	/** In water or rain: this much damage every this many ticks. */
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
-	/** Sunheart: flight speed (blocks/tick) and easing; the beam's reach, bite (every {@link #BEAM_EVERY} ticks) and burn. */
-	public static final double FLIGHT_SPEED = 0.8, FLIGHT_EASE = 0.25;
+	/** Sunheart: the beam's reach, bite (every {@link #BEAM_EVERY} ticks) and burn. */
 	public static final double BEAM_RANGE = 12.0;
 	public static final float BEAM_DAMAGE = 2.0F;
 	public static final int BEAM_EVERY = 4, BEAM_BURN_SECONDS = 3;
@@ -91,15 +91,14 @@ public final class Pyre extends XenoForm {
 			return;
 		}
 		if (key == PowerKey.ABILITY_2) {
-			if (down != live.jet) {
-				live.jet = down;
-				if (!down) {
-					player.removeEffect(MobEffects.LEVITATION);
-					if (!player.onGround()) {
-						player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, JET_SLOW_FALL_TICKS, 0, false, false));
-					}
+			// a toggle: G takes off, G again ends it (the client flies it, as a Z Fighter's flight)
+			if (down) {
+				if (live.jet) {
+					endJet(player, live);
 				} else {
+					live.jet = true;
 					cooldown(player, live, G, 1);
+					sound(player, SoundEvents.BLAZE_SHOOT, 0.8F, 0.7F);
 				}
 			}
 			return;
@@ -137,17 +136,13 @@ public final class Pyre extends XenoForm {
 		ServerLevel level = player.level();
 		// the jet
 		if (live.jet) {
-			// flight where you look, free; Sunheart's is faster
-			boolean sun = live.ultimate;
-			Vec3 want = player.getLookAngle().scale(sun ? FLIGHT_SPEED : JET_SPEED);
-			player.setDeltaMovement(player.getDeltaMovement().lerp(want, sun ? FLIGHT_EASE : JET_EASE));
-			player.syncVelocity = true;
+			// the client flies it (PyreFlightClient); everyone's client draws the comet (PyreComet)
 			player.resetFallDistance();
-			Vec3 at = player.position();
-			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, sun ? 8 : 6, 0.3, 0.1, 0.3, sun ? 0.06 : 0.04);
-			level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.1, at.z, 4, 0.2, 0.1, 0.2, 0.08);
-			if (player.tickCount % 8 == 0) {
-				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, sun ? 1.0F : 1.3F);
+			if (player.onGround() && player.isShiftKeyDown()) {
+				// sneaking on the ground: landed
+				endJet(player, live);
+			} else if (player.tickCount % 8 == 0) {
+				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, live.ultimate ? 1.0F : 1.3F);
 			}
 		}
 		// the trail
@@ -176,6 +171,14 @@ public final class Pyre extends XenoForm {
 		}
 	}
 
+	private static void endJet(ServerPlayer player, XenoformPower.Live live) {
+		live.jet = false;
+		player.removeEffect(MobEffects.LEVITATION);
+		if (!player.onGround()) {
+			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, JET_SLOW_FALL_TICKS, 0, false, false));
+		}
+	}
+
 	/** Fire and lava roll off it. */
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
@@ -198,7 +201,7 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
-		return live.jet && !player.onGround() ? XenoformState.FLY_JET : XenoformState.FLY_NONE;
+		return !live.jet || player.onGround() ? XenoformState.FLY_NONE : live.ultimate ? XenoformState.FLY_SUN : XenoformState.FLY_JET;
 	}
 
 	// ---- Sunheart ----

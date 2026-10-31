@@ -53,6 +53,7 @@ public final class XenoformPowerClient implements PowerClient {
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
+		PyreComet.init();
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new XenoformLayer(avatar));
@@ -129,6 +130,15 @@ public final class XenoformPowerClient implements PowerClient {
 		if (burst > 0) {
 			burst--;
 		}
+		PyreFlightClient.tick(player);
+	}
+
+	/** G as Pyre: the Flame Jet, flown here ({@link PyreFlightClient}); the server toggles it on the same press. */
+	@Override
+	public void onKey(LocalPlayer player, com.jaymospowers.api.PowerKey key, boolean down) {
+		if (down && key == com.jaymospowers.api.PowerKey.ABILITY_2 && "pyre".equals(player.getAttached(XenoformState.FORM))) {
+			PyreFlightClient.toggle(player);
+		}
 	}
 
 	@Override
@@ -164,6 +174,7 @@ public final class XenoformPowerClient implements PowerClient {
 		flash = 0;
 		burst = 0;
 		XenoformSlap.clear();
+		PyreFlightClient.reset();
 		com.jaymospowers.client.power.chrono.ChronoSpeedClient.reset();
 	}
 }

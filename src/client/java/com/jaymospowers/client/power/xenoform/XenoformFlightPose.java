@@ -28,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>Wyrm's wings beat hard while it flies and fold back along its body as it picks up speed (read in its model).</li>
  * <li>Wisp's glide is a ghost's drift: tipped forward, arms reaching out limp and swaying, the tatters streaming back,
  * the whole body rolling and bobbing slowly.</li>
- * <li>Pyre flies on fire: its arms stay swept back as jets (no fist out ahead), and open flames pour from its hands
- * and feet ({@link #tick}).</li>
+ * <li>Pyre flies on fire: its arms stay swept back as jets (no fist out ahead), and small flames spurt from its hands
+ * and feet while it hovers ({@link #tick}); at speed its comet's tail takes over ({@link PyreComet}).</li>
  * </ul>
  */
 public final class XenoformFlightPose {
@@ -47,8 +47,9 @@ public final class XenoformFlightPose {
 	static final float EASE = 0.15F;
 	/** The glide's forward tip (degrees), its slow roll (degrees) and bob (blocks). */
 	static final float GLIDE_LEAN = 38.0F, GLIDE_ROLL = 9.0F, GLIDE_BOB = 0.07F;
-	/** Pyre's foot flames: particles per foot a tick, and their push out behind. */
-	static final int FOOT_FLAMES = 2;
+	/** Pyre's foot flames: particles per foot a tick, and their push out behind; only while cruising less than this much. */
+	static final int FOOT_FLAMES = 1;
+	static final float JETS_UNTIL = 0.5F;
 	static final double FOOT_PUSH = 0.12;
 	/** Pyre ablaze: one flame in this many ticks rises off its body (not in water or rain, nor round your own camera). */
 	static final int BODY_FLAME_EVERY = 3;
@@ -65,7 +66,7 @@ public final class XenoformFlightPose {
 	/** A flying alien that should cruise in Wind's pose (WindPose asks). */
 	public static boolean cruising(Player player) {
 		int kind = XenoformState.flight(player);
-		if (kind != XenoformState.FLY_JET && kind != XenoformState.FLY_WINGS && kind != XenoformState.FLY_VOID) {
+		if (!XenoformState.jet(kind) && kind != XenoformState.FLY_WINGS && kind != XenoformState.FLY_VOID) {
 			return false;
 		}
 		return speed(player) >= CRUISE_SPEED;
@@ -104,12 +105,13 @@ public final class XenoformFlightPose {
 			a[3] = a[2];
 			a[5] = a[4];
 			a[7] = a[6];
-			a[6] = ease(a[6], kind == XenoformState.FLY_JET);
+			a[6] = ease(a[6], XenoformState.jet(kind));
 			a[0] = ease(a[0], kind == XenoformState.FLY_GLIDE);
 			a[2] = ease(a[2], kind == XenoformState.FLY_WINGS);
 			float foldTarget = kind == XenoformState.FLY_WINGS ? Mth.clamp(((float)speed(player) - FOLD_START) / (FOLD_FULL - FOLD_START), 0.0F, 1.0F) : 0.0F;
 			a[4] = a[4] + (foldTarget - a[4]) * EASE * 1.5F;
-			if (kind == XenoformState.FLY_JET && !player.isInvisible()) {
+			// (0.18.85) hovering, small jets from hands and feet; streaking along, the comet (PyreComet) is the fire
+			if (XenoformState.jet(kind) && !player.isInvisible() && WindPose.amount(player, 1.0F) < JETS_UNTIL) {
 				footFlames(level, player);
 			}
 		}
