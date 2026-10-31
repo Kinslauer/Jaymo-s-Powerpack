@@ -1130,6 +1130,8 @@ public final class LifeStory {
 		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
+		// (0.7.452) and the land round them made ahead in the background, wherever the start put them (ArrivalGround)
+		ArrivalGround.around(player);
 		if (start == Start.TIMELOST) {
 			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
 			PowersCompat.awaken(player, "chrono");
