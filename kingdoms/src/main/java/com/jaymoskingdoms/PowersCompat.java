@@ -1687,4 +1687,32 @@ public final class PowersCompat {
 			return null;
 		}
 	}
+
+	private static java.lang.invoke.@Nullable MethodHandle questionDone;
+	private static boolean lookedForQuestionDone;
+
+	/**
+	 * (0.7.424) Powers' {@code Finishers.questionDone(ServerPlayer, boolean)}: ends {@code player}'s questioning hold, the one
+	 * held down let go or ({@code kill}) finished with the weapon's execution. Nothing without Powers.
+	 */
+	public static void questionDone(net.minecraft.server.level.ServerPlayer player, boolean kill) {
+		if (!lookedForQuestionDone) {
+			lookedForQuestionDone = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					questionDone = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.finisher.Finishers"),
+						"questionDone", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' questioning hold", e);
+				}
+			}
+		}
+		if (questionDone != null) {
+			try {
+				questionDone.invoke(player, kill);
+			} catch (Throwable e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't end a questioning hold", e);
+			}
+		}
+	}
 }

@@ -7485,3 +7485,16 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   swallow's rope and skin on the held foe, run up to sealed (`MELT`, 0.58 of the way) and held there wobbling, never
   gulped and with no swell after. The first-person reaching arm follows it too.
 - Compile-checked only; not played.
+
+## 0.7.424: Questioning the downed, and tidings on town boards (pack 0.18.97)
+- Andy: "you can question downed humanoids, unlocked in the tree"; "it should be early on the tree, and available in
+  stealth and strength as well". Perks `ROUGH_QUESTIONS` (Strength tier 1), `QUIET_WORD` (Stealth tier 1),
+  `INTERROGATION` (Will tier 8, level 2). `Questioning` runs the talk: MCA's main menu shows only `jaymoskingdoms_q_*`
+  answers while you hold someone (leader, home, nearby, threaten, stare, swear, spare, finish); whether they talk is by
+  temperament, a threat may break them; Rough Questions doubles it and adds a try, Quiet Word's choke leaves no memory of
+  you and asks who's about, Interrogation stops lies and adds the stare and the oath. Recollections `QUESTIONED`,
+  `SPARED`, `SWORE`. `playerAnswer` gives Powers a held player's realm truths (or a lie).
+- Andy: "tidings can now be nailed this way and posted on boards in towns ... you may just not hear of some news". World
+  news is kept (`Post.POSTED`, 3 days) and pinned on town boards as "Word from abroad" (`town|tidings.<id>|<board>|t`),
+  each town hearing about 70% of it; a bird brings a piece only when it names you or your realm (`Post.concerns`).
+- Compile-checked only; not played.
