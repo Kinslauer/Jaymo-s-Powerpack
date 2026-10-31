@@ -7713,3 +7713,11 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   the time: bring the carried-off child home, cut down 3-5 purist raiders (while a purist realm is near), or kill the
   chief of the nearest camp that preys on them.
 - Compile-checked; not played.
+
+## 0.7.440: props (Motion patch 9; pack 0.18.120)
+- `props/Props`: scarecrow (birds and rabbits within 10 blocks are sent off, every 2 s), gravestone, lamp post (light
+  15), iron candle stand (flint and steel or a fire charge lights it, a bare hand snuffs it; light 12), four plushies
+  (bear, bunny, cat, frog) that squeak when pressed or squeezed in hand, window box and pot planter (plant a small flower,
+  it grows over random ticks, a bare hand picks 1-2 at full bloom).
+- Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
+- Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
