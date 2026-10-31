@@ -154,7 +154,7 @@ final class Staredowns {
 		if (Renown.alignment(Skills.of(sp)) == Skills.Pillar.STRENGTH) {
 			will += WILL_ALIGNED;
 		}
-		// (0.7.434) trophies and a crown worn
+		// (0.7.435) trophies and a crown worn
 		will += Spoils.will(sp);
 		return Will.surging(sp) ? will + WILL_SURGE : will;
 	}

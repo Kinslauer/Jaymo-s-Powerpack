@@ -627,7 +627,7 @@ public final class OgreHolds {
 		if (!site.hold()) {
 			return;
 		}
-		// (0.7.434) his spoils: hide, crown, maul
+		// (0.7.435) his spoils: hide, crown, maul
 		Spoils.ogreKingFell(level, entity, source);
 		// the king is dead: his outposts break up, their ogres go
 		Set<Integer> cleared = new HashSet<>();

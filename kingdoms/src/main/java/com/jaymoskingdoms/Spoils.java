@@ -51,7 +51,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.434) Havens patch 5, spoils (ideas from King's Monsters, ARR: our own names, code and art). What a fallen
+ * (0.7.435) Havens patch 5, spoils (ideas from King's Monsters, ARR: our own names, code and art). What a fallen
  * greenskin or ogre leaves the one who felled him.
  * <ul>
  * <li><b>Trophies worn as baubles</b> (Jaymo's Powers' bauble slots, by its {@code jaymospowers:baubles/<slot>} tags): a

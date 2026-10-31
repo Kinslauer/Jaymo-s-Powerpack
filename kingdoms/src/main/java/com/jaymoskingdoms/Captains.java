@@ -1238,7 +1238,7 @@ public final class Captains {
 		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
 		if (!returns) {
-			// (0.7.434) one who stays dead leaves his tusk to the player who felled him
+			// (0.7.435) one who stays dead leaves his tusk to the player who felled him
 			Spoils.captainFell(level, entity, c.rank(), source);
 		}
 		UUID id = entity.getUUID();
