@@ -76,7 +76,7 @@ public final class EquestrianClient {
 	private static final int WHEEL_HOLD = 6, DOUBLE_TAP = 7;
 	private static final int CHARGE_COLOR = 0xFF9A4A, CRUISE_COLOR = 0xBFF4EA;
 	private static final int MARE_COLOR = 0xFF9AC8, STALLION_COLOR = 0x8AC8FF;
-	/** (0.7.444) A coat's name in the readouts: plain, and a rare (or moonlit) one. */
+	/** (0.7.445) A coat's name in the readouts: plain, and a rare (or moonlit) one. */
 	static final int COAT_COLOR = 0xC8B8A0, RARE_COAT_COLOR = 0xFFD966;
 	/** How long the whistle's been held (-1: it opened the wheel; wait for it to come up). */
 	private static int whistleHeld;
@@ -405,7 +405,7 @@ public final class EquestrianClient {
 		return stack.is(Items.SADDLE) || stack.is(Tackroom.WAR_SADDLE) || stack.is(Tackroom.RACING_SADDLE);
 	}
 
-	/** (0.7.444, Havens patch 8) Its coat by name ("Bay with Blaze"), in gold when it's its breed's rare one or moonlit. */
+	/** (0.7.445, Havens patch 8) Its coat by name ("Bay with Blaze"), in gold when it's its breed's rare one or moonlit. */
 	static Component coat(Equine e) {
 		return Component.translatable("coat.jaymoskingdoms." + e.coatName()).withColor(e.rareCoat() ? RARE_COAT_COLOR : COAT_COLOR);
 	}
@@ -439,7 +439,7 @@ public final class EquestrianClient {
 			return;
 		}
 		Font font = Minecraft.getInstance().font;
-		// (0.7.444) its coat after its breed, sliding when it doesn't fit the box
+		// (0.7.445) its coat after its breed, sliding when it doesn't fit the box
 		MutableComponent head = Component.translatable(e.breed().key()).withColor(com.jaymoskingdoms.client.Ui.GOLD).append(sex(horse));
 		if (!e.breed().ass()) {
 			head.append(Component.literal(" · ").withColor(com.jaymoskingdoms.client.Ui.DIM)).append(coat(e));

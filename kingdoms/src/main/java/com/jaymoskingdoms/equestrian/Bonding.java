@@ -703,7 +703,7 @@ public final class Bonding {
 	}
 
 	private static void openTack(ServerPlayer player, int id) {
-		// (0.7.444) donkeys and mules wear vanilla's saddle and chest, not our tack (their renderer couldn't show it)
+		// (0.7.445) donkeys and mules wear vanilla's saddle and chest, not our tack (their renderer couldn't show it)
 		if (!(player.level().getEntity(id) instanceof AbstractHorse horse) || !Equestrian.covered(horse) || !horse.isTamed() || horse.isBaby()
 			|| Equestrian.peek(horse) instanceof Equine pe && pe.breed().ass()
 			|| player.distanceToSqr(horse) > 64.0 || horse.isVehicle() && !horse.hasPassenger(player)) {

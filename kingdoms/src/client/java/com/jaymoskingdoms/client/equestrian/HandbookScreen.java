@@ -17,7 +17,7 @@ final class HandbookScreen extends Screen {
 	/** How many pages there are (lang keys 1 to this). */
 	static final int PAGES = 11;
 	/**
-	 * (0.7.444, Havens patch 8) The coat pages, from page {@link #FIRST_COATS} on: each lists these breeds' coats by name,
+	 * (0.7.445, Havens patch 8) The coat pages, from page {@link #FIRST_COATS} on: each lists these breeds' coats by name,
 	 * the rare one in gold, under its own words.
 	 */
 	private static final int FIRST_COATS = 10;

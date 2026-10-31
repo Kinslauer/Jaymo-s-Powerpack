@@ -89,7 +89,7 @@ public final class Herding {
 		builder -> builder.persistent(Herd.CODEC).syncWith(Herd.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** Where an owned horse was last seen, for its owner's roster (kept on the Overworld, by horse). */
-	/** (0.7.444) {@code coat}: its coat's name ({@link Equine#coatName}), "" until it's been seen since. */
+	/** (0.7.445) {@code coat}: its coat's name ({@link Equine#coatName}), "" until it's been seen since. */
 	public record Stall(UUID owner, String name, String breed, int sex, GlobalPos pos, int order, boolean foal, long seen, String coat) {
 		public static final Codec<Stall> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.STRING_CODEC.fieldOf("owner").forGetter(Stall::owner),

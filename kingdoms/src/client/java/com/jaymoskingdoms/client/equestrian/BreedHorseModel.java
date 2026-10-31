@@ -59,12 +59,12 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	/** (0.7.305) Ridden by you in first person, the head dips this far (degrees, and px down) to clear your view. */
 	private static final float HEAD_DIP = 25.0F * DEG, HEAD_DIP_DROP = 3.0F;
 	/**
-	 * (0.7.444, Havens patch 8) Rearing: the head tosses side to side (radians, and how fast) and nods up, and the tail
+	 * (0.7.445, Havens patch 8) Rearing: the head tosses side to side (radians, and how fast) and nods up, and the tail
 	 * lashes. Vanilla's rear and graze blends run straight; ours ease in and out of both ({@link #ease}).
 	 */
 	private static final float TOSS_YAW = 0.32F, TOSS_NOD = 0.12F, TOSS_SPEED = 0.45F, LASH = 0.55F, LASH_SPEED = 0.6F;
 	/**
-	 * (0.7.444) A grazing horse takes a step now and then: every {@code STEP_EVERY} ticks one foreleg (the other next time)
+	 * (0.7.445) A grazing horse takes a step now and then: every {@code STEP_EVERY} ticks one foreleg (the other next time)
 	 * lifts and sets down further on over {@code STEP_TICKS}, swung this far forward and bent this much at the knee.
 	 */
 	private static final int STEP_EVERY = 110, STEP_TICKS = 18;
@@ -335,7 +335,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			float headY = (4.0F - LIFT) * rest + (-6.0F - LIFT) * stand + 11.0F * graze - NECK * Mth.cos(headX);
 			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze - NECK * Mth.sin(headX);
 			float headYaw = yaw * (rest + stand);
-			// (0.7.444) reared, it tosses its head
+			// (0.7.445) reared, it tosses its head
 			headYaw += Mth.sin(ticks * TOSS_SPEED) * TOSS_YAW * stand;
 			headX -= (0.5F + 0.5F * Mth.sin(ticks * TOSS_SPEED * 2.0F)) * TOSS_NOD * stand;
 			headY += HEAD_DIP_DROP * state.headDip * rest;
@@ -391,7 +391,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			leg(this.leg2A, this.leg2B, this.leg2C, Mth.lerp(stand, rLeg, hindUpper), Mth.lerp(stand, rC, hindLower), rLeg, hindUpper, stand);
 			leg(this.leg3A, this.leg3B, this.leg3C, Mth.lerp(stand, rLeg, rPaw), Mth.lerp(stand, rB, pawBend), rLeg, rPaw, stand);
 			leg(this.leg4A, this.leg4B, this.leg4C, Mth.lerp(stand, lLeg, lPaw), Mth.lerp(stand, lB, pawBend), lLeg, lPaw, stand);
-			// (0.7.444) grazing, a foreleg steps on now and then
+			// (0.7.445) grazing, a foreleg steps on now and then
 			if (graze > 0.0F && speed < 0.05F) {
 				float t = (ticks + state.phase) % STEP_EVERY;
 				if (t < STEP_TICKS) {
@@ -433,7 +433,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				tailYaw = Mth.cos(ticks * 0.7F);
 				tailLift = 0.0F;
 			}
-			// (0.7.444) reared, the tail lashes
+			// (0.7.445) reared, the tail lashes
 			tailYaw += Mth.sin(ticks * LASH_SPEED) * LASH * stand;
 			this.tailB.y = this.tailB.getInitialPose().y() + tailUp;
 			this.tailC.y = this.tailC.getInitialPose().y() + tailUp;
@@ -494,7 +494,7 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			this.innerWingR.zRot = this.midWingR.zRot = this.outerWingR.zRot = -wingRot;
 		}
 
-		/** (0.7.444) Eased in and out (smoothstep), for vanilla's straight rear and graze blends. */
+		/** (0.7.445) Eased in and out (smoothstep), for vanilla's straight rear and graze blends. */
 		private static float ease(float x) {
 			float t = Mth.clamp(x, 0.0F, 1.0F);
 			return t * t * (3.0F - 2.0F * t);

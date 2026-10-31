@@ -57,7 +57,7 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		boolean wings, airborne, flapping;
 		/** (0.7.305) Ridden by you in first person: how solid it's drawn (you look down through it), and how far its head dips out of view. */
 		float fade = 1.0F, headDip;
-		/** (0.7.444) Its own offset in ticks, so a grazing herd doesn't shuffle its feet all at once. */
+		/** (0.7.445) Its own offset in ticks, so a grazing herd doesn't shuffle its feet all at once. */
 		float phase;
 	}
 

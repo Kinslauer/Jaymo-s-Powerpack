@@ -7787,7 +7787,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   scorched leather apron, elbow gloves and a welding visor. `KINDS` is now `Map.ofEntries` (it outgrew `Map.of`).
 - Compile-checked; not played.
 
-## 0.7.444: horses (Havens patch 8; pack 0.18.123)
+## 0.7.445: horses (Havens patch 8; pack 0.18.124)
 - **Better Horses** (by CanineGray, CC BY-NC 4.0; Modrinth alMAK8J4, v4.3 for 1.21.11) ships unchanged with credit: the
   pack's client fetches it on first launch and switches it on above Fresh Animations (`PackResourcePacks`). Our breed
   horses keep our own renderer, so it draws donkeys and mules. It's made for an older game version (formats 22 to 94),

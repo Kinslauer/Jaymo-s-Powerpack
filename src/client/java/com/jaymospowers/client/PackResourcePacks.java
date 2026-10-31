@@ -65,7 +65,7 @@ final class PackResourcePacks {
 		new Pack("Fresh Animations", "jaymospowers-fresh-animations-v1", "FreshAnimations", "FreshAnimations_v1.11.1_26.1+.zip",
 			"https://cdn.modrinth.com/data/50dA9Sha/versions/tvGVYMD4/FreshAnimations_v1.11.1_26.1%2B.zip",
 			"ae9175983c5109162c86daae1acff34ccf623faf", false),
-		// (0.18.123, Havens patch 8) "Better Horses" (by CanineGray, CC BY-NC 4.0: shipped unchanged, credit to its author,
+		// (0.18.124, Havens patch 8) "Better Horses" (by CanineGray, CC BY-NC 4.0: shipped unchanged, credit to its author,
 		// never edited or copied from): redrawn donkeys and mules through Entity Model Features and Entity Texture
 		// Features, with coat variants. Version 4.3 for 1.21.11 (formats 22-94, older than 26.3's), fetched from Modrinth
 		// (project alMAK8J4). Horses, skeleton horses and zombie horses are Jaymo's Kingdoms' breed horses

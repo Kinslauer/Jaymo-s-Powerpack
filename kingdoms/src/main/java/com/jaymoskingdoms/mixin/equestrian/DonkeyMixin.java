@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.444, Havens patch 8) A donkey's foal (a donkey, or with a horse a mule) needs a jenny and a jack too, as {@link HorseMixin}. */
+/** (0.7.445, Havens patch 8) A donkey's foal (a donkey, or with a horse a mule) needs a jenny and a jack too, as {@link HorseMixin}. */
 @Mixin(Donkey.class)
 abstract class DonkeyMixin {
 	@Inject(method = "canMate", at = @At("RETURN"), cancellable = true)

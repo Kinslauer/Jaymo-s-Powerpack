@@ -237,7 +237,7 @@ public final class Equestrian {
 
 	/** One of the mounts it upgrades: horses, skeleton and zombie horses, war elephants (not donkeys, mules, llamas or camels). */
 	public static boolean covered(Entity e) {
-		// (0.7.444, Havens patch 8) donkeys and mules too: bond, roster, gaits and wheel, drawn as vanilla's (Better Horses')
+		// (0.7.445, Havens patch 8) donkeys and mules too: bond, roster, gaits and wheel, drawn as vanilla's (Better Horses')
 		return e instanceof Horse || e instanceof SkeletonHorse || e instanceof ZombieHorse || e instanceof WarElephant || e instanceof Donkey
 			|| e instanceof Mule;
 	}
@@ -364,7 +364,7 @@ public final class Equestrian {
 			return;
 		}
 		Equine e = Equine.foal(equine(parent), equine(other), baby.getRandom());
-		// (0.7.444) a horse and a donkey make a mule (and two donkeys a donkey, whichever parent's breed it took)
+		// (0.7.445) a horse and a donkey make a mule (and two donkeys a donkey, whichever parent's breed it took)
 		Breed kind = baby instanceof Mule ? Breed.MULE : baby instanceof Donkey ? Breed.DONKEY : null;
 		if (kind != null && e.breed() != kind) {
 			e = new Equine(kind, 0, e.speed(), e.stamina(), e.jump(), e.courage(), e.temper());

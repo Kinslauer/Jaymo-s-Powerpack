@@ -114,7 +114,7 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 		return Math.round(40 + 100 * this.temper);
 	}
 
-	/** (0.7.444) Its coat is its breed's rare one, or moonlit. */
+	/** (0.7.445) Its coat is its breed's rare one, or moonlit. */
 	public boolean rareCoat() {
 		return this.coat == MOONLIT || this.breed.coats.length > 1 && Math.floorMod(this.coat, this.breed.coats.length) == this.breed.coats.length - 1;
 	}

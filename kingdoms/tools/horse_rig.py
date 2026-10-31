@@ -39,7 +39,7 @@ class Part:
 # out along it, so the neck's base stays where it was), extra pieces for its form, and the knight's barding.
 SIMPLE = True
 LIFT, NECK = (0.0, 0.0) if SIMPLE else (3.0, 3.0)
-# (0.7.444, Havens patch 8) FULLER: the classic shape and size kept, but fuller where it shows: jointed legs (a knee in
+# (0.7.445, Havens patch 8) FULLER: the classic shape and size kept, but fuller where it shows: jointed legs (a knee in
 # front, a hock and gaskin behind, the fetlock and coronet, feathering on the heavy breeds), a shaped muzzle by breed
 # (nostrils, the jowl, the draft's Roman nose, the desert horse's fine dished one; never over 4 wide, for the bridle)
 # and longer manes (a forelock, and the mane falling over the neck on all but the steppe pony's standing one). The body
