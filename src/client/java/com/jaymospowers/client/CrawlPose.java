@@ -110,7 +110,7 @@ public final class CrawlPose {
 	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
 	/** On the back: one knee up, the other leg out straight (radians). */
 	static final float BACK_KNEE_UP = -0.55F, BACK_LEG_OUT = 0.12F;
-	/** (0.19.5) The neck up the body from the feet, and the eyes out from it (up and ahead, blocks). */
+	/** (0.19.7) The neck up the body from the feet, and the eyes out from it (up and ahead, blocks). */
 	static final float NECK = 1.5F, EYE_FROM_NECK = 0.25F;
 	/** (0.18.85) Player id → how far over onto the back (0 to 1), and when it was last stepped (game time). */
 	private static final Map<Integer, float[]> TURNED = new HashMap<>();
@@ -127,7 +127,7 @@ public final class CrawlPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
-		// (0.19.5) going down into the crawl or getting up from it
+		// (0.19.7) going down into the crawl or getting up from it
 		if (entity instanceof Player p) {
 			ProneTransition.extract(p, state, partialTicks);
 		} else {
@@ -166,7 +166,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.5) Andy: "the swap from belly down to belly up prone should move your fov with your head so you can see your
+	 * (0.19.7) Andy: "the swap from belly down to belly up prone should move your fov with your head so you can see your
 	 * body correctly". First person, turning over: how far the eyes have moved from where they are lying on the belly
 	 * (world blocks), following the head round the twist ({@link #rotate}) to where it lies face up behind the hips; or
 	 * null lying on the belly. The view keeps where it sits on the belly and moves by this.
@@ -187,7 +187,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.5) Where the eyes are, {@code back} over onto the back, from the feet in the body's own frame (-Z ahead): up
+	 * (0.19.7) Where the eyes are, {@code back} over onto the back, from the feet in the body's own frame (-Z ahead): up
 	 * the body to the neck and out from it as the head is pitched, then through vanilla's crawl tilt and the twist.
 	 */
 	private static Vector3f bodyEye(float back) {
@@ -227,7 +227,7 @@ public final class CrawlPose {
 		State crawl = state.getData(KEY);
 		Float move = state.getData(ProneTransition.KEY);
 		if (move != null && (crawl == null || crawl.rise() < 0.0F && crawl.downed() < 0.0F)) {
-			// (0.19.5) crouching down into it (or getting up), in place of vanilla's tilt
+			// (0.19.7) crouching down into it (or getting up), in place of vanilla's tilt
 			ProneTransition.rotate(state, poseStack, move);
 			return;
 		}
@@ -314,7 +314,7 @@ public final class CrawlPose {
 			return;
 		}
 		if (move != null) {
-			// (0.19.5) going down into the crawl or getting up: crouched, then onto the hands
+			// (0.19.7) going down into the crawl or getting up: crouched, then onto the hands
 			PoseBlend.Frame f = new PoseBlend.Frame(h);
 			ProneTransition.pose(f, move);
 			track.apply(h, f, 1.6F);
