@@ -161,6 +161,15 @@ public class GreatWhale extends WaterAnimal {
 		return super.finalizeSpawn(level, difficulty, reason, group);
 	}
 
+	/** (0.7.433) Made a right whale, a sperm whale or the white whale (a pod on a whaler's far grounds). */
+	public void becomes(int variant) {
+		this.entityData.set(VARIANT, variant);
+		if (variant == WHITE) {
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(WHITE_HEALTH);
+			this.setHealth(this.getMaxHealth());
+		}
+	}
+
 	/** Pulls it (a harpoon line, taut), taken up at its next move. */
 	void tow(Vec3 pull) {
 		this.towed = this.towed.add(pull);

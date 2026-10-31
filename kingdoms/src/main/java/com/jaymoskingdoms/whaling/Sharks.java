@@ -14,7 +14,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -23,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #MOST} at a carcass, and those near it close in and tear at it, each bite taking a stroke's worth of flesh that
  * no one will cut now. Cut in quickly, or there's little left to cut.
  */
-final class Sharks {
+public final class Sharks {
 	static final Identifier SHARK = Identifier.fromNamespaceAndPath("naturalist", "great_white_shark");
 	/** How often (ticks) one may come, the chance it does, how many at most, from how far (blocks), and how far round it's seen. */
 	static final int DRAW_EVERY = 400, MOST = 3;
@@ -34,6 +36,8 @@ final class Sharks {
 	static final float BITE_CHANCE = 0.1F;
 	static final double BITE_REACH = 2.5;
 	static final double SWIM = 1.2;
+	/** (0.7.433) Out on a whaler's far grounds ({@link WhaleCarcass#wildness}): this many more sharks at most for each step out, and this much likelier to come. */
+	static final float MORE_PER_WILD = 0.5F, CHANCE_PER_WILD = 0.08F;
 
 	private static final DustParticleOptions BLOOD = new DustParticleOptions(0x8A1010, 1.6F);
 
@@ -55,7 +59,9 @@ final class Sharks {
 			return;
 		}
 		List<Entity> sharks = level.getEntities((Entity) null, carcass.getBoundingBox().inflate(RANGE), e -> e.getType() == type && e.isAlive());
-		if (draw && sharks.size() < MOST && carcass.getRandom().nextFloat() < DRAW_CHANCE) {
+		int most = MOST + Math.round(carcass.wildness * MORE_PER_WILD);
+		float chance = Math.min(0.9F, DRAW_CHANCE + carcass.wildness * CHANCE_PER_WILD);
+		if (draw && sharks.size() < most && carcass.getRandom().nextFloat() < chance) {
 			arrive(level, carcass, type);
 		}
 		if (!bite) {
@@ -72,6 +78,31 @@ final class Sharks {
 				level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 1.2F, 0.6F);
 			}
 		}
+	}
+
+	/**
+	 * (0.7.433) A shark come up out of the deep near {@code at} (a whaleboat out on the far grounds), set on {@code prey};
+	 * false if there's no Naturalist shark, or no water deep enough there.
+	 */
+	public static boolean hunt(ServerLevel level, Vec3 at, @Nullable LivingEntity prey) {
+		EntityType<?> type = shark();
+		if (type == null) {
+			return false;
+		}
+		for (int tries = 0; tries < 6; tries++) {
+			float angle = level.getRandom().nextFloat() * Mth.TWO_PI;
+			double d = Mth.nextDouble(level.getRandom(), ARRIVE_MIN, ARRIVE_MAX);
+			BlockPos pos = BlockPos.containing(at.x + Mth.cos(angle) * d, level.getSeaLevel() - 4, at.z + Mth.sin(angle) * d);
+			if (level.getFluidState(pos).is(FluidTags.WATER) && level.getFluidState(pos.below()).is(FluidTags.WATER)
+				&& level.getFluidState(pos.above()).is(FluidTags.WATER)) {
+				Entity shark = type.spawn(level, pos, EntitySpawnReason.EVENT);
+				if (shark instanceof Mob mob && prey != null) {
+					mob.setTarget(prey);
+				}
+				return shark != null;
+			}
+		}
+		return false;
 	}
 
 	/** One comes in from out where it can't be seen arriving. */

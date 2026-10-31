@@ -558,6 +558,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Whalers.register();
+		// 0.7.433: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
+		LOGGER.debug("far ground attachments: {} {}", FarGrounds.REACH, FarGrounds.ROVERS);
 		TreasureWrecks.register();
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);

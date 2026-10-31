@@ -7595,3 +7595,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
   health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
 - Compile-checked only; not played.
+## 0.7.433: larger oceans and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
+- **Larger oceans:** `data/minecraft/worldgen/density_function/overworld/continents.json` swaps the overworld's
+  continentalness for the Large Biomes one (four times the scale) shifted 0.06 toward the sea. Continents and oceans
+  are four times as wide and there's somewhat more sea; biomes, erosion and every structure stay at their normal size.
+  New chunks only: an explored world gets a seam where old land meets new terrain, so it wants a new map to show.
+- **The far grounds (`FarGrounds`):** each realm counts its whalers home with whales; each one puts its next ground 160
+  blocks further out (up to 10 steps: 160-320 blocks at first, about 1760-1920 at the furthest). A whaler sunk, given
+  up for lost, or lost unseen puts it back a step. Her captain says how far out she's bound when she sails.
+- **Dangers out there**, rolled every minute while she's on her ground, more each step out:
+  - sea rovers: a pirate ship (out of the nearest pirate cove, or a barbarian camp if there's none) heaves into sight
+    96-128 blocks off, out of players' sight, and runs her down; galleons likelier further out; one more rover is
+    possible every 4 steps. Rovers cruise that ground and are stowed after a day with nobody near. Sinking one doesn't
+    count against its camp's own ship.
+  - sharks: more come to her carcass, sooner, and from step 2 sharks come up under her lowered boats after the oarsmen.
+  - her pods hold more sperm whales (which turn on the boats that strike them) and the white whale now and then.
+  - a voyage made out of anyone's sight is lost with 4% a step (at most 35%).
+- **Reward:** her hold comes home 25% richer for each step out (oil, meat, bone, ambergris), pods are a whale bigger
+  every 3 steps, and ambergris is likelier.
+- Compile-checked and dev-server booted; not played.
