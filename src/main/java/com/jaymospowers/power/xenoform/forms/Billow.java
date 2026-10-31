@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.115, Scan F) Billow, the cloud: a big soft body of white cloud, greyer underneath, with a calm round face. 40
+ * (0.18.117, Scan F) Billow, the cloud: a big soft body of white cloud, greyer underneath, with a calm round face. 40
  * health, fists of 2, slow. It floats: jump to rise, sneak to sink, and otherwise it hangs where it is; falls never
  * hurt it. Up to {@link #SEATS} friends can ride on its back (right-click it; sneak to get off), sat as on a happy
  * ghast ({@code BillowSeatsMixin}). Scanned from a happy ghast, or the Aether's aerwhale ({@code XenoDna}).

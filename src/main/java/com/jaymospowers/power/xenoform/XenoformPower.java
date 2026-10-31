@@ -300,7 +300,7 @@ public final class XenoformPower implements Power {
 		public net.minecraft.world.phys.@Nullable Vec3 anchor;
 		public double rope;
 		/**
-		 * (0.18.115, Scan F) Ooze: squeezed small; blobs split off for the hurt taken. Fuse: ticks Self-Destruct has swelled ({@code swell});
+		 * (0.18.117, Scan F) Ooze: squeezed small; blobs split off for the hurt taken. Fuse: ticks Self-Destruct has swelled ({@code swell});
 		 * the ring blasts still to go off. Billow: ticks left of the downpour and of the fog.
 		 */
 		public boolean squeeze;

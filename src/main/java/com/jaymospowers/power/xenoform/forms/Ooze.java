@@ -33,7 +33,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.115, Scan F of {@code docs/ScanGaps-Plan.md}) Ooze, the living slime: a body of see-through green jelly with a
+ * (0.18.117, Scan F of {@code docs/ScanGaps-Plan.md}) Ooze, the living slime: a body of see-through green jelly with a
  * darker core and two dark eyes. 24 health, fists of 4. It bounces off every fall (sneak to land), and as it's hurt it
  * splits: a small slime of its own drops off at each quarter of its health lost, fights beside it, and creeps back to
  * rejoin it (healing it) once the fight's been over {@link #REJOIN_QUIET} ticks. Scanned from a slime, or the sulfur

@@ -67,7 +67,7 @@ public final class XenoForms {
 	public static final XenoForm SKITTER = register(new com.jaymospowers.power.xenoform.forms.Skitter());
 	public static final XenoForm SHADE = register(new com.jaymospowers.power.xenoform.forms.Shade());
 	public static final XenoForm MIRAGE = register(new com.jaymospowers.power.xenoform.forms.Mirage());
-	/** (0.18.115, Scan F) Ooze (a slime; Magma Ooze from a magma cube), Fuse (a creeper), Thornwild (a creaking), Billow (a happy ghast). */
+	/** (0.18.117, Scan F) Ooze (a slime; Magma Ooze from a magma cube), Fuse (a creeper), Thornwild (a creaking), Billow (a happy ghast). */
 	public static final XenoForm OOZE = register(new com.jaymospowers.power.xenoform.forms.Ooze(false));
 	public static final XenoForm MAGMA_OOZE = register(new com.jaymospowers.power.xenoform.forms.Ooze(true));
 	public static final XenoForm FUSE = register(new com.jaymospowers.power.xenoform.forms.Fuse());

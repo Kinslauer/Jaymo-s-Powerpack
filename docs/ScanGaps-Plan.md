@@ -189,7 +189,7 @@ key; Mirage's copies follow you like Duplex's doubles rather than wander, and la
 
 ### Scan F, odd bodies (Powers, large)
 
-**Built (0.18.115):** all four, with these changes: the magma cube scan is its own alien, Magma Ooze (same kit,
+**Built (0.18.117):** all four, with these changes: the magma cube scan is its own alien, Magma Ooze (same kit,
 burning look, fire immunity, magma-cube blobs), since a scan gives an alien rather than a variant; Ooze's blobs are
 small vanilla slimes (magma cubes) that fight for it, not copies of the alien; V Squeeze shrinks Ooze 60% rather than
 forcing the crawl (everyone can crawl already); Fuse's Self-Destruct is one blast and then four small ones a tick apart

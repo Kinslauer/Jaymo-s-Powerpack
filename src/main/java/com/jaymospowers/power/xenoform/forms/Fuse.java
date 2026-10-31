@@ -23,7 +23,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.115, Scan F) Fuse, the blast alien: a mottled green body with a pale chest, a blocky head with the creeper's
+ * (0.18.117, Scan F) Fuse, the blast alien: a mottled green body with a pale chest, a blocky head with the creeper's
  * dark hollow eyes and frown, and stubby legs. 20 health, fists of 4, and every punch pops (a little burst that knocks
  * back). Its own blasts never hurt it. Scanned from a creeper.
  * <ul>

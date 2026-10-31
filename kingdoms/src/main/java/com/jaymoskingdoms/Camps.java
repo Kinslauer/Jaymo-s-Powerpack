@@ -435,7 +435,7 @@ public final class Camps {
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
-	private static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
+	static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
 		if (!level.isPositionEntityTicking(at)) {
 			return false;
 		}

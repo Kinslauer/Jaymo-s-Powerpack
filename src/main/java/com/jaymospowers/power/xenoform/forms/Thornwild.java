@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.115, Scan F) Thornwild, the plant: a body of bark and twisted wood, mossy at the shoulders, thorns down its
+ * (0.18.117, Scan F) Thornwild, the plant: a body of bark and twisted wood, mossy at the shoulders, thorns down its
  * arms, a face of knots with two glowing amber eyes. 28 health, fists of 5. It heals in sunlight. Scanned from a
  * creaking, or Enderscape's rustle ({@code XenoDna}).
  * <ul>

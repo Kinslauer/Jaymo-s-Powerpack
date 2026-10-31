@@ -960,7 +960,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.115, Scan F) Ooze (and Magma Ooze): a soft, swollen body with a blob on its head that wobbles as it moves. */
+	/** (0.18.117, Scan F) Ooze (and Magma Ooze): a soft, swollen body with a blob on its head that wobbles as it moves. */
 	static final class Ooze extends FormModel {
 		private final ModelPart blob;
 
@@ -986,7 +986,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.115, Scan F) Fuse: nothing but the body; its face does the rest. */
+	/** (0.18.117, Scan F) Fuse: nothing but the body; its face does the rest. */
 	static final class Fuse extends FormModel {
 		Fuse() {
 			super(bake(HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F)), "fuse");
@@ -994,7 +994,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.115, Scan F) Thornwild: a crown of twigs, and thorns along its arms. */
+	/** (0.18.117, Scan F) Thornwild: a crown of twigs, and thorns along its arms. */
 	static final class Thornwild extends FormModel {
 		Thornwild() {
 			super(bake(mesh()), "thornwild");
@@ -1022,7 +1022,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.115, Scan F) Billow: big soft puffs of cloud round its body and head that drift as it breathes. */
+	/** (0.18.117, Scan F) Billow: big soft puffs of cloud round its body and head that drift as it breathes. */
 	static final class Billow extends FormModel {
 		private final ModelPart puff, cap;
 

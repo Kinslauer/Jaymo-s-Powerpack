@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.18.115, Scan F) Billow's riders sit side by side across its back, as on a happy ghast, not all in one spot over its
+ * (0.18.117, Scan F) Billow's riders sit side by side across its back, as on a happy ghast, not all in one spot over its
  * head. Runs on both sides, so every client places them the same.
  */
 @Mixin(Entity.class)
