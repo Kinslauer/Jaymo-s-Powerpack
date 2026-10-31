@@ -158,3 +158,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   pay about double), border clashes (purist raids, militia striking back, reputation for the side you take), kidnapped
   children held on the raiders' road, and haven bounties (raiders, the child, a preying camp). The havens' own builds
   follow in 6c.
+- Patch 6c (Kingdoms 0.7.441): havens built their own way (Tideborn stilt houses with kelp roofs and fish racks,
+  Stoneborn hillside mounds with stone arches, Sylvan tree houses with rope rails, Warrior-born longhouses and a
+  fighting ring, mixed havens taking each in turn); a quarter of havens live alongside goblins and orcs (not raided by
+  the tribes) and a third of those sit under an orc king.

@@ -7721,3 +7721,20 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   it grows over random ticks, a bare hand picks 1-2 at full bloom).
 - Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
 - Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
+## 0.7.441: havens built their own way (Havens patch 6c)
+- **Haven houses** (`HavenBuildings`): a haven's houses are drawn in its blood's way, and a mixed haven's take a bit of
+  each, house by house.
+  - Tideborn: stilt houses three blocks up, with steps to a railed front deck, a fish rack and a barrel, plank walls
+    and a dried-kelp roof.
+  - Stoneborn: low stone-brick houses with a turf-and-moss mound for a roof and the door set in a stone arch (a
+    furnace and a stonecutter inside).
+  - Sylvan: tree houses, a platform on a trunk and four posts five blocks up, a ladder, rope rails, and a small house
+    under a leafy crown.
+  - Warrior-born: longhouses, 7 by 13-15, log walls under a steep spruce roof, a hearth down the middle and beds
+    along both sides.
+- **Fighting ring:** a Warrior-born or mixed haven also builds one: a round of posts and rails 13 across round a
+  sand floor.
+- **Havens alongside goblins and orcs:** a quarter of havens have goblins and orcs among their folk (a quarter of
+  those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
+  of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
+- Compile-checked; not played.

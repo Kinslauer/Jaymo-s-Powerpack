@@ -9556,5 +9556,9 @@
 	"block.jaymoskingdoms.cat_plush": "Cat Plush",
 	"block.jaymoskingdoms.frog_plush": "Frog Plush",
 	"block.jaymoskingdoms.window_box": "Window Box",
-	"block.jaymoskingdoms.pot_planter": "Pot Planter"
+	"block.jaymoskingdoms.pot_planter": "Pot Planter",
+	"title.jaymoskingdoms.haven.orc.king": "Orc-Sworn Elder",
+	"title.jaymoskingdoms.haven.orc.queen": "Orc-Sworn Elder",
+	"title.jaymoskingdoms.haven.orc.lord": "Orc-Sworn Reeve",
+	"title.jaymoskingdoms.haven.orc.lady": "Orc-Sworn Reeve"
 }
