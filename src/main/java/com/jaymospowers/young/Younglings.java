@@ -30,7 +30,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 /**
- * (0.18.114, Motion patch 7) Young for the creatures the game never gave any: spiders and cave spiders, parrots, and our
+ * (0.18.115, Motion patch 7) Young for the creatures the game never gave any: spiders and cave spiders, parrots, and our
  * own wild beasts, whales, aerwhales, skyroot lizards and pigeons (tag {@code jaymospowers:has_young}). Andy: "Just add
  * baby spiders and the wild and farm animal babies that don't already exist." Some natural spawns come with a brood or
  * a calf or two at their side. A youngling is the same creature made small through the scale attribute (so its hitbox,

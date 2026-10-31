@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.114) Younglings (Younglings) squeak higher and drop nothing. */
+/** (0.18.115) Younglings (Younglings) squeak higher and drop nothing. */
 @Mixin(LivingEntity.class)
 abstract class YoungLivingMixin {
 	@Inject(method = "getVoicePitch", at = @At("RETURN"), cancellable = true)

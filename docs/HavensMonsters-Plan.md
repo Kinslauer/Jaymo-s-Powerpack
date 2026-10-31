@@ -146,3 +146,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   stand, and killing him then with a sworn captain of his brood crowns that captain (the tribe is yours).
   (Andy) In-balming: each spirit binds orcs and goblins its own way (Varro's ki mark and battle cry, Ambrose's gentle hand
   on brutes, Grimsby's steel oath, Thessaly's borrowed eyes, the Quiet One's silent shadow).
+- Patch 5 (Powers 0.18.114, Kingdoms 0.7.435): trophies worn as baubles (a dead captain's named tusk, the goblin king's
+  ring, the warchief's necklace of tusks, the Ogre King's hide), each adding to Will; a tribe's king and the Ogre King
+  carry their own weapon and drop its iron head (Gutting Hook, Warchief's Cleaver, Ogre King's Maul; Tool Station only,
+  never cast or forged); and their crowns, worn on the head (+Will) or placed.

@@ -7634,7 +7634,18 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
 - Compile-checked only; not played.
 
-## 0.7.435: rare pets (Motion patch 7; pack 0.18.114)
+## 0.7.435: spoils (Havens patch 5; pack 0.18.114)
+- **Trophies worn as baubles** (Powers' bauble slots take them by its `jaymospowers:baubles/<slot>` tags; `Spoils`): a
+  captain who stays dead leaves a player his tusk (a charm named for him, +1 Will, +2 from rank 3 up); every goblin
+  king leaves his ring (+1 luck, +5% speed), every orc warchief a necklace of tusks (+1.5 attack), the Ogre King his
+  hide (a cloak: +3 armour, +0.15 knockback resistance). Each also adds 1 Will (staredowns and Will clashes).
+- **Weapons taken from kings:** a tribe's king (the goblin king or warchief at its seat) holds his own weapon and drops
+  its iron head, as does the Ogre King: Gutting Hook, Warchief's Cleaver, Ogre King's Maul, put together at Powers'
+  Tool Station only.
+- **Monster crowns:** the same kings drop their crown (goblin, orc, ogre). Right-click the air to wear it (drawn on the
+  head, +1 armour, +2 Will), or place it as a small block.
+- Drops only when a player had the kill. Compile-checked; not played.
+## 0.7.436: rare pets (Motion patch 7; pack 0.18.115)
 - `RarePets`: settlements of 8+ grown get one villager keeping an animal from a far climate (13 kinds by vanilla
   variants), tamed dogs/parrots trail them, others keep near their spot. The keeper brags to players who come near (once a
   day each, `rarepet.jaymoskingdoms.brag.N`) or tells an old tale hinting at Powers' hidden name-tag looks (`.hint.N`).

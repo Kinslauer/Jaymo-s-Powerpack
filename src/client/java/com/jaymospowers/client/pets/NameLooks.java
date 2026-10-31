@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.18.114, Motion patch 7) A few hidden name-tag looks, like vanilla's own: no screen text says what they are, only
+ * (0.18.115, Motion patch 7) A few hidden name-tag looks, like vanilla's own: no screen text says what they are, only
  * villagers' old tales hint at them (Kingdoms' rarepet hints). Drawn only, so a creature's size for hitting it is its own.
  * <ul>
  * <li><b>Pip</b>: stays a whelp, drawn at {@link #PIP}.</li>

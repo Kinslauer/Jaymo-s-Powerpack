@@ -44,7 +44,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.435, Motion patch 7) Rare pets. Andy: "Some villagers will keep rare pets or animals as they found them from a
+ * (0.7.436, Motion patch 7) Rare pets. Andy: "Some villagers will keep rare pets or animals as they found them from a
  * different biome far away and will brag about it as some sort of accomplishment." A realm's settlement of
  * {@link #GROWN_FOR} grown or more comes, in time, to have one villager keeping an animal from far off: a snow fox or a
  * snowy wolf where it's warm, a golden rabbit, an armadillo or a jungle parrot where it's cold, a brown mooshroom

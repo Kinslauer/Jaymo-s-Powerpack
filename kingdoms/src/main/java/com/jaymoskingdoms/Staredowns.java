@@ -146,7 +146,7 @@ final class Staredowns {
 
 	// ---- Will against nerve -------------------------------------------------------------------------------------------
 
-	/** {@code sp}'s Will: their Will pages' ranks, their world tier, a Warrior's name, Second Breath. */
+	/** {@code sp}'s Will: their Will pages' ranks, their world tier, a Warrior's name, Second Breath, trophies and a crown worn. */
 	static int will(ServerPlayer sp) {
 		int will = Will.rank(sp, Skills.Perk.DREAD_PRESENCE) + Will.rank(sp, Skills.Perk.STARE_DOWN) + Will.rank(sp, Skills.Perk.BROKEN_MORALE)
 			+ Will.rank(sp, Skills.Perk.NAME_THAT_CARRIES) + Will.rank(sp, Skills.Perk.LAST_LOOK);
@@ -154,6 +154,8 @@ final class Staredowns {
 		if (Renown.alignment(Skills.of(sp)) == Skills.Pillar.STRENGTH) {
 			will += WILL_ALIGNED;
 		}
+		// (0.7.435) trophies and a crown worn
+		will += Spoils.will(sp);
 		return Will.surging(sp) ? will + WILL_SURGE : will;
 	}
 

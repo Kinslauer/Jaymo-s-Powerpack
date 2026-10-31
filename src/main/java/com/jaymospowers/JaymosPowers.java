@@ -107,7 +107,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.frost.Frost.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
 		com.jaymospowers.layers.Layers.init();
-		// (0.18.114) young for spiders, parrots and our wild beasts, whales and sky creatures
+		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures
 		com.jaymospowers.young.Younglings.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();

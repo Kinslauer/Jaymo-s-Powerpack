@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.114) Some natural spawns of creatures that have young bring a brood or a calf (Younglings). */
+/** (0.18.115) Some natural spawns of creatures that have young bring a brood or a calf (Younglings). */
 @Mixin(Mob.class)
 abstract class YoungSpawnMixin {
 	@Inject(method = "finalizeSpawn", at = @At("RETURN"))

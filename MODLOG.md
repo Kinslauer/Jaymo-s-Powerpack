@@ -4568,7 +4568,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   mob still, Blink, Wary (the next blow blinks you away); water burns it. Mirage (illusioner): Mirror Images (false
   copies that draw mobs off and vanish at a blow, Duplex's doubles with a fake flag), Blind, Unseen, Swap. Each has
   its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
-- **0.18.114, Babies and rare pets (Motion patch 7, `docs/Motion-Plan.md`; Kingdoms 0.7.435):**
+- **0.18.114, Kings' weapons (Havens patch 5; Kingdoms 0.7.435):** the Gutting Hook (quick; each hit hooks the foe a
+  step toward you), the Warchief's Cleaver (heavy; knocks a raised shield aside for 6 s) and the Ogre King's Maul (very
+  heavy; throws the struck back and slows them). Their iron heads (`tinkering/WeaponParts.KINGS`) drop only off kings
+  in Kingdoms and are never shaped, cast or forged; they go together at the Tool Station, and JEI shows that route and
+  where each head comes from. Art: `tools/king_spoils_assets.py`. Compile-checked; not played.
+- **0.18.115, Babies and rare pets (Motion patch 7, `docs/Motion-Plan.md`; Kingdoms 0.7.436):**
 - Younglings (`young/Younglings`, tag `jaymospowers:has_young`): spiders, cave spiders, parrots, aerwhales, skyroot
   lizards and Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons now have young.
   One natural spawn in four brings a brood (spiders: 2-4) or a calf or two. Young are the same creature drawn small
