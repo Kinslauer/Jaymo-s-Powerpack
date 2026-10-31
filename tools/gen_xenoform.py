@@ -1380,6 +1380,149 @@ def lurk():
     save(img, "entity/xenoform_lurk.png")
 
 
+def gyre():
+    """(0.18.103) Gyre, the wind-shell turtle: sea-green hide with pale scales, a domed shell of dark plates edged in
+    moss, wind vents (pale slots) along its rim, a hooked beak, the insignia on the shell's crown."""
+    img = new_skin()
+    hide = (94, 150, 112)
+    plate = (54, 92, 64)
+    parts(img, hide, 0.16)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (150, 196, 158, 255), (b[2] - b[0]) * (b[3] - b[1]) // 10 + 1)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (214, 206, 150), (188, 178, 120), 0.08)
+    for y in range(by0 + 3, by1, 3):
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (150, 140, 96, 255))
+    claws(img, (40, 50, 40, 255))
+    eyes(img, (20, 24, 20, 255), y=11, wide=True, pupil=(230, 230, 200, 255))
+    # extras: shell 10x10x5 at (0,64); beak 4x2x2 at (32,64)
+    shell = (0, 64, 10, 10, 5)
+    box(img, shell, plate, 0.14)
+    for name, (x0, y0, x1, y1) in faces(*shell).items():
+        outline(img, (x0, y0, x1, y1), (120, 170, 96, 255))
+        if name in ("back", "top"):
+            for y in range(y0 + 3, y1 - 1, 4):
+                for x in range(x0 + 1, x1 - 1):
+                    if (x + y // 4) % 4 == 0:
+                        img.putpixel((x, y), (120, 170, 96, 255))
+        if name in ("left", "right"):
+            for y in range(y0 + 2, y1 - 1, 3):
+                rect(img, (x0 + 1, y, x1 - 1, y + 1), (210, 236, 226, 255))
+    sx0, sy0, sx1, sy1 = faces(*shell)["back"]
+    insignia(img, (sx0 + sx1) // 2, sy0 + 2, small=True, rim=(20, 36, 24, 255))
+    box(img, (32, 64, 4, 2, 2), (204, 190, 120), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_gyre.png")
+
+
+def cortex():
+    """(0.18.103) Cortex, the thinking crab: coral-red plates edged dark, a cream belly, small black eyes, one big claw
+    and one small (pale-tipped), and an open skull where a pink brain shows, laced with glowing teal."""
+    img = new_skin()
+    shell = (196, 78, 62)
+    parts(img, shell, 0.14, edge=0.7)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 2, bx1 - 1, by1 - 1), (236, 212, 180), (214, 186, 150), 0.08)
+    claws(img, (90, 30, 26, 255))
+    eyes(img, (16, 12, 12, 255), y=12)
+    rect(img, (10, 14, 14, 15), (120, 40, 34, 255))
+    chest_insignia(img, rim=(80, 26, 22, 255))
+    # extras: big claw 5x5x5 at (0,64); small claw 3x3x3 at (24,64); brain 6x3x6 at (0,76)
+    for part in ((0, 64, 5, 5, 5), (24, 64, 3, 3, 3)):
+        box(img, part, (214, 90, 70), 0.12, edge=0.7)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "left", "right", "back"):
+                rect(img, (x0, y1 - 1, x1, y1), (244, 226, 200, 255))
+    brain = (0, 76, 6, 3, 6)
+    box(img, brain, (232, 150, 170), 0.12)
+    for name, b in faces(*brain).items():
+        veins(img, b, (200, 110, 140, 255), (110, 240, 230, 255), (b[2] - b[0]) // 2 + 1, length=(2, 5))
+    clear_hat(img)
+    save(img, "entity/xenoform_cortex.png")
+
+
+def locust():
+    """(0.18.103) Locust, the crashing hopper: grass-green with yellow belly segments, darker green wing cases veined
+    lighter, long feelers, red-brown hind spurs, big amber compound eyes."""
+    img = new_skin()
+    green = (120, 176, 58)
+    parts(img, green, 0.14)
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for y in range(y0 + 3, y1, 4):
+                    rect(img, (x0, y, x1, y + 1), shade(green + (255,), 0.7))
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1 - 1):
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (226, 214, 96, 255) if (y - by0) % 3 else (184, 168, 64, 255))
+    claws(img, (60, 44, 24, 255))
+    eyes(img, (232, 160, 40, 255), y=10, wide=True, pupil=(90, 50, 10, 255))
+    rect(img, (11, 14, 13, 15), (60, 80, 30, 255))
+    chest_insignia(img, rim=(40, 56, 20, 255))
+    # extras: wing cases 8x11x1 at (0,64); feelers 1x6x1 at (20,64); hind spurs 2x5x2 at (24,64)
+    wings = (0, 64, 8, 11, 1)
+    box(img, wings, (82, 130, 48), 0.12)
+    for name, b in faces(*wings).items():
+        veins(img, b, (60, 100, 36, 255), (150, 200, 96, 255), 3, length=(3, 8))
+    box(img, (20, 64, 1, 6, 1), (70, 96, 40), 0.1)
+    box(img, (24, 64, 2, 5, 2), (150, 80, 50), 0.12)
+    clear_hat(img)
+    save(img, "entity/xenoform_locust.png")
+
+
+def croaker():
+    """(0.18.103) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow belly and throat sac,
+    gold eyes with black slits on top of the head, webbed feet."""
+    img = new_skin()
+    green = (84, 132, 52)
+    parts(img, green, 0.16)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (54, 92, 32, 255), (b[2] - b[0]) * (b[3] - b[1]) // 8 + 1)
+            speckle(img, b, (140, 186, 84, 255), (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0, bx1 - 1, by1 - 1), (236, 226, 150), (214, 200, 120), 0.08)
+    # a wide mouth line
+    rect(img, (8, 13, 16, 14), (40, 60, 24, 255))
+    claws(img, (40, 60, 24, 255))
+    chest_insignia(img, rim=(40, 60, 24, 255))
+    # extras: eyes 3x3x3 at (0,64); throat sac 6x3x3 at (12,64); webbed feet 4x1x4 at (0,72)
+    eye = (0, 64, 3, 3, 3)
+    box(img, eye, (214, 170, 40), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*eye).items():
+        if name in ("front", "left", "right"):
+            rect(img, ((x0 + x1) // 2, y0, (x0 + x1) // 2 + 1, y1), (16, 12, 8, 255))
+    box(img, (12, 64, 6, 3, 3), (236, 222, 150), 0.08)
+    box(img, (0, 72, 4, 1, 4), (70, 112, 44), 0.12)
+    clear_hat(img)
+    save(img, "entity/xenoform_croaker.png")
+
+
+def dud():
+    """(0.18.103) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
+    brows, a wobbly little mouth, two nubs on top of its head."""
+    img = new_skin()
+    pink = (232, 176, 204)
+    parts(img, pink, 0.08)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (250, 230, 240), (240, 214, 228), 0.05)
+    eyes(img, (250, 250, 250, 255), y=11, wide=True, pupil=(30, 24, 40, 255))
+    # worried brows, sloping up in the middle
+    img.putpixel((9, 10), (120, 70, 100, 255))
+    img.putpixel((10, 9), (120, 70, 100, 255))
+    img.putpixel((14, 10), (120, 70, 100, 255))
+    img.putpixel((13, 9), (120, 70, 100, 255))
+    # a wobbly mouth
+    for x, y in ((10, 14), (11, 15), (12, 14), (13, 15)):
+        img.putpixel((x, y), (140, 70, 100, 255))
+    chest_insignia(img, rim=(140, 90, 120, 255))
+    # extras: nubs 2x2x2 at (0,64)
+    box(img, (0, 64, 2, 2, 2), (214, 150, 186), 0.08)
+    clear_hat(img)
+    save(img, "entity/xenoform_dud.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -1387,10 +1530,12 @@ ULTIMATE_COLORS = {
     "bulwark": (184, 196, 208), "pyre": (255, 138, 42), "blur": (76, 141, 255), "prism": (196, 139, 240),
     "wisp": (184, 232, 248), "gremlin": (154, 220, 90), "knell": (31, 184, 200), "wyrm": (192, 96, 224),
     "duplex": (224, 123, 74), "rivet": (159, 180, 192), "gorger": (176, 106, 84), "slipfin": (240, 140, 184),
-    "polestar": (216, 74, 74), "lurk": (110, 82, 176),
+    "polestar": (216, 74, 74), "lurk": (110, 82, 176), "gyre": (95, 163, 122), "cortex": (79, 184, 176),
+    "locust": (141, 179, 58), "croaker": (110, 158, 60),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
+PATCH5 = ("gyre", "cortex", "locust", "croaker")
 
 
 def ultimate(form):
@@ -1439,7 +1584,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1511,7 +1656,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4:
+        if form not in PATCH4 + PATCH5:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -1520,6 +1665,14 @@ if __name__ == "__main__":
     polestar()
     lurk()
     for form in PATCH4:
+        ultimate(form)
+    # (0.18.103) patch 5, after patch 4 for the same reason; Dud has no Ultimate
+    gyre()
+    cortex()
+    locust()
+    croaker()
+    dud()
+    for form in PATCH5:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:

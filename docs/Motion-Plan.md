@@ -82,7 +82,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   the shoulder for about a second. Brave shows a third of the flinch, hotheaded stands with arms tense, gloomy slumps,
   cheerful bounces as they walk.
 
-### Patch 2, Water (Powers 0.18.102 + Kingdoms 0.7.429; picks swim-direction, dives, wakes, underwater-break)
+### Patch 2, Water (Powers 0.18.104 + Kingdoms 0.7.430; picks swim-direction, dives, wakes, underwater-break)
 - **Directional swimming** (`client/water/SwimStrokePose`): in water over half your height, off the bottom, not
   sprint-swimming: breaststroke going forward, backstroke going backward, side stroke going sideways, treading water
   when still. Vanilla's sprint-swim crawl is kept. Only Tideborn (Dolphin's Grace while sprint-swimming) and Slipfin

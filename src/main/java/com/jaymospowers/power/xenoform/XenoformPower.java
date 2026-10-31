@@ -245,6 +245,19 @@ public final class XenoformPower implements Power {
 		public int watched = -1;
 		public boolean faded;
 		public int eyes = -1;
+		/**
+		 * (0.18.103, patch 5) Gyre: ticks left of the shell spin and who it has already bowled; the whirlwind's eye and its
+		 * ticks left. Cortex: the bubble's last tick. Locust: ticks R has been held; mid a crash leap. Croaker: the creature
+		 * in its gullet (entity id, -1 none).
+		 */
+		public int spin;
+		public final java.util.Set<Integer> spun = new java.util.HashSet<>();
+		public net.minecraft.world.phys.@Nullable Vec3 whirl;
+		public int whirlTicks;
+		public long bubbleUntil;
+		public int leapCharge;
+		public boolean crashing;
+		public int swallowed = -1;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -297,6 +310,12 @@ public final class XenoformPower implements Power {
 			brace = spray = rebound = anvilDrop = false;
 			dropFrom = fallSpeed = 0.0;
 			song = 0;
+			spin = whirlTicks = leapCharge = 0;
+			spun.clear();
+			whirl = null;
+			bubbleUntil = 0L;
+			crashing = false;
+			swallowed = -1;
 			gorge = horn = 0;
 			hornSlam = rolled = false;
 			hornFrom = 0.0;
@@ -345,6 +364,10 @@ public final class XenoformPower implements Power {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			// (0.18.103) Dud can't hurt anything
+			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).form == XenoForms.DUD) {
+				return false;
+			}
 			if (!(entity instanceof ServerPlayer player) || !has(player)) {
 				return true;
 			}
