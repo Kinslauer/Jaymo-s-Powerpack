@@ -288,7 +288,7 @@ public final class Tribes {
 		MinecraftServer server = player.level().getServer();
 		// ((0.7.443) and one in its good books)
 		return tribe != null && (truce(server, player.getUUID(), tribe) || SwornCaptains.rules(server, tribe, player.getUUID())
-			|| grudge(server, player.getUUID(), tribe) <= TribePacts.FRIEND_AT);
+			|| grudge(server, player.getUUID(), tribe) <= TribePacts.FRIEND_AT || GreenskinLife.raised(player));
 	}
 
 	/** Someone died: one of a tribe's at a player's hand raises their grudge (and lowers it with the rival brood's tribe). */

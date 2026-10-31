@@ -174,6 +174,8 @@ final class StoryFigure {
 		scene("road.evicted", Act.WALK, Items.EMERALD, Items.BUNDLE, null, null, null, null);
 		scene("road.hideout", Act.STAND, Items.STONE_SWORD, null, lh, null, null, null);
 		scene("road.cast_out", Act.WALK, null);
+		// (0.7.443) raised by the camps: a stone axe in hand
+		scene("road.greenskin", Act.STAND, Items.STONE_AXE);
 		// (0.7.414) the kit roads: the family blade held out, a trader with a coin and a bundle, a pup's bone, the nobodies' wooden sword and rags
 		scene("road.heirloom", Act.STAND, Items.IRON_SWORD);
 		scene("road.trader", Act.WALK, Items.EMERALD, Items.BUNDLE, null, lc, null, lb);

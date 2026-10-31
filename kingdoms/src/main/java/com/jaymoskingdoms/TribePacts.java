@@ -135,7 +135,7 @@ public final class TribePacts {
 		if (p == null) {
 			return by;
 		}
-		float share = Prejudice.degree(Heritage.of(p)) > 0 ? NONHUMAN_SHARE : 1.0F;
+		float share = GreenskinLife.raised(p) ? GreenskinLife.GRUDGE_SHARE : Prejudice.degree(Heritage.of(p)) > 0 ? NONHUMAN_SHARE : 1.0F;
 		return share >= 1.0F ? by : Math.max(1, Math.round(by * share));
 	}
 

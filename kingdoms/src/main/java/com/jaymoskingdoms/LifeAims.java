@@ -147,6 +147,7 @@ public final class LifeAims {
 		AIMS.put(Start.EVICTED, new Aim(Kind.HOME, 3, Stats.Stat.AGILITY));
 		AIMS.put(Start.HIDEOUT, new Aim(Kind.REP, 0, Stats.Stat.FINESSE));
 		AIMS.put(Start.CAST_OUT, new Aim(Kind.SETTLE, 1, Stats.Stat.WITS));
+		AIMS.put(Start.GREENSKIN, new Aim(Kind.REP, 100, Stats.Stat.MIGHT));
 		AIMS.put(Start.HEIRLOOM, new Aim(Kind.BLADE, 10, Stats.Stat.MIGHT));
 		AIMS.put(Start.TRADER, new Aim(Kind.ORDERS, 5, Stats.Stat.WITS));
 		AIMS.put(Start.PUP, new Aim(Kind.WOLF, 1, Stats.Stat.AGILITY));
