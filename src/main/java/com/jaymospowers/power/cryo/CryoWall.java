@@ -50,6 +50,11 @@ public final class CryoWall {
 		if (Powers.silenced(player) || !CryoPower.ready(player, CryoState.WALL)) {
 			return;
 		}
+		raise(player);
+	}
+
+	/** (0.18.105) The wall itself, without the Cryokinesis checks (Rime lends it, {@link CryoLent}). */
+	static void raise(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);

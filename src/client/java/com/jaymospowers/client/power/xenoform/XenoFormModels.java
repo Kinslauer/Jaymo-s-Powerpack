@@ -77,6 +77,10 @@ public final class XenoFormModels {
 			MODELS.put("locust", new Locust());
 			MODELS.put("croaker", new Croaker());
 			MODELS.put("dud", new Dud());
+			MODELS.put("rime", new Rime());
+			MODELS.put("marrow", new Marrow());
+			MODELS.put("swathe", new Swathe());
+			MODELS.put("blight", new Blight());
 		}
 		return MODELS.get(form);
 	}
@@ -428,6 +432,151 @@ public final class XenoFormModels {
 			float wobble = Mth.sin(state.ageInTicks * 0.25F) * 0.05F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.1F * state.walkAnimationSpeed;
 			this.body.zRot += wobble;
 			this.head.zRot += wobble * 1.5F;
+		}
+	}
+
+	/** (0.18.105, Scan B) Rime: angular ice, a crown of three icicles and two icicle spines down its back that shiver. */
+	static final class Rime extends FormModel {
+		private final ModelPart rightSpine, leftSpine;
+
+		Rime() {
+			super(bake(mesh()), "rime");
+			this.insigniaZ = -2.2F;
+			this.rightSpine = this.body.getChild("right_spine");
+			this.leftSpine = this.body.getChild("left_spine");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("crown_mid", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offset(0.0F, -8.2F, -1.0F));
+			head.addOrReplaceChild("crown_right", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(-2.5F, -8.2F, -1.0F, 0.0F, 0.0F, -0.35F));
+			head.addOrReplaceChild("crown_left", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(2.5F, -8.2F, -1.0F, 0.0F, 0.0F, 0.35F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("right_spine", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 8.0F, 2.0F),
+				PartPose.offsetAndRotation(-1.8F, 4.0F, 2.4F, -0.7F, 0.0F, -0.15F));
+			body.addOrReplaceChild("left_spine", CubeListBuilder.create().texOffs(8, 64).mirror().addBox(-1.0F, -8.0F, -1.0F, 2.0F, 8.0F, 2.0F),
+				PartPose.offsetAndRotation(1.8F, 4.0F, 2.4F, -0.7F, 0.0F, 0.15F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float shiver = Mth.sin(state.ageInTicks * 0.9F) * 0.015F;
+			this.rightSpine.zRot = -0.15F + shiver;
+			this.leftSpine.zRot = 0.15F - shiver;
+		}
+	}
+
+	/** (0.18.105, Scan B) Marrow: bare bone, two horns curling back off the skull, an open ribcage that breathes, a spine out its back. */
+	static final class Marrow extends FormModel {
+		private final ModelPart ribs;
+
+		Marrow() {
+			super(bake(mesh()), "marrow");
+			this.insigniaZ = -2.6F;
+			this.ribs = this.body.getChild("ribs");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(-3.0F, -7.6F, -1.0F, -0.6F, 0.0F, -0.4F));
+			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(3.0F, -7.6F, -1.0F, -0.6F, 0.0F, 0.4F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("spine", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F),
+				PartPose.offset(0.0F, 0.5F, 1.8F));
+			body.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(0, 80).addBox(-4.5F, 0.0F, -2.5F, 9.0F, 7.0F, 5.0F),
+				PartPose.offset(0.0F, 1.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float breathe = 1.0F + Mth.sin(state.ageInTicks * 0.1F) * 0.03F;
+			this.ribs.xScale = this.ribs.zScale = breathe;
+		}
+	}
+
+	/** (0.18.105, Scan B) Swathe: wrapped head to foot, a loose end trailing from each arm and a long one down its back, all swaying. */
+	static final class Swathe extends FormModel {
+		private final ModelPart rightEnd, leftEnd, tail;
+
+		Swathe() {
+			super(bake(mesh()), "swathe");
+			this.insigniaZ = -2.25F;
+			this.rightEnd = this.rightArm.getChild("loose_end");
+			this.leftEnd = this.leftArm.getChild("loose_end");
+			this.tail = this.body.getChild("trail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.25F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("right_arm").addOrReplaceChild("loose_end", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, 0.0F, 0.0F, 3.0F, 9.0F, 1.0F),
+				PartPose.offset(-1.0F, 4.0F, 2.2F));
+			root.getChild("left_arm").addOrReplaceChild("loose_end", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.5F, 0.0F, 0.0F, 3.0F, 9.0F, 1.0F),
+				PartPose.offset(1.0F, 4.0F, 2.2F));
+			root.getChild("body").addOrReplaceChild("trail", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 12.0F, 1.0F),
+				PartPose.offset(0.0F, 0.5F, 2.3F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float sway = Mth.sin(state.ageInTicks * 0.12F) * 0.08F;
+			float drag = Math.min(0.8F, state.walkAnimationSpeed * 0.7F);
+			this.rightEnd.xRot = drag + sway;
+			this.leftEnd.xRot = drag - sway;
+			this.tail.xRot = drag * 0.8F + sway * 0.5F;
+			this.tail.zRot = sway;
+		}
+	}
+
+	/** (0.18.105, Scan B) Blight: coal-black bone, a skull on each shoulder beside the big middle one, a ribbed tail that swings. */
+	static final class Blight extends FormModel {
+		private final ModelPart rightSkull, leftSkull, tail;
+
+		Blight() {
+			super(bake(mesh()), "blight");
+			this.insigniaZ = -2.4F;
+			this.rightSkull = this.body.getChild("right_skull");
+			this.leftSkull = this.body.getChild("left_skull");
+			this.tail = this.body.getChild("tail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
+			PartDefinition body = mesh.getRoot().getChild("body");
+			body.addOrReplaceChild("right_skull", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -6.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offsetAndRotation(-7.0F, -1.0F, 0.5F, 0.0F, 0.25F, 0.0F));
+			body.addOrReplaceChild("left_skull", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-3.0F, -6.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offsetAndRotation(7.0F, -1.0F, 0.5F, 0.0F, -0.25F, 0.0F));
+			body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(24, 64).addBox(-1.5F, 0.0F, 0.0F, 3.0F, 10.0F, 3.0F),
+				PartPose.offsetAndRotation(0.0F, 10.0F, 1.5F, 0.6F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float bob = Mth.sin(state.ageInTicks * 0.08F) * 0.08F;
+			this.rightSkull.xRot = bob;
+			this.leftSkull.xRot = -bob;
+			this.rightSkull.yRot = 0.25F + this.head.yRot * 0.3F;
+			this.leftSkull.yRot = -0.25F + this.head.yRot * 0.3F;
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.06F) * 0.3F;
+			this.tail.xRot = 0.6F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.15F * state.walkAnimationSpeed;
 		}
 	}
 

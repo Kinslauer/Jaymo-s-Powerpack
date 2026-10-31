@@ -258,6 +258,19 @@ public final class XenoformPower implements Power {
 		public int leapCharge;
 		public boolean crashing;
 		public int swallowed = -1;
+		/**
+		 * (0.18.105, Scan B) Rime: ticks since it last sprinted while skating. Marrow: it has fallen apart and stood back up
+		 * this change; the bone shield's last tick; lying in a heap until this tick. Swathe: ticks left of the sandstorm.
+		 * Blight: the dark shield is up.
+		 */
+		public int skateIdle;
+		public boolean breathWas;
+		public boolean risen;
+		public long shieldUntil, heapUntil;
+		public int storm;
+		public boolean darkShield;
+		/** Marrow: the thrown rib's heading (its place is {@link #whirl}, its ticks {@link #spin}, who it hit {@link #spun}). */
+		public net.minecraft.world.phys.@Nullable Vec3 ribDir;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -310,6 +323,10 @@ public final class XenoformPower implements Power {
 			brace = spray = rebound = anvilDrop = false;
 			dropFrom = fallSpeed = 0.0;
 			song = 0;
+			skateIdle = storm = 0;
+			risen = darkShield = breathWas = false;
+			shieldUntil = heapUntil = 0L;
+			ribDir = null;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;
@@ -340,6 +357,8 @@ public final class XenoformPower implements Power {
 		XenoNet.register();
 		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
 		XenoDouble.init();
+		// (0.18.105, Scan B) Rime has Cryokinesis's moves lent
+		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
 		XenoStalker.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();

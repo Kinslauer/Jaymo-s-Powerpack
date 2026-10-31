@@ -4484,3 +4484,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Breaking under water** (`TerrainParticleWaterMixin`): block bits drift down slowly, last twice as long, and some
     trail a bubble.
   - Compile-checked; not seen in game.
+- **0.18.105, Scan B (`docs/ScanGaps-Plan.md`), cold and bone:** four new aliens. Rime (stray, snow golem or
+  Iceologer) has the whole Cryokinesis kit lent through `cryo/CryoLent` (breath, shards, Flash Freeze, Ice Wall, Ice
+  Slide while sprinting, the Blizzard as its Ultimate's B) plus frost armour. Marrow (skeleton, silver skeleton,
+  Skeleton Lord): Bone Spikes, boomerang Rib Throw, Bone Shield, Fall Apart, and one rise from a killing blow each
+  change. Swathe (husk): Lash Bind (bolas trip), Lash Pull, Sandstorm (stronger in deserts), Wrap; can't drown or
+  starve. Blight (the Wither, hidden): skulls, a three-skull volley, Rot Touch, Dark Pulse, dark shield at half health.
+  Each has its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
