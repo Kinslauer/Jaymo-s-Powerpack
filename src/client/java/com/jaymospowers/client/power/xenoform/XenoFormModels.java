@@ -72,6 +72,11 @@ public final class XenoFormModels {
 			MODELS.put("slipfin", new Slipfin());
 			MODELS.put("polestar", new Polestar());
 			MODELS.put("lurk", new Lurk());
+			MODELS.put("gyre", new Gyre());
+			MODELS.put("cortex", new Cortex());
+			MODELS.put("locust", new Locust());
+			MODELS.put("croaker", new Croaker());
+			MODELS.put("dud", new Dud());
 		}
 		return MODELS.get(form);
 	}
@@ -259,6 +264,170 @@ public final class XenoFormModels {
 			// the long fingers trail a little behind the arm's swing
 			this.rightHand.xRot = -this.rightArm.xRot * 0.2F;
 			this.leftHand.xRot = -this.leftArm.xRot * 0.2F;
+		}
+	}
+
+	/** (0.18.102, patch 5) Gyre: broad and scaly, a domed shell over its back that rocks as it walks, a hooked beak. */
+	static final class Gyre extends FormModel {
+		private final ModelPart shell;
+
+		Gyre() {
+			super(bake(mesh()), "gyre");
+			this.insigniaZ = -2.5F;
+			this.shell = this.body.getChild("shell");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("body").addOrReplaceChild("shell", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 10.0F, 5.0F, new CubeDeformation(0.5F)),
+				PartPose.offset(0.0F, -0.5F, 1.8F));
+			root.getChild("head").addOrReplaceChild("beak", CubeListBuilder.create().texOffs(32, 64).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 2.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, -3.5F, -4.4F, 0.2F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.shell.zRot = Mth.sin(state.walkAnimationPos * 0.6662F) * 0.06F * state.walkAnimationSpeed;
+		}
+	}
+
+	/**
+	 * (0.18.102, patch 5) Cortex: plated, one big claw on the right hand and a small one on the left that open and shut,
+	 * and an open skull with the brain showing, pulsing a little.
+	 */
+	static final class Cortex extends FormModel {
+		private final ModelPart bigClaw, smallClaw, brain;
+
+		Cortex() {
+			super(bake(mesh()), "cortex");
+			this.insigniaZ = -2.3F;
+			this.bigClaw = this.rightArm.getChild("claw");
+			this.smallClaw = this.leftArm.getChild("claw");
+			this.brain = this.head.getChild("brain");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("right_arm").addOrReplaceChild("claw", CubeListBuilder.create().texOffs(0, 64).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 5.0F, 5.0F),
+				PartPose.offset(-1.0F, 9.0F, 0.0F));
+			root.getChild("left_arm").addOrReplaceChild("claw", CubeListBuilder.create().texOffs(24, 64).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(1.0F, 9.5F, 0.0F));
+			root.getChild("head").addOrReplaceChild("brain", CubeListBuilder.create().texOffs(0, 76).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 3.0F, 6.0F),
+				PartPose.offset(0.0F, -7.6F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float snap = Mth.sin(state.ageInTicks * 0.15F) * 0.12F;
+			this.bigClaw.zRot = snap;
+			this.smallClaw.zRot = -snap;
+			float pulse = 1.0F + Mth.sin(state.ageInTicks * 0.2F) * 0.04F;
+			this.brain.xScale = this.brain.zScale = pulse;
+		}
+	}
+
+	/** (0.18.102, patch 5) Locust: lean, wing cases folded down its back, long feelers that twitch, spurs on its legs. */
+	static final class Locust extends FormModel {
+		private final ModelPart rightFeeler, leftFeeler;
+
+		Locust() {
+			super(bake(mesh()), "locust");
+			this.insigniaZ = -1.8F;
+			this.rightFeeler = this.head.getChild("right_feeler");
+			this.leftFeeler = this.head.getChild("left_feeler");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("body").addOrReplaceChild("wings", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, 0.0F, 0.0F, 8.0F, 11.0F, 1.0F),
+				PartPose.offsetAndRotation(0.0F, 0.5F, 2.0F, 0.12F, 0.0F, 0.0F));
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_feeler", CubeListBuilder.create().texOffs(20, 64).addBox(-0.5F, -6.0F, -0.5F, 1.0F, 6.0F, 1.0F),
+				PartPose.offsetAndRotation(-1.5F, -8.0F, -3.0F, -0.6F, 0.0F, -0.35F));
+			head.addOrReplaceChild("left_feeler", CubeListBuilder.create().texOffs(20, 64).mirror().addBox(-0.5F, -6.0F, -0.5F, 1.0F, 6.0F, 1.0F),
+				PartPose.offsetAndRotation(1.5F, -8.0F, -3.0F, -0.6F, 0.0F, 0.35F));
+			root.getChild("right_leg").addOrReplaceChild("spur", CubeListBuilder.create().texOffs(24, 64).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, 2.0F, 1.5F, 0.6F, 0.0F, 0.0F));
+			root.getChild("left_leg").addOrReplaceChild("spur", CubeListBuilder.create().texOffs(24, 64).mirror().addBox(-1.0F, 0.0F, 0.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, 2.0F, 1.5F, 0.6F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float twitch = Mth.sin(state.ageInTicks * 0.3F) * 0.1F;
+			this.rightFeeler.xRot = -0.6F + twitch;
+			this.leftFeeler.xRot = -0.6F - twitch;
+		}
+	}
+
+	/** (0.18.102, patch 5) Croaker: bulky, eyes on top of its head, a throat sac that swells and sinks, webbed feet. */
+	static final class Croaker extends FormModel {
+		private final ModelPart sac;
+
+		Croaker() {
+			super(bake(mesh()), "croaker");
+			this.insigniaZ = -2.7F;
+			this.sac = this.head.getChild("sac");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.7F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_eye", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, -3.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(-2.5F, -8.2F, -2.0F));
+			head.addOrReplaceChild("left_eye", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.5F, -3.0F, -1.5F, 3.0F, 3.0F, 3.0F),
+				PartPose.offset(2.5F, -8.2F, -2.0F));
+			head.addOrReplaceChild("sac", CubeListBuilder.create().texOffs(12, 64).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 3.0F, 3.0F),
+				PartPose.offset(0.0F, -0.8F, -1.6F));
+			root.getChild("right_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(0, 72).addBox(-2.0F, 0.0F, -3.5F, 4.0F, 1.0F, 4.0F),
+				PartPose.offset(0.0F, 11.5F, 0.0F));
+			root.getChild("left_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(0, 72).mirror().addBox(-2.0F, 0.0F, -3.5F, 4.0F, 1.0F, 4.0F),
+				PartPose.offset(0.0F, 11.5F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float swell = 1.0F + Math.max(0.0F, Mth.sin(state.ageInTicks * 0.12F)) * 0.35F;
+			this.sac.yScale = swell;
+			this.sac.zScale = swell;
+		}
+	}
+
+	/** (0.18.102, patch 5) Dud: small, soft and round, two nubs on its head; it wobbles as it goes. */
+	static final class Dud extends FormModel {
+		Dud() {
+			super(bake(mesh()), "dud");
+			this.insigniaZ = -2.9F;
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.9F), 0.0F);
+			PartDefinition head = mesh.getRoot().getChild("head");
+			head.addOrReplaceChild("right_nub", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
+				PartPose.offset(-2.0F, -8.8F, 0.0F));
+			head.addOrReplaceChild("left_nub", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F),
+				PartPose.offset(2.0F, -8.8F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float wobble = Mth.sin(state.ageInTicks * 0.25F) * 0.05F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.1F * state.walkAnimationSpeed;
+			this.body.zRot += wobble;
+			this.head.zRot += wobble * 1.5F;
 		}
 	}
 

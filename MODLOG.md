@@ -4451,3 +4451,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     gets a shake and the first-person view swings round over the shoulder at it for about a second (aim unchanged),
     at most once every 7 s, with a small rattle while still chased.
   - Compile-checked; not seen in game.
+- **0.18.102, Xeno-Band patch 5 (new aliens B):** Gyre (turtle or breeze: Shell Spin, Gust that puts out fires,
+  Whirlwind, Shell), Cortex (guardian: chain Arc, a shot-stopping Bubble, Mind Lift, Claw Snap; reads the health and
+  Kingdoms temperament of what it looks at), Locust (goat: charged Crash Leap with a landing ring, Kick, Wall Bounce,
+  Hops; no fall damage), Croaker (frog or tadpole: Tongue that hauls creatures or items, Gulp/Spit for small mobs,
+  Bound, Croak), and Dud (hidden, never scanned: can't be hurt, can't hurt, thrown by every blow, draws monsters; no
+  Ultimate). Each has its own model and skin (`gen_xenoform.py`), and the four with Ultimates armoured skins and spikes.
+  Compile-checked; not seen in game.

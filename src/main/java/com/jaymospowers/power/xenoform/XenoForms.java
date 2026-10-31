@@ -43,8 +43,15 @@ public final class XenoForms {
 	public static final XenoForm POLESTAR = register(new com.jaymospowers.power.xenoform.forms.Polestar());
 	/** The void alien: no creature carries it; the two voices give it ({@link XenoVoices}). */
 	public static final XenoForm NADIR = register(new Nadir());
+	/** (0.18.102, patch 5) Gyre (a turtle), Cortex (a guardian), Locust (a goat), Croaker (a frog). */
+	public static final XenoForm GYRE = register(new com.jaymospowers.power.xenoform.forms.Gyre());
+	public static final XenoForm CORTEX = register(new com.jaymospowers.power.xenoform.forms.Cortex());
+	public static final XenoForm LOCUST = register(new com.jaymospowers.power.xenoform.forms.Locust());
+	public static final XenoForm CROAKER = register(new com.jaymospowers.power.xenoform.forms.Croaker());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
+	/** (0.18.102, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */
+	public static final XenoForm DUD = register(new com.jaymospowers.power.xenoform.forms.Dud());
 
 	private XenoForms() {
 	}
