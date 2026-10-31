@@ -249,6 +249,10 @@ public final class JaymosKingdoms implements ModInitializer {
 				// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();
+		// (0.7.425) Havens patch 1: the tribes and their grudge, the pedlar, the bestiary
+		Tribes.register();
+		Pedlars.register();
+		Bestiary.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key

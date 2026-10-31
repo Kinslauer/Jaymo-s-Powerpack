@@ -107,6 +107,8 @@ public final class Languages {
 	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE,
 		// (0.7.424) a blade pressed closer, a hand let go, the blow: no words needed
 		Questioning.THREATEN, Questioning.STARE, Questioning.SPARE, Questioning.FINISH,
+		// (0.7.425) goods pointed at and emeralds held out
+		Pedlars.WARES_ANSWER, Pedlars.TRIBUTE_ANSWER,
 		// (0.7.254) thanks need no words
 		SharedHistory.THANK);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");
