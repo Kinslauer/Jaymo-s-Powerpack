@@ -135,3 +135,8 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   camps or leading hunting bands; 15 traits (8 strengths, 4 weaknesses, 3 fears); learned by questioning, chiefs'
   orders and the pedlar, kept in the journal; a film at the first meeting and lines about the last one; a player's
   killer climbs (or rises) and becomes their sworn foe, wearing their head; the strongest takes a fallen king's seat.
+- Patch 4, first half (Kingdoms 0.7.432): captains come back unless finished or burned (missing what they lost); daily
+  duels, ambushes and feasts set and settled on the post (kill one first and it's off); blood brothers who join the
+  fight and avengers who swear on your head; a Will stare on a downed captain spares him (empty hand) or shames him.
+  (Andy) 6% of captains who would stay dead are raised anyway (necromancer or corrupted magic) as Deathless: no fears,
+  +1 rank, 1.5x health, +3 damage.

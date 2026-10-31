@@ -108,6 +108,10 @@ final class Staredowns {
 		if (refused(sp, mob)) {
 			return false;
 		}
+		if (Captains.starable(mob)) {
+			// (0.7.432) a downed captain: to spare or to shame
+			return true;
+		}
 		return captainOf(mob) != null || ruled(sp, mob) != null;
 	}
 
@@ -197,6 +201,11 @@ final class Staredowns {
 	 * always; a foe aboard, in the saddle, casting or outlawed), false for a plain foe to drop its weapon and run.
 	 */
 	static boolean broke(ServerLevel level, ServerPlayer sp, Mob seen, long now) {
+		if (Captains.starable(seen)) {
+			// (0.7.432) a downed captain, spared (an empty hand) or shamed
+			Captains.stared(level, sp, seen, now);
+			return true;
+		}
 		Ship ship = captainOf(seen);
 		if (ship != null) {
 			captain(level, sp, seen, ship, now);

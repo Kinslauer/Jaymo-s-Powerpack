@@ -590,7 +590,7 @@ public final class PowersCompat {
 	 * A life story's "unarmed" start: {@code player} has long been without {@code part} (Powers' Dismember part bit: an
 	 * arm or a leg), the stump healed over. False without Powers.
 	 */
-	public static boolean bornWithout(net.minecraft.server.level.ServerPlayer player, int part) {
+	public static boolean bornWithout(net.minecraft.world.entity.LivingEntity player, int part) {
 		if (!lookedForBornWithout) {
 			lookedForBornWithout = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
