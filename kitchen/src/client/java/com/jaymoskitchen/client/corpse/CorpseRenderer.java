@@ -448,6 +448,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		ClosedEyes.mark(bodyState);
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
+		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose
+		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(track), state.age, !corpse.isTumbling(),
+			bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F);
 		bodyState.setData(RagdollPose.KEY, pose);
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
