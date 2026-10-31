@@ -98,6 +98,15 @@ public final class FirstPersonCompat {
 	 * by reflection.
 	 */
 	public static void showArms(Object state) {
+		setArmsHidden(state, false);
+	}
+
+	/** (0.18.88) The other way: First-person Model hides your body's arms, for a move that draws its own first-person hands. */
+	public static void hideArms(Object state) {
+		setArmsHidden(state, true);
+	}
+
+	private static void setArmsHidden(Object state, boolean hidden) {
 		if (!LOADED) {
 			return;
 		}
@@ -116,8 +125,8 @@ public final class FirstPersonCompat {
 			return;
 		}
 		try {
-			hideLeftArm.invoke(state, false);
-			hideRightArm.invoke(state, false);
+			hideLeftArm.invoke(state, hidden);
+			hideRightArm.invoke(state, hidden);
 		} catch (Throwable e) {
 			stateAccess = null;
 		}

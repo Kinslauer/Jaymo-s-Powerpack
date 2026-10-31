@@ -498,6 +498,11 @@ public final class Duplex extends XenoForm {
 	}
 
 	@Override
+	public boolean ultimateHasMove() {
+		return true;
+	}
+
+	@Override
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 		if (ultimateReady(player, live) && !loyal(player, live).isEmpty()) {
 			storm(player, live);

@@ -24,7 +24,7 @@ import org.joml.Vector3f;
  * The hologram over the band while you hold Z as yourself: the dialled alien, small and see-through, standing in a green
  * glow just above the dial, so you see who you're dialling as you scroll. It stands upright on screen whatever the wrist's
  * roll and turns to face you, swaying a little so it reads as a figure; it flickers, and goes red while the band can't
- * change you yet (recharging, or a hidden alien not yet earned). It rises with the dial's cap and sinks with it as the
+ * change you yet (recharging, or a hidden alien not yet earned). It rises with the face plate and sinks with it as the
  * hand comes down ({@link XenoformSlamView#pop}). Behind it, light fans up out of the band: a soft gradient
  * ({@code textures/entity/xeno_holo_glow.png}, drawn by {@code tools/gen_xenoform.py}) on a flat card facing you, tinted
  * and flickering with the figure. Drawn from {@link XenoBand#submitOnArm}, the pose stack in the arm's space.

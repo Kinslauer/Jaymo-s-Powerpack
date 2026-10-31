@@ -70,9 +70,14 @@ public final class Nadir extends XenoForm {
 		player.onUpdateAbilities();
 	}
 
+	/**
+	 * (0.18.91) Andy: he "needs the float that wind has on it as well ... Can Fly, In air": he can always fly, so off the
+	 * ground (flying or not) he floats in Wind's hover pose (WindHoverSway), and cruises in Wind's pose at speed.
+	 */
 	@Override
 	public int flight(ServerPlayer player, XenoformPower.Live live) {
-		return player.getAbilities().flying ? XenoformState.FLY_VOID : XenoformState.FLY_NONE;
+		boolean inAir = !player.onGround() && !player.isInWater() && player.getVehicle() == null && !player.onClimbable();
+		return player.getAbilities().flying || inAir ? XenoformState.FLY_VOID : XenoformState.FLY_NONE;
 	}
 
 	@Override
@@ -236,6 +241,12 @@ public final class Nadir extends XenoForm {
 		ServerLevel level = player.level();
 		NadirState st = live.nadir;
 		long now = level.getGameTime();
+		// (0.18.91) the flight stays his: a respawn, a game-mode change or another power can't take double-tap Jump away
+		if (!player.getAbilities().mayfly || player.getAbilities().getFlyingSpeed() != FLY_SPEED) {
+			player.getAbilities().mayfly = true;
+			player.getAbilities().setFlyingSpeed(FLY_SPEED);
+			player.onUpdateAbilities();
+		}
 		holds(player, live, st, now);
 		NadirRift.tickDrop(player, st);
 		NadirGraviton.tick(player, st);

@@ -18,6 +18,7 @@
 		"IchorclothMagicMixin",
 		"CrawlJumpMixin",
 		"ZombieFrostMixin",
+		"XenoformWispStepMixin",
 		"CrawlPlayerMixin",
 		"ProneBowMixin",
 		"StanceDimensionsMixin",

@@ -257,6 +257,12 @@ public final class Downed {
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
+	/**
+	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, so never a revive's hold.
+	 * Xenoform adds one: a tap tears the Xeno-Band off a downed wearer.
+	 */
+	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
+
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
 
@@ -1092,6 +1098,11 @@ public final class Downed {
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();
+				if (!r.begun && r.held - r.start < TAP_TICKS && isDowned(body)) {
+					for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
+						listener.accept(player, body);
+					}
+				}
 				if (r.begun && !r.over) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}

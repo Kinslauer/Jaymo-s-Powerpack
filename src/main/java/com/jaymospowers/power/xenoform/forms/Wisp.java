@@ -173,6 +173,11 @@ public final class Wisp extends XenoForm {
 	}
 
 	@Override
+	public boolean ultimateHasMove() {
+		return true;
+	}
+
+	@Override
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 		if (live.possessed >= 0) {
 			release(player, live, true);

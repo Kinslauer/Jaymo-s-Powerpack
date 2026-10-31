@@ -4293,3 +4293,65 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     (no scroll) rolls you over onto your back over `BACK_TURN_TICKS`, and again onto your belly. On your back you lie feet
     toward where you look, head raised, one knee up, arms up to aim. A bow only draws on your back (`mixin/ProneBowMixin`).
   - Compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+- **0.18.88, the band shows like a watch, and an alien carries no gear:** Andy: in first person the raised band
+  wasn't visible at all, and it should read like a watch face held up to you; and none of your weapons should show on
+  the alien.
+  - The band gets a 5x5 face plate on its outer side (`XenoBand.plate`, texels 0,10 of `xeno_band.png`, from
+    `tools/gen_xenoform.py`): dark rim, metal studs at the corners, a glowing green face. Held up with Z the plate lifts
+    a pixel and grows by half (`PLATE_LIFT_PX`, `PLATE_GROW`), and the dialled alien's silhouette stands dark on the
+    face (`XenoBand.silhouette`: the alien's own model squashed flat onto the face, upright as you see it). The hologram
+    over it stays. The old pop-up cap is gone.
+  - With First-person Model drawing your body, the slam used to play on the body's own arms; the raised forearm came
+    up through the camera and the band never showed. Now the slam's own first-person hands (`XenoformSlamView`) are
+    drawn with it too, and the body's arms are hidden meanwhile (`FirstPersonCompat.hideArms`;
+    `XenoformSlap.FP_BODY_ARMS` turns the old way back on).
+  - As an alien, only the game's own render layers and Xenoform's run on the player
+    (`XenoformLivingEntityRendererMixin.alienLayers`): Weapon Master's holstered weapons, Traveler's Tool Belt, quivers,
+    backpacks, costumes and heritage looks no longer hang off the invisible body. Compile-checked; not seen in game.
+- **0.18.89, Pyre flies like a Z Fighter and leaves a comet:** Andy: "pyre needs a more controllable flight like the z
+  fighters, and the trail should be more like a comet of flame and less repeat particles".
+  - The Flame Jet is a toggle on G, flown on the client (`client/power/xenoform/PyreFlightClient`, after
+    `ZFighterFlightClient`): G lifts you into a hover, WASD moves, Jump rises, Sneak sinks and lands; Sprint streaks along
+    your look, speeding up to 1.4 blocks a tick (Sunheart 2.0, the new flight kind `XenoformState.FLY_SUN`) and turning
+    slower the faster you go; let go to coast back to a hover, S brakes. G again ends it with slow falling. The server
+    (`Pyre`) no longer pushes your velocity; it keeps the jet on, ends it on Sneak on the ground, and syncs the kind.
+  - The jet's server particle spray is gone. `PyreComet` draws one tail of fire on every client: three camera-facing
+    ribbons (red glow, orange flame, white-hot core) along the last 14 ticks of path (20 under Sunheart), tapering and
+    flickering, with a round glowing head round the body and one ember every 3 ticks. It draws in behind you when you
+    stop. Hand and foot jets now only spurt while hovering. Compile-checked; not seen in game.
+- **0.18.90, Aliens tap the insignia on their chest; Wisp floats, made of ki:** Andy: "the aliens should tap the
+  insignia, it should move from the watch to their chest, and they tap that instead of their wrist. they arent wearing a
+  watch" and "wisp should float instead of walk and be made of ki with the current texture overlaid".
+  - As an alien the slap is a tap on the chest (`XenoformSlap.Pose.chest`, `CHEST_*` angles): no wrist comes up, the
+    right hand rises and taps the insignia, which lights with the band's face glow (`XenoBand.submitInsignia`, per-form
+    `FormModel.insigniaY/Z/Size`). First person shows only the right hand pressing in under the view
+    (`XenoformSlamView.chest`). Others see the tap when a player turns alien.
+  - Wisp hovers 0.3 blocks up with a slow bob, its arms drift and trail instead of swinging, no footsteps
+    (`XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
+    texture, scrolling), its own body puffed out (`WispKi`, `XenoFormModels.Wisp.shells`), first-person arm too.
+    Compile-checked; not seen in game.
+- **0.18.91, The last 5 seconds flash; Nadir floats like Wind; the band plan:** Andy's notes on the alien pick page:
+  "the last 5 secs should beep and flash" and "Nadir needs a flight akin to creative on double tap space. he needs the
+  float that wind has on it as well ... Can Fly, In air".
+  - `XenoformPower.BEEP_TICKS` 200 -> 100; beeps quicken to twice a second over the last 2 s (`beepsAt`), and each
+    beep flashes your screen's edge red (`XenoformPowerClient`, counting from `XenoformState.ENDING`).
+  - Nadir's `mayfly` and flying speed are put back every tick while he's Nadir, so double-tap Jump always flies. Off
+    the ground (flying or not) his flight kind is `FLY_VOID`, and `WindHoverSway` gives him Wind's hover float below
+    cruising speed (`XenoformFlightPose.floating`).
+  - `docs/XenoBand-Plan.md`: Andy's 41 picks from the four add-ons as patches 0-9. Compile-checked; not seen in game.
+- **0.18.92, The band's charge; one band in the world (Xeno-Band patch 1):** Andy picked the charge patch first, and
+  ruled "only these two bands will exist in the world, either player killing the other, will remove the band and give it
+  to them", then "you have to tear it off yourself, with a tap". `XenoBands` counts wearers and loose band items on the
+  overworld; stars drop it only when none is out; tapping a downed wearer tears it off into your inventory as an item
+  that keeps its aliens (`Downed.TAPPED_LISTENERS`, fired when use is let go before a revive starts). The random 1-5 minute timer is now a charge
+  (2-5 min by mastery, drained by hits and moves, refills as yourself, kept between changes; knockout empties and locks
+  it a minute). Quick change (Z held + scroll as an alien, a quarter of the charge, dizzy), the band saving you from a
+  killing blow with a fitting alien (10 min), the wild dial (C while Z held), and the Jammed effect with the Potion of
+  Jamming (awkward + echo shard; recipes are data so JEI shows them). HUD charge bar over the dial.
+- **0.18.93, Real Ultimate forms (Xeno-Band patch 2):** Andy: "I'd also like to see real ultimate forms, all we have are
+  a few special attacks". C as an ascended alien now makes it a body of its own: an armoured skin made from its base
+  skin (plates, seams glowing in its colour, fullbright and pulsing), its own spikes, horns, crests and forearm blades
+  (`UltimateSpikes`, a pose-following humanoid model), half again its health on top, fists +50%, 15% bigger, every move's
+  cooldown halved. The Ultimate's own move (Standstill, Geode, Revenant, Swarm's swap, the Tolling, Copper Storm) is on
+  B; C again drops back to the base alien. Lasts until the charge runs out. Textures from `tools/gen_xenoform.py`.
+  Compile-checked; not seen in game.

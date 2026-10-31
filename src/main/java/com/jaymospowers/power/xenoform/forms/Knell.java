@@ -151,6 +151,11 @@ public final class Knell extends XenoForm {
 	}
 
 	@Override
+	public boolean ultimateHasMove() {
+		return true;
+	}
+
+	@Override
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 		if (live.tolls <= 0 && ultimateReady(player, live)) {
 			toll(player, live);

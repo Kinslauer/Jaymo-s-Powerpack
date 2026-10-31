@@ -26,12 +26,24 @@ public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
 	public abstract static class FormModel extends HumanoidModel<AvatarRenderState> {
 		public final Identifier texture;
+		/** (0.18.93) The Ultimate's skin (armoured, plated) and its glowing seams, drawn fullbright over it. */
+		public final Identifier ultimateTexture, ultimateGlow;
+		/** The model's id (its form's). */
+		public final String id;
 		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
 		float renderScale = 1.0F;
+		/**
+		 * (0.18.90) The insignia on its chest, which it taps to change back (it wears no band): the middle of it (model
+		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
+		 */
+		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
 
 		FormModel(ModelPart root, String id) {
 			super(root);
 			this.texture = JaymosPowers.id("textures/entity/xenoform_" + id + ".png");
+			this.ultimateTexture = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate.png");
+			this.ultimateGlow = JaymosPowers.id("textures/entity/xenoform_" + id + "_ultimate_glow.png");
+			this.id = id;
 		}
 	}
 
@@ -74,6 +86,7 @@ public final class XenoFormModels {
 
 		Bulwark() {
 			super(bake(mesh()), "bulwark");
+			this.insigniaZ = -2.9F;
 			this.rightLowerArm = this.body.getChild("right_lower_arm");
 			this.leftLowerArm = this.body.getChild("left_lower_arm");
 		}
@@ -122,6 +135,9 @@ public final class XenoFormModels {
 
 		Pyre() {
 			super(bake(mesh()), "pyre");
+			this.insigniaY = 4.5F;
+			this.insigniaZ = -3.0F;
+			this.insigniaSize = 0.8F;
 			this.hair = this.head.getChild("hair");
 			this.hairTip = this.hair.getChild("tip");
 			this.rightPlume = this.body.getChild("right_plume");
@@ -196,6 +212,7 @@ public final class XenoFormModels {
 
 		Velox() {
 			super(bake(mesh()), "blur");
+			this.insigniaZ = -1.8F;
 			this.tail = this.body.getChild("tail");
 			this.tailTip = this.tail.getChild("tip");
 			this.visor = this.head.getChild("visor");
@@ -247,6 +264,7 @@ public final class XenoFormModels {
 	static final class Prism extends FormModel {
 		Prism() {
 			super(bake(mesh()), "prism");
+			this.insigniaZ = -2.4F;
 		}
 
 		private static MeshDefinition mesh() {
@@ -271,32 +289,62 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Wisp: a hooded thing with no legs, trailing off into tatters that sway. */
+	/**
+	 * Wisp: a hooded thing with no legs, trailing off into tatters that sway. (0.18.90) Andy: "wisp should float instead
+	 * of walk and be made of ki with the current texture overlaid". It never walks: its arms hang and drift instead of
+	 * swinging with its steps, trail back as it moves, and {@link XenoformLayer} draws it floating, bobbing, its skin
+	 * see-through and fullbright over glowing shells of ki ({@link #shells}, the same body puffed out).
+	 */
 	static final class Wisp extends FormModel {
+		/** How far the ki shells stand out from the body (model pixels), inside out. */
+		static final float[] KI_SHELLS = {0.45F, 1.1F};
+		/** How far back its arms trail at a run (radians), and their slow drift. */
+		static final float ARM_TRAIL = 0.5F, ARM_DRIFT = 0.08F;
 		private final ModelPart tatters;
+		/** Its ki, the body again a little bigger each time ({@link #KI_SHELLS}); none on a shell itself. */
+		Wisp[] shells = new Wisp[0];
 
 		Wisp() {
-			super(bake(mesh()), "wisp");
+			this(0.0F);
+			this.shells = new Wisp[KI_SHELLS.length];
+			for (int i = 0; i < KI_SHELLS.length; i++) {
+				this.shells[i] = new Wisp(KI_SHELLS[i]);
+			}
+		}
+
+		private Wisp(float grow) {
+			super(bake(mesh(grow)), "wisp");
 			this.tatters = this.body.getChild("tatters");
 		}
 
-		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+		private static MeshDefinition mesh(float grow) {
+			CubeDeformation puff = new CubeDeformation(grow);
+			MeshDefinition mesh = HumanoidModel.createMesh(puff, 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
-			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 86).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F),
+			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F, puff), PartPose.ZERO);
+			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 86).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F, puff),
 				PartPose.offset(0.0F, 12.0F, 0.0F));
 			return mesh;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
+			// it doesn't walk: the arms take no swing from its steps (the state is put back for the next model)
+			float walk = state.walkAnimationSpeed;
+			state.walkAnimationSpeed = 0.0F;
 			super.setupAnim(state);
+			state.walkAnimationSpeed = walk;
 			this.rightLeg.visible = false;
 			this.leftLeg.visible = false;
 			XenoMotion.Read m = XenoMotion.read(state);
+			// arms hang loose, drifting, and trail back as it glides along
+			float move = Math.min(1.0F, walk);
+			this.rightArm.xRot += move * ARM_TRAIL + Mth.sin(state.ageInTicks * 0.07F) * ARM_DRIFT;
+			this.leftArm.xRot += move * ARM_TRAIL + Mth.sin(state.ageInTicks * 0.07F + 1.7F) * ARM_DRIFT;
+			this.rightArm.zRot += 0.08F + Mth.cos(state.ageInTicks * 0.05F) * 0.04F;
+			this.leftArm.zRot -= 0.08F + Mth.cos(state.ageInTicks * 0.05F + 1.1F) * 0.04F;
 			// the tatters drag behind it, billow up as it drops and swing out of a turn
-			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F + Math.abs(m.fall()) * 0.6F * m.air()
+			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + walk * 0.5F + Math.abs(m.fall()) * 0.6F * m.air()
 				+ m.land() * 0.3F;
 			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F - m.trail() * 0.35F;
 			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
@@ -318,6 +366,7 @@ public final class XenoFormModels {
 
 		Nadir() {
 			super(bake(mesh()), "nadir");
+			this.insigniaZ = -2.3F;
 			this.mantle = this.body.getChild("mantle");
 		}
 
@@ -357,6 +406,9 @@ public final class XenoFormModels {
 
 		Duplex() {
 			super(bake(mesh()), "duplex");
+			this.insigniaY = 2.5F;
+			this.insigniaZ = -3.0F;
+			this.insigniaSize = 0.6F;
 			this.renderScale = RENDER_SCALE;
 			this.rod = this.head.getChild("rod");
 		}
@@ -444,6 +496,8 @@ public final class XenoFormModels {
 
 		Knell() {
 			super(bake(mesh()), "knell");
+			this.insigniaY = 5.5F;
+			this.insigniaZ = -4.0F;
 			for (int i = 0; i < 3; i++) {
 				this.tendrils[i] = this.head.getChild("tendril_" + i);
 			}
@@ -492,6 +546,7 @@ public final class XenoFormModels {
 
 		Wyrm() {
 			super(bake(mesh()), "wyrm");
+			this.insigniaZ = -2.5F;
 			this.tail = this.body.getChild("tail");
 			this.tailMid = this.tail.getChild("mid");
 			this.tailTip = this.tailMid.getChild("tip");

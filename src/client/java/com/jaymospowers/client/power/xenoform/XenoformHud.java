@@ -77,6 +77,17 @@ final class XenoformHud {
 		int[] at = chipsOrigin(width, height, 2);
 		dialChip(graphics, font, player, hud, at[0], at[1], time);
 		scanChip(graphics, font, minecraft, hud, at[0] + CHIP + CHIP_GAP, at[1], time);
+		charge(graphics, player, hud, at[0], at[1] - 15, time);
+	}
+
+	/** (0.18.92) As yourself: the band's charge over the chips, its colour while a slam is possible, grey below that, purple jammed. */
+	private static void charge(GuiGraphicsExtractor graphics, LocalPlayer player, XenoformState.Hud hud, int x, int y, float time) {
+		int width = chipsWidth(2);
+		float share = Mth.clamp(hud.formTicks() / (float)Math.max(1, hud.formTotal()), 0.0F, 1.0F);
+		boolean jammed = com.jaymospowers.power.xenoform.XenoJam.jammed(player);
+		int color = jammed ? 0x6A2CA0 : hud.recharge() > 0 ? 0x707070 : XenoformPower.wild(player) ? pulse(0xC060FF, XenoformPower.COLOR, time * 0.2F) : XenoformPower.COLOR;
+		graphics.fill(x, y, x + width, y + 2, 0x90000000);
+		graphics.fill(x, y, x + Mth.ceil(width * share), y + 2, 0xFF000000 | color);
 	}
 
 	/** The flash: the form's colour round the edges, fading. */

@@ -19,6 +19,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> FORM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_form");
 	/** True while the player's form is in its last seconds (the alien glows red). */
 	public static final RenderStateDataKey<Boolean> ENDING = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ending");
+	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
+	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
 
 	private XenoformClient() {
 	}
@@ -31,6 +33,7 @@ public final class XenoformClient {
 		state.setData(XenoformSlap.KEY, XenoformSlap.extract(entity, form, partialTicks));
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
+		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;

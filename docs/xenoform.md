@@ -28,16 +28,37 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 ## The band [XenoformPower, XenoformState]
 
 - **Z held**: the wrist comes up; **scroll** while holding it to turn the dial through the aliens the band holds
-  (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. Held
-  0.5 s while changed, turn back early.
+  (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. While
+  changed, hold Z 0.5 s and let go to turn back; hold Z and **scroll**, then let go, for a **quick change** into the
+  dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.92).
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
-- **The timer**: a form lasts a random 1–5 minutes until the power is fully mastered (4 abilities), then always 5. The
-  band beeps once a second through the last 10 s, with red motes. Then you turn back where you stand.
+- **The charge** (0.18.92, replaces the random timer): the band holds 2 minutes of form unmastered, growing with
+  each mastered ability to 5 at full mastery (`capacity`). Changed, it spends a point a tick, 10 more per point of
+  damage taken and 20 more per move put on cooldown. What's left stays in the band when you turn back, and as yourself it
+  refills from empty in a minute; a slam needs 10 s of it. The HUD shows it as a thin bar over the dial (grey while too
+  low, purple when jammed, shimmering on the wild dial). The band beeps once a second through the last 5 s (twice a second for the last 2), with red motes, and each beep flashes
+  your screen's edge red (0.18.91). Then you turn back where you stand.
 - **A second life bar**: your max health becomes the alien's and you start it full. When it hits zero you're knocked
   back into your own body (`ALLOW_DEATH` cancels the death) at the health you had before, dizzy for 5 s, and the band
-  recharges for 2 minutes (1 minute after turning back by hand; none in creative). `/kill` and the void still kill you.
+  is emptied and locked for a minute before it refills (none in creative). `/kill` and the void still kill you.
+- **The band saves you** (0.18.92): a killing blow as yourself (not the void or `/kill`, not jammed or locked) slams the
+  band for you, before Downed: a fall gives Wyrm or Wisp, drowning Slipfin (once it exists) or Wisp, fire Pyre or Prism,
+  anything else Bulwark, Knell or Prism, else the dialled alien. At least 30 s of charge, and you turn back at 1 health.
+  Once every 10 minutes.
+- **Wild dial** (0.18.92): C while holding Z as yourself turns it on or off (a player tag, kept). The band changes you
+  into a random known alien as soon as it can, and again every 1 to 60 s while changed (no cost); Z can't turn you back
+  or quick-change. Each move counts double toward mastery.
+- **Jammed** (0.18.92, `XenoJam`): an effect. An alien who has it turns back, and the band won't slam or save you until
+  it ends. Potion of Jamming: awkward + echo shard (20 s; redstone 40 s; gunpowder splash, dragon's breath lingering),
+  tipped arrows from the game's own recipe.
+- **One band in the world** (0.18.92, `XenoBands`, Andy): the overworld keeps who wears it and how many band items are
+  loose. A fallen star holds the band only while nobody wears it and none is loose. A downed wearer can have it torn
+  off: another player taps them (use let go at once; holding is a revive, `Downed.TAPPED_LISTENERS`), the power ends and
+  the taker gets the band as an item that keeps every alien it learned. Killed outright, the wearer keeps it. A loose band
+  destroyed (lava, void, despawn) or a power removed by hand returns it to the stars. `/powerdebug xenoform bands reset`
+  forgets the count.
 - **Fists only**: while changed both hands read as empty to everything that asks the entity (`XenoformHandsMixin` on
   `LivingEntity.getItemBySlot`), so no item can be used, mined with or shown, and punches hit for the alien's attack
   damage. The inventory itself is untouched.
@@ -59,7 +80,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Alien | DNA | Body | R | G | V | B |
 |---|---|---|---|---|---|---|
 | **Bulwark** | iron golem | 1.5x, 40 hp, fists 7, slower, 60% knockback resist, steps up a block | Fist Combo: 3 blows at 4 ticks, 5 each, the last shoves (2 s) | Ground Clap: 6 to all within 5, debris ring (8 s) | Grab: lift the creature you look at overhead (it rides you); V again hurls it. Looking at the ground rips a 4-block chunk out and throws it (1 s) | Leap Slam: a leap; the landing hits 8 within 4 blocks, no fall damage (6 s) |
-| **Pyre** | blaze | 1x, 24 hp, fists 4, fire and lava can't hurt it, water and rain do (1 hp/s) | Fire Bolt: a small fireball (1 s) | Flame Jet (hold): fly toward your look at 0.55/tick, free, arms swept back as jets, flames pour from hands and feet; slow falling on release | Fire Nova: 6 to all within 5 and 5 s of fire (10 s) | Magma Trail: fire under your feet for 6 s (15 s) |
+| **Pyre** | blaze | 1x, 24 hp, fists 4, fire and lava can't hurt it, water and rain do (1 hp/s) | Fire Bolt: a small fireball (1 s) | Flame Jet (G toggles; flown on the client like a Z Fighter, `PyreFlightClient`): hover with WASD/Jump/Sneak at 0.5/tick, Sprint streaks along your look up to 1.4/tick, turning 8°-1.5° a tick; arms swept back as jets; a comet's tail of flame behind it (`PyreComet`); G again or Sneak on the ground ends it, slow falling in the air | Fire Nova: 6 to all within 5 and 5 s of fire (10 s) | Magma Trail: fire under your feet for 6 s (15 s) |
 | **Prism** | shulker | 1.1x, 30 hp, fists 5, 40% knockback resist | Crystal Shards: 3 instant rays in a 12° fan, 4 each, 16 blocks (1.5 s) | Crystal Wall: 5x3 amethyst 3 blocks ahead for 10 s, only in air (12 s) | Reflect (hold): rooted; arrows that hit you are replaced by one shot back at the shooter, other projectiles vanish | Spike Field: 5 + Slowness II to all within 4.5 (10 s) |
 | **Wisp** | phantom | 1x, 16 hp, fists 3, no fall damage, no legs | Phase: through a wall up to 2 thick to the first spot you fit (3 s) | Shroud: Invisibility until you hurt something (`onDealtDamage`); mobs targeting you forget you | Dread Wail: mobs within 10 drop their target and path 10 blocks away for 3 s; players get Darkness (15 s) | Glide (hold): fall at -0.12, drift forward up to 0.7 |
 | **Gremlin** | silverfish | 0.3x, 10 hp, fists 2, 20% faster, no fall damage; fits 1x1 gaps | Spring: 1.1 up, 0.6 out (1.5 s) | Sabotage: within 16 blocks, levers and buttons are pulled, doors/trapdoors/gates toggled, wire/repeaters/comparators/torches popped off (5 s) | Bite: 3 damage within 2.5; players lose 4 food, mobs get Hunger II + Weakness; you heal 2 and eat 2 (3 s) | Climb (hold): up any wall at 0.18/tick |
@@ -117,7 +138,15 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   boxes at a fifth of the size, drawn from the game's own dragon texture, never copied); Wisp's glide tips the body 38° forward with a
   slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
   out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
-  speed 0.16), put back on the way out (creative and spectator keep theirs).
+  speed 0.16, kept every tick; off the ground he floats in Wind's hover pose, 0.18.91), put back on the way out (creative and spectator keep theirs).
+- **Aliens tap the insignia (0.18.90):** an alien wears no band, so changing back (hold Z) no longer raises a wrist:
+  the right hand comes up and taps the insignia on its chest, which lights under it (the band's face glow laid on the
+  chest, `XenoBand.submitInsignia`, placed per form by `FormModel.insigniaY/Z/Size`); in first person only the right hand
+  comes up and presses in under the view (`XenoformSlamView.chest`). Others see the same tap when a player becomes an
+  alien. `XenoformSlap.Pose.chest` marks it; your own tap keeps its kind through the change so the arm doesn't jump.
+- **Wisp is ki (0.18.90):** it floats 0.3 blocks up and bobs instead of walking (no step swing, no footsteps,
+  `XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
+  texture, scrolling) that are its own body puffed out (`XenoFormModels.Wisp.shells`, `WispKi`), first-person arm too.
 - The ending glow: the server sets the synced `XenoformState.ENDING` through a form's last `BEEP_TICKS`; everyone's
   client then draws the alien a second time with the emissive `eyes` render type in pulsing red (`XenoformLayer.glow`),
   the first-person arm too.
@@ -130,14 +159,24 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - **Ascension.** The power ascends on its own once the band is complete (all nine aliens scanned; Duplex, added in 0.15.51, made it nine, and anyone already ascended stays ascended) and the power fully
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
-- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form for the rest of the timer
-  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateAgain` for C again; `onUltimateEnd` before `onExit`).
-  The Ultimate's own move has a cooldown of its own (`live.ultimateNext`). As yourself C only says to slam first.
+- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form until the charge runs out
+  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateEnd` before `onExit`). (0.18.93, patch 2, Andy: "real
+  ultimate forms, all we have are a few special attacks") It is its own body:
+  - **Look:** an armoured skin made from the alien's own (darker plates, seams glowing in its colour, eyes and
+    insignia burning through; `xenoform_<id>_ultimate.png` + `_ultimate_glow.png` drawn fullbright, pulsing), and its
+    own spikes, horns, crests and forearm blades (`UltimateSpikes.Style`, one bone strip tinted per alien). Synced as
+    `XenoformState.ULTIMATE`.
+  - **Body:** half again the alien's health on top of its own (healed in full as it comes on, gone when it ends), fists
+    +50%, 15% bigger (`ULT_HEALTH`, `ULT_DAMAGE`, `ULT_SCALE`).
+  - **Kit:** R G V are the base moves with every cooldown halved (`ULT_COOLDOWN`, in `XenoForm.cooldown`). The
+    Ultimate's own move (`onUltimateAgain`, where `ultimateHasMove`) moves to B; its cooldown is its own
+    (`live.ultimateNext`). C again drops back to the base alien (`dropUltimate`), the charge running on.
+  - As yourself C only says to slam first (or, with Z held, flips the wild dial).
 
 | Alien | Ultimate | What it does |
 |---|---|---|
 | Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
-| Pyre | Sunheart | The jet flies at 0.8/tick; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
+| Pyre | Sunheart | The jet streaks up to 2.0/tick with a longer, wider comet (flight `FLY_SUN`); R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
 | Velox | Standstill | Everything living within 24 blocks gets Slowness VII and its speed cut for 6 s; projectiles hang at 5% speed, then fly on; you get Speed II. C again every 30 s. |
 | Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
 | Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |

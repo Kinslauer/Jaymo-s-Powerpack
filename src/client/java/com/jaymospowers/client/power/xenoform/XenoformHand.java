@@ -42,7 +42,11 @@ public final class XenoformHand {
 		if (player.getSkin().model() == PlayerModelType.SLIM) {
 			poseStack.translate(right ? -0.03F : 0.03F, 0.0F, 0.0F);
 		}
-		collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null);
+		if (model instanceof XenoFormModels.Wisp wisp) {
+			WispKi.submitArm(wisp, right, limb, poseStack, collector, player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true));
+		} else {
+			collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null);
+		}
 		if (model instanceof XenoFormModels.Pyre) {
 			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), light, OverlayTexture.NO_OVERLAY, null);
 		}

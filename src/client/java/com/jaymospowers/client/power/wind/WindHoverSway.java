@@ -171,6 +171,10 @@ public final class WindHoverSway {
 	}
 
 	private static boolean isHovering(Minecraft minecraft, Player player) {
+		// (0.18.91) Nadir floats the same way whenever he's off the ground
+		if (com.jaymospowers.client.power.xenoform.XenoformFlightPose.floating(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.isActive(minecraft.player) && WindPowerClient.INSTANCE.flight().state() == WindFlight.HOVER;
 		}

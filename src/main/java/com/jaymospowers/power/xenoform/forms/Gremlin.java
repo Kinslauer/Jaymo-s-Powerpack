@@ -187,6 +187,11 @@ public final class Gremlin extends XenoForm {
 
 	/** C again: swap places with the gremlin farthest off (nearest, sneaking). */
 	@Override
+	public boolean ultimateHasMove() {
+		return true;
+	}
+
+	@Override
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 		if (!ultimateReady(player, live)) {
 			return;

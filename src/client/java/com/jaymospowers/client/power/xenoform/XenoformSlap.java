@@ -23,16 +23,17 @@ import org.jspecify.annotations.Nullable;
  * hand lands as the hold turns you back (the server's {@link XenoformPower#HOLD_TICKS}). Everyone else sees the slap when a player changes shape. The pose is worked
  * out here from the time ({@link #extract}, onto the render state), laid over the model after it animates
  * ({@link #applyModel}, through the model-feature mixin: the human body and the alien alike), and mirrored in first
- * person by {@code XenoformFirstPersonMixin}.
+ * person by {@code XenoformFirstPersonMixin} (also with First-person Model, whose body arms are hidden for it).
  */
 public final class XenoformSlap {
 	/**
 	 * The slap as raw clocks: {@code rise} the wrist coming up with the hand poised (0-1), {@code hit} the hand coming down
 	 * on it (0-1), {@code since} the ticks since the hand landed (-1 before it has), {@code fall} the arms dropping away
 	 * (0-1). Third person eases them ({@link #raise}, {@link #strike}); first person shapes its own curves from them
-	 * ({@link XenoformSlamView}).
+	 * ({@link XenoformSlamView}). {@code chest}: (0.18.90) an alien's tap, on the insignia on its chest, not the band
+	 * (Andy: "they arent wearing a watch").
 	 */
-	public record Pose(float rise, float hit, float since, float fall) {
+	public record Pose(float rise, float hit, float since, float fall, boolean chest) {
 		/** How far the wrist is up and the hand poised (0-1), eased, as the arms fall away. */
 		public float raise() {
 			return ease(this.rise) * ease(1.0F - this.fall);
@@ -66,6 +67,11 @@ public final class XenoformSlap {
 	 * it and comes down onto the dial. The left arm's turn is {@link #FP_WRIST} (ZYX radians: a big roll, so it is slerped
 	 * from the arm's own pose rather than lerped angle by angle); the right arm's are angles (radians).
 	 */
+	/**
+	 * (0.18.88) Off: posed on First-person Model's body the raised forearm came up through the camera and the band never
+	 * showed (Andy), so the slam's own first-person hands play instead. Kept to turn back on.
+	 */
+	static final boolean FP_BODY_ARMS = false;
 	static final Quaternionf FP_WRIST = new Quaternionf().rotationZYX(1.536F, -2.897F, 0.977F);
 	static final float FP_POISED_X = -2.57F, FP_POISED_Y = -0.85F, FP_STRUCK_X = -2.22F, FP_STRUCK_Y = -0.85F;
 	/** First person: the camera kick when the hand lands (degrees, ticks). */
@@ -73,6 +79,12 @@ public final class XenoformSlap {
 	static final int IMPACT_SHAKE_TICKS = 7;
 	/** The head looks down at the band. */
 	static final float HEAD_DOWN = 0.4F;
+	/**
+	 * (0.18.90) An alien has no band: its right hand comes up off its chest and taps the insignia there (radians, right
+	 * arm), the left arm left be; the head dips less.
+	 */
+	static final float CHEST_POISED_X = -1.55F, CHEST_POISED_Y = -0.35F, CHEST_POISED_Z = 0.25F, CHEST_X = -0.8F, CHEST_Y = -0.78F;
+	static final float CHEST_HEAD_DOWN = 0.25F;
 
 	// yourself
 	private static float holdAt = -1.0F, releaseAt = -1.0F, slamAt = -1.0F, dropAt = -1.0F;
@@ -82,6 +94,8 @@ public final class XenoformSlap {
 	private static boolean landed;
 	/** The running slam started from your own release: play the strike, like everyone else's slap. */
 	private static boolean selfStrike;
+	/** Your slap began as an alien: the tap is on the chest (kept through the change back, so the arm doesn't jump). */
+	private static boolean selfChest;
 	/** An alien's hold that the change cut short: when it began (the wrist keeps rising), else -1. The hand then lands at slamAt. */
 	private static float earlyFrom = -1.0F;
 	// everyone else: the form each was last seen in, and when their slap started
@@ -96,6 +110,7 @@ public final class XenoformSlap {
 		holdAt = now;
 		releaseAt = -1.0F;
 		slamOnRelease = human;
+		selfChest = !human;
 	}
 
 	/** Z came up: as yourself, the band slams now. */
@@ -171,7 +186,7 @@ public final class XenoformSlap {
 	public static @Nullable Pose extract(Avatar entity, @Nullable String form, float partialTicks) {
 		float now = entity.tickCount + partialTicks;
 		if (entity == Minecraft.getInstance().player) {
-			Pose pose = pose(now, holdAt, releaseAt, slamAt, !selfStrike, slamOnRelease, selfStrike ? STRIKE_TICKS : OTHERS_STRIKE_TICKS);
+			Pose pose = pose(now, holdAt, releaseAt, slamAt, !selfStrike, slamOnRelease, selfStrike ? STRIKE_TICKS : OTHERS_STRIKE_TICKS, selfChest);
 			if (pose == null) {
 				slamAt = -1.0F;
 				selfStrike = false;
@@ -194,36 +209,38 @@ public final class XenoformSlap {
 		if (slam == null) {
 			return null;
 		}
-		Pose pose = pose(now, -1.0F, -1.0F, slam, false, false, OTHERS_STRIKE_TICKS);
+		// someone else's slap is seen once they've changed: as the alien, a tap on its chest
+		Pose pose = pose(now, -1.0F, -1.0F, slam, false, false, OTHERS_STRIKE_TICKS, form != null);
 		if (pose == null) {
 			SLAMS.remove(id);
 		}
 		return pose;
 	}
 
-	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld, float strikeTicks) {
+	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld, float strikeTicks,
+		boolean chest) {
 		if (slam >= 0.0F) {
 			float dt = now - slam;
 			if (fromHold && dt < 0.0F && earlyFrom >= 0.0F) {
 				// the hand still on its way down after a cut-short hold
-				return new Pose(Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS), 1.0F + dt / STRIKE_TICKS, -1.0F, 0.0F);
+				return new Pose(Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS), 1.0F + dt / STRIKE_TICKS, -1.0F, 0.0F, chest);
 			}
 			if (!fromHold) {
 				if (dt < OTHERS_RAISE_TICKS) {
-					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F);
+					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F, chest);
 				}
 				if (dt < OTHERS_RAISE_TICKS + strikeTicks) {
-					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / strikeTicks, -1.0F, 0.0F);
+					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / strikeTicks, -1.0F, 0.0F, chest);
 				}
 				dt -= OTHERS_RAISE_TICKS + strikeTicks;
 			}
 			// dt: the ticks since the hand landed
 			if (dt < REST_TICKS) {
 				// a cut-short alien hold may still be mid-rise as the hand lands: carry the rise on
-				return new Pose(fromHold && earlyFrom >= 0.0F ? Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS) : 1.0F, 1.0F, dt, 0.0F);
+				return new Pose(fromHold && earlyFrom >= 0.0F ? Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS) : 1.0F, 1.0F, dt, 0.0F, chest);
 			}
 			if (dt < REST_TICKS + DROP_TICKS) {
-				return new Pose(1.0F, 1.0F, dt, (dt - REST_TICKS) / DROP_TICKS);
+				return new Pose(1.0F, 1.0F, dt, (dt - REST_TICKS) / DROP_TICKS, chest);
 			}
 			return null;
 		}
@@ -240,7 +257,7 @@ public final class XenoformSlap {
 					return null;
 				}
 			}
-			return new Pose(rise, hit, since, fall);
+			return new Pose(rise, hit, since, fall, chest);
 		}
 		return null;
 	}
@@ -279,6 +296,21 @@ public final class XenoformSlap {
 
 	public static void apply(HumanoidModel<?> h, Pose pose, boolean firstPerson) {
 		float raise = pose.raise(), strike = pose.strike();
+		if (pose.chest()) {
+			if (firstPerson) {
+				// your own body: its right arm is hidden and the slam's own hand drawn
+				return;
+			}
+			h.rightArm.xRot = Mth.lerp(raise, h.rightArm.xRot, Mth.lerp(strike, CHEST_POISED_X, CHEST_X));
+			h.rightArm.yRot = Mth.lerp(raise, h.rightArm.yRot, Mth.lerp(strike, CHEST_POISED_Y, CHEST_Y));
+			h.rightArm.zRot = Mth.lerp(raise, h.rightArm.zRot, Mth.lerp(strike, CHEST_POISED_Z, 0.0F));
+			h.head.xRot += CHEST_HEAD_DOWN * raise;
+			return;
+		}
+		if (firstPerson && !FP_BODY_ARMS) {
+			// your own body in first person: its arms are hidden and the slam's own hands drawn (XenoformFirstPersonMixin)
+			return;
+		}
 		if (firstPerson) {
 			Quaternionf from = new Quaternionf().rotationZYX(h.leftArm.zRot, h.leftArm.yRot, h.leftArm.xRot);
 			Vector3f euler = from.slerp(FP_WRIST, raise).getEulerAnglesZYX(new Vector3f());

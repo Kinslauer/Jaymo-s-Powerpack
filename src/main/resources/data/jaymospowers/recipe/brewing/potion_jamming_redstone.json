@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:brewing",
+	"input": {
+		"item": "minecraft:potion",
+		"potion_contents": {
+			"potions": "jaymospowers:jamming"
+		}
+	},
+	"output": {
+		"components": {
+			"minecraft:potion_contents": {
+				"potion": "jaymospowers:long_jamming"
+			}
+		},
+		"id": "minecraft:potion"
+	},
+	"reagent": {
+		"item": "minecraft:redstone"
+	}
+}

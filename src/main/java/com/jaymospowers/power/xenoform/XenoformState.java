@@ -172,14 +172,23 @@ public final class XenoformState {
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/**
 	 * How the alien is flying right now, for everyone's client to pose it ({@link XenoForm#flight}): {@link #FLY_JET}
-	 * (Pyre), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID} (Nadir). Absent: not flying.
+	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID}
+	 * (Nadir). Absent: not flying.
 	 */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4;
+	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
+
+	/** Pyre's jet, plain or Sunheart's. */
+	public static boolean jet(int kind) {
+		return kind == FLY_JET || kind == FLY_SUN;
+	}
 
 	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
 	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.93) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
+	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	private XenoformState() {
