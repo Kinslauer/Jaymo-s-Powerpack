@@ -9275,5 +9275,14 @@
 	"journal.jaymoskingdoms.captain.sworn": "Sworn foe: %s",
 	"journal.jaymoskingdoms.captain.captain": "Captain: %s",
 	"journal.jaymoskingdoms.captain.sworn.objective": "He killed you. He won't stop.",
-	"journal.jaymoskingdoms.captain.objective": "Learn more, or end him."
+	"journal.jaymoskingdoms.captain.objective": "Learn more, or end him.",
+	"talk.jaymoskingdoms.captain.risen.0": "Who's a captain now? %s is!",
+	"talk.jaymoskingdoms.captain.risen.1": "Kneel, all of you! %s leads now!",
+	"talk.jaymoskingdoms.captain.risen.2": "I am %s now. Say it!",
+	"talk.jaymoskingdoms.captain.climbed.0": "Another head for %s!",
+	"talk.jaymoskingdoms.captain.climbed.1": "Higher! %s climbs higher!",
+	"talk.jaymoskingdoms.captain.climbed.2": "Who'll stop %s now?",
+	"talk.jaymoskingdoms.captain.cheer.0": "%1$s! %1$s!",
+	"talk.jaymoskingdoms.captain.cheer.1": "Hail %s!",
+	"talk.jaymoskingdoms.captain.cheer.2": "%1$s! Blood for %1$s!"
 }

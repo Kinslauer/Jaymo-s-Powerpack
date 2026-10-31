@@ -4484,3 +4484,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Breaking under water** (`TerrainParticleWaterMixin`): block bits drift down slowly, last twice as long, and some
     trail a bubble.
   - Compile-checked; not seen in game.
+
+## 0.18.105: a film after your death (Kingdoms' captains)
+- `UltimateFilm.afterDeath`: a film for a player who's just died, their camera on someone (the `Play` packet carries
+  `afterDeath`). It plays on while they're dead, and `DeathScreenFilmMixin` holds the death screen back (not drawn, its
+  clock and buttons waiting) until it ends. Kingdoms 0.7.431 uses it for the captain who killed you: a short scene of him
+  over your body, raised to captain or up a rank, before you can respawn (Andy).
+- Compile-checked; not seen in game.

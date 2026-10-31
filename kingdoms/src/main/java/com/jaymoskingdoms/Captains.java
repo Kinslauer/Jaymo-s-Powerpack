@@ -118,6 +118,9 @@ public final class Captains {
 	static final float BLOOD_AT = 0.75F;
 	/** The pedlar's rumour of a captain (emeralds). */
 	static final int RUMOUR_PRICE = 2;
+	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
+	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
+	static final double CHEER_RANGE = 20.0;
 	/** Lines for each (lang {@code talk.jaymoskingdoms.captain.<what>.<n>}). */
 	static final int LINES = 3;
 	// ================================================================================================================
@@ -288,6 +291,15 @@ public final class Captains {
 	private static final Map<UUID, Vec3> FEARED_FROM = new HashMap<>();
 	/** Bodies who've rallied in this fight, or got back up (hard to kill). */
 	private static final Set<UUID> RALLIED = new HashSet<>(), GOT_UP = new HashSet<>();
+	/** A killer in his scene over a player's body: until when (game time), and where the body lies. */
+	private static final Map<UUID, Long> SCENE = new HashMap<>();
+	private static final Map<UUID, Vec3> SCENE_AT = new HashMap<>();
+
+	/** Something to do a few ticks on (server tick count), kept in memory. */
+	private record Later(int due, Runnable what) {
+	}
+
+	private static final List<Later> LATER = new ArrayList<>();
 
 	private static final String[] ORC_BYNAMES = {"the Cleaver", "Gut-Ripper", "the Hound", "Flesh-Eater", "the Slaver", "Black-Tongue", "the Drowner",
 		"Ear-Taker", "the Lash", "Stone-Fist", "the Mad", "Rot-Breath", "the Tracker", "Neck-Snapper", "the Proud", "Pit-Born"};
@@ -302,9 +314,17 @@ public final class Captains {
 			if (server.getTickCount() % EVERY == 0) {
 				tick(Factions.level(server));
 			}
+			if (!LATER.isEmpty()) {
+				List<Later> due = new ArrayList<>();
+				LATER.removeIf(l -> l.due() <= server.getTickCount() && due.add(l));
+				due.forEach(l -> l.what().run());
+			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FIGHTS.clear();
+			SCENE.clear();
+			SCENE_AT.clear();
+			LATER.clear();
 			FEARED.clear();
 			FEAR_READY.clear();
 			FEARED_FROM.clear();
@@ -641,6 +661,11 @@ public final class Captains {
 
 	/** {@code mob} is {@code c} from now on: his name, his tags, the head he wears. */
 	private static void bind(ServerLevel level, Captain c, LivingEntity mob) {
+		bind(level, c, mob, true);
+	}
+
+	/** As {@link #bind}; {@code dress}: the head he wears goes on now (else at his scene's height, {@link #slew}). */
+	private static void bind(ServerLevel level, Captain c, LivingEntity mob, boolean dress) {
 		McaCompat.rename(mob, c.name());
 		for (String tag : List.copyOf(mob.entityTags())) {
 			if (tag.startsWith(ID_TAG) || tag.startsWith(TRAIT_TAG)) {
@@ -652,7 +677,9 @@ public final class Captains {
 		for (Trait t : traits(c)) {
 			mob.addTag(t.tag());
 		}
-		trophy(mob, c);
+		if (dress) {
+			trophy(mob, c);
+		}
 		put(level.getServer(), c.withBody(mob.getUUID()));
 	}
 
@@ -787,6 +814,20 @@ public final class Captains {
 			return false;
 		}
 		long now = level.getGameTime();
+		Long scene = SCENE.get(mob.getUUID());
+		if (scene != null && now < scene) {
+			// (his scene over a player's body: he stands over it)
+			mob.getNavigation().stop();
+			Vec3 body = SCENE_AT.get(mob.getUUID());
+			if (body != null) {
+				mob.getLookControl().setLookAt(body.x, body.y, body.z);
+			}
+			return true;
+		}
+		if (scene != null) {
+			SCENE.remove(mob.getUUID());
+			SCENE_AT.remove(mob.getUUID());
+		}
 		if (afraid(level, mob, now)) {
 			return true;
 		}
@@ -1113,7 +1154,8 @@ public final class Captains {
 			// (the new head goes on in place of the old)
 			killer.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 		}
-		bind(level, c, killer);
+		bind(level, c, killer, false);
+		scene(level, killer, player, c.id(), risen);
 		FIGHTS.getOrDefault(c.id(), Map.of()).remove(player.getUUID());
 		List<String> sworn = new ArrayList<>(player.getAttachedOrElse(SWORN, List.of()));
 		if (!sworn.contains(c.id())) {
@@ -1123,6 +1165,47 @@ public final class Captains {
 		Speech.say(level, killer, Component.translatable("talk.jaymoskingdoms.captain.gloat." + random.nextInt(LINES), player.getDisplayName()), Speech.RED, SAY_RANGE);
 		Post.news(server, Component.translatable(risen ? "news.jaymoskingdoms.captain.risen" : "news.jaymoskingdoms.captain.slew", c.name(),
 			player.getDisplayName(), Tribes.name(c.tribe())));
+	}
+
+	/**
+	 * (Andy: "a short scene before you respawn of the goblin getting promoted") {@code player}'s camera on {@code killer}
+	 * before their death screen (Powers' film after death): he stands over the body and gloats, and halfway through he's
+	 * raised (a roar, the head put on, his own cheering him by name). Without Powers' film it all still happens in the world.
+	 */
+	private static void scene(ServerLevel level, LivingEntity killer, ServerPlayer player, String id, boolean risen) {
+		long now = level.getGameTime();
+		SCENE.put(killer.getUUID(), now + SCENE_TICKS);
+		SCENE_AT.put(killer.getUUID(), player.position());
+		PowersCompat.deathFilm(player, PowersCompat.FILM_CUTS, SCENE_TICKS, killer);
+		int due = level.getServer().getTickCount() + SCENE_RAISED;
+		UUID killerId = killer.getUUID();
+		LATER.add(new Later(due, () -> raised(level, killerId, id, risen)));
+	}
+
+	/** The height of his scene: the head goes on, a roar, and his own near cheer him by name. */
+	private static void raised(ServerLevel level, UUID killerId, String id, boolean risen) {
+		Captain c = get(level.getServer(), id);
+		if (!(level.getEntity(killerId) instanceof LivingEntity killer) || !killer.isAlive() || c == null || c.fallen()) {
+			return;
+		}
+		trophy(killer, c);
+		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.4F, killer.getRandom().nextFloat() * 0.2F + 0.9F);
+		level.sendParticles(ParticleTypes.ANGRY_VILLAGER, killer.getX(), killer.getY() + killer.getBbHeight(), killer.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
+		level.sendParticles(ParticleTypes.CRIT, killer.getX(), killer.getY() + killer.getBbHeight() * 0.6, killer.getZ(), 30, 0.6, 0.6, 0.6, 0.3);
+		if (killer instanceof Mob mob) {
+			mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		}
+		Speech.say(level, killer, Component.translatable("talk.jaymoskingdoms.captain." + (risen ? "risen" : "climbed") + "." + killer.getRandom().nextInt(LINES),
+			Component.literal(c.name())), Speech.RED, SAY_RANGE);
+		int faction = killer instanceof Worker w ? w.factionId() : -1;
+		int cheers = 0;
+		for (Worker w : Workers.near(level, killer.getBoundingBox().inflate(CHEER_RANGE), x -> x.factionId() == faction && x.mob() != killer && x.mob().isAlive())) {
+			if (cheers++ >= 3) {
+				break;
+			}
+			Speech.say(level, w.mob(), Component.translatable("talk.jaymoskingdoms.captain.cheer." + w.mob().getRandom().nextInt(LINES), Component.literal(c.name())),
+				Speech.RED, SAY_RANGE);
+		}
 	}
 
 	// ---- what you know of them -------------------------------------------------------------------------------------------

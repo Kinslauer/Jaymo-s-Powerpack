@@ -303,6 +303,38 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle deathFilm;
+	private static boolean lookedForDeathFilm;
+
+	/**
+	 * (0.7.431) A film for {@code dead}, who has just died, before their death screen: shot {@code shot} on {@code target}
+	 * for {@code ticks} (Powers' {@code UltimateFilm.afterDeath}, 0.18.105). False without it (an older Powers, or none).
+	 */
+	public static boolean deathFilm(net.minecraft.server.level.ServerPlayer dead, int shot, int ticks, net.minecraft.world.entity.Entity target) {
+		if (!lookedForDeathFilm) {
+			lookedForDeathFilm = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					deathFilm = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.UltimateFilm"), "afterDeath",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, int.class, int.class,
+							net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no film after death (older Powers?)", e);
+				}
+			}
+		}
+		if (deathFilm == null) {
+			return false;
+		}
+		try {
+			deathFilm.invoke(dead, shot, ticks, target.getBoundingBox().getCenter(), target);
+			return true;
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't play a film after death", e);
+			return false;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle impactFrame;
 	private static boolean lookedForImpact;
 
