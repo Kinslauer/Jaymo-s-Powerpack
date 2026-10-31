@@ -7629,3 +7629,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
     to end a foe of yours under 30% health.
   Past a spirit's limit the oldest one is let go.
 - Compile-checked only; not played.
+
+## 0.7.434: clockwork golem idle fidgets (Motion patch 6; pack 0.18.112)
+- Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
+- Compile-checked only; not played.

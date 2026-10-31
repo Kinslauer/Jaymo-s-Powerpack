@@ -4549,7 +4549,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
   from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
   skin and spikes. Compile-checked; not seen in game.
-- **0.18.112, Mob animation (Motion patch 6, `docs/Motion-Plan.md`; Kingdoms 0.7.433):**
+- **0.18.112, Mob animation (Motion patch 6, `docs/Motion-Plan.md`; Kingdoms 0.7.434):**
 - Fresh Animations (FreshLX, v1.11.1 for 26.1+) ships unchanged through EMF: its terms allow modpacks. Fetched from
   Modrinth until the CurseForge ids are filled in. Any mob in one of our poses (downed, tripped, carried, webbed, pet
   acts) pauses EMF so our pose wins.
