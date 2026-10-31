@@ -45,6 +45,11 @@ final class CripplingBlows {
 
 	/** How likely a heavy blow of {@code attacker}'s is to cripple (0 for anyone else's). */
 	private static float chance(LivingEntity attacker) {
+		// (0.7.431) a heavy-handed captain's
+		float captain = Captains.cripples(attacker);
+		if (captain >= 0.0F) {
+			return captain;
+		}
 		if (attacker instanceof Ogre) {
 			return OgreHolds.king(attacker) ? KING : OGRE;
 		}

@@ -116,6 +116,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Captains.PEDLAR_ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.431) what the pedlar's heard of the tribe's captains, for a few emeralds
+			villager.sendChatMessage(com.jaymoskingdoms.Captains.pedlarTells(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Trials.ANSWER.equals(answer) && Languages.understands(player, villager)) {
 			// (0.7.429) asked to see the king: a trial is set
 			villager.sendChatMessage(com.jaymoskingdoms.Trials.ask(player, villager), player);

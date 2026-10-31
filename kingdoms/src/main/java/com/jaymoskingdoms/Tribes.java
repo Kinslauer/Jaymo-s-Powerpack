@@ -485,6 +485,13 @@ public final class Tribes {
 		boolean goblins = tribe.startsWith(GOBLIN + "@");
 		int size = Math.min(HUNT_MAX, HUNT_BASE + grudge / HUNT_PER);
 		List<UUID> members = new ArrayList<>();
+		// (0.7.431) one of the tribe's captains at its head, if one's free (Captains)
+		PathfinderMob captain = Captains.leadBand(level, tribe, camp, at, player.blockPosition());
+		if (captain != null) {
+			captain.addTag(HUNTER_TAG);
+			members.add(captain.getUUID());
+			size--;
+		}
 		for (int i = 0; i < size; i++) {
 			int role = goblins ? (i % 3 == 2 ? Goblins.SLINGER : Goblins.GOBLIN) : (i % 3 == 2 ? Orcs.RANGER : Orcs.GRUNT);
 			PathfinderMob member = muster(level, camp, role, at.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2), player.blockPosition());
