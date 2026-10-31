@@ -4461,3 +4461,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - Art: `tools/gen_bog_iron.py` recolours every iron part and tool layer rust-brown, the ingot, molten bog iron, and the
   armour icons and worn layers from vanilla's iron ones.
 - Compile-checked only; not played.
+- **0.18.103, Xeno-Band patch 5 (new aliens B):** Gyre (turtle or breeze: Shell Spin, Gust that puts out fires,
+  Whirlwind, Shell), Cortex (guardian: chain Arc, a shot-stopping Bubble, Mind Lift, Claw Snap; reads the health and
+  Kingdoms temperament of what it looks at), Locust (goat: charged Crash Leap with a landing ring, Kick, Wall Bounce,
+  Hops; no fall damage), Croaker (frog or tadpole: Tongue that hauls creatures or items, Gulp/Spit for small mobs,
+  Bound, Croak), and Dud (hidden, never scanned: can't be hurt, can't hurt, thrown by every blow, draws monsters; no
+  Ultimate). Each has its own model and skin (`gen_xenoform.py`), and the four with Ultimates armoured skins and spikes.
+  Compile-checked; not seen in game.
