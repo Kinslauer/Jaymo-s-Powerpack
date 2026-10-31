@@ -4656,3 +4656,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the dial's hologram. Pick a face plate (square, round, diamond, wide, tall) and spikes. Each alien can be plain, armoured
   or weathered, painted on the client from its own skin (`XenoLooks`), so every alien has all three. Others see your
   choices; a band taken off keeps them. A preview of you turns beside the rows. Compile-checked; not seen in game.
+
+- **0.18.127, Kingdoms 0.7.447:** a donkey or mule spawning (a caravan's pack animal, say) no longer crashes the server.

@@ -55,6 +55,10 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 			return MOONLIT;
 		}
 		int rare = breed.coats.length - 1;
+		if (rare <= 0) {
+			// (0.7.447) a breed of one coat (the donkey, the mule) has no rare one: nextInt(0) threw and took the server down
+			return 0;
+		}
 		return random.nextFloat() < Equestrian.RARE_COAT_CHANCE ? rare : random.nextInt(rare);
 	}
 
