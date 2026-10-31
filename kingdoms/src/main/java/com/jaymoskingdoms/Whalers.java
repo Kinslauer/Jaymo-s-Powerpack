@@ -386,6 +386,8 @@ public final class Whalers {
 		if (ship == null) {
 			return null;
 		}
+		// (0.7.433) her far ground's rovers need a cove to sail out of: founded now if there's none
+		FarGrounds.coveFor(level, h, far);
 		Voyage voyage = new Voyage(ship.getUUID(), level.getGameTime(), ground);
 		voyage.far = far;
 		put(level.getServer(), f.id(), voyage);

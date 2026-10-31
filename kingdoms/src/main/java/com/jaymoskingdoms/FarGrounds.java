@@ -36,7 +36,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Out there:
  * <ul>
- * <li><b>pirates</b>: sea rovers out of some pirate cove (any barbarian camp if there's no cove) cruise the far grounds.
+ * <li><b>pirates</b>: sea rovers out of the nearest pirate cove cruise the far grounds; with no cove standing, the pirates
+ * found one first ({@link #cove}).
  * While she's on her ground, every {@link #RISK_EVERY} ticks there's a chance (more each step out) one heaves into sight
  * {@link #ROVER_MIN}-{@link #ROVER_MAX} blocks off and runs her down, a galleon likelier the further out. Their home is
  * that ground, so they keep cruising it (they're stowed once nobody's been near for {@link #ROVER_LIFE});</li>
@@ -67,6 +68,9 @@ final class FarGrounds {
 	/** A rover is stowed once this long out (ticks) with no player this near. */
 	static final long ROVER_LIFE = 24000L;
 	static final double ROVER_NEAR = 112.0;
+	/** With no cove standing, a site for one sought this many times, this much past {@link Camps#HIDE_RANGE} from a player, among players this near her harbour. */
+	static final int COVE_TRIES = 12, COVE_SPREAD = 96;
+	static final double COVE_SEEK = 160.0;
 	/** Sharks under her boats: from this step, this chance a roll for each step out. */
 	static final int SHARKS_FROM = 2;
 	static final float SHARK_PER_FAR = 0.07F;
@@ -194,7 +198,7 @@ final class FarGrounds {
 
 	/** A sea rover heaves into sight off {@code ship}, out where nobody sees her come, and makes for her (null: no room, or no pirates in the world). */
 	static @Nullable Ship rover(ServerLevel level, Ship ship, int far, RandomSource random) {
-		Faction camp = sponsor(level.getServer(), ship.blockPosition());
+		Faction camp = cove(level, ship.blockPosition(), Corsairs.playersAboard(level, ship));
 		if (camp == null) {
 			return null;
 		}
@@ -229,26 +233,55 @@ final class FarGrounds {
 		return null;
 	}
 
-	/** The pirates a far ground's rovers sail out of: the nearest pirate cove, or failing any, the nearest barbarian camp. */
-	private static @Nullable Faction sponsor(MinecraftServer server, BlockPos near) {
-		Faction best = null, bestCamp = null;
-		double bestD = Double.MAX_VALUE, bestCampD = Double.MAX_VALUE;
+	/**
+	 * The pirate cove a far ground's rovers sail out of: the nearest standing one. (Andy: "The pirates should always build
+	 * a cove before a ship of theirs set sail") With none, they found one first, on a coast near {@code players} (an
+	 * island off her ground, or the shore by her harbour), out of their sight; null if there's nowhere for one yet.
+	 */
+	static @Nullable Faction cove(ServerLevel level, BlockPos near, List<ServerPlayer> players) {
+		MinecraftServer server = level.getServer();
+		Faction best = null;
+		double bestD = Double.MAX_VALUE;
 		for (Faction f : Factions.all(server)) {
-			if (f.type() != FactionType.BARBARIAN || f.fallen()) {
+			if (f.type() != FactionType.BARBARIAN || f.fallen() || !Camps.pirate(server, f.id())) {
 				continue;
 			}
 			double d = f.seat().distSqr(near);
-			if (Camps.pirate(server, f.id())) {
-				if (d < bestD) {
-					best = f;
-					bestD = d;
-				}
-			} else if (d < bestCampD) {
-				bestCamp = f;
-				bestCampD = d;
+			if (d < bestD) {
+				best = f;
+				bestD = d;
 			}
 		}
-		return best != null ? best : bestCamp;
+		if (best != null || players.isEmpty()) {
+			return best;
+		}
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < COVE_TRIES; tries++) {
+			ServerPlayer player = players.get(random.nextInt(players.size()));
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = Camps.HIDE_RANGE + random.nextInt(COVE_SPREAD);
+			BlockPos at = player.blockPosition().offset((int) Math.round(Math.cos(angle) * r), 0, (int) Math.round(Math.sin(angle) * r));
+			if (!Camps.open(server, level, at) || !PirateCoves.land(level, at)) {
+				continue;
+			}
+			int floor = IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			Faction founded = PirateCoves.found(level, at, floor);
+			if (founded != null) {
+				JaymosKingdoms.LOGGER.info("Pirates founded {} at {} before taking to the far grounds", founded.name(), at.toShortString());
+				return founded;
+			}
+		}
+		return null;
+	}
+
+	/** (A whaler fitting out for a far ground: a cove for its rovers, founded now while her harbour's coast is loaded.) */
+	static void coveFor(ServerLevel level, Navies.Harbour h, int far) {
+		if (far >= PIRATES_FROM) {
+			cove(level, h.shore(), Raids.players(level, h.shore(), COVE_SEEK));
+		}
 	}
 
 	/** {@code ship} is one of the far grounds' rovers. */

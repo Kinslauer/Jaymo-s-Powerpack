@@ -7596,21 +7596,24 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
 - Compile-checked only; not played.
 ## 0.7.433: larger oceans and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
-- **Larger oceans:** `data/minecraft/worldgen/density_function/overworld/continents.json` swaps the overworld's
-  continentalness for the Large Biomes one (four times the scale) shifted 0.06 toward the sea. Continents and oceans
-  are four times as wide and there's somewhat more sea; biomes, erosion and every structure stay at their normal size.
+- **Larger oceans and biomes** (Andy: "why cant biomes be larger as well? ... the cherry grove is usually too small"):
+  `data/minecraft/worldgen/density_function/overworld/` swaps continents, temperature, vegetation and erosion for the
+  Large Biomes noises (four times the scale; continents also shifted 0.06 toward the sea). Oceans, continents and
+  every biome (cherry groves too) are four times as wide, mountain ranges broader; structures keep their size.
   New chunks only: an explored world gets a seam where old land meets new terrain, so it wants a new map to show.
 - **The far grounds (`FarGrounds`):** each realm counts its whalers home with whales; each one puts its next ground 160
   blocks further out (up to 10 steps: 160-320 blocks at first, about 1760-1920 at the furthest). A whaler sunk, given
   up for lost, or lost unseen puts it back a step. Her captain says how far out she's bound when she sails.
 - **Dangers out there**, rolled every minute while she's on her ground, more each step out:
-  - sea rovers: a pirate ship (out of the nearest pirate cove, or a barbarian camp if there's none) heaves into sight
+  - sea rovers: a pirate ship out of the nearest pirate cove heaves into sight
     96-128 blocks off, out of players' sight, and runs her down; galleons likelier further out; one more rover is
-    possible every 4 steps. Rovers cruise that ground and are stowed after a day with nobody near. Sinking one doesn't
+    possible every 4 steps. (Andy: "The pirates should always build a cove before a ship of theirs set sail") With no
+    cove standing, pirates found one first: when a whaler fits out for a far ground, on the coast near her harbour, or
+    on an island coast near her on the ground; until one stands, no rover comes. Rovers cruise that ground and are stowed after a day with nobody near. Sinking one doesn't
     count against its camp's own ship.
   - sharks: more come to her carcass, sooner, and from step 2 sharks come up under her lowered boats after the oarsmen.
   - her pods hold more sperm whales (which turn on the boats that strike them) and the white whale now and then.
   - a voyage made out of anyone's sight is lost with 4% a step (at most 35%).
 - **Reward:** her hold comes home 25% richer for each step out (oil, meat, bone, ambergris), pods are a whale bigger
   every 3 steps, and ambergris is likelier.
-- Compile-checked and dev-server booted; not played.
+- Compile-checked and dev-server booted on a fresh world; not played.
