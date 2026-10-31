@@ -104,6 +104,15 @@ abstract class McaScreensMixin {
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(interact));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson("[{\"identifier\":\"" + WAY + "\",\"x\":-90,\"y\":10,\"row\":" + WAY_ROW
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}]", MCAButton[].class)));
+		// (0.7.449) and the actions moved off the talk menu under it (InteractActions; McaActionButtonsMixin shows only those
+		// that apply, stacked under Ask the Way)
+		StringBuilder acts = new StringBuilder("[");
+		for (int i = 0; i < com.jaymoskingdoms.InteractActions.ALL.size(); i++) {
+			acts.append(i > 0 ? "," : "").append("{\"identifier\":\"gui.button.act.").append(com.jaymoskingdoms.InteractActions.ALL.get(i))
+				.append("\",\"x\":-90,\"y\":10,\"row\":").append(WAY_ROW + 1 + i)
+				.append(",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"\"}");
+		}
+		all.addAll(Arrays.asList(Resources.GSON.fromJson(acts.append("]").toString(), MCAButton[].class)));
 		this.buttons.put("interact", all.toArray(MCAButton[]::new));
 		StringBuilder json = new StringBuilder("[{\"identifier\":\"gui.button.backarrow\",\"x\":-113,\"y\":10,\"row\":0,\"width\":20,\"height\":20,"
 			+ "\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}");

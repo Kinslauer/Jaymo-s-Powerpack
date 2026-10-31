@@ -323,6 +323,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// (0.7.449) the Interact page's actions, sent ahead of MCA's screen
+		InteractActions.register();
 		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
 		ProximityChat.register();
 		VoiceMasks.register();

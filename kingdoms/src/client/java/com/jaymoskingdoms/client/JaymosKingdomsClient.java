@@ -85,6 +85,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		RubberStomachView.register();
 		HandshakeCinematic.register();
 		SpeechBubbles.register();
+		// (0.7.449) which Interact-page actions a villager offers
+		InteractActionsClient.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
 		// (0.7.264, Andy's NOEA picks) the party list on the HUD
