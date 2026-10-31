@@ -68,7 +68,8 @@ public final class Bulwark extends XenoForm {
 
 	@Override
 	public boolean scans(Entity creature) {
-		return creature instanceof IronGolem;
+		// (0.18.97) Kingdoms' clockwork golem is built on the iron golem, but it carries Rivet, not Bulwark
+		return creature instanceof IronGolem && !"jaymoskingdoms".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(creature.getType()).getNamespace());
 	}
 
 	@Override

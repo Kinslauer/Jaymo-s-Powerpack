@@ -4398,3 +4398,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **Rivet fix:** its C did nothing (no `onUltimate`) and it had no Ultimate skin; now it becomes Ironclad like the rest.
   - Models in `XenoFormModels`, skins and Ultimate skins from `tools/gen_xenoform.py` (the new skins drawn last so the
     old ones don't change), spikes in `UltimateSpikes`, HUD icons, lang. Compile-checked; not seen in game.
+- **0.18.97, Scans fixed:** Kingdoms' clockwork golem is built on the iron golem, so scanning it gave Bulwark and Rivet
+  could never be found; Kingdoms' wind dragons and war elephants are built on the horse and scanned as Velox. Bulwark and
+  Velox now skip Kingdoms' creatures (`Bulwark.scans`, `Velox.scans`).
