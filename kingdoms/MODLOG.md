@@ -7498,3 +7498,21 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   news is kept (`Post.POSTED`, 3 days) and pinned on town boards as "Word from abroad" (`town|tidings.<id>|<board>|t`),
   each town hearing about 70% of it; a bird brings a piece only when it names you or your realm (`Post.concerns`).
 - Compile-checked only; not played.
+
+## 0.7.425: the tribes and their grudge (Havens patch 1)
+- `Tribes`: every goblin village and orc camp belongs to its brood's tribe in a 1536-block region; the oldest camp is the
+  king's seat. One grudge per tribe per player (0-100): a kill +4, a king or warchief +30, the pedlar +25, the rival
+  brood's folk in the same country -2, and -3 a day. At 60 a hunting band (3-7, from the nearest camp) musters 40-56
+  blocks off and follows you for five minutes (`HUNTER_TAG`, `hunterStep`; strays from a restart are discarded).
+- Tribute ("Offer tribute" on a chief or the pedlar while you owe a grudge): 3 emeralds for each 10 of grudge. Truce
+  token (`truce_token`, from the pedlar, 16 emeralds): raised in a tribe member's sight, it wipes the grudge and gives
+  a 3-day truce (`McaCompat.foe` spares you unless you strike them).
+- Every chief's store gets a map to its king's seat once (`MAPPED`).
+- `Pedlars`: a goblin trader with two orc guards, met out in a tribe's country (4% per 10 s, once a day per player),
+  walking camp to camp. Sells three odd wares, a goblin mask, a seat map, a truce token and the bestiary; tells you the
+  tribe's mood ("How does the tribe take to me?"); his party strikes no one who hasn't struck it, and no greenskin sets
+  on it. Not saved.
+- `Bestiary` (Greasy Bestiary): a page per goblin/orc kind, a smudge until learned; a kill writes how they fight, one
+  talking under questioning writes their ways. Hints only.
+- Questioning a greenskin: "What does your king think of me?" (`Questioning.MOOD`).
+- Compile-checked only; not played.

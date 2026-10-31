@@ -72,8 +72,8 @@ public final class Questioning {
 	/** The questions on MCA's {@code main} menu (our dialogue data), shown only to the one questioning them. */
 	public static final String LEADER = "jaymoskingdoms_q_leader", HOME = "jaymoskingdoms_q_home", THREATEN = "jaymoskingdoms_q_threaten",
 		SPARE = "jaymoskingdoms_q_spare", FINISH = "jaymoskingdoms_q_finish", NEARBY = "jaymoskingdoms_q_nearby", STARE = "jaymoskingdoms_q_stare",
-		SWEAR = "jaymoskingdoms_q_swear";
-	public static final List<String> ANSWERS = List.of(LEADER, HOME, NEARBY, THREATEN, STARE, SWEAR, SPARE, FINISH);
+		SWEAR = "jaymoskingdoms_q_swear", MOOD = "jaymoskingdoms_q_mood";
+	public static final List<String> ANSWERS = List.of(LEADER, HOME, NEARBY, MOOD, THREATEN, STARE, SWEAR, SPARE, FINISH);
 	/** The perks that unlock questioning (any one), by key: Strength's, Stealth's, Will's. */
 	public static final String ROUGH = "rough_questions", QUIET = "quiet_word", WILL = "interrogation";
 
@@ -160,6 +160,8 @@ public final class Questioning {
 			case STARE -> has(player, WILL) && !session.broken && !session.stared && session.threats >= threats(player);
 			case NEARBY -> has(player, QUIET) && !session.asked.contains(answer);
 			case SWEAR -> has(player, WILL) && !session.asked.contains(answer);
+			// (0.7.425) one of a tribe's: what their king thinks of you (Tribes)
+			case MOOD -> Tribes.of(body) != null && !session.asked.contains(answer);
 			default -> !session.asked.contains(answer);
 		};
 	}
@@ -239,6 +241,15 @@ public final class Questioning {
 		if (SWEAR.equals(answer)) {
 			Recollections.remember(body, player, Recollections.Kind.SWORE, Component.empty());
 			return line("swear", body, player);
+		}
+		if (body instanceof Worker w) {
+			// (0.7.425) what they let slip of their kind goes in your bestiary
+			Bestiary.note(player, w.role(), Bestiary.TOLD);
+		}
+		if (MOOD.equals(answer)) {
+			// (0.7.425) the tribe's grudge, as they'd put it
+			String tribe = Tribes.of(body);
+			return tribe == null ? line("leader.none", body, player) : Tribes.mood(player, tribe, body);
 		}
 		Faction faction = Factions.get(level.getServer(), Rulers.faction(body));
 		if (LEADER.equals(answer)) {

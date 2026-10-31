@@ -256,6 +256,38 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_q_mood",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_pedlar_wares",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_tribe_mood",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_tribute",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }
