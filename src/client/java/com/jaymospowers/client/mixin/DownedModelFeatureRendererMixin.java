@@ -15,5 +15,6 @@ abstract class DownedModelFeatureRendererMixin {
 	private void jaymospowers$downed(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		DownedPose.apply(submit.model(), submit.state());
 		com.jaymospowers.client.wounds.TrippedPose.apply(submit.model(), submit.state());
+		com.jaymospowers.client.pets.PetPoses.apply(submit.model(), submit.state());
 	}
 }

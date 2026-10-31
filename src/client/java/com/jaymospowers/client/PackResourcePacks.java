@@ -57,7 +57,14 @@ final class PackResourcePacks {
 		// Modrinth's 26.3 version, fetched from there): every boat a canoe, through Entity Model Features.
 		new Pack("canoe boats", "jaymospowers-canoe-boats-v1", "Canoe boats", "Canoe boats 26.3.zip",
 			"https://cdn.modrinth.com/data/5NzqnXzh/versions/ZGZQqb3K/Canoe%20boats%2026.3.zip",
-			"b324c1097659ecf79a0d29fe057ed363f4914823", false));
+			"b324c1097659ecf79a0d29fe057ed363f4914823", false),
+		// (Motion patch 6) "Fresh Animations" itself (by FreshLX; its terms let modpacks include it, never redistribute
+		// or edit it): livelier walks and idles for most vanilla mobs, run by Entity Model Features, the base the Player
+		// Extension builds on. Version 1.11.1, made for 26.1+, fetched from Modrinth (project 50dA9Sha). Our mob poses
+		// (downed, tripped, carried, pets) pause it for that mob while they play (PoseTakeover#mobPosed).
+		new Pack("Fresh Animations", "jaymospowers-fresh-animations-v1", "FreshAnimations", "FreshAnimations_v1.11.1_26.1+.zip",
+			"https://cdn.modrinth.com/data/50dA9Sha/versions/tvGVYMD4/FreshAnimations_v1.11.1_26.1%2B.zip",
+			"ae9175983c5109162c86daae1acff34ccf623faf", false));
 
 	private PackResourcePacks() {
 	}

@@ -4549,3 +4549,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
   from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
   skin and spikes. Compile-checked; not seen in game.
+- **0.18.112, Mob animation (Motion patch 6, `docs/Motion-Plan.md`; Kingdoms 0.7.434):**
+- Fresh Animations (FreshLX, v1.11.1 for 26.1+) ships unchanged through EMF: its terms allow modpacks. Fetched from
+  Modrinth until the CurseForge ids are filled in. Any mob in one of our poses (downed, tripped, carried, webbed, pet
+  acts) pauses EMF so our pose wins.
+- Pet wolves (`client/pets/PetPoses`): greet an owner back after 2 minutes away, play bow when the owner is close,
+  lie down then doze (eyes shut) after sitting a while, and wake at loud sounds nearby. Wild wolves lie and doze too.
+- Cats: loaf, knead, groom and stretch in turns while sitting.
+- Wet coats (`client/pets/WetCoats`, tag `jaymospowers:furry`): furry mobs darken in water or rain, shake off once
+  out (shudder + splash) and dry over a minute. Wolves keep vanilla's wet shade; sheep wool isn't darkened.
+- Clockwork golems glance around and shift their weight when idle (Kingdoms `ClockworkGolemRenderer`); iron golem
+  idle comes from Fresh Animations.
