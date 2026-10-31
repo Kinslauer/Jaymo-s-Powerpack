@@ -229,6 +229,10 @@ public final class Tribes {
 
 	/** {@code player}'s grudge with {@code tribe} moves by {@code by} (kept within 0 and {@link #MOST}). */
 	static void add(MinecraftServer server, UUID player, String tribe, int by) {
+		if (by > 0 && SwornCaptains.rules(server, tribe, player)) {
+			// (0.7.433) your own captain sits its seat
+			return;
+		}
 		Tribe t = tribe(server, tribe);
 		int now = Math.max(0, Math.min(MOST, t.grudge().getOrDefault(player.toString(), 0) + by));
 		Map<String, Integer> grudge = new HashMap<>(t.grudge());
@@ -266,7 +270,7 @@ public final class Tribes {
 			return false;
 		}
 		String tribe = of(mob);
-		return tribe != null && truce(player.level().getServer(), player.getUUID(), tribe);
+		return tribe != null && (truce(player.level().getServer(), player.getUUID(), tribe) || SwornCaptains.rules(player.level().getServer(), tribe, player.getUUID()));
 	}
 
 	/** Someone died: one of a tribe's at a player's hand raises their grudge (and lowers it with the rival brood's tribe). */

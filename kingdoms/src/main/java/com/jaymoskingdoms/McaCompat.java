@@ -320,6 +320,17 @@ public final class McaCompat {
 		return LOADED ? McaBridge.hireNobodies(level, player, around, n, outfits, health, damage, contract) : 0;
 	}
 
+	/** (0.7.433) A turned captain follows {@code player} from now on (MCA's own Follow, off his camp's roster). False without MCA. */
+	static boolean swear(net.minecraft.world.entity.Entity mob, ServerPlayer player) {
+		return LOADED && McaBridge.swear(mob, player);
+	}
+
+	/** (0.7.433) A sworn captain's body back at {@code player}'s side; null without MCA. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob swornGreenskin(ServerLevel level, Heritage.Kind kind, String name,
+		net.minecraft.world.phys.Vec3 at, ServerPlayer player, List<net.minecraft.world.item.ItemStack> gear) {
+		return LOADED ? McaBridge.swornGreenskin(level, kind, name, at, player, gear) : null;
+	}
+
 	/** (0.7.418) {@code e} is an MCA villager whose hired contract is still running; false without MCA. */
 	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
 		return LOADED && McaBridge.contractRunning(e);
@@ -619,6 +630,16 @@ public final class McaCompat {
 		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
+		}
+		Boolean balmed = InBalming.foe(guard, target);
+		if (balmed != null) {
+			// (0.7.433) an in-balmed one never goes for his keeper or their others
+			return balmed;
+		}
+		Boolean sworn = SwornCaptains.foe(guard, target);
+		if (sworn != null) {
+			// (0.7.433) a sworn captain at his lord's side, or a camp standing back from a challenge
+			return sworn;
 		}
 		Boolean trial = Trials.foe(guard, target);
 		if (trial != null) {
