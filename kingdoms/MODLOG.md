@@ -7842,7 +7842,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
 - Compile-checked; not seen in game.
 
-## 0.7.449: villagers come over for a reason, and you can ask why; accuse whoever robbed you (pack 0.19.1)
+## 0.7.449: villagers come over for a reason, and you can ask why; accuse whoever robbed you (pack 0.19.2)
 Andy: "when villagers run up to you, you should be able to ask them why or whats going on. they should also have a
 reason other than just introducing themselves." / "you should be able to confront who you think stole from you in the
 talk or interact screen. accusing the wrong person loses you hearts w them".
