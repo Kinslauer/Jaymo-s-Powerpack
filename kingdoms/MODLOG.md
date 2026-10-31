@@ -7541,6 +7541,18 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
   of the villagers' temperament rules touch them.
 - Compile-checked only; not played.
+
+## 0.7.429: the king's guard and the trials (Havens patch 2, second half; pack 0.18.102)
+- `Trials`: every goblin king and orc warchief keeps two guards at his door (the biggest of their kind: 1.35x size, twice
+  the health), replaced a day after one falls. "Ask to see the king" on one of them sets the trial:
+  - orcs, the pit fight: their champion (1.25x, 60 health) in the fighting pit until one of you is down (3 minutes);
+  - goblins, the trap hall: from the door to the throne within 60 s while darts, caltrops and nets go off round you.
+  Hold out an empty hand to an Ogre King's guard for the stone-lifting brawl: hold sneak by the guard for 5 s, then
+  knock him to half with bare fists (a weapon ends it). The rest of the camp holds off during a trial, and nobody dies
+  of one (below 5 health you're beaten and let go).
+- Passing wipes the tribe's grudge with a 3-day truce (for ogres: the region's ogres leave you be for 3 days,
+  `OgreHolds.TRUCE`), and the king sends 8 emeralds. A tribe sets no other trial for 3 days.
+- Bog iron no longer smelts to iron: it melts into Powers' bog iron (`tinkering_melting/bog_iron.json`).
 ## 0.7.429: Tideborn swim with a dolphin's grace (pack 0.18.102)
 - Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
   Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.

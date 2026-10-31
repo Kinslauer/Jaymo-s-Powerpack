@@ -116,6 +116,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Trials.ANSWER.equals(answer) && Languages.understands(player, villager)) {
+			// (0.7.429) asked to see the king: a trial is set
+			villager.sendChatMessage(com.jaymoskingdoms.Trials.ask(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER.equals(answer)) {
 			// (0.7.425) emeralds toward the tribe's grudge
 			villager.sendChatMessage(com.jaymoskingdoms.Tribes.tribute(player, villager), player);

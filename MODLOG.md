@@ -4451,6 +4451,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     gets a shake and the first-person view swings round over the shoulder at it for about a second (aim unchanged),
     at most once every 7 s, with a small rattle while still chased.
   - Compile-checked; not seen in game.
+
+## 0.18.102: bog iron as a Tinkering material (Havens patch 2, second half)
+- `TinkerMaterial.BOG_IRON` (iron-tier, 340 durability, 2.5 attack, a slower heavier handle; Jagged) and `Molten.BOG_IRON`.
+  Jaymo's Kingdoms' raw bog iron (1 ingot) and its ore (2) melt into it through Kingdoms' data file; the ingot casts
+  and forges like any metal. No grid or furnace recipe.
+- Bog iron armour (helmet, chestplate, leggings, boots: 2/6/5/2, toughness 0.5, durability x18) is hammered out on the
+  Smithing Anvil like iron's (`ArmourForging`), repaired with bog iron ingots.
+- Art: `tools/gen_bog_iron.py` recolours every iron part and tool layer rust-brown, the ingot, molten bog iron, and the
+  armour icons and worn layers from vanilla's iron ones.
+- Compile-checked only; not played.
 - **0.18.102, Water (Motion patch 2, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
   - **Strokes** (`client/water/SwimStrokePose`): in water over half your height, off the bottom and not
     sprint-swimming, the body takes the stroke for the way you move against the way you face: breaststroke leaning in

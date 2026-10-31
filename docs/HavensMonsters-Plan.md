@@ -127,5 +127,7 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   chiefs' stores, the Greasy Bestiary, and "What does your king think of me?" when questioning.
 - Patch 2, first half (Kingdoms 0.7.427): ogre outposts and an ogre hold per region, the three-phase Ogre King with his
   two-headed guard, his fall clearing the region's outposts and freeing bog iron (crumbles to rust until then), and
-  crippling blows from ogres and orcs. Still to come in the second half: goblin and orc kings' guards, the three trials
-  before the throne, and bog iron as its own Tinkers material.
+  crippling blows from ogres and orcs.
+- Patch 2, second half (Kingdoms 0.7.429, Powers 0.18.102): goblin and orc kings' guards at the door, the three trials
+  (pit fight, trap hall, stone-lifting brawl) that win a truce and a gift, and bog iron as its own Tinkers material with
+  forged armour.
