@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.433) The far grounds (Andy: "whalers should go further and further out to open ocean with every successful
+ * (0.7.437) The far grounds (Andy: "whalers should go further and further out to open ocean with every successful
  * expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward").
  *
  * <p>Each realm keeps a count of its whalers' voyages that came home with whales ({@link #REACH}). The nearer grounds

@@ -134,6 +134,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (Motion patch 5) the iron golem's eyes glow
 		com.jaymospowers.client.glow.GolemEyes.init();
+		// (Motion patch 6) pets acting like pets, and wet coats that shake dry
+		com.jaymospowers.client.pets.PetPoses.init();
+		com.jaymospowers.client.pets.WetCoats.init();
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open

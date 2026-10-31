@@ -231,7 +231,9 @@ public final class Tinkering {
 				}
 			});
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
-				output.accept(WeaponParts.cast(kind));
+				if (!WeaponParts.king(kind)) {
+					output.accept(WeaponParts.cast(kind));
+				}
 			}
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
 				WeaponParts.heads(kind).forEach(output::accept);

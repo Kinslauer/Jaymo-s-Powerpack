@@ -7595,7 +7595,65 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
   health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
 - Compile-checked only; not played.
-## 0.7.433: larger oceans and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
+
+## 0.7.433: captains challenged, turned and crowned (Havens patch 4, second half)
+- **Challenges:** sneak and use a sheet of paper on anything within 32 blocks of a tribe's goblin village or orc camp to
+  nail up a challenge for its strongest captain there (the post hears of it). Come within 24 blocks in the next day and he
+  steps out to fight you alone while his camp stands back. Kill him and he stays dead (bar the raised), and the tribe's
+  grudge falls by 15. Run (56 blocks) or fall and he climbs a rank. Never come and he calls you a coward on the post.
+- **Death threats:** a captain who swears to have your head (a coward's challenger, a turncoat, one back from the dead you
+  killed) has his threat nailed up for the town boards, and it's in your own Tidings.
+- **Turning captains:** stare a downed captain down with Valor's coating up (Tempered or better, his rank at most two past
+  your Valor rank; a Deathless one never bends), or calm one with Ambrose's In-balming (below). He gets up, leaves his tribe (its grudge rises 20) and follows you as an MCA follower, fighting
+  what's after you and never you. In talk, send him **spying** (back in 2 days with up to 2 of his old tribe's secrets in
+  your Tidings) or to **lead a raid** on its nearest camp (settled at dawn: odds 55% plus 10% a rank over the rival he
+  meets; a win fells that rival and brings you 6 to 11 emeralds by messenger, a loss kills him). Proud captains turn back
+  8% of dawns, spiteful 12% (half if bound), going home and swearing to kill you. A sworn captain who dies doesn't come
+  back (unless he's raised, and then he's his tribe's again). Left behind in another dimension or far off, he catches up.
+- **Taking a king's seat:** a tribe's king takes a fifth of every blow from a player or a sworn captain while any of its
+  captains still stand, and says how many. Kill him with none left standing and a sworn captain of his brood at your
+  call, and that captain is crowned instead of the camp falling: the tribe is yours (no grudge, it never rises, they
+  spare you). Lose the captain or the seat and it's over.
+- **In-balming (Andy):** every spirit binds orcs and goblins its own way, a move at spirit level 4 (each spirit teaches it
+  in a few lines), cast on a downed one in reach (never a chief), 40 mana, a 2-minute wait:
+  - **Varro, Ki Mark** (up to 5): a mark of ki on his brow that only ki users (Z Fighters) see. He goes home as before,
+    but half the time when you're in a fight within 64 blocks (once in 5 minutes) he joins it: a short film for those near,
+    "FOR <you>!!", and he fights your foe for a minute.
+  - **Ambrose, Gentle Hand** (one at a time): only the big ones, a downed orc or an ogre under a quarter of its health
+    (never the Ogre King). He follows you and fights your foes. A captain he calms is sworn to you (spy, raid, all of it).
+  - **Grimsby, Steel Oath** (up to 3): an iron sword in his hand, and when you fight within 24 blocks of him he turns it on
+    his own.
+  - **Thessaly, Borrowed Eyes** (up to 3): each day she tells you what he saw: a captain's secret, or that his tribe is
+    out to hunt you.
+  - **The Quiet One, Silent Shadow** (one): he follows you unseen and silent, and once in 2 minutes steps out of nothing
+    to end a foe of yours under 30% health.
+  Past a spirit's limit the oldest one is let go.
+- Compile-checked only; not played.
+
+## 0.7.434: clockwork golem idle fidgets (Motion patch 6; pack 0.18.112)
+- Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
+- Compile-checked only; not played.
+
+## 0.7.435: spoils (Havens patch 5; pack 0.18.114)
+- **Trophies worn as baubles** (Powers' bauble slots take them by its `jaymospowers:baubles/<slot>` tags; `Spoils`): a
+  captain who stays dead leaves a player his tusk (a charm named for him, +1 Will, +2 from rank 3 up); every goblin
+  king leaves his ring (+1 luck, +5% speed), every orc warchief a necklace of tusks (+1.5 attack), the Ogre King his
+  hide (a cloak: +3 armour, +0.15 knockback resistance). Each also adds 1 Will (staredowns and Will clashes).
+- **Weapons taken from kings:** a tribe's king (the goblin king or warchief at its seat) holds his own weapon and drops
+  its iron head, as does the Ogre King: Gutting Hook, Warchief's Cleaver, Ogre King's Maul, put together at Powers'
+  Tool Station only.
+- **Monster crowns:** the same kings drop their crown (goblin, orc, ogre). Right-click the air to wear it (drawn on the
+  head, +1 armour, +2 Will), or place it as a small block.
+- Drops only when a player had the kill. Compile-checked; not played.
+## 0.7.436: rare pets (Motion patch 7; pack 0.18.115)
+- `RarePets`: settlements of 8+ grown get one villager keeping an animal from a far climate (13 kinds by vanilla
+  variants), tamed dogs/parrots trail them, others keep near their spot. The keeper brags to players who come near (once a
+  day each, `rarepet.jaymoskingdoms.brag.N`) or tells an old tale hinting at Powers' hidden name-tag looks (`.hint.N`).
+  Orphaned rare pets go to a neighbour; a dead one is mourned.
+- Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons get young via Powers'
+  `jaymospowers:has_young` tag.
+- Compile-checked only; not played.
+## 0.7.437: larger oceans and biomes, and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
 - **Larger oceans and biomes** (Andy: "why cant biomes be larger as well? ... the cherry grove is usually too small"):
   `data/minecraft/worldgen/density_function/overworld/` swaps continents, temperature, vegetation and erosion for the
   Large Biomes noises (four times the scale; continents also shifted 0.06 toward the sea). Oceans, continents and

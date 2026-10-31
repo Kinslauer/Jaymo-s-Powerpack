@@ -4549,3 +4549,41 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
   from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
   skin and spikes. Compile-checked; not seen in game.
+- **0.18.112, Mob animation (Motion patch 6, `docs/Motion-Plan.md`; Kingdoms 0.7.434):**
+- Fresh Animations (FreshLX, v1.11.1 for 26.1+) ships unchanged through EMF: its terms allow modpacks. Fetched from
+  Modrinth until the CurseForge ids are filled in. Any mob in one of our poses (downed, tripped, carried, webbed, pet
+  acts) pauses EMF so our pose wins.
+- Pet wolves (`client/pets/PetPoses`): greet an owner back after 2 minutes away, play bow when the owner is close,
+  lie down then doze (eyes shut) after sitting a while, and wake at loud sounds nearby. Wild wolves lie and doze too.
+- Cats: loaf, knead, groom and stretch in turns while sitting.
+- Wet coats (`client/pets/WetCoats`, tag `jaymospowers:furry`): furry mobs darken in water or rain, shake off once
+  out (shudder + splash) and dry over a minute. Wolves keep vanilla's wet shade; sheep wool isn't darkened.
+- Clockwork golems glance around and shift their weight when idle (Kingdoms `ClockworkGolemRenderer`); iron golem
+  idle comes from Fresh Animations.
+- **0.18.113, Scan E (`docs/ScanGaps-Plan.md`), swarm, web and tricks:** four new aliens. Hive (bee, ant, butterfly,
+  caterpillar, dragonfly): Scatter into an insect cloud that blows pass through, Sting, Honey Glue, Swarm. Skitter
+  (spider, cave spider, tarantula): climbs walls and clings to ceilings upside down (drawn turned over, and
+  your camera rolls over with it); Web Line to swing on, Web Tie, poison Bite,
+  Egg Sac (three cave spiders for 30 s). Shade (enderman, drifter): Steal a block and throw it, Stare that holds a
+  mob still, Blink, Wary (the next blow blinks you away); water burns it. Mirage (illusioner): Mirror Images (false
+  copies that draw mobs off and vanish at a blow, Duplex's doubles with a fake flag), Blind, Unseen, Swap. Each has
+  its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.114, Kings' weapons (Havens patch 5; Kingdoms 0.7.435):** the Gutting Hook (quick; each hit hooks the foe a
+  step toward you), the Warchief's Cleaver (heavy; knocks a raised shield aside for 6 s) and the Ogre King's Maul (very
+  heavy; throws the struck back and slows them). Their iron heads (`tinkering/WeaponParts.KINGS`) drop only off kings
+  in Kingdoms and are never shaped, cast or forged; they go together at the Tool Station, and JEI shows that route and
+  where each head comes from. Art: `tools/king_spoils_assets.py`. Compile-checked; not played.
+- **0.18.115, Babies and rare pets (Motion patch 7, `docs/Motion-Plan.md`; Kingdoms 0.7.436):**
+- Younglings (`young/Younglings`, tag `jaymospowers:has_young`): spiders, cave spiders, parrots, aerwhales, skyroot
+  lizards and Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons now have young.
+  One natural spawn in four brings a brood (spiders: 2-4) or a calf or two. Young are the same creature drawn small
+  through the scale attribute (45%, big ones 30%), with health and bite to match. They squeak higher, drop nothing and
+  trail their elders, and grow to full size over a game day.
+- Rare pets (Kingdoms `RarePets`): a realm settlement of 8+ grown comes, in time, to have one villager keeping an
+  animal from far off. That's a snow fox, snow wolf, snow hare, frost frog or woolly pig where it's warm; a sand hare,
+  armadillo, spotted or rust-coat dog, parrot, marsh frog or southern hen where it's cold; a brown mooshroom
+  anywhere. Dogs and parrots are tamed to their keeper; the rest keep about the keeper's spot. Come near the keeper
+  with the animal about and they brag (a bubble, once a day each), and now and then tell an old tale instead. A
+  neighbour takes it in if the keeper dies; a keeper mourns a rare pet that dies.
+- Hidden name-tag looks (`client/pets/NameLooks`), hinted at only in those tales: five names that change how a mob is
+  drawn (size or tint). The game doesn't say which.

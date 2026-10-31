@@ -36,7 +36,7 @@ public final class Sharks {
 	static final float BITE_CHANCE = 0.1F;
 	static final double BITE_REACH = 2.5;
 	static final double SWIM = 1.2;
-	/** (0.7.433) Out on a whaler's far grounds ({@link WhaleCarcass#wildness}): this many more sharks at most for each step out, and this much likelier to come. */
+	/** (0.7.437) Out on a whaler's far grounds ({@link WhaleCarcass#wildness}): this many more sharks at most for each step out, and this much likelier to come. */
 	static final float MORE_PER_WILD = 0.5F, CHANCE_PER_WILD = 0.08F;
 
 	private static final DustParticleOptions BLOOD = new DustParticleOptions(0x8A1010, 1.6F);
@@ -81,7 +81,7 @@ public final class Sharks {
 	}
 
 	/**
-	 * (0.7.433) A shark come up out of the deep near {@code at} (a whaleboat out on the far grounds), set on {@code prey};
+	 * (0.7.437) A shark come up out of the deep near {@code at} (a whaleboat out on the far grounds), set on {@code prey};
 	 * false if there's no Naturalist shark, or no water deep enough there.
 	 */
 	public static boolean hunt(ServerLevel level, Vec3 at, @Nullable LivingEntity prey) {

@@ -40,8 +40,43 @@ public final class PoseTakeover {
 	private PoseTakeover() {
 	}
 
+	/**
+	 * (Motion patch 6) A mob's entity id on its render state (set for every non-player as it's extracted), so a mob in one
+	 * of our poses can have base Fresh Animations paused for it the way a player is.
+	 */
+	public static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> MOB_ID =
+		net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey.create(() -> "jaymospowers:mob_id");
+
+	/** From LivingEntityRenderer.extractRenderState: a mob's id onto its state (see {@link #MOB_ID}). */
+	public static void markMob(Entity entity, LivingEntityRenderState state) {
+		if (!(state instanceof AvatarRenderState)) {
+			state.setData(MOB_ID, entity.getId());
+		}
+	}
+
+	/**
+	 * (Motion patch 6) One of our poses is on a mob: downed, tripped by a bolas, carried or thrown, a web ragdoll, held in
+	 * a symbiote's grab, or a pet's own pose. Fresh Animations (its base pack animates most vanilla mobs) steps aside.
+	 */
+	public static boolean mobPosed(LivingEntityRenderState s) {
+		return com.jaymospowers.client.wounds.DownedPose.down(s) || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
+			|| s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
+			|| s.getData(WebRagdoll.KEY) != null || s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
+			|| com.jaymospowers.client.pets.PetPoses.posed(s);
+	}
+
 	public static void beginDraw(LivingEntityRenderState state) {
 		drawing = state;
+		Integer mob = state.getData(MOB_ID);
+		if (mob != null) {
+			boolean posed = mobPosed(state);
+			EmfCompat.hold(mob, posed);
+			if (posed) {
+				POSED.add(mob.intValue());
+			} else {
+				POSED.remove(mob.intValue());
+			}
+		}
 		if (state instanceof AvatarRenderState avatar) {
 			boolean posed = posed(avatar);
 			EmfCompat.hold(avatar.id, posed);
@@ -99,7 +134,7 @@ public final class PoseTakeover {
 
 	/** One of our poses is on whatever is being drawn right now. */
 	public static boolean drawingPosed() {
-		return drawing instanceof AvatarRenderState avatar && posed(avatar);
+		return drawing instanceof AvatarRenderState avatar ? posed(avatar) : drawing != null && drawing.getData(MOB_ID) != null && mobPosed(drawing);
 	}
 
 	/** Kitchen's ragdoll pose key (a limp player), fetched once by reflection; null if this Kitchen has none. */

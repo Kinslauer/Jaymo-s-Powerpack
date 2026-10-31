@@ -197,7 +197,7 @@ final class Corsairs implements Ship.Captaincy {
 	@Override
 	public @Nullable Input helm(ServerLevel level, Ship ship, Crew crew) {
 		long now = level.getGameTime();
-		// (0.7.433) a far ground's sea rover long out with nobody near is gone again
+		// (0.7.437) a far ground's sea rover long out with nobody near is gone again
 		if (crew.side == Crew.Side.PIRATE && FarGrounds.stowIdle(level, ship)) {
 			return null;
 		}
@@ -702,7 +702,7 @@ final class Corsairs implements Ship.Captaincy {
 			player == null ? Component.translatable("message.jaymoskingdoms.someone") : player.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		switch (crew.side) {
 			case PIRATE -> {
-				// (0.7.433) a far ground's sea rover isn't her camp's own ship
+				// (0.7.437) a far ground's sea rover isn't her camp's own ship
 				if (FarGrounds.rover(level, ship)) {
 					FarGrounds.roverLost(level, ship);
 				} else {

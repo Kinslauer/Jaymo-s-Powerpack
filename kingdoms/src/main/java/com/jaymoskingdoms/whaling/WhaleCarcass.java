@@ -74,7 +74,7 @@ public final class WhaleCarcass extends Entity {
 
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(WhaleCarcass.class, EntityDataSerializers.INT);
 	/**
-	 * (0.7.433) How far out on the open ocean it was taken (a whaler's far grounds, {@code FarGrounds}: 0 near home):
+	 * (0.7.437) How far out on the open ocean it was taken (a whaler's far grounds, {@code FarGrounds}: 0 near home):
 	 * more sharks come to it, sooner. Not saved: set again when her crew take it up.
 	 */
 	public int wildness;

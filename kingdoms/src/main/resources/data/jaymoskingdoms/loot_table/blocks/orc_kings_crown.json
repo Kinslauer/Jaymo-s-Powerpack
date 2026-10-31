@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:orc_kings_crown"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/orc_kings_crown"
+}

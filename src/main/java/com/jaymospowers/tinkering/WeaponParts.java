@@ -150,7 +150,15 @@ public final class WeaponParts {
 	 * (0.17.110) Heads the Part Builder doesn't shape: their stone head is found, not made (Sora's Dagger Blade: a
 	 * village child has it, {@code power/wind/SorasBladeChild}). They still cast and assemble like any other.
 	 */
-	public static final Set<String> FOUND = Set.of(SORAS_DAGGER_BLADE);
+	public static final Set<String> FOUND;
+	/**
+	 * (Havens patch 5, spoils) A king's own weapon, taken from his body: the goblin king's Gutting Hook, the orc king's
+	 * Warchief's Cleaver, the Ogre King's Maul ({@code armory/KingWeapons}). Kingdoms drops the iron head when he falls;
+	 * it's never shaped, cast or forged anew (no cast is made from it), only put together at the Tool Station.
+	 */
+	public static final String GUTTING_HOOK_BLADE = "gutting_hook_blade", WARCHIEF_CLEAVER_BLADE = "warchief_cleaver_blade",
+		OGRE_MAUL_HEAD = "ogre_maul_head";
+	public static final Set<String> KINGS = Set.of(GUTTING_HOOK_BLADE, WARCHIEF_CLEAVER_BLADE, OGRE_MAUL_HEAD);
 	/** Every kind, by its head's id; costs are the ingots their old crafting recipes took. */
 	public static final Map<String, Kind> KINDS = new LinkedHashMap<>();
 	public static final Map<Kind, Item> PARTS = new LinkedHashMap<>();
@@ -215,6 +223,18 @@ public final class WeaponParts {
 		add(new Kind("pod_tank_blank", "jaymospowers:pod_tank", Scheme.SINGLE_COPPER, 5 * INGOT, Assembly.ALONE, 1));
 		// (0.18.50) the Sealed Helm (power/zfighter/breath/Breath): an iron seal, finished with a glass block at the Tool Station
 		add(new Kind("helm_seal", "jaymospowers:sealed_helm", Scheme.SINGLE, 2 * INGOT, Assembly.GLASS, 1));
+		// (Havens patch 5) the kings' weapons: iron heads taken from fallen kings, never made
+		add(new Kind(GUTTING_HOOK_BLADE, "jaymospowers:gutting_hook", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
+		add(new Kind(WARCHIEF_CLEAVER_BLADE, "jaymospowers:warchief_cleaver", Scheme.SINGLE, 5 * INGOT, Assembly.TOUGH_BINDING, 1));
+		add(new Kind(OGRE_MAUL_HEAD, "jaymospowers:ogre_kings_maul", Scheme.SINGLE, 8 * INGOT, Assembly.TOUGH_BINDING, 1));
+		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
+		found.add(SORAS_DAGGER_BLADE);
+		FOUND = Set.copyOf(found);
+	}
+
+	/** (Havens patch 5) A king's weapon head ({@link #KINGS}): taken, never shaped, cast or forged. */
+	public static boolean king(Kind kind) {
+		return KINGS.contains(kind.part());
 	}
 
 	/** (0.18.50) Whether {@code stack} is the plain item some assembly takes beside its head (the Sealed Helm's glass block). */
@@ -277,12 +297,15 @@ public final class WeaponParts {
 	/** The head pouring this liquid over a cast of this kind makes, or null. */
 	public static @Nullable ItemStack castResult(Kind kind, Molten molten) {
 		Metal metal = Metal.of(molten);
-		return metal == null || kind.in(metal) == null ? null : WeaponPartItem.of(kind, metal, 1);
+		return metal == null || king(kind) || kind.in(metal) == null ? null : WeaponPartItem.of(kind, metal, 1);
 	}
 
 	/** The metal heads a cast of this kind makes. */
 	public static List<ItemStack> castResults(Kind kind) {
 		List<ItemStack> out = new ArrayList<>();
+		if (king(kind)) {
+			return out;
+		}
 		for (Metal metal : Metal.values()) {
 			if (metal.molten != null && kind.in(metal) != null) {
 				out.add(WeaponPartItem.of(kind, metal, 1));
@@ -294,6 +317,11 @@ public final class WeaponParts {
 	/** Every head of this kind (stone and metals), any of which gold turns into its cast. */
 	public static List<ItemStack> heads(Kind kind) {
 		List<ItemStack> out = new ArrayList<>();
+		if (king(kind)) {
+			// (Havens patch 5) a king's head comes in his own iron only
+			out.add(WeaponPartItem.of(kind, Metal.IRON, 1));
+			return out;
+		}
 		out.add(WeaponPartItem.of(kind, Metal.STONE, 1));
 		out.addAll(castResults(kind));
 		return out;

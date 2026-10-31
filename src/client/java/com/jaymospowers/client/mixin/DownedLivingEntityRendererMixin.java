@@ -25,6 +25,11 @@ abstract class DownedLivingEntityRendererMixin {
 	private void jaymospowers$downedState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		DownedPose.extract(entity, state, partialTicks);
 		TrippedPose.extract(entity, state, partialTicks);
+		// (Motion patch 6) pets' own poses, wet coats, and the mob's id so Fresh Animations can step aside for our poses
+		com.jaymospowers.client.pets.PetPoses.extract(entity, state, partialTicks);
+		com.jaymospowers.client.pets.WetCoats.extract(entity, state, partialTicks);
+		com.jaymospowers.client.pets.NameLooks.extract(entity, state);
+		com.jaymospowers.client.PoseTakeover.markMob(entity, state);
 		// (0.18.84) out cold (a rock to the head, too much poppy, bled out): eyes shut, as Kitchen shuts a corpse's
 		if (com.jaymospowers.core.wounds.Downed.passedOut(entity)) {
 			com.jaymoskitchen.client.corpse.ClosedEyes.mark(state);
@@ -47,11 +52,14 @@ abstract class DownedLivingEntityRendererMixin {
 		CameraRenderState camera, CallbackInfo ci) {
 		DownedPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		TrippedPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymospowers.client.pets.PetPoses.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$downedLying(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		DownedPose.rotate(state, poseStack, entityScale);
 		TrippedPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.pets.PetPoses.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.pets.WetCoats.rotate(state, poseStack);
 	}
 }

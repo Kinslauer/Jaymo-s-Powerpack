@@ -259,6 +259,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		CripplingBlows.register();
 		Trials.register();
 		Captains.register();
+		SwornCaptains.register();
+		InBalming.register();
+		Spoils.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
@@ -443,6 +446,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
+		RarePets.register();
 		// 0.7.201: letters, messenger pigeons and couriers across the land; the news by letter, not chat (and their attachments)
 		LOGGER.debug("post attachments: {} {} {} {}", Couriers.ERRANDS, PigeonPost.FLIGHTS, Post.NAMES, Post.WAITING);
 		Letters.register();
@@ -558,7 +563,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Whalers.register();
-		// 0.7.433: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
+		// 0.7.437: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
 		LOGGER.debug("far ground attachments: {} {}", FarGrounds.REACH, FarGrounds.ROVERS);
 		TreasureWrecks.register();
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,

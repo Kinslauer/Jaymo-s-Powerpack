@@ -396,6 +396,11 @@ public final class Captains {
 				}
 				return;
 			}
+			if (SwornCaptains.free(level.getServer(), id) && !c.body().map(entity.getUUID()::equals).orElse(false)) {
+				// (4b) a sworn captain's old body, left behind (he's been sent for since, or is away on his lord's errand)
+				entity.discard();
+				return;
+			}
 			Entity other = c.body().map(level::getEntity).orElse(null);
 			if (other != null && other != entity && other.isAlive()) {
 				// (two of him: the one already about stays)
@@ -446,7 +451,7 @@ public final class Captains {
 		return null;
 	}
 
-	private static Map<String, Captain> all(MinecraftServer server) {
+	static Map<String, Captain> all(MinecraftServer server) {
 		return Factions.level(server).getAttachedOrElse(CAPTAINS, Map.of());
 	}
 
@@ -454,7 +459,7 @@ public final class Captains {
 		return all(server).get(id);
 	}
 
-	private static void put(MinecraftServer server, Captain c) {
+	static void put(MinecraftServer server, Captain c) {
 		Map<String, Captain> all = new HashMap<>(all(server));
 		all.put(c.id(), c);
 		Factions.level(server).setAttached(CAPTAINS, Map.copyOf(all));
@@ -464,7 +469,7 @@ public final class Captains {
 	static List<Captain> of(MinecraftServer server, String tribe) {
 		List<Captain> out = new ArrayList<>();
 		for (Captain c : all(server).values()) {
-			if (!c.fallen() && c.tribe().equals(tribe)) {
+			if (!c.fallen() && c.tribe().equals(tribe) && !SwornCaptains.free(server, c.id())) {
 				out.add(c);
 			}
 		}
@@ -472,13 +477,13 @@ public final class Captains {
 		return out;
 	}
 
-	private static @Nullable Captain of(Entity e) {
+	static @Nullable Captain of(Entity e) {
 		String id = idOf(e);
 		MinecraftServer server = e.level().getServer();
 		return id == null || server == null ? null : get(server, id);
 	}
 
-	private static List<Trait> traits(Captain c) {
+	static List<Trait> traits(Captain c) {
 		List<Trait> out = new ArrayList<>();
 		for (String key : c.traits()) {
 			Trait t = Trait.parse(key);
@@ -510,7 +515,7 @@ public final class Captains {
 	}
 
 	/** A strength {@code c} hasn't yet (and that doesn't clash with his traits), or null. */
-	private static @Nullable Trait newStrength(Captain c, RandomSource random) {
+	static @Nullable Trait newStrength(Captain c, RandomSource random) {
 		List<Trait> have = traits(c), open = new ArrayList<>();
 		for (Trait t : Trait.values()) {
 			if (t.sort == Sort.STRENGTH && t != Trait.DEATHLESS && !have.contains(t) && have.stream().noneMatch(t::clashes)) {
@@ -554,6 +559,10 @@ public final class Captains {
 		days(level);
 		seats(level);
 		for (Captain c : List.copyOf(all(server).values())) {
+			if (SwornCaptains.free(server, c.id())) {
+				// (4b) sworn to a player: at their side, or away on their business
+				continue;
+			}
 			Faction camp = c.fallen() ? null : near.get(c.post());
 			if (camp == null && !c.fallen() && tribes.contains(c.tribe()) && !standing(server, c.post())) {
 				// (his camp is gone: he goes to another of the tribe's)
@@ -606,7 +615,7 @@ public final class Captains {
 	}
 
 	/** The camp of {@code camps} with the fewest of {@code tribe}'s captains posted to it. */
-	private static int quietest(MinecraftServer server, String tribe, List<Faction> camps) {
+	static int quietest(MinecraftServer server, String tribe, List<Faction> camps) {
 		Map<Integer, Integer> posted = new HashMap<>();
 		for (Captain c : of(server, tribe)) {
 			posted.merge(c.post(), 1, Integer::sum);
@@ -690,7 +699,7 @@ public final class Captains {
 	}
 
 	/** His build for {@code rank}: bigger, tougher and harder-hitting than his kind. */
-	private static void build(PathfinderMob mob, int rank) {
+	static void build(PathfinderMob mob, int rank) {
 		AttributeInstance size = mob.getAttribute(Attributes.SCALE);
 		if (size != null) {
 			size.setBaseValue(size.getBaseValue() * (SCALE_BASE + SCALE_PER_RANK * rank));
@@ -707,7 +716,7 @@ public final class Captains {
 	}
 
 	/** (Andy) A raised captain's build: tougher, harder-hitting, a little bigger. */
-	private static void deathless(PathfinderMob mob) {
+	static void deathless(PathfinderMob mob) {
 		AttributeInstance size = mob.getAttribute(Attributes.SCALE);
 		if (size != null) {
 			size.setBaseValue(size.getBaseValue() * DEATHLESS_SCALE);
@@ -745,7 +754,7 @@ public final class Captains {
 	}
 
 	/** {@code mob} is {@code c} from now on: his name, his tags, the head he wears. */
-	private static void bind(ServerLevel level, Captain c, LivingEntity mob) {
+	static void bind(ServerLevel level, Captain c, LivingEntity mob) {
 		bind(level, c, mob, true);
 	}
 
@@ -944,7 +953,7 @@ public final class Captains {
 			level.sendParticles(mob.getRandom().nextBoolean() ? ParticleTypes.SOUL : ParticleTypes.SMOKE, mob.getRandomX(0.6), mob.getRandomY(), mob.getRandomZ(0.6),
 				1, 0.0, 0.03, 0.0, 0.01);
 		}
-		if (mob.tickCount % 20 == 0) {
+		if (mob.tickCount % 20 == 0 && !SwornCaptains.sworn(level.getServer(), c.id())) {
 			meet(level, c, mob, now);
 			fights(level, c, mob, now);
 			trophy(mob, c);
@@ -1095,7 +1104,7 @@ public final class Captains {
 	}
 
 	/** {@code player}'s last meeting with captain {@code id} went as {@code how}. */
-	private static void outcome(MinecraftServer server, String id, UUID player, String how, long now) {
+	static void outcome(MinecraftServer server, String id, UUID player, String how, long now) {
 		Captain c = get(server, id);
 		if (c == null) {
 			return;
@@ -1209,7 +1218,10 @@ public final class Captains {
 		}
 		boolean finished = Downed.isDowned(entity) || lost.contains("head");
 		boolean burned = source.is(DamageTypeTags.IS_FIRE) || entity.isOnFire();
-		boolean returns = !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
+		// (4b) a sworn captain dies in his lord's service; one beaten in his own challenge stays dead (but for the raised)
+		boolean wasSworn = SwornCaptains.fell(level, c);
+		boolean honoured = SwornCaptains.challengeWon(level, c, source);
+		boolean returns = !wasSworn && !honoured && !finished && !burned && !c.chief() && random.nextFloat() < RETURN_CHANCE;
 		boolean raised = !returns && !c.chief() && !c.has(Trait.DEATHLESS) && random.nextFloat() < RAISED_CHANCE;
 		if (raised) {
 			// (Andy) back from anything, by corrupted magic or a necromancer: no fear left in him
@@ -1225,6 +1237,10 @@ public final class Captains {
 		long back = returns ? now + 24000L * (RETURN_DAYS_MIN + random.nextInt(RETURN_DAYS_MAX - RETURN_DAYS_MIN + 1)) : -1L;
 		put(server, c.fell(back, lost));
 		FIGHTS.remove(c.id());
+		if (!returns) {
+			// (0.7.435) one who stays dead leaves his tusk to the player who felled him
+			Spoils.captainFell(level, entity, c.rank(), source);
+		}
 		UUID id = entity.getUUID();
 		FEARED.remove(id);
 		FEAR_READY.remove(id);
@@ -1307,6 +1323,8 @@ public final class Captains {
 				continue;
 			}
 			put(server, c.returned(quietest(server, c.tribe(), camps)));
+			// (4b) his death threats for whoever killed him
+			SwornCaptains.back(server, c);
 			Post.news(server, Component.translatable(c.has(Trait.DEATHLESS) ? "news.jaymoskingdoms.captain.raised." + level.getRandom().nextInt(2)
 				: "news.jaymoskingdoms.captain.returned", c.name(), Tribes.name(c.tribe())));
 		}
@@ -1549,7 +1567,7 @@ public final class Captains {
 	}
 
 	/** {@code c} up a rank, and maybe a strength more. */
-	private static void raise(ServerLevel level, Captain c, RandomSource random) {
+	static void raise(ServerLevel level, Captain c, RandomSource random) {
 		Captain now = get(level.getServer(), c.id());
 		if (now == null || now.fallen()) {
 			return;
@@ -1571,7 +1589,7 @@ public final class Captains {
 	}
 
 	/** {@code c} falls to one of his own ({@code returns}: he'll be back in a few days). */
-	private static void fall(ServerLevel level, Captain c, boolean returns) {
+	static void fall(ServerLevel level, Captain c, boolean returns) {
 		Captain now = get(level.getServer(), c.id());
 		if (now == null || now.fallen()) {
 			return;
@@ -1587,7 +1605,7 @@ public final class Captains {
 	// ---- (patch 4) shamed or spared --------------------------------------------------------------------------------------
 
 	/** (Staredowns) {@code seen} is a downed captain {@code sp} may stare at: to spare (an empty hand) or to shame. */
-	static boolean starable(Mob seen) {
+	public static boolean starable(Mob seen) {
 		return is(seen) && Downed.isDowned(seen);
 	}
 
@@ -1602,6 +1620,10 @@ public final class Captains {
 		}
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
+		if (SwornCaptains.byValor(level, sp, seen, c)) {
+			// (4b) Valor's coating up: turned, or he refuses it
+			return;
+		}
 		seen.addTag(Downed.REVIVE_TAG);
 		Map<UUID, Fight> fights = FIGHTS.get(c.id());
 		if (fights != null) {
@@ -1667,7 +1689,7 @@ public final class Captains {
 	}
 
 	/** A captain of {@code tribe} (those at {@code camp} first) with a trait {@code player} doesn't know of the {@code sorts}, and it; or null. */
-	private static Map.@Nullable Entry<Captain, Trait> unknown(ServerPlayer player, String tribe, int camp, Set<Sort> sorts, RandomSource random) {
+	static Map.@Nullable Entry<Captain, Trait> unknown(ServerPlayer player, String tribe, int camp, Set<Sort> sorts, RandomSource random) {
 		List<Captain> captains = new ArrayList<>(of(player.level().getServer(), tribe));
 		captains.sort(Comparator.comparingInt(c -> c.post() == camp ? 0 : 1));
 		for (Captain c : captains) {

@@ -161,7 +161,7 @@ public class GreatWhale extends WaterAnimal {
 		return super.finalizeSpawn(level, difficulty, reason, group);
 	}
 
-	/** (0.7.433) Made a right whale, a sperm whale or the white whale (a pod on a whaler's far grounds). */
+	/** (0.7.437) Made a right whale, a sperm whale or the white whale (a pod on a whaler's far grounds). */
 	public void becomes(int variant) {
 		this.entityData.set(VARIANT, variant);
 		if (variant == WHITE) {
