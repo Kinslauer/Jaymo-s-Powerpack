@@ -210,6 +210,12 @@ public final class Workers {
 			Javelins.tick(level, w);
 			return Trials.guardStep(level, w);
 		}
+		if (TribePacts.ally(mob)) {
+			// (0.7.443) one of a tribe's war band, called to a friend's aid
+			Greenskins.step(level, w);
+			Javelins.tick(level, w);
+			return TribePacts.allyStep(level, w);
+		}
 		if (Tribes.hunter(mob)) {
 			// (0.7.425) one of a tribe's hunting band on a hated player's trail
 			Greenskins.step(level, w);

@@ -191,7 +191,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	/** The fin sets, by drawing: a crest, ear fins, long arm fins (every set has arm fins). */
 	static final boolean[] CREST = {true, false, true}, EARS = {false, true, true}, LONG_ARMS = {false, false, true};
 	private static final ModelPart[] HEAD_FINS = new ModelPart[3];
-	private static ModelPart rightArmFin, leftArmFin, rightArmFinLong, leftArmFinLong;
+	private static ModelPart rightArmFin, leftArmFin, rightArmFinLong, leftArmFinLong, rightWeb, leftWeb;
+	/**
+	 * (0.7.443, Havens patch 7b: "more monstrous non-humans") A Tideborn's fins this much bigger than they were, and webbing
+	 * along the outer edge of each hand (arm space: the hand y 9-12).
+	 */
+	static final float FIN_SCALE = 1.45F, WEB_TOP = 8.5F;
+	static final int WEB_HEIGHT = 4;
+	/** (0.7.443) A Stoneborn's heavy stone brow (head space: just over the eyes) and the cracks over the face, neck and chest. */
+	static final Identifier STONE_BROW = JaymosKingdoms.id("textures/entity/heritage/stoneborn_brow.png"),
+		STONE_CRACKS = JaymosKingdoms.id("textures/entity/heritage/stoneborn_cracks.png");
+	static final float BROW_Y = -5.6F, BROW_JUT = 1.4F;
+	private static ModelPart brow;
 
 	/** (0.7.262) A Divine-born's drifting light. */
 	private static final DustParticleOptions LIGHT_MOTE = new DustParticleOptions(0xFFE9A0, 0.6F);
@@ -386,6 +397,31 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			finTextures(style);
 			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0);
 		}
+		if (kind == Kind.STONEBORN) {
+			// (0.7.443) cracks over the face and chest, and the heavy brow
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(STONE_CRACKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+				state.outlineColor);
+			if (!headFinsCovered) {
+				brow(poseStack, collector, lightCoords, marks);
+			}
+		}
+	}
+
+	/** (0.7.443) A Stoneborn's heavy brow ridge over the eyes (players and villagers). */
+	static void brow(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, net.minecraft.client.model.HumanoidModel<?> model) {
+		if (!model.head.visible) {
+			return;
+		}
+		if (brow == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -1.0F, -BROW_JUT, 8.0F, 2.0F, 2.0F),
+				PartPose.offset(0.0F, BROW_Y, -4.0F + BROW_JUT * 0.5F));
+			brow = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		}
+		poseStack.pushPose();
+		model.head.translateAndRotate(poseStack);
+		collector.order(1).submitModelPart(brow, poseStack, RenderTypes.entityCutout(STONE_BROW), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+		poseStack.popPose();
 	}
 
 	/** (0.7.262) The Bio-built's plates laid over a variant's own marks, by form (the second, the third). */
@@ -476,12 +512,14 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			poseStack.pushPose();
 			model.rightArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? rightArmFinLong : rightArmFin);
+			fin(poseStack, collector, lightCoords, glow, rightWeb);
 			poseStack.popPose();
 		}
 		if (model.leftArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? leftArmFinLong : leftArmFin);
+			fin(poseStack, collector, lightCoords, glow, leftWeb);
 			poseStack.popPose();
 		}
 	}
@@ -509,7 +547,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 						PartPose.offsetAndRotation(side * 4.0F, -6.0F, -1.0F, 0.0F, side * EAR_FLARE, 0.0F));
 				}
 			}
-			HEAD_FINS[set] = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+			HEAD_FINS[set] = bigger(LayerDefinition.create(mesh, 32, 32).bakeRoot());
 		}
 		return HEAD_FINS[set];
 	}
@@ -523,13 +561,35 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		leftArmFin = armFin(1, 16, 12, 6, 3.0F);
 		rightArmFinLong = armFin(-1, 24, 0, 8, 1.0F);
 		leftArmFinLong = armFin(1, 24, 0, 8, 1.0F);
+		rightWeb = web(-1);
+		leftWeb = web(1);
 	}
 
 	private static ModelPart armFin(int side, int u, int v, int height, float top) {
 		MeshDefinition mesh = new MeshDefinition();
 		mesh.getRoot().addOrReplaceChild("fin", CubeListBuilder.create().texOffs(u, v).addBox(0.0F, 0.0F, 0.0F, 0.0F, height, 3.0F),
 			PartPose.offsetAndRotation(side * 1.0F, top, 2.0F, 0.0F, side * ARM_FLARE, 0.0F));
+		return bigger(LayerDefinition.create(mesh, 32, 32).bakeRoot());
+	}
+
+	/** (0.7.443) Webbing down the outer edge of a hand, from the fin sheet. */
+	private static ModelPart web(int side) {
+		MeshDefinition mesh = new MeshDefinition();
+		mesh.getRoot().addOrReplaceChild("web", CubeListBuilder.create().texOffs(16, 12).addBox(0.0F, 0.0F, -1.5F, 0.0F, WEB_HEIGHT, 3.0F),
+			PartPose.offsetAndRotation(side * 3.2F, WEB_TOP, 0.0F, 0.0F, 0.0F, side * 0.2F));
 		return LayerDefinition.create(mesh, 32, 32).bakeRoot();
+	}
+
+	/** (0.7.443) Every fin of {@code root} drawn {@link #FIN_SCALE} bigger, each about its own root. */
+	private static ModelPart bigger(ModelPart root) {
+		root.getAllParts().forEach(p -> {
+			if (p != root) {
+				p.xScale = FIN_SCALE;
+				p.yScale = FIN_SCALE;
+				p.zScale = FIN_SCALE;
+			}
+		});
+		return root;
 	}
 
 	/** Every client tick: now and then a particle off a hand (whatever each heritage has). */

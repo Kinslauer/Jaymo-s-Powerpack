@@ -15,7 +15,7 @@ Four of each, all original:
   gloves and boots, the patrol's gold badge on the chest.
 - star_reader: (0.7.442) a star-reader from Powers' fallen-star craters, a long night-blue robe pricked with silver stars,
   a deep hood, a rope belt and a lens on a chain.
-- star_smith: (0.7.443) the star forge's smith, a dark fitted suit with green-lit seams under a heavy scorched leather
+- star_smith: (0.7.444) the star forge's smith, a dark fitted suit with green-lit seams under a heavy scorched leather
   apron, thick gloves to the elbow and a welding visor pushed up on the brow.
 
 Run from the kingdoms project root: python -I tools/gen_zfighter_outfits.py (also writes build/zfighter-outfits-preview.png)."""

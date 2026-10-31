@@ -162,3 +162,10 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   Stoneborn hillside mounds with stone arches, Sylvan tree houses with rope rails, Warrior-born longhouses and a
   fighting ring, mixed havens taking each in turn); a quarter of havens live alongside goblins and orcs (not raided by
   the tribes) and a third of those sit under an orc king.
+- Patch 7a (Kingdoms 0.7.443): havens pay the tribes for peace and the nearest haven feeds each Ogre King's hoard;
+  non-humans' grudge rises at half; a tribe's favour below nothing (gifts, killing its rivals) brings a war band when
+  your realm or haven is raided.
+- Patch 7b (same PR, Kingdoms 0.7.443): the greenskin road (raised in an orc camp or goblin village, opened by good standing
+  with an orc tribe; the camps spare you, human towns mind you at degree 5); bigger Tideborn fins and webbed hands,
+  Stoneborn cracks and brow, Warrior-born villagers' tails always out, Bio-built villagers in their first form's horns and
+  tail; tied-down tails smelled by kin, havens, hunters and the tribes.

@@ -154,6 +154,10 @@ public final class LifeStory {
 	/** (0.7.417, Andy) The heritages that can wake in the alchemist's lab. */
 	static final Set<Heritage.Kind> LAB_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.of(Heritage.Kind.BIOBUILT,
 		Heritage.Kind.RUBBERFOLK, Heritage.Kind.EMBERBORN, Heritage.Kind.STONEBORN, Heritage.Kind.SYLVAN));
+	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan or Bio-built). */
+	static final Set<Heritage.Kind> GREENSKIN_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.complementOf(java.util.EnumSet.of(
+		Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN, Heritage.Kind.BIOBUILT, Heritage.Kind.GOBLIN,
+		Heritage.Kind.ORC)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -166,6 +170,8 @@ public final class LifeStory {
 		// (0.7.412, Andy's picks from the Kenshi and Streets of Rogue study) the hard roads: chained among a camp's captives, starving and
 		// maimed beside an outlaw camp, in a realm's cells, put out of a realm's streets, in an outlaw hideout, turned away by your own kind
 		CHAINED(false), ROCK_BOTTOM(false), SENTENCED(true), EVICTED(true), HIDEOUT(false), CAST_OUT(false),
+		// (0.7.443, Havens patch 7b) raised in an orc camp or a goblin village (GreenskinLife)
+		GREENSKIN(false),
 		// (0.7.414, the kit roads) a family blade someone wants back, a pack mule on a King's Road, a pup at heel, three poor hired hands
 		HEIRLOOM(false), TRADER(false), PUP(false), NOBODIES(false),
 		// (0.7.417, the powered roads) a hermit alchemist's lab (Powers), the Mad Tinkerer's bench (Powers), the moon's curse
@@ -226,6 +232,7 @@ public final class LifeStory {
 		TERMS.put(Start.MAW, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.CHAINED, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.CAST_OUT, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.GREENSKIN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
 		// (0.7.414) the kit roads
 		TERMS.put(Start.HEIRLOOM, new Terms(Mark.HARD, 0));
@@ -302,6 +309,8 @@ public final class LifeStory {
 				case VERDANT -> Set.of(Heritage.Kind.VERDANT);
 				case DEMON -> Set.of(Heritage.Kind.EMBERBORN);
 				case CAST_OUT -> Set.of(Heritage.Kind.BIOBUILT);
+				// (0.7.443) a half-orc or a goblin-raised human: one who passes for human
+				case GREENSKIN -> GREENSKIN_KINDS;
 				case LAB -> LAB_KINDS;
 				case null, default -> Set.of();
 			};
@@ -422,6 +431,7 @@ public final class LifeStory {
 				Answer.road(Start.EVICTED, Items.OAK_DOOR),
 				Answer.road(Start.HIDEOUT, Items.BARREL),
 				Answer.road(Start.CAST_OUT, Items.SLIME_BALL),
+				Answer.road(Start.GREENSKIN, Items.ROTTEN_FLESH),
 				Answer.road(Start.HEIRLOOM, Items.IRON_SWORD),
 				Answer.road(Start.TRADER, Items.CHEST),
 				Answer.road(Start.PUP, Items.BONE),
@@ -1398,6 +1408,16 @@ public final class LifeStory {
 					}
 				}
 			}
+			case GREENSKIN -> {
+				// (0.7.443) just outside the orc camp or goblin village that raised you (GreenskinLife)
+				Faction camp = GreenskinLife.home(server, spawn);
+				if (camp != null) {
+					to = spot(level, mate, camp.seat(), GreenskinLife.WAKE_MIN, GreenskinLife.WAKE_MAX, random);
+					if (to != null) {
+						GreenskinLife.raise(player, camp);
+					}
+				}
+			}
 			case CAST_OUT -> {
 				// (0.7.412) outside the gates of a haven that would have taken them in (the wild without one): their own turn them away for three days
 				Faction haven = StoryHomes.standing(server, player, heritage, spawn);
@@ -1681,6 +1701,15 @@ public final class LifeStory {
 		if (landed == Start.HIDEOUT) {
 			give(player, new ItemStack(Items.EMERALD, HIDEOUT_EMERALDS));
 		}
+		if (landed == Start.GREENSKIN) {
+			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
+			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
+			give(player, new ItemStack(Items.STONE_AXE));
+			give(player, new ItemStack(Items.ROTTEN_FLESH, 3));
+			if (!GreenskinLife.halfOrc(player) && Disguise.MASK != null) {
+				give(player, new ItemStack(Disguise.MASK));
+			}
+		}
 		if (landed == Start.CAVE) {
 			give(player, new ItemStack(Items.IRON_PICKAXE));
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
@@ -1859,7 +1888,7 @@ public final class LifeStory {
 
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
-		Start.HIDEOUT, Start.CAST_OUT, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
+		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
 
 	/**
 	 * (0.7.417, Start Together) Where a player's road set them down: the start that came to pass, the realm it named (-1: none),

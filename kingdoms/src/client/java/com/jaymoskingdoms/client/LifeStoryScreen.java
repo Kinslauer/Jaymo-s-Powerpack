@@ -997,6 +997,8 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("evicted", new int[] {0xFF1A1A3A, 0xFF6A5A7A, 0xFF4A4448}),
 		java.util.Map.entry("hideout", new int[] {0xFF0A0A12, 0xFF3A2A1A, 0xFF2A1E16}),
 		java.util.Map.entry("cast_out", new int[] {0xFF1A2A2E, 0xFF5A7A6A, 0xFF3A4A3A}),
+		// (0.7.443) a camp's smoky dusk over bog ground
+		java.util.Map.entry("greenskin", new int[] {0xFF1E2416, 0xFF7A6A3A, 0xFF3A4428}),
 		// (0.7.414) the kit roads: a dusk road with a far fire, a King's Road under morning light, a meadow at first light, a grey dawn over a bare moor
 		java.util.Map.entry("heirloom", new int[] {0xFF1A2230, 0xFF9A6A4A, 0xFF3A3A32}),
 		java.util.Map.entry("trader", new int[] {0xFF5A7AA8, 0xFFE0C890, 0xFF8A7A5A}),

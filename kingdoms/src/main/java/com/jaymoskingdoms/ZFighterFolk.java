@@ -67,7 +67,7 @@ public final class ZFighterFolk {
 		Map.entry(PATROL_TAG, "patrolman"),
 		// (0.7.442) Powers' star-readers, who come to a fallen star's crater and keep to its rim
 		Map.entry("jaymospowers_star_reader", "star_reader"),
-		// (0.7.443) Powers' star forge smith, who keeps the forge on a far world and reforges Xeno-Bands
+		// (0.7.444) Powers' star forge smith, who keeps the forge on a far world and reforges Xeno-Bands
 		Map.entry("jaymospowers_star_smith", "star_smith"));
 	/**
 	 * (0.7.405) Andy: the Judge's MCA screen said "Jobless" and "Mood: Depressed". Which character they are ({@link #KINDS}),

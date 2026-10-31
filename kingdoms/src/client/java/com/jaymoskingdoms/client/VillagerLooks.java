@@ -41,8 +41,18 @@ public final class VillagerLooks {
 	 * On a villager's render state: its heritage, which drawing, whether the eyes glow now, the glow's tint (0: none).
 	 * (0.7.214) {@code style}: its heritage variant's look ({@link VariantLooks}), drawn instead of the first's.
 	 */
-	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow, boolean avatar, VariantLooks.@Nullable Style style) {
+	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow, boolean avatar, VariantLooks.@Nullable Style style, int palette) {
 	}
+
+	/**
+	 * (0.7.443, Havens patch 7b: "more monstrous non-humans") A Warrior-born villager's tail, always out (only players tie
+	 * theirs down): its segments (length, thickness in pixels), how each tapers, the bends down it, how far and fast it sways.
+	 */
+	static final float TAIL_LENGTH = 3.2F, TAIL_THICK = 2.2F, TAIL_TAPER = 0.93F, TAIL_SWAY = 0.18F, TAIL_SWAY_SPEED = 0.06F;
+	static final float[] TAIL_BENDS = {-0.85F, -0.15F, 0.05F, 0.15F, 0.25F, 0.35F, 0.45F, 0.5F};
+	static final float[] TAIL_ROOT = {0.0F, 10.5F, 1.8F};
+	static final Identifier TAIL = JaymosKingdoms.id("textures/entity/heritage/warrior_tail.png");
+	private static net.minecraft.client.model.geom.ModelPart tailSegment;
 
 	/** (0.7.187) A Flame Avatar's char and lava veins (the same as a player avatar's in Jaymo's Powers; tools/gen_flame_avatar.py). */
 	static final Identifier AVATAR_CHAR = JaymosKingdoms.id("textures/entity/ember/avatar_char.png");
@@ -79,7 +89,8 @@ public final class VillagerLooks {
 		Heritage.Kind heritage = entity instanceof Player ? null : VillagerHeritage.of(entity);
 		// (0.7.214) a plain Heartlander or Warrior-born has no look; their variants do
 		VariantLooks.Style style = heritage == null ? null : VariantLooks.of(entity);
-		if (heritage == null || style == null && (heritage == Heritage.Kind.HEARTLANDER || heritage == Heritage.Kind.WARRIORBORN)) {
+		// ((0.7.443) a Warrior-born's tail always shows, so they keep a look)
+		if (heritage == null || style == null && heritage == Heritage.Kind.HEARTLANDER) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -105,7 +116,7 @@ public final class VillagerLooks {
 		if (avatar && !entity.isInWater() && !entity.isInvisible()) {
 			state.displayFireAnimation = true;
 		}
-		state.setData(KEY, new Look(heritage, variant, lit, glow, avatar, style));
+		state.setData(KEY, new Look(heritage, variant, lit, glow, avatar, style, heritage == Heritage.Kind.BIOBUILT ? BioForms.palette(entity) : 0));
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
@@ -151,6 +162,10 @@ public final class VillagerLooks {
 					state.outlineColor);
 				return;
 			}
+			if (look.heritage() == Heritage.Kind.WARRIORBORN) {
+				// (0.7.443) its tail, out for all to see
+				tail(poseStack, collector, lightCoords, marks, state.ageInTicks);
+			}
 			HeritageLooks.Kind kind = HeritageLooks.Kind.of(look.heritage());
 			VariantLooks.Style style = look.style();
 			if (kind == null && style == null) {
@@ -173,7 +188,45 @@ public final class VillagerLooks {
 				HeritageLooks.finTextures(style);
 				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, false, false);
 			}
+			if (kind == HeritageLooks.Kind.STONEBORN) {
+				// (0.7.443) cracks over the face and chest, and the heavy brow
+				collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(HeritageLooks.STONE_CRACKS), lightCoords,
+					OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+				HeritageLooks.brow(poseStack, collector, lightCoords, marks);
+			}
+			if (kind == HeritageLooks.Kind.BIOBUILT) {
+				// (0.7.443) more than marks: the first form's horns, beak, claws and growths, and its tail
+				BioForms.villagerForm(poseStack, collector, lightCoords, marks, look.palette(), state.ageInTicks);
+			}
 		}
+	}
+
+	/** (0.7.443) A Warrior-born villager's tail: a chain of furred segments off the small of the back, bending down and out, swaying. */
+	private static void tail(PoseStack poseStack, SubmitNodeCollector collector, int light, HumanoidModel<?> model, float age) {
+		if (!model.body.visible) {
+			return;
+		}
+		if (tailSegment == null) {
+			net.minecraft.client.model.geom.builders.MeshDefinition mesh = new net.minecraft.client.model.geom.builders.MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("segment", net.minecraft.client.model.geom.builders.CubeListBuilder.create().texOffs(0, 0)
+				.addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F), net.minecraft.client.model.geom.PartPose.ZERO);
+			tailSegment = net.minecraft.client.model.geom.builders.LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		}
+		poseStack.pushPose();
+		model.body.translateAndRotate(poseStack);
+		poseStack.translate(TAIL_ROOT[0] / 16.0F, TAIL_ROOT[1] / 16.0F, TAIL_ROOT[2] / 16.0F);
+		float thick = TAIL_THICK / 3.0F;
+		for (int i = 0; i < TAIL_BENDS.length; i++) {
+			float sway = TAIL_SWAY * Mth.sin(age * TAIL_SWAY_SPEED - i * 0.5F) * (0.3F + i / (float)TAIL_BENDS.length);
+			poseStack.rotate(new org.joml.Quaternionf().rotationZYX(0.0F, sway, TAIL_BENDS[i]));
+			poseStack.pushPose();
+			poseStack.scale(thick, thick, TAIL_LENGTH / 4.0F);
+			collector.order(1).submitModelPart(tailSegment, poseStack, RenderTypes.entityCutout(TAIL), light, OverlayTexture.NO_OVERLAY, null, -1);
+			poseStack.popPose();
+			poseStack.translate(0.0F, 0.0F, TAIL_LENGTH / 16.0F);
+			poseStack.scale(TAIL_TAPER, TAIL_TAPER, TAIL_TAPER);
+		}
+		poseStack.popPose();
 	}
 
 	@SuppressWarnings("unchecked")

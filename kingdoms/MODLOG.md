@@ -7744,7 +7744,43 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
 - Compile-checked; not played.
 
-## 0.7.443: the star smith (Xeno-Band patch 7; pack 0.18.123)
+## 0.7.443: havens and the tribes (Havens patch 7)
+- **Havens pay the tribes** (`TribePacts`): once a day every haven pays 4 emeralds from its treasury to each goblin or
+  orc tribe with a camp within 1200 blocks (into the king's seat). The tribe's war bands leave a paid-up haven alone
+  for 2 days; a haven that can't pay is raided like anyone. Human realms never pay. Havens that live alongside the
+  tribes (6c) are spared as before.
+- **Ogre Kings take tribute:** each standing Ogre King takes 3 emeralds a day from the nearest haven within 1200
+  blocks, into a chest of his hold when it's loaded. Haven folk talk of what they pay (and when they couldn't).
+- **Non-humans' grudge:** a non-human's grudge with a tribe rises at half the usual (by blood, mask or no).
+- **A tribe's favour:** the grudge can now go below nothing, down to -60, and that is the tribe's favour. You win it
+  with gifts to a chief or the pedlar once you owe nothing (6 emeralds for 10 favour) and by killing the rival brood's
+  folk. It fades 1 a day. The tribe's mood has a new "friend" line.
+- **Calling on a tribe:** with favour of 30 or more, when raiders (a camp's or purists') set out against the realm or
+  haven you're sworn to, the friendliest tribe with a camp within 1500 blocks sends a war band of 3-6 to its seat (at
+  most once a day per player). The band fights only the raiders and whoever is set on you; the town's guards leave
+  it be. It goes home 30 s after the raid is over, or after 6 minutes.
+- Good standing (favour 20) with an orc tribe is recorded as the deed `tribe.orc_friend`, which will open the greenskin road
+  (below). Haven guards no longer set on a tribe's pedlar.
+- A tribe whose favour you hold (20 or more) leaves you be unless you strike first. A truce token now clears only the
+  grudge, never the favour.
+- **A greenskin life** (`GreenskinLife`): a new life-story road, "Raised by the camps", opened for the world once anyone
+  stands well with an orc tribe. Only for bloods that pass for human. You wake 10-18 blocks outside the nearest orc camp
+  (a half-orc) or goblin village (goblin-raised), with a leather jerkin, a stone axe and (goblin-raised) a goblin mask.
+  - No goblin or orc of any tribe sets on you unless you strike first; every tribe's grudge rises at a quarter; your
+    home tribe starts you at 30 favour, enough to call on it.
+  - Human towns mind you at degree 5 (Bio-built 6, Tideborn 4), the tolerant at 40% of that, purists harder. A full
+    mask hides a goblin-raised human's past; a half-orc's never. Non-humans and havens don't hold it against you.
+  - Aim: a good name of 100 with a human realm ("the Accepted").
+- **More monstrous non-humans:**
+  - Tideborn fins are drawn 1.45x bigger, and both hands get webbing down the outer edge (players and villagers).
+  - Stoneborn get dark cracks over the face, neck and chest and a heavy stone brow (players and villagers).
+  - Warrior-born villagers always show a furred tail, swaying.
+  - Bio-built villagers wear the first form's horns, beak, claws and growths and its stinger tail over their marks.
+  - Textures: `tools/gen_monstrous_looks.py`.
+- **Tails smelled:** a Warrior-born player's tied tail still fools townsfolk, but not those who know: Warrior-born
+  villagers, a haven's people, hunters (fletchers and leatherworkers) and the tribes' goblins and orcs. A mask no longer
+  hides the blood from them, and now and then (at most every 2.5 minutes) one within 6 blocks says they smell it.
+## 0.7.444: the star smith (Xeno-Band patch 7; pack 0.18.123)
 - **Star smith** (`ZFighterFolk.KINDS`, `star_smith`): Powers' smith who keeps the Star Forge on a far world. They are an
   MCA villager like the other Z Fighter characters, with their own opening lines, name line, part ("Star Smith") and
   bearing ("Gruff"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a dark suit with green-lit seams, a
