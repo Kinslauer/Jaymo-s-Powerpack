@@ -186,23 +186,23 @@ public class CorpseEntity extends Entity {
 	 */
 	public static final int CUT_TICKS = 30, CARCASS_BONES = 2;
 	/**
-	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: sneak + use held on it drags it along
-	 * the ground behind you, {@code DRAG_BEHIND} blocks back (plus half its length), at up to {@code DRAG_SPEED} blocks a
-	 * tick, up steps of a block. You're slowed while you haul it, less the stronger you are ({@link Hauling}). A right-click anywhere lets go; one
-	 * on a butcher block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table. Further off than
-	 * {@code DRAG_LEASH} and it slips from your hands.
-	 * (0.5.36) Andy sent a clip of a friend struggling to drag a cow. It was held behind wherever you looked, so turning to
-	 * it or backing up swung it round through you, and it caught on corners. Now it's on a rope: it only moves when the
-	 * rope goes taut, straight at you when nothing's in the way, else along the path you walked ({@code DRAG_CRUMB} apart).
+	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: held use on it drags it along the
+	 * ground behind you. You're slowed while you haul it, less the stronger you are ({@link Hauling}). A right-click
+	 * anywhere lets go; one on a butcher block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table.
+	 * Further off than {@code DRAG_LEASH} (caught on something) and it slips from your hands.
+	 * (0.5.39) Andy: "dragging anything should ragdoll the target, and tether either one hand for smaller targets, or two
+	 * hands for large animals like cows or bears". It stays a ragdoll the whole way: its hind legs (a person's ankles) are
+	 * in your hands ({@link #dragHands}), an arm's length ({@code DRAG_ARM}) from your shoulders, and the rest of it drags
+	 * and bumps along behind over the ground and whatever's in the way. Any animal too big for a pocket can be dragged.
 	 */
-	public static final double DRAG_BEHIND = 0.9, DRAG_SPEED = 0.3, DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5, DRAG_CRUMB = 0.35;
-	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt. */
+	public static final double DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5;
+	/** (0.5.39) Your shoulders' height and spread, and your arm's reach (blocks, at normal size). */
+	public static final double DRAG_SHOULDER = 1.4, DRAG_SHOULDER_SPREAD = 0.35, DRAG_ARM = 0.7;
+	/** (0.5.39) Wider than this standing (a bear, a horse), a cow-sized carcass, or an animal taller than this (a llama): both hands. */
+	public static final float TWO_HANDED_WIDTH = 0.9F, TWO_HANDED_HEIGHT = 1.6F;
+	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt; (0.5.39) only while it moves this fast (blocks a tick). */
 	private static final int DRAG_SCRAPE_EVERY = 8;
-	/** (0.5.36) The most of your path a dragged carcass remembers, and how far it turns a tick to lie along the pull. */
-	private static final int DRAG_TRAIL_MAX = 48;
-	private static final float DRAG_TURN = 12.0F;
-	/** (0.5.36) Server: where its hauler has walked since it last had a clear line to them, oldest first. Never saved. */
-	private final java.util.ArrayDeque<Vec3> dragTrail = new java.util.ArrayDeque<>();
+	private static final double DRAG_SCRAPE_SPEED = 0.05;
 
 	private CorpseKind kind = CorpseKind.OTHER;
 	private List<ItemStack> loot = new ArrayList<>();
@@ -541,6 +541,12 @@ public class CorpseEntity extends Entity {
 
 	/** Free on the server: the body is stepped (made first if there isn't one: loaded, or let go of some other way). */
 	private void tickRagdoll(ServerLevel level) {
+		ensureRagdoll();
+		ragdoll.tick(this, level);
+	}
+
+	/** Server: a body for it, if it hasn't one yet (its saved points, or lying where it is). */
+	private void ensureRagdoll() {
 		if (ragdoll == null) {
 			RagdollBody saved = null;
 			if (savedPoints != null) {
@@ -556,7 +562,6 @@ public class CorpseEntity extends Entity {
 				lieDown(getDeltaMovement(), false);
 			}
 		}
-		ragdoll.tick(this, level);
 	}
 
 	void setTumbling(boolean tumbling) {
@@ -1054,8 +1059,7 @@ public class CorpseEntity extends Entity {
 			setCarrier(null);
 		}
 		if (this.entityData.get(DRAGGER) >= 0) {
-			// (0.5.31) hauled along the ground
-			this.ragdoll = null;
+			// (0.5.31) hauled along the ground, (0.5.39) a ragdoll held by the legs
 			if (level() instanceof ServerLevel level) {
 				Entity dragger = dragger();
 				if (dragger == null) {
@@ -1414,7 +1418,8 @@ public class CorpseEntity extends Entity {
 				? "message.jaymoskitchen.corpse.need_axe" : tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.carry"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		return pickUp(level, player);
+		// (0.5.39) too big for a pocket: an empty hand held on it takes it by the legs and drags it
+		return fitsInPocket() ? pickUp(level, player) : grab(level, player, true);
 	}
 
 	/**
@@ -1422,6 +1427,11 @@ public class CorpseEntity extends Entity {
 	 * {@link #HOLD_GRACE} without use) and it starts again. A big carcass can't be lifted at all.
 	 */
 	private InteractionResult lift(ServerLevel level, Player player) {
+		return grab(level, player, false);
+	}
+
+	/** (0.5.39) The held take: lifted into the arms, or with {@code dragOnly} (or too big to lift) taken by the legs to drag. */
+	private InteractionResult grab(ServerLevel level, Player player, boolean dragOnly) {
 		if (dragger() != null) {
 			// (someone's already hauling it)
 			return InteractionResult.SUCCESS_SERVER;
@@ -1434,7 +1444,7 @@ public class CorpseEntity extends Entity {
 		liftLast = now;
 		long held = now - liftStart;
 		// (0.5.36) the strong lift what everyone else has to drag
-		boolean drags = tooBigToLift() && !(Hauling.canLiftBig(player) && !isHuge());
+		boolean drags = dragOnly || tooBigToLift() && !(Hauling.canLiftBig(player) && !isHuge());
 		if (held >= LIFT_TICKS) {
 			liftBy = null;
 			return drags ? drag(level, player) : carry(level, player);
@@ -1456,10 +1466,8 @@ public class CorpseEntity extends Entity {
 		if (this.entityData.get(SLUNG) >= 0) {
 			unsling(false);
 		}
-		this.ragdoll = null;
 		this.entityData.set(TUMBLING, false);
 		this.entityData.set(DRAGGER, player.getId());
-		dragTrail.clear();
 		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.dragging"));
 		return InteractionResult.SUCCESS_SERVER;
@@ -1486,18 +1494,22 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		this.entityData.set(DRAGGER, -1);
-		dragTrail.clear();
 		grabCooldown = GRAB_COOLDOWN;
-		setDeltaMovement(Vec3.ZERO);
-		lieDown(Vec3.ZERO, onButcherBlock());
+		if (ragdoll != null) {
+			// (0.5.39) dropped from your hands: it falls and slides as it was going
+			ragdoll.body.release();
+			ragdoll.body.wake();
+		} else {
+			lieDown(Vec3.ZERO, onButcherBlock());
+		}
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.5F);
 		}
 	}
 
 	/**
-	 * (0.5.31) Server, each tick it's dragged: pulled along behind, over the ground and up steps. (0.5.36) On a rope: still
-	 * while there's slack, and taut, hauled toward you, round corners along the path you took.
+	 * (0.5.31) Server, each tick it's dragged. (0.5.39) Its legs are put in your hands and the body is stepped: the rest
+	 * of it hangs from them and drags over the ground and whatever's in the way.
 	 */
 	private void tickDrag(ServerLevel level, Entity dragger) {
 		if (!(dragger instanceof Player player) || !player.isAlive() || player.level() != level || player.isSpectator() || player.isPassenger()
@@ -1505,49 +1517,22 @@ public class CorpseEntity extends Entity {
 			stopDrag();
 			return;
 		}
-		Vec3 feet = player.position();
-		if (dragTrail.isEmpty() || dragTrail.peekLast().distanceToSqr(feet) >= DRAG_CRUMB * DRAG_CRUMB) {
-			dragTrail.addLast(feet);
-			if (dragTrail.size() > DRAG_TRAIL_MAX) {
-				dragTrail.removeFirst();
-			}
+		ensureRagdoll();
+		RagdollBody body = ragdoll.body;
+		int hands = dragHands();
+		for (int h = 0; h < hands; h++) {
+			int point = gripPoint(body.rig, h);
+			Vec3 hand = dragHand(player, h, new Vec3(body.x[point], body.y[point], body.z[point]));
+			body.grip(h, point, hand.x, hand.y, hand.z);
 		}
-		// nothing between it and you: the rope runs straight, and the path behind is forgotten
-		Vec3 from = position().add(0.0, Math.min(0.3, getBbHeight() * 0.5), 0.0);
-		Vec3 to = feet.add(0.0, 0.3, 0.0);
-		if (level.clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
-			net.minecraft.world.level.ClipContext.Fluid.NONE, this)).getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
-			dragTrail.clear();
-		}
-		// points of the path it has reached are behind it
-		while (!dragTrail.isEmpty() && flat(dragTrail.peekFirst().subtract(position())).lengthSqr() < 0.25) {
-			dragTrail.removeFirst();
-		}
-		Vec3 next = dragTrail.isEmpty() ? feet : dragTrail.peekFirst();
-		double rope = flat(next.subtract(position())).length();
-		Vec3 last = next;
-		for (Vec3 crumb : dragTrail) {
-			rope += flat(crumb.subtract(last)).length();
-			last = crumb;
-		}
-		rope += flat(feet.subtract(last)).length();
-		double taut = rope - (DRAG_BEHIND + getBbWidth() * 0.5);
-		Vec3 pull = flat(next.subtract(position()));
-		double dist = pull.length();
-		Vec3 along = taut > 0.02 && dist > 0.01 ? pull.scale(Math.min(DRAG_SPEED, Math.min(taut, dist)) / dist) : Vec3.ZERO;
-		Vec3 motion = new Vec3(along.x, onGround() ? -0.08 : Math.max(-1.0, getDeltaMovement().y - 0.08), along.z);
-		setDeltaMovement(motion);
-		move(net.minecraft.world.entity.MoverType.SELF, motion);
-		// head first, feet trailing: it lies along the rope, turning a little at a time
-		if (dist > 0.05) {
-			float facing = (float) (Mth.atan2(-pull.x, pull.z) * Mth.RAD_TO_DEG) + 90.0F;
-			setYRot(Mth.approachDegrees(getYRot(), facing, DRAG_TURN));
-		}
+		ragdoll.tick(this, level);
 		if (tickCount % 20 == 0) {
 			// a dead weight: hauling it is slow going, (0.5.36) Slowness IV less your brawn
 			Hauling.encumber(player, Hauling.DRAG_SLOWNESS);
 		}
-		if (along.lengthSqr() > 0.0025 && tickCount % DRAG_SCRAPE_EVERY == 0) {
+		double[] speed = ragdoll.body.speed();
+		if (ragdoll.body.grounded() && speed[0] * speed[0] + speed[2] * speed[2] > DRAG_SCRAPE_SPEED * DRAG_SCRAPE_SPEED
+			&& tickCount % DRAG_SCRAPE_EVERY == 0) {
 			net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(blockPosition().below());
 			if (!ground.isAir()) {
 				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), getX(), getY() + 0.05, getZ(),
@@ -1557,15 +1542,51 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	/** (0.5.36) {@code v} on the level: its rise dropped. */
-	private static Vec3 flat(Vec3 v) {
-		return new Vec3(v.x, 0.0, v.z);
+	/** (0.5.39) How many hands it's dragged by: both for a big animal (a cow, a bear, a horse, a llama), else one. */
+	public int dragHands() {
+		if (isBigCarcass()) {
+			return 2;
+		}
+		EntityType<?> type = isPlayerCorpse() ? EntityTypes.PLAYER : sourceType();
+		if (type == null) {
+			return 1;
+		}
+		EntityDimensions size = type.getDimensions();
+		return size.width() > TWO_HANDED_WIDTH || kind == CorpseKind.ANIMAL && size.height() > TWO_HANDED_HEIGHT ? 2 : 1;
 	}
 
-	@Override
-	public float maxUpStep() {
-		// (0.5.31) dragged, it's hauled up a step as you climb it
-		return this.entityData.get(DRAGGER) >= 0 ? 1.0F : super.maxUpStep();
+	/** (0.5.39) The point of {@code rig} that hand {@code hand} (0 the right, 1 the left) holds: a hind leg, an ankle, a corner. */
+	public static int gripPoint(RagdollRig rig, int hand) {
+		return switch (rig.shape) {
+			case QUADRUPED -> hand == 0 ? RagdollRig.BR_FOOT : RagdollRig.BL_FOOT;
+			case HUMANOID -> hand == 0 ? RagdollRig.R_FOOT : RagdollRig.L_FOOT;
+			case BOX -> hand == 0 ? RagdollRig.BOTTOM_RIGHT : RagdollRig.BOTTOM_LEFT;
+		};
+	}
+
+	/**
+	 * (0.5.39) Where {@code player}'s hand {@code hand} (0 right, 1 left) is, holding what's now at {@code at}: reaching
+	 * toward it from that shoulder, an arm's length at most (nearer, the hand stays where the leg is).
+	 */
+	public static Vec3 dragHand(Player player, int hand, Vec3 at) {
+		Vec3 shoulder = dragShoulder(player, hand);
+		Vec3 reach = at.subtract(shoulder);
+		double len = reach.length();
+		double arm = DRAG_ARM * player.getScale();
+		if (len < 1.0E-4) {
+			// (right on the shoulder) down and behind
+			float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+			return shoulder.add(new Vec3(Mth.sin(yaw), -1.0, -Mth.cos(yaw)).normalize().scale(arm));
+		}
+		return len <= arm ? at : shoulder.add(reach.scale(arm / len));
+	}
+
+	/** (0.5.39) {@code player}'s shoulder for hand {@code hand} (0 right, 1 left), turned with their body. */
+	public static Vec3 dragShoulder(Player player, int hand) {
+		float scale = player.getScale();
+		float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+		double side = (hand == 0 ? 1.0 : -1.0) * DRAG_SHOULDER_SPREAD * scale;
+		return new Vec3(player.getX() - Mth.cos(yaw) * side, player.getY() + DRAG_SHOULDER * scale, player.getZ() - Mth.sin(yaw) * side);
 	}
 
 	/**
