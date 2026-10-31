@@ -292,6 +292,13 @@ public final class XenoformPower implements Power {
 		public int gripTicks, lure, frenzy, rolls, fetch, sonar;
 		public final it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap lights = new it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap();
 		public boolean perched;
+		/**
+		 * (0.18.113, Scan E) Hive: ticks left of the scatter. Skitter: where its web line is fixed and the line's length;
+		 * ticks left of its brood.
+		 */
+		public int scatter, brood;
+		public net.minecraft.world.phys.@Nullable Vec3 anchor;
+		public double rope;
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -356,6 +363,9 @@ public final class XenoformPower implements Power {
 			gripTicks = lure = frenzy = rolls = fetch = sonar = 0;
 			lights.clear();
 			perched = false;
+			scatter = brood = 0;
+			anchor = null;
+			rope = 0.0;
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;
@@ -528,6 +538,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.SHELL);
 		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.CEILING);
 	}
 
 	@Override
@@ -1046,6 +1057,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.CEILING);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		int left = Math.max(0, live.ticksLeft);

@@ -1910,6 +1910,137 @@ def keen():
     save(img, "entity/xenoform_keen.png")
 
 
+def hive():
+    """(0.18.113, Scan E) Hive, the swarm: amber and black bands, a fuzzy black head with big dark compound eyes, black
+    antennae, pale veined wings and a striped abdomen."""
+    img = new_skin()
+    amber = (224, 164, 40)
+    black = (36, 30, 24)
+    parts(img, amber, 0.12)
+    for part in (BODY,) + LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 2, y1, 4):
+                rect(img, (x0, y, x1, min(y + 2, y1)), shade(black + (255,), 1.0))
+    box(img, HEAD, black, 0.12)
+    fur(img, (HEAD,), black, (60, 50, 40, 255), 4)
+    rect(img, (8, 10, 11, 14), (70, 40, 20, 255))
+    rect(img, (13, 10, 16, 14), (70, 40, 20, 255))
+    img.putpixel((9, 11), (200, 150, 90, 255))
+    img.putpixel((14, 11), (200, 150, 90, 255))
+    claws(img, (20, 16, 12, 255))
+    chest_insignia(img, rim=(60, 40, 10, 255))
+    # extras: antennae 1x4x1 at (0,64); wings 1x7x5 at (6,64); abdomen 6x6x6 at (20,64)
+    box(img, (0, 64, 1, 4, 1), black, 0.1)
+    wing = (6, 64, 1, 7, 5)
+    box(img, wing, (214, 228, 236), 0.04)
+    for name, (x0, y0, x1, y1) in faces(*wing).items():
+        if name in ("left", "right"):
+            for x in range(x0 + 1, x1, 2):
+                rect(img, (x, y0, x + 1, y1), (150, 170, 184, 255))
+    belly = (20, 64, 6, 6, 6)
+    box(img, belly, amber, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*belly).items():
+        if name in ("top", "bottom"):
+            continue
+        for y in range(y0 + 1, y1, 3):
+            rect(img, (x0, y, x1, y + 1), black + (255,))
+    clear_hat(img)
+    save(img, "entity/xenoform_hive.png")
+
+
+def skitter():
+    """(0.18.113, Scan E) Skitter, the eight-legged: black-brown and hairy, a paler hourglass on the abdomen, a cluster
+    of red eyes, banded legs."""
+    img = new_skin()
+    hide = (58, 42, 34)
+    parts(img, hide, 0.14)
+    fur(img, BASE_PARTS, hide, (34, 24, 20, 255), 4)
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0 + 5, x1, y0 + 6), (96, 70, 52, 255))
+    for x, y in ((9, 10), (14, 10), (10, 11), (13, 11), (9, 12), (14, 12), (11, 12), (12, 12)):
+        img.putpixel((x, y), (220, 30, 30, 255))
+    rect(img, (10, 14, 14, 15), (20, 12, 10, 255))
+    claws(img, (20, 14, 12, 255))
+    chest_insignia(img, rim=(30, 20, 16, 255))
+    # extras: leg 8x1x1 at (0,64); abdomen 7x6x7 at (20,64)
+    leg = (0, 64, 8, 1, 1)
+    box(img, leg, hide, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*leg).items():
+        for x in range(x0 + 2, x1, 3):
+            rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
+    belly = (20, 64, 7, 6, 7)
+    box(img, belly, (48, 36, 30), 0.14)
+    for name, b in faces(*belly).items():
+        speckle(img, b, (28, 20, 16, 255), 8)
+    bx0, by0, bx1, by1 = faces(*belly)["top"]
+    cx = (bx0 + bx1) // 2
+    for i, w in enumerate((3, 1, 3)):
+        rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_skitter.png")
+
+
+def shade_form():
+    """(0.18.113, Scan E) Shade, the stealer: near-black with a faint violet sheen, and long narrow glowing violet eyes."""
+    img = new_skin()
+    dark = (26, 20, 32)
+    parts(img, dark, 0.08)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (44, 32, 58, 255), (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+    rect(img, (8, 11, 11, 12), (210, 120, 255, 255))
+    rect(img, (13, 11, 16, 12), (210, 120, 255, 255))
+    img.putpixel((9, 11), (250, 220, 255, 255))
+    img.putpixel((14, 11), (250, 220, 255, 255))
+    claws(img, (10, 8, 14, 255))
+    chest_insignia(img, rim=(20, 14, 30, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_shade.png")
+
+
+def mirage():
+    """(0.18.113, Scan E) Mirage, the illusionist: a deep blue robe trimmed in gold, a pale grey face with bright blue
+    eyes in the hood's shadow."""
+    img = new_skin()
+    robe = (46, 74, 160)
+    gold = (220, 180, 70, 255)
+    parts(img, robe, 0.1)
+    rect(img, (8, 8, 16, 16), (150, 150, 160, 255))
+    rect(img, (8, 8, 16, 10), (30, 40, 80, 255))
+    eyes(img, (120, 200, 255, 255), y=11)
+    rect(img, (11, 14, 13, 15), (100, 100, 110, 255))
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 3, fy0, fx0 + 5, fy1), gold)
+    for part in ARMS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 3, x1, y1 - 2), gold)
+        rect(img, front(part)[:1] + (front(part)[3] - 2,) + front(part)[2:3] + (front(part)[3],), (150, 150, 160, 255))
+    chest_insignia(img, rim=(20, 30, 70, 255))
+    # extras: hood 8x8x8 at (0,64); robe skirt 8x8x4 at (0,82)
+    hood = (0, 64, 8, 8, 8)
+    box(img, hood, (40, 64, 144), 0.1)
+    hx0, hy0, hx1, hy1 = faces(*hood)["front"]
+    rect(img, (hx0 + 1, hy0 + 2, hx1 - 1, hy1), CLEAR)
+    for name, (x0, y0, x1, y1) in faces(*hood).items():
+        if name != "front":
+            rect(img, (x0, y1 - 1, x1, y1), gold)
+    rect(img, (hx0, hy0 + 1, hx1, hy0 + 2), gold)
+    skirt = (0, 82, 8, 8, 4)
+    box(img, skirt, robe, 0.1)
+    for name, (x0, y0, x1, y1) in faces(*skirt).items():
+        if name in ("front", "back", "left", "right"):
+            rect(img, (x0, y1 - 1, x1, y1), gold)
+    sx0, sy0, sx1, sy1 = faces(*skirt)["front"]
+    rect(img, (sx0 + 3, sy0, sx0 + 5, sy1), gold)
+    clear_hat(img)
+    save(img, "entity/xenoform_mirage.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -1922,6 +2053,7 @@ ULTIMATE_COLORS = {
     "rime": (158, 216, 240), "marrow": (230, 224, 204), "swathe": (196, 170, 120), "blight": (120, 100, 150),
     "howl": (176, 160, 140), "prowl": (224, 150, 60), "tusk": (150, 100, 70), "talon": (214, 180, 60),
     "murk": (150, 120, 190), "gnasher": (110, 150, 180), "lumen": (200, 240, 255), "keen": (200, 60, 70),
+    "hive": (240, 180, 50), "skitter": (200, 40, 40), "shade": (200, 110, 255), "mirage": (110, 170, 255),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
@@ -1929,6 +2061,7 @@ PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")
 SCAN_C = ("howl", "prowl", "tusk", "talon")
 SCAN_D = ("murk", "gnasher", "lumen", "keen")
+SCAN_E = ("hive", "skitter", "shade", "mirage")
 
 
 def ultimate(form):
@@ -1977,7 +2110,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -2049,7 +2182,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -2087,6 +2220,13 @@ if __name__ == "__main__":
     lumen()
     keen()
     for form in SCAN_D:
+        ultimate(form)
+    # (0.18.113) Scan E, last again
+    hive()
+    skitter()
+    shade_form()
+    mirage()
+    for form in SCAN_E:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
