@@ -110,7 +110,9 @@ public final class Languages {
 		// (0.7.425) goods pointed at and emeralds held out
 		Pedlars.WARES_ANSWER, Pedlars.TRIBUTE_ANSWER,
 		// (0.7.254) thanks need no words
-		SharedHistory.THANK);
+		SharedHistory.THANK,
+		// (0.7.449) why they came over: they can show you
+		ComingOver.ANSWER);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");
 
 	/** Learning: what speaking a tongue takes; what each stretch among its speakers and each trade with one adds. */
