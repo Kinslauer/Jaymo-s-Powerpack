@@ -4415,7 +4415,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Bedrock pack, nothing copied).
   - **Landing roll for everyone:** `LandingRoll` and `DodgeClient` no longer ask for Sure Footing (Andy: "remove it from
     the tree, but keep the skillcheck"): double-tap Sneak (or the dodge key) just before or just as you land. Sure
-    Footing left `Freerun.Perk` and Kingdoms' tree (Kingdoms 0.7.425).
+    Footing left `Freerun.Perk` and Kingdoms' tree (Kingdoms 0.7.426).
   - **Hero landing:** fall damage of 6+ that you'd live through, not rolled, lands you in the three-point
     `WebPose.HERO_LAND` (drawn for anyone by `WebBodyPose`) with a thud and a ring of dust (`LandingRoll.dust`); rolling
     in the late window takes it away. Web's own hero landings kick up the dust too, and every glide (wings) landing is
