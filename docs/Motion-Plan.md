@@ -111,7 +111,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
 - **Worn lanterns** (Andy, added to the patch): any lantern in the belt bauble slot hangs at the hip; a Lantern Pole
   in the body slot is worn on the back with its lantern over the head; both swing, and glow with LambDynamicLights.
 
-### Patch 5, 3D models (Powers 0.18.109; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
+### Patch 5, 3D models (Powers 0.18.110; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
 - **Built-in pack "Jaymo's Powers: 3D items and plants"** (`resourcepacks/held_3d`, `tools/gen_held_3d.py`), on by
   default: held models voxelised from each item's own sprite for every vanilla tool tier, bow, crossbow, fishing rod,
   shears, mace, compass, recovery compass, clock, totem, brush, saddle and bottles (ours too); flat in the inventory.

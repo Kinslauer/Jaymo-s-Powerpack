@@ -1662,6 +1662,144 @@ def blight():
     save(img, "entity/xenoform_blight.png")
 
 
+def fur(img, part_list, base, dark, n_div=6):
+    """Fur: a coarse grain, darker flecks."""
+    for part in part_list:
+        for name, b in faces(*part).items():
+            speckle(img, b, dark, (b[2] - b[0]) * (b[3] - b[1]) // n_div + 1)
+
+
+def howl():
+    """(0.18.109, Scan C) Howl, the pack hunter: grey-brown fur, darker saddle down the back, a pale chest and muzzle,
+    amber eyes, tall ears dark at the tips, a bushy tail."""
+    img = new_skin()
+    coat = (138, 122, 102)
+    parts(img, coat, 0.16)
+    fur(img, BASE_PARTS, coat, (96, 84, 70, 255))
+    bx0, by0, bx1, by1 = faces(*BODY)["back"]
+    vgrad(img, (bx0, by0, bx1, by1), (70, 62, 54), (100, 88, 74), 0.1)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1 - 4), (214, 204, 186), (180, 168, 148), 0.08)
+    eyes(img, (240, 170, 40, 255), y=11, pupil=(30, 20, 10, 255))
+    rect(img, (10, 10, 11, 11), (60, 50, 40, 255))
+    rect(img, (13, 10, 14, 11), (60, 50, 40, 255))
+    claws(img, (50, 44, 38, 255))
+    chest_insignia(img, rim=(60, 50, 40, 255))
+    # extras: snout 3x3x4 at (0,64); ears 2x3x1 at (16,64); tail 2x2x8 at (24,64)
+    snout = (0, 64, 3, 3, 4)
+    box(img, snout, (196, 184, 164), 0.1)
+    nx0, ny0, nx1, ny1 = faces(*snout)["front"]
+    rect(img, (nx0, ny0, nx1, ny0 + 1), (30, 26, 24, 255))
+    box(img, (16, 64, 2, 3, 1), (110, 96, 80), 0.12)
+    rect(img, (16, 64, 22, 66), (60, 52, 44, 255))
+    tail = (24, 64, 2, 2, 8)
+    box(img, tail, (120, 106, 88), 0.18)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("left", "right", "top", "bottom"):
+            speckle(img, (x0, y0, x1, y1), (220, 210, 190, 255), 3)
+    clear_hat(img)
+    save(img, "entity/xenoform_howl.png")
+
+
+def prowl():
+    """(0.18.109, Scan C) Prowl, the great cat: tawny orange with dark stripes, a cream belly and muzzle, green eyes with
+    slit pupils, round ears, a long striped tail."""
+    img = new_skin()
+    tawny = (204, 138, 60)
+    parts(img, tawny, 0.12)
+    stripe = (50, 34, 24, 255)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 1, y1, 3):
+                for x in range(x0, x1):
+                    if (x * 3 + y) % 7 < 3:
+                        img.putpixel((x, y), stripe)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0 + 1, fx1 - 2, fy1), (240, 226, 200), (226, 208, 176), 0.06)
+    rect(img, (9, 13, 15, 16), (236, 222, 196, 255))
+    rect(img, (11, 13, 13, 14), (60, 36, 30, 255))
+    rect(img, (9, 11, 11, 12), (120, 200, 80, 255))
+    rect(img, (13, 11, 15, 12), (120, 200, 80, 255))
+    img.putpixel((10, 11), (10, 10, 10, 255))
+    img.putpixel((13, 11), (10, 10, 10, 255))
+    claws(img, (230, 220, 200, 255))
+    chest_insignia(img, rim=(60, 40, 24, 255))
+    # extras: ears 2x2x1 at (0,64); tail 2x2x10 at (8,64)
+    box(img, (0, 64, 2, 2, 1), (170, 110, 50), 0.1)
+    tail = (8, 64, 2, 2, 10)
+    box(img, tail, tawny, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("left", "right", "top", "bottom"):
+            for x in range(x0 + 1, x1, 3):
+                rect(img, (x, y0, x + 1, y1), stripe)
+    clear_hat(img)
+    save(img, "entity/xenoform_prowl.png")
+
+
+def tusk():
+    """(0.18.109, Scan C) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane, a pink-grey snout, small red
+    eyes, ivory tusks, hooves."""
+    img = new_skin()
+    hide = (107, 74, 50)
+    parts(img, hide, 0.2)
+    fur(img, BASE_PARTS, hide, (70, 46, 30, 255), 4)
+    eyes(img, (200, 40, 30, 255), y=10)
+    claws(img, (40, 30, 24, 255), rows=2)
+    chest_insignia(img, rim=(50, 34, 22, 255))
+    # extras: snout 4x3x2 at (0,64); tusks 1x3x1 at (14,64); mane 2x12x3 at (20,64)
+    snout = (0, 64, 4, 3, 2)
+    box(img, snout, (186, 140, 130), 0.1)
+    sx0, sy0, sx1, sy1 = faces(*snout)["front"]
+    img.putpixel((sx0 + 1, sy0 + 1), (60, 30, 30, 255))
+    img.putpixel((sx1 - 2, sy0 + 1), (60, 30, 30, 255))
+    vgrad(img, (14, 64, 18, 68), (250, 244, 220), (200, 188, 150), 0.04)
+    mane = (20, 64, 2, 12, 3)
+    box(img, mane, (52, 34, 24), 0.25)
+    for name, (x0, y0, x1, y1) in faces(*mane).items():
+        speckle(img, (x0, y0, x1, y1), (90, 64, 44, 255), 4)
+    clear_hat(img)
+    save(img, "entity/xenoform_tusk.png")
+
+
+def talon():
+    """(0.18.109, Scan C) Talon, the raptor: brown feathers barred paler, a white-feathered head, fierce yellow eyes,
+    a hooked yellow beak dark at the tip, broad barred wings, a fanned tail, yellow scaled legs with black talons."""
+    img = new_skin()
+    brown = (130, 88, 52)
+    parts(img, brown, 0.14, which=(BODY, RARM, LARM))
+    for part in (BODY, RARM, LARM):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 2, y1, 3):
+                for x in range(x0, x1, 2):
+                    img.putpixel((x, y), (186, 150, 108, 255))
+    parts(img, (236, 232, 222), 0.06, which=(HEAD,))
+    parts(img, (214, 180, 60), 0.12, which=LEGS)
+    for part in LEGS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name not in ("top", "bottom"):
+                rect(img, (x0, y0, x1, y0 + 4), shade(brown + (255,), 0.9))
+    eyes(img, (250, 210, 40, 255), y=11, wide=True, pupil=(10, 10, 10, 255))
+    rect(img, (8, 10, 16, 11), (110, 96, 80, 255))
+    claws(img, (20, 18, 16, 255), which=LEGS)
+    chest_insignia(img, rim=(70, 46, 26, 255))
+    # extras: beak 2x2x3 at (0,64); wings 1x10x6 at (12,64); tail fan 6x1x5 at (0,82)
+    beak = (0, 64, 2, 2, 3)
+    box(img, beak, (232, 196, 60), 0.08)
+    bx0, by0, bx1, by1 = faces(*beak)["front"]
+    rect(img, (bx0, by1 - 1, bx1, by1), (40, 30, 20, 255))
+    for part in ((12, 64, 1, 10, 6), (0, 82, 6, 1, 5)):
+        box(img, part, (110, 74, 44), 0.12)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (176, 140, 98, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_talon.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -1672,11 +1810,13 @@ ULTIMATE_COLORS = {
     "polestar": (216, 74, 74), "lurk": (110, 82, 176), "gyre": (95, 163, 122), "cortex": (79, 184, 176),
     "locust": (141, 179, 58), "croaker": (110, 158, 60),
     "rime": (158, 216, 240), "marrow": (230, 224, 204), "swathe": (196, 170, 120), "blight": (120, 100, 150),
+    "howl": (176, 160, 140), "prowl": (224, 150, 60), "tusk": (150, 100, 70), "talon": (214, 180, 60),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")
+SCAN_C = ("howl", "prowl", "tusk", "talon")
 
 
 def ultimate(form):
@@ -1725,7 +1865,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1797,7 +1937,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -1821,6 +1961,13 @@ if __name__ == "__main__":
     swathe()
     blight()
     for form in SCAN_B:
+        ultimate(form)
+    # (0.18.109) Scan C, last again
+    howl()
+    prowl()
+    tusk()
+    talon()
+    for form in SCAN_C:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:

@@ -4521,7 +4521,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     straight down and swing on a spring as you move. With LambDynamicLights they light up around you
     (`LdlWornLanternMixin`, optional).
   - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.
-- **0.18.109, 3D models (Motion patch 5, `docs/Motion-Plan.md`):** ideas from Actions & Stuff, our own models.
+- **0.18.109, Scan C (`docs/ScanGaps-Plan.md`), beasts:** four new aliens. Howl (wolf, werewolf, feral wolf, coyote):
+  Pounce, a Howl that brings wild wolves to hunt beside you, Scent (blood stains and bleeders show), Lockjaw; stronger
+  at night. Prowl (ocelot, tiger, lion): silent, unseen while sneaking, no fall damage under 12 blocks; Long Pounce
+  that pins, Rake, Stalk, Roar. Tusk (hoglin, boar, rhino, wild boar, minotaur, burrukai, kirrid, taegore): Charge,
+  Gore, Root Out (food from the ground), Thick Hide. Talon (parrot, vulture, songbirds): flies and glides, Stoop that
+  snatches and carries a mob, Far Sight, Feather Darts. Each has its own model, skin, Ultimate skin and spikes.
+  Compile-checked; not seen in game.
+- **0.18.110, 3D models (Motion patch 5, `docs/Motion-Plan.md`):** ideas from Actions & Stuff, our own models.
   - **Built-in pack "Jaymo's Powers: 3D items and plants"** (`resourcepacks/held_3d`, from `tools/gen_held_3d.py`), on
     by default, switch it off in Resource Packs for the flat look. Held items are voxelised from their own sprites
     (handles and heavy parts thicker than blades and strings); the inventory, frames, shelves and dropped items keep
