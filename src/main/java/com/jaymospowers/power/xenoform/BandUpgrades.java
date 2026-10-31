@@ -416,7 +416,10 @@ public final class BandUpgrades {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.band.wiped").withStyle(ChatFormatting.GRAY));
 			}
 			default -> {
-				return;
+				// (0.18.126, patch 9) the Looks tab
+				if (!BandStyle.act(player, what, arg)) {
+					return;
+				}
 			}
 		}
 		open(player);

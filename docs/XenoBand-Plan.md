@@ -160,6 +160,9 @@ those whose people have seen anyone change into the alien. Band items now carry 
 - **The crime:** in realms that know about aliens, wearing it is a crime.
 
 ### Patch 9, Looks (Powers, art; picks alien-looks, band-custom)
+
+**Built (0.18.126):** as in `docs/xenoform.md` ("Looks"). Choices: the three looks are painted on the client from each
+alien's own skin (no new art, every alien covered); the preview turns you (the band), not the alien.
 - **Alien looks:** two or three looks per alien (plain, armoured, weathered), picked on the band screen.
 - **Dress the band:** a glow colour that also tints each alien's green lines and the slam flash, a faceplate shape and
   spikes, with a turning preview.

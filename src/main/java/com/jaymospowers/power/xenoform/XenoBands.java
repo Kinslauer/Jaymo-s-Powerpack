@@ -51,7 +51,7 @@ public final class XenoBands {
 	/** (0.18.125, patch 8) The rival band's own count: its wearers, and its loose items (the hunter's wrist counts as loose). */
 	public static final AttachmentType<Count> RIVAL_COUNT = AttachmentRegistry.create(JaymosPowers.id("rival_bands"),
 		builder -> builder.persistent(Count.CODEC));
-	private static final String UPGRADES_KEY = "xeno_upgrades";
+	private static final String UPGRADES_KEY = "xeno_upgrades", STYLE_KEY = "xeno_style";
 
 	private static final String ALIENS_KEY = "xeno_aliens";
 
@@ -154,12 +154,13 @@ public final class XenoBands {
 		List<String> aliens = XenoformState.band(player).unlocked();
 		boolean rival = XenoformState.rival(player);
 		BandUpgrades.Upgrades upgrades = player.getAttached(BandUpgrades.UPGRADES);
+		BandStyle.Style style = player.getAttached(BandStyle.STYLE);
 		Powers.set(player, null);
 		player.removeAttached(XenoformState.BAND);
 		player.removeAttached(BandUpgrades.UPGRADES);
 		loosed(killer.level().getServer(), rival);
 		killer.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		killer.getInventory().placeItemBackInInventory(item(aliens, rival, upgrades), net.minecraft.util.Prediction.SERVER_ONLY);
+		killer.getInventory().placeItemBackInInventory(styled(item(aliens, rival, upgrades), style), net.minecraft.util.Prediction.SERVER_ONLY);
 		killer.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_won", player.getDisplayName()).withStyle(ChatFormatting.GREEN));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.band_lost", killer.getDisplayName()).withStyle(ChatFormatting.RED));
 		ServerLevel level = killer.level();
@@ -186,6 +187,28 @@ public final class XenoBands {
 			stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
 		}
 		return stack;
+	}
+
+	/** (0.18.126) {@code stack} carrying how its band was dressed ({@link BandStyle}), when it was. */
+	static ItemStack styled(ItemStack stack, BandStyle.@org.jspecify.annotations.Nullable Style style) {
+		if (style == null || style.equals(BandStyle.Style.NONE)) {
+			return stack;
+		}
+		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		net.minecraft.nbt.CompoundTag tag = data == null ? new net.minecraft.nbt.CompoundTag() : data.copyTag();
+		BandStyle.Style.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, style).result().ifPresent(t -> tag.put(STYLE_KEY, t));
+		stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		return stack;
+	}
+
+	/** (0.18.126) How a band item's band was dressed, or null for plain. */
+	static BandStyle.@org.jspecify.annotations.Nullable Style styleOf(ItemStack stack) {
+		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		if (data == null) {
+			return null;
+		}
+		net.minecraft.nbt.Tag tag = data.copyTag().get(STYLE_KEY);
+		return tag == null ? null : BandStyle.Style.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, tag).result().orElse(null);
 	}
 
 	/** (0.18.125) The reforge, modules and skills a band item carries, or null for none. */

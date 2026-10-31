@@ -4651,3 +4651,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Its aliens are drawn darkened and its band and insignia red (`XenoformClient.DARK`). Band items now carry their
   reforge, modules and skills. Test: `/powerdebug xenoform hunter`. Art from `tools/gen_xenoform.py` (`rival_band`).
   Compile-checked (the JEI line by hand); not seen in game.
+- **0.18.126, Looks (Xeno-Band patch 9, `docs/XenoBand-Plan.md`):** the band screen's new Looks tab dresses the band,
+  all for show. Pick a glow (9 colours): it paints the band, every alien's green lines and insignia, the slam's flash and
+  the dial's hologram. Pick a face plate (square, round, diamond, wide, tall) and spikes. Each alien can be plain, armoured
+  or weathered, painted on the client from its own skin (`XenoLooks`), so every alien has all three. Others see your
+  choices; a band taken off keeps them. A preview of you turns beside the rows. Compile-checked; not seen in game.

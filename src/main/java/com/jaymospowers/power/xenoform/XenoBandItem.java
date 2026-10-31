@@ -92,6 +92,13 @@ public final class XenoBandItem extends Item {
 		} else {
 			server.setAttached(BandUpgrades.UPGRADES, upgrades);
 		}
+		// (0.18.126) and how it's dressed
+		BandStyle.Style style = XenoBands.styleOf(stack);
+		if (style == null) {
+			server.removeAttached(BandStyle.STYLE);
+		} else {
+			server.setAttached(BandStyle.STYLE, style);
+		}
 		if (rival) {
 			server.setAttached(XenoformState.RIVAL, true);
 			server.addTag(XenoformState.RIVAL_TAG);

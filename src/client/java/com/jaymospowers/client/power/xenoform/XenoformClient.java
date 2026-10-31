@@ -28,6 +28,11 @@ public final class XenoformClient {
 	/** (0.18.119) How far into Towerback's grab (ticks; -1: not grabbing). */
 	/** (0.18.125, patch 8) A rival band's alien (or wearer): darkened, its band and insignia red. */
 	public static final RenderStateDataKey<Boolean> DARK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_dark");
+	/** (0.18.126, patch 9) How the band is dressed: the glow (RGB), the alien's look, the plate's shape and spikes. */
+	public static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:xenoform_glow");
+	public static final RenderStateDataKey<String> LOOK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_look");
+	public static final RenderStateDataKey<String> PLATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_plate");
+	public static final RenderStateDataKey<Boolean> SPIKES = RenderStateDataKey.create(() -> "jaymospowers:xenoform_spikes");
 	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
 
 	private XenoformClient() {
@@ -42,6 +47,18 @@ public final class XenoformClient {
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
 		state.setData(DARK, player != null && XenoformState.rival(player));
+		if (player != null && XenoformPower.has(player)) {
+			com.jaymospowers.power.xenoform.BandStyle.Style style = com.jaymospowers.power.xenoform.BandStyle.get(player);
+			state.setData(GLOW, com.jaymospowers.power.xenoform.BandStyle.glow(player));
+			state.setData(LOOK, form == null ? null : style.look(form).id);
+			state.setData(PLATE, style.plate());
+			state.setData(SPIKES, style.spikes());
+		} else {
+			state.setData(GLOW, null);
+			state.setData(LOOK, null);
+			state.setData(PLATE, null);
+			state.setData(SPIKES, false);
+		}
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);

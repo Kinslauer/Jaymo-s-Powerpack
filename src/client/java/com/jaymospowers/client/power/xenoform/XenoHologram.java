@@ -39,6 +39,12 @@ final class XenoHologram {
 	static final int GLITCH_EVERY = 23;
 	/** The colours it's tinted: the band's green, or red while the band would refuse. */
 	static final int TINT = 0x7CFF9A, REFUSED_TINT = 0xFF5040;
+
+	/** (0.18.126, patch 9) The band's glow, a touch paler (its own green gives {@link #TINT}). */
+	static int tint(net.minecraft.world.entity.player.Player player) {
+		int glow = com.jaymospowers.power.xenoform.BandStyle.glow(player);
+		return glow == com.jaymospowers.power.xenoform.BandStyle.GREEN ? TINT : XenoLooks.mix(glow, 0xFFFFFF, 0.2F);
+	}
 	/** The glow behind it: its height (blocks, from the dial up), how far behind the figure it stands (blocks), and its opacity (0-1). */
 	static final float GLOW_HEIGHT = 0.48F, GLOW_BACK = 0.05F, GLOW_ALPHA = 0.75F;
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_holo_glow.png");
@@ -89,7 +95,7 @@ final class XenoHologram {
 		}
 		float fade = flicker * Math.min(1.0F, pop * 1.5F);
 		float reach = Mth.clamp(at.length() / REF_DISTANCE, MIN_REACH, MAX_REACH);
-		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : TINT;
+		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : tint(player);
 		// turned to face the camera (a model's front is its -z)
 		float face = (float)Math.toDegrees(Mth.atan2(at.x, at.z));
 		poseStack.pushPose();

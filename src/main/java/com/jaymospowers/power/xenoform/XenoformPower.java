@@ -576,6 +576,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.GRAB);
 		BandUpgrades.clear(player);
+		player.removeAttached(BandStyle.STYLE);
 	}
 
 	@Override
