@@ -4560,3 +4560,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   out (shudder + splash) and dry over a minute. Wolves keep vanilla's wet shade; sheep wool isn't darkened.
 - Clockwork golems glance around and shift their weight when idle (Kingdoms `ClockworkGolemRenderer`); iron golem
   idle comes from Fresh Animations.
+- **0.18.113, Scan E (`docs/ScanGaps-Plan.md`), swarm, web and tricks:** four new aliens. Hive (bee, ant, butterfly,
+  caterpillar, dragonfly): Scatter into an insect cloud that blows pass through, Sting, Honey Glue, Swarm. Skitter
+  (spider, cave spider, tarantula): climbs walls and clings to ceilings upside down (drawn turned over, and
+  your camera rolls over with it); Web Line to swing on, Web Tie, poison Bite,
+  Egg Sac (three cave spiders for 30 s). Shade (enderman, drifter): Steal a block and throw it, Stare that holds a
+  mob still, Blink, Wary (the next blow blinks you away); water burns it. Mirage (illusioner): Mirror Images (false
+  copies that draw mobs off and vanish at a blow, Duplex's doubles with a fake flag), Blind, Unseen, Swap. Each has
+  its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.

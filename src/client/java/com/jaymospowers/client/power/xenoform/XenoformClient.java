@@ -40,6 +40,7 @@ public final class XenoformClient {
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
+		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}

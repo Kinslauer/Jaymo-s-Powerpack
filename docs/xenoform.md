@@ -109,6 +109,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Gnasher** | dolphin; sharks, Naturalist alligator, piranha, Friends & Foes mauler | 1.1x, 30 hp, fists 6, 40% knockback resist; in water Dolphin's Grace II, water breathing; bleeders in water within 48 glow | Clamp: 6 and a dirty cut, held 4 s (dragged, Slowness IV); R again lets go (5 s) | Lunge: a 1.5 leap, 0.6 up; first creature met takes 5 (4 s) | Frenzy: 10 s, Speed and Strength one level per bleeder within 16 (max 3) (20 s) | Death Roll: only while clamped: 2 s, 3 and a cut every half second, then tripped 3 s and let go (10 s) |
 | **Lumen** | allay; Naturalist firefly, Friends & Foes glare | 0.7x, 16 hp, fists 2; falls no faster than 0.15 unless sneaking; no fall damage | Mend: you, players and pets within 8 heal 4 (10 s) | Flare: Blindness 4 s to all within 8, mobs lose you (8 s) | Light: a level-15 light block where you look (24) for 30 s, six at most, oldest out first; needs build rights (2 s) | Fetch: 10 s, dropped items within 24 matching your held item (any, empty-handed) fly to you (15 s) |
 | **Keen** | bat; Kingdoms vampire bat, blightwing | 0.6x, 14 hp, fists 3; Night Vision; no fall damage; flies like Talon; sneak under a ceiling to hang (jump lets go) | Sonar: 6 s, every creature within 24 outlined in points only you see (10 s) | Screech: anything airborne within 16 takes 3 and is thrown down; elytra stop (10 s) | Drain: 4, you heal 3 (3 s) | Echo: a 1.8 dash; Invisibility 1.5 s if light is 7 or less (3 s) |
+| **Hive** | bee; Naturalist ant, butterfly, caterpillar, dragonfly | 0.8x, 16 hp, fists 3; no fall damage | Scatter: 4 s a cloud of insects: Invisibility, blows pass through, mobs lose you, jump held lifts you (15 s) | Sting: 3 and Poison II 5 s (2.5 s) | Honey Glue: the aimed creature (12) gets Slowness X and can't jump 4 s (8 s) | Swarm: the aimed creature (24) is stung 1.5 and poisoned every half second for 6 s (15 s) |
+| **Skitter** | spider, cave spider; Kingdoms tarantula | 0.9x, 22 hp, fists 4; climbs any wall it walks into (sneak to stop); jump held under a ceiling clings there upside down (body and your camera turn over) and crawls | Web Line: a line to the block you look at (32), held to its length so falls swing; sneak reels in; R again lets go (1 s) | Web Tie: the aimed creature (12) is tripped 4 s (or Slowness VI) and weakened (10 s) | Bite: 4 and Poison II 5 s (3 s) | Egg Sac: 3 cave spiders for 30 s, at what you fight or what hits you, never players (60 s) |
+| **Shade** | enderman; Enderscape drifter | 1.3x, 30 hp, fists 6; water and rain burn (1 a second) | Steal: the aimed block (6) up to hardness 10, no block entities, needs build rights, held over your head; R again throws it (2 damage per block fallen, max 20) (1.5 s) | Stare: the aimed creature (24) held still while you keep it under your crosshair, up to 5 s; G again lets go (10 s) | Blink: to where you look (24) (2 s) | Wary: 10 s; the next blow that would land blinks you up to 10 away instead (15 s) |
+| **Mirage** | illusioner; Friends & Foes illusioner | 1x, 20 hp, fists 3 | Mirror Images: 3 false copies for 15 s; mobs within 16 after you go after one; a copy vanishes at any blow and never fights (20 s) | Blind: Blindness and Darkness 5 s on the aimed creature (16), it loses you (8 s) | Unseen: Invisibility 5 s, mobs within 24 lose you (20 s) | Swap: trade places with the copy farthest off (nearest, sneaking); what was after you goes after it (2 s) |
 
 ### More DNA [XenoDna] (0.18.100)
 
@@ -139,6 +143,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Gnasher | sharks, Naturalist alligator, piranha, Friends & Foes mauler |
 | Lumen | Naturalist firefly, Friends & Foes glare |
 | Keen | Kingdoms vampire bat, blightwing |
+| Hive | Naturalist ant, butterfly, caterpillar, dragonfly |
+| Skitter | Kingdoms tarantula |
+| Shade | Enderscape drifter |
+| Mirage | Friends & Foes illusioner |
 | Rivet | Kingdoms redstone golem and mimic, android mech, war mech, Omen mechs, android, worky drone, test unit |
 
 **No DNA:** cow, pig, sheep, rabbit, turkey, duck, capybara; zombies, drowned, zombie villagers, zombified piglins and
