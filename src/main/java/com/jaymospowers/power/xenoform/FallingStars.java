@@ -222,17 +222,26 @@ public final class FallingStars {
 		boolean carved = WebCraterFeature.carve(level, level.getRandom(), ground, false);
 		if (carved && WebPower.GOO != null && level.getBlockState(seat).is(WebPower.GOO)) {
 			// the crater's heart is where the goo would sit: the star instead
-			level.setBlock(seat, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);
+			starAt(level, seat);
 			return;
 		}
 		// odd ground: just set it down on top
 		BlockPos.MutableBlockPos pos = ground.above().mutable();
 		for (int i = 0; i < 8 && pos.getY() > level.getMinY(); i++, pos.move(0, -1, 0)) {
 			if (level.getBlockState(pos.below()).isSolid() && (level.getBlockState(pos).isAir() || level.getBlockState(pos).canBeReplaced())) {
-				level.setBlock(pos, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);
+				starAt(level, pos);
 				return;
 			}
 		}
-		level.setBlock(ground, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);
+		starAt(level, ground);
+	}
+
+	/** (0.18.120) The star set in its crater; one in {@link XenoFinds#WRECK_ONE_IN} came down a wreck. */
+	private static void starAt(ServerLevel level, BlockPos pos) {
+		BlockPos at = pos.immutable();
+		level.setBlock(at, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);
+		if (level.getRandom().nextInt(XenoFinds.WRECK_ONE_IN) == 0) {
+			StarWreckBlock.wreck(level, at);
+		}
 	}
 }
