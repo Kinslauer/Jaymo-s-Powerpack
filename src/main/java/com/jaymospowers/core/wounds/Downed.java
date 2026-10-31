@@ -140,6 +140,12 @@ public final class Downed {
 	public static final float TOO_HURT_FRACTION = 0.25F;
 	/** (0.18.5) The hit that breaks off a held action (rising, a revive, Second Wind's eating), before Unflinching. */
 	public static final int HOLD_HITS = 2;
+	/**
+	 * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Each press of sneak while knocked out
+	 * brings them round this much sooner (ticks), and the bar of how far off coming round is (its length, and the
+	 * longest knock-out it measures, ticks).
+	 */
+	public static final int MASH_TICKS = 12, MASH_BAR = 12, MASH_BAR_TICKS = 900;
 	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
 	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
@@ -173,10 +179,11 @@ public final class Downed {
 		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/**
 	 * (0.14.4) Knocked out for a while (too much poppy): when they come round (game time), shifted up one bit, the low bit set
-	 * if they were down before it (they come round still down). Saved, server side.
+	 * if they were down before it (they come round still down). Saved; (0.18.84) synced to the one knocked out, whose
+	 * screen goes black ({@code DownedHud}).
 	 */
 	public static final AttachmentType<Long> KNOCKED = AttachmentRegistry.create(JaymosPowers.id("downed_knocked"),
-		builder -> builder.persistent(Codec.LONG));
+		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
 	/**
 	 * (0.15.130) A player who has died and not yet respawned (set as they die; the body that respawns starts without it).
 	 * Saved, so one who quits on the death screen isn't taken for one stuck at no health ({@link #limbo}) when they're back.
@@ -251,7 +258,7 @@ public final class Downed {
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
 	/**
-	 * (0.18.88) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, so never a revive's hold.
+	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, so never a revive's hold.
 	 * Xenoform adds one: a tap tears the Xeno-Band off a downed wearer.
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
@@ -267,6 +274,8 @@ public final class Downed {
 
 	/** (0.18.5) Downed player → their rise. Not saved. */
 	private static final Map<UUID, Rise> RISES = new HashMap<>();
+	/** (0.18.84) Knocked-out players holding sneak last tick (a press is sneak coming down). Not saved. */
+	private static final Set<UUID> MASH_HELD = new java.util.HashSet<>();
 
 	private Downed() {
 	}
@@ -290,7 +299,7 @@ public final class Downed {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source)
+			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && !outCold(entity)
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
 				// (0.18.5) three hearts or more on the downed: that's the end of them
 				FELLED_BY.put(entity, source);
@@ -298,7 +307,8 @@ public final class Downed {
 				return false;
 			}
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
-				|| entity instanceof Player) {
+				|| entity instanceof Player || outCold(entity)) {
+				// ((0.18.84) and on one knocked out from standing, unhurt: blows land as on anyone awake)
 				// (mobs, fire, falls: real harm, out of what's left; (0.15.33) on a downed player, a player's blow too)
 				return true;
 			}
@@ -367,6 +377,7 @@ public final class Downed {
 			REVIVING.clear();
 			GIVING_UP.clear();
 			RISES.clear();
+			MASH_HELD.clear();
 		});
 	}
 
@@ -386,6 +397,15 @@ public final class Downed {
 	public static long since(Entity entity) {
 		Long downed = entity.getAttached(DOWNED);
 		return downed == null ? 0L : downed >> 1;
+	}
+
+	/**
+	 * (0.18.84) Knocked out from standing (a rock, too much poppy), not downed by their wounds: no three-heart blow ends
+	 * them and a player's blows are real harm, as on anyone. Server side.
+	 */
+	public static boolean outCold(Entity entity) {
+		Long knocked = entity.getAttached(KNOCKED);
+		return knocked != null && (knocked & 1L) == 0L;
 	}
 
 	/** A downed player who has passed out. */
@@ -641,8 +661,17 @@ public final class Downed {
 	 * those who can go down ({@link #downable}) or already are. True if they were knocked out.
 	 */
 	public static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks) {
+		return knockOut(level, entity, ticks, false, "message.jaymospowers.downed.knocked_out");
+	}
+
+	/**
+	 * (0.18.84) Knocked out, as {@link #knockOut(ServerLevel, LivingEntity, int)}; {@code anyBody}: a mob that couldn't
+	 * otherwise go down (a wild animal, a spider) is laid out too ({@link #stunnable}); {@code message}: what a player
+	 * knocked out is told.
+	 */
+	public static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks, boolean anyBody, String message) {
 		boolean was = isDowned(entity);
-		if (!was && !downable(entity)) {
+		if (!was && !downable(entity) && !(anyBody && stunnable(entity))) {
 			return false;
 		}
 		if (!was) {
@@ -653,9 +682,22 @@ public final class Downed {
 		entity.setAttached(OUT, true);
 		entity.setAttached(KNOCKED, (level.getGameTime() + ticks) << 1 | (was ? 1L : 0L));
 		if (entity instanceof ServerPlayer player) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_out").withStyle(ChatFormatting.DARK_PURPLE));
+			MASH_HELD.add(player.getUUID());
+			player.sendOverlayMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE));
 		}
 		return true;
+	}
+
+	/**
+	 * (0.18.84) A mob that can be knocked out though it wouldn't go down for dying: anything with a body ({@link BodyPlan})
+	 * that isn't a boss, nor wider than 2 blocks or taller than 3 (an ogre, a ravager).
+	 */
+	public static boolean stunnable(LivingEntity entity) {
+		if (!(entity instanceof Mob) || BodyPlan.of(entity) == null || !com.jaymospowers.power.gravity.GravityWeight.liftable(entity)) {
+			return false;
+		}
+		var size = entity.getType().getDimensions();
+		return size.width() <= 2.0F && size.height() <= 3.0F;
 	}
 
 	/** (0.14.4) A knock-out's end: they come round (still down if they were before it, else up). True if it ended just now. */
@@ -834,14 +876,28 @@ public final class Downed {
 				speed.addOrUpdateTransientModifier(new AttributeModifier(SLOW_ID, slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			}
 		}
-		if (player.hasAttached(KNOCKED)) {
+		Long knocked = player.getAttached(KNOCKED);
+		if (knocked != null) {
 			// (0.14.4) knocked out, not dying: nothing to give up, they'll come round
 			GIVING_UP.remove(player.getUUID());
-			if (now % HINT_TICKS == 0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_out").withStyle(ChatFormatting.DARK_PURPLE));
+			// (0.18.84) and mashing sneak brings them round sooner
+			boolean press = player.isShiftKeyDown() && MASH_HELD.add(player.getUUID());
+			if (!player.isShiftKeyDown()) {
+				MASH_HELD.remove(player.getUUID());
+			}
+			long until = knocked >> 1;
+			if (press) {
+				until = Math.max(now, until - MASH_TICKS);
+				player.setAttached(KNOCKED, until << 1 | (knocked & 1L));
+			}
+			if (press || now % HINT_TICKS == 0) {
+				int filled = MASH_BAR - Math.round(MASH_BAR * Math.min(1.0F, (until - now) / (float) MASH_BAR_TICKS));
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_mash",
+					"|".repeat(filled) + ".".repeat(MASH_BAR - filled)).withStyle(ChatFormatting.DARK_PURPLE));
 			}
 			return;
 		}
+		MASH_HELD.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
 		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
 			GIVING_UP.remove(player.getUUID());

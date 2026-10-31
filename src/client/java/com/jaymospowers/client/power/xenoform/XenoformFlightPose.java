@@ -72,7 +72,7 @@ public final class XenoformFlightPose {
 		return speed(player) >= CRUISE_SPEED;
 	}
 
-	/** (0.18.87) Nadir off the ground and not cruising: he floats in Wind's hover pose (WindHoverSway asks). */
+	/** (0.18.91) Nadir off the ground and not cruising: he floats in Wind's hover pose (WindHoverSway asks). */
 	public static boolean floating(Player player) {
 		return XenoformState.flight(player) == XenoformState.FLY_VOID && speed(player) < CRUISE_SPEED;
 	}
@@ -115,7 +115,7 @@ public final class XenoformFlightPose {
 			a[2] = ease(a[2], kind == XenoformState.FLY_WINGS);
 			float foldTarget = kind == XenoformState.FLY_WINGS ? Mth.clamp(((float)speed(player) - FOLD_START) / (FOLD_FULL - FOLD_START), 0.0F, 1.0F) : 0.0F;
 			a[4] = a[4] + (foldTarget - a[4]) * EASE * 1.5F;
-			// (0.18.85) hovering, small jets from hands and feet; streaking along, the comet (PyreComet) is the fire
+			// (0.18.89) hovering, small jets from hands and feet; streaking along, the comet (PyreComet) is the fire
 			if (XenoformState.jet(kind) && !player.isInvisible() && WindPose.amount(player, 1.0F) < JETS_UNTIL) {
 				footFlames(level, player);
 			}

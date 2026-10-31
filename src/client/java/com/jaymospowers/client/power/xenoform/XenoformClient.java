@@ -19,7 +19,7 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> FORM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_form");
 	/** True while the player's form is in its last seconds (the alien glows red). */
 	public static final RenderStateDataKey<Boolean> ENDING = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ending");
-	/** (0.18.89) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
+	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
 	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
 
 	private XenoformClient() {

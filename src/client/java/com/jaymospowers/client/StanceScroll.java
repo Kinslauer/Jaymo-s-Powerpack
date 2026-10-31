@@ -51,7 +51,15 @@ public final class StanceScroll {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || !minecraft.options.keyShift.isDown()
-			|| JaymosPowersClient.modeKey().isDown() || !able(player)) {
+			|| JaymosPowersClient.modeKey().isDown()) {
+			return false;
+		}
+		// (0.18.85) mid-slide the wheel says whether it ends in prone
+		if (com.jaymospowers.client.freerun.FreerunClient.slideScroll(amount)) {
+			scrolledThisPress = true;
+			return true;
+		}
+		if (!able(player)) {
 			return false;
 		}
 		scrolledThisPress = true;
@@ -86,6 +94,16 @@ public final class StanceScroll {
 			case Stance.STAND -> false;
 			default -> null;
 		};
+	}
+
+	/** (0.18.85) Whether the wheel turned during the current (or just-released) press of Sneak. */
+	static boolean scrolledThisPress() {
+		return scrolledThisPress;
+	}
+
+	/** (0.18.85) A slide held down into prone by the wheel: prone is now the held stance. */
+	public static void holdProne() {
+		held = Stance.PRONE;
 	}
 
 	/** The stance the local player is in now. Sneak held with no stance held counts as a sneak. */

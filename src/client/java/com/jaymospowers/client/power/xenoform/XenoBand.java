@@ -45,7 +45,7 @@ public final class XenoBand {
 	 */
 	static final float GROW = 1.1F, ARMOUR_GROW = 1.25F;
 	/**
-	 * (0.18.84) The face plate (Andy: the band should show like a watch, its face big and lit): how far it lifts out of the
+	 * (0.18.88) The face plate (Andy: the band should show like a watch, its face big and lit): how far it lifts out of the
 	 * band while raised (model pixels) and how much it grows then, about its middle; the silhouette's share of the green
 	 * face's height, how far off the face it stands (blocks) and its colour.
 	 */
@@ -177,7 +177,7 @@ public final class XenoBand {
 	}
 
 	/**
-	 * (0.18.86) The insignia on an alien's chest, lit as it taps it to change back (Andy: "the insignia ... should move
+	 * (0.18.90) The insignia on an alien's chest, lit as it taps it to change back (Andy: "the insignia ... should move
 	 * from the watch to their chest"): the band's face plate laid flat on the chest's front, only its glow drawn, over the
 	 * insignia the skin already wears. The pose stack is the layer's, before the body's own placement.
 	 */

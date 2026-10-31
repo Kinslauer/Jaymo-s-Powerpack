@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.85) Pyre's comet (Andy: "the trail should be more like a comet of flame and less repeat particles"): while a
+ * (0.18.89) Pyre's comet (Andy: "the trail should be more like a comet of flame and less repeat particles"): while a
  * Pyre flies ({@link XenoformState#jet}) and moves, one long tail of fire streams back along the path it took, wide and
  * white-hot at the body and narrowing to a dark red wisp, with a round glowing head round the body. Three ribbons laid
  * over each other (an outer red glow, orange flame, a yellow-white core over the front of it), turned to face the camera,

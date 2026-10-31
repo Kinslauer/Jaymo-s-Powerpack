@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.86) Wisp floats, so it makes no footsteps. */
+/** (0.18.90) Wisp floats, so it makes no footsteps. */
 @Mixin(Player.class)
 abstract class XenoformWispStepMixin {
 	@Inject(method = "playStepSound", at = @At("HEAD"), cancellable = true)

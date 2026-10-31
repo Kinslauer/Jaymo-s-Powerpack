@@ -4263,7 +4263,37 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
     open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
   - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.
-- **0.18.84, the band shows like a watch, and an alien carries no gear:** Andy: in first person the raised band
+- **0.18.84, rocks knock people out:** Andy: "throwing rocks should have a chance to knockout unsuspecting mobs and players.
+  you can then lift and carry them if you are strong enough. you may have to remove armor." A thrown rock (`ground/ThrownRocks`)
+  that hits someone unsuspecting (asleep; or no target, not hurt in 5 s, and the thrower outside a 60-degree cone of their sight
+  or out of line of sight) knocks them out 60% of the time on the head (within 0.35 of eye height), 20% elsewhere, for 15-45 s
+  (`Downed.knockOut` with `anyBody`: wild animals and spiders too, through `Downed.stunnable`, not bosses or giants). Out cold
+  they lie still with their eyes shut (Kitchen's `ClosedEyes`, marked in `DownedLivingEntityRendererMixin` for any passed-out
+  body). Knocked out from standing (`Downed.outCold`), a three-heart blow no longer kills outright and a player's blow is real
+  damage. `Downed.KNOCKED` now syncs to its owner: their screen goes black over the HUD (`DownedHud`, fading back as they come
+  round), and each sneak press takes 12 ticks off (`Downed.MASH_TICKS`), with a bar on the action bar. Lifting (`Carry`): anyone
+  lifts a body wearing up to 12 armour + toughness points (leather, gold, chain), each point of Kitchen brawn 6 more
+  (`Carry.FREE_ARMOUR`, `ARMOUR_PER_BRAWN`, brawn through `KitchenCompat.brawn`); too heavy, a finished lift pulls the heaviest
+  piece off a downed body and drops it beside them instead (`Carry.shed`). Gravity users and Wind snatches are exempt.
+  Andy: "the thrown rocks that break leave what looks like an egg splat". That was Subtle Effects' snowball splat, from the
+  snowball's hit event; `RockSnowballMixin` keeps any snowball wearing a rock (ours or Kingdoms' cobblestone) from sending it.
+  A broken rock cracks the block it hit (break stage 3, fading a stage every 12 ticks) and throws 12 stone specks that fall and
+  settle; one that stays lying sheds 3. Compile-checked; not seen in game.
+- **0.18.85, MGSV-style prone, belly slides, a stepping crouch:** Andy: "the crouch above prone, it doesnt animate the legs
+  moving like it used to. it should look like a sneak from a skyrim character", plus slides into prone and a back/belly toggle.
+  - *The crouch's stride* (`client/CrouchPose`): each thigh swings `LOW_STRIDE` either side of `LOW_THIGH`, full stride at a
+    sneak's pace (`STRIDE_GAIN`), and the knee bends `LOW_LIFT` more as the leg comes through so the foot lifts.
+  - *Belly slide* (`freerun/Slide.BELLY`, `client/freerun/RunPose.belly`): a slide out of the fast run is a head-first dive on
+    your stomach, arms out overhead. A slide out of a regular sprint (or within `SPRINT_GRACE_TICKS` of one) is the feet-first
+    slide on your back as before.
+  - *Slide into prone* (`FreerunClient`): hold Sneak through the slide, or scroll down during it (`slideScroll`), and it ends
+    in prone instead of getting up: on your belly from the belly slide, on your back from the back slide. Scrolling holds it
+    as the wheel's stance.
+  - *Back and belly* (`core/Crawl.SUPINE`, synced; `CrawlTaps.turnOver`; `client/CrawlPose` `back`): prone, a tap of Sneak
+    (no scroll) rolls you over onto your back over `BACK_TURN_TICKS`, and again onto your belly. On your back you lie feet
+    toward where you look, head raised, one knee up, arms up to aim. A bow only draws on your back (`mixin/ProneBowMixin`).
+  - Compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+- **0.18.88, the band shows like a watch, and an alien carries no gear:** Andy: in first person the raised band
   wasn't visible at all, and it should read like a watch face held up to you; and none of your weapons should show on
   the alien.
   - The band gets a 5x5 face plate on its outer side (`XenoBand.plate`, texels 0,10 of `xeno_band.png`, from
@@ -4278,7 +4308,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - As an alien, only the game's own render layers and Xenoform's run on the player
     (`XenoformLivingEntityRendererMixin.alienLayers`): Weapon Master's holstered weapons, Traveler's Tool Belt, quivers,
     backpacks, costumes and heritage looks no longer hang off the invisible body. Compile-checked; not seen in game.
-- **0.18.85, Pyre flies like a Z Fighter and leaves a comet:** Andy: "pyre needs a more controllable flight like the z
+- **0.18.89, Pyre flies like a Z Fighter and leaves a comet:** Andy: "pyre needs a more controllable flight like the z
   fighters, and the trail should be more like a comet of flame and less repeat particles".
   - The Flame Jet is a toggle on G, flown on the client (`client/power/xenoform/PyreFlightClient`, after
     `ZFighterFlightClient`): G lifts you into a hover, WASD moves, Jump rises, Sneak sinks and lands; Sprint streaks along
@@ -4289,7 +4319,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     ribbons (red glow, orange flame, white-hot core) along the last 14 ticks of path (20 under Sunheart), tapering and
     flickering, with a round glowing head round the body and one ember every 3 ticks. It draws in behind you when you
     stop. Hand and foot jets now only spurt while hovering. Compile-checked; not seen in game.
-- **0.18.86, Aliens tap the insignia on their chest; Wisp floats, made of ki:** Andy: "the aliens should tap the
+- **0.18.90, Aliens tap the insignia on their chest; Wisp floats, made of ki:** Andy: "the aliens should tap the
   insignia, it should move from the watch to their chest, and they tap that instead of their wrist. they arent wearing a
   watch" and "wisp should float instead of walk and be made of ki with the current texture overlaid".
   - As an alien the slap is a tap on the chest (`XenoformSlap.Pose.chest`, `CHEST_*` angles): no wrist comes up, the
@@ -4300,7 +4330,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     (`XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
     texture, scrolling), its own body puffed out (`WispKi`, `XenoFormModels.Wisp.shells`), first-person arm too.
     Compile-checked; not seen in game.
-- **0.18.87, The last 5 seconds flash; Nadir floats like Wind; the band plan:** Andy's notes on the alien pick page:
+- **0.18.91, The last 5 seconds flash; Nadir floats like Wind; the band plan:** Andy's notes on the alien pick page:
   "the last 5 secs should beep and flash" and "Nadir needs a flight akin to creative on double tap space. he needs the
   float that wind has on it as well ... Can Fly, In air".
   - `XenoformPower.BEEP_TICKS` 200 -> 100; beeps quicken to twice a second over the last 2 s (`beepsAt`), and each
@@ -4309,7 +4339,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     the ground (flying or not) his flight kind is `FLY_VOID`, and `WindHoverSway` gives him Wind's hover float below
     cruising speed (`XenoformFlightPose.floating`).
   - `docs/XenoBand-Plan.md`: Andy's 41 picks from the four add-ons as patches 0-9. Compile-checked; not seen in game.
-- **0.18.88, The band's charge; one band in the world (Xeno-Band patch 1):** Andy picked the charge patch first, and
+- **0.18.92, The band's charge; one band in the world (Xeno-Band patch 1):** Andy picked the charge patch first, and
   ruled "only these two bands will exist in the world, either player killing the other, will remove the band and give it
   to them", then "you have to tear it off yourself, with a tap". `XenoBands` counts wearers and loose band items on the
   overworld; stars drop it only when none is out; tapping a downed wearer tears it off into your inventory as an item
@@ -4318,7 +4348,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   it a minute). Quick change (Z held + scroll as an alien, a quarter of the charge, dizzy), the band saving you from a
   killing blow with a fitting alien (10 min), the wild dial (C while Z held), and the Jammed effect with the Potion of
   Jamming (awkward + echo shard; recipes are data so JEI shows them). HUD charge bar over the dial.
-- **0.18.89, Real Ultimate forms (Xeno-Band patch 2):** Andy: "I'd also like to see real ultimate forms, all we have are
+- **0.18.93, Real Ultimate forms (Xeno-Band patch 2):** Andy: "I'd also like to see real ultimate forms, all we have are
   a few special attacks". C as an ascended alien now makes it a body of its own: an armoured skin made from its base
   skin (plates, seams glowing in its colour, fullbright and pulsing), its own spikes, horns, crests and forearm blades
   (`UltimateSpikes`, a pose-following humanoid model), half again its health on top, fists +50%, 15% bigger, every move's

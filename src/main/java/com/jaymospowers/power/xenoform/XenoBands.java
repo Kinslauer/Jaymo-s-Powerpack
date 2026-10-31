@@ -21,7 +21,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.88) Andy: "only these two bands will exist in the world, either player killing the other, will remove the band
+ * (0.18.92) Andy: "only these two bands will exist in the world, either player killing the other, will remove the band
  * and give it to them. they can then do whatever they want with it." The world keeps count of its one Xeno-Band (the
  * rival band, patch 8, will keep its own): who wears it, and how many band items are loose (in an inventory, a chest,
  * or lying on the ground). A fallen star holds the band only while nobody wears it and none is loose.

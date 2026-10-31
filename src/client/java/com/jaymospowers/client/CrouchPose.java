@@ -59,6 +59,14 @@ public final class CrouchPose {
 	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
 	/** The low crouch: both thighs this far forward (radians), and the body sunk to match (blocks: 6 px of thigh, 1 - cos). */
 	static final float LOW_THIGH = 1.2F, LOW_DROP = 0.24F;
+	/**
+	 * (0.18.85) The low crouch's stride, a Skyrim sneak: how far each thigh swings either side of {@link #LOW_THIGH}
+	 * (radians), how quickly it's at full stride with walking speed (vanilla's 0..1, times this), and how far the knee bends
+	 * more to lift the foot as it comes through (radians).
+	 */
+	static final float LOW_STRIDE = 0.5F, STRIDE_GAIN = 2.5F, LOW_LIFT = 0.6F;
+	/** Vanilla's stride beat (radians per walked step). */
+	static final float STRIDE_BEAT = 0.6662F;
 	/** Into and out of the low crouch (ticks). */
 	static final float LOW_IN = 9.0F;
 	/** Standing into vanilla's crouch and back (ticks). */
@@ -186,9 +194,11 @@ public final class CrouchPose {
 		float k = c.kneel();
 		float low = c.low() * (1.0F - k);
 		if (low > 0.0F) {
-			// the low crouch: thighs forward (half the stride still swings them), knees bent at bendKnee
-			h.rightLeg.xRot = Mth.lerp(low, h.rightLeg.xRot, h.rightLeg.xRot * 0.5F - LOW_THIGH);
-			h.leftLeg.xRot = Mth.lerp(low, h.leftLeg.xRot, h.leftLeg.xRot * 0.5F - LOW_THIGH);
+			// the low crouch: thighs forward, stepping through a full slow stride (0.18.85: a Skyrim sneak; it was half
+			// vanilla's, too small at a sneak's pace to see), knees bent at bendKnee
+			float swing = Mth.cos(c.pos() * STRIDE_BEAT) * LOW_STRIDE * stride(c);
+			h.rightLeg.xRot = Mth.lerp(low, h.rightLeg.xRot, -LOW_THIGH + swing);
+			h.leftLeg.xRot = Mth.lerp(low, h.leftLeg.xRot, -LOW_THIGH - swing);
 		}
 		if (k <= 0.0F) {
 			return;
@@ -258,8 +268,10 @@ public final class CrouchPose {
 		HumanoidModel<?> h = (HumanoidModel<?>) model;
 		// (0.18.57) in the low crouch each knee bends as far as its thigh is forward, so the shin stands straight
 		float low = c.low() * (1.0F - c.kneel());
-		float right = Mth.lerp(c.kneel(), Math.max(0.0F, -h.rightLeg.xRot) * c.low(), FRONT_KNEE);
-		float left = Math.max(0.0F, -h.leftLeg.xRot) * low;
+		// (0.18.85) and more as the leg comes through, lifting the foot off the ground
+		float lift = Mth.sin(c.pos() * STRIDE_BEAT) * LOW_LIFT * stride(c) * low;
+		float right = Mth.lerp(c.kneel(), Math.max(0.0F, -h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
+		float left = Math.max(0.0F, -h.leftLeg.xRot) * low + Math.max(0.0F, -lift);
 		if (right > 0.0F) {
 			KneeBend.bend(h.rightLeg, right);
 		}
@@ -287,6 +299,11 @@ public final class CrouchPose {
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */
 	private static boolean free(HumanoidModel.ArmPose pose) {
 		return pose == HumanoidModel.ArmPose.EMPTY || pose == HumanoidModel.ArmPose.ITEM;
+	}
+
+	/** (0.18.85) How far into a full stride the low crouch is stepping, by walking speed (0 stood still). */
+	private static float stride(Crouch c) {
+		return Mth.clamp(c.speed() * STRIDE_GAIN, 0.0F, 1.0F);
 	}
 
 	private static float approach(float from, float to, float step) {

@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.Potion;
 
 /**
- * (0.18.88) Jammed (the band-jammer pick): static in the band. An alien who catches it is thrown back into their own body,
+ * (0.18.92) Jammed (the band-jammer pick): static in the band. An alien who catches it is thrown back into their own body,
  * and the band won't slam (or save them) until it wears off. Does nothing to anyone without a band.
  * <p>
  * The Potion of Jamming is brewed from an awkward potion and an echo shard (redstone to lengthen it, gunpowder and

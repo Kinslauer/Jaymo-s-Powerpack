@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 
 /**
- * (0.18.86) Andy: "wisp should float instead of walk and be made of ki with the current texture overlaid". Wisp's body
+ * (0.18.90) Andy: "wisp should float instead of walk and be made of ki with the current texture overlaid". Wisp's body
  * is light: its skin drawn see-through and fullbright, over shells of pale ki (the Z Fighters' ki glow texture, its
  * wisps rising) that stand out from the body ({@link XenoFormModels.Wisp#shells}), and the whole of it hovers above the
  * ground, bobbing. Its first-person arm is drawn the same way.

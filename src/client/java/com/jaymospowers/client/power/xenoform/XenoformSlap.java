@@ -30,7 +30,7 @@ public final class XenoformSlap {
 	 * The slap as raw clocks: {@code rise} the wrist coming up with the hand poised (0-1), {@code hit} the hand coming down
 	 * on it (0-1), {@code since} the ticks since the hand landed (-1 before it has), {@code fall} the arms dropping away
 	 * (0-1). Third person eases them ({@link #raise}, {@link #strike}); first person shapes its own curves from them
-	 * ({@link XenoformSlamView}). {@code chest}: (0.18.86) an alien's tap, on the insignia on its chest, not the band
+	 * ({@link XenoformSlamView}). {@code chest}: (0.18.90) an alien's tap, on the insignia on its chest, not the band
 	 * (Andy: "they arent wearing a watch").
 	 */
 	public record Pose(float rise, float hit, float since, float fall, boolean chest) {
@@ -68,7 +68,7 @@ public final class XenoformSlap {
 	 * from the arm's own pose rather than lerped angle by angle); the right arm's are angles (radians).
 	 */
 	/**
-	 * (0.18.84) Off: posed on First-person Model's body the raised forearm came up through the camera and the band never
+	 * (0.18.88) Off: posed on First-person Model's body the raised forearm came up through the camera and the band never
 	 * showed (Andy), so the slam's own first-person hands play instead. Kept to turn back on.
 	 */
 	static final boolean FP_BODY_ARMS = false;
@@ -80,7 +80,7 @@ public final class XenoformSlap {
 	/** The head looks down at the band. */
 	static final float HEAD_DOWN = 0.4F;
 	/**
-	 * (0.18.86) An alien has no band: its right hand comes up off its chest and taps the insignia there (radians, right
+	 * (0.18.90) An alien has no band: its right hand comes up off its chest and taps the insignia there (radians, right
 	 * arm), the left arm left be; the head dips less.
 	 */
 	static final float CHEST_POISED_X = -1.55F, CHEST_POISED_Y = -0.35F, CHEST_POISED_Z = 0.25F, CHEST_X = -0.8F, CHEST_Y = -0.78F;

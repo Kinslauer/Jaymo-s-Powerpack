@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * and rain do.
  * <ul>
  * <li>R, Fire Bolt: a small fireball where you look.</li>
- * <li>G, Flame Jet (0.18.85, a toggle, steered like a Z Fighter's flight on the client: {@code PyreFlightClient}): hover
+ * <li>G, Flame Jet (0.18.89, a toggle, steered like a Z Fighter's flight on the client: {@code PyreFlightClient}): hover
  * with WASD, Jump and Sneak, Sprint to streak along your look; G again (or Sneak on the ground) ends it, and you drift
  * down. Free. It leaves a comet's tail of flame ({@code PyreComet}).</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>

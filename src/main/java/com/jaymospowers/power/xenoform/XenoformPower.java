@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * and you become the dialled alien. As an alien, Z held {@link #HOLD_TICKS} turns you back early.</li>
  * <li>R G V B: the alien's moves ({@link XenoForm#onKey}). As a human they do nothing.</li>
  * <li>X held {@link #SCAN_TICKS} at a creature: scan it; if it carries an alien's DNA, the band unlocks that alien.</li>
- * <li>(0.18.88) The band's charge: a form spends it a point a tick, more when you're hit ({@link #HURT_DRAIN}) or a move
+ * <li>(0.18.92) The band's charge: a form spends it a point a tick, more when you're hit ({@link #HURT_DRAIN}) or a move
  * goes on cooldown ({@link #MOVE_DRAIN}); as yourself it refills over {@link #REFILL_TICKS}. Mastery grows it from
  * {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. The band beeps through the last {@link #BEEP_TICKS}. When it's spent, when the
  * alien's health is gone, or when you hold Z and let go, you turn back at the health you had before; a knockout empties it
@@ -71,7 +71,7 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
-	/** (0.18.88) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
+	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
 	public static final int CHARGE_MIN = 2400, CHARGE_MAX = 6000;
 	/** An empty band refills in this long as yourself; a slam needs at least this much. */
 	public static final int REFILL_TICKS = 1200, SLAM_MIN = 200;
@@ -89,7 +89,7 @@ public final class XenoformPower implements Power {
 	/** The player tag that keeps the wild dial on (kept through relogs). */
 	public static final String WILD_TAG = "jaymospowers_xeno_wild";
 	/**
-	 * (0.18.87) The band beeps and the screen flashes through the last 5 seconds of a form (Andy): once a second, then
+	 * (0.18.91) The band beeps and the screen flashes through the last 5 seconds of a form (Andy): once a second, then
 	 * twice a second over the last {@link #BEEP_FAST_TICKS}.
 	 */
 	public static final int BEEP_TICKS = 100, BEEP_FAST_TICKS = 40;
@@ -115,7 +115,7 @@ public final class XenoformPower implements Power {
 	/** (0.16.24) An Ultimate's film (ticks): low and close, sweeping round the alien. */
 	static final int ULTIMATE_FILM_TICKS = 36;
 	/**
-	 * (0.18.89, patch 2: Andy wants "real ultimate forms") The Ultimate is its own body on top of the base alien's: this
+	 * (0.18.93, patch 2: Andy wants "real ultimate forms") The Ultimate is its own body on top of the base alien's: this
 	 * much more health (share of the alien's, its own bar on top, healed in full as it comes on), more fist damage (share),
 	 * bigger (scale added), and every move's cooldown times {@link #ULT_COOLDOWN}.
 	 */
@@ -141,7 +141,7 @@ public final class XenoformPower implements Power {
 		/** The health they had as a human, given back when they turn back. */
 		float humanHealth;
 		int recharge, rechargeTotal;
-		/** (0.18.88) The band's charge as yourself (-1: not yet known, full). In a form it is {@link #ticksLeft}. */
+		/** (0.18.92) The band's charge as yourself (-1: not yet known, full). In a form it is {@link #ticksLeft}. */
 		float charge = -1.0F;
 		/** When the band last saved you from a killing blow (game time, 0: never); ticks to the wild dial's next change. */
 		long lastSave;
@@ -291,7 +291,7 @@ public final class XenoformPower implements Power {
 		XenoBands.init();
 		XenoJam.register();
 		// the alien's health is a second life bar: at zero you're knocked back into your own body instead of dying
-		// (0.18.88) as yourself, the band may slam itself to save you (default phase: before Downed takes the blow)
+		// (0.18.92) as yourself, the band may slam itself to save you (default phase: before Downed takes the blow)
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
 			if (!(entity instanceof ServerPlayer player) || !has(player)) {
 				return true;
@@ -314,7 +314,7 @@ public final class XenoformPower implements Power {
 			Live live = live(player);
 			return live.form == null || live.form.allowDamage(player, live, source, amount);
 		});
-		// (0.18.88) hits drain the charge
+		// (0.18.92) hits drain the charge
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (entity instanceof ServerPlayer player && has(player) && damageTaken > 0.0F) {
 				Live live = live(player);
@@ -663,7 +663,7 @@ public final class XenoformPower implements Power {
 		Live live = live(player);
 		if (live.form != null) {
 			if (live.ultimate && key == PowerKey.ABILITY_4 && live.form.ultimateHasMove()) {
-				// (0.18.89) the Ultimate's own move takes B
+				// (0.18.93) the Ultimate's own move takes B
 				if (down) {
 					live.form.onUltimateAgain(player, live);
 				}
@@ -730,7 +730,7 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		if (live.form != null) {
-			// (0.18.88) quick change: the wheel picks the next alien, letting go of Z changes into it
+			// (0.18.92) quick change: the wheel picks the next alien, letting go of Z changes into it
 			if (wild(player)) {
 				return;
 			}
@@ -751,7 +751,7 @@ public final class XenoformPower implements Power {
 		Live live = live(player);
 		XenoForm form = live.form;
 		if (form == null && live.modeDownAt >= 0L) {
-			// (0.18.88) C while Z is held as yourself: the wild dial on or off (letting Z go then doesn't slam)
+			// (0.18.92) C while Z is held as yourself: the wild dial on or off (letting Z go then doesn't slam)
 			live.slammed = true;
 			toggleWild(player, live);
 			return;
@@ -768,7 +768,7 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		if (live.ultimate) {
-			// (0.18.89) C again: back to the base alien
+			// (0.18.93) C again: back to the base alien
 			dropUltimate(player, live, true);
 			return;
 		}
@@ -966,7 +966,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.18.89) C again as the Ultimate: back to the base alien, its own extras undone, the Ultimate's health gone with it.
+	 * (0.18.93) C again as the Ultimate: back to the base alien, its own extras undone, the Ultimate's health gone with it.
 	 * The charge runs on.
 	 */
 	private static void dropUltimate(ServerPlayer player, Live live, boolean fx) {
@@ -988,7 +988,7 @@ public final class XenoformPower implements Power {
 		}
 	}
 
-	/** (0.18.89) The Ultimate's body on ({@code on}) or off: its health on top (healed in full), fists, size, and the look everyone sees. */
+	/** (0.18.93) The Ultimate's body on ({@code on}) or off: its health on top (healed in full), fists, size, and the look everyone sees. */
 	private static void ultimateBody(ServerPlayer player, XenoForm form, boolean on) {
 		if (on) {
 			float extra = form.health * ULT_HEALTH;
@@ -1067,7 +1067,7 @@ public final class XenoformPower implements Power {
 		live.hudDirty = true;
 	}
 
-	// ---------------------------------------------------------------- (0.18.88) the band's charge
+	// ---------------------------------------------------------------- (0.18.92) the band's charge
 
 	/** The band's full charge: mastery grows it from {@link #CHARGE_MIN} to {@link #CHARGE_MAX}. */
 	public static int capacity(Player player) {

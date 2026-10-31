@@ -59,7 +59,7 @@ public final class XenoBandItem extends Item {
 			serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
 			return InteractionResult.FAIL;
 		}
-		// (0.18.88) a band taken off someone still holds their aliens
+		// (0.18.92) a band taken off someone still holds their aliens
 		java.util.List<String> aliens = XenoBands.aliensOf(stack);
 		if (!aliens.isEmpty()) {
 			server.setAttached(XenoformState.BAND, new XenoformState.Band(aliens, 0));

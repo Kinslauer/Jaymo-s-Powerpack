@@ -14,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
  * Test commands (gamemasters only):
  * <ul>
  * <li>{@code /powerdebug xenoform band}: a Xeno-Band in your hand;</li>
- * <li>{@code /powerdebug xenoform bands reset}: the world forgets every worn and loose band (0.18.88);</li>
+ * <li>{@code /powerdebug xenoform bands reset}: the world forgets every worn and loose band (0.18.92);</li>
  * <li>{@code /powerdebug xenoform star}: a star falls where you're looking (about 30 blocks off);</li>
  * <li>{@code /powerdebug xenoform unlock <alien|all>}: the band takes in that alien;</li>
  * <li>{@code /powerdebug xenoform form <alien>}: become it now, recharge or not; {@code revert}: back to yourself;</li>

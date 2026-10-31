@@ -101,7 +101,7 @@ public final class FirstPersonCompat {
 		setArmsHidden(state, false);
 	}
 
-	/** (0.18.84) The other way: First-person Model hides your body's arms, for a move that draws its own first-person hands. */
+	/** (0.18.88) The other way: First-person Model hides your body's arms, for a move that draws its own first-person hands. */
 	public static void hideArms(Object state) {
 		setArmsHidden(state, true);
 	}

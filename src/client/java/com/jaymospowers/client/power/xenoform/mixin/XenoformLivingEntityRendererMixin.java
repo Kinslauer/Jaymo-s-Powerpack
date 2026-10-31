@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <ul>
  * <li>the band's slam in first person with First-person Model drawing your body: the body's arms are hidden while it
  * plays, since the slam's own hands (XenoformFirstPersonMixin) are drawn instead;</li>
- * <li>(0.18.84) as an alien, only the game's own layers and Xenoform's run (Andy: none of your weapons should show on
+ * <li>(0.18.88) as an alien, only the game's own layers and Xenoform's run (Andy: none of your weapons should show on
  * the alien). Other layers hang things off the player's own body, now invisible under the alien: holstered weapons (YDM's
  * Weapon Master), tool belts (Traveler's Tool Belt), quivers, backpacks, costumes, heritage looks.</li>
  * </ul>

@@ -45,12 +45,21 @@ public final class RunPose {
 	static final float RUB = 0.04F, RUB_BEAT = 1.9F;
 	/** Back up: the pop forward (degrees, and how long, seconds), the arms swinging into the run. */
 	static final float POP_DEGREES = 12.0F, POP_TIME = 0.3F, POP_ARMS = 0.7F, POP_LEGS = 0.55F;
+	/**
+	 * (0.18.85) The belly slide off a fast run: how far the body dives forward about the feet (degrees), how far it's lifted
+	 * so the chest lies on the ground (blocks), the arms reached out overhead (pitch, out to the side), the legs trailing
+	 * (each a little bent up off the ground), the head raised to look ahead (radians).
+	 */
+	static final float BELLY_TILT = 84.0F, BELLY_LIFT = 0.14F, BELLY_ARMS = -2.95F, BELLY_ARMS_OUT = 0.22F,
+		BELLY_LEG = 0.14F, BELLY_LEG_OUT = 0.08F, BELLY_HEAD = -1.05F;
 
 	public static final RenderStateDataKey<Boolean> LEAN = RenderStateDataKey.create(() -> "jaymospowers:freerun_lean");
 	public static final RenderStateDataKey<Boolean> SLIDE = RenderStateDataKey.create(() -> "jaymospowers:freerun_slide");
 
 	private static final PoseBlend.Channel LEAN_BLEND = PoseBlend.channel("freerun_lean");
 	private static final PoseBlend.Channel SLIDE_BLEND = PoseBlend.channel("freerun_slide");
+	/** (0.18.85) Sliders on their belly (by id), kept while the slide eases out so the getting-up dives the right way. */
+	private static final java.util.Set<Integer> BELLY = new java.util.HashSet<>();
 
 	private RunPose() {
 	}
@@ -76,6 +85,15 @@ public final class RunPose {
 	public static void extractAvatar(Avatar entity, AvatarRenderState state, float partialTicks) {
 		boolean slide = entity instanceof Player player && Slide.sliding(player);
 		PoseBlend.Track track = SLIDE_BLEND.track(entity.getId(), slide);
+		if (slide) {
+			if (Slide.belly((Player) entity)) {
+				BELLY.add(entity.getId());
+			} else {
+				BELLY.remove(entity.getId());
+			}
+		} else if (track == null) {
+			BELLY.remove(entity.getId());
+		}
 		// while easing out too, unless it's become a real crawl (a low ceiling), which vanilla tilts as usual
 		if (track == null || !slide && entity.isVisuallySwimming()) {
 			return;
@@ -100,6 +118,12 @@ public final class RunPose {
 			return;
 		}
 		float w = slide.amount();
+		if (BELLY.contains(avatar.id)) {
+			// (0.18.85) head first, face down: dived forward about the feet, the chest lifted onto the ground
+			poseStack.translate(0.0F, BELLY_LIFT * w, 0.0F);
+			poseStack.rotateDegrees(Axis.XP, -BELLY_TILT * w);
+			return;
+		}
 		if (slide.on()) {
 			// lying back about the feet, the hips let down to the ground
 			poseStack.translate(0.0F, -SLIDE_DROP * w, 0.0F);
@@ -122,6 +146,10 @@ public final class RunPose {
 		}
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
 		float t = track.age();
+		if (BELLY.contains(state.id)) {
+			belly(state, h, f, track);
+			return;
+		}
 		if (!track.on()) {
 			// back up: arms swinging into the stride, the lead leg stepping through
 			float pop = PoseBlend.bump(t, 0.0F, POP_TIME * 0.35F, POP_TIME * 0.4F, POP_TIME);
@@ -144,6 +172,24 @@ public final class RunPose {
 		f.set(PoseBlend.RIGHT_ARM, Mth.lerp(in, -0.5F, TRAIL_ARM), 0.0F, Mth.lerp(in, 0.1F, TRAIL_OUT));
 		f.shake(PoseBlend.RIGHT_ARM + 2, rub);
 		f.set(PoseBlend.LEFT_ARM, Mth.lerp(in, -0.9F, BALANCE_ARM), 0.0F, -Mth.lerp(in, 0.1F, BALANCE_OUT));
+		track.apply(h, f);
+	}
+
+	/**
+	 * (0.18.85) Andy: "when in a sprint, (the fast one after a while of movement) you do a full baseball slide on your
+	 * stomach". Arms reached out overhead past the head, the head up to look where you're going, the legs trailing a little
+	 * apart, knees off the ground; the hands drag the ground as you go.
+	 */
+	private static void belly(AvatarRenderState state, HumanoidModel<?> h, PoseBlend.Frame f, PoseBlend.Track track) {
+		float in = track.on() ? PoseBlend.seg(track.age(), 0.0F, DROP_IN_TIME * 1.5F) : 1.0F;
+		float rub = Mth.sin(state.ageInTicks * RUB_BEAT) * RUB * in;
+		f.set(PoseBlend.HEAD, BELLY_HEAD * in, f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
+		f.set(PoseBlend.RIGHT_ARM, Mth.lerp(in, -1.2F, BELLY_ARMS), 0.0F, -BELLY_ARMS_OUT * in);
+		f.set(PoseBlend.LEFT_ARM, Mth.lerp(in, -1.2F, BELLY_ARMS), 0.0F, BELLY_ARMS_OUT * in);
+		f.shake(PoseBlend.RIGHT_ARM + 2, rub);
+		f.shake(PoseBlend.LEFT_ARM + 2, -rub);
+		f.set(PoseBlend.RIGHT_LEG, BELLY_LEG * in, 0.0F, BELLY_LEG_OUT * in);
+		f.set(PoseBlend.LEFT_LEG, BELLY_LEG * 1.4F * in, 0.0F, -BELLY_LEG_OUT * in);
 		track.apply(h, f);
 	}
 }

@@ -26,14 +26,14 @@ public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
 	public abstract static class FormModel extends HumanoidModel<AvatarRenderState> {
 		public final Identifier texture;
-		/** (0.18.89) The Ultimate's skin (armoured, plated) and its glowing seams, drawn fullbright over it. */
+		/** (0.18.93) The Ultimate's skin (armoured, plated) and its glowing seams, drawn fullbright over it. */
 		public final Identifier ultimateTexture, ultimateGlow;
 		/** The model's id (its form's). */
 		public final String id;
 		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
 		float renderScale = 1.0F;
 		/**
-		 * (0.18.86) The insignia on its chest, which it taps to change back (it wears no band): the middle of it (model
+		 * (0.18.90) The insignia on its chest, which it taps to change back (it wears no band): the middle of it (model
 		 * pixels in the body's space, y down) on the front of the chest (z), and its size against the band's 5-pixel face.
 		 */
 		float insigniaY = 7.5F, insigniaZ = -2.0F, insigniaSize = 1.0F;
@@ -290,7 +290,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Wisp: a hooded thing with no legs, trailing off into tatters that sway. (0.18.86) Andy: "wisp should float instead
+	 * Wisp: a hooded thing with no legs, trailing off into tatters that sway. (0.18.90) Andy: "wisp should float instead
 	 * of walk and be made of ki with the current texture overlaid". It never walks: its arms hang and drift instead of
 	 * swinging with its steps, trail back as it moves, and {@link XenoformLayer} draws it floating, bobbing, its skin
 	 * see-through and fullbright over glowing shells of ki ({@link #shells}, the same body puffed out).

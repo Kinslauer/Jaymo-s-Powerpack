@@ -1158,7 +1158,7 @@ def duplex():
     save(img, "entity/xenoform_duplex.png")
 
 
-# (0.18.89, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
+# (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
 ULTIMATE_COLORS = {

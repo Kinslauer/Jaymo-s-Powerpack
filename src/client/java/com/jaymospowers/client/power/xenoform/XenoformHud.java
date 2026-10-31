@@ -80,7 +80,7 @@ final class XenoformHud {
 		charge(graphics, player, hud, at[0], at[1] - 15, time);
 	}
 
-	/** (0.18.88) As yourself: the band's charge over the chips, its colour while a slam is possible, grey below that, purple jammed. */
+	/** (0.18.92) As yourself: the band's charge over the chips, its colour while a slam is possible, grey below that, purple jammed. */
 	private static void charge(GuiGraphicsExtractor graphics, LocalPlayer player, XenoformState.Hud hud, int x, int y, float time) {
 		int width = chipsWidth(2);
 		float share = Mth.clamp(hud.formTicks() / (float)Math.max(1, hud.formTotal()), 0.0F, 1.0F);

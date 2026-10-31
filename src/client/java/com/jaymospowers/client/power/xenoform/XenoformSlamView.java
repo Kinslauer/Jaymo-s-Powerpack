@@ -52,7 +52,7 @@ public final class XenoformSlamView {
 	static final float R_BOB_Y = 0.01F, R_BOB_ROLL = 2.0F;
 
 	/**
-	 * (0.18.86) An alien's tap on the insignia on its chest (it wears no band): no wrist comes up; the right hand rises
+	 * (0.18.90) An alien's tap on the insignia on its chest (it wears no band): no wrist comes up; the right hand rises
 	 * into the lower right of the view, then presses down and in toward you, onto the chest just under the view.
 	 */
 	static final float[] C_POS_POISED = {0.38F, -0.42F, -0.8F}, C_POS_STRUCK = {0.06F, -0.78F, -0.42F};

@@ -72,7 +72,7 @@ Each of the nine Ultimates becomes its own evolved alien, not a buff on the same
 - **Health:** the Ultimate keeps its own health on top of the base alien's.
 - **New Ultimates:** Nadir gets none. The aliens added in patches 3 to 5 get theirs later.
 
-Built (0.18.89): the body as planned (armoured skin from the base one, glowing seams, per-alien spikes, health on
+Built (0.18.93): the body as planned (armoured skin from the base one, glowing seams, per-alien spikes, health on
 top, bigger). The kit so far: R G V are the base moves with halved cooldowns and harder fists, B is the Ultimate's own
 move, C again drops back. Brand-new R G V moves per Ultimate are left for a follow-up once Andy has seen these in game.
 

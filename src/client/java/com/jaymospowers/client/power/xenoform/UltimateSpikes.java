@@ -15,7 +15,7 @@ import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.89, patch 2) An Ultimate's spikes, horns and crests, worn over its armoured skin ({@link XenoformLayer}). A
+ * (0.18.93, patch 2) An Ultimate's spikes, horns and crests, worn over its armoured skin ({@link XenoformLayer}). A
  * humanoid model with no body of its own, only the spikes hung on its head, body and limbs, so it takes the same pose
  * as the alien (the same animation, and every pose mixin that touches humanoid models). Its parts start where the
  * alien's do ({@link ModelPart#setInitialPose}). One plain strip of bone ({@code xenoform_ultimate_spikes.png}) tinted

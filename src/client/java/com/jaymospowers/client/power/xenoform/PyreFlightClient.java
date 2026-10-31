@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.85) Pyre's Flame Jet, flown on the client like a Z Fighter's flight (Andy: "a more controllable flight like the
+ * (0.18.89) Pyre's Flame Jet, flown on the client like a Z Fighter's flight (Andy: "a more controllable flight like the
  * z fighters"); player motion is client-authoritative, so its own velocity is steered toward what the controls ask and
  * handed to the player every tick. The server only keeps the jet on ({@code Pyre}: G toggles it, Sneak on the ground
  * lands) and says so through the synced {@link XenoformState#FLIGHT}.

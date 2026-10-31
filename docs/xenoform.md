@@ -30,30 +30,30 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 - **Z held**: the wrist comes up; **scroll** while holding it to turn the dial through the aliens the band holds
   (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. While
   changed, hold Z 0.5 s and let go to turn back; hold Z and **scroll**, then let go, for a **quick change** into the
-  dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.88).
+  dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.92).
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
-- **The charge** (0.18.88, replaces the random timer): the band holds 2 minutes of form unmastered, growing with
+- **The charge** (0.18.92, replaces the random timer): the band holds 2 minutes of form unmastered, growing with
   each mastered ability to 5 at full mastery (`capacity`). Changed, it spends a point a tick, 10 more per point of
   damage taken and 20 more per move put on cooldown. What's left stays in the band when you turn back, and as yourself it
   refills from empty in a minute; a slam needs 10 s of it. The HUD shows it as a thin bar over the dial (grey while too
   low, purple when jammed, shimmering on the wild dial). The band beeps once a second through the last 5 s (twice a second for the last 2), with red motes, and each beep flashes
-  your screen's edge red (0.18.87). Then you turn back where you stand.
+  your screen's edge red (0.18.91). Then you turn back where you stand.
 - **A second life bar**: your max health becomes the alien's and you start it full. When it hits zero you're knocked
   back into your own body (`ALLOW_DEATH` cancels the death) at the health you had before, dizzy for 5 s, and the band
   is emptied and locked for a minute before it refills (none in creative). `/kill` and the void still kill you.
-- **The band saves you** (0.18.88): a killing blow as yourself (not the void or `/kill`, not jammed or locked) slams the
+- **The band saves you** (0.18.92): a killing blow as yourself (not the void or `/kill`, not jammed or locked) slams the
   band for you, before Downed: a fall gives Wyrm or Wisp, drowning Slipfin (once it exists) or Wisp, fire Pyre or Prism,
   anything else Bulwark, Knell or Prism, else the dialled alien. At least 30 s of charge, and you turn back at 1 health.
   Once every 10 minutes.
-- **Wild dial** (0.18.88): C while holding Z as yourself turns it on or off (a player tag, kept). The band changes you
+- **Wild dial** (0.18.92): C while holding Z as yourself turns it on or off (a player tag, kept). The band changes you
   into a random known alien as soon as it can, and again every 1 to 60 s while changed (no cost); Z can't turn you back
   or quick-change. Each move counts double toward mastery.
-- **Jammed** (0.18.88, `XenoJam`): an effect. An alien who has it turns back, and the band won't slam or save you until
+- **Jammed** (0.18.92, `XenoJam`): an effect. An alien who has it turns back, and the band won't slam or save you until
   it ends. Potion of Jamming: awkward + echo shard (20 s; redstone 40 s; gunpowder splash, dragon's breath lingering),
   tipped arrows from the game's own recipe.
-- **One band in the world** (0.18.88, `XenoBands`, Andy): the overworld keeps who wears it and how many band items are
+- **One band in the world** (0.18.92, `XenoBands`, Andy): the overworld keeps who wears it and how many band items are
   loose. A fallen star holds the band only while nobody wears it and none is loose. A downed wearer can have it torn
   off: another player taps them (use let go at once; holding is a revive, `Downed.TAPPED_LISTENERS`), the power ends and
   the taker gets the band as an item that keeps every alien it learned. Killed outright, the wearer keeps it. A loose band
@@ -138,13 +138,13 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   boxes at a fifth of the size, drawn from the game's own dragon texture, never copied); Wisp's glide tips the body 38° forward with a
   slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
   out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
-  speed 0.16, kept every tick; off the ground he floats in Wind's hover pose, 0.18.87), put back on the way out (creative and spectator keep theirs).
-- **Aliens tap the insignia (0.18.86):** an alien wears no band, so changing back (hold Z) no longer raises a wrist:
+  speed 0.16, kept every tick; off the ground he floats in Wind's hover pose, 0.18.91), put back on the way out (creative and spectator keep theirs).
+- **Aliens tap the insignia (0.18.90):** an alien wears no band, so changing back (hold Z) no longer raises a wrist:
   the right hand comes up and taps the insignia on its chest, which lights under it (the band's face glow laid on the
   chest, `XenoBand.submitInsignia`, placed per form by `FormModel.insigniaY/Z/Size`); in first person only the right hand
   comes up and presses in under the view (`XenoformSlamView.chest`). Others see the same tap when a player becomes an
   alien. `XenoformSlap.Pose.chest` marks it; your own tap keeps its kind through the change so the arm doesn't jump.
-- **Wisp is ki (0.18.86):** it floats 0.3 blocks up and bobs instead of walking (no step swing, no footsteps,
+- **Wisp is ki (0.18.90):** it floats 0.3 blocks up and bobs instead of walking (no step swing, no footsteps,
   `XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
   texture, scrolling) that are its own body puffed out (`XenoFormModels.Wisp.shells`, `WispKi`), first-person arm too.
 - The ending glow: the server sets the synced `XenoformState.ENDING` through a form's last `BEEP_TICKS`; everyone's
@@ -160,7 +160,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
 - **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form until the charge runs out
-  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateEnd` before `onExit`). (0.18.89, patch 2, Andy: "real
+  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateEnd` before `onExit`). (0.18.93, patch 2, Andy: "real
   ultimate forms, all we have are a few special attacks") It is its own body:
   - **Look:** an armoured skin made from the alien's own (darker plates, seams glowing in its colour, eyes and
     insignia burning through; `xenoform_<id>_ultimate.png` + `_ultimate_glow.png` drawn fullbright, pulsing), and its

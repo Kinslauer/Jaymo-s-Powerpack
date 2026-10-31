@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
  * pass over the body ({@link #glow}).
  */
 final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
-	/** (0.18.86) How brightly the chest's insignia lights as the hand comes up to it; it's full once the hand is on it. */
+	/** (0.18.90) How brightly the chest's insignia lights as the hand comes up to it; it's full once the hand is on it. */
 	static final float INSIGNIA_HELD = 0.3F;
 
 	XenoformLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
@@ -39,12 +39,12 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
 		if (model instanceof XenoFormModels.Wisp wisp) {
-			// (0.18.86) Wisp floats, a body of ki under its skin
+			// (0.18.90) Wisp floats, a body of ki under its skin
 			WispKi.lift(poseStack, state);
 			WispKi.submit(wisp, state, poseStack, collector);
 		} else {
 			// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
-			// (0.18.89) the Ultimate wears its armoured skin instead
+			// (0.18.93) the Ultimate wears its armoured skin instead
 			renderColoredCutoutModel(model, ultimate ? model.ultimateTexture : model.texture, poseStack, collector, lightCoords, state, -1, 1);
 		}
 		if (ultimate) {
@@ -57,7 +57,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		}
 		XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 		if (slap != null && slap.chest()) {
-			// (0.18.86) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
+			// (0.18.90) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
 			model.setupAnim(state);
 			XenoformFlightPose.applyModel(model, state);
 			XenoBand.submitInsignia(poseStack, collector, lightCoords, model, Math.max(INSIGNIA_HELD * slap.raise(), slap.strike()));
@@ -82,7 +82,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	}
 
 	/**
-	 * (0.18.89) The Ultimate over the alien: its plate seams glowing fullbright (pulsing slowly), and its spikes, horns and
+	 * (0.18.93) The Ultimate over the alien: its plate seams glowing fullbright (pulsing slowly), and its spikes, horns and
 	 * crests in a darker shade of its colour ({@link UltimateSpikes}).
 	 */
 	private static void ultimate(XenoFormModels.FormModel model, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {

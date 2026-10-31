@@ -187,7 +187,7 @@ public final class XenoformState {
 	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
 	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
-	/** (0.18.89) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
+	/** (0.18.93) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
 	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 

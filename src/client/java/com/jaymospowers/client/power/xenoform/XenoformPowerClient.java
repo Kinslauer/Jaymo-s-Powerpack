@@ -41,7 +41,7 @@ public final class XenoformPowerClient implements PowerClient {
 	static int flashColor;
 	/** Ticks left of the slam's burst of light. */
 	static int burst;
-	/** (0.18.87) Each beep of a form's last seconds flashes the screen's edge this colour for this long (the flash fades over FLASH_TICKS). */
+	/** (0.18.91) Each beep of a form's last seconds flashes the screen's edge this colour for this long (the flash fades over FLASH_TICKS). */
 	static final int BEEP_FLASH_COLOR = 0xFF3030, BEEP_FLASH_TICKS = 8;
 	/** The form's ticks left as this client counts them through its end, and whether it was ending last tick. */
 	private static int endingTicks;
@@ -69,7 +69,7 @@ public final class XenoformPowerClient implements PowerClient {
 
 	/**
 	 * From the scroll mixin: while a band wearer holds Z, the wheel turns the dial (down: the next alien, like the hotbar)
-	 * and the hotbar stays put; as an alien, letting Z go then quick-changes (0.18.88). True if the scroll was taken.
+	 * and the hotbar stays put; as an alien, letting Z go then quick-changes (0.18.92). True if the scroll was taken.
 	 */
 	public static boolean scroll(double amount) {
 		Minecraft minecraft = Minecraft.getInstance();
@@ -129,7 +129,7 @@ public final class XenoformPowerClient implements PowerClient {
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
 		}
-		// (0.18.87) the last 5 seconds: the screen's edge flashes red on each beep, the server's clock kept from the moment the end began
+		// (0.18.91) the last 5 seconds: the screen's edge flashes red on each beep, the server's clock kept from the moment the end began
 		boolean ending = XenoformState.ending(player);
 		if (ending && !endingWas) {
 			endingTicks = XenoformPower.BEEP_TICKS;
