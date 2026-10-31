@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:item/tinkering/large_tool",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/broad_axe/large/binding_bog_iron"
+  }
+}

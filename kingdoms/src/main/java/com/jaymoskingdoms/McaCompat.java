@@ -613,6 +613,11 @@ public final class McaCompat {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
 		}
+		Boolean trial = Trials.foe(guard, target);
+		if (trial != null) {
+			// (0.7.429) a trial under way: the pit's champion goes for his challenger alone, the rest of the camp leaves them be
+			return trial;
+		}
 		if (Tribes.of(guard) != null && (Pedlars.party(target) || Tribes.spares(guard, target))) {
 			// (0.7.425) no greenskin sets on a pedlar's party; a tribe under truce with a player, or a pedlar's party, spares them
 			return false;

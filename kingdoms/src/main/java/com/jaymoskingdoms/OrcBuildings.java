@@ -472,6 +472,11 @@ final class OrcBuildings {
 			WATCHTOWER.placer(fire, gate).at(TOWER_SPOT), PIT.placer(fire, gate).at(2, 0, 2));
 	}
 
+	/** (0.7.429) The middle of the fighting pit of a camp built round {@code fire} (the pit fight, {@link Trials}). */
+	static BlockPos pit(BlockPos fire, Direction gate) {
+		return PIT.placer(fire, gate).at(2, 0, 2);
+	}
+
 	/** Where the warchief of a camp built round {@code fire} (its gate facing {@code gate}) holds court. */
 	static BlockPos throne(BlockPos fire, Direction gate) {
 		return LONGHOUSE.placer(fire, gate).at(THRONE);

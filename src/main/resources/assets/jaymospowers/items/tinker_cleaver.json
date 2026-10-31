@@ -191,6 +191,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/handle_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -381,6 +388,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -566,6 +580,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_bog_iron"
                     }
                   }
                 ],
@@ -758,6 +779,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -943,6 +971,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_bog_iron"
                     }
                   }
                 ],
@@ -1130,6 +1165,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_star_metal"
+                  }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_bog_iron"
                   }
                 }
               ],
@@ -1324,6 +1366,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/handle_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -1514,6 +1563,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -1699,6 +1755,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_bog_iron"
                 }
               }
             ],
@@ -1891,6 +1954,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -2076,6 +2146,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_bog_iron"
                 }
               }
             ],
@@ -2263,6 +2340,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_bog_iron"
               }
             }
           ],
