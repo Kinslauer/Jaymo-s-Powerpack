@@ -104,6 +104,8 @@ public final class RoadLocks {
 		lock(Start.ROCK_BOTTOM, p -> is(p, Question.RAISED, "healers") && is(p, Question.CHILDHOOD, "caves"), "rise.chained");
 		lock(Start.SENTENCED, p -> is(p, Question.RAISED, "merchants") && is(p, Question.YOUTH, "cutpurses"), "cells.held");
 		lock(Start.EVICTED, p -> is(p, Question.RAISED, "farmers") && is(p, Question.YOUTH, "winter"), "cells.served");
+		// (0.7.443, Havens patch 7b) Andy: "unlockable by reaching good rep with the orcs" (TribePacts); no secret past opens it
+		lock(Start.GREENSKIN, p -> false, TribePacts.FRIEND_DEED);
 		lock(Start.HIDEOUT, p -> is(p, Question.RAISED, "outlaws") && is(p, Question.YOUTH, "cutpurses"), "market.black", "cells.broke");
 		// the kit roads
 		lock(Start.HEIRLOOM, p -> is(p, Question.RAISED, "nobles") && is(p, Question.YOUTH, "levy"), "assassin.killed");

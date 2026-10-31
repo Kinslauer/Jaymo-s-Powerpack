@@ -151,7 +151,7 @@ public final class Prejudice {
 	/** How far from human {@code e} is seen to be: a player's or villager's blood (a full mask hides a player's). */
 	static int degree(Entity e) {
 		if (e instanceof Player p) {
-			return masked(p) ? 0 : degree(Heritage.of(p));
+			return Math.max(GreenskinLife.degree(p), masked(p) ? 0 : degree(Heritage.of(p)));
 		}
 		return degree(VillagerHeritage.of(e));
 	}
@@ -162,13 +162,20 @@ public final class Prejudice {
 	 */
 	static float minds(LivingEntity who, Entity whom) {
 		// ((0.7.381) never by the village that took them in on their story's start: StoryHomes)
-		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) || StoryHomes.takenIn(who, whom)) {
+		// ((0.7.443) a mask hides a tied-down tail's blood from no one who smells it: Tails)
+		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) && Tails.smells(who, p) == null
+			|| StoryHomes.takenIn(who, whom)) {
 			return 0.0F;
 		}
 		// ((0.7.412) a cast-out start: their own kind turn them away for the first days, StoryHard)
 		float cast = StoryHard.castOutMinds(who, whom);
 		if (cast > 0.0F) {
 			return cast;
+		}
+		// ((0.7.443) raised among the goblins or orcs: the far end of non-human to the human towns, GreenskinLife)
+		float green = GreenskinLife.minds(who, whom);
+		if (green >= 0.0F) {
+			return green;
 		}
 		Heritage.Kind mine = VillagerHeritage.of(who), theirs = Purists.of(whom);
 		if (mine == null || theirs == null && !(whom instanceof Player) || mine == theirs) {
@@ -347,6 +354,11 @@ public final class Prejudice {
 			return null;
 		}
 		Component name = Identities.shownName(player), blood = Purists.name(mine);
+		Component paid = TribePacts.gossip(level, villager, player);
+		if (paid != null) {
+			// (0.7.443) what the haven pays the tribes, or an Ogre King
+			return paid;
+		}
 		if (Havens.home(villager) != null && degree(mine) > 0 && random.nextFloat() < HAVEN_GOSSIP_CHANCE) {
 			return Component.translatable("prejudice.jaymoskingdoms.gossip.haven." + random.nextInt(HAVEN_GOSSIP_LINES), blood, name);
 		}

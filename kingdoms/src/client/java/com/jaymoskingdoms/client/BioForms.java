@@ -271,6 +271,14 @@ public final class BioForms {
 		return true;
 	}
 
+	/** (0.7.443, Havens patch 7b) A Bio-built villager: the first form's parts and its tail over their own body (their marks under it). */
+	static void villagerForm(PoseStack poseStack, SubmitNodeCollector collector, int light, HumanoidModel<?> model, int palette, float age) {
+		parts(poseStack, collector, light, model, 0, palette, false, false);
+		if (model.body.visible && TAILS[0] != null) {
+			tail(poseStack, collector, light, model.body, 0, palette, TAILS[0], age);
+		}
+	}
+
 	/** The form's parts on {@code model}'s bones (a bud's too). */
 	static void parts(PoseStack poseStack, SubmitNodeCollector collector, int light, HumanoidModel<?> model, int form, int palette, boolean headCovered,
 		boolean bodyCovered) {
