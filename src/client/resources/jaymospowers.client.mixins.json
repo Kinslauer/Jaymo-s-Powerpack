@@ -53,6 +53,7 @@
 		"DownedKeysMixin",
 		"LimbKeysMixin",
 		"CarryCameraMixin",
+		"ProneCameraMixin",
 		"HeadCamMixin",
 		"GiantCameraMixin",
 		"GiantPickMixin",

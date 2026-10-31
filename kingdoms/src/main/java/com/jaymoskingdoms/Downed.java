@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.102) Andy (2026-10-20): "I dont want any modern medicine". The tending is a bandaging now: when it's done the body
  * is tagged {@link #BANDAGED_TAG} as well, and Powers stops its bleeding and gives it a bandage's heal.
  * <p>
- * (0.7.450) Andy (2026-10-31): "mounted guards should dismount to revive, right now they just walk into you perpetually".
+ * (0.7.453) Andy (2026-10-31): "mounted guards should dismount to revive, right now they just walk into you perpetually".
  * A rider may come to help: he rides over, gets down {@link #DISMOUNT_REACH} off, tends them on foot while his horse
  * waits, and climbs back up when he's done (or called away). The horse he left is kept for him meanwhile: no other
  * rider takes it and a lent one doesn't vanish ({@link #waiting}).
@@ -62,7 +62,7 @@ public final class Downed {
 	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
 	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
 	static final float HELP_SPEED = 0.8F;
-	/** (0.7.450) A mounted helper gets down this near the downed one (blocks), and climbs back on a horse no farther off than this. */
+	/** (0.7.453) A mounted helper gets down this near the downed one (blocks), and climbs back on a horse no farther off than this. */
 	static final double DISMOUNT_REACH = 4.0, REMOUNT_REACH = 10.0;
 	/** (0.7.181) A downed player is tended where their reputation is above this. */
 	static final int HELP_PLAYER_REP = 0;
@@ -83,7 +83,7 @@ public final class Downed {
 	private static final class Tending {
 		final Villager helper;
 		int ticks;
-		/** (0.7.450) The horse they got down from to tend them, waiting to be ridden again. */
+		/** (0.7.453) The horse they got down from to tend them, waiting to be ridden again. */
 		@Nullable AbstractHorse horse;
 
 		Tending(Villager helper) {
@@ -94,7 +94,7 @@ public final class Downed {
 	private static final Map<LivingEntity, Tending> TENDED = new WeakHashMap<>();
 	/** The villagers tending someone just now. */
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
-	/** (0.7.450) Horses waiting while their riders tend someone downed. */
+	/** (0.7.453) Horses waiting while their riders tend someone downed. */
 	private static final Map<AbstractHorse, Villager> WAITING = new WeakHashMap<>();
 
 	private Downed() {
@@ -326,7 +326,7 @@ public final class Downed {
 		AbstractHorse ridden = Cavalry.horse(helper);
 		boolean gotDown = ridden != null && helper.distanceToSqr(body) <= DISMOUNT_REACH * DISMOUNT_REACH;
 		if (gotDown) {
-			// (0.7.450) a rider gets down to see to them; his horse waits
+			// (0.7.453) a rider gets down to see to them; his horse waits
 			helper.stopRiding();
 			ridden.getNavigation().stop();
 			tending.horse = ridden;
@@ -365,7 +365,7 @@ public final class Downed {
 	}
 
 	private static boolean canHelp(Villager v, LivingEntity body) {
-		// ((0.7.450) a rider may come too: he gets down at their side)
+		// ((0.7.453) a rider may come too: he gets down at their side)
 		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && (!v.isPassenger() || Cavalry.mounted(v)) && !v.isNoAi() && v.getTarget() == null
 			&& (!Frights.afraid(v.getUUID()) || Temperaments.fearless(v)) && !McaCompat.panicking(v) && v.level() == body.level()
 			&& v.distanceToSqr(body) < Temperaments.helpRange(v) * Temperaments.helpRange(v) * 1.5;
@@ -377,7 +377,7 @@ public final class Downed {
 			Villager helper = tending.helper;
 			HELPING.remove(helper);
 			helper.setShiftKeyDown(false);
-			// (0.7.450) no longer bound for them (a rider left steering into them forever, before)
+			// (0.7.453) no longer bound for them (a rider left steering into them forever, before)
 			helper.getBrain().getMemory(MemoryModuleType.WALK_TARGET).ifPresent(walk -> {
 				if (walk.getTarget().currentBlockPosition().closerThan(body.blockPosition(), 2.0)) {
 					helper.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -388,7 +388,7 @@ public final class Downed {
 		}
 	}
 
-	/** (0.7.450) A rider who got down to tend someone climbs back on his horse, if it's still there and free. */
+	/** (0.7.453) A rider who got down to tend someone climbs back on his horse, if it's still there and free. */
 	private static void remount(Villager helper, @Nullable AbstractHorse horse) {
 		if (horse == null) {
 			return;
@@ -401,7 +401,7 @@ public final class Downed {
 		}
 	}
 
-	/** (0.7.450) {@code horse} waits for its rider, who got down to tend someone downed: keep it for him. */
+	/** (0.7.453) {@code horse} waits for its rider, who got down to tend someone downed: keep it for him. */
 	static boolean waiting(Entity horse) {
 		return horse instanceof AbstractHorse h && WAITING.containsKey(h);
 	}
