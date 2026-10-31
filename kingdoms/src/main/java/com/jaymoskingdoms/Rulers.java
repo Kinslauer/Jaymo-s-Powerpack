@@ -295,6 +295,10 @@ public final class Rulers {
 	 */
 	static Component title(@Nullable MinecraftServer server, @Nullable Faction f, int role, boolean female) {
 		String haven = server == null ? "" : Havens.of(server, f);
+		if (!haven.isEmpty() && Havens.orcRuled(server, f)) {
+			// (0.7.440) a haven under an orc king
+			haven = "orc";
+		}
 		return haven.isEmpty() ? title(role, female) : Component.translatable("title.jaymoskingdoms.haven." + haven + "." + key(role, female));
 	}
 

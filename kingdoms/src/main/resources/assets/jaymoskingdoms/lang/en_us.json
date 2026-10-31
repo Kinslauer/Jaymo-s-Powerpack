@@ -9546,5 +9546,9 @@
 	"quest.jaymoskingdoms.haven.camp.text": "The camp at %1$s preys on us: our herds, our gatherers, anyone who walks too far alone. Their chief is at %2$s, %3$s. Kill him and they'll scatter.",
 	"quest.jaymoskingdoms.haven.child.title": "Bring %1$s Home",
 	"quest.jaymoskingdoms.haven.child.text": "The raiders from %2$s took %1$s. They camped on the road home, near %3$s, %4$s. Please bring the child back to us.",
-	"quest.jaymoskingdoms.objective.rescue": "Free %1$s and bring them home (%2$s, %3$s)."
+	"quest.jaymoskingdoms.objective.rescue": "Free %1$s and bring them home (%2$s, %3$s).",
+	"title.jaymoskingdoms.haven.orc.king": "Orc-Sworn Elder",
+	"title.jaymoskingdoms.haven.orc.queen": "Orc-Sworn Elder",
+	"title.jaymoskingdoms.haven.orc.lord": "Orc-Sworn Reeve",
+	"title.jaymoskingdoms.haven.orc.lady": "Orc-Sworn Reeve"
 }

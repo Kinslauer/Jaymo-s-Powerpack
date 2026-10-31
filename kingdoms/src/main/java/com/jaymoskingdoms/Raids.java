@@ -208,6 +208,10 @@ final class Raids {
 			if (ACTIVE.values().stream().anyMatch(r -> r.target == f.id())) {
 				continue;
 			}
+			if ((Camps.orc(server, camp.id()) || Camps.goblin(server, camp.id())) && Havens.greenskin(server, f)) {
+				// (0.7.440) a haven that lives alongside the tribes isn't raided by them
+				continue;
+			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
 				// (0.7.42) pirates raid only from the sea
 				continue;
