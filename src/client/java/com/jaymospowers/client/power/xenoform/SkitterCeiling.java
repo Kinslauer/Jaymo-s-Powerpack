@@ -62,6 +62,11 @@ public final class SkitterCeiling {
 		return a == null ? 0.0F : XenoformFlightPose.smooth(Mth.lerp(partialTicks, a[1], a[0]));
 	}
 
+	/** More than half turned over: the mouse and strafe keys go by the rolled view. */
+	public static boolean overturned(@Nullable Entity entity) {
+		return amount(entity, 1.0F) > 0.5F;
+	}
+
 	/** From the avatar renderer's extractRenderState. */
 	static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		float flip = amount(entity, partialTicks);

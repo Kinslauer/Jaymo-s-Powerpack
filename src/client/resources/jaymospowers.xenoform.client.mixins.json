@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymospowers.client.power.xenoform.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["XenoformArmInvoker", "XenoformAvatarRendererMixin", "XenoformFirstPersonMixin", "XenoformLivingEntityRendererMixin", "XenoformModelFeatureRendererMixin", "XenoformScrollMixin", "SkitterCeilingCameraMixin"],
+	"client": ["XenoformArmInvoker", "XenoformAvatarRendererMixin", "XenoformFirstPersonMixin", "XenoformLivingEntityRendererMixin", "XenoformModelFeatureRendererMixin", "XenoformScrollMixin", "SkitterCeilingCameraMixin", "SkitterCeilingMouseMixin", "SkitterCeilingInputMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
