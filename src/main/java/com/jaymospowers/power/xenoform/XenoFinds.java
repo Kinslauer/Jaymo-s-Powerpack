@@ -121,6 +121,7 @@ public final class XenoFinds {
 		COPPER_DUST = item("copper_dust", Rarity.COMMON);
 		GOLD_DUST = item("gold_dust", Rarity.COMMON);
 		StarWreckBlock.init();
+		StarReaders.init();
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("star_probe"));
 		PROBE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.<StarProbe>of(StarProbe::new, MobCategory.MONSTER)
 			.sized(0.4F, 0.8F).eyeHeight(0.5F).clientTrackingRange(8).noLootTable().build(key));

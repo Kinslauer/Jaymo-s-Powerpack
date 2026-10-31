@@ -4614,10 +4614,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with the letterbox film), G Stomp, V Swat, B Roar. Powers has its own copy of the stomp and grab, so Kingdoms only
   supplies the mobs. Z tapped as any alien now goes to the form (`XenoForm.onModeTap`). Own model, skin, Ultimate skin
   and spikes. Compile-checked; not seen in game.
-- **0.18.120, Earning aliens (Xeno-Band patch 6, Powers side, `docs/XenoBand-Plan.md`):** star tablets (fallen stars,
+- **0.18.120, Earning aliens (Xeno-Band patch 6, `docs/XenoBand-Plan.md`; Kingdoms 0.7.442):** star tablets (fallen stars,
   fishing treasure, Ancient Remnants chests, band hunters, Gremlin): hold one as you slam the band and it learns an alien
   it didn't hold. Alien-only crafting with JEI pages: Gremlin makes tablets at a crafting table, Bulwark grinds ore into
   two dusts at a grindstone, Pyre smelts what it holds. One fallen star in ten comes down a wreck that sends out probes
   while a band wearer is near; probes drop circuits, the wreck a wreck core. Android mechs hunt band wearers on some
   nights and drop tablets. A corrupted band's wrong-alien glitch can teach an alien it never held (Dud only so).
+  Star-readers (`StarReaders`): one fallen star in three draws an MCA villager to its rim a day or so later; their talk
+  trades a tablet for 3 star metal, reads your band, and drops hints about the sky.
   New art from `tools/gen_xeno_finds.py`. Compile-checked (the JEI page by hand: JEI isn't in the cloud jars); not seen in game.

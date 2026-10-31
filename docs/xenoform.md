@@ -185,7 +185,13 @@ Scanning stays the main way in. Beside it:
   that an android mech comes for them from 28-44 blocks off. It drops a tablet and 2-4 circuits.
 - **A glitch can teach:** when a corrupted band's slam glitches to the wrong alien, 20% of the time it lands on an alien
   the band never held (Dud included) and keeps it. Dud comes only this way (`XenoformPower.GLITCH_TEACH_CHANCE`).
-- Tuning: constants at the top of `XenoFinds` and `StarWreckBlock`. Art: `tools/gen_xeno_finds.py`.
+- **Star-readers** (`StarReaders`, with Kingdoms and MCA): one fallen star in 3 is remembered on its level, and a day to
+  a day and a half later, once a player is within 96, a star-reader (an MCA villager, tag `jaymospowers_star_reader`)
+  comes to stand 7-10 blocks out on the crater's rim, facing in. None comes within 96 of another. "Talk about work" opens
+  their screen: a star tablet for 3 star metal ingots, a reading of your band (how many aliens it has yet to hold), and a
+  hint about the sky (wrecks and probes, hunters, the smith on a moon, glitches, fishing, remnant hollows, tablets).
+  Module plans join the trade with patch 7.
+- Tuning: constants at the top of `XenoFinds`, `StarWreckBlock` and `StarReaders`. Art: `tools/gen_xeno_finds.py`.
 
 ## Rendering [client/power/xenoform]
 

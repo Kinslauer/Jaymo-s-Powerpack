@@ -7694,3 +7694,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Haven Token:** a new talk answer, "Ask them to vouch for you at the gate", is offered to humans by a haven's grown
   folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
 - Compile-checked; not played.
+
+## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.120)
+- **Star-readers** (`ZFighterFolk.KINDS`, `star_reader`): Powers' new characters who come to a fallen star's crater and
+  keep to its rim. They are MCA villagers like the other Z Fighter characters, with their own opening lines, name line,
+  part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue
+  robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
+- Compile-checked; not played.

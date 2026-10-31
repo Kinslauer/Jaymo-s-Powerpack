@@ -115,7 +115,8 @@ move, C again drops back. Brand-new R G V moves per Ultimate are left for a foll
 **Built, Powers side (0.18.120):** tablets, the three alien crafts with JEI pages, star wrecks with probes, band hunters
 and the teaching glitch, as in `docs/xenoform.md` ("Earning aliens"). Choices: a tablet holds no alien of its own; the
 band reads a random one it doesn't hold yet. Probes are built on the vex (its flight, our skin). The star-reader
-(Kingdoms) comes as its own PR next.
+(Kingdoms 0.7.442) is spawned and talked for by Powers (`StarReaders`), dressed and voiced by Kingdoms; module plans
+join their trade once patch 7 makes them.
 - **Star tablets:** found in fallen star loot, fishing treasure and remnant chests. Hold one while slamming and the
   band learns that alien.
 - **Alien-only crafting:** Gremlin assembles tablets, Bulwark grinds ore into two dusts, and Pyre smelts what you carry.

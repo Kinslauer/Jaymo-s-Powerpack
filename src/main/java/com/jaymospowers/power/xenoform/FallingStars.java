@@ -243,5 +243,7 @@ public final class FallingStars {
 		if (level.getRandom().nextInt(XenoFinds.WRECK_ONE_IN) == 0) {
 			StarWreckBlock.wreck(level, at);
 		}
+		// (0.18.121) and one in StarReaders.ONE_IN draws a star-reader, a day or so later
+		StarReaders.crater(level, at);
 	}
 }

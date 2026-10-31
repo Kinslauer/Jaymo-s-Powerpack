@@ -64,7 +64,9 @@ public final class ZFighterFolk {
 		"jaymospowers_demon_master", "demon_master",
 		// (0.7.348) Andy: an Omen's pilot, out of its mech in Powers' future, a curious villager (Powers moves and talks for them)
 		PILOT_TAG, PILOT_KIND,
-		PATROL_TAG, "patrolman");
+		PATROL_TAG, "patrolman",
+		// (0.7.442) Powers' star-readers, who come to a fallen star's crater and keep to its rim
+		"jaymospowers_star_reader", "star_reader");
 	/**
 	 * (0.7.405) Andy: the Judge's MCA screen said "Jobless" and "Mood: Depressed". Which character they are ({@link #KINDS}),
 	 * synced so MCA's screen shows their part and bearing in place of a trade and a mood ({@code McaZFighterInfoMixin}).
