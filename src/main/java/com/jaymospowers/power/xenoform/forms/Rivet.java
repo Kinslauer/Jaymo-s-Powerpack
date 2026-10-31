@@ -152,6 +152,14 @@ public final class Rivet extends XenoForm {
 		return !source.is(net.minecraft.tags.DamageTypeTags.IS_FALL);
 	}
 
+	/** (0.18.96) The Ultimate (Ironclad): only the band's own stronger body, no move of its own. */
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.6, 0.0), 40, 0.5, 0.2);
+		sound(player, SoundEvents.ANVIL_LAND, 1.0F, 0.6F);
+		return true;
+	}
+
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		setShell(player, live, null);

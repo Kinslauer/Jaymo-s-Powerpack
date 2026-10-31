@@ -89,6 +89,9 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Velox** | horse (any) | 0.9x, 20 hp, fists 4, 80% faster, 4 blocks of extra safe fall; runs on water while sprinting | Velocity (toggle, after Chrono's Overclock): +100% speed and Overclock's sprint boost, steps up whole blocks, runs up walls holding forward, runs on water and lava, no fall damage, Shift walks, a light blue speed-force streak; R again to stop (2 s) | Rapid Punches: 6 double hits, one every 2 ticks, on the creature you aim at within 3.5; the last shoves (5 s) | Cyclone: 1.5 s, sweeps everything within 6 round you and lifts it up to 3.5 blocks, 3 damage once (10 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
 | **Duplex** | copper golem | 0.55x (a copper golem's size and build, its doubles too), 18 hp, fists 3, 10% faster, 20% knockback resist; the name counts you all (`Duplex.title`, also on the HUD): Duplex, Triplex, Quadruplex, up to Septuplex | Split: a double steps out beside you (`XenoDouble`: 6 hp, fists 3, never saved), up to 3; doubles go for what you hit, what hits or hunts you or them, and visible hostiles within 12, and swarm it (`SwarmGoal`: a turning ring, blows in turn every 3-6 ticks, +35% damage per extra double); a loyal double's death costs you 2 (2 s) | Rally: doubles target what you aim at within 16; at nothing, they come back (1 s). Sneak: Fetch, the nearest free double picks up the aimed solid block (`CarryBlock.liftableAny`, where you may break it) and carries it on its head; sneak + G again sets it down where you aim; dropped as a falling block if the double goes | Switch: trade places with the aimed double, or the farthest within 32 (2 s) | Merge: doubles within 24 pop back into you, healing 3 each (8 s) |
 | **Rivet** | clockwork golem (Kingdoms) | 0.6x, 20 hp, fists 4, 15% faster, 20% knockback resist; liquid metal, so falls never hurt it | Meld: flow into the furnace (or blast furnace, smoker), piston, anvil, stonecutter, smithing table, dispenser (or dropper) or note block you look at within 5 and take its shape (the block stays); R G V B become the shell's moves, sneak + R pours you out (1 s) | Lash: 5 damage and a drag to you, 7 blocks (2 s) | Pour: a 1.4 dash where you look, half a second where nothing can land on you (2 s) | Ride: climb into the aimed minecart, iron golem, clockwork golem or android mech (4 blocks) and drive it where you look; it's sped up, strengthened and glows green, and goes for what you hit; B again climbs out (1 s) |
+| **Gorger** | armadillo | 1.1x, 30 hp, fists 5, a little slower, 50% knockback resist | Gulp: eats the aimed block within 4.5 (breakable by you, hardness 0-50, no block entities, where you may build; no drop), 1 bite + 1 per 3 hardness (max 3), gut holds 12 (0.4 s) | Gut Blast: the gut as a 9-block cone of rubble, 2 a bite and a shove; empties it (2 s) | Horn Charge: 22 ticks running at 0.75 where you look, the first creature met takes 7 and a toss; run off a ledge and it becomes a slam: landing hits all within 4 for 5 + 1 a block fallen (max 18), no fall damage (5 s) | Roll Up (hold): Slowness IV, Resistance II, no sliding, shots glance off |
+| **Slipfin** | axolotl | 0.8x, 22 hp, fists 4, 10% faster; in water Dolphin's Grace II, water breathing, night vision; never drowns; out of water and rain 30 s it dries (1 hp and Slowness every 2 s); can't be carried or taken by tendrils, slips out of carries and trips on its own | Bubble Jet: a 12-block jet, 3 (6 under water), pushes, puts out fire (1 s) | Slip: out of any carry, ride on a monster, trip; Slowness gone; Speed II 3 s (5 s) | Dart: a lunge (2.0 in water, 0.9 on land) that bites the first creature for 6 (1.5 s) | Regrow: one lost limb back, every break knit, Regeneration II 5 s (45 s) |
+| **Polestar** | Magnetic Giant (Kingdoms) | 1.2x, 36 hp, fists 6, a little slower, 70% knockback resist | Pull: things wearing iron or chainmail (an iron golem counts 4) in a cone ahead within 16 are dragged to you, 0.4 + 0.25 a piece; iron items on the ground fly to you (2 s) | Repel: all iron-wearers within 8 take 1.5 a piece and a throw; arrows in the air turn back (4 s) | Lift: tear an iron, raw iron, bars, trapdoor, anvil, cauldron, chain or heavy pressure plate block out (6 blocks) and hold it; V again throws it as a falling block (2 a block fallen, max 30) (0.5 s / 3 s) | Field (hold): arrows heading at you within 6 turn back at their shooter |
 
 ## Rendering [client/power/xenoform]
 
@@ -276,6 +279,34 @@ fuel come out of the inventory. Sneak + R pours out of any shell. All numbers ar
 | Note block | Stun Pulse: 2, Slowness IV and Nausea 3 s to all within 6 (6 s) | Lure: mobs within 16 walk to the aimed spot (24 blocks) (10 s) | Chord: plays the band's theme; you and friends within 12 get Regeneration 5 s (10 s) | Bass Drop: 4 and a throw within 5 (4 s) |
 
 Not done yet: riding a ship's cannon (Kingdoms' cannons aren't entities to climb into; left for later).
+
+## The stalker and Lurk [XenoStalker, forms/Lurk]
+
+(0.18.96, Xeno-Band patch 4.) At night in the Overworld, within 160 blocks of a monolith Kingdoms knows of
+(`Monoliths.nearestFoot`, by reflection), a band wearer who hasn't found Lurk may be visited: every 10 s, a 1 in 5
+chance, one stalker per wearer. It stands 22-34 blocks off (behind you more often than not), on the surface, always
+facing you, and is there only for you. Nothing hurts it and it never fights. Catch it with your eyes (look straight at
+it, nothing between, within 56) and it's gone in a puff of smoke; the count is kept on you (`XenoformState.SIGHTINGS`).
+The third time it slips out of its skin instead: a pale, see-through husk kneels where it stood for 5 minutes, and the
+band can scan it. It leaves on its own at day, after 2 minutes, or if you go 64 blocks off; it's never saved.
+
+**Lurk** (`hidden()`, so not counted toward a complete band, but unlike Nadir not `lent()`: it's yours to slam like any
+other): 1.05x, 26 hp, fists 5, 15% faster; tall, thin, long-fingered, six eyes (`XenoFormModels.Lurk`).
+R Watch (64 blocks: Glowing 20 s, and it loses you; 3 s), G Behind (to the watched creature or the aimed one within
+24, behind it, 7, doubled if it wasn't facing you; 5 s), V Dread (everything within 16 looking at you: Darkness,
+Slowness II, Weakness 6 s and a moment's Blindness; 15 s), B Fade (invisible, hunters forget you, until you strike or
+B again; 10 s after).
+
+## Duplex's eyes
+
+(0.18.96) Sneak + V as Duplex: your camera moves into the aimed double (or the farthest within 48) and you see what it
+sees, your own body held still where it stands (`XenoformState.EYES`, synced to you only; `client/XenoEyes`). V again,
+the double dying or straying past 48 blocks, or the change ending brings you back.
+
+## Not yet
+
+Slipfin's slickness covers Powers' carries, Web's tendrils and bolas trips; a Kingdoms giant's grab is Kingdoms' own
+and still holds it (G, Slip, gets it out of a ride on a monster).
 
 ## Later
 
