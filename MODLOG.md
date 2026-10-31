@@ -4684,3 +4684,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
+
+- **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.

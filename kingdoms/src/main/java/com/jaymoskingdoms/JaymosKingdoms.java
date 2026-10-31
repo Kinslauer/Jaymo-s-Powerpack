@@ -304,6 +304,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoadLocks.register();
 		Manacles.register();
 		StoryGround.register();
+		// 0.7.452: the land round a new arrival made ahead in the background
+		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)

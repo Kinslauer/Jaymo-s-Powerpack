@@ -7891,3 +7891,10 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
   the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
   same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
 - Compile-checked; not seen in game.
+
+## 0.7.452: the land round a new arrival is made ahead (pack 0.19.6)
+- Andy: "the issue with chunky is we are not necessarily going to be spawning within the 500 or so blocks it generates
+  because of the distinct starts." Once a life story sets someone down (any start, any world), `ArrivalGround` makes the
+  land round them in the background: every chunk from just past their view (8) out to 20 chunks, nearest first, two at
+  a time, and none while the server's average tick is over 40 ms. Each is let go once made. One arrival's land at a time.
+  Tuning at the top of `ArrivalGround`. Built; not yet watched on the Deck.
