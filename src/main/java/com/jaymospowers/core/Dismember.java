@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
  * </ul>
  * A player's lost limbs never grow back by themselves, not even by dying (Andy, 0.18.84: a respawn keeps every lost arm
- * and leg, only a lost head comes back): only a Hermit Bean or being Verdant regrows them ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
+ * and leg, only a lost head comes back): only a Hermit Bean, being Verdant, or a Kingdoms heritage that mends (Bio-built on its own, Rubber-folk with a swallow) regrows them ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
  * <p>
  * (0.14.2) Wounds phase 3: no more flat random sever. A part comes off on <b>overkill</b> ({@link #severOnOverkill},
  * called by {@code Wounds}): a blade's blow on a limb that's already broken, or one that takes the head past zero, for more
@@ -104,6 +104,9 @@ public final class Dismember {
 	public static final float SEVER_BASE = 0.6F;
 
 	/** The parts this creature has lost (a {@link #HEAD}... bitmask). Saved, synced to everyone, not kept through death. */
+	/** (0.18.84) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
+	static final String RUBBER_TAG = "jaymoskingdoms_heritage_rubberfolk";
+	static final float RUBBER_SEVER_SCALE = 2.0F;
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -353,6 +356,10 @@ public final class Dismember {
 			}
 			attacker = striker;
 			scale = scale(target, BLADE_CHANCE);
+		}
+		// (0.18.84) Andy: rubber limbs come off easier (they grow back with a swallow, Kingdoms' RubberFolk)
+		if (target.entityTags().contains(RUBBER_TAG)) {
+			scale *= RUBBER_SEVER_SCALE;
 		}
 		// (0.17.183) Will's Grim Hand: likelier (Kingdoms)
 		scale *= com.jaymospowers.core.wounds.WillSkill.severScale(attacker, target);
