@@ -43,7 +43,8 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * (0.7.262, Andy's NOEA picks) Rubber-folk: pink and stretchy. Their reach is longer ({@link #REACH}: the stretch, as a
- * longer arm and not a drawn one), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
+ * longer arm and not a drawn one), a lost limb grows back on its own ({@link #REGROW_EVERY}, as a Verdant's does, through
+ * Jaymo's Powers' dismemberment), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
  * that lies downed, and press the heritage key close by ((0.7.288) a toggle, {@link HeritageHold}: the hand on it, pulses
  * through both, and it shrinks away) to swallow it for a heal ({@link #absorb}). (0.7.297, Andy: "rubber absorb should take
  * the absorbed's powers/ or abilities. they basically adopt their stats into themselves. but only one at a time") They
@@ -51,7 +52,8 @@ import net.minecraft.world.level.block.Blocks;
  * could do (fire, water, flight, night eyes, a spring), until the next swallow replaces it or they die.
  * (0.7.421, Andy: "rubbers can lose limbs easier to dismemberment but they can grow them back with every swallow") A
  * blade takes their limbs off more easily (Jaymo's Powers' {@code Dismember.RUBBER_SEVER_SCALE}), and each swallow
- * stretches one lost limb back into place ({@link #absorb}); nothing grows back without one.
+ * stretches one lost limb back into place ({@link #absorb}), on top of the slow regrowth. Blunt blows bounce off them
+ * ({@link #BOUNCE}: a mace, a hammer, a club, a bare fist).
  * They have a sweet tooth: cookies, pie, honey, berries, melon, cake, and Jaymo's Kitchen's tarts, pies, cobbler and
  * brownies mend them ({@link #sweet}). Flaw: rubber burns, and pops: fire burns them longer, and arrows hurt more
  * ({@link Heritage#dealt}).
@@ -62,6 +64,10 @@ public final class RubberFolk {
 	/** Fire burns this much longer (a share), and arrows and spines hurt this many times as much (the flaw). */
 	static final double BURN = 0.6;
 	static final float POPS = 1.25F;
+	/** (0.7.421) Blunt blows (a mace, a hammer, a club, a bare fist) hurt this share as much: rubber gives. */
+	static final float BOUNCE = 0.6F;
+	/** A lost limb grows back this often (ticks), one at a time. */
+	static final int REGROW_EVERY = 400;
 	/**
 	 * Absorbing: how far the foe may be (blocks), how long it takes (ticks), the share of its health they take back, at
 	 * least and at most, and food. A weak foe is small (at most this wide and tall) with this little health at most; a downed
@@ -239,6 +245,12 @@ public final class RubberFolk {
 			Adopted adopted = player.getAttached(ADOPTED);
 			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && player.isAlive()) {
 				gifts(player, adopted);
+			}
+			// a lost limb grows back, one at a time
+			if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
+				level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));
 			}
 			// a sweet finished (seen eating it last tick, with next to nothing left)
 			if (player.isUsingItem() && sweet(player.getUseItem())) {
@@ -439,9 +451,16 @@ public final class RubberFolk {
 		}
 	}
 
-	/** (the flaw) arrows and spines pop them: the factor on harm from {@code source}. */
+	/** (the flaw) arrows and spines pop them; (0.7.421) blunt blows bounce off ({@link #BOUNCE}): the factor on harm from {@code source}. */
 	static float taken(net.minecraft.world.damagesource.DamageSource source) {
-		return source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.CACTUS)
-			|| source.is(net.minecraft.world.damagesource.DamageTypes.STALAGMITE) ? POPS : 1.0F;
+		if (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.CACTUS)
+			|| source.is(net.minecraft.world.damagesource.DamageTypes.STALAGMITE)) {
+			return POPS;
+		}
+		if (source.is(net.minecraft.world.damagesource.DamageTypes.MACE_SMASH) || source.getDirectEntity() instanceof LivingEntity striker
+			&& source.getEntity() == striker && (striker.getMainHandItem().isEmpty() || PowersCompat.blunt(striker.getMainHandItem()))) {
+			return BOUNCE;
+		}
+		return 1.0F;
 	}
 }

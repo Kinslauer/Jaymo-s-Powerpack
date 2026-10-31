@@ -610,6 +610,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.421) Powers' {@code Fractures.blunt(ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle blunt;
+	private static boolean lookedForBlunt;
+
+	/** (0.7.421) Whether {@code stack} is a blunt weapon by Powers' reckoning (a mace, hammer, club...); false without Powers. */
+	public static boolean blunt(net.minecraft.world.item.ItemStack stack) {
+		if (!lookedForBlunt) {
+			lookedForBlunt = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					blunt = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Fractures"), "blunt",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blunt weapons (older Powers?)", e);
+				}
+			}
+		}
+		if (blunt == null) {
+			return stack.is(net.minecraft.world.item.Items.MACE);
+		}
+		try {
+			return (boolean)blunt.invoke(stack);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;
