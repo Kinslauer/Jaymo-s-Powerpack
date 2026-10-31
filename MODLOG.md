@@ -4263,3 +4263,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
     open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
   - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+- **0.18.84, rocks knock people out:** Andy: "throwing rocks should have a chance to knockout unsuspecting mobs and players.
+  you can then lift and carry them if you are strong enough. you may have to remove armor." A thrown rock (`ground/ThrownRocks`)
+  that hits someone unsuspecting (asleep; or no target, not hurt in 5 s, and the thrower outside a 60-degree cone of their sight
+  or out of line of sight) knocks them out 60% of the time on the head (within 0.35 of eye height), 20% elsewhere, for 15-45 s
+  (`Downed.knockOut` with `anyBody`: wild animals and spiders too, through `Downed.stunnable`, not bosses or giants). Out cold
+  they lie still with their eyes shut (Kitchen's `ClosedEyes`, marked in `DownedLivingEntityRendererMixin` for any passed-out
+  body). Knocked out from standing (`Downed.outCold`), a three-heart blow no longer kills outright and a player's blow is real
+  damage. `Downed.KNOCKED` now syncs to its owner: their screen goes black over the HUD (`DownedHud`, fading back as they come
+  round), and each sneak press takes 12 ticks off (`Downed.MASH_TICKS`), with a bar on the action bar. Lifting (`Carry`): anyone
+  lifts a body wearing up to 12 armour + toughness points (leather, gold, chain), each point of Kitchen brawn 6 more
+  (`Carry.FREE_ARMOUR`, `ARMOUR_PER_BRAWN`, brawn through `KitchenCompat.brawn`); too heavy, a finished lift pulls the heaviest
+  piece off a downed body and drops it beside them instead (`Carry.shed`). Gravity users and Wind snatches are exempt.
+  Andy: "the thrown rocks that break leave what looks like an egg splat". That was Subtle Effects' snowball splat, from the
+  snowball's hit event; `RockSnowballMixin` keeps any snowball wearing a rock (ours or Kingdoms' cobblestone) from sending it.
+  A broken rock cracks the block it hit (break stage 3, fading a stage every 12 ticks) and throws 12 stone specks that fall and
+  settle; one that stays lying sheds 3. Compile-checked; not seen in game.
