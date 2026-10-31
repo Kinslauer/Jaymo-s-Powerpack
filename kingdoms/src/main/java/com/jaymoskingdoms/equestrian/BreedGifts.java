@@ -122,8 +122,17 @@ public final class BreedGifts {
 			case COURSER -> sprint ? 1.0 + BURST[tier] : 1.0;
 			case PALFREY -> road(horse.level().getBlockState(horse.getBlockPosBelowThatAffectsMyMovement())) ? 1.0 + ROAD[tier] : 1.0;
 			case DESERT_HORSE -> target > 0.0 && horse.getDeltaMovement().horizontalDistance() < target * 0.5 ? 1.0 + QUICK_START[tier] : 1.0;
+			// (0.7.444) the donkey keeps its pace under a pack; the mule is surest (and quicker) on bare stone and gravel
+			case DONKEY -> horse instanceof net.minecraft.world.entity.animal.equine.AbstractChestedHorse c && c.hasChest() ? 1.0 + ROAD[tier] : 1.0;
+			case MULE -> stony(horse.level().getBlockState(horse.getBlockPosBelowThatAffectsMyMovement())) ? 1.0 + ROAD[tier] : 1.0;
 			default -> 1.0;
 		};
+	}
+
+	/** (0.7.444) Bare stone or loose rock: the mule's ground. */
+	static boolean stony(BlockState under) {
+		return under.is(BlockTags.BASE_STONE_OVERWORLD) || under.is(Blocks.GRAVEL) || under.is(Blocks.COBBLESTONE) || under.is(Blocks.MOSSY_COBBLESTONE)
+			|| under.is(Blocks.CALCITE) || under.is(Blocks.DRIPSTONE_BLOCK);
 	}
 
 	/** A road: a dirt path, gravel, or a laid stone or brick road. */

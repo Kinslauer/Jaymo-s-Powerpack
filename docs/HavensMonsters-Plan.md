@@ -169,3 +169,6 @@ Donkeys and mules join our breed systems but keep vanilla's renderer, so Better 
   with an orc tribe; the camps spare you, human towns mind you at degree 5); bigger Tideborn fins and webbed hands,
   Stoneborn cracks and brow, Warrior-born villagers' tails always out, Bio-built villagers in their first form's horns and
   tail; tied-down tails smelled by kin, havens, hunters and the tribes.
+- Patch 8 (Kingdoms 0.7.444, pack 0.18.123): Better Horses shipped unchanged (draws donkeys and mules), donkeys and mules
+  in our breed systems on vanilla's look, coat names in the readouts, roster and handbook, eased rearing and grazing
+  with a head toss, tail lash and grazing steps, and a fuller classic horse (jointed legs, shaped muzzles, longer manes).

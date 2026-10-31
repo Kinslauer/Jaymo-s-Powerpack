@@ -7781,3 +7781,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   villagers, a haven's people, hunters (fletchers and leatherworkers) and the tribes' goblins and orcs. A mask no longer
   hides the blood from them, and now and then (at most every 2.5 minutes) one within 6 blocks says they smell it.
 - Compile-checked; not played.
+
+## 0.7.444: horses (Havens patch 8; pack 0.18.123)
+- **Better Horses** (by CanineGray, CC BY-NC 4.0; Modrinth alMAK8J4, v4.3 for 1.21.11) ships unchanged with credit: the
+  pack's client fetches it on first launch and switches it on above Fresh Animations (`PackResourcePacks`). Our breed
+  horses keep our own renderer, so it draws donkeys and mules. It's made for an older game version (formats 22 to 94),
+  so it needs a look in game on 26.3.
+- **Donkeys and mules join our breeds** (`Breed.DONKEY`, `Breed.MULE`): bond and trust, the roster, the command wheel,
+  gaits and stamina (they canter at most), hunger and thirst, the stats a Rider reads. They keep vanilla's saddle and
+  chest (no Tack button) and vanilla's look. A jenny and a jack make a donkey; a horse and a donkey a mule, which never
+  breeds. Rider gifts: the donkey keeps its pace under a pack, the mule is quicker on bare stone and gravel.
+- **Coat names you can read:** the Rider's saddle glance, the horse's screen and the roster name the coat ("Bay with
+  Blaze"), the rare one in gold, and two handbook pages list every breed's coats and how foals take a parent's coat.
+- **Smoother rearing and grazing** (`BreedHorseModel`): both blends ease in and out; reared, the head tosses and the
+  tail lashes; a grazing horse steps a foreleg on now and then, each horse on its own beat.
+- **A fuller horse** (`tools/horse_rig.py` FULLER, the classic shape kept): jointed legs (knee, hock and gaskin,
+  fetlock and coronet, feathering on the draft and destrier), a shaped muzzle by breed (nostrils, jowl, Roman nose,
+  dished face; never over 4 wide, so the bridle fits) and longer manes (a forelock, and the mane falling over the neck
+  on all but the steppe pony). Set FULLER = False and rerun `tools/gen_horses.py` for the plain horse again.
+- Compile-checked; not played.

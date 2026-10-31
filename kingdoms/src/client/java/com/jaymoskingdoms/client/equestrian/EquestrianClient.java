@@ -76,6 +76,8 @@ public final class EquestrianClient {
 	private static final int WHEEL_HOLD = 6, DOUBLE_TAP = 7;
 	private static final int CHARGE_COLOR = 0xFF9A4A, CRUISE_COLOR = 0xBFF4EA;
 	private static final int MARE_COLOR = 0xFF9AC8, STALLION_COLOR = 0x8AC8FF;
+	/** (0.7.444) A coat's name in the readouts: plain, and a rare (or moonlit) one. */
+	static final int COAT_COLOR = 0xC8B8A0, RARE_COAT_COLOR = 0xFFD966;
 	/** How long the whistle's been held (-1: it opened the wheel; wait for it to come up). */
 	private static int whistleHeld;
 	/** Riding on without holding forward; the tick forward was last pressed; whether it was down last tick. */
@@ -144,7 +146,8 @@ public final class EquestrianClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosKingdoms.id("horse_tag"), EquestrianClient::tag);
 		ScreenEvents.AFTER_INIT.register((minecraft, screen, width, height) -> {
 			if (screen instanceof AbstractMountInventoryScreen<?> mount && screen instanceof MountScreen holder
-				&& holder.jaymoskingdoms$mount() instanceof AbstractHorse horse && Equestrian.covered(horse) && horse.isTamed() && !horse.isBaby()) {
+				&& holder.jaymoskingdoms$mount() instanceof AbstractHorse horse && Equestrian.covered(horse) && horse.isTamed() && !horse.isBaby()
+				&& !(Equestrian.peek(horse) instanceof Equine pe && pe.breed().ass())) {
 				int x = (width - imageWidth(mount)) / 2 + imageWidth(mount) - 42;
 				int y = (height - imageHeight(mount)) / 2 + 3;
 				Screens.getWidgets(screen).add(Button.builder(Component.translatable("button.jaymoskingdoms.tack"),
@@ -381,6 +384,9 @@ public final class EquestrianClient {
 		int cx = graphics.guiWidth() / 2;
 		int y = graphics.guiHeight() / 2 + 10;
 		MutableComponent label = Component.translatable(e.breed().key()).withColor(0xE0E0E0).append(sex(horse));
+		if (!e.breed().ass()) {
+			label.append(Component.literal(" · ").withColor(0x909090)).append(coat(e));
+		}
 		graphics.text(font, label, cx - font.width(label) / 2, y, 0xFFFFFFFF);
 		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
 		int x = cx - 45;
@@ -397,6 +403,11 @@ public final class EquestrianClient {
 
 	private static boolean saddle(ItemStack stack) {
 		return stack.is(Items.SADDLE) || stack.is(Tackroom.WAR_SADDLE) || stack.is(Tackroom.RACING_SADDLE);
+	}
+
+	/** (0.7.444, Havens patch 8) Its coat by name ("Bay with Blaze"), in gold when it's its breed's rare one or moonlit. */
+	static Component coat(Equine e) {
+		return Component.translatable("coat.jaymoskingdoms." + e.coatName()).withColor(e.rareCoat() ? RARE_COAT_COLOR : COAT_COLOR);
 	}
 
 	/** Its sex as a coloured symbol after its name (nothing until it's known). */
@@ -428,7 +439,12 @@ public final class EquestrianClient {
 			return;
 		}
 		Font font = Minecraft.getInstance().font;
-		graphics.text(font, Component.translatable(e.breed().key()).copy().append(sex(horse)), x + 2, y + 1, com.jaymoskingdoms.client.Ui.GOLD, false);
+		// (0.7.444) its coat after its breed, sliding when it doesn't fit the box
+		MutableComponent head = Component.translatable(e.breed().key()).withColor(com.jaymoskingdoms.client.Ui.GOLD).append(sex(horse));
+		if (!e.breed().ass()) {
+			head.append(Component.literal(" · ").withColor(com.jaymoskingdoms.client.Ui.DIM)).append(coat(e));
+		}
+		com.jaymoskingdoms.client.Ui.line(graphics, font, head, x + 2, y + 1, 86, com.jaymoskingdoms.client.Ui.GOLD);
 		// (0.5.44) a horse shows you what it's made of only once it trusts you
 		Player viewer = Minecraft.getInstance().player;
 		Bond b = horse.getAttached(Bonding.BOND);

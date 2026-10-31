@@ -89,7 +89,8 @@ public final class Herding {
 		builder -> builder.persistent(Herd.CODEC).syncWith(Herd.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** Where an owned horse was last seen, for its owner's roster (kept on the Overworld, by horse). */
-	public record Stall(UUID owner, String name, String breed, int sex, GlobalPos pos, int order, boolean foal, long seen) {
+	/** (0.7.444) {@code coat}: its coat's name ({@link Equine#coatName}), "" until it's been seen since. */
+	public record Stall(UUID owner, String name, String breed, int sex, GlobalPos pos, int order, boolean foal, long seen, String coat) {
 		public static final Codec<Stall> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.STRING_CODEC.fieldOf("owner").forGetter(Stall::owner),
 				Codec.STRING.optionalFieldOf("name", "").forGetter(Stall::name),
@@ -98,7 +99,8 @@ public final class Herding {
 				GlobalPos.CODEC.fieldOf("pos").forGetter(Stall::pos),
 				Codec.INT.optionalFieldOf("order", 0).forGetter(Stall::order),
 				Codec.BOOL.optionalFieldOf("foal", false).forGetter(Stall::foal),
-				Codec.LONG.optionalFieldOf("seen", 0L).forGetter(Stall::seen))
+				Codec.LONG.optionalFieldOf("seen", 0L).forGetter(Stall::seen),
+				Codec.STRING.optionalFieldOf("coat", "").forGetter(Stall::coat))
 			.apply(i, Stall::new));
 	}
 
@@ -153,7 +155,8 @@ public final class Herding {
 	}
 
 	/** One horse on the roster: its name ("" for its breed's), breed, sex, where it is, its order, whether it's a foal, and whether it's about now. */
-	public record Entry(UUID id, String name, String breed, int sex, Identifier dimension, BlockPos pos, int order, boolean foal, boolean here) {
+	public record Entry(UUID id, String name, String breed, int sex, Identifier dimension, BlockPos pos, int order, boolean foal, boolean here,
+		String coat) {
 		static void write(FriendlyByteBuf buf, Entry e) {
 			buf.writeUUID(e.id);
 			buf.writeUtf(e.name);
@@ -164,11 +167,12 @@ public final class Herding {
 			buf.writeVarInt(e.order);
 			buf.writeBoolean(e.foal);
 			buf.writeBoolean(e.here);
+			buf.writeUtf(e.coat);
 		}
 
 		static Entry read(FriendlyByteBuf buf) {
 			return new Entry(buf.readUUID(), buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readIdentifier(), buf.readBlockPos(), buf.readVarInt(),
-				buf.readBoolean(), buf.readBoolean());
+				buf.readBoolean(), buf.readBoolean(), buf.readUtf());
 		}
 	}
 
@@ -594,7 +598,8 @@ public final class Herding {
 		Herd h = herd(horse);
 		String name = horse.hasCustomName() ? horse.getCustomName().getString() : "";
 		Stall stall = new Stall(ref.getUUID(), name, e == null ? Breed.PALFREY.id() : e.breed().id(), h.sex(),
-			GlobalPos.of(level.dimension(), horse.blockPosition()), h.order(), horse.isBaby(), level.getGameTime());
+			GlobalPos.of(level.dimension(), horse.blockPosition()), h.order(), horse.isBaby(), level.getGameTime(),
+			e == null || e.breed().ass() ? "" : e.coatName());
 		Stall was = all.get(horse.getUUID());
 		if (stall.equals(was) || was != null && sameButTime(was, stall) && stall.seen - was.seen < 200L) {
 			return;
@@ -605,7 +610,7 @@ public final class Herding {
 	}
 
 	private static boolean sameButTime(Stall a, Stall b) {
-		return a.owner.equals(b.owner) && a.name.equals(b.name) && a.breed.equals(b.breed) && a.sex == b.sex && a.order == b.order && a.foal == b.foal
+		return a.owner.equals(b.owner) && a.name.equals(b.name) && a.breed.equals(b.breed) && a.sex == b.sex && a.order == b.order && a.foal == b.foal && a.coat.equals(b.coat)
 			&& a.pos.dimension().equals(b.pos.dimension()) && a.pos.pos().closerThan(b.pos.pos(), 8.0);
 	}
 
@@ -635,7 +640,7 @@ public final class Herding {
 				pos = h.blockPosition();
 				order = herd(h).order();
 			}
-			list.add(new Entry(e.getKey(), s.name, s.breed, s.sex, s.pos.dimension().identifier(), pos, order, s.foal, here));
+			list.add(new Entry(e.getKey(), s.name, s.breed, s.sex, s.pos.dimension().identifier(), pos, order, s.foal, here, s.coat));
 		}
 		Vec3 at = player.position();
 		Identifier dim = player.level().dimension().identifier();
