@@ -610,11 +610,11 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.421) Powers' {@code Fractures.blunt(ItemStack)}. */
+	/** (0.7.422) Powers' {@code Fractures.blunt(ItemStack)}. */
 	private static java.lang.invoke.@Nullable MethodHandle blunt;
 	private static boolean lookedForBlunt;
 
-	/** (0.7.421) Whether {@code stack} is a blunt weapon by Powers' reckoning (a mace, hammer, club...); false without Powers. */
+	/** (0.7.422) Whether {@code stack} is a blunt weapon by Powers' reckoning (a mace, hammer, club...); false without Powers. */
 	public static boolean blunt(net.minecraft.world.item.ItemStack stack) {
 		if (!lookedForBlunt) {
 			lookedForBlunt = true;

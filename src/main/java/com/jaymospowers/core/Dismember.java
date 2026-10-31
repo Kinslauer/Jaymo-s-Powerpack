@@ -65,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Arm</b>: whatever that hand held falls, and it holds nothing more.</li>
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
  * </ul>
- * A player's lost limbs never grow back by themselves, not even by dying (Andy, 0.18.86: a respawn keeps every lost arm
+ * A player's lost limbs never grow back by themselves, not even by dying (Andy, 0.18.87: a respawn keeps every lost arm
  * and leg, only a lost head comes back): only a Hermit Bean, being Verdant, or a Kingdoms heritage that mends (Bio-built on its own, Rubber-folk with a swallow) regrows them ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
  * <p>
  * (0.14.2) Wounds phase 3: no more flat random sever. A part comes off on <b>overkill</b> ({@link #severOnOverkill},
@@ -104,7 +104,7 @@ public final class Dismember {
 	public static final float SEVER_BASE = 0.6F;
 
 	/** The parts this creature has lost (a {@link #HEAD}... bitmask). Saved, synced to everyone, not kept through death. */
-	/** (0.18.86) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
+	/** (0.18.87) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
 	static final String RUBBER_TAG = "jaymoskingdoms_heritage_rubberfolk";
 	static final float RUBBER_SEVER_SCALE = 2.0F;
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
@@ -357,7 +357,7 @@ public final class Dismember {
 			attacker = striker;
 			scale = scale(target, BLADE_CHANCE);
 		}
-		// (0.18.86) Andy: rubber limbs come off easier (they grow back with a swallow, Kingdoms' RubberFolk)
+		// (0.18.87) Andy: rubber limbs come off easier (they grow back with a swallow, Kingdoms' RubberFolk)
 		if (target.entityTags().contains(RUBBER_TAG)) {
 			scale *= RUBBER_SEVER_SCALE;
 		}
@@ -496,7 +496,7 @@ public final class Dismember {
 
 	/**
 	 * Lost parts grown back (Andy: a living player only ever regrows them as a Verdant or with a Hermit Bean; dying
-	 * doesn't, 0.18.86): every one, or just the first still missing. True if anything grew back.
+	 * doesn't, 0.18.87): every one, or just the first still missing. True if anything grew back.
 	 */
 	public static boolean regrow(LivingEntity target, boolean all) {
 		int mask = missing(target);

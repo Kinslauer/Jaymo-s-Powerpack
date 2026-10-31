@@ -50,7 +50,7 @@ import net.minecraft.world.level.block.Blocks;
  * the absorbed's powers/ or abilities. they basically adopt their stats into themselves. but only one at a time") They
  * take on the last thing they swallowed ({@link #ADOPTED}): a share of its health, blow, armour and pace, and what it
  * could do (fire, water, flight, night eyes, a spring), until the next swallow replaces it or they die.
- * (0.7.421, Andy: "rubbers can lose limbs easier to dismemberment but they can grow them back with every swallow") A
+ * (0.7.422, Andy: "rubbers can lose limbs easier to dismemberment but they can grow them back with every swallow") A
  * blade takes their limbs off more easily (Jaymo's Powers' {@code Dismember.RUBBER_SEVER_SCALE}), and each swallow
  * stretches one lost limb back into place ({@link #absorb}), on top of the slow regrowth. Blunt blows bounce off them
  * ({@link #BOUNCE}: a mace, a hammer, a club, a bare fist).
@@ -64,7 +64,7 @@ public final class RubberFolk {
 	/** Fire burns this much longer (a share), and arrows and spines hurt this many times as much (the flaw). */
 	static final double BURN = 0.6;
 	static final float POPS = 1.25F;
-	/** (0.7.421) Blunt blows (a mace, a hammer, a club, a bare fist) hurt this share as much: rubber gives. */
+	/** (0.7.422) Blunt blows (a mace, a hammer, a club, a bare fist) hurt this share as much: rubber gives. */
 	static final float BOUNCE = 0.6F;
 	/** A lost limb grows back this often (ticks), one at a time. */
 	static final int REGROW_EVERY = 400;
@@ -342,7 +342,7 @@ public final class RubberFolk {
 		level.sendParticles(PINK, foe.getX(), foe.getY(0.5), foe.getZ(), 20, 0.3, 0.4, 0.3, 0.03);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.heal(heal);
-		// (0.7.421) every swallow stretches one lost limb back into place
+		// (0.7.422) every swallow stretches one lost limb back into place
 		if (PowersCompat.regrow(player, false)) {
 			level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));
@@ -451,7 +451,7 @@ public final class RubberFolk {
 		}
 	}
 
-	/** (the flaw) arrows and spines pop them; (0.7.421) blunt blows bounce off ({@link #BOUNCE}): the factor on harm from {@code source}. */
+	/** (the flaw) arrows and spines pop them; (0.7.422) blunt blows bounce off ({@link #BOUNCE}): the factor on harm from {@code source}. */
 	static float taken(net.minecraft.world.damagesource.DamageSource source) {
 		if (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.CACTUS)
 			|| source.is(net.minecraft.world.damagesource.DamageTypes.STALAGMITE)) {
