@@ -263,6 +263,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		InBalming.register();
 		Spoils.register();
 		HavenGates.register();
+		HavenWares.register();
+		BorderClashes.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
