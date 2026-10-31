@@ -309,6 +309,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
 		com.jaymoskingdoms.carpentry.Carpentry.register();
+		// 0.7.440: props: scarecrow, gravestone, lamp post, candle stand, plushies, planters
+		com.jaymoskingdoms.props.Props.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)

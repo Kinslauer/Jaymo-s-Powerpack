@@ -7714,7 +7714,14 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   chief of the nearest camp that preys on them.
 - Compile-checked; not played.
 
-## 0.7.440: havens built their own way (Havens patch 6c)
+## 0.7.440: props (Motion patch 9; pack 0.18.120)
+- `props/Props`: scarecrow (birds and rabbits within 10 blocks are sent off, every 2 s), gravestone, lamp post (light
+  15), iron candle stand (flint and steel or a fire charge lights it, a bare hand snuffs it; light 12), four plushies
+  (bear, bunny, cat, frog) that squeak when pressed or squeezed in hand, window box and pot planter (plant a small flower,
+  it grows over random ticks, a bare hand picks 1-2 at full bloom).
+- Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
+- Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
+## 0.7.441: havens built their own way (Havens patch 6c)
 - **Haven houses** (`HavenBuildings`): a haven's houses are drawn in its blood's way, and a mixed haven's take a bit of
   each, house by house.
   - Tideborn: stilt houses three blocks up, with steps to a railed front deck, a fish rack and a barrel, plank walls

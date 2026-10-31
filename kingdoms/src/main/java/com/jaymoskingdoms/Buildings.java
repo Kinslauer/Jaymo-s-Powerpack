@@ -72,7 +72,7 @@ final class Buildings {
 			realm(type, "barracks", Buildings::barracks, 1, 32);
 			// (0.7.384) the school's hall, its master at the middle ({@link SchoolHalls}; Weapon Forms)
 			realm(type, "training_hall", JobHalls::trainingHall, 1, 34);
-			// (0.7.440) a Warrior-born (or mixed) haven's fighting ring ({@link Planner#eligible} keeps it to them)
+			// (0.7.441) a Warrior-born (or mixed) haven's fighting ring ({@link Planner#eligible} keeps it to them)
 			realm(type, HavenBuildings.RING, HavenBuildings::ring, 1, 30);
 			realm(type, "house", Buildings::house, 7, 36);
 			town(type, "wall", Buildings::wall, 12, 40);
@@ -163,7 +163,7 @@ final class Buildings {
 	 */
 	static Blueprint house(Kit k) {
 		if (!k.haven.isEmpty() && !k.classic) {
-			// (0.7.440) a haven builds its own way ({@link HavenBuildings})
+			// (0.7.441) a haven builds its own way ({@link HavenBuildings})
 			return HavenBuildings.house(k);
 		}
 		if (k.blossom && !k.classic) {
@@ -1426,7 +1426,7 @@ final class Buildings {
 		final boolean classic;
 		/** (0.5.7) the land is dry (flat roofs are common), and how this building's stone is weathered */
 		final boolean dry;
-		/** (0.7.440) the haven it's built for: "" none, "mixed", or a blood's key ({@link HavenBuildings}) */
+		/** (0.7.441) the haven it's built for: "" none, "mixed", or a blood's key ({@link HavenBuildings}) */
 		String haven = "";
 		final int salt;
 		private final List<String> colours;

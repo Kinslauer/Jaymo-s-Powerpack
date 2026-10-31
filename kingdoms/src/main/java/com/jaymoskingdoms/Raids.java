@@ -209,7 +209,7 @@ final class Raids {
 				continue;
 			}
 			if ((Camps.orc(server, camp.id()) || Camps.goblin(server, camp.id())) && Havens.greenskin(server, f)) {
-				// (0.7.440) a haven that lives alongside the tribes isn't raided by them
+				// (0.7.441) a haven that lives alongside the tribes isn't raided by them
 				continue;
 			}
 			if (pirates && !PirateCoves.coastal(level, f)) {

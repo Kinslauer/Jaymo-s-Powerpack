@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.7.440) Havens patch 6c: havens built their own way (ideas from the havens pick list; our own designs). A haven's
+ * (0.7.441) Havens patch 6c: havens built their own way (ideas from the havens pick list; our own designs). A haven's
  * houses are drawn in its blood's way instead of a cottage ({@link Buildings#house}); a mixed haven's take a bit of
  * each, house by house.
  * <ul>

@@ -45,7 +45,7 @@ public final class Havens {
 	/** A mixed haven's bloods, by weight: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int MIX_TIDE = 3, MIX_STONE = 3, MIX_WARRIOR = 2, MIX_SYLVAN = 3;
 	/**
-	 * (0.7.440, Andy: "some havens live in unity with goblins and orcs or maybe under an orc king") This share of havens
+	 * (0.7.441, Andy: "some havens live in unity with goblins and orcs or maybe under an orc king") This share of havens
 	 * live alongside goblins and orcs: that share of those born there are goblins and orcs, and the tribes' war bands
 	 * leave them be. This share of those sit under an orc king: more of their folk are orcs, and their ruler goes by an
 	 * orc's title.
@@ -184,7 +184,7 @@ public final class Havens {
 			return null;
 		}
 		if (greenskin(server, f) && random.nextFloat() < (orcRuled(server, f) ? ORC_RULED_BIRTHS : GREENSKIN_BIRTHS)) {
-			// (0.7.440) one of the goblins and orcs who live there
+			// (0.7.441) one of the goblins and orcs who live there
 			return orcRuled(server, f) || random.nextBoolean() ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
 		}
 		if (!MIXED.equals(haven)) {
@@ -195,12 +195,12 @@ public final class Havens {
 			: pick - MIX_WARRIOR < 0 ? Heritage.Kind.WARRIORBORN : Heritage.Kind.SYLVAN;
 	}
 
-	/** (0.7.440) Haven {@code f} lives alongside goblins and orcs (drawn from who it is, so always the same). */
+	/** (0.7.441) Haven {@code f} lives alongside goblins and orcs (drawn from who it is, so always the same). */
 	static boolean greenskin(MinecraftServer server, @Nullable Faction f) {
 		return is(server, f) && Math.floorMod(lot(f) >>> 11, 1000L) < (long)(GREENSKIN_SHARE * 1000);
 	}
 
-	/** (0.7.440) Haven {@code f} sits under an orc king (one of those that live alongside the tribes). */
+	/** (0.7.441) Haven {@code f} sits under an orc king (one of those that live alongside the tribes). */
 	static boolean orcRuled(MinecraftServer server, @Nullable Faction f) {
 		return greenskin(server, f) && Math.floorMod(lot(f) >>> 37, 1000L) < (long)(ORC_KING_SHARE * 1000);
 	}
@@ -214,7 +214,7 @@ public final class Havens {
 	static boolean fits(MinecraftServer server, @Nullable Faction f, Heritage.@Nullable Kind kind) {
 		String haven = of(server, f);
 		if (kind != null && kind.brood && greenskin(server, f)) {
-			// (0.7.440) its goblins and orcs
+			// (0.7.441) its goblins and orcs
 			return true;
 		}
 		return haven.isEmpty() || (MIXED.equals(haven) ? Prejudice.degree(kind) > 0 : kind != null && haven.equals(kind.key()));

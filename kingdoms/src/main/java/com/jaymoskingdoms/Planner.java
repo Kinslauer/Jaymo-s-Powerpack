@@ -146,7 +146,7 @@ public final class Planner {
 				continue;
 			}
 			if (e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f)) {
-				// (0.7.440) only a Warrior-born or mixed haven builds a fighting ring
+				// (0.7.441) only a Warrior-born or mixed haven builds a fighting ring
 				continue;
 			}
 			if (e.id().equals(TAVERN)) {
