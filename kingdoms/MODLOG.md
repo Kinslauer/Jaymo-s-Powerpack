@@ -7534,4 +7534,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   to rust when mined; after, it drops raw bog iron (1-2), which smelts to iron and counts as raw iron for Tinkers.
 - `CripplingBlows`: a hit of 6+ from an ogre (18%, the king 30%), a warchief (22%) or a raging grunt (10%) may break a
   leg (Powers' `Wounds.breakPart`, through `PowersCompat.breakLeg`).
+## 0.7.428: Player temperaments (pack 0.18.101)
+- Andy: the starting questionnaire gives players a temperament they can't change. `PlayerTemperaments` works it out
+  from the life story (who raised you and the childhood weigh 2, some roads 1; ties go to the childhood), sets it in
+  the villagers' own `Temperaments.TEMPERAMENT` (synced, so Powers draws it), and says it once in chat ("Your nature is
+  set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
+  of the villagers' temperament rules touch them.
 - Compile-checked only; not played.

@@ -876,6 +876,8 @@ public final class LifeStory {
 		}
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road == null ? "" : road.key));
+		// (Powers' Motion patch 1) the temperament the story makes, fixed for good; told once the road is chosen too
+		PlayerTemperaments.settle(player, road != null);
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
 		Flaws.choose(player, live.flaws(), live.switches());
 		Heritage.set(player, heritage);
@@ -948,6 +950,7 @@ public final class LifeStory {
 		List<String> story = new ArrayList<>(of(player));
 		story.set(Question.ROAD.ordinal(), road.key);
 		player.setAttached(STORY, List.copyOf(story));
+		PlayerTemperaments.settle(player, true);
 		// (0.7.420) a road told after the creator may add story points of its own (Rustfall's), which a life from nothing gives up too
 		if (road.start == Start.RUSTFALL) {
 			Flaws.giveUpMore(player, RUSTFALL_STAT, 1);

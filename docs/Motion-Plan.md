@@ -68,16 +68,19 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   meditating. The I key is renamed Shadowbox and only does something for Z Fighters and Gravity users; anyone else
   pressing it gets a hint on how to sit.
 
-### Patch 1, Body motion and temperaments (Powers + Kingdoms; picks torso-lag, strafe-lean, hurt-flinch, scared-idle, scared-flee)
-- **Torso lag:** the body turns towards the head over `TORSO_EASE` ticks, capped at `TORSO_MAX` degrees, all players.
-- **Strafe lean:** while locked on (`core.LockOn`), side steps cross the legs and lean the body `STRAFE_LEAN` into the move.
-- **Flinch:** a hit jerks the body away from the attacker's side for `FLINCH_TICKS`, scaled by damage; not while downed.
-- **Player temperaments:** the life-story creator's answers pick one of the 12 temperaments (`Temperaments.Temperament`) for the player, fixed
-  for good (shown on the body screen). Each temperament gets one small player effect. There's no paranoid one, so timid and suspicious play that part: scared idle (hunched, glancing
-  about, hands close) when it's dark around you, at low health or near a monster king, and the panicked flee: sprinting
-  from a hostile at low health shakes the first-person camera and turns it to look back over the shoulder for a moment.
-  Existing players get a temper rolled from their saved answers on next join. Other examples: brave never flinches at small hits, hotheaded
-  clenches fists in the idle, gloomy slumps, cheerful walks with a slight bounce.
+### Patch 1, Body motion and temperaments (Powers 0.18.101 + Kingdoms 0.7.428; picks torso-lag, strafe-lean, hurt-flinch, scared-idle, scared-flee)
+- **Torso twist** (`client/BodyMotion`): the chest turns `TORSO_SHARE` (a third) of the way after the head, at most
+  `TORSO_MAX` (22) degrees, shoulders carried round; all players. Vanilla already lets the body lag the head.
+- **Strafe lean:** while locked on (`LockOn.LOCKED`, a new synced flag), side steps lean the body `STRAFE_LEAN` (9)
+  degrees into the move.
+- **Flinch:** a hit tips the body away from where it came from while the red flash lasts; not while downed.
+- **Player temperaments** (Kingdoms `PlayerTemperaments`): the life story's answers pick one of the 12 temperaments for
+  good (who raised you and the childhood weigh 2, some roads 1), said once in chat. Old players get theirs on next join.
+  There's no paranoid one, so timid and suspicious play that part: scared idle (hunched, glancing about, hands drawn
+  in) when it's dark, under 40% health or a monster is within 10 blocks; and the panicked flee (`client/PanicCam`):
+  sprinting at half health or less from a monster close behind shakes the first-person view and swings it round over
+  the shoulder for about a second. Brave shows a third of the flinch, hotheaded stands with arms tense, gloomy slumps,
+  cheerful bounces as they walk.
 
 ### Patch 2, Water (Powers; picks swim-direction, dives, wakes, underwater-break)
 - **Directional swimming:** side stroke and backstroke picked from input against look. Only Tideborn and a swimming

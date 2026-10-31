@@ -133,6 +133,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		PanicCam.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
