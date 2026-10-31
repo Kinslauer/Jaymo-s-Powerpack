@@ -4662,3 +4662,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+  your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
+  first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
+  with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
+  `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Compile-checked; not seen in game.
