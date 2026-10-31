@@ -4662,3 +4662,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1, Kingdoms 0.7.449:** "Ask the way" in a villager's talk menu: a healer, butcher, smith, tailor, the tavern,
+  the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"), or, if
+  they like you (or they're a child), walk you there.

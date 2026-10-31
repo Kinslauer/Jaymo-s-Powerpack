@@ -429,6 +429,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
+		// (0.7.449) asking the way in town
+		Directions.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);

@@ -138,6 +138,16 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_way",
+      "results": [
+        {
+          "actions": {
+            "next": "jaymoskingdoms_way"
+          }
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_ask_after",
       "results": [
         {

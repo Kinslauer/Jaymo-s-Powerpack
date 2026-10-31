@@ -7841,3 +7841,18 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
   till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
 - Compile-checked; not seen in game.
+
+## 0.7.449: ask a villager the way (pack 0.19.1)
+- Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if you need a
+  doctor, or a butcher". MCA's main menu has "Ask the way" (`Directions`), opening its own list (dialogue question
+  `jaymoskingdoms_way`): a healer (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown
+  shepherd), the tavern, the stables, whoever rules here, or never mind (back to the menu).
+- They find the nearest in their town (folk within 128 blocks, at their workstation if it's near them; the faction's
+  standing tavern or stable; the ruler, or the seat while they're away) and turn to face it for a moment, telling you
+  who and where in MCA's chat ("Bram the butcher? That way: about 40 paces to the north-east."), and if they're abed.
+- One with 10+ hearts for you, or any child, walks you there if it's 10-96 blocks off: waits when you fall 7 blocks
+  behind and calls you on, gives up past 32, points out the rest after 2 minutes or 12 seconds of getting no nearer,
+  and says so when you've arrived. Guards, archers, a realm's workers and rulers keep their posts and only point; their
+  routines leave a guide be (`Routines.idle`). Below -15 hearts: "Find it yourself." Asking needs a shared tongue; a
+  ship's crew isn't asked. Tuning at the top of `Directions`.
+- Compile-checked; not seen in game.

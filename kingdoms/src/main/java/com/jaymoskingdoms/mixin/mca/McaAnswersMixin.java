@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up; (0.7.380) only the one for the latest of it ({@link SharedHistory#current}).
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}) shows only on a guard of a town that owes you a favour.
+ * (0.7.449) "Ask the way" ({@link com.jaymoskingdoms.Directions}) shows on anyone but a ship's crew.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -163,6 +164,10 @@ abstract class McaAnswersMixin {
 			} else {
 				cir.getReturnValue().removeAll(com.jaymoskingdoms.Questioning.ANSWERS);
 			}
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Directions.offers(villager)) {
+			// (0.7.449) "Ask the way": anyone but a ship's crew
+			cir.getReturnValue().remove(com.jaymoskingdoms.Directions.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
