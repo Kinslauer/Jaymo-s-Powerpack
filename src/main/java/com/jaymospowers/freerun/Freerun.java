@@ -69,9 +69,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Freerunner</b> (2 ranks): rank 1, a sprinting jump at something waist-high (at most 1.5 blocks: a fence, a
  * wall, a block) vaults it at full speed; rank 2, a wall kick: in the air beside or facing a wall, Jump kicks off it
  * ({@link #KICK_UP} up, {@link #KICK_OUT} out), each wall face once until you land.</li>
- * <li><b>Sure Footing</b>: (0.15.67) a dodge made as you land rolls the fall off: no fall damage
- * ({@link LandingRoll}, with a forgiving window either side of touchdown). Narrow tops ({@link #NARROW}) are no longer
- * its: anyone walks and runs them, arms out to balance.</li>
+ * <li><b>Landing roll</b> (Sure Footing's until Motion patch 0, everyone's now; the perk left the tree): a dodge made
+ * as you land rolls the fall off: no fall damage ({@link LandingRoll}, with a forgiving window either side of
+ * touchdown); a hard fall you don't roll lands in the hero landing. Anyone walks and runs narrow tops
+ * ({@link #NARROW}), arms out to balance. Freerunner 1 also opens the air flip ({@link AirFlip}).</li>
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
  * <li><b>Bar Swing</b>: jump at a fence, iron bar or chain lying above your head to catch it and hang, swinging; Jump
@@ -187,7 +188,7 @@ public final class Freerun {
 
 	/** The perks, in the order they're packed into {@link #PERKS} (4 bits each), with their Kingdoms keys. */
 	public enum Perk {
-		CLIMBER, FREERUNNER, SURE_FOOTING, LEAP_OF_FAITH, BAR_SWING, WALL_RUNNER;
+		CLIMBER, FREERUNNER, LEAP_OF_FAITH, BAR_SWING, WALL_RUNNER;
 
 		public String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
@@ -283,6 +284,7 @@ public final class Freerun {
 			return true;
 		});
 		LandingRoll.init();
+		AirFlip.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		FastRun.init();
 		Slide.init();

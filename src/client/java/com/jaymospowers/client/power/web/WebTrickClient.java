@@ -9,7 +9,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Picks the swing tricks ({@link WebTricks}) from how the swing actually goes: a flip, corkscrew or cartwheel off a
  * released web; a twirl or a giant swing on the web, at the bottom of a fast arc or when the next web catches; and on
- * touching down a superhero landing, a roll, or the wings' flare and spin. {@link WebSwing} tells it what happened.
+ * touching down a superhero landing or a roll (the wings always come down in the superhero landing). {@link WebSwing} tells it what happened.
  */
 final class WebTrickClient {
 	/** A released web flips you only if you're moving at least this fast (blocks/tick). */
@@ -20,8 +20,6 @@ final class WebTrickClient {
 	static final double CATCH_CHANCE = 0.4;
 	/** Touching down: this fast across the ground (blocks/tick) rolls; slower, a fall this far (blocks) lands three-point. */
 	static final double HERO_DROP = 2.5, ROLL_SPEED = 0.55;
-	/** The wings fold into a roll instead of their flare only above this speed. */
-	static final double WINGS_ROLL_SPEED = 1.2;
 	/**
 	 * The wings' freedive coming down onto the ground at this speed (blocks/tick), its sideways drift under this much
 	 * of the fall: a superhero landing that breaks the ground ({@link com.jaymospowers.power.web.WebSlam}).
@@ -122,7 +120,8 @@ final class WebTrickClient {
 			return;
 		}
 		if (wings) {
-			kind = across > WINGS_ROLL_SPEED ? WebPose.LAND_ROLL : WebPose.WINGS_LAND;
+			// (Motion patch 0) Andy: the hero landing "over all web's glide landings too"
+			kind = WebPose.HERO_LAND;
 		} else if (across > ROLL_SPEED) {
 			// coming in fast: carried on into a roll, however far the drop
 			kind = WebPose.LAND_ROLL;

@@ -120,6 +120,7 @@ public final class FreerunClient {
 			reset();
 			return;
 		}
+		AirFlipClient.tick(minecraft, player);
 		Input input = player.input.keyPresses;
 		boolean jumpPressed = input.jump() && !jumpWasDown;
 		jumpWasDown = input.jump();

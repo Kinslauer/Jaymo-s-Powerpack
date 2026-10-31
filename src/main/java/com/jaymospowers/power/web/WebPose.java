@@ -33,6 +33,12 @@ public record WebPose(int kind, long start, int side) {
 	 * then thrown open as spikes and lashing tendrils burst out of the whole body.
 	 */
 	public static final int SPIKES = 14;
+	/**
+	 * (Motion patch 0) A tucked flip over backwards in mid-air, from a tap of Sneak in the air with Back held ({@code
+	 * freerun.AirFlip}): anyone who may flip, web slinger or freerunner. A trick like the others (its own number, past
+	 * the symbiote's two, so nothing saved moves).
+	 */
+	public static final int BACK_FLIP = 15;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -47,7 +53,7 @@ public record WebPose(int kind, long start, int side) {
 	public int ticks() {
 		return switch (kind) {
 			case RAGDOLL -> RAGDOLL_TICKS;
-			case FRONT_FLIP, CARTWHEEL, LAND_ROLL -> 14;
+			case FRONT_FLIP, BACK_FLIP, CARTWHEEL, LAND_ROLL -> 14;
 			case CORKSCREW, GIANT -> 16;
 			case TWIRL -> 12;
 			case HERO_LAND -> 28;
@@ -59,7 +65,7 @@ public record WebPose(int kind, long start, int side) {
 	}
 
 	public static boolean trick(int kind) {
-		return kind >= FIRST_TRICK && kind <= LAST_TRICK;
+		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP;
 	}
 
 	public static boolean landing(int kind) {
