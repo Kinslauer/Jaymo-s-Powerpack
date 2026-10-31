@@ -4429,3 +4429,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     I key is Shadowbox now, for Z Fighters and Gravity users only (others get a hint on how to sit).
   - Balancing on chains and end rods was already everyone's (`freerun_narrow`); nothing changed there.
   - Compile-checked; not seen in game.
+- **0.18.100, Body motion and temperaments (Motion patch 1, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **`client/BodyMotion`**, laid over every player's model (Fresh Animations not paused) only while none of our poses
+    is on: the chest turns about a third of the way after the head (max 22 degrees, shoulders carried round); locked on
+    (`LockOn.LOCKED`, new synced flag), side steps lean the body into the move; a hit tips the body away from where it
+    came from while the red flash lasts (not while downed).
+  - **Player temperaments** (Kingdoms 0.7.427): the life story picks one of the 12 for good. Timid and suspicious
+    players hunch, glance about and draw their hands in when it's dark, they're under 40% health or a monster is within
+    10 blocks; hotheaded ones stand with arms tense and forward; gloomy ones slump with the head hung; cheerful ones
+    bounce as they walk; brave ones show a third of the flinch.
+  - **`client/PanicCam`:** a timid or suspicious player sprinting at half health or less from a monster close behind
+    gets a shake and the first-person view swings round over the shoulder at it for about a second (aim unchanged),
+    at most once every 7 s, with a small rattle while still chased.
+  - Compile-checked; not seen in game.

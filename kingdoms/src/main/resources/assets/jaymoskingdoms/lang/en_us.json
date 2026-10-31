@@ -5733,6 +5733,7 @@
 	"message.jaymoskingdoms.feral.request.broken": "You went where it told you not to. The wolf won't forget.",
 	"message.jaymoskingdoms.feral.request.ignored": "You ignored it. The wolf remembers.",
 	"temperament.jaymoskingdoms.line": "Temperament: %s",
+	"temperament.jaymoskingdoms.yours": "Your nature is set for good: %s",
 	"temperament.jaymoskingdoms.kindhearted": "Kindhearted",
 	"temperament.jaymoskingdoms.cheerful": "Cheerful",
 	"temperament.jaymoskingdoms.devout": "Devout",

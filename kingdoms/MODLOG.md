@@ -7520,3 +7520,10 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
 - Compile-checked only; not played.
 
+## 0.7.427: Player temperaments (pack 0.18.100)
+- Andy: the starting questionnaire gives players a temperament they can't change. `PlayerTemperaments` works it out
+  from the life story (who raised you and the childhood weigh 2, some roads 1; ties go to the childhood), sets it in
+  the villagers' own `Temperaments.TEMPERAMENT` (synced, so Powers draws it), and says it once in chat ("Your nature is
+  set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
+  of the villagers' temperament rules touch them.
+- Compile-checked only; not played.

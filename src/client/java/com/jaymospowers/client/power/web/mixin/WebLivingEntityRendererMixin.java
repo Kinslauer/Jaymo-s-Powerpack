@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class WebLivingEntityRendererMixin {
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$webGlideLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
+		// (Motion patch 1) the small motions first, so every pose after them stands on top
+		com.jaymospowers.client.BodyMotion.rotate(state, poseStack, entityScale);
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
@@ -48,6 +50,7 @@ abstract class WebLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
+		com.jaymospowers.client.BodyMotion.extract(entity, state, partialTicks);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.BalancePose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.RunPose.extract(entity, state, partialTicks);
