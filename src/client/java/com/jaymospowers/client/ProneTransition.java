@@ -21,7 +21,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.6) Andy: "the character should also crouch down and into the prone smoother than it does now, the animations
+ * (0.19.7) Andy: "the character should also crouch down and into the prone smoother than it does now, the animations
  * kinda glide together". Going prone by your own crawl (the Crawl key, the stance wheel) is no longer vanilla's swimming
  * tilt, which pivots the body about the feet while it jumps a block back: you crouch, then go forward down onto your
  * hands as the legs slide out behind you, ending exactly where the crawl lies. Getting up plays it backwards: the hands
