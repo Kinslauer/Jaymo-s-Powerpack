@@ -1800,6 +1800,116 @@ def talon():
     save(img, "entity/xenoform_talon.png")
 
 
+def murk():
+    """(0.18.111, Scan D) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly, big black eyes with a
+    pale ring, a long mantle and pale-suckered tentacles."""
+    img = new_skin()
+    skin = (106, 88, 120)
+    parts(img, skin, 0.12)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (74, 58, 90, 255), (b[2] - b[0]) * (b[3] - b[1]) // 7 + 1)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1), (176, 160, 186), (150, 134, 162), 0.06)
+    rect(img, (8, 10, 11, 13), (220, 214, 230, 255))
+    rect(img, (13, 10, 16, 13), (220, 214, 230, 255))
+    rect(img, (9, 11, 11, 13), (10, 8, 14, 255))
+    rect(img, (13, 11, 15, 13), (10, 8, 14, 255))
+    claws(img, (70, 56, 86, 255))
+    chest_insignia(img, rim=(50, 38, 64, 255))
+    # extras: mantle 6x8x4 at (0,64); tentacles 1x6x1 at (20,64)
+    mantle = (0, 64, 6, 8, 4)
+    box(img, mantle, (96, 78, 112), 0.14)
+    for name, b in faces(*mantle).items():
+        speckle(img, b, (70, 54, 86, 255), 6)
+    tent = (20, 64, 1, 6, 1)
+    box(img, tent, (120, 100, 134), 0.08)
+    for name, (x0, y0, x1, y1) in faces(*tent).items():
+        if name == "front":
+            for y in range(y0 + 1, y1, 2):
+                img.putpixel((x0, y), (226, 214, 232, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_murk.png")
+
+
+def gnasher():
+    """(0.18.111, Scan D) Gnasher, the shark: grey-blue on top, sharp white underneath, gill slits, flat black eyes, a
+    jaw of white teeth, a tall fin and tail."""
+    img = new_skin()
+    top = (92, 116, 136)
+    parts(img, top, 0.1)
+    for part in BASE_PARTS:
+        fx0, fy0, fx1, fy1 = faces(*part)["front"]
+        rect(img, (fx0 + 1, fy0 + (fy1 - fy0) // 3, fx1 - 1, fy1), (226, 230, 232, 255))
+    rect(img, (8, 8, 16, 12), shade(top + (255,), 1.0))
+    rect(img, (9, 10, 10, 11), (8, 8, 10, 255))
+    rect(img, (14, 10, 15, 11), (8, 8, 10, 255))
+    rect(img, (8, 14, 16, 15), (40, 20, 24, 255))
+    for x in range(8, 16, 2):
+        img.putpixel((x, 13), (250, 250, 250, 255))
+        img.putpixel((x + 1, 15), (250, 250, 250, 255))
+    for x in (16, 17, 18):
+        rect(img, (x * 1, 22, x + 1, 26), (50, 64, 78, 255))
+    claws(img, (60, 76, 90, 255))
+    chest_insignia(img, rim=(50, 64, 78, 255))
+    # extras: fin 1x6x4 at (0,64); snout 6x2x3 at (12,64); tail 2x2x6 at (30,64)
+    box(img, (0, 64, 1, 6, 4), (82, 104, 124), 0.08)
+    snout = (12, 64, 6, 2, 3)
+    box(img, snout, (96, 120, 140), 0.08)
+    sx0, sy0, sx1, sy1 = faces(*snout)["bottom"]
+    rect(img, (sx0, sy0, sx1, sy1), (226, 230, 232, 255))
+    box(img, (30, 64, 2, 2, 6), (86, 108, 128), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_gnasher.png")
+
+
+def lumen():
+    """(0.18.111, Scan D) Lumen, the light: pale sky blue, lighter towards the edges, a bright white-gold core in its
+    chest, soft white eyes, thin pale fins."""
+    img = new_skin()
+    blue = (154, 220, 244)
+    parts(img, blue, 0.06, edge=1.12)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 7), (252, 246, 210, 255))
+    rect(img, (fx0 + 3, fy0 + 3, fx1 - 3, fy0 + 6), (255, 255, 250, 255))
+    eyes(img, (250, 255, 255, 255), y=11, wide=True, pupil=(90, 170, 220, 255))
+    claws(img, (210, 240, 252, 255))
+    chest_insignia(img, rim=(70, 140, 180, 255))
+    # extras: fins 1x5x4 at (0,64)
+    box(img, (0, 64, 1, 5, 4), (210, 240, 252), 0.05)
+    clear_hat(img)
+    save(img, "entity/xenoform_lumen.png")
+
+
+def keen():
+    """(0.18.111, Scan D) Keen, the sonar bat: dark brown-grey fur, a lighter chest, tiny red eyes, a pink pug snout,
+    huge ears with pink insides, leathery near-black wings."""
+    img = new_skin()
+    fur_c = (74, 60, 64)
+    parts(img, fur_c, 0.16)
+    fur(img, BASE_PARTS, fur_c, (50, 40, 44, 255), 5)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1 - 3), (128, 108, 104), (100, 84, 84), 0.08)
+    rect(img, (10, 11, 11, 12), (220, 40, 40, 255))
+    rect(img, (13, 11, 14, 12), (220, 40, 40, 255))
+    rect(img, (11, 13, 13, 15), (200, 140, 140, 255))
+    claws(img, (30, 24, 26, 255))
+    chest_insignia(img, rim=(40, 30, 32, 255))
+    # extras: ears 2x4x1 at (0,64); wings 1x10x5 at (6,64)
+    ear = (0, 64, 2, 4, 1)
+    box(img, ear, (70, 56, 60), 0.1)
+    ex0, ey0, ex1, ey1 = faces(*ear)["front"]
+    rect(img, (ex0, ey0 + 1, ex1, ey1), (190, 130, 130, 255))
+    wing = (6, 64, 1, 10, 5)
+    box(img, wing, (44, 36, 40), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*wing).items():
+        if name in ("left", "right"):
+            for x in range(x0 + 1, x1, 2):
+                rect(img, (x, y0, x + 1, y1), (30, 24, 28, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_keen.png")
+
+
 # (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
 # glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
 # Nadir has no Ultimate form (its C is a film).
@@ -1811,12 +1921,14 @@ ULTIMATE_COLORS = {
     "locust": (141, 179, 58), "croaker": (110, 158, 60),
     "rime": (158, 216, 240), "marrow": (230, 224, 204), "swathe": (196, 170, 120), "blight": (120, 100, 150),
     "howl": (176, 160, 140), "prowl": (224, 150, 60), "tusk": (150, 100, 70), "talon": (214, 180, 60),
+    "murk": (150, 120, 190), "gnasher": (110, 150, 180), "lumen": (200, 240, 255), "keen": (200, 60, 70),
 }
 ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
 PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
 PATCH5 = ("gyre", "cortex", "locust", "croaker")
 SCAN_B = ("rime", "marrow", "swathe", "blight")
 SCAN_C = ("howl", "prowl", "tusk", "talon")
+SCAN_D = ("murk", "gnasher", "lumen", "keen")
 
 
 def ultimate(form):
@@ -1865,7 +1977,7 @@ def ultimate_spikes():
     save(img, "entity/xenoform_ultimate_spikes.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon")
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1937,7 +2049,7 @@ if __name__ == "__main__":
     band_worn()
     holo_glow()
     for form in ULTIMATE_COLORS:
-        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D:
             ultimate(form)
     ultimate_spikes()
     # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
@@ -1968,6 +2080,13 @@ if __name__ == "__main__":
     tusk()
     talon()
     for form in SCAN_C:
+        ultimate(form)
+    # (0.18.111) Scan D, last again
+    murk()
+    gnasher()
+    lumen()
+    keen()
+    for form in SCAN_D:
         ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:

@@ -4543,3 +4543,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     armour trims at full block light (`GlowingTrimMixin`).
   - Not done: per-wood carved canoes (Canoe Boats is CC BY-NC and downloaded at install, so we can't ship edits to it).
   - Compile-checked; not seen in game.
+- **0.18.111, Scan D (`docs/ScanGaps-Plan.md`), water and light:** four new aliens. Murk (squid, anglerfish,
+  barnacle): Ink, Tentacles that hold four, Jet, Lure; a fast swimmer. Gnasher (dolphin, sharks, alligator, piranha,
+  mauler): smells bleeders in water; Clamp, Lunge, Frenzy, Death Roll. Lumen (allay, firefly, glare), the support
+  alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
+  from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
+  skin and spikes. Compile-checked; not seen in game.

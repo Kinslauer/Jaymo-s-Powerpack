@@ -85,6 +85,10 @@ public final class XenoFormModels {
 			MODELS.put("prowl", new Prowl());
 			MODELS.put("tusk", new Tusk());
 			MODELS.put("talon", new Talon());
+			MODELS.put("murk", new Murk());
+			MODELS.put("gnasher", new Gnasher());
+			MODELS.put("lumen", new Lumen());
+			MODELS.put("keen", new Keen());
 		}
 		return MODELS.get(form);
 	}
@@ -703,6 +707,136 @@ public final class XenoFormModels {
 			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
 			this.rightWing.yRot = -spread * 0.6F;
 			this.leftWing.yRot = spread * 0.6F;
+		}
+	}
+
+	/** (0.18.111, Scan D) Murk: a long soft mantle swept back from its head, four tentacles hanging from its jaw that drift. */
+	static final class Murk extends FormModel {
+		private final ModelPart[] tentacles = new ModelPart[4];
+
+		Murk() {
+			super(bake(mesh()), "murk");
+			this.insigniaZ = -2.2F;
+			for (int i = 0; i < 4; i++) {
+				this.tentacles[i] = this.head.getChild("tentacle_" + i);
+			}
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F);
+			PartDefinition head = mesh.getRoot().getChild("head");
+			head.addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -8.0F, 0.0F, 6.0F, 8.0F, 4.0F),
+				PartPose.offsetAndRotation(0.0F, -6.0F, 1.0F, -0.6F, 0.0F, 0.0F));
+			for (int i = 0; i < 4; i++) {
+				float x = -2.25F + i * 1.5F;
+				head.addOrReplaceChild("tentacle_" + i, CubeListBuilder.create().texOffs(20, 64).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 6.0F, 1.0F),
+					PartPose.offset(x, 0.0F, -3.0F));
+			}
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			for (int i = 0; i < 4; i++) {
+				this.tentacles[i].xRot = -0.15F + Mth.sin(state.ageInTicks * 0.12F + i * 1.3F) * 0.15F;
+				this.tentacles[i].zRot = Mth.sin(state.ageInTicks * 0.09F + i) * 0.1F;
+			}
+		}
+	}
+
+	/** (0.18.111, Scan D) Gnasher: a blunt snout over a toothed jaw, a tall fin on its back, a heavy tail that sweeps. */
+	static final class Gnasher extends FormModel {
+		private final ModelPart tail;
+
+		Gnasher() {
+			super(bake(mesh()), "gnasher");
+			this.insigniaZ = -2.5F;
+			this.tail = this.body.getChild("tail");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("snout", CubeListBuilder.create().texOffs(12, 64).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 2.0F, 3.0F),
+				PartPose.offset(0.0F, -2.0F, -4.4F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -6.0F, 0.0F, 1.0F, 6.0F, 4.0F),
+				PartPose.offsetAndRotation(0.0F, 4.0F, 2.4F, -0.5F, 0.0F, 0.0F));
+			body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(30, 64).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, 10.5F, 2.0F, -0.4F, 0.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.2F) * 0.2F + Mth.sin(state.walkAnimationPos * 0.6662F) * 0.3F * state.walkAnimationSpeed;
+		}
+	}
+
+	/** (0.18.111, Scan D) Lumen: small and slight, two thin wing-fins on its back that flutter. */
+	static final class Lumen extends FormModel {
+		private final ModelPart rightFin, leftFin;
+
+		Lumen() {
+			super(bake(mesh()), "lumen");
+			this.insigniaZ = -1.7F;
+			this.rightFin = this.body.getChild("right_fin");
+			this.leftFin = this.body.getChild("left_fin");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.3F), 0.0F);
+			PartDefinition body = mesh.getRoot().getChild("body");
+			body.addOrReplaceChild("right_fin", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 5.0F, 4.0F),
+				PartPose.offsetAndRotation(-1.5F, 1.0F, 1.8F, 0.0F, -0.6F, 0.0F));
+			body.addOrReplaceChild("left_fin", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, 0.0F, 0.0F, 1.0F, 5.0F, 4.0F),
+				PartPose.offsetAndRotation(1.5F, 1.0F, 1.8F, 0.0F, 0.6F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float flutter = Mth.sin(state.ageInTicks * 0.9F) * 0.25F;
+			this.rightFin.yRot = -0.6F - flutter;
+			this.leftFin.yRot = 0.6F + flutter;
+		}
+	}
+
+	/** (0.18.111, Scan D) Keen: huge ears, and leathery wings down its arms that spread when it lifts them. */
+	static final class Keen extends FormModel {
+		private final ModelPart rightWing, leftWing;
+
+		Keen() {
+			super(bake(mesh()), "keen");
+			this.insigniaZ = -1.9F;
+			this.rightWing = this.rightArm.getChild("wing");
+			this.leftWing = this.leftArm.getChild("wing");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -4.0F, -0.5F, 2.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(-2.5F, -8.0F, -0.5F, 0.0F, 0.0F, -0.3F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -4.0F, -0.5F, 2.0F, 4.0F, 1.0F),
+				PartPose.offsetAndRotation(2.5F, -8.0F, -0.5F, 0.0F, 0.0F, 0.3F));
+			root.getChild("right_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(6, 64).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 5.0F),
+				PartPose.offset(-1.5F, 0.0F, 1.0F));
+			root.getChild("left_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(6, 64).mirror().addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 5.0F),
+				PartPose.offset(1.5F, 0.0F, 1.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
+			this.rightWing.yRot = -spread * 0.7F;
+			this.leftWing.yRot = spread * 0.7F;
 		}
 	}
 
