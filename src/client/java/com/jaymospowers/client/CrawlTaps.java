@@ -234,7 +234,7 @@ public final class CrawlTaps {
 		ClientPlayNetworking.send(new Crawl.Key(true));
 	}
 
-	/** (0.19.7) Prone from a held slide: stay down once Sneak is let go (the stance wheel turned down), as the key does. */
+	/** (0.19.8) Prone from a held slide: stay down once Sneak is let go (the stance wheel turned down), as the key does. */
 	static void lockProne() {
 		whileSneaking = false;
 	}
