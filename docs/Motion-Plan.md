@@ -100,13 +100,14 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   swinging. Painted on copies of the skin, only when the head front has a plain two-pixel eye pair on one row (rows
   3-6); other skins stay as they are. Knocked out and dead keep the closed eyes we have. MCA-drawn faces aren't touched.
 
-### Patch 4, Holding and using items (Powers; picks flint-steel, shears, held-tools, held-lantern, + flintlock note)
-- **Flint and steel / flint and rock:** two-handed strike in first and third person, spark, then flame.
-- **Shears:** brought to the centre of the screen, snipping on use.
-- **Compass and clock:** held up in one hand like NEA's maps.
-- **Held lantern:** a hanging 3D lantern in hand that swings as you walk.
-- **Flintlock:** the musket's sights treatment with less of a sight picture (smooth barrel, raised to eye line, not
-  aimed down), and dual wielding: a flintlock in each hand fires left then right, each reloads on its own.
+### Patch 4, Holding and using items (Powers 0.18.107; picks flint-steel, shears, held-tools, held-lantern, + flintlock note)
+- **Flint and steel / flint and rock** (`client/armory/HeldItems`): two-handed strike in third person, a chop in first
+  person, sparks off flint and steel (the rock strike already sparks); the fire comes as before.
+- **Shears:** brought in towards the centre of the screen, snipping on use.
+- **Compass and clock:** held up in one hand to read; in third person the arm comes up when you look down.
+- **Held lantern:** held out a little, swinging with your step (first and third person).
+- **Flintlock:** held ready, raised to the eye line at its own side, not onto the crosshair (`MusketSights`); dual
+  wielding (`armory/DualFlintlocks`): one in each hand fires main then off, then reloads main then off.
 
 ### Patch 5, 3D models (art; picks tools-3d, items-3d, bottles-3d, emissive, mushroom-dripstone, double-slabs, boats-3d)
 - 3D held models for the vanilla tool set and bow (inventory icons stay flat), with a pack toggle.

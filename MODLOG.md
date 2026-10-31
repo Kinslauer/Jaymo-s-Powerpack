@@ -4498,3 +4498,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   clock and buttons waiting) until it ends. Kingdoms 0.7.431 uses it for the captain who killed you: a short scene of him
   over your body, raised to captain or up a rank, before you can respawn (Andy).
 - Compile-checked; not seen in game.
+- **0.18.107, Holding and using items (Motion patch 4, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **Dual flintlocks** (`armory/DualFlintlocks`, `WeaponModDualFlintlockMixin`): a WeaponMod flintlock in each hand
+    fire in turn, main hand first, and each reloads on its own (fire, fire, reload main, reload off). One alone is
+    unchanged.
+  - **Pistol sights** (`client/armory/MusketSights`): the flintlock held ready comes up to the eye line out at its own
+    side, not onto the crosshair (smooth barrel, Andy); no bow pose. Each hand rises on its own. Added to First-person
+    Model's vanilla-hands list like the musket.
+  - **`client/armory/HeldItems`:** flint and steel (and flint and rock) struck two-handed in third person, a chop in
+    first person, sparks off flint and steel; shears brought in to the middle and snipping; compass and clock held up
+    to read (third person: the arm comes up when you look down); any lantern held out and swinging with your step.
+  - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.
