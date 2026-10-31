@@ -9130,5 +9130,17 @@
 	"bestiary.jaymoskingdoms.warchief": "Warchief",
 	"bestiary.jaymoskingdoms.warchief.0": "The biggest of them, with the most scars to show for it.",
 	"bestiary.jaymoskingdoms.warchief.1": "When he roars, step back. When he slams, step aside.",
-	"bestiary.jaymoskingdoms.warchief.2": "The goblins have a king. The orcs want one."
+	"bestiary.jaymoskingdoms.warchief.2": "The goblins have a king. The orcs want one.",
+	"block.jaymoskingdoms.bog_iron_ore": "Bog Iron Ore",
+	"item.jaymoskingdoms.raw_bog_iron": "Raw Bog Iron",
+	"message.jaymoskingdoms.bog_iron.crumbles": "It crumbles to rust in your hands.",
+	"message.jaymoskingdoms.crippled_leg": "Something in your leg gives way.",
+	"entity.jaymoskingdoms.ogre_king": "%1$s %2$s, Ogre King",
+	"entity.jaymoskingdoms.ogre_kings_guard": "King's Guard",
+	"talk.jaymoskingdoms.ogre_king.phase2.0": "OGRES! TO YOUR KING!",
+	"talk.jaymoskingdoms.ogre_king.phase2.1": "You bleed me? Come, all of you!",
+	"talk.jaymoskingdoms.ogre_king.phase3.0": "I'll bury you under my hold!",
+	"talk.jaymoskingdoms.ogre_king.phase3.1": "Stand still, little thing!",
+	"news.jaymoskingdoms.ogre_king.fell": "%s has fallen. His ogres scatter.",
+	"news.jaymoskingdoms.ogre_king.slain": "%2$s has slain %1$s. His ogres scatter."
 }

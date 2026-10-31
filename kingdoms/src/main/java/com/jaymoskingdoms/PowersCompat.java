@@ -1586,6 +1586,43 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
+	// ---- (0.7.426) crippling blows: a broken leg ------------------------------------------------------------------------
+
+	private static boolean lookedForBreak;
+	/** Powers' {@code Wounds.breakPart(LivingEntity, BodyPart, Entity)} and its {@code BodyPart} legs. */
+	private static java.lang.invoke.@Nullable MethodHandle breakPart;
+	private static @Nullable Object leftLeg, rightLeg;
+
+	/**
+	 * (0.7.426) A crippling blow breaks one of {@code target}'s legs ({@code by} struck it). False without Powers (or an
+	 * older one), if it has no legs to break, or that one's broken already.
+	 */
+	public static boolean breakLeg(LivingEntity target, net.minecraft.world.entity.@Nullable Entity by) {
+		if (!lookedForBreak) {
+			lookedForBreak = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> part = Class.forName("com.jaymospowers.core.wounds.BodyPart");
+					breakPart = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Wounds"), "breakPart",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, part, net.minecraft.world.entity.Entity.class));
+					leftLeg = part.getField("LEFT_LEG").get(null);
+					rightLeg = part.getField("RIGHT_LEG").get(null);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no breakable legs (older Powers?)", e);
+				}
+			}
+		}
+		if (breakPart == null) {
+			return false;
+		}
+		boolean left = target.getRandom().nextBoolean();
+		try {
+			return (boolean) breakPart.invoke(target, left ? leftLeg : rightLeg, by) || (boolean) breakPart.invoke(target, left ? rightLeg : leftLeg, by);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.404) bolas: the trip ------------------------------------------------------------------------------------
 
 	private static boolean lookedForTrip;
