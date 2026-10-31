@@ -231,6 +231,17 @@ public final class Captives {
 		return v;
 	}
 
+	/**
+	 * (0.7.439) {@code v}, carried off from {@code home} by raiders ({@link BorderClashes}), held in chains where they are,
+	 * to be brought home.
+	 */
+	static void hold(ServerLevel level, Villager v, Faction home) {
+		v.setAttached(CAPTIVE, new Captive(home.id(), Optional.empty(), level.getGameTime(), FOLK));
+		bind(v, true);
+		v.setPersistenceRequired();
+		LOADED.add(v);
+	}
+
 	/** In chains (they don't move, and nothing harms or even sees them) or out of them. */
 	private static void bind(Villager v, boolean chained) {
 		v.setNoAi(chained);
@@ -472,6 +483,9 @@ public final class Captives {
 	 */
 	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home, int standing) {
 		v.removeAttached(CAPTIVE);
+		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
+		BorderClashes.home(level.getServer(), v.getUUID());
+		Quests.rescued(player, v);
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
 		MinecraftServer server = level.getServer();

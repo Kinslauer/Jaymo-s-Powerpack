@@ -161,6 +161,10 @@ public final class Workers {
 			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
 			return Rulers.step(level, e);
 		}
+		if (BorderClashes.isMan(w)) {
+			// (0.7.439) one of a border clash's party: on the march as it sends him
+			return BorderClashes.villagerStep(level, w);
+		}
 		if (WarParties.isSoldier(w)) {
 			// (0.7.295) a soldier of a war party: on the march as it sends him
 			return WarParties.villagerStep(level, w);

@@ -18,5 +18,7 @@ abstract class VillagerPriceMixin {
 		Purists.prices((Villager)(Object)this, player);
 		// (0.7.221) and one who looks down on your blood
 		Prejudice.prices((Villager)(Object)this, player);
+		// (0.7.439) a haven's own wares, or a human town buying them
+		com.jaymoskingdoms.HavenWares.offers((Villager)(Object)this, player);
 	}
 }

@@ -1010,6 +1010,17 @@ public final class Quests {
 	}
 
 	/** A slay target: an entity type id, {@code #tag}, or {@code *monster}. */
+	/** (0.7.439) {@code child}, carried off from a haven, is home with {@code player}: their rescue quest is done. */
+	static void rescued(ServerPlayer player, LivingEntity child) {
+		for (Quest q : log(player)) {
+			if (q.kind() == Quest.RESCUE && !q.counted() && q.objective().other().map(child.getUUID()::equals).orElse(false)) {
+				put(player, q.withProgress(1));
+				player.sendOverlayMessage(Component.translatable("quest.jaymoskingdoms.objective.return", q.giver().name()).withStyle(ChatFormatting.GREEN));
+				sync(player, true);
+			}
+		}
+	}
+
 	static boolean matches(String target, Entity entity) {
 		Boolean cure = Cures.matches(target, entity);
 		if (cure != null) {
@@ -1017,6 +1028,10 @@ public final class Quests {
 		}
 		if (target.equals("*monster")) {
 			return entity instanceof Enemy;
+		}
+		if (target.equals("*purist_raider")) {
+			// (0.7.439) one of a purist party raiding a haven
+			return BorderClashes.puristRaider(entity);
 		}
 		if (target.startsWith("#")) {
 			Identifier id = Identifier.tryParse(target.substring(1));
@@ -1198,7 +1213,7 @@ public final class Quests {
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
 			case Quest.CHIEF, Quest.WARBAND, Quest.RACE -> Component.translatable(key, q.objective().place());
 			case Quest.STUD -> Component.translatable(key, breedName(q));
-			case Quest.GRUDGE -> Component.translatable(key, q.objective().otherName());
+			case Quest.GRUDGE, Quest.RESCUE -> Component.translatable(key, q.objective().otherName());
 			// (the reasons differ by the king's temper, the title only by how it's done)
 			case Quest.REGICIDE -> Component.translatable(Rulers.her("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", ruled(q)),
 				q.objective().place());
@@ -1274,6 +1289,7 @@ public final class Quests {
 			case Quest.GRUDGE -> Component.translatable(key, o.otherName(), o.count(), x(q), z(q));
 			case Quest.RELIEF -> Component.translatable(key, o.count(), o.place());
 			case Quest.ESCORT -> Component.translatable(key, o.place(), x(q), z(q));
+			case Quest.RESCUE -> Component.translatable(key, o.otherName(), o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -1312,6 +1328,7 @@ public final class Quests {
 			case Quest.RELIEF -> Component.translatable("quest.jaymoskingdoms.objective.rubble", o.place(), o.progress(), o.count());
 			case Quest.ESCORT -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.escorting" : "quest.jaymoskingdoms.objective.escort",
 				q.giver().name(), o.place(), x(q), z(q));
+			case Quest.RESCUE -> Component.translatable("quest.jaymoskingdoms.objective.rescue", o.otherName(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

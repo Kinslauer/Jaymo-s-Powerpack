@@ -7694,3 +7694,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Haven Token:** a new talk answer, "Ask them to vouch for you at the gate", is offered to humans by a haven's grown
   folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
 - Compile-checked; not played.
+
+## 0.7.439: havens with their own life, second half (Havens patch 6b)
+- **Wares only havens make** (`HavenWares`): a haven's traders also sell their blood's wares. Tideborn sell Tide Pearls
+  and Deep Fish (good food), Stoneborn sell Cut Gems and Stoneborn picks/axes (stone, Efficiency II, Unbreaking II),
+  Sylvan sell Sylvan Herbs and Sylvan Bows (Power II), and Warrior-born sell War Hides and War Jerkins (dark-red
+  leather, Protection II). A mixed haven's trader sells one blood's. Traders in human towns buy the five goods a
+  player carries, when their trade has a use for them, at about twice the haven's price.
+- **Border clashes** (`BorderClashes`): now and then the nearest human purist realm (within 1500 blocks) sends 3-6 of
+  its guards against a haven a player is near. They muster on the road, march on the seat, fight its guards for two
+  minutes, then go home. A raided haven owes them one: once a player is near that realm's seat, the haven's militia
+  march on it the same way. Cutting down a raider (or militiaman) earns +8 with the side being raided, and cutting
+  down a defender earns +8 with the raiders, on top of the usual price for killing a realm's guard.
+- **Kidnapped children:** raiders who aren't all cut down may carry off one of the haven's children, left bound at
+  their muster on the road. A villager there cries out and has a rescue quest ready: free the child and they follow
+  you home (the usual captive rewards, plus the quest's).
+- **Haven bounties** (`QuestBoard.haven`): a haven villager with work asks for one of the haven's own troubles 40% of
+  the time: bring the carried-off child home, cut down 3-5 purist raiders (while a purist realm is near), or kill the
+  chief of the nearest camp that preys on them.
+- Compile-checked; not played.
