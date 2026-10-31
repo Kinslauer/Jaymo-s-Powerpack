@@ -153,5 +153,6 @@
   "item.jaymospowers.king_weapon.maul": "Throws the struck back, reeling",
   "jei.jaymospowers.king_head.gutting_hook_blade": "Taken from a tribe's goblin king when he falls (the king at its oldest village). It can't be cast or forged: put it together at the Tool Station with a Tool Handle and a Tool Binding.",
   "jei.jaymospowers.king_head.warchief_cleaver_blade": "Taken from a tribe's orc king when he falls (the warchief at its oldest camp). It can't be cast or forged: put it together at the Tool Station with a Tough Handle and a Tool Binding.",
-  "jei.jaymospowers.king_head.ogre_maul_head": "Taken from an Ogre King when he falls in his hold. It can't be cast or forged: put it together at the Tool Station with a Tough Handle and a Tool Binding."
+  "jei.jaymospowers.king_head.ogre_maul_head": "Taken from an Ogre King when he falls in his hold. It can't be cast or forged: put it together at the Tool Station with a Tough Handle and a Tool Binding.",
+  "message.jaymospowers.lodged.stuck": "Your %s is stuck fast in them. Go and take it."
 }

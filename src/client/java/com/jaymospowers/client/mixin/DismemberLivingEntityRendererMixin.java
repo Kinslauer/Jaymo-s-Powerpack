@@ -19,6 +19,8 @@ abstract class DismemberLivingEntityRendererMixin {
 		Dismembered.extract(entity, state);
 		// (0.15.90) and the bandages and splints that show
 		com.jaymospowers.client.wounds.DressingsLayer.extract(entity, state);
+		// (0.18.118) weapons stuck in the body
+		com.jaymospowers.client.armory.LodgedLayer.extract(entity, state);
 		// (0.18.82) and a wooden or iron limb standing in for a lost one
 		com.jaymospowers.client.wounds.ProstheticLayer.extract(entity, state);
 		// (0.15.151) and a Flame Avatar's burning body

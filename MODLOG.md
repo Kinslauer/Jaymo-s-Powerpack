@@ -4594,3 +4594,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (creaking, rustle): heals in sunlight; Roots, Thorn Volley, Hedge (withers after 30 s), Bloom. Billow (happy ghast,
   aerwhale): floats and carries up to three friends on its back; Downpour, Thunderhead, Gust, Fog. Each has its own
   model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.118, Stuck weapons (Motion patch 8, `docs/Motion-Plan.md`):**
+- Some zombies rise with a weapon stuck in them: a worn sword, axe, dagger or hatchet, shown standing out of the body.
+  On first sight of a player they wrench it out and fight with it. It always drops when they die. (`armory/Lodged`, 7%
+  of natural zombie spawns.)
+- A thrown dagger that hits a zombie without killing it stays in. Anything stuck in a living body is pulled free with an
+  empty hand's use, which hurts them, and drops where they die. Up to three show on a humanoid (`client/armory/LodgedLayer`).
+- A finisher's killing stroke can leave your weapon standing in the body until you go and take it: Run Through 5%,
+  Stabbed Through 8%, Executioner (axes) 12%. The chance halves after 12 bladed finisher kills, thirds after 24, and so
+  on. Never in creative.
+- Andy: dropped weapons. Going down, players and mobs let go of the weapons in their hands, which land a little way off
+  (`core/wounds/DroppedArms`); 1 in 10 hang on and crawl with them, and die still holding them. A mob killed outright
+  drops its weapons too, except for 1 in 5 that die clutching them. Players dying outright drop everything as before.
