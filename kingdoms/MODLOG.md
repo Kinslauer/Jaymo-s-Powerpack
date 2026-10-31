@@ -7645,3 +7645,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - **Monster crowns:** the same kings drop their crown (goblin, orc, ogre). Right-click the air to wear it (drawn on the
   head, +1 armour, +2 Will), or place it as a small block.
 - Drops only when a player had the kill. Compile-checked; not played.
+
+## 0.7.438: havens with their own life, first half (Havens patch 6a)
+- **Haven rulers' titles** (`Rulers.title`): a haven's ruler goes by their blood's title in the boss bar, audiences,
+  introductions and standing: Tide-Father/Tide-Mother and Shore-Warden (Tideborn), Stone-Elder and Stone-Reeve
+  (Stoneborn), Grove-Warden and Grove-Keeper (Sylvan), War-Chief and War-Leader (Warrior-born), High Elder and Elder
+  (mixed). Rules and succession are unchanged.
+- **Banners** (`Outfits.HAVEN_ARMS`, `HavenGates.banners`): each blood has its own arms (Tideborn cyan with waves,
+  Stoneborn grey with bricks, Sylvan green with a flower, Warrior-born red with a skull, mixed purple with a globe).
+  Once a haven's seat is loaded its banner goes up beside it, and its guards' shields bear the arms.
+- **Dress** (`Uniforms`, `tools/gen_uniforms.py havens`): haven guards and folk wear 32 new MCA outfits in their
+  blood's style: shell and net, stone-grey leather, leaf and bark, furs and war paint.
+- **Strangers at the gate** (`HavenGates`): a human within 40 blocks of a haven's seat is stopped by its nearest guard.
+  First a warning, then 10 s later a shove back out with Slowness, and if they keep coming, the guards set on them.
+  Non-humans of any blood walk in, and so does a masked player who passes for one. A human is let in if they carry
+  a Haven Token for that haven, have 400+ reputation there, or walk with an escort: a non-human player, or one of the
+  haven's folk with 40+ hearts.
+- **Haven Token:** a new talk answer, "Ask them to vouch for you at the gate", is offered to humans by a haven's grown
+  folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
+- Compile-checked; not played.

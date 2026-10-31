@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -94,6 +95,27 @@ public final class Outfits {
 		List.of(BannerPatterns.STRIPE_LEFT, BannerPatterns.STRIPE_RIGHT),
 		List.of(BannerPatterns.DIAGONAL_LEFT));
 
+	/**
+	 * (0.7.438, Havens patch 6) A haven's own arms by its blood (its {@link Havens} key), past the end of
+	 * {@link #ORDINARIES}: field, charge and charges. Tideborn waves on sea-blue, Stoneborn masonry on grey, Sylvan a
+	 * flower in a leafy border on green, Warrior-born a skull over teeth on red, a mixed haven a globe on purple.
+	 */
+	private record HavenArms(String blood, DyeColor field, DyeColor charge, List<ResourceKey<BannerPattern>> charges) {
+	}
+
+	private static final List<HavenArms> HAVEN_ARMS = List.of(
+		new HavenArms("tideborn", DyeColor.CYAN, DyeColor.WHITE, List.of(BannerPatterns.TRIANGLES_BOTTOM, BannerPatterns.FLOW)),
+		new HavenArms("stoneborn", DyeColor.LIGHT_GRAY, DyeColor.BLACK, List.of(BannerPatterns.BRICKS, BannerPatterns.TRIANGLE_TOP)),
+		new HavenArms("sylvan", DyeColor.GREEN, DyeColor.YELLOW, List.of(BannerPatterns.FLOWER, BannerPatterns.CURLY_BORDER)),
+		new HavenArms("warriorborn", DyeColor.RED, DyeColor.BLACK, List.of(BannerPatterns.TRIANGLES_BOTTOM, BannerPatterns.SKULL)),
+		new HavenArms("mixed", DyeColor.PURPLE, DyeColor.WHITE, List.of(BannerPatterns.GLOBE, BannerPatterns.BORDER)));
+
+	/** The charges of arms with this {@code ordinary} (a haven's past the end of {@link #ORDINARIES}). */
+	private static List<ResourceKey<BannerPattern>> charges(int ordinary) {
+		return ordinary >= ORDINARIES.size() ? HAVEN_ARMS.get(Math.min(ordinary - ORDINARIES.size(), HAVEN_ARMS.size() - 1)).charges()
+			: ORDINARIES.get(Math.floorMod(ordinary, ORDINARIES.size()));
+	}
+
 	/** Trim patterns a realm may wear (the ones that read well on a mob). */
 	private static final List<ResourceKey<TrimPattern>> PATTERNS = List.of(TrimPatterns.SENTRY, TrimPatterns.DUNE, TrimPatterns.COAST,
 		TrimPatterns.WILD, TrimPatterns.WARD, TrimPatterns.EYE, TrimPatterns.VEX, TrimPatterns.TIDE, TrimPatterns.SNOUT, TrimPatterns.RIB,
@@ -131,7 +153,25 @@ public final class Outfits {
 	static Heraldry heraldry(Faction faction, @Nullable MinecraftServer server) {
 		DyeColor color = server == null ? faction.color() : faction.styleColor(server);
 		boolean vassal = faction.type() == FactionType.FIEFDOM && faction.overlord() >= 0;
-		return Heraldry.of(vassal ? faction.overlord() : faction.id(), color, vassal);
+		Heraldry arms = Heraldry.of(vassal ? faction.overlord() : faction.id(), color, vassal);
+		String haven = server == null ? "" : Havens.of(server, faction);
+		for (int i = 0; i < HAVEN_ARMS.size(); i++) {
+			HavenArms h = HAVEN_ARMS.get(i);
+			if (h.blood().equals(haven)) {
+				// (0.7.438) a haven flies its own blood's arms (a vassal haven bordered as any vassal)
+				return new Heraldry(h.field(), h.charge(), ORDINARIES.size() + i, vassal, arms.pattern(), Outfits.material(h.field()), arms.harness(),
+					arms.armoury());
+			}
+		}
+		return arms;
+	}
+
+	/** (0.7.438) {@code faction}'s arms as a banner of their field colour (a haven's seat flies it, {@link Havens}). */
+	static ItemStack banner(ServerLevel level, Faction faction) {
+		Heraldry arms = heraldry(faction, level.getServer());
+		ItemStack stack = new ItemStack(net.minecraft.world.item.Items.BANNER.pick(arms.field()));
+		stack.set(DataComponents.BANNER_PATTERNS, layers(level.registryAccess(), arms));
+		return stack;
 	}
 
 	/** Dresses {@code folk} for its role in {@code faction}'s arms and {@code climate}'s gear (its role's outfit already on). */
@@ -334,9 +374,13 @@ public final class Outfits {
 
 	/** The charges of the realm's arms, as banner layers (on a shield, or a banner). */
 	static BannerPatternLayers layers(Folk folk, Heraldry arms) {
-		Registry<BannerPattern> patterns = folk.level().registryAccess().lookupOrThrow(Registries.BANNER_PATTERN);
+		return layers(folk.level().registryAccess(), arms);
+	}
+
+	static BannerPatternLayers layers(net.minecraft.core.RegistryAccess access, Heraldry arms) {
+		Registry<BannerPattern> patterns = access.lookupOrThrow(Registries.BANNER_PATTERN);
 		BannerPatternLayers.Builder builder = new BannerPatternLayers.Builder();
-		for (ResourceKey<BannerPattern> key : ORDINARIES.get(arms.ordinary())) {
+		for (ResourceKey<BannerPattern> key : charges(arms.ordinary())) {
 			patterns.get(key).ifPresent(p -> builder.add(p, arms.charge()));
 		}
 		if (arms.bordered()) {
