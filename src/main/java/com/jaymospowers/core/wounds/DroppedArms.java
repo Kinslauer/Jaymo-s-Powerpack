@@ -16,7 +16,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.18.117, Motion patch 8) Andy: "When players or enemy mobs go down or die outright, they drop their weapons to the
+ * (0.18.118, Motion patch 8) Andy: "When players or enemy mobs go down or die outright, they drop their weapons to the
  * ground, in very few cases will they keep it in their hand as they crawl, and some may die with it still in their
  * clutches." Going down, a player or mob lets go of the weapons in its hands (thrown a little way) unless it's one of the
  * few that hang on ({@link #KEEP_DOWN}); one that hung on dies still holding them. A mob killed outright (never down)

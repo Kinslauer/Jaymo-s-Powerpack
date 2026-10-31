@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.117) A mob killed outright mostly lets go of its weapons as it dies (DroppedArms), before its loot and corpse. */
+/** (0.18.118) A mob killed outright mostly lets go of its weapons as it dies (DroppedArms), before its loot and corpse. */
 @Mixin(LivingEntity.class)
 abstract class DroppedArmsDeathMixin {
 	@Inject(method = "die", at = @At("HEAD"))

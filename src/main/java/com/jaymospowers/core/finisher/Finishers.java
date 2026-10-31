@@ -1187,7 +1187,7 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
-		// (0.18.117) now and then the blade stays in them (less, the more you've done this)
+		// (0.18.118) now and then the blade stays in them (less, the more you've done this)
 		com.jaymospowers.armory.Lodged.killingStroke(level, player, body, kind);
 		if (kind.strike == Strike.CRUSH || kind == Kind.GREATSWORD || com.jaymospowers.power.zfighter.ZFighterExecutions.crushes(kind)) {
 			// (0.15.117) a spider under it is crushed flat: legs, no body (Kitchen); a greatsword is heavy enough too (Andy)

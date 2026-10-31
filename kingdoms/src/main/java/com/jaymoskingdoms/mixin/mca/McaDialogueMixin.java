@@ -131,6 +131,14 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.HavenGates.VOUCH_ANSWER.equals(answer) && Languages.understands(player, villager)
+			&& com.jaymoskingdoms.HavenGates.offers(player, villager)) {
+			// (0.7.438) asked to vouch for a human at their haven's gate: a token, if they think well enough of you
+			villager.sendChatMessage(com.jaymoskingdoms.HavenGates.vouch(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Trials.ANSWER.equals(answer) && Languages.understands(player, villager)) {
 			// (0.7.429) asked to see the king: a trial is set
 			villager.sendChatMessage(com.jaymoskingdoms.Trials.ask(player, villager), player);

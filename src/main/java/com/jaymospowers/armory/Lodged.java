@@ -41,7 +41,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 
 /**
- * (0.18.117, Motion patch 8) Stuck weapons. Andy: "You can throw daggers at them or sometimes the run through
+ * (0.18.118, Motion patch 8) Stuck weapons. Andy: "You can throw daggers at them or sometimes the run through
  * animation will leave your sword stuck in them because you are less experienced, axes get stuck with higher frequencies
  * but both low."
  * <ul>

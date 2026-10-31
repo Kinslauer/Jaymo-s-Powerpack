@@ -282,7 +282,20 @@ public final class Rulers {
 
 	/** A ruler's title: King, Queen, Lord or Lady. */
 	static Component title(int role, boolean female) {
-		return Component.translatable("title.jaymoskingdoms." + (role == Folk.LORD ? (female ? "lady" : "lord") : (female ? "queen" : "king")));
+		return Component.translatable("title.jaymoskingdoms." + key(role, female));
+	}
+
+	private static String key(int role, boolean female) {
+		return role == Folk.LORD ? (female ? "lady" : "lord") : (female ? "queen" : "king");
+	}
+
+	/**
+	 * (0.7.438, Havens patch 6) {@code f}'s ruler's title: a haven's ruler takes their blood's (Tide-Mother, Stone-Elder,
+	 * Grove-Warden, War-Chief; a mixed haven's High Elder), anyone else's is King, Queen, Lord or Lady.
+	 */
+	static Component title(@Nullable MinecraftServer server, @Nullable Faction f, int role, boolean female) {
+		String haven = server == null ? "" : Havens.of(server, f);
+		return haven.isEmpty() ? title(role, female) : Component.translatable("title.jaymoskingdoms.haven." + haven + "." + key(role, female));
 	}
 
 	/** Who last ruled {@code faction} (alive or dead), if a villager: their family is first in line. */
@@ -444,7 +457,7 @@ public final class Rulers {
 		}
 		if (mob.tickCount % 5 == 0) {
 			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id,
-				Component.translatable("entity.jaymoskingdoms.ruler_titled", title(role, McaCompat.female(mob)), mob.getDisplayName(), f.name()),
+				Component.translatable("entity.jaymoskingdoms.ruler_titled", title(s, f, role, McaCompat.female(mob)), mob.getDisplayName(), f.name()),
 				role == Folk.LORD ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
 			BossBars.show(level, mob, bar);

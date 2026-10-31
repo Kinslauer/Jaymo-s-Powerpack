@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.18.115) Some natural spawns bring young (Younglings); (0.18.117) some zombies rise with a weapon in them (Lodged). */
+/** (0.18.115) Some natural spawns bring young (Younglings); (0.18.118) some zombies rise with a weapon in them (Lodged). */
 @Mixin(Mob.class)
 abstract class YoungSpawnMixin {
 	@Inject(method = "finalizeSpawn", at = @At("RETURN"))

@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.18.117) Weapons stuck in a humanoid body (Lodged), drawn standing out of its back and sides, blade buried: up to three,
+ * (0.18.118) Weapons stuck in a humanoid body (Lodged), drawn standing out of its back and sides, blade buried: up to three,
  * each in its own spot and lean.
  */
 public final class LodgedLayer {

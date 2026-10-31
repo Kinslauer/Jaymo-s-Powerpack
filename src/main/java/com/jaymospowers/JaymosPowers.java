@@ -109,7 +109,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.layers.Layers.init();
 		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures
 		com.jaymospowers.young.Younglings.init();
-		// (0.18.117) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
+		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
 		com.jaymospowers.armory.Lodged.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();

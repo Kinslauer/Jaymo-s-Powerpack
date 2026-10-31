@@ -4587,7 +4587,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   neighbour takes it in if the keeper dies; a keeper mourns a rare pet that dies.
 - Hidden name-tag looks (`client/pets/NameLooks`), hinted at only in those tales: five names that change how a mob is
   drawn (size or tint). The game doesn't say which.
-- **0.18.117, Stuck weapons (Motion patch 8, `docs/Motion-Plan.md`):**
+- **0.18.117, Scan F (`docs/ScanGaps-Plan.md`), odd bodies:** five new aliens. Ooze (slime, sulfur cube, swets, mud
+  golem): bounces off falls, splits into fighting blobs as it's hurt that rejoin it after; Engulf, Spit, Squeeze
+  (shrinks for one-block gaps), Split. Magma Ooze (magma cube): the same, burning and fireproof. Fuse (creeper):
+  punches pop; Blast Pod, Fuse Dash, Self-Destruct (hold, blow up, re-form; costs band charge), Defuse. Thornwild
+  (creaking, rustle): heals in sunlight; Roots, Thorn Volley, Hedge (withers after 30 s), Bloom. Billow (happy ghast,
+  aerwhale): floats and carries up to three friends on its back; Downpour, Thunderhead, Gust, Fog. Each has its own
+  model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.118, Stuck weapons (Motion patch 8, `docs/Motion-Plan.md`):**
 - Some zombies rise with a weapon stuck in them: a worn sword, axe, dagger or hatchet, shown standing out of the body.
   On first sight of a player they wrench it out and fight with it. It always drops when they die. (`armory/Lodged`, 7%
   of natural zombie spawns.)
