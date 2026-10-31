@@ -4662,3 +4662,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
   after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
   grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1, Kingdoms 0.7.449:** taking a bout in the fight pit no longer teleports you in: the bell waits for you to walk
+  into the ring, and both fighters square up for a breath before the first blow. A bookie met in town leads you to the
+  den instead of dealing in the street; a guard overhearing it starts a crackdown. Villagers no longer pile up on the
+  speakeasy ladder.

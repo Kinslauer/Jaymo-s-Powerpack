@@ -7841,3 +7841,25 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
   till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
 - Compile-checked; not seen in game.
+
+## 0.7.449: fair bouts, the bookie leads you down, crackdowns, a clear ladder (pack 0.19.1)
+- Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in." Nobody is teleported into
+  the ring any more (`FightPit.run`). At the bell's time the bell waits up to a minute (`CALL_TICKS`) for a player on
+  the card to walk into the ring, the bookie calling them in; if they never come the bout's called off and every stake,
+  their entry too, goes back. After the bell both stand in their corners 3 seconds (`GRACE_TICKS`) before anyone
+  swings or a punch counts. A player needs 8 wind (12 health) to take a place (`MIN_WIND`), checked again at the bell,
+  and a blow made bigger by anything else is still never let take them under the yield point.
+- Andy: "if you pay the bookie outside of the speakeasy, he should lead you to it." By day the bookie may be up in town
+  (`Bookies.outAndAbout`). There he won't open his book or take a coin: he says to follow and walks you to the hatch
+  (`Bookies.Walk`), waiting when you fall behind and giving up if you wander 32 blocks off, then goes down first.
+  Come evening he walks home himself.
+- Andy: "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the open are frowned upon and
+  rare." Asking a bookie in the street with a guard within 12 blocks: he's never heard of a den, and the guard has
+  (`Underworld.crackDown`, attachment `den_crackdowns`). A street sale of contraband seen by a guard does the same.
+  For a day: no crook whispers the way, street buyers are 25 less receptive, bookies lead nobody and stay home.
+- Andy: "bug where there are so many villagers stuck on the speakeasy ladder" (video: an unemployed villager wedged in
+  the shaft). The den's hands wandered up the ladder, a replacement was hired a day later, and so on. Now every 2 seconds
+  (`Underworld.keepHome`): the fence, dice-thrower, attendant and fighters found out of their rooms are put back at
+  their spots, a second hand with the same job goes back to town as an ordinary villager, the bookie counts as present
+  anywhere within 64 blocks, and anyone else stuck in the shaft 2 checks running is put out at its nearer end.
+- Compile-checked; not seen in game.
