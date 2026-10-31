@@ -7853,4 +7853,7 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   their hints and reasons, as before) and "Open starts (n)" back.
 - Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
   title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Andy: "i seem unable to select any of these" (the harder life's flaws and switches). Nothing in the click path drops
+  the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
+  same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
 - Compile-checked; not seen in game.

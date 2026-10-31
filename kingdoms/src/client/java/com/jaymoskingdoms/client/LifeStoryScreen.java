@@ -855,8 +855,16 @@ final class LifeStoryScreen extends Screen {
 			// (0.7.420) a flaw or a switch of a harder life
 			int choice = choiceAt(mx, my);
 			if (choice >= 0 && event.button() == 0) {
-				flip(choice);
-				click();
+				// (0.7.449) Andy: "i seem unable to select any of these". A flip is the one click on this screen that undoes
+				// itself when it arrives twice (a row or a chip just picks the same thing again), so a second click on the
+				// same choice straight after the first is taken as the same click
+				long now = System.currentTimeMillis();
+				if (choice != this.lastFlip || now - this.lastFlipAt > FLIP_REPEAT_MS) {
+					flip(choice);
+					click();
+				}
+				this.lastFlip = choice;
+				this.lastFlipAt = now;
 				return true;
 			}
 		}
@@ -1434,6 +1442,11 @@ final class LifeStoryScreen extends Screen {
 	private static final int[] SWITCH_BITS = {Flaws.WARY, Flaws.HUNTED, Flaws.RAGS, Flaws.NOTHING};
 	/** (0.7.420) The choice rows as last laid out: {unscrolled y, height, index} (0..3 a flaw, 4..7 a switch). */
 	private final List<int[]> choiceRows = new ArrayList<>();
+	/** (0.7.449) The last choice flipped and when, so a click delivered twice flips it once. */
+	private int lastFlip = -1;
+	private long lastFlipAt;
+	/** (0.7.449) A click on the same choice this soon after the last (ms) is the same click. */
+	static final long FLIP_REPEAT_MS = 250L;
 
 	/** The effect line of choice {@code i}, with its numbers. */
 	private static Component effect(int i) {
