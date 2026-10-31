@@ -80,7 +80,7 @@ final class LifeStoryScreen extends Screen {
 	 * and how far (pixels).
 	 */
 	static final int ARROW_W = 16, STRIP_H = 24, CELL_W = 22, ICON_WELL = 64, ICON_SCALE = 3;
-	/** (0.7.450) The Locked / Open starts button's width, in the road's header. */
+	/** (0.7.451) The Locked / Open starts button's width, in the road's header. */
 	static final int LOCKED_W = 96;
 	static final float TEXT_SHARE = 0.44F;
 	static final long SLIDE_MS = 220L;
@@ -117,7 +117,7 @@ final class LifeStoryScreen extends Screen {
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
 	/**
-	 * (0.7.450) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
+	 * (0.7.451) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
 	 * Whether the carousel shows the locked starts instead of the open ones.
 	 */
 	private boolean showLocked;
@@ -586,7 +586,7 @@ final class LifeStoryScreen extends Screen {
 		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
 		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
 		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
-		// (0.7.450) the locked starts, in a menu of their own
+		// (0.7.451) the locked starts, in a menu of their own
 		this.lockedButton = addRenderableWidget(Button.builder(Component.empty(), b -> flipLocked())
 			.bounds(left() + panelW() - 8 - LOCKED_W - 64, top() + 4, LOCKED_W, 14).build());
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
@@ -855,7 +855,7 @@ final class LifeStoryScreen extends Screen {
 			// (0.7.420) a flaw or a switch of a harder life
 			int choice = choiceAt(mx, my);
 			if (choice >= 0 && event.button() == 0) {
-				// (0.7.450) Andy: "i seem unable to select any of these". A flip is the one click on this screen that undoes
+				// (0.7.451) Andy: "i seem unable to select any of these". A flip is the one click on this screen that undoes
 				// itself when it arrives twice (a row or a chip just picks the same thing again), so a second click on the
 				// same choice straight after the first is taken as the same click
 				long now = System.currentTimeMillis();
@@ -1107,7 +1107,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.450) The starts the carousel goes through, as indices into the road's answers: those open to this story, or
+	 * (0.7.451) The starts the carousel goes through, as indices into the road's answers: those open to this story, or
 	 * ({@code locked}) the rest, each in the road's order.
 	 */
 	private static List<Integer> roadView(boolean locked) {
@@ -1125,7 +1125,7 @@ final class LifeStoryScreen extends Screen {
 		return roadView(this.showLocked);
 	}
 
-	/** (0.7.450) Over to the locked starts, or back to the open ones (the first of them shown, unless one already is). */
+	/** (0.7.451) Over to the locked starts, or back to the open ones (the first of them shown, unless one already is). */
 	private void flipLocked() {
 		this.showLocked = !this.showLocked;
 		List<Integer> view = roadView();
@@ -1194,7 +1194,7 @@ final class LifeStoryScreen extends Screen {
 	private void carouselPage(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		List<Answer> roads = Question.ROAD.answers();
 		int ri = Question.ROAD.ordinal();
-		// (0.7.450) the open starts, or the locked ones; the locked menu with none left in it goes back to the open
+		// (0.7.451) the open starts, or the locked ones; the locked menu with none left in it goes back to the open
 		List<Integer> view = roadView();
 		if (this.showLocked && view.isEmpty()) {
 			this.showLocked = false;
@@ -1442,10 +1442,10 @@ final class LifeStoryScreen extends Screen {
 	private static final int[] SWITCH_BITS = {Flaws.WARY, Flaws.HUNTED, Flaws.RAGS, Flaws.NOTHING};
 	/** (0.7.420) The choice rows as last laid out: {unscrolled y, height, index} (0..3 a flaw, 4..7 a switch). */
 	private final List<int[]> choiceRows = new ArrayList<>();
-	/** (0.7.450) The last choice flipped and when, so a click delivered twice flips it once. */
+	/** (0.7.451) The last choice flipped and when, so a click delivered twice flips it once. */
 	private int lastFlip = -1;
 	private long lastFlipAt;
-	/** (0.7.450) A click on the same choice this soon after the last (ms) is the same click. */
+	/** (0.7.451) A click on the same choice this soon after the last (ms) is the same click. */
 	static final long FLIP_REPEAT_MS = 250L;
 
 	/** The effect line of choice {@code i}, with its numbers. */

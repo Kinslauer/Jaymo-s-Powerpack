@@ -15,7 +15,7 @@ abstract class MobSwingModelFeatureRendererMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;setupAnim(Ljava/lang/Object;)V",
 		shift = At.Shift.AFTER))
 	private void jaymoskingdoms$swing(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
-		// (0.7.450) the list lives in ModelPoses, so a model can be posed this way ahead of its draw too
+		// (0.7.451) the list lives in ModelPoses, so a model can be posed this way ahead of its draw too
 		com.jaymoskingdoms.client.ModelPoses.after(submit.model(), submit.state());
 	}
 }

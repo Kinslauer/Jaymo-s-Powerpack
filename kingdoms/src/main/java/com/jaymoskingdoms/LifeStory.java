@@ -160,7 +160,7 @@ public final class LifeStory {
 		Heritage.Kind.ORC)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
-	/** (0.7.450) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
+	/** (0.7.451) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
 	static final int FATE_TITLE_IN = 20, FATE_TITLE_STAY = 200, FATE_TITLE_OUT = 40;
 
 	public static final String FATE = "fate";
@@ -1145,7 +1145,7 @@ public final class LifeStory {
 		player.sendSystemMessage(Component.translatable(fated ? "message.jaymoskingdoms.story.fated" : "message.jaymoskingdoms.story.begun",
 			Component.translatable(road)).withStyle(ChatFormatting.GOLD));
 		if (fated) {
-			// (0.7.450) Andy: "there is nothing that tells you the start you got if you choose the random start": fate's pick
+			// (0.7.451) Andy: "there is nothing that tells you the start you got if you choose the random start": fate's pick
 			// across the screen as they wake, held past the few seconds the land takes to load
 			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(FATE_TITLE_IN, FATE_TITLE_STAY, FATE_TITLE_OUT));
 			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(

@@ -3,7 +3,7 @@ package com.jaymoskingdoms.client;
 import net.minecraft.client.model.Model;
 
 /**
- * (0.7.450) What's done to a model right after it's posed for drawing (the mixin on {@code ModelFeatureRenderer.prepareModel}),
+ * (0.7.451) What's done to a model right after it's posed for drawing (the mixin on {@code ModelFeatureRenderer.prepareModel}),
  * in one place, so a model whose bones are read before it's drawn can be posed the same way first ({@link BioForms#submit}).
  */
 public final class ModelPoses {

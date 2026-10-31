@@ -4671,5 +4671,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.2, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
   storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
   "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
-- **0.19.3, Kingdoms 0.7.450:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
+- **0.19.3, Kingdoms 0.7.450:** taking a bout in the fight pit no longer teleports you in: the bell waits for you to walk
+  into the ring, and both fighters square up for a breath before the first blow. A bookie met in town leads you to the
+  den instead of dealing in the street; a guard overhearing it starts a crackdown. Villagers no longer pile up on the
+  speakeasy ladder.
+- **0.19.4, Kingdoms 0.7.451:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
   only the starts open to you, with the rest under "Locked"; "Let fate decide" tells you the start it picked.
