@@ -46,6 +46,13 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Moving, leaving the ground, or being hurt breaks it; keep holding the key and you settle in again once still. The
  * state is synced to everyone so every client draws the pose (MeditatePose).
+ *
+ * <p>(Motion patch 0) <b>Sit anywhere</b>, after Actions &amp; Stuff's idea (Andy: "make the look down the meditation
+ * trigger as well, leaving I to shadowboxing for those that have it"): anyone who stands still, sneaking and looking
+ * down past {@link #SIT_PITCH}, for {@link #SIT_TICKS} (5 s) sits down cross-legged where they are, and stays sat after
+ * letting go of Sneak, until they move, jump or are hurt. With the Meditation perk that sitting is meditating (the
+ * mastery comes as it always did); without it, it's only a rest. The Meditate key (I) is the shadowboxers' now (a Z
+ * Fighter or a Gravity user, still opened by the Meditation perk); anyone else pressing it is told how to sit.
  */
 public final class Meditate {
 	/** Ticks of stillness before it starts counting (sitting down, finding the rhythm). */
@@ -59,6 +66,9 @@ public final class Meditate {
 	static final double STILL = 0.0025;
 	/** After a hit, this long before you can settle again (ticks). */
 	static final int HURT_BREAK = 40;
+	/** (Motion patch 0) Sit anywhere: looking down at least this far (degrees), sneaking and still, this long (ticks), sits you down. */
+	public static final float SIT_PITCH = 65.0F;
+	public static final int SIT_TICKS = 100;
 
 	public static final int MEDITATING = 0, SHADOWBOXING = 1, SHADOWBOXING_HEAVY = 2;
 
@@ -90,6 +100,9 @@ public final class Meditate {
 
 	/** Players holding the key; where each was last tick; when each may settle again after a hit (game time). */
 	private static final Set<UUID> HELD = new HashSet<>();
+	/** (Motion patch 0) Players sat down by looking down (no key held); how long each has been looking down, sneaking and still. */
+	private static final Set<UUID> SITTING = new HashSet<>();
+	private static final Map<UUID, Integer> LOOKING_DOWN = new HashMap<>();
 	private static final Map<UUID, Vec3> LAST = new HashMap<>();
 	private static final Map<UUID, Long> BROKEN_UNTIL = new HashMap<>();
 
@@ -115,9 +128,12 @@ public final class Meditate {
 		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, ctx) -> key(ctx.player(), payload.down()));
 		ServerTickEvents.END_SERVER_TICK.register(Meditate::tick);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
-			if (entity instanceof ServerPlayer player && damageTaken > 0.0F && HELD.contains(player.getUUID())) {
-				BROKEN_UNTIL.put(player.getUUID(), player.level().getGameTime() + HURT_BREAK);
-				stop(player);
+			if (entity instanceof ServerPlayer player && damageTaken > 0.0F) {
+				LOOKING_DOWN.remove(player.getUUID());
+				if (HELD.contains(player.getUUID()) || SITTING.remove(player.getUUID())) {
+					BROKEN_UNTIL.put(player.getUUID(), player.level().getGameTime() + HURT_BREAK);
+					stop(player);
+				}
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
@@ -125,6 +141,8 @@ public final class Meditate {
 			HELD.clear();
 			LAST.clear();
 			BROKEN_UNTIL.clear();
+			SITTING.clear();
+			LOOKING_DOWN.clear();
 		});
 	}
 
@@ -142,14 +160,22 @@ public final class Meditate {
 
 	private static void key(ServerPlayer player, boolean down) {
 		if (!down) {
-			forget(player.getUUID());
-			stop(player);
+			// (Motion patch 0) letting go only ends a held shadowbox, never a sit
+			if (HELD.remove(player.getUUID())) {
+				stop(player);
+			}
+			return;
+		}
+		if (kind(player) == MEDITATING) {
+			// (Motion patch 0) the key is the shadowboxers'; everyone else sits by looking down
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.meditate.sit").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		if (rank(player) <= 0) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.meditate.locked").withStyle(ChatFormatting.GRAY));
 			return;
 		}
+		SITTING.remove(player.getUUID());
 		HELD.add(player.getUUID());
 	}
 
@@ -157,6 +183,8 @@ public final class Meditate {
 		HELD.remove(id);
 		LAST.remove(id);
 		BROKEN_UNTIL.remove(id);
+		SITTING.remove(id);
+		LOOKING_DOWN.remove(id);
 	}
 
 	private static void stop(ServerPlayer player) {
@@ -182,27 +210,59 @@ public final class Meditate {
 			&& !player.isSleeping() && !player.getAbilities().flying && !player.isFallFlying() && !Crawl.crawling(player);
 	}
 
+	/**
+	 * (Motion patch 0) Sit anywhere: counts how long each player has stood still, sneaking and looking down, and sits
+	 * them down once it's {@link #SIT_TICKS}. Swinging or using an item (building a bridge, digging down) resets it.
+	 */
+	private static void watchForSitting(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			UUID id = player.getUUID();
+			if (HELD.contains(id) || SITTING.contains(id)) {
+				continue;
+			}
+			Vec3 at = player.position();
+			Vec3 was = LAST.put(id, at);
+			boolean still = was != null && at.distanceToSqr(was) < STILL;
+			if (!still || !player.isShiftKeyDown() || player.getXRot() < SIT_PITCH || player.isSwinging() || player.isUsingItem()
+				|| !canMeditate(player) || BROKEN_UNTIL.getOrDefault(id, 0L) > player.level().getGameTime()) {
+				LOOKING_DOWN.remove(id);
+				continue;
+			}
+			if (LOOKING_DOWN.merge(id, 1, Integer::sum) >= SIT_TICKS) {
+				LOOKING_DOWN.remove(id);
+				SITTING.add(id);
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
-		if (HELD.isEmpty()) {
+		watchForSitting(server);
+		if (HELD.isEmpty() && SITTING.isEmpty()) {
 			return;
 		}
-		for (UUID id : HELD.toArray(new UUID[0])) {
+		Set<UUID> sessions = new HashSet<>(HELD);
+		sessions.addAll(SITTING);
+		for (UUID id : sessions) {
 			ServerPlayer player = server.getPlayerList().getPlayer(id);
 			if (player == null) {
 				forget(id);
 				continue;
 			}
+			boolean sat = !HELD.contains(id);
 			ServerLevel level = player.level();
 			long now = level.getGameTime();
 			Vec3 at = player.position();
 			Vec3 was = LAST.put(id, at);
 			boolean still = was != null && at.distanceToSqr(was) < STILL;
 			if (!still || !canMeditate(player) || BROKEN_UNTIL.getOrDefault(id, 0L) > now) {
+				// moved, jumped or hit: a held key settles in again once still; a sit is over until you sit again
+				SITTING.remove(id);
 				stop(player);
 				continue;
 			}
 			State state = player.getAttached(STATE);
-			int kind = kind(player);
+			// sat down by looking down: always the cross-legged sit, shadowboxers too
+			int kind = sat ? MEDITATING : kind(player);
 			int combos = Shadowbox.combos(Mastery.unlocked(player));
 			if (state == null) {
 				state = new State(now, kind, combos);
@@ -216,14 +276,15 @@ public final class Meditate {
 			if (time < SETTLE) {
 				continue;
 			}
-			int perPoint = TICKS_PER_POINT[Math.min(TICKS_PER_POINT.length - 1, rank(player))];
-			// a Gravity user's shadowboxing only pays beside a partner (another shadowboxer)
-			boolean pays = !Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE) || partnered(player);
+			int rank = rank(player);
+			int perPoint = TICKS_PER_POINT[Math.min(TICKS_PER_POINT.length - 1, rank)];
+			// a Gravity user's shadowboxing only pays beside a partner (another shadowboxer); a plain sit only with the perk
+			boolean pays = sat ? rank > 0 : !Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE) || partnered(player);
 			if (pays && (time - SETTLE) % perPoint == perPoint - 1) {
 				Mastery.practice(player, 1);
 			}
 			if (kind == MEDITATING) {
-				if (time % 20 == 0) {
+				if (pays && time % 20 == 0) {
 					level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.3, 0.4, 0.15);
 				}
 			} else {

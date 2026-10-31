@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
-/** The Meditate key (I by default): held, it tells the server; let go (or a screen opens), it tells it again. */
+/** The Meditate key (I by default; shown as Shadowbox since Motion patch 0): held, it tells the server; let go (or a screen opens), it tells it again. */
 final class MeditateClient {
 	private static KeyMapping key;
 	private static boolean wasDown;

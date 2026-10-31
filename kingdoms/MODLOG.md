@@ -7497,8 +7497,6 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Andy: "tidings can now be nailed this way and posted on boards in towns ... you may just not hear of some news". World
   news is kept (`Post.POSTED`, 3 days) and pinned on town boards as "Word from abroad" (`town|tidings.<id>|<board>|t`),
   each town hearing about 70% of it; a bird brings a piece only when it names you or your realm (`Post.concerns`).
-- Compile-checked only; not played.
-
 ## 0.7.425: the tribes and their grudge (Havens patch 1)
 - `Tribes`: every goblin village and orc camp belongs to its brood's tribe in a 1536-block region; the oldest camp is the
   king's seat. One grudge per tribe per player (0-100): a kill +4, a king or warchief +30, the pedlar +25, the rival
@@ -7517,7 +7515,13 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
 - Questioning a greenskin: "What does your king think of me?" (`Questioning.MOOD`).
 - Compile-checked only; not played.
 
-## 0.7.426: the ogre tribe, bog iron and crippling blows (Havens patch 2, first half)
+## 0.7.426: Sure Footing leaves the tree (pack 0.18.99)
+- Andy: give everyone the landing roll. Sure Footing is gone from Stealth's Freerun page; ranks saved under
+  `sure_footing` count for nothing, so their points come back. Bar Swing moved up into its slot (needs Climber now).
+  Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
+- Compile-checked only; not played.
+
+## 0.7.427: the ogre tribe, bog iron and crippling blows (Havens patch 2, first half)
 - `OgreHolds`: up to 3 ogre outposts per region (1536 blocks) in plains and swamps, rising 64-96 blocks from a player
   away from settlements: a broken ring of mossy stones, a log lean-to, a bone pile, a fire and a chest of scraps; led by a
   two-headed brute (plains) or a cave ogre (swamps) with two ogres. Once a region has had an outpost, its ogre hold may
