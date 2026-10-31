@@ -68,7 +68,7 @@ touch Kingdoms too, 9 is Kingdoms/Kitchen. Pairs that can run side by side (diff
   meditating. The I key is renamed Shadowbox and only does something for Z Fighters and Gravity users; anyone else
   pressing it gets a hint on how to sit.
 
-### Patch 1, Body motion and temperaments (Powers 0.18.100 + Kingdoms 0.7.427; picks torso-lag, strafe-lean, hurt-flinch, scared-idle, scared-flee)
+### Patch 1, Body motion and temperaments (Powers 0.18.101 + Kingdoms 0.7.428; picks torso-lag, strafe-lean, hurt-flinch, scared-idle, scared-flee)
 - **Torso twist** (`client/BodyMotion`): the chest turns `TORSO_SHARE` (a third) of the way after the head, at most
   `TORSO_MAX` (22) degrees, shoulders carried round; all players. Vanilla already lets the body lag the head.
 - **Strafe lean:** while locked on (`LockOn.LOCKED`, a new synced flag), side steps lean the body `STRAFE_LEAN` (9)

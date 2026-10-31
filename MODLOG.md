@@ -4438,12 +4438,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   mimic and our machines), and those who carry no DNA (farm animals, the walking dead, illagers, piglins, villagers and
   every MCA/Kingdoms folk, hornkin, the Piglin King, our named people, demons, the aerbunny). Mod mobs match by id, so a
   missing mod never matches. Compile-checked; not seen in game.
-- **0.18.100, Body motion and temperaments (Motion patch 1, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+- **0.18.101, Body motion and temperaments (Motion patch 1, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
   - **`client/BodyMotion`**, laid over every player's model (Fresh Animations not paused) only while none of our poses
     is on: the chest turns about a third of the way after the head (max 22 degrees, shoulders carried round); locked on
     (`LockOn.LOCKED`, new synced flag), side steps lean the body into the move; a hit tips the body away from where it
     came from while the red flash lasts (not while downed).
-  - **Player temperaments** (Kingdoms 0.7.427): the life story picks one of the 12 for good. Timid and suspicious
+  - **Player temperaments** (Kingdoms 0.7.428): the life story picks one of the 12 for good. Timid and suspicious
     players hunch, glance about and draw their hands in when it's dark, they're under 40% health or a monster is within
     10 blocks; hotheaded ones stand with arms tense and forward; gloomy ones slump with the head hung; cheerful ones
     bounce as they walk; brave ones show a third of the flinch.
