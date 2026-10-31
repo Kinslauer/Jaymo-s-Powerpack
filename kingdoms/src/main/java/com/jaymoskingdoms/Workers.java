@@ -98,6 +98,11 @@ public final class Workers {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);
 		}
+		Boolean balmed = InBalming.step(level, w);
+		if (balmed != null) {
+			// (0.7.433) an orc or goblin a spirit in-balmed: fighting for their keeper, or at their side
+			return balmed;
+		}
 		if (w.role() == Looters.LOOTER && !(mob instanceof Folk)) {
 			// (0.7.295) a looter: his creeping and robbing are Looters' doing
 			return true;

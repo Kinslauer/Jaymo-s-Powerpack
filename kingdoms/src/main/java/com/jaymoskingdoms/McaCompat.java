@@ -631,6 +631,11 @@ public final class McaCompat {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
 		}
+		Boolean balmed = InBalming.foe(guard, target);
+		if (balmed != null) {
+			// (0.7.433) an in-balmed one never goes for his keeper or their others
+			return balmed;
+		}
 		Boolean sworn = SwornCaptains.foe(guard, target);
 		if (sworn != null) {
 			// (0.7.433) a sworn captain at his lord's side, or a camp standing back from a challenge

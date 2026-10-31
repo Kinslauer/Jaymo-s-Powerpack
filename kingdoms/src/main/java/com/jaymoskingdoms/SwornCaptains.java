@@ -47,8 +47,8 @@ import org.jspecify.annotations.Nullable;
  * it; run or fall and he climbs. Never come and he calls you a coward on the post. Whenever a captain swears to have your
  * head (a coward, a turncoat, one back from the dead you killed), his death threat goes up on the town boards.</li>
  * <li><b>Turning captains.</b> A downed captain stared down with Valor's coating up (Tempered or better, his rank no more
- * than {@value #VALOR_REACH} past yours; never a Deathless one), or bound by Varro's Binding (Varro, level
- * {@code BINDING_LEVEL}), is sworn to you: he gets up, leaves his camp and follows you as MCA's followers do. Ask him in
+ * than {@value #VALOR_REACH} past yours; never a Deathless one), or calmed by Ambrose's In-balming ({@link InBalming}),
+ * is sworn to you: he gets up, leaves his camp and follows you as MCA's followers do. Ask him in
  * talk to <b>spy</b> on his old tribe (back in {@value #SPY_DAYS} days with what he heard of its captains) or to <b>lead a
  * raid</b> on its nearest camp (settled at dawn: a rival captain falls and he brings back loot, or he falls). Proud and
  * spiteful ones may turn back on you at dawn ({@link #BETRAY_PROUD}, {@link #BETRAY_SPITEFUL}; half that if bound).</li>
@@ -309,7 +309,7 @@ public final class SwornCaptains {
 		return true;
 	}
 
-	/** (Varro's Binding) {@code player} binds the downed captain {@code seen} to them. False if he's no downed captain, or a chief. */
+	/** (Ambrose's In-balming, {@link InBalming}) {@code player} binds the downed captain {@code seen} to them. False if he's no downed captain, or a chief. */
 	public static boolean bind(ServerLevel level, ServerPlayer player, LivingEntity seen) {
 		Captain c = seen instanceof Mob m && Captains.starable(m) ? Captains.of(seen) : null;
 		if (c == null || c.chief() || c.fallen() || sworn(level.getServer(), c.id())) {

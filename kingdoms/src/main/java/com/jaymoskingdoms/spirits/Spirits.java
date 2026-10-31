@@ -650,9 +650,9 @@ public final class Spirits {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spirit.level", Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name"), level)
 			.withStyle(ChatFormatting.AQUA));
 		SpiritVoice.sayNow(player, state.kind(), "level");
-		if (state.kind() == VARRO && state.level() < Varro.BINDING_LEVEL && level >= Varro.BINDING_LEVEL) {
-			// (0.7.433) Varro remembers the leagues of orcs he led, and teaches the Binding
-			SpiritVoice.sayNow(player, VARRO, "teach");
+		if (state.level() < com.jaymoskingdoms.InBalming.LEVEL && level >= com.jaymoskingdoms.InBalming.LEVEL) {
+			// (0.7.433) each spirit teaches its In-balming (Varro remembers the leagues of orcs he led)
+			SpiritVoice.sayNow(player, state.kind(), "teach");
 		}
 	}
 

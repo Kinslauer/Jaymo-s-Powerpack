@@ -61,14 +61,6 @@ public final class Varro extends Spirit {
 	static final double ARCHER_RANGE = 24.0;
 	/** A folk's javelin hits this hard before the spirit's level counts. */
 	static final float FOLK_JAVELIN = 10.0F;
-	/**
-	 * (0.7.433) Binding (Havens patch 4b; Andy: "learning a spell from Varro who remembers commanding leagues of orcs"): the
-	 * level it's taught at, its mana, its wait (ticks), and how far off the downed captain may lie.
-	 */
-	public static final int BINDING_LEVEL = 4;
-	static final float BINDING_COST = 40.0F;
-	static final int BINDING_COOLDOWN = 2400;
-	static final double BINDING_REACH = 6.0;
 
 	/** A mark: whose, and until when. */
 	private record Mark(UUID owner, long until) {
@@ -88,7 +80,7 @@ public final class Varro extends Spirit {
 		MOVES.add(new VolleyMove());
 		MOVES.add(new BombardMove());
 		MOVES.add(new SpearWallMove());
-		MOVES.add(new BindingMove());
+		MOVES.add(new InBalm(Spirits.VARRO));
 		MOVES.add(SpiritExecutions.move("execute_varro", Spirits.VARRO));
 	}
 
@@ -445,65 +437,6 @@ public final class Varro extends Spirit {
 			level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.TRIDENT_HIT_GROUND, SoundSource.PLAYERS, 1.0F, 0.8F);
 			PowersCompat.shake(player, 0.3F);
 			said(player);
-			return true;
-		}
-	}
-
-	/**
-	 * (0.7.433) Binding: a downed captain of a tribe (the one you look at, or the nearest in reach) is sworn to you
-	 * ({@link com.jaymoskingdoms.SwornCaptains#bind}). Nothing to bind, nothing spent.
-	 */
-	private static final class BindingMove implements Move {
-		@Override
-		public String id() {
-			return "binding";
-		}
-
-		@Override
-		public float cost() {
-			return BINDING_COST;
-		}
-
-		@Override
-		public int cooldown() {
-			return BINDING_COOLDOWN;
-		}
-
-		@Override
-		public int level() {
-			return BINDING_LEVEL;
-		}
-
-		@Override
-		public int pose() {
-			return Poses.HOLD;
-		}
-
-		@Override
-		public int intent() {
-			return Mana.WILL;
-		}
-
-		@Override
-		public boolean cast(ServerPlayer player, SpiritState state, int charge) {
-			ServerLevel level = (ServerLevel)player.level();
-			LivingEntity seen = Arcana.sighted(player);
-			if (seen == null || seen.distanceTo(player) > BINDING_REACH || !com.jaymoskingdoms.SwornCaptains.bind(level, player, seen)) {
-				LivingEntity nearest = null;
-				for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BINDING_REACH),
-					e -> e instanceof net.minecraft.world.entity.Mob m && com.jaymoskingdoms.Captains.starable(m) && player.hasLineOfSight(e))) {
-					if (nearest == null || e.distanceTo(player) < nearest.distanceTo(player)) {
-						nearest = e;
-					}
-				}
-				if (nearest == null || !com.jaymoskingdoms.SwornCaptains.bind(level, player, nearest)) {
-					return false;
-				}
-				seen = nearest;
-			}
-			Mana.sendSeen(level, Mana.MOTE, seen.getX(), seen.getY(0.6), seen.getZ(), 24, 0.4, 0.6, 0.4, 0.05);
-			level.sendParticles(SpiritJavelin.AMBER, seen.getX(), seen.getY(0.6), seen.getZ(), 20, 0.4, 0.6, 0.4, 0.0);
-			SpiritVoice.sayNow(player, Spirits.VARRO, "bound");
 			return true;
 		}
 	}
