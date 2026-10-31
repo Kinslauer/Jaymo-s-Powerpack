@@ -225,6 +225,17 @@ public final class OgreHolds {
 		return e.entityTags().contains(KING_TAG);
 	}
 
+	/** (0.7.442) Where every standing hold's king sits (its centre), by its king's id. */
+	static Map<UUID, BlockPos> holds(MinecraftServer server) {
+		Map<UUID, BlockPos> out = new HashMap<>();
+		for (Site s : sites(server)) {
+			if (s.hold() && !s.cleared()) {
+				out.put(s.leader(), s.at());
+			}
+		}
+		return out;
+	}
+
 	/** The region's hold, standing or fallen, or null if none rose there yet. */
 	private static @Nullable Site hold(MinecraftServer server, String region) {
 		for (Site s : sites(server)) {

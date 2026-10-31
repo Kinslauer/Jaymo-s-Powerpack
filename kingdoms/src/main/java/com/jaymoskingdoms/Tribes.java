@@ -227,14 +227,20 @@ public final class Tribes {
 		return tribe(server, tribe).grudge().getOrDefault(player.toString(), 0);
 	}
 
-	/** {@code player}'s grudge with {@code tribe} moves by {@code by} (kept within 0 and {@link #MOST}). */
+	/**
+	 * {@code player}'s grudge with {@code tribe} moves by {@code by} (kept within {@code -}{@link TribePacts#FAVOUR_MOST} and
+	 * {@link #MOST}: (0.7.442) below nothing is the tribe's favour, {@link TribePacts}). A non-human's grudge rises slower.
+	 */
 	static void add(MinecraftServer server, UUID player, String tribe, int by) {
 		if (by > 0 && SwornCaptains.rules(server, tribe, player)) {
 			// (0.7.433) your own captain sits its seat
 			return;
 		}
+		if (by > 0) {
+			by = TribePacts.grudgeShare(server, player, by);
+		}
 		Tribe t = tribe(server, tribe);
-		int now = Math.max(0, Math.min(MOST, t.grudge().getOrDefault(player.toString(), 0) + by));
+		int now = Math.max(-TribePacts.FAVOUR_MOST, Math.min(MOST, t.grudge().getOrDefault(player.toString(), 0) + by));
 		Map<String, Integer> grudge = new HashMap<>(t.grudge());
 		if (now == 0) {
 			grudge.remove(player.toString());
@@ -242,6 +248,15 @@ public final class Tribes {
 			grudge.put(player.toString(), now);
 		}
 		put(server, tribe, new Tribe(Map.copyOf(grudge), t.truce(), t.hunted()));
+		TribePacts.favoured(server, tribe, now);
+	}
+
+	/** (0.7.442) {@code player}'s grudge with {@code tribe} wiped clean (their favour, if any, kept). */
+	static void clear(MinecraftServer server, UUID player, String tribe) {
+		int g = grudge(server, player, tribe);
+		if (g > 0) {
+			add(server, player, tribe, -g);
+		}
 	}
 
 	/** {@code player} is under truce with {@code tribe}. */
@@ -251,7 +266,7 @@ public final class Tribes {
 
 	/** A truce: the grudge wiped clean, and {@link #TRUCE_DAYS} days of peace. */
 	static void makeTruce(MinecraftServer server, UUID player, String tribe) {
-		add(server, player, tribe, -MOST);
+		clear(server, player, tribe);
 		Tribe t = tribe(server, tribe);
 		Map<String, Long> truce = new HashMap<>(t.truce());
 		truce.put(player.toString(), Factions.level(server).getGameTime() + 24000L * TRUCE_DAYS);
@@ -270,7 +285,10 @@ public final class Tribes {
 			return false;
 		}
 		String tribe = of(mob);
-		return tribe != null && (truce(player.level().getServer(), player.getUUID(), tribe) || SwornCaptains.rules(player.level().getServer(), tribe, player.getUUID()));
+		MinecraftServer server = player.level().getServer();
+		// ((0.7.442) and one in its good books)
+		return tribe != null && (truce(server, player.getUUID(), tribe) || SwornCaptains.rules(server, tribe, player.getUUID())
+			|| grudge(server, player.getUUID(), tribe) <= TribePacts.FRIEND_AT);
 	}
 
 	/** Someone died: one of a tribe's at a player's hand raises their grudge (and lowers it with the rival brood's tribe). */
@@ -295,16 +313,19 @@ public final class Tribes {
 	static Component mood(ServerPlayer player, String tribe, LivingEntity speaker) {
 		MinecraftServer server = player.level().getServer();
 		int g = grudge(server, player.getUUID(), tribe);
-		String band = truce(server, player.getUUID(), tribe) ? "truce" : g >= MOOD_HUNTED ? "hunted" : g >= MOOD_ANGRY ? "angry" : g >= MOOD_WARY ? "wary" : "calm";
+		String band = g <= TribePacts.ALLY_AT ? "friend" : truce(server, player.getUUID(), tribe) ? "truce" : g >= MOOD_HUNTED ? "hunted" : g >= MOOD_ANGRY ? "angry" : g >= MOOD_WARY ? "wary" : "calm";
 		return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.mood." + band + "." + speaker.getRandom().nextInt(3),
 			Recollections.nameTo(player, speaker), name(tribe));
 	}
 
-	/** {@code player} may offer tribute to {@code villager}: a tribe's chief or its pedlar, and they bear a grudge. */
+	/**
+	 * {@code player} may offer tribute to {@code villager}: a tribe's chief or its pedlar, and they bear a grudge, or
+	 * (0.7.442) a gift for its favour while it isn't at its most.
+	 */
 	public static boolean takesTribute(ServerPlayer player, LivingEntity villager) {
 		String tribe = of(villager);
 		return tribe != null && villager instanceof Worker w && (Greenskins.chief(w.role()) || Pedlars.pedlar(villager))
-			&& grudge(player.level().getServer(), player.getUUID(), tribe) > 0;
+			&& grudge(player.level().getServer(), player.getUUID(), tribe) > -TribePacts.FAVOUR_MOST;
 	}
 
 	/** {@code player} offers tribute to {@code villager}: emeralds from their pack pay the grudge off. What they say. */
@@ -315,7 +336,9 @@ public final class Tribes {
 			return Component.empty();
 		}
 		int g = grudge(server, player.getUUID(), tribe);
-		int want = (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_EMERALDS;
+		// ((0.7.442) no grudge left: a gift, toward the tribe's favour)
+		boolean gift = g <= 0;
+		int want = gift ? TribePacts.GIFT_EMERALDS : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_EMERALDS;
 		int paid = 0;
 		var inv = player.getInventory();
 		for (int slot = 0; slot < inv.getContainerSize() && paid < want; slot++) {
@@ -328,7 +351,19 @@ public final class Tribes {
 		}
 		int steps = paid / TRIBUTE_EMERALDS;
 		String line;
-		if (steps <= 0) {
+		if (gift) {
+			if (paid < want) {
+				// (short: handed back)
+				if (paid > 0) {
+					player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, paid), net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				line = "none";
+			} else {
+				add(server, player.getUUID(), tribe, -TribePacts.GIFT_FAVOUR);
+				line = "gift";
+				player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.6F);
+			}
+		} else if (steps <= 0) {
 			line = "none";
 		} else {
 			add(server, player.getUUID(), tribe, -steps * TRIBUTE_STEP);
@@ -353,6 +388,7 @@ public final class Tribes {
 		}
 		maps(level);
 		bands(level);
+		TribePacts.tick(level);
 		Pedlars.tick(level);
 	}
 
@@ -362,8 +398,9 @@ public final class Tribes {
 		for (var e : all(server).entrySet()) {
 			Map<String, Integer> grudge = new HashMap<>();
 			for (var g : e.getValue().grudge().entrySet()) {
-				int left = g.getValue() - DAILY * days;
-				if (left > 0) {
+				// ((0.7.442) a favour fades too, slower, back toward nothing)
+				int left = g.getValue() > 0 ? g.getValue() - DAILY * days : Math.min(0, g.getValue() + TribePacts.FAVOUR_DAILY * days);
+				if (left != 0) {
 					grudge.put(g.getKey(), left);
 				}
 			}

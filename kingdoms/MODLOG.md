@@ -7738,3 +7738,24 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
   of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
 - Compile-checked; not played.
+
+## 0.7.442: havens and the tribes, first half (Havens patch 7a)
+- **Havens pay the tribes** (`TribePacts`): once a day every haven pays 4 emeralds from its treasury to each goblin or
+  orc tribe with a camp within 1200 blocks (into the king's seat). The tribe's war bands leave a paid-up haven alone
+  for 2 days; a haven that can't pay is raided like anyone. Human realms never pay. Havens that live alongside the
+  tribes (6c) are spared as before.
+- **Ogre Kings take tribute:** each standing Ogre King takes 3 emeralds a day from the nearest haven within 1200
+  blocks, into a chest of his hold when it's loaded. Haven folk talk of what they pay (and when they couldn't).
+- **Non-humans' grudge:** a non-human's grudge with a tribe rises at half the usual (by blood, mask or no).
+- **A tribe's favour:** the grudge can now go below nothing, down to -60, and that is the tribe's favour. You win it
+  with gifts to a chief or the pedlar once you owe nothing (6 emeralds for 10 favour) and by killing the rival brood's
+  folk. It fades 1 a day. The tribe's mood has a new "friend" line.
+- **Calling on a tribe:** with favour of 30 or more, when raiders (a camp's or purists') set out against the realm or
+  haven you're sworn to, the friendliest tribe with a camp within 1500 blocks sends a war band of 3-6 to its seat (at
+  most once a day per player). The band fights only the raiders and whoever is set on you; the town's guards leave
+  it be. It goes home 30 s after the raid is over, or after 6 minutes.
+- Good standing (favour 20) with an orc tribe is recorded as the deed `tribe.orc_friend`, which will open the greenskin road
+  (7b). Haven guards no longer set on a tribe's pedlar.
+- A tribe whose favour you hold (20 or more) leaves you be unless you strike first. A truce token now clears only the
+  grudge, never the favour.
+- Compile-checked; not played.

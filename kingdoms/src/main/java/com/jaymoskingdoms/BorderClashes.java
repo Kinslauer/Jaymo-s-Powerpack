@@ -143,6 +143,11 @@ public final class BorderClashes {
 		return partyOf(entity.getUUID()) != null;
 	}
 
+	/** (0.7.442) Settlement {@code target} has a clash party on it just now. */
+	static boolean under(int target) {
+		return ACTIVE.containsKey(target);
+	}
+
 	/** {@code entity} is one of a purist raiding party's men (for haven bounties). */
 	static boolean puristRaider(Entity entity) {
 		Party p = partyOf(entity.getUUID());
@@ -252,6 +257,10 @@ public final class BorderClashes {
 			return false;
 		}
 		ACTIVE.put(target.id(), party);
+		if (!militia) {
+			// (0.7.442) a tribe that favours one of the haven's own may send them a war band
+			TribePacts.called(level, target, from);
+		}
 		LAST.put(militia ? from.id() : target.id(), now);
 		Raids.tell(level, target.seat(), Component.translatable(militia ? "message.jaymoskingdoms.clash.militia" : "message.jaymoskingdoms.clash.raid",
 			from.name(), target.name()).withStyle(ChatFormatting.RED));

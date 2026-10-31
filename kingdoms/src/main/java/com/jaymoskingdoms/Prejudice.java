@@ -347,6 +347,11 @@ public final class Prejudice {
 			return null;
 		}
 		Component name = Identities.shownName(player), blood = Purists.name(mine);
+		Component paid = TribePacts.gossip(level, villager, player);
+		if (paid != null) {
+			// (0.7.442) what the haven pays the tribes, or an Ogre King
+			return paid;
+		}
 		if (Havens.home(villager) != null && degree(mine) > 0 && random.nextFloat() < HAVEN_GOSSIP_CHANCE) {
 			return Component.translatable("prejudice.jaymoskingdoms.gossip.haven." + random.nextInt(HAVEN_GOSSIP_LINES), blood, name);
 		}
