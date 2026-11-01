@@ -94,7 +94,7 @@ import net.minecraft.world.phys.Vec3;
  * a power, a command) brings him straight back to the hall ({@link #hold}). Only the fortune teller, the wish and the
  * {@link #STAY_TICKS} wait let him go. A living visitor is free to come and go as before.
  * <p>
- * (0.19.32) Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate,
+ * (0.19.33) Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate,
  * giving you access to all the different starts you may have unlocked", and "make the judge offer it in his interactions
  * menu". With Jaymo's Kingdoms, whoever is let go chooses: go back to the life he had, or be born again ({@link #reborn}: the
  * whole life story told anew, with every start he or his group has opened). The fortune teller asks once he has paid (or won);
@@ -185,7 +185,7 @@ public final class ZFighterAfterlife {
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	public static final AttachmentType<Boolean> CHAMPION = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_champion"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
-	/** (0.19.32) He paid the fortune teller this stay but hasn't gone yet (he chose nothing): the next ask is free. Saved. */
+	/** (0.19.33) He paid the fortune teller this stay but hasn't gone yet (he chose nothing): the next ask is free. Saved. */
 	public static final AttachmentType<Boolean> PAID = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_paid"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** On the Aether's level: the Other World's site has been built. Saved. */
@@ -195,9 +195,9 @@ public final class ZFighterAfterlife {
 	/** A death waiting for its respawn (game time of the death), and a move waiting for next tick (the tick to do it on). */
 	private static final Map<UUID, Long> PENDING = new HashMap<>();
 	private static final Map<UUID, Long> ARRIVALS = new HashMap<>();
-	/** (0.19.32) Players let go by the wish or the wait, and the tick to ask them whether to be born again. */
+	/** (0.19.33) Players let go by the wish or the wait, and the tick to ask them whether to be born again. */
 	private static final Map<UUID, Long> WAKINGS = new HashMap<>();
-	/** (0.19.32) How long after waking in the world (ticks) that is asked: past the dimension's loading screen. */
+	/** (0.19.33) How long after waking in the world (ticks) that is asked: past the dimension's loading screen. */
 	static final long WAKE_ASK_DELAY = 40L;
 
 	/** A tournament in progress: the round, the spirit fighter in the ring, and whether he fell. */
@@ -218,7 +218,7 @@ public final class ZFighterAfterlife {
 	private record Return(ResourceKey<Level> dimension, BlockPos at, CompletableFuture<?> loading, After after) {
 	}
 
-	/** (0.19.32) What follows the way home: nothing more, he is born again, or he is asked whether to be. */
+	/** (0.19.33) What follows the way home: nothing more, he is born again, or he is asked whether to be. */
 	enum After {
 		AS_WAS, REBORN, ASK
 	}
@@ -478,7 +478,7 @@ public final class ZFighterAfterlife {
 		returnHome(player, After.AS_WAS);
 	}
 
-	/** (0.19.32) {@code after}: what follows once he wakes in the world (born again, or asked whether to be). */
+	/** (0.19.33) {@code after}: what follows once he wakes in the world (born again, or asked whether to be). */
 	private static void returnHome(ServerPlayer player, After after) {
 		endGauntlet(player);
 		MinecraftServer server = player.level().getServer();
@@ -518,7 +518,7 @@ public final class ZFighterAfterlife {
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, WAKE_RESISTANCE, 1));
 		to.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.05);
 		to.playSound(null, at, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.4F);
-		// (0.19.32) born again: Kingdoms tells the life story anew (back as he was if it can't)
+		// (0.19.33) born again: Kingdoms tells the life story anew (back as he was if it can't)
 		if (after != After.REBORN || !ZFighterKingdoms.reincarnate(player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
 		}
@@ -527,7 +527,7 @@ public final class ZFighterAfterlife {
 		}
 	}
 
-	// ---------------------------------------------------------------- born again (0.19.32)
+	// ---------------------------------------------------------------- born again (0.19.33)
 
 	/** Whether {@code player} may be asked to be born again: Kingdoms' life story, and the talk screen, on his side. */
 	static boolean mayBeReborn(ServerPlayer player) {
@@ -696,7 +696,7 @@ public final class ZFighterAfterlife {
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
 					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))),
-				// (0.19.32) Andy: "make the judge offer it in his interactions menu": one of the dead may ask to be born again
+				// (0.19.33) Andy: "make the judge offer it in his interactions menu": one of the dead may ask to be born again
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn", among(player) && mayBeReborn(player), () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable("talk.jaymospowers.judge.reborn_ask"), List.of(
 						ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn_yes", true, () -> {
@@ -714,7 +714,7 @@ public final class ZFighterAfterlife {
 			default -> {
 				boolean free = Boolean.TRUE.equals(player.getAttached(CHAMPION)) || Boolean.TRUE.equals(player.getAttached(PAID));
 				if (!among(player) || free) {
-					// (0.19.32) free to go: she asks how (as he was, or born again), unless only the old way is there
+					// (0.19.33) free to go: she asks how (as he was, or born again), unless only the old way is there
 					ZFighterNpcs.ask(player, npc, Component.translatable(!among(player) ? "talk.jaymospowers.teller.alive"
 						: Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.teller.champion" : "talk.jaymospowers.teller.paid"),
 						among(player) ? List.of(ZFighterNpcs.Option.of("talk.jaymospowers.teller.go", true, () -> {
@@ -765,7 +765,7 @@ public final class ZFighterAfterlife {
 	}
 
 	/**
-	 * (0.19.32) Paid from her talk screen: with the choice there she asks it herself ({@link #leave}); without it, as before,
+	 * (0.19.33) Paid from her talk screen: with the choice there she asks it herself ({@link #leave}); without it, as before,
 	 * what came of it is her reply.
 	 */
 	private static void paid(ServerPlayer player, LivingEntity teller, boolean emeralds, Runnable back) {

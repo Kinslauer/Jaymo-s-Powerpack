@@ -45,7 +45,7 @@ final class ZFighterKingdoms {
 	private static Method NEAREST_MONOLITH;
 	/** (0.18.52) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
-	/** (0.19.32) Kingdoms' LifeStory.canReincarnate(ServerPlayer) and reincarnate(ServerPlayer): being born again. */
+	/** (0.19.33) Kingdoms' LifeStory.canReincarnate(ServerPlayer) and reincarnate(ServerPlayer): being born again. */
 	private static Method CAN_REBORN, REBORN;
 	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
 	private static Method TIER_OPEN;
@@ -209,7 +209,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.19.32) Whether {@code player} can be born again through Kingdoms' life story (Kingdoms there, its story screen on his client). */
+	/** (0.19.33) Whether {@code player} can be born again through Kingdoms' life story (Kingdoms there, its story screen on his client). */
 	static boolean canReincarnate(ServerPlayer player) {
 		if (CAN_REBORN == null) {
 			return false;
@@ -223,7 +223,7 @@ final class ZFighterKingdoms {
 	}
 
 	/**
-	 * (0.19.32) {@code player} is born again: Kingdoms unmakes his heritage, class and story and tells the life story anew,
+	 * (0.19.33) {@code player} is born again: Kingdoms unmakes his heritage, class and story and tells the life story anew,
 	 * with every start he or his group has opened. False without Kingdoms (or its story screen).
 	 */
 	static boolean reincarnate(ServerPlayer player) {

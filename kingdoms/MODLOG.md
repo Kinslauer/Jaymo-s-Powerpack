@@ -8013,7 +8013,7 @@ the closer the Grue comes. The spirit fights it the whole way, until the Grue ta
 - **Exorcism:** a friend downs the host, then uses a Purifying Draught on them. The Grue burns out, takes the spirit with
   it (never another), and 20 lingering corruption goes. Ops: `/kingdom grue free <player>`, `/kingdom grue hold <player> <n>`.
 
-## 0.7.466: born again from the afterlife; starts per player and group (pack 0.19.32)
+## 0.7.466: born again from the afterlife; starts per player and group (pack 0.19.33)
 Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate, giving
 you access to all the different starts you may have unlocked. starts are now per group / player", and "make the judge
 offer it in his interactions menu".

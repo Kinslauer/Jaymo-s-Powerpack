@@ -223,7 +223,7 @@ public final class ZFighterNpcs {
 		return true;
 	}
 
-	/** (0.19.32) Whether the talk screen is there (Kingdoms and MCA), so a choice can be put to a player. */
+	/** (0.19.33) Whether the talk screen is there (Kingdoms and MCA), so a choice can be put to a player. */
 	public static boolean canAsk() {
 		return ASK != null;
 	}
