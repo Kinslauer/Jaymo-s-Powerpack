@@ -81,6 +81,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterOrbs.init();
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
+		ZFighterFakeMoonSky.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		// (0.18.49) the space pod, drawn from its parts
