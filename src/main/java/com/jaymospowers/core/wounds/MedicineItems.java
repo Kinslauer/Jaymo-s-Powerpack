@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.ItemLore;
@@ -42,6 +43,9 @@ public final class MedicineItems {
 	public static Item LEECHES;
 	public static Item WILLOW_BARK_TEA;
 	public static Item POPPY_SYRUP;
+	/** (0.19.20) The herbal remedies, the clean rag, the healer's satchel and the sickbed foods (docs/Healing-Plan.md). */
+	public static Item YARROW_POWDER, KNITBONE_POULTICE, BURN_SALVE, GARLIC_POULTICE, CLEAN_RAG, HEALERS_SATCHEL;
+	public static Item BONE_BROTH, CHAMOMILE_TEA, POSSET;
 
 	/** (0.14.4) Smelling salts' uses, and needle and thread's. */
 	public static final int SALTS_USES = 4, NEEDLE_USES = 8;
@@ -63,6 +67,21 @@ public final class MedicineItems {
 		POPPY_SYRUP = item("poppy_syrup", p -> new DrinkItem(true, p.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
 
+		// (0.19.20) the five wild herbs (blocks and items), then what's made of them
+		com.jaymospowers.core.wounds.herbs.Herbs.register();
+		YARROW_POWDER = item("yarrow_powder", p -> new MedicineItem(Treatment.Remedy.YARROW, p.stacksTo(16)));
+		KNITBONE_POULTICE = item("knitbone_poultice", p -> new MedicineItem(Treatment.Remedy.KNITBONE, p.stacksTo(16)));
+		BURN_SALVE = item("burn_salve", p -> new MedicineItem(Treatment.Remedy.SALVE, p.stacksTo(16)));
+		GARLIC_POULTICE = item("garlic_poultice", p -> new MedicineItem(Treatment.Remedy.GARLIC, p.stacksTo(16)));
+		CLEAN_RAG = item("clean_rag", p -> new MedicineItem(Treatment.Remedy.CLEAN_RAG, p.stacksTo(16)));
+		HEALERS_SATCHEL = item("healers_satchel", p -> new Satchel.SatchelItem(p.stacksTo(1)));
+		BONE_BROTH = item("bone_broth", p -> new SickbedItem(SickbedItem.Kind.BROTH, p.stacksTo(16).usingConvertsTo(Items.BOWL)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
+		CHAMOMILE_TEA = item("chamomile_tea", p -> new SickbedItem(SickbedItem.Kind.CHAMOMILE, p.stacksTo(16).usingConvertsTo(Items.BOWL)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
+		POSSET = item("posset", p -> new SickbedItem(SickbedItem.Kind.POSSET, p.stacksTo(16).usingConvertsTo(Items.BOWL)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
+
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("medicine"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
 			.title(Component.translatable("itemGroup.jaymospowers.medicine"))
@@ -72,7 +91,7 @@ public final class MedicineItems {
 	}
 
 	/** An item with its one line of lore (how it's used), from lang {@code tooltip.jaymospowers.<id>}. */
-	private static Item item(String id, Function<Item.Properties, Item> factory) {
+	public static Item item(String id, Function<Item.Properties, Item> factory) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
 		Item.Properties properties = new Item.Properties().setId(key).component(DataComponents.LORE, new ItemLore(List.of(
 			Component.translatable("tooltip.jaymospowers." + id).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))));
@@ -96,10 +115,33 @@ public final class MedicineItems {
 
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
+			// (0.19.20) a dirty rag in or facing water is washed by holding use (sneak + use still treats)
+			if (this.remedy == Treatment.Remedy.RAG && !player.isShiftKeyDown() && RagWashing.canWash(player)) {
+				player.startUsingItem(hand);
+				return InteractionResult.CONSUME;
+			}
 			if (player instanceof ServerPlayer server) {
 				Treatment.useOnSelf(server, hand, this.remedy);
 			}
 			return InteractionResult.SUCCESS;
+		}
+
+		/** (0.19.20) Only washing rags is a held use. */
+		@Override
+		public int getUseDuration(ItemStack stack, LivingEntity user) {
+			return this.remedy == Treatment.Remedy.RAG ? RagWashing.USE_TICKS : 0;
+		}
+
+		@Override
+		public ItemUseAnimation getUseAnimation(ItemStack stack) {
+			return this.remedy == Treatment.Remedy.RAG ? ItemUseAnimation.BRUSH : ItemUseAnimation.NONE;
+		}
+
+		@Override
+		public void onUseTick(Level level, LivingEntity user, ItemStack stack, int remaining) {
+			if (this.remedy == Treatment.Remedy.RAG) {
+				RagWashing.washTick(level, user, stack);
+			}
 		}
 	}
 
@@ -120,6 +162,33 @@ public final class MedicineItems {
 					Pain.poppy(server, entity);
 				} else {
 					Pain.tea(entity);
+				}
+			}
+			return left;
+		}
+	}
+
+	/** (0.19.20) Bone broth, chamomile tea and posset: sickbed foods, drunk from a bowl; see {@link Herbal}. */
+	public static final class SickbedItem extends Item {
+		public enum Kind {
+			BROTH, CHAMOMILE, POSSET
+		}
+
+		final Kind kind;
+
+		SickbedItem(Kind kind, Item.Properties properties) {
+			super(properties);
+			this.kind = kind;
+		}
+
+		@Override
+		public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+			ItemStack left = super.finishUsingItem(stack, level, entity);
+			if (level instanceof ServerLevel) {
+				switch (this.kind) {
+					case BROTH -> Herbal.broth(entity);
+					case CHAMOMILE -> Herbal.chamomile(entity);
+					case POSSET -> Herbal.posset(entity);
 				}
 			}
 			return left;

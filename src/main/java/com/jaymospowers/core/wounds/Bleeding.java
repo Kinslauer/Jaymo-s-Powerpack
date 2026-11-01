@@ -284,6 +284,11 @@ public final class Bleeding {
 	 * till then; {@code dirty} (a rag): it may fester while it's on.
 	 */
 	static void dress(LivingEntity entity, BodyPart part, float heal, int ticks, boolean dirty) {
+		dress(entity, part, heal, ticks, dirty, dirty);
+	}
+
+	/** (0.19.20) As above; {@code rag}: it looks like a rag whether or not it is dirty (a clean rag, boiled or washed, never festers). */
+	static void dress(LivingEntity entity, BodyPart part, float heal, int ticks, boolean dirty, boolean rag) {
 		if (!(entity.level() instanceof ServerLevel level)) {
 			return;
 		}
@@ -294,7 +299,7 @@ public final class Bleeding {
 		set(entity, BANDAGED, bandaged(entity) | Breaks.bit(part));
 		// (0.15.90) and it shows: linen, or a rag
 		int bit = Breaks.bit(part);
-		set(entity, WRAPPED, wrapped(entity) & ~(bit << RAG_SHIFT) | bit | (dirty ? bit << RAG_SHIFT : 0));
+		set(entity, WRAPPED, wrapped(entity) & ~(bit << RAG_SHIFT) | bit | (rag ? bit << RAG_SHIFT : 0));
 		long now = level.getGameTime();
 		if (dirty && !clean(entity, i, now)) {
 			set(entity, DIRTY, dirty(entity) | Breaks.bit(part));
@@ -316,6 +321,11 @@ public final class Bleeding {
 	 * {@link #CLEAN_TICKS}. True if there was festering or dirt to clean.
 	 */
 	static boolean clean(LivingEntity entity, BodyPart part) {
+		return clean(entity, part, CLEAN_TICKS);
+	}
+
+	/** (0.19.20) As {@link #clean(LivingEntity, BodyPart)}, clean for {@code ward} ticks (garlic's ten minutes). */
+	static boolean clean(LivingEntity entity, BodyPart part, int ward) {
 		if (!(entity.level() instanceof ServerLevel level)) {
 			return false;
 		}
@@ -323,7 +333,8 @@ public final class Bleeding {
 		boolean any = ((festering(entity) | dirty(entity)) & bit) != 0;
 		unfester(entity, part);
 		set(entity, DIRTY, dirty(entity) & ~bit);
-		CLEANED.computeIfAbsent(entity, e -> new long[PARTS])[part.ordinal()] = level.getGameTime() + CLEAN_TICKS;
+		long[] until = CLEANED.computeIfAbsent(entity, e -> new long[PARTS]);
+		until[part.ordinal()] = Math.max(until[part.ordinal()], level.getGameTime() + ward);
 		return any;
 	}
 
@@ -558,9 +569,12 @@ public final class Bleeding {
 			return;
 		}
 		long now = level.getGameTime();
-		body.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, FEVER_TICKS + 40, 0, false, false, true));
-		if (!(body instanceof Player player && (player.isCreative() || player.isSpectator())) && !Downed.isDowned(body)) {
-			Wounds.hurtPart(body, BodyPart.BODY, FEVER_DAMAGE, null);
+		// (0.19.20) bone broth cools it for a while: no weakness, no harm
+		if (!Herbal.feverCooled(body)) {
+			body.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, FEVER_TICKS + 40, 0, false, false, true));
+			if (!(body instanceof Player player && (player.isCreative() || player.isSpectator())) && !Downed.isDowned(body)) {
+				Wounds.hurtPart(body, BodyPart.BODY, FEVER_DAMAGE, null);
+			}
 		}
 		if (!body.isAlive()) {
 			return;

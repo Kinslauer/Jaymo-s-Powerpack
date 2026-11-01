@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:comfrey",
+    "jaymospowers:comfrey",
+    "#minecraft:leaves"
+  ],
+  "result": {
+    "id": "jaymospowers:knitbone_poultice",
+    "count": 2
+  }
+}

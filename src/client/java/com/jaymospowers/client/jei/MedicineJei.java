@@ -1,8 +1,12 @@
 package com.jaymospowers.client.jei;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.Herbal;
 import com.jaymospowers.core.wounds.MedicineItems;
 import com.jaymospowers.core.wounds.Pain;
+import com.jaymospowers.core.wounds.RagWashing;
+import com.jaymospowers.core.wounds.Satchel;
+import com.jaymospowers.core.wounds.herbs.Herbs;
 import com.jaymospowers.core.wounds.Treatment;
 import com.jaymospowers.power.web.KitchenCompat;
 import java.util.ArrayList;
@@ -59,6 +63,30 @@ public final class MedicineJei implements IModPlugin {
 		add(recipes, MedicineItems.WILLOW_BARK_TEA, note("tea.1", Pain.TEA_TICKS / 1200), note("tea.2", Pain.TEA_DELAY / 20), note("drink"));
 		add(recipes, MedicineItems.POPPY_SYRUP, note("poppy.1", Pain.POPPY_TICKS / 1200), note("poppy.2"), note("poppy.3"));
 		add(recipes, Items.HONEY_BOTTLE, note("clean.1"), note("clean.2"), note("sneak"));
+		// (0.19.20) the herbs: wild plants (right click a grown one to pick, plant the herb to grow more) and what they make
+		add(recipes, Herbs.COMFREY, note("herb.1"), note("herb.2"), note("herb.comfrey"));
+		add(recipes, Herbs.YARROW, note("herb.1"), note("herb.2"), note("herb.yarrow"));
+		add(recipes, Herbs.PLANTAIN, note("herb.1"), note("herb.2"), note("herb.plantain"));
+		add(recipes, Herbs.WILD_GARLIC, note("herb.1"), note("herb.2"), note("herb.wild_garlic"));
+		add(recipes, Herbs.CHAMOMILE, note("herb.1"), note("herb.2"), note("herb.chamomile"));
+		add(recipes, MedicineItems.YARROW_POWDER, note("yarrow.1"), note("yarrow.2"), note("use_part"));
+		add(recipes, MedicineItems.KNITBONE_POULTICE, note("knitbone.1", num(Herbal.KNIT_NOW), Herbal.KNIT_TICKS / 1200), note("knitbone.2"), note("use_part"));
+		add(recipes, MedicineItems.BURN_SALVE, note("salve.1"), note("salve.2", num(Herbal.SALVE_HEAL), Herbal.SALVE_TICKS / 20), note("use_part"));
+		add(recipes, MedicineItems.GARLIC_POULTICE, note("garlic.1"), note("garlic.2", Herbal.GARLIC_WARD_TICKS / 1200), note("use_part"));
+		add(recipes, MedicineItems.CLEAN_RAG, note("clean_rag.1"), note("clean_rag.2", num(Treatment.RAG_HEAL)), note("use_part"));
+		add(recipes, MedicineItems.HEALERS_SATCHEL, note("satchel.1", Satchel.CAPACITY), note("satchel.2", Math.round(Satchel.SHORTEN * 100.0F)),
+			note("satchel.3"));
+		add(recipes, MedicineItems.BONE_BROTH, note("broth.1", num(Herbal.BROTH_HEAL)), note("broth.2", Herbal.BROTH_COOL_TICKS / 1200), note("drink"));
+		add(recipes, MedicineItems.CHAMOMILE_TEA, note("chamomile.1", Herbal.CALM_SLEEP_MULTIPLIER), note("chamomile.2"), note("drink"));
+		add(recipes, MedicineItems.POSSET, note("posset.1"), note("posset.2", num(Herbal.POSSET_HEAL)), note("drink"));
+		// washing and boiling rags: a dirty rag in, a clean one out
+		recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(MedicineItems.RAG)), List.of(new ItemStack(Items.WATER_BUCKET))),
+			List.of(new ItemStack(MedicineItems.CLEAN_RAG)),
+			List.of(note("wash.1", RagWashing.WASH_TICKS / 20), note("wash.2", Math.round(RagWashing.STAYS_DIRTY * 100.0F)), note("wash.3"))));
+		recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(MedicineItems.RAG)), List.of(new ItemStack(Items.CAULDRON)),
+			List.of(new ItemStack(Items.CAMPFIRE), new ItemStack(Items.SOUL_CAMPFIRE), new ItemStack(Items.MAGMA_BLOCK), new ItemStack(Items.LAVA_BUCKET))),
+			List.of(new ItemStack(MedicineItems.CLEAN_RAG)),
+			List.of(note("boil.1", RagWashing.RAGS_PER_LEVEL), note("boil.2", RagWashing.BOIL_TICKS / 20), note("boil.3"))));
 		// Kitchen's strong spirits, whichever item that is (none without Kitchen)
 		for (Item item : BuiltInRegistries.ITEM) {
 			ItemStack stack = new ItemStack(item);
