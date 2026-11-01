@@ -38,6 +38,11 @@ import org.jspecify.annotations.Nullable;
 public final class Crawl {
 	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
 	public static final int ROLL_TICKS = 5;
+	/**
+	 * (0.19.28) Andy: "on your back, you shuffle forward with your hips, so you move slower than you would prone on your
+	 * stomach". Prone on the back moves at this share of the belly crawl's pace (the client's input is scaled).
+	 */
+	public static final float SUPINE_SPEED = 0.45F;
 	/** How far a roll carries you sideways, in blocks. */
 	public static final double ROLL_DISTANCE = 1.0;
 	/** How long you can keep rolling one way (2 s) before you must roll back the other way. */

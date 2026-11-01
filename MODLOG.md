@@ -4776,3 +4776,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
+- **0.19.28, crawling and prone look real:** Andy: "the crawling and crouch animations should be more like smart movement mod,
+  or at least realistically animate your hands moving and grabbing and dragging you, same with the prone movement on your back,
+  you shuffle forward with your hips, so you move slower than you would prone on your stomach". Smart Moving is GPL-3.0, so it
+  was a reference for the feel only; nothing of it is copied.
+  - Belly crawl (`CrawlPose`): each hand reaches ahead beside the head, plants, and is held in place on the ground while the body
+    slides up past it to the chest, then lifts and swings out and forward again, hand over hand. The hand's path is solved for
+    the shoulder and a bent elbow (`CrawlPose.arm`/`reach`), the stroke runs off the ground covered (about 1 block per two
+    pulls) and is laid past the pose springs, so the planted hand barely slides. Elbow and opposite knee go together: the knee
+    draws up the side, shin folded back flat, and pushes out straight as that arm pulls. Crawling backward plays it in reverse.
+    The chest lifts a little on each pull. Downed players drag the same way with the hands, legs still limp.
+  - `KneeBend` now bends any joint height and can fold sideways (about the part's Z, flat along the ground), which is how the
+    elbows and the crawl's knees bend. An arm holding something stays straight so the item stays in the hand.
+  - On your back (`Crawl.SUPINE`): a hip shuffle. Heels dug in ahead with the knees up (the shins bent down to them), hands
+    pressing beside the hips while the hips scoot up to the heels, then the legs slide out again; the body is drawn ahead in
+    steps (`CrawlPose.surge`) so the hips only move while the heels are dug in. It moves at 45% of the belly crawl's pace
+    (`Crawl.SUPINE_SPEED`, input scaled in `StanceSpeedMixin`).
+  - The plain sneak and the low crouch are unchanged. Compile-checked with javac against the 26.3 jars; not built with Gradle
+    or seen in game. Tune in the `CrawlPose` constants (HAND_*, PLANTED, STROKE, HEEL_*, BACK_STROKE).
