@@ -135,6 +135,12 @@ public final class Pain {
 		}
 	}
 
+	/** (0.19.20) A little ease from rest or a warm soak: the pain dulled at once, for {@code ticks} more (joined to any numbness already running). */
+	public static void ease(LivingEntity entity, int ticks) {
+		long now = entity.level().getGameTime();
+		dull(entity, now, now + ticks);
+	}
+
 	/** (0.14.4) Leeches: the pain dulled at once, and for longer. */
 	static void leeches(LivingEntity entity) {
 		long now = entity.level().getGameTime();
