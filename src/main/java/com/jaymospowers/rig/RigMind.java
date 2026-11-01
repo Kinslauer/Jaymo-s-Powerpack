@@ -300,7 +300,7 @@ public final class RigMind {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig.unlock." + level,
 			Component.keybind("key.jaymospowers.rig"), Component.keybind("key.jaymospowers.ability_4"), Component.keybind("key.jaymospowers.ultimate"),
 			Component.keybind("key.jump")).withStyle(ChatFormatting.DARK_AQUA));
-		// (0.19.28) the pack's milestone fanfare
+		// (0.19.29) the pack's milestone fanfare
 		com.jaymospowers.core.Milestones.fanfare(player, Component.translatable("training.jaymospowers.rig_title"),
 			Component.translatable("training.jaymospowers.rig_subtitle", level), null, 0x4FD8FF,
 			level >= Rig.MAX_LEVEL ? com.jaymospowers.core.Milestones.GRAND : com.jaymospowers.core.Milestones.MAJOR);

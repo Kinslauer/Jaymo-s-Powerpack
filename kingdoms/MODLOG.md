@@ -7987,7 +7987,7 @@ constants at the top of each class.
 - The Deck server would not start on 0.19.25 ("Failed to load registries"): `infirmary_cot.json` used `minecraft:block_state_property`,
   which 26.3 dropped. It's written with `minecraft:match_block` now, as the Training Post's was.
 
-- **0.7.464, longer skill training with milestones (Jaymo's Powers 0.19.28):** Andy: "a longer grind but every milestone
+- **0.7.464, longer skill training with milestones (Jaymo's Powers 0.19.29):** Andy: "a longer grind but every milestone
   should feel more rewarding". `Skills.XP_BASE`/`XP_STEP` 30/15 -> 60/30; saved experience is scaled once on join to
   `Skills.PACE` (kept in the xp map under `_pace`), so nobody loses a level. Every `MILESTONE_EVERY` (5) levels in a pillar
   is a bonus point (`Progress.points`, retroactive). Level-ups play `Fanfare.fanfare` (a copy of Powers' chord):

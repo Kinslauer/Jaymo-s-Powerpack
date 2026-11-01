@@ -160,7 +160,7 @@ public final class ZFighterItems {
 	/** How much faster {@code player} trains for what's on his feet (1 with no weights). */
 	static float weightRate(Player player) {
 		ItemStack feet = player.getItemBySlot(EquipmentSlot.FEET);
-		// (0.19.28) a Weighted Gi on top stacks with what's on the feet
+		// (0.19.29) a Weighted Gi on top stacks with what's on the feet
 		float gi = com.jaymospowers.core.Training.giRate(player);
 		if (feet.is(HEAVY_TRAINING_WEIGHTS)) {
 			return HEAVY_RATE * gi;

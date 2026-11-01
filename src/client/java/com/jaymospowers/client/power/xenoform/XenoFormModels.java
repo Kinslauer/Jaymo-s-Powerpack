@@ -1055,13 +1055,28 @@ public final class XenoFormModels {
 
 	/**
 	 * (0.18.119, Scan G) Towerback: a hulk of stone, a heavy brow, mossy boulders for pauldrons, and a broken watchtower
-	 * grown out of its back, its battlements on top. It walks with the Giants' slow sway ({@link #SWAY}) and plays its
-	 * grab ({@link com.jaymospowers.power.xenoform.forms.Towerback#grabPhase}): the right hand rears back, comes down,
-	 * holds its catch at its chest and hurls it into the ground.
+	 * grown out of its back, its battlements on top. It plays its grab
+	 * ({@link com.jaymospowers.power.xenoform.forms.Towerback#grabPhase}): the right hand rears back, comes down, holds its
+	 * catch at its chest and hurls it into the ground.
+	 * <p>
+	 * (0.19.28) Andy: "long exaggerated steps and motions while still covering alot of ground", and "the backhand should be
+	 * slow too, like a charged ability". Its legs follow its own stride over the ground ({@link XenoformClient#TOWER_STRIDE},
+	 * a step every {@code Towerback#STRIDE_PER_SCALE} blocks per scale) instead of vanilla's walk, swung wide and lifted;
+	 * it sinks onto each footfall so its feet stay planted, its weight rolls over the planted foot, its shoulders turn and
+	 * its arms swing big against its legs. The swat ({@link XenoformClient#TOWER_SWAT}) draws the right arm across its
+	 * chest and coils, trembling, then whips it out wide.
 	 */
 	static final class Towerback extends FormModel {
-		/** Its legs swing this many times slower than a player's (a Giant's long, heavy stride). */
-		static final float SWAY = 2.5F;
+		/**
+		 * (0.19.28) Its walk (radians, pixels): how far the legs swing (wide of what the stride needs, so it reads as
+		 * striding), how high the foot coming forward lifts, its legs' length (for how far it sinks onto a footfall), and
+		 * an extra drop as the foot lands; its arms' swing and flare, its roll over the planted foot, its shoulders' turn,
+		 * its lean into the walk.
+		 */
+		static final float LEG_SWING = 0.85F, FOOT_LIFT = 2.5F, LEG_LENGTH = 12.0F, LAND_DROP = 1.2F;
+		static final float ARM_SWING = 0.9F, ARM_FLARE = 0.12F, ROLL = 0.11F, SHOULDER_TURN = 0.22F, LEAN = 0.12F;
+		/** (0.19.28) The swat's arm (radians): drawn across the chest and coiled, then flung out wide to its right; how it turns its shoulders and trembles. */
+		static final float SWAT_RAISE = -1.45F, SWAT_ACROSS = -1.15F, SWAT_OUT = 1.35F, SWAT_COIL = -0.5F, SWAT_UNCOIL = 0.45F, SWAT_TREMBLE = 0.05F;
 		/** The grab's arm (radians, x): reared back, reaching down, held at the chest, slammed down. */
 		static final float REAR = -2.9F, REACH = -1.1F, HOLD_UP = -1.45F, SLAMMED = -0.35F;
 		private final ModelPart tower;
@@ -1093,13 +1108,23 @@ public final class XenoFormModels {
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
-			// the Giants' slow sway: the same pace over the ground, a slower, heavier swing
-			float pos = state.walkAnimationPos;
-			state.walkAnimationPos = pos / SWAY;
-			super.setupAnim(state);
-			state.walkAnimationPos = pos;
+			Float stride = state.getData(XenoformClient.TOWER_STRIDE);
+			float speed = state.walkAnimationSpeed;
+			if (stride != null && !state.isPassenger) {
+				// its own walk replaces vanilla's quick swing
+				state.walkAnimationSpeed = 0.0F;
+				super.setupAnim(state);
+				state.walkAnimationSpeed = speed;
+				walk(stride, Math.min(1.0F, speed * 1.3F));
+			} else {
+				super.setupAnim(state);
+			}
 			float breath = Mth.sin(state.ageInTicks * 0.05F);
 			this.tower.xRot = 0.08F + breath * 0.02F;
+			Float swat = state.getData(XenoformClient.TOWER_SWAT);
+			if (swat != null && swat >= 0.0F) {
+				swat(swat);
+			}
 			Float phase = state.getData(XenoformClient.TOWER_GRAB);
 			if (phase == null || phase < 0.0F) {
 				return;
@@ -1126,6 +1151,85 @@ public final class XenoFormModels {
 			this.rightArm.zRot = Mth.lerp(weight, this.rightArm.zRot, 0.15F);
 			// it leans into the throw
 			this.body.xRot = Mth.lerp(weight, this.body.xRot, arm < -2.0F ? -0.15F : 0.2F);
+		}
+
+		/**
+		 * (0.19.28) One step of its walk: {@code stride} in radians (a foot down at each half turn past a quarter),
+		 * {@code amount} how far into walking it is (0 standing).
+		 */
+		private void walk(float stride, float amount) {
+			if (amount <= 0.001F) {
+				return;
+			}
+			float swing = Mth.sin(stride), forward = Mth.cos(stride);
+			// legs: wide swings, the foot coming forward lifted clear of the ground
+			this.rightLeg.xRot = swing * LEG_SWING * amount;
+			this.leftLeg.xRot = -swing * LEG_SWING * amount;
+			this.rightLeg.y -= Math.max(0.0F, -forward) * FOOT_LIFT * amount;
+			this.leftLeg.y -= Math.max(0.0F, forward) * FOOT_LIFT * amount;
+			// it sinks onto each footfall (a swung leg reaches less far down), and a little more as the foot lands
+			float sink = LEG_LENGTH * (1.0F - Mth.cos(this.rightLeg.xRot)) + Mth.abs(swing) * Mth.abs(swing) * Mth.abs(swing) * LAND_DROP * amount;
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg}) {
+				part.y += sink;
+			}
+			// its weight rolls over the planted foot; its head keeps level; it leans into the walk
+			this.body.zRot += forward * ROLL * amount;
+			this.head.zRot -= forward * ROLL * 0.6F * amount;
+			this.body.xRot += LEAN * amount;
+			this.head.xRot -= LEAN * 0.5F * amount;
+			// its shoulders turn with the arm swinging forward, and the arms swing big against the legs, flared out
+			turn(-swing * SHOULDER_TURN * amount);
+			this.rightArm.xRot += -swing * ARM_SWING * amount;
+			this.leftArm.xRot += swing * ARM_SWING * amount;
+			this.rightArm.zRot += ARM_FLARE * amount;
+			this.leftArm.zRot -= ARM_FLARE * amount;
+		}
+
+		/** Its shoulders turned by {@code yaw} (radians): the body turns and the arms go round with it, as vanilla's swing does. */
+		private void turn(float yaw) {
+			this.body.yRot += yaw;
+			float total = this.body.yRot;
+			this.rightArm.z = Mth.sin(total) * 5.0F;
+			this.rightArm.x = -Mth.cos(total) * 5.0F;
+			this.leftArm.z = -Mth.sin(total) * 5.0F;
+			this.leftArm.x = Mth.cos(total) * 5.0F;
+			this.rightArm.yRot += yaw;
+			this.leftArm.yRot += yaw;
+		}
+
+		/**
+		 * (0.19.28) The swat, {@code t} ticks in: the right arm drawn across the chest as the shoulders coil, trembling
+		 * as it builds; then whipped out wide as they uncoil (the blow lands halfway); then easing back.
+		 */
+		private void swat(float t) {
+			int windup = com.jaymospowers.power.xenoform.forms.Towerback.SWAT_WINDUP;
+			int strike = com.jaymospowers.power.xenoform.forms.Towerback.SWAT_STRIKE;
+			int recover = com.jaymospowers.power.xenoform.forms.Towerback.SWAT_RECOVER;
+			float across, coil, weight = 1.0F, tremble = 0.0F;
+			if (t < windup) {
+				float k = ease(t / windup);
+				weight = k;
+				across = SWAT_ACROSS;
+				coil = SWAT_COIL;
+				tremble = Mth.sin(t * 2.3F) * SWAT_TREMBLE * k;
+			} else if ((t -= windup) < strike) {
+				// fast out of the coil: the swing itself is quick, after the long draw
+				float k = t / strike;
+				k = k * k;
+				across = Mth.lerp(k, SWAT_ACROSS, SWAT_OUT);
+				coil = Mth.lerp(k, SWAT_COIL, SWAT_UNCOIL);
+			} else {
+				t -= strike;
+				across = SWAT_OUT;
+				coil = SWAT_UNCOIL;
+				weight = 1.0F - ease(t / recover);
+			}
+			float bodyTurn = Mth.lerp(weight, this.body.yRot, coil) - this.body.yRot;
+			turn(bodyTurn);
+			this.rightArm.xRot = Mth.lerp(weight, this.rightArm.xRot, SWAT_RAISE + tremble);
+			this.rightArm.yRot = Mth.lerp(weight, this.rightArm.yRot, across + this.body.yRot);
+			this.rightArm.zRot = Mth.lerp(weight, this.rightArm.zRot, 0.0F);
+			this.body.xRot = Mth.lerp(weight, this.body.xRot, 0.15F);
 		}
 
 		private static float ease(float x) {

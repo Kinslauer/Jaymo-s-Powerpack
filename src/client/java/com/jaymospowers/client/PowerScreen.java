@@ -777,7 +777,7 @@ public class PowerScreen extends Screen {
 
 	// ---------------------------------------------------------------- mastery
 
-	/** (0.19.28) Past the four abilities: the Mastery rank and the way to the next. */
+	/** (0.19.29) Past the four abilities: the Mastery rank and the way to the next. */
 	private static Component rankLabel(Player player) {
 		float next = Mastery.rankProgress(player);
 		Component rank = com.jaymospowers.core.Training.rankName(Mastery.rank(player));

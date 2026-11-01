@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.28) The one fanfare every progression milestone in the pack plays, so reaching one always feels the same way: a
+ * (0.19.29) The one fanfare every progression milestone in the pack plays, so reaching one always feels the same way: a
  * big title with what you earned under it, a layered chord (the level-up chime, and for bigger steps the challenge
  * fanfare and a beacon's hum, then a totem's flourish for the grandest), a burst of sparks in the track's colour that
  * people nearby see and hear too, a small kick of the screen, and a gold line in chat saying what it gives.

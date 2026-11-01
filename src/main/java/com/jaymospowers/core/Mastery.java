@@ -44,7 +44,7 @@ public final class Mastery {
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	/**
-	 * (0.19.28) Rank points earned once every ability is learned: they climb the Mastery ranks ({@link Training#RANK_AT},
+	 * (0.19.29) Rank points earned once every ability is learned: they climb the Mastery ranks ({@link Training#RANK_AT},
 	 * Adept to Paragon), each a permanent stat jump.
 	 */
 	public static final AttachmentType<Integer> RANK_POINTS = AttachmentRegistry.create(JaymosPowers.id("mastery_rank"),
@@ -53,7 +53,7 @@ public final class Mastery {
 	/** Every ability. */
 	public static final int ALL = 4;
 	/**
-	 * Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order). (0.19.28)
+	 * Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order). (0.19.29)
 	 * Each costs more than the last: 60, 90, 120, 150 (3, 4.5, 6 and 7.5 days from time alone; a third of that at the
 	 * most with practice). Saves from the flat 60-an-ability scale keep what they learned and start at the new floor.
 	 */
@@ -127,18 +127,18 @@ public final class Mastery {
 		return points == null ? 0 : points;
 	}
 
-	/** (0.19.28) Rank points past the four abilities. */
+	/** (0.19.29) Rank points past the four abilities. */
 	public static int rankPoints(Player player) {
 		Integer points = player.getAttached(RANK_POINTS);
 		return points == null ? 0 : points;
 	}
 
-	/** (0.19.28) The Mastery rank (0 none, 1 Adept ... 5 Paragon); always 0 until every ability is learned. */
+	/** (0.19.29) The Mastery rank (0 none, 1 Adept ... 5 Paragon); always 0 until every ability is learned. */
 	public static int rank(Player player) {
 		return unlocked(player) < ALL ? 0 : Training.rankFor(rankPoints(player));
 	}
 
-	/** (0.19.28) Progress toward the next rank (0-1), or -1 at Paragon. Works on both sides. */
+	/** (0.19.29) Progress toward the next rank (0-1), or -1 at Paragon. Works on both sides. */
 	public static float rankProgress(Player player) {
 		int rank = rank(player);
 		if (rank >= Training.RANKS) {
@@ -265,7 +265,7 @@ public final class Mastery {
 		return true;
 	}
 
-	/** (0.19.28) Meditating in a training spot ({@link Training#spot}): one more practice point allowed. */
+	/** (0.19.29) Meditating in a training spot ({@link Training#spot}): one more practice point allowed. */
 	static void spotAllowance(ServerPlayer player) {
 		allow(player, 1);
 	}
@@ -279,7 +279,7 @@ public final class Mastery {
 	private static void addPoints(ServerPlayer player, int amount) {
 		int unlocked = unlocked(player);
 		if (unlocked >= ALL) {
-			// (0.19.28) past the four abilities: the Mastery ranks
+			// (0.19.29) past the four abilities: the Mastery ranks
 			int was = rank(player);
 			player.setAttached(RANK_POINTS, Math.min(Training.RANK_AT[Training.RANKS], rankPoints(player) + amount));
 			int now = rank(player);
@@ -315,7 +315,7 @@ public final class Mastery {
 		String line = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key." + key.id();
 		Component ability = Component.translatable(line + ".name").withStyle(style -> style.withColor(TextColor.fromRgb(power.color())));
 		Component full = Component.translatable(line);
-		// (0.19.28) the pack's milestone fanfare; the last ability is the grandest
+		// (0.19.29) the pack's milestone fanfare; the last ability is the grandest
 		boolean last = unlocked(player) >= ALL;
 		Component chat = Component.translatable("message.jaymospowers.unlocked_chat", Component.keybind("key.jaymospowers." + key.id()),
 				ability.copy().withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(full))), Component.keybind("key.jaymospowers.menu"));

@@ -51,7 +51,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.28) Training a power, all in one place: the pace past the four abilities (the Mastery ranks), the spots and
+ * (0.19.29) Training a power, all in one place: the pace past the four abilities (the Mastery ranks), the spots and
  * gear that make meditating and shadowboxing count for more, and the training items themselves. Every tuning number for
  * it is a constant at the top of this class.
  *

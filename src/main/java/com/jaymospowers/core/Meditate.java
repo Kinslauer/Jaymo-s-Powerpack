@@ -280,7 +280,7 @@ public final class Meditate {
 			int perPoint = TICKS_PER_POINT[Math.min(TICKS_PER_POINT.length - 1, rank)];
 			// a Gravity user's shadowboxing only pays beside a partner (another shadowboxer); a plain sit only with the perk
 			boolean pays = sat ? rank > 0 : !Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE) || partnered(player);
-			// (0.19.28) a training spot (the cold for Wind, fire for Smoke, a Weighted Gi...) pays twice as often and lets more through
+			// (0.19.29) a training spot (the cold for Wind, fire for Smoke, a Weighted Gi...) pays twice as often and lets more through
 			String spot = pays ? Training.spot(player) : null;
 			if (spot != null) {
 				perPoint = Math.max(20, Math.round(perPoint * Training.SPOT_PACE));
