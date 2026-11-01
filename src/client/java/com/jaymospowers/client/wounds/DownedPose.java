@@ -67,12 +67,19 @@ public final class DownedPose {
 	static final float FLAIL_STIFFNESS = 2.5F;
 	/** (0.15.142) An animal on its side paddling in the same bursts: its legs' pace (walk cycle a tick) and swing (walk speed). */
 	static final float PADDLE_RATE = 0.9F, PADDLE_SWING = 0.9F;
+	/**
+	 * (0.19.32) A downed machine shorting out ({@code Malfunction}): a fault every this many ticks (give or take), how long
+	 * it lasts (ticks), how often its limbs snap to a new angle in one (ticks), how far they snap (radians), how far the
+	 * whole body jolts (degrees), and the faint tremor between faults (radians).
+	 */
+	static final float GLITCH_EVERY = 45.0F, GLITCH_TICKS = 12.0F, GLITCH_STEP = 2.0F, GLITCH_LIMBS = 0.7F, GLITCH_JOLT = 4.0F,
+		GLITCH_TREMOR = 0.03F;
 
 	/**
 	 * This frame's downed pose: {@code amount} of the fall (0-1, a little over in the bounce), {@code crawls}, a
 	 * {@code person}, {@code broken} limbs ({@link Dismember} bits), {@code down} ticks since it went down, the {@code id}.
 	 */
-	record Down(float amount, boolean crawls, boolean person, int broken, float down, int id, boolean out) {
+	record Down(float amount, boolean crawls, boolean person, int broken, float down, int id, boolean out, boolean machine) {
 	}
 
 	static final RenderStateDataKey<Down> KEY = RenderStateDataKey.create(() -> "jaymospowers:downed");
@@ -94,9 +101,9 @@ public final class DownedPose {
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);
 		boolean person = BodyPlan.of(entity) == BodyPlan.HUMANOID;
 		Down pose = new Down(fall(down), Downed.crawls(entity), person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),
-			Downed.passedOut(entity));
+			Downed.passedOut(entity), com.jaymospowers.core.wounds.Malfunction.is(entity));
 		state.setData(KEY, pose);
-		if (!person && !pose.crawls()) {
+		if (!person && !pose.crawls() && !pose.machine()) {
 			// (0.15.142) an animal on its side paddles its legs in its fits (its own walk, run in the air)
 			float paddle = flail(pose);
 			if (paddle > 0.0F) {
@@ -173,6 +180,15 @@ public final class DownedPose {
 			poseStack.rotate(Axis.XP.rotationDegrees(90.0F * amount));
 			poseStack.translate(0.0F, -height * 0.555F * flat, -ON_BACK_LIFT * flat);
 		}
+		if (pose.machine()) {
+			// (0.19.32) a fault jolts the whole frame in hard little jerks (any model, however it's built)
+			float glitch = glitch(pose);
+			if (glitch > 0.0F) {
+				float t = (float) Math.floor(state.ageInTicks / GLITCH_STEP);
+				poseStack.rotate(Axis.ZP.rotationDegrees(GLITCH_JOLT * glitch * jerk(pose.id(), t, 7)));
+				poseStack.rotate(Axis.XP.rotationDegrees(GLITCH_JOLT * 0.5F * glitch * jerk(pose.id(), t, 11)));
+			}
+		}
 	}
 
 	/** Right after a model was posed for this state (the body, and each armour piece). */
@@ -201,8 +217,9 @@ public final class DownedPose {
 		PoseBlend.Frame f = new PoseBlend.Frame(m);
 		pose(f, living, pose);
 		// ((0.15.142) stiffer while it thrashes, so the beats aren't smoothed away)
-		track.apply(m, f, 0.8F + FLAIL_STIFFNESS * (pose.crawls() ? 0.0F : flail(pose)));
-		if (!pose.crawls()) {
+		track.apply(m, f, pose.machine() ? 0.8F + FLAIL_STIFFNESS * 2.0F
+			: 0.8F + FLAIL_STIFFNESS * (pose.crawls() ? 0.0F : flail(pose)));
+		if (!pose.crawls() && !pose.machine()) {
 			// now and then it tries to sit up (the upper body lifting at the hips) and sinks back
 			PoseBlend.bend(m, RISE_PITCH * rise(living, pose) * Math.min(1.0F, pose.amount()), 0.0F, 0.0F, 0.0F, 0.0F);
 		}
@@ -210,7 +227,9 @@ public final class DownedPose {
 
 	/** The frame: crawling or lying, come with the fall (as it goes down the limbs go from standing to lying). */
 	private static void pose(PoseBlend.Frame f, LivingEntityRenderState living, Down pose) {
-		if (pose.crawls()) {
+		if (pose.machine()) {
+			shortOut(f, living, pose);
+		} else if (pose.crawls()) {
 			CrawlPose.stroke(f, phase(living, pose), moving(living), pose.broken(), true);
 		} else {
 			lie(f, living, pose);
@@ -275,6 +294,65 @@ public final class DownedPose {
 			}
 			f.mix(PoseBlend.HEAD, 0.2F, Mth.sin(a * 0.9F) * FLAIL_HEAD, 0.0F, flail);
 		}
+	}
+
+	/**
+	 * (0.19.32) A machine on its back: no breath and no trying to sit up, its limbs locked where they fell, arms out and
+	 * legs straight, a faint tremor running through them. In a fault each limb snaps to a new angle every
+	 * {@link #GLITCH_STEP} ticks (held, not swung: a seizing servo) and the head twitches round.
+	 */
+	private static void shortOut(PoseBlend.Frame f, LivingEntityRenderState state, Down pose) {
+		float age = state.ageInTicks;
+		int id = pose.id();
+		float tremor = pose.out() ? 0.0F : GLITCH_TREMOR;
+		f.set(PoseBlend.RIGHT_ARM, -0.2F + Mth.sin(age * 2.7F + id) * tremor, 0.0F, 0.6F);
+		f.set(PoseBlend.LEFT_ARM, -0.2F + Mth.sin(age * 3.1F + id * 3) * tremor, 0.0F, -0.6F);
+		f.set(PoseBlend.RIGHT_LEG, 0.0F, 0.0F, 0.1F);
+		f.set(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -0.1F);
+		f.set(PoseBlend.HEAD, 0.0F, 0.4F, 0.0F);
+		float glitch = glitch(pose);
+		if (glitch <= 0.0F) {
+			return;
+		}
+		float t = (float) Math.floor(age / GLITCH_STEP);
+		int broken = pose.broken();
+		float g = GLITCH_LIMBS;
+		if ((broken & Dismember.RIGHT_ARM) == 0) {
+			f.mix(PoseBlend.RIGHT_ARM, -0.9F + jerk(id, t, 1) * g, 0.0F, 0.6F + jerk(id, t, 2) * g, glitch);
+		}
+		if ((broken & Dismember.LEFT_ARM) == 0) {
+			f.mix(PoseBlend.LEFT_ARM, -0.9F + jerk(id, t, 3) * g, 0.0F, -0.6F + jerk(id, t, 4) * g, glitch);
+		}
+		if ((broken & Dismember.RIGHT_LEG) == 0) {
+			f.mix(PoseBlend.RIGHT_LEG, -0.3F + jerk(id, t, 5) * g * 0.6F, 0.0F, 0.1F, glitch);
+		}
+		if ((broken & Dismember.LEFT_LEG) == 0) {
+			f.mix(PoseBlend.LEFT_LEG, -0.3F + jerk(id, t, 6) * g * 0.6F, 0.0F, -0.1F, glitch);
+		}
+		f.mix(PoseBlend.HEAD, jerk(id, t, 8) * 0.4F, jerk(id, t, 9) * 1.0F, jerk(id, t, 10) * 0.3F, glitch);
+	}
+
+	/** (0.19.32) A machine's fault (0-1): one as it lands, then every so often, each on its own beat. Never shut down. */
+	private static float glitch(Down pose) {
+		if (pose.out()) {
+			return 0.0F;
+		}
+		float down = pose.down();
+		if (down < FALL_TICKS + GLITCH_TICKS * 2.0F) {
+			return down < FALL_TICKS ? 0.0F : 1.0F;
+		}
+		float every = GLITCH_EVERY + (pose.id() & 31);
+		float t = (down + (pose.id() * 53 & 0xFF)) % every;
+		return t < GLITCH_TICKS ? 1.0F : 0.0F;
+	}
+
+	/** (0.19.32) A fixed random value (-1 to 1) for this body, this step of a fault and this joint: the same every frame of the step. */
+	private static float jerk(int id, float step, int joint) {
+		int h = id * 73856093 ^ (int) step * 19349663 ^ joint * 83492791;
+		h ^= h >>> 13;
+		h *= 0x5bd1e995;
+		h ^= h >>> 15;
+		return (h & 0xFFFF) / 32767.5F - 1.0F;
 	}
 
 	/**

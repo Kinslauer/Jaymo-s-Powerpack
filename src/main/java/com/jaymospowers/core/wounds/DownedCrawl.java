@@ -87,6 +87,12 @@ public final class DownedCrawl {
 	 * {@code felledBy}: who put it down, if known.
 	 */
 	static void tick(ServerLevel level, Mob mob, @Nullable Entity felledBy) {
+		if (Malfunction.is(mob)) {
+			// (0.19.32) a machine doesn't groan or crawl: it sparks and shorts out where it lies
+			mob.getNavigation().stop();
+			Malfunction.tick(level, mob);
+			return;
+		}
 		State s = STATES.computeIfAbsent(mob, m -> new State());
 		long now = level.getGameTime();
 		boolean out = Downed.passedOut(mob);

@@ -72,7 +72,7 @@ public final class KitchenCompat {
 		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "heavy_corpses"));
 
 	/** (0.19.32) A robot or golem (Kitchen's machine corpses, heavy ones included): nothing in it to eat or tear up. */
-	static boolean machine(net.minecraft.world.entity.@Nullable EntityType<?> type) {
+	public static boolean machine(net.minecraft.world.entity.@Nullable EntityType<?> type) {
 		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || heavy(type));
 	}
 
