@@ -4766,3 +4766,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Jaymo's Kingdoms 0.7.462 adds paid healing from town healers, the infirmary cot and the shrine (its MODLOG).
   - Everything is in JEI's Medicine page, washing and boiling too. Compile-checked with javac against the 26.3 jars; not built with
     Gradle or seen in game.
+
+- **0.19.25, seeing an Ultimate no longer crashes the game:** Andy: "crash just then". `UltimateSpikes` put the `hat` part at
+  the model's root, but 26.3's `HumanoidModel` looks for it inside `head`, so the first Ultimate form with spikes drawn on a
+  client threw "Can't find part hat" and crashed that client. It's in the head now.
