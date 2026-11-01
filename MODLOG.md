@@ -4715,3 +4715,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   golems don't: they arrest you as before, unless the guard is hotheaded or spiteful (Kingdoms).
   No creepers, fliers, slimes or bosses. Kingdoms' captains still get their
   own scene after the kill (`core/wounds/MobExecutions`, tuning at the top). Compile-checked; not seen in game.
+- **0.19.22, rocks match the ground:** Andy: "way too many sandstone rocks [...] there should be primarily flint and cobble
+  stone on this gravel plain, the rocks should adapt to whats underneath it, except for grass, then it always does
+  cobblestone rock pebbles". A loose rock now takes its stone from the block it lies on (`GroundRocksFeature.surfaceRock`):
+  grass, gravel and stone give the plain (cobblestone) rock, sand and sandstone sandstone, red sand and terracotta red
+  sandstone, granite/diorite/andesite/tuff/deepslate their own. Only on dirt and the like does the column under it decide,
+  and sand buried under dirt no longer makes sandstone; the desert/beach sandstone and badlands fallbacks are gone. Rocks
+  on gravel are loose flint 45% of the time (`GRAVEL_FLINT`). Pebble piles on grass are always the plain rock now
+  (`PebblePilesFeature`). New chunks only.
