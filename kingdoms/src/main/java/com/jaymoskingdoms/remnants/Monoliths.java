@@ -92,10 +92,19 @@ public final class Monoliths {
 	 * it this many blocks across: the pillar 9 wide, 39 to 54 tall, its crown 3 wide, its core and shards 3 blocks a side.
 	 */
 	static final int SCALE = 3;
-	/** The pillar (in its own blocks, {@link #SCALE} each): how tall before its broken crown, its bands' spacing, the gap under the floating core. */
-	static final int PILLAR_LEAST = 13, PILLAR_MOST = 18, BAND_EVERY = 4, CORE_GAP = 2;
+	/**
+	 * The pillar (in its own blocks, {@link #SCALE} each): how tall before its broken crown, its bands' spacing, the gap
+	 * under the floating heart. (0.7.455) Andy: "I'd like the monoliths larger ... like the mod they came from": Ancient
+	 * Remnants' monoliths stand some 120 blocks with their heart high in them, so ours now rise 78 to 102 blocks to the
+	 * crown, on a broad 5x5 foot ({@link #FOOT_SHARE} of the way up) under the 3x3 shaft.
+	 */
+	static final int PILLAR_LEAST = 26, PILLAR_MOST = 34, BAND_EVERY = 4, CORE_GAP = 2;
+	/** How much of the pillar (share of its height) is its broad foot. */
+	static final float FOOT_SHARE = 0.3F;
+	/** Room kept under the world's ceiling: a monolith too tall for where it stands is cut shorter (blocks). */
+	static final int CEILING_ROOM = 16;
 	/** The paved ground round its foot (radius, blocks), and how many broken pieces lie about. */
-	static final int GROUND_RADIUS = 4 * SCALE, RUBBLE = 9;
+	static final int GROUND_RADIUS = 6 * SCALE, RUBBLE = 14;
 	/** How uneven the ground under it may be (blocks). */
 	static final int FIT_ROUGHNESS = 6;
 	/**
@@ -104,7 +113,7 @@ public final class Monoliths {
 	 */
 	static final String TINKERS_TIER_TAG = "incorrect_for_diamond_tool";
 	/** How far round its foot (blocks, level) and how high above it its own blocks reach. */
-	static final int PART_RADIUS = 8, PART_HEIGHT = (PILLAR_MOST + CORE_GAP + 3) * SCALE;
+	static final int PART_RADIUS = 2 * SCALE + SCALE / 2 + 1, PART_HEIGHT = (PILLAR_MOST + CORE_GAP + 3) * SCALE;
 	/** The world tier the first Giant's fall raises the world to (1: Borderlands). */
 	static final int FIRST_GIANT_TIER = 1;
 
@@ -113,17 +122,28 @@ public final class Monoliths {
 
 	public static final int AWAKE = 0, CLAIMED = 1;
 
-	/** One monolith: where (its foot), its element, whether its Giant has fallen, and whether we raised it (else Ancient Remnants did). */
-	public record Monolith(BlockPos pos, Element element, int state, boolean ours) {
+	/** No heart known yet (one raised before 0.7.455, not yet looked over), or none to be found. */
+	static final int HEART_UNKNOWN = -1, HEART_NONE = -2;
+
+	/**
+	 * One monolith: where (its foot), its element, whether its Giant has fallen, whether we raised it (else Ancient
+	 * Remnants did), and (0.7.455) how high over its foot its living heart floats ({@link MonolithHeart}).
+	 */
+	public record Monolith(BlockPos pos, Element element, int state, boolean ours, int heart) {
 		static final Codec<Monolith> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.LONG.fieldOf("pos").forGetter(m -> m.pos().asLong()),
 			Codec.INT.optionalFieldOf("element", 0).forGetter(m -> m.element().ordinal()),
 			Codec.INT.optionalFieldOf("state", AWAKE).forGetter(Monolith::state),
-			Codec.BOOL.optionalFieldOf("ours", true).forGetter(Monolith::ours)
-		).apply(i, (pos, element, state, ours) -> new Monolith(BlockPos.of(pos), Element.byOrdinal(element), state, ours)));
+			Codec.BOOL.optionalFieldOf("ours", true).forGetter(Monolith::ours),
+			Codec.INT.optionalFieldOf("heart", HEART_UNKNOWN).forGetter(Monolith::heart)
+		).apply(i, (pos, element, state, ours, heart) -> new Monolith(BlockPos.of(pos), Element.byOrdinal(element), state, ours, heart)));
 
 		Monolith claimed() {
-			return new Monolith(this.pos, this.element, CLAIMED, this.ours);
+			return new Monolith(this.pos, this.element, CLAIMED, this.ours, this.heart);
+		}
+
+		Monolith withHeart(int heart) {
+			return new Monolith(this.pos, this.element, this.state, this.ours, heart);
 		}
 	}
 
@@ -242,7 +262,9 @@ public final class Monoliths {
 		ServerLevel level = Factions.level(server);
 		if (now % CHECK_TICKS == 0) {
 			wake(level);
+			upgradeHearts(level);
 		}
+		MonolithHeart.tick(level, all(level));
 		if (now % RAISE_TICKS == 0) {
 			RandomSource random = level.getRandom();
 			for (ServerPlayer player : level.players()) {
@@ -292,11 +314,26 @@ public final class Monoliths {
 		}
 	}
 
+	/** (0.7.455) Awake monoliths of ours raised before their hearts moved: their block core becomes a living heart. */
+	private static void upgradeHearts(ServerLevel level) {
+		for (Monolith m : all(level)) {
+			if (m.ours() && m.state() == AWAKE && m.heart() == HEART_UNKNOWN && level.isPositionEntityTicking(m.pos())) {
+				int heart = MonolithHeart.fromBlocks(level, m);
+				Monolith now = m.withHeart(heart < 0 ? HEART_NONE : heart);
+				remember(level, now);
+				if (heart >= 0) {
+					MonolithHeart.raise(level, now);
+				}
+			}
+		}
+	}
+
 	/** {@code m} hums, its Giant still asleep (no one near is in the world tier to wake it): a low drone and its motes. */
 	static void hum(ServerLevel level, Monolith m) {
 		BlockPos pos = m.pos();
 		level.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, HUM_VOLUME, HUM_PITCH);
-		level.sendParticles(m.element().mote, pos.getX() + 0.5, pos.getY() + PILLAR_LEAST, pos.getZ() + 0.5, 6, 0.6, 1.0, 0.6, 0.01);
+		double up = m.heart() >= 0 ? m.heart() : PILLAR_LEAST;
+		level.sendParticles(m.element().mote, pos.getX() + 0.5, pos.getY() + up, pos.getZ() + 0.5, 6, 0.6, 1.0, 0.6, 0.01);
 	}
 
 	/** The living Giant bound to {@code m}, if one is about. */
@@ -435,6 +472,9 @@ public final class Monoliths {
 	 */
 	public static Monolith raise(ServerLevel level, BlockPos foot, Element element, RandomSource random) {
 		int height = PILLAR_LEAST + random.nextInt(PILLAR_MOST - PILLAR_LEAST + 1);
+		// never into the world's ceiling: the crown, the gap and the heart's swing all fit under it
+		int room = (level.getMaxY() - CEILING_ROOM - foot.getY()) / SCALE - CORE_GAP - 3;
+		height = Math.max(8, Math.min(height, room));
 		BlockState stone = element.stone().defaultBlockState(), band = element.band().defaultBlockState();
 		// the ground round its foot, its own
 		for (int dx = -GROUND_RADIUS; dx <= GROUND_RADIUS; dx++) {
@@ -448,33 +488,34 @@ public final class Monoliths {
 				}
 			}
 		}
-		// the pillar: 3x3, then a 1x1 crown, broken off (each of its blocks SCALE across, the middle one over the foot)
-		int narrow = height - 4;
+		// the pillar: a broad 5x5 foot (its corners cut), a 3x3 shaft, then a 1x1 crown, broken off (each of its blocks
+		// SCALE across, the middle one over the foot)
+		int broad = Math.max(2, Math.round(height * FOOT_SHARE)), narrow = height - 4;
 		for (int y = 0; y < height; y++) {
 			BlockState here = y % BAND_EVERY == BAND_EVERY - 1 ? band : stone;
-			int r = y < narrow ? 1 : 0;
+			int r = y < broad ? 2 : y < narrow ? 1 : 0;
 			for (int dx = -r; dx <= r; dx++) {
 				for (int dz = -r; dz <= r; dz++) {
-					// the top rows of the broad part crumble at the corners
-					boolean crumbled = r == 1 && y >= narrow - 2 && Math.abs(dx) + Math.abs(dz) == 2 && random.nextBoolean();
+					int edge = Math.abs(dx) + Math.abs(dz);
+					if (r == 2 && edge == 4) {
+						continue;
+					}
+					// the top rows of each broad part crumble at the corners
+					boolean crumbled = (r == 1 && y >= narrow - 2 && edge == 2 || r == 2 && y >= broad - 2 && edge == 3) && random.nextBoolean();
 					cube(level, foot, dx, y, dz, crumbled ? Blocks.AIR.defaultBlockState() : here);
 				}
 			}
 		}
-		// the core, floating over the break, and its four shards
-		for (int y = height; y < height + CORE_GAP; y++) {
+		// room over the break for the heart, which floats there (MonolithHeart)
+		for (int y = height; y < height + CORE_GAP + 3; y++) {
 			cube(level, foot, 0, y, 0, Blocks.AIR.defaultBlockState());
 		}
-		cube(level, foot, 0, height + CORE_GAP, 0, element.core().defaultBlockState());
-		cube(level, foot, 2, height + CORE_GAP - 1, 2, band);
-		cube(level, foot, -2, height + CORE_GAP, 2, band);
-		cube(level, foot, 2, height + CORE_GAP + 1, -2, band);
-		cube(level, foot, -2, height + CORE_GAP - 1, -2, band);
-		BlockPos core = foot.above((height + CORE_GAP) * SCALE + SCALE / 2);
+		int heart = (height + CORE_GAP) * SCALE + SCALE / 2;
+		BlockPos core = foot.above(heart);
 		// broken pieces about its foot, a few blocks each, sunk into the ground
 		for (int i = 0; i < RUBBLE; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
-			int r = (3 + random.nextInt(3)) * SCALE;
+			int r = (4 + random.nextInt(4)) * SCALE;
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, foot.offset(Mth.floor(Math.cos(angle) * r), 0,
 				Mth.floor(Math.sin(angle) * r)));
 			BlockState piece = random.nextInt(3) == 0 ? band : stone;
@@ -484,8 +525,9 @@ public final class Monoliths {
 			}
 		}
 		level.sendParticles(element.mote, core.getX() + 0.5, core.getY() + 0.5, core.getZ() + 0.5, 120, 3.0, 3.0, 3.0, 0.02);
-		Monolith m = new Monolith(foot.immutable(), element, AWAKE, true);
+		Monolith m = new Monolith(foot.immutable(), element, AWAKE, true, heart);
 		remember(level, m);
+		MonolithHeart.raise(level, m);
 		JaymosKingdoms.LOGGER.info("A {} monolith rose at {}", element.key(), foot);
 		return m;
 	}
@@ -547,6 +589,11 @@ public final class Monoliths {
 
 	/** Its Giant fallen, the monolith's core goes out: the floating core is gone, the shards left hanging. */
 	private static void darken(ServerLevel level, Monolith m) {
+		// (0.7.455) a living heart: its core goes out, the shards hang dark
+		if (m.heart() >= 0 && MonolithHeart.darken(level, m)) {
+			level.playSound(null, m.pos().above(m.heart()), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3.0F, 0.5F);
+			return;
+		}
 		// (0.7.263) its core a cube now (and the single block of one raised before)
 		BlockPos out = null;
 		int half = SCALE / 2;

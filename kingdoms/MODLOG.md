@@ -7920,3 +7920,20 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
   Interact button (only Introduce, Gift, Trade).
 - Compile-checked; not seen in game.
+
+## 0.7.455: larger monoliths with a living heart (pack 0.19.12)
+- Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
+  studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
+  glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.
+- Bigger: new monoliths rise 78-102 blocks to the crown (was 39-54) on a broad 5x5 foot (corners cut, a third of the
+  way up) under the 3x3 shaft and 1x1 crown; paved ground and rubble spread wider. Cut shorter under the world's ceiling.
+- Animated (`MonolithHeart`): the heart floats over the crown as seven block displays of the element's gem, all
+  full-bright: a core that turns and swells, and six crystal shards (cubes stood on a corner) on its six sides. The
+  cluster tumbles slowly on all three axes; the shards breathe out and in, stretching as they swing. Moved every 3
+  ticks with smooth interpolation, only while a player is within 192 blocks. Motes of its element and end-rod sparks
+  are drawn in to it off the stone round it.
+- Old monoliths still awake keep their size but get the living heart: their block core and the four still shards are
+  taken out and the displays float in their place (once, when first loaded). Monoliths remember their heart height
+  (`heart` in the `monoliths` attachment).
+- Giant slain: the core goes out and the shards hang still and dark (band stone).
+- Tuning at the top of `MonolithHeart` and `Monoliths`. Compile-checked; not seen in game.
