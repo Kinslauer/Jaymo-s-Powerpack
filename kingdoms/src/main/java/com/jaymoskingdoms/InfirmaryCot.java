@@ -5,12 +5,10 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.459) The infirmary cot: a low bed (two blocks, like any bed, but a hand lower) of planks and wool. It is a vanilla
@@ -38,11 +36,5 @@ public final class InfirmaryCot extends BedBlock {
 	@Override
 	protected RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
-	}
-
-	/** A cot has no colour to keep, so no block entity (the bed's own is for vanilla beds only). */
-	@Override
-	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return null;
 	}
 }

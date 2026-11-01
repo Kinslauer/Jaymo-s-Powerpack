@@ -69,7 +69,7 @@ public final class Healing {
 	static void register() {
 		ResourceKey<Block> cot = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("infirmary_cot"));
 		COT = Registry.register(BuiltInRegistries.BLOCK, cot, new InfirmaryCot(BlockBehaviour.Properties.of().setId(cot)
-			.mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY)));
+			.mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)));
 		COT_ITEM = blockItem("infirmary_cot", COT);
 		ResourceKey<Block> shrine = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("shrine"));
 		SHRINE = Registry.register(BuiltInRegistries.BLOCK, shrine, new Shrine(BlockBehaviour.Properties.of().setId(shrine)
