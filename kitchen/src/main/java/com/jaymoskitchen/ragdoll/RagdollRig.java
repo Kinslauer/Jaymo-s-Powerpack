@@ -9,13 +9,16 @@ package com.jaymoskitchen.ragdoll;
  * Players, zombies, skeletons, villagers, illagers, piglins, endermen...</li>
  * <li>{@link Shape#QUADRUPED}: a level torso (front and back corners), a head out in front, four legs.</li>
  * <li>{@link Shape#BOX}: a rigid block the body's size (fish, chickens, slimes, spiders, anything odd).</li>
+ * <li>{@link Shape#CHAIN}: (0.5.47) a small rigid head and a long body of many short links behind it, each joint
+ * bending freely (snakes). It drapes over whatever it lies on like a rope.</li>
  * </ul>
  * Rest positions are in body space: feet on y = 0, facing +Z (south, as a mob with yaw 0), its right toward -X.
  * Nothing here touches Minecraft, so the simulation can be checked on its own (tools/ragdoll_sim).
  */
 public final class RagdollRig {
 	public enum Shape {
-		HUMANOID, QUADRUPED, BOX;
+		// new shapes go on the end: saved corpses and the network keep the number
+		HUMANOID, QUADRUPED, BOX, CHAIN;
 
 		public static Shape byId(int id) {
 			Shape[] all = values();
@@ -31,6 +34,11 @@ public final class RagdollRig {
 		FR_FOOT = 6, FL_FOOT = 7, BR_FOOT = 8, BL_FOOT = 9, MIDDLE = 10;
 	/** A box body's middle (where it's drawn from). */
 	public static final int BOX_MIDDLE = 8;
+	/**
+	 * (0.5.47) Chain point indices: the head's corners are the torso's (snout "top", back of the head "bottom"), then
+	 * the body's joints run back from the head, the last one the tail's tip.
+	 */
+	public static final int CHAIN_FIRST = 4;
 	/** The torso's four corners, by role: the two toward the head ("top") and the two away from it. */
 	public static final int TOP_RIGHT = 0, TOP_LEFT = 1, BOTTOM_RIGHT = 2, BOTTOM_LEFT = 3;
 
@@ -42,6 +50,12 @@ public final class RagdollRig {
 	private static final float LEG_LEAN = 0.55F;
 	/** Quadruped legs, and how far their heads nod. */
 	private static final float HOOF_CONE = 1.2F, MUZZLE_CONE = 1.0F;
+	/**
+	 * (0.5.47) A chain body: how many joints behind the head, its length (a share of its width), how thick it is, and
+	 * how far each joint may bend (radians from straight). Andy: "a snake should go all noodle like when they ragdoll".
+	 */
+	private static final int CHAIN_JOINTS = 10;
+	private static final float CHAIN_LENGTH = 3.5F, CHAIN_THICK = 0.16F, CHAIN_HEAD = 0.14F, CHAIN_BEND = 1.3F;
 	/** Smallest a point can be (blocks), so tiny bodies still touch the ground. */
 	private static final float MIN_RADIUS = 0.04F;
 
@@ -61,9 +75,20 @@ public final class RagdollRig {
 	public final float[] coneAxisX, coneAxisY, coneAxisZ, coneAngle;
 	/** The point the body's height above the ground is measured at, and where it's drawn from (the neck). */
 	public final int pivot;
+	/**
+	 * (0.5.47) Struts: points {@code strutA[i]} and {@code strutB[i]} are pushed apart when nearer than
+	 * {@code strutMin[i]}, never pulled together: how far a chain's joints can bend.
+	 */
+	public final int[] strutA, strutB;
+	public final float[] strutMin;
 
 	private RagdollRig(Shape shape, float width, float height, float[][] points, float[] radius, int[][] sticks,
 		float[][] cones, int pivot) {
+		this(shape, width, height, points, radius, sticks, cones, pivot, new int[0][], new float[0]);
+	}
+
+	private RagdollRig(Shape shape, float width, float height, float[][] points, float[] radius, int[][] sticks,
+		float[][] cones, int pivot, int[][] struts, float[] strutShare) {
 		this.shape = shape;
 		this.width = width;
 		this.height = height;
@@ -105,6 +130,26 @@ public final class RagdollRig {
 			coneAngle[i] = cones[i][5];
 		}
 		this.pivot = pivot;
+		this.strutA = new int[struts.length];
+		this.strutB = new int[struts.length];
+		this.strutMin = new float[struts.length];
+		for (int i = 0; i < struts.length; i++) {
+			int a = struts[i][0], b = struts[i][1];
+			strutA[i] = a;
+			strutB[i] = b;
+			float dx = restX[a] - restX[b], dy = restY[a] - restY[b], dz = restZ[a] - restZ[b];
+			strutMin[i] = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) * strutShare[i];
+		}
+	}
+
+	/** (0.5.47) True for a chain body (a snake): its joints run from {@link #CHAIN_FIRST} to the last point. */
+	public boolean chain() {
+		return shape == Shape.CHAIN;
+	}
+
+	/** (0.5.47) The tail's tip of a chain body (its last point). */
+	public int tailTip() {
+		return count - 1;
 	}
 
 	public static RagdollRig of(Shape shape, float width, float height) {
@@ -114,6 +159,7 @@ public final class RagdollRig {
 			case HUMANOID -> humanoid(width, height);
 			case QUADRUPED -> quadruped(width, height);
 			case BOX -> box(width, height);
+			case CHAIN -> chain(width, height);
 		};
 	}
 
@@ -211,6 +257,62 @@ public final class RagdollRig {
 		java.util.Arrays.fill(radius, r);
 		int[][] sticks = join(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8}, new int[0][]);
 		return new RagdollRig(Shape.BOX, width, height, points, radius, sticks, new float[0][], BOX_MIDDLE);
+	}
+
+	/**
+	 * (0.5.47) A snake: lying along +Z (head forward), a small rigid head (four corners, as a torso's) and
+	 * {@link #CHAIN_JOINTS} joints behind it, each held to the next by a stick and free to bend every way up to
+	 * {@link #CHAIN_BEND} (struts two joints apart stop it folding flat on itself). Nothing stiffens it, so it sags
+	 * over edges, drapes over bumps and flops when shoved.
+	 */
+	private static RagdollRig chain(float width, float height) {
+		float length = Math.max(width * CHAIN_LENGTH, 0.6F);
+		float thick = Math.max(Math.min(width * CHAIN_THICK, height * 0.25F), MIN_RADIUS);
+		float head = Math.max(length * CHAIN_HEAD, thick * 2.0F);
+		float halfW = thick * 0.7F;
+		float front = length * 0.5F, back = front - head;
+		float seg = (length - head) / CHAIN_JOINTS;
+		int n = CHAIN_FIRST + CHAIN_JOINTS;
+		float[][] points = new float[n][];
+		points[TOP_RIGHT] = new float[] {-halfW, thick, front};
+		points[TOP_LEFT] = new float[] {halfW, thick, front};
+		points[BOTTOM_RIGHT] = new float[] {-halfW, thick, back};
+		points[BOTTOM_LEFT] = new float[] {halfW, thick, back};
+		float[] radius = new float[n];
+		for (int k = 0; k < CHAIN_JOINTS; k++) {
+			points[CHAIN_FIRST + k] = new float[] {0, thick, back - seg * (k + 1)};
+			// tapering to the tail
+			radius[CHAIN_FIRST + k] = Math.max(thick * (1.0F - 0.5F * k / (CHAIN_JOINTS - 1)), MIN_RADIUS);
+		}
+		for (int i = 0; i < CHAIN_FIRST; i++) {
+			radius[i] = Math.max(thick * 0.8F, MIN_RADIUS);
+		}
+		// the head rigid, hinged to the first joint by both its back corners; then joint to joint
+		int[][] extra = new int[2 + CHAIN_JOINTS - 1][];
+		extra[0] = new int[] {BOTTOM_RIGHT, CHAIN_FIRST};
+		extra[1] = new int[] {BOTTOM_LEFT, CHAIN_FIRST};
+		for (int k = 0; k + 1 < CHAIN_JOINTS; k++) {
+			extra[2 + k] = new int[] {CHAIN_FIRST + k, CHAIN_FIRST + k + 1};
+		}
+		int[][] sticks = join(new int[] {TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT}, extra);
+		// bending: two links meeting at angle a (from straight) leave their far ends 2 cos(a / 2) of a link apart
+		float bend = (float) Math.cos(CHAIN_BEND * 0.5F);
+		int[][] struts = new int[3 + CHAIN_JOINTS - 2][];
+		float[] share = new float[struts.length];
+		// the head nods on its hinge no further than a joint bends
+		struts[0] = new int[] {TOP_RIGHT, CHAIN_FIRST};
+		struts[1] = new int[] {TOP_LEFT, CHAIN_FIRST};
+		float nod = (float) Math.sqrt(head * head + seg * seg + 2.0F * head * seg * Math.cos(CHAIN_BEND)) / (head + seg);
+		share[0] = share[1] = Math.min(1.0F, nod);
+		// the back of the head to the second joint
+		struts[2] = new int[] {BOTTOM_RIGHT, CHAIN_FIRST + 1};
+		share[2] = bend;
+		for (int k = 0; k + 2 < CHAIN_JOINTS; k++) {
+			struts[3 + k] = new int[] {CHAIN_FIRST + k, CHAIN_FIRST + k + 2};
+			share[3 + k] = bend;
+		}
+		return new RagdollRig(Shape.CHAIN, width, height, points, radius, sticks, new float[0][], CHAIN_FIRST, struts,
+			share);
 	}
 
 	/** Every pair of {@code rigid} points held fast (a rigid body), plus the {@code extra} sticks. */

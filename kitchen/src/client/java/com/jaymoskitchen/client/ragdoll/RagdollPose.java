@@ -72,6 +72,8 @@ public final class RagdollPose {
 	private final float curl;
 	/** (0.5.40) A corpse's parts the ragdoll doesn't drive, hung loose (see {@link LooseParts}); null for none. */
 	private LooseParts.Motion loose;
+	/** (0.5.47) A chain body's line from the head's tip to the tail's tip (x, y, z each, drawn-relative); null if not one. */
+	private float[] chain;
 	private float looseTime, looseScale = 1.0F;
 	private boolean looseGrounded;
 
@@ -164,7 +166,7 @@ public final class RagdollPose {
 		Limb[] limbs = switch (rig.shape) {
 			case HUMANOID -> HUMANOID;
 			case QUADRUPED -> QUADRUPED;
-			case BOX -> NONE;
+			case BOX, CHAIN -> NONE;
 		};
 		float[] angles = new float[limbs.length * 3];
 		float[] out = new float[3];
@@ -180,7 +182,25 @@ public final class RagdollPose {
 				angles[l * 3 + k] = onSide && !onBack ? out[k] + (QUADRUPED_SIDE[l * 3 + k] - out[k]) * side : out[k];
 			}
 		}
-		return new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
+		RagdollPose pose = new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
+		if (rig.chain() && !onBack) {
+			// (0.5.47) the snout, the back of the head, then every joint back to the tail's tip
+			int joints = n - RagdollRig.CHAIN_FIRST;
+			float[] line = new float[(joints + 2) * 3];
+			line[0] = (x[RagdollRig.TOP_RIGHT] + x[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[1] = (y[RagdollRig.TOP_RIGHT] + y[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[2] = (z[RagdollRig.TOP_RIGHT] + z[RagdollRig.TOP_LEFT]) * 0.5F;
+			line[3] = (x[RagdollRig.BOTTOM_RIGHT] + x[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			line[4] = (y[RagdollRig.BOTTOM_RIGHT] + y[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			line[5] = (z[RagdollRig.BOTTOM_RIGHT] + z[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			for (int j = 0; j < joints; j++) {
+				line[6 + j * 3] = x[RagdollRig.CHAIN_FIRST + j];
+				line[7 + j * 3] = y[RagdollRig.CHAIN_FIRST + j];
+				line[8 + j * 3] = z[RagdollRig.CHAIN_FIRST + j];
+			}
+			pose.chain = line;
+		}
+		return pose;
 	}
 
 	/**
@@ -313,6 +333,8 @@ public final class RagdollPose {
 		if (curl > 0.0F) {
 			curl(root);
 		}
+		// (0.5.47) a snake's body laid along its chain, segment by segment
+		java.util.Set<String> spine = chain != null ? ChainSpine.apply(root, body, looseScale, chain) : null;
 		// (humanoids only when their arms aren't the ones the ragdoll knows: a modded brute's, a villager's folded arms)
 		if (loose != null && (shape != RagdollRig.Shape.HUMANOID || find(root, "right_arm") == null)) {
 			java.util.Set<String> skip = new java.util.HashSet<>();
@@ -321,6 +343,9 @@ public final class RagdollPose {
 			}
 			if (curl > 0.0F) {
 				java.util.Collections.addAll(skip, SPIDER_LEGS);
+			}
+			if (spine != null) {
+				skip.addAll(spine);
 			}
 			LooseParts.apply(root, body, looseScale, loose, looseTime, looseGrounded, skip);
 		}
