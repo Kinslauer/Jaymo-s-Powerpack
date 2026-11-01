@@ -46,5 +46,6 @@ it stands), Rivet (a living-metal blob that stands up when it fights), Nadir and
 Marrow, Swathe, Mirage, Polestar, Towerback (the Giants' kin) and Duplex (a golem's build already).
 
 ## Open questions
-1. Should small bodies (Ooze, Croaker, Gremlin, Locust) get a small box too, like Billow, so they fit through gaps?
+1. ~~Should small bodies get a small box too?~~ Andy (2026-11-01): yes. Ooze, Magma Ooze and Croaker get a low box
+   (as Billow's) with their new bodies in patches 3 and 5, fitting through one-block gaps.
 2. Is that the right six to keep humanoid?
