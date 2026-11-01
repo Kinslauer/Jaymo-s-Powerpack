@@ -4895,3 +4895,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   form apart and lifted it out of its frame. The 0.19.11 check was made in a test game without Fresh Animations. Fresh
   Animations now pauses for you while the story screen is up (Kingdoms MODLOG). Checked in a test game with MCA and Fresh
   Animations.
+- **0.19.50, Kingdoms 0.7.474, ogres with the orcs:** Ogre bands now live in orc camps (or raise new ones with the orcs) and
+  help them build. Jade calls goblins and orcs "Goblin" and "Orc" instead of MCA's "Male Villager". Half-orc players are drawn
+  like the greenskins, with a skin slider on the greenskin road that goes beyond green. Idle orc guards no longer loop "My
+  weapon! / Not done yet!" (Kingdoms MODLOG). Compile-checked; not played.

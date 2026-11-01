@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.GreenskinLife;
 import com.jaymoskingdoms.Greenskins;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -7,6 +8,7 @@ import com.jaymoskingdoms.McaCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -17,12 +19,13 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
@@ -39,6 +42,9 @@ import org.jspecify.annotations.Nullable;
  * or bone-white). Tusks, scars and paint keep their own colours.</li>
  * </ul>
  * Each one's shape and marks are fixed by its UUID. Clothes drawn over the body hide the marks under them.
+ * <p>(0.7.474) A half-orc player ({@link GreenskinLife#halfOrc}) wears an orc's look too, on the skin they picked on the
+ * life story's slider ({@link GreenskinLife#TONE}), greens and greys and browns ({@code McaVerdantSkinMixin} colours MCA's
+ * skin with it).
  */
 public final class GreenskinLooks {
 	/** On a villager's render state: its brood, which shape, which marks (and an orc's scars), and its green. */
@@ -69,7 +75,8 @@ public final class GreenskinLooks {
 
 	static void register() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
-			if (!(renderer instanceof AvatarRenderer<?>) && renderer.getModel() instanceof HumanoidModel<?>) {
+			// ((0.7.474) players too: a half-orc)
+			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer));
 			}
 		});
@@ -82,15 +89,42 @@ public final class GreenskinLooks {
 
 	/** From the living renderer's extractRenderState ({@link VillagerLooks#extract}): a goblin's or an orc's look, or none. True if it's one. */
 	static boolean extract(LivingEntity entity, LivingEntityRenderState state) {
-		Heritage.Kind kind = entity instanceof Player || entity instanceof com.jaymoskingdoms.Folk ? null : Greenskins.of(entity);
+		long bits = entity.getUUID().getLeastSignificantBits();
+		if (entity instanceof Player) {
+			// (0.7.474) a half-orc player: an orc's tusks, brow, ears and marks, on the skin they picked
+			int skin = halfOrcSkin(entity);
+			state.setData(KEY, skin == 0 ? null : new Look(Heritage.Kind.ORC, (int)Math.floorMod(bits >>> 3, (long)SHAPES),
+				(int)Math.floorMod(bits >>> 7, (long)MARKS), (int)Math.floorMod(bits >>> 11, (long)MARKS), skin));
+			return skin != 0;
+		}
+		Heritage.Kind kind = entity instanceof com.jaymoskingdoms.Folk ? null : Greenskins.of(entity);
 		if (kind == null) {
 			state.setData(KEY, null);
 			return false;
 		}
-		long bits = entity.getUUID().getLeastSignificantBits();
 		state.setData(KEY, new Look(kind, (int)Math.floorMod(bits >>> 3, (long)SHAPES), (int)Math.floorMod(bits >>> 7, (long)MARKS),
 			(int)Math.floorMod(bits >>> 11, (long)MARKS), Greenskins.skin(entity)));
 		return true;
+	}
+
+	/**
+	 * (0.7.474) While the life story's greenskin road is shown, the skin on its slider (0 to 1), drawn on you there; -1
+	 * otherwise ({@code LifeStoryScreen}).
+	 */
+	public static float previewTone = -1.0F;
+
+	/**
+	 * (0.7.474) The skin {@code entity} (a player, or the figure of you on MCA's creator) wears as a half-orc (opaque ARGB):
+	 * the tone they picked ({@link GreenskinLife#skin}), or the slider's while the story shows it to you; 0 for anyone else.
+	 */
+	public static int halfOrcSkin(Entity entity) {
+		Minecraft minecraft = Minecraft.getInstance();
+		boolean you = entity == minecraft.player || entity == EditorFigure.current();
+		if (you && previewTone >= 0.0F) {
+			return GreenskinLife.toneColor(previewTone);
+		}
+		Entity whose = entity == EditorFigure.current() ? minecraft.player : entity;
+		return whose != null && GreenskinLife.halfOrc(whose) ? GreenskinLife.skin(whose) : 0;
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
@@ -101,7 +135,8 @@ public final class GreenskinLooks {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Look look = state.getData(KEY);
-			if (look == null || state.isInvisible) {
+			if (look == null || state.isInvisible || state instanceof AvatarRenderState && PowersCover.face(state)) {
+				// ((0.7.474) a half-orc's mask or the symbiote's suit covers it)
 				return;
 			}
 			HumanoidModel<S> model = this.getParentModel();

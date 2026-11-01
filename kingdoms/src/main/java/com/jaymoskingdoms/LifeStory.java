@@ -645,16 +645,18 @@ public final class LifeStory {
 	/**
 	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
-	 * road makes you (the afterlife's).
+	 * road makes you (the afterlife's); {@code tone}: (0.7.474) a half-orc's skin on the greenskin road's slider
+	 * ({@link GreenskinLife#TONE}).
 	 */
-	public record Road(int road, int roadRealm, int look) implements CustomPacketPayload {
+	public record Road(int road, int roadRealm, int look, float tone) implements CustomPacketPayload {
 		public static final Type<Road> TYPE = new Type<>(JaymosKingdoms.id("story_road_pick"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Road> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.road + 1);
 				buf.writeVarInt(p.roadRealm + 1);
 				buf.writeVarInt(p.look);
-			}, buf -> new Road(buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt()));
+				buf.writeFloat(p.tone);
+			}, buf -> new Road(buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readFloat()));
 
 		@Override
 		public Type<Road> type() {
@@ -1009,6 +1011,10 @@ public final class LifeStory {
 			Heritage.set(player, road.makes());
 			HeritageVariants.choose(player, road.makes(), payload.look());
 			Stats.attributes(player);
+		}
+		if (road.start == Start.GREENSKIN) {
+			// (0.7.474) the skin they'd have as a half-orc (the slider on the greenskin road)
+			player.setAttached(GreenskinLife.TONE, Mth.clamp(payload.tone(), 0.0F, 1.0F));
 		}
 		List<String> story = new ArrayList<>(of(player));
 		story.set(Question.ROAD.ordinal(), road.key);

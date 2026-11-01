@@ -183,6 +183,21 @@ public final class Introductions {
 		player.setAttached(STRUCK, next);
 	}
 
+	/**
+	 * (0.7.474) What {@code e}, a villager whose name you haven't asked, goes by: a goblin or an orc as one (Andy: "they
+	 * shouldnt be referred to as villagers if they are orc or goblin"), anyone else what MCA calls them.
+	 */
+	public static Component what(Entity e) {
+		Heritage.Kind brood = Greenskins.of(e);
+		if (brood == Heritage.Kind.ORC) {
+			return Component.translatable("identity.jaymoskingdoms.orc_name");
+		}
+		if (brood == Heritage.Kind.GOBLIN) {
+			return Component.translatable("identity.jaymoskingdoms.goblin_name");
+		}
+		return e.getType().getDescription();
+	}
+
 	/** What an unintroduced player is called. */
 	public static Component stranger() {
 		return Component.translatable("identity.jaymoskingdoms.stranger");
