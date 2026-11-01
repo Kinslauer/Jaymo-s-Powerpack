@@ -8031,7 +8031,7 @@ offer it in his interactions menu".
   MCA's look and name are kept.
 - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
 
-## 0.7.467: the Strong Strike and the barrage clash (pack 0.19.34)
+## 0.7.467: the Strong Strike and the barrage clash (pack 0.19.35)
 Andy: "each spirit should have a strong strike attack that whips the fist straight forward within your view, and when one
 of these punches clashes with another you get a barrage style clash, that requires precise timing or manipulation
 otherwise to win" (the stand rush gif), and the Grue trial "needs to culminate in one of these, with letterboxing and music".

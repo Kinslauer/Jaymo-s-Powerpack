@@ -87,6 +87,14 @@ public final class XenoformClient {
 		if (form == null) {
 			return;
 		}
+		if ("billow".equals(form)) {
+			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level
+			state.swimAmount = 0.0F;
+			state.isVisuallySwimming = false;
+			if (state.pose == net.minecraft.world.entity.Pose.SWIMMING) {
+				state.pose = net.minecraft.world.entity.Pose.STANDING;
+			}
+		}
 		hideBody(state);
 	}
 

@@ -4838,7 +4838,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Let go by the Eternal Dragon's wish or the long wait, you are asked two seconds after waking in the world
     (`WAKE_ASK_DELAY`). Without Kingdoms everything works as before.
   - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
-- **0.19.34, Kingdoms 0.7.467:** the spirits' Strong Strike and the barrage clash. Andy: "each spirit should have a strong
+- **0.19.34, Put the band away; aliens that aren't men:** Andy: "right clicking while scrolling the watch should let you put it away". Right
+  click while holding Z drops the wrist, and letting Z go then does nothing (no slam, quick change or turning back); the
+  click uses nothing in hand (`XenoNet.PutAway`). Andy: "there should be mechanical sound effects for every scroll": each
+  turn of the dial now clicks like a ratchet (a lever's click, higher turning on, lower turning back, over a relay's tick),
+  and a stuck dial (one alien) knocks. Andy: "Fuse and skitter should move uniquely, the aliens should not all be
+  humanoid, in fact it should be rare, skitter should move like a spider, and billow should be a real cloud, functioning
+  similar to smoke". Skitter is now a spider (low, eight legs in a spider's alternating fours, the body bobbing, a
+  biting lunge, flat when sneaking, the insignia on its abdomen). Fuse is a creeper's build on four stubby legs that
+  shuffle in diagonal pairs with a waddle and a bounce, swelling on each punch. Billow is a cloud (a soft mass, a face
+  puff that turns, puffs churning on top and trailing as it moves) and works like the Smoke power's wholly-smoke: a
+  block high, it seeps through doors, fences, bars and panes (not what it's resting on), shots fly through it and
+  creatures pass through; riders sit on its top. The rest are planned in `docs/AlienBodies-Plan.md` (five more
+  patches; six aliens stay humanoid). Andy: Duplex's "legs are disconnected": with Touch'n Motion loaded, `TnmFollow`
+  stamped the player body's part positions on every humanoid model drawn on a player, the alien's too, lifting the
+  golem's body and arms to a player's shoulders over its short legs; aliens (and their spikes) now keep their own pose.
+  Compile-checked; not seen in game.
+- **0.19.35, Kingdoms 0.7.467:** the spirits' Strong Strike and the barrage clash. Andy: "each spirit should have a strong
   strike attack that whips the fist straight forward within your view, and when one of these punches clashes with another
   you get a barrage style clash, that requires precise timing or manipulation otherwise to win". Every spirit's first move
   is now a straight punch; two meeting start a rhythm duel to an original drum track, letterboxed. Kingdoms-only change
