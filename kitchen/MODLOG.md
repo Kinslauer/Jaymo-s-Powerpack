@@ -1259,3 +1259,10 @@ user they need water". New client `DryVeins`: at `FROM` (8) water or less, thin 
 corners, reaching a little further in and showing a little more as the water runs out (opacity 0.35 to 0.65, three short
 layers, no heartbeat), and fade back once you drink. Hidden in creative and spectator. Art: `textures/gui/dry_veins_1..3.png`,
 drawn by Kingdoms' `tools/gen_thirst_veins.py water`. Compile-checked; not seen in game.
+
+## 0.5.44: small spiders always smash, any spider sometimes (pack 0.19.46)
+Andy: "smaller spiders should be smashed on every kill, and a chance for any spider to smash from any weapon, not just
+blunt." `SpiderCrush.crushed`: a crushable mob no wider than `SMALL_WIDTH` (1 block: cave spiders, shrunken or young
+spiders) bursts into legs on any kill, whatever the weapon; any other spider killed by someone (blade, arrow, power) is
+smashed `ANY_KILL_CHANCE` (25%) of the time. Deaths with no killer (poison, burning, drowning) still leave a body unless
+they crush (falls, anvils, mace, Powers' blunt marks). Corpse smashing unchanged. Not compile-checked; not seen in game.
