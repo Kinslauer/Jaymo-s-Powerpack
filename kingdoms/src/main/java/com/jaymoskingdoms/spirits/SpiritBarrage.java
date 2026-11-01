@@ -607,7 +607,7 @@ public final class SpiritBarrage {
 		if (damage <= 0.0F) {
 			return;
 		}
-		lose.invulnerableTime = 0;
+		lose.setInvulnerableTime(0);
 		dealing = true;
 		try {
 			lose.hurtServer(level, SpiritFoes.source(level, win), damage);

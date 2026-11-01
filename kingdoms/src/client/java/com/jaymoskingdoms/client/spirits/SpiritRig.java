@@ -215,10 +215,10 @@ final class SpiritRig {
 		if (pose == Poses.BARRAGE) {
 			// (0.7.467) the barrage: both fists pounding out in turn, far faster than the flurry, timed by the clock (not the
 			// stamp) so the pounding never stops when the pose is stamped again; each blow from its own angle
-			float beat = ageInTicks * BARRAGE_SPEED + i * Mth.PI;
-			float pump = 0.5F + 0.5F * Mth.sin(beat);
-			now.sx += BARRAGE_SPREAD * Mth.sin(beat * 0.5F + i);
-			now.sy += BARRAGE_SPREAD * Mth.cos(beat * 0.37F + i * 2.0F);
+			float pound = ageInTicks * BARRAGE_SPEED + i * Mth.PI;
+			float pump = 0.5F + 0.5F * Mth.sin(pound);
+			now.sx += BARRAGE_SPREAD * Mth.sin(pound * 0.5F + i);
+			now.sy += BARRAGE_SPREAD * Mth.cos(pound * 0.37F + i * 2.0F);
 			now.elbow = Mth.lerp(pump, WIND_ELBOW * 0.7F, 0.0F);
 			now.reach = shape.reach() * pump;
 		}

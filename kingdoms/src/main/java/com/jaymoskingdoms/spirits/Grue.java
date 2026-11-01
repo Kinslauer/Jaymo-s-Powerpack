@@ -209,6 +209,8 @@ public final class Grue {
 		JaymosKingdoms.LOGGER.debug("grue attachments: {} {} {}", GRUE, ROUTINE, HEARD);
 		PayloadTypeRegistry.clientboundPlay().register(Drive.TYPE, Drive.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Lash.TYPE, Lash.CODEC);
+		// (0.7.468) the trial when it takes you
+		GrueTrial.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> forgetAll());
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer().getUUID()));
 		// the host's hands are the Grue's: no blows, no blocks, nothing used but what keeps the body fed and alive
@@ -274,7 +276,12 @@ public final class Grue {
 	/** The Grue's hold on {@code entity} (0 for none). */
 	public static float hold(Entity entity) {
 		State s = entity.getAttached(GRUE);
-		return s == null ? 0.0F : s.taken() ? TAKEN : s.hold();
+		if (s == null) {
+			// (0.7.468) Grue Form burns as red as the Grue itself
+			SpiritState spirit = Spirits.state(entity);
+			return spirit != null && spirit.toggled(SpiritState.GRUE_FORM) ? TAKEN : 0.0F;
+		}
+		return s.taken() ? TAKEN : s.hold();
 	}
 
 	/** What a host may still use: food and anything drunk or eaten. */
@@ -287,7 +294,14 @@ public final class Grue {
 	/** Every tick for each player ({@link Spirits#tick}). */
 	static void tick(ServerPlayer player, long now) {
 		SpiritState spirit = Spirits.state(player);
-		if (spirit == null || player.isCreative() || player.isSpectator() || !player.isAlive()) {
+		if (spirit == null || player.isCreative() || player.isSpectator() || !player.isAlive() || GrueTrial.active(player)) {
+			return;
+		}
+		// (0.7.468) subjugated: it never creeps in again, and Grue Form costs its mana
+		if (GrueTrial.mastered(spirit)) {
+			if ((now + player.getId()) % 20L == 0L) {
+				GrueTrial.formSecond(player, spirit);
+			}
 			return;
 		}
 		State state = player.getAttached(GRUE);
@@ -352,7 +366,8 @@ public final class Grue {
 			SpiritVoice.sayNow(player, spirit.kind(), "grue.fight");
 			NEXT_LASH.put(player.getUUID(), player.level().getGameTime() + LASH_MIN / 2);
 		}
-		if (hold >= TAKEN) {
+		if (hold >= TAKEN && !GrueTrial.start(player)) {
+			// (0.7.468) the trial first (GrueTrial); straight to it only where there's no sky to raise an arena in
 			overtake(player, spirit);
 		}
 	}
@@ -372,7 +387,8 @@ public final class Grue {
 
 	/** A forbidden cast was made by {@code player} ({@code ForbiddenArts}): the spirit warns, and the Grue gains. */
 	public static void darkAct(ServerPlayer player) {
-		if (Spirits.state(player) == null || taken(player) || player.isCreative()) {
+		if (Spirits.state(player) == null || taken(player) || player.isCreative() || GrueTrial.mastered(Spirits.state(player))
+			|| GrueTrial.active(player)) {
 			return;
 		}
 		warn(player, "grue.warn", player.level().getGameTime());
@@ -386,7 +402,7 @@ public final class Grue {
 	public static boolean stayHand(ServerPlayer player) {
 		SpiritState spirit = Spirits.state(player);
 		float hold = hold(player);
-		if (spirit == null || taken(player) || player.isCreative() || hold < STIR) {
+		if (spirit == null || taken(player) || player.isCreative() || hold < STIR || GrueTrial.mastered(spirit) || GrueTrial.active(player)) {
 			return false;
 		}
 		float chance = STAY_LOW + (STAY_HIGH - STAY_LOW) * Math.clamp((hold - STIR) / (TAKEN - STIR), 0.0F, 1.0F);
@@ -479,6 +495,19 @@ public final class Grue {
 	}
 
 	// ---- taken -----------------------------------------------------------------------------------------------------------
+
+	/** (0.7.468) The trial lost: it has them now. */
+	static void overtakeNow(ServerPlayer player) {
+		SpiritState spirit = Spirits.state(player);
+		if (spirit != null) {
+			overtake(player, spirit);
+		}
+	}
+
+	/** (0.7.468) The Grue's own voice to {@code player} ({@link #speak}). */
+	static void speakTo(ServerPlayer player, String event) {
+		speak(player, event);
+	}
 
 	/** It has the spirit, and the body. */
 	private static void overtake(ServerPlayer player, SpiritState spirit) {
