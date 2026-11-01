@@ -53,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * top of a jump already falling are all caught, and Jump needn't be held (forward still is).
  *
  * <p>(0.19.40) The crouch grab: standing in front of a single block with a gap only one block high over it (no room to
- * stand up there), crouching takes hold of its edge and pulls you up and in onto your belly the same way, with no jump
+ * stand up there), the crouch stance (the wheel's low crouch, (0.19.51) never plain Sneak) takes hold of its edge and pulls you up and in onto your belly the same way, with no jump
  * and no hang ({@link #crouchSpot}).
  *
  * <p>The moves are the client's (player movement is client-authoritative; see {@code client/LedgeClient}): it finds the
@@ -111,7 +111,7 @@ public final class Ledge {
 	/** Where the prone climb ends: your middle this far past the edge (blocks), or {@link #CLIMB_IN} when the gap is shallower. */
 	public static final double PRONE_IN = 0.9;
 	/**
-	 * (0.19.40) The crouch grab: on the ground, a fresh Sneak facing a block whose top edge is this far over your feet
+	 * (0.19.40) The crouch grab: on the ground in the low crouch ({@link Stance#LOW}), facing a block whose top edge is this far over your feet
 	 * (blocks: over a slab's step, no higher than the chest), with a gap only one block high above it, catches the edge
 	 * and pulls you up and in onto your belly.
 	 */

@@ -25,8 +25,11 @@ import org.jspecify.annotations.Nullable;
  * as the climb does (the body drops to 0.6 high, lifted so the eyes stay put), rises to the top and slides in, and you
  * stay prone after it.
  *
- * <p>(0.19.40) The crouch grab: on the ground, a fresh Sneak facing a single block with a one-high gap over it
- * ({@link Ledge#crouchSpot}) takes its edge and goes straight into that prone climb, with no hang first.
+ * <p>(0.19.40) The crouch grab: on the ground, facing a single block with a one-high gap over it
+ * ({@link Ledge#crouchSpot}), you take its edge and go straight into that prone climb, with no hang first.
+ * (0.19.51) Andy: "i want a gap like this accessible from crouch, not sneak". It comes from the crouch stance (the wheel's
+ * low crouch) only, never a press of Sneak or the wheel's plain sneak: crouched, walk into the block (or drop into the
+ * crouch facing it, or press forward from the knee) and you pull up and in on your belly.
  */
 public final class LedgeClient {
 	private enum Phase { NONE, HANG, CLIMB }
@@ -51,8 +54,8 @@ public final class LedgeClient {
 	private static final int DROP_TICKS = 10;
 	private static final double DROP_MAX = 3.2;
 	private static int dropLeft;
-	/** (0.19.40) Sneak was down last tick (the crouch grab wants a fresh press). */
-	private static boolean sneakWas;
+	/** (0.19.51) The local player was in the low crouch last tick (dropping into it facing a gap takes the gap). */
+	private static boolean lowWas;
 	private static double dropTop;
 
 	private LedgeClient() {
@@ -130,16 +133,20 @@ public final class LedgeClient {
 			cooldown--;
 		}
 		Input input = player.input.keyPresses;
-		boolean freshSneak = input.shift() && !sneakWas;
-		sneakWas = input.shift();
+		boolean low = com.jaymospowers.core.Stance.localLow == player.getId();
+		boolean freshLow = low && !lowWas;
+		lowWas = low;
+		// (the raw key: on the knee the walking keys are dropped from the input, but pressing on still climbs in)
+		boolean pushing = minecraft.gui.screen() == null && minecraft.options.keyUp.isDown();
 		if (dropLeft > 0) {
 			tickDrop(player);
 		}
 		switch (phase) {
 			case NONE -> {
-				if (freshSneak) {
+				if (low && (freshLow || pushing)) {
 					tryCrouchGrab(player);
-				} else {
+				}
+				if (phase == Phase.NONE) {
 					tryGrab(player, input);
 				}
 			}
@@ -149,8 +156,8 @@ public final class LedgeClient {
 	}
 
 	/**
-	 * (0.19.40) Crouching on the ground at a single block with a one-high gap over it: take its edge and pull in onto the
-	 * belly at once. Not mid-sprint (that's a slide) or while freerunning.
+	 * (0.19.40) In the low crouch on the ground at a single block with a one-high gap over it: take its edge and pull in
+	 * onto the belly at once. Not mid-sprint (that's a slide) or while freerunning.
 	 */
 	private static void tryCrouchGrab(LocalPlayer player) {
 		if (cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player) || !Crawl.canCrawl(player)
@@ -396,7 +403,7 @@ public final class LedgeClient {
 	private static void reset() {
 		end();
 		dropLeft = 0;
-		sneakWas = false;
+		lowWas = false;
 		cooldown = 0;
 		confirmed = false;
 	}
