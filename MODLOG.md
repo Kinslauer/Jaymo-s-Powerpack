@@ -4899,8 +4899,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   help them build. Jade calls goblins and orcs "Goblin" and "Orc" instead of MCA's "Male Villager". Half-orc players are drawn
   like the greenskins, with a skin slider on the greenskin road that goes beyond green. Idle orc guards no longer loop "My
   weapon! / Not done yet!" (Kingdoms MODLOG). Compile-checked; not played.
+- **0.19.51, crouch into low gaps:** The grab that pulls you up onto a block and in on your belly under a one-high gap
+  now comes from the crouch stance (the wheel's low crouch), not from pressing Sneak: crouched, walk into the block, drop
+  into the crouch facing it, or press forward from the knee. Plain Sneak stays vanilla. Not compile-checked; not played.
 
-- **0.19.51, Kingdoms 0.7.475, greenskin camps grow in tiers:** Orc camps and goblin villages grow through four tiers (war
+- **0.19.52, Kingdoms 0.7.475, greenskin camps grow in tiers:** Orc camps and goblin villages grow through four tiers (war
   camp to horde kingdom, village to goblin kingdom), each with a wider palisade raised an arc a day, roads, and new
   buildings placed differently in every camp: market squares, ogre dens, smelters, breweries, war-beast pens and a great
   hall. A tier 4 camp claims land, its chief becomes Warlord or Goblin King, the news tells of it, and its tribe's nearby
