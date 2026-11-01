@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -475,6 +476,20 @@ final class StoryFigure {
 			}
 		}
 		return missing;
+	}
+
+	/**
+	 * (0.7.472) Andy: "the bio built start still glitches on the preview ... you said it was fixed but this is still broken".
+	 * While the story is up you hang in stasis, flying ({@code StoryStasis}), and the road page draws you yourself. Fresh
+	 * Animations (through Entity Model Features) reads that flight and played its flying pose on you in the preview, leaning
+	 * and lifting the figure out of its frame; it moves the bones' pivots, which MCA's bodies, the armour and the Bio-built
+	 * form's parts each take differently, so the form came apart. The 0.7.457 check was made without Fresh Animations. So
+	 * EMF pauses for you while the story screen is up ({@link EmfBladePause}), and the figure only acts out its scene, as
+	 * the stand-in does.
+	 */
+	public static boolean drawingYou(Object entity) {
+		Minecraft minecraft = Minecraft.getInstance();
+		return entity != null && entity == minecraft.player && minecraft.gui.screen() instanceof LifeStoryScreen;
 	}
 
 	/** The story closed: a stand-in figure is let go. */

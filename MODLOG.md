@@ -4888,3 +4888,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.46, Kitchen 0.5.44, spiders smash more:** Andy: "smaller spiders should be smashed on every kill, and a chance for
   any spider to smash from any weapon, not just blunt". Cave spiders and any spider 1 block wide or less burst into legs on
   every kill; other spiders do a quarter of the time, from any weapon (Kitchen `SpiderCrush`, Kitchen MODLOG).
+
+- **0.19.48, Kingdoms 0.7.472, the Bio-built road preview, again:** Andy: "the bio built start still glitches on the
+  preview ... you said it was fixed but this is still broken". While you make your character you hang in the sky, flying
+  (stasis), and Fresh Animations played its flying pose on the figure of you on the road page, which tore the Bio-built
+  form apart and lifted it out of its frame. The 0.19.11 check was made in a test game without Fresh Animations. Fresh
+  Animations now pauses for you while the story screen is up (Kingdoms MODLOG). Checked in a test game with MCA and Fresh
+  Animations.
