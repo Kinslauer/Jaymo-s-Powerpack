@@ -1241,5 +1241,26 @@
 				"stream": true
 			}
 		]
+	},
+	"spirit.barrage_theme": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:spirit/barrage_theme"
+			}
+		]
+	},
+	"spirit.barrage_rush": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:spirit/barrage_rush"
+			}
+		]
+	},
+	"spirit.barrage_draw": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:spirit/barrage_draw"
+			}
+		]
 	}
 }

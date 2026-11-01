@@ -2,6 +2,8 @@ package com.jaymoskingdoms.client.spirits;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
+import com.jaymoskingdoms.spirits.SpiritBarrage;
+import com.jaymoskingdoms.spirits.SpiritBarrage.Barrage;
 import com.jaymoskingdoms.spirits.SpiritClash;
 import com.jaymoskingdoms.spirits.SpiritClash.Clash;
 import com.jaymoskingdoms.spirits.SpiritState;
@@ -34,6 +36,9 @@ import org.jspecify.annotations.Nullable;
  * HUD clears but for a tug bar showing the lead in the two spirits' colours, the camera swings side-on to the pair, the
  * movement keys go dead, and the screen shakes harder the further the lead swings. When it ends the screen flashes in the
  * winner's colour. An attuned viewer near a clash gets the bars only.
+ * <p>
+ * (0.7.467) The barrage clash ({@link SpiritBarrage}) runs the same film: its own lead on the tug bar, the beat and what each
+ * blow did drawn over it ({@link BarrageClient}), its drum track playing.
  */
 public final class ClashCinematic {
 	/** Each bar's height as a share of the screen's; how much of the way they slide a tick. */
@@ -67,6 +72,9 @@ public final class ClashCinematic {
 	private static Vec3 otherAt = Vec3.ZERO;
 	/** Your lead over them, -100 to 100. */
 	private static int lead;
+	/** (0.7.467) Whether the film is a barrage's, and the two sides' colours (RGB) for its tug bar. */
+	private static boolean barrage;
+	private static int mineColor = 0xFFFFFF, theirColor = 0xFFFFFF;
 	/** The finished clash's flash: its end time, and the winner's colour. */
 	private static long flashAt = -1L;
 	private static int flashColor = 0xFFFFFF;
@@ -103,7 +111,13 @@ public final class ClashCinematic {
 
 	private static boolean live(Entity entity) {
 		Clash clash = entity.getAttached(SpiritClash.CLASH);
-		return clash != null && !clash.over();
+		Barrage bar = entity.getAttached(SpiritBarrage.BARRAGE);
+		return clash != null && !clash.over() || bar != null && !bar.over();
+	}
+
+	/** Whether the film running is a barrage's. */
+	static boolean barrage() {
+		return running && barrage;
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -111,17 +125,32 @@ public final class ClashCinematic {
 		LocalPlayer self = minecraft.player;
 		Clash mine = self == null || minecraft.level == null ? null : self.getAttached(SpiritClash.CLASH);
 		Clash now = mine != null && !mine.over() ? mine : null;
+		Barrage bar = self == null || minecraft.level == null ? null : self.getAttached(SpiritBarrage.BARRAGE);
+		Barrage barNow = bar != null && !bar.over() ? bar : null;
 		boolean viewer = false;
-		if (self != null && now != null) {
+		if (self != null && (now != null || barNow != null)) {
 			if (!running) {
 				running = true;
 				viewBefore = minecraft.options.getCameraType();
 				side = self.getRandom().nextBoolean() ? 1.0F : -1.0F;
 			}
-			boolean first = now.a() == self.getId();
-			other = first ? now.b() : now.a();
-			since = now.start();
-			lead = first ? now.lead() : -now.lead();
+			if (now != null) {
+				boolean first = now.a() == self.getId();
+				other = first ? now.b() : now.a();
+				since = now.start();
+				lead = first ? now.lead() : -now.lead();
+				barrage = false;
+				mineColor = colourOf(self);
+				theirColor = colourOf(self.level().getEntity(other));
+			} else {
+				boolean first = barNow.a() == self.getId();
+				other = first ? barNow.b() : barNow.a();
+				since = barNow.start();
+				lead = first ? barNow.lead() : -barNow.lead();
+				barrage = true;
+				mineColor = first ? barNow.colorA() : barNow.colorB();
+				theirColor = first ? barNow.colorB() : barNow.colorA();
+			}
 		} else {
 			if (running) {
 				stop(minecraft);
@@ -131,6 +160,11 @@ public final class ClashCinematic {
 				flashAt = mine.end();
 				Entity won = mine.winner() == 0 ? null : self.level().getEntity(mine.winner() == 1 ? mine.a() : mine.b());
 				flashColor = colourOf(won);
+			}
+			if (self != null && bar != null && bar.over() && bar.end() != flashAt) {
+				// (0.7.467) a barrage's flash, in the winner's colour
+				flashAt = bar.end();
+				flashColor = bar.winner() == 1 ? bar.colorA() : bar.winner() == 2 ? bar.colorB() : 0xFFFFFF;
 			}
 			if (self != null && minecraft.level != null && Mana.attuned(self)) {
 				for (Player p : minecraft.level.players()) {
@@ -248,14 +282,18 @@ public final class ClashCinematic {
 
 	/** The tug bar: your side's colour from the left, theirs from the right, the knot where the lead stands. */
 	private static void tug(GuiGraphicsExtractor graphics, Minecraft minecraft, LocalPlayer self, int width, int height) {
-		Entity them = self.level().getEntity(other);
-		int mine = ARGB.opaque(colourOf(self)), theirs = ARGB.opaque(colourOf(them));
+		int mine = ARGB.opaque(mineColor), theirs = ARGB.opaque(theirColor);
 		int x0 = (width - TUG_WIDTH) / 2, y0 = height - TUG_LIFT - TUG_HEIGHT;
 		int knot = x0 + Math.round(TUG_WIDTH * (0.5F + lead / 200.0F));
 		graphics.fill(x0 - 2, y0 - 2, x0 + TUG_WIDTH + 2, y0 + TUG_HEIGHT + 2, 0xFF000000);
 		graphics.fill(x0, y0, knot, y0 + TUG_HEIGHT, mine);
 		graphics.fill(knot, y0, x0 + TUG_WIDTH, y0 + TUG_HEIGHT, theirs);
 		graphics.fill(knot - 2, y0 - 4, knot + 2, y0 + TUG_HEIGHT + 4, 0xFFFFFFFF);
+		if (barrage) {
+			// (0.7.467) the beat, what the last blow did, and how to strike
+			BarrageClient.hud(graphics, minecraft, self, width, y0);
+			return;
+		}
 		Component hint = Component.translatable("message.jaymoskingdoms.spirit.clash_tap");
 		Font font = minecraft.font;
 		graphics.text(font, hint, (width - font.width(hint)) / 2, y0 - 16, 0xFFFFFFFF, true);

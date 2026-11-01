@@ -4854,3 +4854,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   stamped the player body's part positions on every humanoid model drawn on a player, the alien's too, lifting the
   golem's body and arms to a player's shoulders over its short legs; aliens (and their spikes) now keep their own pose.
   Compile-checked; not seen in game.
+- **0.19.35, Kingdoms 0.7.467:** the spirits' Strong Strike and the barrage clash. Andy: "each spirit should have a strong
+  strike attack that whips the fist straight forward within your view, and when one of these punches clashes with another
+  you get a barrage style clash, that requires precise timing or manipulation otherwise to win". Every spirit's first move
+  is now a straight punch; two meeting start a rhythm duel to an original drum track, letterboxed. Kingdoms-only change
+  (see its MODLOG); the pack version moves with it.
