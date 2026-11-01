@@ -27,6 +27,39 @@ final class McaLookModels {
 	private McaLookModels() {
 	}
 
+	/** Per model class: its "receives the deferred pose" flag, or null when it has none. */
+	private static final java.util.Map<Class<?>, java.util.Optional<java.lang.reflect.Field>> DEFERRED = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/**
+	 * (0.7.457) Whether {@code model}, drawn for {@code state}, takes its whole pose from the one MCA captured off the
+	 * renderer's model as it was posed for the layers: that pose already holds what {@link ModelPoses#after} laid on
+	 * that model ({@code MobSwingLivingEntityRendererMixin}), so laying it on again doubles it.
+	 */
+	static boolean posedByMca(Object model, Object state) {
+		if (!(state instanceof net.conczin.mca.client.render.VillagerStateHolder holder) || holder.mca$getHumanoidModelPose() == null) {
+			return false;
+		}
+		java.lang.reflect.Field flag = DEFERRED.computeIfAbsent(model.getClass(), McaLookModels::deferredFlag).orElse(null);
+		try {
+			return flag != null && flag.getBoolean(model);
+		} catch (IllegalAccessException e) {
+			return false;
+		}
+	}
+
+	private static java.util.Optional<java.lang.reflect.Field> deferredFlag(Class<?> type) {
+		for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+			try {
+				java.lang.reflect.Field f = c.getDeclaredField("receivesDeferredAnimationPose");
+				f.setAccessible(true);
+				return java.util.Optional.of(f);
+			} catch (NoSuchFieldException | RuntimeException ignored) {
+				// (up the tree)
+			}
+		}
+		return java.util.Optional.empty();
+	}
+
 	/** The body to draw the marks on, posed like {@code parent}; null when the parent isn't MCA's (folk, others). */
 	static @Nullable HumanoidModel<?> marks(HumanoidModel<?> parent) {
 		if (!(parent instanceof VillagerEntityModelMCA villager)) {

@@ -24,8 +24,11 @@ What was taken from each, as behaviour only:
 
 Differences that remain from the originals (on purpose):
 - Our monoliths are raised by code near players in the wild (like Kingdoms' treasure wrecks), not by worldgen: no
-  datapack structures, so they work in old worlds too. They are a broken 3x3 pillar with a floating core, not the
-  mod's designs.
+  datapack structures, so they work in old worlds too. They are a broken pillar (5x5 foot, 3x3 shaft, 1x1 crown,
+  78-102 blocks to the crown since 0.7.458) with a floating heart, not the mod's designs.
+- (0.7.458) The heart moves like the Elderheart does (behaviour only): `MonolithHeart` floats seven block displays of
+  the element's gem, a core and six crystal shards on its sides, tumbling on all three axes while the shards breathe
+  out and in, with motes drawn in off the stone round it. When the Giant falls the core goes out and the shards hang dark.
 - There are no blessings, codex or research scraps (Ancient Remnants' rewards); a monolith's reward is its Giant.
 - The elements follow the biome: cold biomes Arctic, mountains/hills/badlands Magnetic, swamps/jungles Irradiated,
   everything else Highfield (`Element.of`).
