@@ -23,7 +23,7 @@ import org.joml.Vector3f;
  * The texture is cut with it, so skin, trousers, armour and MCA bodies all bend the same way. Boxes that are drawn by
  * other mods' fast paths (Sodium's) are drawn by us while bent, then handed back.
  * <p>
- * (0.19.29) Elbows too, and joints that fold sideways: {@link #bend(ModelPart, float, float, boolean)} cuts at any height
+ * (0.19.30) Elbows too, and joints that fold sideways: {@link #bend(ModelPart, float, float, boolean)} cuts at any height
  * down the part and can swing the lower half about the part's own Z (across, in the plane the part sweeps in with its
  * zRot) instead of X. The crawl folds its forearms and shins flat along the ground that way ({@code CrawlPose}).
  */
@@ -51,7 +51,7 @@ public final class KneeBend {
 	}
 
 	/**
-	 * (0.19.29) Draw {@code limb} bent at {@code joint} pixels down it by {@code angle} radians until {@link #restore}: about
+	 * (0.19.30) Draw {@code limb} bent at {@code joint} pixels down it by {@code angle} radians until {@link #restore}: about
 	 * its X (+ swings the lower half back, as a knee) or, {@code sideways}, about its Z (+ swings it toward -X, the way a
 	 * + zRot turns the whole part). Only call it right before the model is drawn.
 	 */
@@ -96,7 +96,7 @@ public final class KneeBend {
 	static final class Bent extends ModelPart.Cube {
 		final ModelPart.Cube cube;
 		float angle;
-		/** (0.19.29) Where the joint is (pixels down the part), and whether it folds about Z. */
+		/** (0.19.30) Where the joint is (pixels down the part), and whether it folds about Z. */
 		float joint = KNEE;
 		boolean sideways;
 
@@ -190,7 +190,7 @@ public final class KneeBend {
 	}
 
 	/**
-	 * The bend: the shin swung back by {@code angle} about the leg's middle at the knee ({@code joint} down it); (0.19.29) or,
+	 * The bend: the shin swung back by {@code angle} about the leg's middle at the knee ({@code joint} down it); (0.19.30) or,
 	 * {@code sideways}, swung across about the part's middle ({@code xc}) in its X-Y plane.
 	 */
 	private record Knee(float angle, float joint, float xc, float zc, boolean sideways, float sin, float cos, float tilt) {

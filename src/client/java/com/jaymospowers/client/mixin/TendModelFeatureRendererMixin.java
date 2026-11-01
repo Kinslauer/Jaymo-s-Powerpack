@@ -23,7 +23,7 @@ abstract class TendModelFeatureRendererMixin {
 		target = "Lnet/minecraft/client/model/Model;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"))
 	private void jaymospowers$bendKnee(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.CrouchPose.bendKnee(submit.model(), submit.state());
-		// (0.19.29) and the crawl's elbows and knees
+		// (0.19.30) and the crawl's elbows and knees
 		com.jaymospowers.client.CrawlPose.bendLimbs(submit.model(), submit.state());
 	}
 

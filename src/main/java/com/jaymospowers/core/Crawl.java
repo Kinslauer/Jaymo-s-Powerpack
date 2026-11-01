@@ -39,7 +39,7 @@ public final class Crawl {
 	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
 	public static final int ROLL_TICKS = 5;
 	/**
-	 * (0.19.29) Andy: "on your back, you shuffle forward with your hips, so you move slower than you would prone on your
+	 * (0.19.30) Andy: "on your back, you shuffle forward with your hips, so you move slower than you would prone on your
 	 * stomach". Prone on the back moves at this share of the belly crawl's pace (the client's input is scaled).
 	 */
 	public static final float SUPINE_SPEED = 0.45F;

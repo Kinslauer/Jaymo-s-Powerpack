@@ -66,6 +66,7 @@ final class SkillCommands {
 			Skills.Progress before = Skills.of(p);
 			Map<String, Integer> xp = new HashMap<>(before.xp());
 			xp.put(pillar.key(), Skills.total(level));
+			xp.put(Skills.PACE_KEY, Skills.PACE);
 			Map<String, Integer> ranks = new HashMap<>(before.ranks());
 			Skills.Progress after = new Skills.Progress(Map.copyOf(xp), Map.copyOf(ranks));
 			if (after.points(pillar) < 0) {

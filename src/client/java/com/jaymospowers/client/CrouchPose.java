@@ -40,7 +40,7 @@ import net.minecraft.world.entity.player.Player;
  * sneak is vanilla's, and only the low crouch goes onto one knee when still (the firing stance). And every change eases: vanilla snaps in and out of
  * its crouch, so the body is blended between standing and crouched over {@link #BEND_IN} ticks ({@link #bendBody}),
  * the low crouch and the arms over {@link #LOW_IN} and {@link #READY_IN}, all on a smootherstep curve.
- * <p>(0.19.29) Andy: "the crouch walk looks like tippy toeing". The stride swung the thighs while the body stayed at one
+ * <p>(0.19.30) Andy: "the crouch walk looks like tippy toeing". The stride swung the thighs while the body stayed at one
  * height, so the legs came up short and the feet hovered or stood on their toes. Now each knee bends just enough to put its
  * foot on the ground wherever its thigh is ({@link #groundKnee}), the shin leaning forward over the foot as in a real crouch
  * walk; the thighs come further forward, the steps are longer and slower, only the leg coming through lifts, and the upper body leans
@@ -63,11 +63,11 @@ public final class CrouchPose {
 	 */
 	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
 	/**
-	 * The low crouch: both thighs this far forward (radians), and the body sunk this much more (blocks). (0.19.29) Thighs further forward;
+	 * The low crouch: both thighs this far forward (radians), and the body sunk this much more (blocks). (0.19.30) Thighs further forward;
 	 * the knees bend to reach the ground from there ({@link #groundKnee}).
 	 */
 	static final float LOW_THIGH = 1.3F, LOW_DROP = 0.22F;
-	/** (0.19.29) The low crouch: the upper body leaned forward over the knees (radians, past vanilla's crouch), the head kept up. */
+	/** (0.19.30) The low crouch: the upper body leaned forward over the knees (radians, past vanilla's crouch), the head kept up. */
 	static final float LOW_LEAN = 0.2F;
 	/**
 	 * (0.18.85) The low crouch's stride, a Skyrim sneak: how far each thigh swings either side of {@link #LOW_THIGH}
@@ -75,7 +75,7 @@ public final class CrouchPose {
 	 * more to lift the foot as it comes through (radians).
 	 */
 	static final float LOW_STRIDE = 0.35F, STRIDE_GAIN = 2.5F, LOW_LIFT = 0.5F;
-	/** The stride's beat (radians per unit walked; vanilla's walk is 0.6662). (0.19.29) Slower: longer, heavier steps. */
+	/** The stride's beat (radians per unit walked; vanilla's walk is 0.6662). (0.19.30) Slower: longer, heavier steps. */
 	static final float STRIDE_BEAT = 0.5F;
 	/** Into and out of the low crouch (ticks). */
 	static final float LOW_IN = 9.0F;
@@ -209,7 +209,7 @@ public final class CrouchPose {
 			float swing = Mth.cos(c.pos() * STRIDE_BEAT) * LOW_STRIDE * stride(c);
 			h.rightLeg.xRot = Mth.lerp(low, h.rightLeg.xRot, -LOW_THIGH + swing);
 			h.leftLeg.xRot = Mth.lerp(low, h.leftLeg.xRot, -LOW_THIGH - swing);
-			// (0.19.29) leaning forward over the knees, eyes still ahead
+			// (0.19.30) leaning forward over the knees, eyes still ahead
 			PoseBlend.bend(h, LOW_LEAN * low, 0.0F, 0.0F, 0.0F, 0.0F);
 			h.head.xRot -= LOW_LEAN * low;
 		}
@@ -283,7 +283,7 @@ public final class CrouchPose {
 		float low = c.low() * (1.0F - c.kneel());
 		// (0.18.85) and more as the leg comes through, lifting the foot off the ground
 		float lift = Mth.sin(c.pos() * STRIDE_BEAT) * LOW_LIFT * stride(c) * low;
-		// (0.19.29) each foot on the ground wherever its thigh is (or lifted, coming through)
+		// (0.19.30) each foot on the ground wherever its thigh is (or lifted, coming through)
 		float right = Mth.lerp(c.kneel(), groundKnee(-h.rightLeg.xRot) * c.low() + Math.max(0.0F, lift), FRONT_KNEE);
 		float left = groundKnee(-h.leftLeg.xRot) * low + Math.max(0.0F, -lift);
 		if (right > 0.0F) {
@@ -317,7 +317,7 @@ public final class CrouchPose {
 
 	/** (0.18.85) How far into a full stride the low crouch is stepping, by walking speed (0 stood still). */
 	/**
-	 * (0.19.29) In the low crouch, how far a knee bends so the foot of a thigh raised {@code thigh} radians forward is on the
+	 * (0.19.30) In the low crouch, how far a knee bends so the foot of a thigh raised {@code thigh} radians forward is on the
 	 * ground, the body sunk {@link #LOW} + {@link #LOW_DROP}: the shin leans back from the knee to the foot (the knee over the
 	 * toes). A thigh too far forward to reach just hangs its shin straight down.
 	 */
