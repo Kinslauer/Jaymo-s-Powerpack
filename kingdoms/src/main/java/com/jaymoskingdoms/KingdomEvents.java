@@ -155,8 +155,12 @@ public final class KingdomEvents {
 				int id = here == null ? -1 : here.id();
 				Integer was = WHERE.put(player.getUUID(), id);
 				if (was != null && was != id && here != null) {
-					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.entering", here.name(),
-						Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id()))))
+					Component rep = Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id())));
+					// ((0.7.475) a greenskin camp by its tier: "Entering Skullmaw, Horde town")
+					String tier = Hordes.tierKey(server, here);
+					player.sendOverlayMessage((tier != null
+						? Component.translatable("message.jaymoskingdoms.entering_camp", here.name(), Component.translatable(tier), rep)
+						: Component.translatable("message.jaymoskingdoms.entering", here.name(), rep))
 						.withStyle(here.color().getTextColor() == 0 ? ChatFormatting.WHITE : ChatFormatting.GOLD));
 				}
 			}

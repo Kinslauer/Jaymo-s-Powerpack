@@ -200,6 +200,8 @@ public final class Camps {
 		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();
+		// (0.7.475) greenskin camps grow in tiers
+		Hordes.register();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();
@@ -665,6 +667,8 @@ public final class Camps {
 			CampData band = data(server, camp.id());
 			OgreHolds.campFell(server, band != null ? band.center() : camp.seat());
 		}
+		// (0.7.475) a greenskin realm's vassals are free
+		Hordes.fell(server, camp.id());
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
 			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
 			if (folk.isCarrying()) {
@@ -686,6 +690,10 @@ public final class Camps {
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
 		int reach = pirates ? PirateCoves.RADIUS + 1 : orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		if (orcs || goblins) {
+			// (0.7.475) and its outer walls and band, as far as it grew
+			reach = Math.max(reach, Hordes.radius(server, camp.id()) + 2);
+		}
 		int high = pirates ? PirateCoves.CLEAR_HEIGHT : orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
 		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
 		Holds.Hold held = Holds.get(server, camp.id());
@@ -747,7 +755,9 @@ public final class Camps {
 				.then(Commands.literal("pirate").executes(c -> foundHere(c, PirateCoves.KIND))))
 			.then(Commands.literal("raid").executes(Camps::raidNow))
 			.then(Commands.literal("grow").executes(Camps::growNow))
-			.then(Commands.literal("info").executes(Camps::info));
+			.then(Commands.literal("info").executes(Camps::info))
+			// (0.7.475) a greenskin camp's tier
+			.then(Hordes.command());
 	}
 
 	private static int foundHere(CommandContext<CommandSourceStack> c, String kind) throws CommandSyntaxException {
@@ -776,7 +786,7 @@ public final class Camps {
 		return 1;
 	}
 
-	private static @Nullable Faction nearestCamp(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+	static @Nullable Faction nearestCamp(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Faction best = null;
 		double bestDist = Double.MAX_VALUE;
@@ -882,6 +892,10 @@ public final class Camps {
 					.append(data.grown()).append(" days");
 			}
 			out.append(", last raid ").append((now - data.lastRaid()) / 20).append(" s ago");
+			if (data.orc() || data.goblin()) {
+				// (0.7.475) its tier
+				out.append("\n").append(Hordes.describe(level, camp, data).getString());
+			}
 		}
 		out.append("\nroster: ").append(camp.holdings().roster());
 		boolean leaderHere = camp.leader().isPresent() && level.getEntity(camp.leader().get()) != null;
