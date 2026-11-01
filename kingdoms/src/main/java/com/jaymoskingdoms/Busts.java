@@ -288,7 +288,7 @@ public final class Busts {
 				long until = now + JAIL_TICKS + offences * JAIL_PER_OFFENCE;
 				player.setAttached(JAILED, new Jail(f.id(), cell, until));
 				// (0.7.419) a road deed: someone locked in a realm's cells
-				Deeds.done(level.getServer(), "cells.held");
+				Deeds.done(player, "cells.held");
 				Vec3 c = Vec3.atBottomCenterOf(cell);
 				player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
 				level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
@@ -361,7 +361,7 @@ public final class Busts {
 			player.removeAttached(JAILED);
 			if (f != null) {
 				// (0.7.419) a road deed: a sentence served out
-				Deeds.done(level.getServer(), "cells.served");
+				Deeds.done(player, "cells.served");
 			}
 			if (f != null && player.isAlive()) {
 				Vec3 out = Speakeasy.release(level, f);
@@ -376,7 +376,7 @@ public final class Busts {
 		if (player.level() != level || player.position().distanceTo(Vec3.atBottomCenterOf(jail.cell())) > JAIL_REACH) {
 			player.removeAttached(JAILED);
 			// (0.7.419) a road deed: out of the cells before the sentence was done
-			Deeds.done(level.getServer(), "cells.broke");
+			Deeds.done(player, "cells.broke");
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.escaped", f.name()).withStyle(ChatFormatting.DARK_RED));
 			Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.escaped", Post.nameOf(player), f.name()));
 			Theft.arrest(player, level, f, Theft.OUTLAW_TICKS);

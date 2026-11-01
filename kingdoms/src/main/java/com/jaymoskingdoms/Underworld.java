@@ -946,7 +946,7 @@ public final class Underworld {
 			return;
 		}
 		// (0.7.419) a road deed: something traded that the law forbids
-		Deeds.done(level.getServer(), "market.black");
+		Deeds.done(player, "market.black");
 		Faction f = Theft.lawAt(level, v.blockPosition());
 		if (f == null || !f.type().isRealm()) {
 			return;
