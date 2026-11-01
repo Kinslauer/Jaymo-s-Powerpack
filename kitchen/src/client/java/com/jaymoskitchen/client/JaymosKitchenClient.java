@@ -48,6 +48,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
+		// (0.5.45) a dragged body follows the hand this client draws
+		com.jaymoskitchen.client.ragdoll.DragSim.register();
 		com.jaymoskitchen.client.ragdoll.LimpController.register();
 		// drinking: the view sways when you're drunk
 		com.jaymoskitchen.client.brewing.DrunkSway.register();

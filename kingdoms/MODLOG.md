@@ -8113,7 +8113,7 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   (`BloodVision.beat`), creep in slowly and draw back over a few seconds after a drink. Dhampirs never thirst, so never see
   them. Art: six growth rings, `textures/gui/thirst_veins_1..6.png` (320x180 pixel art, drawn by `tools/gen_thirst_veins.py`).
 
-## 0.7.472: the Bio-built figure on the road page, again (pack 0.19.46)
+## 0.7.472: the Bio-built figure on the road page, again (pack 0.19.48)
 - Andy: "the bio built start still glitches on the preview can you see it? you said it was fixed but this is still broken"
   (video: on "What sets you on the road now?" the Bio-built figure of you leant over, rose out of its frame and came apart).
   0.7.455 was checked in a test game without Fresh Animations. While the story is up you hang in stasis, flying
