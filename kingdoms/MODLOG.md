@@ -7920,7 +7920,7 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
   Interact button (only Introduce, Gift, Trade).
 - Compile-checked; not seen in game.
-## 0.7.456: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.15)
+## 0.7.457: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.16)
 - Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1, right 3): the story's
   flaw click waited for button 0 and never came, and the right-click step-back took button 1, so a left click on the
   Heritage, Class and Look buttons stepped back. Both use `InputConstants.MOUSE_BUTTON_LEFT/RIGHT` now. The double-click

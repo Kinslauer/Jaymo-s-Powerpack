@@ -31,7 +31,7 @@ final class McaLookModels {
 	private static final java.util.Map<Class<?>, java.util.Optional<java.lang.reflect.Field>> DEFERRED = new java.util.concurrent.ConcurrentHashMap<>();
 
 	/**
-	 * (0.7.456) Whether {@code model}, drawn for {@code state}, takes its whole pose from the one MCA captured off the
+	 * (0.7.457) Whether {@code model}, drawn for {@code state}, takes its whole pose from the one MCA captured off the
 	 * renderer's model as it was posed for the layers: that pose already holds what {@link ModelPoses#after} laid on
 	 * that model ({@code MobSwingLivingEntityRendererMixin}), so laying it on again doubles it.
 	 */
