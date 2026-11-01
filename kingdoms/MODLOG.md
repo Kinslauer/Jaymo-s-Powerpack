@@ -7939,7 +7939,7 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
   on a body MCA has posed (`McaLookModels.posedByMca`). Checked in a test game (Xvfb): the flaws tick and the figure
   stands right.
 
-## 0.7.458: larger monoliths with a living heart (pack 0.19.17)
+## 0.7.458: larger monoliths with a living heart (pack 0.19.19)
 - Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
   studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
   glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.
