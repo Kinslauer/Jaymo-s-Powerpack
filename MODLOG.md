@@ -4911,3 +4911,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.53, Kitchen 0.5.47, limp snakes:** Dead snakes are a chain ragdoll now, a head and ten loose joints, so they
   sag, drape over bumps and edges, and flop when dragged, the body drawn segment by segment along the chain instead of a
   few stiff blocks (Kitchen MODLOG). Not compile-checked; not played.
+- **0.19.54, Kitchen jar:** `libs/` now holds Jaymo's Kitchen 0.5.47 (built from `kitchen/`) in place of 0.5.33.1, which
+  predated `corpse/Hauling` and broke the root build (`KitchenCompat.brawn`). The pack ships the new Kitchen.
+  Compile-checked; not played.
