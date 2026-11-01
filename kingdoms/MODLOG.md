@@ -8148,7 +8148,7 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   counts as theirs, and MCA draws it for the next fight.
 - Compile-checked with javac against the 26.3 jars; not played.
 
-## 0.7.475: greenskin camps grow in tiers (pack 0.19.51)
+## 0.7.475: greenskin camps grow in tiers (pack 0.19.52)
 Hordes patch 2 (`docs/Hordes-Plan.md`). Andy: "they should all build similarly and expand further, making it possible to find
 a large goblin camp the size of a kingdom even".
 - **Tiers** (`Hordes`, saved per camp in `jaymoskingdoms:hordes`; a camp without an entry is tier 1, so old camps start
