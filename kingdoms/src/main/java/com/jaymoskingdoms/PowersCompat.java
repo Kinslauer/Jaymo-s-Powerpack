@@ -33,6 +33,37 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
+	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
+	private static boolean lookedForMoon;
+
+	/**
+	 * (Andy, 2026-11-01) Whether a Z Fighter's false moon (a great ball of ki thrown up into the night) shines on
+	 * {@code entity}: it takes the wolf's curse like a full moon. False without Powers.
+	 */
+	public static boolean falseMoon(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.Entity entity) {
+		if (!lookedForMoon) {
+			lookedForMoon = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					falseMoon = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterFakeMoon"),
+						"shines", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' false moon", e);
+				}
+			}
+		}
+		if (falseMoon == null) {
+			return false;
+		}
+		try {
+			return (boolean)falseMoon.invoke(level, entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/**
 	 * (0.7.184) Takes {@code target}'s head off as Jaymo's Powers' dismemberment does (a headless mob may stagger on a while,
 	 * a skeleton fights on, anything else drops), {@code by} its killer, and nails the head to the wall at {@code wall},
