@@ -4803,5 +4803,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     pressing beside the hips while the hips scoot up to the heels, then the legs slide out again; the body is drawn ahead in
     steps (`CrawlPose.surge`) so the hips only move while the heels are dug in. It moves at 45% of the belly crawl's pace
     (`Crawl.SUPINE_SPEED`, input scaled in `StanceSpeedMixin`).
-  - The plain sneak and the low crouch are unchanged. Compile-checked with javac against the 26.3 jars; not built with Gradle
+  - The crouch walk (the low crouch from the stance wheel) no longer tiptoes. Andy: "the crouch walk looks like tippy toeing".
+    The stride swung the thighs while the body stayed at one height, so the feet hovered or stood on their toes. Now each knee
+    bends just enough to put its foot on the ground wherever its thigh is (`CrouchPose.groundKnee`), with the shin leaning
+    forward over the foot. The steps are longer and slower, only the leg coming through lifts, and the upper body leans
+    forward over the knees (`LOW_LEAN`) with the head kept up. The plain sneak is still vanilla's.
+  - Compile-checked with javac against the 26.3 jars; not built with Gradle
     or seen in game. Tune in the `CrawlPose` constants (HAND_*, PLANTED, STROKE, HEEL_*, BACK_STROKE).
