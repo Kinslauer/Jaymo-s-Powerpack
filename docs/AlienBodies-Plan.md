@@ -38,7 +38,7 @@ squid, tentacles trailing), Gnasher (a shark, swims level, drags itself on land)
 floating).
 
 ## Patch 6: non-human bipeds
-Bulwark (a hulk walking on its knuckles), Knell (a hunched horned beast), Rime (a stooped ice brute), Shade (a thin
+Bulwark (Andy: the four arms emphasised, a thinner body, the arms held out in an idle stance that keeps swapping which pair is raised), Knell (a hunched horned beast), Rime (a stooped ice brute), Shade (a thin
 crawling shadow that unfolds tall), Thornwild (a treant with root feet), Lurk (on all fours when stalking, tall when
 it stands), Rivet (a living-metal blob that stands up when it fights), Nadir and Dud (shapeless).
 
