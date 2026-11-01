@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.464) The Grue. Andy (2026-11-01): "each spirit warns against it, vehemently because the closer you dip into the dark
+ * (0.7.465) The Grue. Andy (2026-11-01): "each spirit warns against it, vehemently because the closer you dip into the dark
  * arts, i.e flux, death and blood magic, the Grue will overtake your spirit, fighting it as much as it can along the way,
  * sometimes forcing you away from certain harmful actions, plucking the items from your very hands, until the grue attacks
  * you both, ultimately over taking the spirit and turning a deep dark red hue instead. The grue was a vile evil wizard who

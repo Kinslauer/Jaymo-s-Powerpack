@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.464) The Grue walks its host (or a spirit pulls its keeper out of flux) ({@link GrueClient}): no movement key answers. */
+/** (0.7.465) The Grue walks its host (or a spirit pulls its keeper out of flux) ({@link GrueClient}): no movement key answers. */
 @Mixin(KeyboardInput.class)
 abstract class GrueInputMixin extends ClientInput {
 	@Inject(method = "tick", at = @At("TAIL"))

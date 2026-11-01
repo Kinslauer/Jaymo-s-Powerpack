@@ -176,7 +176,7 @@ public final class SeizureClient {
 		steerAt(player, prey.getBoundingBox().getCenter(), speed);
 	}
 
-	/** (0.7.464) {@link #steer} at a point rather than a being (the Grue walking its host's routine, a spirit pulling you out of flux). */
+	/** (0.7.465) {@link #steer} at a point rather than a being (the Grue walking its host's routine, a spirit pulling you out of flux). */
 	public static void steerAt(LocalPlayer player, Vec3 point, double speed) {
 		Vec3 to = point.subtract(player.getEyePosition());
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.464) The Grue has its host ({@link GrueClient#hostLocked}): the attack key does nothing, and the use key only eats or
+ * (0.7.465) The Grue has its host ({@link GrueClient#hostLocked}): the attack key does nothing, and the use key only eats or
  * drinks what is in hand (the server holds to the same, {@link Grue}). Ahead of the default priority, like the tome's.
  */
 @Mixin(value = Minecraft.class, priority = 900)

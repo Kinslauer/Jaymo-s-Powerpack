@@ -62,7 +62,19 @@ public final class Skills {
 	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts, and (0.7.102) Stealth, {@link #STEALTH_MAX_LEVEL},
 	 * for freerunning).
 	 */
-	public static final int XP_BASE = 30, XP_STEP = 15, MAX_LEVEL = 15;
+	// (0.7.464) doubled (the pack-wide training pass, from 30/15): saved experience is doubled once to match ({@link #PACE})
+	public static final int XP_BASE = 60, XP_STEP = 30, MAX_LEVEL = 15;
+	/**
+	 * (0.7.464) The pace the saved experience is on: when {@link #XP_BASE}/{@link #XP_STEP} are scaled, raise this by the same
+	 * factor and every player's saved experience is scaled to match when they next join, so nobody loses a level.
+	 */
+	public static final int PACE = 2;
+	static final String PACE_KEY = "_pace";
+	/** (0.7.464) Every this many levels in a pillar is a milestone: a bonus point to spend there, and the big fanfare. */
+	public static final int MILESTONE_EVERY = 5;
+	/** (0.7.464) A Weighted Gi (Jaymo's Powers) worn: Strength experience counts this much more. */
+	static final float GI_STRENGTH = 1.5F;
+	static final String GI_ID = "jaymospowers:weighted_gi";
 	/** (0.6.5) Strength's highest level: the levels past {@link #MAX_LEVEL} pay for the Combat Arts ({@link CombatArts}). */
 	public static final int STRENGTH_MAX_LEVEL = 25;
 	/**
@@ -125,15 +137,18 @@ public final class Skills {
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
-		SURVIVAL(true, SURVIVAL_MAX_LEVEL), STEALTH(true, STEALTH_MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
+		SURVIVAL(true, SURVIVAL_MAX_LEVEL, 0x6DBE45), STEALTH(true, STEALTH_MAX_LEVEL, 0x7A6FD0), STRENGTH(true, STRENGTH_MAX_LEVEL, 0xD0452F);
 
 		public final boolean open;
 		/** The pillar's highest level. */
 		public final int maxLevel;
+		/** (0.7.464) Its colour, for the milestone sparks. */
+		public final int color;
 
-		Pillar(boolean open, int maxLevel) {
+		Pillar(boolean open, int maxLevel, int color) {
 			this.open = open;
 			this.maxLevel = maxLevel;
+			this.color = color;
 		}
 
 		public String key() {
@@ -303,7 +318,8 @@ public final class Skills {
 					spent += rank(perk) * perk.cost;
 				}
 			}
-			return level(pillar) - spent;
+			// (0.7.464) and a bonus point at every milestone level
+			return level(pillar) + level(pillar) / MILESTONE_EVERY - spent;
 		}
 
 		/** Why {@code perk} can't take another rank now (a translation key), or null if it can. */
@@ -391,7 +407,10 @@ public final class Skills {
 			}
 		});
 		// (perks that work through attributes are put back on a player whenever they come into the world)
-		ServerPlayerEvents.JOIN.register(Skills::refresh);
+		ServerPlayerEvents.JOIN.register(player -> {
+			repace(player);
+			refresh(player);
+		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
 		// a bottle o' enchanting, drunk (sneak and use it), gives back every point
 		UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -571,6 +590,23 @@ public final class Skills {
 		return 0;
 	}
 
+	/** (0.7.464) Scales {@code player}'s saved experience onto the current {@link #PACE}, once, so their levels stay put. */
+	static void repace(ServerPlayer player) {
+		Progress p = of(player);
+		int was = Math.max(1, p.xp().getOrDefault(PACE_KEY, 1));
+		if (was == PACE) {
+			return;
+		}
+		Map<String, Integer> xp = new HashMap<>();
+		for (Map.Entry<String, Integer> e : p.xp().entrySet()) {
+			if (!e.getKey().equals(PACE_KEY)) {
+				xp.put(e.getKey(), (int)Math.min(Integer.MAX_VALUE, (long)e.getValue() * PACE / was));
+			}
+		}
+		xp.put(PACE_KEY, PACE);
+		player.setAttached(PROGRESS, new Progress(Map.copyOf(xp), p.ranks()));
+	}
+
 	/** Gives {@code player} {@code amount} experience in {@code pillar}; a level reached is announced. */
 	static void grant(ServerPlayer player, Pillar pillar, int amount) {
 		if (amount <= 0) {
@@ -578,6 +614,11 @@ public final class Skills {
 		}
 		// (0.7.57) Wits: every pillar learns faster
 		amount = Math.max(amount, Math.round(amount * Stats.xpFactor(player) * Heritage.xpFactor(player)));
+		// (0.7.464) training under weight
+		if (pillar == Pillar.STRENGTH && GI_ID.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM
+			.getKey(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).getItem()).toString())) {
+			amount = Math.max(amount + 1, Math.round(amount * GI_STRENGTH));
+		}
 		Progress p = of(player);
 		int before = p.xp(pillar);
 		int after = Math.min(total(pillar.maxLevel), before + amount);
@@ -586,13 +627,21 @@ public final class Skills {
 		}
 		Map<String, Integer> xp = new HashMap<>(p.xp());
 		xp.put(pillar.key(), after);
+		xp.put(PACE_KEY, PACE);
 		player.setAttached(PROGRESS, new Progress(Map.copyOf(xp), p.ranks()));
 		int was = level(before, pillar.maxLevel), now = level(after, pillar.maxLevel);
 		if (now > was) {
 			refresh(player);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.level", Component.translatable("skill.jaymoskingdoms." + pillar.key()), now)
-				.withStyle(ChatFormatting.GOLD));
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4F, 1.3F);
+			// (0.7.464) the pack's milestone fanfare: small for a level, big every fifth (with its bonus point), grand at the top
+			Component name = Component.translatable("skill.jaymoskingdoms." + pillar.key());
+			boolean top = now >= pillar.maxLevel;
+			boolean milestone = now / MILESTONE_EVERY > was / MILESTONE_EVERY;
+			int size = top ? Fanfare.GRAND : milestone ? Fanfare.MAJOR : Fanfare.MINOR;
+			Component chat = milestone
+				? Component.translatable("message.jaymoskingdoms.skills.milestone", name, now)
+				: Component.translatable("message.jaymoskingdoms.skills.level", name, now);
+			Fanfare.fanfare(player, Component.translatable(top ? "message.jaymoskingdoms.skills.top_title" : "message.jaymoskingdoms.skills.level_title", name),
+				Component.translatable("message.jaymoskingdoms.skills.level_subtitle", now), chat, pillar.color, size);
 		}
 	}
 

@@ -64,7 +64,7 @@ import org.jspecify.annotations.Nullable;
 public final class SpiritArms {
 	/** On a being's render state: its spirit's arms this frame, or null for none. */
 	static final RenderStateDataKey<Look> LOOK = RenderStateDataKey.create(() -> "jaymoskingdoms:spirit_arms");
-	/** (0.7.464) The Grue's hold on the wearer (0-100), for the red in the arms ({@link GrueClient#tint}). */
+	/** (0.7.465) The Grue's hold on the wearer (0-100), for the red in the arms ({@link GrueClient#tint}). */
 	static final RenderStateDataKey<Float> GRUE = RenderStateDataKey.create(() -> "jaymoskingdoms:spirit_grue");
 
 	/** Ticks the arms take to appear and to vanish. */
@@ -274,7 +274,7 @@ public final class SpiritArms {
 	/** From the living renderer's extractRenderState (called by {@link ManaClient#extract}): this being's arms, if it has a spirit. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(LOOK, look(entity));
-		// (0.7.464) how far the Grue has it
+		// (0.7.465) how far the Grue has it
 		state.setData(GRUE, com.jaymoskingdoms.spirits.Grue.hold(entity));
 	}
 
@@ -658,7 +658,7 @@ public final class SpiritArms {
 			float spear = kind == Spirits.GRIMSBY && look.pose() == Poses.SPEAR ? look.poseWeight() : 0.0F;
 			color = ARGB.srgbLerp(axe * AXE_MIX, color, AXE_COLOR);
 			color = ARGB.srgbLerp(spear * SPEAR_MIX, color, SPEAR_COLOR);
-			// (0.7.464) the Grue's red: a flicker, then streaks, then all of it
+			// (0.7.465) the Grue's red: a flicker, then streaks, then all of it
 			Float hold = state.getData(GRUE);
 			float grue = hold == null ? 0.0F : GrueClient.tint(hold, state.ageInTicks);
 			color = ARGB.srgbLerp(grue, color, GrueClient.RED);

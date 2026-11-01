@@ -179,7 +179,7 @@ public final class Spirits {
 		SpiritExecutions.register();
 		SpiritClash.register();
 		FolkSpirits.register();
-		// (0.7.464) the Grue, who takes the spirits of those who dabble in the dark
+		// (0.7.465) the Grue, who takes the spirits of those who dabble in the dark
 		Grue.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
@@ -362,7 +362,7 @@ public final class Spirits {
 		}
 		SpiritState state = state(player);
 		if (Grue.taken(player)) {
-			// (0.7.464) it isn't yours any more
+			// (0.7.465) it isn't yours any more
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.grue.no_answer").withStyle(s -> s.withColor(Grue.COLOR)));
 			return;
 		}
@@ -427,7 +427,7 @@ public final class Spirits {
 		SpiritVoice.sayNow(player, state.kind(), "summon");
 	}
 
-	/** (0.7.464) The Grue keeps the spirit out, whatever mana there is (it's no longer theirs to call). */
+	/** (0.7.465) The Grue keeps the spirit out, whatever mana there is (it's no longer theirs to call). */
 	static void forceOut(ServerPlayer player) {
 		SpiritState state = state(player);
 		if (state == null || state.out()) {
@@ -526,7 +526,7 @@ public final class Spirits {
 
 	/** Once a second while it's out: the drain, the bond, the tiredness. False if it faded. */
 	private static boolean second(ServerPlayer player, SpiritState state) {
-		// (0.7.464) the Grue needs none of your mana to keep it out
+		// (0.7.465) the Grue needs none of your mana to keep it out
 		if (!player.isCreative() && !Grue.taken(player)) {
 			Mana.drain(player, DRAIN_PER_SECOND);
 			if (Mana.current(player) < TIRED_AT) {

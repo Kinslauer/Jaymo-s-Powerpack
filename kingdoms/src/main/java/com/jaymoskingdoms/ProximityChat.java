@@ -54,7 +54,7 @@ public final class ProximityChat {
 	static void register() {
 		ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> {
 			String text = message.signedContent().strip();
-			// (0.7.464) the Grue keeps your words to wear later; and while it has you, yours don't come out
+			// (0.7.465) the Grue keeps your words to wear later; and while it has you, yours don't come out
 			if (!text.isEmpty() && com.jaymoskingdoms.spirits.Grue.heard(sender, text)) {
 				speak(sender, text);
 			}
@@ -69,7 +69,7 @@ public final class ProximityChat {
 			}))));
 	}
 
-	/** (0.7.464) The Grue says {@code text} aloud with its host's mouth (as if they had). */
+	/** (0.7.465) The Grue says {@code text} aloud with its host's mouth (as if they had). */
 	public static void speakAs(ServerPlayer host, String text) {
 		speak(host, text);
 	}

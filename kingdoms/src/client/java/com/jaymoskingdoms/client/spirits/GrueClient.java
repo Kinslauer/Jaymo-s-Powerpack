@@ -21,7 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.464) The client half of {@link Grue}: while it (or, for a moment, your own spirit pulling you out of flux) has the
+ * (0.7.465) The client half of {@link Grue}: while it (or, for a moment, your own spirit pulling you out of flux) has the
  * wheel, it walks you where the server says and turns your head (no movement key answers, {@code GrueInputMixin}); while it
  * has you, your hands answer only for food and drink ({@code GrueHandsMixin}) and the screen's edges throb a deep dark red.
  * Its lashes flash red. The spirit's arms redden with its hold ({@link #tint}), for everyone who sees them.

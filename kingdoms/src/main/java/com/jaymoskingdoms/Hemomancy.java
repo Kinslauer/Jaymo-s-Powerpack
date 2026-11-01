@@ -176,7 +176,7 @@ public final class Hemomancy {
 		if (player.getCooldowns().isOnCooldown(key)) {
 			return true;
 		}
-		// (0.7.464) the spirit stays your hand (the Grue is near)
+		// (0.7.465) the spirit stays your hand (the Grue is near)
 		if (ForbiddenArts.stayed(player)) {
 			return true;
 		}

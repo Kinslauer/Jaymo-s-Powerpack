@@ -63,7 +63,7 @@ public final class SpiritVoice {
 		if (!force && now < NEXT.getOrDefault(player.getUUID(), 0L)) {
 			return false;
 		}
-		// (0.7.464) the spirit is the Grue's now: it says nothing of its own
+		// (0.7.465) the spirit is the Grue's now: it says nothing of its own
 		if (Grue.taken(player)) {
 			return false;
 		}
