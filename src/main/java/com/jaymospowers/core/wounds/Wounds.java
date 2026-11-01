@@ -160,6 +160,8 @@ public final class Wounds {
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
 		SelfRevive.register();
+		// (0.19.13) hostiles walk up and finish a downed player off, filmed for them
+		MobExecutions.register();
 		// (0.15.82) up from the downed, but battered
 		Battered.register();
 		// (0.18.71) tripped by a bolas: a leg broken, face down on the ground a while
