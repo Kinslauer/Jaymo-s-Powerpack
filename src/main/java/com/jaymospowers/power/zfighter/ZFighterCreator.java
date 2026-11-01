@@ -142,6 +142,7 @@ public final class ZFighterCreator {
 		PayloadTypeRegistry.serverboundPlay().register(Forget.TYPE, Forget.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Make.TYPE, (payload, ctx) -> make(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(Forget.TYPE, (payload, ctx) -> forget(ctx.player(), payload.index()));
+		ZFighterFakeMoon.init();
 	}
 
 	// ---------------------------------------------------------------- who has what
@@ -399,6 +400,15 @@ public final class ZFighterCreator {
 		if (made.shape() == BALL) {
 			double size = 0.4 + charge * (0.5 + 0.35 * p);
 			Vec3 from = player.getEyePosition().add(0.0, 1.0 + charge * p * 0.3, 0.0);
+			if (ZFighterFakeMoon.takes(player, from, player.getViewVector(1.0F), size)) {
+				// (Andy, 2026-11-01) thrown up into the night sky, a big one stays up as a false moon
+				ZFighterFakeMoon.raise(player, from, size, color);
+				Shakes.send(player, 0.3F + 0.15F * p * charge, player.position());
+				if (!player.isCreative()) {
+					player.causeFoodExhaustion(0.2F * p * (1.0F + charge));
+				}
+				return;
+			}
 			Vec3 aim = player.getEyePosition().add(look.scale(24.0)).subtract(from).normalize();
 			ZFighterKi.throwBall(player, from, aim.scale(1.1), damage, color, size, 2.0 + size * 2.0, 1.0F + charge * p * 0.5F,
 				ZFighterArts.griefing(level) && p >= 3, 120);

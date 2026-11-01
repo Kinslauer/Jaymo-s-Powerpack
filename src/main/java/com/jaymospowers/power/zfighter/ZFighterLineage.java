@@ -575,7 +575,9 @@ public final class ZFighterLineage {
 			player.removeAttached(TAIL_CUT);
 		}
 		boolean wild = wild(player);
-		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
+		// (Andy, 2026-11-01) a false moon ({@link ZFighterFakeMoon}) shines like a full one, any night
+		boolean fakeMoon = tailOut(player) && ZFighterFakeMoon.shines(level, player);
+		boolean moonlit = fakeMoon || tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
 			live.apePeak = player.getY();
