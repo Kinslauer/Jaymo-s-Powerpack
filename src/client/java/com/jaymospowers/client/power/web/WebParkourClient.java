@@ -40,6 +40,9 @@ final class WebParkourClient {
 	/** The wall face last kicked off: not again until you land (a different wall is fine, so a chimney can be climbed). */
 	private @Nullable Direction lastKick;
 	private boolean jumpWasDown, shiftWasDown, wasSprinting;
+	/** Ground speed (blocks/tick) over the last few ticks, newest at {@link #speedAt}: a vault needs the top one fast enough. */
+	private final double[] recentSpeed = new double[WebParkour.VAULT_SPEED_TICKS];
+	private int speedAt;
 
 	void reset() {
 		stop();
@@ -59,6 +62,8 @@ final class WebParkourClient {
 		shiftWasDown = input.shift();
 		boolean sprinting = player.isSprinting() || wasSprinting;
 		wasSprinting = player.isSprinting();
+		speedAt = (speedAt + 1) % recentSpeed.length;
+		recentSpeed[speedAt] = Math.hypot(player.getX() - player.xo, player.getZ() - player.zo);
 		if (cooldown > 0) {
 			cooldown--;
 		}
@@ -106,8 +111,8 @@ final class WebParkourClient {
 
 	/** Sprinting into a one-block obstacle with room above it: a hand on it and the legs swung over. */
 	private void tryVault(LocalPlayer player) {
-		// (running into it stops you dead, so it's the bump that counts, not the speed)
-		if (!player.horizontalCollision) {
+		// running into it stops you dead, so the speed that counts is the top one of the last few ticks before the bump
+		if (!player.horizontalCollision || topRecentSpeed() < WebParkour.VAULT_MIN_SPEED) {
 			return;
 		}
 		Vec3 flat = player.getDeltaMovement().horizontal();
@@ -123,6 +128,14 @@ final class WebParkourClient {
 		player.setDeltaMovement(dir.scale(forward).add(0.0, WebParkour.VAULT_UP, 0.0));
 		start(player, WebParkour.VAULT, null);
 		cooldown = WebParkour.VAULT_COOLDOWN;
+	}
+
+	private double topRecentSpeed() {
+		double top = 0.0;
+		for (double s : recentSpeed) {
+			top = Math.max(top, s);
+		}
+		return top;
 	}
 
 	// ---- cling and wall jump ----------------------------------------------------------------------------------------
