@@ -156,6 +156,9 @@ public final class Wounds {
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
+		// (0.19.24) herbal remedies' lasting effects, rag washing and boiling
+		Herbal.register();
+		RagWashing.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
@@ -169,6 +172,9 @@ public final class Wounds {
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
+		// (0.19.24) rest by a campfire, soaking in a hot spring
+		Resting.register();
+		HotSprings.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(KILLING_PHASE, (entity, source, amount) -> {

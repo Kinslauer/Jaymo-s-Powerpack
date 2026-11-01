@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "jaymospowers:chamomile",
+    "jaymospowers:chamomile"
+  ],
+  "result": {
+    "id": "jaymospowers:chamomile_tea",
+    "count": 1
+  }
+}

@@ -4729,3 +4729,40 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   pales into a moon and hangs 2 minutes (`ZFighterFakeMoon`, tuning at the top). Its light counts as a full moon on any
   phase within 112 blocks: Warrior-born players with the tail out turn into the Great Ape (those without the
   power still roll, once a night) and stay it while it shines; wrapped Warrior-born villagers get one 35% roll each. Compile-checked; not seen in game.
+- **0.19.24, healing herbs, rag washing, the healer's satchel and sickbed foods (docs/Healing-Plan.md 1-4 and 7):** Andy: "we need
+  more healing methods and items", "make the herbs common so you have an early method to treat wounds", "allow an inefficient
+  method of purifying rags, to prevent festering, maybe involving water". All in `core/wounds/`; assets from `tools/gen_herbs.py`.
+  - *Wild herbs* (`core/wounds/herbs/`): comfrey, yarrow, plantain, wild garlic and chamomile are `HerbBushBlock`s with four ages
+    (random-tick growth in light), picked like sweet berries (right click a grown one: 1-3 herbs, back to age 1; breaking gives
+    the herb back, 1-3 grown). The herb item is the block's item and plants age 0 on grass, dirt or farmland. Worldgen is data
+    (`worldgen/feature/<id>_patch`, `placed_feature/<id>_patch`: one chance in 2-3 a chunk, 7-8 tries over a 12-block patch) added
+    by `Herbs.register` with `BiomeModifications` in plains/meadows/forests (comfrey, chamomile), plains/savanna/hills (yarrow), every
+    grassy land biome (plantain), forests/taiga/swamps (wild garlic).
+  - *Remedies* (`Treatment.Remedy` YARROW, KNITBONE, SALVE, GARLIC, CLEAN_RAG; the usual flow: body screen, sneak for the worst
+    part, hold on another): yarrow powder stops a cut at once (not a stump); knitbone poultice mends the part a little and
+    knits a break faster for 10 minutes (`Herbal.knit`, an extra `KNIT_PER_SECOND` healed into the part); burn salve puts out fire,
+    zeroes frozen ticks and the Freezing effect, and heals 4 over 20 s (`Herbal.salve`); garlic poultice cleans like honey and wards
+    the part from festering for 10 minutes (`Bleeding.clean(entity, part, ward)`); a clean rag dresses like a rag but is never dirty
+    (`Bleeding.dress(..., dirty, rag)`). Herbal's timers are in memory, like dressings.
+  - *Rag washing* (`RagWashing`): hold use with rags in water or facing water (no sneak): a rag every 4 s, 25% stay dirty and are
+    kept. Boiling: use rags on a water cauldron with fire, soul fire, a lit campfire, magma or lava under it: up to 4 a water level,
+    20 s, always clean; the water is kept; if the heat or water goes the rags come out dirty; a stopping server hands them out clean.
+  - *Healer's satchel* (`Satchel`): a bundle of up to 64 medicine items (kit, poultices, drinks, sickbed foods; not herbs), click to
+    fill or empty. Carried anywhere in the inventory, treatments take a quarter less time, and a stack that runs out in hand is
+    refilled from it.
+  - *Sickbed foods* (`MedicineItems.SickbedItem`): bone broth (3 healed over the worst parts, cools a fever 5 minutes), chamomile tea
+    (weak willow-bark, and the next full sleep heals every hurt part twice over, `Herbal.sleepHeal`; the flag is the scoreboard tag
+    `jaymospowers_calm_sleep`), posset (cures nausea and poison, heals 2). Powers has no plain sleep heal, so only calm sleep heals
+    (to 60% of a part); a cot or bed that heals (Kingdoms') asks `Herbal.sleepHeal(player)`.
+  - *Campfire rest* (`Resting`): sneaking, crouching low or meditating, hardly moving, within 3 blocks of a lit campfire, the most
+    hurt part heals 0.75 every 5 s (never above 60% of that part, never sets a bone) and the pain eases. Warm embers rise round you.
+  - *Hot springs* (`HotSprings`, `Resting`): small pools (radius 2-4) of water over a gravel floor and magma, ringed with gravel,
+    stone and calcite, in mountain, taiga and snowy biomes, with steam rising. Soaking in one (or any water with magma within 3
+    blocks under you) eases pain, thaws frostbite and Freezing, clears short Nausea/Slowness, and heals the worst part 0.5 every 2 s
+    up to 60%. `Pain.ease(entity, ticks)` is new.
+  - *Healing brews* (`alchemy/healing/HealingBrews`): Bone-Knitting Elixir (sets and knits the worst broken limb over 2 min) and
+    Draught of Vigour (every part heals over 60 s, past the 60% cap), made in the crucible from herbs (the five herbs dissolve into
+    plant/life essences), unlocked by the new Bonesetting and Vigour research.
+  - Jaymo's Kingdoms 0.7.462 adds paid healing from town healers, the infirmary cot and the shrine (its MODLOG).
+  - Everything is in JEI's Medicine page, washing and boiling too. Compile-checked with javac against the 26.3 jars; not built with
+    Gradle or seen in game.

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:bone",
+    "#jaymospowers:herbs",
+    "minecraft:potion"
+  ],
+  "result": {
+    "id": "jaymospowers:bone_broth",
+    "count": 1
+  }
+}

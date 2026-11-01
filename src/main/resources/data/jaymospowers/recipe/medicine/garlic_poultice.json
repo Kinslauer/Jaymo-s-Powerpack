@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:wild_garlic",
+    "jaymospowers:wild_garlic",
+    "#minecraft:leaves"
+  ],
+  "result": {
+    "id": "jaymospowers:garlic_poultice",
+    "count": 2
+  }
+}

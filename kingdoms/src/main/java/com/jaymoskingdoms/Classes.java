@@ -478,7 +478,7 @@ public final class Classes {
 					enabled.add(Approaches.emeralds(player) >= WRIT_EMERALDS);
 				}
 				default -> {
-					options.add(Restoration.optionLine(kind));
+					options.add(Restoration.optionLine(player, kind));
 					enabled.add(Restoration.optionOpen(player, kind));
 				}
 			}

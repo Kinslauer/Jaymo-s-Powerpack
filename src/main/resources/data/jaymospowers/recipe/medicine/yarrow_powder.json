@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:yarrow"
+  ],
+  "result": {
+    "id": "jaymospowers:yarrow_powder",
+    "count": 2
+  }
+}

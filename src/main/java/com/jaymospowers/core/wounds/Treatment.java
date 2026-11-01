@@ -116,7 +116,13 @@ public final class Treatment {
 		BANDAGE(40, true), RAG(40, true), SPLINT(60, true), NEEDLE(60, true), CAUTERY(20, true), SPIRITS(20, true), HONEY(20, true),
 		SALTS(20, false), LEECHES(40, false), POPPY(40, false),
 		/** (0.17.93) Metal parts: an android's only repair (sneak + use, like spirits). */
-		METAL(40, true);
+		METAL(40, true),
+		/**
+		 * (0.19.24) The herbal remedies (docs/Healing-Plan.md): yarrow powder packed into a cut, a knitbone poultice on a
+		 * break, a burn salve, a garlic poultice (cleans like honey, and wards off festering), and a clean rag (washed or
+		 * boiled: dresses like a rag but never festers).
+		 */
+		YARROW(40, true), KNITBONE(60, true), SALVE(40, true), GARLIC(40, true), CLEAN_RAG(40, true);
 
 		public final int ticks;
 		public final boolean part;
@@ -132,7 +138,8 @@ public final class Treatment {
 
 		/** One of our own medicine items (the body screen is theirs). */
 		boolean screen() {
-			return this == BANDAGE || this == RAG || this == SPLINT || this == NEEDLE;
+			return this == BANDAGE || this == RAG || this == SPLINT || this == NEEDLE || this == YARROW || this == KNITBONE
+				|| this == SALVE || this == GARLIC || this == CLEAN_RAG;
 		}
 	}
 
@@ -357,7 +364,11 @@ public final class Treatment {
 		boolean missing = Breaks.missing(body, part);
 		boolean bleeding = (Bleeding.bleeding(body) & bit) != 0;
 		return switch (remedy) {
-			case BANDAGE, RAG -> !missing && (bleeding || Wounds.fraction(body, part) < 0.999F) && !Bleeding.dressed(body, part);
+			case BANDAGE, RAG, CLEAN_RAG -> !missing && (bleeding || Wounds.fraction(body, part) < 0.999F) && !Bleeding.dressed(body, part);
+			case YARROW -> bleeding && !missing;
+			case KNITBONE -> Herbal.knittable(body, part);
+			case SALVE -> Herbal.salvable(body, part);
+			case GARLIC -> ((Bleeding.festering(body) | Bleeding.dirty(body) | Bleeding.bleeding(body)) & bit) != 0;
 			case SPLINT -> Breaks.splintable(body, part);
 			case NEEDLE -> bleeding && !missing;
 			case CAUTERY -> bleeding;
@@ -516,7 +527,7 @@ public final class Treatment {
 			return InteractionResult.SUCCESS;
 		}
 		// (0.15.99) held, it's the worst part (or the whole body) with you kneeling at their side; a tap, the body screen
-		SESSIONS.put(server.getUUID(), new Session(body, null, remedy, hand, server.position(), sneak, MedicineSkill.ticks(server, remedy.ticks), true, now));
+		SESSIONS.put(server.getUUID(), new Session(body, null, remedy, hand, server.position(), sneak, Satchel.shorten(server, MedicineSkill.ticks(server, remedy.ticks)), true, now));
 		return InteractionResult.SUCCESS;
 	}
 
@@ -684,7 +695,7 @@ public final class Treatment {
 			// (already at it: use repeats while held)
 			return;
 		}
-		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak, MedicineSkill.ticks(player, remedy.ticks), false,
+		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak, Satchel.shorten(player, MedicineSkill.ticks(player, remedy.ticks)), false,
 			player.level().getGameTime()));
 		announce(player, body, part, remedy);
 	}
@@ -794,14 +805,35 @@ public final class Treatment {
 	private static void apply(ServerLevel level, ServerPlayer player, Session s, ItemStack stack) {
 		LivingEntity body = s.target;
 		BodyPart part = s.part;
+		net.minecraft.world.item.Item used = stack.getItem();
 		Component done = Component.translatable("message.jaymospowers.wounds.treated." + s.remedy.name().toLowerCase(java.util.Locale.ROOT),
 			part == null ? body.getDisplayName() : part.displayName());
 		switch (s.remedy) {
-			case BANDAGE, RAG -> {
-				boolean rag = s.remedy == Remedy.RAG;
+			case BANDAGE, RAG, CLEAN_RAG -> {
+				boolean rag = s.remedy != Remedy.BANDAGE;
 				Bleeding.stop(body, part, false);
-				// (0.15.49) Field Dresser: a better dressing
-				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, rag);
+				// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
+				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, s.remedy == Remedy.RAG, rag);
+				stack.consume(1, player);
+			}
+			case YARROW -> {
+				Bleeding.stop(body, part, false);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.7F, 1.2F);
+				stack.consume(1, player);
+			}
+			case KNITBONE -> {
+				Herbal.knit(body, part);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 0.6F, 1.2F);
+				stack.consume(1, player);
+			}
+			case SALVE -> {
+				Herbal.salve(body, part);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4F, 1.6F);
+				stack.consume(1, player);
+			}
+			case GARLIC -> {
+				Bleeding.clean(body, part, Herbal.GARLIC_WARD_TICKS);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.7F, 0.8F);
 				stack.consume(1, player);
 			}
 			case SPLINT -> {
@@ -883,6 +915,10 @@ public final class Treatment {
 			}
 		}
 		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
+		// (0.19.24) the stack in hand ran out: the next of it comes from a healer's satchel
+		if (player.getItemInHand(s.hand).isEmpty()) {
+			Satchel.refill(player, s.hand, used);
+		}
 		// (0.15.49) a little Survival experience (Kingdoms)
 		MedicineSkill.treated(player);
 		if (body != player) {

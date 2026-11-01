@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C C",
+    "BGB",
+    "BBB"
+  ],
+  "key": {
+    "C": "#minecraft:candles",
+    "B": "minecraft:stone_bricks",
+    "G": "minecraft:gold_nugget"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:shrine"
+  }
+}
