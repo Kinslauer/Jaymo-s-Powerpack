@@ -575,12 +575,15 @@ public final class ZFighterLineage {
 			player.removeAttached(TAIL_CUT);
 		}
 		boolean wild = wild(player);
-		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
+		// (Andy, 2026-11-01) a false moon ({@link ZFighterFakeMoon}) shines like a full one, any night
+		boolean fakeMoon = tailOut(player) && ZFighterFakeMoon.shines(level, player);
+		boolean moonlit = fakeMoon || tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
 			live.apePeak = player.getY();
 			if (moonlit && player.isAlive() && live.apeSize <= 0.0F) {
-				if (!wild) {
+				if (!wild || fakeMoon) {
+					// a false moon is close and bright: it takes even one without the power, no roll
 					becomeApe(player, live);
 				} else if (now - live.wildRolledAt >= WILD_ROLL_EVERY) {
 					// no Z Fighter: the moon may or may not take him, once a night

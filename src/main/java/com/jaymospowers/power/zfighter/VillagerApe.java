@@ -127,7 +127,15 @@ final class VillagerApe {
 	}
 
 	private static boolean moonlit(Mob mob, ServerLevel level) {
-		return fullMoonNight(level) && level.canSeeSky(BlockPos.containing(mob.getEyePosition()));
+		return fullMoonNight(level) && level.canSeeSky(BlockPos.containing(mob.getEyePosition())) || ZFighterFakeMoon.shines(level, mob);
+	}
+
+	/** (Andy, 2026-11-01) A false moon's light takes it ({@link ZFighterFakeMoon}), whatever the real moon is doing. */
+	static void turnUnderFakeMoon(Mob mob, ServerLevel level) {
+		if (APES.containsKey(mob.getUUID()) || !mob.isAlive()) {
+			return;
+		}
+		turn(mob, level, level.getGameTime(), "message.jaymospowers.villager_ape_turn_fake_moon");
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -157,13 +165,13 @@ final class VillagerApe {
 				}
 			}
 			for (Mob mob : turning) {
-				turn(mob, level, now);
+				turn(mob, level, now, "message.jaymospowers.villager_ape_turn");
 			}
 		}
 	}
 
 	/** The moon takes it: the tail tears loose and it swells into the wild Great Ape. */
-	private static void turn(Mob mob, ServerLevel level, long now) {
+	private static void turn(Mob mob, ServerLevel level, long now, String told) {
 		ZFighterPower.Live live = new ZFighterPower.Live();
 		live.wildFrom = now;
 		live.apePeak = mob.getY();
@@ -179,7 +187,7 @@ final class VillagerApe {
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.4F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 2.0F, 0.6F);
 		ZFighterLineage.shake(mob, mob.position(), ZFighterLineage.APE_STEP_RANGE * 1.5, ZFighterLineage.APE_CHANGE_SHAKE);
-		tell(mob, level, "message.jaymospowers.villager_ape_turn", ChatFormatting.RED);
+		tell(mob, level, told, ChatFormatting.RED);
 		body(mob, live);
 	}
 
