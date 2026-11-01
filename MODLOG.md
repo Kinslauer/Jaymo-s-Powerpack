@@ -4869,3 +4869,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   bigger, tinted the ball's pale colour, easing in and back out (`ZFighterFakeMoon.Sky` payload, client
   `ZFighterFakeMoonSky` + `ZFighterFakeMoonSkyMixin` on `SkyRenderer`). The apes and werewolves still turn under it as
   before. Compile-checked; not seen in game.
+
+- **0.19.39, Kingdoms 0.7.470, giants knock trees down as they walk:** Andy: "apes should also knock trees down with their
+  strides, as well as towerback, all giants should get this damaging effect". New `core/GiantTrample`: every step of a Great
+  Ape (players and raging villagers) and of Towerback knocks over the trees round its feet, and walking into a tree pushes it
+  over. With Kingdoms the tree topples whole away from the giant (`Trees.trample`, by reflection) and the falling wood crushes
+  whatever it lands on; player-built log walls aren't natural trees and stay. Without Kingdoms the trunk just breaks. Players
+  only fell where they may build; villager apes only with mob griefing on. The Aether Giants already pushed trees over when
+  they walked into them; now each of their steps fells the trees within 2.5 blocks of them too (Kingdoms MODLOG).

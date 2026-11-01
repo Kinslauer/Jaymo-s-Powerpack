@@ -415,6 +415,8 @@ public final class Towerback extends XenoForm {
 					footfall(player, live, level, 1.0, WAVE_DAMAGE, WAVE_JOLT_UP);
 				}
 			}
+			// (0.19.39) walking into a tree pushes it over
+			com.jaymospowers.core.GiantTrample.tick(player, now);
 			if (live.towering && now % TRAMPLE_EVERY == 0 && player.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4) {
 				trample(player, level);
 			}
@@ -447,6 +449,8 @@ public final class Towerback extends XenoForm {
 		GroundCracks.crack(level, under, player.getRandom(), Math.max(2, Math.round(size * 0.8F)));
 		Shakes.heavy(player, foot, SHAKE_RANGE_PER_SCALE * size, STEP_SHAKE * size);
 		live.waves.add(new Wave(foot, WAVE_RANGE_PER_SCALE * size * range, WAVE_SPEED_PER_SCALE * size, damage * heft(live), up));
+		// (0.19.39) the trees round its feet go down
+		com.jaymospowers.core.GiantTrample.step(player);
 	}
 
 	/**

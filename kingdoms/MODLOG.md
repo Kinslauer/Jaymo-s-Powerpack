@@ -8098,3 +8098,9 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
 ## 0.7.469: the greenskin road's deed goes to who earned it (pack 0.19.37)
 - Master didn't compile: 0.7.466 made deeds per player and group, and `TribePacts.favoured` still marked the deed for the
   whole world. It now records it for the player who won the orc tribe's favour (`RoadDeeds.done`, kept even if they're away).
+
+## 0.7.470: Aether Giants fell trees with every step (pack 0.19.39)
+- Andy: "all giants should get this damaging effect" (trees knocked down by their strides). Each footfall now topples the
+  natural trees within `STEP_TREE_REACH` (2.5 blocks) of the Giant, away from it, and the falling wood crushes what it lands
+  on (mob griefing on). Walking into trees still knocks them over as before. Powers' Great Apes and Towerback do the same
+  through `core/GiantTrample`.

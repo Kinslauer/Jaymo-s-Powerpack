@@ -261,6 +261,10 @@ final class VillagerApe {
 		if (now % ZFighterLineage.APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			ZFighterLineage.stomp(mob, level);
 		}
+		if (live.apeSize >= 0.5F) {
+			// (0.19.39) walking into a tree pushes it over
+			com.jaymospowers.core.GiantTrample.tick(mob, now);
+		}
 	}
 
 	/** It swells into the ape (or shrinks back), a little every tick. */
