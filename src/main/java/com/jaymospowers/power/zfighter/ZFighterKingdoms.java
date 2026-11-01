@@ -45,6 +45,8 @@ final class ZFighterKingdoms {
 	private static Method NEAREST_MONOLITH;
 	/** (0.18.52) Kingdoms' WorldTiers.deed(ServerPlayer, String): a rung's exit deed is done ("pod_flight", "maw_salvage"). */
 	private static Method DEED;
+	/** (0.19.33) Kingdoms' LifeStory.canReincarnate(ServerPlayer) and reincarnate(ServerPlayer): being born again. */
+	private static Method CAN_REBORN, REBORN;
 	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
@@ -119,6 +121,14 @@ final class ZFighterKingdoms {
 				DEED = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("deed", ServerPlayer.class, String.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				DEED = null;
+			}
+			try {
+				Class<?> story = Class.forName("com.jaymoskingdoms.LifeStory");
+				CAN_REBORN = story.getMethod("canReincarnate", ServerPlayer.class);
+				REBORN = story.getMethod("reincarnate", ServerPlayer.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				CAN_REBORN = null;
+				REBORN = null;
 			}
 			try {
 				Class<?> tier = Class.forName("com.jaymoskingdoms.WorldTiers$Tier");
@@ -196,6 +206,35 @@ final class ZFighterKingdoms {
 			return (BlockPos)NEAREST_MONOLITH.invoke(null, level, from);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return null;
+		}
+	}
+
+	/** (0.19.33) Whether {@code player} can be born again through Kingdoms' life story (Kingdoms there, its story screen on his client). */
+	static boolean canReincarnate(ServerPlayer player) {
+		if (CAN_REBORN == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(CAN_REBORN.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			CAN_REBORN = null;
+			return false;
+		}
+	}
+
+	/**
+	 * (0.19.33) {@code player} is born again: Kingdoms unmakes his heritage, class and story and tells the life story anew,
+	 * with every start he or his group has opened. False without Kingdoms (or its story screen).
+	 */
+	static boolean reincarnate(ServerPlayer player) {
+		if (REBORN == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(REBORN.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			REBORN = null;
+			return false;
 		}
 	}
 

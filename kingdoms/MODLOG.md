@@ -8013,7 +8013,24 @@ the closer the Grue comes. The spirit fights it the whole way, until the Grue ta
 - **Exorcism:** a friend downs the host, then uses a Purifying Draught on them. The Grue burns out, takes the spirit with
   it (never another), and 20 lingering corruption goes. Ops: `/kingdom grue free <player>`, `/kingdom grue hold <player> <n>`.
 
-## 0.7.466: the Grue's trial (pack 0.19.33)
+## 0.7.466: born again from the afterlife; starts per player and group (pack 0.19.33)
+Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or reincarnate, giving
+you access to all the different starts you may have unlocked. starts are now per group / player", and "make the judge
+offer it in his interactions menu".
+- **Road deeds per player and group (`RoadDeeds`):** a deed (a captive freed, a pit bout won, a world reached, ...) no
+  longer opens its road for the whole world. It is kept for the one who did it (`road_deeds_own`, by UUID, so a merchant
+  order delivered while away counts) and for their group, the handshake party (`Parties.team`, `road_deeds_groups` by team
+  name). A road is open to you if you, your group, or a group member who is on did its deed. World events count for who
+  was there: a blood moon for everyone on in the Overworld as it ends, a falling star for everyone within 384 blocks
+  (`RoadDeeds.STAR_SEEN`), a whale for the striker and everyone near it.
+- Old saves: the world-wide deeds done before this patch are handed, once, to every player who had already told their
+  story (`road_deeds_handed`). New players start with only their own. Ops' `/kingdom roads unlock|lock` still force a road
+  for everyone; `/kingdom roads deeds <player>` lists the deeds a player may count.
+- **`LifeStory.reincarnate`** (called by Powers): unmakes heritage, class and story as a Writ of Rebirth does and tells
+  the whole life story again, with every road the player or their group has opened. Roads already taken stay theirs.
+  MCA's look and name are kept.
+- Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
+## 0.7.467: the Grue's trial (pack 0.19.34)
 Jung, through Andy: when the Grue takes you, you're sent to a black realm to fight it, and if you win you can use the curse
 at will. Andy chose a sealed arena in the sky (no new dimension, keeping the no-new-realms rule) and "the blindness fog
 rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`.

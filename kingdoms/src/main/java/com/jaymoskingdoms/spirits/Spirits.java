@@ -303,7 +303,7 @@ public final class Spirits {
 				list.add(move);
 			}
 		}
-		// (0.7.466) the Grue's, once subjugated
+		// (0.7.467) the Grue's, once subjugated
 		if (GrueTrial.mastered(state)) {
 			list.addAll(GrueTrial.MOVES);
 		}
@@ -319,7 +319,7 @@ public final class Spirits {
 	/** How much harder its moves hit at this level (1.0 at level 1, {@link #LEVEL_DAMAGE} more for each level after). */
 	public static float damageScale(SpiritState state) {
 		float scale = 1.0F + LEVEL_DAMAGE * (Math.clamp(state.level(), 1, MAX_LEVEL) - 1);
-		// (0.7.466) Grue Form
+		// (0.7.467) Grue Form
 		return state.toggled(SpiritState.GRUE_FORM) ? scale * GrueTrial.FORM_DAMAGE : scale;
 	}
 

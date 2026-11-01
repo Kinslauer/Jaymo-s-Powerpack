@@ -223,6 +223,11 @@ public final class ZFighterNpcs {
 		return true;
 	}
 
+	/** (0.19.33) Whether the talk screen is there (Kingdoms and MCA), so a choice can be put to a player. */
+	public static boolean canAsk() {
+		return ASK != null;
+	}
+
 	/** {@code npc} says {@code words}, with these answers and a farewell. Without the talk screen, the words go to chat. */
 	public static void ask(ServerPlayer player, LivingEntity npc, Component words, List<Option> options) {
 		List<Option> all = new ArrayList<>(options);
