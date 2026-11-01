@@ -19,7 +19,7 @@ import net.minecraft.sounds.SoundSource;
  * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Knocked out ({@link Downed#KNOCKED}: a rock,
  * too much poppy), the screen goes black; coming round, it fades back in. The "mash sneak" line comes from the server.
  * <p>
- * (0.19.52) Bleeding out (ideas from Death Engine, rebuilt): a dark red ring closes in from the edges as their strength
+ * (0.19.55) Bleeding out (ideas from Death Engine, rebuilt): a dark red ring closes in from the edges as their strength
  * fades ({@link Downed#strength}), and their heart is heard while still awake: racing on the first adrenaline, then
  * slowing and pounding louder as they weaken, slowest once passed out.
  */
@@ -28,26 +28,26 @@ public final class DownedHud {
 	static final int GREY = 0x2A2A2A, DOWN_ALPHA = 0x60, OUT_ALPHA = 0xC0;
 	/** How long the grey takes to come over the screen (ticks). */
 	static final int FADE_IN_TICKS = 20;
-	/** Passed out: a heartbeat this loud and this deep ((0.19.52) how often: {@link #BEAT_OUT}). */
+	/** Passed out: a heartbeat this loud and this deep ((0.19.55) how often: {@link #BEAT_OUT}). */
 	static final float HEARTBEAT_VOLUME = 0.7F, HEARTBEAT_PITCH = 0.6F;
 
 	/**
-	 * (0.19.52) The bleeding-out ring: its colour (RGB), how far in from the edges it reaches at full strength and spent
+	 * (0.19.55) The bleeding-out ring: its colour (RGB), how far in from the edges it reaches at full strength and spent
 	 * (share of the screen's shorter side), how thick at the very edge (0-255) at full strength and spent, and the bands
 	 * it's drawn in (more is smoother). It breathes in and out with the heartbeat by this much.
 	 */
 	static final int RING = 0x3A0000, RING_BANDS = 14;
 	static final float RING_STRONG = 0.12F, RING_SPENT = 0.42F, RING_EDGE_STRONG = 70.0F, RING_EDGE_SPENT = 210.0F, RING_PULSE = 0.08F;
-	/** (0.19.52) Awake: a heartbeat every this many ticks at full strength (racing) and spent, this loud at each. */
+	/** (0.19.55) Awake: a heartbeat every this many ticks at full strength (racing) and spent, this loud at each. */
 	static final float BEAT_STRONG = 14.0F, BEAT_SPENT = 44.0F, BEAT_VOLUME_STRONG = 0.3F, BEAT_VOLUME_SPENT = 0.65F;
-	/** (0.19.52) Passed out: slower still. */
+	/** (0.19.55) Passed out: slower still. */
 	static final float BEAT_OUT = 52.0F;
 
 	/** (0.18.84) Knocked out: how long the black takes to come over the screen, and to lift as they come round (ticks). */
 	static final float BLACK_IN_TICKS = 6.0F, BLACK_OUT_TICKS = 30.0F;
 
 	private static int downTicks;
-	/** (0.19.52) Ticks since the last heartbeat, and how far through the beat's swell the ring is (0-1). */
+	/** (0.19.55) Ticks since the last heartbeat, and how far through the beat's swell the ring is (0-1). */
 	private static float sinceBeat, beatSwell, beatSwellBefore;
 	/** (0.18.84) How black the screen is (0-1), last tick and this one. */
 	private static float black, blackBefore;
@@ -79,7 +79,7 @@ public final class DownedHud {
 		if (player.hasAttached(Downed.KNOCKED)) {
 			return;
 		}
-		// (0.19.52) racing at first, slowing as they weaken, slowest out cold
+		// (0.19.55) racing at first, slowing as they weaken, slowest out cold
 		boolean out = Downed.passedOut(player);
 		float strength = Downed.strength(player);
 		float every = out ? BEAT_OUT : net.minecraft.util.Mth.lerp(strength, BEAT_SPENT, BEAT_STRONG);
@@ -107,7 +107,7 @@ public final class DownedHud {
 	}
 
 	/**
-	 * (0.19.52) The bleeding-out ring: dark red, thickest at the edges and thinning inward, reaching further in and darker as
+	 * (0.19.55) The bleeding-out ring: dark red, thickest at the edges and thinning inward, reaching further in and darker as
 	 * {@code strength} fades, swelling a little on each heartbeat. Drawn as frames of bands, from the edge in.
 	 */
 	private static void ring(GuiGraphicsExtractor graphics, float strength, float swell, float fade) {

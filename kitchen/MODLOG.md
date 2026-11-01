@@ -1266,3 +1266,22 @@ blunt." `SpiderCrush.crushed`: a crushable mob no wider than `SMALL_WIDTH` (1 bl
 spiders) bursts into legs on any kill, whatever the weapon; any other spider killed by someone (blade, arrow, power) is
 smashed `ANY_KILL_CHANCE` (25%) of the time. Deaths with no killer (poison, burning, drowning) still leave a body unless
 they crush (falls, anvils, mace, Powers' blunt marks). Corpse smashing unchanged. Not compile-checked; not seen in game.
+
+## 0.5.47: dead snakes go limp (pack 0.19.53)
+Andy: "a snake should go all noodle like when they ragdoll, this stiffness doesnt make sense". Naturalist's snake was a
+rigid `BOX` ragdoll, its tail segments only swung by `LooseParts`, so it lay as a few stiff blocks bent at sharp angles.
+New ragdoll shape `RagdollRig.Shape.CHAIN` (tag `jaymoskitchen:ragdoll_chain`, holding `naturalist:snake`): a small rigid
+head (four corners, so it has a torso frame like every other shape) and `CHAIN_JOINTS` (10) joints behind it, each held to
+the next by a stick and free to bend every way up to `CHAIN_BEND` (1.3 rad, kept by compression-only struts two joints
+apart, `RagdollRig.strutA/strutB/strutMin`). Its belly grips what it lies on (`RagdollBody.CHAIN_GRIP`, `GRIP_GIVE`): a
+slowly sliding point stops dead and barely gives to the sticks, so a snake draped over a step stays draped instead of
+slithering off. A snake wedged among blocks that goes nowhere in `CHAIN_SETTLE_TICKS` falls asleep (`settleChain`), and
+asleep it only wakes past `CHAIN_WAKE`. Laid down (`RagdollBody.lying`) it lies in a lazy S. Held by the tail's tip.
+Drawing: new client `ChainSpine` finds the model's spine by name (a `tail...` run and a `neck`/`head` beside it; Naturalist:
+main -> neck -> skull, main -> tail -> tail2 -> tail3 -> tail4) and lays it along the chain, head tip first: the first
+segment each way is moved onto the chain, every segment turned so its far end lands on the chain its own length on, the
+neck laid flat and the head level. `LooseParts` leaves the spine alone, and (when there's no physics, carried) follows a
+run of same-named parts (tail, tail2, tail3...) to its end instead of stopping two deep. Old snake corpses keep their box.
+`tools/ragdoll_sim` gains snake checks (settles flat, drapes over a bump and down a step, bends no further than it can);
+the spine laying was checked against a stand-in of Naturalist's snake model. Not compile-checked against the game; not seen
+in game.

@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  * sees them, so the two move as one on every screen; a carried player's own client moves itself the same way and tells
  * the server), the loose limbs' sway is stepped, and a carried player's jump is sent as a struggle.
  * <p>
- * (0.19.52) A body dragged by the shoulder ({@link Carry#DRAG}) is laid on the ground behind the carrier's hand instead
+ * (0.19.55) A body dragged by the shoulder ({@link Carry#DRAG}) is laid on the ground behind the carrier's hand instead
  * ({@link Carry#dragStep}, as the server does it), and its legs ragdoll as they drag ({@link Drag}): each one a sprung
  * limb kicked up off the ground by the bumps of the ground going by (more the faster it goes), by the body dropping or
  * rising over a step, and swung aside as the body is turned, falling back flat and bouncing off the ground; the head
@@ -40,7 +40,7 @@ public final class CarryClient {
 	static final float TRAIL_FULL_SPEED = 1.2F;
 
 	/**
-	 * (0.19.52) The dragged legs' ragdoll: the ground's bumps kick them up (radians a tick, per block/tick of speed, on an
+	 * (0.19.55) The dragged legs' ragdoll: the ground's bumps kick them up (radians a tick, per block/tick of speed, on an
 	 * uneven beat that many times a block), a drop or rise of the body kicks them (per block), a turn swings them aside (per
 	 * degree); they're sprung back flat (lifted) and to lying a little apart (aside), losing this much of their swing a
 	 * tick, and bounce off the ground keeping this much. Lifted at most this far, swung aside at most this far.
@@ -48,11 +48,11 @@ public final class CarryClient {
 	static final float BUMP_KICK = 0.9F, BUMP_BEAT = 7.0F, DROP_KICK = 1.6F, TURN_SWING = 0.012F;
 	static final float LEG_STIFFNESS = 0.22F, LEG_ASIDE_STIFFNESS = 0.08F, LEG_DAMPING = 0.82F, GROUND_BOUNCE = 0.3F;
 	static final float LEG_LIFT_MAX = 0.7F, LEG_ASIDE_MAX = 0.7F, LEG_SPLAY = 0.14F;
-	/** (0.19.52) The head: jolted this much by the bumps (share of a leg's kick), sprung back this hard, and its damping. */
+	/** (0.19.55) The head: jolted this much by the bumps (share of a leg's kick), sprung back this hard, and its damping. */
 	static final float HEAD_JOLT = 0.5F, HEAD_STIFFNESS = 0.18F, HEAD_DAMPING = 0.8F;
 
 	/**
-	 * (0.19.52) One dragged body: where its shoulders and hips lie (and last tick's), its yaw, and its limbs' ragdoll:
+	 * (0.19.55) One dragged body: where its shoulders and hips lie (and last tick's), its yaw, and its limbs' ragdoll:
 	 * {right leg lifted, right leg aside, left lifted, left aside, head} with their speeds, now and last tick.
 	 */
 	static final class Drag {
@@ -149,7 +149,7 @@ public final class CarryClient {
 		}
 	}
 
-	/** (0.19.52) Lays a dragged body along the ground behind the carrier's hand, and steps its legs' ragdoll. */
+	/** (0.19.55) Lays a dragged body along the ground behind the carrier's hand, and steps its legs' ragdoll. */
 	private static void drag(Entity carried, Player carrier) {
 		Drag d = DRAGS.computeIfAbsent(carried.getId(), id -> new Drag());
 		Vec3[] lay = Carry.dragStep(carrier.position(), carrier.yBodyRot, d.shoulders, d.hips);
@@ -210,7 +210,7 @@ public final class CarryClient {
 	}
 
 	/**
-	 * (0.19.52) This frame's drag of a dragged body: {yaw (degrees), right leg lifted, right leg aside, left lifted, left
+	 * (0.19.55) This frame's drag of a dragged body: {yaw (degrees), right leg lifted, right leg aside, left lifted, left
 	 * aside, head}, or null if it isn't being dragged (yet).
 	 */
 	static float @Nullable [] dragOf(Entity carried, float partialTicks) {

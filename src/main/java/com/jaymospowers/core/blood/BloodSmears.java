@@ -16,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.19.52) Andy liked Death Engine's blood trail (ideas only: All Rights Reserved, Forge only): a body dragged over the
+ * (0.19.55) Andy liked Death Engine's blood trail (ideas only: All Rights Reserved, Forge only): a body dragged over the
  * ground smears its blood along it. Anyone downed who crawls or is dragged ({@link #downed}, from {@link Downed}), and
  * Jaymo's Kitchen's carcasses dragged behind a player ({@link #tick}), leave a streak of {@link BloodTrail#smear}s behind
  * them, one every {@link #STEP} blocks. A living one's smears are its own stains, so hunting mobs ({@link BloodTracking})

@@ -8147,3 +8147,50 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   weapon and pulled it out ("Not done yet!"), MCA stowed it again, and the guard looped. A weapon in a villager's pack now
   counts as theirs, and MCA draws it for the next fight.
 - Compile-checked with javac against the 26.3 jars; not played.
+
+## 0.7.475: greenskin camps grow in tiers (pack 0.19.52)
+Hordes patch 2 (`docs/Hordes-Plan.md`). Andy: "they should all build similarly and expand further, making it possible to find
+a large goblin camp the size of a kingdom even".
+- **Tiers** (`Hordes`, saved per camp in `jaymoskingdoms:hordes`; a camp without an entry is tier 1, so old camps start
+  there). Orc camps go War camp, Warhold, Horde town, Horde kingdom; goblin villages go Village, Warren, Goblin town,
+  Goblin kingdom. Wall radius 22 / 36 / 52 / 72, folk cap 15 or 16 / 20 / 25 / 30 (`WALL_RADIUS`, `ORC_CAP`,
+  `GOBLIN_CAP`). A camp moves up at its daily growth once its tier is filled: tier 1 its seven inner buildings up, tiers
+  2 and 3 their wall closed, gates cut and band built; its folk at the cap; and old enough (10 / 25 / 50 days,
+  `TIER_DAYS`). Tier 4 only for the tribe's king seat (its oldest camp). Daily takings grow with the tier
+  (`YIELD_PERCENT`, 100 to 250%) until Patch 3's jobs replace them. New folk wander out to six blocks inside the outer
+  wall. The tier's name shows in `/kingdom list` and `info`, the journal's map and list, and the "Entering" line.
+- **Outer palisades.** Moving up, a camp raises its new ring one arc of eight a day (`ARCS`, 6 logs each), two a day with
+  ogres in the camp, starting at the front gate and working round to the back. Same style as its first stockade (dark oak
+  on a blackstone foot with bone-and-skull posts for orcs, spruce with skull posts for goblins), stakes on top, a walkway
+  and ladders, gates on all four sides and the two gate towers at the front. The wall follows the land (each column on its
+  own ground, its foot filled where the land falls away) and leaves a gap wherever a player placed a block (`Placed`),
+  anything is built, there's water, or another settlement holds the land. Once it closes, gates are cut in the old ring's
+  sides and back (with ladders beside them), and roads of coarse dirt (with gravel for orcs) run from each old gate to the
+  new ring's. Nothing goes up with a player within 24 blocks, as before.
+- **The band and its planner.** New buildings go into the band between the two walls, one or more a day as the inner list
+  did (each ogre one more). The angle-slot planner shuffles the tier's list with a seed from the camp's id and fire (the
+  same layout after a restart, a different one for every camp), then tries each building round the band from its own
+  angle, row by row, facing the fire, until its whole footprint lies in the band, off the four ways out and two blocks
+  clear of the others. Each goes up on its own levelled patch (no more than 4 blocks of rise and fall), or is passed over
+  if a player's block, anything built or water is in the way. Per-tier lists replace the fixed seven: tier 2 tents or
+  huts, a forge or tavern, a watchtower or lookout, a pit, racks, patches, totems and the war-beast pens; tier 3 adds the
+  market square, the ogre den (orcs), the smelter and the brewery (goblins); tier 4 has two of most.
+- **New buildings** (`HordeBuildings`, our own designs in the camps' materials): the market square (9 x 9, four stalls
+  under striped awnings, a lantern post over a trough), the ogre den (a mossy stone mound with a bone-framed mouth, hay
+  and bones inside), the smelter (furnaces and blast furnaces under a smoking chimney, a lava cauldron, an anvil), the
+  goblin brewery (a mushroom-roofed hall of cauldrons, brewing stands and casks), war-beast pens (a staked yard with
+  troughs, a tethering post and a lean-to), and the great halls.
+- **Tier 4, a greenskin realm.** The great hall goes up over the longhouse or great hut in its footprint (taller, stone
+  below, corner towers or mushroom spires), the throne where it was and the hoard chest left standing with its loot. The
+  camp claims land as a kingdom does (6 chunks each way; tiers 2 and 3 claim 3 and 4). Its chief takes a title, Warlord
+  or Goblin King, on his boss bar. The news tells of each new tier, and of the realm and how many camps bow to it. Its
+  tribe's smaller camps within 640 blocks become its vassals: the realm stays a camp (`FactionType.BARBARIAN`) and the
+  vassals keep theirs, with the realm as their overlord (`Relations.vassalize`), so `/kingdom list` shows "vassal of".
+  Killing its chief frees them, and a cleared camp's outer walls and band rot like its middle.
+- **`/kingdom camp tier`** (operators): the nearest greenskin camp's tier, its wall arcs, band buildings, days in the
+  tier, and what it still needs for the next (or its realm's title, land and vassals). `/kingdom camp tier <1-4>` moves
+  it there, building each tier between at once; `... now` builds the last one at once too. `/kingdom camp info` shows the
+  same lines; `/kingdom camp grow` grows it a day (its next step goes up even with you near, if its days and pile allow).
+- A `hoard` field waits on each camp's tier for Patch 3's chief's hoard. Coins, jobs, markets' traders, caravans and the
+  city buildings are Patches 3 and 4.
+- Compile-checked against the 26.3 jars; not played.

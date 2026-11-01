@@ -277,7 +277,7 @@ public final class Corpses {
 			int head = switch (rig.shape) {
 				case HUMANOID -> RagdollRig.HEAD;
 				case QUADRUPED -> RagdollRig.SNOUT;
-				case BOX -> RagdollRig.TOP_RIGHT;
+				case BOX, CHAIN -> RagdollRig.TOP_RIGHT;
 			};
 			body.hit(body.x[head], body.y[head], body.z[head], dx / length * push, 0.0, dz / length * push, TOPPLE_SHARE);
 		}

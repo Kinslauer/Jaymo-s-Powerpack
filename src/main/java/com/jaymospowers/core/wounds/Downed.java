@@ -130,7 +130,7 @@ public final class Downed {
 	/** A downed player's crawl, slower than a crawl (share of speed lost), and passed out: none at all. */
 	public static final double PLAYER_CRAWL_SLOW = -0.5, PASSED_OUT_SLOW = -1.0;
 	/**
-	 * (0.19.52) Andy liked Death Engine's crawl (ideas only: it's All Rights Reserved), where you only crawl well for the
+	 * (0.19.55) Andy liked Death Engine's crawl (ideas only: it's All Rights Reserved), where you only crawl well for the
 	 * first moments. Going down, a downed one has {@link #ADRENALINE_TICKS} of adrenaline, crawling at
 	 * {@link #ADRENALINE_SLOW} (a player) or {@link #ADRENALINE_PACE} times a mob's crawl; then their strength
 	 * ({@link #strength}) fades steadily until they pass out at {@link #BLEED_OUT_TICKS}, the crawl slowing from
@@ -419,7 +419,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.19.52) How much strength a downed one has left (1 down to 0): full through the {@link #ADRENALINE_TICKS} after
+	 * (0.19.55) How much strength a downed one has left (1 down to 0): full through the {@link #ADRENALINE_TICKS} after
 	 * going down, then fading steadily to nothing at {@link #BLEED_OUT_TICKS} (when a player passes out). 0 passed out or
 	 * knocked out; 1 if not downed. Both sides (it's read from the synced time they went down).
 	 */
@@ -427,7 +427,7 @@ public final class Downed {
 		return strength(entity, entity.level().getGameTime() - since(entity));
 	}
 
-	/** (0.19.52) As {@link #strength(Entity)}, {@code down} ticks after going down. */
+	/** (0.19.55) As {@link #strength(Entity)}, {@code down} ticks after going down. */
 	public static float strength(Entity entity, float down) {
 		if (!isDowned(entity)) {
 			return 1.0F;
@@ -441,12 +441,12 @@ public final class Downed {
 		return net.minecraft.util.Mth.clamp(1.0F - (down - ADRENALINE_TICKS) / (float) (BLEED_OUT_TICKS - ADRENALINE_TICKS), 0.0F, 1.0F);
 	}
 
-	/** (0.19.52) Still in the first rush of adrenaline after going down (the quick crawl). */
+	/** (0.19.55) Still in the first rush of adrenaline after going down (the quick crawl). */
 	public static boolean adrenaline(Entity entity) {
 		return isDowned(entity) && !passedOut(entity) && entity.level().getGameTime() - since(entity) <= ADRENALINE_TICKS;
 	}
 
-	/** (0.19.52) A downed mob's crawl pace: a share of {@link #CRAWL_SPEED}, quick on adrenaline, fading with its strength. */
+	/** (0.19.55) A downed mob's crawl pace: a share of {@link #CRAWL_SPEED}, quick on adrenaline, fading with its strength. */
 	public static double crawlPace(Entity entity) {
 		return CRAWL_SPEED * (adrenaline(entity) ? ADRENALINE_PACE : net.minecraft.util.Mth.lerp(strength(entity), SPENT_PACE, 1.0));
 	}
@@ -867,7 +867,7 @@ public final class Downed {
 		mob.setJumping(false);
 		mob.setXxa(0.0F);
 		mob.setSpeed(0.0F);
-		// (0.19.52) crawling or dragged, it smears its blood along the ground
+		// (0.19.55) crawling or dragged, it smears its blood along the ground
 		com.jaymospowers.core.blood.BloodSmears.downed(level, mob);
 		if (Carry.isCarried(mob) || com.jaymospowers.core.finisher.Finishers.targeted(mob)) {
 			// ((0.15.98) and lying still under a finisher)
@@ -918,7 +918,7 @@ public final class Downed {
 			out = true;
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 0.6F, 0.5F);
 		}
-		// (0.19.52) crawling or dragged, they smear their blood along the ground
+		// (0.19.55) crawling or dragged, they smear their blood along the ground
 		com.jaymospowers.core.blood.BloodSmears.downed(level, player);
 		// flat on the ground (but limp in the arms of whoever carries them)
 		if (Carry.isCarried(player) && !Carry.isDragged(player)) {
@@ -930,7 +930,7 @@ public final class Downed {
 		}
 		player.setSprinting(false);
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-		// (0.19.52) quick on adrenaline, then slower as their strength fades (in hundredths, so it isn't resent every tick)
+		// (0.19.55) quick on adrenaline, then slower as their strength fades (in hundredths, so it isn't resent every tick)
 		double slow = out ? PASSED_OUT_SLOW : adrenaline(player) ? ADRENALINE_SLOW
 			: Math.round(net.minecraft.util.Mth.lerp(strength(player), SPENT_CRAWL_SLOW, PLAYER_CRAWL_SLOW) * 100.0) / 100.0;
 		if (speed != null) {

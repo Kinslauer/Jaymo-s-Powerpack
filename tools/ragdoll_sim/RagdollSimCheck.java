@@ -283,6 +283,47 @@ public final class RagdollSimCheck {
 			}
 		}
 
+		System.out.println("A snake goes limp (0.5.47)");
+		{
+			RagdollRig snake = RagdollRig.of(RagdollRig.Shape.CHAIN, 0.6F, 0.7F);
+			// on flat ground, dropped from a little up
+			World w = ground();
+			RagdollBody b = RagdollBody.lying(snake, 0, 64.3, 0, 30, true, 7);
+			int t = run(b, w, 600);
+			check("snake settles", t >= 0 && t < 600, "ticks " + t);
+			check("snake nothing in the ground", worstDepth(b, w) < 0.03, "depth " + f(worstDepth(b, w)));
+			check("snake links keep length", worstStretch(b) < 0.05, "stretch " + f(worstStretch(b)));
+			double flat = 0;
+			for (int i = 0; i < snake.count; i++) {
+				flat = Math.max(flat, b.y[i] - 64 - snake.radius[i]);
+			}
+			check("snake lies flat along the ground", flat < 0.05, "highest " + f(flat));
+			// across a one-block step: it bends over the edge, part on top and part down the face and below
+			World step = new World().add(-50, 62, -50, 50, 63, 50).add(-50, 63, -50, 50, 64, 0);
+			RagdollBody d = RagdollBody.standing(snake, 0, 64, -0.5, 180);
+			run(d, step, 600);
+			int tip = snake.tailTip();
+			check("snake's tail hangs down the step", d.y[tip] < 63.3, "tail tip y " + f(d.y[tip]));
+			check("snake's head stays on top", d.y[RagdollRig.TOP_RIGHT] > 63.9, "head y " + f(d.y[RagdollRig.TOP_RIGHT]));
+			check("snake nothing in the step", worstDepth(d, step) < 0.03, "depth " + f(worstDepth(d, step)));
+			check("snake links keep length on the step", worstStretch(d) < 0.05, "stretch " + f(worstStretch(d)));
+			// over a one-block bump: it drapes over it, both ends on the ground either side
+			World bump = ground().add(-0.5, 64, -0.5, 0.5, 64.4, 0.5);
+			RagdollBody e = RagdollBody.standing(snake, 0, 64.6, 0, 0);
+			run(e, bump, 600);
+			check("snake drapes over a bump", e.y[RagdollRig.TOP_RIGHT] < 64.3 && e.y[tip] < 64.3,
+				"head y " + f(e.y[RagdollRig.TOP_RIGHT]) + ", tail y " + f(e.y[tip]));
+			check("snake nothing in the bump", worstDepth(e, bump) < 0.03, "depth " + f(worstDepth(e, bump)));
+			// bends: no joint folded tighter than the rig allows
+			double worst = 0;
+			for (int s = 0; s < snake.strutA.length; s++) {
+				int i = snake.strutA[s], j = snake.strutB[s];
+				double dx = e.x[i] - e.x[j], dy = e.y[i] - e.y[j], dz = e.z[i] - e.z[j];
+				worst = Math.max(worst, snake.strutMin[s] - Math.sqrt(dx * dx + dy * dy + dz * dz));
+			}
+			check("snake joints bend no further than they can", worst < 0.03, "over by " + f(worst));
+		}
+
 		System.out.println(failures == 0 ? "All good." : failures + " failed.");
 		System.exit(failures == 0 ? 0 : 1);
 	}

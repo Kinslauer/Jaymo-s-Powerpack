@@ -49,7 +49,7 @@ public final class BloodParticles {
 	/**
 	 * A pool of blood on the ground (or whatever's under it), this size. (0.17.182) One of {@link BloodTrail}'s lasting
 	 * stains carries its {@code mark} id (0 for a passing splash), how many ticks old it is and how many it has left.
-	 * (0.19.52) {@code shape}: {@link #ROUND}, or a smear dragged out along the ground east-west ({@link #SMEAR_X}) or
+	 * (0.19.55) {@code shape}: {@link #ROUND}, or a smear dragged out along the ground east-west ({@link #SMEAR_X}) or
 	 * north-south ({@link #SMEAR_Z}), long and narrow (a body dragged through it, {@link BloodTrail#smear}).
 	 */
 	public record Puddle(int color, float scale, long mark, int age, int life, int shape) implements ParticleOptions {
@@ -112,7 +112,7 @@ public final class BloodParticles {
 	/** Registers the particles (by loading this class). */
 	public static void init() {
 		BloodTrail.init();
-		// (0.19.52) bodies dragged over the ground smear it
+		// (0.19.55) bodies dragged over the ground smear it
 		BloodSmears.init();
 	}
 

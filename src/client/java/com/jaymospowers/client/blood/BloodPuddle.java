@@ -39,7 +39,7 @@ final class BloodPuddle extends Particle {
 	static final float DRIED_AT = 0.5F, DRIED = 0.45F;
 	/** A puddle is this many blocks across at scale 1. */
 	static final float SIZE = 1.5F;
-	/** (0.19.52) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
+	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
 	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
 	private static final double SAME_HEIGHT = 1.0E-4;
 
@@ -47,7 +47,7 @@ final class BloodPuddle extends Particle {
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
 	private final float yaw;
-	/** (0.19.52) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
+	/** (0.19.55) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
 	private final float stretchX, stretchZ;
 	private final float r, g, b;
 	private final float zFight;
@@ -65,7 +65,7 @@ final class BloodPuddle extends Particle {
 		this.zd = 0.0;
 		this.baseSize = SIZE * scale;
 		boolean round = shape == BloodParticles.Puddle.ROUND;
-		// (0.19.52) a smear is only ever turned end for end, so its sprite stays drawn out along its length
+		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
 		this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
 		this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;

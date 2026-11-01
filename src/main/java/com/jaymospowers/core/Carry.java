@@ -98,7 +98,7 @@ import org.jspecify.annotations.Nullable;
  * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
  * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can).
  * <p>
- * (0.19.52) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
+ * (0.19.55) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
  * Engine's drag as the idea, rebuilt). Sneak + held use on someone downed ({@link #draggable}) now takes them by the
  * shoulder and drags them along the ground behind you ({@link #DRAG}), whatever armour they wear; their body follows your
  * hand on its own path ({@link #dragStep}), and they smear their blood along it ({@code BloodSmears}). Right-click lets
@@ -114,10 +114,10 @@ public final class Carry {
 	public static final int BLOCK = 5;
 	/** A severed head or limb ({@link SeveredPart}) dangling from the right hand. Never rolled, kept in flight. */
 	public static final int PART = 6;
-	/** (0.19.52) Someone downed, taken by the shoulder and dragged along the ground behind. Never rolled. */
+	/** (0.19.55) Someone downed, taken by the shoulder and dragged along the ground behind. Never rolled. */
 	public static final int DRAG = 7;
 	/**
-	 * (0.19.52) The drag: the grip (the dragged one's shoulders) this far to the carrier's right and behind their feet
+	 * (0.19.55) The drag: the grip (the dragged one's shoulders) this far to the carrier's right and behind their feet
 	 * (blocks), held on this much slack; their hips trail the shoulders this far behind along the path. The carrier walks
 	 * this much slower (share of their speed).
 	 */
@@ -270,7 +270,7 @@ public final class Carry {
 		net.minecraft.core.@Nullable BlockPos placeAt;
 		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
 		final boolean windOnly;
-		/** (0.19.52) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
+		/** (0.19.55) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
 		@Nullable Vec3 dragShoulders, dragHips;
 
 		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly, boolean windOnly) {
@@ -357,7 +357,7 @@ public final class Carry {
 		return id != null && entity.level().getEntity(id) instanceof Player player ? player : null;
 	}
 
-	/** (0.19.52) This entity is being dragged along the ground by the shoulder ({@link #DRAG}), either side. */
+	/** (0.19.55) This entity is being dragged along the ground by the shoulder ({@link #DRAG}), either side. */
 	public static boolean isDragged(Entity entity) {
 		Player carrier = carrierOf(entity);
 		Carrying hold = carrier == null ? null : carrier.getAttached(CARRYING);
@@ -365,7 +365,7 @@ public final class Carry {
 	}
 
 	/**
-	 * (0.19.52) Whether this is taken by the shoulder and dragged rather than lifted: someone downed (a player, a villager,
+	 * (0.19.55) Whether this is taken by the shoulder and dragged rather than lifted: someone downed (a player, a villager,
 	 * any humanoid), not an animal, and no bigger than a person.
 	 */
 	public static boolean draggable(Entity entity) {
@@ -374,7 +374,7 @@ public final class Carry {
 	}
 
 	/**
-	 * (0.19.52) One step of a drag, the same on the server and on every client: the grip is beside and behind the carrier
+	 * (0.19.55) One step of a drag, the same on the server and on every client: the grip is beside and behind the carrier
 	 * ({@code at}, facing {@code yaw}); the shoulders ({@code shoulders}) are pulled after it once the slack is taken up,
 	 * and the hips ({@code hips}) trail the shoulders along the way they've come, like a trailer. Null ones start lying
 	 * straight out behind. Returns {shoulders, hips} (on the carrier's level, height and all).
@@ -402,7 +402,7 @@ public final class Carry {
 		return new Vec3[] {s, h};
 	}
 
-	/** (0.19.52) The way a dragged body lies (its yaw: feet toward {@code hips}, head toward its shoulders and the carrier). */
+	/** (0.19.55) The way a dragged body lies (its yaw: feet toward {@code hips}, head toward its shoulders and the carrier). */
 	public static float dragYaw(Vec3 shoulders, Vec3 hips) {
 		return (float) (Mth.atan2(-(hips.x - shoulders.x), hips.z - shoulders.z) * Mth.RAD_TO_DEG);
 	}
@@ -606,7 +606,7 @@ public final class Carry {
 				it.remove();
 				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
 					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
-					// (0.19.52) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too
+					// (0.19.55) someone downed is taken by the shoulder and dragged, armour and all; (0.18.84) anyone else too
 					// heavy in their armour has a piece come off instead, and the next lift tries again
 					if (draggable(target) && !GravityWeight.lightens(player) && !flying(player)) {
 						drag(player, target);
@@ -732,7 +732,7 @@ public final class Carry {
 		return best;
 	}
 
-	/** (0.19.52) Takes {@code target} (someone downed) by the shoulder, to drag along the ground behind {@code carrier}. */
+	/** (0.19.55) Takes {@code target} (someone downed) by the shoulder, to drag along the ground behind {@code carrier}. */
 	static void drag(ServerPlayer carrier, Entity target) {
 		Entry entry = new Entry(carrier.getUUID(), target, DRAG, false, carrier.position(), false, false);
 		Vec3[] lay = dragStep(carrier.position(), carrier.getYRot(), null, null);
@@ -765,7 +765,7 @@ public final class Carry {
 	}
 
 	/**
-	 * (0.19.52) Dragging someone, sneak + right-click: up into your arms (too heavy in their armour, a piece comes off
+	 * (0.19.55) Dragging someone, sneak + right-click: up into your arms (too heavy in their armour, a piece comes off
 	 * instead and you keep dragging).
 	 */
 	private static void hoist(ServerPlayer carrier, Entry entry) {
@@ -835,7 +835,7 @@ public final class Carry {
 			return;
 		}
 		if (entry.hold == DRAG) {
-			// (0.19.52) let go where they lie, or hoisted up into the arms
+			// (0.19.55) let go where they lie, or hoisted up into the arms
 			if (toss) {
 				hoist(carrier, entry);
 			} else {
@@ -929,7 +929,7 @@ public final class Carry {
 		REGRAB.put(carried.getUUID(), now + REGRAB_TICKS);
 		Vec3 at = carried.position();
 		Vec3 velocity = Vec3.ZERO;
-		// ((0.19.52) a dragged body is let go where it lies)
+		// ((0.19.55) a dragged body is let go where it lies)
 		if (carrier != null && carrier.level() == level && how != Let.SET_DOWN && entry.hold != DRAG) {
 			float yaw = carrier.getYRot() * Mth.DEG_TO_RAD;
 			Vec3 ahead = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
@@ -1039,7 +1039,7 @@ public final class Carry {
 		entry.lastCarrierPos = here;
 		carried.resetFallDistance();
 		if (entry.hold == DRAG) {
-			// (0.19.52) along the ground behind the hand: the server lays a mob there (a player's own client moves them, the same way)
+			// (0.19.55) along the ground behind the hand: the server lays a mob there (a player's own client moves them, the same way)
 			Vec3[] lay = dragStep(here, carrier.getYRot(), entry.dragShoulders, entry.dragHips);
 			entry.dragShoulders = lay[0];
 			entry.dragHips = lay[1];

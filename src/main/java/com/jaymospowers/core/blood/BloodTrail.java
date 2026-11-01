@@ -63,7 +63,7 @@ public final class BloodTrail {
 		final int color;
 		final @Nullable UUID by;
 		float scale;
-		/** (0.19.52) Round, or a smear along one axis ({@link BloodParticles.Puddle#shape}). */
+		/** (0.19.55) Round, or a smear along one axis ({@link BloodParticles.Puddle#shape}). */
 		final int shape;
 		/** When it was spilt (or last bled on), and the game time players may first see it (a drop still falling). */
 		public long laid;
@@ -147,7 +147,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.19.52) Andy liked Death Engine's blood trail behind a dragged body (ideas only). A smear of {@code body}'s blood
+	 * (0.19.55) Andy liked Death Engine's blood trail behind a dragged body (ideas only). A smear of {@code body}'s blood
 	 * (tracked like any stain if it's alive) dragged along the ground from {@code from} to {@code to}: one long, narrow
 	 * stain lying the way it was dragged, this wide. Smears never soak into the stains around them, so a dragged body
 	 * leaves an unbroken streak rather than one growing pool.
