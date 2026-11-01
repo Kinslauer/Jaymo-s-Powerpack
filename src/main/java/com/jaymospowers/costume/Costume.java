@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.11.66) Costumes, stage 1: design one at the Costume Table ({@link CostumeTableBlock}, the designer screen), sew it
  * (wool, leather, string and the dyes it uses), and put it on by using the costume item. A worn costume lives on the
- * player ({@link #WORN}: kept through death, synced to everyone), over the body in every pose, with the armour under it
+ * player ({@link #WORN}: synced to everyone; (0.19.49) dying leaves it on the body, {@link CorpseCostume}), over the body in every pose, with the armour under it
  * still protecting but not drawn. Take it off at a table or with {@code /costume off}.
  * <p>
  * Later stages read the worn design: {@link #masked} is the hook for a secret identity ({@link SecretIdentity}, 0.11.70).
@@ -56,6 +56,15 @@ public final class Costume {
 	/** (0.12.3) On a player: their costume's head piece is off (synced to everyone: they see the face). Cleared with the costume. */
 	public static final AttachmentType<Boolean> UNMASKED = AttachmentRegistry.create(JaymosPowers.id("costume_unmasked"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.19.49) On a dead player's corpse (Jaymo's Kitchen's): the costume they died in, still on the body (synced to
+	 * everyone, saved with the corpse) until someone pulls it off ({@link CorpseCostume}).
+	 */
+	public static final AttachmentType<CostumeDesign> CORPSE_WORN = AttachmentRegistry.create(JaymosPowers.id("corpse_costume"),
+		builder -> builder.persistent(CostumeDesign.CODEC).syncWith(CostumeDesign.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** (0.19.49) On a corpse: its costume's head piece was off when they died (the face shows). */
+	public static final AttachmentType<Boolean> CORPSE_UNMASKED = AttachmentRegistry.create(JaymosPowers.id("corpse_costume_unmasked"),
+		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** (0.12.3) The mask key can't flip the mask again sooner than this (ticks). */
 	static final int MASK_COOLDOWN = 10;
 	/** The sound of the mask coming off and going on: pitches. */
@@ -82,6 +91,7 @@ public final class Costume {
 		CostumeNet.init();
 		CostumeTailoring.init();
 		SecretIdentity.init();
+		CorpseCostume.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);
 			output.accept(CostumeItem.of(CostumeDesign.DEFAULT));
@@ -178,6 +188,37 @@ public final class Costume {
 		player.sendOverlayMessage(Component.translatable(off ? "message.jaymospowers.costume.mask_off" : "message.jaymospowers.costume.mask_on", piece));
 		// the face is out (or hidden again): who you're seen as follows
 		SecretIdentity.update(player);
+	}
+
+	/**
+	 * (0.19.49) Someone else takes {@code player}'s face covering off (a guard over a downed player, Andy: "the guards will
+	 * unmask you before deciding what to do"): the costume's mask or hood comes off (the rest stays on), a Rig Helm's
+	 * faceplate goes up, or a bandit mask or bandana is pulled off and dropped at their feet. True if anything came off.
+	 */
+	public static boolean unmaskBy(ServerPlayer player) {
+		CostumeDesign worn = worn(player);
+		boolean took = false;
+		if (worn != null && worn.mask() != CostumeDesign.Mask.NONE && !unmasked(player)) {
+			player.setAttached(UNMASKED, true);
+			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.8F,
+				MASK_OFF_PITCH);
+			took = true;
+		}
+		if (com.jaymospowers.rig.Rig.helmIdentity(player) != null) {
+			// (faceplate down: up it goes)
+			com.jaymospowers.rig.RigHelm.toggleFace(player);
+			took = true;
+		}
+		if (BanditMask.wears(player)) {
+			ItemStack mask = player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD);
+			player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, ItemStack.EMPTY);
+			player.drop(mask, false, Prediction.SERVER_ONLY);
+			took = true;
+		}
+		if (took) {
+			SecretIdentity.update(player);
+		}
+		return took;
 	}
 
 	/** Puts this design on (server): whatever was worn before goes back to the inventory, or drops. */

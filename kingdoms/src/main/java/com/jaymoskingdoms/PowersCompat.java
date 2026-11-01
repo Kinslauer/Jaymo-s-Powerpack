@@ -385,11 +385,65 @@ public final class PowersCompat {
 				if (!Downed.isGuard(mob)) {
 					return false;
 				}
+				if (victim instanceof net.minecraft.server.level.ServerPlayer p && Unmasking.awaits(p)) {
+					// (0.7.473) a masked player downed in town: the guards see who it is before anything else
+					return true;
+				}
 				Temperaments.Temperament t = Temperaments.of(mob);
 				return t != Temperaments.Temperament.HOTHEADED && t != Temperaments.Temperament.SPITEFUL;
 			});
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle unmaskPlayer, stripCorpse;
+	private static boolean lookedForUnmask;
+
+	private static void lookForUnmask() {
+		if (lookedForUnmask) {
+			return;
+		}
+		lookedForUnmask = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> c = Class.forName("com.jaymospowers.costume.CorpseCostume");
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			unmaskPlayer = lookup.findStatic(c, "unmask", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+			stripCorpse = lookup.findStatic(c, "strip", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class,
+				LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no corpse costumes (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.473) A guard takes a downed {@code player}'s face covering off (Powers' {@code CorpseCostume.unmask}: a costume's
+	 * mask or hood, a Rig Helm's faceplate, a bandit mask). False without it, or if nothing came off.
+	 */
+	static boolean unmaskPlayer(net.minecraft.server.level.ServerPlayer player) {
+		lookForUnmask();
+		try {
+			return unmaskPlayer != null && (boolean)unmaskPlayer.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't unmask a downed player", e);
+			return false;
+		}
+	}
+
+	/**
+	 * (0.7.473) {@code by} pulls the costume off a dead player's body (Powers' {@code CorpseCostume.strip}; Powers then calls
+	 * {@link Identities#corpseUnmasked}). False without it.
+	 */
+	static boolean stripCorpse(net.minecraft.world.entity.Entity corpse, LivingEntity by) {
+		lookForUnmask();
+		try {
+			return stripCorpse != null && (boolean)stripCorpse.invoke(corpse, by);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't strip a costumed body", e);
+			return false;
 		}
 	}
 

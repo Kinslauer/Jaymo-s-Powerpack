@@ -188,14 +188,23 @@ public final class CostumeClient {
 			if (design == null || state.isInvisible || covered(state)) {
 				return;
 			}
+			draw(this.models, getParentModel(), this.renderer, poseStack, collector, lightCoords, state, design);
+		}
+
+		/**
+		 * (0.19.49) Draws {@code design} over {@code parent} (the model this body is drawn with just now). {@code renderer}
+		 * is the player renderer drawing it, or null for a body drawn on its own (a dead player's, CorpseCostumeClient):
+		 * then {@code parent} is the only skin the suit covers.
+		 */
+		static void draw(CostumeModels.Set models, PlayerModel parent, @Nullable RenderLayerParent<AvatarRenderState, PlayerModel> renderer,
+				PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, CostumeDesign design) {
 			int primary = 0xFF000000 | design.primary().getTextureDiffuseColor();
 			int secondary = 0xFF000000 | design.secondary().getTextureDiffuseColor();
 			// (0.11.78) the costume follows the model this player is drawn with now (CostumeBody): MCA swaps it per player
-			PlayerModel parent = getParentModel();
 			state.setData(CostumeBody.PARENT, parent);
 			boolean slim = CostumeBody.slim(parent, state.skin.model() == PlayerModelType.SLIM);
 			String cut = design.cut().getSerializedName();
-			CostumeModels.Worn suit = this.models.suit(design.cut(), slim);
+			CostumeModels.Worn suit = models.suit(design.cut(), slim);
 			Identifier suitPrimary = CostumeModels.texture("suit", cut, slim, false), suitSecondary = CostumeModels.texture("suit", cut, slim, true);
 			renderColoredCutoutModel(suit, suitPrimary, poseStack, collector, lightCoords, state, primary, 1);
 			renderColoredCutoutModel(suit, suitSecondary, poseStack, collector, lightCoords, state, secondary, 1);
@@ -211,51 +220,55 @@ public final class CostumeClient {
 				}
 			}
 			// (0.15.34) the skin under what the suit covers isn't drawn (CostumeCover)
-			CostumeCover.mark(state, this.renderer, suitPrimary, suitSecondary);
-			CostumeModels.Worn mask = this.models.mask(design.mask());
+			if (renderer != null) {
+				CostumeCover.mark(state, renderer, suitPrimary, suitSecondary);
+			} else {
+				CostumeCover.markSkin(state, parent, suitPrimary, suitSecondary);
+			}
+			CostumeModels.Worn mask = models.mask(design.mask());
 			if (mask != null) {
 				String name = design.mask().getSerializedName();
 				renderColoredCutoutModel(mask, CostumeModels.texture("mask", name, false, false), poseStack, collector, lightCoords, state, primary, 1);
 				renderColoredCutoutModel(mask, CostumeModels.texture("mask", name, false, true), poseStack, collector, lightCoords, state, secondary, 1);
 			}
-			CostumeModels.Worn cape = this.models.cape(design.cape());
+			CostumeModels.Worn cape = models.cape(design.cape());
 			if (cape != null && !state.chestEquipment.has(DataComponents.GLIDER)) {
 				String name = design.cape().getSerializedName();
 				renderColoredCutoutModel(cape, CostumeModels.texture("cape", name, false, false), poseStack, collector, lightCoords, state, primary, 1);
 				renderColoredCutoutModel(cape, CostumeModels.texture("cape", name, false, true), poseStack, collector, lightCoords, state, secondary, 1);
 			}
 			if (design.hasEmblem()) {
-				renderColoredCutoutModel(this.models.emblem, CostumeEmblems.texture(design), poseStack, collector, lightCoords, state, -1, 1);
+				renderColoredCutoutModel(models.emblem, CostumeEmblems.texture(design), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			// (0.17.60) the suit editor's pieces
-			kit(design, slim, poseStack, collector, lightCoords, state);
+			kit(models, design, slim, poseStack, collector, lightCoords, state);
 		}
 
 		/** (0.17.60) Gloves, boots, belt, helmet and fins, each once per colour it uses (primary, secondary, trim). */
-		private void kit(CostumeDesign design, boolean slim, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {
+		private static void kit(CostumeModels.Set models, CostumeDesign design, boolean slim, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {
 			CostumeKit kit = design.kit();
 			int[] colours = {0xFF000000 | design.primary().getTextureDiffuseColor(), 0xFF000000 | design.secondary().getTextureDiffuseColor(),
 				0xFF000000 | design.trim().getTextureDiffuseColor()};
 			if (kit.gloves() != CostumeKit.Gloves.NONE) {
-				piece(CostumeModels.kitKey(kit.gloves(), false), slim, colours, poseStack, collector, lightCoords, state);
+				piece(models, CostumeModels.kitKey(kit.gloves(), false), slim, colours, poseStack, collector, lightCoords, state);
 			}
 			if (kit.boots() != CostumeKit.Boots.NONE) {
-				piece(CostumeModels.kitKey(kit.boots()), false, colours, poseStack, collector, lightCoords, state);
+				piece(models, CostumeModels.kitKey(kit.boots()), false, colours, poseStack, collector, lightCoords, state);
 			}
 			if (kit.belt() != CostumeKit.Belt.NONE) {
-				piece(CostumeModels.kitKey(kit.belt()), false, colours, poseStack, collector, lightCoords, state);
+				piece(models, CostumeModels.kitKey(kit.belt()), false, colours, poseStack, collector, lightCoords, state);
 			}
 			if (kit.helm() != CostumeKit.Helm.NONE) {
-				piece(CostumeModels.kitKey(kit.helm()), false, colours, poseStack, collector, lightCoords, state);
+				piece(models, CostumeModels.kitKey(kit.helm()), false, colours, poseStack, collector, lightCoords, state);
 			}
 			if (kit.fins() != CostumeKit.Fins.NONE) {
-				piece(CostumeModels.kitKey(kit.fins()), false, colours, poseStack, collector, lightCoords, state);
+				piece(models, CostumeModels.kitKey(kit.fins()), false, colours, poseStack, collector, lightCoords, state);
 			}
 		}
 
-		private void piece(String key, boolean slim, int[] colours, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
+		private static void piece(CostumeModels.Set models, String key, boolean slim, int[] colours, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
 				AvatarRenderState state) {
-			CostumeModels.Worn model = this.models.kit(slim ? key + "_slim" : key);
+			CostumeModels.Worn model = models.kit(slim ? key + "_slim" : key);
 			if (model == null) {
 				return;
 			}

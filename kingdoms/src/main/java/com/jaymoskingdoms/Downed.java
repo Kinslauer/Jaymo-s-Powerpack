@@ -289,6 +289,10 @@ public final class Downed {
 			return;
 		}
 		ServerPlayer player = body instanceof ServerPlayer p ? p : null;
+		if (player != null && Unmasking.awaits(player)) {
+			// (0.7.473) masked in town: nobody decides anything till the guards have seen who it is
+			return;
+		}
 		Faction place = player == null ? null : Temperaments.placeOf(level.getServer(), level, player);
 		boolean kin = player == null && !Looters.is(body) && kin(body);
 		if (player == null && !kin && !Temperaments.humanoid(body)) {

@@ -190,13 +190,18 @@ public final class Introductions {
 
 	/** {@code player} now knows {@code e}'s name. True if they didn't before. */
 	static boolean learn(ServerPlayer player, Entity e) {
+		return learn(player, e.getUUID());
+	}
+
+	/** (0.7.473) {@code player} now knows the name of whoever has the id {@code id} (a dead player whose face they've seen). */
+	static boolean learn(ServerPlayer player, UUID id) {
 		Set<UUID> known = player.getAttached(KNOWN);
-		if (known != null && known.contains(e.getUUID())) {
+		if (known != null && known.contains(id)) {
 			return false;
 		}
 		// a new set, so it's synced
 		Set<UUID> next = known == null ? new HashSet<>() : new HashSet<>(known);
-		next.add(e.getUUID());
+		next.add(id);
 		player.setAttached(KNOWN, next);
 		return true;
 	}
