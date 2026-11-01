@@ -315,6 +315,9 @@ public final class XenoformPower implements Power {
 		public boolean towering, leftFoot, grabHolding;
 		public long sizeNext, grabStart = -1L;
 		public float strideAt;
+		/** (0.19.28) Towerback's swat (since when, -1: none) and its footfalls so far (synced, for the legs' stride). */
+		public long swatStart = -1L;
+		public int steps;
 		public int grabPrey = -1;
 		public net.minecraft.world.phys.@Nullable Vec3 grabFrom, grabTo;
 		public final java.util.List<com.jaymospowers.power.xenoform.forms.Towerback.Wave> waves = new java.util.ArrayList<>();
@@ -391,6 +394,8 @@ public final class XenoformPower implements Power {
 			sizeNext = 0L;
 			grabStart = -1L;
 			strideAt = 0.0F;
+			swatStart = -1L;
+			steps = 0;
 			grabPrey = -1;
 			grabFrom = grabTo = null;
 			waves.clear();
@@ -575,6 +580,8 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.GRAB);
+		player.removeAttached(XenoformState.SWAT);
+		player.removeAttached(XenoformState.STEP);
 		BandUpgrades.clear(player);
 		player.removeAttached(BandStyle.STYLE);
 	}
