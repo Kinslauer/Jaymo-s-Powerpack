@@ -112,6 +112,8 @@ public class AetherGiant extends Monster {
 	static final int TRAMPLE_EVERY = 5;
 	/** How high up its legs it fells trees whole (blocks); above that, and for anything else, it smashes straight through. */
 	static final int TRAMPLE_HEIGHT = 6;
+	/** (0.7.470) How far past its body each step knocks trees down (blocks). */
+	static final double STEP_TREE_REACH = 2.5;
 	/** (0.7.184) Its death: the tick it hits the ground and breaks up, and the bursts of stone along where it lies (to this share of its height ahead). */
 	static final int SHATTER_TICK = 10, SHATTER_BURSTS = 6;
 	static final double SHATTER_REACH = 0.6;
@@ -396,11 +398,7 @@ public class AetherGiant extends Monster {
 		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
 		int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
 		// the trees first (they need their leaves to count as trees and fall whole), then the rest
-		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, Math.min(y1, y0 + TRAMPLE_HEIGHT), z1)) {
-			if (level.getBlockState(pos).is(BlockTags.LOGS)) {
-				Trees.trample(level, pos.immutable(), this);
-			}
-		}
+		this.trampleTrees(level, 1.0);
 		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
 			BlockState state = level.getBlockState(pos);
 			if (state.isAir() || !state.getFluidState().isEmpty() && state.getCollisionShape(level, pos).isEmpty()
@@ -408,6 +406,18 @@ public class AetherGiant extends Monster {
 				continue;
 			}
 			level.destroyBlock(pos, this.random.nextFloat() < TRAMPLE_DROPS, this);
+		}
+	}
+
+	/** The natural trees within {@code reach} of its body topple away from it (and crush what they land on). */
+	private void trampleTrees(ServerLevel level, double reach) {
+		AABB box = this.getBoundingBox().inflate(reach, 0.0, reach);
+		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
+		int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
+		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, Math.min(y1, y0 + TRAMPLE_HEIGHT), z1)) {
+			if (level.getBlockState(pos).is(BlockTags.LOGS)) {
+				Trees.trample(level, pos.immutable(), this);
+			}
 		}
 	}
 
@@ -633,6 +643,10 @@ public class AetherGiant extends Monster {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.RAVAGER_STEP, this.getSoundSource(), 3.0F, 0.35F + this.random.nextFloat() * 0.1F);
 		level.playSound(null, at.x, at.y, at.z, ground.getSoundType().getBreakSound(), this.getSoundSource(), 2.0F, 0.5F);
 		this.crack(level, under);
+		if (level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+			// (0.7.470) Andy: "all giants should get this damaging effect": the trees round its feet go down with every step
+			this.trampleTrees(level, STEP_TREE_REACH);
+		}
 		this.waves.add(new Wave(at.x, at.y, at.z));
 	}
 

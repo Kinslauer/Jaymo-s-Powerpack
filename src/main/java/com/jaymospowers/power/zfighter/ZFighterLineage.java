@@ -643,6 +643,10 @@ public final class ZFighterLineage {
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
 		}
+		if (live.apeSize >= 0.5F) {
+			// (0.19.38) walking into a tree pushes it over
+			com.jaymospowers.core.GiantTrample.tick(player, now);
+		}
 		ApeSmash.tick(player, now);
 	}
 
@@ -664,6 +668,8 @@ public final class ZFighterLineage {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
 		BlockPos under = BlockPos.containing(foot.x, foot.y - 0.5, foot.z);
 		com.jaymospowers.core.GroundCracks.crack(level, under, level.getRandom(), Math.max(1, (int)Math.round(reach * 0.5)));
+		// (0.19.38) the trees round his feet go down
+		com.jaymospowers.core.GiantTrample.step(player);
 		ZFighterNet.ApeStep step = new ZFighterNet.ApeStep(player.getId(), live.apeLeftFoot, foot.x, under.getY() + 1.0, foot.z, (float)reach,
 			(float)(APE_STRIDE * Math.max(0.5F, live.apeSize)));
 		for (ServerPlayer viewer : PlayerLookup.tracking(player)) {
