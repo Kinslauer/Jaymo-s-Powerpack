@@ -22,6 +22,10 @@ import org.joml.Vector3f;
  * {@link #KNEE}, the shin swung back about the middle of the leg, and the cut itself tilted halfway so the two halves meet.
  * The texture is cut with it, so skin, trousers, armour and MCA bodies all bend the same way. Boxes that are drawn by
  * other mods' fast paths (Sodium's) are drawn by us while bent, then handed back.
+ * <p>
+ * (0.19.30) Elbows too, and joints that fold sideways: {@link #bend(ModelPart, float, float, boolean)} cuts at any height
+ * down the part and can swing the lower half about the part's own Z (across, in the plane the part sweeps in with its
+ * zRot) instead of X. The crawl folds its forearms and shins flat along the ground that way ({@code CrawlPose}).
  */
 public final class KneeBend {
 	/** The knee: this far down the leg from the hip (pixels; half of a 12 pixel leg). */
@@ -43,6 +47,16 @@ public final class KneeBend {
 	 * the shin swinging back, until {@link #restore}. Only call it right before the model is drawn.
 	 */
 	public static void bend(ModelPart leg, float angle) {
+		bend(leg, angle, KNEE, false);
+	}
+
+	/**
+	 * (0.19.30) Draw {@code limb} bent at {@code joint} pixels down it by {@code angle} radians until {@link #restore}: about
+	 * its X (+ swings the lower half back, as a knee) or, {@code sideways}, about its Z (+ swings it toward -X, the way a
+	 * + zRot turns the whole part). Only call it right before the model is drawn.
+	 */
+	public static void bend(ModelPart limb, float angle, float joint, boolean sideways) {
+		ModelPart leg = limb;
 		if (Math.abs(angle) < EPS) {
 			return;
 		}
@@ -60,6 +74,8 @@ public final class KneeBend {
 			for (ModelPart.Cube cube : cubes) {
 				Bent b = cube instanceof Bent already ? already : BENT.computeIfAbsent(cube, Bent::new);
 				b.angle = angle;
+				b.joint = joint;
+				b.sideways = sideways;
 				bent.add(b);
 			}
 			SWAPPED.put(part, cubes);
@@ -80,6 +96,9 @@ public final class KneeBend {
 	static final class Bent extends ModelPart.Cube {
 		final ModelPart.Cube cube;
 		float angle;
+		/** (0.19.30) Where the joint is (pixels down the part), and whether it folds about Z. */
+		float joint = KNEE;
+		boolean sideways;
 
 		Bent(ModelPart.Cube cube) {
 			// (no faces of its own: it draws the original's)
@@ -90,13 +109,15 @@ public final class KneeBend {
 
 		@Override
 		public void compile(PoseStack.Pose pose, VertexConsumer out, int light, int overlay, int color) {
-			if (this.cube.maxY <= KNEE + EPS) {
+			float joint = this.joint;
+			if (this.cube.maxY <= joint + EPS) {
 				// all thigh
 				this.cube.compile(pose, out, light, overlay, color);
 				return;
 			}
-			Knee knee = new Knee(this.angle, (this.cube.minZ + this.cube.maxZ) * 0.5F);
-			boolean allShin = this.cube.minY >= KNEE - EPS;
+			Knee knee = new Knee(this.angle, joint, (this.cube.minX + this.cube.maxX) * 0.5F, (this.cube.minZ + this.cube.maxZ) * 0.5F,
+				this.sideways);
+			boolean allShin = this.cube.minY >= joint - EPS;
 			Vector3f normal = new Vector3f();
 			Vector3f at = new Vector3f();
 			ModelPart.Vertex[] quad = new ModelPart.Vertex[4];
@@ -105,8 +126,8 @@ public final class KneeBend {
 				Vector3f n = new Vector3f(polygon.normal());
 				boolean above = true, below = true;
 				for (ModelPart.Vertex vertex : v) {
-					above &= vertex.y() <= KNEE + EPS;
-					below &= vertex.y() >= KNEE - EPS;
+					above &= vertex.y() <= joint + EPS;
+					below &= vertex.y() >= joint - EPS;
 				}
 				if (allShin || below && !above) {
 					emit(pose, out, v, knee, 2, knee.turn(n), light, overlay, color, normal, at);
@@ -138,18 +159,18 @@ public final class KneeBend {
 				}
 				ModelPart.Vertex top = v[i].y() < partner.y() ? v[i] : partner;
 				ModelPart.Vertex bottom = top == v[i] ? partner : v[i];
-				float f = (KNEE - top.y()) / (bottom.y() - top.y());
-				mid[i] = new ModelPart.Vertex(Mth.lerp(f, top.x(), bottom.x()), KNEE, Mth.lerp(f, top.z(), bottom.z()), Mth.lerp(f, top.u(), bottom.u()),
+				float f = (knee.joint() - top.y()) / (bottom.y() - top.y());
+				mid[i] = new ModelPart.Vertex(Mth.lerp(f, top.x(), bottom.x()), knee.joint(), Mth.lerp(f, top.z(), bottom.z()), Mth.lerp(f, top.u(), bottom.u()),
 					Mth.lerp(f, top.v(), bottom.v()));
 			}
 			// the thigh: the top corners as they are, the bottom ones cut at the knee
 			for (int i = 0; i < 4; i++) {
-				quad[i] = v[i].y() < KNEE ? v[i] : mid[i];
+				quad[i] = v[i].y() < knee.joint() ? v[i] : mid[i];
 			}
 			emit(pose, out, quad, knee, 0, n, light, overlay, color, normal, at);
 			// the shin: from the cut down
 			for (int i = 0; i < 4; i++) {
-				quad[i] = v[i].y() > KNEE ? v[i] : mid[i];
+				quad[i] = v[i].y() > knee.joint() ? v[i] : mid[i];
 			}
 			emit(pose, out, quad, knee, 0, knee.turn(new Vector3f(n)), light, overlay, color, normal, at);
 			return true;
@@ -168,26 +189,45 @@ public final class KneeBend {
 		}
 	}
 
-	/** The bend: the shin swung back by {@code angle} about the leg's middle at the knee. */
-	private record Knee(float angle, float zc, float sin, float cos, float tilt) {
-		Knee(float angle, float zc) {
-			this(angle, zc, Mth.sin(angle), Mth.cos(angle), (float) Math.tan(Mth.clamp(angle * 0.5F, -MAX_HALF, MAX_HALF)));
+	/**
+	 * The bend: the shin swung back by {@code angle} about the leg's middle at the knee ({@code joint} down it); (0.19.30) or,
+	 * {@code sideways}, swung across about the part's middle ({@code xc}) in its X-Y plane.
+	 */
+	private record Knee(float angle, float joint, float xc, float zc, boolean sideways, float sin, float cos, float tilt) {
+		Knee(float angle, float joint, float xc, float zc, boolean sideways) {
+			this(angle, joint, xc, zc, sideways, Mth.sin(angle), Mth.cos(angle), (float) Math.tan(Mth.clamp(angle * 0.5F, -MAX_HALF, MAX_HALF)));
 		}
 
-		/** A corner where it's drawn (in the leg's pixels). */
+		/** A corner where it's drawn (in the part's pixels). */
 		void place(ModelPart.Vertex v, boolean shin, Vector3f at) {
-			float dy = v.y() - KNEE, dz = v.z() - this.zc;
+			float dy = v.y() - this.joint;
 			if (!shin && dy < -EPS) {
 				at.set(v.x(), v.y(), v.z());
-			} else if (!shin && dy <= EPS) {
+				return;
+			}
+			if (this.sideways) {
+				float dx = v.x() - this.xc;
+				if (!shin && dy <= EPS) {
+					// on the cut: tilted halfway across
+					at.set(v.x(), this.joint + dx * this.tilt, v.z());
+				} else {
+					at.set(this.xc + dx * this.cos - dy * this.sin, this.joint + dx * this.sin + dy * this.cos, v.z());
+				}
+				return;
+			}
+			float dz = v.z() - this.zc;
+			if (!shin && dy <= EPS) {
 				// on the cut: tilted halfway, stretched so the leg keeps its depth
-				at.set(v.x(), KNEE - dz * this.tilt, v.z());
+				at.set(v.x(), this.joint - dz * this.tilt, v.z());
 			} else {
-				at.set(v.x(), KNEE + dy * this.cos - dz * this.sin, this.zc + dy * this.sin + dz * this.cos);
+				at.set(v.x(), this.joint + dy * this.cos - dz * this.sin, this.zc + dy * this.sin + dz * this.cos);
 			}
 		}
 
 		Vector3f turn(Vector3f n) {
+			if (this.sideways) {
+				return n.set(n.x() * this.cos - n.y() * this.sin, n.x() * this.sin + n.y() * this.cos, n.z());
+			}
 			return n.set(n.x(), n.y() * this.cos - n.z() * this.sin, n.y() * this.sin + n.z() * this.cos);
 		}
 	}

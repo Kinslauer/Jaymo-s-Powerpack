@@ -63,6 +63,10 @@ public final class SpiritVoice {
 		if (!force && now < NEXT.getOrDefault(player.getUUID(), 0L)) {
 			return false;
 		}
+		// (0.7.465) the spirit is the Grue's now: it says nothing of its own
+		if (Grue.taken(player)) {
+			return false;
+		}
 		if (kind == Spirits.QUIET) {
 			// (the Quiet One says nothing, but for the one word at the end and the dots of its sickness)
 			if ("bond".equals(event)) {

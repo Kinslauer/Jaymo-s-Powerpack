@@ -791,6 +791,13 @@ public final class Finishers {
 				hold.start = now;
 				continue;
 			}
+			if (bare && com.jaymospowers.core.wounds.Malfunction.is(hold.body)) {
+				// (0.19.32) a machine has no neck to snap: only a weapon finishes it
+				if ((now - hold.start) % HEAD_HINT_EVERY == BAR_AFTER) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.machine", hold.body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				}
+				continue;
+			}
 			if (bare && !atHead(player, hold.body)) {
 				// (0.15.146) the neck snap is done kneeling at their head
 				if ((now - hold.start) % HEAD_HINT_EVERY == BAR_AFTER) {

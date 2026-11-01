@@ -36,8 +36,9 @@ import org.jspecify.annotations.Nullable;
  * verdant and divine born." Only {@link #OPEN} roads are there from the first day; every other road of the life story starts
  * locked and opens in one of two ways, both kept in {@link #LOCKS} (one row a road):
  * <ul>
- * <li><b>A deed</b> done by anyone in this world ({@link RoadDeeds}: freeing a captive, serving a sentence, a blood moon that
- * has come and gone, a star that fell, a whale taken, a world reached, ...). It opens the road for everyone.</li>
+ * <li><b>A deed</b> ({@link RoadDeeds}: freeing a captive, serving a sentence, a blood moon that has come and gone, a star
+ * that fell, a whale taken, a world reached, ...). (0.7.466) Andy: "starts are now per group / player": it opens the road
+ * for the one who did it and their group (the handshake party), not the whole world.</li>
  * <li><b>A secret past</b>: earlier answers of this player's own story (raised by outlaws and a cutpurse youth: the Hideout).</li>
  * </ul>
  * A road a player already took is never taken from them ({@link #TOOK}, and the road their story names). Ops can force a road
@@ -126,21 +127,21 @@ public final class RoadLocks {
 
 	static void register() {
 		JaymosKingdoms.LOGGER.debug("road lock attachment: {}", TOOK);
+		RoadDeeds.register();
 		// kills that count as deeds: a spider put down, a stray (the cold's bone archer)
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer killer) {
-				MinecraftServer server = killer.level().getServer();
 				if (entity instanceof Spider) {
-					Deeds.done(server, "kill.spider");
+					Deeds.done(killer, "kill.spider");
 				} else if (entity instanceof Stray) {
-					Deeds.done(server, "kill.stray");
+					Deeds.done(killer, "kill.stray");
 				}
 			}
 		});
 		// a world of Jaymo's Powers reached (the moon, Rustfall, the Maw, the Cinder forge, the time chamber)
 		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> {
 			if (to.dimension().identifier().getNamespace().equals("jaymospowers")) {
-				Deeds.done(to.getServer(), "world." + to.dimension().identifier().getPath());
+				Deeds.done(player, "world." + to.dimension().identifier().getPath());
 			}
 		});
 	}
@@ -172,17 +173,22 @@ public final class RoadLocks {
 		return RoadDeeds.has(server, FORCE_SHUT + key(start));
 	}
 
-	/** Whether a deed done in this world, or ops, has opened {@code start} for everyone. */
-	static boolean deedOpen(MinecraftServer server, Start start) {
+	/**
+	 * Whether ops have opened {@code start} for everyone, or (0.7.466) a deed done by {@code player} or their group has
+	 * opened it for them ({@link RoadDeeds#of}).
+	 */
+	static boolean deedOpen(MinecraftServer server, @Nullable Player player, Start start) {
 		if (RoadDeeds.has(server, FORCE_OPEN + key(start))) {
 			return true;
 		}
 		Lock lock = LOCKS.get(start);
-		if (lock != null) {
-			for (String deed : lock.deeds()) {
-				if (RoadDeeds.has(server, deed)) {
-					return true;
-				}
+		if (lock == null || !(player instanceof ServerPlayer sp)) {
+			return false;
+		}
+		Set<String> done = RoadDeeds.of(sp);
+		for (String deed : lock.deeds()) {
+			if (done.contains(deed)) {
+				return true;
 			}
 		}
 		return false;
@@ -211,14 +217,14 @@ public final class RoadLocks {
 		if (basic(start)) {
 			return true;
 		}
-		return !shut(server, start) && (deedOpen(server, start) || took(player, start) || pastOpens(start, past));
+		return !shut(server, start) && (deedOpen(server, player, start) || took(player, start) || pastOpens(start, past));
 	}
 
 	/** The keys of the locked roads {@code player} can take whatever their past (a deed, ops or a road they took), sent to their screen. */
 	static List<String> opened(MinecraftServer server, @Nullable Player player) {
 		List<String> out = new ArrayList<>();
 		for (Start s : LOCKS.keySet()) {
-			if (!shut(server, s) && (deedOpen(server, s) || took(player, s))) {
+			if (!shut(server, s) && (deedOpen(server, player, s) || took(player, s))) {
 				out.add(key(s));
 			}
 		}
@@ -258,13 +264,24 @@ public final class RoadLocks {
 
 	// ---- the op command -------------------------------------------------------------------------------------------------
 
-	/** {@code /kingdom roads unlock|lock <road|all>} (ops): force a locked road open or shut for everyone, for testing. */
+	/**
+	 * {@code /kingdom roads unlock|lock <road|all>} (ops): force a locked road open or shut for everyone, for testing.
+	 * (0.7.466) {@code /kingdom roads deeds <player>}: the deeds that player may count (their own and their group's).
+	 */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("roads").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("unlock").then(Commands.argument("road", StringArgumentType.word()).suggests((c, b) -> suggest(b))
 				.executes(c -> force(c.getSource(), StringArgumentType.getString(c, "road"), true))))
 			.then(Commands.literal("lock").then(Commands.argument("road", StringArgumentType.word()).suggests((c, b) -> suggest(b))
-				.executes(c -> force(c.getSource(), StringArgumentType.getString(c, "road"), false))));
+				.executes(c -> force(c.getSource(), StringArgumentType.getString(c, "road"), false))))
+			.then(Commands.literal("deeds").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+				.executes(c -> {
+					ServerPlayer p = net.minecraft.commands.arguments.EntityArgument.getPlayer(c, "player");
+					Set<String> done = RoadDeeds.of(p);
+					c.getSource().sendSuccess(() -> Component.translatable("commands.jaymoskingdoms.roads.deeds", p.getDisplayName(), done.size(),
+						done.isEmpty() ? "-" : String.join(", ", done)), false);
+					return done.size();
+				})));
 	}
 
 	private static CompletableFuture<Suggestions> suggest(SuggestionsBuilder b) {

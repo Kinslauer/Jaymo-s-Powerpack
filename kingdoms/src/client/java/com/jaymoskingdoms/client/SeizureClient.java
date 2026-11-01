@@ -173,7 +173,12 @@ public final class SeizureClient {
 
 	/** Straight at it if the way's open (or a step it can hop), else the nearest way round; up out of water. */
 	private static void steer(LocalPlayer player, Entity prey, double speed) {
-		Vec3 to = prey.getBoundingBox().getCenter().subtract(player.getEyePosition());
+		steerAt(player, prey.getBoundingBox().getCenter(), speed);
+	}
+
+	/** (0.7.465) {@link #steer} at a point rather than a being (the Grue walking its host's routine, a spirit pulling you out of flux). */
+	public static void steerAt(LocalPlayer player, Vec3 point, double speed) {
+		Vec3 to = point.subtract(player.getEyePosition());
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float pitch = (float)(-Mth.atan2(to.y, to.horizontalDistance()) * Mth.RAD_TO_DEG);
 		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * TURN);

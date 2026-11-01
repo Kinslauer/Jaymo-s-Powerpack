@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class BillowSeatsMixin {
 	/** Seat offsets across its back (sideways, forward), in blocks at Billow's size. */
 	private static final double[][] SEATS = {{-0.55, 0.15}, {0.55, 0.15}, {0.0, -0.45}};
-	/** (0.19.29) The top of the cloud, in blocks at size 1 (its box is the low swimming one; the cloud is drawn taller). */
+	/** (0.19.34) The top of the cloud, in blocks at size 1 (its box is the low swimming one; the cloud is drawn taller). */
 	private static final double SEAT_HEIGHT = 0.7;
 
 	@Inject(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V", at = @At("TAIL"))

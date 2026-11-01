@@ -368,7 +368,7 @@ public final class LifeAims {
 	/** (MerchantOrders) {@code n} of {@code buyer}'s orders have been sent on to them. */
 	static void ordersSent(MinecraftServer server, UUID buyer, int n) {
 		// (0.7.419) a road deed: a merchant order carried through
-		Deeds.done(server, "orders.sent");
+		RoadDeeds.done(server, buyer, "orders.sent");
 		ServerPlayer player = server.getPlayerList().getPlayer(buyer);
 		if (player != null) {
 			count(player, Kind.ORDERS, n);
@@ -378,7 +378,7 @@ public final class LifeAims {
 	/** (Assassins) The assassin sent for {@code player} is dead by their hand. */
 	static void assassinKilled(ServerPlayer player) {
 		// (0.7.419) a road deed: a hired blade met and beaten
-		Deeds.done(player.level().getServer(), "assassin.killed");
+		Deeds.done(player, "assassin.killed");
 		count(player, Kind.BLADE, aimGoal(player, Kind.BLADE));
 	}
 
@@ -397,16 +397,15 @@ public final class LifeAims {
 			}
 		}
 		if (entity instanceof GreatWhale) {
-			boolean taken = source.getEntity() instanceof ServerPlayer;
+			// (0.7.419) a road deed: a great whale taken (0.7.466: by the one who struck and each traveller near it)
+			if (source.getEntity() instanceof ServerPlayer striker) {
+				Deeds.done(striker, "whale.taken");
+			}
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				if (p.level() == level && p.distanceToSqr(entity) <= WHALE_NEAR * WHALE_NEAR) {
-					taken = true;
 					count(p, Kind.WHALE, 1);
+					Deeds.done(p, "whale.taken");
 				}
-			}
-			if (taken) {
-				// (0.7.419) a road deed: a great whale taken (by a traveller or their crew)
-				Deeds.done(server, "whale.taken");
 			}
 		}
 		if (entity instanceof Wolf wolf && wolf.isTame()) {
@@ -666,10 +665,10 @@ public final class LifeAims {
 			Speech.sayTo(level, near, player, Component.translatable("aim.jaymoskingdoms.cheer." + level.getRandom().nextInt(LINES), title), Speech.GOLD);
 		}
 		// (0.7.419) a road deed: someone saw their aim through
-		RoadDeeds.done(server, "aim.done");
+		RoadDeeds.done(player, "aim.done");
 		LifeStory.Terms terms = LifeStory.terms(road);
 		if (terms.mark() == LifeStory.Mark.VERY_HARD || terms.mark() == LifeStory.Mark.CRUEL) {
-			RoadDeeds.done(server, "rise." + life.aim());
+			RoadDeeds.done(player, "rise." + life.aim());
 		}
 	}
 

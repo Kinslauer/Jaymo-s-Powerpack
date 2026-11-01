@@ -56,6 +56,13 @@ public final class Corpses {
 	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).
 	 */
 	public static final TagKey<EntityType<?>> HEAVY_CORPSES = tag("heavy_corpses");
+	/**
+	 * (0.5.42) Machines and golems (copper golems, clockwork golems, androids, mechs, sentries...): built, not born. They
+	 * deconstruct the way an iron golem does: searched once, everything falls out and the rest comes apart and is gone.
+	 * They never rot, burn, bleed or get butchered, and scavengers leave them be. Every heavy corpse counts as one too;
+	 * a machine that isn't heavy can still be lifted and carried.
+	 */
+	public static final TagKey<EntityType<?>> MACHINE_CORPSES = tag("machine_corpses");
 	/** (0.5.24) What butchers an animal's corpse: any axe, and Jaymo's Powers' primitive and bone knives. */
 	public static final TagKey<Item> BUTCHERING_TOOLS = TagKey.create(Registries.ITEM, JaymosKitchen.id("butchering_tools"));
 	/**
@@ -188,6 +195,11 @@ public final class Corpses {
 			}
 		}
 		return missing;
+	}
+
+	/** (0.5.42) A robot or golem ({@link #MACHINE_CORPSES}, heavy corpses included). */
+	public static boolean isMachine(@org.jspecify.annotations.Nullable EntityType<?> type) {
+		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || type.builtInRegistryHolder().is(HEAVY_CORPSES));
 	}
 
 	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */

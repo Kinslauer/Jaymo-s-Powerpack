@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.19.29) Billow is cloud: creatures pass through it, neither pushing it nor pushed. */
+/** (0.19.34) Billow is cloud: creatures pass through it, neither pushing it nor pushed. */
 @Mixin(LivingEntity.class)
 abstract class BillowPushMixin {
 	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)

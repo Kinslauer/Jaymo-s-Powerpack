@@ -4776,7 +4776,69 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
-- **0.19.28, Put the band away; aliens that aren't men:** Andy: "right clicking while scrolling the watch should let you put it away". Right
+
+- **0.19.28, Towerback strides and winds up its swat:** Andy (clip of Towerback): "the way giants move is wrong they should have
+  long exaggerated steps and motions while still covering alot of ground. the backhand should be slow too, like a charged
+  ability even though its a tap". Towerback walked at 80% of a player's pace with vanilla's leg swing slowed 2.5x, so a 9-block
+  body shuffled. Now it moves 70% faster than a player (monolith size 120% more on top), steps every 5 blocks (16 at monolith
+  size; `STRIDE_PER_SCALE` 0.7 to 1.0), and the model walks on its own stride over the ground (`XenoformClient.stride`, eased
+  onto each server footfall via the synced `XenoformState.STEP`): wide leg swings, the forward foot lifted, sinking onto each
+  footfall, rolling over the planted foot, shoulders turning, big arm swings. Swat (V) is still a tap but plays like a charged
+  move: 22 ticks drawing the right arm across its chest and coiling (slowed, growling), a 6-tick whip out to its right (the blow
+  lands mid-swing, flinging to the right now), 14 ticks easing back; synced by `XenoformState.SWAT`. Tuning: constants at the top
+  of `Towerback` (SPEED, SWAT_*) and `XenoFormModels.Towerback` (LEG_SWING, ARM_SWING, ROLL, SWAT_*).
+- **0.19.29, training takes longer and every milestone lands harder (Kingdoms 0.7.464):** Andy: "further emphasize
+  training your abilities across the whole pack, that means a longer grind but every milestone should feel more rewarding",
+  then "new training items, like weighted clothing costumes for z fighters/gravity, meditating in the cold for wind".
+  - `core/Milestones`: one fanfare for every progression step (title + subtitle, a layered chord that grows with the step,
+    sparks in the track's colour that people nearby see, a screen kick, a gold chat line). Sizes MINOR/MAJOR/GRAND.
+  - `core/Mastery`: abilities cost 60, 90, 120, 150 (`UNLOCK_AT` {0,60,150,270,420}; was flat 60). Old saves keep their
+    abilities and start at the new floor. Past the four abilities, rank points (`RANK_POINTS`) climb five Mastery ranks,
+    Adept to Paragon (`Training.RANK_AT`, about 8-24 days each from time alone), each a permanent stat jump in the power's
+    direction (`Training.PERKS`, xN at rank N). The powers screen shows the rank and the bar to the next.
+  - `core/Training`: meditating/shadowboxing in a power's training spot pays twice as often (`SPOT_PACE`) and refills the
+    practice allowance a point every 30 s (`SPOT_ALLOWANCE_TICKS`): Wind cold or above y 150, Darktide water/rain at night,
+    Cryo ice/snow/powder snow/cold, Web 3+ cobwebs near, Smoke a lit campfire near, Chrono holding a Training Hourglass,
+    Resonance holding a Tuning Fork or by a bell, Arsenal a weapon in hand, Gravity and Z Fighters in a Weighted Gi (or heavy
+    weights). New items: Weighted Gi (chest; slower, lower jumps; Z Fighters train x1.5 on top of the ankle weights; Kingdoms
+    Strength experience x1.5), Training Hourglass, Tuning Fork, with recipes.
+  - Rig: every experience source halved (`RigLevels`), levels play the fanfare.
+  - Kingdoms 0.7.464 (its MODLOG): skill levels take twice the experience (saved experience doubled once, `Skills.PACE`),
+    every 5th level a bonus point, the fanfare on each level.
+- **0.19.30, crawling and prone look real:** Andy: "the crawling and crouch animations should be more like smart movement mod,
+  or at least realistically animate your hands moving and grabbing and dragging you, same with the prone movement on your back,
+  you shuffle forward with your hips, so you move slower than you would prone on your stomach". Smart Moving is GPL-3.0, so it
+  was a reference for the feel only; nothing of it is copied.
+  - Belly crawl (`CrawlPose`): each hand reaches ahead beside the head, plants, and is held in place on the ground while the body
+    slides up past it to the chest, then lifts and swings out and forward again, hand over hand. The hand's path is solved for
+    the shoulder and a bent elbow (`CrawlPose.arm`/`reach`), the stroke runs off the ground covered (about 1 block per two
+    pulls) and is laid past the pose springs, so the planted hand barely slides. Elbow and opposite knee go together: the knee
+    draws up the side, shin folded back flat, and pushes out straight as that arm pulls. Crawling backward plays it in reverse.
+    The chest lifts a little on each pull. Downed players drag the same way with the hands, legs still limp.
+  - `KneeBend` now bends any joint height and can fold sideways (about the part's Z, flat along the ground), which is how the
+    elbows and the crawl's knees bend. An arm holding something stays straight so the item stays in the hand.
+  - On your back (`Crawl.SUPINE`): a hip shuffle. Heels dug in ahead with the knees up (the shins bent down to them), hands
+    pressing beside the hips while the hips scoot up to the heels, then the legs slide out again; the body is drawn ahead in
+    steps (`CrawlPose.surge`) so the hips only move while the heels are dug in. It moves at 45% of the belly crawl's pace
+    (`Crawl.SUPINE_SPEED`, input scaled in `StanceSpeedMixin`).
+  - The crouch walk (the low crouch from the stance wheel) no longer tiptoes. Andy: "the crouch walk looks like tippy toeing".
+    The stride swung the thighs while the body stayed at one height, so the feet hovered or stood on their toes. Now each knee
+    bends just enough to put its foot on the ground wherever its thigh is (`CrouchPose.groundKnee`), with the shin leaning
+    forward over the foot. The steps are longer and slower, only the leg coming through lifts, and the upper body leans
+    forward over the knees (`LOW_LEAN`) with the head kept up. The plain sneak is still vanilla's.
+  - Compile-checked with javac against the 26.3 jars; not built with Gradle
+    or seen in game. Tune in the `CrawlPose` constants (HAND_*, PLANTED, STROKE, HEEL_*, BACK_STROKE).
+- **0.19.31, Kingdoms 0.7.465:** the Grue: the dark arts let an old evil wizard take over your mana spirit, then your body.
+- **0.19.33, Kingdoms 0.7.466:** born again from the afterlife. Andy: "when respawning from heaven or leaving the aether
+  you are given the option to start over, or reincarnate", and "make the judge offer it in his interactions menu".
+  - The Judge's talk screen has "Ask to be born again" for the dead (with Kingdoms and MCA). He asks once more, then you are
+    let go and Kingdoms tells your life story anew, with every start you or your group have opened (`LifeStory.reincarnate`).
+  - The fortune teller, once paid (or the tournament won), asks "Go back as I was" or "Be born again". Shut the screen and
+    you stay, paid: the next ask is free (`ZFighterAfterlife.PAID`).
+  - Let go by the Eternal Dragon's wish or the long wait, you are asked two seconds after waking in the world
+    (`WAKE_ASK_DELAY`). Without Kingdoms everything works as before.
+  - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
+- **0.19.34, Put the band away; aliens that aren't men:** Andy: "right clicking while scrolling the watch should let you put it away". Right
   click while holding Z drops the wrist, and letting Z go then does nothing (no slam, quick change or turning back); the
   click uses nothing in hand (`XenoNet.PutAway`). Andy: "there should be mechanical sound effects for every scroll": each
   turn of the dial now clicks like a ratchet (a lever's click, higher turning on, lower turning back, over a relay's tick),

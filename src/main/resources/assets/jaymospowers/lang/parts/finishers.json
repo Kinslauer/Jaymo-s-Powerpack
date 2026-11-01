@@ -19,6 +19,7 @@
 	"message.jaymospowers.finisher.whip": "Garrotte: %s",
 	"message.jaymospowers.finisher.rock": "Stoned: %s",
 	"message.jaymospowers.finisher.head": "Kneel at %s's head to snap the neck",
+	"message.jaymospowers.finisher.machine": "%s has no neck to snap. Finish it with a weapon",
 	"message.jaymospowers.finisher.choose": "Question  %s  Kill",
 	"message.jaymospowers.finisher.questioned": "%s holds you down for questioning",
 	"message.jaymospowers.finisher.q_blade": "Blade at the throat: %s",

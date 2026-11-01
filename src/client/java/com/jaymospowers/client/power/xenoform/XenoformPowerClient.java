@@ -35,7 +35,7 @@ public final class XenoformPowerClient implements PowerClient {
 
 	private static @Nullable KeyMapping skillKey;
 	private static boolean skillWasDown;
-	/** (0.19.28) Z's hold was put away with a right click: letting Z go does nothing. */
+	/** (0.19.34) Z's hold was put away with a right click: letting Z go does nothing. */
 	static boolean putAway;
 	private static @Nullable String formWas;
 	/** Ticks left of the flash, and the colour of the shape it marked. */
@@ -114,7 +114,7 @@ public final class XenoformPowerClient implements PowerClient {
 	}
 
 	/**
-	 * (0.19.28) Right click while Z is held: the band is put away (the arms drop, letting Z go does nothing). The click is
+	 * (0.19.34) Right click while Z is held: the band is put away (the arms drop, letting Z go does nothing). The click is
 	 * taken, so nothing in hand is used, and use stays off until the button comes up.
 	 */
 	private static void putAwayInput(Minecraft minecraft) {
@@ -222,7 +222,7 @@ public final class XenoformPowerClient implements PowerClient {
 			putAway = false;
 			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
 		} else if (putAway) {
-			// (0.19.28) put away with a right click: the arms are already down
+			// (0.19.34) put away with a right click: the arms are already down
 			putAway = false;
 		} else if (player.getAttached(XenoformState.FORM) == null && refused(player)) {
 			// a band still recharging, or Nadir dialled before the voices are content, refuses the change: the arms drop away, no strike, kick or burst for nothing

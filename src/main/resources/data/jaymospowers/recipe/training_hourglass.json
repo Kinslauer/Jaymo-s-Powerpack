@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "minecraft:glass",
+    "S": "#minecraft:sand"
+  },
+  "pattern": [
+    "PPP",
+    "GSG",
+    "PPP"
+  ],
+  "result": {
+    "id": "jaymospowers:training_hourglass"
+  }
+}

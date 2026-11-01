@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.19.29) Billow seeps through anything short of a full block, as wholly smoke does: doors, fences, bars, panes,
+ * (0.19.34) Billow seeps through anything short of a full block, as wholly smoke does: doors, fences, bars, panes,
  * trapdoors. What it's resting on stays solid (a cloud can sit on a slab or a fence top). Runs on both sides, so the
  * cloud's own movement agrees with the server's.
  */

@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.18.117, Scan F) Billow, the cloud: a big soft body of white cloud, greyer underneath, with a calm round face. 40
  * health, fists of 2, slow. It floats: jump to rise, sneak to sink, and otherwise it hangs where it is; falls never
- * hurt it. (0.19.29) It's a real cloud now, not a man of cloud, and works like the Smoke power's wholly-smoke: low and
+ * hurt it. (0.19.34) It's a real cloud now, not a man of cloud, and works like the Smoke power's wholly-smoke: low and
  * loose (the swimming pose's box, a block high), it seeps through doors, fences, bars, panes and trapdoors, shots fly
  * through it and creatures pass through it ({@link #cloud}, {@code BillowPoseMixin} and the rest); blows still land.
  * It sheds wisps as it drifts. Up to {@link #SEATS} friends can ride on its back (right-click it; sneak to get off), sat as on a happy
@@ -55,7 +55,7 @@ public final class Billow extends XenoForm {
 	public static final int GUST_COOLDOWN = 60;
 	public static final int FOG_TICKS = 200, FOG_COOLDOWN = 500;
 	public static final double FOG_RADIUS = 8.0;
-	/** (0.19.29) Wisps shed as it drifts: one every this many ticks standing, and more the faster it goes. */
+	/** (0.19.34) Wisps shed as it drifts: one every this many ticks standing, and more the faster it goes. */
 	public static final int WISP_TICKS = 6;
 	public static final double WISP_SPEED = 0.08;
 
@@ -75,7 +75,7 @@ public final class Billow extends XenoForm {
 		});
 	}
 
-	/** (0.19.29) Whether {@code player} is Billow, a cloud (both sides). */
+	/** (0.19.34) Whether {@code player} is Billow, a cloud (both sides). */
 	public static boolean cloud(Player player) {
 		return "billow".equals(player.getAttached(XenoformState.FORM));
 	}

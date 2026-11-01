@@ -395,9 +395,9 @@ public final class Deeds {
 	private static void record(ServerPlayer player, Faction f, Kind kind) {
 		// (0.7.419) road deeds: a fire put out, a life saved (anyone doing it opens a road for everyone, RoadLocks)
 		if (kind == Kind.FIRE) {
-			done(player.level().getServer(), "fire.doused");
+			done(player, "fire.doused");
 		} else if (kind == Kind.SAVE) {
-			done(player.level().getServer(), "life.saved");
+			done(player, "life.saved");
 		}
 		if (Identities.hidden(player, f.id())) {
 			// (0.7.62) a masked stranger did it: the costume's name is made by it (its reputation), not theirs
@@ -561,13 +561,13 @@ public final class Deeds {
 
 	// ---- road deeds (0.7.418) -------------------------------------------------------------------------------------------
 
-	/** (0.7.418) Records road deed {@code id} as done, for the whole world ({@link RoadDeeds}). True if it is new. */
-	public static boolean done(MinecraftServer server, String id) {
-		return RoadDeeds.done(server, id);
+	/** (0.7.418) Records road deed {@code id} as done (0.7.466: by {@code player} and their group, {@link RoadDeeds}). True if it is new. */
+	public static boolean done(ServerPlayer player, String id) {
+		return RoadDeeds.done(player, id);
 	}
 
-	/** (0.7.418) Whether road deed {@code id} has been done in this world ({@link RoadDeeds}). */
-	public static boolean has(MinecraftServer server, String id) {
-		return RoadDeeds.has(server, id);
+	/** (0.7.466) Whether {@code player} (or their group) has done road deed {@code id} ({@link RoadDeeds}). */
+	public static boolean has(ServerPlayer player, String id) {
+		return RoadDeeds.has(player, id);
 	}
 }

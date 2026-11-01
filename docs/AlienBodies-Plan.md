@@ -9,7 +9,7 @@ the mesh (the first-person hand, the band, the chest tap and every pose mixin st
 insignia should sit (on Skitter it lies face-up on the abdomen), since `XenoBand.submitInsignia` draws from it. Ultimate
 spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien drops or trims its entry.
 
-## Patch 1 (done, 0.19.28): Skitter, Fuse, Billow
+## Patch 1 (done, 0.19.34): Skitter, Fuse, Billow
 - **Skitter:** a spider, low to the ground, 8 legs in a spider's alternating fours, body bob, abdomen sway, flat crouch,
   biting lunge.
 - **Fuse:** a creeper's build, no arms, 4 stubby legs shuffling in diagonal pairs with a waddle, a bounce and a late

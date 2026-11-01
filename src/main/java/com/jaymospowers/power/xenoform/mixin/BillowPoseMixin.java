@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.19.29) Billow is a cloud, low and loose like the Smoke power's wholly-smoke: it takes the swimming pose's box
+ * (0.19.34) Billow is a cloud, low and loose like the Smoke power's wholly-smoke: it takes the swimming pose's box
  * (a block high at its size), so it slips through holes and under things. It's drawn upright all the same
  * ({@code XenoformClient.extract}).
  */

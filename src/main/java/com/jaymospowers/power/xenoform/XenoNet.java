@@ -22,7 +22,7 @@ public final class XenoNet {
 		}
 	}
 
-	/** (0.19.28) Client → server: right click while Z is held: the wrist goes down, letting Z go does nothing. */
+	/** (0.19.34) Client → server: right click while Z is held: the wrist goes down, letting Z go does nothing. */
 	public record PutAway() implements CustomPacketPayload {
 		public static final Type<PutAway> TYPE = new Type<>(JaymosPowers.id("xenoform_put_away"));
 		public static final StreamCodec<ByteBuf, PutAway> CODEC = StreamCodec.unit(new PutAway());

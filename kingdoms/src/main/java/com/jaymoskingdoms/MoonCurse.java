@@ -124,7 +124,7 @@ public final class MoonCurse {
 		}
 		player.removeAttached(CURSED);
 		// (0.7.419) a road deed: someone mended of the moon's curse
-		Deeds.done(player.level().getServer(), "moon.cured");
+		Deeds.done(player, "moon.cured");
 		WAS_FERAL.remove(player.getUUID());
 		NEXT_LUNGE.remove(player.getUUID());
 		removeOurs(player, MobEffects.STRENGTH, STRENGTH);

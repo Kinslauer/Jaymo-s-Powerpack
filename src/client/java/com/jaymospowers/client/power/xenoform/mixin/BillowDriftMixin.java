@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.19.29) Billow's low box is the swimming pose's, but a cloud isn't crawling: it drifts at its own pace. */
+/** (0.19.34) Billow's low box is the swimming pose's, but a cloud isn't crawling: it drifts at its own pace. */
 @Mixin(LocalPlayer.class)
 abstract class BillowDriftMixin {
 	@Inject(method = "isMovingSlowly", at = @At("HEAD"), cancellable = true)

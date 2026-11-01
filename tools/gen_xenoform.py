@@ -1981,7 +1981,7 @@ def skitter():
     rect(img, (10, 14, 14, 15), (20, 12, 10, 255))
     claws(img, (20, 14, 12, 255))
     chest_insignia(img, rim=(30, 20, 16, 255))
-    # (0.19.29) the spider body: thorax 6x6x6 at (0,64), head 8x8x8 at (24,64), abdomen 10x8x12 at (0,80), fang 1x2x1
+    # (0.19.34) the spider body: thorax 6x6x6 at (0,64), head 8x8x8 at (24,64), abdomen 10x8x12 at (0,80), fang 1x2x1
     # at (44,80), legs 16x2x2 at (0,100) (right) and (0,104) (left)
     thorax = (0, 64, 6, 6, 6)
     box(img, thorax, hide, 0.14)
@@ -2130,7 +2130,7 @@ def fuse():
     rect(img, (10, 13, 11, 16), (16, 20, 16, 255))
     rect(img, (13, 13, 14, 16), (16, 20, 16, 255))
     claws(img, (40, 70, 36, 255))
-    # (0.19.29) four stubby legs use the top 6 rows of the leg skin: dark feet at their bottom
+    # (0.19.34) four stubby legs use the top 6 rows of the leg skin: dark feet at their bottom
     for part in LEGS:
         for nm, (x0, y0, x1, y1) in faces(part[0], part[1], 4, 6, 4).items():
             if nm in ("front", "back", "left", "right"):
@@ -2178,7 +2178,7 @@ def billow():
     rect(img, (13, 11, 15, 13), (60, 70, 90, 255))
     rect(img, (11, 14, 13, 15), (150, 160, 180, 255))
     chest_insignia(img, rim=(150, 160, 180, 255))
-    # (0.19.29) the cloud: mass 18x7x14 at (0,64), big puffs 10x8x10 at (0,86), small puffs 8x6x8 at (0,104)
+    # (0.19.34) the cloud: mass 18x7x14 at (0,64), big puffs 10x8x10 at (0,86), small puffs 8x6x8 at (0,104)
     soft = {"top": 1.05, "bottom": 0.66, "right": 0.9, "left": 0.9, "front": 0.98, "back": 0.86}
     for part in ((0, 64, 18, 7, 14), (0, 86, 10, 8, 10), (0, 104, 8, 6, 8)):
         box(img, part, white, 0.05, light=soft)

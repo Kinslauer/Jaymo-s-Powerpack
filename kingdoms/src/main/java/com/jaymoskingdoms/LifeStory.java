@@ -2127,6 +2127,32 @@ public final class LifeStory {
 		Heritage.clear(p);
 	}
 
+	/**
+	 * (0.7.466) Whether {@code player} can be born again (their client shows the story screen). Called by Jaymo's Powers
+	 * (reflection) before the Other World offers it.
+	 */
+	public static boolean canReincarnate(ServerPlayer player) {
+		return ServerPlayNetworking.canSend(player, Open.TYPE);
+	}
+
+	/**
+	 * (0.7.466) Andy: "when respawning from heaven or leaving the aether you are given the option to start over, or
+	 * reincarnate, giving you access to all the different starts you may have unlocked." Called by Jaymo's Powers
+	 * (reflection) when one of the dead chooses to be born again (the Judge, the fortune teller, or the moment they are let
+	 * go): as a Writ of Rebirth does, their heritage, class and story are unmade and the whole life story is told again,
+	 * with every road they or their group have opened ({@link RoadLocks}). False if their client has no story screen.
+	 */
+	public static boolean reincarnate(ServerPlayer player) {
+		if (!canReincarnate(player)) {
+			return false;
+		}
+		unmake(player);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.reborn").withStyle(ChatFormatting.LIGHT_PURPLE));
+		Classes.next(player);
+		return true;
+	}
+
 	/** {@code /kingdom story reset <players>} (ops): unmakes their heritage, class and story, and asks for their story again. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("story").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
