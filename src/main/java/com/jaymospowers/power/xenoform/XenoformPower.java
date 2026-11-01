@@ -915,6 +915,22 @@ public final class XenoformPower implements Power {
 		}
 	}
 
+	/**
+	 * (0.19.28) Andy: "right clicking while scrolling the watch should let you put it away". Right click while Z is held:
+	 * the hold is dropped, so letting Z go neither slams, quick-changes nor turns you back. The dial stays where it was turned.
+	 */
+	static void putAway(ServerPlayer player) {
+		Live live = live(player);
+		if (!has(player) || live.modeDownAt < 0L) {
+			return;
+		}
+		live.modeDownAt = -1L;
+		live.slammed = true;
+		live.quickDial = false;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_CHAIN.value(),
+			net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 1.4F);
+	}
+
 	/** The scroll wheel while Z is held (from the client): turns the dial, as yourself only. */
 	static void scrollDial(ServerPlayer player, int by) {
 		Live live = live(player);

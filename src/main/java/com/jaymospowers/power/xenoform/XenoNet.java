@@ -22,6 +22,17 @@ public final class XenoNet {
 		}
 	}
 
+	/** (0.19.28) Client → server: right click while Z is held: the wrist goes down, letting Z go does nothing. */
+	public record PutAway() implements CustomPacketPayload {
+		public static final Type<PutAway> TYPE = new Type<>(JaymosPowers.id("xenoform_put_away"));
+		public static final StreamCodec<ByteBuf, PutAway> CODEC = StreamCodec.unit(new PutAway());
+
+		@Override
+		public Type<PutAway> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: the scroll wheel turned while Z was held: turn the dial one alien on (1) or back (-1). */
 	public record Dial(int by) implements CustomPacketPayload {
 		public static final Type<Dial> TYPE = new Type<>(JaymosPowers.id("xenoform_dial"));
@@ -54,6 +65,8 @@ public final class XenoNet {
 		ServerPlayNetworking.registerGlobalReceiver(Skill.TYPE, (payload, ctx) -> XenoformPower.skill(ctx.player(), payload.down()));
 		PayloadTypeRegistry.serverboundPlay().register(Dial.TYPE, Dial.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Dial.TYPE, (payload, ctx) -> XenoformPower.scrollDial(ctx.player(), payload.by()));
+		PayloadTypeRegistry.serverboundPlay().register(PutAway.TYPE, PutAway.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(PutAway.TYPE, (payload, ctx) -> XenoformPower.putAway(ctx.player()));
 		PayloadTypeRegistry.clientboundPlay().register(Flash.TYPE, Flash.CODEC);
 	}
 }

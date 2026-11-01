@@ -32,6 +32,8 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   changed, hold Z 0.5 s and let go to turn back; hold Z and **scroll**, then let go, for a **quick change** into the
   dialled alien (a quarter of the full charge, a second of dizziness; refused below 10 s of charge left) (0.18.92).
   (0.18.123) Quick change must be bought with band points first (see "Upgrading the band").
+- (0.19.28) **Right click while Z is held** puts the band away: the arms drop and letting Z go does nothing (no
+  slam, quick change or turning back). The click uses nothing in hand. The dial stays where you turned it.
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.

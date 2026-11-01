@@ -35,6 +35,8 @@ public final class XenoformPowerClient implements PowerClient {
 
 	private static @Nullable KeyMapping skillKey;
 	private static boolean skillWasDown;
+	/** (0.19.28) Z's hold was put away with a right click: letting Z go does nothing. */
+	static boolean putAway;
 	private static @Nullable String formWas;
 	/** Ticks left of the flash, and the colour of the shape it marked. */
 	static int flash;
@@ -59,6 +61,7 @@ public final class XenoformPowerClient implements PowerClient {
 		// (0.18.122) the star wrecks' probes
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoFinds.PROBE, StarProbeRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
+		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::putAwayInput);
 		NadirRulesScreen.register();
 		// (0.18.123, patch 7) the band screen
 		BandScreen.register();
@@ -86,7 +89,7 @@ public final class XenoformPowerClient implements PowerClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || player.isSpectator() || !XenoformPower.has(player)
-			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown()) {
+			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown() || putAway) {
 			return false;
 		}
 		ClientPlayNetworking.send(new XenoNet.Dial(amount < 0.0 ? 1 : -1));
@@ -108,6 +111,41 @@ public final class XenoformPowerClient implements PowerClient {
 	static String skillKeyLabel(Minecraft minecraft) {
 		KeyMapping mapping = skillKey(minecraft);
 		return mapping == null ? "X" : mapping.getTranslatedKeyMessage().getString();
+	}
+
+	/**
+	 * (0.19.28) Right click while Z is held: the band is put away (the arms drop, letting Z go does nothing). The click is
+	 * taken, so nothing in hand is used, and use stays off until the button comes up.
+	 */
+	private static void putAwayInput(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null || minecraft.gui.screen() != null || !XenoformPower.has(player)) {
+			return;
+		}
+		if (putAway) {
+			// (cleared when Z next goes up or down, in onMode)
+			if (minecraft.options.keyUse.isDown()) {
+				while (minecraft.options.keyUse.consumeClick()) {
+					// taken
+				}
+				minecraft.options.keyUse.setDown(false);
+			}
+			return;
+		}
+		if (!com.jaymospowers.client.JaymosPowersClient.modeKey().isDown()) {
+			return;
+		}
+		boolean clicked = false;
+		while (minecraft.options.keyUse.consumeClick()) {
+			clicked = true;
+		}
+		if (!clicked) {
+			return;
+		}
+		minecraft.options.keyUse.setDown(false);
+		putAway = true;
+		XenoformSlap.drop(player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+		ClientPlayNetworking.send(new XenoNet.PutAway());
 	}
 
 	/** X for a band wearer: the scan, held. Its presses are taken here so nothing else answers them. */
@@ -181,7 +219,11 @@ public final class XenoformPowerClient implements PowerClient {
 		// the same fractional clock the slap pose reads (tick + partial), so the release doesn't quantise to a tick
 		float now = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		if (down) {
+			putAway = false;
 			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
+		} else if (putAway) {
+			// (0.19.28) put away with a right click: the arms are already down
+			putAway = false;
 		} else if (player.getAttached(XenoformState.FORM) == null && refused(player)) {
 			// a band still recharging, or Nadir dialled before the voices are content, refuses the change: the arms drop away, no strike, kick or burst for nothing
 			XenoformSlap.drop(now);

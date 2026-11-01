@@ -4776,3 +4776,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
+- **0.19.28, Put the band away:** Andy: "right clicking while scrolling the watch should let you put it away". Right
+  click while holding Z drops the wrist, and letting Z go then does nothing (no slam, quick change or turning back); the
+  click uses nothing in hand (`XenoNet.PutAway`). Compile-checked; not seen in game.
