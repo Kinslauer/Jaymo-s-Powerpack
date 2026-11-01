@@ -8956,5 +8956,14 @@
 	"speech.jaymoskingdoms.drifter.hired.0": "You won't regret it.",
 	"speech.jaymoskingdoms.drifter.hired.1": "Lead on, then.",
 	"speech.jaymoskingdoms.drifter.hired.2": "A hot meal and a fight. Fair enough.",
-	"message.jaymoskingdoms.drifter.hired": "%s signs on for %s emeralds."
+	"message.jaymoskingdoms.drifter.hired": "%s signs on for %s emeralds.",
+	"block.jaymoskingdoms.infirmary_cot": "Infirmary Cot",
+	"block.jaymoskingdoms.shrine": "Shrine",
+	"talk.jaymoskingdoms.healer.treatment": "A full treatment: bones set, cuts closed, every part healed (%s emeralds)",
+	"talk.jaymoskingdoms.healer.treated": "Lie still... bones set, cuts closed, all mended. A limb that is gone I cannot give back.",
+	"talk.jaymoskingdoms.healer.cot": "Rest easy. I'll see to your bones and your wounds while you lie there.",
+	"message.jaymoskingdoms.cot.brewing": "The brewing stand's herbs ease you: your bones are set and your wounds mended.",
+	"message.jaymoskingdoms.shrine.praying": "Praying... %s",
+	"message.jaymoskingdoms.shrine.answered": "A calm warmth settles over you.",
+	"message.jaymoskingdoms.shrine.quiet": "The candles are quiet. You have prayed today."
 }

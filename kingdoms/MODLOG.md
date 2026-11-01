@@ -7468,3 +7468,22 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   come for you; last ten days with the mark), so a start from nothing can be paid back on every road; a light sleeper is only
   woken by a monster that is after them or can see the bed (not caged or no-AI ones behind walls), never in creative; the
   rags line says what still comes (the Journal and whatever the aim is about).
+
+## 0.7.459: Healers, the infirmary cot and the shrine
+Healing plan 9 to 11 (`docs/Healing-Plan.md`). All three reach Jaymo's Powers' wounds through `PowersCompat` (new calls: `injuries`,
+`setBones`, `healEveryPart`); without Powers they heal the hearts. The shared code is `Healing`; tuning is in `static final`
+constants at the top of each class.
+- **Paid healing** (`Restoration.services`, `Healing.treat`): a village cleric (sneak and use, with emeralds or empty-handed, as
+  before) and a court wizard now also offer **A full treatment**: cuts closed, festering cleaned, every break set, every part
+  healed to full so the breaks knit. Not a severed limb, not the downed, no curse lifted. Price `4`, plus `5` a break, `1` a cut,
+  `3` a festering part and `2` a quarter of health lost, at most 48 emeralds; the option is greyed out when there is nothing to
+  treat or you cannot pay. The healer answers in a speech bubble.
+- **Infirmary cot** (`InfirmaryCot`, a vanilla `BedBlock` subclass, 6/16 high, no block entity, its own head and foot models; recipe
+  3 wool over 2 planks and a stick; in the `beds` tag): sleeps, rests (`BedRest`) and sets the spawn like any bed. Lying on it for
+  5 seconds, asleep or resting, with a cleric or court wizard within 16 blocks or a brewing stand within 8, sets and knits your breaks
+  and heals every part to full (once a lying down; the healer speaks, a brewing stand only an overlay line).
+- **Shrine** (`Shrine`; recipe 2 candles, 5 stone bricks, a gold nugget): hold use for 5 seconds (the held button re-uses the block
+  every 4 ticks; a pause over 10 ticks, walking off or turning away breaks the prayer). Once per Minecraft day per player
+  (`shrine_prayed` attachment, the overworld day number, kept through death): every part heals 3 and festering is cleared, with a
+  chime and motes.
+- Textures and models by `tools/gen_healing_blocks.py`.
