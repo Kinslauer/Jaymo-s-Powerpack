@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
  * them the biome's rock (granite on savannas, diorite in birch woods, cherry groves and meadows, andesite in taigas and
  * the hills, mossy in jungles, swamps and dark woods, red sandstone in the badlands, sandstone on beaches), the rest
  * plain stone. A telling stone just under the turf still wins, as it does for the other rocks.
- * (0.19.16) Andy: "except for grass, then it always does cobblestone rock pebbles": pebbles on grass are always plain
+ * (0.19.22) Andy: "except for grass, then it always does cobblestone rock pebbles": pebbles on grass are always plain
  * stone (the cobblestone rock) now, whatever the biome or the stone under the turf.
  * Placement: worldgen/placed_feature/pebble_piles.json.
  */

@@ -87,7 +87,7 @@ final class AncientRemnantsCompat {
 		}
 		BlockPos foot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre);
 		Element element = Element.of(level.getBiome(foot));
-		Monoliths.remember(level, new Monoliths.Monolith(foot.immutable(), element, Monoliths.AWAKE, false));
+		Monoliths.remember(level, new Monoliths.Monolith(foot.immutable(), element, Monoliths.AWAKE, false, Monoliths.HEART_NONE));
 		JaymosKingdoms.LOGGER.info("Ancient Remnants' monolith at {} carries the {} remnant", foot, element.key());
 	}
 }

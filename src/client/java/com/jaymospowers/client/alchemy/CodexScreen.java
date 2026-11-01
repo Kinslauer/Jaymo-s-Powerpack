@@ -457,7 +457,7 @@ public class CodexScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int mx = (int) event.x(), my = (int) event.y();
-		if (event.button() == 0) {
+		if (event.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) {
 			int tw = tabW(), ty = top() + UiStyle.HEADER;
 			for (int i = 0; i < tabs(); i++) {
 				if (UiStyle.over(mx, my, left() + 6 + i * tw, ty, tw, TAB_H)) {
@@ -485,7 +485,7 @@ public class CodexScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-		if (event.button() == 0 && !essencePage() && UiStyle.over((int) event.x(), (int) event.y(), graphX(), graphY(), graphW(), graphH())) {
+		if (event.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT && !essencePage() && UiStyle.over((int) event.x(), (int) event.y(), graphX(), graphY(), graphW(), graphH())) {
 			panX[tab] += (int) Math.round(dx);
 			panY[tab] += (int) Math.round(dy);
 			return true;
