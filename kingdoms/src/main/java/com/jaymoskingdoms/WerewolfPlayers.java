@@ -306,7 +306,9 @@ public final class WerewolfPlayers {
 			}
 			Form f = FORMS.get(player.getUUID());
 			if (f == null) {
-				if (moon && curse.night() != nightNo && !player.isSpectator()) {
+				// (Andy, 2026-11-01) a Z Fighter's false moon forces it too, any night
+				if ((moon || Vampires.night(clock) && PowersCompat.falseMoon(player.level(), player)) && curse.night() != nightNo
+					&& !player.isSpectator()) {
 					begin(player, now, true);
 				}
 				continue;

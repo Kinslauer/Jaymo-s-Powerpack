@@ -7959,3 +7959,8 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - **0.7.459 (pack 0.19.20):** with Powers' executions of the downed (`MobExecutions`), a realm's guards and archers and a
   village's own iron golems never finish off a downed player: they arrest as before. Only a hotheaded or spiteful guard
   will (`PowersCompat.spareRighteousGuards`). Compile-checked; not seen in game.
+
+- **0.7.461, werewolves and the false moon:** Andy: werewolves "should" turn under a Z Fighter's false moon (Powers'
+  `ZFighterFakeMoon`, a great ball of ki thrown up into the night). Cursed villagers and cursed players under its light
+  change as under a full moon, any night (`PowersCompat.falseMoon`, read by reflection; nothing without Powers). Once
+  changed, the beast lasts the night as usual. Compile-checked; not seen in game.
