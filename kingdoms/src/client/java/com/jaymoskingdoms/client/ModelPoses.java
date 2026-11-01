@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.McaCompat;
 import net.minecraft.client.model.Model;
 
 /**
@@ -16,7 +17,12 @@ public final class ModelPoses {
 		PickpocketPose.apply(model, state);
 		BioAbsorbPose.apply(model, state);
 		RubberEngulf.apply(model, state);
-		BioForms.apply(model, state);
+		// (0.7.455) Andy: "still having a problem with the way the character is drawn on the start path screen". A Bio-built's
+		// hunch is added to the bones, and MCA's skin and clothes bodies take the pose it captured after the hunch was
+		// already on: added again, the head sank into the chest and the arms pushed out
+		if (!McaCompat.LOADED || !McaLookModels.posedByMca(model, state)) {
+			BioForms.apply(model, state);
+		}
 		HandshakePose.apply(model, state);
 		MobAnimations.apply(model, state);
 		HiddenBladeClient.pose(model, state);
