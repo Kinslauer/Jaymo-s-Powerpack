@@ -420,9 +420,9 @@ public class CorpseEntity extends Entity {
 		return taken;
 	}
 
-	/** (0.5.9) A body that can be robbed at all: not an animal's, a fish's, a player's or an iron one. */
+	/** (0.5.9) A body that can be robbed at all: not an animal's, a fish's, a player's or a machine's. */
 	private boolean robbable() {
-		return kind != CorpseKind.ANIMAL && kind != CorpseKind.FISH && kind != CorpseKind.PLAYER && !isPlayerCorpse() && !isHeavy() && !isFish();
+		return kind != CorpseKind.ANIMAL && kind != CorpseKind.FISH && kind != CorpseKind.PLAYER && !isPlayerCorpse() && !isMachine() && !isFish();
 	}
 
 	/** (0.5.9) The look {@link #hasValuables} last answered for, and its answer. */
@@ -1252,8 +1252,8 @@ public class CorpseEntity extends Entity {
 			if (age >= REANIMATE_TICKS) {
 				reanimate(level);
 			}
-		} else if (isHeavy()) {
-			// iron doesn't rot: left long enough, it falls apart where it lies (its loot with it)
+		} else if (isMachine()) {
+			// (0.5.42) iron (and any machine) doesn't rot: left long enough, it falls apart where it lies (its loot with it)
 			if (age >= ROT_TICKS) {
 				startCrumbling(level);
 			}
@@ -1362,9 +1362,19 @@ public class CorpseEntity extends Entity {
 				? "message.jaymoskitchen.corpse.too_heavy" : "message.jaymoskitchen.corpse.no_butchering"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
+		// (0.5.42) a lighter machine (a copper golem, an android) can be carried, but there's nothing in it to butcher
+		if (isMachine() && held.is(Corpses.BUTCHERING_TOOLS)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.no_butchering"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		// sneak with an empty hand: carry any corpse in your arms (a skeleton, a spider, a chicken...), (0.5.31) lifted with a hold
 		if (player.isShiftKeyDown() && held.isEmpty()) {
 			return lift(level, player);
+		}
+		// (0.5.42) a machine (a copper golem, a drone, an android) is looted where it lies and comes apart, like an iron
+		// golem: never pocketed, never treated as an animal's carcass
+		if (isMachine()) {
+			return search(level, player);
 		}
 		// an empty hand on anything small enough (whatever it was): into a bag in your pocket
 		if (held.isEmpty() && kind != CorpseKind.PLAYER && fitsInPocket()) {
@@ -1798,7 +1808,7 @@ public class CorpseEntity extends Entity {
 	 * {@link ButcheringBonus}). On the ground: a rough job, about half the usual.
 	 */
 	private void butcher(ServerLevel level, boolean onBlock) {
-		if (isHeavy()) {
+		if (isMachine()) {
 			return;
 		}
 		if (onBlock) {
@@ -1849,7 +1859,7 @@ public class CorpseEntity extends Entity {
 
 	/** (0.4.32) A passive animal's body, the only kind a butcher villager will take: no monsters, nothing heavy. */
 	public boolean isButcherable() {
-		return kind == CorpseKind.ANIMAL && !isHostile() && !isHeavy();
+		return kind == CorpseKind.ANIMAL && !isHostile() && !isMachine();
 	}
 
 	/** (0.4.35) Records who killed it, for {@link Scavengers}. */
@@ -1870,7 +1880,7 @@ public class CorpseEntity extends Entity {
 	 */
 	public boolean isCarrionFor(Entity mob) {
 		if (isRemoved() || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER
-			|| isPlayerCorpse() || isHostile() || isHeavy() || isOnFire() || carrier() != null || isPassenger()
+			|| isPlayerCorpse() || isHostile() || isMachine() || isOnFire() || carrier() != null || isPassenger()
 			|| isTumbling() || isNoGravity() || this.entityData.get(CRUMBLING)) {
 			return false;
 		}
@@ -1941,8 +1951,8 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult search(ServerLevel level, Player player) {
-		if (isHeavy()) {
-			// stripped of what's worth taking, the iron gives way: it falls apart, then it's gone
+		if (isMachine()) {
+			// stripped of what's worth taking, the iron (or copper, or plating) gives way: it falls apart, then it's gone
 			dropLoot(level);
 			searched = true;
 			play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
@@ -2022,9 +2032,9 @@ public class CorpseEntity extends Entity {
 		return new CorpseData(look(), templates);
 	}
 
-	/** Whether fire takes it: everything but a heavy (iron) corpse. */
+	/** Whether fire takes it: everything but a machine (an iron golem, a robot). */
 	public boolean burns() {
-		return kind.burns() && !isHeavy();
+		return kind.burns() && !isMachine();
 	}
 
 	/** Client: how far it has fallen apart, 0 (whole) to 1 (gone). */
@@ -2049,7 +2059,7 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		net.minecraft.core.particles.BlockParticleOption iron = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
-			net.minecraft.world.level.block.Blocks.IRON_BLOCK.defaultBlockState());
+			debris());
 		float w = getBbWidth() / 2.0F;
 		if (crumbleTicks % 8 == 1) {
 			jolt(crumbleTicks > CRUMBLE_TICKS / 2);
@@ -2070,6 +2080,40 @@ public class CorpseEntity extends Entity {
 	public boolean isHeavy() {
 		EntityType<?> type = sourceType();
 		return type != null && type.builtInRegistryHolder().is(Corpses.HEAVY_CORPSES);
+	}
+
+	/**
+	 * (0.5.42) Built, not born (an iron or copper golem, an android, a mech, a sentry): looted once it comes apart, and it
+	 * never rots, burns, bleeds or gets butchered. See {@link Corpses#MACHINE_CORPSES}; every heavy corpse is one too.
+	 */
+	public boolean isMachine() {
+		return Corpses.isMachine(sourceType());
+	}
+
+	/**
+	 * (0.5.42) What a machine comes apart into, for the pieces flying off it: iron by default, copper for copper and
+	 * clockwork builds, redstone, sculk, tuff or stone for the golems made of those. Picked by its id, so other mods'
+	 * golems need no code here.
+	 */
+	private net.minecraft.world.level.block.state.BlockState debris() {
+		return debris(sourceType());
+	}
+
+	static net.minecraft.world.level.block.state.BlockState debris(@Nullable EntityType<?> type) {
+		String id = type == null ? "" : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(type).getPath();
+		net.minecraft.world.level.block.Block block = net.minecraft.world.level.block.Blocks.IRON_BLOCK;
+		if (id.contains("copper") || id.contains("clockwork")) {
+			block = net.minecraft.world.level.block.Blocks.RAW_COPPER_BLOCK;
+		} else if (id.contains("redstone")) {
+			block = net.minecraft.world.level.block.Blocks.REDSTONE_BLOCK;
+		} else if (id.contains("skulk") || id.contains("sculk")) {
+			block = net.minecraft.world.level.block.Blocks.SCULK;
+		} else if (id.contains("tuff")) {
+			block = net.minecraft.world.level.block.Blocks.TUFF;
+		} else if (id.contains("sentry") || id.equals("slider")) {
+			block = net.minecraft.world.level.block.Blocks.STONE_BRICKS;
+		}
+		return block.defaultBlockState();
 	}
 
 	/** A cow-sized carcass: needs a 2x2 butcher table, and is slower to carry. */
@@ -2630,7 +2674,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	private void hit(DamageSource source, float damage) {
-		if (ON_HIT.isEmpty() || damage <= 0.0F || kind == CorpseKind.SKELETON || isHeavy() || isOnFire()) {
+		if (ON_HIT.isEmpty() || damage <= 0.0F || kind == CorpseKind.SKELETON || isMachine() || isOnFire()) {
 			return;
 		}
 		java.util.Map.Entry<DamageSource, Float> blow = java.util.Map.entry(source, damage);

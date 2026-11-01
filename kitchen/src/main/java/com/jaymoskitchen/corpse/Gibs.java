@@ -161,6 +161,15 @@ public final class Gibs {
 				level.addFreshEntity(item);
 			}
 		}
+		EntityType<?> kind = body instanceof CorpseEntity corpse ? corpse.sourceType() : body.getType();
+		if (Corpses.isMachine(kind)) {
+			// (0.5.42) a robot or golem doesn't bleed: its plating and parts scatter with a clang
+			BlockParticleOption debris = new BlockParticleOption(ParticleTypes.BLOCK, CorpseEntity.debris(kind));
+			level.sendParticles(debris, at.x, at.y + 0.4, at.z, 40, width * 0.4, 0.3, width * 0.4, 0.3);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_GOLEM_DEATH, SoundSource.HOSTILE, 1.0F, 0.8F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
+			return;
+		}
 		if (ON_BURST.isEmpty() || source == null) {
 			// no Jaymo's Powers to bleed it: a spray of red
 			BlockParticleOption blood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState());

@@ -38,8 +38,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * A war mech of the future: a towering walker left running in the ruins. It strides at whatever it sees (players and
  * the dead alike), raises its arm cannons and hoses them with bursts, lobs a shell every few seconds that bursts
- * where its target stands (no blocks broken), and smashes anything that gets close. It carries a boss bar. It leaves
- * no body, only a heap of scrap.
+ * where its target stands (no blocks broken), and smashes anything that gets close. It carries a boss bar. (0.19.32) It
+ * leaves a wreck that comes apart like an iron golem's once its scrap is searched out (Kitchen's heavy corpses).
  * <p>(0.17.135) The same class is the smaller <b>android mech</b> ({@link FutureMachines#ANDROID_MECH}): lighter cannons, no
  * shells. One leads a patrol now and then, and the Mad Tinkerer sets one on you as his test unit. Both are drawn on our own
  * mech model in one of four builds (tools/gen_android_mech.py).
@@ -71,7 +71,6 @@ public class FutureMech extends Monster {
 		this.xpReward = android() ? 25 : 60;
 		this.bar = new ServerBossEvent(java.util.UUID.randomUUID(), type.getDescription(), BossEvent.BossBarColor.RED,
 			BossEvent.BossBarOverlay.NOTCHED_10);
-		addTag("jaymoskitchen.no_corpse");
 	}
 
 	/** The smaller android mech rather than the war mech? */
