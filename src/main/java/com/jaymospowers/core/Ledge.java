@@ -52,6 +52,10 @@ import org.jspecify.annotations.Nullable;
  * isn't possible. The catch is more forgiving too: an edge a little above your eyes, a wall a little further off, or the
  * top of a jump already falling are all caught, and Jump needn't be held (forward still is).
  *
+ * <p>(0.19.40) The crouch grab: standing in front of a single block with a gap only one block high over it (no room to
+ * stand up there), crouching takes hold of its edge and pulls you up and in onto your belly the same way, with no jump
+ * and no hang ({@link #crouchSpot}).
+ *
  * <p>The moves are the client's (player movement is client-authoritative; see {@code client/LedgeClient}): it finds the
  * ledge with {@link #find}, holds the body still and walks it up the mantle's path. The server checks the rules
  * ({@link #canHang}), resets the fall, charges the climb's hunger, plays the sounds, syncs {@link #HOLD} so everyone
@@ -106,6 +110,12 @@ public final class Ledge {
 	public static final double PRONE_EYE_KEEP = 1.22;
 	/** Where the prone climb ends: your middle this far past the edge (blocks), or {@link #CLIMB_IN} when the gap is shallower. */
 	public static final double PRONE_IN = 0.9;
+	/**
+	 * (0.19.40) The crouch grab: on the ground, a fresh Sneak facing a block whose top edge is this far over your feet
+	 * (blocks: over a slab's step, no higher than the chest), with a gap only one block high above it, catches the edge
+	 * and pulls you up and in onto your belly.
+	 */
+	public static final double CROUCH_EDGE_MIN = 0.7, CROUCH_EDGE_MAX = 1.6;
 
 	/** Ticks the local client waits for the server to confirm a grab before giving up on it (a refused grab drops). */
 	public static final int CONFIRM_TICKS = 20;
@@ -359,6 +369,73 @@ public final class Ledge {
 				? pos.getX() + (sign > 0 ? shape.max(Direction.Axis.X) : shape.min(Direction.Axis.X))
 				: pos.getZ() + (sign > 0 ? shape.max(Direction.Axis.Z) : shape.min(Direction.Axis.Z));
 			return finish(player, level, pos, walk.getOpposite(), top, wall, -sign);
+		}
+
+		/**
+		 * (0.19.40) The crouch grab's spot: the block straight ahead whose top is {@link #CROUCH_EDGE_MIN} to
+		 * {@link #CROUCH_EDGE_MAX} over the feet, within {@link #REACH}, with room above it to lie flat but not to stand.
+		 * The "hang" is where the player stands, against the block. Null when there's none.
+		 */
+		public static @Nullable Spot crouchSpot(Player player) {
+			Direction face = Direction.fromYRot(player.getYRot());
+			if (Math.abs(Mth.wrapDegrees(player.getYRot() - face.toYRot())) > GRAB_FACING_DEGREES) {
+				return null;
+			}
+			Level level = player.level();
+			double half = player.getBbWidth() * 0.5;
+			double feet = player.getY();
+			double aheadX = player.getX() + face.getStepX() * (half + REACH + 0.01);
+			double aheadZ = player.getZ() + face.getStepZ() * (half + REACH + 0.01);
+			CollisionContext context = CollisionContext.of(player);
+			for (int y = Mth.floor(feet + CROUCH_EDGE_MAX); y >= Mth.floor(feet + CROUCH_EDGE_MIN) - 1; y--) {
+				BlockPos pos = BlockPos.containing(aheadX, y, aheadZ);
+				BlockState state = level.getBlockState(pos);
+				VoxelShape shape = state.getCollisionShape(level, pos, context);
+				if (shape.isEmpty()) {
+					continue;
+				}
+				double top = pos.getY() + shape.max(Direction.Axis.Y);
+				if (top > feet + CROUCH_EDGE_MAX || top < feet + CROUCH_EDGE_MIN || state.is(NO_GRAB) || topArea(shape) < MIN_TOP_AREA) {
+					return null;
+				}
+				int sign = face.getAxisDirection().getStep();
+				double wall = face.getAxis() == Direction.Axis.X
+					? pos.getX() + (sign > 0 ? shape.min(Direction.Axis.X) : shape.max(Direction.Axis.X))
+					: pos.getZ() + (sign > 0 ? shape.min(Direction.Axis.Z) : shape.max(Direction.Axis.Z));
+				double at = face.getAxis() == Direction.Axis.X ? player.getX() : player.getZ();
+				double gap = (wall - at) * sign - half;
+				if (gap < -0.05 || gap > REACH) {
+					return null;
+				}
+				// stand where you are, up against the block
+				Vec3 hang = along(face, player.position(), wall - sign * (half + HANG_GAP), feet);
+				AABB box = player.getBoundingBox().move(hang.subtract(player.position())).deflate(1.0E-7);
+				if (!level.noCollision(player, box)) {
+					return null;
+				}
+				// room to stand up there: that's a step or a climb, not a crawl
+				Vec3 onTop = along(face, hang, wall + sign * CLIMB_IN, top + CLIMB_LIFT);
+				AABB standing = player.getDimensions(net.minecraft.world.entity.Pose.STANDING).makeBoundingBox(onTop).deflate(1.0E-7);
+				if (level.noCollision(player, standing) && solidUnder(level, onTop, top)) {
+					return null;
+				}
+				// the flat body (lifted so the eyes keep their place, as from a hang) up to the top, then in on the belly
+				AABB flat = player.getDimensions(net.minecraft.world.entity.Pose.SWIMMING).makeBoundingBox(hang).deflate(1.0E-7);
+				double from = Math.min(hang.y + PRONE_EYE_KEEP, top + CLIMB_LIFT);
+				AABB flatRise = flat.move(0.0, from - hang.y, 0.0).expandTowards(0.0, top + CLIMB_LIFT - from, 0.0);
+				if (!level.noCollision(player, flatRise)) {
+					return null;
+				}
+				for (double in : new double[] {PRONE_IN, CLIMB_IN}) {
+					Vec3 belly = along(face, hang, wall + sign * in, top + CLIMB_LIFT);
+					AABB flatAcross = flat.move(0.0, top + CLIMB_LIFT - hang.y, 0.0).expandTowards(belly.x - hang.x, 0.0, belly.z - hang.z);
+					if (level.noCollision(player, flatAcross) && solidUnder(level, belly, top)) {
+						return new Spot(pos, face, top, hang, belly, false, belly);
+					}
+				}
+				return null;
+			}
+			return null;
 		}
 
 		private static @Nullable Spot finish(Player player, Level level, BlockPos pos, Direction face, double top, double wall, int sign) {

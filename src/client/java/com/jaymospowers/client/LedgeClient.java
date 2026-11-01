@@ -24,6 +24,9 @@ import org.jspecify.annotations.Nullable;
  * from {@code CrawlTaps}), or Jump under a gap too low to stand in, pulls you up and in onto your belly: the crawl begins
  * as the climb does (the body drops to 0.6 high, lifted so the eyes stay put), rises to the top and slides in, and you
  * stay prone after it.
+ *
+ * <p>(0.19.40) The crouch grab: on the ground, a fresh Sneak facing a single block with a one-high gap over it
+ * ({@link Ledge#crouchSpot}) takes its edge and goes straight into that prone climb, with no hang first.
  */
 public final class LedgeClient {
 	private enum Phase { NONE, HANG, CLIMB }
@@ -48,6 +51,8 @@ public final class LedgeClient {
 	private static final int DROP_TICKS = 10;
 	private static final double DROP_MAX = 3.2;
 	private static int dropLeft;
+	/** (0.19.40) Sneak was down last tick (the crouch grab wants a fresh press). */
+	private static boolean sneakWas;
 	private static double dropTop;
 
 	private LedgeClient() {
@@ -125,14 +130,39 @@ public final class LedgeClient {
 			cooldown--;
 		}
 		Input input = player.input.keyPresses;
+		boolean freshSneak = input.shift() && !sneakWas;
+		sneakWas = input.shift();
 		if (dropLeft > 0) {
 			tickDrop(player);
 		}
 		switch (phase) {
-		case NONE -> tryGrab(player, input);
+			case NONE -> {
+				if (freshSneak) {
+					tryCrouchGrab(player);
+				} else {
+					tryGrab(player, input);
+				}
+			}
 			case HANG -> tickHang(player, input);
 			case CLIMB -> tickClimb(player);
 		}
+	}
+
+	/**
+	 * (0.19.40) Crouching on the ground at a single block with a one-high gap over it: take its edge and pull in onto the
+	 * belly at once. Not mid-sprint (that's a slide) or while freerunning.
+	 */
+	private static void tryCrouchGrab(LocalPlayer player) {
+		if (cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player) || !Crawl.canCrawl(player)
+			|| CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
+			return;
+		}
+		Ledge.Spot found = Ledge.crouchSpot(player);
+		if (found == null || found.onBelly() == null) {
+			return;
+		}
+		grab(player, found);
+		startClimb(player, found, true);
 	}
 
 	private static void tryGrab(LocalPlayer player, Input input) {
@@ -364,8 +394,9 @@ public final class LedgeClient {
 	}
 
 	private static void reset() {
-	end();
-	dropLeft = 0;
+		end();
+		dropLeft = 0;
+		sneakWas = false;
 		cooldown = 0;
 		confirmed = false;
 	}
