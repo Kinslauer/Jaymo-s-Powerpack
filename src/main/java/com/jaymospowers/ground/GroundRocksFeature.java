@@ -19,7 +19,7 @@ import net.minecraft.world.level.material.Fluids;
 
 /**
  * A few piles of loose rocks (or flint) around {@code origin}, on natural ground only (so not on paths, floors or roofs).
- * A rock is the stone of the block it lies on (0.19.11, Andy: "the rocks should adapt to whats underneath it, except for
+ * A rock is the stone of the block it lies on (0.19.16, Andy: "the rocks should adapt to whats underneath it, except for
  * grass, then it always does cobblestone rock pebbles"): plain stone on grass and gravel (and gravel often gets flint
  * instead), sandstone only on sand and sandstone, red sandstone on red sand and terracotta, granite on granite and so on.
  * On dirt and the like the first telling stone in the column under it decides (granite, diorite, andesite, tuff,
@@ -45,7 +45,7 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 	public static final int FLINT_ELSEWHERE = 15;
 	/** (0.17.175) Scattered rocks keep to grass this seldom (in 100); grass mostly gets pebble piles (PebblePilesFeature). */
 	public static final int ON_GRASS = 20;
-	/** (0.19.11) Andy: "there should be primarily flint and cobble stone on this gravel plain". Rocks on gravel are loose flint this often (in 100). */
+	/** (0.19.16) Andy: "there should be primarily flint and cobble stone on this gravel plain". Rocks on gravel are loose flint this often (in 100). */
 	public static final int GRAVEL_FLINT = 45;
 	/** In jungles, swamps and lush caves, plain stone rocks are mossy this often (in 100). */
 	public static final int MOSSY_CHANCE = 60;
@@ -140,7 +140,7 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 		return lush && random.nextInt(100) < MOSSY_CHANCE ? GroundRocks.Variant.MOSSY : GroundRocks.Variant.STONE;
 	}
 
-	/** (0.19.11) The rock the block a rock lies on makes by itself, or null when it doesn't tell (dirt, mud, clay...) and the column under it decides. */
+	/** (0.19.16) The rock the block a rock lies on makes by itself, or null when it doesn't tell (dirt, mud, clay...) and the column under it decides. */
 	static GroundRocks.Variant surfaceRock(BlockState ground) {
 		if (ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.STONE) || ground.is(Blocks.COBBLESTONE)
 			|| ground.is(Blocks.CALCITE)) {
