@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "plant": 6,
+    "life": 8,
+    "light": 3,
+    "water": 3
+  },
+  "result": {
+    "item": "jaymospowers:draught_of_vigour",
+    "count": 1
+  },
+  "research": "vigour"
+}

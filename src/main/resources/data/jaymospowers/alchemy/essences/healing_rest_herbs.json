@@ -1,0 +1,29 @@
+{
+  "items": {
+    "jaymospowers:comfrey": {
+      "plant": 3,
+      "earth": 2,
+      "life": 1
+    },
+    "jaymospowers:yarrow": {
+      "plant": 3,
+      "life": 2,
+      "light": 1
+    },
+    "jaymospowers:plantain": {
+      "plant": 3,
+      "water": 2,
+      "life": 1
+    },
+    "jaymospowers:wild_garlic": {
+      "plant": 3,
+      "life": 1,
+      "salt": 1
+    },
+    "jaymospowers:chamomile": {
+      "plant": 3,
+      "life": 2,
+      "spirit": 1
+    }
+  }
+}
