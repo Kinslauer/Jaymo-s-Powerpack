@@ -131,6 +131,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
 		BloodVision.register();
+		// (0.7.471) blood thirst: veins creep in from the screen edges
+		ThirstVeins.register();
 		// 0.7.185: the blood fever's and the wolf's holds (they walk you; each key a heave against them)
 		SeizureClient.register();
 		// (0.7.465) the Grue driving its host
