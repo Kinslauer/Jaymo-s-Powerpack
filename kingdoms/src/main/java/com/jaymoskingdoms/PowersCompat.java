@@ -1872,6 +1872,9 @@ public final class PowersCompat {
 			} catch (Throwable e) {
 				JaymosKingdoms.LOGGER.warn("Couldn't end a questioning hold", e);
 			}
+		}
+	}
+
 	// ---- (0.7.462) the healing trade: Powers' wounds, for paid treatment, the infirmary cot and the shrine ------------------
 
 	/** What ails a body: bit masks, a bit per body part, as Powers' wounds keep them. */
