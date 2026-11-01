@@ -248,7 +248,7 @@ public final class Tribes {
 			grudge.put(player.toString(), now);
 		}
 		put(server, tribe, new Tribe(Map.copyOf(grudge), t.truce(), t.hunted()));
-		TribePacts.favoured(server, tribe, now);
+		TribePacts.favoured(server, player, tribe, now);
 	}
 
 	/** (0.7.443) {@code player}'s grudge with {@code tribe} wiped clean (their favour, if any, kept). */

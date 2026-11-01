@@ -4860,3 +4860,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   is now a straight punch; two meeting start a rhythm duel to an original drum track, letterboxed. Kingdoms-only change
   (see its MODLOG); the pack version moves with it.
 - **0.19.36, Kingdoms 0.7.468:** the Grue's trial: when it takes you, fog rolls in and you fight it in a black arena in the sky; win and its power is yours. The fight ends in a barrage clash, letterboxed with drums.
+
+- **0.19.37, Kingdoms 0.7.469:** the build compiles again; an orc tribe's good standing opens the greenskin road for the one who won it.

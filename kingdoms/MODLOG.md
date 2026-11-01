@@ -8094,3 +8094,7 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
 - Fixes two compile errors that came in with 0.7.467's barrage: `Entity.invulnerableTime` is private in 26.3 (now
   `setInvulnerableTime`), and `SpiritRig` declared `beat` twice.
 - Compile-checked with javac against the 26.3 jars; not played.
+
+## 0.7.469: the greenskin road's deed goes to who earned it (pack 0.19.37)
+- Master didn't compile: 0.7.466 made deeds per player and group, and `TribePacts.favoured` still marked the deed for the
+  whole world. It now records it for the player who won the orc tribe's favour (`RoadDeeds.done`, kept even if they're away).

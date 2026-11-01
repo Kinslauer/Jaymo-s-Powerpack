@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * rival brood's folk. It fades slowly ({@link #FAVOUR_DAILY} a day). At {@link #ALLY_AT} or better, when raiders fall on
  * the realm or haven you're sworn to, the tribe's king sends a war band ({@link #called}) that fights the raiders and goes
  * home once they're gone. Good standing with an orc tribe ({@link #FRIEND_AT}) opens the greenskin road of the life story
- * for the world ({@link #FRIEND_DEED}).</li>
+ * for them and their group ({@link #FRIEND_DEED}).</li>
  * </ul>
  */
 public final class TribePacts {
@@ -140,9 +140,9 @@ public final class TribePacts {
 	}
 
 	/** (From {@link Tribes#add}) a grudge with {@code tribe} is now {@code now}: good standing with an orc tribe opens the greenskin road. */
-	static void favoured(MinecraftServer server, String tribe, int now) {
+	static void favoured(MinecraftServer server, UUID player, String tribe, int now) {
 		if (now <= FRIEND_AT && tribe.startsWith(Tribes.ORC + "@")) {
-			Deeds.done(server, FRIEND_DEED);
+			RoadDeeds.done(server, player, FRIEND_DEED);
 		}
 	}
 
