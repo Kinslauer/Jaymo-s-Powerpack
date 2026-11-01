@@ -416,7 +416,7 @@ final class MerchantOrders {
 	 */
 	static void taken(ServerLevel level, ServerPlayer buyer, Faction town, ItemStack goods, long wait) {
 		// (0.7.419) a road deed: a merchant's order taken on
-		Deeds.done(level.getServer(), "orders.taken");
+		Deeds.done(buyer, "orders.taken");
 		put(level.getServer(), new Order(UUID.randomUUID().toString(), buyer.getUUID(), goods, 0, town.name(), town.name(), town.id(),
 			town.seat(), level.getGameTime() + wait, "", 0));
 	}

@@ -525,7 +525,7 @@ final class Retinue {
 		w.bannedUntil = now + BAN_TICKS;
 		w.threatened = now;
 		// (0.7.419) a road deed: shown the city's gate
-		Deeds.done(level.getServer(), "banned.city");
+		Deeds.done(p, "banned.city");
 		p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".banished", king.getDisplayName(), f.name(), BAN_TICKS / 1200,
 			Purists.name(Heritage.of(p)))
 			.withStyle(ChatFormatting.DARK_RED));

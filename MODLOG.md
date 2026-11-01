@@ -4829,3 +4829,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Compile-checked with javac against the 26.3 jars; not built with Gradle
     or seen in game. Tune in the `CrawlPose` constants (HAND_*, PLANTED, STROKE, HEEL_*, BACK_STROKE).
 - **0.19.31, Kingdoms 0.7.465:** the Grue: the dark arts let an old evil wizard take over your mana spirit, then your body.
+- **0.19.33, Kingdoms 0.7.466:** born again from the afterlife. Andy: "when respawning from heaven or leaving the aether
+  you are given the option to start over, or reincarnate", and "make the judge offer it in his interactions menu".
+  - The Judge's talk screen has "Ask to be born again" for the dead (with Kingdoms and MCA). He asks once more, then you are
+    let go and Kingdoms tells your life story anew, with every start you or your group have opened (`LifeStory.reincarnate`).
+  - The fortune teller, once paid (or the tournament won), asks "Go back as I was" or "Be born again". Shut the screen and
+    you stay, paid: the next ask is free (`ZFighterAfterlife.PAID`).
+  - Let go by the Eternal Dragon's wish or the long wait, you are asked two seconds after waking in the world
+    (`WAKE_ASK_DELAY`). Without Kingdoms everything works as before.
+  - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
