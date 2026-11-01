@@ -8194,3 +8194,22 @@ a large goblin camp the size of a kingdom even".
 - A `hoard` field waits on each camp's tier for Patch 3's chief's hoard. Coins, jobs, markets' traders, caravans and the
   city buildings are Patches 3 and 4.
 - Compile-checked against the 26.3 jars; not played.
+
+## 0.7.476: Thessaly's mana wings (pack 0.19.54)
+Andy: "Thelassy should grow mana wings for users, that allow them to hover, with the wind hover animation, and increases
+height and speed as they master it. the mana wings animate like angelic wispy 2-3 player wide hands with wings that extend
+beneath it, and flap gently as they hover."
+- **Mana wings** (`wings`, Thessaly's, level 1, cost 6, a toggle bit `SpiritState.WINGS`): spread, you hover whenever you
+  are off the ground (WASD drifts, Jump rises, Sneak sinks to land); spread on the ground they lift you, and Jump takes off
+  again. Everything grows with the spirit's level (`ThessalyWings`): the most height above the ground 4 to 24 blocks (over
+  a drop they settle down to it), drift 0.22 to 0.5 blocks a tick, rise 0.16 to 0.36, the hands from about two to three
+  player-widths across; the upkeep falls from 2 to 0.8 mana a second aloft. No fall damage while spread, 1 spirit xp per
+  5 s aloft, no flying kick (`ValorFlightMixin`); out of mana they fade into a short slow fall. Put away, they fold.
+- **The look** (`client/spirits/ManaWings`): at your shoulder blades two great open hands of her light, palms back and
+  fingers fanned like a wing's tips, with seven feathers of light hanging beneath each, longer further out; drawn as the
+  arms are (the ki glow's wisps in hollow shells, her rose in mana's blue taken toward white). They beat slowly while you
+  hover, a little harder as you climb, the hands and fingers flexing a moment late and the feathers trailing each beat;
+  on the ground they rest half spread, and folding away they sweep back, droop and fade. Motes of light drift down off
+  them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
+- **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
+  and sway in the air the way the wind's hover does, for anyone watching.

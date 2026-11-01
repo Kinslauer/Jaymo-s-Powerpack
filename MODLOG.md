@@ -4911,3 +4911,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.53, Kitchen 0.5.47, limp snakes:** Dead snakes are a chain ragdoll now, a head and ten loose joints, so they
   sag, drape over bumps and edges, and flop when dragged, the body drawn segment by segment along the chain instead of a
   few stiff blocks (Kitchen MODLOG). Not compile-checked; not played.
+- **0.19.54, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
+  wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.

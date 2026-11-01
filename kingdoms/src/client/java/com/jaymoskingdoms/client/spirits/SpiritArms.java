@@ -279,6 +279,8 @@ public final class SpiritArms {
 		state.setData(LOOK, look(entity));
 		// (0.7.465) how far the Grue has it
 		state.setData(GRUE, com.jaymoskingdoms.spirits.Grue.hold(entity));
+		// (Andy, 2026-11-01) Thessaly's mana wings
+		ManaWings.extract(entity, state);
 	}
 
 	private static @Nullable Look look(LivingEntity entity) {
