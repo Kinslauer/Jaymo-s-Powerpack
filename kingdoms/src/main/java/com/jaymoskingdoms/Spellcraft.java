@@ -433,6 +433,10 @@ public final class Spellcraft {
 
 	/** (0.7.231) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
 	private static boolean pay(ServerPlayer player, String element, String what) {
+		// (0.7.464) the spirit stays a death or blood Sorcerer's hand (the Grue is near)
+		if (ForbiddenArts.forbidden(element) && ForbiddenArts.stayed(player)) {
+			return false;
+		}
 		return element.equals("blood") ? Hemomancy.pay(player, Hemomancy.cost(what)) : Mana.cast(player, what);
 	}
 

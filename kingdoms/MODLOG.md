@@ -7986,3 +7986,23 @@ constants at the top of each class.
 ## 0.7.463: the infirmary cot's loot table loads (pack 0.19.27)
 - The Deck server would not start on 0.19.25 ("Failed to load registries"): `infirmary_cot.json` used `minecraft:block_state_property`,
   which 26.3 dropped. It's written with `minecraft:match_block` now, as the Training Post's was.
+
+## 0.7.464: the Grue (pack 0.19.28)
+Andy: corruption should matter to mana spirits. The deeper a keeper goes into the dark arts (flux, death and blood magic),
+the closer the Grue comes. The spirit fights it the whole way, until the Grue takes the spirit, then the body. `spirits/Grue`.
+- **Hold (0-100):** each look (20 s) adds 0.03 per point of alchemical corruption above 10, up to half less at full bond.
+  Every forbidden cast adds 3. It ebbs by 1 a look while corruption is under 10.
+- **Warnings:** every spirit warns in its own voice when you cast death or blood magic, stand in pooled flux, or your
+  corruption jumps. The Quiet One breaks its silence for this alone.
+- **25+:** the spirit may stop a forbidden cast (35% rising to 75%), plucking what's in your hand and flinging it ahead.
+  In pooled flux it may take the wheel and walk you out. The arms flicker dark red.
+- **55+:** every 1.5 to 3.5 min the Grue lashes at you both: 3 to 8 hurt (never past 2 hearts), -2 bond, a red flash.
+  The arms stay streaked red.
+- **100, taken:** the spirit turns deep dark red and stops answering. The Grue keeps it out with no mana drain and drives
+  the body (client steering shared with seizures). It walks your routine (the spot you were at each in-game hour, kept
+  every 30 s), idles there, and fights anything after you: a 14-hurt strike and a 9-hurt grasp from 14 blocks, scaled by
+  spirit level. It runs below 30% health. Now and then it says one of your last 16 lines aloud when someone is within 32
+  blocks, and taunts you. You may only eat and drink: no attacks, blocks or other uses, and your chat doesn't come out
+  (/ooc does).
+- **Exorcism:** a friend downs the host, then uses a Purifying Draught on them. The Grue burns out, takes the spirit with
+  it (never another), and 20 lingering corruption goes. Ops: `/kingdom grue free <player>`, `/kingdom grue hold <player> <n>`.

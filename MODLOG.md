@@ -4776,3 +4776,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
+- **0.19.28, Kingdoms 0.7.464:** the Grue: the dark arts let an old evil wizard take over your mana spirit, then your body.

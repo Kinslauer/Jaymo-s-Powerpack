@@ -199,7 +199,7 @@ public final class Necromancy {
 
 	private static void reap(ServerPlayer player, ServerLevel level, LivingEntity target) {
 		ItemStack key = Arcana.BONE_STAFF.getDefaultInstance();
-		if (player.getCooldowns().isOnCooldown(key) || !Mana.cast(player, "reap")) {
+		if (player.getCooldowns().isOnCooldown(key) || ForbiddenArts.stayed(player) || !Mana.cast(player, "reap")) {
 			return;
 		}
 		player.getCooldowns().addCooldown(key, Spellcraft.BOLT_COOLDOWN);
@@ -274,7 +274,7 @@ public final class Necromancy {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.death.wont_rise"));
 			return;
 		}
-		if (!Mana.cast(player, "raise")) {
+		if (ForbiddenArts.stayed(player) || !Mana.cast(player, "raise")) {
 			return;
 		}
 		if (Thralls.raise(level, type, corpse.position(), -1, player.getUUID(), true, RAISE_LIFE, null) == null) {

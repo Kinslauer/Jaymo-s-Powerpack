@@ -176,6 +176,10 @@ public final class Hemomancy {
 		if (player.getCooldowns().isOnCooldown(key)) {
 			return true;
 		}
+		// (0.7.464) the spirit stays your hand (the Grue is near)
+		if (ForbiddenArts.stayed(player)) {
+			return true;
+		}
 		boolean cast = target != null ? grip(level, player, target, power(player), true) : hemorrhage(level, player, power(player), true);
 		if (cast) {
 			// (a scroll's or a staff's cast is counted where it's read or cast, Spellcraft.afterCast)
