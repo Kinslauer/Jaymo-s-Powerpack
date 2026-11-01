@@ -4693,3 +4693,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
 - **0.19.15, Kingdoms 0.7.456:** a tree felled into another tree no longer stands back up: it glances off to a clear
   side and falls on, or, boxed in, leans a moment and breaks apart.
+
+- **0.19.16, Kingdoms 0.7.457:** left and right clicks fixed on screens that tell them apart. 26.3 numbers the mouse
+  buttons from 1 (left 1, middle 2, right 3), so a check for "left is 0" never matched and "right is 1" caught left
+  clicks. The life story's flaws and switches can be ticked now, and a left click on its Heritage, Class and Look buttons
+  steps forward instead of back. In Powers the Codex's tabs and graph dragging, the Z Fighter star map's clicks, and
+  right-click stepping back on the costume and suit editor buttons work again (`InputConstants.MOUSE_BUTTON_LEFT/RIGHT`).
+  The Bio-built's hunch is no longer laid on twice on MCA's bodies (head sunk into the chest, arms pushed out), on the
+  story's start page and in the world. Seen working in a test game.

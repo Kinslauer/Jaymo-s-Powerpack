@@ -94,7 +94,7 @@ public final class Monoliths {
 	static final int SCALE = 3;
 	/**
 	 * The pillar (in its own blocks, {@link #SCALE} each): how tall before its broken crown, its bands' spacing, the gap
-	 * under the floating heart. (0.7.457) Andy: "I'd like the monoliths larger ... like the mod they came from": Ancient
+	 * under the floating heart. (0.7.458) Andy: "I'd like the monoliths larger ... like the mod they came from": Ancient
 	 * Remnants' monoliths stand some 120 blocks with their heart high in them, so ours now rise 78 to 102 blocks to the
 	 * crown, on a broad 5x5 foot ({@link #FOOT_SHARE} of the way up) under the 3x3 shaft.
 	 */
@@ -122,12 +122,12 @@ public final class Monoliths {
 
 	public static final int AWAKE = 0, CLAIMED = 1;
 
-	/** No heart known yet (one raised before 0.7.457, not yet looked over), or none to be found. */
+	/** No heart known yet (one raised before 0.7.458, not yet looked over), or none to be found. */
 	static final int HEART_UNKNOWN = -1, HEART_NONE = -2;
 
 	/**
 	 * One monolith: where (its foot), its element, whether its Giant has fallen, whether we raised it (else Ancient
-	 * Remnants did), and (0.7.457) how high over its foot its living heart floats ({@link MonolithHeart}).
+	 * Remnants did), and (0.7.458) how high over its foot its living heart floats ({@link MonolithHeart}).
 	 */
 	public record Monolith(BlockPos pos, Element element, int state, boolean ours, int heart) {
 		static final Codec<Monolith> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -314,7 +314,7 @@ public final class Monoliths {
 		}
 	}
 
-	/** (0.7.457) Awake monoliths of ours raised before their hearts moved: their block core becomes a living heart. */
+	/** (0.7.458) Awake monoliths of ours raised before their hearts moved: their block core becomes a living heart. */
 	private static void upgradeHearts(ServerLevel level) {
 		for (Monolith m : all(level)) {
 			if (m.ours() && m.state() == AWAKE && m.heart() == HEART_UNKNOWN && level.isPositionEntityTicking(m.pos())) {
@@ -589,7 +589,7 @@ public final class Monoliths {
 
 	/** Its Giant fallen, the monolith's core goes out: the floating core is gone, the shards left hanging. */
 	private static void darken(ServerLevel level, Monolith m) {
-		// (0.7.457) a living heart: its core goes out, the shards hang dark
+		// (0.7.458) a living heart: its core goes out, the shards hang dark
 		if (m.heart() >= 0 && MonolithHeart.darken(level, m)) {
 			level.playSound(null, m.pos().above(m.heart()), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3.0F, 0.5F);
 			return;

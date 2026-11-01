@@ -383,7 +383,7 @@ public class ZFighterStarMapScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		LocalPlayer player = this.minecraft.player;
-		if (player == null || event.button() != 0) {
+		if (player == null || event.button() != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) {
 			return super.mouseClicked(event, doubleClick);
 		}
 		double mx = (event.x() - this.ox) / this.scale, my = (event.y() - this.oy) / this.scale;

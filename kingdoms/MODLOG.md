@@ -7928,8 +7928,18 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - With no clear way down it leans there a moment and breaks apart, dropping its wood and leaves; it is never set back
   as standing blocks. Trees that get past half over still settle lying as before.
 - Compile-checked; not seen in game.
+## 0.7.457: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.16)
+- Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1, right 3): the story's
+  flaw click waited for button 0 and never came, and the right-click step-back took button 1, so a left click on the
+  Heritage, Class and Look buttons stepped back. Both use `InputConstants.MOUSE_BUTTON_LEFT/RIGHT` now. The double-click
+  guard from 0.7.451 is gone (it was a wrong guess).
+- Andy: "still having a problem with the way the character is drawn on the start path screen". MCA's skin and clothes
+  bodies take the pose MCA captured off the renderer's model after our poses were laid on it; the Bio-built hunch (an
+  added offset) was then added again when each was drawn, sinking the head into the chest. `ModelPoses.after` skips it
+  on a body MCA has posed (`McaLookModels.posedByMca`). Checked in a test game (Xvfb): the flaws tick and the figure
+  stands right.
 
-## 0.7.457: larger monoliths with a living heart (pack 0.19.16)
+## 0.7.458: larger monoliths with a living heart (pack 0.19.17)
 - Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
   studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
   glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.
