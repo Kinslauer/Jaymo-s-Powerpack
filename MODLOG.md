@@ -4288,4 +4288,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     (weak willow-bark, and the next full sleep heals every hurt part twice over, `Herbal.sleepHeal`; the flag is the scoreboard tag
     `jaymospowers_calm_sleep`), posset (cures nausea and poison, heals 2). Powers has no plain sleep heal, so only calm sleep heals
     (to 60% of a part); a cot or bed that heals (Kingdoms') asks `Herbal.sleepHeal(player)`.
-  - Everything is in JEI's Medicine page, washing and boiling too. Not compile-checked or seen in game.
+  - *Campfire rest* (`Resting`): sneaking, crouching low or meditating, hardly moving, within 3 blocks of a lit campfire, the most
+    hurt part heals 0.75 every 5 s (never above 60% of that part, never sets a bone) and the pain eases. Warm embers rise round you.
+  - *Hot springs* (`HotSprings`, `Resting`): small pools (radius 2-4) of water over a gravel floor and magma, ringed with gravel,
+    stone and calcite, in mountain, taiga and snowy biomes, with steam rising. Soaking in one (or any water with magma within 3
+    blocks under you) eases pain, thaws frostbite and Freezing, clears short Nausea/Slowness, and heals the worst part 0.5 every 2 s
+    up to 60%. `Pain.ease(entity, ticks)` is new.
+  - *Healing brews* (`alchemy/healing/HealingBrews`): Bone-Knitting Elixir (sets and knits the worst broken limb over 2 min) and
+    Draught of Vigour (every part heals over 60 s, past the 60% cap), made in the crucible from herbs (the five herbs dissolve into
+    plant/life essences), unlocked by the new Bonesetting and Vigour research.
+  - Jaymo's Kingdoms 0.7.459 adds paid healing from town healers, the infirmary cot and the shrine (its MODLOG).
+  - Everything is in JEI's Medicine page, washing and boiling too. Compile-checked with javac against the 26.3 jars; not built with
+    Gradle or seen in game.
