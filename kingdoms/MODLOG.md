@@ -8104,3 +8104,11 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   natural trees within `STEP_TREE_REACH` (2.5 blocks) of the Giant, away from it, and the falling wood crushes what it lands
   on (mob griefing on). Walking into trees still knocks them over as before. Powers' Great Apes and Towerback do the same
   through `core/GiantTrample`.
+
+## 0.7.471: blood-thirst veins creep in from the screen's edges (pack 0.19.42)
+- Andy: "veins should encroach on your screen the thirstier you get". The pack has two thirsts (Kitchen's water thirst and a
+  vampire's blood thirst); the veins are the vampire's. New client `ThirstVeins`: dark veins grow in from the corners and edges
+  as the pallor rises (`Vampires.pallor`: from 5 minutes after a drink to full at 2 days), reaching about two thirds of the way
+  in, the middle left clear, once starving or the blood fever burns. They darken and swell with the vampire's heartbeat
+  (`BloodVision.beat`), creep in slowly and draw back over a few seconds after a drink. Dhampirs never thirst, so never see
+  them. Art: six growth rings, `textures/gui/thirst_veins_1..6.png` (320x180 pixel art, drawn by `tools/gen_thirst_veins.py`).

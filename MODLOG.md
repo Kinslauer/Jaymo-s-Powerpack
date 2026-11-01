@@ -4877,3 +4877,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   whatever it lands on; player-built log walls aren't natural trees and stay. Without Kingdoms the trunk just breaks. Players
   only fell where they may build; villager apes only with mob griefing on. The Aether Giants already pushed trees over when
   they walked into them; now each of their steps fells the trees within 2.5 blocks of them too (Kingdoms MODLOG).
+
+- **0.19.42, Kingdoms 0.7.471, blood-thirst veins:** Andy: "veins should encroach on your screen the thirstier you get". A
+  vampire player's screen grows dark veins in from the edges as their blood thirst rises, pulsing with their heartbeat, and
+  they draw back after a drink (Kingdoms `ThirstVeins`, Kingdoms MODLOG). Compile-checked; not seen in game.
