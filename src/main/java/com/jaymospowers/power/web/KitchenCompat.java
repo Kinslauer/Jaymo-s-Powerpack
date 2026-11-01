@@ -79,6 +79,24 @@ public final class KitchenCompat {
 	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> MACHINE_CORPSES = net.minecraft.tags.TagKey.create(
 		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "machine_corpses"));
 
+	/** (0.19.55) The carcass {@code player} is dragging along the ground behind them (Kitchen's drag), or null. */
+	public static @Nullable Entity draggedCorpse(Player player) {
+		if (!LOADED) {
+			return null;
+		}
+		try {
+			return Kitchen.dragged(player);
+		} catch (LinkageError e) {
+			// an older Kitchen with no dragging
+			return null;
+		}
+	}
+
+	/** (0.19.55) What a Kitchen body was (a player's corpse: a player), or null if unknown. */
+	public static net.minecraft.world.entity.@Nullable EntityType<?> bodyType(Entity corpse) {
+		return isPlayerCorpse(corpse) ? net.minecraft.world.entity.EntityTypes.PLAYER : sourceType(corpse);
+	}
+
 	/** Someone (anyone) is carrying this corpse right now. */
 	static boolean isCarried(Entity entity) {
 		return LOADED && Kitchen.carried(entity);
@@ -246,6 +264,10 @@ public final class KitchenCompat {
 
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static @Nullable Entity dragged(Player player) {
+			return com.jaymoskitchen.corpse.CorpseEntity.draggedBy(player);
 		}
 
 		static void take(Player player, Entity entity) {

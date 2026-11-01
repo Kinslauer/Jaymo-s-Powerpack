@@ -54,15 +54,22 @@ import org.jspecify.annotations.Nullable;
  * and pushing back as that arm pulls. Crawling backward plays it in reverse (the hands push). On the back
  * ({@code Crawl.SUPINE}) it's a hip shuffle: heels dug in ahead, knees up, hands pushing beside the hips while the hips
  * scoot up to the heels ({@link #surge}), then the legs slide out again, and it's slower ({@code Crawl.SUPINE_SPEED}).
+ * <p>
+ * (0.19.55) Andy: "the animation should change as the strength fades" (Death Engine's crawl as the idea, rebuilt). A downed
+ * crawl is drawn by how much strength is left ({@link Downed#strength}, {@link #vigour}): on the first adrenaline the
+ * hands claw ahead quick and even, the head up looking for cover, the chest heaving high; as they weaken the reach
+ * shortens, the hands slide back along the ground instead of lifting, each pull lingers longer (the hitch), the head
+ * hangs, the arms tremble and the breathing slows to deep gasps; nearly spent, the pushes up off the ground come rarely
+ * and barely lift.
  */
 public final class CrawlPose {
 	/**
-	 * Strokes per unit of the walk cycle (vanilla's walk is 0.6662; the walk cycle runs 4 a block), and the uneven downed
-	 * crawl's hitch on each pull. (0.19.30) One stroke (both hands) is 2 PI / (4 * STROKE) blocks, about 1: each hand is
+	 * Strokes per unit of the walk cycle (vanilla's walk is 0.6662; the walk cycle runs 4 a block). (The uneven downed
+	 * crawl's hitch on each pull: (0.19.55) {@link #STRONG_HITCH}, by strength.) (0.19.30) One stroke (both hands) is 2 PI / (4 * STROKE) blocks, about 1: each hand is
 	 * planted for {@link #PLANTED} of it while the body slides about as far as the hand is dragged under it
 	 * ({@link #HAND_REACH} to {@link #HAND_PULL}), so it all but stays put on the ground.
 	 */
-	static final float STROKE = 1.6F, DOWNED_HITCH = 0.35F;
+	static final float STROKE = 1.6F;
 	/** Moving: how much of the stroke shows at a crawl's speed (walkAnimationSpeed times this, at the most 1). */
 	static final float MOVING_PER_SPEED = 6.0F;
 	/**
@@ -74,6 +81,21 @@ public final class CrawlPose {
 	static final float PLANTED = 0.5F;
 	/** (0.19.30) Swinging forward, the hand arcs out this far (pixels) and lifts off the ground this much (radians). */
 	static final float RECOVER_OUT = 2.0F, RECOVER_LIFT = 0.4F;
+	/**
+	 * (0.19.55) Spent (no strength left): the hand reaches only this far ahead (pixels out, back), lifts this share of
+	 * {@link #RECOVER_LIFT}/{@link #RECOVER_OUT} coming forward (sliding along the ground), and the arms tremble this much
+	 * (radians). On adrenaline each pull's hitch is cut to this share.
+	 */
+	static final float[] HAND_REACH_SPENT = {1.6F, -6.2F};
+	static final float SPENT_LIFT = 0.2F, SPENT_TREMBLE = 0.05F, ADRENALINE_HITCH = 0.4F;
+	/** (0.19.55) The hitch on each pull: full strength, spent (under 0.5, or the stroke would run backward). */
+	static final float STRONG_HITCH = 0.3F, SPENT_HITCH = 0.46F;
+	/** (0.19.55) Spent: the head hangs this low at rest (radians), its look ahead on a pull this much of a strong one's. */
+	static final float SPENT_HEAD = -0.08F, SPENT_LOOK = 0.3F;
+	/** (0.19.55) The chest's heave on a pull, and the push-ups, this much of a strong one's spent; on adrenaline this much more. */
+	static final float SPENT_HEAVE = 0.35F, ADRENALINE_HEAVE = 1.4F, SPENT_ATTEMPT = 0.35F;
+	/** (0.19.55) Breathing spent: this much deeper and this much slower; on adrenaline this much quicker. */
+	static final float SPENT_BREATH_DEPTH = 2.2F, SPENT_BREATH_RATE = 0.5F, ADRENALINE_BREATH_RATE = 1.5F;
 	/** (0.19.30) The arm: shoulder to elbow and elbow to fingertips (pixels), and the elbow this far down the arm's box. */
 	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F;
 	/** (0.19.30) The knee folds the shin back flat along the ground by this much of the thigh's drive (keeps the foot behind). */
@@ -129,11 +151,24 @@ public final class CrawlPose {
 	 * cycle; {@code downed}: ticks since they went down, or -1; {@code out}: passed out; {@code broken}: the broken limbs
 	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id; {@code sneak}:
 	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back; {@code fwd}:
-	 * (0.19.30) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way.
+	 * (0.19.30) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way; {@code vigour}:
+	 * (0.19.55) downed, the strength left (0 spent to 1), up to {@code 1 + ADRENALINE} on the first adrenaline; 1 otherwise.
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
-		boolean sneak, float rise, float back, float fwd) {
+		boolean sneak, float rise, float back, float fwd, float vigour) {
+		/** (0.19.55) The strength left, 0 to 1 (adrenaline counts as full). */
+		float strength() {
+			return Mth.clamp(this.vigour, 0.0F, 1.0F);
+		}
+
+		/** (0.19.55) How far into the first adrenaline (1 just down, 0 once it's worn off). */
+		float rush() {
+			return Mth.clamp((this.vigour - 1.0F) / ADRENALINE, 0.0F, 1.0F);
+		}
 	}
+
+	/** (0.19.55) On the first adrenaline, {@code vigour} runs this far over 1 (fading as it wears off). */
+	static final float ADRENALINE = 0.25F;
 
 	/**
 	 * (0.18.85) On the back ({@code Crawl.SUPINE}): turning over takes this long (ticks), twisting about the middle of the
@@ -205,9 +240,24 @@ public final class CrawlPose {
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
 			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown(), rise,
-			turned(player, time + partialTicks), along < -1.0E-4 ? -1.0F : 1.0F));
+			turned(player, time + partialTicks), along < -1.0E-4 ? -1.0F : 1.0F, vigour(player, since)));
 		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
 		state.isCrouching = false;
+	}
+
+	/**
+	 * (0.19.55) How much a downed player has left in them ({@code down} ticks after going down): their strength (0 to 1),
+	 * and on the first adrenaline more, from {@code 1 + ADRENALINE} just down to 1 as it wears off. 1 when not downed.
+	 */
+	static float vigour(Player player, float down) {
+		if (down < 0.0F) {
+			return 1.0F;
+		}
+		float strength = Downed.strength(player, down);
+		if (strength >= 1.0F && down <= Downed.ADRENALINE_TICKS && !Downed.passedOut(player)) {
+			return 1.0F + ADRENALINE * (1.0F - down / Downed.ADRENALINE_TICKS);
+		}
+		return strength;
 	}
 
 	/**
@@ -321,11 +371,16 @@ public final class CrawlPose {
 			// the jolt of hitting the ground: the chest bouncing up off it, smaller each time
 			lift += FALL_JOLT * (float)Math.exp(-crawl.downed() * FALL_DECAY) * Math.abs(Mth.sin(crawl.downed() * FALL_RING));
 			if (!crawl.out()) {
-				// laboured breathing, and now and then a try at pushing up
-				lift += BREATH_DEGREES * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE)) * w;
-				lift += ATTEMPT_DEGREES * attempt(crawl) * w;
-				// (0.15.86) each arm's pull hauls the chest up off the ground a little
-				lift += DRAG_HEAVE * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
+				// laboured breathing, and now and then a try at pushing up; (0.19.55) quick and shallow on adrenaline, slowing to
+				// deep gasps as they weaken
+				float weak = 1.0F - crawl.strength();
+				float depth = Mth.lerp(weak, 1.0F, SPENT_BREATH_DEPTH);
+				float rate = BREATH_RATE * Mth.lerp(weak, 1.0F, SPENT_BREATH_RATE) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_BREATH_RATE);
+				lift += BREATH_DEGREES * depth * (0.5F + 0.5F * Mth.sin(crawl.age() * rate)) * w;
+				lift += ATTEMPT_DEGREES * attempt(crawl) * Mth.lerp(weak, 1.0F, SPENT_ATTEMPT) * w;
+				// (0.15.86) each arm's pull hauls the chest up off the ground a little; (0.19.55) less as they weaken
+				float heave = Mth.lerp(weak, 1.0F, SPENT_HEAVE) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_HEAVE);
+				lift += DRAG_HEAVE * heave * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
 			} else {
 				lift += BREATH_DEGREES * 0.5F * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE * 0.5F)) * w;
 			}
@@ -410,7 +465,13 @@ public final class CrawlPose {
 			track.apply(h, f, 1.2F);
 			return;
 		}
-		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F, elbow(state, true), elbow(state, false));
+		stroke(f, phase(crawl), moving(crawl), broken, crawl.downed() >= 0.0F, elbow(state, true), elbow(state, false), crawl.strength());
+		if (crawl.downed() >= 0.0F) {
+			// (0.19.55) weakening, the arms tremble with the effort (still or crawling)
+			float tremble = SPENT_TREMBLE * (1.0F - crawl.strength()) * Mth.sin(crawl.age() * 2.1F);
+			f.shake(PoseBlend.RIGHT_ARM + 2, tremble);
+			f.shake(PoseBlend.LEFT_ARM + 2, -tremble * 0.8F);
+		}
 		float press = crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F;
 		if (press > 0.0F) {
 			// the try at pushing up: both (good) arms pressed straight down under the shoulders, head up
@@ -476,6 +537,15 @@ public final class CrawlPose {
 	 */
 	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed, boolean rightElbow,
 		boolean leftElbow) {
+		stroke(f, phase, moving, broken, downed, rightElbow, leftElbow, 1.0F);
+	}
+
+	/**
+	 * (0.19.55) As above, {@code strength} left (0 spent to 1): the reach shortens, the hands slide back along the ground
+	 * rather than lifting, and the head hangs and looks up less on each pull.
+	 */
+	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed, boolean rightElbow,
+		boolean leftElbow, float strength) {
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
 		boolean rightLeg = (broken & Dismember.RIGHT_LEG) == 0, leftLeg = (broken & Dismember.LEFT_LEG) == 0;
 		float effort = rightArm && leftArm && rightLeg && leftLeg ? 1.0F : HURT_EFFORT;
@@ -484,10 +554,10 @@ public final class CrawlPose {
 		// only ease the pose in and out.
 		float rightU = cycle(phase), leftU = cycle(phase + Mth.PI);
 		if (rightArm) {
-			armOnto(f, PoseBlend.RIGHT_ARM, rightU, moving, rightElbow, 1.0F);
+			armOnto(f, PoseBlend.RIGHT_ARM, rightU, moving, rightElbow, 1.0F, strength);
 		}
 		if (leftArm) {
-			armOnto(f, PoseBlend.LEFT_ARM, leftU, moving, leftElbow, -1.0F);
+			armOnto(f, PoseBlend.LEFT_ARM, leftU, moving, leftElbow, -1.0F, strength);
 		}
 		if (downed) {
 			// (0.15.86) limp: the legs trail apart, toes dragging, bounced a little by each pull; the waist doesn't twist
@@ -500,8 +570,10 @@ public final class CrawlPose {
 			}
 			f.set(PoseBlend.BODY + 1, 0.0F);
 			f.set(PoseBlend.HIP_YAW, 0.0F);
-			float look = Math.abs(Mth.sin(phase)) * moving;
-			f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, HEAD_DOWN_REST, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
+			// (0.19.55) weakening, the head hangs lower and lifts less on each pull
+			float look = Math.abs(Mth.sin(phase)) * moving * Mth.lerp(strength, SPENT_LOOK, 1.0F);
+			float rest = Mth.lerp(moving * strength, Mth.lerp(strength, SPENT_HEAD, HEAD_DOWN_REST), HEAD_REST);
+			f.set(PoseBlend.HEAD, Mth.lerp(look, rest, HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 			return;
 		}
 		// (0.19.30) elbow and opposite knee together: the right knee draws up the side as the left hand comes forward, and
@@ -543,17 +615,24 @@ public final class CrawlPose {
 	 * Lying still it rests folded under the face. Without an elbow the straight arm points where the hand would be.
 	 */
 	static Arm arm(float u, float moving, boolean elbow) {
+		return arm(u, moving, elbow, 1.0F);
+	}
+
+	/** (0.19.55) As above, with {@code strength} left (0 to 1): a shorter reach, the hand sliding forward low along the ground. */
+	static Arm arm(float u, float moving, boolean elbow, float strength) {
 		float out, back, lift = ARM_DIP;
+		float reachOut = Mth.lerp(strength, HAND_REACH_SPENT[0], HAND_REACH[0]), reachBack = Mth.lerp(strength, HAND_REACH_SPENT[1], HAND_REACH[1]);
+		float raise = Mth.lerp(strength, SPENT_LIFT, 1.0F);
 		if (u < PLANTED) {
 			float t = u / PLANTED;
-			out = Mth.lerp(t, HAND_REACH[0], HAND_PULL[0]);
-			back = Mth.lerp(t, HAND_REACH[1], HAND_PULL[1]);
+			out = Mth.lerp(t, reachOut, HAND_PULL[0]);
+			back = Mth.lerp(t, reachBack, HAND_PULL[1]);
 		} else {
 			float t = PoseBlend.smooth((u - PLANTED) / (1.0F - PLANTED));
 			float arc = Mth.sin(Mth.PI * t);
-			out = Mth.lerp(t, HAND_PULL[0], HAND_REACH[0]) + RECOVER_OUT * arc;
-			back = Mth.lerp(t, HAND_PULL[1], HAND_REACH[1]);
-			lift += RECOVER_LIFT * arc;
+			out = Mth.lerp(t, HAND_PULL[0], reachOut) + RECOVER_OUT * raise * arc;
+			back = Mth.lerp(t, HAND_PULL[1], reachBack);
+			lift += RECOVER_LIFT * raise * arc;
 		}
 		out = Mth.lerp(moving, HAND_REST[0], out);
 		back = Mth.lerp(moving, HAND_REST[1], back);
@@ -582,9 +661,9 @@ public final class CrawlPose {
 	}
 
 	/** (0.19.30) Lays the arm on: a steady target for the springs to ease in, the stroke on top past them. {@code side}: 1 right, -1 left. */
-	private static void armOnto(PoseBlend.Frame f, int part, float u, float moving, boolean elbow, float side) {
+	private static void armOnto(PoseBlend.Frame f, int part, float u, float moving, boolean elbow, float side, float strength) {
 		Arm rest = arm(0.0F, 0.0F, elbow);
-		Arm now = arm(u, moving, elbow);
+		Arm now = arm(u, moving, elbow, strength);
 		f.set(part, rest.lift(), 0.0F, side * rest.sweep());
 		f.shake(part, now.lift() - rest.lift());
 		f.shake(part + 2, side * (now.sweep() - rest.sweep()));
@@ -675,10 +754,10 @@ public final class CrawlPose {
 		float phase = phase(crawl), moving = moving(crawl);
 		float press = 1.0F - (crawl.downed() >= 0.0F ? attempt(crawl) : 0.0F);
 		if ((broken & Dismember.RIGHT_ARM) == 0 && elbow(state, true)) {
-			KneeBend.bend(h.rightArm, arm(cycle(phase), moving, true).elbow() * flat * press, ELBOW, true);
+			KneeBend.bend(h.rightArm, arm(cycle(phase), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
 		}
 		if ((broken & Dismember.LEFT_ARM) == 0 && elbow(state, false)) {
-			KneeBend.bend(h.leftArm, -arm(cycle(phase + Mth.PI), moving, true).elbow() * flat * press, ELBOW, true);
+			KneeBend.bend(h.leftArm, -arm(cycle(phase + Mth.PI), moving, true, crawl.strength()).elbow() * flat * press, ELBOW, true);
 		}
 		if (crawl.downed() < 0.0F) {
 			// the knee drawn up the side folds its shin back along the ground, the foot behind it
@@ -744,7 +823,9 @@ public final class CrawlPose {
 		float phase = crawl.stride() * STROKE * crawl.fwd();
 		if (crawl.downed() >= 0.0F) {
 			phase *= DRAG_STROKE;
-			phase += DOWNED_HITCH * Mth.sin(phase * 2.0F);
+			// (0.19.55) lingering longer on each pull as they weaken, hardly at all on adrenaline
+			float hitch = Mth.lerp(crawl.strength(), SPENT_HITCH, STRONG_HITCH) * Mth.lerp(crawl.rush(), 1.0F, ADRENALINE_HITCH);
+			phase += hitch * Mth.sin(phase * 2.0F);
 		}
 		return phase;
 	}

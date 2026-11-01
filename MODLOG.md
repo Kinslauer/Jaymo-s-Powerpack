@@ -4914,3 +4914,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.54, Kitchen jar:** `libs/` now holds Jaymo's Kitchen 0.5.47 (built from `kitchen/`) in place of 0.5.33.1, which
   predated `corpse/Hauling` and broke the root build (`KitchenCompat.brawn`). The pack ships the new Kitchen.
   Compile-checked; not played.
+- **0.19.55, downed upgrades from Death Engine's ideas:** Andy liked Death Engine's crawl, blood trail and downed state
+  (All Rights Reserved and Forge only, so ideas only, rebuilt here). Going down gives 10 s of adrenaline (a quicker crawl),
+  then strength fades steadily to pass-out at 2 min, the crawl slowing from -50% to -85% (mobs too, `Downed.strength`,
+  `crawlPace`). The crawl animation follows it: on adrenaline quick even strokes with the head up, weakening to a shorter
+  reach, hands sliding along the ground, longer hitches, a hanging head, trembling arms and slow deep gasps (`CrawlPose`).
+  Crawling and dragged bodies, and Kitchen carcasses dragged behind you, leave long blood smears along the ground every
+  half block (`BloodSmears`, `BloodTrail.smear`, stretched stains in `BloodPuddle`); a living crawler's smears are tracked
+  like any blood. The downed screen gets a dark red ring that closes in as strength fades and a heartbeat that races, then
+  slows. Sneak + held use on someone downed now takes them by the shoulder and drags them along the ground (`Carry.DRAG`):
+  the body slopes from your hand to the hips, the legs ragdoll (kicked up by bumps, swung on turns, bouncing back down),
+  arms trail and the head lolls; right-click lets go, sneak + right-click lifts them into your arms (armour permitting).
+  Compile-checked (0 errors against the 26.3 jars); not played.
