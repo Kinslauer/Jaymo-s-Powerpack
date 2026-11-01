@@ -183,6 +183,12 @@ public final class XenoformState {
 	/** (0.18.119, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */
 	public static final AttachmentType<Long> GRAB = AttachmentRegistry.create(JaymosPowers.id("xenoform_grab"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.19.28) Towerback's swat: when it began (game time), so every client poses the backhand. Absent: not swatting. */
+	public static final AttachmentType<Long> SWAT = AttachmentRegistry.create(JaymosPowers.id("xenoform_swat"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.19.28) Towerback's footfalls so far: each new one, every client brings its legs' stride round to a foot coming down. */
+	public static final AttachmentType<Integer> STEP = AttachmentRegistry.create(JaymosPowers.id("xenoform_step"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
 
 	/** Pyre's jet, plain or Sunheart's. */

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). (0.19.28) Prone on the back, shuffling on
+ * (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). (0.19.29) Prone on the back, shuffling on
  * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}).
  */
 @Mixin(LocalPlayer.class)

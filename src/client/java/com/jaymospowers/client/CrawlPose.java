@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * up, the swimming tilt vanilla eases out over a few ticks is cancelled ({@link #RISEN_KEY}), so they don't pitch
  * forward again as they stand.
  * <p>
- * (0.19.28) Andy: "realistically animate your hands moving and grabbing and dragging you, same with the prone movement on
+ * (0.19.29) Andy: "realistically animate your hands moving and grabbing and dragging you, same with the prone movement on
  * your back, you shuffle forward with your hips, so you move slower than you would prone on your stomach" (Smart Moving's
  * crawl as the feel to aim for; GPL, so ideas only, nothing of it copied). Each hand now reaches ahead, plants, and stays
  * put on the ground while the body is dragged up past it: the hand's path is solved for the shoulder and a bent elbow
@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
 public final class CrawlPose {
 	/**
 	 * Strokes per unit of the walk cycle (vanilla's walk is 0.6662; the walk cycle runs 4 a block), and the uneven downed
-	 * crawl's hitch on each pull. (0.19.28) One stroke (both hands) is 2 PI / (4 * STROKE) blocks, about 1: each hand is
+	 * crawl's hitch on each pull. (0.19.29) One stroke (both hands) is 2 PI / (4 * STROKE) blocks, about 1: each hand is
 	 * planted for {@link #PLANTED} of it while the body slides about as far as the hand is dragged under it
 	 * ({@link #HAND_REACH} to {@link #HAND_PULL}), so it all but stays put on the ground.
 	 */
@@ -66,17 +66,17 @@ public final class CrawlPose {
 	/** Moving: how much of the stroke shows at a crawl's speed (walkAnimationSpeed times this, at the most 1). */
 	static final float MOVING_PER_SPEED = 6.0F;
 	/**
-	 * (0.19.28) The hand's path, in model pixels from the shoulder (out to the side, back toward the feet): reached ahead
+	 * (0.19.29) The hand's path, in model pixels from the shoulder (out to the side, back toward the feet): reached ahead
 	 * beside the head, pulled straight back beside the chest (the elbow out and back), folded under the face at rest.
 	 */
 	static final float[] HAND_REACH = {1.0F, -9.4F}, HAND_PULL = {1.0F, -2.8F}, HAND_REST = {-3.0F, -6.0F};
-	/** (0.19.28) The share of each hand's stroke it's planted and pulling (the rest it's lifted, coming forward). */
+	/** (0.19.29) The share of each hand's stroke it's planted and pulling (the rest it's lifted, coming forward). */
 	static final float PLANTED = 0.5F;
-	/** (0.19.28) Swinging forward, the hand arcs out this far (pixels) and lifts off the ground this much (radians). */
+	/** (0.19.29) Swinging forward, the hand arcs out this far (pixels) and lifts off the ground this much (radians). */
 	static final float RECOVER_OUT = 2.0F, RECOVER_LIFT = 0.4F;
-	/** (0.19.28) The arm: shoulder to elbow and elbow to fingertips (pixels), and the elbow this far down the arm's box. */
+	/** (0.19.29) The arm: shoulder to elbow and elbow to fingertips (pixels), and the elbow this far down the arm's box. */
 	static final float UPPER_ARM = 4.0F, FOREARM = 6.0F, ELBOW = 4.0F;
-	/** (0.19.28) The knee folds the shin back flat along the ground by this much of the thigh's drive (keeps the foot behind). */
+	/** (0.19.29) The knee folds the shin back flat along the ground by this much of the thigh's drive (keeps the foot behind). */
 	static final float KNEE_FOLD = 1.15F;
 	/**
 	 * The arms sweep flat along the ground (face down, a roll (z) of PI points an arm ahead past the head, PI/2 straight
@@ -84,7 +84,7 @@ public final class CrawlPose {
 	 * to the ground (x, - is down) and lift off it coming forward.
 	 */
 	static final float ARM_DIP = -0.15F;
-	/** The knees driven up the side (radians out), at rest and at the drive, and the foot lifted with it. (0.19.28) further. */
+	/** The knees driven up the side (radians out), at rest and at the drive, and the foot lifted with it. (0.19.29) further. */
 	static final float LEG_OUT = 0.1F, KNEE_DRIVE = 0.85F, KNEE_LIFT = 0.1F;
 	/** The head: resting, and lifted to look ahead on each pull (radians: -PI/2 looks along the ground). */
 	static final float HEAD_REST = -0.75F, HEAD_LOOK = -1.3F, HEAD_DOWN_REST = -0.3F;
@@ -98,7 +98,7 @@ public final class CrawlPose {
 	 * (degrees), and the limp torso's sway (share of {@link #ROCK_DEGREES}).
 	 */
 	static final float DRAG_STROKE = 0.6F, DRAG_MOVING_PER_SPEED = 8.0F, DRAG_HEAVE = 4.0F, LIMP_ROCK = 0.35F;
-	/** (0.19.28) Crawling (not downed), the chest lifts this much on each pull too (degrees). */
+	/** (0.19.29) Crawling (not downed), the chest lifts this much on each pull too (degrees). */
 	static final float CRAWL_HEAVE = 1.5F;
 	/** (0.15.86) Downed, the limp legs trailing: spread apart, toes dragging (x), and the small bounce each pull gives them. */
 	static final float LIMP_LEG_OUT = 0.12F, LIMP_LEG_X = 0.08F, LIMP_BOUNCE = 0.06F;
@@ -126,7 +126,7 @@ public final class CrawlPose {
 	 * cycle; {@code downed}: ticks since they went down, or -1; {@code out}: passed out; {@code broken}: the broken limbs
 	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id; {@code sneak}:
 	 * (0.15.86) downed and holding Sneak to give up; {@code back}: (0.18.85) 0 to 1, turned over onto the back; {@code fwd}:
-	 * (0.19.28) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way.
+	 * (0.19.29) 1 moving the way they face (head first on the belly, feet first on the back), -1 the other way.
 	 */
 	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
 		boolean sneak, float rise, float back, float fwd) {
@@ -142,12 +142,12 @@ public final class CrawlPose {
 	/** On the back: one knee up, the other leg out straight (radians). */
 	static final float BACK_KNEE_UP = -0.55F, BACK_LEG_OUT = 0.12F;
 	/**
-	 * (0.19.28) The hip shuffle on the back: hip to heel (pixels, along the ground) with the legs slid out and with the hips
+	 * (0.19.29) The hip shuffle on the back: hip to heel (pixels, along the ground) with the legs slid out and with the hips
 	 * scooted up to the heels; the share of each shuffle the heels are dug in (the hips moving); and strokes per unit of the
 	 * walk cycle, set so one shuffle covers the hips' scoot (8.3 pixels: 2 PI / (4 * 8.3/16)).
 	 */
 	static final float HEEL_FAR = 11.8F, HEEL_NEAR = 3.5F, SCOOT = 0.55F, BACK_STROKE = 3.03F;
-	/** (0.19.28) On the back: the hands press down beside the hips as they scoot (radians), and the head nods forward with it. */
+	/** (0.19.29) On the back: the hands press down beside the hips as they scoot (radians), and the head nods forward with it. */
 	static final float BACK_PUSH = 0.35F, BACK_NOD = 0.15F;
 	/** (0.19.9) The neck up the body from the feet, and the eyes out from it (up and ahead, blocks). */
 	static final float NECK = 1.5F, EYE_FROM_NECK = 0.25F;
@@ -197,7 +197,7 @@ public final class CrawlPose {
 		} else if (downed) {
 			RISEN.remove(player.getId());
 		}
-		// (0.19.28) which way they're going along the body: the way they face, or backing up
+		// (0.19.29) which way they're going along the body: the way they face, or backing up
 		float yaw = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double along = -Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo);
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
@@ -292,7 +292,7 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl.back() > 0.0F) {
-			// (0.19.28) the hips scooting up to the heels and resting while the legs slide out: the body drawn a little ahead
+			// (0.19.29) the hips scooting up to the heels and resting while the legs slide out: the body drawn a little ahead
 			// of or behind where it is, along its length (the way they look; feet first)
 			float surge = surge(crawl) * crawl.back();
 			if (Math.abs(surge) > 1.0E-4F) {
@@ -327,7 +327,7 @@ public final class CrawlPose {
 				lift += BREATH_DEGREES * 0.5F * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE * 0.5F)) * w;
 			}
 		} else {
-			// (0.19.28) the chest lifts a little as each hand pulls
+			// (0.19.29) the chest lifts a little as each hand pulls
 			lift += CRAWL_HEAVE * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
 		}
 		if (!crawl.out()) {
@@ -428,11 +428,11 @@ public final class CrawlPose {
 			// (0.18.85) on the back: head up looking down past the feet, one knee raised; the arms at the sides, or up
 			// and out toward the feet to aim (a drawn bow, a crossbow or gun held ready)
 			boolean aiming = state.isUsingItem || aims(state.rightArmPose) || aims(state.leftArmPose);
-			// (0.19.28) the belly crawl's stroke (laid past the springs) fades out as they turn over
+			// (0.19.29) the belly crawl's stroke (laid past the springs) fades out as they turn over
 			for (int i = PoseBlend.RIGHT_ARM; i < PoseBlend.HIP_PITCH; i++) {
 				f.raw[i] *= 1.0F - back;
 			}
-			// (0.19.28) the hip shuffle: heels dug in ahead, the hands pressing down by the hips as they scoot up to them
+			// (0.19.29) the hip shuffle: heels dug in ahead, the hands pressing down by the hips as they scoot up to them
 			float m = moving(crawl);
 			float u = backCycle(crawl);
 			float push = m * Mth.sin(Mth.PI * Math.min(1.0F, u / SCOOT));
@@ -468,7 +468,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.28) As above; {@code rightElbow}/{@code leftElbow}: that arm's elbow is drawn bent ({@link #bendLimbs}), so its
+	 * (0.19.29) As above; {@code rightElbow}/{@code leftElbow}: that arm's elbow is drawn bent ({@link #bendLimbs}), so its
 	 * hand is placed with the bend, otherwise the straight arm points at where the hand would be.
 	 */
 	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed, boolean rightElbow,
@@ -476,7 +476,7 @@ public final class CrawlPose {
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
 		boolean rightLeg = (broken & Dismember.RIGHT_LEG) == 0, leftLeg = (broken & Dismember.LEFT_LEG) == 0;
 		float effort = rightArm && leftArm && rightLeg && leftLeg ? 1.0F : HURT_EFFORT;
-		// (0.19.28) each hand reaches, plants and drags the body up past it; the left half a stroke behind the right. The
+		// (0.19.29) each hand reaches, plants and drags the body up past it; the left half a stroke behind the right. The
 		// cycle is laid on past the springs (they'd lag behind the ground and the planted hand would slide); the springs
 		// only ease the pose in and out.
 		float rightU = cycle(phase), leftU = cycle(phase + Mth.PI);
@@ -501,7 +501,7 @@ public final class CrawlPose {
 			f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, HEAD_DOWN_REST, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 			return;
 		}
-		// (0.19.28) elbow and opposite knee together: the right knee draws up the side as the left hand comes forward, and
+		// (0.19.29) elbow and opposite knee together: the right knee draws up the side as the left hand comes forward, and
 		// pushes back as it pulls (a good leg drives harder for a broken one)
 		if (rightLeg) {
 			float drive = knee(leftU, moving) * (leftLeg ? 1.0F : effort);
@@ -524,18 +524,18 @@ public final class CrawlPose {
 		f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, headRest, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 	}
 
-	/** (0.19.28) Where in its own stroke a hand is (0 just planted ahead, {@link #PLANTED} pulled back, 1 planted again). */
+	/** (0.19.29) Where in its own stroke a hand is (0 just planted ahead, {@link #PLANTED} pulled back, 1 planted again). */
 	static float cycle(float phase) {
 		float u = phase / Mth.TWO_PI;
 		return u - Mth.floor(u);
 	}
 
-	/** (0.19.28) An arm's angles for this frame: the shoulder's sweep along the ground, the elbow's fold, the lift. */
+	/** (0.19.29) An arm's angles for this frame: the shoulder's sweep along the ground, the elbow's fold, the lift. */
 	record Arm(float sweep, float elbow, float lift) {
 	}
 
 	/**
-	 * (0.19.28) The arm {@code u} through its stroke: planted, the hand dragged straight back along the ground from the reach
+	 * (0.19.29) The arm {@code u} through its stroke: planted, the hand dragged straight back along the ground from the reach
 	 * to beside the chest (at the pace the body moves past it); then lifted and swung out and forward to the reach again.
 	 * Lying still it rests folded under the face. Without an elbow the straight arm points where the hand would be.
 	 */
@@ -559,7 +559,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.28) The shoulder's sweep (zRot of a right arm: 0 down along the body toward the feet, PI ahead past the head) and
+	 * (0.19.29) The shoulder's sweep (zRot of a right arm: 0 down along the body toward the feet, PI ahead past the head) and
 	 * the elbow's fold that put the fingertips {@code out} to the side and {@code back} toward the feet (pixels), the elbow
 	 * out and behind; or, without an elbow, the straight arm pointing there.
 	 */
@@ -578,7 +578,7 @@ public final class CrawlPose {
 		return new Arm(aim - offset, fold, lift);
 	}
 
-	/** (0.19.28) Lays the arm on: a steady target for the springs to ease in, the stroke on top past them. {@code side}: 1 right, -1 left. */
+	/** (0.19.29) Lays the arm on: a steady target for the springs to ease in, the stroke on top past them. {@code side}: 1 right, -1 left. */
 	private static void armOnto(PoseBlend.Frame f, int part, float u, float moving, boolean elbow, float side) {
 		Arm rest = arm(0.0F, 0.0F, elbow);
 		Arm now = arm(u, moving, elbow);
@@ -588,7 +588,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.28) How far a knee is drawn up the side (0 to 1) as the opposite hand is {@code u} through its stroke: drawn up
+	 * (0.19.29) How far a knee is drawn up the side (0 to 1) as the opposite hand is {@code u} through its stroke: drawn up
 	 * as that hand swings forward, pushed back out straight as it pulls.
 	 */
 	static float knee(float u, float moving) {
@@ -596,19 +596,19 @@ public final class CrawlPose {
 		return k * moving;
 	}
 
-	/** (0.19.28) Where in the hip shuffle (0 heels just dug in, {@link #SCOOT} hips up to them, 1 legs slid out again). */
+	/** (0.19.29) Where in the hip shuffle (0 heels just dug in, {@link #SCOOT} hips up to them, 1 legs slid out again). */
 	static float backCycle(State crawl) {
 		return cycle(crawl.stride() * BACK_STROKE * crawl.fwd());
 	}
 
-	/** (0.19.28) Hip to heel (pixels) through the shuffle: shrinking as the hips scoot up, growing as the legs slide out. */
+	/** (0.19.29) Hip to heel (pixels) through the shuffle: shrinking as the hips scoot up, growing as the legs slide out. */
 	static float heel(float u) {
 		return u < SCOOT ? Mth.lerp(PoseBlend.smooth(u / SCOOT), HEEL_FAR, HEEL_NEAR)
 			: Mth.lerp(PoseBlend.smooth((u - SCOOT) / (1.0F - SCOOT)), HEEL_NEAR, HEEL_FAR);
 	}
 
 	/**
-	 * (0.19.28) On the back, how far a thigh is raised (radians, toward the sky) so its heel sits on the ground where the
+	 * (0.19.29) On the back, how far a thigh is raised (radians, toward the sky) so its heel sits on the ground where the
 	 * shuffle has it (the shin folds back down to it, {@link #bendLimbs}); the right leads a little. Lying still, the right
 	 * knee up and the left out straight.
 	 */
@@ -622,7 +622,7 @@ public final class CrawlPose {
 	}
 
 	/**
-	 * (0.19.28) On the back, the body drawn along its length (blocks, toward the feet; 1 = how far a shuffle goes) so the hips
+	 * (0.19.29) On the back, the body drawn along its length (blocks, toward the feet; 1 = how far a shuffle goes) so the hips
 	 * move only while the heels are dug in and rest while the legs slide out, though the player glides on all the while.
 	 */
 	static float surge(State crawl) {
@@ -632,13 +632,13 @@ public final class CrawlPose {
 		return s * crawl.fwd() * moving(crawl);
 	}
 
-	/** (0.19.28) Whether this arm's elbow is bent in the crawl: an empty hand (one holding something keeps it straight, the item in it). */
+	/** (0.19.29) Whether this arm's elbow is bent in the crawl: an empty hand (one holding something keeps it straight, the item in it). */
 	private static boolean elbow(AvatarRenderState state, boolean right) {
 		return (right ? state.rightArmPose : state.leftArmPose) == HumanoidModel.ArmPose.EMPTY;
 	}
 
 	/**
-	 * (0.19.28) Right before the model is drawn (after {@link #applyModel}): the crawl's elbows and knees bent for this one
+	 * (0.19.29) Right before the model is drawn (after {@link #applyModel}): the crawl's elbows and knees bent for this one
 	 * draw ({@link KneeBend#restore} once it's drawn). On the belly the forearms and shins fold flat along the ground; on the
 	 * back the knees bend up so the heels sit on it.
 	 */
@@ -732,7 +732,7 @@ public final class CrawlPose {
 
 	/** Where in the stroke: from the distance crawled; downed, slower and hitching (lingering on each pull). */
 	private static float phase(State crawl) {
-		// (0.19.28) backing up plays the stroke in reverse (the hands push)
+		// (0.19.29) backing up plays the stroke in reverse (the hands push)
 		float phase = crawl.stride() * STROKE * crawl.fwd();
 		if (crawl.downed() >= 0.0F) {
 			phase *= DRAG_STROKE;
