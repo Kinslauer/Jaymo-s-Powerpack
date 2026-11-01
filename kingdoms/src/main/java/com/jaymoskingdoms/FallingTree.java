@@ -74,6 +74,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.232) From Tree Physics' ideas (ARR, none of its code): coming down, its wood breaks through other trees' leaves
  * in its way ({@link #sweep}); landing, some of its own leaves snap off, more the harder they struck ({@link #snaps});
  * and lying, its logs are a fallen trunk you can push, roll or build on ({@link FallenTrunks}).
+ * <p>
+ * (0.7.456) Felled into another tree, it never stands back up: struck before it's half over, it glances off to the side
+ * ({@link #glance}) and falls on; with no way down at all it leans there a moment and breaks apart.
  */
 public final class FallingTree extends Entity {
 	/** Its first push (degrees a tick), a steady nudge, and the pull of its own weight (scaled by how far it leans). */
@@ -102,6 +105,9 @@ public final class FallingTree extends Entity {
 	static final float LEAF_SNAP = 0.5F, LEAF_SNAP_FULL = 1.5F;
 	/** (0.7.232) The most standing leaves (other trees') its wood breaks through in a tick as it comes down. */
 	static final int SWEEP_MOST = 12;
+	/** (0.7.456) Under this lean (degrees) it isn't lying yet: struck there it glances off sideways, at most this many times. */
+	static final float LYING = 45.0F;
+	static final int GLANCES = 2;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -140,6 +146,9 @@ public final class FallingTree extends Entity {
 	private final Set<UUID> struck = new HashSet<>();
 	/** (0.7.232) How fast it struck the ground: its whole speed (blocks a tick), and its turn (per block from its turning point). */
 	private float landFlat, landTurning;
+	/** (0.7.456) How often it has glanced off something in its way, and whether it came to rest still half standing. */
+	private int glanced;
+	private boolean propped;
 
 	public FallingTree(EntityType<? extends FallingTree> type, Level level) {
 		super(type, level);
@@ -343,7 +352,8 @@ public final class FallingTree extends Entity {
 		}
 		if (this.downAt >= 0) {
 			if (this.tickCount - this.downAt >= LIES) {
-				if (this.sink != null) {
+				// (0.7.456) still half standing (caught on another tree): it never goes back up as blocks, it breaks apart
+				if (this.sink != null || this.propped) {
 					this.breakApart(level, pieces);
 				} else {
 					this.settle(level, pieces);
@@ -359,6 +369,9 @@ public final class FallingTree extends Entity {
 		this.speed += NUDGE + WEIGHT * Mth.sin(lean * Mth.DEG_TO_RAD) / this.reach;
 		float next = Math.min(FLAT, lean + this.speed);
 		boolean blocked = this.strikes(level, pieces, next, 2);
+		if (blocked && lean < LYING && this.glance(level, pieces, lean, next)) {
+			blocked = false;
+		}
 		boolean landed = next >= FLAT || this.tickCount >= LONGEST || blocked;
 		float at = blocked ? lean : next;
 		this.hit(level, pieces, at, 2, 0.0F, this.speed * Mth.DEG_TO_RAD);
@@ -373,8 +386,37 @@ public final class FallingTree extends Entity {
 		}
 		this.landTurning = this.speed * Mth.DEG_TO_RAD;
 		this.land(level, pieces, at);
+		if (at < LYING) {
+			// (0.7.456) caught half standing: it leans there a moment (no quick settle), then breaks apart
+			this.propped = true;
+			this.downAt = this.tickCount;
+			return;
+		}
 		// (down in under half a second: it settles at once)
 		this.downAt = this.tickCount < QUICK ? this.tickCount - LIES : this.tickCount;
+	}
+
+	/**
+	 * (0.7.456) Struck while leaning {@code lean} (on its way to {@code next}) before it's half over: it glances off to
+	 * one side or the other (a quarter turn, along a compass line), whichever way is clear, and falls on that way.
+	 * Returns whether it found one.
+	 */
+	private boolean glance(ServerLevel level, List<Piece> pieces, float lean, float next) {
+		if (this.glanced >= GLANCES) {
+			return false;
+		}
+		float heading = this.heading();
+		float first = level.getRandom().nextBoolean() ? Mth.HALF_PI : -Mth.HALF_PI;
+		for (float side : new float[] {first, -first}) {
+			float h = heading + side;
+			if (!this.strikes(level, pieces, lean, 2, h) && !this.strikes(level, pieces, next, 2, h)) {
+				this.glanced++;
+				this.setAttached(HEADING, Mth.wrapDegrees(h * Mth.RAD_TO_DEG) * Mth.DEG_TO_RAD);
+				level.playSound(null, this.blockPosition(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.2F, 0.6F);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** (0.6.12) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
@@ -411,7 +453,12 @@ public final class FallingTree extends Entity {
 
 	/** Whether its wood (from {@code fromY} above its origin up), leaning {@code lean}, runs into anything solid. */
 	private boolean strikes(ServerLevel level, List<Piece> pieces, float lean, int fromY) {
-		Quaternionf turn = turn(lean, this.heading());
+		return this.strikes(level, pieces, lean, fromY, this.heading());
+	}
+
+	/** As {@link #strikes(ServerLevel, List, float, int)}, falling toward {@code heading} instead. */
+	private boolean strikes(ServerLevel level, List<Piece> pieces, float lean, int fromY, float heading) {
+		Quaternionf turn = turn(lean, heading);
 		for (Piece p : pieces) {
 			if (p.y() < fromY || !p.blockState().is(BlockTags.LOGS)) {
 				continue;

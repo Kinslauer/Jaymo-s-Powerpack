@@ -4691,3 +4691,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
+- **0.19.15, Kingdoms 0.7.456:** a tree felled into another tree no longer stands back up: it glances off to a clear
+  side and falls on, or, boxed in, leans a moment and breaks apart.
