@@ -4884,3 +4884,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   less emphasized, just to show the user they need water": at 8 water or less, thin dusky veins show at the edges and
   corners, a little further in and stronger as the water runs out (Kitchen `DryVeins`, Kitchen MODLOG). Compile-checked;
   not seen in game.
+
+- **0.19.46, Kitchen 0.5.44, spiders smash more:** Andy: "smaller spiders should be smashed on every kill, and a chance for
+  any spider to smash from any weapon, not just blunt". Cave spiders and any spider 1 block wide or less burst into legs on
+  every kill; other spiders do a quarter of the time, from any weapon (Kitchen `SpiderCrush`, Kitchen MODLOG).
