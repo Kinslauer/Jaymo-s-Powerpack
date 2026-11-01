@@ -4913,4 +4913,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   slows. Sneak + held use on someone downed now takes them by the shoulder and drags them along the ground (`Carry.DRAG`):
   the body slopes from your hand to the hips, the legs ragdoll (kicked up by bumps, swung on turns, bouncing back down),
   arms trail and the head lolls; right-click lets go, sneak + right-click lifts them into your arms (armour permitting).
-  Not compile-checked yet; not played.
+  Compile-checked (0 errors against the 26.3 jars); not played.
