@@ -279,12 +279,12 @@ final class JournalScreen extends Screen {
 				int color = 0xFF000000 | p.color();
 				int[] at = marker(x, y, p.seat(), perPixel, half);
 				boolean camp = p.type() == FactionType.BARBARIAN.ordinal();
-				int size = p.type() == FactionType.KINGDOM.ordinal() ? 4 : 3;
+				int size = p.realm() ? 4 : 3;
 				graphics.fill(at[0] - size - 1, at[1] - size - 1, at[0] + size + 1, at[1] + size + 1, camp ? 0xFF8A1010 : 0xFF000000);
 				graphics.fill(at[0] - size, at[1] - size, at[0] + size, at[1] + size, color);
 				if (Math.abs(mouseX - at[0]) <= size + 1 && Math.abs(mouseY - at[1]) <= size + 1) {
 					hover.add(Component.literal(p.name()));
-					hover.add(Component.translatable("journal.jaymoskingdoms.kind." + FactionType.values()[p.type()].id()).withColor(COLOR_DIM));
+					hover.add(Component.translatable(p.kind()).withColor(COLOR_DIM));
 					if (p.rated()) {
 						hover.add(Component.translatable("journal.jaymoskingdoms.rep", Component.translatable("journal.jaymoskingdoms.word." + p.word()), p.reputation())
 							.withColor(repColor(p.reputation())));
@@ -408,7 +408,7 @@ final class JournalScreen extends Screen {
 			graphics.fill(x + 6, ty, x + 8, ty + REP_ROW - 2, 0xFF000000 | p.color());
 			int bw = 90, bx = x + w - bw - 12;
 			Ui.line(graphics, this.font, Component.literal(p.name()), x + 12, ty + 2, bx - x - 20, COLOR_TEXT);
-			Component kind = Component.translatable("journal.jaymoskingdoms.kind." + FactionType.values()[p.type()].id());
+			Component kind = Component.translatable(p.kind());
 			if (player != null && book.here()) {
 				kind = Component.translatable("journal.jaymoskingdoms.kind_where", kind, where(player, p.seat()));
 			}

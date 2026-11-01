@@ -140,7 +140,7 @@ final class KingdomCommands {
 			: f.overlord() >= 0 ? Component.translatable("message.jaymoskingdoms.state.vassal", nameOf(server, f.overlord()))
 			: Component.translatable("message.jaymoskingdoms.state.standing");
 		return Component.literal(f.name()).withStyle(ChatFormatting.GOLD)
-			.append(Component.translatable("message.jaymoskingdoms.line", Component.translatable(f.type().key()), f.color().getName(),
+			.append(Component.translatable("message.jaymoskingdoms.line", Hordes.kindName(server, f), f.color().getName(),
 				f.seat().toShortString(), state, f.members().size(), f.treasury()).withStyle(ChatFormatting.GRAY));
 	}
 

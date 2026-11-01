@@ -222,7 +222,8 @@ final class OrcCamps {
 		takings.put(Items.LEATHER, DAY_LEATHER);
 		if (Storage.loaded(level, camp)) {
 			for (var e : takings.entrySet()) {
-				Storage.put(level, camp, e.getKey(), e.getValue() * days);
+				// ((0.7.475) a bigger camp, more hands)
+				Storage.put(level, camp, e.getKey(), Hordes.yield(server, camp.id(), e.getValue()) * days);
 			}
 		}
 		Camps.updateData(server, camp.id(), d -> d.withGrown(d.grown() + days));
@@ -230,7 +231,8 @@ final class OrcCamps {
 		if (data == null) {
 			return;
 		}
-		int cap = (int)Math.min(MAX_ORCS, START_GRUNTS + START_RANGERS + data.grown() / DAYS_PER_ORC);
+		// ((0.7.475) the cap grows with its tier)
+		int cap = Math.min(Hordes.folkCap(server, camp.id(), true), START_GRUNTS + START_RANGERS + data.grown() / DAYS_PER_ORC);
 		RandomSource random = level.getRandom();
 		BlockPos fire = data.center();
 		for (int i = 0; i < days; i++) {
@@ -240,8 +242,10 @@ final class OrcCamps {
 			}
 			int rangers = now.holdings().count(Orcs.RANGER);
 			int role = rangers * RANGER_EVERY < fighters(now) ? Orcs.RANGER : Orcs.GRUNT;
-			spawn(level, camp.id(), role, spot(level, fire, random), fire, OrcBuildings.HOME_RADIUS);
+			spawn(level, camp.id(), role, spot(level, fire, random), fire, Hordes.homeRadius(server, camp.id(), OrcBuildings.HOME_RADIUS));
 		}
+		// (0.7.475) and it may move up a tier
+		Hordes.day(level, camp.id());
 	}
 
 	/** Its grunts and rangers on the roster, or on their way back to it (a dead one's place still to fill). */
@@ -271,6 +275,10 @@ final class OrcCamps {
 			MISSING.remove(camp.id());
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
+		}
+		// (0.7.475) past its first stockade: its tier's wall and band
+		if (Hordes.tick(level, camp, data, force)) {
+			return;
 		}
 		// ((0.7.474) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
 		int ogres = OgreHolds.haulers(level, camp.id(), data.center()).size();

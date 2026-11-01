@@ -46,8 +46,11 @@ public final class Journal {
 	public record Entry(boolean royal, boolean ready, Component title, Component giver, Component text, Component objective, Optional<BlockPos> target) {
 	}
 
-	/** One settlement: its name, kind ({@link FactionType} ordinal), colour, seat, and (if it rates you) your reputation and its word. */
-	public record Place(String name, int type, int color, BlockPos seat, boolean rated, int reputation, String word) {
+	/**
+	 * One settlement: its name, kind ({@link FactionType} ordinal), colour, seat, and (if it rates you) your reputation and
+	 * its word; (0.7.475) what it's called (a lang key: a greenskin camp by its tier) and whether it's marked as a realm.
+	 */
+	public record Place(String name, int type, int color, BlockPos seat, boolean rated, int reputation, String word, String kind, boolean realm) {
 	}
 
 	/** Server → player: open the journal. {@code here}: the player stands in the settlements' world (markers belong on the map). */
@@ -76,6 +79,8 @@ public final class Journal {
 				buf.writeBoolean(p.rated);
 				buf.writeInt(p.reputation);
 				buf.writeUtf(p.word);
+				buf.writeUtf(p.kind);
+				buf.writeBoolean(p.realm);
 			}
 			buf.writeBoolean(here);
 		}
@@ -95,7 +100,8 @@ public final class Journal {
 			n = buf.readVarInt();
 			List<Place> places = new ArrayList<>();
 			for (int i = 0; i < n; i++) {
-				places.add(new Place(buf.readUtf(), buf.readVarInt(), buf.readInt(), buf.readBlockPos(), buf.readBoolean(), buf.readInt(), buf.readUtf()));
+				places.add(new Place(buf.readUtf(), buf.readVarInt(), buf.readInt(), buf.readBlockPos(), buf.readBoolean(), buf.readInt(), buf.readUtf(),
+					buf.readUtf(), buf.readBoolean()));
 			}
 			return new Book(entries, places, buf.readBoolean());
 		}
@@ -191,7 +197,8 @@ public final class Journal {
 			.limit(MAX_PLACES).toList()) {
 			boolean rated = f.type() != FactionType.BARBARIAN;
 			int rep = rated ? Reputation.get(player, f.id()) : 0;
-			places.add(new Place(f.name(), f.type().ordinal(), f.styleColor(server).getTextureDiffuseColor(), f.seat(), rated, rep, rated ? Reputation.word(rep) : ""));
+			places.add(new Place(f.name(), f.type().ordinal(), f.styleColor(server).getTextureDiffuseColor(), f.seat(), rated, rep, rated ? Reputation.word(rep) : "",
+				Hordes.journalKind(server, f), f.type() == FactionType.KINGDOM || Hordes.realm(server, f.id())));
 		}
 		ServerPlayNetworking.send(player, new Book(entries, places, level == Factions.level(server)));
 	}
