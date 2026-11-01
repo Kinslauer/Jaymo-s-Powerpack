@@ -5,10 +5,14 @@ pixels stay chunky like the rest of the pack). Layer 1 is the stubs at the very 
 of growth inward, so drawing layers 1..n shows veins reaching further the higher n is. A pixel's layer is the deepest
 point its branch had reached by then, so every layer joins onto the ones before it.
 
-Run from kingdoms/: python3 tools/gen_thirst_veins.py
+(Kitchen 0.5.43) `water` draws Kitchen's water-thirst veins instead: three thin, muted dusky layers that only reach a
+short way in (kitchen textures/gui/dry_veins_1..3.png, client ClimateHud), a quieter hint that you need a drink.
+
+Run from kingdoms/: python3 tools/gen_thirst_veins.py [water]
 """
 import math
 import random
+import sys
 from pathlib import Path
 
 from PIL import Image
@@ -21,13 +25,28 @@ REACH = 0.62
 ROUND = 3.0
 OUT = Path(__file__).resolve().parent.parent / "src/main/resources/assets/jaymoskingdoms/textures/gui"
 
+PREFIX = "thirst_veins"
 # palette: bruise haze, the vein's dark wall, its lit middle
 HAZE = (58, 0, 12, 60)
 WALL = (74, 8, 18, 236)
 CORE = (138, 22, 34, 245)
 TIP = (92, 12, 22, 190)
+# thickest trunk, and how far apart the trunks root (pixels, before the mid-edge thinning)
+MAX_WIDTH, SPACING = 3, (12, 20)
+SEED = 0x7EEF
 
-rng = random.Random(0x7EEF)
+WATER = len(sys.argv) > 1 and sys.argv[1] == "water"
+if WATER:
+    STAGES, REACH, PREFIX = 3, 0.3, "dry_veins"
+    OUT = Path(__file__).resolve().parent.parent.parent / "kitchen/src/main/resources/assets/jaymoskitchen/textures/gui"
+    HAZE = (40, 22, 34, 34)
+    WALL = (66, 44, 60, 190)
+    CORE = (112, 82, 100, 200)
+    TIP = (80, 56, 72, 140)
+    MAX_WIDTH, SPACING = 2, (18, 30)
+    SEED = 0xD27
+
+rng = random.Random(SEED)
 CX, CY = (W - 1) / 2, (H - 1) / 2
 
 
@@ -113,14 +132,14 @@ def seeds():
                 p, a = (-1.0, t), 0.0
             else:
                 p, a = (W, t), math.pi
-            width = 3 if corner < 0.22 or rng.random() < 0.35 else 2
+            width = min(MAX_WIDTH, 3 if corner < 0.22 or rng.random() < 0.35 else 2)
             out.append((p, a + rng.uniform(-0.5, 0.5), width))
-            t += rng.uniform(12, 20) + corner * (40 if edge < 2 else 16)
+            t += rng.uniform(*SPACING) + corner * (40 if edge < 2 else 16)
     return out
 
 
 for (sx, sy), a, w in seeds():
-    grow(sx, sy, a, w, rng.randint(90, 170), -1.0, REACH * rng.uniform(0.55, 1.0))
+    grow(sx, sy, a, w, rng.randint(90, 170) if not WATER else rng.randint(40, 80), -1.0, REACH * rng.uniform(0.55, 1.0))
 
 colours = {1: HAZE, 2: WALL, 3: CORE, 4: TIP}
 OUT.mkdir(parents=True, exist_ok=True)
@@ -130,5 +149,5 @@ for s in range(STAGES):
     for (x, y), (stage, kind) in grid.items():
         if stage == s:
             px[x, y] = colours[kind]
-    img.save(OUT / f"thirst_veins_{s + 1}.png")
+    img.save(OUT / f"{PREFIX}_{s + 1}.png")
 print("wrote", STAGES, "layers to", OUT)
