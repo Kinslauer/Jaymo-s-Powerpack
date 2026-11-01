@@ -89,6 +89,16 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.playerCorpse(entity);
 	}
 
+	/** (0.19.49) Whose body a player's corpse is (null if it isn't one, or Jaymo's Kitchen isn't here). */
+	public static java.util.@Nullable UUID corpseOwner(Entity entity) {
+		return LOADED ? Kitchen.owner(entity) : null;
+	}
+
+	/** (0.19.49) The name of the player a corpse was ("" if it isn't one). */
+	public static String corpseOwnerName(Entity entity) {
+		return LOADED ? Kitchen.ownerName(entity) : "";
+	}
+
 	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
 	static boolean playersLeaveCorpses() {
 		return LOADED;
@@ -212,6 +222,14 @@ public final class KitchenCompat {
 
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
+		static java.util.@Nullable UUID owner(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse() ? corpse.owner().orElse(null) : null;
+		}
+
+		static String ownerName(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse() ? corpse.ownerName() : "";
+		}
+
 		static void endLegCrawl(Entity entity) {
 			if (entity.hasAttached(com.jaymoskitchen.archery.LegShots.CRAWL)) {
 				entity.removeAttached(com.jaymoskitchen.archery.LegShots.CRAWL);

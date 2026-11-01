@@ -192,7 +192,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		// (0.4.44) a dead player is drawn as the villager MCA draws them as (their genes, hair and clothes), lying like any
 		// other villager's body; without one, in their player skin
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
 			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
@@ -316,7 +316,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.turn.identity();
 		state.move.set(0.0F, 0.0F, 0.0F);
 		state.lift[0] = 0.0F;
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, null, yaw, partialTicks);
 			AvatarRenderState avatar = state.avatar;
@@ -405,7 +405,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z,
 			track.side(partialTicks), track.sideUp(), false);
 		state.pose = pose;
-		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, null, 0.0F, partialTicks);
 			AvatarRenderState avatar = state.avatar;
@@ -534,6 +534,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			avatar.setData(Ragdoll.KEY, ragdoll);
 			state.faceUp = ragdoll.faceUp();
 		}
+		// (0.5.46) whatever another mod dresses the body in (Jaymo's Powers: the costume they died in)
+		CorpseDressing.extract(corpse, avatar);
 	}
 
 	@Override
@@ -574,6 +576,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? slim : wide;
 			collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
 				OverlayTexture.NO_OVERLAY, state.outlineColor);
+			CorpseDressing.submit(state.avatar, model, poseStack, collector, state.lightCoords);
 		} else if (state.bodyRenderer != null) {
 			submitBody(state.bodyRenderer, state.body, poseStack, collector, camera);
 		}
