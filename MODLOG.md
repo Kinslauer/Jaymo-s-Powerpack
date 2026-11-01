@@ -4776,3 +4776,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
+
+- **0.19.28, Towerback strides and winds up its swat:** Andy (clip of Towerback): "the way giants move is wrong they should have
+  long exaggerated steps and motions while still covering alot of ground. the backhand should be slow too, like a charged
+  ability even though its a tap". Towerback walked at 80% of a player's pace with vanilla's leg swing slowed 2.5x, so a 9-block
+  body shuffled. Now it moves 70% faster than a player (monolith size 120% more on top), steps every 5 blocks (16 at monolith
+  size; `STRIDE_PER_SCALE` 0.7 to 1.0), and the model walks on its own stride over the ground (`XenoformClient.stride`, eased
+  onto each server footfall via the synced `XenoformState.STEP`): wide leg swings, the forward foot lifted, sinking onto each
+  footfall, rolling over the planted foot, shoulders turning, big arm swings. Swat (V) is still a tap but plays like a charged
+  move: 22 ticks drawing the right arm across its chest and coiling (slowed, growling), a 6-tick whip out to its right (the blow
+  lands mid-swing, flinging to the right now), 14 ticks easing back; synced by `XenoformState.SWAT`. Tuning: constants at the top
+  of `Towerback` (SPEED, SWAT_*) and `XenoFormModels.Towerback` (LEG_SWING, ARM_SWING, ROLL, SWAT_*).

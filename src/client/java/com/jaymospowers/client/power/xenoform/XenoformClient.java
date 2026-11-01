@@ -34,6 +34,24 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> PLATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_plate");
 	public static final RenderStateDataKey<Boolean> SPIKES = RenderStateDataKey.create(() -> "jaymospowers:xenoform_spikes");
 	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
+	/** (0.19.28) How far into Towerback's swat (ticks; -1: not swatting). */
+	public static final RenderStateDataKey<Float> TOWER_SWAT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_swat");
+	/**
+	 * (0.19.28) Towerback's stride (radians: a foot comes down at every half turn past a quarter, {@link #stride}), so its
+	 * legs keep to the ground it covers. Null: not Towerback.
+	 */
+	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
+	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
+	private static final double STRIDE_CATCH_UP = 0.3;
+
+	/** One Towerback's walk on this client: its stride now and last tick, when it was last moved on, the error left to take up, its footfalls. */
+	private static final class Stride {
+		double phase, prev, catchUp;
+		long tick = Long.MIN_VALUE;
+		int steps = -1;
+	}
+
+	private static final java.util.Map<Player, Stride> STRIDES = new java.util.WeakHashMap<>();
 
 	private XenoformClient() {
 	}
@@ -62,12 +80,50 @@ public final class XenoformClient {
 		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
+		state.setData(TOWER_SWAT, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.swatPhase(player, partialTicks) : -1.0F);
+		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}
 		hideBody(state);
+	}
+
+	/**
+	 * (0.19.28) Towerback's stride: half a turn for every step's length it moves over the ground (the server's
+	 * {@code Towerback#STRIDE_PER_SCALE} times its size), so a foot comes down each time the ground shakes. Each new
+	 * footfall from the server ({@link XenoformState#STEP}) eases the stride round to the nearest foot coming down.
+	 */
+	private static float stride(Player player, float partialTicks) {
+		Stride s = STRIDES.computeIfAbsent(player, p -> new Stride());
+		long now = player.level().getGameTime();
+		if (s.tick != now) {
+			s.prev = s.phase;
+			double step = com.jaymospowers.power.xenoform.forms.Towerback.STRIDE_PER_SCALE * Math.max(1.0F, player.getScale());
+			double moved = Math.sqrt(net.minecraft.util.Mth.square(player.getX() - player.xo) + net.minecraft.util.Mth.square(player.getZ() - player.zo));
+			if (s.tick != Long.MIN_VALUE && moved < step) {
+				// (a teleport doesn't spin the legs)
+				s.phase += moved / step * Math.PI;
+			}
+			Integer steps = player.getAttached(XenoformState.STEP);
+			int count = steps != null ? steps : 0;
+			if (s.steps >= 0 && count != s.steps) {
+				// a foot is down now: at a quarter turn past every half turn
+				double down = Math.PI * Math.round((s.phase - Math.PI * 0.5) / Math.PI) + Math.PI * 0.5;
+				s.catchUp = down - s.phase;
+			}
+			s.steps = count;
+			double take = s.catchUp * STRIDE_CATCH_UP;
+			s.phase += take;
+			s.catchUp -= take;
+			if (s.phase > Math.PI * 4.0) {
+				s.phase -= Math.PI * 4.0;
+				s.prev -= Math.PI * 4.0;
+			}
+			s.tick = now;
+		}
+		return (float)(s.prev + (s.phase - s.prev) * partialTicks);
 	}
 
 	/**

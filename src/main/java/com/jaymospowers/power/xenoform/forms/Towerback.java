@@ -56,7 +56,9 @@ import net.minecraft.world.phys.Vec3;
  * closes on nothing), snatches what it aimed at, lifts it to its chest and squeezes, then slams it into the ground. The
  * letterbox film plays for both.</li>
  * <li>G, Stomp: one great stamp; its shockwave runs out twice as far as a step's and throws everything up.</li>
- * <li>V, Swat: a backhand across the front of it that flings everything there aside.</li>
+ * <li>V, Swat: a backhand across the front of it that flings everything there aside. (0.19.28) A tap, but slow, like a
+ * charged move: it draws its arm across its chest and coils ({@link #SWAT_WINDUP} ticks, slowed, with a grinding growl),
+ * whips it out ({@link #SWAT_STRIKE}; the blow lands mid-swing) and straightens up ({@link #SWAT_RECOVER}).</li>
  * <li>B, Roar: monsters round it are weakened and slowed, and lose their nerve (and their target).</li>
  * </ul>
  */
@@ -65,11 +67,19 @@ public final class Towerback extends XenoForm {
 	/** Its sizes: the form's own (5x, about 9 blocks) and, Z tapped, the monolith Giants' (the scale attribute's limit). */
 	public static final float BIG = 5.0F, MONOLITH = 16.0F;
 	/** At monolith size: health on top, hitting power on top (both added), and this much faster (share of its speed). */
-	public static final double MONOLITH_HEALTH = 80.0, MONOLITH_DAMAGE = 8.0, MONOLITH_SPEED = 0.6, MONOLITH_STEP = 3.0;
+	public static final double MONOLITH_HEALTH = 80.0, MONOLITH_DAMAGE = 8.0, MONOLITH_SPEED = 1.2, MONOLITH_STEP = 3.0;
+	/**
+	 * (0.19.28) Its walking speed, as a share of the player's own on top (it was -0.2: a 9-block body shuffling at less than
+	 * a player's pace). Andy: "long exaggerated steps and motions while still covering alot of ground".
+	 */
+	public static final double SPEED = 0.7;
 	/** How long between size changes (ticks). */
 	public static final int SIZE_COOLDOWN = 60;
-	/** Its stride: a step every this many blocks walked per scale (5x: ~3.5 blocks; 16x: ~11). */
-	public static final double STRIDE_PER_SCALE = 0.7;
+	/**
+	 * Its stride: a step every this many blocks walked per scale (5x: 5 blocks; 16x: 16). (0.19.28) Was 0.7; the model's
+	 * legs swing to this same stride ({@code XenoFormModels.Towerback}), so its feet keep to the ground.
+	 */
+	public static final double STRIDE_PER_SCALE = 1.0;
 	/**
 	 * Each step's shockwave, as the Giants': it runs out along the ground this fast (blocks a tick, per scale) to this
 	 * far (per scale), hurting whoever stands on the ground in its way, most near the foot and this share of that at the
@@ -104,6 +114,9 @@ public final class Towerback extends XenoForm {
 	public static final double SWAT_REACH_PER_SCALE = 1.2, SWAT_THROW = 2.4, SWAT_UP = 0.6, SWAT_ARC = 0.2;
 	public static final float SWAT_DAMAGE = 12.0F;
 	public static final int SWAT_COOLDOWN = 80;
+	/** (0.19.28) The swat's timing (ticks): drawing back and coiling, the swing (it lands halfway), straightening up; slowed this much winding up. */
+	public static final int SWAT_WINDUP = 22, SWAT_STRIKE = 6, SWAT_RECOVER = 14, SWAT_TOTAL = SWAT_WINDUP + SWAT_STRIKE + SWAT_RECOVER;
+	public static final int SWAT_SLOW = 2;
 	/** Roar (B): its reach per scale, how long the weakness and slowness last, its cooldown. */
 	public static final double ROAR_RANGE_PER_SCALE = 3.0;
 	public static final int ROAR_TICKS = 160, ROAR_COOLDOWN = 400;
@@ -134,7 +147,7 @@ public final class Towerback extends XenoForm {
 	}
 
 	public Towerback() {
-		super("towerback", BIG, 120.0F, 12.0, -0.2, 1.0, 1.0, Items.CHISELED_STONE_BRICKS, 0x8A8F96);
+		super("towerback", BIG, 120.0F, 12.0, SPEED, 1.0, 1.0, Items.CHISELED_STONE_BRICKS, 0x8A8F96);
 	}
 
 	@Override
@@ -146,6 +159,7 @@ public final class Towerback extends XenoForm {
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		endGrab(player, live);
+		endSwat(player, live);
 		monolith(player, false);
 		live.towering = false;
 		live.waves.clear();
@@ -155,7 +169,7 @@ public final class Towerback extends XenoForm {
 	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (now < live.sizeNext || live.grabStart >= 0L) {
+		if (now < live.sizeNext || live.grabStart >= 0L || live.swatStart >= 0L) {
 			return true;
 		}
 		if (!live.towering && !openSky(player)) {
@@ -248,7 +262,7 @@ public final class Towerback extends XenoForm {
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
-		if (!down || live.grabStart >= 0L) {
+		if (!down || live.grabStart >= 0L || live.swatStart >= 0L) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -276,7 +290,7 @@ public final class Towerback extends XenoForm {
 			}
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
-					swat(player, live, level, size);
+					beginSwat(player, live, level);
 					cooldown(player, live, V, SWAT_COOLDOWN);
 				}
 			}
@@ -291,12 +305,53 @@ public final class Towerback extends XenoForm {
 		}
 	}
 
+	/**
+	 * (0.19.28) The swat begins: it draws its right arm across its chest and coils, slowed, with a grinding growl; every
+	 * client poses it from {@link XenoformState#SWAT}. The blow lands in {@link #swatTick}.
+	 */
+	private static void beginSwat(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
+		long now = level.getGameTime();
+		live.swatStart = now;
+		player.setAttached(XenoformState.SWAT, now);
+		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SWAT_WINDUP, SWAT_SLOW, false, false, false));
+		sound(player, SoundEvents.RAVAGER_ROAR, 2.0F, 0.35F);
+		sound(player, SoundEvents.GRINDSTONE_USE, 1.6F, 0.5F);
+	}
+
+	/** (0.19.28) The swat runs on: the coil tightens (dust off its shoulders), the blow lands mid-swing, then it's over. */
+	private static void swatTick(ServerPlayer player, XenoformPower.Live live, ServerLevel level, long now) {
+		long t = now - live.swatStart;
+		if (t < SWAT_WINDUP && t % 6 == 0) {
+			burst(level, ParticleTypes.CAMPFIRE_COSY_SMOKE, player.position().add(0.0, player.getBbHeight() * 0.75, 0.0), 3, player.getBbWidth() * 0.4, 0.01);
+		}
+		if (t == SWAT_WINDUP + SWAT_STRIKE / 2) {
+			swat(player, live, level, size(player));
+		}
+		if (t >= SWAT_TOTAL) {
+			endSwat(player, live);
+		}
+	}
+
+	private static void endSwat(ServerPlayer player, XenoformPower.Live live) {
+		live.swatStart = -1L;
+		player.removeAttached(XenoformState.SWAT);
+	}
+
+	/** (Client) How far into its swat a Towerback is (ticks, {@link #SWAT_TOTAL} long), or -1. */
+	public static float swatPhase(Entity entity, float partialTicks) {
+		Long start = entity.getAttached(XenoformState.SWAT);
+		if (start == null) {
+			return -1.0F;
+		}
+		float t = entity.level().getGameTime() - start + partialTicks;
+		return t >= 0.0F && t < SWAT_TOTAL ? t : -1.0F;
+	}
+
 	/** A backhand across the front of it: everything there is struck and flung aside. */
 	private static void swat(ServerPlayer player, XenoformPower.Live live, ServerLevel level, float size) {
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Vec3 facing = Vec3.directionFromRotation(0.0F, player.getYRot());
-		// the swing goes right to left: thrown off to its left
-		Vec3 aside = facing.yRot(Mth.HALF_PI);
+		// (0.19.28) a right-handed backhand, across its chest and out: thrown off to its right
+		Vec3 aside = facing.yRot(-Mth.HALF_PI);
 		double reach = player.getBbWidth() * 0.5 + SWAT_REACH_PER_SCALE * size;
 		for (LivingEntity e : around(player, reach)) {
 			Vec3 to = e.position().subtract(player.position()).horizontal();
@@ -310,7 +365,7 @@ public final class Towerback extends XenoForm {
 			level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 10, 0.4, 0.4, 0.4, 0.2);
 		}
 		for (int i = 1; i <= 8; i++) {
-			Vec3 p = player.position().add(0.0, player.getBbHeight() * 0.4, 0.0).add(facing.yRot((4 - i) * 0.25F).scale(reach * 0.8));
+			Vec3 p = player.position().add(0.0, player.getBbHeight() * 0.4, 0.0).add(facing.yRot((i - 4) * 0.25F).scale(reach * 0.8));
 			level.sendParticles(ParticleTypes.SWEEP_ATTACK, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 2.0F, 0.4F);
@@ -346,6 +401,9 @@ public final class Towerback extends XenoForm {
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		if (live.swatStart >= 0L) {
+			swatTick(player, live, level, now);
+		}
 		if (live.grabStart >= 0L) {
 			grabTick(player, live, level, now);
 		} else {
@@ -371,6 +429,9 @@ public final class Towerback extends XenoForm {
 	private static void footfall(ServerPlayer player, XenoformPower.Live live, ServerLevel level, double range, float damage, double up) {
 		float size = size(player);
 		live.leftFoot = !live.leftFoot;
+		// (0.19.28) every client sets its legs' stride by this, so a foot is down as the ground shakes
+		live.steps++;
+		player.setAttached(XenoformState.STEP, live.steps);
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		double side = (live.leftFoot ? 1.0 : -1.0) * player.getBbWidth() * 0.25;
 		Vec3 foot = player.position().add(Math.cos(yaw) * side, 0.0, Math.sin(yaw) * side);
