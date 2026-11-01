@@ -2,7 +2,11 @@ package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +48,18 @@ public final class GreenskinLife {
 
 	/** On a player: "orc" (a half-orc) or "goblin" (goblin-raised), "|", and their home tribe. Saved, kept through death. */
 	static final AttachmentType<String> RAISED = AttachmentRegistry.create(JaymosKingdoms.id("greenskin_raised"),
-		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+	/** (0.7.472) On a player: a half-orc's skin, picked on the life story's slider (0 to 1 along {@link #TONES}). Saved, synced, kept through death. */
+	public static final AttachmentType<Float> TONE = AttachmentRegistry.create(JaymosKingdoms.id("half_orc_tone"),
+		builder -> builder.persistent(Codec.FLOAT).copyOnDeath().syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.7.472) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
+	 * than green". The slider's skins, end to end (blended between): ash-pale, sallow, lime, orc green, moss, grey-green,
+	 * slate, ruddy brown, umber, charcoal.
+	 */
+	static final int[] TONES = {0xC2C6A8, 0xB3A275, 0x93B256, 0x6F8C45, 0x56703A, 0x7C8572, 0x676D70, 0x845A3E, 0x5C4430, 0x3A3633};
+	/** Where the slider sits for one who never moved it. */
+	public static final float TONE_DEFAULT = 0.33F;
 
 	private GreenskinLife() {
 	}
@@ -62,6 +77,21 @@ public final class GreenskinLife {
 	public static boolean halfOrc(@Nullable Entity p) {
 		String r = p instanceof Player ? p.getAttached(RAISED) : null;
 		return r != null && r.startsWith(ORC + "|");
+	}
+
+	/** (0.7.472) A half-orc's skin at {@code tone} (0 to 1) along the slider (opaque ARGB). */
+	public static int toneColor(float tone) {
+		float at = Mth.clamp(tone, 0.0F, 1.0F) * (TONES.length - 1);
+		int i = Math.min((int)at, TONES.length - 2);
+		float t = at - i;
+		int a = TONES[i], b = TONES[i + 1];
+		return ARGB.color(255, Math.round(Mth.lerp(t, ARGB.red(a), ARGB.red(b))), Math.round(Mth.lerp(t, ARGB.green(a), ARGB.green(b))),
+			Math.round(Mth.lerp(t, ARGB.blue(a), ARGB.blue(b))));
+	}
+
+	/** (0.7.472) {@code p}'s half-orc skin (opaque ARGB), as they set it on the slider. */
+	public static int skin(Entity p) {
+		return toneColor(p.getAttachedOrElse(TONE, TONE_DEFAULT));
 	}
 
 	/** The standing goblin village or orc camp nearest {@code from}, or null. */

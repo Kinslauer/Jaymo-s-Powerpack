@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <ol>
  * <li>cry out ({@code talk.jaymoskingdoms.disarmed.*}) the moment their hand is empty;</li>
  * <li>go back for their own weapon if it's lying near;</li>
- * <li>otherwise swap: a weapon in the off hand (or, for a villager, in their pack) comes to hand, and folk draw the
+ * <li>otherwise swap: a weapon in the off hand comes to hand, and folk draw the
  * sidearm at their belt ({@link #SIDEARM}, once a life);</li>
  * <li>otherwise go for the nearest weapon on the ground ({@link #SEARCH_RANGE}), an archer preferring a bow;</li>
  * <li>and with none, fight with their fists (an archer with nothing to shoot closes in instead of standing at range).</li>
@@ -130,6 +130,13 @@ public final class Rearm {
 			// never seen with a weapon: empty-handed is how they are
 			return;
 		}
+		if (mob instanceof Villager villager && packed(villager)) {
+			// (0.7.472) MCA puts a guard's weapon away in their pack between fights and draws it again for the next: it isn't
+			// lost (taking it out here only had MCA put it back, crying "My weapon!" and "Not done yet!" over and over)
+			state.lost = false;
+			state.seeking = null;
+			return;
+		}
 		if (!state.lost) {
 			state.lost = true;
 			say(level, mob, "disarmed", DISARMED_LINES, Speech.RED);
@@ -158,6 +165,17 @@ public final class Rearm {
 		}
 	}
 
+	/** A weapon waits in {@code villager}'s pack. */
+	private static boolean packed(Villager villager) {
+		SimpleContainer pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (isWeapon(pack.getItem(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** A weapon they already have comes to hand: the off hand's, a villager's pack's, or folk's sidearm. */
 	private static boolean swap(ServerLevel level, Mob mob, State state) {
 		ItemStack off = mob.getOffhandItem();
@@ -167,15 +185,8 @@ public final class Rearm {
 			drawn(level, mob);
 			return true;
 		}
-		if (mob instanceof Villager villager) {
-			SimpleContainer pack = villager.getInventory();
-			for (int i = 0; i < pack.getContainerSize(); i++) {
-				if (isWeapon(pack.getItem(i))) {
-					mob.setItemSlot(EquipmentSlot.MAINHAND, pack.removeItem(i, 1));
-					drawn(level, mob);
-					return true;
-				}
-			}
+		if (mob instanceof Villager) {
+			// (a weapon in a villager's pack is MCA's to draw: see tick)
 			return false;
 		}
 		if (!state.sidearmDrawn) {

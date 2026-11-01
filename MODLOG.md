@@ -4884,3 +4884,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   less emphasized, just to show the user they need water": at 8 water or less, thin dusky veins show at the edges and
   corners, a little further in and stronger as the water runs out (Kitchen `DryVeins`, Kitchen MODLOG). Compile-checked;
   not seen in game.
+
+- **0.19.46, Kingdoms 0.7.472, ogres with the orcs:** Ogre bands now live in orc camps (or raise new ones with the orcs) and
+  help them build. Jade calls goblins and orcs "Goblin" and "Orc" instead of MCA's "Male Villager". Half-orc players are drawn
+  like the greenskins, with a skin slider on the greenskin road that goes beyond green. Idle orc guards no longer loop "My
+  weapon! / Not done yet!" (Kingdoms MODLOG). Compile-checked; not played.

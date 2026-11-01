@@ -8112,3 +8112,27 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   in, the middle left clear, once starving or the blood fever burns. They darken and swell with the vampire's heartbeat
   (`BloodVision.beat`), creep in slowly and draw back over a few seconds after a drink. Dhampirs never thirst, so never see
   them. Art: six growth rings, `textures/gui/thirst_veins_1..6.png` (320x180 pixel art, drawn by `tools/gen_thirst_veins.py`).
+
+## 0.7.472: ogres live with the orcs, half-orcs look the part, orcs named right (pack 0.19.46)
+- **Ogres build with the orcs.** Andy: "these ogres should build these camps with the orcs as they will help them expand and
+  buid like the villagers do". An ogre band (a two-headed brute and two ogres) no longer rings itself with mossy stones in the
+  wild. It moves into an orc camp in its region that has no band yet (`OgreHolds.joinCamp`), or raises a new orc camp there
+  with the orcs (`OrcCamps.foundNear`, in orc country, kingdom or no). Each ogre in a camp lets it raise one more building a
+  day, and the nearest one lumbers over and heaves each new building into place (`OgreHolds.haul`). Ogres and greenskins
+  never attack each other unless one is struck (`OgreHolds.spares`, in `Ogre`'s targets and the MCA guard sensor). A band in
+  a camp also spares anyone raised among the orcs. When the camp is cleared its band breaks up: they fight on, and are gone
+  once they unload. Lone outposts raised before this stay as they were. The Ogre King and his hold are unchanged; his death
+  still breaks up every band in his region.
+- **Jade names greenskins.** Andy: "they shouldnt be referred to as villagers if they are orc or goblin, jade reads them out
+  incorrectly". A goblin or orc you haven't been introduced to now shows as "Goblin" or "Orc" (`Introductions.what`), not
+  MCA's "Male Villager". Jade's mod line under them reads Jaymo's Kingdoms instead of Minecraft Comes Alive.
+- **Half-orc looks.** Andy: "half orcs should look just like these green skins, just with a skin color slider that includes
+  more than green". A half-orc player (greenskin road, raised by orcs) is drawn with an orc's tusks, brow, ears, marks and
+  scars (`GreenskinLooks`, now on players too). Their skin comes from a new slider on the greenskin road's page in the life
+  story, which runs through ash-pale, sallow, lime, orc green, moss, grey-green, slate, ruddy brown, umber and charcoal
+  (`GreenskinLife.TONES`, saved as `TONE`). You see yourself on that skin while you slide it. Masks and the symbiote cover the
+  look. The raised-by attachment is now synced so other clients draw it. Half-orcs from before default to lime.
+- **Idle orcs stop crying "My weapon!".** MCA puts a guard's weapon in their pack between fights. `Rearm` took that for a lost
+  weapon and pulled it out ("Not done yet!"), MCA stowed it again, and the guard looped. A weapon in a villager's pack now
+  counts as theirs, and MCA draws it for the next fight.
+- Compile-checked with javac against the 26.3 jars; not played.

@@ -59,9 +59,12 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.426) Havens patch 2, the ogre tribe (ideas from King's Monsters, ARR, and Shadow of War: our own names, code and
- * buildings). In each region ({@link Tribes#REGION} a side) the ogres keep up to {@link #OUTPOSTS} <b>outposts</b> in the
- * plains and swamps, a ring of mossy stones round a lean-to and a bone pile, each led by a two-headed brute (plains) or a
- * cave ogre (swamps) with a couple of ogres. Once a region has an outpost, a great <b>ogre hold</b> may rise in it: a
+ * buildings). In each region ({@link Tribes#REGION} a side) the ogres keep up to {@link #OUTPOSTS} <b>bands</b>, each led by
+ * a two-headed brute with a couple of ogres. (0.7.472) Andy: "these ogres should build these camps with the orcs as they
+ * will help them expand and build". A band no longer rings itself with mossy stones in the wild: it lives in an orc camp
+ * ({@link #joinCamp}), one that has none yet or one it raises with the orcs ({@link OrcCamps#foundNear}); there its ogres
+ * haul for the builders (the camp raises another building a day for each, {@link #haulers}), and ogres and greenskins never
+ * set on each other ({@link #spares}). Outposts raised before stand as they were. Once a region has an outpost, a great <b>ogre hold</b> may rise in it: a
  * walled yard of old stone with a throne, the <b>Ogre King</b> on it and his guard (the biggest of their kind) at the gate.
  * <p>The king fights in three phases ({@link #step}): his fists and smash; at two thirds he roars, calls ogres from the
  * hold and quickens; at a third he tears up boulders and hurls them. Killing him clears his region's outposts (their
@@ -78,10 +81,10 @@ public final class OgreHolds {
 	/** Where they rise: so far from the player (blocks), never this near a settlement or another ogre site. */
 	static final int RISE_NEAR = 64, RISE_FAR = 96;
 	static final double SETTLEMENT_GAP = 240.0, SITE_GAP = 200.0;
-	/** Sizes: an outpost's ring and a hold's walls (radius), the most the ground may rise and fall under one. */
-	static final int OUTPOST_RADIUS = 6, HOLD_RADIUS = 12, HOLD_WALL = 4, MAX_SPREAD = 4;
-	/** An outpost's ogres with its leader, and how near home they keep. */
-	static final int OUTPOST_OGRES = 2, OUTPOST_HOME = 12, HOLD_HOME = 10, GUARD_HOME = 3;
+	/** Sizes: a hold's walls (radius), the most the ground may rise and fall under one. */
+	static final int HOLD_RADIUS = 12, HOLD_WALL = 4, MAX_SPREAD = 4;
+	/** How near home a hold's ogres keep (its king, his guards). */
+	static final int HOLD_HOME = 10, GUARD_HOME = 3;
 	/** The Ogre King: health, blows, size; his guards. */
 	static final double KING_HEALTH = 320.0, KING_DAMAGE = 15.0, KING_SCALE = 1.7;
 	static final double GUARD_HEALTH = 110.0, GUARD_DAMAGE = 11.0, GUARD_SCALE = 1.3;
@@ -272,9 +275,16 @@ public final class OgreHolds {
 				}
 			}
 			if (standing < OUTPOSTS && random.nextFloat() < OUTPOST_CHANCE) {
-				BlockPos at = spot(level, player, OUTPOST_RADIUS, true);
-				if (at != null && region(at).equals(region)) {
-					buildOutpost(level, at, region);
+				// (0.7.472) a band of ogres throws in with the orcs: it joins an orc camp of the region that has none yet, or
+				// raises a new one with them (no more lone rings of mossy stones)
+				Faction camp = bandless(level, player, region);
+				if (camp != null) {
+					joinCamp(level, camp, region);
+					return;
+				}
+				Faction founded = OrcCamps.foundNear(level, player, region);
+				if (founded != null) {
+					joinCamp(level, founded, region);
 					return;
 				}
 			}
@@ -347,58 +357,6 @@ public final class OgreHolds {
 				}
 			}
 		}
-	}
-
-	private static void buildOutpost(ServerLevel level, BlockPos at, String region) {
-		MinecraftServer server = level.getServer();
-		RandomSource random = level.getRandom();
-		boolean swamp = level.getBiome(at).is(Biomes.SWAMP) || level.getBiome(at).is(Biomes.MANGROVE_SWAMP);
-		floor(level, at, OUTPOST_RADIUS, (swamp ? Blocks.MUD : Blocks.COARSE_DIRT).defaultBlockState(), 5);
-		// a broken ring of mossy stones
-		for (int a = 0; a < 360; a += 15) {
-			if (random.nextInt(4) == 0) {
-				continue;
-			}
-			BlockPos p = at.offset((int) Math.round(Math.cos(Math.toRadians(a)) * OUTPOST_RADIUS), 0, (int) Math.round(Math.sin(Math.toRadians(a)) * OUTPOST_RADIUS));
-			level.setBlock(p, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
-			if (random.nextBoolean()) {
-				level.setBlock(p.above(), Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
-			}
-		}
-		// a lean-to of logs, its roof sloping to the back
-		BlockPos lean = at.offset(-3, 0, -3);
-		for (int dx = 0; dx < 4; dx++) {
-			level.setBlock(lean.offset(dx, 0, 0), Blocks.SPRUCE_LOG.defaultBlockState(), 2);
-			level.setBlock(lean.offset(dx, 1, 0), Blocks.SPRUCE_LOG.defaultBlockState(), 2);
-			level.setBlock(lean.offset(dx, 2, 0), Blocks.SPRUCE_SLAB.defaultBlockState(), 2);
-			level.setBlock(lean.offset(dx, 2, 1), Blocks.SPRUCE_SLAB.defaultBlockState(), 2);
-			level.setBlock(lean.offset(dx, 1, 2), Blocks.SPRUCE_SLAB.defaultBlockState(), 2);
-		}
-		level.setBlock(lean.offset(0, 0, 2), Blocks.SPRUCE_FENCE.defaultBlockState(), 2);
-		level.setBlock(lean.offset(3, 0, 2), Blocks.SPRUCE_FENCE.defaultBlockState(), 2);
-		// the bone pile and the fire
-		level.setBlock(at.offset(3, 0, 2), Blocks.BONE_BLOCK.defaultBlockState(), 2);
-		level.setBlock(at.offset(3, 1, 2), Blocks.BONE_BLOCK.defaultBlockState(), 2);
-		level.setBlock(at.offset(2, 0, 3), Blocks.BONE_BLOCK.defaultBlockState(), 2);
-		level.setBlock(at.offset(4, 0, 3), Blocks.SKELETON_SKULL.defaultBlockState(), 2);
-		level.setBlock(at, Blocks.CAMPFIRE.defaultBlockState(), 2);
-		chest(level, lean.offset(1, 0, 1), Direction.SOUTH, random, false);
-		int id = nextId(server);
-		Ogre leader = ogre(level, swamp ? Monsters.CAVE_OGRE : Monsters.OGRE, at.offset(0, 0, 2), at, OUTPOST_HOME, id);
-		if (leader == null) {
-			return;
-		}
-		if (!swamp) {
-			leader.setTwoHeads(true);
-		}
-		for (int i = 0; i < OUTPOST_OGRES; i++) {
-			Ogre o = ogre(level, Monsters.OGRE, at.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2), at, OUTPOST_HOME, id);
-			if (o != null) {
-				o.setTwoHeads(false);
-			}
-		}
-		put(server, new Site(id, false, at, region, leader.getUUID(), false));
-		JaymosKingdoms.LOGGER.info("An ogre outpost rose at {}", at);
 	}
 
 	private static void buildHold(ServerLevel level, BlockPos at, String region) {
@@ -525,6 +483,130 @@ public final class OgreHolds {
 	private static void set(@Nullable AttributeInstance a, double v) {
 		if (a != null) {
 			a.setBaseValue(v);
+		}
+	}
+
+	// ---- (0.7.472) bands in the orc camps -------------------------------------------------------------------------------
+
+	/** A band in an orc camp: its ogres besides the brute, how near the fire they keep. */
+	static final int BAND_OGRES = 2, BAND_HOME = 16;
+	/** On a band's ogres: the camp they live in (by id). */
+	static final String CAMP_PREFIX = "jaymoskingdoms.ogre_camp.";
+
+	/** {@code ogre} is one of a band living in an orc camp. */
+	public static boolean camped(Entity ogre) {
+		for (String tag : ogre.entityTags()) {
+			if (tag.startsWith(CAMP_PREFIX)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * An ogre and {@code other} leave each other be: ogres and greenskins (goblins and orcs, villager or folk) never set on
+	 * each other unless struck, and a band in an orc camp spares those its orcs spare (one raised among them).
+	 */
+	public static boolean spares(LivingEntity a, LivingEntity b) {
+		LivingEntity ogre = a instanceof Ogre ? a : b instanceof Ogre ? b : null;
+		LivingEntity other = ogre == a ? b : a;
+		if (ogre == null || other instanceof Ogre || other == ogre.getLastHurtByMob()) {
+			return false;
+		}
+		if (Greenskins.of(other) != null || other instanceof Folk folk && (Goblins.isGoblin(folk.role()) || Orcs.isOrc(folk.role()))) {
+			return true;
+		}
+		return other instanceof Player p && camped(ogre) && GreenskinLife.raised(p);
+	}
+
+	/** The standing orc camp of {@code region} nearest {@code player} with no band of ogres yet (and loaded), or null. */
+	private static @Nullable Faction bandless(ServerLevel level, ServerPlayer player, String region) {
+		MinecraftServer server = level.getServer();
+		Faction best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
+			Camps.CampData data = Camps.data(server, f.id());
+			if (f.fallen() || data == null || !data.orc() || data.clearedAt() >= 0 || !region(data.center()).equals(region)
+				|| !level.isPositionEntityTicking(data.center()) || band(server, data.center()) != null) {
+				continue;
+			}
+			double d = player.distanceToSqr(Vec3.atCenterOf(data.center()));
+			if (d < bestD) {
+				bestD = d;
+				best = f;
+			}
+		}
+		return best;
+	}
+
+	/** The standing band living round the fire at {@code fire}, or null. */
+	private static @Nullable Site band(MinecraftServer server, BlockPos fire) {
+		for (Site s : sites(server)) {
+			if (!s.hold() && !s.cleared() && s.at().equals(fire)) {
+				return s;
+			}
+		}
+		return null;
+	}
+
+	/** A band comes to live in {@code camp}: a two-headed brute and his ogres by its fire, tagged with the camp. */
+	static void joinCamp(ServerLevel level, Faction camp, String region) {
+		MinecraftServer server = level.getServer();
+		Camps.CampData data = Camps.data(server, camp.id());
+		if (data == null) {
+			return;
+		}
+		BlockPos fire = data.center();
+		RandomSource random = level.getRandom();
+		int id = nextId(server);
+		Ogre leader = ogre(level, Monsters.OGRE, OrcCamps.spot(level, fire, random), fire, BAND_HOME, id);
+		if (leader == null) {
+			return;
+		}
+		leader.setTwoHeads(true);
+		leader.addTag(CAMP_PREFIX + camp.id());
+		for (int i = 0; i < BAND_OGRES; i++) {
+			Ogre o = ogre(level, Monsters.OGRE, OrcCamps.spot(level, fire, random), fire, BAND_HOME, id);
+			if (o != null) {
+				o.setTwoHeads(false);
+				o.addTag(CAMP_PREFIX + camp.id());
+			}
+		}
+		put(server, new Site(id, false, fire, region, leader.getUUID(), false));
+		JaymosKingdoms.LOGGER.info("A band of ogres came to live in {}", camp.name());
+	}
+
+	/** {@code camp}'s ogres about its fire just now (alive and loaded): its builders' haulers. */
+	static List<Ogre> haulers(ServerLevel level, int camp, BlockPos fire) {
+		String tag = CAMP_PREFIX + camp;
+		return level.getEntitiesOfClass(Ogre.class, new net.minecraft.world.phys.AABB(fire).inflate(OrcBuildings.CLEAR_RADIUS + BAND_HOME),
+			o -> o.isAlive() && o.entityTags().contains(tag));
+	}
+
+	/** {@code camp} raised a building at {@code where}: the nearest of its ogres lumbers over and heaves it into place. */
+	static void haul(ServerLevel level, int camp, BlockPos fire, BlockPos where) {
+		Ogre best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Ogre o : haulers(level, camp, fire)) {
+			double d = o.distanceToSqr(Vec3.atCenterOf(where));
+			if (o.getTarget() == null && d < bestD) {
+				bestD = d;
+				best = o;
+			}
+		}
+		if (best == null) {
+			return;
+		}
+		best.getNavigation().moveTo(where.getX() + 0.5, where.getY(), where.getZ() + 0.5, 0.9);
+		best.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, where.getX(), where.getY(), where.getZ(), SoundEvents.WOOD_PLACE, SoundSource.HOSTILE, 1.5F, 0.6F);
+	}
+
+	/** {@code camp}, at {@code fire}, was cleared: its band breaks up (they fight on now, and are gone once they unload). */
+	static void campFell(MinecraftServer server, BlockPos fire) {
+		Site band = band(server, fire);
+		if (band != null) {
+			put(server, band.clear());
 		}
 	}
 

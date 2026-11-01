@@ -660,6 +660,11 @@ public final class Camps {
 			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
 		Raids.scatter(level, camp.id());
+		if (orcs) {
+			// (0.7.472) its band of ogres breaks up
+			CampData band = data(server, camp.id());
+			OgreHolds.campFell(server, band != null ? band.center() : camp.seat());
+		}
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
 			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
 			if (folk.isCarrying()) {

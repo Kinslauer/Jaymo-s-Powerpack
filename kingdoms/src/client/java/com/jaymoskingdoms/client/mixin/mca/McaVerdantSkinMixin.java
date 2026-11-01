@@ -5,6 +5,7 @@ import com.jaymoskingdoms.Verdants;
 import net.conczin.mca.client.render.VillagerVisuals;
 import net.conczin.mca.client.render.layer.SkinLayer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -54,7 +55,11 @@ abstract class McaVerdantSkinMixin {
 			// (0.7.236) the figure on MCA's editor, which isn't in the world
 			entity = com.jaymoskingdoms.client.EditorFigure.byId(visuals.entityId());
 		}
-		if (entity != null && yours(entity) && com.jaymoskingdoms.VillagerHeritage.of(entity) == com.jaymoskingdoms.Heritage.Kind.VERDANT) {
+		int halfOrc = entity != null && yours(entity) ? com.jaymoskingdoms.client.GreenskinLooks.halfOrcSkin(entity) : 0;
+		if (halfOrc != 0) {
+			// (0.7.472) a half-orc's skin, as they set it on the life story's slider (or the slider while it's shown)
+			cir.setReturnValue(ARGB.color(ARGB.alpha(cir.getReturnValueI()), ARGB.red(halfOrc), ARGB.green(halfOrc), ARGB.blue(halfOrc)));
+		} else if (entity != null && yours(entity) && com.jaymoskingdoms.VillagerHeritage.of(entity) == com.jaymoskingdoms.Heritage.Kind.VERDANT) {
 			// (0.7.304) a Verdant player's shade of green, as dark as MCA's skin slider sets it (as a Rubber-folk's pink is)
 			cir.setReturnValue(Verdants.fromSkin(entity, cir.getReturnValueI()));
 		} else if (entity != null && !Verdants.is(entity)) {

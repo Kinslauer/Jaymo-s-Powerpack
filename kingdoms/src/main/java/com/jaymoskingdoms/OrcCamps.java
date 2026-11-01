@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -28,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * taiga, dark forest, hills, plains and snow), a dark oak stockade round a war fire, the warchief in his longhouse, grunts
  * sparring in the pit, rangers on the towers, a shaman by the fire ({@link OrcBuildings}, {@link Orcs}). It grows daily by
  * its own hands (more orcs, more tents), and its war bands raid the nearest kingdom ({@link Raids}). Kill its warchief and
- * it is cleared like any camp ({@link Camps#chiefSlain}).
+ * it is cleared like any camp ({@link Camps#chiefSlain}). (0.7.472) A band of ogres may live in one ({@link OgreHolds#joinCamp}),
+ * or raise a new one with the orcs ({@link #foundNear}); each of its ogres lets the camp raise another building a day.
  */
 final class OrcCamps {
 	/** {@link Camps.CampData#kind} of an orc camp. */
@@ -116,6 +118,30 @@ final class OrcCamps {
 		spawn(level, id, Orcs.SHAMAN, fire.offset(2, 0, 2), fire, OrcBuildings.HOME_RADIUS / 2);
 		JaymosKingdoms.LOGGER.info("An orc camp, {}, rose at {}", camp.name(), fire);
 		return Factions.get(server, id);
+	}
+
+	/**
+	 * (0.7.472) A band of ogres and the orcs raise a camp together somewhere near {@code player} in {@code region}, by the
+	 * same rules as any camp (open ground out of sight, orc country, ground flat enough) but in the wild, kingdom or no; or
+	 * null if there's nowhere fit.
+	 */
+	static @Nullable Faction foundNear(ServerLevel level, ServerPlayer player, String region) {
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < Camps.SITE_TRIES; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = Camps.HIDE_RANGE + random.nextInt(Camps.SITE_SPREAD);
+			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			if (!OgreHolds.region(at).equals(region) || !Camps.open(server, level, at) || !land(level, at)) {
+				continue;
+			}
+			int floor = IllagerBuildings.floor(level, at, MAX_SPREAD, OrcBuildings.CLEAR_RADIUS);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			return found(level, at, floor, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+		}
+		return null;
 	}
 
 	private static String name(MinecraftServer server, RandomSource random) {
@@ -246,7 +272,9 @@ final class OrcCamps {
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
 		}
-		int allowed = Math.min(OrcBuildings.GROWTH.size(), data.grown());
+		// ((0.7.472) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
+		int ogres = OgreHolds.haulers(level, camp.id(), data.center()).size();
+		int allowed = Math.min(OrcBuildings.GROWTH.size(), data.grown() * (1 + ogres));
 		if (data.built() >= allowed || !Storage.loaded(level, camp)) {
 			return;
 		}
@@ -268,6 +296,7 @@ final class OrcCamps {
 			Storage.take(level, camp, e.getKey(), e.getValue());
 		}
 		OrcBuildings.place(level, spot, data.center(), data.gate());
+		OgreHolds.haul(level, camp.id(), data.center(), where);
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
 	}
