@@ -101,7 +101,7 @@ public final class Downed {
 	}
 
 	static void register() {
-		// (0.7.457) righteous guards arrest the downed rather than execute them (Powers' MobExecutions)
+		// (0.7.459) righteous guards arrest the downed rather than execute them (Powers' MobExecutions)
 		PowersCompat.spareRighteousGuards();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(EARLY, Event.DEFAULT_PHASE);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(EARLY, (entity, source, amount) -> {

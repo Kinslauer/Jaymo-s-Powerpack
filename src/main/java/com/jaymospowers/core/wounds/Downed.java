@@ -758,7 +758,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.19.16) A hostile's execution of a downed player ({@link MobExecutions}): their death now, credited to {@code by}.
+	 * (0.19.20) A hostile's execution of a downed player ({@link MobExecutions}): their death now, credited to {@code by}.
 	 */
 	public static void execute(ServerLevel level, LivingEntity entity, Mob by) {
 		if (!entity.isAlive()) {

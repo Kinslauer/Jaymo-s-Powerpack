@@ -222,7 +222,7 @@ public class CostumeScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int mouseX = (int)event.x(), mouseY = (int)event.y();
-		boolean right = event.button() == 1;
+		boolean right = event.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT;
 		// right-click on a cycling button steps it back
 		if (right && this.cut.isMouseOver(mouseX, mouseY)) {
 			cycleCut(-1);

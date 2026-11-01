@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.16) Andy (2026-11-01): "enemy mobs and illagers should be able to execute you, with a letterboxed scene". A downed
+ * (0.19.20) Andy (2026-11-01): "enemy mobs and illagers should be able to execute you, with a letterboxed scene". A downed
  * player lying where hostiles can see them gets finished off: after {@link #GRACE_TICKS} (time for a friend to come), the
  * nearest hostile ({@link Enemy}: zombies, skeletons, spiders, illagers, piglins, the warden...; not creepers, fliers,
  * slimes or bosses, {@link #able}), or anyone else fighting them (a bandit, a barbarian, a guard, a golem) that sees them leaves its fight, walks over and kills them with a move of its own
@@ -91,7 +91,7 @@ public final class MobExecutions {
 	static final int SCAN_EVERY = 10;
 	/** Screen shake for the victim at the wind-up and the blow. */
 	static final float WINDUP_SHAKE = 0.6F, KILL_SHAKE = 2.2F;
-	/** (0.19.16) Struck by the victim this recently (ticks), a mob counts as fighting them. */
+	/** (0.19.20) Struck by the victim this recently (ticks), a mob counts as fighting them. */
 	public static final int GRUDGE_TICKS = 400;
 	/** Smaller than this (width and height) is too small to do it (silverfish, endermites). */
 	static final float MIN_SIZE = 0.5F;
@@ -102,7 +102,7 @@ public final class MobExecutions {
 	 */
 	public static final List<Predicate<Mob>> EXECUTIONERS = new ArrayList<>();
 	/**
-	 * (0.19.16) Mobs that won't execute this victim even fighting them. Andy: guards "prioritize arresting you because
+	 * (0.19.20) Mobs that won't execute this victim even fighting them. Andy: guards "prioritize arresting you because
 	 * unless they are of a certain temperament they try to be righteous and just": Kingdoms adds its guards here, all but
 	 * the hotheaded and spiteful. Plain JDK and vanilla types, so another mod can add to it by reflection.
 	 */
@@ -189,7 +189,7 @@ public final class MobExecutions {
 
 	/**
 	 * Whether {@code mob} may execute {@code victim}: on its feet, big enough, and walking (no creepers, fliers, slimes,
-	 * water mobs or bosses), not ridden or riding; and (0.19.16, Andy: "everyone") either a hostile ({@link Enemy}, or one
+	 * water mobs or bosses), not ridden or riding; and (0.19.20, Andy: "everyone") either a hostile ({@link Enemy}, or one
 	 * {@link #EXECUTIONERS} names) or anyone at all who is fighting them: a bandit, a barbarian, a guard, a golem, a wolf.
 	 */
 	public static boolean able(Mob mob, LivingEntity victim) {
