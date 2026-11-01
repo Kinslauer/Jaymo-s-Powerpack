@@ -68,8 +68,8 @@ import org.jspecify.annotations.Nullable;
  * fight magic users", "unique to everyone that possesses one", grown by "the feats they accomplish". Andy ticked the whole
  * design list (Claude Doc "Valor design list"), every suggested answer, and Senses reveal a disguised vampire at Unbroken.
  *
- * <p><b>Waking</b> ({@link #canWake}, {@link #wake}): Strength level {@value #WAKE_LEVEL}, a Will perk, and no Mage or Sorcerer.
- * Then beating a foe stronger than you, rising from downed and winning that fight, Refuse to Fall saving you, or killing what
+ * <p><b>Waking</b> ({@link #canWake}, {@link #wake}): Strength level {@value #WAKE_LEVEL}, a Will perk, {@value #WAKE_DAYS} days
+ * played, and no Mage or Sorcerer. Then beating a foe stronger than you, rising from downed and winning that fight, Refuse to Fall saving you, or killing what
  * was after someone else wakes it: a heartbeat and a pulse of colour, no chat text. The feat that woke it is its
  * {@link Origin} (a quirk for life); its look ({@link Look}), soul colour and name are rolled with it.
  *
@@ -92,6 +92,11 @@ public final class Valor {
 	// ---- tuning ----------------------------------------------------------------------------------------------------
 	/** Strength level needed before Valor can wake; for the child of a Valor parent (Lineage). */
 	static final int WAKE_LEVEL = 5, HEIR_WAKE_LEVEL = 3;
+	/**
+	 * (2026-11-01, Andy: Jungxvv woke Valor in about 6 days, "i'd like that increased maybe 4x") In-game days a player must
+	 * have played (their own play time, not the world clock) before Valor can wake at all. Raise or lower to retune.
+	 */
+	static final int WAKE_DAYS = 24;
 	/** On a player who took over the child of a Valor holder. */
 	static final String HEIR_TAG = "jaymoskingdoms_valor_heir";
 	/** Valor experience at each rank (Spark, Kindled, Tempered, Steeled, Unbroken). */
@@ -606,6 +611,9 @@ public final class Valor {
 		if (unbound(sp)) {
 			return false;
 		}
+		if (sp instanceof ServerPlayer server && playedDays(server) < WAKE_DAYS) {
+			return false;
+		}
 		Skills.Progress progress = Skills.of(sp);
 		if (progress.level(Skills.Pillar.STRENGTH) < (sp.entityTags().contains(HEIR_TAG) ? HEIR_WAKE_LEVEL : WAKE_LEVEL)) {
 			return false;
@@ -616,6 +624,11 @@ public final class Valor {
 			}
 		}
 		return false;
+	}
+
+	/** In-game days {@code sp} has played (their play-time statistic). */
+	static long playedDays(ServerPlayer sp) {
+		return sp.getStats().getValue(net.minecraft.stats.Stats.CUSTOM.get(net.minecraft.stats.Stats.PLAY_TIME)) / Will.DAY;
 	}
 
 	/** {@code sp}'s Valor wakes from {@code origin}: its look, soul colour and name rolled; a heartbeat and a pulse, no words. */
