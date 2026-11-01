@@ -334,6 +334,34 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.457) Powers' executions of the downed (pack 0.19.16, {@code MobExecutions}): Andy: guards "prioritize arresting
+	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer
+	 * ({@link Downed#isGuard}) or a village's own iron golem never finishes off a downed player, unless the guard is
+	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. Nothing without that Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void spareRighteousGuards() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.MobExecutions").getField("SPARE").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add((mob, victim) -> {
+				if (mob instanceof net.minecraft.world.entity.animal.golem.IronGolem golem) {
+					return !golem.isPlayerCreated();
+				}
+				if (!Downed.isGuard(mob)) {
+					return false;
+				}
+				Temperaments.Temperament t = Temperaments.of(mob);
+				return t != Temperaments.Temperament.HOTHEADED && t != Temperaments.Temperament.SPITEFUL;
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle deathFilm;
 	private static boolean lookedForDeathFilm;
 

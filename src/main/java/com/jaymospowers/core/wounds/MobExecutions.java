@@ -101,6 +101,12 @@ public final class MobExecutions {
 	 * {@link Enemy} already. They still have to be {@link #able}.
 	 */
 	public static final List<Predicate<Mob>> EXECUTIONERS = new ArrayList<>();
+	/**
+	 * (0.19.16) Mobs that won't execute this victim even fighting them. Andy: guards "prioritize arresting you because
+	 * unless they are of a certain temperament they try to be righteous and just": Kingdoms adds its guards here, all but
+	 * the hotheaded and spiteful. Plain JDK and vanilla types, so another mod can add to it by reflection.
+	 */
+	public static final List<java.util.function.BiPredicate<Mob, LivingEntity>> SPARE = new ArrayList<>();
 
 	/** How it kills, picked by what it holds and what it is ({@link #moveOf}). */
 	public enum Move {
@@ -198,6 +204,11 @@ public final class MobExecutions {
 		}
 		if (mob.getBbWidth() < MIN_SIZE && mob.getBbHeight() < MIN_SIZE) {
 			return false;
+		}
+		for (java.util.function.BiPredicate<Mob, LivingEntity> spare : SPARE) {
+			if (spare.test(mob, victim)) {
+				return false;
+			}
 		}
 		if (mob instanceof Enemy || fighting(mob, victim)) {
 			return true;
