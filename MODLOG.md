@@ -4926,3 +4926,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the body slopes from your hand to the hips, the legs ragdoll (kicked up by bumps, swung on turns, bouncing back down),
   arms trail and the head lolls; right-click lets go, sneak + right-click lifts them into your arms (armour permitting).
   Compile-checked (0 errors against the 26.3 jars); not played.
+- **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
+  wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.

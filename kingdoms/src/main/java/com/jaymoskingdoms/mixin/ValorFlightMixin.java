@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.410) Flying on a Skyward Valor's wings isn't floating where you shouldn't: no flying kick. */
+/** (0.7.410) Flying on a Skyward Valor's wings (or, Andy 2026-11-01, Thessaly's mana wings) isn't floating where you shouldn't: no flying kick. */
 @Mixin(ServerGamePacketListenerImpl.class)
 abstract class ValorFlightMixin {
 	@Shadow
@@ -19,6 +19,10 @@ abstract class ValorFlightMixin {
 	@Inject(method = "getMaximumFlyingTicks", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$valorWings(Entity entity, CallbackInfoReturnable<Integer> cir) {
 		if (entity == this.player && ValorWings.flying(this.player)) {
+			cir.setReturnValue(Integer.MAX_VALUE);
+		}
+		// (Andy, 2026-11-01) nor hovering on Thessaly's mana wings
+		if (entity == this.player && com.jaymoskingdoms.spirits.ThessalyWings.spread(com.jaymoskingdoms.spirits.Spirits.state(this.player))) {
 			cir.setReturnValue(Integer.MAX_VALUE);
 		}
 	}
