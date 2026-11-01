@@ -4862,8 +4862,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.36, Kingdoms 0.7.468:** the Grue's trial: when it takes you, fog rolls in and you fight it in a black arena in the sky; win and its power is yours. The fight ends in a barrage clash, letterboxed with drums.
 
 - **0.19.37, Kingdoms 0.7.469:** the build compiles again; an orc tribe's good standing opens the greenskin road for the one who won it.
+- **0.19.38, the false moon goes to space:** Andy: "the false moon should animate small, charging within your hand, and
+  thrown all the way to space, replacing the moon itself". Aimed up at an open night sky, a made Great Ball now gathers
+  small in the palm (0.12 growing to 0.5 across). Thrown (big enough), it streaks 220 blocks up, faster and smaller until
+  it's gone, and then the sky's moon is the false one for everyone within 128 blocks of the throw: always full, 1.6x
+  bigger, tinted the ball's pale colour, easing in and back out (`ZFighterFakeMoon.Sky` payload, client
+  `ZFighterFakeMoonSky` + `ZFighterFakeMoonSkyMixin` on `SkyRenderer`). The apes and werewolves still turn under it as
+  before. Compile-checked; not seen in game.
 
-- **0.19.38, Kingdoms 0.7.470, giants knock trees down as they walk:** Andy: "apes should also knock trees down with their
+- **0.19.39, Kingdoms 0.7.470, giants knock trees down as they walk:** Andy: "apes should also knock trees down with their
   strides, as well as towerback, all giants should get this damaging effect". New `core/GiantTrample`: every step of a Great
   Ape (players and raging villagers) and of Towerback knocks over the trees round its feet, and walking into a tree pushes it
   over. With Kingdoms the tree topples whole away from the giant (`Trees.trample`, by reflection) and the falling wood crushes

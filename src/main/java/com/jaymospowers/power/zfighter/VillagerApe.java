@@ -262,7 +262,7 @@ final class VillagerApe {
 			ZFighterLineage.stomp(mob, level);
 		}
 		if (live.apeSize >= 0.5F) {
-			// (0.19.38) walking into a tree pushes it over
+			// (0.19.39) walking into a tree pushes it over
 			com.jaymospowers.core.GiantTrample.tick(mob, now);
 		}
 	}

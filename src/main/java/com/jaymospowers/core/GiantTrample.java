@@ -19,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.38) Andy: "apes should also knock trees down with their strides, as well as towerback, all giants should get this
+ * (0.19.39) Andy: "apes should also knock trees down with their strides, as well as towerback, all giants should get this
  * damaging effect". A giant's steps (the Great Ape's, Towerback's) knock over the trees round its feet, and walking into a
  * tree pushes it down. With Jaymo's Kingdoms the tree topples whole, away from the giant ({@code Trees.trample}, as the
  * Aether Giants'), and the falling wood crushes whatever it lands on; without it the trunk just breaks. A player giant

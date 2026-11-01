@@ -368,9 +368,13 @@ public final class ZFighterCreator {
 		ServerLevel level = player.level();
 		Vec3 look = player.getViewVector(1.0F);
 		boolean ball = made.shape() == BALL;
-		Vec3 hands = ball ? player.getEyePosition().add(0.0, 1.0 + charge * made.power() * 0.3, 0.0)
+		// (Andy, 2026-11-01) aimed up at the night sky, a Great Ball gathers small in the hand, to be thrown up as a false moon
+		boolean moon = ball && ZFighterFakeMoon.aiming(player);
+		Vec3 hands = moon ? ZFighterKi.palm(player, look)
+			: ball ? player.getEyePosition().add(0.0, 1.0 + charge * made.power() * 0.3, 0.0)
 			: player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
-		double size = ball ? 0.4 + charge * (0.5 + 0.35 * made.power()) : made.shape() == NEEDLE ? 0.1 + 0.15 * charge : 0.25 + 0.6 * charge;
+		double size = moon ? ZFighterFakeMoon.HAND_SIZE + charge * ZFighterFakeMoon.HAND_GROW
+			: ball ? 0.4 + charge * (0.5 + 0.35 * made.power()) : made.shape() == NEEDLE ? 0.1 + 0.15 * charge : 0.25 + 0.6 * charge;
 		ZFighterKi.orb(level, -(player.getId() * 4 + 3), hands, size, made.color());
 		var random = level.getRandom();
 		if (random.nextInt(2) == 0) {
@@ -399,10 +403,13 @@ public final class ZFighterCreator {
 		int color = made.color();
 		if (made.shape() == BALL) {
 			double size = 0.4 + charge * (0.5 + 0.35 * p);
-			Vec3 from = player.getEyePosition().add(0.0, 1.0 + charge * p * 0.3, 0.0);
-			if (ZFighterFakeMoon.takes(player, from, player.getViewVector(1.0F), size)) {
-				// (Andy, 2026-11-01) thrown up into the night sky, a big one stays up as a false moon
-				ZFighterFakeMoon.raise(player, from, size, color);
+			// (gathered in the hand when aimed at the night sky)
+			Vec3 from = ZFighterFakeMoon.aiming(player) ? ZFighterKi.palm(player, look)
+				: player.getEyePosition().add(0.0, 1.0 + charge * p * 0.3, 0.0);
+			if (ZFighterFakeMoon.takes(player, size)) {
+				// (Andy, 2026-11-01) thrown up into the night sky from the hand, a big one goes to space as a false moon
+				ZFighterFakeMoon.raise(player, ZFighterKi.palm(player, player.getViewVector(1.0F)),
+					ZFighterFakeMoon.HAND_SIZE + charge * ZFighterFakeMoon.HAND_GROW, color);
 				Shakes.send(player, 0.3F + 0.15F * p * charge, player.position());
 				if (!player.isCreative()) {
 					player.causeFoodExhaustion(0.2F * p * (1.0F + charge));

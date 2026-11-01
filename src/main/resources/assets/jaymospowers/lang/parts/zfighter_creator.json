@@ -33,8 +33,8 @@
   "screen.jaymospowers.zfighter_creator.shape.needle": "Needle",
   "screen.jaymospowers.zfighter_creator.shape.needle.desc": "A thin, very fast beam from one finger. No blast, all point.",
   "screen.jaymospowers.zfighter_creator.shape.ball": "Great Ball",
-  "screen.jaymospowers.zfighter_creator.shape.ball.desc": "A ball of ki gathered overhead, growing as you charge, then thrown. At strength 3 and up it tears the ground. At night, a big one thrown straight up into open sky stays up as a false moon.",
+  "screen.jaymospowers.zfighter_creator.shape.ball.desc": "A ball of ki gathered overhead, growing as you charge, then thrown. At strength 3 and up it tears the ground. Aimed up at an open night sky it gathers in your hand instead, and a big one thrown up goes all the way to space and takes the moon's place.",
   "message.jaymospowers.zfighter_creator.made": "You made %s. It's on %s now.",
   "message.jaymospowers.zfighter_creator.forgot": "You let %s go.",
-  "message.jaymospowers.zfighter_fake_moon.raised": "The ball climbs into the night and hangs there, pale as a full moon."
+  "message.jaymospowers.zfighter_fake_moon.raised": "The ball streaks up into the night until it's gone. The moon up there is a full one now."
 }
