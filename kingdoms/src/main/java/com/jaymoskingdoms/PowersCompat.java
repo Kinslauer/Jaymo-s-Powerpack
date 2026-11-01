@@ -1660,4 +1660,105 @@ public final class PowersCompat {
 			return null;
 		}
 	}
+
+	// ---- (0.7.459) the healing trade: Powers' wounds, for paid treatment, the infirmary cot and the shrine ------------------
+
+	/** What ails a body: bit masks, a bit per body part, as Powers' wounds keep them. */
+	public record Injuries(int broken, int bleeding, int festering) {
+		public static final Injuries NONE = new Injuries(0, 0, 0);
+
+		public boolean any() {
+			return broken != 0 || bleeding != 0 || festering != 0;
+		}
+
+		/** Parts broken, cut open, and festering, added up. */
+		public int count() {
+			return Integer.bitCount(broken) + Integer.bitCount(bleeding) + Integer.bitCount(festering);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle brokenMask, bleedingMask, festeringMask, setAllBones, healPart, missingLimbs, limbBit, partValues;
+	private static boolean lookedForHealing;
+
+	private static void lookForHealing() {
+		if (lookedForHealing) {
+			return;
+		}
+		lookedForHealing = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> entity = net.minecraft.world.entity.Entity.class;
+			Class<?> living = net.minecraft.world.entity.LivingEntity.class;
+			Class<?> wounds = Class.forName("com.jaymospowers.core.wounds.Wounds");
+			Class<?> bleeding = Class.forName("com.jaymospowers.core.wounds.Bleeding");
+			Class<?> breaks = Class.forName("com.jaymospowers.core.wounds.Breaks");
+			Class<?> part = Class.forName("com.jaymospowers.core.wounds.BodyPart");
+			Class<?> dismember = Class.forName("com.jaymospowers.core.Dismember");
+			java.lang.invoke.MethodType mask = java.lang.invoke.MethodType.methodType(int.class, entity);
+			brokenMask = lookup.findStatic(wounds, "broken", mask);
+			bleedingMask = lookup.findStatic(bleeding, "bleeding", mask);
+			festeringMask = lookup.findStatic(bleeding, "festering", mask);
+			setAllBones = lookup.findStatic(wounds, "mendAll", java.lang.invoke.MethodType.methodType(boolean.class, living));
+			healPart = lookup.findStatic(wounds, "healPart", java.lang.invoke.MethodType.methodType(float.class, living, part, float.class));
+			missingLimbs = lookup.findStatic(dismember, "missing", mask);
+			limbBit = lookup.findStatic(breaks, "limb", java.lang.invoke.MethodType.methodType(int.class, part));
+			partValues = java.lang.invoke.MethodHandles.constant(Object[].class, part.getEnumConstants());
+		} catch (ReflectiveOperationException | LinkageError e) {
+			brokenMask = null;
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' wounds for healing (older Powers?)", e);
+		}
+	}
+
+	/** (0.7.459) Which parts of {@code entity} are broken, cut open and festering (none without Powers). */
+	public static Injuries injuries(net.minecraft.world.entity.LivingEntity entity) {
+		lookForHealing();
+		if (brokenMask == null || bleedingMask == null || festeringMask == null) {
+			return Injuries.NONE;
+		}
+		try {
+			return new Injuries((int)brokenMask.invoke((net.minecraft.world.entity.Entity)entity),
+				(int)bleedingMask.invoke((net.minecraft.world.entity.Entity)entity), (int)festeringMask.invoke((net.minecraft.world.entity.Entity)entity));
+		} catch (Throwable e) {
+			return Injuries.NONE;
+		}
+	}
+
+	/** (0.7.459) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
+	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
+		lookForHealing();
+		try {
+			return setAllBones != null && (boolean)setAllBones.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * (0.7.459) Heals every part {@code entity} still has by up to {@code amount} each (Powers' {@code Wounds.healPart}, no
+	 * further than each may heal; a severed limb stays gone). Returns the total taken, or -1 without Powers.
+	 */
+	public static float healEveryPart(net.minecraft.world.entity.LivingEntity entity, float amount) {
+		lookForHealing();
+		if (healPart == null || missingLimbs == null || limbBit == null || partValues == null) {
+			return -1.0F;
+		}
+		try {
+			Object[] parts = (Object[])partValues.invoke();
+			int gone = (int)missingLimbs.invoke((net.minecraft.world.entity.Entity)entity);
+			float total = 0.0F;
+			for (Object part : parts) {
+				int limb = (int)limbBit.invoke(part);
+				if (limb != 0 && (gone & limb) != 0) {
+					continue;
+				}
+				total += (float)healPart.invoke(entity, part, amount);
+			}
+			return total;
+		} catch (Throwable e) {
+			return -1.0F;
+		}
+	}
 }

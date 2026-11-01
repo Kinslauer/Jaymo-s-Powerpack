@@ -624,6 +624,8 @@ public final class Restoration {
 			return out;
 		}
 		out.add(wizard && friendOfRealm(player, healer) ? "heal_free" : "heal");
+		// (0.7.459) and the full treatment, for a price that grows with the injuries (Healing)
+		out.add("treatment");
 		out.add("scroll_mending");
 		if (wizard && reputation(player, healer) >= HONOURED_REP) {
 			out.add("scroll_restoration");
@@ -632,8 +634,9 @@ public final class Restoration {
 	}
 
 	/** An option's line, and whether it can be taken now. */
-	static Component optionLine(String kind) {
+	static Component optionLine(ServerPlayer player, String kind) {
 		return switch (kind) {
+			case "treatment" -> Component.translatable("talk.jaymoskingdoms.healer.treatment", Healing.treatmentPrice(player));
 			case "heal" -> Component.translatable("talk.jaymoskingdoms.healer.heal", HEAL_EMERALDS);
 			case "heal_free" -> Component.translatable("talk.jaymoskingdoms.healer.heal_free");
 			case "scroll_mending" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_mending", MENDING_SCROLL_EMERALDS);
@@ -646,6 +649,7 @@ public final class Restoration {
 		int emeralds = Approaches.emeralds(player);
 		return switch (kind) {
 			case "heal" -> emeralds >= HEAL_EMERALDS && hurt(player);
+			case "treatment" -> Healing.needsTreatment(player) && emeralds >= Healing.treatmentPrice(player);
 			case "heal_free" -> hurt(player);
 			case "scroll_mending" -> emeralds >= MENDING_SCROLL_EMERALDS;
 			case "scroll_restoration" -> emeralds >= RESTORATION_SCROLL_EMERALDS && restorationDue(player);
@@ -663,7 +667,7 @@ public final class Restoration {
 		List<Component> options = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
 		for (String kind : kinds) {
-			options.add(optionLine(kind));
+			options.add(optionLine(player, kind));
 			enabled.add(optionOpen(player, kind));
 		}
 		OFFERS.put(player.getUUID(), new Offer(healer.getId(), kinds));
@@ -690,7 +694,7 @@ public final class Restoration {
 	static boolean serve(ServerPlayer player, LivingEntity healer, String kind) {
 		ServerLevel level = player.level();
 		if (!optionOpen(player, kind)) {
-			return kind.startsWith("heal") || kind.startsWith("scroll_");
+			return kind.startsWith("heal") || kind.startsWith("scroll_") || kind.equals("treatment");
 		}
 		switch (kind) {
 			case "heal", "heal_free" -> {
@@ -710,6 +714,15 @@ public final class Restoration {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 1.3F);
 				Speech.tell(level, healer, player, Component.translatable(kind.equals("heal") ? "talk.jaymoskingdoms.healer.healed"
 					: "talk.jaymoskingdoms.healer.healed_free"), Speech.GOLD);
+			}
+			case "treatment" -> {
+				// (0.7.459) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
+				Approaches.take(player, Items.EMERALD, Healing.treatmentPrice(player));
+				Healing.treat(player);
+				beam(level, healer, player, GOLD_MOTE);
+				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD_MOTE, 18);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 1.3F);
+				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.treated"), Speech.GOLD);
 			}
 			case "scroll_mending" -> {
 				Approaches.take(player, Items.EMERALD, MENDING_SCROLL_EMERALDS);

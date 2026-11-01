@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "PSP"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:infirmary_cot"
+  }
+}
