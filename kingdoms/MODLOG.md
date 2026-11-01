@@ -7920,6 +7920,14 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
 - "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
   Interact button (only Introduce, Gift, Trade).
 - Compile-checked; not seen in game.
+
+## 0.7.456: a felled tree never stands back up (pack 0.19.15)
+- A tree felled into another tree was caught almost upright and then settled as real blocks at that lean, so it
+  looked like it replanted itself. Now, struck before it's half over (`FallingTree.LYING`, 45°), it glances off a
+  quarter turn to whichever side is clear and falls on that way (at most `GLANCES` times, with a knock).
+- With no clear way down it leans there a moment and breaks apart, dropping its wood and leaves; it is never set back
+  as standing blocks. Trees that get past half over still settle lying as before.
+- Compile-checked; not seen in game.
 ## 0.7.457: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.16)
 - Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1, right 3): the story's
   flaw click waited for button 0 and never came, and the right-click step-back took button 1, so a left click on the
