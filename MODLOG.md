@@ -4699,5 +4699,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   runs you through, a bow or crossbow fires point blank, an evoker's fangs close on you, a witch breaks a potion on you,
   zombies and spiders feed, a ravager or the warden crushes you, empty hands stamp. Hitting the executioner before the
   blow breaks it off (it turns on whoever hit it and waits 15 s before trying again); so does a revive, rising, being
-  carried off or crawling away (it follows). No creepers, fliers, slimes or bosses. Kingdoms' captains still get their
+  carried off or crawling away (it follows). Not only monsters: anyone fighting you (they have you as their target, or
+  you struck them in the last 20 s) can do it too: bandits, barbarians, orcs, pirates, guards, golems, wolves.
+  No creepers, fliers, slimes or bosses. Kingdoms' captains still get their
   own scene after the kill (`core/wounds/MobExecutions`, tuning at the top). Compile-checked; not seen in game.

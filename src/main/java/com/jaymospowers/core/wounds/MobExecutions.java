@@ -27,6 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Blaze;
@@ -55,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * (0.19.13) Andy (2026-11-01): "enemy mobs and illagers should be able to execute you, with a letterboxed scene". A downed
  * player lying where hostiles can see them gets finished off: after {@link #GRACE_TICKS} (time for a friend to come), the
  * nearest hostile ({@link Enemy}: zombies, skeletons, spiders, illagers, piglins, the warden...; not creepers, fliers,
- * slimes or bosses, {@link #able}) that sees them leaves its fight, walks over and kills them with a move of its own
+ * slimes or bosses, {@link #able}), or anyone else fighting them (a bandit, a barbarian, a guard, a golem) that sees them leaves its fight, walks over and kills them with a move of its own
  * ({@link Move}: an axe takes the head, a blade runs them through, a bow or crossbow fires point blank, an evoker's fangs
  * close on them, a zombie or spider feeds, a witch breaks a potion on them, a ravager or the warden crushes them).
  * <p>
@@ -90,6 +91,8 @@ public final class MobExecutions {
 	static final int SCAN_EVERY = 10;
 	/** Screen shake for the victim at the wind-up and the blow. */
 	static final float WINDUP_SHAKE = 0.6F, KILL_SHAKE = 2.2F;
+	/** (0.19.13) Struck by the victim this recently (ticks), a mob counts as fighting them. */
+	public static final int GRUDGE_TICKS = 400;
 	/** Smaller than this (width and height) is too small to do it (silverfish, endermites). */
 	static final float MIN_SIZE = 0.5F;
 
@@ -179,12 +182,13 @@ public final class MobExecutions {
 	}
 
 	/**
-	 * Whether {@code mob} may execute anyone: a hostile on its feet, big enough, that walks (no creepers, fliers, slimes,
-	 * water mobs or bosses), not ridden or riding, not someone's.
+	 * Whether {@code mob} may execute {@code victim}: on its feet, big enough, and walking (no creepers, fliers, slimes,
+	 * water mobs or bosses), not ridden or riding; and (0.19.13, Andy: "everyone") either a hostile ({@link Enemy}, or one
+	 * {@link #EXECUTIONERS} names) or anyone at all who is fighting them: a bandit, a barbarian, a guard, a golem, a wolf.
 	 */
-	public static boolean able(Mob mob) {
+	public static boolean able(Mob mob, LivingEntity victim) {
 		if (!mob.isAlive() || mob.isNoAi() || Downed.isDowned(mob) || mob.isPassenger() || mob.isVehicle() && !(mob instanceof Spider)
-			|| Carry.isCarried(mob) || mob.isSleeping()) {
+			|| Carry.isCarried(mob) || mob.isSleeping() || mob.isBaby() && !(mob instanceof Enemy)) {
 			return false;
 		}
 		if (mob instanceof Creeper || mob instanceof Slime || mob instanceof Ghast || mob instanceof Phantom || mob instanceof Vex
@@ -195,7 +199,7 @@ public final class MobExecutions {
 		if (mob.getBbWidth() < MIN_SIZE && mob.getBbHeight() < MIN_SIZE) {
 			return false;
 		}
-		if (mob instanceof Enemy) {
+		if (mob instanceof Enemy || fighting(mob, victim)) {
 			return true;
 		}
 		for (Predicate<Mob> p : EXECUTIONERS) {
@@ -204,6 +208,22 @@ public final class MobExecutions {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether {@code mob} is fighting {@code victim}: it has them as its target (or its brain's attack target), or they
+	 * struck it within {@link #GRUDGE_TICKS}.
+	 */
+	public static boolean fighting(Mob mob, LivingEntity victim) {
+		if (mob.getTarget() == victim) {
+			return true;
+		}
+		// (as Kingdoms' Rulers.target: a brain without the memory throws on getMemory)
+		if (mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+			&& mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) == victim) {
+			return true;
+		}
+		return mob.getLastHurtByMob() == victim && mob.tickCount - mob.getLastHurtByMobTimestamp() < GRUDGE_TICKS;
 	}
 
 	/** What {@code mob} does it with. */
@@ -231,7 +251,7 @@ public final class MobExecutions {
 
 	private static Move bare(Mob mob) {
 		if (mob instanceof Zombie || mob instanceof Spider || BodyPlan.of(mob) != BodyPlan.HUMANOID) {
-			return mob.getBbWidth() > 1.4F ? Move.CRUSH : Move.FEED;
+			return mob.getBbWidth() >= 1.3F ? Move.CRUSH : Move.FEED;
 		}
 		return Move.STAMP;
 	}
@@ -278,7 +298,7 @@ public final class MobExecutions {
 		double bestDistance = Double.MAX_VALUE;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SEEK_RANGE), Mob::isAlive)) {
 			Long shaken = SHAKEN.get(mob);
-			if (shaken != null && now < shaken || BY_MOB.containsKey(mob) || !able(mob) || Finishers.busy(mob)) {
+			if (shaken != null && now < shaken || BY_MOB.containsKey(mob) || !able(mob, player) || Finishers.busy(mob)) {
 				continue;
 			}
 			double d = mob.distanceToSqr(player);
