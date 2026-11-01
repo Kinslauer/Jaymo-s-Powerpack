@@ -7921,7 +7921,15 @@ talk or interact screen. accusing the wrong person loses you hearts w them".
   Interact button (only Introduce, Gift, Trade).
 - Compile-checked; not seen in game.
 
-## 0.7.455: larger monoliths with a living heart (pack 0.19.12)
+## 0.7.456: a felled tree never stands back up (pack 0.19.15)
+- A tree felled into another tree was caught almost upright and then settled as real blocks at that lean, so it
+  looked like it replanted itself. Now, struck before it's half over (`FallingTree.LYING`, 45°), it glances off a
+  quarter turn to whichever side is clear and falls on that way (at most `GLANCES` times, with a knock).
+- With no clear way down it leans there a moment and breaks apart, dropping its wood and leaves; it is never set back
+  as standing blocks. Trees that get past half over still settle lying as before.
+- Compile-checked; not seen in game.
+
+## 0.7.457: larger monoliths with a living heart (pack 0.19.16)
 - Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
   studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
   glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.

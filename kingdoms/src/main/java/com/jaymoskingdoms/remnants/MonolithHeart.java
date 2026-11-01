@@ -21,7 +21,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * (0.7.455) Andy: "I'd like the monoliths larger and animated more like the mod they came from". A monolith's heart is
+ * (0.7.457) Andy: "I'd like the monoliths larger and animated more like the mod they came from". A monolith's heart is
  * no longer blocks but block displays the server moves: a glowing core of its element's gem with six gem shards on its
  * six sides, the whole cluster slowly tumbling while the shards breathe out and in, stretching as they go, and motes
  * drawn in to it off the stone round it. That is how Ancient Remnants' Elderheart behaves (studied from its public
@@ -225,7 +225,7 @@ public final class MonolithHeart {
 	}
 
 	/**
-	 * (0.7.455) A monolith raised before its heart moved: finds its old block core over the pillar, and with it takes
+	 * (0.7.457) A monolith raised before its heart moved: finds its old block core over the pillar, and with it takes
 	 * out the core and the four still shards about it so a living heart can float there. Returns how high over the foot
 	 * the heart's centre is, or -1 if no core was found.
 	 */
@@ -249,7 +249,7 @@ public final class MonolithHeart {
 			// one raised before 0.7.263: a single core block, left shards and all
 			return bottom;
 		}
-		// the shards stood one cube lower, level and one higher, two cubes out on the diagonals (Monoliths.raise before 0.7.455)
+		// the shards stood one cube lower, level and one higher, two cubes out on the diagonals (Monoliths.raise before 0.7.457)
 		int[][] shards = {{2, -1, 2}, {-2, 0, 2}, {2, 1, -2}, {-2, -1, -2}};
 		for (int[] s : shards) {
 			BlockPos corner = foot.offset(s[0] * scale - half, bottom + s[1] * scale, s[2] * scale - half);
