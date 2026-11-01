@@ -167,6 +167,10 @@ public final class Arcana {
 		if (Will.hushed(player)) {
 			return false;
 		}
+		// (0.7.465) the spirit grabs your hand before the forbidden words are out
+		if (ForbiddenArts.forbidden(spell) && ForbiddenArts.stayed(player)) {
+			return false;
+		}
 		return switch (spell) {
 			case "raising" -> raising(level, player, power);
 			case "draining" -> draining(level, player, power);

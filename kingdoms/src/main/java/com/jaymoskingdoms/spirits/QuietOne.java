@@ -241,7 +241,8 @@ public final class QuietOne extends Spirit {
 
 	/** Whether the Quiet One may say {@code event} to {@code player}: its sick dots, and its one word at full bond, once. */
 	static boolean mayWhisper(ServerPlayer player, String event) {
-		if (event.startsWith("sick.")) {
+		// (0.7.465) the one thing that breaks its silence: the Grue
+		if (event.startsWith("sick.") || event.startsWith("grue.")) {
 			return true;
 		}
 		if (!event.equals("word")) {

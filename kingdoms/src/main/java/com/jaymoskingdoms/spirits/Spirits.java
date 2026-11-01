@@ -179,6 +179,8 @@ public final class Spirits {
 		SpiritExecutions.register();
 		SpiritClash.register();
 		FolkSpirits.register();
+		// (0.7.465) the Grue, who takes the spirits of those who dabble in the dark
+		Grue.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
 			IDLE_AT.clear();
@@ -359,6 +361,11 @@ public final class Spirits {
 			return;
 		}
 		SpiritState state = state(player);
+		if (Grue.taken(player)) {
+			// (0.7.465) it isn't yours any more
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.grue.no_answer").withStyle(s -> s.withColor(Grue.COLOR)));
+			return;
+		}
 		if (state == null) {
 			if (key.action() == SUMMON) {
 				player.sendOverlayMessage(Component.translatable(SpiritSickness.sick(player) ? "message.jaymoskingdoms.spirit.asleep"
@@ -418,6 +425,16 @@ public final class Spirits {
 		Mana.sendSeen(level, Mana.MOTE, player.getX(), player.getY() + 1.2, player.getZ(), 24, 0.5, 0.7, 0.5, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.9F);
 		SpiritVoice.sayNow(player, state.kind(), "summon");
+	}
+
+	/** (0.7.465) The Grue keeps the spirit out, whatever mana there is (it's no longer theirs to call). */
+	static void forceOut(ServerPlayer player) {
+		SpiritState state = state(player);
+		if (state == null || state.out()) {
+			return;
+		}
+		set(player, state.withOut(true).withShow(player.level().getGameTime(), Poses.REACH));
+		OUT_TICKS.put(player.getUUID(), 0);
 	}
 
 	/** Puts the spirit away, saying {@code event} if it has one to say (null: quietly). */
@@ -490,6 +507,7 @@ public final class Spirits {
 		if (now % 20L == 0L) {
 			SpiritSickness.tick(player, now);
 		}
+		Grue.tick(player, now);
 		SpiritState state = state(player);
 		if (state == null || !state.out()) {
 			return;
@@ -508,7 +526,8 @@ public final class Spirits {
 
 	/** Once a second while it's out: the drain, the bond, the tiredness. False if it faded. */
 	private static boolean second(ServerPlayer player, SpiritState state) {
-		if (!player.isCreative()) {
+		// (0.7.465) the Grue needs none of your mana to keep it out
+		if (!player.isCreative() && !Grue.taken(player)) {
 			Mana.drain(player, DRAIN_PER_SECOND);
 			if (Mana.current(player) < TIRED_AT) {
 				putAway(player, "tired");
