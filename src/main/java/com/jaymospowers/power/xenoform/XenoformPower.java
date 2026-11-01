@@ -71,6 +71,8 @@ public final class XenoformPower implements Power {
 	// ---- tuning (ticks) ----
 	/** Z held this long slams the band. */
 	public static final int HOLD_TICKS = 10;
+	/** (0.19.28) The dial's ratchet click pitch, turning on (a little lower turning back). */
+	static final float DIAL_CLICK_PITCH = 1.7F;
 	/** (0.18.122, patch 6) A wrong-alien glitch lands this often on an alien the band never held, and the band keeps it. */
 	public static final float GLITCH_TEACH_CHANCE = 0.2F;
 	/** (0.18.92) The band's charge (ticks of form): its size unmastered and fully mastered (2 and 5 minutes). */
@@ -1029,6 +1031,8 @@ public final class XenoformPower implements Power {
 	public static void dial(ServerPlayer player, int by) {
 		XenoformState.Band band = XenoformState.band(player);
 		if (band.unlocked().size() <= 1) {
+			// (0.19.28) the dial still clicks, but it's stuck: a dull knock
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.5F, 0.6F);
 			XenoForm only = XenoForms.get(band.dialled());
 			if (only != null) {
 				hint(player, live(player), Component.translatable("message.jaymospowers.xenoform.only_one", only.name()));
@@ -1042,7 +1046,13 @@ public final class XenoformPower implements Power {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.dialled", form.name().copy()
 				.withStyle(style -> style.withColor(TextColor.fromRgb(form.color)))));
 		}
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7F, 1.6F);
+		// (0.19.28) Andy: "there should be mechanical sound effects for every scroll": a ratchet's click (higher turning on,
+		// lower turning back) over the tick of the bulb's relay, and the chime under them
+		float pitch = by > 0 ? DIAL_CLICK_PITCH : DIAL_CLICK_PITCH * 0.85F;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.55F,
+			pitch + player.getRandom().nextFloat() * 0.08F);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.35F, 1.8F);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.25F, 1.6F);
 	}
 
 	private static void hint(ServerPlayer player, Live live, Component text) {

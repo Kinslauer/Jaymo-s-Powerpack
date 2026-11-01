@@ -4778,4 +4778,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
 - **0.19.28, Put the band away:** Andy: "right clicking while scrolling the watch should let you put it away". Right
   click while holding Z drops the wrist, and letting Z go then does nothing (no slam, quick change or turning back); the
-  click uses nothing in hand (`XenoNet.PutAway`). Compile-checked; not seen in game.
+  click uses nothing in hand (`XenoNet.PutAway`). Andy: "there should be mechanical sound effects for every scroll": each
+  turn of the dial now clicks like a ratchet (a lever's click, higher turning on, lower turning back, over a relay's tick),
+  and a stuck dial (one alien) knocks. Compile-checked; not seen in game.
