@@ -8195,7 +8195,7 @@ a large goblin camp the size of a kingdom even".
   city buildings are Patches 3 and 4.
 - Compile-checked against the 26.3 jars; not played.
 
-## 0.7.476: Thessaly's mana wings (pack 0.19.55)
+## 0.7.476: Thessaly's mana wings (pack 0.19.56)
 Andy: "Thelassy should grow mana wings for users, that allow them to hover, with the wind hover animation, and increases
 height and speed as they master it. the mana wings animate like angelic wispy 2-3 player wide hands with wings that extend
 beneath it, and flap gently as they hover."
