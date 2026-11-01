@@ -582,8 +582,7 @@ public final class ZFighterLineage {
 		if (!ape(player)) {
 			live.apePeak = player.getY();
 			if (moonlit && player.isAlive() && live.apeSize <= 0.0F) {
-				if (!wild || fakeMoon) {
-					// a false moon is close and bright: it takes even one without the power, no roll
+				if (!wild) {
 					becomeApe(player, live);
 				} else if (now - live.wildRolledAt >= WILD_ROLL_EVERY) {
 					// no Z Fighter: the moon may or may not take him, once a night

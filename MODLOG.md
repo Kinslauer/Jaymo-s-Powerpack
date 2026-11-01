@@ -4727,5 +4727,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   creator, any large orb that when thrown into the sky at night, turns any warrior born with an unleashed tail". A made
   Great Ball at least 1.5 blocks across, thrown about 50 degrees up or steeper into open night sky, climbs 48 blocks,
   pales into a moon and hangs 2 minutes (`ZFighterFakeMoon`, tuning at the top). Its light counts as a full moon on any
-  phase within 112 blocks: Warrior-born players with the tail out turn into the Great Ape (no roll for those without the
-  power) and stay it while it shines; wrapped Warrior-born villagers get one 35% roll each. Compile-checked; not seen in game.
+  phase within 112 blocks: Warrior-born players with the tail out turn into the Great Ape (those without the
+  power still roll, once a night) and stay it while it shines; wrapped Warrior-born villagers get one 35% roll each. Compile-checked; not seen in game.

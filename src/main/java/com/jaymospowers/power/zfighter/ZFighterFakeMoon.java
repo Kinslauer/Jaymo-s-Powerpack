@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
  * (Andy, 2026-11-01) The false moon: a made Great Ball ({@link ZFighterCreator#BALL}) big enough, thrown almost straight
  * up into an open night sky, doesn't come down. It climbs, swells and pales into a little moon that hangs there a while,
  * and it shines like a full one on any phase of the moon. Every Warrior-born under it with the tail out turns into the
- * Great Ape ({@link ZFighterLineage}; a fighter without the Z Fighter power turns for certain here, with no roll), and stays
+ * Great Ape ({@link ZFighterLineage}; one without the Z Fighter power still rolls, as under the real moon), and stays
  * the ape while it hangs. Villagers keep their tails wrapped, but the light still gets at them: each wrapped Warrior-born
  * villager under it is rolled once ({@link #VILLAGER_CHANCE}) and may turn ({@link VillagerApe}).
  *
