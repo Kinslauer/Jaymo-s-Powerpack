@@ -4692,7 +4692,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
 
-- **0.19.11, Kingdoms 0.7.455:** left and right clicks fixed on screens that tell them apart. 26.3 numbers the mouse
+- **0.19.15, Kingdoms 0.7.456:** left and right clicks fixed on screens that tell them apart. 26.3 numbers the mouse
   buttons from 1 (left 1, middle 2, right 3), so a check for "left is 0" never matched and "right is 1" caught left
   clicks. The life story's flaws and switches can be ticked now, and a left click on its Heritage, Class and Look buttons
   steps forward instead of back. In Powers the Codex's tabs and graph dragging, the Z Fighter star map's clicks, and

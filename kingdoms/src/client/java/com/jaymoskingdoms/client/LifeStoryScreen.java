@@ -855,7 +855,7 @@ final class LifeStoryScreen extends Screen {
 			// (0.7.420) a flaw or a switch of a harder life
 			int choice = choiceAt(mx, my);
 			if (choice >= 0 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-				// (0.7.455) Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1,
+				// (0.7.456) Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1,
 				// right 3), so the left button was never 0 and no flip ever came
 				flip(choice);
 				click();
