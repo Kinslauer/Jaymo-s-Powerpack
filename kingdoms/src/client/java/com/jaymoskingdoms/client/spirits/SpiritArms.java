@@ -202,6 +202,9 @@ public final class SpiritArms {
 		TABLE[Poses.SENSE] = new float[] {-0.10F, 0.30F, 1.50F};    // spread wide and still
 		TABLE[Poses.CLASH] = new float[] {-1.57F, -0.65F, 0.05F};   // both thrust forward, hands locked at full reach
 		TABLE[Poses.SPEAK] = TABLE[Poses.IDLE];                     // as it rests (the floating ones take their own rest)
+		// (0.7.467) the strong strike: straight out along the aim (the hand then shoots the whole way, as a far hand does)
+		TABLE[Poses.PUNCH] = new float[] {-1.57F, 0.0F, 0.0F};
+		TABLE[Poses.BARRAGE] = new float[] {-1.57F, -0.30F, 0.05F}; // both fists pounding ahead, in turn (SpiritRig)
 	}
 
 	/** How far manifest each being's arms are: eased from where they were when the spirit went out or away. */
@@ -313,7 +316,9 @@ public final class SpiritArms {
 		float age = (float)(now - spirit.shownAt());
 		float weight = 0.0F;
 		if (spirit.show() != 0L && pose > Poses.IDLE && pose < Poses.COUNT && age >= 0.0F) {
-			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
+			// (0.7.467) the barrage is stamped again every 8 ticks: held at full, not eased in each time
+			float in = pose == Poses.BARRAGE ? 1.0F : Math.min(1.0F, age / POSE_IN);
+			weight = age < POSE_TICKS ? in : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
 		// the figure shows each time the projection forms, and fades while the arms go on
@@ -696,7 +701,7 @@ public final class SpiritArms {
 			// the trail: two soft ghosts of the arm behind it while it moves fast (a blow's snap, a grasp closing), not at rest;
 			// the slower wisp is the smoke off it ({@link #wisp})
 			boolean fast = look.pose() != Poses.IDLE && look.poseWeight() > 0.0F && look.poseAge() >= SpiritRig.WIND_T
-				&& look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER;
+				&& look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER || look.pose() == Poses.BARRAGE && look.poseWeight() > 0.0F;
 			if (!fast) {
 				return;
 			}
@@ -846,6 +851,8 @@ public final class SpiritArms {
 	static final float SHIELD_OUT = 1.25F, SHIELD_DROP = 0.3F, SHIELD_APART = 0.32F, SHIELD_HAND = 2.8F;
 	/** Beneath: the hands' gap (pixels), how far ahead of the feet (pixels), how far below them, how big they swell, their cup. */
 	static final float BENEATH_APART = 3.0F, BENEATH_AHEAD = 1.5F, BENEATH_DROP = 2.0F, BENEATH_HAND = 2.6F, BENEATH_CUP = 0.45F;
+	/** (0.7.467) The strong strike: ticks the fist stays at full stretch, and ticks it takes to snap back. */
+	static final float PUNCH_HOLD = 7.0F, PUNCH_BACK = 4.0F;
 	/** Ticks the shield and the cradle take to form. */
 	static final float FORM_TICKS = 3.0F;
 
@@ -862,6 +869,10 @@ public final class SpiritArms {
 	private static void shape(ModelPart arm, SpiritRig.Frame f, int mode, Look look, HumanoidRenderState state, float age, float w,
 		float size, float side, boolean pair) {
 		float hold = age < POSE_TICKS ? 1.0F : w;
+		if (look.pose() == Poses.PUNCH) {
+			// (0.7.467) a whip, not a reach: out, a beat at full stretch, and snapped back
+			hold = Math.min(hold, Mth.clamp(1.0F - (age - PUNCH_HOLD) / PUNCH_BACK, 0.0F, 1.0F));
+		}
 		float pitch = state.xRot * Mth.DEG_TO_RAD, yaw = state.yRot * Mth.DEG_TO_RAD;
 		// the aim, in the model's own space (y down, -z ahead, the right side -x)
 		float dx = -Mth.cos(pitch) * Mth.sin(yaw), dy = Mth.sin(pitch), dz = -Mth.cos(pitch) * Mth.cos(yaw);

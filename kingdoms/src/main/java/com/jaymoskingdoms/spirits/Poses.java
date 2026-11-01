@@ -14,8 +14,10 @@ public final class Poses {
 		TRAP = 31, UNLOCK = 32, JUGGLE = 33, ECHO = 34, MIRROR = 35, STILL = 36, SILENT = 37, SENSE = 38, CLASH = 39;
 	/** (0.7.258) The spirit speaking: the arm shows itself as it is, by its keeper, while it talks. */
 	public static final int SPEAK = 40;
+	/** (0.7.467) The strong strike: the fist whipped straight out along the aim; the barrage clash's pounding fists. */
+	public static final int PUNCH = 41, BARRAGE = 42;
 	/** How many poses there are (every id is below this, and below 64, which {@code show} packs it into). */
-	public static final int COUNT = 41;
+	public static final int COUNT = 43;
 
 	private Poses() {
 	}

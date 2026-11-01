@@ -42,7 +42,7 @@ public final class GrueClient {
 	private static float speed;
 	private static boolean grue;
 	private static float lash, lastLash;
-	/** (0.7.467) The trial's fog: now, last tick, where it's going and how much it moves a tick ({@link GrueTrial.Fog}). */
+	/** (0.7.468) The trial's fog: now, last tick, where it's going and how much it moves a tick ({@link GrueTrial.Fog}). */
 	private static float fog, lastFog, fogTo, fogStep;
 
 	private GrueClient() {
@@ -163,7 +163,7 @@ public final class GrueClient {
 			graphics.blit(RenderPipelines.VIGNETTE, VIGNETTE, 0, 0, 0.0F, 0.0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(),
 				graphics.guiHeight(), color);
 		}
-		// (0.7.467) the trial's fog rolling in: from the edges first, then over everything
+		// (0.7.468) the trial's fog rolling in: from the edges first, then over everything
 		float f = Mth.lerp(partialTicks, lastFog, fog);
 		if (f > 0.0F) {
 			float edge = Math.min(1.0F, f * 2.0F);

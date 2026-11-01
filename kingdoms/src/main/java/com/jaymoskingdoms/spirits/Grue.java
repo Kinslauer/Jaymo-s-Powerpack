@@ -209,7 +209,7 @@ public final class Grue {
 		JaymosKingdoms.LOGGER.debug("grue attachments: {} {} {}", GRUE, ROUTINE, HEARD);
 		PayloadTypeRegistry.clientboundPlay().register(Drive.TYPE, Drive.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Lash.TYPE, Lash.CODEC);
-		// (0.7.467) the trial when it takes you
+		// (0.7.468) the trial when it takes you
 		GrueTrial.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> forgetAll());
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer().getUUID()));
@@ -277,7 +277,7 @@ public final class Grue {
 	public static float hold(Entity entity) {
 		State s = entity.getAttached(GRUE);
 		if (s == null) {
-			// (0.7.467) Grue Form burns as red as the Grue itself
+			// (0.7.468) Grue Form burns as red as the Grue itself
 			SpiritState spirit = Spirits.state(entity);
 			return spirit != null && spirit.toggled(SpiritState.GRUE_FORM) ? TAKEN : 0.0F;
 		}
@@ -297,7 +297,7 @@ public final class Grue {
 		if (spirit == null || player.isCreative() || player.isSpectator() || !player.isAlive() || GrueTrial.active(player)) {
 			return;
 		}
-		// (0.7.467) subjugated: it never creeps in again, and Grue Form costs its mana
+		// (0.7.468) subjugated: it never creeps in again, and Grue Form costs its mana
 		if (GrueTrial.mastered(spirit)) {
 			if ((now + player.getId()) % 20L == 0L) {
 				GrueTrial.formSecond(player, spirit);
@@ -367,7 +367,7 @@ public final class Grue {
 			NEXT_LASH.put(player.getUUID(), player.level().getGameTime() + LASH_MIN / 2);
 		}
 		if (hold >= TAKEN && !GrueTrial.start(player)) {
-			// (0.7.467) the trial first (GrueTrial); straight to it only where there's no sky to raise an arena in
+			// (0.7.468) the trial first (GrueTrial); straight to it only where there's no sky to raise an arena in
 			overtake(player, spirit);
 		}
 	}
@@ -496,7 +496,7 @@ public final class Grue {
 
 	// ---- taken -----------------------------------------------------------------------------------------------------------
 
-	/** (0.7.467) The trial lost: it has them now. */
+	/** (0.7.468) The trial lost: it has them now. */
 	static void overtakeNow(ServerPlayer player) {
 		SpiritState spirit = Spirits.state(player);
 		if (spirit != null) {
@@ -504,7 +504,7 @@ public final class Grue {
 		}
 	}
 
-	/** (0.7.467) The Grue's own voice to {@code player} ({@link #speak}). */
+	/** (0.7.468) The Grue's own voice to {@code player} ({@link #speak}). */
 	static void speakTo(ServerPlayer player, String event) {
 		speak(player, event);
 	}

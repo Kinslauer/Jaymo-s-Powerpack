@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.467) The Grue's trial. Jung, through Andy (2026-11-01): when the Grue takes you, "the player gets tped to a black
+ * (0.7.468) The Grue's trial. Jung, through Andy (2026-11-01): when the Grue takes you, "the player gets tped to a black
  * realm with a boss fight to subjugate the curse when it can then be used at will"; Andy chose a sealed arena in the sky
  * (no new dimension) and "the blindness fog rollin effect happens first, then you appear in the skybox".
  * <ul>
