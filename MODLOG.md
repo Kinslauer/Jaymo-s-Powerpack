@@ -4884,3 +4884,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   less emphasized, just to show the user they need water": at 8 water or less, thin dusky veins show at the edges and
   corners, a little further in and stronger as the water runs out (Kitchen `DryVeins`, Kitchen MODLOG). Compile-checked;
   not seen in game.
+
+- **0.19.46, Kingdoms 0.7.472, the Bio-built road preview, again:** Andy: "the bio built start still glitches on the
+  preview ... you said it was fixed but this is still broken". While you make your character you hang in the sky, flying
+  (stasis), and Fresh Animations played its flying pose on the figure of you on the road page, which tore the Bio-built
+  form apart and lifted it out of its frame. The 0.19.11 check was made in a test game without Fresh Animations. Fresh
+  Animations now pauses for you while the story screen is up (Kingdoms MODLOG). Checked in a test game with MCA and Fresh
+  Animations.
