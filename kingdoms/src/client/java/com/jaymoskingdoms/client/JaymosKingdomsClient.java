@@ -182,6 +182,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.SpiritHud.register();
 		com.jaymoskingdoms.client.spirits.SpiritVoiceSound.register();
 		com.jaymoskingdoms.client.spirits.ClashCinematic.register();
+		// (0.7.467) the barrage clash: the key read every frame, the beat, the drum track
+		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
 		// (0.7.292) goblins and orcs as MCA villagers

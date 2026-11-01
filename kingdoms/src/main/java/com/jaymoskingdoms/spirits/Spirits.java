@@ -178,6 +178,8 @@ public final class Spirits {
 		QuietOne.register();
 		SpiritExecutions.register();
 		SpiritClash.register();
+		// (0.7.467) the strong strike's barrage clash
+		SpiritBarrage.register();
 		FolkSpirits.register();
 		// (0.7.465) the Grue, who takes the spirits of those who dabble in the dark
 		Grue.register();
@@ -357,7 +359,8 @@ public final class Spirits {
 	// ---- the key ----------------------------------------------------------------------------------------------------
 
 	private static void key(ServerPlayer player, Key key) {
-		if (player.isSpectator() || !player.isAlive()) {
+		// (0.7.467) in a barrage the key beats time (SpiritBarrage.Tap), and the spirit can't be sent off or swapped
+		if (player.isSpectator() || !player.isAlive() || SpiritBarrage.busy(player)) {
 			return;
 		}
 		SpiritState state = state(player);

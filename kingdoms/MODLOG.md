@@ -8030,3 +8030,40 @@ offer it in his interactions menu".
   the whole life story again, with every road the player or their group has opened. Roads already taken stay theirs.
   MCA's look and name are kept.
 - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
+
+## 0.7.467: the Strong Strike and the barrage clash (pack 0.19.34)
+Andy: "each spirit should have a strong strike attack that whips the fist straight forward within your view, and when one
+of these punches clashes with another you get a barrage style clash, that requires precise timing or manipulation
+otherwise to win" (the stand rush gif), and the Grue trial "needs to culminate in one of these, with letterboxing and music".
+- **Strong Strike (`SpiritPunch`, move `punch`):** every spirit's first move, from level 1. The fist winds up and whips
+  straight out along your aim (`Poses.PUNCH`: the arm stretches the whole way, a beat at full stretch, snapped back), in
+  first person too, and hits the first thing in line. Per spirit: Grimsby 6.5 hurt / 0.8 s / 7 blocks, Varro 9 / 1.3 s /
+  6 blocks with a big throw, Ambrose 6 / 0.9 s / 7, Thessaly 4.5 / 0.5 s / 10 blocks, the Quiet One 6 / 0.8 s / 7 by its
+  size this summon. Scaled by spirit level; 5 mana; a punch into the air still goes out. Allies are never struck.
+- **Punches meeting:** a punch at a keeper whose spirit is out lands 3 ticks late; if they punch back at you within 12
+  ticks, the fists meet, neither lands, and a barrage begins. A folk keeper punched with its spirit out answers in kind one
+  time in two. Punches don't start the old locked-arms clash (`SpiritClash`) any more; the other strikes still do.
+- **The barrage clash (`SpiritBarrage`):** both rooted face to face, both spirits pounding fists in the middle
+  (`Poses.BARRAGE`, both arms, fast, each blow from its own angle, ghost trails), sparks and fist sounds where they meet.
+  The film is the clash's (`ClashCinematic`: letterbox, side camera, tug bar) with its own drum track. The drum is the
+  clock: two count-in clicks, then 6 beats every half second, 6 every 0.4 s, 8 every 0.3 s.
+  - Tap the spirit key on the drum: within 1 tick is PERFECT (4 points), within 2.5 ticks Good (2); landed blows in a row
+    add 0.5 each (up to 2). A beat let pass scores nothing.
+  - Mashing loses: a tap off the beat, or a second tap on one beat, staggers you (3 points to them, your next beat lost).
+  - Feint (the manipulation): sneak and tap on a beat (8 mana, once in 3 beats). If they struck that beat, their blow goes
+    past you, its worth (4) is yours and their streak breaks; if they didn't, it's wasted.
+  - Taps are timed on your own screen, every frame, to the hundredth of a tick, and sent as an offset (`SpiritBarrage.Tap`),
+    so lag doesn't move the beat.
+  - Decided at a 30 point lead or when the drum ends; within 2 points it's a draw (a crash, both pushed back 3 blocks).
+    Otherwise the winner's flurry breaks through: a second of blows (1 hurt each, scaled by level), a last 4 with an
+    impact frame, the loser thrown 8 blocks, +4 bond, the clash win/lose lines.
+  - HUD over the tug bar: a square closing on your fist (white on the drum), the good window, your tap's timing (PERFECT /
+    Good / Too early / Too late), what came of the beat (landed, missed, staggered, feinted, ...), and the keys.
+  - Music: `sounds/spirit/barrage_theme.ogg` (big drum and clap on every beat, fist ticks between, a climbing A-minor bass,
+    a riser), `barrage_rush.ogg` (a roll into the blow) and `barrage_draw.ogg`, our own, made by `tools/barrage_music.py`.
+    Played on the jukebox volume (music is often turned off, and the drum is the clock).
+- **For scripted fights (the Grue trial):** `SpiritBarrage.start(ServerPlayer, LivingEntity foe, float skill, Ending)`
+  against any living thing; the foe keeps the beat by `skill` (0-1). Neither side needs a spirit out. It never takes
+  either side below 1 health; `Ending` is told once: WON, LOST, DRAW, or BROKEN (a side died, left, changed world, or
+  `cancel` was called). `inBarrage(entity)`. The two sides can't hurt each other during it except by its own blows.
+- Not compile-checked or seen in game yet.

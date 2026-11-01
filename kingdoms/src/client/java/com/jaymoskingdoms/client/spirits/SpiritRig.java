@@ -53,6 +53,8 @@ final class SpiritRig {
 	static final float CURL_BASE = 1.45F, CURL_TIP = 1.65F, SPREAD = 0.2F;
 	/** The flurry and shove: the arms pump in turn at this speed. */
 	static final float PUMP_SPEED = 1.8F;
+	/** (0.7.467) The barrage: how fast the fists pound (radians a tick), and how far each blow strays from straight ahead. */
+	static final float BARRAGE_SPEED = 4.2F, BARRAGE_SPREAD = 0.22F;
 
 	/** Model pixels: the upper arm runs from y -2 to the elbow at 4; the forearm is 6 long to the wrist. */
 	static final float ELBOW_Y = 4.0F, FORE = 6.0F;
@@ -106,6 +108,9 @@ final class SpiritRig {
 		SHAPES[Poses.SILENT] = new Shape(STRIKE, 0.0F, 0.0F, 0.15F, 0.0F, 1.6F);
 		SHAPES[Poses.SENSE] = new Shape(OPEN, -0.3F, -0.6F, 0.0F, 1.0F, 0.0F);
 		SHAPES[Poses.CLASH] = new Shape(GRASP, 0.0F, -0.3F, 0.85F, 0.6F, 1.2F);
+		// (0.7.467) the strong strike: a tight fist, wound up and whipped out, the forearm stretching; the barrage's fists
+		SHAPES[Poses.PUNCH] = new Shape(STRIKE, 0.0F, 0.0F, 1.0F, 0.0F, 1.6F);
+		SHAPES[Poses.BARRAGE] = new Shape(HOLD, -0.2F, 0.0F, 1.0F, 0.0F, 1.4F);
 	}
 
 	private SpiritRig() {
@@ -204,7 +209,18 @@ final class SpiritRig {
 					now.lerp(smooth(Math.min(1.0F, (age - OPEN_T) / CLOSE_T)), open, aim);
 				}
 			}
-			default -> now.lerp(smooth(Math.min(1.0F, age / SpiritArms.POSE_IN)), rest, aim);
+			// (the barrage is stamped again and again: it never eases back in)
+			default -> now.lerp(pose == Poses.BARRAGE ? 1.0F : smooth(Math.min(1.0F, age / SpiritArms.POSE_IN)), rest, aim);
+		}
+		if (pose == Poses.BARRAGE) {
+			// (0.7.467) the barrage: both fists pounding out in turn, far faster than the flurry, timed by the clock (not the
+			// stamp) so the pounding never stops when the pose is stamped again; each blow from its own angle
+			float beat = ageInTicks * BARRAGE_SPEED + i * Mth.PI;
+			float pump = 0.5F + 0.5F * Mth.sin(beat);
+			now.sx += BARRAGE_SPREAD * Mth.sin(beat * 0.5F + i);
+			now.sy += BARRAGE_SPREAD * Mth.cos(beat * 0.37F + i * 2.0F);
+			now.elbow = Mth.lerp(pump, WIND_ELBOW * 0.7F, 0.0F);
+			now.reach = shape.reach() * pump;
 		}
 		if (pose == Poses.FLURRY || pose == Poses.SHOVE) {
 			// the blows: the two arms pump in turn, each straightening out and drawing back

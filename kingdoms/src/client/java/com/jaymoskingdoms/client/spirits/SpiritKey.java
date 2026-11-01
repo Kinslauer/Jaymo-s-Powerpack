@@ -65,6 +65,11 @@ public final class SpiritKey {
 		return at == null ? 0L : Math.max(0L, at - now);
 	}
 
+	/** The spirit key itself (the barrage reads its presses every frame). */
+	static KeyMapping mapping() {
+		return key;
+	}
+
 	/** How many ticks the key has been held right now (0 if it isn't). */
 	static int held() {
 		return was ? held : 0;
@@ -85,6 +90,13 @@ public final class SpiritKey {
 			return;
 		}
 		boolean down = key.isDown();
+		if (BarrageClient.active()) {
+			// (0.7.467) in a barrage the key beats time: the press is read every frame (BarrageClient), and the release casts nothing
+			was = down;
+			held = 0;
+			sent = true;
+			return;
+		}
 		if (down && !was) {
 			held = 0;
 			sent = false;

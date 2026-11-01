@@ -4838,3 +4838,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Let go by the Eternal Dragon's wish or the long wait, you are asked two seconds after waking in the world
     (`WAKE_ASK_DELAY`). Without Kingdoms everything works as before.
   - Compile-checked with javac against the 26.3 jars; not built with Gradle or seen in game.
+- **0.19.34, Kingdoms 0.7.467:** the spirits' Strong Strike and the barrage clash. Andy: "each spirit should have a strong
+  strike attack that whips the fist straight forward within your view, and when one of these punches clashes with another
+  you get a barrage style clash, that requires precise timing or manipulation otherwise to win". Every spirit's first move
+  is now a straight punch; two meeting start a rhythm duel to an original drum track, letterboxed. Kingdoms-only change
+  (see its MODLOG); the pack version moves with it.
