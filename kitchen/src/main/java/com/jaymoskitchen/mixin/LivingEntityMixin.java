@@ -113,6 +113,12 @@ abstract class LivingEntityMixin implements CorpseCapture {
 	@Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)
 	private void jaymoskitchen$leaveCorpse(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
+		if (com.jaymoskitchen.corpse.SnowMelt.melts(self)) {
+			// (0.5.41) a snow golem melts away instead of tipping over and puffing (both sides count it down)
+			com.jaymoskitchen.corpse.SnowMelt.tick(self);
+			ci.cancel();
+			return;
+		}
 		if (self.deathTime != 0) {
 			return;
 		}
