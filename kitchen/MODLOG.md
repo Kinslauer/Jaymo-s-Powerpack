@@ -1267,7 +1267,7 @@ spiders) bursts into legs on any kill, whatever the weapon; any other spider kil
 smashed `ANY_KILL_CHANCE` (25%) of the time. Deaths with no killer (poison, burning, drowning) still leave a body unless
 they crush (falls, anvils, mace, Powers' blunt marks). Corpse smashing unchanged. Not compile-checked; not seen in game.
 
-## 0.5.47: dead snakes go limp (pack 0.19.52)
+## 0.5.47: dead snakes go limp (pack 0.19.53)
 Andy: "a snake should go all noodle like when they ragdoll, this stiffness doesnt make sense". Naturalist's snake was a
 rigid `BOX` ragdoll, its tail segments only swung by `LooseParts`, so it lay as a few stiff blocks bent at sharp angles.
 New ragdoll shape `RagdollRig.Shape.CHAIN` (tag `jaymoskitchen:ragdoll_chain`, holding `naturalist:snake`): a small rigid

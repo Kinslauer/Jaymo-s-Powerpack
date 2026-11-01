@@ -85,8 +85,11 @@ final class CampChiefs {
 			return;
 		}
 		if (mob.tickCount % 5 == 0) {
-			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(),
+			// ((0.7.475) a greenskin realm's chief by his title: Warlord, Goblin King)
+			net.minecraft.network.chat.Component name = Hordes.titled(level.getServer(), w.factionId(), mob.getDisplayName());
+			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, name,
 				w.role() == Goblins.KING ? BossEvent.BossBarColor.GREEN : BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
+			bar.setName(name);
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
 			BossBars.show(level, mob, bar);
 		}

@@ -205,7 +205,8 @@ final class GoblinVillages {
 		takings.put(Items.BONE, DAY_BONES);
 		if (Storage.loaded(level, village)) {
 			for (var e : takings.entrySet()) {
-				Storage.put(level, village, e.getKey(), e.getValue() * days);
+				// ((0.7.475) a bigger village, more hands)
+				Storage.put(level, village, e.getKey(), Hordes.yield(server, village.id(), e.getValue()) * days);
 			}
 		}
 		Camps.updateData(server, village.id(), d -> d.withGrown(d.grown() + days));
@@ -214,7 +215,8 @@ final class GoblinVillages {
 			return;
 		}
 		long age = data.grown();
-		int cap = (int)Math.min(MAX_GOBLINS, START_GOBLINS + START_SLINGERS + age / DAYS_PER_GOBLIN);
+		// ((0.7.475) the cap grows with its tier)
+		int cap = (int)Math.min(Hordes.folkCap(server, village.id(), false), START_GOBLINS + START_SLINGERS + age / DAYS_PER_GOBLIN);
 		RandomSource random = level.getRandom();
 		BlockPos fire = data.center();
 		for (int i = 0; i < days; i++) {
@@ -224,8 +226,10 @@ final class GoblinVillages {
 			}
 			int slingers = now.holdings().count(Goblins.SLINGER);
 			int role = slingers * SLINGER_EVERY < goblins(now) ? Goblins.SLINGER : Goblins.GOBLIN;
-			spawn(level, village.id(), role, spot(level, fire, random), fire, GoblinBuildings.HOME_RADIUS);
+			spawn(level, village.id(), role, spot(level, fire, random), fire, Hordes.homeRadius(server, village.id(), GoblinBuildings.HOME_RADIUS));
 		}
+		// (0.7.475) and it may move up a tier
+		Hordes.day(level, village.id());
 	}
 
 	/** Its goblins on the roster, or on their way back to it (a dead one's place still to fill). */
@@ -255,6 +259,10 @@ final class GoblinVillages {
 			MISSING.remove(village.id());
 			crown(level, village, GoblinBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new goblin king (the last was lost)", village.name());
+		}
+		// (0.7.475) past its first stockade: its tier's wall and band
+		if (Hordes.tick(level, village, data, force)) {
+			return;
 		}
 		int allowed = Math.min(GoblinBuildings.GROWTH.size(), data.grown());
 		if (data.built() >= allowed || !Storage.loaded(level, village)) {
