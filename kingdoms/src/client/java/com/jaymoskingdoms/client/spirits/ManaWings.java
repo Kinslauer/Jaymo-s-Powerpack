@@ -74,16 +74,27 @@ public final class ManaWings {
 	static final double LIFT = 0.42;
 	/** How fast the wings open or fold, and lift or settle, per tick (0-1). */
 	static final float OPEN_EASE = 0.12F, ALOFT_EASE = 0.1F, RISING_EASE = 0.15F;
-	/** The beat: radians a tick at rest and added at a full climb; how far it swings resting on the ground, aloft and climbing. */
-	static final float FLAP_SPEED = 0.13F, FLAP_SPEED_RISE = 0.12F;
-	static final float FLAP_REST = 0.05F, FLAP_ALOFT = 0.22F, FLAP_RISE = 0.15F;
-	/** The wing's raise (radians up from level) on the ground and aloft, and folded away (drooping). */
-	static final float RAISE_GROUND = 0.12F, RAISE_ALOFT = 0.38F, RAISE_FOLDED = -0.9F;
-	/** The wing's sweep back (radians) spread and folded, and how far a downstroke brings it forward. */
-	static final float SWEEP = 0.35F, SWEEP_FOLDED = 1.25F, SWEEP_BEAT = 0.1F;
+	/**
+	 * The beat, like an eagle's (Andy, 2026-11-01: "the wings should flap beside and down you", with a gif of a fish eagle): a
+	 * full stroke from high over your back down past your sides, the downstroke quicker than the recovery
+	 * ({@code DOWNSTROKE} of each beat). Radians a tick at rest and added at a full climb; how far it swings either side of its
+	 * middle resting on the ground, hovering, and more at a climb.
+	 */
+	static final float FLAP_SPEED = 0.16F, FLAP_SPEED_RISE = 0.12F, DOWNSTROKE = 0.42F;
+	static final float FLAP_REST = 0.05F, FLAP_ALOFT = 0.8F, FLAP_RISE = 0.1F;
+	/** The middle of the stroke (radians up from level) on the ground and aloft, and folded away (drooping). */
+	static final float RAISE_GROUND = 0.12F, RAISE_ALOFT = 0.15F, RAISE_FOLDED = -0.9F;
+	/** The wing's sweep back (radians) spread (out at your sides) and folded, and how far a downstroke brings it forward. */
+	static final float SWEEP = 0.15F, SWEEP_FOLDED = 1.25F, SWEEP_BEAT = 0.15F;
+	/** The hand's lag through the stroke: its tips bend up as the wing pushes down and trail down as it rises (radians). */
+	static final float WRIST_LAG = 0.4F, TIP_LAG = 0.25F;
+	/** The fingers spread wider on the downstroke and close on the recovery (share of their fan). */
+	static final float FAN_BEAT = 0.3F;
 	/** The size folded, as a share of spread. */
 	static final float FOLDED_SIZE = 0.55F;
 	/** The feathers: how far they trail behind the wing's beat (radians of the beat, then more for each further out), and how far they swing. */
+	/** How much of the wing's droop below level the feathers take back, to keep hanging down beside you. */
+	static final float FEATHER_HANG = 0.6F;
 	static final float FEATHER_LAG = 0.6F, FEATHER_LAG_EACH = 0.25F, FEATHER_SWING = 0.15F, FEATHER_TILT = 0.2F;
 	/** The shells, inside out: how far each sits off the cubes (model pixels) and how bright each is. */
 	static final float[] SHELLS = {0.0F, 0.45F, 1.0F};
@@ -404,10 +415,14 @@ public final class ManaWings {
 			float open = look.open(), aloft = look.aloft(), rising = look.rising();
 			float t = state.ageInTicks;
 			float speed = FLAP_SPEED + FLAP_SPEED_RISE * rising;
-			float beat = Mth.sin(t * speed);
+			// where in the stroke: {height 1 top to -1 bottom, its motion -1 sweeping down to 1 rising}
+			float[] stroke = stroke(t * speed);
+			float beat = stroke[0], motion = stroke[1];
 			float swing = (FLAP_REST + FLAP_ALOFT * aloft + FLAP_RISE * rising) * open;
 			float raise = Mth.lerp(open, RAISE_FOLDED, Mth.lerp(aloft, RAISE_GROUND, RAISE_ALOFT) + swing * beat);
-			float sweep = Mth.lerp(open, SWEEP_FOLDED, SWEEP - SWEEP_BEAT * beat * aloft);
+			// the downstroke reaches forward a little, the recovery draws back
+			float sweep = Mth.lerp(open, SWEEP_FOLDED, SWEEP - SWEEP_BEAT * -motion * aloft);
+			float stroking = open * aloft;
 			float size = look.size() * Mth.lerp(open, FOLDED_SIZE, 1.0F);
 			for (int w = 0; w < 2; w++) {
 				// +1: the wing out to the wearer's left (model +x); -1: to the right
@@ -419,20 +434,39 @@ public final class ManaWings {
 				wing.xScale = size;
 				wing.yScale = size;
 				wing.zScale = size;
-				// the hand follows the beat a moment late, the fingers flex with it and fan out as the wings open
-				this.hands[w].zRot = -s * 0.12F * Mth.sin(t * speed - 0.5F) * open;
+				// the hand lags the stroke (tips up as it pushes down, trailing down as it lifts), the fingers spread on the
+				// downstroke and close on the way up, and fan out as the wings open
+				this.hands[w].zRot = -s * WRIST_LAG * motion * stroking;
+				float fan = (0.4F + 0.6F * open) * (1.0F - FAN_BEAT * motion * stroking);
 				for (int f = 0; f < FINGER_FAN.length; f++) {
-					this.fingers[w][f].zRot = -s * FINGER_FAN[f] * (0.4F + 0.6F * open);
-					this.tips[w][f].zRot = -s * (0.12F + 0.08F * Mth.sin(t * speed - 0.9F)) * open;
+					this.fingers[w][f].zRot = -s * FINGER_FAN[f] * fan;
+					this.tips[w][f].zRot = -s * (0.12F * open + TIP_LAG * motion * stroking);
 				}
 				// the feathers trail each beat, the outer ones latest, and fan out as the wings open
 				for (int f = 0; f < FEATHERS; f++) {
 					ModelPart feather = this.feathers[w][f];
-					feather.xRot = FEATHER_TILT + FEATHER_SWING * Mth.sin(t * speed - FEATHER_LAG - f * FEATHER_LAG_EACH) * open * (0.3F + 0.7F * aloft);
-					feather.zRot = -s * (FEATHER_FAN + FEATHER_FAN_EACH * f) * (0.3F + 0.7F * open);
+					feather.xRot = FEATHER_TILT + FEATHER_SWING * stroke(t * speed - FEATHER_LAG - f * FEATHER_LAG_EACH)[0] * open * (0.3F + 0.7F * aloft);
+					// (at the bottom of the stroke they keep hanging mostly down, so they don't sweep in under you)
+					feather.zRot = -s * (FEATHER_FAN + FEATHER_FAN_EACH * f) * (0.3F + 0.7F * open) + s * FEATHER_HANG * Math.min(raise, 0.0F) * open;
 				}
 			}
 		}
+	}
+
+	/**
+	 * The stroke at {@code phase} (radians, one beat each 2 pi): {height, motion}. The height runs from 1 (wings high over the
+	 * back) down to -1 (beside and below you) over the first {@link #DOWNSTROKE} of the beat and back up over the rest, eased
+	 * at each end; the motion is -1 at the fastest of the downstroke, 1 at the fastest of the recovery.
+	 */
+	static float[] stroke(float phase) {
+		float u = phase / Mth.TWO_PI;
+		u -= (float)Math.floor(u);
+		if (u < DOWNSTROKE) {
+			float k = u / DOWNSTROKE;
+			return new float[] {Mth.cos(Mth.PI * k), -Mth.sin(Mth.PI * k)};
+		}
+		float k = (u - DOWNSTROKE) / (1.0F - DOWNSTROKE);
+		return new float[] {-Mth.cos(Mth.PI * k), Mth.sin(Mth.PI * k)};
 	}
 
 	/** The wings' mesh, its cubes grown {@code out} model pixels (a shell). The standard parts are empty but the body's wings. */

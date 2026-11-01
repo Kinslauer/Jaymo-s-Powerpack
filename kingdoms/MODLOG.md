@@ -8207,8 +8207,11 @@ beneath it, and flap gently as they hover."
   5 s aloft, no flying kick (`ValorFlightMixin`); out of mana they fade into a short slow fall. Put away, they fold.
 - **The look** (`client/spirits/ManaWings`): at your shoulder blades two great open hands of her light, palms back and
   fingers fanned like a wing's tips, with seven feathers of light hanging beneath each, longer further out; drawn as the
-  arms are (the ki glow's wisps in hollow shells, her rose in mana's blue taken toward white). They beat slowly while you
-  hover, a little harder as you climb, the hands and fingers flexing a moment late and the feathers trailing each beat;
+  arms are (the ki glow's wisps in hollow shells, her rose in mana's blue taken toward white). While you hover they beat
+  like an eagle's (Andy sent a fish eagle gif: "flap beside and down you"): a full stroke from high over your back down
+  past your sides, the downstroke quicker than the recovery, about one beat in two seconds and faster as you climb; the
+  hands lag the stroke (tips up on the way down, trailing on the way up), the fingers spread on the downstroke, and the
+  feathers trail each beat and keep hanging down beside you at the bottom;
   on the ground they rest half spread, and folding away they sweep back, droop and fade. Motes of light drift down off
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
