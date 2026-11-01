@@ -157,6 +157,16 @@ public final class FutureGuns {
 		return true;
 	}
 
+	/**
+	 * (0.19.26) A random modern handgun from the future with one full magazine in it (and no spare rounds), for the
+	 * Arsenal's rift ({@code power/arsenal/ArsenalFutureGun}). Empty without TaCZ.
+	 */
+	public static ItemStack handgun(RandomSource random) {
+		Gun[] pistols = java.util.Arrays.stream(MODERN).filter(gun -> gun.kind == PISTOL).toArray(Gun[]::new);
+		Gun pick = pistols[random.nextInt(pistols.length)];
+		return TaczGuns.modernGun(pick.id.substring("tacz:".length()), pick.magazine);
+	}
+
 	/** Mobs that have given up their melee rush (redone after a reload, which brings the goals back). */
 	private static final Map<Mob, Boolean> HELD_BACK = new WeakHashMap<>();
 
