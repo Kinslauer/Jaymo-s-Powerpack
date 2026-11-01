@@ -89,6 +89,10 @@ public final class GrueTrial {
 	static final int LIMIT = 6000;
 	/** The Grue's health and armour. */
 	static final double BOSS_HEALTH = 260.0, BOSS_ARMOUR = 10.0;
+	/** The finale: at this share of its health (or a killing blow) the Grue locks fists with them in a barrage ({@link SpiritBarrage}). */
+	static final float FINALE_AT = 0.1F;
+	/** How well the Grue keeps the barrage's beat, and how much a draw wears it down (the spirit pulling at it). */
+	static final float FINALE_SKILL = 0.68F, FINALE_DRAW_EASE = 0.1F, FINALE_SKILL_LOW = 0.3F;
 	/** Its strike (close, hurt, ticks between) and grasp (from, to, hurt, ticks between, pull). */
 	static final double STRIKE_REACH = 3.5, GRASP_FROM = 4.0, GRASP_TO = 20.0, GRASP_PULL = 1.2;
 	static final float STRIKE_HURT = 7.0F, GRASP_HURT = 5.0F;
@@ -143,6 +147,9 @@ public final class GrueTrial {
 		@Nullable UUID boss;
 		@Nullable ServerBossEvent bar;
 		long nextStrike, nextGrasp, nextShades, nextDark, nextBlink, nextSpirit;
+		/** The finale barrage: {@link #FINALE_NONE} not yet, running, won, or it couldn't start (then it just dies). */
+		int finale;
+		int draws;
 
 		Trial(UUID player, ServerLevel level, BlockPos centre, Vec3 back, long since) {
 			this.player = player;
@@ -152,6 +159,8 @@ public final class GrueTrial {
 			this.since = since;
 		}
 	}
+
+	private static final int FINALE_NONE = 0, FINALE_ON = 1, FINALE_WON = 2, FINALE_NO = 3;
 
 	private static final Map<UUID, Trial> TRIALS = new HashMap<>();
 	/** The moves a keeper who subjugated the Grue has ({@link Spirits#moves}). */
@@ -178,6 +187,19 @@ public final class GrueTrial {
 				player.setHealth(FALLEN_HEALTH);
 				end(player, false);
 				return false;
+			}
+			if (entity.entityTags().contains(BOSS_TAG)) {
+				// (no killing blow ends it: the last of it is fought out fist to fist)
+				for (Trial trial : TRIALS.values()) {
+					if (entity.getUUID().equals(trial.boss) && (trial.finale == FINALE_NONE || trial.finale == FINALE_ON)) {
+						entity.setHealth(1.0F);
+						ServerPlayer player = trial.level.getServer().getPlayerList().getPlayer(trial.player);
+						if (player != null && trial.finale == FINALE_NONE && entity instanceof Evoker boss) {
+							finale(player, trial, boss);
+						}
+						return trial.finale == FINALE_NO;
+					}
+				}
 			}
 			return true;
 		});
@@ -277,7 +299,7 @@ public final class GrueTrial {
 				cutShort(player, trial);
 				continue;
 			}
-			if (Downed.isDowned(player) || t > LIMIT) {
+			if (Downed.isDowned(player) || t > LIMIT && trial.finale != FINALE_ON) {
 				end(player, false);
 				continue;
 			}
@@ -299,6 +321,10 @@ public final class GrueTrial {
 			}
 			if (!(found instanceof Evoker boss) || !boss.isAlive()) {
 				end(player, true);
+				continue;
+			}
+			if (trial.finale == FINALE_ON) {
+				boss.getNavigation().stop();
 				continue;
 			}
 			fight(player, trial, boss, trial.level.getGameTime());
@@ -362,6 +388,10 @@ public final class GrueTrial {
 		float share = boss.getHealth() / boss.getMaxHealth();
 		if (trial.bar != null) {
 			trial.bar.setProgress(share);
+		}
+		if (trial.finale == FINALE_NONE && share <= FINALE_AT) {
+			finale(player, trial, boss);
+			return;
 		}
 		boss.setTarget(player);
 		if ((now & 3L) == 0L) {
@@ -444,6 +474,61 @@ public final class GrueTrial {
 		}
 		burst(level, boss.position().add(0.0, 1.5, 0.0), 40, 1.0);
 		level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.HOSTILE, 1.4F, 0.6F);
+	}
+
+	// ---- the finale -------------------------------------------------------------------------------------------------
+
+	/** Down to its last: everything else is swept off the drum, and the Grue meets them fist to fist (letterboxed, drums). */
+	private static void finale(ServerPlayer player, Trial trial, Evoker boss) {
+		ServerLevel level = trial.level;
+		for (Entity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(trial.centre).inflate(RADIUS + 4, HEIGHT + 4, RADIUS + 4),
+			e -> e != boss && (e.entityTags().contains(BOSS_TAG) || e instanceof Vex))) {
+			burst(level, e.position().add(0.0, 0.8, 0.0), 12, 0.5);
+			e.discard();
+		}
+		boss.removeAllEffects();
+		boss.setNoAi(true);
+		float skill = Math.max(FINALE_SKILL_LOW, FINALE_SKILL - trial.draws * FINALE_DRAW_EASE);
+		UUID id = player.getUUID();
+		if (!SpiritBarrage.start(player, boss, skill, result -> finaleEnded(id, result))) {
+			boss.setNoAi(false);
+			trial.finale = FINALE_NO;
+			return;
+		}
+		trial.finale = FINALE_ON;
+		if (trial.draws == 0) {
+			Grue.speakTo(player, "finale");
+		}
+	}
+
+	/** The barrage is over: won, the Grue falls; lost, it has them; a draw, they go again; broken off, the fight goes on. */
+	private static void finaleEnded(UUID id, SpiritBarrage.Result result) {
+		Trial trial = TRIALS.get(id);
+		if (trial == null || trial.finale != FINALE_ON) {
+			return;
+		}
+		ServerPlayer player = trial.level.getServer().getPlayerList().getPlayer(id);
+		Entity found = trial.boss == null ? null : trial.level.getEntity(trial.boss);
+		if (player == null || !(found instanceof Evoker boss)) {
+			trial.finale = FINALE_NONE;
+			return;
+		}
+		boss.setNoAi(false);
+		switch (result) {
+			case WON -> {
+				trial.finale = FINALE_WON;
+				boss.kill(trial.level);
+				if (TRIALS.containsKey(id)) {
+					end(player, true);
+				}
+			}
+			case LOST -> end(player, false);
+			case DRAW -> {
+				trial.draws++;
+				trial.finale = FINALE_NONE;
+			}
+			case BROKEN -> trial.finale = FINALE_NONE;
+		}
 	}
 
 	// ---- the end ----------------------------------------------------------------------------------------------------

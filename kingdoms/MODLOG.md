@@ -8086,3 +8086,11 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   Exorcism still frees you.
 - **Cut short** (logout, server stop, the boss lost without dying): arena cleared, you're put back, and the hold drops to 95,
   so it comes again. `TRIAL` is saved, so a crash is mended at your next login.
+- **Finale (0.7.468):** Andy: "the fight needs to culminate in one of these, with letterboxing and music". At a tenth of its
+  health, or on what would be the killing blow, the Grue sweeps its shades and vexes off the drum and locks fists with you
+  in a barrage clash (`SpiritBarrage`, letterboxed with drums; Grue skill 0.68). Win and it falls, and the curse is yours.
+  Lose and it has you. A draw starts the clash again, with the Grue 0.1 clumsier each time (never below 0.3). If the clash is
+  broken off, the fight goes on and the clash starts again. If the clash can't start at all, the Grue just dies as before.
+- Fixes two compile errors that came in with 0.7.467's barrage: `Entity.invulnerableTime` is private in 26.3 (now
+  `setInvulnerableTime`), and `SpiritRig` declared `beat` twice.
+- Compile-checked with javac against the 26.3 jars; not played.
