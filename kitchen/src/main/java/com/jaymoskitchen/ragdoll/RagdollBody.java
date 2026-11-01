@@ -41,6 +41,17 @@ public final class RagdollBody {
 	private static final float KICK_SPEED = 0.03F, KICK_SHARE = 0.45F, KICK_LIFT = 0.04F;
 	/** A point pressed into a block from inside it goes out of the top if that's within this much of the nearest way out. */
 	private static final float PREFER_UP = 0.35F;
+	/** (0.5.47) A chain body (a snake) sliding slower than this along what it lies on grips it (blocks a sub-step). */
+	private static final float CHAIN_GRIP = 0.03F;
+	/**
+	 * (0.5.47) A chain body asleep wakes only when a tick moves it further than this (blocks): it may buzz a little
+	 * where it's wedged. Awake and lying on something, it sleeps if no point drifted further than
+	 * {@code CHAIN_SETTLE_DRIFT} in {@code CHAIN_SETTLE_TICKS}.
+	 */
+	private static final float CHAIN_WAKE = 0.05F, CHAIN_SETTLE_DRIFT = 0.03F;
+	private static final int CHAIN_SETTLE_TICKS = 40;
+	/** (0.5.47) How much of a stick's pull a gripping point takes, against a free one's 1. */
+	private static final double GRIP_GIVE = 0.03;
 	/** (0.5.24) Pinned on a table and lying on it, a body loses this much more of its speed each tick (it settles). */
 	private static final float PIN_DAMP = 0.7F;
 
@@ -48,6 +59,11 @@ public final class RagdollBody {
 	public final double[] x, y, z, px, py, pz;
 	private final float[] normalY;
 	private final boolean[] touching;
+	/** (0.5.47) Chain points held where they lie by their grip this sub-step (see {@link #CHAIN_GRIP}). */
+	private final boolean[] gripping;
+	/** (0.5.47) Where a chain body's points were when it last began a settling check (see {@link #settleChain}). */
+	private double[] settleX, settleY, settleZ;
+	private int settleTicks;
 	private final float[] frame = new float[9];
 	private final RagdollWorld.Boxes solids = new RagdollWorld.Boxes(), movers = new RagdollWorld.Boxes();
 	private int quiet, sleepingFor;
@@ -71,6 +87,7 @@ public final class RagdollBody {
 		pz = new double[n];
 		normalY = new float[n];
 		touching = new boolean[n];
+		gripping = new boolean[n];
 	}
 
 	// ---------------------------------------------------------------- building
@@ -110,6 +127,23 @@ public final class RagdollBody {
 			splay(bx, by, RagdollRig.L_HIP, RagdollRig.L_FOOT, 0.05F + random.nextFloat() * 0.4F);
 			// head lolled to one side
 			splay(bx, by, RagdollRig.NECK, RagdollRig.HEAD, (random.nextFloat() - 0.5F) * 1.2F);
+		} else if (rig.chain()) {
+			// (0.5.47) a snake laid down in a lazy S, each joint turned a little from the last
+			float heading = 0.0F, turn = (random.nextFloat() - 0.5F) * 0.8F;
+			float px0 = (bx[RagdollRig.BOTTOM_RIGHT] + bx[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			float pz0 = (bz[RagdollRig.BOTTOM_RIGHT] + bz[RagdollRig.BOTTOM_LEFT]) * 0.5F;
+			for (int i = RagdollRig.CHAIN_FIRST; i < n; i++) {
+				// rest joints lie in a straight line back along -Z
+				float seg = rig.restZ[i == RagdollRig.CHAIN_FIRST ? RagdollRig.BOTTOM_RIGHT : i - 1] - rig.restZ[i];
+				heading += turn;
+				if (Math.abs(heading) > 0.9F || random.nextFloat() < 0.25F) {
+					turn = -Math.signum(heading) * (0.2F + random.nextFloat() * 0.35F);
+				}
+				px0 += (float) Math.sin(heading) * seg;
+				pz0 -= (float) Math.cos(heading) * seg;
+				bx[i] = px0;
+				bz[i] = pz0;
+			}
 		}
 		// a humanoid lies down (its up turns to the yaw, its front to the sky or the ground); a four-legged body rolls
 		// onto its side; either way it's then turned to face along the yaw
@@ -513,7 +547,7 @@ public final class RagdollBody {
 		}
 		moved = Math.sqrt(moved);
 		if (asleep) {
-			if (moved > SLEEP_SPEED * 3) {
+			if (moved > (rig.chain() ? CHAIN_WAKE : SLEEP_SPEED * 3)) {
 				wake();
 			} else {
 				stop();
@@ -526,7 +560,45 @@ public final class RagdollBody {
 			}
 		} else {
 			quiet = 0;
+			if (rig.chain()) {
+				settleChain();
+			}
 		}
+	}
+
+	/**
+	 * (0.5.47) A snake wedged among blocks can buzz on the spot for ever (its bends pushing against the blocks): lying
+	 * on something and gone nowhere in {@link #CHAIN_SETTLE_TICKS}, it falls asleep where it is.
+	 */
+	private void settleChain() {
+		if (!grounded || gripped()) {
+			settleTicks = 0;
+			return;
+		}
+		if (settleX == null) {
+			settleX = new double[rig.count];
+			settleY = new double[rig.count];
+			settleZ = new double[rig.count];
+		}
+		if (settleTicks++ == 0) {
+			System.arraycopy(x, 0, settleX, 0, rig.count);
+			System.arraycopy(y, 0, settleY, 0, rig.count);
+			System.arraycopy(z, 0, settleZ, 0, rig.count);
+			return;
+		}
+		if (settleTicks < CHAIN_SETTLE_TICKS) {
+			return;
+		}
+		settleTicks = 0;
+		for (int i = 0; i < rig.count; i++) {
+			double dx = x[i] - settleX[i], dy = y[i] - settleY[i], dz = z[i] - settleZ[i];
+			if (dx * dx + dy * dy + dz * dz > CHAIN_SETTLE_DRIFT * CHAIN_SETTLE_DRIFT) {
+				return;
+			}
+		}
+		asleep = true;
+		sleepingFor = 0;
+		stop();
 	}
 
 	/** Scales every point's speed (how far behind it its last place is). */
@@ -591,7 +663,28 @@ public final class RagdollBody {
 			if (d < 1.0E-9) {
 				continue;
 			}
-			double k = (d - len[s]) / d * 0.5;
+			double k = (d - len[s]) / d;
+			// (0.5.47) a gripping point (a snake's belly on the ground) barely gives: the rest of the stick moves
+			double wi = gripping[i] ? GRIP_GIVE : 1.0, wj = gripping[j] ? GRIP_GIVE : 1.0;
+			double ki = k * wi / (wi + wj), kj = k * wj / (wi + wj);
+			x[i] += dx * ki;
+			y[i] += dy * ki;
+			z[i] += dz * ki;
+			x[j] -= dx * kj;
+			y[j] -= dy * kj;
+			z[j] -= dz * kj;
+		}
+		// (0.5.47) struts only push apart (how far a chain's joints bend)
+		int[] sa = rig.strutA, sb = rig.strutB;
+		float[] min = rig.strutMin;
+		for (int s = 0; s < sa.length; s++) {
+			int i = sa[s], j = sb[s];
+			double dx = x[j] - x[i], dy = y[j] - y[i], dz = z[j] - z[i];
+			double d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+			if (d >= min[s] || d < 1.0E-9) {
+				continue;
+			}
+			double k = (d - min[s]) / d * 0.5;
 			x[i] += dx * k;
 			y[i] += dy * k;
 			z[i] += dz * k;
@@ -659,6 +752,7 @@ public final class RagdollBody {
 			float r = rig.radius[i];
 			double nxSum = 0, nySum = 0, nzSum = 0;
 			boolean hit = false;
+			gripping[i] = false;
 			for (int b = 0; b < boxes; b++) {
 				int o = b * 9;
 				double minX = d[o], minY = d[o + 1], minZ = d[o + 2], maxX = d[o + 3], maxY = d[o + 4], maxZ = d[o + 5];
@@ -724,6 +818,16 @@ public final class RagdollBody {
 			double nx = nxSum / nl, ny = nySum / nl, nz = nzSum / nl;
 			touching[i] = true;
 			normalY[i] = (float) ny;
+			if (rig.chain() && ny > 0.5) {
+				// (0.5.47) a snake's belly grips what it lies on: moving slowly along it, it's heavy to the sticks (the
+				// rest of the body gives instead) and loses all its slide, so it stays draped over an edge
+				double gx = x[i] - px[i], gy = y[i] - py[i], gz = z[i] - pz[i];
+				double gn = gx * nx + gy * ny + gz * nz;
+				gx -= gn * nx;
+				gy -= gn * ny;
+				gz -= gn * nz;
+				gripping[i] = gx * gx + gy * gy + gz * gz < CHAIN_GRIP * CHAIN_GRIP;
+			}
 			if (!last) {
 				continue;
 			}
@@ -731,7 +835,7 @@ public final class RagdollBody {
 			double vx = x[i] - px[i], vy = y[i] - py[i], vz = z[i] - pz[i];
 			double vn = vx * nx + vy * ny + vz * nz;
 			double tx = vx - vn * nx, ty = vy - vn * ny, tz = vz - vn * nz;
-			double keep = 1 - FRICTION;
+			double keep = gripping[i] ? 0.0 : 1 - FRICTION;
 			double out = vn < -BOUNCE_MIN ? -vn * BOUNCE : Math.max(vn, 0);
 			vx = tx * keep + nx * out;
 			vy = ty * keep + ny * out;

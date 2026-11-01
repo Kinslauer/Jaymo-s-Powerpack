@@ -52,6 +52,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		KingdomEvents.register();
 		// barbarian camps, their raiders and raids (and their attachment)
 		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
+		// (0.7.475) greenskin camps' tiers
+		LOGGER.debug("horde attachment: {}", Hordes.HORDES);
 		LOGGER.debug("illager attachment: {}", Illagers.TAG);
 		Camps.register();
 		// 0.7.148: outlaws spared by the barbarian camps

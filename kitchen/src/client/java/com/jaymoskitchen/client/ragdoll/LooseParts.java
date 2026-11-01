@@ -272,7 +272,8 @@ public final class LooseParts {
 			if (node != null) {
 				out.add(node);
 			}
-			if (level + 1 < DEPTH) {
+			if (level + 1 < DEPTH || runsOn(name, child)) {
+				// (0.5.47) a run of the same part (tail, tail2, tail3...) hangs to its end, every link loose
 				walk(child, childPath, next, level + 1, total, out);
 			}
 		}
@@ -309,6 +310,20 @@ public final class LooseParts {
 			length = Math.max(length, x * dx + y * dy + z * dz);
 		}
 		return new Node(path, name, part, chain, level, dx, dy, dz, length);
+	}
+
+	/** (0.5.47) Whether {@code part} (called {@code name}) carries the next of its run: "tail" holding "tail2". */
+	private static boolean runsOn(String name, ModelPart part) {
+		String stem = name.toLowerCase(Locale.ROOT).replaceAll("[0-9_]+$", "");
+		if (stem.isEmpty()) {
+			return false;
+		}
+		for (String child : children(part).keySet()) {
+			if (child.toLowerCase(Locale.ROOT).startsWith(stem)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static ModelPart[] extend(ModelPart[] chain, ModelPart part) {

@@ -14,6 +14,8 @@ public final class RagdollShapes {
 	public static final TagKey<EntityType<?>> HUMANOID = tag("ragdoll_humanoid");
 	public static final TagKey<EntityType<?>> QUADRUPED = tag("ragdoll_quadruped");
 	public static final TagKey<EntityType<?>> BOX = tag("ragdoll_box");
+	/** (0.5.47) Long bendy bodies (snakes): a head and a chain of loose joints. */
+	public static final TagKey<EntityType<?>> CHAIN = tag("ragdoll_chain");
 
 	private RagdollShapes() {
 	}
@@ -28,6 +30,9 @@ public final class RagdollShapes {
 		}
 		if (type.builtInRegistryHolder().is(QUADRUPED)) {
 			return RagdollRig.Shape.QUADRUPED;
+		}
+		if (type.builtInRegistryHolder().is(CHAIN)) {
+			return RagdollRig.Shape.CHAIN;
 		}
 		if (type.builtInRegistryHolder().is(BOX)) {
 			return RagdollRig.Shape.BOX;
