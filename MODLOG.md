@@ -4788,4 +4788,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   puff that turns, puffs churning on top and trailing as it moves) and works like the Smoke power's wholly-smoke: a
   block high, it seeps through doors, fences, bars and panes (not what it's resting on), shots fly through it and
   creatures pass through; riders sit on its top. The rest are planned in `docs/AlienBodies-Plan.md` (five more
-  patches; six aliens stay humanoid). Compile-checked; not seen in game.
+  patches; six aliens stay humanoid). Andy: Duplex's "legs are disconnected": with Touch'n Motion loaded, `TnmFollow`
+  stamped the player body's part positions on every humanoid model drawn on a player, the alien's too, lifting the
+  golem's body and arms to a player's shoulders over its short legs; aliens (and their spikes) now keep their own pose.
+  Compile-checked; not seen in game.
