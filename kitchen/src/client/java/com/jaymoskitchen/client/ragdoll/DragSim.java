@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.5.44) Andy: the dragged body "should move from that single point instead of jumping every movement". The server's
+ * (0.5.45) Andy: the dragged body "should move from that single point instead of jumping every movement". The server's
  * points come a round trip behind the hand you see (your own hand most of all), so a body being dragged is worked out
  * here instead, every tick after the players have moved: its one held point ({@link CorpseEntity#gripPoint}) is put in
  * the hand where this client draws it, and the rest hangs and drags from it over this client's blocks. It starts from

@@ -194,14 +194,14 @@ public class CorpseEntity extends Entity {
 	 * hands for large animals like cows or bears". It stays a ragdoll the whole way: its hind legs (a person's ankles) are
 	 * in your hands ({@link #dragHands}), an arm's length ({@code DRAG_ARM}) from your shoulders, and the rest of it drags
 	 * and bumps along behind over the ground and whatever's in the way. Any animal too big for a pocket can be dragged.
-	 * (0.5.44) Andy: "the drag needs to tether the hand to one part of the mob's body, and keep those two together ... the
+	 * (0.5.45) Andy: "the drag needs to tether the hand to one part of the mob's body, and keep those two together ... the
 	 * mob should move from that single point instead of jumping every movement". One point is held ({@link #gripPoint}),
 	 * by one hand or by both together, and each client works the dragged body out itself from the hand it sees
 	 * ({@code DragSim}), so the leg never lags behind the hand by the server's round trip.
 	 */
 	public static final double DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5;
 	/**
-	 * (0.5.39) Your shoulders' height and spread, and your arm's reach to the grip (blocks, at normal size); (0.5.44) as the
+	 * (0.5.39) Your shoulders' height and spread, and your arm's reach to the grip (blocks, at normal size); (0.5.45) as the
 	 * player model has them (arm pivots 22 pixels up and 5 out, the hand 10 pixels down the arm), so the leg sits in the
 	 * drawn hand.
 	 */
@@ -1570,7 +1570,7 @@ public class CorpseEntity extends Entity {
 		return size.width() > TWO_HANDED_WIDTH || kind == CorpseKind.ANIMAL && size.height() > TWO_HANDED_HEIGHT ? 2 : 1;
 	}
 
-	/** (0.5.39) The one point of {@code rig} it's held by, (0.5.44) whatever the hands: a hind leg, an ankle, a corner. */
+	/** (0.5.39) The one point of {@code rig} it's held by, (0.5.45) whatever the hands: a hind leg, an ankle, a corner. */
 	public static int gripPoint(RagdollRig rig) {
 		return switch (rig.shape) {
 			case QUADRUPED -> RagdollRig.BR_FOOT;
@@ -1581,7 +1581,7 @@ public class CorpseEntity extends Entity {
 
 	/**
 	 * (0.5.39) Where {@code player}'s hand is, holding what's now at {@code at}: reaching toward it from the right shoulder
-	 * ({@code hands} 1), or (0.5.44) both hands together from the middle of the chest, an arm's length at most (nearer, the
+	 * ({@code hands} 1), or (0.5.45) both hands together from the middle of the chest, an arm's length at most (nearer, the
 	 * hand stays where the leg is).
 	 */
 	public static Vec3 dragHand(Player player, int hands, Vec3 at) {

@@ -49,7 +49,7 @@ public final class DragPose {
 		double forwardX = -Mth.sin(yaw), forwardZ = Mth.cos(yaw);
 		double rightX = -Mth.cos(yaw), rightZ = -Mth.sin(yaw);
 		float scale = state.scale;
-		// (0.5.44) one point held, by one hand or by both together
+		// (0.5.45) one point held, by one hand or by both together
 		track.point(CorpseEntity.gripPoint(track.rig), partialTicks, at, 0);
 		for (int h = 0; h < hands; h++) {
 			double side = (h == 0 ? 1.0 : -1.0) * CorpseEntity.DRAG_SHOULDER_SPREAD * scale;
