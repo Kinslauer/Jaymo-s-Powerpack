@@ -30,6 +30,10 @@ import net.minecraft.world.item.Items;
  * <p>Crushed is a death from a {@link #CRUSHES} blow (a long fall, a falling anvil or block, a mace's smash, being flung
  * into a wall), or one another mod marked with {@link #CRUSHED_TAG}: Jaymo's Powers marks heavy blunt weapons' kills, a
  * blunt finisher, and its slams and crushes.
+ * <p>(0.5.44) Andy: "smaller spiders should be smashed on every kill, and a chance for any spider to smash from any
+ * weapon, not just blunt." A small one (no wider than {@link #SMALL_WIDTH}: a cave spider, a shrunken or young spider)
+ * is smashed by any kill, and any other spider killed by anyone, with anything, is smashed {@link #ANY_KILL_CHANCE} of
+ * the time. Deaths with nobody behind them (poison, burning, drowning) still leave a body, unless they crush.
  */
 public final class SpiderCrush {
 	/** What a crushing death squashes into legs instead of a corpse. */
@@ -38,6 +42,11 @@ public final class SpiderCrush {
 	public static final TagKey<DamageType> CRUSHES = TagKey.create(Registries.DAMAGE_TYPE, JaymosKitchen.id("crushes"));
 	/** (Scoreboard) tag another mod puts on a creature whose death just now was a crushing one. */
 	public static final String CRUSHED_TAG = "jaymoskitchen.crushed";
+
+	/** A spider this narrow or narrower (blocks; a cave spider is 0.7, a spider 1.4) is smashed by any kill. */
+	static final float SMALL_WIDTH = 1.0F;
+	/** The chance any other spider's kill, by any weapon, smashes it. */
+	static final float ANY_KILL_CHANCE = 0.25F;
 
 	/** Legs left, at random between these (a spider has eight; the rest are pulp). */
 	static final int LEGS_MIN = 2, LEGS_MAX = 6;
@@ -69,7 +78,17 @@ public final class SpiderCrush {
 			return true;
 		}
 		DamageSource last = mob.getLastDamageSource();
-		return last != null && last.is(CRUSHES);
+		if (last == null) {
+			return false;
+		}
+		if (last.is(CRUSHES)) {
+			return true;
+		}
+		if (last.getEntity() == null) {
+			// not a kill: poison, burning, drowning leave the body
+			return false;
+		}
+		return mob.getBbWidth() <= SMALL_WIDTH || mob.getRandom().nextFloat() < ANY_KILL_CHANCE;
 	}
 
 	/** {@code mob} is crushed: its legs scatter, its loot (and gear) drops loose, and it leaves no corpse. */

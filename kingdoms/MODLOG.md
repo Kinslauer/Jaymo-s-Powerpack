@@ -8113,7 +8113,18 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   (`BloodVision.beat`), creep in slowly and draw back over a few seconds after a drink. Dhampirs never thirst, so never see
   them. Art: six growth rings, `textures/gui/thirst_veins_1..6.png` (320x180 pixel art, drawn by `tools/gen_thirst_veins.py`).
 
-## 0.7.472: ogres live with the orcs, half-orcs look the part, orcs named right (pack 0.19.46)
+## 0.7.472: the Bio-built figure on the road page, again (pack 0.19.48)
+- Andy: "the bio built start still glitches on the preview can you see it? you said it was fixed but this is still broken"
+  (video: on "What sets you on the road now?" the Bio-built figure of you leant over, rose out of its frame and came apart).
+  0.7.455 was checked in a test game without Fresh Animations. While the story is up you hang in stasis, flying
+  (`StoryStasis`), and Fresh Animations' player pack reads `abilities.flying`: through EMF it played its flying pose on the
+  road page's figure of you (it's you yourself there, not a stand-in). That pose moves the bones' pivots, which MCA's
+  bodies, the armour and the form's parts each take differently. EMF now pauses for you while the story screen is up
+  (`StoryFigure.drawingYou`, registered in `EmfBladePause`), so the figure acts out its scene as the stand-in does.
+- Checked in a test game (Xvfb) with MCA, EMF/ETF and Fresh Animations: Player Extension: before, you hung in Fresh
+  Animations' flying pose (legs dangling) on every road; after, the figure stands, walks or works as the road says, the
+  form whole.
+## 0.7.474: ogres live with the orcs, half-orcs look the part, orcs named right (pack 0.19.50)
 - **Ogres build with the orcs.** Andy: "these ogres should build these camps with the orcs as they will help them expand and
   buid like the villagers do". An ogre band (a two-headed brute and two ogres) no longer rings itself with mossy stones in the
   wild. It moves into an orc camp in its region that has no band yet (`OgreHolds.joinCamp`), or raises a new orc camp there

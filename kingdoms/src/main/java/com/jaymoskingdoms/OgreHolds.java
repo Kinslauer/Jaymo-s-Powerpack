@@ -60,7 +60,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.426) Havens patch 2, the ogre tribe (ideas from King's Monsters, ARR, and Shadow of War: our own names, code and
  * buildings). In each region ({@link Tribes#REGION} a side) the ogres keep up to {@link #OUTPOSTS} <b>bands</b>, each led by
- * a two-headed brute with a couple of ogres. (0.7.472) Andy: "these ogres should build these camps with the orcs as they
+ * a two-headed brute with a couple of ogres. (0.7.474) Andy: "these ogres should build these camps with the orcs as they
  * will help them expand and build". A band no longer rings itself with mossy stones in the wild: it lives in an orc camp
  * ({@link #joinCamp}), one that has none yet or one it raises with the orcs ({@link OrcCamps#foundNear}); there its ogres
  * haul for the builders (the camp raises another building a day for each, {@link #haulers}), and ogres and greenskins never
@@ -275,7 +275,7 @@ public final class OgreHolds {
 				}
 			}
 			if (standing < OUTPOSTS && random.nextFloat() < OUTPOST_CHANCE) {
-				// (0.7.472) a band of ogres throws in with the orcs: it joins an orc camp of the region that has none yet, or
+				// (0.7.474) a band of ogres throws in with the orcs: it joins an orc camp of the region that has none yet, or
 				// raises a new one with them (no more lone rings of mossy stones)
 				Faction camp = bandless(level, player, region);
 				if (camp != null) {
@@ -486,7 +486,7 @@ public final class OgreHolds {
 		}
 	}
 
-	// ---- (0.7.472) bands in the orc camps -------------------------------------------------------------------------------
+	// ---- (0.7.474) bands in the orc camps -------------------------------------------------------------------------------
 
 	/** A band in an orc camp: its ogres besides the brute, how near the fire they keep. */
 	static final int BAND_OGRES = 2, BAND_HOME = 16;

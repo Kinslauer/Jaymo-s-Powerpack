@@ -49,11 +49,11 @@ public final class GreenskinLife {
 	/** On a player: "orc" (a half-orc) or "goblin" (goblin-raised), "|", and their home tribe. Saved, kept through death. */
 	static final AttachmentType<String> RAISED = AttachmentRegistry.create(JaymosKingdoms.id("greenskin_raised"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
-	/** (0.7.472) On a player: a half-orc's skin, picked on the life story's slider (0 to 1 along {@link #TONES}). Saved, synced, kept through death. */
+	/** (0.7.474) On a player: a half-orc's skin, picked on the life story's slider (0 to 1 along {@link #TONES}). Saved, synced, kept through death. */
 	public static final AttachmentType<Float> TONE = AttachmentRegistry.create(JaymosKingdoms.id("half_orc_tone"),
 		builder -> builder.persistent(Codec.FLOAT).copyOnDeath().syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 	/**
-	 * (0.7.472) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
+	 * (0.7.474) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
 	 * than green". The slider's skins, end to end (blended between): ash-pale, sallow, lime, orc green, moss, grey-green,
 	 * slate, ruddy brown, umber, charcoal.
 	 */
@@ -79,7 +79,7 @@ public final class GreenskinLife {
 		return r != null && r.startsWith(ORC + "|");
 	}
 
-	/** (0.7.472) A half-orc's skin at {@code tone} (0 to 1) along the slider (opaque ARGB). */
+	/** (0.7.474) A half-orc's skin at {@code tone} (0 to 1) along the slider (opaque ARGB). */
 	public static int toneColor(float tone) {
 		float at = Mth.clamp(tone, 0.0F, 1.0F) * (TONES.length - 1);
 		int i = Math.min((int)at, TONES.length - 2);
@@ -89,7 +89,7 @@ public final class GreenskinLife {
 			Math.round(Mth.lerp(t, ARGB.blue(a), ARGB.blue(b))));
 	}
 
-	/** (0.7.472) {@code p}'s half-orc skin (opaque ARGB), as they set it on the slider. */
+	/** (0.7.474) {@code p}'s half-orc skin (opaque ARGB), as they set it on the slider. */
 	public static int skin(Entity p) {
 		return toneColor(p.getAttachedOrElse(TONE, TONE_DEFAULT));
 	}

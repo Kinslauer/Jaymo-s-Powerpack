@@ -645,7 +645,7 @@ public final class LifeStory {
 	/**
 	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
-	 * road makes you (the afterlife's); {@code tone}: (0.7.472) a half-orc's skin on the greenskin road's slider
+	 * road makes you (the afterlife's); {@code tone}: (0.7.474) a half-orc's skin on the greenskin road's slider
 	 * ({@link GreenskinLife#TONE}).
 	 */
 	public record Road(int road, int roadRealm, int look, float tone) implements CustomPacketPayload {
@@ -1013,7 +1013,7 @@ public final class LifeStory {
 			Stats.attributes(player);
 		}
 		if (road.start == Start.GREENSKIN) {
-			// (0.7.472) the skin they'd have as a half-orc (the slider on the greenskin road)
+			// (0.7.474) the skin they'd have as a half-orc (the slider on the greenskin road)
 			player.setAttached(GreenskinLife.TONE, Mth.clamp(payload.tone(), 0.0F, 1.0F));
 		}
 		List<String> story = new ArrayList<>(of(player));

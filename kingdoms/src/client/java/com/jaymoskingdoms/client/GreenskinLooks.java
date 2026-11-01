@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * or bone-white). Tusks, scars and paint keep their own colours.</li>
  * </ul>
  * Each one's shape and marks are fixed by its UUID. Clothes drawn over the body hide the marks under them.
- * <p>(0.7.472) A half-orc player ({@link GreenskinLife#halfOrc}) wears an orc's look too, on the skin they picked on the
+ * <p>(0.7.474) A half-orc player ({@link GreenskinLife#halfOrc}) wears an orc's look too, on the skin they picked on the
  * life story's slider ({@link GreenskinLife#TONE}), greens and greys and browns ({@code McaVerdantSkinMixin} colours MCA's
  * skin with it).
  */
@@ -75,7 +75,7 @@ public final class GreenskinLooks {
 
 	static void register() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
-			// ((0.7.472) players too: a half-orc)
+			// ((0.7.474) players too: a half-orc)
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer));
 			}
@@ -91,7 +91,7 @@ public final class GreenskinLooks {
 	static boolean extract(LivingEntity entity, LivingEntityRenderState state) {
 		long bits = entity.getUUID().getLeastSignificantBits();
 		if (entity instanceof Player) {
-			// (0.7.472) a half-orc player: an orc's tusks, brow, ears and marks, on the skin they picked
+			// (0.7.474) a half-orc player: an orc's tusks, brow, ears and marks, on the skin they picked
 			int skin = halfOrcSkin(entity);
 			state.setData(KEY, skin == 0 ? null : new Look(Heritage.Kind.ORC, (int)Math.floorMod(bits >>> 3, (long)SHAPES),
 				(int)Math.floorMod(bits >>> 7, (long)MARKS), (int)Math.floorMod(bits >>> 11, (long)MARKS), skin));
@@ -108,13 +108,13 @@ public final class GreenskinLooks {
 	}
 
 	/**
-	 * (0.7.472) While the life story's greenskin road is shown, the skin on its slider (0 to 1), drawn on you there; -1
+	 * (0.7.474) While the life story's greenskin road is shown, the skin on its slider (0 to 1), drawn on you there; -1
 	 * otherwise ({@code LifeStoryScreen}).
 	 */
 	public static float previewTone = -1.0F;
 
 	/**
-	 * (0.7.472) The skin {@code entity} (a player, or the figure of you on MCA's creator) wears as a half-orc (opaque ARGB):
+	 * (0.7.474) The skin {@code entity} (a player, or the figure of you on MCA's creator) wears as a half-orc (opaque ARGB):
 	 * the tone they picked ({@link GreenskinLife#skin}), or the slider's while the story shows it to you; 0 for anyone else.
 	 */
 	public static int halfOrcSkin(Entity entity) {
@@ -136,7 +136,7 @@ public final class GreenskinLooks {
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Look look = state.getData(KEY);
 			if (look == null || state.isInvisible || state instanceof AvatarRenderState && PowersCover.face(state)) {
-				// ((0.7.472) a half-orc's mask or the symbiote's suit covers it)
+				// ((0.7.474) a half-orc's mask or the symbiote's suit covers it)
 				return;
 			}
 			HumanoidModel<S> model = this.getParentModel();

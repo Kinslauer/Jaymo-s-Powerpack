@@ -131,7 +131,7 @@ public final class Rearm {
 			return;
 		}
 		if (mob instanceof Villager villager && packed(villager)) {
-			// (0.7.472) MCA puts a guard's weapon away in their pack between fights and draws it again for the next: it isn't
+			// (0.7.474) MCA puts a guard's weapon away in their pack between fights and draws it again for the next: it isn't
 			// lost (taking it out here only had MCA put it back, crying "My weapon!" and "Not done yet!" over and over)
 			state.lost = false;
 			state.seeking = null;

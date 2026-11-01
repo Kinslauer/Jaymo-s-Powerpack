@@ -4885,7 +4885,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   corners, a little further in and stronger as the water runs out (Kitchen `DryVeins`, Kitchen MODLOG). Compile-checked;
   not seen in game.
 
-- **0.19.46, Kingdoms 0.7.472, ogres with the orcs:** Ogre bands now live in orc camps (or raise new ones with the orcs) and
+- **0.19.46, Kitchen 0.5.44, spiders smash more:** Andy: "smaller spiders should be smashed on every kill, and a chance for
+  any spider to smash from any weapon, not just blunt". Cave spiders and any spider 1 block wide or less burst into legs on
+  every kill; other spiders do a quarter of the time, from any weapon (Kitchen `SpiderCrush`, Kitchen MODLOG).
+
+- **0.19.48, Kingdoms 0.7.472, the Bio-built road preview, again:** Andy: "the bio built start still glitches on the
+  preview ... you said it was fixed but this is still broken". While you make your character you hang in the sky, flying
+  (stasis), and Fresh Animations played its flying pose on the figure of you on the road page, which tore the Bio-built
+  form apart and lifted it out of its frame. The 0.19.11 check was made in a test game without Fresh Animations. Fresh
+  Animations now pauses for you while the story screen is up (Kingdoms MODLOG). Checked in a test game with MCA and Fresh
+  Animations.
+- **0.19.50, Kingdoms 0.7.474, ogres with the orcs:** Ogre bands now live in orc camps (or raise new ones with the orcs) and
   help them build. Jade calls goblins and orcs "Goblin" and "Orc" instead of MCA's "Male Villager". Half-orc players are drawn
   like the greenskins, with a skin slider on the greenskin road that goes beyond green. Idle orc guards no longer loop "My
   weapon! / Not done yet!" (Kingdoms MODLOG). Compile-checked; not played.

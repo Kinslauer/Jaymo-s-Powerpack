@@ -206,6 +206,10 @@ public final class Busts {
 	/** Downed by a guard, or yielding to one: true if they were sentenced. */
 	private static boolean caught(ServerLevel level, ServerPlayer player, Faction f, String crime) {
 		boolean downed = Downed.isDowned(player);
+		if (downed && Unmasking.awaits(player)) {
+			// (0.7.473) masked: the guards see who it is first
+			return false;
+		}
 		List<Worker> near = Underworld.guards(level, f, player.getBoundingBox().inflate(downed ? TAKE_RANGE : YIELD_RANGE));
 		if (near.isEmpty()) {
 			YIELDING.remove(player.getUUID());

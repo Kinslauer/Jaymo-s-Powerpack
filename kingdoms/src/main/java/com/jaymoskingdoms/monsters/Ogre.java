@@ -79,7 +79,7 @@ public class Ogre extends LegendMonster {
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
 			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && !com.jaymoskingdoms.InBalming.spares(this, target)
 				&& !com.jaymoskingdoms.OgreHolds.spares(this, target)));
-		// ((0.7.472) never a goblin or an orc: the ogres throw in with the greenskins, OgreHolds)
+		// ((0.7.474) never a goblin or an orc: the ogres throw in with the greenskins, OgreHolds)
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true,
 			(target, level) -> !com.jaymoskingdoms.OgreHolds.spares(this, target)));
 	}
@@ -143,7 +143,7 @@ public class Ogre extends LegendMonster {
 		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.6F);
 		for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(SMASH_RANGE),
 			e -> e != this && !(e instanceof Ogre) && e.isAlive() && e.distanceToSqr(at) < SMASH_RANGE * SMASH_RANGE
-				// ((0.7.472) the greenskins about it are spared the blow, so a fight in an orc camp doesn't turn them on each other)
+				// ((0.7.474) the greenskins about it are spared the blow, so a fight in an orc camp doesn't turn them on each other)
 				&& !com.jaymoskingdoms.OgreHolds.spares(this, e))) {
 			if (hit instanceof Player p && (p.isCreative() || p.isSpectator())) {
 				continue;

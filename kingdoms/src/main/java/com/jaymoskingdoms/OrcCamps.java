@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * taiga, dark forest, hills, plains and snow), a dark oak stockade round a war fire, the warchief in his longhouse, grunts
  * sparring in the pit, rangers on the towers, a shaman by the fire ({@link OrcBuildings}, {@link Orcs}). It grows daily by
  * its own hands (more orcs, more tents), and its war bands raid the nearest kingdom ({@link Raids}). Kill its warchief and
- * it is cleared like any camp ({@link Camps#chiefSlain}). (0.7.472) A band of ogres may live in one ({@link OgreHolds#joinCamp}),
+ * it is cleared like any camp ({@link Camps#chiefSlain}). (0.7.474) A band of ogres may live in one ({@link OgreHolds#joinCamp}),
  * or raise a new one with the orcs ({@link #foundNear}); each of its ogres lets the camp raise another building a day.
  */
 final class OrcCamps {
@@ -121,7 +121,7 @@ final class OrcCamps {
 	}
 
 	/**
-	 * (0.7.472) A band of ogres and the orcs raise a camp together somewhere near {@code player} in {@code region}, by the
+	 * (0.7.474) A band of ogres and the orcs raise a camp together somewhere near {@code player} in {@code region}, by the
 	 * same rules as any camp (open ground out of sight, orc country, ground flat enough) but in the wild, kingdom or no; or
 	 * null if there's nowhere fit.
 	 */
@@ -272,7 +272,7 @@ final class OrcCamps {
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
 		}
-		// ((0.7.472) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
+		// ((0.7.474) each of its ogres hauls for the builders: another building a day apiece, OgreHolds)
 		int ogres = OgreHolds.haulers(level, camp.id(), data.center()).size();
 		int allowed = Math.min(OrcBuildings.GROWTH.size(), data.grown() * (1 + ogres));
 		if (data.built() >= allowed || !Storage.loaded(level, camp)) {

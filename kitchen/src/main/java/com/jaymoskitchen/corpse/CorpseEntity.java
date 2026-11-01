@@ -194,10 +194,18 @@ public class CorpseEntity extends Entity {
 	 * hands for large animals like cows or bears". It stays a ragdoll the whole way: its hind legs (a person's ankles) are
 	 * in your hands ({@link #dragHands}), an arm's length ({@code DRAG_ARM}) from your shoulders, and the rest of it drags
 	 * and bumps along behind over the ground and whatever's in the way. Any animal too big for a pocket can be dragged.
+	 * (0.5.45) Andy: "the drag needs to tether the hand to one part of the mob's body, and keep those two together ... the
+	 * mob should move from that single point instead of jumping every movement". One point is held ({@link #gripPoint}),
+	 * by one hand or by both together, and each client works the dragged body out itself from the hand it sees
+	 * ({@code DragSim}), so the leg never lags behind the hand by the server's round trip.
 	 */
 	public static final double DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5;
-	/** (0.5.39) Your shoulders' height and spread, and your arm's reach (blocks, at normal size). */
-	public static final double DRAG_SHOULDER = 1.4, DRAG_SHOULDER_SPREAD = 0.35, DRAG_ARM = 0.7;
+	/**
+	 * (0.5.39) Your shoulders' height and spread, and your arm's reach to the grip (blocks, at normal size); (0.5.45) as the
+	 * player model has them (arm pivots 22 pixels up and 5 out, the hand 10 pixels down the arm), so the leg sits in the
+	 * drawn hand.
+	 */
+	public static final double DRAG_SHOULDER = 1.375, DRAG_SHOULDER_SPREAD = 0.3125, DRAG_ARM = 0.625;
 	/** (0.5.39) Wider than this standing (a bear, a horse), a cow-sized carcass, or an animal taller than this (a llama): both hands. */
 	public static final float TWO_HANDED_WIDTH = 0.9F, TWO_HANDED_HEIGHT = 1.6F;
 	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt; (0.5.39) only while it moves this fast (blocks a tick). */
@@ -1529,12 +1537,9 @@ public class CorpseEntity extends Entity {
 		}
 		ensureRagdoll();
 		RagdollBody body = ragdoll.body;
-		int hands = dragHands();
-		for (int h = 0; h < hands; h++) {
-			int point = gripPoint(body.rig, h);
-			Vec3 hand = dragHand(player, h, new Vec3(body.x[point], body.y[point], body.z[point]));
-			body.grip(h, point, hand.x, hand.y, hand.z);
-		}
+		int point = gripPoint(body.rig);
+		Vec3 hand = dragHand(player, dragHands(), new Vec3(body.x[point], body.y[point], body.z[point]));
+		body.grip(0, point, hand.x, hand.y, hand.z);
 		ragdoll.tick(this, level);
 		if (tickCount % 20 == 0) {
 			// a dead weight: hauling it is slow going, (0.5.36) Slowness IV less your brawn
@@ -1565,24 +1570,26 @@ public class CorpseEntity extends Entity {
 		return size.width() > TWO_HANDED_WIDTH || kind == CorpseKind.ANIMAL && size.height() > TWO_HANDED_HEIGHT ? 2 : 1;
 	}
 
-	/** (0.5.39) The point of {@code rig} that hand {@code hand} (0 the right, 1 the left) holds: a hind leg, an ankle, a corner. */
-	public static int gripPoint(RagdollRig rig, int hand) {
+	/** (0.5.39) The one point of {@code rig} it's held by, (0.5.45) whatever the hands: a hind leg, an ankle, a corner. */
+	public static int gripPoint(RagdollRig rig) {
 		return switch (rig.shape) {
-			case QUADRUPED -> hand == 0 ? RagdollRig.BR_FOOT : RagdollRig.BL_FOOT;
-			case HUMANOID -> hand == 0 ? RagdollRig.R_FOOT : RagdollRig.L_FOOT;
-			case BOX -> hand == 0 ? RagdollRig.BOTTOM_RIGHT : RagdollRig.BOTTOM_LEFT;
+			case QUADRUPED -> RagdollRig.BR_FOOT;
+			case HUMANOID -> RagdollRig.R_FOOT;
+			case BOX -> RagdollRig.BOTTOM_RIGHT;
 		};
 	}
 
 	/**
-	 * (0.5.39) Where {@code player}'s hand {@code hand} (0 right, 1 left) is, holding what's now at {@code at}: reaching
-	 * toward it from that shoulder, an arm's length at most (nearer, the hand stays where the leg is).
+	 * (0.5.39) Where {@code player}'s hand is, holding what's now at {@code at}: reaching toward it from the right shoulder
+	 * ({@code hands} 1), or (0.5.45) both hands together from the middle of the chest, an arm's length at most (nearer, the
+	 * hand stays where the leg is).
 	 */
-	public static Vec3 dragHand(Player player, int hand, Vec3 at) {
-		Vec3 shoulder = dragShoulder(player, hand);
+	public static Vec3 dragHand(Player player, int hands, Vec3 at) {
+		Vec3 shoulder = dragShoulder(player, hands > 1 ? 0 : 1);
 		Vec3 reach = at.subtract(shoulder);
 		double len = reach.length();
-		double arm = DRAG_ARM * player.getScale();
+		// both hands meet in front of the chest: an arm from either shoulder reaches that far from the middle
+		double arm = (hands > 1 ? Math.sqrt(DRAG_ARM * DRAG_ARM - DRAG_SHOULDER_SPREAD * DRAG_SHOULDER_SPREAD) : DRAG_ARM) * player.getScale();
 		if (len < 1.0E-4) {
 			// (right on the shoulder) down and behind
 			float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
@@ -1591,12 +1598,12 @@ public class CorpseEntity extends Entity {
 		return len <= arm ? at : shoulder.add(reach.scale(arm / len));
 	}
 
-	/** (0.5.39) {@code player}'s shoulder for hand {@code hand} (0 right, 1 left), turned with their body. */
-	public static Vec3 dragShoulder(Player player, int hand) {
+	/** (0.5.39) {@code player}'s shoulder on {@code side} (1 right, -1 left, 0 between them), turned with their body. */
+	public static Vec3 dragShoulder(Player player, int side) {
 		float scale = player.getScale();
 		float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
-		double side = (hand == 0 ? 1.0 : -1.0) * DRAG_SHOULDER_SPREAD * scale;
-		return new Vec3(player.getX() - Mth.cos(yaw) * side, player.getY() + DRAG_SHOULDER * scale, player.getZ() - Mth.sin(yaw) * side);
+		double out = side * DRAG_SHOULDER_SPREAD * scale;
+		return new Vec3(player.getX() - Mth.cos(yaw) * out, player.getY() + DRAG_SHOULDER * scale, player.getZ() - Mth.sin(yaw) * out);
 	}
 
 	/**

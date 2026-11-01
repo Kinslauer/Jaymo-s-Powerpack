@@ -94,5 +94,7 @@
   "message.jaymospowers.costume.mask_on": "You put your %s back on",
   "message.jaymospowers.costume.no_mask": "Your costume has nothing on the head to take off",
   "screen.jaymospowers.costume.mask_off": "Mask off",
-  "screen.jaymospowers.costume.mask_on": "Mask on"
+  "screen.jaymospowers.costume.mask_on": "Mask on",
+  "message.jaymospowers.costume.corpse_unmasked": "You pull the mask off %1$s: it's %2$s",
+  "message.jaymospowers.costume.corpse_stripped": "You take the costume off %2$s's body"
 }

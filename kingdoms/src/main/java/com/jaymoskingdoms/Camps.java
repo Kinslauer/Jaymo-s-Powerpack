@@ -661,7 +661,7 @@ public final class Camps {
 		}
 		Raids.scatter(level, camp.id());
 		if (orcs) {
-			// (0.7.472) its band of ogres breaks up
+			// (0.7.474) its band of ogres breaks up
 			CampData band = data(server, camp.id());
 			OgreHolds.campFell(server, band != null ? band.center() : camp.seat());
 		}

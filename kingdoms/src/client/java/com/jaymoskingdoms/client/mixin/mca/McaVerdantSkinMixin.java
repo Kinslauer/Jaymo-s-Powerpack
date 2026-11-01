@@ -57,7 +57,7 @@ abstract class McaVerdantSkinMixin {
 		}
 		int halfOrc = entity != null && yours(entity) ? com.jaymoskingdoms.client.GreenskinLooks.halfOrcSkin(entity) : 0;
 		if (halfOrc != 0) {
-			// (0.7.472) a half-orc's skin, as they set it on the life story's slider (or the slider while it's shown)
+			// (0.7.474) a half-orc's skin, as they set it on the life story's slider (or the slider while it's shown)
 			cir.setReturnValue(ARGB.color(ARGB.alpha(cir.getReturnValueI()), ARGB.red(halfOrc), ARGB.green(halfOrc), ARGB.blue(halfOrc)));
 		} else if (entity != null && yours(entity) && com.jaymoskingdoms.VillagerHeritage.of(entity) == com.jaymoskingdoms.Heritage.Kind.VERDANT) {
 			// (0.7.304) a Verdant player's shade of green, as dark as MCA's skin slider sets it (as a Rubber-folk's pink is)

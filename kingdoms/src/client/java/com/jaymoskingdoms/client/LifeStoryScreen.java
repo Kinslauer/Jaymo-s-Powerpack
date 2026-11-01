@@ -110,7 +110,7 @@ final class LifeStoryScreen extends Screen {
 		int gender = -1;
 		/** (0.7.420) The flaws taken (a bit each, {@link Flaws.Flaw#bit}) and the hard-road switches ({@link Flaws#WARY} and the rest). */
 		int flaws, switches;
-		/** (0.7.472) A half-orc's skin on the greenskin road's slider (0 to 1, {@link GreenskinLife#TONE}). */
+		/** (0.7.474) A half-orc's skin on the greenskin road's slider (0 to 1, {@link GreenskinLife#TONE}). */
 		float tone = GreenskinLife.TONE_DEFAULT;
 
 		Draft() {
@@ -120,7 +120,7 @@ final class LifeStoryScreen extends Screen {
 
 	private final boolean forced;
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
-	/** (0.7.472) On the greenskin road: a half-orc's skin. */
+	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
 	/**
 	 * (0.7.451) Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'".
@@ -234,7 +234,7 @@ final class LifeStoryScreen extends Screen {
 	public void removed() {
 		// (0.7.286) the stand-in figure is no longer MCA's editor figure
 		StoryFigure.closed();
-		// ((0.7.472) and you're no longer drawn on the greenskin road's slider)
+		// ((0.7.474) and you're no longer drawn on the greenskin road's slider)
 		GreenskinLooks.previewTone = -1.0F;
 		// (0.7.360) Andy: "if the narrator is still speaking when you move on, it will double up the voice. make it cut off
 		// anytime the player advances." Leaving the story cuts the reading off too
@@ -594,7 +594,7 @@ final class LifeStoryScreen extends Screen {
 		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
 		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
 		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
-		// (0.7.472) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
+		// (0.7.474) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
 		// than green": on the greenskin road, under you (placed as the page is drawn)
 		this.tone = addRenderableWidget(new ToneSlider());
 		// (0.7.451) the locked starts, in a menu of their own
@@ -1238,7 +1238,7 @@ final class LifeStoryScreen extends Screen {
 		graphics.fill(bx0, ground, bx1, ground + 1, 0x40000000);
 		graphics.fillGradient(bx0, ground + 1, bx1, sy1, 0x00000000, 0x60000000);
 
-		// (0.7.472) the greenskin road: you're drawn a half-orc on the slider's skin, the slider along the foot of the place
+		// (0.7.474) the greenskin road: you're drawn a half-orc on the slider's skin, the slider along the foot of the place
 		boolean greenskin = a.start() == LifeStory.Start.GREENSKIN && open(a);
 		GreenskinLooks.previewTone = greenskin ? draft.tone : -1.0F;
 		if (this.tone != null) {
@@ -1953,10 +1953,10 @@ final class LifeStoryScreen extends Screen {
 		return a == null ? "raised" : a.key().toLowerCase(Locale.ROOT);
 	}
 
-	/** (0.7.472) The greenskin road's slider's height. */
+	/** (0.7.474) The greenskin road's slider's height. */
 	static final int TONE_H = 14;
 
-	/** (0.7.472) A half-orc's skin along {@link GreenskinLife#TONES}: greens, greys and browns. */
+	/** (0.7.474) A half-orc's skin along {@link GreenskinLife#TONES}: greens, greys and browns. */
 	private final class ToneSlider extends AbstractSliderButton {
 		ToneSlider() {
 			super(0, 0, 120, TONE_H, Component.empty(), draft.tone);

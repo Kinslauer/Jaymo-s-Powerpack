@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.7.180) On a client, a villager whose name you haven't asked ({@link Introductions}) goes by what they are
- * ("Villager", their trade) wherever the client names them: Jade, MCA's screens. (0.7.472) A goblin or an orc goes by
+ * ("Villager", their trade) wherever the client names them: Jade, MCA's screens. (0.7.474) A goblin or an orc goes by
  * "Goblin" or "Orc", never MCA's "Male Villager".
  */
 @Mixin(VillagerEntityMCA.class)
