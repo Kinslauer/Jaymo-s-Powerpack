@@ -7982,3 +7982,7 @@ constants at the top of each class.
   (`shrine_prayed` attachment, the overworld day number, kept through death): every part heals 3 and festering is cleared, with a
   chime and motes.
 - Textures and models by `tools/gen_healing_blocks.py`.
+
+## 0.7.463: the infirmary cot's loot table loads (pack 0.19.27)
+- The Deck server would not start on 0.19.25 ("Failed to load registries"): `infirmary_cot.json` used `minecraft:block_state_property`,
+  which 26.3 dropped. It's written with `minecraft:match_block` now, as the Training Post's was.

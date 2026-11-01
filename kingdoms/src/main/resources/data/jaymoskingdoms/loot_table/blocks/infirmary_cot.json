@@ -3,22 +3,20 @@
   "pools": [
     {
       "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jaymoskingdoms:infirmary_cot"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:infirmary_cot",
-          "properties": {
-            "part": "head"
+          "name": "jaymoskingdoms:infirmary_cot",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskingdoms:infirmary_cot",
+            "state": {
+              "part": "head"
+            }
           }
-        },
-        {
-          "condition": "minecraft:survives_explosion"
         }
       ]
     }
