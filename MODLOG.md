@@ -4829,3 +4829,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Compile-checked with javac against the 26.3 jars; not built with Gradle
     or seen in game. Tune in the `CrawlPose` constants (HAND_*, PLANTED, STROKE, HEEL_*, BACK_STROKE).
 - **0.19.31, Kingdoms 0.7.465:** the Grue: the dark arts let an old evil wizard take over your mana spirit, then your body.
+- **0.19.33, Kingdoms 0.7.466:** the Grue's trial: when it takes you, fog rolls in and you fight it in a black arena in the sky; win and its power is yours.

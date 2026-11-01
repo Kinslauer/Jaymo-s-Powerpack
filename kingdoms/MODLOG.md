@@ -8012,3 +8012,23 @@ the closer the Grue comes. The spirit fights it the whole way, until the Grue ta
   (/ooc does).
 - **Exorcism:** a friend downs the host, then uses a Purifying Draught on them. The Grue burns out, takes the spirit with
   it (never another), and 20 lingering corruption goes. Ops: `/kingdom grue free <player>`, `/kingdom grue hold <player> <n>`.
+
+## 0.7.466: the Grue's trial (pack 0.19.33)
+Jung, through Andy: when the Grue takes you, you're sent to a black realm to fight it, and if you win you can use the curse
+at will. Andy chose a sealed arena in the sky (no new dimension, keeping the no-new-realms rule) and "the blindness fog
+rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`.
+- **Fog:** at hold 100, black fog rolls in from the screen's edges (blindness, darkness) for 3 s.
+- **Arena:** a sealed drum of black concrete (radius 13, 10 high), 26 blocks below the top of the world over where you stood,
+  lit only by a ring of crying obsidian. It's built only into air, and afterwards only arena blocks in the arena's shape are
+  removed. Wander off (a pearl, a power) and you're put back inside.
+- **The Grue:** a dark red evoker with 260 health and 10 armour, plus its own fangs and vexes. It has a 7-hurt strike up close
+  and a 5-hurt grasp from 4-20 blocks. Below 2/3 health it calls 3 shades (every 20 s) and throws darkness. Below 1/3 it's dark
+  the whole time and it blinks about the arena every 6 s, while your spirit breaks through every 10 s to hold it (Slowness VI,
+  Weakness III). 5 minute limit. It has a boss bar.
+- **Win:** the curse is subjugated. The hold is gone for good, `SpiritState.MASTERED` is set (it survives every summon), and
+  two spirit moves are added: Grue Form (a toggle: arms deep red, every spirit move does 1.75x, 2 mana a second) and Grue's
+  Grasp (20 blocks, 10 hurt x level, pulls in).
+- **Lose** (you would die, you're downed, or time runs out): you're back where you stood and the Grue has you, as in 0.7.465.
+  Exorcism still frees you.
+- **Cut short** (logout, server stop, the boss lost without dying): arena cleared, you're put back, and the hold drops to 95,
+  so it comes again. `TRIAL` is saved, so a crash is mended at your next login.

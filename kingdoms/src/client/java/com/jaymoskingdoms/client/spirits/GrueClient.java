@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.spirits;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.SeizureClient;
 import com.jaymoskingdoms.spirits.Grue;
+import com.jaymoskingdoms.spirits.GrueTrial;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -41,6 +42,8 @@ public final class GrueClient {
 	private static float speed;
 	private static boolean grue;
 	private static float lash, lastLash;
+	/** (0.7.466) The trial's fog: now, last tick, where it's going and how much it moves a tick ({@link GrueTrial.Fog}). */
+	private static float fog, lastFog, fogTo, fogStep;
 
 	private GrueClient() {
 	}
@@ -64,7 +67,12 @@ public final class GrueClient {
 				player.setXRot(Mth.clamp(player.getXRot() + (player.getRandom().nextFloat() - 0.5F) * LASH_JOLT * payload.strength(), -90.0F, 90.0F));
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(GrueTrial.Fog.TYPE, (payload, context) -> {
+			fogTo = payload.to();
+			fogStep = Math.abs(fogTo - fog) / Math.max(1, payload.ticks());
+		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			fog = lastFog = fogTo = 0.0F;
 			ticks = 0;
 			lash = lastLash = 0.0F;
 		});
@@ -85,6 +93,8 @@ public final class GrueClient {
 	private static void tick(Minecraft minecraft) {
 		lastLash = lash;
 		lash = Math.max(0.0F, lash - LASH_FADE);
+		lastFog = fog;
+		fog = fog < fogTo ? Math.min(fogTo, fog + fogStep) : Math.max(fogTo, fog - fogStep);
 		LocalPlayer player = minecraft.player;
 		if (player == null || minecraft.level == null) {
 			ticks = 0;
@@ -152,6 +162,17 @@ public final class GrueClient {
 			int color = ARGB.colorFromFloat(1.0F, 0.35F * k, k, k);
 			graphics.blit(RenderPipelines.VIGNETTE, VIGNETTE, 0, 0, 0.0F, 0.0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(),
 				graphics.guiHeight(), color);
+		}
+		// (0.7.466) the trial's fog rolling in: from the edges first, then over everything
+		float f = Mth.lerp(partialTicks, lastFog, fog);
+		if (f > 0.0F) {
+			float edge = Math.min(1.0F, f * 2.0F);
+			graphics.blit(RenderPipelines.VIGNETTE, VIGNETTE, 0, 0, 0.0F, 0.0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(),
+				graphics.guiHeight(), ARGB.colorFromFloat(1.0F, edge, edge, edge));
+			float over = Mth.clamp(f * 2.0F - 1.0F, 0.0F, 1.0F);
+			if (over > 0.0F) {
+				graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), ARGB.colorFromFloat(over, 0.0F, 0.0F, 0.0F));
+			}
 		}
 		if (taken && minecraft.gui.screen() == null) {
 			graphics.centeredText(minecraft.font, Component.translatable("hud.jaymoskingdoms.grue.taken"), graphics.guiWidth() / 2,
