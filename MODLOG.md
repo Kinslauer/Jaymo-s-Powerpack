@@ -4908,3 +4908,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   buildings placed differently in every camp: market squares, ogre dens, smelters, breweries, war-beast pens and a great
   hall. A tier 4 camp claims land, its chief becomes Warlord or Goblin King, the news tells of it, and its tribe's nearby
   camps become its vassals. `/kingdom camp tier` shows and sets a camp's tier (Kingdoms MODLOG). Compile-checked; not played.
+- **0.19.53, Kitchen 0.5.47, limp snakes:** Dead snakes are a chain ragdoll now, a head and ten loose joints, so they
+  sag, drape over bumps and edges, and flop when dragged, the body drawn segment by segment along the chain instead of a
+  few stiff blocks (Kitchen MODLOG). Not compile-checked; not played.

@@ -1576,6 +1576,8 @@ public class CorpseEntity extends Entity {
 			case QUADRUPED -> RagdollRig.BR_FOOT;
 			case HUMANOID -> RagdollRig.R_FOOT;
 			case BOX -> RagdollRig.BOTTOM_RIGHT;
+			// (0.5.47) a snake by the tip of its tail, hanging
+			case CHAIN -> rig.tailTip();
 		};
 	}
 
