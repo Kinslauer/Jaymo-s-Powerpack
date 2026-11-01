@@ -77,7 +77,8 @@ public final class BloodClient {
 			known.restain(options.scale(), options.age(), options.life());
 			return null;
 		}
-		BloodPuddle stain = new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), options.age(), options.life());
+		BloodPuddle stain = new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), options.age(), options.life(),
+			options.shape());
 		STAINS.put(options.mark(), stain);
 		return stain;
 	}

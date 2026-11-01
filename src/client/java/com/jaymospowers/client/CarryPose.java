@@ -33,6 +33,12 @@ import org.jspecify.annotations.Nullable;
  * (0.15.42) The carrier's side moves with the weight ({@link PoseBlend}): they bend at the hips and knees to pick it up,
  * lift with the legs, and carry it with a heavier, rolling walk, the body swaying and the arms giving a little on each
  * step; setting it down bends them the same way, and the hold eases in and out.
+ * <p>
+ * (0.19.52) Dragged by the shoulder ({@link Carry#DRAG}): lying on the back along the ground behind the carrier, head
+ * toward them, the shoulders held up off the ground in their hand and the body sloping down to the hips; the legs lie
+ * flat and ragdoll as they drag ({@code CarryClient.Drag}: kicked up by the bumps, swung aside on turns, bouncing back
+ * down), the arms trail limp beside the body and the head lolls back, jolting. The carrier bends forward into the pull,
+ * the right arm reaching back and down to the shoulder.
  */
 public final class CarryPose {
 	/** On a carried body: how it's held. */
@@ -44,7 +50,11 @@ public final class CarryPose {
 
 	/** The swing ({@code back}, {@code left}: radians-ish, from CarryClient) and wind {@code trail} (0-1) of a held body. */
 	public record Held(int hold, boolean animal, int carrierId, float partialTicks, float back, float left, float trail,
-		float time, float width, float height) {
+		float time, float width, float height, float @Nullable [] drag) {
+		Held(int hold, boolean animal, int carrierId, float partialTicks, float back, float left, float trail, float time, float width,
+			float height) {
+			this(hold, animal, carrierId, partialTicks, back, left, trail, time, width, height, null);
+		}
 	}
 
 	/** {@code width}: of what's held (blocks), so the arms spread round a wide one overhead. */
@@ -61,6 +71,14 @@ public final class CarryPose {
 	static final float SHOULDER_X = 0.66F, SHOULDER_Y = -0.5F, SHOULDER_Z = 0.05F, SHOULDER_LEAN = 10.0F;
 	/** Over the back: back to back, a little higher, leaning onto the carrier (and lying on them in a cruise). */
 	static final float BACK_Y = 0.12F, BACK_Z = 0.3F, BACK_TIP = 14.0F;
+	/**
+	 * (0.19.52) Dragged: the shoulders held this high (blocks; the hips' back then just touches the ground), the body
+	 * sloping down from them this steeply (degrees), turned about the collar this far up the body. The arms lie this far
+	 * out from the sides, the head lolled back this far (radians).
+	 */
+	static final float DRAG_LIFT = 0.53F, DRAG_INCLINE = 40.0F, DRAG_COLLAR = 1.35F, DRAG_ARMS_OUT = 0.32F, DRAG_HEAD = -0.55F;
+	/** (0.19.52) The carrier dragging: the right arm back and down (radians), out a little; leaning into the pull, sunk this much (pixels). */
+	static final float DRAG_ARM = 0.8F, DRAG_ARM_OUT = 0.18F, DRAG_LEAN = 0.32F, DRAG_SINK = 1.8F;
 	/** How far (degrees) the whole held body swings per unit of sway, and how wide the limbs swing (radians). */
 	static final float BODY_SWAY = 7.0F, LIMB_SWAY = 0.55F;
 	/** A thrown body: how far it turns over in the air (degrees), and how hard its limbs flop. */
@@ -119,10 +137,12 @@ public final class CarryPose {
 			return;
 		}
 		float[] sway = CarryClient.swayOf(entity, partialTicks);
+		float[] drag = hold.hold() == Carry.DRAG ? CarryClient.dragOf(entity, partialTicks) : null;
 		state.setData(HELD_KEY, new Held(hold.hold(), !Carry.person(entity), carrier.getId(), partialTicks, sway[0], sway[1], sway[2],
-			entity.tickCount + partialTicks, entity.getBbWidth(), entity.getBbHeight()));
-		// turned to the carrier's facing, limp: no walking, crouching, swimming or anything else's pose
-		state.bodyRot = Mth.rotLerp(partialTicks, carrier.yBodyRotO, carrier.yBodyRot);
+			entity.tickCount + partialTicks, entity.getBbWidth(), entity.getBbHeight(), drag));
+		// turned to the carrier's facing (or (0.19.52) dragged, lying the way it's dragged), limp: no walking, crouching,
+		// swimming or anything else's pose
+		state.bodyRot = drag != null ? drag[0] : Mth.rotLerp(partialTicks, carrier.yBodyRotO, carrier.yBodyRot);
 		state.yRot = 0.0F;
 		state.xRot = 0.0F;
 		state.walkAnimationSpeed = 0.0F;
@@ -175,6 +195,10 @@ public final class CarryPose {
 	/** Moves a body from its carrier's feet into the hold. */
 	private static void hold(PoseStack poseStack, Held held) {
 		float back = held.back(), left = held.left();
+		if (held.hold() == Carry.DRAG) {
+			dragHold(poseStack, held);
+			return;
+		}
 		if (held.hold() == Carry.OVERHEAD) {
 			overheadHold(poseStack, held);
 			return;
@@ -217,6 +241,21 @@ public final class CarryPose {
 				poseStack.rotateDegrees(Axis.ZP, left * BODY_SWAY * 0.5F);
 			}
 		}
+	}
+
+	/**
+	 * (0.19.52) Dragged: already lying where it's dragged (CarryClient), facing away from the carrier; laid on its back with
+	 * the head toward them, turned about the collar so the shoulders are held up and the body slopes down to the hips,
+	 * rocking a little as the legs kick.
+	 */
+	private static void dragHold(PoseStack poseStack, Held held) {
+		float[] drag = held.drag();
+		float rock = drag == null ? 0.0F : (drag[2] + drag[4]) * 4.0F;
+		float h = held.height() > 0.0F ? Math.min(1.0F, held.height() / 1.8F) : 1.0F;
+		poseStack.translate(0.0F, DRAG_LIFT * h, 0.0F);
+		poseStack.rotateDegrees(Axis.XP, 90.0F - DRAG_INCLINE);
+		poseStack.rotateDegrees(Axis.YP, rock);
+		poseStack.translate(0.0F, -DRAG_COLLAR * h, 0.0F);
 	}
 
 	/**
@@ -285,6 +324,14 @@ public final class CarryPose {
 		}
 		Held held = living.getData(HELD_KEY);
 		if (held != null) {
+			if (held.hold() == Carry.DRAG) {
+				if (model instanceof HumanoidModel<?> h) {
+					draggedLimbs(h, held);
+				} else {
+					flop(model.root(), held.time() * 0.3F, 0.12F);
+				}
+				return;
+			}
 			if (held.hold() == Carry.OVERHEAD) {
 				// weightless: everything drifts slowly, as if underwater
 				flop(model.root(), held.time() * 0.45F, OVERHEAD_FLOAT + Math.min(0.3F, Math.abs(held.back()) + Math.abs(held.left())) * 0.5F);
@@ -355,6 +402,33 @@ public final class CarryPose {
 	}
 
 	/**
+	 * (0.19.52) A dragged body's limbs: the legs laid flat along the ground behind (bent at the hips against the body's
+	 * slope) and ragdolling as CarryClient kicks and swings them; the arms trailing limp out to the sides; the head lolled
+	 * back and jolting.
+	 */
+	private static void draggedLimbs(HumanoidModel<?> h, Held held) {
+		float[] drag = held.drag();
+		float flat = -DRAG_INCLINE * Mth.DEG_TO_RAD;
+		float rightLift = 0.0F, rightAside = 0.12F, leftLift = 0.0F, leftAside = -0.12F, head = 0.0F;
+		if (drag != null) {
+			rightLift = drag[1];
+			rightAside = drag[2];
+			leftLift = drag[3];
+			leftAside = drag[4];
+			head = drag[5];
+		}
+		set(h.rightLeg, flat + rightLift, 0.0F, rightAside);
+		set(h.leftLeg, flat + leftLift, 0.0F, leftAside);
+		// the arms trail along the ground beside the body, dragged loose by the legs' jolts
+		set(h.rightArm, flat * 0.8F + rightLift * 0.3F, 0.0F, DRAG_ARMS_OUT + rightAside * 0.3F);
+		set(h.leftArm, flat * 0.8F + leftLift * 0.3F, 0.0F, -DRAG_ARMS_OUT + leftAside * 0.3F);
+		set(h.head, DRAG_HEAD + head, 0.0F, (rightAside + leftAside) * 0.4F);
+		h.hat.xRot = h.head.xRot;
+		h.hat.yRot = h.head.yRot;
+		h.hat.zRot = h.head.zRot;
+	}
+
+	/**
 	 * (0.15.42) The carrier, eased: the bend to pick it up and the lift, the hold's arms over a weighted walk, the bend to set
 	 * it down (the last hold is kept on the track for that), all laid on by the hold's weight.
 	 */
@@ -396,7 +470,12 @@ public final class CarryPose {
 		f.add(PoseBlend.DROP, step * WALK_BOB);
 		f.add(PoseBlend.RIGHT_ARM, step * WALK_GIVE);
 		f.add(PoseBlend.LEFT_ARM, step * WALK_GIVE);
+		if (last.hold() == Carry.DRAG) {
+			// (0.19.52) sunk a little at the knees, hauling
+			f.add(PoseBlend.DROP, DRAG_SINK * carry);
+		}
 		float lean = switch (last.hold()) {
+			case Carry.DRAG -> DRAG_LEAN;
 			case Carry.BRIDAL, Carry.BLOCK -> LEAN_FRONT;
 			case Carry.FIREMAN, Carry.SHOULDER, Carry.PART, Carry.OVERHEAD -> 0.0F;
 			default -> LEAN_BACK;
@@ -426,6 +505,11 @@ public final class CarryPose {
 		if (holding.hold() == Carry.PART) {
 			// a head or a limb dangling from the right hand (the left is free)
 			set(h.rightArm, PART_ARM, 0.0F, PART_ARM_OUT);
+			return;
+		}
+		if (holding.hold() == Carry.DRAG) {
+			// (0.19.52) the right hand back and down at the dragged one's shoulder (the left swings free)
+			set(h.rightArm, DRAG_ARM, 0.0F, DRAG_ARM_OUT);
 			return;
 		}
 		if (holding.hold() == Carry.BLOCK) {
@@ -507,7 +591,8 @@ public final class CarryPose {
 			return null;
 		}
 		Carry.Carrying hold = carrier.getAttached(Carry.CARRYING);
-		if (hold == null) {
+		if (hold == null || hold.hold() == Carry.DRAG) {
+			// ((0.19.52) dragged: the view stays your own, lying where you're dragged)
 			return null;
 		}
 		float[] sway = CarryClient.swayOf(minecraft.player, partialTicks);
@@ -531,6 +616,10 @@ public final class CarryPose {
 			poseStack.rotateDegrees(Axis.XP, -60.0F);
 			poseStack.rotateDegrees(Axis.ZP, side * 8.0F);
 			return true;
+		}
+		if (hold == Carry.DRAG) {
+			// (0.19.52) the hand dragging is behind you, out of sight
+			return false;
 		}
 		if (hold == Carry.PART) {
 			if (!right) {

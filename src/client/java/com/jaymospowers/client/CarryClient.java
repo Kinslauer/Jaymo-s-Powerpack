@@ -20,6 +20,12 @@ import org.jspecify.annotations.Nullable;
  * Carrying, client side: every tick each carried body is put at its carrier's feet (from the carrier as this client
  * sees them, so the two move as one on every screen; a carried player's own client moves itself the same way and tells
  * the server), the loose limbs' sway is stepped, and a carried player's jump is sent as a struggle.
+ * <p>
+ * (0.19.52) A body dragged by the shoulder ({@link Carry#DRAG}) is laid on the ground behind the carrier's hand instead
+ * ({@link Carry#dragStep}, as the server does it), and its legs ragdoll as they drag ({@link Drag}): each one a sprung
+ * limb kicked up off the ground by the bumps of the ground going by (more the faster it goes), by the body dropping or
+ * rising over a step, and swung aside as the body is turned, falling back flat and bouncing off the ground; the head
+ * lolls and jolts with them.
  */
 public final class CarryClient {
 	/**
@@ -32,6 +38,34 @@ public final class CarryClient {
 	static final float SWAY_TRAIL = 1.6F, SWAY_STEP = 0.07F, SWAY_MAX = 1.3F;
 	/** The wind trail in flight: 0 at rest, 1 by {@code TRAIL_FULL_SPEED} blocks/tick. */
 	static final float TRAIL_FULL_SPEED = 1.2F;
+
+	/**
+	 * (0.19.52) The dragged legs' ragdoll: the ground's bumps kick them up (radians a tick, per block/tick of speed, on an
+	 * uneven beat that many times a block), a drop or rise of the body kicks them (per block), a turn swings them aside (per
+	 * degree); they're sprung back flat (lifted) and to lying a little apart (aside), losing this much of their swing a
+	 * tick, and bounce off the ground keeping this much. Lifted at most this far, swung aside at most this far.
+	 */
+	static final float BUMP_KICK = 0.9F, BUMP_BEAT = 7.0F, DROP_KICK = 1.6F, TURN_SWING = 0.012F;
+	static final float LEG_STIFFNESS = 0.22F, LEG_ASIDE_STIFFNESS = 0.08F, LEG_DAMPING = 0.82F, GROUND_BOUNCE = 0.3F;
+	static final float LEG_LIFT_MAX = 0.7F, LEG_ASIDE_MAX = 0.7F, LEG_SPLAY = 0.14F;
+	/** (0.19.52) The head: jolted this much by the bumps (share of a leg's kick), sprung back this hard, and its damping. */
+	static final float HEAD_JOLT = 0.5F, HEAD_STIFFNESS = 0.18F, HEAD_DAMPING = 0.8F;
+
+	/**
+	 * (0.19.52) One dragged body: where its shoulders and hips lie (and last tick's), its yaw, and its limbs' ragdoll:
+	 * {right leg lifted, right leg aside, left lifted, left aside, head} with their speeds, now and last tick.
+	 */
+	static final class Drag {
+		@Nullable Vec3 shoulders, hips;
+		Vec3 shouldersO = Vec3.ZERO;
+		float yaw, yawO;
+		final float[] limbs = new float[5], limbsO = new float[5], speed = new float[5];
+		float travelled;
+		boolean fresh = true;
+	}
+
+	/** Dragged entity id → its drag. */
+	private static final Map<Integer, Drag> DRAGS = new HashMap<>();
 
 	/** This player, if they're being carried: by whom (entity id), as the server last said; -1 when free. */
 	private static int selfCarrier = -1;
@@ -81,10 +115,15 @@ public final class CarryClient {
 				// let go (the server said so first): it's putting us down, don't pull back
 				continue;
 			}
+			if (carrying.hold() == Carry.DRAG) {
+				drag(carried, carrier);
+				continue;
+			}
 			follow(carried, carrier);
 			sway(carried, carrier);
 		}
 		SWAY.keySet().removeIf(id -> !(level.getEntity(id) instanceof Entity e) || !Carry.isCarried(e));
+		DRAGS.keySet().removeIf(id -> !(level.getEntity(id) instanceof Entity e) || !Carry.isDragged(e));
 		// one jump to get free
 		boolean jump = minecraft.options.keyJump.isDown();
 		if (jump && !jumpWasDown && localCarrier(minecraft) != null && minecraft.gui.screen() == null) {
@@ -108,6 +147,83 @@ public final class CarryClient {
 			carried.setYRot(carrier.yBodyRot);
 			carried.setXRot(0.0F);
 		}
+	}
+
+	/** (0.19.52) Lays a dragged body along the ground behind the carrier's hand, and steps its legs' ragdoll. */
+	private static void drag(Entity carried, Player carrier) {
+		Drag d = DRAGS.computeIfAbsent(carried.getId(), id -> new Drag());
+		Vec3[] lay = Carry.dragStep(carrier.position(), carrier.yBodyRot, d.shoulders, d.hips);
+		d.shouldersO = d.shoulders == null ? lay[0] : d.shoulders;
+		d.shoulders = lay[0];
+		d.hips = lay[1];
+		d.yawO = d.yaw;
+		d.yaw = Carry.dragYaw(lay[0], lay[1]);
+		if (d.fresh) {
+			d.fresh = false;
+			d.yawO = d.yaw;
+			d.limbs[0] = 0.0F;
+			d.limbs[1] = LEG_SPLAY;
+			d.limbs[3] = -LEG_SPLAY;
+		}
+		carried.setPos(lay[0].x, lay[0].y, lay[0].z);
+		carried.setOldPosAndRot(d.shouldersO, carried.getYRot(), carried.getXRot());
+		carried.setDeltaMovement(Vec3.ZERO);
+		carried.resetFallDistance();
+		if (carried instanceof LivingEntity living && !(carried instanceof Player)) {
+			living.yBodyRot = d.yaw;
+			living.yBodyRotO = d.yawO;
+			living.setYRot(d.yaw);
+		}
+		System.arraycopy(d.limbs, 0, d.limbsO, 0, d.limbs.length);
+		double dx = lay[0].x - d.shouldersO.x, dz = lay[0].z - d.shouldersO.z;
+		float moved = (float) Math.min(1.0, Math.sqrt(dx * dx + dz * dz));
+		float dy = (float) Mth.clamp(lay[0].y - d.shouldersO.y, -1.0, 1.0);
+		float turn = Mth.wrapDegrees(d.yaw - d.yawO);
+		d.travelled += moved;
+		for (int leg = 0; leg < 2; leg++) {
+			int lift = leg * 2, aside = lift + 1;
+			float side = leg == 0 ? 1.0F : -1.0F;
+			// the ground going by: an uneven beat of bumps, each leg on its own
+			float beat = d.travelled * BUMP_BEAT + leg * 2.3F;
+			float bump = Math.max(0.0F, Mth.sin(beat) * Mth.sin(beat * 2.31F + 1.1F));
+			d.speed[lift] -= bump * BUMP_KICK * moved + Math.abs(dy) * DROP_KICK * (dy > 0.0F ? 1.0F : 0.6F);
+			d.speed[lift] -= d.limbs[lift] * LEG_STIFFNESS;
+			d.speed[aside] += -turn * TURN_SWING - (d.limbs[aside] - side * LEG_SPLAY) * LEG_ASIDE_STIFFNESS;
+			d.speed[lift] *= LEG_DAMPING;
+			d.speed[aside] *= LEG_DAMPING;
+			d.limbs[lift] += d.speed[lift];
+			d.limbs[aside] = Mth.clamp(d.limbs[aside] + d.speed[aside], -LEG_ASIDE_MAX, LEG_ASIDE_MAX);
+			if (d.limbs[lift] > 0.0F) {
+				// back down flat: it bounces off the ground
+				d.limbs[lift] = 0.0F;
+				d.speed[lift] = -d.speed[lift] * GROUND_BOUNCE;
+			} else if (d.limbs[lift] < -LEG_LIFT_MAX) {
+				d.limbs[lift] = -LEG_LIFT_MAX;
+				d.speed[lift] = 0.0F;
+			}
+		}
+		// the head lolls back, jolted by the same bumps
+		float jolt = Math.max(0.0F, Mth.sin(d.travelled * BUMP_BEAT * 1.3F)) * BUMP_KICK * HEAD_JOLT * moved;
+		d.speed[4] += jolt - d.limbs[4] * HEAD_STIFFNESS;
+		d.speed[4] *= HEAD_DAMPING;
+		d.limbs[4] = Mth.clamp(d.limbs[4] + d.speed[4], -0.6F, 0.6F);
+	}
+
+	/**
+	 * (0.19.52) This frame's drag of a dragged body: {yaw (degrees), right leg lifted, right leg aside, left lifted, left
+	 * aside, head}, or null if it isn't being dragged (yet).
+	 */
+	static float @Nullable [] dragOf(Entity carried, float partialTicks) {
+		Drag d = DRAGS.get(carried.getId());
+		if (d == null || d.shoulders == null) {
+			return null;
+		}
+		float[] out = new float[6];
+		out[0] = Mth.rotLerp(partialTicks, d.yawO, d.yaw);
+		for (int i = 0; i < 5; i++) {
+			out[i + 1] = Mth.lerp(partialTicks, d.limbsO[i], d.limbs[i]);
+		}
+		return out;
 	}
 
 	/** Steps the loose limbs' swing from how the carrier moves and turns. */
