@@ -113,8 +113,11 @@ public final class CrawlPose {
 	/**
 	 * (0.18.5) Rising: the share of the rise spent pushing up, then kneeling (the rest is standing), how far the body is
 	 * turned up by the end of each (degrees: 90 stands), the knees drawn under kneeling (radians), and the hand on the knee.
+	 * (0.19.41) Andy: "the get up animation should be more gradual so you are only just getting to your feet as the
+	 * animation ends": the stages no longer ease out and pause between them, and the standing straightens steadily right
+	 * to the last tick, so they reach their feet as the bar fills, not a second before.
 	 */
-	static final float PUSH_SHARE = 0.3F, KNEEL_SHARE = 0.65F, PUSH_DEGREES = 25.0F, KNEEL_DEGREES = 60.0F, KNEEL_LEGS = -1.25F,
+	static final float PUSH_SHARE = 0.35F, KNEEL_SHARE = 0.75F, PUSH_DEGREES = 30.0F, KNEEL_DEGREES = 62.0F, KNEEL_LEGS = -1.25F,
 		KNEE_HAND_X = -0.7F;
 	/** (0.18.5) How long after rising the leftover swimming tilt is cancelled (ticks). */
 	static final long RISEN_TICKS = 30L;
@@ -286,7 +289,7 @@ public final class CrawlPose {
 		}
 		if (crawl.rise() >= 0.0F) {
 			// (0.18.5) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
-			float up = PoseBlend.smooth(crawl.rise());
+			float up = riseDegrees(crawl.rise()) / 90.0F;
 			poseStack.translate(0.0F, up, -0.3F * up);
 			poseStack.rotateDegrees(Axis.XP, riseDegrees(crawl.rise()) + Mth.sin(crawl.age() * 2.3F) * 0.6F * (1.0F - crawl.rise()));
 			return;
@@ -690,13 +693,17 @@ public final class CrawlPose {
 
 	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
 	static float riseDegrees(float t) {
+		t = Mth.clamp(t, 0.0F, 1.0F);
 		if (t < PUSH_SHARE) {
-			return PUSH_DEGREES * PoseBlend.smooth(t / PUSH_SHARE);
+			// (0.19.41) a slow start off the ground, then on at a steady pace (no ease-out: no pause before kneeling)
+			float x = t / PUSH_SHARE;
+			return PUSH_DEGREES * x * x * (2.0F - x);
 		}
 		if (t < KNEEL_SHARE) {
-			return Mth.lerp(PoseBlend.smooth((t - PUSH_SHARE) / (KNEEL_SHARE - PUSH_SHARE)), PUSH_DEGREES, KNEEL_DEGREES);
+			return Mth.lerp((t - PUSH_SHARE) / (KNEEL_SHARE - PUSH_SHARE), PUSH_DEGREES, KNEEL_DEGREES);
 		}
-		return Mth.lerp(PoseBlend.smooth((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE)), KNEEL_DEGREES, 90.0F);
+		// (0.19.41) straightening steadily to the very end: upright only as the rise finishes
+		return Mth.lerp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), KNEEL_DEGREES, 90.0F);
 	}
 
 	/**
@@ -706,8 +713,9 @@ public final class CrawlPose {
 	private static void rise(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {
 		float t = crawl.rise();
 		float press = 1.0F - PoseBlend.seg(t, PUSH_SHARE * 0.7F, KNEEL_SHARE);
-		float kneel = PoseBlend.bump(t, PUSH_SHARE * 0.6F, PUSH_SHARE + 0.1F, KNEEL_SHARE, 1.0F);
-		float stand = PoseBlend.seg(t, KNEEL_SHARE, 1.0F);
+		// (0.19.41) the knees and arms straighten steadily through the standing, done only at the end
+		float stand = Mth.clamp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), 0.0F, 1.0F);
+		float kneel = PoseBlend.seg(t, PUSH_SHARE * 0.6F, PUSH_SHARE + 0.1F) * (1.0F - stand);
 		float shake = Mth.sin(crawl.age() * 2.3F) * 0.05F * (1.0F - stand);
 		if (rightArm) {
 			f.set(PoseBlend.RIGHT_ARM, Mth.lerp(press, Mth.lerp(stand, KNEE_HAND_X, 0.0F), PRESS_X), 0.0F, Mth.lerp(press, 0.1F, PRESS_OUT));
