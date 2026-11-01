@@ -4776,3 +4776,22 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
+
+- **0.19.28, training takes longer and every milestone lands harder (Kingdoms 0.7.464):** Andy: "further emphasize
+  training your abilities across the whole pack, that means a longer grind but every milestone should feel more rewarding",
+  then "new training items, like weighted clothing costumes for z fighters/gravity, meditating in the cold for wind".
+  - `core/Milestones`: one fanfare for every progression step (title + subtitle, a layered chord that grows with the step,
+    sparks in the track's colour that people nearby see, a screen kick, a gold chat line). Sizes MINOR/MAJOR/GRAND.
+  - `core/Mastery`: abilities cost 60, 90, 120, 150 (`UNLOCK_AT` {0,60,150,270,420}; was flat 60). Old saves keep their
+    abilities and start at the new floor. Past the four abilities, rank points (`RANK_POINTS`) climb five Mastery ranks,
+    Adept to Paragon (`Training.RANK_AT`, about 8-24 days each from time alone), each a permanent stat jump in the power's
+    direction (`Training.PERKS`, xN at rank N). The powers screen shows the rank and the bar to the next.
+  - `core/Training`: meditating/shadowboxing in a power's training spot pays twice as often (`SPOT_PACE`) and refills the
+    practice allowance a point every 30 s (`SPOT_ALLOWANCE_TICKS`): Wind cold or above y 150, Darktide water/rain at night,
+    Cryo ice/snow/powder snow/cold, Web 3+ cobwebs near, Smoke a lit campfire near, Chrono holding a Training Hourglass,
+    Resonance holding a Tuning Fork or by a bell, Arsenal a weapon in hand, Gravity and Z Fighters in a Weighted Gi (or heavy
+    weights). New items: Weighted Gi (chest; slower, lower jumps; Z Fighters train x1.5 on top of the ankle weights; Kingdoms
+    Strength experience x1.5), Training Hourglass, Tuning Fork, with recipes.
+  - Rig: every experience source halved (`RigLevels`), levels play the fanfare.
+  - Kingdoms 0.7.464 (its MODLOG): skill levels take twice the experience (saved experience doubled once, `Skills.PACE`),
+    every 5th level a bonus point, the fanfare on each level.

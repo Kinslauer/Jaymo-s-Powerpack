@@ -43,10 +43,21 @@ public final class Mastery {
 	public static final AttachmentType<Integer> POINTS = AttachmentRegistry.create(JaymosPowers.id("mastery"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
+	/**
+	 * (0.19.28) Rank points earned once every ability is learned: they climb the Mastery ranks ({@link Training#RANK_AT},
+	 * Adept to Paragon), each a permanent stat jump.
+	 */
+	public static final AttachmentType<Integer> RANK_POINTS = AttachmentRegistry.create(JaymosPowers.id("mastery_rank"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+
 	/** Every ability. */
 	public static final int ALL = 4;
-	/** Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order): 60 an ability. */
-	public static final int[] UNLOCK_AT = {0, 60, 120, 180, 240};
+	/**
+	 * Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order). (0.19.28)
+	 * Each costs more than the last: 60, 90, 120, 150 (3, 4.5, 6 and 7.5 days from time alone; a third of that at the
+	 * most with practice). Saves from the flat 60-an-ability scale keep what they learned and start at the new floor.
+	 */
+	public static final int[] UNLOCK_AT = {0, 60, 150, 270, 420};
 	/** One point per this many ticks of survival play with the power: 60 points (an ability) in 3 in-game days. */
 	public static final int TICKS_PER_TIME_POINT = 1200;
 	/**
@@ -116,6 +127,33 @@ public final class Mastery {
 		return points == null ? 0 : points;
 	}
 
+	/** (0.19.28) Rank points past the four abilities. */
+	public static int rankPoints(Player player) {
+		Integer points = player.getAttached(RANK_POINTS);
+		return points == null ? 0 : points;
+	}
+
+	/** (0.19.28) The Mastery rank (0 none, 1 Adept ... 5 Paragon); always 0 until every ability is learned. */
+	public static int rank(Player player) {
+		return unlocked(player) < ALL ? 0 : Training.rankFor(rankPoints(player));
+	}
+
+	/** (0.19.28) Progress toward the next rank (0-1), or -1 at Paragon. Works on both sides. */
+	public static float rankProgress(Player player) {
+		int rank = rank(player);
+		if (rank >= Training.RANKS) {
+			return -1.0F;
+		}
+		int from = Training.RANK_AT[rank];
+		int to = Training.RANK_AT[rank + 1];
+		return Mth.clamp((rankPoints(player) - from) / (float)(to - from), 0.0F, 1.0F);
+	}
+
+	/** Nothing left to learn: every ability and the last rank. */
+	private static boolean done(Player player) {
+		return unlocked(player) >= ALL && rank(player) >= Training.RANKS;
+	}
+
 	/** Progress toward the next unlock (0-1), or -1 when everything is unlocked. Works on both sides. */
 	public static float progress(Player player) {
 		int unlocked = unlocked(player);
@@ -131,12 +169,14 @@ public final class Mastery {
 	static void startFresh(ServerPlayer player) {
 		player.setAttached(UNLOCKED, 0);
 		player.setAttached(POINTS, 0);
+		player.removeAttached(RANK_POINTS);
 	}
 
 	/** Everything unlocked (creative pick, /power set, losing the power). */
 	static void unlockAll(ServerPlayer player) {
 		player.removeAttached(UNLOCKED);
 		player.removeAttached(POINTS);
+		player.removeAttached(RANK_POINTS);
 	}
 
 	/** {@code /power level}: set how many abilities are unlocked, with the points to match. */
@@ -156,7 +196,7 @@ public final class Mastery {
 	}
 
 	static void tick(ServerPlayer player) {
-		if (unlocked(player) >= ALL || player.isCreative() || player.isSpectator() || !player.isAlive()) {
+		if (done(player) || player.isCreative() || player.isSpectator() || !player.isAlive()) {
 			return;
 		}
 		if (player.tickCount <= 0) {
@@ -193,7 +233,7 @@ public final class Mastery {
 
 	/** An unlocked ability (or the starter) was used: that's practice (rate-limited). Powers with passive starters call it too. */
 	public static void used(ServerPlayer player) {
-		if (unlocked(player) >= ALL || player.isCreative()) {
+		if (done(player) || player.isCreative()) {
 			return;
 		}
 		long now = player.level().getGameTime();
@@ -207,7 +247,7 @@ public final class Mastery {
 
 	/** Practice away from the abilities (meditating, sparring; see {@link Meditate}): {@code amount} points, as the allowance lets. */
 	public static void practice(ServerPlayer player, int amount) {
-		if (unlocked(player) >= ALL || player.isCreative() || Powers.of(player) == null) {
+		if (done(player) || player.isCreative() || Powers.of(player) == null) {
 			return;
 		}
 		practise(player, amount);
@@ -218,20 +258,39 @@ public final class Mastery {
 	 * killing them, {@code core/gifted/GiftedAI}). Nothing once every ability is learned, in creative, or without a power.
 	 */
 	public static boolean grant(ServerPlayer player, int amount) {
-		if (unlocked(player) >= ALL || player.isCreative() || Powers.of(player) == null) {
+		if (done(player) || player.isCreative() || Powers.of(player) == null) {
 			return false;
 		}
 		addPoints(player, amount);
 		return true;
 	}
 
+	/** (0.19.28) Meditating in a training spot ({@link Training#spot}): one more practice point allowed. */
+	static void spotAllowance(ServerPlayer player) {
+		allow(player, 1);
+	}
+
 	static void forget(Player player) {
 		LAST_USE_CREDIT.remove(player.getUUID());
+		Training.forget(player.getUUID());
 		ALLOWANCE.remove(player.getUUID());
 	}
 
 	private static void addPoints(ServerPlayer player, int amount) {
 		int unlocked = unlocked(player);
+		if (unlocked >= ALL) {
+			// (0.19.28) past the four abilities: the Mastery ranks
+			int was = rank(player);
+			player.setAttached(RANK_POINTS, Math.min(Training.RANK_AT[Training.RANKS], rankPoints(player) + amount));
+			int now = rank(player);
+			Power power = Powers.of(player);
+			if (power != null) {
+				for (int r = was + 1; r <= now; r++) {
+					Training.announceRank(player, power, r);
+				}
+			}
+			return;
+		}
 		// older saves earned abilities on a quicker scale: start them at the floor of what they already have
 		int floor = unlocked < ALL ? UNLOCK_AT[unlocked] : 0;
 		int points = Math.max(points(player), floor) + amount;
@@ -256,12 +315,14 @@ public final class Mastery {
 		String line = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key." + key.id();
 		Component ability = Component.translatable(line + ".name").withStyle(style -> style.withColor(TextColor.fromRgb(power.color())));
 		Component full = Component.translatable(line);
-		player.connection.send(new ClientboundSetTitlesAnimationPacket(8, 50, 15));
-		player.connection.send(new ClientboundSetTitleTextPacket(Component.translatable("message.jaymospowers.unlocked")));
-		player.connection.send(new ClientboundSetSubtitleTextPacket(ability));
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.unlocked_chat", Component.keybind("key.jaymospowers." + key.id()),
-				ability.copy().withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(full))), Component.keybind("key.jaymospowers.menu"))
-			.withStyle(ChatFormatting.GOLD));
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F);
+		// (0.19.28) the pack's milestone fanfare; the last ability is the grandest
+		boolean last = unlocked(player) >= ALL;
+		Component chat = Component.translatable("message.jaymospowers.unlocked_chat", Component.keybind("key.jaymospowers." + key.id()),
+				ability.copy().withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(full))), Component.keybind("key.jaymospowers.menu"));
+		if (last) {
+			chat = chat.copy().append(" ").append(Component.translatable("training.jaymospowers.all_learned", power.name()));
+		}
+		Milestones.fanfare(player, Component.translatable(last ? "training.jaymospowers.mastered_title" : "message.jaymospowers.unlocked"), ability, chat,
+			power.color(), last ? Milestones.GRAND : Milestones.MAJOR);
 	}
 }

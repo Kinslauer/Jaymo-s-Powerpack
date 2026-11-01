@@ -13,15 +13,17 @@ import net.minecraft.world.item.ItemStack;
  * alive after it). Each new level it remarks on in its own voice and names what it can do now.
  */
 public final class RigLevels {
+	// (0.19.28) every source halved (the pack-wide training pass): the levels take about twice as long, and saved
+	// experience keeps the level it had
 	/** Kills: a hostile, a player, anything with at least {@link #BOSS_HEALTH} max health. Other kills teach nothing. */
-	static final int KILL_XP = 5, KILL_PLAYER_XP = 25, KILL_BOSS_XP = 120;
+	static final int KILL_XP = 3, KILL_PLAYER_XP = 12, KILL_BOSS_XP = 60;
 	static final float BOSS_HEALTH = 150.0F;
 	/** Stripping a wreck. */
-	static final int SALVAGE_XP = 40;
-	/** Time worn: this much every {@link #WORN_EVERY} ticks (a minute: 60 an hour). */
-	static final int WORN_XP = 1, WORN_EVERY = 1200;
+	static final int SALVAGE_XP = 20;
+	/** Time worn: this much every {@link #WORN_EVERY} ticks (two minutes: 30 an hour). */
+	static final int WORN_XP = 1, WORN_EVERY = 2400;
 	/** A danger warning proved right. */
-	static final int WARNING_XP = 8;
+	static final int WARNING_XP = 4;
 	/** Where the experience stops counting (well past the top level). */
 	static final int XP_CAP = 100000;
 
