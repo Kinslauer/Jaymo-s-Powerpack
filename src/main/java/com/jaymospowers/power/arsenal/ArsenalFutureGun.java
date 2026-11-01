@@ -17,8 +17,8 @@ import org.jspecify.annotations.Nullable;
  * instead of your pinned weapon or a stash relic, and nothing without TaCZ.
  */
 final class ArsenalFutureGun {
-	/** The chance a Reach brings a handgun from the future instead of its weapon (1 pull in 40). */
-	static final float CHANCE = 1.0F / 40.0F;
+	/** The chance a Reach brings a handgun from the future instead of its weapon (1 pull in 600). */
+	static final float CHANCE = 1.0F / 600.0F;
 
 	private ArsenalFutureGun() {
 	}
