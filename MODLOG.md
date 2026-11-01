@@ -4692,7 +4692,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
 
-- **0.19.13, executed by monsters:** lie downed where a hostile can see you (5 s after you fall) and the nearest one
+- **0.19.15, Kingdoms 0.7.456:** a tree felled into another tree no longer stands back up: it glances off to a clear
+  side and falls on, or, boxed in, leans a moment and breaks apart.
+
+- **0.19.16, executed by your enemies:** lie downed where a hostile can see you (5 s after you fall) and the nearest one
   within 16 blocks leaves its fight, walks over and finishes you, filmed for you: black bars, a low tilted shot of it
   standing over you raising its weapon, then the blow and cuts round the killer over your body before the death screen
   (players nearby see the bars). Its move depends on what it is and holds: an axe takes your head (vindicators), a blade
