@@ -71,6 +71,14 @@ public final class KitchenCompat {
 	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> HEAVY_CORPSES = net.minecraft.tags.TagKey.create(
 		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "heavy_corpses"));
 
+	/** (0.19.32) A robot or golem (Kitchen's machine corpses, heavy ones included): nothing in it to eat or tear up. */
+	public static boolean machine(net.minecraft.world.entity.@Nullable EntityType<?> type) {
+		return type != null && (type.builtInRegistryHolder().is(MACHINE_CORPSES) || heavy(type));
+	}
+
+	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> MACHINE_CORPSES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "machine_corpses"));
+
 	/** Someone (anyone) is carrying this corpse right now. */
 	static boolean isCarried(Entity entity) {
 		return LOADED && Kitchen.carried(entity);
@@ -136,7 +144,7 @@ public final class KitchenCompat {
 	 * rough job, about half its loot. Returns whether it was.
 	 */
 	static boolean butcherRough(Entity entity) {
-		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
+		return LOADED && !isHeavy(entity) && !machine(Kitchen.sourceType(entity)) && Kitchen.butcherRough(entity);
 	}
 
 	/** Kitchen's tag for a body that leaves nothing behind when it dies (read as it would swap the dying mob for its corpse). */

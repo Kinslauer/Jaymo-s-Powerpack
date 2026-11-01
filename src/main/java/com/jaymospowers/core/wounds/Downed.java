@@ -488,7 +488,8 @@ public final class Downed {
 
 	/** Down they go; {@code source}: what felled them (null: nothing did, a knock-out); {@code keepHealth}: (0.14.4) a knock-out takes none. */
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
-		boolean crawler = !(entity instanceof Player)
+		// ((0.19.32) a machine never crawls: it shorts out where it fell, Malfunction)
+		boolean crawler = !(entity instanceof Player) && !Malfunction.is(entity)
 			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
 		entity.removeAttached(TOO_HURT);
 		entity.removeAttached(RISING);
