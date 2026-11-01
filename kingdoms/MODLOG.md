@@ -8105,7 +8105,7 @@ rollin effect happens first, then you appear in the skybox". `spirits/GrueTrial`
   on (mob griefing on). Walking into trees still knocks them over as before. Powers' Great Apes and Towerback do the same
   through `core/GiantTrample`.
 
-## 0.7.471: blood-thirst veins creep in from the screen's edges (pack 0.19.43)
+## 0.7.471: blood-thirst veins creep in from the screen's edges (pack 0.19.44)
 - Andy: "veins should encroach on your screen the thirstier you get". The pack has two thirsts (Kitchen's water thirst and a
   vampire's blood thirst); the veins are the vampire's. New client `ThirstVeins`: dark veins grow in from the corners and edges
   as the pallor rises (`Vampires.pallor`: from 5 minutes after a drink to full at 2 days), reaching about two thirds of the way

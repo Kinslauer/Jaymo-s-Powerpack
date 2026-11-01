@@ -1253,7 +1253,7 @@ buffs are Powers' own effects, found by id when first needed: `Dish.Buff` now ta
 constructor with a Holder is kept), and falls back to Luck if Powers is missing. Each recipe loads only when its items exist
 (`fabric:load_conditions`). Art, models, recipes and lang come from Powers' `tools/gen_back_home.py`. Compile-checked; not seen in game.
 
-## 0.5.43: faint veins when you need water (pack 0.19.43)
+## 0.5.43: faint veins when you need water (pack 0.19.44)
 Andy, after the vampire's blood-thirst veins (Kingdoms 0.7.471): water thirst too, "smaller less emphasized, just to show the
 user they need water". New client `DryVeins`: at `FROM` (8) water or less, thin dusky veins show at the screen's edges and
 corners, reaching a little further in and showing a little more as the water runs out (opacity 0.35 to 0.65, three short
