@@ -141,6 +141,10 @@ public final class ClientRagdolls {
 
 	/** A body's points as sent. A body seen for the first time (or changed shape) starts there, not from nothing. */
 	public static void put(int id, RagdollSnapshot snapshot) {
+		if (DragSim.active(id)) {
+			// (0.5.44) being dragged: this client works it out from the hand it draws
+			return;
+		}
 		Track track = TRACKS.get(id);
 		if (track == null || !snapshot.fits(track.rig)) {
 			track = new Track(snapshot.rig());

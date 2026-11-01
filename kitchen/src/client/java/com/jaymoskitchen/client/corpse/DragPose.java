@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.39) A player dragging a body reaches back to it: each holding arm (the right alone for a small one, both for a cow
- * or a bear) points at the leg it has hold of, wherever the ragdoll has swung it, and the body leans into the pull with
+ * or a bear) points at the leg in hand, wherever the ragdoll has swung it, and the body leans into the pull with
  * a shortened stride. Worked out in {@code AvatarRendererMixin} from the body's points this frame; applied after the
  * model animates, like {@link CarryPose}.
  */
@@ -49,8 +49,9 @@ public final class DragPose {
 		double forwardX = -Mth.sin(yaw), forwardZ = Mth.cos(yaw);
 		double rightX = -Mth.cos(yaw), rightZ = -Mth.sin(yaw);
 		float scale = state.scale;
+		// (0.5.44) one point held, by one hand or by both together
+		track.point(CorpseEntity.gripPoint(track.rig), partialTicks, at, 0);
 		for (int h = 0; h < hands; h++) {
-			track.point(CorpseEntity.gripPoint(track.rig, h), partialTicks, at, 0);
 			double side = (h == 0 ? 1.0 : -1.0) * CorpseEntity.DRAG_SHOULDER_SPREAD * scale;
 			double dx = at[0] - (state.x + rightX * side);
 			double dy = at[1] - (state.y + CorpseEntity.DRAG_SHOULDER * scale);
