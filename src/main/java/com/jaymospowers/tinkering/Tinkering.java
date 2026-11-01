@@ -105,6 +105,9 @@ public final class Tinkering {
 	/** (0.18.56) Star metal: the ore a fallen star leaves (Jaymo's Kingdoms' falling stars place it), and the ingot it melts to and casts. */
 	public static Block STAR_METAL_ORE;
 	public static Item STAR_METAL_INGOT;
+	/** (0.18.102) Bog iron: its ingot (cast from Kingdoms' raw bog iron, melted) and the armour forged from it (helmet, chestplate, leggings, boots). */
+	public static Item BOG_IRON_INGOT;
+	public static final Item[] BOG_IRON_ARMOUR = new Item[4];
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
 	/** (0.18.52) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
@@ -218,13 +221,19 @@ public final class Tinkering {
 			output.accept(STEEL_BLOCK);
 			output.accept(STEEL_BLEND);
 			output.accept(STAR_METAL_ORE);
+			output.accept(BOG_IRON_INGOT);
+			for (Item piece : BOG_IRON_ARMOUR) {
+				output.accept(piece);
+			}
 			CASTS.forEach((shape, cast) -> {
 				if (shape != CastItem.Shape.WEAPON) {
 					output.accept(cast);
 				}
 			});
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
-				output.accept(WeaponParts.cast(kind));
+				if (!WeaponParts.king(kind)) {
+					output.accept(WeaponParts.cast(kind));
+				}
 			}
 			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
 				WeaponParts.heads(kind).forEach(output::accept);
@@ -288,6 +297,7 @@ public final class Tinkering {
 		}
 		registerSteel();
 		registerStarMetal();
+		registerBogIron();
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}
@@ -327,6 +337,41 @@ public final class Tinkering {
 		TinkerMaterial.own(TinkerMaterial.STAR_METAL, 1, STAR_METAL_INGOT);
 		Melting.starMetal(STAR_METAL_ORE.asItem());
 	}
+
+	/**
+	 * (0.18.102, Havens patch 2) Bog iron: Jaymo's Kingdoms' swamp ore, which mines only once an Ogre King has fallen. Its raw lumps
+	 * melt in the smeltery (Kingdoms' data file), and the ingot casts and forges like any metal; its armour is hammered out on
+	 * the Smithing Anvil ({@code ArmourForging}). No grid or furnace recipe.
+	 */
+	private static void registerBogIron() {
+		BOG_IRON_INGOT = item("bog_iron_ingot", Item::new, Function.identity());
+		ALLOY_INGOTS.put(Molten.BOG_IRON, BOG_IRON_INGOT);
+		TinkerMaterial.own(TinkerMaterial.BOG_IRON, 1, BOG_IRON_INGOT);
+		java.util.Map<net.minecraft.world.item.equipment.ArmorType, Integer> defense = new EnumMap<>(net.minecraft.world.item.equipment.ArmorType.class);
+		net.minecraft.world.item.equipment.ArmorType[] types = {net.minecraft.world.item.equipment.ArmorType.HELMET,
+			net.minecraft.world.item.equipment.ArmorType.CHESTPLATE, net.minecraft.world.item.equipment.ArmorType.LEGGINGS,
+			net.minecraft.world.item.equipment.ArmorType.BOOTS};
+		int[] points = BOG_IRON_DEFENSE;
+		for (int i = 0; i < 4; i++) {
+			defense.put(types[i], points[i]);
+		}
+		defense.put(net.minecraft.world.item.equipment.ArmorType.BODY, points[1]);
+		net.minecraft.tags.TagKey<Item> repairs = net.minecraft.tags.TagKey.create(Registries.ITEM, JaymosPowers.id("repairs_bog_iron_armor"));
+		ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> asset = ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+			JaymosPowers.id("bog_iron"));
+		net.minecraft.world.item.equipment.ArmorMaterial material = new net.minecraft.world.item.equipment.ArmorMaterial(BOG_IRON_DURABILITY, defense, 7,
+			net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_IRON, BOG_IRON_TOUGHNESS, BOG_IRON_KNOCKBACK, repairs, asset);
+		String[] names = {"helmet", "chestplate", "leggings", "boots"};
+		for (int i = 0; i < 4; i++) {
+			net.minecraft.world.item.equipment.ArmorType type = types[i];
+			BOG_IRON_ARMOUR[i] = item("bog_iron_" + names[i], Item::new, p -> p.humanoidArmor(material, type));
+		}
+	}
+
+	/** (0.18.102) Bog iron armour: durability multiplier (iron 15), points (helmet, chestplate, leggings, boots), toughness, knockback resistance. */
+	static final int BOG_IRON_DURABILITY = 18;
+	static final int[] BOG_IRON_DEFENSE = {2, 6, 5, 2};
+	static final float BOG_IRON_TOUGHNESS = 0.5F, BOG_IRON_KNOCKBACK = 0.05F;
 
 	/** (0.8.111) Silver ore in the Overworld, smelted like iron or melted (doubled) in the smeltery; a metal for parts. */
 	private static void registerSilver() {

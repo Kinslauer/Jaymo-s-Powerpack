@@ -181,6 +181,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/battlesign/handle_star_metal"
             }
+          },
+          {
+            "when": "bog_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_bog_iron"
+            }
           }
         ],
         "fallback": {
@@ -371,6 +378,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_broken_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -556,6 +570,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_bog_iron"
               }
             }
           ],

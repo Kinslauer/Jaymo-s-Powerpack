@@ -7469,7 +7469,502 @@ does, so MCA's clothing, hair and face layers stay off a Bio-built player either
   woken by a monster that is after them or can see the bed (not caged or no-AI ones behind walls), never in creative; the
   rags line says what still comes (the Journal and whatever the aim is about).
 
-## 0.7.459: Healers, the infirmary cot and the shrine
+## 0.7.421: the rubber swallow reaches from your own hand (pack 0.18.86)
+- Andy: "the rubber swallow should animate from the outstretched hand in first person". While a Rubber-folk swallows a
+  foe, their first-person main arm reaches out ahead over 6 ticks (bare, the held item hidden; no swing), turned about the
+  shoulder so the fist sits a little right of and below the middle of the screen, trembling with the pulses
+  (`RubberEngulf.firstPersonReach`, `RubberReachFirstPersonMixin`).
+- The rope now leaves that fist: where the game draws it (`RubberFistMixin` on `AvatarRenderer.renderHand`) is kept in
+  view space and carried into the world at the same spot on screen through the world's own field of view (the hand is
+  drawn at a fixed 70), so it lines up at any FOV. Third person and other players are unchanged.
+- Compile-checked only; not played.
+
+## 0.7.423: Rubber-folk melt onto a self-destruct's target (pack 0.18.94)
+- Andy: "rubber uses the skin colored blob animation to kind of melt onto the grab target". While a Rubber-folk gathers
+  Jaymo's Powers' Self-Destruct, `RubberEngulf` reads Powers' `ZFighterSelfDestruct.HOLDING` (by reflection) and draws the
+  swallow's rope and skin on the held foe, run up to sealed (`MELT`, 0.58 of the way) and held there wobbling, never
+  gulped and with no swell after. The first-person reaching arm follows it too.
+- Compile-checked only; not played.
+
+## 0.7.424: Questioning the downed, and tidings on town boards (pack 0.18.97)
+- Andy: "you can question downed humanoids, unlocked in the tree"; "it should be early on the tree, and available in
+  stealth and strength as well". Perks `ROUGH_QUESTIONS` (Strength tier 1), `QUIET_WORD` (Stealth tier 1),
+  `INTERROGATION` (Will tier 8, level 2). `Questioning` runs the talk: MCA's main menu shows only `jaymoskingdoms_q_*`
+  answers while you hold someone (leader, home, nearby, threaten, stare, swear, spare, finish); whether they talk is by
+  temperament, a threat may break them; Rough Questions doubles it and adds a try, Quiet Word's choke leaves no memory of
+  you and asks who's about, Interrogation stops lies and adds the stare and the oath. Recollections `QUESTIONED`,
+  `SPARED`, `SWORE`. `playerAnswer` gives Powers a held player's realm truths (or a lie).
+- Andy: "tidings can now be nailed this way and posted on boards in towns ... you may just not hear of some news". World
+  news is kept (`Post.POSTED`, 3 days) and pinned on town boards as "Word from abroad" (`town|tidings.<id>|<board>|t`),
+  each town hearing about 70% of it; a bird brings a piece only when it names you or your realm (`Post.concerns`).
+## 0.7.425: the tribes and their grudge (Havens patch 1)
+- `Tribes`: every goblin village and orc camp belongs to its brood's tribe in a 1536-block region; the oldest camp is the
+  king's seat. One grudge per tribe per player (0-100): a kill +4, a king or warchief +30, the pedlar +25, the rival
+  brood's folk in the same country -2, and -3 a day. At 60 a hunting band (3-7, from the nearest camp) musters 40-56
+  blocks off and follows you for five minutes (`HUNTER_TAG`, `hunterStep`; strays from a restart are discarded).
+- Tribute ("Offer tribute" on a chief or the pedlar while you owe a grudge): 3 emeralds for each 10 of grudge. Truce
+  token (`truce_token`, from the pedlar, 16 emeralds): raised in a tribe member's sight, it wipes the grudge and gives
+  a 3-day truce (`McaCompat.foe` spares you unless you strike them).
+- Every chief's store gets a map to its king's seat once (`MAPPED`).
+- `Pedlars`: a goblin trader with two orc guards, met out in a tribe's country (4% per 10 s, once a day per player),
+  walking camp to camp. Sells three odd wares, a goblin mask, a seat map, a truce token and the bestiary; tells you the
+  tribe's mood ("How does the tribe take to me?"); his party strikes no one who hasn't struck it, and no greenskin sets
+  on it. Not saved.
+- `Bestiary` (Greasy Bestiary): a page per goblin/orc kind, a smudge until learned; a kill writes how they fight, one
+  talking under questioning writes their ways. Hints only.
+- Questioning a greenskin: "What does your king think of me?" (`Questioning.MOOD`).
+- Compile-checked only; not played.
+
+## 0.7.426: Sure Footing leaves the tree (pack 0.18.99)
+- Andy: give everyone the landing roll. Sure Footing is gone from Stealth's Freerun page; ranks saved under
+  `sure_footing` count for nothing, so their points come back. Bar Swing moved up into its slot (needs Climber now).
+  Freerunner's text mentions the air flip, Meditation's the sit (sneak and look down) and the Shadowbox key.
+- Compile-checked only; not played.
+
+## 0.7.427: the ogre tribe, bog iron and crippling blows (Havens patch 2, first half)
+- `OgreHolds`: up to 3 ogre outposts per region (1536 blocks) in plains and swamps, rising 64-96 blocks from a player
+  away from settlements: a broken ring of mossy stones, a log lean-to, a bone pile, a fire and a chest of scraps; led by a
+  two-headed brute (plains) or a cave ogre (swamps) with two ogres. Once a region has had an outpost, its ogre hold may
+  rise: a stone-walled yard with a throne and a hoard chest, the Ogre King on it (320 health, 1.7x size) and two
+  two-headed King's Guards (1.3x) at the gate. Saved as `ogre_sites`.
+- The king in three phases: fists and smash; at two thirds a roar, two ogres called from the hold, Speed and Strength;
+  at a third he hurls boulders (10 damage) every 2.5 s at a foe out of reach. His fall clears his region's outposts
+  (their ogres go), goes on the news, and the first king to fall frees bog iron.
+- `BogIron`: lumps of bog iron ore in the mud and clay under new swamp chunks. Until an Ogre King has fallen it crumbles
+  to rust when mined; after, it drops raw bog iron (1-2), which smelts to iron and counts as raw iron for Tinkers.
+- `CripplingBlows`: a hit of 6+ from an ogre (18%, the king 30%), a warchief (22%) or a raging grunt (10%) may break a
+  leg (Powers' `Wounds.breakPart`, through `PowersCompat.breakLeg`).
+## 0.7.428: Player temperaments (pack 0.18.101)
+- Andy: the starting questionnaire gives players a temperament they can't change. `PlayerTemperaments` works it out
+  from the life story (who raised you and the childhood weigh 2, some roads 1; ties go to the childhood), sets it in
+  the villagers' own `Temperaments.TEMPERAMENT` (synced, so Powers draws it), and says it once in chat ("Your nature is
+  set for good"). Old players get theirs on next join; it's set again after death. Players aren't humanoids, so none
+  of the villagers' temperament rules touch them.
+- Compile-checked only; not played.
+
+## 0.7.429: the king's guard and the trials (Havens patch 2, second half; pack 0.18.102)
+- `Trials`: every goblin king and orc warchief keeps two guards at his door (the biggest of their kind: 1.35x size, twice
+  the health), replaced a day after one falls. "Ask to see the king" on one of them sets the trial:
+  - orcs, the pit fight: their champion (1.25x, 60 health) in the fighting pit until one of you is down (3 minutes);
+  - goblins, the trap hall: from the door to the throne within 60 s while darts, caltrops and nets go off round you.
+  Hold out an empty hand to an Ogre King's guard for the stone-lifting brawl: hold sneak by the guard for 5 s, then
+  knock him to half with bare fists (a weapon ends it). The rest of the camp holds off during a trial, and nobody dies
+  of one (below 5 health you're beaten and let go).
+- Passing wipes the tribe's grudge with a 3-day truce (for ogres: the region's ogres leave you be for 3 days,
+  `OgreHolds.TRUCE`), and the king sends 8 emeralds. A tribe sets no other trial for 3 days.
+- Bog iron no longer smelts to iron: it melts into Powers' bog iron (`tinkering_melting/bog_iron.json`).
+## 0.7.430: Tideborn swim with a dolphin's grace (pack 0.18.104)
+- Andy: only Tideborn (and Powers' swimming Xeno forms) get the faster swim. A sprint-swimming Tideborn has Dolphin's
+  Grace (no particles), on top of their water movement bonus. Powers' Motion patch 2.
+- Compile-checked only; not played.
+## 0.7.431: captains (Havens patch 3; pack 0.18.106)
+- `Captains`: every goblin and orc tribe keeps a ladder of 4 named captains under its king (up to 7; ranks 1 to 5), each
+  with a byname, gear and size by rank, posted to one of its camps (shown when a player comes within 80 blocks), or at
+  the head of a hunting band. A new one rises a day to fill the ladder.
+- 2 to 4 traits each: strengths (thick hide, arrow-proof, fire-born, heavy-handed (cripples at 40%), hard to kill,
+  blood rage, venomous, rallying), weaknesses (soft to arrows, glass jaw (blunt and fists), blind side, burns easily)
+  and fears (fire, beasts and riders, his own blood: he runs for 5 s).
+- Learning them: "What does your captain fear?" when questioning one of the tribe (a proud or spiteful one may lie,
+  unless you have Interrogation); a chief's orders in each camp's store (read the page); the pedlar's rumours ("Heard
+  anything of the captains?", 2 emeralds). What you know is in your journal.
+- Meetings remembered: the first time a captain sees you, a short letterbox film (Powers) and his name; later, a line
+  about how it went last time (you ran, beat him, spared or questioned him, or he killed you).
+- A captain who kills a player climbs a rank, gains a strength and wears their head (it drops when he dies); one of the
+  tribe's common folk who does it becomes a captain. He's that player's sworn foe in their journal until he falls.
+- Andy: a short scene before you respawn. Your camera cuts round your killer (Powers 0.18.106's film after death, the
+  death screen waiting) as he stands over your body and gloats; halfway, he roars, puts your head on, and his own
+  cheer his name.
+- When a king's camp falls and another becomes the seat, the strongest captain takes it as its chief. Fallen captains
+  stay fallen for now (patch 4 brings some back). Captains' deaths, rises and crownings go on the post.
+- Compile-checked only; not played.
+## 0.7.432: captains living their lives (Havens patch 4, first half)
+- **They come back:** a captain killed without being finished (killed while downed, or beheaded) or burned comes back
+  75% of the time, 1 to 3 days later, at one of his tribe's camps. He's missing whatever parts he lost (Powers'
+  limbs), he's your sworn foe if you killed him, and the post says he's been seen again. His first words are about it.
+- **Duels, ambushes and feasts:** once a day, in a tribe whose seat is within 2000 blocks of a player, two of its captains
+  may duel at a camp, one may ambush another, or one holds a feast. You hear of it on the post when it's set and when it's
+  settled at dawn (the winner or feaster climbs a rank; the loser falls, sometimes to come back). Kill one of them first
+  and it never happens.
+- **Blood brothers and avengers:** a new captain has a blood brother among the standing ones a quarter of the time. A
+  brother within 40 blocks joins his brother's fight with you, and when one falls to a player, the other climbs a rank,
+  gains a strength and swears to avenge him (with no brother, another of the tribe may, 30%).
+- **Spared or shamed:** stare a downed captain down (Stare Down). With an empty hand you spare him: he gets up and runs,
+  and remembers it. With anything in hand you shame him before his own: down a rank, a strength lost, a new fear, "the
+  Shamed" for a byname, and he gets up and runs. The post hears of it.
+- **Raised (Andy):** a captain who would have stayed dead (finished, burned, anything but a chief) still comes back 6% of
+  the time, raised by a necromancer or corrupted magic. He's Deathless: every fear gone, a rank up, half again the
+  health, +3 damage, a touch bigger, soul smoke drifting off him. Rarer, much harder. Deathless is never rolled.
+- Compile-checked only; not played.
+
+## 0.7.433: captains challenged, turned and crowned (Havens patch 4, second half)
+- **Challenges:** sneak and use a sheet of paper on anything within 32 blocks of a tribe's goblin village or orc camp to
+  nail up a challenge for its strongest captain there (the post hears of it). Come within 24 blocks in the next day and he
+  steps out to fight you alone while his camp stands back. Kill him and he stays dead (bar the raised), and the tribe's
+  grudge falls by 15. Run (56 blocks) or fall and he climbs a rank. Never come and he calls you a coward on the post.
+- **Death threats:** a captain who swears to have your head (a coward's challenger, a turncoat, one back from the dead you
+  killed) has his threat nailed up for the town boards, and it's in your own Tidings.
+- **Turning captains:** stare a downed captain down with Valor's coating up (Tempered or better, his rank at most two past
+  your Valor rank; a Deathless one never bends), or calm one with Ambrose's In-balming (below). He gets up, leaves his tribe (its grudge rises 20) and follows you as an MCA follower, fighting
+  what's after you and never you. In talk, send him **spying** (back in 2 days with up to 2 of his old tribe's secrets in
+  your Tidings) or to **lead a raid** on its nearest camp (settled at dawn: odds 55% plus 10% a rank over the rival he
+  meets; a win fells that rival and brings you 6 to 11 emeralds by messenger, a loss kills him). Proud captains turn back
+  8% of dawns, spiteful 12% (half if bound), going home and swearing to kill you. A sworn captain who dies doesn't come
+  back (unless he's raised, and then he's his tribe's again). Left behind in another dimension or far off, he catches up.
+- **Taking a king's seat:** a tribe's king takes a fifth of every blow from a player or a sworn captain while any of its
+  captains still stand, and says how many. Kill him with none left standing and a sworn captain of his brood at your
+  call, and that captain is crowned instead of the camp falling: the tribe is yours (no grudge, it never rises, they
+  spare you). Lose the captain or the seat and it's over.
+- **In-balming (Andy):** every spirit binds orcs and goblins its own way, a move at spirit level 4 (each spirit teaches it
+  in a few lines), cast on a downed one in reach (never a chief), 40 mana, a 2-minute wait:
+  - **Varro, Ki Mark** (up to 5): a mark of ki on his brow that only ki users (Z Fighters) see. He goes home as before,
+    but half the time when you're in a fight within 64 blocks (once in 5 minutes) he joins it: a short film for those near,
+    "FOR <you>!!", and he fights your foe for a minute.
+  - **Ambrose, Gentle Hand** (one at a time): only the big ones, a downed orc or an ogre under a quarter of its health
+    (never the Ogre King). He follows you and fights your foes. A captain he calms is sworn to you (spy, raid, all of it).
+  - **Grimsby, Steel Oath** (up to 3): an iron sword in his hand, and when you fight within 24 blocks of him he turns it on
+    his own.
+  - **Thessaly, Borrowed Eyes** (up to 3): each day she tells you what he saw: a captain's secret, or that his tribe is
+    out to hunt you.
+  - **The Quiet One, Silent Shadow** (one): he follows you unseen and silent, and once in 2 minutes steps out of nothing
+    to end a foe of yours under 30% health.
+  Past a spirit's limit the oldest one is let go.
+- Compile-checked only; not played.
+
+## 0.7.434: clockwork golem idle fidgets (Motion patch 6; pack 0.18.112)
+- Idle clockwork golems glance around now and then and shift their weight (`ClockworkGolemRenderer`).
+- Compile-checked only; not played.
+
+## 0.7.435: spoils (Havens patch 5; pack 0.18.114)
+- **Trophies worn as baubles** (Powers' bauble slots take them by its `jaymospowers:baubles/<slot>` tags; `Spoils`): a
+  captain who stays dead leaves a player his tusk (a charm named for him, +1 Will, +2 from rank 3 up); every goblin
+  king leaves his ring (+1 luck, +5% speed), every orc warchief a necklace of tusks (+1.5 attack), the Ogre King his
+  hide (a cloak: +3 armour, +0.15 knockback resistance). Each also adds 1 Will (staredowns and Will clashes).
+- **Weapons taken from kings:** a tribe's king (the goblin king or warchief at its seat) holds his own weapon and drops
+  its iron head, as does the Ogre King: Gutting Hook, Warchief's Cleaver, Ogre King's Maul, put together at Powers'
+  Tool Station only.
+- **Monster crowns:** the same kings drop their crown (goblin, orc, ogre). Right-click the air to wear it (drawn on the
+  head, +1 armour, +2 Will), or place it as a small block.
+- Drops only when a player had the kill. Compile-checked; not played.
+## 0.7.436: rare pets (Motion patch 7; pack 0.18.115)
+- `RarePets`: settlements of 8+ grown get one villager keeping an animal from a far climate (13 kinds by vanilla
+  variants), tamed dogs/parrots trail them, others keep near their spot. The keeper brags to players who come near (once a
+  day each, `rarepet.jaymoskingdoms.brag.N`) or tells an old tale hinting at Powers' hidden name-tag looks (`.hint.N`).
+  Orphaned rare pets go to a neighbour; a dead one is mourned.
+- Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons get young via Powers'
+  `jaymospowers:has_young` tag.
+- Compile-checked only; not played.
+## 0.7.437: larger oceans and biomes, and the far grounds (Andy: "Oceans should generate much larger, and whalers should go further and further out to open ocean with every successful expedition, incurring greater risks of attack from pirates and wildlife, but also greater reward")
+- **Larger oceans and biomes** (Andy: "why cant biomes be larger as well? ... the cherry grove is usually too small"):
+  `data/minecraft/worldgen/density_function/overworld/` swaps continents, temperature, vegetation and erosion for the
+  Large Biomes noises (four times the scale; continents also shifted 0.06 toward the sea). Oceans, continents and
+  every biome (cherry groves too) are four times as wide, mountain ranges broader; structures keep their size.
+  New chunks only: an explored world gets a seam where old land meets new terrain, so it wants a new map to show.
+- **The far grounds (`FarGrounds`):** each realm counts its whalers home with whales; each one puts its next ground 160
+  blocks further out (up to 10 steps: 160-320 blocks at first, about 1760-1920 at the furthest). A whaler sunk, given
+  up for lost, or lost unseen puts it back a step. Her captain says how far out she's bound when she sails.
+- **Dangers out there**, rolled every minute while she's on her ground, more each step out:
+  - sea rovers: a pirate ship out of the nearest pirate cove heaves into sight
+    96-128 blocks off, out of players' sight, and runs her down; galleons likelier further out; one more rover is
+    possible every 4 steps. (Andy: "The pirates should always build a cove before a ship of theirs set sail") With no
+    cove standing, pirates found one first: when a whaler fits out for a far ground, on the coast near her harbour, or
+    on an island coast near her on the ground; until one stands, no rover comes. Rovers cruise that ground and are stowed after a day with nobody near. Sinking one doesn't
+    count against its camp's own ship.
+  - sharks: more come to her carcass, sooner, and from step 2 sharks come up under her lowered boats after the oarsmen.
+  - her pods hold more sperm whales (which turn on the boats that strike them) and the white whale now and then.
+  - a voyage made out of anyone's sight is lost with 4% a step (at most 35%).
+- **Reward:** her hold comes home 25% richer for each step out (oil, meat, bone, ambergris), pods are a whale bigger
+  every 3 steps, and ambergris is likelier.
+- Compile-checked and dev-server booted on a fresh world; not played.
+
+## 0.7.438: havens with their own life, first half (Havens patch 6a)
+- **Haven rulers' titles** (`Rulers.title`): a haven's ruler goes by their blood's title in the boss bar, audiences,
+  introductions and standing: Tide-Father/Tide-Mother and Shore-Warden (Tideborn), Stone-Elder and Stone-Reeve
+  (Stoneborn), Grove-Warden and Grove-Keeper (Sylvan), War-Chief and War-Leader (Warrior-born), High Elder and Elder
+  (mixed). Rules and succession are unchanged.
+- **Banners** (`Outfits.HAVEN_ARMS`, `HavenGates.banners`): each blood has its own arms (Tideborn cyan with waves,
+  Stoneborn grey with bricks, Sylvan green with a flower, Warrior-born red with a skull, mixed purple with a globe).
+  Once a haven's seat is loaded its banner goes up beside it, and its guards' shields bear the arms.
+- **Dress** (`Uniforms`, `tools/gen_uniforms.py havens`): haven guards and folk wear 32 new MCA outfits in their
+  blood's style: shell and net, stone-grey leather, leaf and bark, furs and war paint.
+- **Strangers at the gate** (`HavenGates`): a human within 40 blocks of a haven's seat is stopped by its nearest guard.
+  First a warning, then 10 s later a shove back out with Slowness, and if they keep coming, the guards set on them.
+  Non-humans of any blood walk in, and so does a masked player who passes for one. A human is let in if they carry
+  a Haven Token for that haven, have 400+ reputation there, or walk with an escort: a non-human player, or one of the
+  haven's folk with 40+ hearts.
+- **Haven Token:** a new talk answer, "Ask them to vouch for you at the gate", is offered to humans by a haven's grown
+  folk. With 60+ hearts they give you a token named for their haven; otherwise they politely refuse.
+- Compile-checked; not played.
+
+## 0.7.439: havens with their own life, second half (Havens patch 6b)
+- **Wares only havens make** (`HavenWares`): a haven's traders also sell their blood's wares. Tideborn sell Tide Pearls
+  and Deep Fish (good food), Stoneborn sell Cut Gems and Stoneborn picks/axes (stone, Efficiency II, Unbreaking II),
+  Sylvan sell Sylvan Herbs and Sylvan Bows (Power II), and Warrior-born sell War Hides and War Jerkins (dark-red
+  leather, Protection II). A mixed haven's trader sells one blood's. Traders in human towns buy the five goods a
+  player carries, when their trade has a use for them, at about twice the haven's price.
+- **Border clashes** (`BorderClashes`): now and then the nearest human purist realm (within 1500 blocks) sends 3-6 of
+  its guards against a haven a player is near. They muster on the road, march on the seat, fight its guards for two
+  minutes, then go home. A raided haven owes them one: once a player is near that realm's seat, the haven's militia
+  march on it the same way. Cutting down a raider (or militiaman) earns +8 with the side being raided, and cutting
+  down a defender earns +8 with the raiders, on top of the usual price for killing a realm's guard.
+- **Kidnapped children:** raiders who aren't all cut down may carry off one of the haven's children, left bound at
+  their muster on the road. A villager there cries out and has a rescue quest ready: free the child and they follow
+  you home (the usual captive rewards, plus the quest's).
+- **Haven bounties** (`QuestBoard.haven`): a haven villager with work asks for one of the haven's own troubles 40% of
+  the time: bring the carried-off child home, cut down 3-5 purist raiders (while a purist realm is near), or kill the
+  chief of the nearest camp that preys on them.
+- Compile-checked; not played.
+
+## 0.7.440: props (Motion patch 9; pack 0.18.120)
+- `props/Props`: scarecrow (birds and rabbits within 10 blocks are sent off, every 2 s), gravestone, lamp post (light
+  15), iron candle stand (flint and steel or a fire charge lights it, a bare hand snuffs it; light 12), four plushies
+  (bear, bunny, cat, frog) that squeak when pressed or squeezed in hand, window box and pot planter (plant a small flower,
+  it grows over random ticks, a bare hand picks 1-2 at full bloom).
+- Plushies are MCA gifts (`data/mca/gifts/plushies.json`): children +20, the married +10.
+- Our own shapes on vanilla textures, from `tools/gen_props.py`. Compile-checked only; not played.
+## 0.7.441: havens built their own way (Havens patch 6c)
+- **Haven houses** (`HavenBuildings`): a haven's houses are drawn in its blood's way, and a mixed haven's take a bit of
+  each, house by house.
+  - Tideborn: stilt houses three blocks up, with steps to a railed front deck, a fish rack and a barrel, plank walls
+    and a dried-kelp roof.
+  - Stoneborn: low stone-brick houses with a turf-and-moss mound for a roof and the door set in a stone arch (a
+    furnace and a stonecutter inside).
+  - Sylvan: tree houses, a platform on a trunk and four posts five blocks up, a ladder, rope rails, and a small house
+    under a leafy crown.
+  - Warrior-born: longhouses, 7 by 13-15, log walls under a steep spruce roof, a hearth down the middle and beds
+    along both sides.
+- **Fighting ring:** a Warrior-born or mixed haven also builds one: a round of posts and rails 13 across round a
+  sand floor.
+- **Havens alongside goblins and orcs:** a quarter of havens have goblins and orcs among their folk (a quarter of
+  those born there), and the tribes' war bands don't raid them. About a third of those sit under an orc king: more
+  of their folk are orcs, and their ruler is the Orc-Sworn Elder (lords: Orc-Sworn Reeve).
+## 0.7.442: star-readers (Xeno-Band patch 6; pack 0.18.122)
+- **Star-readers** (`ZFighterFolk.KINDS`, `star_reader`): Powers' new characters who come to a fallen star's crater and
+  keep to its rim. They are MCA villagers like the other Z Fighter characters, with their own opening lines, name line,
+  part ("Star-Reader") and bearing ("Watchful"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a night-blue
+  robe pricked with silver stars, a deep hood, a rope belt and a lens on a chain. Powers holds their spawning and talk.
+- Compile-checked; not played.
+
+## 0.7.443: havens and the tribes (Havens patch 7)
+- **Havens pay the tribes** (`TribePacts`): once a day every haven pays 4 emeralds from its treasury to each goblin or
+  orc tribe with a camp within 1200 blocks (into the king's seat). The tribe's war bands leave a paid-up haven alone
+  for 2 days; a haven that can't pay is raided like anyone. Human realms never pay. Havens that live alongside the
+  tribes (6c) are spared as before.
+- **Ogre Kings take tribute:** each standing Ogre King takes 3 emeralds a day from the nearest haven within 1200
+  blocks, into a chest of his hold when it's loaded. Haven folk talk of what they pay (and when they couldn't).
+- **Non-humans' grudge:** a non-human's grudge with a tribe rises at half the usual (by blood, mask or no).
+- **A tribe's favour:** the grudge can now go below nothing, down to -60, and that is the tribe's favour. You win it
+  with gifts to a chief or the pedlar once you owe nothing (6 emeralds for 10 favour) and by killing the rival brood's
+  folk. It fades 1 a day. The tribe's mood has a new "friend" line.
+- **Calling on a tribe:** with favour of 30 or more, when raiders (a camp's or purists') set out against the realm or
+  haven you're sworn to, the friendliest tribe with a camp within 1500 blocks sends a war band of 3-6 to its seat (at
+  most once a day per player). The band fights only the raiders and whoever is set on you; the town's guards leave
+  it be. It goes home 30 s after the raid is over, or after 6 minutes.
+- Good standing (favour 20) with an orc tribe is recorded as the deed `tribe.orc_friend`, which will open the greenskin road
+  (below). Haven guards no longer set on a tribe's pedlar.
+- A tribe whose favour you hold (20 or more) leaves you be unless you strike first. A truce token now clears only the
+  grudge, never the favour.
+- **A greenskin life** (`GreenskinLife`): a new life-story road, "Raised by the camps", opened for the world once anyone
+  stands well with an orc tribe. Only for bloods that pass for human. You wake 10-18 blocks outside the nearest orc camp
+  (a half-orc) or goblin village (goblin-raised), with a leather jerkin, a stone axe and (goblin-raised) a goblin mask.
+  - No goblin or orc of any tribe sets on you unless you strike first; every tribe's grudge rises at a quarter; your
+    home tribe starts you at 30 favour, enough to call on it.
+  - Human towns mind you at degree 5 (Bio-built 6, Tideborn 4), the tolerant at 40% of that, purists harder. A full
+    mask hides a goblin-raised human's past; a half-orc's never. Non-humans and havens don't hold it against you.
+  - Aim: a good name of 100 with a human realm ("the Accepted").
+- **More monstrous non-humans:**
+  - Tideborn fins are drawn 1.45x bigger, and both hands get webbing down the outer edge (players and villagers).
+  - Stoneborn get dark cracks over the face, neck and chest and a heavy stone brow (players and villagers).
+  - Warrior-born villagers always show a furred tail, swaying.
+  - Bio-built villagers wear the first form's horns, beak, claws and growths and its stinger tail over their marks.
+  - Textures: `tools/gen_monstrous_looks.py`.
+- **Tails smelled:** a Warrior-born player's tied tail still fools townsfolk, but not those who know: Warrior-born
+  villagers, a haven's people, hunters (fletchers and leatherworkers) and the tribes' goblins and orcs. A mask no longer
+  hides the blood from them, and now and then (at most every 2.5 minutes) one within 6 blocks says they smell it.
+## 0.7.444: the star smith (Xeno-Band patch 7; pack 0.18.123)
+- **Star smith** (`ZFighterFolk.KINDS`, `star_smith`): Powers' smith who keeps the Star Forge on a far world. They are an
+  MCA villager like the other Z Fighter characters, with their own opening lines, name line, part ("Star Smith") and
+  bearing ("Gruff"). They wear 4 new outfits (`tools/gen_zfighter_outfits.py`): a dark suit with green-lit seams, a
+  scorched leather apron, elbow gloves and a welding visor. `KINDS` is now `Map.ofEntries` (it outgrew `Map.of`).
+- Compile-checked; not played.
+
+## 0.7.445: horses (Havens patch 8; pack 0.18.124)
+- **Better Horses** (by CanineGray, CC BY-NC 4.0; Modrinth alMAK8J4, v4.3 for 1.21.11) ships unchanged with credit: the
+  pack's client fetches it on first launch and switches it on above Fresh Animations (`PackResourcePacks`). Our breed
+  horses keep our own renderer, so it draws donkeys and mules. It's made for an older game version (formats 22 to 94),
+  so it needs a look in game on 26.3.
+- **Donkeys and mules join our breeds** (`Breed.DONKEY`, `Breed.MULE`): bond and trust, the roster, the command wheel,
+  gaits and stamina (they canter at most), hunger and thirst, the stats a Rider reads. They keep vanilla's saddle and
+  chest (no Tack button) and vanilla's look. A jenny and a jack make a donkey; a horse and a donkey a mule, which never
+  breeds. Rider gifts: the donkey keeps its pace under a pack, the mule is quicker on bare stone and gravel.
+- **Coat names you can read:** the Rider's saddle glance, the horse's screen and the roster name the coat ("Bay with
+  Blaze"), the rare one in gold, and two handbook pages list every breed's coats and how foals take a parent's coat.
+- **Smoother rearing and grazing** (`BreedHorseModel`): both blends ease in and out; reared, the head tosses and the
+  tail lashes; a grazing horse steps a foreleg on now and then, each horse on its own beat.
+- **A fuller horse** (`tools/horse_rig.py` FULLER, the classic shape kept): jointed legs (knee, hock and gaskin,
+  fetlock and coronet, feathering on the draft and destrier), a shaped muzzle by breed (nostrils, jowl, Roman nose,
+  dished face; never over 4 wide, so the bridle fits) and longer manes (a forelock, and the mane falling over the neck
+  on all but the steppe pony). Set FULLER = False and rerun `tools/gen_horses.py` for the plain horse again.
+- Compile-checked; not played.
+
+## 0.7.446: the band hunter and the red band (Xeno-Band patch 8; pack 0.18.125)
+- **Band hunter** (`ZFighterFolk.KINDS`, `band_hunter`): Powers' outcast who wears the rival band and hunts Xeno-Band
+  wearers. An MCA villager with his own opening lines, name line, part ("Band Hunter") and bearing ("Hungry"); Powers
+  walks him (like the patrol), so `step` leaves him be, and the same once he's bandless and running. 4 new outfits
+  (`tools/gen_zfighter_outfits.py`): a long ragged coat over patched clothes, a torn hood, wrapped shins and the red band
+  on his left wrist.
+- **Wearing the red band is a crime** (`Theft.Crime.RIVAL_BAND`, heavy) where a realm that knows the bands holds the law
+  and its people see it (`Aliens.rivalBand`). A realm knows the bands once its people have seen anyone change into the
+  alien (`Aliens.AWARE`, from now on). Once per realm every 2 minutes; nobody notices it later.
+- Compile-checked; not played.
+
+## 0.7.447: donkeys and mules no longer crash the server (pack 0.18.127)
+- Andy: "what just happened to the server?" The Deck server crashed when a roaming caravan's pack donkey spawned. Since
+  0.7.445 donkeys and mules are breeds with a single coat, and rolling a coat for one asked for a random pick out of zero
+  ordinary coats (`Equine.coat`, `nextInt(0)`), which throws. A one-coat breed now just takes its coat.
+
+## 0.7.448: the life story fits the heritage you were born to (pack 0.19.0)
+- Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have anyone who
+  raised them for example. switch all applicably and add wherever you see fit". The story's pages after "Where were you
+  born?" now read in that blood's words: `LifeStoryScreen.story` takes `story.jaymoskingdoms.as.<heritage>.<rest>` over
+  the plain key where the lang has one (titles, lines, answers, tales, short lines).
+- Bio-built: "Who took you in, after the vats?" (bought as a field hand, a sideshow exhibit, broken out of a cage by
+  outlaws, "Nobody: you raised yourself"); "In your first months..." and "Once you were full grown..." with every answer
+  and tale rewritten. Rubber-folk are raised on the fair's road, Tideborn are found, Warrior-born grow up in the camp,
+  Stoneborn in the hold, and the rest get their land's farmers, hunters, fishers and so on.
+- One raiser of their own per blood (`Answer.onlyBorn`): the Mad Tinkerer and sewer vat-kin (Bio-built), the acrobats and
+  the ringmaster (Rubber-folk), the water temple's keepers (Tideborn), the grove-keepers (Sylvan), a Verdant elder, Hornkin
+  under the truce (Emberborn), snow wolves (Frostborn), barrow-keepers (Nightborn), the warband's chief (Warrior-born), an
+  old martial master (Earthling), the dawn priests (Dawnborn). Each gives an attribute point, a temperament, a figure's
+  clothes and a village job lean like the others.
+- "Minor nobles of a realm" isn't asked of the Bio-built, Warrior-born or Verdant (`Answer.notBorn`). A new birthplace
+  drops answers its blood isn't asked; the server refuses them too.
+- The narrator: a blood's own lines are voiced once their clips are made (`make_voices.py narrator`, then `--sounds`);
+  till then they're read in silence. The 13 new raisers' tales are listed in sounds.json for the same run.
+- Compile-checked; not seen in game.
+
+## 0.7.449: villagers come over for a reason, and you can ask why; accuse whoever robbed you (pack 0.19.2)
+Andy: "when villagers run up to you, you should be able to ask them why or whats going on. they should also have a
+reason other than just introducing themselves." / "you should be able to confront who you think stole from you in the
+talk or interact screen. accusing the wrong person loses you hearts w them".
+- `ComingOver`: a stranger only hurries over (`Handshakes`) with a reason, picked by weight and temperament: you're
+  hurt (they hand you bread), a monster's near you (they point it out, it glows a few seconds), rain or a storm, thanks
+  they owe you (their memory of you), your deeds here, your rare heritage is theirs, you're a foreigner or in armour
+  they've not seen, word of a beast, or (rarely) they took you for someone else. No reason, nobody comes. The hail
+  says why, the arrival line says it fully, and they still wave or shake and give their name.
+- "Ask what's going on" in MCA's menu for a day after (also after an `Approaches` visit: what more they had to say).
+  Without a shared tongue it's gestures.
+- "Accuse them of theft" in MCA's menu for a day after you notice you were robbed or cheated (`Crooks`): the thief is
+  confronted as by a right-click, however long ago it was; anyone else loses 8 hearts with you, says so, and remembers
+  it (`Recollections.Kind.ACCUSED`, which you can apologise for). One accusation per villager per theft.
+## 0.7.450: fair bouts, the bookie leads you down, crackdowns, a clear ladder (pack 0.19.3)
+- Andy: "I just accepted a bout, and got instantly knocked out because i was teleported in." Nobody is teleported into
+  the ring any more (`FightPit.run`). At the bell's time the bell waits up to a minute (`CALL_TICKS`) for a player on
+  the card to walk into the ring, the bookie calling them in; if they never come the bout's called off and every stake,
+  their entry too, goes back. After the bell both stand in their corners 3 seconds (`GRACE_TICKS`) before anyone
+  swings or a punch counts. A player needs 8 wind (12 health) to take a place (`MIN_WIND`), checked again at the bell,
+  and a blow made bigger by anything else is still never let take them under the yield point.
+- Andy: "if you pay the bookie outside of the speakeasy, he should lead you to it." By day the bookie may be up in town
+  (`Bookies.outAndAbout`). There he won't open his book or take a coin: he says to follow and walks you to the hatch
+  (`Bookies.Walk`), waiting when you fall behind and giving up if you wander 32 blocks off, then goes down first.
+  Come evening he walks home himself.
+- Andy: "guards overhearing talk of the speakeasy will begin to crackdown, so deals out in the open are frowned upon and
+  rare." Asking a bookie in the street with a guard within 12 blocks: he's never heard of a den, and the guard has
+  (`Underworld.crackDown`, attachment `den_crackdowns`). A street sale of contraband seen by a guard does the same.
+  For a day: no crook whispers the way, street buyers are 25 less receptive, bookies lead nobody and stay home.
+- Andy: "bug where there are so many villagers stuck on the speakeasy ladder" (video: an unemployed villager wedged in
+  the shaft). The den's hands wandered up the ladder, a replacement was hired a day later, and so on. Now every 2 seconds
+  (`Underworld.keepHome`): the fence, dice-thrower, attendant and fighters found out of their rooms are put back at
+  their spots, a second hand with the same job goes back to town as an ordinary villager, the bookie counts as present
+  anywhere within 64 blocks, and anyone else stuck in the shaft 2 checks running is put out at its nearer end.
+## 0.7.451: story screen fixes (pack 0.19.4)
+- Andy: "there is a problem with the way the character is drawn". A Bio-built's form parts (beak head, horns, bracers,
+  tail) were placed on the marks model's bones at submit time, but that shared model still held a pose from another draw
+  (the world's, another player's); the body itself is posed from the state only when drawn. So on the story screen the
+  head and parts sat askew of the body and armour. `BioForms.submit` now poses the bones from the state first
+  (`ModelPoses.now`: `setupAnim` plus the same after-pose list the `prepareModel` mixin runs, now kept in `ModelPoses.after`).
+- Andy: "make only the starts the player has available listed. put the rest in another menu under 'locked'". The road
+  carousel goes through the open starts only; a "Locked (n)" button in its header switches to the locked ones (with
+  their hints and reasons, as before) and "Open starts (n)" back.
+- Andy: "there is nothing that tells you the start you got if you choose the random start". Fate's pick is shown as a
+  title on waking (the start's name, its short line under it) and said in chat as "Fate chose your start: ...".
+- Andy: "i seem unable to select any of these" (the harder life's flaws and switches). Nothing in the click path drops
+  the click, and a flip is the only click on the screen that undoes itself if it arrives twice, so a second click on the
+  same choice within 250 ms (`FLIP_REPEAT_MS`) now counts as the same click. Unconfirmed cause: check in game.
+- Compile-checked; not seen in game.
+
+## 0.7.452: the land round a new arrival is made ahead (pack 0.19.6)
+- Andy: "the issue with chunky is we are not necessarily going to be spawning within the 500 or so blocks it generates
+  because of the distinct starts." Once a life story sets someone down (any start, any world), `ArrivalGround` makes the
+  land round them in the background: every chunk from just past their view (8) out to 20 chunks, nearest first, two at
+  a time, and none while the server's average tick is over 40 ms. Each is let go once made. One arrival's land at a time.
+  Tuning at the top of `ArrivalGround`. Built; not yet watched on the Deck.
+## 0.7.454: ask a villager the way; action options on the Interact page (pack 0.19.8)
+- Andy: "you should be able to ask villagers where certain things in town are in the talk option, such as if you need a
+  doctor, or a butcher"; then "move some of these options to the interact menu". MCA's Interact page has Ask the
+  Way (row 9, `McaScreensMixin`), opening its own page (`McaWayPageMixin`; its back arrow returns to Interact): a healer
+  (a cleric), a butcher, a smith (armourer, weaponsmith or toolsmith), a tailor (a grown shepherd), the tavern, the
+  stables, whoever rules here. Each sends MCA command `way.<place>`, answered by `Directions` (`McaCommandMixin`).
+- They find the nearest in their town (folk within 128 blocks, at their workstation if it's near them; the faction's
+  standing tavern or stable; the ruler, or the seat while they're away) and turn to face it for a moment, telling you
+  who and where in MCA's chat ("Bram the butcher? That way: about 40 paces to the north-east."), and if they're abed.
+- One with 10+ hearts for you, or any child, walks you there if it's 10-96 blocks off: waits when you fall 7 blocks
+  behind and calls you on, gives up past 32, points out the rest after 2 minutes or 12 seconds of getting no nearer,
+  and says so when you've arrived. Guards, archers, a realm's workers and rulers keep their posts and only point; their
+  routines leave a guide be (`Routines.idle`). Below -15 hearts: "Find it yourself." Asking needs a shared tongue (a
+  foreigner shrugs); a ship's crew says nothing. Tuning at the top of `Directions`.
+- Andy picked "Ask the way plus action options": Seek an audience, a pedlar's wares, Offer tribute and a sworn
+  captain's Send to Spy / Send to Raid are Interact buttons now (`InteractActions`), gone from the talk menu
+  (`McaAnswersMixin`). Which apply is worked out as you right-click a villager and sent ahead of MCA's screen
+  (`InteractActions.Offered`); the client shows only those, stacked under Ask the Way (`McaActionButtonsMixin`). Each
+  comes back as MCA command `act.<action>` and is checked again before it's done. Wares and tribute need no words.
+- "Offer a handshake" stays where it was: it only shows to someone whose name you don't know, and their page has no
+  Interact button (only Introduce, Gift, Trade).
+- Compile-checked; not seen in game.
+
+## 0.7.456: a felled tree never stands back up (pack 0.19.15)
+- A tree felled into another tree was caught almost upright and then settled as real blocks at that lean, so it
+  looked like it replanted itself. Now, struck before it's half over (`FallingTree.LYING`, 45°), it glances off a
+  quarter turn to whichever side is clear and falls on that way (at most `GLANCES` times, with a knock).
+- With no clear way down it leans there a moment and breaks apart, dropping its wood and leaves; it is never set back
+  as standing blocks. Trees that get past half over still settle lying as before.
+- Compile-checked; not seen in game.
+## 0.7.457: flaws can be ticked; the Bio-built figure drawn right (pack 0.19.16)
+- Andy: "i still cant tick any flaws or switches". 26.3 numbers the mouse buttons from 1 (left 1, right 3): the story's
+  flaw click waited for button 0 and never came, and the right-click step-back took button 1, so a left click on the
+  Heritage, Class and Look buttons stepped back. Both use `InputConstants.MOUSE_BUTTON_LEFT/RIGHT` now. The double-click
+  guard from 0.7.451 is gone (it was a wrong guess).
+- Andy: "still having a problem with the way the character is drawn on the start path screen". MCA's skin and clothes
+  bodies take the pose MCA captured off the renderer's model after our poses were laid on it; the Bio-built hunch (an
+  added offset) was then added again when each was drawn, sinking the head into the chest. `ModelPoses.after` skips it
+  on a body MCA has posed (`McaLookModels.posedByMca`). Checked in a test game (Xvfb): the flaws tick and the figure
+  stands right.
+
+## 0.7.458: larger monoliths with a living heart (pack 0.19.19)
+- Andy: "I'd like the monoliths larger and animated more like the mod they came from" (Ancient Remnants: Monoliths,
+  studied from its public source as behaviour only). Its monoliths stand about 120 blocks with an Elderheart of six
+  glowing shards that tumbles and breathes; ours now match that feel with our own code and blocks.
+- Bigger: new monoliths rise 78-102 blocks to the crown (was 39-54) on a broad 5x5 foot (corners cut, a third of the
+  way up) under the 3x3 shaft and 1x1 crown; paved ground and rubble spread wider. Cut shorter under the world's ceiling.
+- Animated (`MonolithHeart`): the heart floats over the crown as seven block displays of the element's gem, all
+  full-bright: a core that turns and swells, and six crystal shards (cubes stood on a corner) on its six sides. The
+  cluster tumbles slowly on all three axes; the shards breathe out and in, stretching as they swing. Moved every 3
+  ticks with smooth interpolation, only while a player is within 192 blocks. Motes of its element and end-rod sparks
+  are drawn in to it off the stone round it.
+- Old monoliths still awake keep their size but get the living heart: their block core and the four still shards are
+  taken out and the displays float in their place (once, when first loaded). Monoliths remember their heart height
+  (`heart` in the `monoliths` attachment).
+- Giant slain: the core goes out and the shards hang still and dark (band stone).
+- Tuning at the top of `MonolithHeart` and `Monoliths`. Compile-checked; not seen in game.
+
+- **0.7.459 (pack 0.19.20):** with Powers' executions of the downed (`MobExecutions`), a realm's guards and archers and a
+  village's own iron golems never finish off a downed player: they arrest as before. Only a hotheaded or spiteful guard
+  will (`PowersCompat.spareRighteousGuards`). Compile-checked; not seen in game.
+
+- **0.7.461, werewolves and the false moon:** Andy: werewolves "should" turn under a Z Fighter's false moon (Powers'
+  `ZFighterFakeMoon`, a great ball of ki thrown up into the night). Cursed villagers and cursed players under its light
+  change as under a full moon, any night (`PowersCompat.falseMoon`, read by reflection; nothing without Powers). Once
+  changed, the beast lasts the night as usual. Compile-checked; not seen in game.
+## 0.7.462: Healers, the infirmary cot and the shrine
 Healing plan 9 to 11 (`docs/Healing-Plan.md`). All three reach Jaymo's Powers' wounds through `PowersCompat` (new calls: `injuries`,
 `setBones`, `healEveryPart`); without Powers they heal the hearts. The shared code is `Healing`; tuning is in `static final`
 constants at the top of each class.

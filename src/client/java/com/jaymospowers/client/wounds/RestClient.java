@@ -12,14 +12,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * (0.19.20) The look of rest and hot springs, all particles: warm embers drifting up round someone resting by a campfire,
+ * (0.19.24) The look of rest and hot springs, all particles: warm embers drifting up round someone resting by a campfire,
  * and steam rising off the water of a hot spring (water with magma two or three blocks under it) near the player.
  */
 public final class RestClient {
 	// ---- tuning ----
-	/** (0.19.20) Ticks between the embers round a rester. */
+	/** (0.19.24) Ticks between the embers round a rester. */
 	public static final int EMBER_EVERY = 6;
-	/** (0.19.20) Random spots sampled each tick for steam, and how far round the player (blocks) they range. */
+	/** (0.19.24) Random spots sampled each tick for steam, and how far round the player (blocks) they range. */
 	public static final int STEAM_SAMPLES = 40, STEAM_RANGE = 9;
 
 	private RestClient() {

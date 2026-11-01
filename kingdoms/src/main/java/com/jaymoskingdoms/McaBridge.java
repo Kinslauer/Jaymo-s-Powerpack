@@ -264,6 +264,51 @@ final class McaBridge {
 		return made;
 	}
 
+	/**
+	 * (0.7.433) {@link McaCompat#swear}: {@code mob} (a tribe's captain, held down and turned) leaves his camp and follows
+	 * {@code player}: off its roster, at home nowhere, and liked enough never to leave of MCA's own accord. False if he's
+	 * no MCA villager.
+	 */
+	static boolean swear(net.minecraft.world.entity.Entity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA v)) {
+			return false;
+		}
+		Enlisted e = worker(v);
+		if (e.role() >= 0) {
+			e.discharge();
+		}
+		v.clearHome();
+		v.getVillagerBrain().getMemoriesForPlayer(player).setHearts(Math.max(Strangers.TRUSTED_HEARTS, Config.getInstance().marriageHeartsRequirement));
+		v.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+		v.setPersistenceRequired();
+		return true;
+	}
+
+	/**
+	 * (0.7.433) {@link McaCompat#swornGreenskin}: a sworn captain back at {@code player}'s side (from spying or a raid): a
+	 * goblin or an orc ({@code kind}) named {@code name} at {@code at}, a guard in {@code gear}, following them. Null without
+	 * a body made.
+	 */
+	static @Nullable PathfinderMob swornGreenskin(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, ServerPlayer player,
+		List<net.minecraft.world.item.ItemStack> gear) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withName(name).withPosition(at).withAge(0)
+			.withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		broodBorn(villager, kind, false);
+		EquipmentSlot[] slots = {EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS};
+		for (int i = 0; i < slots.length && i < gear.size(); i++) {
+			if (!gear.get(i).isEmpty()) {
+				villager.setItemSlot(slots[i], gear.get(i).copy());
+				villager.getInventory().addItem(gear.get(i).copy());
+				villager.setDropChance(slots[i], 0.0F);
+			}
+		}
+		swear(villager, player);
+		return villager;
+	}
+
 	/** (0.7.418) Whether {@code e} is an MCA villager whose hired contract is still running. */
 	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
 		return e instanceof VillagerEntityMCA v && v.getDespawnDelay() > 0;
@@ -951,6 +996,58 @@ final class McaBridge {
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
 		return true;
+	}
+
+	/** (0.7.431) {@code e}, one of MCA's villagers, goes by {@code name} from now on. False if it's no MCA villager. */
+	static boolean rename(net.minecraft.world.entity.Entity e, String name) {
+		if (e instanceof VillagerEntityMCA villager) {
+			villager.setName(name);
+			return true;
+		}
+		return false;
+	}
+
+	/** (0.7.424) {@code body} can be questioned on the execution hold ({@link Questioning}): one of MCA's grown villagers. */
+	static boolean questionable(LivingEntity body) {
+		return body instanceof VillagerEntityMCA villager && !villager.isBaby() && villager.isAlive();
+	}
+
+	/** (0.7.424) MCA's talk screen on {@code body}, held down by {@code player} ({@link #questioningOpening} opens it). */
+	static void openQuestioning(ServerPlayer player, LivingEntity body) {
+		if (body instanceof VillagerEntityMCA villager) {
+			villager.getInteractions().interactAt(player, villager.position(), net.minecraft.world.InteractionHand.MAIN_HAND);
+		}
+	}
+
+	/** (0.7.424) The questioning's over: {@code player}'s talk screen on {@code body} closes. */
+	static void closeQuestioning(ServerPlayer player, LivingEntity body) {
+		if (body instanceof VillagerEntityMCA villager && villager.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent()) {
+			villager.getInteractions().stopInteracting();
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.OpenGuiRequest(net.conczin.mca.network.s2c.OpenGuiRequest.Type.CLOSE), player);
+	}
+
+	/**
+	 * (0.7.424) MCA's menu opening ("root") on one {@code player} holds down to question ({@link Questioning}): they beg or
+	 * glare, and the main menu shows only the questions. True if so.
+	 */
+	static boolean questioningOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Questioning.active(player, villager)) {
+			return false;
+		}
+		questioningSay(player, villager, Questioning.opening(player, villager));
+		return true;
+	}
+
+	/** (0.7.424) {@code line} from {@code villager} on the questioning screen, the questions still shown (those left). */
+	static void questioningSay(ServerPlayer player, LivingEntity mob, Component line) {
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (!(mob instanceof VillagerEntityMCA villager) || main == null) {
+			return;
+		}
+		Component heard = Languages.understands(player, villager) ? line : Component.translatable("dialogue.chat.jaymoskingdoms.question.wordless");
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(heard, false), player);
 	}
 
 	/**

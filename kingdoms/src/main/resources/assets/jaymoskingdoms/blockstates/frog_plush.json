@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/frog_plush"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/frog_plush",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/frog_plush",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/frog_plush",
+      "y": 270
+    }
+  }
+}

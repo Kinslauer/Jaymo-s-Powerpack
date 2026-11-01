@@ -33,6 +33,37 @@ public final class PowersCompat {
 	private PowersCompat() {
 	}
 
+	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
+	private static boolean lookedForMoon;
+
+	/**
+	 * (Andy, 2026-11-01) Whether a Z Fighter's false moon (a great ball of ki thrown up into the night) shines on
+	 * {@code entity}: it takes the wolf's curse like a full moon. False without Powers.
+	 */
+	public static boolean falseMoon(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.Entity entity) {
+		if (!lookedForMoon) {
+			lookedForMoon = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					falseMoon = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterFakeMoon"),
+						"shines", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' false moon", e);
+				}
+			}
+		}
+		if (falseMoon == null) {
+			return false;
+		}
+		try {
+			return (boolean)falseMoon.invoke(level, entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/**
 	 * (0.7.184) Takes {@code target}'s head off as Jaymo's Powers' dismemberment does (a headless mob may stagger on a while,
 	 * a skeleton fights on, anything else drops), {@code by} its killer, and nails the head to the wall at {@code wall},
@@ -106,6 +137,37 @@ public final class PowersCompat {
 			}
 		}
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
+	}
+
+	/** (Havens patch 5) Powers' {@code Baubles.worn(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle wornBaubles;
+	private static boolean lookedForBaubles;
+
+	/**
+	 * (Havens patch 5) What {@code player} wears in Jaymo's Powers' bauble slots (server), empty stacks and all; an empty
+	 * list without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	public static java.util.List<net.minecraft.world.item.ItemStack> baubles(Player player) {
+		if (!lookedForBaubles) {
+			lookedForBaubles = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					wornBaubles = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.baubles.Baubles"), "worn",
+						java.lang.invoke.MethodType.methodType(java.util.List.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' baubles (older Powers?)", e);
+				}
+			}
+		}
+		if (wornBaubles == null) {
+			return java.util.List.of();
+		}
+		try {
+			return (java.util.List<net.minecraft.world.item.ItemStack>)wornBaubles.invoke(player);
+		} catch (Throwable e) {
+			return java.util.List.of();
+		}
 	}
 
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
@@ -300,6 +362,66 @@ public final class PowersCompat {
 			}
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't play a film", e);
+		}
+	}
+
+	/**
+	 * (0.7.459) Powers' executions of the downed (pack 0.19.20, {@code MobExecutions}): Andy: guards "prioritize arresting
+	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer
+	 * ({@link Downed#isGuard}) or a village's own iron golem never finishes off a downed player, unless the guard is
+	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. Nothing without that Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	static void spareRighteousGuards() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.MobExecutions").getField("SPARE").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add((mob, victim) -> {
+				if (mob instanceof net.minecraft.world.entity.animal.golem.IronGolem golem) {
+					return !golem.isPlayerCreated();
+				}
+				if (!Downed.isGuard(mob)) {
+					return false;
+				}
+				Temperaments.Temperament t = Temperaments.of(mob);
+				return t != Temperaments.Temperament.HOTHEADED && t != Temperaments.Temperament.SPITEFUL;
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle deathFilm;
+	private static boolean lookedForDeathFilm;
+
+	/**
+	 * (0.7.431) A film for {@code dead}, who has just died, before their death screen: shot {@code shot} on {@code target}
+	 * for {@code ticks} (Powers' {@code UltimateFilm.afterDeath}, 0.18.106). False without it (an older Powers, or none).
+	 */
+	public static boolean deathFilm(net.minecraft.server.level.ServerPlayer dead, int shot, int ticks, net.minecraft.world.entity.Entity target) {
+		if (!lookedForDeathFilm) {
+			lookedForDeathFilm = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					deathFilm = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.UltimateFilm"), "afterDeath",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, int.class, int.class,
+							net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no film after death (older Powers?)", e);
+				}
+			}
+		}
+		if (deathFilm == null) {
+			return false;
+		}
+		try {
+			deathFilm.invoke(dead, shot, ticks, target.getBoundingBox().getCenter(), target);
+			return true;
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't play a film after death", e);
+			return false;
 		}
 	}
 
@@ -558,7 +680,7 @@ public final class PowersCompat {
 	 * A life story's "unarmed" start: {@code player} has long been without {@code part} (Powers' Dismember part bit: an
 	 * arm or a leg), the stump healed over. False without Powers.
 	 */
-	public static boolean bornWithout(net.minecraft.server.level.ServerPlayer player, int part) {
+	public static boolean bornWithout(net.minecraft.world.entity.LivingEntity player, int part) {
 		if (!lookedForBornWithout) {
 			lookedForBornWithout = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
@@ -605,6 +727,33 @@ public final class PowersCompat {
 		}
 		try {
 			return (boolean)regrow.invoke(body, all);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.422) Powers' {@code Fractures.blunt(ItemStack)}. */
+	private static java.lang.invoke.@Nullable MethodHandle blunt;
+	private static boolean lookedForBlunt;
+
+	/** (0.7.422) Whether {@code stack} is a blunt weapon by Powers' reckoning (a mace, hammer, club...); false without Powers. */
+	public static boolean blunt(net.minecraft.world.item.ItemStack stack) {
+		if (!lookedForBlunt) {
+			lookedForBlunt = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					blunt = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Fractures"), "blunt",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blunt weapons (older Powers?)", e);
+				}
+			}
+		}
+		if (blunt == null) {
+			return stack.is(net.minecraft.world.item.Items.MACE);
+		}
+		try {
+			return (boolean)blunt.invoke(stack);
 		} catch (Throwable e) {
 			return false;
 		}
@@ -1559,6 +1708,43 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
+	// ---- (0.7.426) crippling blows: a broken leg ------------------------------------------------------------------------
+
+	private static boolean lookedForBreak;
+	/** Powers' {@code Wounds.breakPart(LivingEntity, BodyPart, Entity)} and its {@code BodyPart} legs. */
+	private static java.lang.invoke.@Nullable MethodHandle breakPart;
+	private static @Nullable Object leftLeg, rightLeg;
+
+	/**
+	 * (0.7.426) A crippling blow breaks one of {@code target}'s legs ({@code by} struck it). False without Powers (or an
+	 * older one), if it has no legs to break, or that one's broken already.
+	 */
+	public static boolean breakLeg(LivingEntity target, net.minecraft.world.entity.@Nullable Entity by) {
+		if (!lookedForBreak) {
+			lookedForBreak = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> part = Class.forName("com.jaymospowers.core.wounds.BodyPart");
+					breakPart = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Wounds"), "breakPart",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, part, net.minecraft.world.entity.Entity.class));
+					leftLeg = part.getField("LEFT_LEG").get(null);
+					rightLeg = part.getField("RIGHT_LEG").get(null);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no breakable legs (older Powers?)", e);
+				}
+			}
+		}
+		if (breakPart == null) {
+			return false;
+		}
+		boolean left = target.getRandom().nextBoolean();
+		try {
+			return (boolean) breakPart.invoke(target, left ? leftLeg : rightLeg, by) || (boolean) breakPart.invoke(target, left ? rightLeg : leftLeg, by);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.404) bolas: the trip ------------------------------------------------------------------------------------
 
 	private static boolean lookedForTrip;
@@ -1661,7 +1847,32 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.459) the healing trade: Powers' wounds, for paid treatment, the infirmary cot and the shrine ------------------
+	private static java.lang.invoke.@Nullable MethodHandle questionDone;
+	private static boolean lookedForQuestionDone;
+
+	/**
+	 * (0.7.424) Powers' {@code Finishers.questionDone(ServerPlayer, boolean)}: ends {@code player}'s questioning hold, the one
+	 * held down let go or ({@code kill}) finished with the weapon's execution. Nothing without Powers.
+	 */
+	public static void questionDone(net.minecraft.server.level.ServerPlayer player, boolean kill) {
+		if (!lookedForQuestionDone) {
+			lookedForQuestionDone = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					questionDone = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.finisher.Finishers"),
+						"questionDone", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' questioning hold", e);
+				}
+			}
+		}
+		if (questionDone != null) {
+			try {
+				questionDone.invoke(player, kill);
+			} catch (Throwable e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't end a questioning hold", e);
+			}
+	// ---- (0.7.462) the healing trade: Powers' wounds, for paid treatment, the infirmary cot and the shrine ------------------
 
 	/** What ails a body: bit masks, a bit per body part, as Powers' wounds keep them. */
 	public record Injuries(int broken, int bleeding, int festering) {
@@ -1712,7 +1923,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.459) Which parts of {@code entity} are broken, cut open and festering (none without Powers). */
+	/** (0.7.462) Which parts of {@code entity} are broken, cut open and festering (none without Powers). */
 	public static Injuries injuries(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();
 		if (brokenMask == null || bleedingMask == null || festeringMask == null) {
@@ -1726,7 +1937,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.459) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
+	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();
 		try {
@@ -1737,7 +1948,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.459) Heals every part {@code entity} still has by up to {@code amount} each (Powers' {@code Wounds.healPart}, no
+	 * (0.7.462) Heals every part {@code entity} still has by up to {@code amount} each (Powers' {@code Wounds.healPart}, no
 	 * further than each may heal; a severed limb stays gone). Returns the total taken, or -1 without Powers.
 	 */
 	public static float healEveryPart(net.minecraft.world.entity.LivingEntity entity, float amount) {

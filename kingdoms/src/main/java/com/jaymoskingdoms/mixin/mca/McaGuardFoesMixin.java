@@ -20,6 +20,11 @@ abstract class McaGuardFoesMixin {
 		at = @At("RETURN"), cancellable = true)
 	private static void jaymoskingdoms$foes(LivingEntity entity, LivingEntity guard, Optional<Player> followed, Optional<Integer> configured,
 		CallbackInfoReturnable<Integer> cir) {
+		if (guard != null && (com.jaymoskingdoms.SwornCaptains.spares(guard, entity) || com.jaymoskingdoms.InBalming.spares(guard, entity))) {
+			// (0.7.433) a sworn captain never goes for his lord
+			cir.setReturnValue(-1);
+			return;
+		}
 		if (cir.getReturnValueI() < FOE_PRIORITY && guard != null && McaCompat.foe(guard, entity)) {
 			cir.setReturnValue(FOE_PRIORITY);
 		}

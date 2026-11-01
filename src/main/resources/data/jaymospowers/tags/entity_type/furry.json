@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cat",
+    "minecraft:ocelot",
+    "minecraft:fox",
+    "minecraft:horse",
+    "minecraft:donkey",
+    "minecraft:mule",
+    "minecraft:llama",
+    "minecraft:trader_llama",
+    "minecraft:sheep",
+    "minecraft:rabbit",
+    "minecraft:polar_bear",
+    "minecraft:panda",
+    "minecraft:goat",
+    "minecraft:camel",
+    "jaymospowers:aerbunny",
+    "jaymospowers:sheepuff",
+    "jaymospowers:kirrid",
+    "jaymospowers:burrukai",
+    "jaymospowers:taegore"
+  ]
+}

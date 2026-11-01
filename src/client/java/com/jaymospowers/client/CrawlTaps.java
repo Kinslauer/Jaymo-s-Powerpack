@@ -22,6 +22,9 @@ import org.jspecify.annotations.Nullable;
  * (0.15.108) Pressed while hanging from a ledge, it climbs you in onto your belly when there's room to lie up there
  * ({@link LedgeClient#proneClimb}; otherwise it does nothing, rather than dropping you). A slide that ends with Sneak still
  * held leaves you prone ({@link #goProne}); you get up when you let go of Sneak (once there's room), or as usual.
+ * <p>
+ * (0.18.85) Lying prone (not held down by Sneak from a slide), a tap of Sneak turns you over, belly to back or back to
+ * belly ({@link #turnOver}, {@code Crawl.SUPINE}); a press that scrolls the stance wheel isn't a tap.
  */
 public final class CrawlTaps {
 	/** The most ticks between two Left (or two Right) presses that count as a double tap for a roll. */
@@ -35,6 +38,9 @@ public final class CrawlTaps {
 	private static boolean whileSneaking;
 	/** (0.17.164) Jump was down last tick (a fresh press stands you up from a crawl the server holds). */
 	private static boolean jumpWasDown;
+	/** (0.18.85) Sneak went down while lying prone (its release, unscrolled, turns you over). */
+	private static boolean sneakPressedProne;
+	private static boolean sneakWasDown;
 
 	private static boolean leftWasDown;
 	private static boolean rightWasDown;
@@ -74,6 +80,7 @@ public final class CrawlTaps {
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
 			crawling = false;
+			Crawl.localSupine = -1;
 			whileSneaking = false;
 			Crawl.localCrawler = -1;
 			rollLeft = 0;
@@ -109,8 +116,34 @@ public final class CrawlTaps {
 			goProne(player, false);
 		}
 		jumpWasDown = jump;
+		tickTurnOver(minecraft, player, free);
 		tickRoll(minecraft, player);
 		tickAdrift(player);
+	}
+
+	/** (0.18.85) A tap of Sneak while prone (by your own crawl, not held down by it) turns you over. */
+	private static void tickTurnOver(Minecraft minecraft, LocalPlayer player, boolean free) {
+		boolean sneak = minecraft.options.keyShift.isDown();
+		if (!crawling || whileSneaking) {
+			sneakPressedProne = false;
+		} else if (sneak && !sneakWasDown) {
+			sneakPressedProne = true;
+		} else if (!sneak && sneakWasDown && sneakPressedProne) {
+			sneakPressedProne = false;
+			if (free && !StanceScroll.scrolledThisPress() && rollLeft == 0 && !Downed.isDowned(player)) {
+				turnOver(player, Crawl.localSupine != player.getId());
+			}
+		}
+		sneakWasDown = sneak;
+	}
+
+	/** (0.18.85) Onto your back ({@code back}) or belly, while prone by your own crawl. */
+	public static void turnOver(LocalPlayer player, boolean back) {
+		if (!crawling || back == (Crawl.localSupine == player.getId())) {
+			return;
+		}
+		Crawl.localSupine = back ? player.getId() : -1;
+		ClientPlayNetworking.send(new Crawl.Supine(back));
 	}
 
 	/**
@@ -194,10 +227,16 @@ public final class CrawlTaps {
 			return;
 		}
 		crawling = true;
+		Crawl.localSupine = -1;
 		CrawlTaps.whileSneaking = whileSneaking;
 		jumpReleased = !Minecraft.getInstance().options.keyJump.isDown();
 		Crawl.localCrawler = player.getId();
 		ClientPlayNetworking.send(new Crawl.Key(true));
+	}
+
+	/** (0.19.9) Prone from a held slide: stay down once Sneak is let go (the stance wheel turned down), as the key does. */
+	static void lockProne() {
+		whileSneaking = false;
 	}
 
 	/** (0.18.57) Whether the local player is prone by their own gesture (the key, a held slide or the stance wheel). */
@@ -214,6 +253,7 @@ public final class CrawlTaps {
 
 	private static void stop() {
 		crawling = false;
+		Crawl.localSupine = -1;
 		whileSneaking = false;
 		Crawl.localCrawler = -1;
 		ClientPlayNetworking.send(new Crawl.Key(false));

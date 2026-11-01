@@ -19,6 +19,21 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<String> FORM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_form");
 	/** True while the player's form is in its last seconds (the alien glows red). */
 	public static final RenderStateDataKey<Boolean> ENDING = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ending");
+	/** (0.18.95) Rivet's shell: the block it's melded into (null: none). */
+	public static final RenderStateDataKey<String> SHELL = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shell");
+	/** (0.18.96) The stalker's shed skin: drawn as a pale, see-through husk. */
+	public static final RenderStateDataKey<Boolean> SHED = RenderStateDataKey.create(() -> "jaymospowers:xenoform_shed");
+	/** (0.18.93) True while the alien is its Ultimate form (armoured, spiked, glowing seams). */
+	public static final RenderStateDataKey<Boolean> ULTIMATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_ultimate");
+	/** (0.18.119) How far into Towerback's grab (ticks; -1: not grabbing). */
+	/** (0.18.125, patch 8) A rival band's alien (or wearer): darkened, its band and insignia red. */
+	public static final RenderStateDataKey<Boolean> DARK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_dark");
+	/** (0.18.126, patch 9) How the band is dressed: the glow (RGB), the alien's look, the plate's shape and spikes. */
+	public static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:xenoform_glow");
+	public static final RenderStateDataKey<String> LOOK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_look");
+	public static final RenderStateDataKey<String> PLATE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_plate");
+	public static final RenderStateDataKey<Boolean> SPIKES = RenderStateDataKey.create(() -> "jaymospowers:xenoform_spikes");
+	public static final RenderStateDataKey<Float> TOWER_GRAB = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_grab");
 
 	private XenoformClient() {
 	}
@@ -31,7 +46,24 @@ public final class XenoformClient {
 		state.setData(XenoformSlap.KEY, XenoformSlap.extract(entity, form, partialTicks));
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
+		state.setData(DARK, player != null && XenoformState.rival(player));
+		if (player != null && XenoformPower.has(player)) {
+			com.jaymospowers.power.xenoform.BandStyle.Style style = com.jaymospowers.power.xenoform.BandStyle.get(player);
+			state.setData(GLOW, com.jaymospowers.power.xenoform.BandStyle.glow(player));
+			state.setData(LOOK, form == null ? null : style.look(form).id);
+			state.setData(PLATE, style.plate());
+			state.setData(SPIKES, style.spikes());
+		} else {
+			state.setData(GLOW, null);
+			state.setData(LOOK, null);
+			state.setData(PLATE, null);
+			state.setData(SPIKES, false);
+		}
+		state.setData(ULTIMATE, form != null && Boolean.TRUE.equals(player.getAttached(XenoformState.ULTIMATE)));
+		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
+		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		XenoformFlightPose.extract(entity, state, partialTicks);
+		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}

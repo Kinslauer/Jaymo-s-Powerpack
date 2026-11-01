@@ -1,4 +1,4 @@
-"""Healing, campfire rest / hot springs / brews track (0.19.20): the two healing brews' textures, models, item
+"""Healing, campfire rest / hot springs / brews track (0.19.24): the two healing brews' textures, models, item
 definitions, crucible recipes, the herbs' essences and the lang part.
 
 Bottles follow docs/Vanilla-Style.md as the alchemy phials do: 16x16, no black outline (the outline is the darkest

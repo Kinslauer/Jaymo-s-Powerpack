@@ -48,6 +48,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PositionMoveRotation;
@@ -56,8 +57,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -133,6 +136,11 @@ public final class Carry {
 	static final double LIFT_GAP = 1.0;
 	/** (0.17.7) Anything wider or taller than this standing (blocks) is too big to lift by hand: a person fits, a horse or an ogre doesn't. */
 	static final float MAX_LIFT_WIDTH = 1.0F, MAX_LIFT_HEIGHT = 2.2F;
+	/**
+	 * (0.18.84) Armour + toughness points a body may wear and still be lifted by anyone (leather 7, gold 11, chain 12; iron
+	 * 15, diamond 28, netherite 32), and how many more each point of brawn lifts.
+	 */
+	public static final int FREE_ARMOUR = 12, ARMOUR_PER_BRAWN = 6;
 	/** After being let go, how long before the same one can be picked up again (ticks). */
 	static final int REGRAB_TICKS = 20;
 	/** Let go: a drop carries on with the carrier's momentum, nudged ahead; a throw goes this fast ahead and up (b/t). */
@@ -378,6 +386,10 @@ public final class Carry {
 	 * work on them).
 	 */
 	public static boolean canBeCarriedBy(Player player, Entity entity) {
+		if (com.jaymospowers.power.xenoform.forms.Slipfin.slippery(entity)) {
+			// (0.18.96) Slipfin slides out of any grip
+			return false;
+		}
 		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
 			|| windCarries(player, entity);
 	}
@@ -525,7 +537,12 @@ public final class Carry {
 				it.remove();
 				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
 					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
-					pickUp(player, target);
+					// (0.18.84) too heavy in their armour: a piece comes off instead, and the next lift tries again
+					if (overloaded(player, target) > 0) {
+						shed(player, (LivingEntity) target);
+					} else {
+						pickUp(player, target);
+					}
 				}
 				continue;
 			}
@@ -535,6 +552,78 @@ public final class Carry {
 					"|".repeat(filled) + ".".repeat(LIFT_BAR - filled)).withStyle(ChatFormatting.GRAY));
 			}
 		}
+	}
+
+	/**
+	 * (0.18.84) Andy: "you can then lift and carry them if you are strong enough. you may have to remove armor." How much
+	 * more armour {@code target} wears than {@code carrier} can lift (armour + toughness points, {@link #armourWeight}): 0
+	 * or less and they can. Anyone lifts {@link #FREE_ARMOUR} (a body in leather, chain or gold); each point of brawn
+	 * (Kitchen's {@code Hauling}: Strength, size, Might, Packhorse, a Z Fighter's) lifts {@link #ARMOUR_PER_BRAWN} more.
+	 * A Gravity user feels no weight, and a Wind user's snatch in the air, a block or a severed part are never too heavy.
+	 */
+	public static int overloaded(Player carrier, Entity target) {
+		if (!(target instanceof LivingEntity body) || target instanceof SeveredPart || CarryBlock.is(target) || GravityWeight.lightens(carrier)
+			|| windCarries(carrier, target)) {
+			return 0;
+		}
+		return armourWeight(body) - FREE_ARMOUR - ARMOUR_PER_BRAWN * KitchenCompat.brawn(carrier);
+	}
+
+	/** (0.18.84) The weight of what {@code body} wears: each armour piece's armour and toughness points. */
+	public static int armourWeight(LivingEntity body) {
+		int weight = 0;
+		for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+			if (slot.isArmor()) {
+				weight += pieceWeight(body.getItemBySlot(slot), slot);
+			}
+		}
+		return weight;
+	}
+
+	/** (0.18.84) One armour piece's weight, worn in {@code slot}: its armour and toughness points. */
+	static int pieceWeight(ItemStack stack, EquipmentSlot slot) {
+		if (stack.isEmpty()) {
+			return 0;
+		}
+		double[] points = {0.0};
+		stack.forEachModifier(slot, (attribute, modifier) -> {
+			if ((attribute.is(Attributes.ARMOR) || attribute.is(Attributes.ARMOR_TOUGHNESS))
+				&& modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+				points[0] += modifier.amount();
+			}
+		});
+		return (int) Math.round(points[0]);
+	}
+
+	/**
+	 * (0.18.84) Too heavy to lift: {@code carrier} pulls the heaviest piece of armour off the body instead, and it drops
+	 * beside them (a downed body only; someone standing is just too heavy). Lift again for the next piece, or the body.
+	 */
+	static void shed(ServerPlayer carrier, LivingEntity body) {
+		EquipmentSlot heaviest = null;
+		int most = 0;
+		for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+			int weight = slot.isArmor() ? pieceWeight(body.getItemBySlot(slot), slot) : 0;
+			if (weight > most) {
+				most = weight;
+				heaviest = slot;
+			}
+		}
+		if (heaviest == null || !Downed.isDowned(body)) {
+			carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.too_heavy", body.getDisplayName()).withStyle(ChatFormatting.RED));
+			return;
+		}
+		ItemStack piece = body.getItemBySlot(heaviest);
+		body.setItemSlot(heaviest, ItemStack.EMPTY);
+		ServerLevel level = carrier.level();
+		ItemEntity item = new ItemEntity(level, body.getX(), body.getY() + 0.3, body.getZ(), piece);
+		item.setDefaultPickUpDelay();
+		level.addFreshEntity(item);
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.8F, 0.8F);
+		carrier.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		int still = overloaded(carrier, body);
+		carrier.sendOverlayMessage(Component.translatable(still > 0 ? "message.jaymospowers.carry.shed_more" : "message.jaymospowers.carry.shed",
+			piece.getHoverName(), body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 	}
 
 	/** (0.17.18) The open air between two hitboxes (blocks): 0 when they touch or overlap. */

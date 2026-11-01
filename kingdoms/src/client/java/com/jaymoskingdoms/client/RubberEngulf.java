@@ -6,6 +6,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.RubberFolk;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -14,8 +15,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -27,6 +31,9 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * (0.7.290) Andy: "the absorb should animate the user's body leeching onto and over the enemy, like rubber, then it
@@ -43,6 +50,10 @@ import net.minecraft.world.phys.Vec3;
  * width grow by the foe's bulk, a little with each pulse, {@code BodySizes.withMass}).</li>
  * </ol>
  * The rubber is drawn in the world ({@link #render}); the swell goes on the model as it's posed ({@link #apply}).
+ * <p>
+ * (0.7.421) Andy: "the rubber swallow should animate from the outstretched hand in first person". Your own first-person
+ * arm reaches out ahead ({@link #firstPersonReach}), trembling with the pulses, and the rope leaves its fist: where the
+ * game drew the fist ({@link #captureFist}) is carried into the world, onto the same spot on screen.
  */
 public final class RubberEngulf {
 	/** Pink rubber with a sheen ({@code tools/gen_rubber_skin.py}). */
@@ -58,17 +69,71 @@ public final class RubberEngulf {
 	/** The mesh: sides round the rope, pieces along it; rings and slices of the skin. */
 	static final int SIDES = 8, PIECES = 14, RINGS = 10, SLICES = 14;
 
+	/** First person: how long your arm takes to reach out (ticks), and its tremble (degrees). */
+	static final float REACH_TICKS = 6.0F, FIRST_TREMBLE = 1.5F;
+	/**
+	 * First person, the right arm (hand view space, blocks): the game's own shoulder and fist, and where the reaching fist
+	 * goes and the way the arm points there (in from below, at the middle of the screen). The left arm is the mirror.
+	 */
+	static final Vector3f SHOULDER = new Vector3f(0.479F, -0.844F, -0.528F), FIST = new Vector3f(0.755F, -0.438F, -1.095F),
+		REACH_FIST = new Vector3f(0.26F, -0.24F, -1.15F), REACH_AIM = new Vector3f(0.12F, 0.3F, -1.0F).normalize();
+	/** The reach, for the right arm: the turn about the shoulder, and the move after it. */
+	static final Quaternionf REACH_TURN = new Quaternionf().rotationTo(new Vector3f(FIST).sub(SHOULDER).normalize(), REACH_AIM);
+	static final Vector3f REACH_MOVE = new Vector3f(REACH_FIST).sub(new Vector3f(FIST).sub(SHOULDER).rotate(REACH_TURN).add(SHOULDER));
+	/** Where the fist sits along the arm (model pixels from the shoulder pivot), the rope's root inside it. */
+	static final float FIST_DOWN = 9.0F, FIST_IN = 1.0F;
+
 	/** This frame's swell (0 .. 1) for a player who just swallowed, on their render state. */
 	static final RenderStateDataKey<Float> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:rubber_swell");
 
 	/** Entity id → the clock (ticks) their swallow began; → how far it had got last frame; → when they last swallowed. */
 	private static final Map<Integer, Float> STARTED = new HashMap<>(), REACHED = new HashMap<>(), SWALLOWED = new HashMap<>();
 
+	/** The camera's turn this frame (world render), for the hand pass that follows it. */
+	private static final Quaternionf ORIENTATION = new Quaternionf();
+	/** Your reaching fist in view space (blocks, hand projection), and the frame clock it was drawn at (-1: never). */
+	private static final Vector3f FIST_VIEW = new Vector3f();
+	private static float fistAt = -1.0F;
+	/** The game is drawing your reaching arm right now ({@link #captureFist} keeps its fist). */
+	private static boolean reaching;
+
 	private RubberEngulf() {
 	}
 
 	public static void register() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(RubberEngulf::render);
+	}
+
+	/**
+	 * (0.7.423, Andy: "rubber uses the skin colored blob animation to kind of melt onto the grab target") A Rubber-folk
+	 * gathering Jaymo's Powers' Self-Destruct melts onto the one they grabbed: the swallow's rope and skin, run up to
+	 * sealed ({@link #MELT}) and held there, wobbling, never gulped.
+	 */
+	static final float MELT = 0.58F;
+	private static net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> holding;
+	private static boolean lookedForHolding;
+
+	/** Powers' {@code ZFighterSelfDestruct.HOLDING}, looked up once; null without Powers. */
+	@SuppressWarnings("unchecked")
+	private static net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> holdingType() {
+		if (!lookedForHolding) {
+			lookedForHolding = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					holding = (net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer>)Class.forName("com.jaymospowers.power.zfighter.ZFighterSelfDestruct")
+						.getField("HOLDING").get(null);
+				} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+					holding = null;
+				}
+			}
+		}
+		return holding;
+	}
+
+	/** Who {@code player} is melting onto for a self-destruct (an entity id), or null. */
+	private static Integer melting(Player player) {
+		var type = holdingType();
+		return type == null ? null : player.getAttached(type);
 	}
 
 	/** {@code entity} is a Rubber-folk. */
@@ -100,10 +165,13 @@ public final class RubberEngulf {
 			return;
 		}
 		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		Vec3 camera = context.levelState().cameraRenderState.pos;
+		CameraRenderState cameraState = context.levelState().cameraRenderState;
+		Vec3 camera = cameraState.pos;
+		ORIENTATION.set(cameraState.orientation);
 		for (Player player : level.players()) {
 			float clock = player.tickCount + partialTick;
 			Integer id = player.getAttached(HeritageHold.ABSORBING);
+			boolean melt = id == null && (id = melting(player)) != null;
 			Entity foe = id == null || !rubber(player) ? null : level.getEntity(id);
 			if (!(foe instanceof LivingEntity)) {
 				if (STARTED.containsKey(player.getId())) {
@@ -115,19 +183,90 @@ public final class RubberEngulf {
 				continue;
 			}
 			float t = progress(player, clock);
-			draw(context, level, camera, player, foe, t, clock, partialTick);
+			if (melt) {
+				t = Math.min(t, MELT);
+				REACHED.put(player.getId(), t);
+			}
+			Vec3 fist = player == minecraft.player && cameraState.isFirstPerson ? firstPersonFist(cameraState, clock) : null;
+			draw(context, level, camera, player, foe, t, clock, partialTick, fist);
 		}
 	}
 
+	/**
+	 * Where your reaching fist is in the world this frame (first person): the fist as the game last drew it, moved out to
+	 * the same spot on screen through the world's own field of view. Null before the arm's been drawn (hand hidden).
+	 */
+	private static Vec3 firstPersonFist(CameraRenderState cameraState, float clock) {
+		if (fistAt < 0.0F || Math.abs(clock - fistAt) > 2.0F) {
+			return null;
+		}
+		// the hand is drawn at its own (fixed) field of view: the same spot on screen at the same depth is wider or narrower
+		float spread = 1.0F / (cameraState.projectionMatrix.m11() * (float)Math.tan(cameraState.hudFov * 0.5F * Mth.DEG_TO_RAD));
+		Vector3f world = new Vector3f(FIST_VIEW.x * spread, FIST_VIEW.y * spread, FIST_VIEW.z).rotate(cameraState.orientation);
+		return cameraState.pos.add(world.x, world.y, world.z);
+	}
+
+	/**
+	 * First person, before the game draws your {@code hand}: while you're swallowing, the main arm reaches out ahead,
+	 * trembling with the pulses. Returns how far it's out (0 .. 1); 0 leaves the hand to the game. The caller draws the
+	 * bare arm (whatever's held is hidden while the hand's out), between {@link #reaching(boolean)} true and false.
+	 */
+	public static float firstPersonReach(PoseStack poseStack, AvatarRenderState avatar, net.minecraft.world.InteractionHand hand) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Player player = minecraft.player;
+		if (player == null || avatar.id != player.getId() || avatar.isInvisible || hand != net.minecraft.world.InteractionHand.MAIN_HAND) {
+			return 0.0F;
+		}
+		Float started = STARTED.get(player.getId());
+		if (started == null || player.getAttached(HeritageHold.ABSORBING) == null && melting(player) == null) {
+			return 0.0F;
+		}
+		float clock = player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float w = ease(Mth.clamp((clock - started) / REACH_TICKS, 0.0F, 1.0F));
+		if (w <= 0.0F) {
+			return 0.0F;
+		}
+		float side = avatar.mainArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
+		// about the shoulder: turned to point ahead, then moved so the fist sits a little right of and below the middle
+		Quaternionf turn = new Quaternionf().slerp(new Quaternionf(REACH_TURN.x, side * REACH_TURN.y, side * REACH_TURN.z, REACH_TURN.w), w);
+		poseStack.translate(side * REACH_MOVE.x * w, REACH_MOVE.y * w, REACH_MOVE.z * w);
+		poseStack.translate(side * SHOULDER.x, SHOULDER.y, SHOULDER.z);
+		poseStack.rotate(turn);
+		poseStack.rotateDegrees(Axis.XP, Mth.sin(clock * 1.3F) * FIRST_TREMBLE * w);
+		poseStack.translate(-side * SHOULDER.x, -SHOULDER.y, -SHOULDER.z);
+		return w;
+	}
+
+	/** The game is (true) or done (false) drawing your reaching arm. */
+	public static void reaching(boolean now) {
+		reaching = now;
+	}
+
+	/** The game just drew a first-person {@code arm} at {@code poseStack}: if it's your reaching arm, keep where its fist is. */
+	public static void captureFist(PoseStack poseStack, ModelPart arm, boolean right) {
+		if (!reaching) {
+			return;
+		}
+		Matrix4f at = new Matrix4f(poseStack.last().pose());
+		at.translate(arm.x / 16.0F, arm.y / 16.0F, arm.z / 16.0F).rotate(new Quaternionf().rotationZYX(arm.zRot, arm.yRot, arm.xRot));
+		Vector3f fist = at.transformPosition(new Vector3f((right ? -FIST_IN : FIST_IN) / 16.0F, FIST_DOWN / 16.0F, 0.0F));
+		// the hand pass starts from the camera's turn: take it off, leaving the fist in view space
+		FIST_VIEW.set(fist).rotate(new Quaternionf(ORIENTATION).conjugate());
+		Minecraft minecraft = Minecraft.getInstance();
+		fistAt = minecraft.player == null ? -1.0F : minecraft.player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+	}
+
 	/** The rope and the skin for one swallow, {@code t} of the way through. */
-	private static void draw(LevelRenderContext context, ClientLevel level, Vec3 camera, Player player, Entity foe, float t, float clock, float partialTick) {
+	private static void draw(LevelRenderContext context, ClientLevel level, Vec3 camera, Player player, Entity foe, float t, float clock, float partialTick,
+		Vec3 firstPersonFist) {
 		Vec3 body = player.getPosition(partialTick);
 		Vec3 middle = foe.getPosition(partialTick).add(0.0, foe.getBbHeight() * 0.5, 0.0);
 		Vec3 flat = new Vec3(middle.x - body.x, 0.0, middle.z - body.z);
 		Vec3 toward = flat.lengthSqr() < 1.0E-6 ? player.getLookAngle().multiply(1.0, 0.0, 1.0).normalize() : flat.normalize();
 		// the reaching hand: out from the shoulder of the main arm, toward the foe
 		Vec3 right = new Vec3(-toward.z, 0.0, toward.x).scale(player.getMainArm() == HumanoidArm.RIGHT ? 1.0 : -1.0);
-		Vec3 hand = body.add(0.0, player.getBbHeight() * 0.72, 0.0).add(right.scale(0.33)).add(toward.scale(0.45));
+		Vec3 hand = firstPersonFist != null ? firstPersonFist
+			: body.add(0.0, player.getBbHeight() * 0.72, 0.0).add(right.scale(0.33)).add(toward.scale(0.45));
 		// the skin round the foe, and where the rope strikes it (its side facing the hand)
 		double rx = foe.getBbWidth() * 0.5 * SKIN_OFF, ry = foe.getBbHeight() * 0.5 * SKIN_OFF;
 		Vec3 back = hand.subtract(middle);

@@ -15,5 +15,8 @@
 	"item.jaymospowers.brawlers_belt": "Brawler's Belt",
 	"item.jaymospowers.divers_circlet": "Diver's Circlet",
 	"item.jaymospowers.featherfall_cloak": "Featherfall Cloak",
-	"item.jaymospowers.rabbit_foot_charm": "Rabbit's Foot Charm"
+	"item.jaymospowers.rabbit_foot_charm": "Rabbit's Foot Charm",
+	"item.jaymospowers.lantern_pole": "Lantern Pole",
+	"tooltip.jaymospowers.lantern_pole": "Worn on your back, the lantern hung out over your head",
+	"tooltip.jaymospowers.hip_lantern": "Fits the belt slot: hangs at your hip"
 }

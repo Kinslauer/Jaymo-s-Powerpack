@@ -83,7 +83,8 @@ final class CorpseRagdoll {
 		if (++sinceTable >= TABLE_EVERY) {
 			sinceTable = 0;
 			if (!body.pinned()) {
-				if (body.grounded()) {
+				// ((0.5.39) not while it's held: dragged over a table, it goes on over it)
+				if (body.grounded() && !body.gripped()) {
 					pinOnTable(corpse);
 				}
 			} else if (corpse.tableUnder(body) == null) {

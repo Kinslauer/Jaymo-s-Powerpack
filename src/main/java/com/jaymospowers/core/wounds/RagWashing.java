@@ -36,7 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 /**
- * (0.19.20) Getting a clean rag (docs/Healing-Plan.md section 3). Andy: "allow an inefficient method of purifying rags, to
+ * (0.19.24) Getting a clean rag (docs/Healing-Plan.md section 3). Andy: "allow an inefficient method of purifying rags, to
  * prevent festering, maybe involving water". A dirty rag ({@link MedicineItems#RAG}) may fester the wound it binds; a
  * clean one ({@link MedicineItems#CLEAN_RAG}) dresses the same and never does. Two ways, both slow on purpose:
  * <ul>
@@ -49,12 +49,12 @@ import net.minecraft.world.phys.HitResult;
  * All on the server; a boil is kept in memory only (a stopping server hands the rags out clean).
  */
 public final class RagWashing {
-	/** (0.19.20) Washing: one rag every this many ticks, and the chance it comes out still dirty. */
+	/** (0.19.24) Washing: one rag every this many ticks, and the chance it comes out still dirty. */
 	public static final int WASH_TICKS = 80;
 	public static final float STAYS_DIRTY = 0.25F;
-	/** (0.19.20) How far (blocks) you may face water to wash in it. */
+	/** (0.19.24) How far (blocks) you may face water to wash in it. */
 	public static final double WASH_REACH = 3.0;
-	/** (0.19.20) Boiling: a batch takes this many ticks, and holds this many rags per water level. */
+	/** (0.19.24) Boiling: a batch takes this many ticks, and holds this many rags per water level. */
 	public static final int BOIL_TICKS = 400, RAGS_PER_LEVEL = 4;
 	/** Washing is a held use this long (ticks); it ends when you let go or run out of rags. */
 	public static final int USE_TICKS = 72000;

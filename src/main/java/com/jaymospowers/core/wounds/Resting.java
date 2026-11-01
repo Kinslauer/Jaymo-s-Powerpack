@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.19.20) Rest by a fire and soaking in a hot spring: the gentle, slow kinds of healing that never mend a bone.
+ * (0.19.24) Rest by a fire and soaking in a hot spring: the gentle, slow kinds of healing that never mend a bone.
  * <ul>
  * <li><b>Campfire rest:</b> sneaking, in the low crouch or meditating, hardly moving, within {@link #FIRE_RANGE} blocks of
  * a lit campfire: every {@link #REST_INTERVAL} ticks the most hurt part heals {@link #REST_HEAL}, never above
@@ -36,25 +36,25 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Resting {
 	// ---- tuning ----
-	/** (0.19.20) Self-care stops at this share of a part (Kitchen's {@code Stomach.SELF_HEAL_CAP}, kept here so Powers doesn't need Kitchen). */
+	/** (0.19.24) Self-care stops at this share of a part (Kitchen's {@code Stomach.SELF_HEAL_CAP}, kept here so Powers doesn't need Kitchen). */
 	public static final float SELF_HEAL_CAP = 0.6F;
-	/** (0.19.20) How far from a lit campfire (blocks) rest counts. */
+	/** (0.19.24) How far from a lit campfire (blocks) rest counts. */
 	public static final int FIRE_RANGE = 3;
-	/** (0.19.20) Ticks between the heals of a rest, and what each heals (health points). */
+	/** (0.19.24) Ticks between the heals of a rest, and what each heals (health points). */
 	public static final int REST_INTERVAL = 100;
 	public static final float REST_HEAL = 0.75F;
-	/** (0.19.20) How long each rest or soak eases the pain for (ticks), refreshed every second. */
+	/** (0.19.24) How long each rest or soak eases the pain for (ticks), refreshed every second. */
 	public static final int EASE_TICKS = 100;
-	/** (0.19.20) The most a player may have moved in a second (blocks, squared) and still count as keeping still. */
+	/** (0.19.24) The most a player may have moved in a second (blocks, squared) and still count as keeping still. */
 	public static final double STILL_DISTANCE_SQR = 0.04;
-	/** (0.19.20) How far under your feet the magma may lie for a soak (blocks). */
+	/** (0.19.24) How far under your feet the magma may lie for a soak (blocks). */
 	public static final int SPRING_DEPTH = 3;
-	/** (0.19.20) Ticks between the heals of a soak, and what each heals (health points). */
+	/** (0.19.24) Ticks between the heals of a soak, and what each heals (health points). */
 	public static final int SOAK_HEAL_INTERVAL = 40;
 	public static final float SOAK_HEAL = 0.5F;
-	/** (0.19.20) Frozen ticks a second of soaking thaws (full freeze is 140). */
+	/** (0.19.24) Frozen ticks a second of soaking thaws (full freeze is 140). */
 	public static final int SOAK_THAW = 60;
-	/** (0.19.20) A Nausea or Slowness shorter than this (ticks) is a daze, and a soak clears it. */
+	/** (0.19.24) A Nausea or Slowness shorter than this (ticks) is a daze, and a soak clears it. */
 	public static final int DAZE_MAX_TICKS = 400;
 
 	private static final Map<ServerPlayer, Vec3> LAST = new WeakHashMap<>();

@@ -11,7 +11,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.459) The infirmary cot: a low bed (two blocks, like any bed, but a hand lower) of planks and wool. It is a vanilla
+ * (0.7.462) The infirmary cot: a low bed (two blocks, like any bed, but a hand lower) of planks and wool. It is a vanilla
  * {@link BedBlock} in everything but looks: it sleeps and rests ({@link BedRest}) and sets the spawn as a bed does, so the
  * sleep code needs nothing new. It has no colour and no block entity (a cot is drawn by its model, not the bed renderer).
  * Whoever lies on one for {@link Healing#COT_TICKS} where a healer works within {@link Healing#HEALER_NEAR} blocks, or a
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * {@link Healing#tick}.
  */
 public final class InfirmaryCot extends BedBlock {
-	/** (0.7.459) How high the cot stands (sixteenths of a block); vanilla beds stand 9. */
+	/** (0.7.462) How high the cot stands (sixteenths of a block); vanilla beds stand 9. */
 	static final int HEIGHT = 6;
 	private static final VoxelShape SHAPE = net.minecraft.world.level.block.Block.box(0.0, 0.0, 0.0, 16.0, HEIGHT, 16.0);
 

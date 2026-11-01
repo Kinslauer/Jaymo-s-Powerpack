@@ -63,7 +63,7 @@ public final class MedicineJei implements IModPlugin {
 		add(recipes, MedicineItems.WILLOW_BARK_TEA, note("tea.1", Pain.TEA_TICKS / 1200), note("tea.2", Pain.TEA_DELAY / 20), note("drink"));
 		add(recipes, MedicineItems.POPPY_SYRUP, note("poppy.1", Pain.POPPY_TICKS / 1200), note("poppy.2"), note("poppy.3"));
 		add(recipes, Items.HONEY_BOTTLE, note("clean.1"), note("clean.2"), note("sneak"));
-		// (0.19.20) the herbs: wild plants (right click a grown one to pick, plant the herb to grow more) and what they make
+		// (0.19.24) the herbs: wild plants (right click a grown one to pick, plant the herb to grow more) and what they make
 		add(recipes, Herbs.COMFREY, note("herb.1"), note("herb.2"), note("herb.comfrey"));
 		add(recipes, Herbs.YARROW, note("herb.1"), note("herb.2"), note("herb.yarrow"));
 		add(recipes, Herbs.PLANTAIN, note("herb.1"), note("herb.2"), note("herb.plantain"));

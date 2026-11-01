@@ -23,7 +23,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 /**
- * (0.19.20) Hot springs: small pools of warm water in mountain, taiga and snowy biomes
+ * (0.19.24) Hot springs: small pools of warm water in mountain, taiga and snowy biomes
  * ({@code worldgen/placed_feature/hot_spring.json}, a few per many chunks). Soaking in one heals slowly ({@link Resting}).
  * <p>
  * A pool is a disc of radius {@link #MIN_RADIUS} to {@link #MAX_RADIUS} cut {@link #WATER_DEPTH} deep into flat ground, its
@@ -34,11 +34,11 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
  */
 public final class HotSprings {
 	// ---- tuning ----
-	/** (0.19.20) Pool radius (blocks), at least and at most. */
+	/** (0.19.24) Pool radius (blocks), at least and at most. */
 	public static final int MIN_RADIUS = 2, MAX_RADIUS = 4;
-	/** (0.19.20) Layers of water, top level with the ground. */
+	/** (0.19.24) Layers of water, top level with the ground. */
 	public static final int WATER_DEPTH = 2;
-	/** (0.19.20) Of the rim blocks, this many in 100 are gravel, this many more calcite; the rest stone. */
+	/** (0.19.24) Of the rim blocks, this many in 100 are gravel, this many more calcite; the rest stone. */
 	public static final int RIM_GRAVEL = 45, RIM_CALCITE = 20;
 
 	private HotSprings() {

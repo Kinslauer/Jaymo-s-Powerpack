@@ -24,7 +24,7 @@ import org.joml.Vector3f;
  * The hologram over the band while you hold Z as yourself: the dialled alien, small and see-through, standing in a green
  * glow just above the dial, so you see who you're dialling as you scroll. It stands upright on screen whatever the wrist's
  * roll and turns to face you, swaying a little so it reads as a figure; it flickers, and goes red while the band can't
- * change you yet (recharging, or a hidden alien not yet earned). It rises with the dial's cap and sinks with it as the
+ * change you yet (recharging, or a hidden alien not yet earned). It rises with the face plate and sinks with it as the
  * hand comes down ({@link XenoformSlamView#pop}). Behind it, light fans up out of the band: a soft gradient
  * ({@code textures/entity/xeno_holo_glow.png}, drawn by {@code tools/gen_xenoform.py}) on a flat card facing you, tinted
  * and flickering with the figure. Drawn from {@link XenoBand#submitOnArm}, the pose stack in the arm's space.
@@ -39,6 +39,12 @@ final class XenoHologram {
 	static final int GLITCH_EVERY = 23;
 	/** The colours it's tinted: the band's green, or red while the band would refuse. */
 	static final int TINT = 0x7CFF9A, REFUSED_TINT = 0xFF5040;
+
+	/** (0.18.126, patch 9) The band's glow, a touch paler (its own green gives {@link #TINT}). */
+	static int tint(net.minecraft.world.entity.player.Player player) {
+		int glow = com.jaymospowers.power.xenoform.BandStyle.glow(player);
+		return glow == com.jaymospowers.power.xenoform.BandStyle.GREEN ? TINT : XenoLooks.mix(glow, 0xFFFFFF, 0.2F);
+	}
 	/** The glow behind it: its height (blocks, from the dial up), how far behind the figure it stands (blocks), and its opacity (0-1). */
 	static final float GLOW_HEIGHT = 0.48F, GLOW_BACK = 0.05F, GLOW_ALPHA = 0.75F;
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_holo_glow.png");
@@ -89,7 +95,7 @@ final class XenoHologram {
 		}
 		float fade = flicker * Math.min(1.0F, pop * 1.5F);
 		float reach = Mth.clamp(at.length() / REF_DISTANCE, MIN_REACH, MAX_REACH);
-		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : TINT;
+		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : tint(player);
 		// turned to face the camera (a model's front is its -z)
 		float face = (float)Math.toDegrees(Mth.atan2(at.x, at.z));
 		poseStack.pushPose();

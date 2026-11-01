@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -34,6 +35,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -53,6 +55,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -99,6 +102,8 @@ public final class ZFighterAfterlife {
 	static final int FALL_LIMIT = 24;
 	/** How long he stays at most (ticks) before the Other World lets him go. */
 	static final long STAY_TICKS = 36000L;
+	/** (0.18.121) How many chunks round the way home are loaded before he is sent back (0 = that chunk only). */
+	static final int HOME_RADIUS = 1;
 	/**
 	 * The site: the hall's middle in the Aether (blocks). Far from the lowland islands Wind arrives on (it arrives at the x and z it
 	 * rose from, and nobody rises from out here).
@@ -190,6 +195,19 @@ public final class ZFighterAfterlife {
 
 	private static final Map<UUID, Gauntlet> GAUNTLETS = new HashMap<>();
 
+	/**
+	 * (0.18.121, Andy: "crash on startup") A way home being opened: where he goes, and the loading of its chunks. Sending him back
+	 * used to load the spot on the server thread ({@code ServerLevel.getChunk}). Where it had never been generated (a new world,
+	 * a life story's way back) that stalled the whole server for most of a minute on the Deck, and every client timed out. Now
+	 * the chunks are asked for with a ticket of our own and he is sent on the tick they are there ({@link #tick}).
+	 */
+	private record Return(ResourceKey<Level> dimension, BlockPos at, CompletableFuture<?> loading) {
+	}
+
+	private static final Map<UUID, Return> RETURNS = new HashMap<>();
+	/** Holds a way home's chunks while they load: no timeout, loads, never saved (so it needs no registry entry). */
+	private static final TicketType HOMEWARD = new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_LOADING);
+
 	private ZFighterAfterlife() {
 	}
 
@@ -220,6 +238,7 @@ public final class ZFighterAfterlife {
 			PENDING.clear();
 			ARRIVALS.clear();
 			GAUNTLETS.clear();
+			RETURNS.clear();
 		});
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterAfterlife::tick);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -284,6 +303,26 @@ public final class ZFighterAfterlife {
 
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
+		if (!RETURNS.isEmpty()) {
+			for (Iterator<Map.Entry<UUID, Return>> it = RETURNS.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<UUID, Return> entry = it.next();
+				Return ret = entry.getValue();
+				if (!ret.loading().isDone()) {
+					continue;
+				}
+				it.remove();
+				ServerLevel to = server.getLevel(ret.dimension());
+				if (to == null) {
+					continue;
+				}
+				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+				if (player != null && player.isAlive() && among(player)) {
+					wake(player, to, ret.at());
+				}
+				// (after the move his own tickets hold the chunks; if he left, they're on disk for his next turn)
+				to.getChunkSource().removeTicketWithRadius(HOMEWARD, ChunkPos.containing(ret.at()), HOME_RADIUS);
+			}
+		}
 		if (!ARRIVALS.isEmpty()) {
 			for (Iterator<Map.Entry<UUID, Long>> it = ARRIVALS.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<UUID, Long> entry = it.next();
@@ -302,7 +341,7 @@ public final class ZFighterAfterlife {
 		}
 		for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
 			Long since = player.getAttached(STAY);
-			if (since == null) {
+			if (since == null || RETURNS.containsKey(player.getUUID())) {
 				continue;
 			}
 			if (now - since >= STAY_TICKS) {
@@ -396,7 +435,10 @@ public final class ZFighterAfterlife {
 		return inOtherWorld(player);
 	}
 
-	/** Back among the living: to where he woke in the world, whole, the halo gone. */
+	/**
+	 * Back among the living: to where he woke in the world, whole, the halo gone. (0.18.121) If the spot isn't loaded he waits
+	 * among the dead while it loads ({@link Return}) and goes on the tick it is there; a second call while it loads does nothing.
+	 */
 	static void returnHome(ServerPlayer player) {
 		endGauntlet(player);
 		MinecraftServer server = player.level().getServer();
@@ -409,6 +451,21 @@ public final class ZFighterAfterlife {
 		} else {
 			at = home.pos();
 		}
+		ChunkPos chunk = ChunkPos.containing(at);
+		if (to.getChunkSource().hasChunk(chunk.x(), chunk.z())) {
+			wake(player, to, at);
+			return;
+		}
+		if (RETURNS.containsKey(player.getUUID())) {
+			return;
+		}
+		CompletableFuture<?> loading = to.getChunkSource().addTicketAndLoadWithRadius(HOMEWARD, chunk, HOME_RADIUS);
+		RETURNS.put(player.getUUID(), new Return(to.dimension(), at, loading));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_opening").withStyle(ChatFormatting.AQUA));
+	}
+
+	/** The move itself, once the spot is loaded (the sync load stays for an odd failed load: the old way, a stall at worst). */
+	private static void wake(ServerPlayer player, ServerLevel to, BlockPos at) {
 		to.getChunk(at);
 		player.removeAttached(STAY);
 		player.removeAttached(TAUGHT);

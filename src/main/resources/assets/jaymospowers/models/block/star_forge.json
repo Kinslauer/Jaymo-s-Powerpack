@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymospowers:block/star_forge_top",
+    "bottom": "jaymospowers:block/star_forge_top",
+    "side": "jaymospowers:block/star_forge_side"
+  }
+}

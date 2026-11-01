@@ -528,7 +528,9 @@ public final class KingdomEvents {
 		} else if (faction != null && w.role() >= 0 && !Rulers.leaderRole(w.role())) {
 			// ((0.7.294) a caravan's villagers were never on its roster; (0.7.295) a war party's loss is undone, as its folk's)
 			WarParties.soldierDied(w);
-			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w));
+			// (0.7.439) a border clash's man was never on a roster either; and cutting one down takes a side
+			boolean clash = BorderClashes.died(level, w, killer);
+			lostHand(server, faction, w.role(), killer, !Caravans.isCaravanFolk(w) && !clash);
 		}
 	}
 

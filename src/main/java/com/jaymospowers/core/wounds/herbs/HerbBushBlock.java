@@ -30,14 +30,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.20) A wild herb (comfrey, yarrow, plantain, wild garlic, chamomile): a small bushy plant with four growth stages
+ * (0.19.24) A wild herb (comfrey, yarrow, plantain, wild garlic, chamomile): a small bushy plant with four growth stages
  * (age 0 to 3) that grows on random ticks in light, like a sweet berry bush. Right-click a grown one to pick
  * {@link #MIN_PICKED} to {@link #MAX_PICKED} herbs; it drops back to {@link #PICKED_AGE} and grows again. Breaking it gives
  * the herb back (the loot table: 1, or 1 to 3 when grown). The herb item is this block's item, so it plants itself (age 0)
  * on grass, dirt or farmland. The default state is a grown plant: that is what worldgen places.
  */
 public class HerbBushBlock extends Block {
-	// ---- tuning (0.19.20) ----
+	// ---- tuning (0.19.24) ----
 	/** A random tick grows it with 1 chance in this many, with this much light on it. */
 	public static final int GROW_CHANCE = 6, GROW_LIGHT = 9;
 	/** The age a picked plant goes back to, and the herbs a right-click gives. */

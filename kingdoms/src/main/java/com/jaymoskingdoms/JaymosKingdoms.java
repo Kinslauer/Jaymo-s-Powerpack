@@ -180,6 +180,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();
+		// (0.7.449) strangers come over only for a reason, and say why when asked
+		ComingOver.register();
 		// (0.7.264, Andy's NOEA picks) parties: invites, no friendly fire, shared slay quests, members' stats (and its attachment)
 		LOGGER.debug("party attachment: {}", Parties.META);
 		Parties.register();
@@ -249,6 +251,25 @@ public final class JaymosKingdoms implements ModInitializer {
 				// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();
+		// (0.7.425) Havens patch 1: the tribes and their grudge, the pedlar, the bestiary
+		Tribes.register();
+		Pedlars.register();
+		Bestiary.register();
+		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
+		OgreHolds.register();
+		BogIron.register();
+		CripplingBlows.register();
+		Trials.register();
+		Captains.register();
+		SwornCaptains.register();
+		InBalming.register();
+		Spoils.register();
+		HavenGates.register();
+		HavenWares.register();
+		BorderClashes.register();
+		TribePacts.register();
+		Tails.register();
+		GreenskinLife.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
@@ -283,6 +304,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoadLocks.register();
 		Manacles.register();
 		StoryGround.register();
+		// 0.7.452: the land round a new arrival made ahead in the background
+		ArrivalGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
@@ -293,6 +316,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
 		com.jaymoskingdoms.carpentry.Carpentry.register();
+		// 0.7.440: props: scarecrow, gravestone, lamp post, candle stand, plushies, planters
+		com.jaymoskingdoms.props.Props.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
@@ -302,6 +327,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobParry.register();
 		BladeClash.register();
 		Speech.register();
+		// (0.7.454) the Interact page's actions, sent ahead of MCA's screen
+		InteractActions.register();
 		// 0.7.332: proximity chat (typed chat heard only nearby) and voice-changer masks (payload before any receiver)
 		ProximityChat.register();
 		VoiceMasks.register();
@@ -320,7 +347,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
 		BedRest.register();
-		// (0.7.459) more healing: the infirmary cot, the shrine, and a healer's full treatment (and the shrine's attachment)
+		// (0.7.462) more healing: the infirmary cot, the shrine, and a healer's full treatment (and the shrine's attachment)
 		Healing.register();
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
@@ -410,10 +437,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
 		SharedHistory.register();
+		// (0.7.454) asking the way in town
+		Directions.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
+		PlayerTemperaments.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		GiftTales.register();
@@ -434,6 +464,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
+		RarePets.register();
 		// 0.7.201: letters, messenger pigeons and couriers across the land; the news by letter, not chat (and their attachments)
 		LOGGER.debug("post attachments: {} {} {} {}", Couriers.ERRANDS, PigeonPost.FLIGHTS, Post.NAMES, Post.WAITING);
 		Letters.register();
@@ -549,6 +581,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Whalers.register();
+		// 0.7.437: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
+		LOGGER.debug("far ground attachments: {} {}", FarGrounds.REACH, FarGrounds.ROVERS);
 		TreasureWrecks.register();
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);

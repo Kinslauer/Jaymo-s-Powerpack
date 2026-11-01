@@ -77,7 +77,7 @@ public class Ogre extends LegendMonster {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
-			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL));
+			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && !com.jaymoskingdoms.InBalming.spares(this, target)));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
 	}
 
@@ -89,6 +89,11 @@ public class Ogre extends LegendMonster {
 
 	public boolean twoHeads() {
 		return this.entityData.get(TWO_HEADS);
+	}
+
+	/** (0.7.426) Gives it two heads (and a club) or one: an outpost's brute, the king's guard. */
+	public void setTwoHeads(boolean two) {
+		this.entityData.set(TWO_HEADS, two);
 	}
 
 	@Override
@@ -106,6 +111,8 @@ public class Ogre extends LegendMonster {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		// (0.7.433) one Ambrose calmed: at its keeper's side
+		com.jaymoskingdoms.InBalming.ogreStep(level, this);
 		if (this.windup > 0) {
 			if (--this.windup == 0) {
 				this.smash(level);

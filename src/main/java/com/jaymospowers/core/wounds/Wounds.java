@@ -156,13 +156,15 @@ public final class Wounds {
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
-		// (0.19.20) herbal remedies' lasting effects, rag washing and boiling
+		// (0.19.24) herbal remedies' lasting effects, rag washing and boiling
 		Herbal.register();
 		RagWashing.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them
 		Tending.register();
 		SelfRevive.register();
+		// (0.19.20) hostiles walk up and finish a downed player off, filmed for them
+		MobExecutions.register();
 		// (0.15.82) up from the downed, but battered
 		Battered.register();
 		// (0.18.71) tripped by a bolas: a leg broken, face down on the ground a while
@@ -170,7 +172,7 @@ public final class Wounds {
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
-		// (0.19.20) rest by a campfire, soaking in a hot spring
+		// (0.19.24) rest by a campfire, soaking in a hot spring
 		Resting.register();
 		HotSprings.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)

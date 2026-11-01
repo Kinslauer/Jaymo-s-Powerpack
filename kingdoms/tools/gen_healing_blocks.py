@@ -1,4 +1,4 @@
-"""(0.7.459) The infirmary cot and the shrine: textures (16x16, painted per docs/Vanilla-Style.md), block models, blockstates,
+"""(0.7.462) The infirmary cot and the shrine: textures (16x16, painted per docs/Vanilla-Style.md), block models, blockstates,
 item definitions, loot tables and recipes. Run from kingdoms/: python -I tools/gen_healing_blocks.py
 
 Every face names a #variable (26.3 models: a raw sprite id renders purple). Each texture is a strip atlas: a face uses the whole

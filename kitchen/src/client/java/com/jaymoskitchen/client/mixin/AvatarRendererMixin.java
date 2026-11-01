@@ -26,5 +26,8 @@ abstract class AvatarRendererMixin {
 		state.setData(QuiverRenderData.KEY, worn == null ? null : QuiverRenderData.of(worn));
 		// carrying a corpse: arms out in front, under it
 		state.setData(CarryPose.KEY, entity instanceof Player player && CorpseEntity.carriedBy(player) != null);
+		// (0.5.39) dragging one: reaching back to the legs in hand
+		state.setData(com.jaymoskitchen.client.corpse.DragPose.KEY,
+			entity instanceof Player player ? com.jaymoskitchen.client.corpse.DragPose.of(player, state, partialTick) : null);
 	}
 }

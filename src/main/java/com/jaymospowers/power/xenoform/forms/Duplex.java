@@ -72,6 +72,9 @@ public final class Duplex extends XenoForm {
 	public static final int SWITCH_COOLDOWN = 40;
 	public static final double SWITCH_REACH = 32.0;
 	public static final int MERGE_COOLDOWN = 160;
+	/** (0.18.96) Sneak + V: looking out through a double's eyes; it ends past this range (blocks), and V's cooldown after. */
+	public static final double EYES_RANGE = 48.0;
+	public static final int EYES_COOLDOWN = 20;
 	public static final float MERGE_HEAL = 3.0F;
 	/** Doubles this far off (or farther) don't make it back for a merge. */
 	public static final double MERGE_RANGE = 24.0;
@@ -95,6 +98,7 @@ public final class Duplex extends XenoForm {
 
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
+		closeEyes(player, live);
 		popAll(player.level(), live.doubles);
 	}
 
@@ -115,6 +119,18 @@ public final class Duplex extends XenoForm {
 				}
 			}
 			case ABILITY_3 -> {
+				if (live.eyes >= 0) {
+					// V again: back behind your own eyes
+					closeEyes(player, live);
+					cooldown(player, live, V, EYES_COOLDOWN);
+					return;
+				}
+				if (player.isShiftKeyDown()) {
+					if (ready(player, live, V) && openEyes(player, live)) {
+						cooldown(player, live, V, EYES_COOLDOWN);
+					}
+					return;
+				}
 				if (ready(player, live, V) && swap(player, live)) {
 					cooldown(player, live, V, SWITCH_COOLDOWN);
 				}
@@ -131,6 +147,14 @@ public final class Duplex extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		if (live.eyes >= 0) {
+			// (0.18.96) looking through a double: you stand still; it ends if the double goes or strays too far
+			if (player.level().getEntity(live.eyes) instanceof XenoDouble twin && twin.isAlive() && twin.distanceTo(player) <= EYES_RANGE) {
+				player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 5, 9, false, false));
+			} else {
+				closeEyes(player, live);
+			}
+		}
 		if (player.tickCount % 10 != 0) {
 			return;
 		}
@@ -434,6 +458,40 @@ public final class Duplex extends XenoForm {
 		return true;
 	}
 
+	/**
+	 * (0.18.96) Sneak + V: look out through the aimed double's eyes (or the farthest one): your own client's camera moves
+	 * to it ({@code XenoformState.EYES}, synced to you only) while your body stands where it was.
+	 */
+	private static boolean openEyes(ServerPlayer player, XenoformPower.Live live) {
+		LivingEntity aimedAt = aimedDouble(player);
+		XenoDouble pick = aimedAt instanceof XenoDouble twin ? twin : null;
+		if (pick == null) {
+			double best = -1.0;
+			for (XenoDouble twin : loyal(player, live)) {
+				double d = twin.distanceToSqr(player);
+				if (d > best && d < EYES_RANGE * EYES_RANGE) {
+					best = d;
+					pick = twin;
+				}
+			}
+		}
+		if (pick == null) {
+			return false;
+		}
+		live.eyes = pick.getId();
+		player.setAttached(XenoformState.EYES, pick.getId());
+		sound(player, SoundEvents.COPPER_BULB_TURN_ON, 0.8F, 1.8F);
+		return true;
+	}
+
+	private static void closeEyes(ServerPlayer player, XenoformPower.Live live) {
+		if (live.eyes >= 0) {
+			live.eyes = -1;
+			player.removeAttached(XenoformState.EYES);
+			sound(player, SoundEvents.COPPER_BULB_TURN_OFF, 0.8F, 1.4F);
+		}
+	}
+
 	/** The double under the crosshair (aimed() skips allies, and loyal doubles are your allies). */
 	private static @Nullable LivingEntity aimedDouble(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
@@ -494,6 +552,11 @@ public final class Duplex extends XenoForm {
 		}
 		storm(player, live);
 		announce(player, 1 + live.doubles.size());
+		return true;
+	}
+
+	@Override
+	public boolean ultimateHasMove() {
 		return true;
 	}
 

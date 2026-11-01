@@ -67,12 +67,17 @@ public final class SharedHistory {
 	/** What you did to them, to apologise for. */
 	static final Set<Recollections.Kind> WRONGS = Set.of(Recollections.Kind.STRUCK, Recollections.Kind.RUDE, Recollections.Kind.LIED,
 		Recollections.Kind.THREATENED, Recollections.Kind.CRIME, Recollections.Kind.ROBBED, Recollections.Kind.KILLED_KIN, Recollections.Kind.REBUFFED,
-		Recollections.Kind.QUEST_FAILED, Recollections.Kind.THREW);
+		Recollections.Kind.QUEST_FAILED, Recollections.Kind.THREW,
+		// (0.7.424)
+		Recollections.Kind.QUESTIONED,
+		// (0.7.449) a theft laid at their door wrongly
+		Recollections.Kind.ACCUSED);
 	/** What they did to you, to have out with them. */
 	static final Set<Recollections.Kind> ROUGH = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU);
 	/** What you did for them, to ask after. */
 	static final Set<Recollections.Kind> HELPED = Set.of(Recollections.Kind.SAVED, Recollections.Kind.FREED, Recollections.Kind.HOME,
-		Recollections.Kind.MENDED, Recollections.Kind.CARRIED, Recollections.Kind.GOT_UP, Recollections.Kind.TENDED, Recollections.Kind.SHIELDED);
+		Recollections.Kind.MENDED, Recollections.Kind.CARRIED, Recollections.Kind.GOT_UP, Recollections.Kind.TENDED, Recollections.Kind.SHIELDED,
+		Recollections.Kind.SPARED);
 	/** A first dealing that colours an introduction. */
 	static final Set<Recollections.Kind> FIRST = Set.of(Recollections.Kind.SHOVED_YOU, Recollections.Kind.SEARCHED_YOU, Recollections.Kind.HALTED_YOU,
 		Recollections.Kind.REVIVED_YOU, Recollections.Kind.LED_YOU, Recollections.Kind.STRUCK, Recollections.Kind.RUDE, Recollections.Kind.CRIME,

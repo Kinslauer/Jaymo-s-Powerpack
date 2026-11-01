@@ -154,8 +154,14 @@ public final class LifeStory {
 	/** (0.7.417, Andy) The heritages that can wake in the alchemist's lab. */
 	static final Set<Heritage.Kind> LAB_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.of(Heritage.Kind.BIOBUILT,
 		Heritage.Kind.RUBBERFOLK, Heritage.Kind.EMBERBORN, Heritage.Kind.STONEBORN, Heritage.Kind.SYLVAN));
+	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan or Bio-built). */
+	static final Set<Heritage.Kind> GREENSKIN_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.complementOf(java.util.EnumSet.of(
+		Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN, Heritage.Kind.BIOBUILT, Heritage.Kind.GOBLIN,
+		Heritage.Kind.ORC)));
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
+	/** (0.7.451) "Let fate decide": how its pick is shown across the screen on waking (ticks to fade in, to stay, to fade out). */
+	static final int FATE_TITLE_IN = 20, FATE_TITLE_STAY = 200, FATE_TITLE_OUT = 40;
 
 	public static final String FATE = "fate";
 
@@ -166,6 +172,8 @@ public final class LifeStory {
 		// (0.7.412, Andy's picks from the Kenshi and Streets of Rogue study) the hard roads: chained among a camp's captives, starving and
 		// maimed beside an outlaw camp, in a realm's cells, put out of a realm's streets, in an outlaw hideout, turned away by your own kind
 		CHAINED(false), ROCK_BOTTOM(false), SENTENCED(true), EVICTED(true), HIDEOUT(false), CAST_OUT(false),
+		// (0.7.443, Havens patch 7b) raised in an orc camp or a goblin village (GreenskinLife)
+		GREENSKIN(false),
 		// (0.7.414, the kit roads) a family blade someone wants back, a pack mule on a King's Road, a pup at heel, three poor hired hands
 		HEIRLOOM(false), TRADER(false), PUP(false), NOBODIES(false),
 		// (0.7.417, the powered roads) a hermit alchemist's lab (Powers), the Mad Tinkerer's bench (Powers), the moon's curse
@@ -226,6 +234,7 @@ public final class LifeStory {
 		TERMS.put(Start.MAW, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.CHAINED, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.CAST_OUT, new Terms(Mark.VERY_HARD, 0));
+		TERMS.put(Start.GREENSKIN, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
 		// (0.7.414) the kit roads
 		TERMS.put(Start.HEIRLOOM, new Terms(Mark.HARD, 0));
@@ -251,7 +260,29 @@ public final class LifeStory {
 	 * first that is the born heritage's is pre-picked); {@code start}: question 6's; {@code realm}: you name a realm for it.
 	 */
 	public record Answer(String key, Item icon, Heritage.@Nullable Kind heritage, Stats.@Nullable Stat stat, boolean freePoint,
-		Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm) {
+		Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm,
+		Set<Heritage.Kind> only, Set<Heritage.Kind> never) {
+
+		Answer(String key, Item icon, Heritage.@Nullable Kind heritage, Stats.@Nullable Stat stat, boolean freePoint,
+			Classes.@Nullable PlayerClass cls, String power, List<String> looks, @Nullable Start start, boolean realm) {
+			this(key, icon, heritage, stat, freePoint, cls, power, looks, start, realm, Set.of(), Set.of());
+		}
+
+		/**
+		 * (0.7.448) Andy: "this screen should recontextualize dependent on which heritage you pick. bio built wouldnt have
+		 * anyone who raised them". An answer only those born to {@code kinds} are asked (the vat-born's Tinkerer, the fair's
+		 * acrobats).
+		 */
+		Answer onlyBorn(Heritage.Kind... kinds) {
+			return new Answer(this.key, this.icon, this.heritage, this.stat, this.freePoint, this.cls, this.power, this.looks, this.start, this.realm,
+				Set.of(kinds), this.never);
+		}
+
+		/** (0.7.448) An answer that makes no sense for those born to {@code kinds} (a vat-born's noble family): not asked of them. */
+		Answer notBorn(Heritage.Kind... kinds) {
+			return new Answer(this.key, this.icon, this.heritage, this.stat, this.freePoint, this.cls, this.power, this.looks, this.start, this.realm,
+				this.only, Set.of(kinds));
+		}
 
 		static Answer born(Heritage.Kind kind, String key) {
 			return new Answer(key, kind.icon, kind, null, false, null, "", List.of(), null, false);
@@ -298,10 +329,15 @@ public final class LifeStory {
 		 * Emberborn, Stoneborn or Sylvan. Empty for any.
 		 */
 		public Set<Heritage.Kind> onlyFor() {
+			if (!this.only.isEmpty()) {
+				return this.only;
+			}
 			return switch (this.start) {
 				case VERDANT -> Set.of(Heritage.Kind.VERDANT);
 				case DEMON -> Set.of(Heritage.Kind.EMBERBORN);
 				case CAST_OUT -> Set.of(Heritage.Kind.BIOBUILT);
+				// (0.7.443) a half-orc or a goblin-raised human: one who passes for human
+				case GREENSKIN -> GREENSKIN_KINDS;
 				case LAB -> LAB_KINDS;
 				case null, default -> Set.of();
 			};
@@ -309,6 +345,9 @@ public final class LifeStory {
 
 		/** (0.7.417) Whether {@code kind} may take this start: any (the start is for no one heritage alone), or one of {@link #onlyFor}. */
 		public boolean fits(Heritage.@Nullable Kind kind) {
+			if (kind != null && this.never.contains(kind)) {
+				return false;
+			}
 			Set<Heritage.Kind> only = this.onlyFor();
 			return only.isEmpty() || kind != null && only.contains(kind);
 		}
@@ -365,7 +404,24 @@ public final class LifeStory {
 				Answer.raised("healers", Items.GLISTERING_MELON_SLICE, Stats.Stat.WITS, false),
 				Answer.raised("wizard", Items.ENCHANTED_BOOK, Stats.Stat.WITS, false),
 				Answer.raised("outlaws", Items.TRIPWIRE_HOOK, Stats.Stat.AGILITY, false),
-				Answer.raised("nobles", Items.GOLDEN_HELMET, Stats.Stat.WITS, true),
+				// (0.7.448) no noble house claims a vat-born, and the warband has no titles to give
+				Answer.raised("nobles", Items.GOLDEN_HELMET, Stats.Stat.WITS, true).notBorn(Heritage.Kind.BIOBUILT, Heritage.Kind.WARRIORBORN,
+					Heritage.Kind.VERDANT),
+				// (0.7.448) who only some bloods could have been raised by (the rest of the answers are told their way: lang
+				// story.jaymoskingdoms.as.<heritage>.<question>...)
+				Answer.raised("tinkerer", Items.REDSTONE, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.BIOBUILT),
+				Answer.raised("vatkin", Items.GLASS_BOTTLE, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.BIOBUILT),
+				Answer.raised("acrobats", Items.FEATHER, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.RUBBERFOLK),
+				Answer.raised("ringmaster", Items.NAME_TAG, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.RUBBERFOLK),
+				Answer.raised("keepers", Items.PRISMARINE_SHARD, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.TIDEBORN),
+				Answer.raised("grovekeepers", Items.FERN, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.SYLVAN),
+				Answer.raised("elders", Items.GLOW_BERRIES, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.VERDANT),
+				Answer.raised("hornkin", Items.GOLD_INGOT, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.EMBERBORN),
+				Answer.raised("wolves", Items.BONE, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.FROSTBORN),
+				Answer.raised("barrows", Items.SOUL_LANTERN, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.NIGHTBORN),
+				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
+				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
+				Answer.raised("sunpriests", Items.GLOWSTONE_DUST, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.DAWNBORN),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(
 				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit"),
@@ -422,6 +478,7 @@ public final class LifeStory {
 				Answer.road(Start.EVICTED, Items.OAK_DOOR),
 				Answer.road(Start.HIDEOUT, Items.BARREL),
 				Answer.road(Start.CAST_OUT, Items.SLIME_BALL),
+				Answer.road(Start.GREENSKIN, Items.ROTTEN_FLESH),
 				Answer.road(Start.HEIRLOOM, Items.IRON_SWORD),
 				Answer.road(Start.TRADER, Items.CHEST),
 				Answer.road(Start.PUP, Items.BONE),
@@ -851,6 +908,12 @@ public final class LifeStory {
 			}
 			heritage = kinds[live.heritage()];
 		}
+		// (0.7.448) the questions asked were the birthplace's: an answer for another blood (a vat-born's Tinkerer) is refused
+		for (Answer a : new Answer[] {raised, child, youth, turn}) {
+			if (a != null && !a.fits(born.heritage)) {
+				return;
+			}
+		}
 		// (0.7.349) the Verdant World's start is the Verdant-born's alone (0.7.355: the demon master's, the Emberborn's); the afterlife's makes you Divine-born
 		if (road != null && !road.fits(heritage)) {
 			return;
@@ -876,6 +939,8 @@ public final class LifeStory {
 		}
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road == null ? "" : road.key));
+		// (Powers' Motion patch 1) the temperament the story makes, fixed for good; told once the road is chosen too
+		PlayerTemperaments.settle(player, road != null);
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
 		Flaws.choose(player, live.flaws(), live.switches());
 		Heritage.set(player, heritage);
@@ -948,6 +1013,7 @@ public final class LifeStory {
 		List<String> story = new ArrayList<>(of(player));
 		story.set(Question.ROAD.ordinal(), road.key);
 		player.setAttached(STORY, List.copyOf(story));
+		PlayerTemperaments.settle(player, true);
 		// (0.7.420) a road told after the creator may add story points of its own (Rustfall's), which a life from nothing gives up too
 		if (road.start == Start.RUSTFALL) {
 			Flaws.giveUpMore(player, RUSTFALL_STAT, 1);
@@ -1002,7 +1068,8 @@ public final class LifeStory {
 			return;
 		}
 		RandomSource random = player.getRandom();
-		Start road0 = chosen == Start.FATE ? fated(server, player, random) : chosen;
+		boolean byFate = chosen == Start.FATE;
+		Start road0 = byFate ? fated(server, player, random) : chosen;
 		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
 		java.util.function.Consumer<Start> go = start -> {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -1016,7 +1083,7 @@ public final class LifeStory {
 			p.removeAttached(ROAD);
 			DEPARTED.remove(id);
 			StoryStasis.release(p);
-			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling);
+			arrive(p, start, roadRealm, bornAs, raised, cls, option, calling, byFate);
 		};
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
@@ -1034,7 +1101,7 @@ public final class LifeStory {
 
 	/** Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. */
 	private static void arrive(ServerPlayer player, Start start, @Nullable Faction roadRealm, Heritage.Kind bornAs, Answer raised,
-		Classes.PlayerClass cls, String option, String calling) {
+		Classes.PlayerClass cls, String option, String calling, boolean fated) {
 		RandomSource random = player.getRandom();
 		Start landed = begin(player, start, roadRealm, bornAs, random);
 		if (landed == Start.UNARMED || landed == Start.ROCK_BOTTOM) {
@@ -1063,6 +1130,8 @@ public final class LifeStory {
 		Flaws.landed(player);
 		// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 		StoryGround.settle(player);
+		// (0.7.452) and the land round them made ahead in the background, wherever the start put them (ArrivalGround)
+		ArrivalGround.around(player);
 		if (start == Start.TIMELOST) {
 			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
 			PowersCompat.awaken(player, "chrono");
@@ -1074,8 +1143,18 @@ public final class LifeStory {
 			PowersCompat.call(player, calling, ECHO_TICKS);
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
-			Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
+		String road = "story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT);
+		player.sendSystemMessage(Component.translatable(fated ? "message.jaymoskingdoms.story.fated" : "message.jaymoskingdoms.story.begun",
+			Component.translatable(road)).withStyle(ChatFormatting.GOLD));
+		if (fated) {
+			// (0.7.451) Andy: "there is nothing that tells you the start you got if you choose the random start": fate's pick
+			// across the screen as they wake, held past the few seconds the land takes to load
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(FATE_TITLE_IN, FATE_TITLE_STAY, FATE_TITLE_OUT));
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+				Component.translatable(road + ".short", "").withStyle(ChatFormatting.GRAY)));
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+				Component.translatable("message.jaymoskingdoms.story.fated.title", Component.translatable(road)).withStyle(ChatFormatting.GOLD)));
+		}
 	}
 
 	/**
@@ -1395,6 +1474,16 @@ public final class LifeStory {
 					}
 				}
 			}
+			case GREENSKIN -> {
+				// (0.7.443) just outside the orc camp or goblin village that raised you (GreenskinLife)
+				Faction camp = GreenskinLife.home(server, spawn);
+				if (camp != null) {
+					to = spot(level, mate, camp.seat(), GreenskinLife.WAKE_MIN, GreenskinLife.WAKE_MAX, random);
+					if (to != null) {
+						GreenskinLife.raise(player, camp);
+					}
+				}
+			}
 			case CAST_OUT -> {
 				// (0.7.412) outside the gates of a haven that would have taken them in (the wild without one): their own turn them away for three days
 				Faction haven = StoryHomes.standing(server, player, heritage, spawn);
@@ -1678,6 +1767,15 @@ public final class LifeStory {
 		if (landed == Start.HIDEOUT) {
 			give(player, new ItemStack(Items.EMERALD, HIDEOUT_EMERALDS));
 		}
+		if (landed == Start.GREENSKIN) {
+			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
+			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
+			give(player, new ItemStack(Items.STONE_AXE));
+			give(player, new ItemStack(Items.ROTTEN_FLESH, 3));
+			if (!GreenskinLife.halfOrc(player) && Disguise.MASK != null) {
+				give(player, new ItemStack(Disguise.MASK));
+			}
+		}
 		if (landed == Start.CAVE) {
 			give(player, new ItemStack(Items.IRON_PICKAXE));
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
@@ -1856,7 +1954,7 @@ public final class LifeStory {
 
 	/** (0.7.412) The starts that tell you a line on waking (lang {@code message.jaymoskingdoms.story.<start>}). */
 	static final Set<Start> HARD_MESSAGES = Set.of(Start.CAPTIVE, Start.TIMELOST, Start.CHAINED, Start.ROCK_BOTTOM, Start.SENTENCED, Start.EVICTED,
-		Start.HIDEOUT, Start.CAST_OUT, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
+		Start.HIDEOUT, Start.CAST_OUT, Start.GREENSKIN, Start.HEIRLOOM, Start.TRADER, Start.PUP, Start.NOBODIES, Start.LAB, Start.ANDROID, Start.MOON_CURSED);
 
 	/**
 	 * (0.7.417, Start Together) Where a player's road set them down: the start that came to pass, the realm it named (-1: none),

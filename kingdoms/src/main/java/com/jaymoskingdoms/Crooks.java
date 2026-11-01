@@ -135,6 +135,14 @@ public final class Crooks {
 	static final long CONFRONT_TICKS = 20L * 60 * 5, OWED_TICKS = 24000L;
 	/** Confronting: the chance they give it back (base, with a weapon in hand, per 100 reputation; never under or over). */
 	static final float GIVE_BACK = 0.35F, GIVE_BACK_ARMED = 0.25F, GIVE_BACK_REP = 0.04F, GIVE_BACK_MIN = 0.1F, GIVE_BACK_MAX = 0.85F;
+	/**
+	 * (0.7.449) Andy: "you should be able to confront who you think stole from you in the talk or interact screen.
+	 * accusing the wrong person loses you hearts w them". "Accuse them of theft" ({@link #ACCUSE_ANSWER}) in MCA's menu,
+	 * for {@link #OWED_TICKS} after you find something gone: the thief is confronted as by a right-click, however long
+	 * ago it was; anyone else takes it badly ({@link #WRONG_HEARTS}, and they remember it).
+	 */
+	public static final String ACCUSE_ANSWER = "jaymoskingdoms_thief";
+	static final int WRONG_HEARTS = -8;
 	/** On the run: how long (ticks), how far off they make for, their pace. */
 	static final int RUN_TICKS = 20 * 45;
 	static final double RUN_DISTANCE = 40.0;
@@ -222,6 +230,10 @@ public final class Crooks {
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
 	private static final List<Gloat> GLOATS = new ArrayList<>();
 	private static final List<Missed> MISSED = new ArrayList<>();
+	/** (0.7.449) Player → when they last found they'd been robbed or cheated (game time). */
+	private static final Map<UUID, Long> ROBBED_AT = new HashMap<>();
+	/** (0.7.449) "player/villager": who each player has accused since they were last robbed. */
+	private static final Set<String> ACCUSED = new HashSet<>();
 	/** Faction → when it last suffered arson (game time). */
 	private static final Map<Integer, Long> ARSON = new HashMap<>();
 
@@ -261,6 +273,8 @@ public final class Crooks {
 			GLOATS.clear();
 			MISSED.clear();
 			ARSON.clear();
+			ROBBED_AT.clear();
+			ACCUSED.clear();
 		});
 	}
 
@@ -585,10 +599,12 @@ public final class Crooks {
 			caught(level, crook, f, seen.get(0), "thief", NOTE_PICK);
 			mark.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.picked_seen", crook.getDisplayName(), what)
 				.withStyle(ChatFormatting.RED));
+			robbed(mark, now);
 		} else if (random.nextFloat() < FEEL_CHANCE) {
 			// felt it: they know who, and the crook makes off
 			mark.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.picked_felt", crook.getDisplayName(), what)
 				.withStyle(ChatFormatting.RED));
+			robbed(mark, now);
 			Speech.say(level, crook, line("caught", random), Speech.YELLOW, Approaches.SPEECH_RANGE);
 			run(level, crook, mark.position());
 		} else {
@@ -850,6 +866,10 @@ public final class Crooks {
 				continue;
 			}
 			it.remove();
+			ServerPlayer cheated = level.getServer().getPlayerList().getPlayer(g.player());
+			if (cheated != null) {
+				robbed(cheated, now);
+			}
 			if (g.crook().isAlive() && !Downed.isDowned(g.crook())) {
 				// aloud, over their head: anyone near hears them crow
 				Speech.say(level, g.crook(), Component.translatable("crook.jaymoskingdoms.gloat." + level.getRandom().nextInt(LINES), g.paid()),
@@ -869,6 +889,7 @@ public final class Crooks {
 			ServerPlayer player = server.getPlayerList().getPlayer(m.player());
 			if (player != null) {
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.missed", m.what()).withStyle(ChatFormatting.GRAY));
+				robbed(player, now);
 			}
 		}
 	}
@@ -929,6 +950,11 @@ public final class Crooks {
 	 * way, they're found out. False if there's nothing to confront them about.
 	 */
 	private static boolean confront(ServerLevel level, ServerPlayer player, Villager crook) {
+		return confront(level, player, crook, false);
+	}
+
+	/** (0.7.449) {@code late}: accused from their menu, however long ago it was (while it's still owed). */
+	private static boolean confront(ServerLevel level, ServerPlayer player, Villager crook, boolean late) {
 		Pockets p = POCKETS.get(crook.getUUID());
 		if (p == null || Downed.isDowned(crook) || p.confronted.contains(player.getUUID()) || player.distanceTo(crook) > Approaches.TALK_RANGE) {
 			return false;
@@ -936,7 +962,7 @@ public final class Crooks {
 		long now = level.getGameTime();
 		List<Owed> mine = new ArrayList<>();
 		for (Owed o : p.owed) {
-			if (player.getUUID().equals(o.owner()) && now <= o.confrontBy()) {
+			if (player.getUUID().equals(o.owner()) && (late || now <= o.confrontBy())) {
 				mine.add(o);
 			}
 		}
@@ -970,6 +996,44 @@ public final class Crooks {
 			run(level, crook, player.position());
 		}
 		return true;
+	}
+
+	// ---- (0.7.449) accusing someone of it ---------------------------------------------------------------------------
+
+	/** {@code player} has found they were robbed or cheated: for a while they can accuse whoever they think did it. */
+	private static void robbed(ServerPlayer player, long now) {
+		ROBBED_AT.put(player.getUUID(), now);
+		String mine = player.getUUID() + "/";
+		ACCUSED.removeIf(k -> k.startsWith(mine));
+	}
+
+	/** "Accuse them of theft" shows on a grown villager while {@code player} has a theft to lay at someone's door, and hasn't yet accused them. */
+	public static boolean canAccuse(ServerPlayer player, Villager villager) {
+		Long at = ROBBED_AT.get(player.getUUID());
+		if (at == null || player.level().getGameTime() - at > OWED_TICKS) {
+			return false;
+		}
+		Pockets p = POCKETS.get(villager.getUUID());
+		return !villager.isBaby() && !Downed.isDowned(villager) && !ACCUSED.contains(player.getUUID() + "/" + villager.getUUID())
+			&& (p == null || !p.confronted.contains(player.getUUID()));
+	}
+
+	/** {@code player} accuses {@code villager} of robbing them: the thief is confronted; anyone else is hurt by it, and remembers. */
+	public static void accuse(ServerPlayer player, Villager villager) {
+		ServerLevel level = player.level();
+		ACCUSED.add(player.getUUID() + "/" + villager.getUUID());
+		if (confront(level, player, villager, true)) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		Speech.say(level, player, line("demand", random), Speech.WHITE, Approaches.SPEECH_RANGE);
+		villager.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		Speech.tell(level, villager, player, line("wrongly_accused", random), Speech.RED);
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
+		McaCompat.hearts(villager, player, WRONG_HEARTS);
+		Recollections.remember(villager, player, Recollections.Kind.ACCUSED, Component.empty());
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.crook.wrongly_accused", villager.getDisplayName())
+			.withStyle(ChatFormatting.GRAY));
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {

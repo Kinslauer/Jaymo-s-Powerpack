@@ -37,6 +37,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up; (0.7.380) only the one for the latest of it ({@link SharedHistory#current}).
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}) shows only on a guard of a town that owes you a favour.
+ * (0.7.454) "Seek an audience", a pedlar's wares, tribute and a sworn captain's orders moved to the Interact page
+ * ({@link com.jaymoskingdoms.InteractActions}): never in the talk menu now.
+ * (0.7.449) "Ask what's going on" ({@link com.jaymoskingdoms.ComingOver#ANSWER}) shows only on one who came over to you lately.
+ * (0.7.449) "Accuse them of theft" ({@link com.jaymoskingdoms.Crooks#ACCUSE_ANSWER}) shows only after you've found you were robbed.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -105,6 +109,14 @@ abstract class McaAnswersMixin {
 				}
 			}
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Crooks.canAccuse(player, villager)) {
+			// (0.7.449) only while you've a theft to lay at someone's door, and not on one you've already accused
+			cir.getReturnValue().remove(com.jaymoskingdoms.Crooks.ACCUSE_ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ComingOver.canAsk(player, villager)) {
+			// (0.7.449) only one who came over to you lately
+			cir.getReturnValue().remove(com.jaymoskingdoms.ComingOver.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Captives.canSpeakOf(player, villager)) {
 			// (0.7.340) only a guard of a town that owes you for one you brought home
 			cir.getReturnValue().remove(com.jaymoskingdoms.Captives.ANSWER);
@@ -128,6 +140,46 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !com.jaymoskingdoms.forms.Bouts.canOffer(player, villager)) {
 			// (0.7.385) only today's bout master of a realm at its festival
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Bouts.ANSWER);
+		}
+		if ("main".equals(name)) {
+			// (0.7.425) a tribe's pedlar: his wares and the tribe's mood; tribute to a chief or the pedlar, owing a grudge
+			if (!com.jaymoskingdoms.Pedlars.pedlar(villager)) {
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.WARES_ANSWER);
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.MOOD_ANSWER);
+			}
+			if (!com.jaymoskingdoms.SwornCaptains.takesOrders(player, villager)) {
+				// (0.7.433) only a captain sworn to you, at your side, is sent spying or raiding
+				cir.getReturnValue().remove(com.jaymoskingdoms.SwornCaptains.SPY_ANSWER);
+				cir.getReturnValue().remove(com.jaymoskingdoms.SwornCaptains.RAID_ANSWER);
+			}
+			if (!com.jaymoskingdoms.Captains.pedlarHears(villager)) {
+				// (0.7.431) only a tribe's pedlar has heard of its captains
+				cir.getReturnValue().remove(com.jaymoskingdoms.Captains.PEDLAR_ANSWER);
+			}
+			if (!com.jaymoskingdoms.Trials.offers(player, villager)) {
+				// (0.7.429) only a king's guard, to see the king
+				cir.getReturnValue().remove(com.jaymoskingdoms.Trials.ANSWER);
+			}
+			if (!com.jaymoskingdoms.HavenGates.offers(player, villager)) {
+				// (0.7.438) only a haven's grown folk, to a human, are asked to vouch at its gate
+				cir.getReturnValue().remove(com.jaymoskingdoms.HavenGates.VOUCH_ANSWER);
+			}
+			if (!com.jaymoskingdoms.Tribes.takesTribute(player, villager)) {
+				cir.getReturnValue().remove(com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER);
+			}
+		}
+		if ("main".equals(name)) {
+			// (0.7.424) held down for questioning: only the questions (those not yet asked); otherwise never them
+			if (com.jaymoskingdoms.Questioning.active(player, villager)) {
+				cir.getReturnValue().removeIf(answer -> !com.jaymoskingdoms.Questioning.offers(player, villager, answer));
+			} else {
+				cir.getReturnValue().removeAll(com.jaymoskingdoms.Questioning.ANSWERS);
+			}
+		}
+		if ("main".equals(name)) {
+			// (0.7.454) on the Interact page now (InteractActions): an audience, a pedlar's wares, tribute, a captain's orders
+			cir.getReturnValue().removeAll(List.of(Rulers.ANSWER, com.jaymoskingdoms.Pedlars.WARES_ANSWER, com.jaymoskingdoms.Pedlars.TRIBUTE_ANSWER,
+				com.jaymoskingdoms.SwornCaptains.SPY_ANSWER, com.jaymoskingdoms.SwornCaptains.RAID_ANSWER));
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

@@ -328,7 +328,8 @@ public final class Lycans {
 				}
 				continue;
 			}
-			if (!moon || BEASTS.containsKey(id)) {
+			// (Andy, 2026-11-01) a Z Fighter's false moon takes them too, any night
+			if (!(moon || night && PowersCompat.falseMoon(level, mob)) || BEASTS.containsKey(id)) {
 				DUE.remove(id);
 				continue;
 			}

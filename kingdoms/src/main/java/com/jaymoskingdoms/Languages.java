@@ -101,12 +101,21 @@ public final class Languages {
 	 * MCA's buttons that need no words: trading, a gift, beckoning them to follow or stay or move, riding, picking up a
 	 * little one, and (for your own hires and family) their pack and armour. Everything else is asked aloud.
 	 */
-	public static final Set<String> SIMPLE_COMMANDS = Set.of("trade", "gift", "follow", "stay", "move", "ridehorse", "pick_up", "inventory", "armor",
+	public static final Set<String> SIMPLE_COMMANDS = Set.of(
+		// (0.7.454) goods pointed at and emeralds held out, from the Interact page now (InteractActions)
+		InteractActions.COMMAND + InteractActions.WARES, InteractActions.COMMAND + InteractActions.TRIBUTE,
+		"trade", "gift", "follow", "stay", "move", "ridehorse", "pick_up", "inventory", "armor",
 		"slap");
 	/** MCA's talk menu: what can be done without words (a hug, a kiss, rock-paper-scissors, (0.7.204) a handshake), and the greetings that lead to it. */
 	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE,
+		// (0.7.424) a blade pressed closer, a hand let go, the blow: no words needed
+		Questioning.THREATEN, Questioning.STARE, Questioning.SPARE, Questioning.FINISH,
+		// (0.7.425) goods pointed at and emeralds held out
+		Pedlars.WARES_ANSWER, Pedlars.TRIBUTE_ANSWER,
 		// (0.7.254) thanks need no words
-		SharedHistory.THANK);
+		SharedHistory.THANK,
+		// (0.7.449) why they came over: they can show you
+		ComingOver.ANSWER);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");
 
 	/** Learning: what speaking a tongue takes; what each stretch among its speakers and each trade with one adds. */

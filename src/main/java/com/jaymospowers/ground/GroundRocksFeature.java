@@ -19,9 +19,12 @@ import net.minecraft.world.level.material.Fluids;
 
 /**
  * A few piles of loose rocks (or flint) around {@code origin}, on natural ground only (so not on paths, floors or roofs).
- * A rock is the stone of the ground it lies on: the first telling stone in the column under it (granite, diorite,
- * andesite, tuff, deepslate, sandstone...), else the biome's (mossy in jungles and swamps, sandstone in deserts and on
- * beaches, red sandstone in the badlands), else plain stone; in water, salt crystals.
+ * A rock is the stone of the block it lies on (0.19.22, Andy: "the rocks should adapt to whats underneath it, except for
+ * grass, then it always does cobblestone rock pebbles"): plain stone on grass and gravel (and gravel often gets flint
+ * instead), sandstone only on sand and sandstone, red sandstone on red sand and terracotta, granite on granite and so on.
+ * On dirt and the like the first telling stone in the column under it decides (granite, diorite, andesite, tuff,
+ * deepslate; never sandstone from sand buried under the dirt), else mossy in jungles and swamps, else plain stone;
+ * in water, salt crystals.
  * Placement: worldgen/placed_feature/loose_*.json.
  */
 public record GroundRocksFeature(boolean flint) implements Feature {
@@ -42,6 +45,8 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 	public static final int FLINT_ELSEWHERE = 15;
 	/** (0.17.175) Scattered rocks keep to grass this seldom (in 100); grass mostly gets pebble piles (PebblePilesFeature). */
 	public static final int ON_GRASS = 20;
+	/** (0.19.22) Andy: "there should be primarily flint and cobble stone on this gravel plain". Rocks on gravel are loose flint this often (in 100). */
+	public static final int GRAVEL_FLINT = 45;
 	/** In jungles, swamps and lush caves, plain stone rocks are mossy this often (in 100). */
 	public static final int MOSSY_CHANCE = 60;
 
@@ -64,7 +69,9 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 				continue;
 			}
 			BlockState state;
-			if (this.flint) {
+			if (!this.flint && level.getBlockState(spot.below()).is(Blocks.GRAVEL) && random.nextInt(100) < GRAVEL_FLINT) {
+				state = GroundRocks.LOOSE_FLINT.defaultBlockState().setValue(LooseStonesBlock.FLINTS, size(random, FLINT_SIZES));
+			} else if (this.flint) {
 				if (!this.flintLies(level, spot, random)) {
 					continue;
 				}
@@ -113,9 +120,14 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 	}
 
 	static GroundRocks.Variant variant(WorldGenLevel level, BlockPos spot, RandomSource random) {
-		for (int dy = 1; dy <= STRATA_DEPTH; dy++) {
+		GroundRocks.Variant onTop = surfaceRock(level.getBlockState(spot.below()));
+		if (onTop != null) {
+			return onTop;
+		}
+		for (int dy = 2; dy <= STRATA_DEPTH; dy++) {
 			GroundRocks.Variant found = stoneOf(level.getBlockState(spot.below(dy)));
-			if (found != null) {
+			// sand buried under dirt doesn't show at the surface: sandstone rocks lie only on sand and sandstone
+			if (found != null && found != GroundRocks.Variant.SANDSTONE && found != GroundRocks.Variant.RED_SANDSTONE) {
 				return found;
 			}
 		}
@@ -123,15 +135,22 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 			return GroundRocks.Variant.DEEPSLATE;
 		}
 		Holder<Biome> biome = level.getBiome(spot);
-		if (biome.is(BiomeTags.IS_BADLANDS)) {
-			return GroundRocks.Variant.RED_SANDSTONE;
-		}
-		if (biome.is(Biomes.DESERT) || biome.is(BiomeTags.IS_BEACH)) {
-			return GroundRocks.Variant.SANDSTONE;
-		}
 		boolean lush = biome.is(BiomeTags.IS_JUNGLE) || biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) || biome.is(Biomes.LUSH_CAVES)
 			|| biome.is(Biomes.DARK_FOREST) || biome.is(Biomes.OLD_GROWTH_PINE_TAIGA) || biome.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA);
 		return lush && random.nextInt(100) < MOSSY_CHANCE ? GroundRocks.Variant.MOSSY : GroundRocks.Variant.STONE;
+	}
+
+	/** (0.19.22) The rock the block a rock lies on makes by itself, or null when it doesn't tell (dirt, mud, clay...) and the column under it decides. */
+	static GroundRocks.Variant surfaceRock(BlockState ground) {
+		if (ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.GRAVEL) || ground.is(Blocks.STONE) || ground.is(Blocks.COBBLESTONE)
+			|| ground.is(Blocks.CALCITE)) {
+			return GroundRocks.Variant.STONE;
+		} else if (ground.is(Blocks.RED_SAND) || ground.is(Blocks.RED_SANDSTONE) || ground.is(BlockTags.TERRACOTTA)) {
+			return GroundRocks.Variant.RED_SANDSTONE;
+		} else if (ground.is(BlockTags.SAND) || ground.is(Blocks.SANDSTONE)) {
+			return GroundRocks.Variant.SANDSTONE;
+		}
+		return stoneOf(ground);
 	}
 
 	/** The rock a telling block makes, or null for plain stone, dirt and the rest (keep looking). */

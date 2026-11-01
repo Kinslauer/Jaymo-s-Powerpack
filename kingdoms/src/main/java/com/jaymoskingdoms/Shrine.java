@@ -27,20 +27,20 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.459) The shrine: a small stone altar with candles. Hold use on it for {@link #PRAY_TICKS} (five seconds) to pray: once
+ * (0.7.462) The shrine: a small stone altar with candles. Hold use on it for {@link #PRAY_TICKS} (five seconds) to pray: once
  * a Minecraft day for each player, every part of the body heals a little ({@link #PRAYER_HEAL}) and festering is cleared,
  * with a soft chime and motes of light. The block gets a use every few ticks while the button is held, so the prayer counts
  * from the first use and is lost if the uses stop for {@link #BREAK_TICKS}, if you walk off, or if you turn to another block.
  * The day you last prayed is kept on the player ({@link #PRAYED}), through death.
  */
 public final class Shrine extends Block {
-	/** (0.7.459) How long to hold use (ticks), the longest pause between uses before the prayer is broken, how far you may stand. */
+	/** (0.7.462) How long to hold use (ticks), the longest pause between uses before the prayer is broken, how far you may stand. */
 	static final int PRAY_TICKS = 100, BREAK_TICKS = 10;
 	static final double REACH = 4.5;
-	/** (0.7.459) The heal each part gets (health points), and the altar's glow. */
+	/** (0.7.462) The heal each part gets (health points), and the altar's glow. */
 	static final float PRAYER_HEAL = 3.0F;
 	static final int LIGHT = 6;
-	/** (0.7.459) One Minecraft day, in ticks. */
+	/** (0.7.462) One Minecraft day, in ticks. */
 	static final long DAY = 24000L;
 
 	/** The day (overworld clock time / 24000) a player last prayed. Saved, kept through death. */

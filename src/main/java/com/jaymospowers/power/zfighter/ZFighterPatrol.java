@@ -69,11 +69,19 @@ import org.jspecify.annotations.Nullable;
  * and judging on your power level will recruit you to be one as well. giving you a galactic patrol job, a pod and a license
  * to fight crime on various planets."
  * <p>
- * <b>The visits</b> (needs Jaymo's Kingdoms and MCA): every {@link #VISIT_DAYS} days or so a patrolman's pod comes down out of
- * the sky by a town a player is near ({@link #tick}). The patrolman ({@link #TAG}, an MCA villager through Kingdoms'
- * {@code ZFighterFolk}, in the patrol's uniform) steps out with a Z Fighter's gift ({@link Gifted}) and roams the town, going for
- * any monster or rogue fighter that comes near ({@link #patrol}); after {@link #STAY_TICKS} he walks back to his pod and lifts
- * off. His pod is only a sight (a block display): nobody can take it.
+ * <b>The visits</b> (needs Jaymo's Kingdoms and MCA). (0.19.1, Andy: "they shouldnt just appear. they always need a reason.")
+ * A patrolman never drops in at random any more; every pod that comes down has a {@link Cause}:
+ * <ul>
+ * <li>{@link Cause#PURSUIT}: a raider band ({@link ZFighterRaiders}) came down by a town and the Patrol is on its tail
+ * ({@link #PURSUIT_CHANCE}): his pod lands {@link #PURSUIT_DELAY} after theirs, he runs the band's raiders down wherever they
+ * are, and once the band is beaten or gone he lingers {@link #PURSUIT_LINGER} and leaves.</li>
+ * <li>{@link Cause#RECRUIT}: word of a strong fighter (power {@link #RECRUIT_POWER}, Borderlands open, no officer yet) has
+ * reached the Patrol: a patrolman comes down by them, walks to them to make his offer, and leaves once they have answered,
+ * gone or {@link #RECRUIT_STAY} has passed. A refusal is asked again after {@link #RECRUIT_GAP}.</li>
+ * </ul>
+ * The patrolman ({@link #TAG}, an MCA villager through Kingdoms' {@code ZFighterFolk}, in the patrol's uniform) steps out with a
+ * Z Fighter's gift ({@link Gifted}). One with no cause (from an older save, or come some other way) goes straight home. Nobody can
+ * take his pod.
  * <p>
  * <b>Talking</b> ("Talk about work" in MCA's menu, which a stranger only gets once introduced): he tells of his travels, a
  * piece a talk ({@link #STORIES}), and weighs your power level ({@link ZFighterScouter#powerLevel}): at {@link #RECRUIT_POWER}
@@ -87,12 +95,20 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ZFighterPatrol {
 	// ---- tuning ----
-	/** How often a patrolman visits (days, and a spread on top), how far from the town's seat he lands, and how long he stays. */
-	static final long VISIT_DAYS = 3L, VISIT_SPREAD = 24000L;
+	/** How far from where he is headed his pod lands. */
 	static final int LAND_MIN = 14, LAND_MAX = 30;
-	static final int STAY_TICKS = 30000;
-	/** A town is visited only with a player this near its seat. */
-	static final double NEAR = 160.0;
+	/** (0.19.1) Pursuit: the chance the Patrol follows a raider band down, how long after them (ticks), how long he stays at most,
+	 * how long he lingers once the band is beaten or gone, and how far he will go after one of its raiders. */
+	static final float PURSUIT_CHANCE = 0.6F;
+	static final int PURSUIT_DELAY = 600, PURSUIT_STAY = 14000, PURSUIT_LINGER = 1200;
+	static final double PURSUIT_RANGE = 96.0;
+	/** (0.19.1) Recruiting: how long he stays at most, how long after the answer he leaves, the wait before a refusal is asked
+	 * again (ticks), how near he walks to them, and how far off they may get before he gives up. */
+	static final int RECRUIT_STAY = 6000, ANSWERED_STAY = 300;
+	static final long RECRUIT_GAP = 7 * 24000L;
+	static final double RECRUIT_CLOSE = 3.0, RECRUIT_LOST = 128.0;
+	/** A patrolman with something to do near a player only fights monsters this near him on the way. */
+	static final double SIDE_FIGHT = 8.0;
 	/** How far he goes for a foe, how far he roams from his pod, how hard his fists land and how often. */
 	static final double FIGHT_RANGE = 24.0, ROAM = 22.0, REACH = 2.6;
 	static final float PUNCH = 7.0F;
@@ -132,11 +148,31 @@ public final class ZFighterPatrol {
 	public static final String FLYING_TAG = "jaymospowers.patrol_pod_flying";
 	static final long DAY = 24000L;
 
-	/** A patrolman's visit: where his pod stands and when he leaves. */
-	public record Visit(BlockPos pod, long leave) {
+	/** (0.19.1) Why a patrolman came down: there is always a reason. NONE is only an older save's, and he goes home. */
+	public enum Cause {
+		NONE, PURSUIT, RECRUIT;
+
+		static Cause of(String name) {
+			for (Cause c : values()) {
+				if (c.name().equals(name)) {
+					return c;
+				}
+			}
+			return NONE;
+		}
+	}
+
+	/** A patrolman's visit: where his pod stands, when he leaves, why he came, and who for (the band he chases, the fighter he recruits). */
+	public record Visit(BlockPos pod, long leave, Cause cause, java.util.Optional<UUID> target) {
 		public static final Codec<Visit> CODEC = RecordCodecBuilder.create(i -> i.group(
 			BlockPos.CODEC.fieldOf("pod").forGetter(Visit::pod),
-			Codec.LONG.fieldOf("leave").forGetter(Visit::leave)).apply(i, Visit::new));
+			Codec.LONG.fieldOf("leave").forGetter(Visit::leave),
+			Codec.STRING.optionalFieldOf("cause", "NONE").xmap(Cause::of, Cause::name).forGetter(Visit::cause),
+			net.minecraft.core.UUIDUtil.CODEC.optionalFieldOf("target").forGetter(Visit::target)).apply(i, Visit::new));
+
+		Visit leaving(long at) {
+			return new Visit(pod, Math.min(leave, at), cause, target);
+		}
 	}
 
 	/** An officer of the patrol: arrests made, and the patrolman visit (his leave time) that last fuelled him. */
@@ -153,11 +189,20 @@ public final class ZFighterPatrol {
 		builder -> builder.persistent(Codec.INT));
 	public static final AttachmentType<Member> MEMBER = AttachmentRegistry.create(JaymosPowers.id("patrol_member"),
 		builder -> builder.persistent(Member.CODEC).copyOnDeath());
-	/** When the next patrolman may come (overworld game time). */
+	/** (0.19.1) No longer used: patrolmen stopped coming on a timer. Kept registered so older saves load cleanly. */
 	public static final AttachmentType<Long> NEXT = AttachmentRegistry.create(JaymosPowers.id("patrol_next"),
 		builder -> builder.persistent(Codec.LONG));
+	/** (0.19.1) On a player: when the Patrol may next come to recruit them (game time). */
+	public static final AttachmentType<Long> RECRUIT_NEXT = AttachmentRegistry.create(JaymosPowers.id("patrol_recruit_next"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
 	public static Item LICENSE;
+
+	/** (0.19.1) A pursuit on its way down: the band, where it came down, and when the patrolman's pod follows. */
+	private record Pursuit(ServerLevel level, UUID band, BlockPos where, long at) {
+	}
+
+	private static final List<Pursuit> PURSUITS = new ArrayList<>();
 
 	/** A warrant out: whose, the criminal, his world, and when it was written. */
 	private record Warrant(UUID owner, UUID criminal, ResourceKey<Level> level, int planet) {
@@ -197,6 +242,7 @@ public final class ZFighterPatrol {
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterPatrol::afterDeath);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIERS.clear();
+			PURSUITS.clear();
 			WARRANTS.clear();
 			NEXT_WARRANT.clear();
 		});
@@ -259,51 +305,78 @@ public final class ZFighterPatrol {
 		if (ticks % 100 == 0 && !WARRANTS.isEmpty()) {
 			warrants(server);
 		}
+		if (ticks % 20 == 0 && !PURSUITS.isEmpty()) {
+			pursuits(server);
+		}
 		if (ticks % 600 == 0) {
-			visits(server);
+			recruiters(server);
 		}
 	}
 
-	/** Now and then, by day, a patrolman comes down by a town someone is near. */
-	private static void visits(MinecraftServer server) {
+	/** (0.19.1) A raider band came down by {@code where}: the Patrol may be on its tail, a little behind it. */
+	static void pursue(ServerLevel level, UUID band, BlockPos where) {
+		if (!ZFighterNpcs.villagers() || !ZFighterKingdoms.present() || level.getRandom().nextFloat() >= PURSUIT_CHANCE) {
+			return;
+		}
+		PURSUITS.add(new Pursuit(level, band, where, level.getGameTime() + PURSUIT_DELAY));
+	}
+
+	/** Pursuits whose time has come: the patrolman's pod comes down by where the band landed, if the band is still there. */
+	private static void pursuits(MinecraftServer server) {
+		for (Iterator<Pursuit> it = PURSUITS.iterator(); it.hasNext();) {
+			Pursuit p = it.next();
+			if (p.level().getGameTime() < p.at()) {
+				continue;
+			}
+			it.remove();
+			if (!ZFighterRaiders.raiders(p.band()).isEmpty()) {
+				arrive(p.level(), p.where(), p.level().getRandom().nextInt(NAMES), Cause.PURSUIT, p.band(), PURSUIT_STAY);
+			}
+		}
+	}
+
+	/** (0.19.1) Now and then, by day: a strong fighter out under the sky whom the Patrol has heard of gets a recruiter. */
+	private static void recruiters(MinecraftServer server) {
 		ServerLevel level = server.overworld();
 		if (!ZFighterNpcs.villagers() || !ZFighterKingdoms.present() || !level.isBrightOutside()) {
 			return;
 		}
 		long now = level.getGameTime();
-		Long next = level.getAttached(NEXT);
-		RandomSource random = level.getRandom();
-		if (next == null) {
-			level.setAttached(NEXT, now + DAY + random.nextInt((int)VISIT_SPREAD));
-			return;
-		}
-		if (now < next) {
-			return;
-		}
-		List<ZFighterKingdoms.Settlement> near = new ArrayList<>();
-		for (ZFighterKingdoms.Settlement s : ZFighterKingdoms.settlements(server)) {
-			BlockPos seat = s.seat();
-			if (!"CAMP".equals(s.type()) && level.getNearestPlayer(seat.getX(), seat.getY(), seat.getZ(), NEAR, p -> !p.isSpectator()) != null) {
-				near.add(s);
+		for (ServerPlayer player : level.players()) {
+			if (player.isSpectator() || member(player) || now < player.getAttachedOrElse(RECRUIT_NEXT, 0L)
+				|| ZFighterScouter.powerLevel(player) < RECRUIT_POWER || !level.canSeeSky(player.blockPosition().above())) {
+				continue;
 			}
-		}
-		if (near.isEmpty()) {
-			return;
-		}
-		ZFighterKingdoms.Settlement s = near.get(random.nextInt(near.size()));
-		if (arrive(level, s.seat(), random.nextInt(NAMES))) {
-			level.setAttached(NEXT, now + VISIT_DAYS * DAY + random.nextInt((int)VISIT_SPREAD));
+			int tier = ZFighterKingdoms.openTier(player);
+			if (tier >= 0 && tier < RANK_TIER[0] || recruiterFor(level, player)) {
+				continue;
+			}
+			if (arrive(level, player.blockPosition(), level.getRandom().nextInt(NAMES), Cause.RECRUIT, player.getUUID(), RECRUIT_STAY)) {
+				player.setAttached(RECRUIT_NEXT, now + RECRUIT_GAP);
+				return;
+			}
 		}
 	}
 
-	/** A patrolman's pod starts down over open ground by {@code seat}; true if a spot was found. */
-	static boolean arrive(ServerLevel level, BlockPos seat, int name) {
+	/** Whether a recruiter is already down (or coming down) for {@code player}. */
+	private static boolean recruiterFor(ServerLevel level, ServerPlayer player) {
+		for (PathfinderMob man : level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(RECRUIT_LOST), ZFighterPatrol::patrolman)) {
+			Visit v = man.getAttached(VISIT);
+			if (v != null && v.cause() == Cause.RECRUIT && v.target().filter(player.getUUID()::equals).isPresent()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A patrolman's pod starts down over open ground by {@code seat}, for {@code cause}; true if a spot was found. */
+	static boolean arrive(ServerLevel level, BlockPos seat, int name, Cause cause, UUID target, int stay) {
 		RandomSource random = level.getRandom();
 		// (0.18.54) a landing yard within reach: down on a free pad, and the town named for it
 		BlockPos pad = ZFighterYard.freePad(level, seat);
 		if (pad != null) {
 			land(level, pad, name, f -> {
-				stepOut((ServerLevel)f.pod.level(), f);
+				stepOut((ServerLevel)f.pod.level(), f, cause, target, stay);
 				ZFighterKingdoms.yardTouched((ServerLevel)f.pod.level(), f.ground);
 			});
 			level.playSound(null, pad.getX(), pad.getY() + 20, pad.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
@@ -318,7 +391,7 @@ public final class ZFighterPatrol {
 			if (ground == null) {
 				continue;
 			}
-			land(level, ground, name, f -> stepOut((ServerLevel)f.pod.level(), f));
+			land(level, ground, name, f -> stepOut((ServerLevel)f.pod.level(), f, cause, target, stay));
 			level.playSound(null, ground.getX(), ground.getY() + 20, ground.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.NEUTRAL, 3.0F, 0.6F);
 			return true;
 		}
@@ -389,7 +462,7 @@ public final class ZFighterPatrol {
 	}
 
 	/** Down: the patrolman steps out beside his pod, with his gift, for a stay. */
-	private static void stepOut(ServerLevel level, Flier f) {
+	private static void stepOut(ServerLevel level, Flier f, Cause cause, UUID target, int stay) {
 		BlockPos ground = f.ground;
 		Vec3 feet = new Vec3(ground.getX() + 2.5, ground.getY(), ground.getZ() + 0.5);
 		LivingEntity man = ZFighterNpcs.villager(level, feet, level.getRandom().nextFloat() * 360.0F, TAG, "entity.jaymospowers.patrolman_" + f.name,
@@ -398,7 +471,7 @@ public final class ZFighterPatrol {
 			f.pod.discard();
 			return;
 		}
-		man.setAttached(VISIT, new Visit(ground, level.getGameTime() + STAY_TICKS));
+		man.setAttached(VISIT, new Visit(ground, level.getGameTime() + stay, cause, java.util.Optional.of(target)));
 		Gifted.give(man, "zfighter", Gifted.BOLD, true, true);
 	}
 
@@ -420,9 +493,9 @@ public final class ZFighterPatrol {
 
 	private static void patrol(ServerLevel level, PathfinderMob man, long now) {
 		Visit visit = man.getAttached(VISIT);
-		if (visit == null) {
-			// one that came some other way: his visit starts where he stands
-			visit = new Visit(man.blockPosition(), now + STAY_TICKS);
+		if (visit == null || visit.cause() == Cause.NONE) {
+			// (0.19.1) one with no reason to be here (an older save's, or come some other way): he goes home now
+			visit = new Visit(visit == null ? man.blockPosition() : visit.pod(), now, Cause.NONE, java.util.Optional.empty());
 			man.setAttached(VISIT, visit);
 		}
 		Vec3 pod = Vec3.atBottomCenterOf(visit.pod());
@@ -430,11 +503,36 @@ public final class ZFighterPatrol {
 			if (man.distanceToSqr(pod) < 9.0 || now > visit.leave() + 1200) {
 				depart(level, man, visit);
 			} else {
+				man.setTarget(null);
 				man.getNavigation().moveTo(pod.x, pod.y, pod.z, 0.8);
 			}
 			return;
 		}
-		LivingEntity foe = foe(level, man);
+		LivingEntity foe = null;
+		@Nullable ServerPlayer recruit = null;
+		if (visit.cause() == Cause.PURSUIT) {
+			// the band he came after, wherever its raiders are; once it is beaten or gone he lingers a little and leaves
+			UUID band = visit.target().orElse(null);
+			List<? extends LivingEntity> raiders = band == null ? List.of() : ZFighterRaiders.raiders(band);
+			if (raiders.isEmpty()) {
+				if (visit.leave() > now + PURSUIT_LINGER) {
+					visit = visit.leaving(now + PURSUIT_LINGER);
+					man.setAttached(VISIT, visit);
+				}
+			} else {
+				foe = nearest(man, raiders, PURSUIT_RANGE);
+			}
+		} else if (visit.cause() == Cause.RECRUIT) {
+			UUID id = visit.target().orElse(null);
+			recruit = id != null && level.getPlayerByUUID(id) instanceof ServerPlayer p && p.isAlive() && man.distanceTo(p) < RECRUIT_LOST ? p : null;
+			if (recruit == null || member(recruit)) {
+				// they are gone, or already sworn in: nothing left for him here
+				man.setAttached(VISIT, visit.leaving(now + ANSWERED_STAY));
+			}
+		}
+		if (foe == null) {
+			foe = foe(level, man, visit.cause() == Cause.RECRUIT ? SIDE_FIGHT : FIGHT_RANGE);
+		}
 		if (foe != null) {
 			man.setTarget(foe);
 			man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
@@ -455,7 +553,18 @@ public final class ZFighterPatrol {
 			return;
 		}
 		man.setTarget(null);
+		if (recruit != null && !member(recruit)) {
+			// he came for them: he walks up and waits by them for their answer
+			man.getLookControl().setLookAt(recruit, 30.0F, 30.0F);
+			if (man.distanceTo(recruit) > RECRUIT_CLOSE) {
+				man.getNavigation().moveTo(recruit, 0.8);
+			} else {
+				man.getNavigation().stop();
+			}
+			return;
+		}
 		if (man.getNavigation().isDone() && man.getRandom().nextInt(ROAM_EVERY / THINK_EVERY) == 0) {
+			// the band beaten, he looks the ground over by his pod before he goes
 			RandomSource random = man.getRandom();
 			double x = pod.x + (random.nextDouble() * 2.0 - 1.0) * ROAM, z = pod.z + (random.nextDouble() * 2.0 - 1.0) * ROAM;
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(x), Mth.floor(z));
@@ -463,11 +572,25 @@ public final class ZFighterPatrol {
 		}
 	}
 
+	/** The nearest of {@code from} within {@code range} of him, or null. */
+	private static @Nullable LivingEntity nearest(PathfinderMob man, List<? extends LivingEntity> from, double range) {
+		LivingEntity best = null;
+		double bestD = range * range;
+		for (LivingEntity e : from) {
+			double d = man.distanceToSqr(e);
+			if (e.level() == man.level() && d < bestD) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best;
+	}
+
 	/** The nearest monster or rogue fighter within reach of him, or null. */
-	private static @Nullable LivingEntity foe(ServerLevel level, PathfinderMob man) {
+	private static @Nullable LivingEntity foe(ServerLevel level, PathfinderMob man, double range) {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
-		AABB box = man.getBoundingBox().inflate(FIGHT_RANGE);
+		AABB box = man.getBoundingBox().inflate(range);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e instanceof Enemy && !(e instanceof Player))) {
 			double d = man.distanceToSqr(e);
 			if (d < bestD) {
@@ -502,7 +625,12 @@ public final class ZFighterPatrol {
 			mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		}
 		Member member = player.getAttached(MEMBER);
-		String greet = member != null ? "greet.officer" : ZFighterScouter.powerLevel(player) >= RECRUIT_POWER ? "greet.strong" : "greet";
+		// (0.19.1) he says why he is here: the band he chases, or the fighter he came to find
+		Visit visit = man.getAttached(VISIT);
+		Cause cause = visit == null ? Cause.NONE : visit.cause();
+		boolean forThem = cause == Cause.RECRUIT && visit.target().filter(player.getUUID()::equals).isPresent();
+		String greet = member != null ? "greet.officer" : forThem ? "greet.recruit" : cause == Cause.PURSUIT ? "greet.pursuit"
+			: ZFighterScouter.powerLevel(player) >= RECRUIT_POWER ? "greet.strong" : "greet";
 		menu(player, man, line(greet, GREET_LINES, man), member);
 	}
 
@@ -530,7 +658,11 @@ public final class ZFighterPatrol {
 						ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.sworn"),
 							List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 					}),
-					ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.later", true, back)));
+					ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.later", true, () -> {
+						// (0.19.1) a recruiter has his answer: he heads home, and asks again another time
+						answered(man, player);
+						back.run();
+					})));
 			}));
 		} else {
 			Visit visit = man.getAttached(VISIT);
@@ -548,6 +680,14 @@ public final class ZFighterPatrol {
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);
+	}
+
+	/** A recruiter who came for {@code player} has had their answer: he leaves soon. */
+	private static void answered(LivingEntity man, ServerPlayer player) {
+		Visit visit = man.getAttached(VISIT);
+		if (visit != null && visit.cause() == Cause.RECRUIT && visit.target().filter(player.getUUID()::equals).isPresent()) {
+			man.setAttached(VISIT, visit.leaving(man.level().getGameTime() + ANSWERED_STAY));
+		}
 	}
 
 	/** The next of his travel stories, or that he has told them all. */

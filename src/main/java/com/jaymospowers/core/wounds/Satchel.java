@@ -20,14 +20,14 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
- * (0.19.20) The healer's satchel (docs/Healing-Plan.md section 4): leather and string, a bundle that holds only medicine
+ * (0.19.24) The healer's satchel (docs/Healing-Plan.md section 4): leather and string, a bundle that holds only medicine
  * (the kit of {@link MedicineItems}, poultices, drinks and sickbed foods), up to {@link #CAPACITY} items. Click it with
  * medicine on the cursor to put it in, with an empty cursor to take a stack out (right click, like a bundle). Carried
  * anywhere in the inventory, treatments take {@link #SHORTEN} less time ({@link #shorten}), and when the stack in hand
  * runs out after a treatment, the next one comes from the satchel ({@link #refill}).
  */
 public final class Satchel {
-	/** (0.19.20) Medicine items a satchel holds, and the share a treatment is shortened by while one is carried. */
+	/** (0.19.24) Medicine items a satchel holds, and the share a treatment is shortened by while one is carried. */
 	public static final int CAPACITY = 64;
 	public static final float SHORTEN = 0.25F;
 

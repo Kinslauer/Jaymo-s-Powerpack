@@ -184,6 +184,11 @@ public final class Prism extends XenoForm {
 	}
 
 	@Override
+	public boolean ultimateHasMove() {
+		return true;
+	}
+
+	@Override
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 		if (ultimateReady(player, live)) {
 			geode(player, live);

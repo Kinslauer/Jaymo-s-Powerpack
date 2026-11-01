@@ -24,7 +24,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * (0.19.20) The five wild herbs (docs/Healing-Plan.md section 1). Andy: "make the herbs common so you have an early method
+ * (0.19.24) The five wild herbs (docs/Healing-Plan.md section 1). Andy: "make the herbs common so you have an early method
  * to treat wounds". Each is a {@link HerbBushBlock} with its herb item (which plants it), and a patch feature (data:
  * {@code worldgen/feature/<id>_patch.json}, {@code worldgen/placed_feature/<id>_patch.json}) added to the biomes it grows in,
  * like vanilla flowers. Blocks and items are registered from {@link MedicineItems#register}, so the herbs sit in the

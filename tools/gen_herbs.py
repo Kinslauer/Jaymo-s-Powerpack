@@ -1,4 +1,4 @@
-"""Jaymo's Powers 0.19.20 healing herbs: block textures (5 plants x 4 growth stages), item icons, models, blockstates,
+"""Jaymo's Powers 0.19.24 healing herbs: block textures (5 plants x 4 growth stages), item icons, models, blockstates,
 loot tables, recipes, tags and worldgen JSON for the herbs, poultices and sickbed foods (docs/Healing-Plan.md).
 
 Run from the repository root:  python3 -I tools/gen_herbs.py

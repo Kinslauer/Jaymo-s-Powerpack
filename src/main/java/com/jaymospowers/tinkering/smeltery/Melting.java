@@ -343,6 +343,10 @@ public final class Melting {
 			return new ItemStack(Tinkering.CASTS.get(shape));
 		}
 		WeaponParts.Kind kind = ((WeaponPartItem) cast.getItem()).kind;
+		if (WeaponParts.king(kind)) {
+			// (Havens patch 5) a king's weapon is taken, never copied
+			return null;
+		}
 		ItemStack made = WeaponParts.cast(kind);
 		if (kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE)) {
 			made.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymospowers.soras_blade_cast"));

@@ -1,0 +1,7 @@
+{
+  "values": [
+    "jaymospowers:aerwhale",
+    {"id": "jaymoskingdoms:moose", "required": false},
+    {"id": "jaymoskingdoms:great_whale", "required": false}
+  ]
+}

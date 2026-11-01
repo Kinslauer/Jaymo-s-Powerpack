@@ -106,15 +106,17 @@ public final class ZFighterTraining {
 	public static final int AFTERIMAGE = 21;
 	/** (0.17.56) Sonic Sway, a quick technique on G ({@link ZFighterSonicSway}). */
 	public static final int SONIC_SWAY = 22;
-	public static final int TECHNIQUES = 23;
+	/** (0.18.94) Self-destruct, charged on V; only android, Bio-built and Rubber-folk bodies ({@link ZFighterSelfDestruct}). */
+	public static final int SELF_DESTRUCT = 23;
+	public static final int TECHNIQUES = 24;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
 		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
-		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway"};
+		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway", "self_destruct"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
 	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
-		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400};
+		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400, 3000};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
@@ -218,7 +220,8 @@ public final class ZFighterTraining {
 
 		/** Whether technique {@code index} ({@link #KI_BLAST} etc.) has been learned. */
 		public boolean knows(int index) {
-			return (techniques & 1 << index) != 0;
+			// (0.18.94) only the learned ones' bits: a made technique (100 up) is the creator's
+			return index >= 0 && index < 32 && (techniques & 1 << index) != 0;
 		}
 
 		Data withTechnique(int index) {
@@ -483,6 +486,9 @@ public final class ZFighterTraining {
 		if (index == SPIRIT_BOMB && (formsOpen(player) < FORMS || data.mastery(FORMS) < SPIRIT_BOMB_MASTERY)) {
 			return "screen.jaymospowers.zfighter.need_super3";
 		}
+		if (index == SELF_DESTRUCT && !ZFighterSelfDestruct.fit(player)) {
+			return "screen.jaymospowers.zfighter.need_self_destruct_body";
+		}
 		if (index == TELEPORT && formsOpen(player) < 2) {
 			return "screen.jaymospowers.zfighter_senses.need_super2";
 		}
@@ -522,6 +528,11 @@ public final class ZFighterTraining {
 		}
 	}
 
+	/** (0.18.94) Whether {@code player} has technique {@code index}: learned, or made ({@link ZFighterCreator}). Both sides. */
+	public static boolean owns(Player player, int index) {
+		return ZFighterCreator.custom(index) ? ZFighterCreator.made(player, index) != null : of(player).knows(index);
+	}
+
 	/** Puts a learned technique on its key: G for the quick ones, V for the charged ones. */
 	static void equipTechnique(ServerPlayer player, int index) {
 		if (index == TELEPORT) {
@@ -529,7 +540,7 @@ public final class ZFighterTraining {
 			return;
 		}
 		Data data = of(player);
-		if (index < 0 || index >= TECHNIQUES || index == SPIRIT_BOMB || !data.knows(index)) {
+		if (ZFighterCreator.custom(index) ? !owns(player, index) : index < 0 || index >= TECHNIQUES || index == SPIRIT_BOMB || !data.knows(index)) {
 			return;
 		}
 		player.setAttached(DATA, charged(index) ? data.withCharged(index) : data.withQuick(index));

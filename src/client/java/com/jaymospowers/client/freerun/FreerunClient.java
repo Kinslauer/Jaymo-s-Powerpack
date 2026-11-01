@@ -77,6 +77,9 @@ public final class FreerunClient {
 	/** (0.15.12) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
 	private static Vec3 runDir = Vec3.ZERO, slideDir = Vec3.ZERO;
 	private static double runSpeed, slideSpeed;
+	/** (0.18.85) Ticks since the last sprinting tick on the ground (a plain sprint's slide), and the wheel turned down mid-slide. */
+	private static int sinceSprint = Integer.MAX_VALUE;
+	private static boolean keepProne;
 	/** (0.15.12) A corner being turned while clinging: ticks left, the step per tick and the wall that follows. */
 	private static int cornerLeft;
 	private static Vec3 cornerStep = Vec3.ZERO;
@@ -117,6 +120,7 @@ public final class FreerunClient {
 			reset();
 			return;
 		}
+		AirFlipClient.tick(minecraft, player);
 		Input input = player.input.keyPresses;
 		boolean jumpPressed = input.jump() && !jumpWasDown;
 		jumpWasDown = input.jump();
@@ -132,7 +136,11 @@ public final class FreerunClient {
 			} else {
 			airTicks++;
 		}
+		if (sinceSprint < Integer.MAX_VALUE) {
+			sinceSprint++;
+		}
 		if (player.isSprinting() && player.onGround()) {
+			sinceSprint = 0;
 			Vec3 step = new Vec3(player.getX() - player.xo, 0.0, player.getZ() - player.zo);
 			if (step.lengthSqr() > 0.0025) {
 				runDir = step.normalize();
@@ -476,9 +484,13 @@ public final class FreerunClient {
 
 	// ---- fast run slide -----------------------------------------------------------------------------------------------
 
-	/** In a fast run, Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the dodge's): drop into a slide. */
+	/**
+	 * In a fast run (or, 0.18.85, a plain sprint), Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the dodge's): drop into
+	 * a slide. Out of a fast run it's a head-first dive onto the belly, out of a plain sprint feet first on the back.
+	 */
 	private static boolean trySlide(LocalPlayer player, Input input) {
-		if (!(player.onGround() && FastRun.active(player) && input.shift() && !input.jump() && Freerun.canMove(player, Freerun.SLIDE))) {
+		boolean running = FastRun.active(player) || player.isSprinting() || sinceSprint <= Slide.SPRINT_GRACE_TICKS;
+		if (!(player.onGround() && running && input.shift() && !input.jump() && Freerun.canMove(player, Freerun.SLIDE))) {
 			sneakTicks = 0;
 			return false;
 		}
@@ -489,7 +501,8 @@ public final class FreerunClient {
 		slideDir = runDir.lengthSqr() > 0.5 ? runDir : Vec3.directionFromRotation(0.0F, player.getYRot());
 		slideSpeed = Mth.clamp(runSpeed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
 		slideWait = 0;
-player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
+		keepProne = false;
+		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
 		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
 		return true;
 	}
@@ -513,12 +526,21 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 			return;
 		}
 		if (ticks > Slide.TICKS || !player.onGround() && airTicks > 2 || slideSpeed < Slide.STOP_SPEED || ticks > 2 && player.horizontalCollision) {
-			if (player.onGround() && player.input.keyPresses.shift()) {
-				// (0.15.108) Sneak still held: stay down, prone, till it's let go (no running on out of it)
+			if (player.onGround() && (player.input.keyPresses.shift() || keepProne)) {
+				// (0.15.108) Sneak still held: stay down, prone, till it's let go (no running on out of it). (0.18.85) Or the
+				// wheel turned down mid-slide: prone till you get up. Lying the way you slid: a dive on the belly, else the back.
+				boolean back = !Slide.belly(player);
 				end(player);
 				cooldown = Slide.COOLDOWN;
 				player.setSprinting(false);
-				com.jaymospowers.client.CrawlTaps.goProne(player, true);
+				com.jaymospowers.client.CrawlTaps.goProne(player, !keepProne);
+				if (back) {
+					com.jaymospowers.client.CrawlTaps.turnOver(player, true);
+				}
+				if (keepProne) {
+					com.jaymospowers.client.StanceScroll.holdProne();
+				}
+				keepProne = false;
 			} else {
 				endSlide(player);
 			}
@@ -528,6 +550,18 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 		if (ticks % 2 == 0) {
 			player.level().addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, 0.01, 0.0);
 		}
+	}
+
+	/**
+	 * (0.18.85) From {@code StanceScroll}: Sneak + the wheel mid-slide. Down: the slide ends in prone, held there; up: it
+	 * doesn't. True if a slide took the wheel.
+	 */
+	public static boolean slideScroll(double amount) {
+		if (kind != Freerun.SLIDE) {
+			return false;
+		}
+		keepProne = amount < 0.0;
+		return true;
 	}
 
 	private static void endSlide(LocalPlayer player) {

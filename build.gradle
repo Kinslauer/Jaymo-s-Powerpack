@@ -367,6 +367,12 @@ def packResourcePacks = [
 	// Canoe Boats (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): every boat becomes a canoe,
 	// through Entity Model Features and Entity Texture Features (both already in the pack). Made for 26.3.
 	[cf: [1086847, 8944107], file: "Canoe boats 26.3.zip"],
+	// (Motion patch 6) Fresh Animations itself (by FreshLX; modpacks may include it, never redistribute it) isn't listed
+	// here yet: its CurseForge file id couldn't be looked up from the cloud, so client/PackResourcePacks fetches it from
+	// Modrinth on first launch. Add [cf: [<project>, <file>], file: "FreshAnimations_v1.11.1_26.1+.zip"] once known.
+	// (Havens patch 8) Better Horses (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): redrawn
+	// donkeys and mules through Entity Model Features. Same story as Fresh Animations: fetched from Modrinth by
+	// client/PackResourcePacks until its CurseForge file id is added here, [cf: [<project>, <file>], file: "Better Horses v4.3 1.21.11.zip"].
 ]
 // shader packs, client-only: the CurseForge import downloads them into shaderpacks/ by id, and Jaymo's Powers chooses
 // and switches on Complementary Unbound in Iris once per install (client/ShaderPreset).

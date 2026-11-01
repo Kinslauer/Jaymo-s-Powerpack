@@ -43,7 +43,7 @@ public final class MedicineItems {
 	public static Item LEECHES;
 	public static Item WILLOW_BARK_TEA;
 	public static Item POPPY_SYRUP;
-	/** (0.19.20) The herbal remedies, the clean rag, the healer's satchel and the sickbed foods (docs/Healing-Plan.md). */
+	/** (0.19.24) The herbal remedies, the clean rag, the healer's satchel and the sickbed foods (docs/Healing-Plan.md). */
 	public static Item YARROW_POWDER, KNITBONE_POULTICE, BURN_SALVE, GARLIC_POULTICE, CLEAN_RAG, HEALERS_SATCHEL;
 	public static Item BONE_BROTH, CHAMOMILE_TEA, POSSET;
 
@@ -67,7 +67,7 @@ public final class MedicineItems {
 		POPPY_SYRUP = item("poppy_syrup", p -> new DrinkItem(true, p.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)));
 
-		// (0.19.20) the five wild herbs (blocks and items), then what's made of them
+		// (0.19.24) the five wild herbs (blocks and items), then what's made of them
 		com.jaymospowers.core.wounds.herbs.Herbs.register();
 		YARROW_POWDER = item("yarrow_powder", p -> new MedicineItem(Treatment.Remedy.YARROW, p.stacksTo(16)));
 		KNITBONE_POULTICE = item("knitbone_poultice", p -> new MedicineItem(Treatment.Remedy.KNITBONE, p.stacksTo(16)));
@@ -115,7 +115,7 @@ public final class MedicineItems {
 
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
-			// (0.19.20) a dirty rag in or facing water is washed by holding use (sneak + use still treats)
+			// (0.19.24) a dirty rag in or facing water is washed by holding use (sneak + use still treats)
 			if (this.remedy == Treatment.Remedy.RAG && !player.isShiftKeyDown() && RagWashing.canWash(player)) {
 				player.startUsingItem(hand);
 				return InteractionResult.CONSUME;
@@ -126,7 +126,7 @@ public final class MedicineItems {
 			return InteractionResult.SUCCESS;
 		}
 
-		/** (0.19.20) Only washing rags is a held use. */
+		/** (0.19.24) Only washing rags is a held use. */
 		@Override
 		public int getUseDuration(ItemStack stack, LivingEntity user) {
 			return this.remedy == Treatment.Remedy.RAG ? RagWashing.USE_TICKS : 0;
@@ -168,7 +168,7 @@ public final class MedicineItems {
 		}
 	}
 
-	/** (0.19.20) Bone broth, chamomile tea and posset: sickbed foods, drunk from a bowl; see {@link Herbal}. */
+	/** (0.19.24) Bone broth, chamomile tea and posset: sickbed foods, drunk from a bowl; see {@link Herbal}. */
 	public static final class SickbedItem extends Item {
 		public enum Kind {
 			BROTH, CHAMOMILE, POSSET

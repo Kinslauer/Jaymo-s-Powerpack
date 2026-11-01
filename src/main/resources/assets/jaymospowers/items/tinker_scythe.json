@@ -191,6 +191,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/accessory_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -376,6 +383,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/handle_star_metal"
+                  }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_bog_iron"
                   }
                 }
               ],
@@ -567,6 +581,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_broken_star_metal"
                     }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_bog_iron"
+                    }
                   }
                 ],
                 "fallback": {
@@ -752,6 +773,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_star_metal"
+                    }
+                  },
+                  {
+                    "when": "bog_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_bog_iron"
                     }
                   }
                 ],
@@ -961,6 +989,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/binding_star_metal"
                   }
+                },
+                {
+                  "when": "bog_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_bog_iron"
+                  }
                 }
               ],
               "fallback": {
@@ -1154,6 +1189,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/accessory_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -1339,6 +1381,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/handle_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_bog_iron"
               }
             }
           ],
@@ -1530,6 +1579,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_broken_star_metal"
                 }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_bog_iron"
+                }
               }
             ],
             "fallback": {
@@ -1715,6 +1771,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_star_metal"
+                }
+              },
+              {
+                "when": "bog_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_bog_iron"
                 }
               }
             ],
@@ -1923,6 +1986,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/binding_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_bog_iron"
               }
             }
           ],

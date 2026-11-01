@@ -521,7 +521,7 @@ public final class Breaks {
 	}
 
 	/** Every break gone at once (full healing, a debug command). */
-	static void clearAll(LivingEntity entity) {
+	public static void clearAll(LivingEntity entity) {
 		boolean crawled = crawlOnly(entity);
 		int mask = broken(entity);
 		entity.removeAttached(BROKEN);

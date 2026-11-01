@@ -118,7 +118,7 @@ public final class Treatment {
 		/** (0.17.93) Metal parts: an android's only repair (sneak + use, like spirits). */
 		METAL(40, true),
 		/**
-		 * (0.19.20) The herbal remedies (docs/Healing-Plan.md): yarrow powder packed into a cut, a knitbone poultice on a
+		 * (0.19.24) The herbal remedies (docs/Healing-Plan.md): yarrow powder packed into a cut, a knitbone poultice on a
 		 * break, a burn salve, a garlic poultice (cleans like honey, and wards off festering), and a clean rag (washed or
 		 * boiled: dresses like a rag but never festers).
 		 */
@@ -812,7 +812,7 @@ public final class Treatment {
 			case BANDAGE, RAG, CLEAN_RAG -> {
 				boolean rag = s.remedy != Remedy.BANDAGE;
 				Bleeding.stop(body, part, false);
-				// (0.15.49) Field Dresser: a better dressing. (0.19.20) a clean rag looks like a rag but is not dirty
+				// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
 				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, s.remedy == Remedy.RAG, rag);
 				stack.consume(1, player);
 			}
@@ -915,7 +915,7 @@ public final class Treatment {
 			}
 		}
 		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
-		// (0.19.20) the stack in hand ran out: the next of it comes from a healer's satchel
+		// (0.19.24) the stack in hand ran out: the next of it comes from a healer's satchel
 		if (player.getItemInHand(s.hand).isEmpty()) {
 			Satchel.refill(player, s.hand, used);
 		}

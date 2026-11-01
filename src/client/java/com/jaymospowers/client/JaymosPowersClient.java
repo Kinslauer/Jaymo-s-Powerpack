@@ -65,6 +65,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
+		com.jaymospowers.client.armory.LodgedLayer.register();
 		com.jaymospowers.client.wounds.ProstheticLayer.register();
 		// (0.18.71) a bolas' cord on a tripped body's legs
 		com.jaymospowers.client.wounds.TrippedPose.register();
@@ -126,6 +127,17 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) vanilla tools, bow, compass, clock, totem, brush, saddle and bottles solid in hand, 3D mushrooms
+		// and dripstone (tools/gen_held_3d.py); on by default, switched off in Resource Packs for the flat look
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_3d"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (Motion patch 5) the iron golem's eyes glow
+		com.jaymospowers.client.glow.GolemEyes.init();
+		// (Motion patch 6) pets acting like pets, and wet coats that shake dry
+		com.jaymospowers.client.pets.PetPoses.init();
+		com.jaymospowers.client.pets.WetCoats.init();
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
@@ -133,6 +145,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		PanicCam.init();
+		com.jaymospowers.client.water.BoatWakes.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
@@ -146,10 +160,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		com.jaymospowers.client.armory.MusketSights.init();
+		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		StanceScroll.init();
+		ProneTransition.init();
 		StanceHud.init();
 		com.jaymospowers.client.wounds.WoundsHud.init();
 		com.jaymospowers.client.wounds.DownedHud.init();
@@ -162,6 +178,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
+		// (Motion patch 4) lanterns worn at the hip (belt slot) and on a pole on the back (body slot)
+		com.jaymospowers.client.baubles.WornLanterns.init();
 		com.jaymospowers.client.alchemy.AlchemyClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
@@ -176,7 +194,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
-		// (0.19.20) campfire embers and hot spring steam
+		// (0.19.24) campfire embers and hot spring steam
 		com.jaymospowers.client.wounds.RestClient.init();
 	}
 

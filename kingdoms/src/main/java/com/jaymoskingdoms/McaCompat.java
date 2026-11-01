@@ -320,6 +320,17 @@ public final class McaCompat {
 		return LOADED ? McaBridge.hireNobodies(level, player, around, n, outfits, health, damage, contract) : 0;
 	}
 
+	/** (0.7.433) A turned captain follows {@code player} from now on (MCA's own Follow, off his camp's roster). False without MCA. */
+	static boolean swear(net.minecraft.world.entity.Entity mob, ServerPlayer player) {
+		return LOADED && McaBridge.swear(mob, player);
+	}
+
+	/** (0.7.433) A sworn captain's body back at {@code player}'s side; null without MCA. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob swornGreenskin(ServerLevel level, Heritage.Kind kind, String name,
+		net.minecraft.world.phys.Vec3 at, ServerPlayer player, List<net.minecraft.world.item.ItemStack> gear) {
+		return LOADED ? McaBridge.swornGreenskin(level, kind, name, at, player, gear) : null;
+	}
+
 	/** (0.7.418) {@code e} is an MCA villager whose hired contract is still running; false without MCA. */
 	static boolean contractRunning(net.minecraft.world.entity.Entity e) {
 		return LOADED && McaBridge.contractRunning(e);
@@ -505,6 +516,13 @@ public final class McaCompat {
 		return Greenskins.brood(folk.role()) != null ? McaBridge.greenskinOf(level, folk) : McaBridge.raiderOf(level, folk);
 	}
 
+	/** (0.7.431) {@code mob} goes by {@code name}: an MCA villager's own name, or else a name of its own (a captain, {@link Captains}). */
+	static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
+		if (!LOADED || !McaBridge.rename(mob, name)) {
+			mob.setCustomName(net.minecraft.network.chat.Component.literal(name));
+		}
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);
@@ -559,6 +577,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
+	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
 	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */
 	public static boolean zfighterOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.zfighterOpening(villager, player);
@@ -607,6 +630,30 @@ public final class McaCompat {
 		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
 			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
 			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
+		}
+		Boolean balmed = InBalming.foe(guard, target);
+		if (balmed != null) {
+			// (0.7.433) an in-balmed one never goes for his keeper or their others
+			return balmed;
+		}
+		Boolean sworn = SwornCaptains.foe(guard, target);
+		if (sworn != null) {
+			// (0.7.433) a sworn captain at his lord's side, or a camp standing back from a challenge
+			return sworn;
+		}
+		Boolean trial = Trials.foe(guard, target);
+		if (trial != null) {
+			// (0.7.429) a trial under way: the pit's champion goes for his challenger alone, the rest of the camp leaves them be
+			return trial;
+		}
+		Boolean pact = TribePacts.foe(guard, target);
+		if (pact != null) {
+			// (0.7.443) a tribe's war band called to a friend's aid, or the guards of the place it came to
+			return pact;
+		}
+		if (Tribes.of(guard) != null && (Pedlars.party(target) || Tribes.spares(guard, target))) {
+			// (0.7.425) no greenskin sets on a pedlar's party; a tribe under truce with a player, or a pedlar's party, spares them
+			return false;
 		}
 		if (guard instanceof Worker w && Barbarians.villagerRole(w.role()) && guard.level().getServer() != null) {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for

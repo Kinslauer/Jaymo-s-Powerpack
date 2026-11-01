@@ -19,7 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.19.20) The herbal remedies' lasting effects, all medieval (docs/Healing-Plan.md): what a knitbone poultice, a burn
+ * (0.19.24) The herbal remedies' lasting effects, all medieval (docs/Healing-Plan.md): what a knitbone poultice, a burn
  * salve, a garlic poultice, bone broth, chamomile tea and posset leave working on a body after {@link Treatment} or a
  * drink has done the first part.
  * <ul>
@@ -35,32 +35,32 @@ import net.minecraft.world.entity.player.Player;
  * Not saved (like a dressing): a reload ends them, except the calm-sleep flag, which is a scoreboard tag.
  */
 public final class Herbal {
-	/** (0.19.20) Knitbone: heals the part this much at once (health points), then this much more every second, for this long (ticks). */
+	/** (0.19.24) Knitbone: heals the part this much at once (health points), then this much more every second, for this long (ticks). */
 	public static final float KNIT_NOW = 1.0F, KNIT_PER_SECOND = 0.1F;
 	public static final int KNIT_TICKS = 12000;
-	/** (0.19.20) Burn salve: heals the part this much (health points) over this long (ticks). */
+	/** (0.19.24) Burn salve: heals the part this much (health points) over this long (ticks). */
 	public static final float SALVE_HEAL = 4.0F;
 	public static final int SALVE_TICKS = 400;
-	/** (0.19.20) A part cleaned with garlic can't fester for this long (ticks). */
+	/** (0.19.24) A part cleaned with garlic can't fester for this long (ticks). */
 	public static final int GARLIC_WARD_TICKS = 12000;
-	/** (0.19.20) Bone broth: heals this much (health points) over the worst parts, and cools a fever this long (ticks). */
+	/** (0.19.24) Bone broth: heals this much (health points) over the worst parts, and cools a fever this long (ticks). */
 	public static final float BROTH_HEAL = 3.0F;
 	public static final int BROTH_COOL_TICKS = 6000;
-	/** (0.19.20) Posset: heals this much (health points) over the worst parts. */
+	/** (0.19.24) Posset: heals this much (health points) over the worst parts. */
 	public static final float POSSET_HEAL = 2.0F;
-	/** (0.19.20) Chamomile tea: weaker than willow-bark's, this share of its length. */
+	/** (0.19.24) Chamomile tea: weaker than willow-bark's, this share of its length. */
 	public static final float CHAMOMILE_PAIN_SHARE = 0.5F;
 	/**
-	 * (0.19.20) What a full sleep heals into every hurt part (health points); chamomile's calm sleep doubles it. Powers heals
+	 * (0.19.24) What a full sleep heals into every hurt part (health points); chamomile's calm sleep doubles it. Powers heals
 	 * nothing in a plain sleep itself: a bed or cot that does (Kingdoms') asks {@link #sleepHeal}.
 	 */
 	public static final float SLEEP_PART_HEAL = 1.0F;
 	public static final int CALM_SLEEP_MULTIPLIER = 2;
-	/** (0.19.20) Self-care (a sleep) never takes a part past this fraction. */
+	/** (0.19.24) Self-care (a sleep) never takes a part past this fraction. */
 	public static final float SLEEP_CAP = 0.6F;
-	/** (0.19.20) The scoreboard tag of a player whose next sleep is calm. */
+	/** (0.19.24) The scoreboard tag of a player whose next sleep is calm. */
 	public static final String CALM_SLEEP_TAG = "jaymospowers_calm_sleep";
-	/** (0.19.20) Herbal work runs this often (ticks). */
+	/** (0.19.24) Herbal work runs this often (ticks). */
 	static final int EVERY = 20;
 
 	private static final int PARTS = BodyPart.values().length;
@@ -168,7 +168,7 @@ public final class Herbal {
 	}
 
 	/**
-	 * (0.19.20) What a sleep heals into each hurt part (health points) for {@code player}: {@link #SLEEP_PART_HEAL}, doubled
+	 * (0.19.24) What a sleep heals into each hurt part (health points) for {@code player}: {@link #SLEEP_PART_HEAL}, doubled
 	 * by a calm sleep. Call it once per sleep; it uses up the calm. For a bed or cot that heals (Kingdoms', by reflection).
 	 */
 	public static float sleepHeal(Player player) {

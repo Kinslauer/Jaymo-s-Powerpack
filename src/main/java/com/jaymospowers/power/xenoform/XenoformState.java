@@ -172,15 +172,53 @@ public final class XenoformState {
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/**
 	 * How the alien is flying right now, for everyone's client to pose it ({@link XenoForm#flight}): {@link #FLY_JET}
-	 * (Pyre), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID} (Nadir). Absent: not flying.
+	 * (Pyre; {@link #FLY_SUN} under Sunheart, faster), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID}
+	 * (Nadir). Absent: not flying.
 	 */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4;
+	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
+	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.119, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */
+	public static final AttachmentType<Long> GRAB = AttachmentRegistry.create(JaymosPowers.id("xenoform_grab"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4, FLY_SUN = 5;
+
+	/** Pyre's jet, plain or Sunheart's. */
+	public static boolean jet(int kind) {
+		return kind == FLY_JET || kind == FLY_SUN;
+	}
 
 	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
 	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.95) Rivet's shell: the block it has melded into (furnace, piston, ...), drawn as that block. */
+	public static final AttachmentType<String> SHELL = AttachmentRegistry.create(JaymosPowers.id("xenoform_shell"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+	/** (0.18.96) How many times this player has caught the stalker's eye (three, and it sheds its skin). Kept, not synced. */
+	public static final AttachmentType<Integer> SIGHTINGS = AttachmentRegistry.create(JaymosPowers.id("xenoform_sightings"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+	/** (0.18.96) Duplex looking out through a double's eyes: the double's entity id. Synced to that player only. */
+	public static final AttachmentType<Integer> EYES = AttachmentRegistry.create(JaymosPowers.id("xenoform_eyes"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+	/** (0.18.93) The alien is its Ultimate form (drawn armoured, spiked and glowing, {@code XenoformLayer}). */
+	public static final AttachmentType<Boolean> ULTIMATE = AttachmentRegistry.create(JaymosPowers.id("xenoform_ultimate"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.18.125, Xeno-Band patch 8) The band worn is the rival band (dark red; its aliens drawn darkened). Saved, kept
+	 * through death, synced to everyone so every client draws it. The player also carries {@link #RIVAL_TAG} while it's on.
+	 */
+	public static final AttachmentType<Boolean> RIVAL = AttachmentRegistry.create(JaymosPowers.id("xenoform_rival"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.18.125) The player tag for the rival band's wearer, for mods that read players without our classes (Kingdoms' law). */
+	public static final String RIVAL_TAG = "jaymospowers_rival_band";
+
+	/** Whether {@code player} wears the rival band (both sides). */
+	public static boolean rival(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(RIVAL));
+	}
 
 	private XenoformState() {
 	}

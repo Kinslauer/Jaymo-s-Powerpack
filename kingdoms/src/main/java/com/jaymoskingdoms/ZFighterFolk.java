@@ -52,19 +52,28 @@ public final class ZFighterFolk {
 	static final String PILOT_TAG = "jaymospowers.omen_pilot", PILOT_KIND = "omen_pilot";
 	/** (0.7.359) Powers' galactic patrolmen: they come and go in their pods, roam and fight on Powers' say, in the patrol's uniform. */
 	static final String PATROL_TAG = "jaymospowers.patrolman";
+	/** (0.7.446) Powers' band hunter (and the same man, bandless, running): Powers walks him to his prey and away. */
+	static final String HUNTER_TAG = "jaymospowers_band_hunter", HUNTER_FLED_TAG = "jaymospowers_band_hunter_fled";
 
 	/** Powers' tags for its characters, and the outfits each wears ({@code skins/clothing/zfighter/<kind>_<n>}). */
-	static final Map<String, String> KINDS = Map.of(
-		"jaymospowers_keeper", "keeper",
-		"jaymospowers_hermit", "hermit",
-		"jaymospowers_scientist", "tinkerer",
-		"jaymospowers_judge", "judge",
-		"jaymospowers_afterlife_master", "road_master",
-		"jaymospowers_fortune_teller", "teller",
-		"jaymospowers_demon_master", "demon_master",
+	static final Map<String, String> KINDS = Map.ofEntries(
+		Map.entry("jaymospowers_keeper", "keeper"),
+		Map.entry("jaymospowers_hermit", "hermit"),
+		Map.entry("jaymospowers_scientist", "tinkerer"),
+		Map.entry("jaymospowers_judge", "judge"),
+		Map.entry("jaymospowers_afterlife_master", "road_master"),
+		Map.entry("jaymospowers_fortune_teller", "teller"),
+		Map.entry("jaymospowers_demon_master", "demon_master"),
 		// (0.7.348) Andy: an Omen's pilot, out of its mech in Powers' future, a curious villager (Powers moves and talks for them)
-		PILOT_TAG, PILOT_KIND,
-		PATROL_TAG, "patrolman");
+		Map.entry(PILOT_TAG, PILOT_KIND),
+		Map.entry(PATROL_TAG, "patrolman"),
+		// (0.7.442) Powers' star-readers, who come to a fallen star's crater and keep to its rim
+		Map.entry("jaymospowers_star_reader", "star_reader"),
+		// (0.7.444) Powers' star forge smith, who keeps the forge on a far world and reforges Xeno-Bands
+		Map.entry("jaymospowers_star_smith", "star_smith"),
+		// (0.7.446) Powers' band hunter, an outcast with the rival band who hunts Xeno-Band wearers (and runs once it's torn off)
+		Map.entry(HUNTER_TAG, "band_hunter"),
+		Map.entry(HUNTER_FLED_TAG, "band_hunter"));
 	/**
 	 * (0.7.405) Andy: the Judge's MCA screen said "Jobless" and "Mood: Depressed". Which character they are ({@link #KINDS}),
 	 * synced so MCA's screen shows their part and bearing in place of a trade and a mood ({@code McaZFighterInfoMixin}).
@@ -140,9 +149,11 @@ public final class ZFighterFolk {
 		if (kind != null && !kind.equals(mob.getAttached(PART))) {
 			mob.setAttached(PART, kind);
 		}
-		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG)) {
+		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG) || mob.entityTags().contains(HUNTER_TAG)
+			|| mob.entityTags().contains(HUNTER_FLED_TAG)) {
 			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
 			// ((0.7.359) a galactic patrolman: Powers walks them round the town and into fights)
+			// ((0.7.446) the band hunter: Powers walks him down his prey, and off once he's beaten)
 			return true;
 		}
 		mob.getNavigation().stop();

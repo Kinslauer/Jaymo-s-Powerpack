@@ -91,6 +91,11 @@ public final class BackpackClient {
 		state.showCape = false;
 	}
 
+	/** Whether this player is drawn wearing a backpack (after {@link #extract}). */
+	public static boolean worn(AvatarRenderState state) {
+		return state.getData(KEY) != null;
+	}
+
 	/**
 	 * A worn backpack hanging from the shoulders: a damped spring each way. It swings out (bottom away from the back)
 	 * when you speed up or fall, presses in when you land or stop, and rolls when you turn or sidestep.

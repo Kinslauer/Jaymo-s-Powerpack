@@ -117,6 +117,8 @@
 	"message.jaymospowers.downed.come_round": "You come round. Crawl, or wait for help.",
 	"message.jaymospowers.downed.roused": "The salts sting you awake. You're up!",
 	"message.jaymospowers.downed.knocked_out": "Too much poppy: you're out cold.",
+	"message.jaymospowers.downed.knocked_rock": "A rock out of nowhere: you're out cold.",
+	"message.jaymospowers.downed.knocked_mash": "Out cold. Mash sneak to come round [%s]",
 	"jei.jaymospowers.medicine": "Medicine",
 	"item.jaymospowers.comfrey": "Comfrey",
 	"item.jaymospowers.yarrow": "Yarrow",

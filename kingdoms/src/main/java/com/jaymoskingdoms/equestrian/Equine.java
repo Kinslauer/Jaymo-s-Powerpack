@@ -55,6 +55,10 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 			return MOONLIT;
 		}
 		int rare = breed.coats.length - 1;
+		if (rare <= 0) {
+			// (0.7.447) a breed of one coat (the donkey, the mule) has no rare one: nextInt(0) threw and took the server down
+			return 0;
+		}
 		return random.nextFloat() < Equestrian.RARE_COAT_CHANCE ? rare : random.nextInt(rare);
 	}
 
@@ -112,6 +116,11 @@ public record Equine(Breed breed, int coat, float speed, float stamina, float ju
 
 	public int maxTemper() {
 		return Math.round(40 + 100 * this.temper);
+	}
+
+	/** (0.7.445) Its coat is its breed's rare one, or moonlit. */
+	public boolean rareCoat() {
+		return this.coat == MOONLIT || this.breed.coats.length > 1 && Math.floorMod(this.coat, this.breed.coats.length) == this.breed.coats.length - 1;
 	}
 
 	public String coatName() {

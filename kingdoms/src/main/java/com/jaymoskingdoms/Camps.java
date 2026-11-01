@@ -435,7 +435,7 @@ public final class Camps {
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
-	private static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
+	static boolean open(MinecraftServer server, ServerLevel level, BlockPos at) {
 		if (!level.isPositionEntityTicking(at)) {
 			return false;
 		}
@@ -625,6 +625,12 @@ public final class Camps {
 	 * is anyone's), and its tents start to rot.
 	 */
 	static void chiefSlain(ServerLevel level, LivingEntity chief, int campId, DamageSource source) {
+		// (0.7.435) a goblin king's or a warchief's spoils: his trophy, and a tribe's king his crown and weapon
+		Spoils.kingFell(level, chief, campId, source);
+		if (SwornCaptains.seatTaken(level, chief, campId, source)) {
+			// (0.7.433) a tribe's king, killed by one with a sworn captain to crown: the seat is theirs, the camp stands
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, campId);
 		if (camp == null || camp.fallen() || camp.type() != FactionType.BARBARIAN) {

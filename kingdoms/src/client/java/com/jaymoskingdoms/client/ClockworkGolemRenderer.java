@@ -35,6 +35,8 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 		float sinceChanged;
 		/** How far its blow has run (ticks, counting down from 10), 0 for none. */
 		float attack;
+		/** (Motion patch 6) Its entity id, so each golem fidgets on its own clock. */
+		int id;
 	}
 
 	public ClockworkGolemRenderer(EntityRendererProvider.Context context) {
@@ -55,6 +57,7 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 		state.sinceChanged = golem.sinceChanged() + partialTicks;
 		int tick = golem.getAttackAnimationTick();
 		state.attack = tick > 0 ? tick - partialTicks : 0.0F;
+		state.id = golem.getId();
 	}
 
 	@Override
@@ -92,6 +95,11 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 		/** An iron golem's blow runs this long (ticks). */
 		static final float BLOW_TICKS = 10.0F;
 		static final float STRIDE = Mth.TWO_PI / 0.6662F;
+		/**
+		 * (Motion patch 6) Idle fidgets, after Actions &amp; Stuff's golem idle: every FIDGET_EVERY ticks (plus a little per
+		 * golem) it looks slowly round (LOOK radians each way) and shifts its weight (SHIFT radians), over FIDGET_TICKS.
+		 */
+		static final float FIDGET_EVERY = 260.0F, FIDGET_TICKS = 90.0F, LOOK = 0.7F, SHIFT = 0.06F;
 
 		private final BbModel bb;
 
@@ -117,6 +125,16 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 			this.bb.play("walk", state.walkAnimationPos / STRIDE * this.bb.length("walk"), pace);
 			if (state.attack > 0.0F) {
 				this.bb.play("atack", (1.0F - state.attack / BLOW_TICKS) * this.bb.length("atack"), 1.0F);
+			}
+			if (pace < 0.1F && state.attack <= 0.0F) {
+				// standing about: now and then a slow look round and a shift of its weight from foot to foot
+				float every = FIDGET_EVERY + (state.id & 7) * 20.0F;
+				float t = (state.ageInTicks + (state.id * 31 & 127)) % every;
+				if (t < FIDGET_TICKS) {
+					float f = Mth.sin(t / FIDGET_TICKS * Mth.PI);
+					this.bb.part("head").yRot += LOOK * f * Mth.sin(t / FIDGET_TICKS * Mth.TWO_PI);
+					this.root().zRot += SHIFT * f * Mth.sin(t / FIDGET_TICKS * Mth.TWO_PI * 1.5F);
+				}
 			}
 			this.bb.part("head").yRot += state.yRot * Mth.DEG_TO_RAD;
 			this.bb.part("head").xRot += state.xRot * Mth.DEG_TO_RAD;

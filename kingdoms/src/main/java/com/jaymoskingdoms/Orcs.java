@@ -182,7 +182,8 @@ public final class Orcs {
 	/** What an orc attacks on sight. */
 	static boolean prey(LivingEntity target) {
 		if (target instanceof ServerPlayer player) {
-			return !player.isCreative() && !player.isSpectator();
+			// ((0.7.443) never one raised among them, GreenskinLife)
+			return !player.isCreative() && !player.isSpectator() && !GreenskinLife.raised(player);
 		}
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;

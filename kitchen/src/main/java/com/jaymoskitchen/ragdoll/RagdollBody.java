@@ -56,6 +56,9 @@ public final class RagdollBody {
 	/** (0.5.24) Pinned on a table: the torso's corners stay over this rectangle (min x, min z, max x, max z). */
 	private boolean pinned;
 	private double pinMinX, pinMinZ, pinMaxX, pinMaxZ;
+	/** (0.5.39) Held in a hand (two at most): which point each hand has hold of (-1: none), and where the hand is. */
+	private final int[] gripPoint = {-1, -1};
+	private final double[] gripX = new double[2], gripY = new double[2], gripZ = new double[2];
 
 	public RagdollBody(RagdollRig rig) {
 		this.rig = rig;
@@ -237,6 +240,45 @@ public final class RagdollBody {
 
 	public boolean pinned() {
 		return pinned;
+	}
+
+	/**
+	 * (0.5.39) {@code hand} (0 or 1) has hold of {@code point}, at {@code (hx, hy, hz)}: the point goes where the hand is
+	 * and the rest of the body hangs and drags from it over whatever it lies on. Taken hold of just now, it's put in the
+	 * hand at once, not flung there.
+	 */
+	public void grip(int hand, int point, double hx, double hy, double hz) {
+		if (gripPoint[hand] != point) {
+			gripPoint[hand] = point;
+			x[point] = px[point] = hx;
+			y[point] = py[point] = hy;
+			z[point] = pz[point] = hz;
+		}
+		gripX[hand] = hx;
+		gripY[hand] = hy;
+		gripZ[hand] = hz;
+		wake();
+	}
+
+	/** (0.5.39) Let go of with both hands: it falls and slides as it was moving. */
+	public void release() {
+		gripPoint[0] = gripPoint[1] = -1;
+	}
+
+	public boolean gripped() {
+		return gripPoint[0] >= 0 || gripPoint[1] >= 0;
+	}
+
+	/** (0.5.39) Held points stay in their hands, whatever the sticks and blocks say. */
+	private void hold() {
+		for (int h = 0; h < 2; h++) {
+			int p = gripPoint[h];
+			if (p >= 0) {
+				x[p] = gripX[h];
+				y[p] = gripY[h];
+				z[p] = gripZ[h];
+			}
+		}
 	}
 
 	public void wake() {
@@ -450,6 +492,9 @@ public final class RagdollBody {
 				if (pinned) {
 					pen();
 				}
+				if (gripPoint[0] >= 0 || gripPoint[1] >= 0) {
+					hold();
+				}
 			}
 		}
 		rescale(substeps);
@@ -473,7 +518,7 @@ public final class RagdollBody {
 			} else {
 				stop();
 			}
-		} else if (moved < SLEEP_SPEED && grounded) {
+		} else if (moved < SLEEP_SPEED && grounded && !gripped()) {
 			if (++quiet >= SLEEP_TICKS) {
 				asleep = true;
 				sleepingFor = 0;

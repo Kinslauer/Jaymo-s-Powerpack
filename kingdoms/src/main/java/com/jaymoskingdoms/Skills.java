@@ -184,9 +184,10 @@ public final class Skills {
 		// (0.7.102) Stealth's second page, freerunning (the moves are Jaymo's Powers' Freerun); last, so no ordinal moves
 		CLIMBER(Pillar.STEALTH, 3, 1, 3, 4, 0),
 		FREERUNNER(Pillar.STEALTH, 2, 1, 3, 4, 2),
-		SURE_FOOTING(Pillar.STEALTH, 1, 1, 8, 5, 0, CLIMBER),
+		// (Powers' Motion patch 0) Sure Footing left the tree: the landing roll is everyone's now (Andy). Ranks saved under
+		// sure_footing count for nothing, so their points come back; Bar Swing moved up into its place
 		LEAP_OF_FAITH(Pillar.STEALTH, 1, 2, 8, 5, 2, FREERUNNER),
-		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 6, 0, SURE_FOOTING),
+		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 5, 0, CLIMBER),
 		WALL_RUNNER(Pillar.STEALTH, 2, 1, 12, 6, 2, LEAP_OF_FAITH),
 		// (0.7.111) Stealth's third page, Shadows: how far mobs see you, how fast they lose you, and what an unaware blow does (Senses)
 		SHADOWED(Pillar.STEALTH, 3, 1, 5, 8, 0),
@@ -225,7 +226,14 @@ public final class Skills {
 		UNBROKEN_ROAR(Pillar.STRENGTH, 1, 3, 22, 15, 1, SECOND_BREATH),
 		// (0.7.358) Andy: "lets you withstand more hits during charged interactions": rising by yourself, a revive, Second
 		// Wind's eating each take one more hit a rank before they're broken off (Jaymo's Powers' WillSkill.holdHits); last, so no ordinal moves
-		UNFLINCHING(Pillar.STRENGTH, 2, 1, 10, 12, 1, NO_GETTING_UP);
+		UNFLINCHING(Pillar.STRENGTH, 2, 1, 10, 12, 1, NO_GETTING_UP),
+		// (0.7.424) Andy: "you can question downed humanoids, unlocked in the tree": the execution hold offers question or
+		// kill (Jaymo's Powers' Finishers reads this rank by key), and the talk menu opens with the questions ({@link Questioning})
+		INTERROGATION(Pillar.STRENGTH, 1, 1, 2, 8, 1),
+		// (0.7.424) Andy: "it should be early on the tree, and available in stealth and strength as well": the same choice,
+		// each with its own edge ({@link Questioning})
+		ROUGH_QUESTIONS(Pillar.STRENGTH, 1, 1, 0, 1, 1, HEAVY_BLOWS),
+		QUIET_WORD(Pillar.STEALTH, 1, 1, 0, 1, 1, LIGHT_FINGERS);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

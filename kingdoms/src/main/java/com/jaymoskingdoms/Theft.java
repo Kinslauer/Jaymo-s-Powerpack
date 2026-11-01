@@ -141,7 +141,9 @@ public final class Theft {
 		/** (0.7.231) death magic cast where a realm's people see ({@link Necromancy}). */
 		NECROMANCY(Weight.HEAVY, "necromancy"),
 		/** (0.7.231) blood magic cast where a realm's people see ({@link Hemomancy}). */
-		BLOOD_MAGIC(Weight.HEAVY, "blood_magic");
+		BLOOD_MAGIC(Weight.HEAVY, "blood_magic"),
+		/** (0.7.446) Powers' rival band worn where a realm that knows the band's aliens sees it ({@link Aliens#rivalBand}). */
+		RIVAL_BAND(Weight.HEAVY, "rival_band");
 
 		final Weight weight;
 		final String cry;

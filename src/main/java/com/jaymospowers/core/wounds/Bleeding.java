@@ -287,7 +287,7 @@ public final class Bleeding {
 		dress(entity, part, heal, ticks, dirty, dirty);
 	}
 
-	/** (0.19.20) As above; {@code rag}: it looks like a rag whether or not it is dirty (a clean rag, boiled or washed, never festers). */
+	/** (0.19.24) As above; {@code rag}: it looks like a rag whether or not it is dirty (a clean rag, boiled or washed, never festers). */
 	static void dress(LivingEntity entity, BodyPart part, float heal, int ticks, boolean dirty, boolean rag) {
 		if (!(entity.level() instanceof ServerLevel level)) {
 			return;
@@ -324,7 +324,7 @@ public final class Bleeding {
 		return clean(entity, part, CLEAN_TICKS);
 	}
 
-	/** (0.19.20) As {@link #clean(LivingEntity, BodyPart)}, clean for {@code ward} ticks (garlic's ten minutes). */
+	/** (0.19.24) As {@link #clean(LivingEntity, BodyPart)}, clean for {@code ward} ticks (garlic's ten minutes). */
 	static boolean clean(LivingEntity entity, BodyPart part, int ward) {
 		if (!(entity.level() instanceof ServerLevel level)) {
 			return false;
@@ -569,7 +569,7 @@ public final class Bleeding {
 			return;
 		}
 		long now = level.getGameTime();
-		// (0.19.20) bone broth cools it for a while: no weakness, no harm
+		// (0.19.24) bone broth cools it for a while: no weakness, no harm
 		if (!Herbal.feverCooled(body)) {
 			body.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, FEVER_TICKS + 40, 0, false, false, true));
 			if (!(body instanceof Player player && (player.isCreative() || player.isSpectator())) && !Downed.isDowned(body)) {

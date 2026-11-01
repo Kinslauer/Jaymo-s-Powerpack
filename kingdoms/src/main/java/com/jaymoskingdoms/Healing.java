@@ -37,23 +37,23 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.459) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for emeralds, the infirmary cot
+ * (0.7.462) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for emeralds, the infirmary cot
  * ({@link InfirmaryCot}) and the shrine ({@link Shrine}). All of them reach the body's parts through Jaymo's Powers' wounds
  * ({@link PowersCompat}); without Powers they heal the hearts. This class holds what they share: the treatment itself, its
  * price, what makes a place an infirmary, and the blocks' registration.
  */
 public final class Healing {
 	// ---- the healer's price (emeralds) ----
-	/** (0.7.459) A full treatment: a base, then so much for each break, each open cut, each festering part, and for every quarter of health lost. */
+	/** (0.7.462) A full treatment: a base, then so much for each break, each open cut, each festering part, and for every quarter of health lost. */
 	static final int TREATMENT_BASE = 4, PER_BREAK = 5, PER_CUT = 1, PER_FESTER = 3, PER_QUARTER_LOST = 2;
-	/** (0.7.459) The most a treatment ever costs. */
+	/** (0.7.462) The most a treatment ever costs. */
 	static final int TREATMENT_MAX = 48;
 
 	// ---- the infirmary ----
-	/** (0.7.459) A cleric or court wizard this near (blocks), or a brewing stand this near, makes a cot an infirmary. */
+	/** (0.7.462) A cleric or court wizard this near (blocks), or a brewing stand this near, makes a cot an infirmary. */
 	static final double HEALER_NEAR = 16.0;
 	static final int STAND_NEAR = 8;
-	/** (0.7.459) How long (ticks) you lie on a cot, asleep or resting, before an infirmary treats you. */
+	/** (0.7.462) How long (ticks) you lie on a cot, asleep or resting, before an infirmary treats you. */
 	static final int COT_TICKS = 100;
 
 	public static Block COT, SHRINE;

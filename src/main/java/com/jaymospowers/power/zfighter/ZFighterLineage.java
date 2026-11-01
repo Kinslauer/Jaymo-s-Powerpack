@@ -295,9 +295,19 @@ public final class ZFighterLineage {
 
 	/** The lang key of a technique: the V's Ki Wave is each lineage's own (Crimson Cannon, Spiral Lance, Frost Needle). */
 	public static String techniqueKey(Player player, int technique) {
+		if (technique < 0 || technique >= ZFighterTraining.TECHNIQUES) {
+			// (0.18.94) a made technique has a name, not a key (techniqueName)
+			return "technique.jaymospowers.zfighter.made";
+		}
 		String key = "technique.jaymospowers.zfighter." + ZFighterTraining.TECHNIQUE_KEYS[technique];
 		int lineage = of(player);
 		return technique == ZFighterTraining.KI_WAVE && lineage > EARTHLING ? key + "." + KEYS[lineage] : key;
+	}
+
+	/** (0.18.94) A technique's name as shown: a made one's own, in its colour, or the learned one's. */
+	public static net.minecraft.network.chat.Component techniqueName(Player player, int technique) {
+		ZFighterCreator.Made made = ZFighterCreator.made(player, technique);
+		return made != null ? ZFighterCreator.name(made) : net.minecraft.network.chat.Component.translatable(techniqueKey(player, technique));
 	}
 
 	public static String formKey(Player player, int form) {
@@ -565,7 +575,9 @@ public final class ZFighterLineage {
 			player.removeAttached(TAIL_CUT);
 		}
 		boolean wild = wild(player);
-		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
+		// (Andy, 2026-11-01) a false moon ({@link ZFighterFakeMoon}) shines like a full one, any night
+		boolean fakeMoon = tailOut(player) && ZFighterFakeMoon.shines(level, player);
+		boolean moonlit = fakeMoon || tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
 			live.apePeak = player.getY();

@@ -624,7 +624,7 @@ public final class Restoration {
 			return out;
 		}
 		out.add(wizard && friendOfRealm(player, healer) ? "heal_free" : "heal");
-		// (0.7.459) and the full treatment, for a price that grows with the injuries (Healing)
+		// (0.7.462) and the full treatment, for a price that grows with the injuries (Healing)
 		out.add("treatment");
 		out.add("scroll_mending");
 		if (wizard && reputation(player, healer) >= HONOURED_REP) {
@@ -716,7 +716,7 @@ public final class Restoration {
 					: "talk.jaymoskingdoms.healer.healed_free"), Speech.GOLD);
 			}
 			case "treatment" -> {
-				// (0.7.459) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
+				// (0.7.462) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
 				Approaches.take(player, Items.EMERALD, Healing.treatmentPrice(player));
 				Healing.treat(player);
 				beam(level, healer, player, GOLD_MOTE);

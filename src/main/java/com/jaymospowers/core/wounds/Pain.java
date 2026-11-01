@@ -126,7 +126,7 @@ public final class Pain {
 		tea(entity, 1.0F);
 	}
 
-	/** (0.19.20) A cup of tea that lasts {@code share} of willow-bark's (chamomile's is weaker). */
+	/** (0.19.24) A cup of tea that lasts {@code share} of willow-bark's (chamomile's is weaker). */
 	static void tea(LivingEntity entity, float share) {
 		long now = entity.level().getGameTime();
 		dull(entity, now + TEA_DELAY, now + TEA_DELAY + Math.round(TEA_TICKS * share));
@@ -135,7 +135,7 @@ public final class Pain {
 		}
 	}
 
-	/** (0.19.20) A little ease from rest or a warm soak: the pain dulled at once, for {@code ticks} more (joined to any numbness already running). */
+	/** (0.19.24) A little ease from rest or a warm soak: the pain dulled at once, for {@code ticks} more (joined to any numbness already running). */
 	public static void ease(LivingEntity entity, int ticks) {
 		long now = entity.level().getGameTime();
 		dull(entity, now, now + ticks);

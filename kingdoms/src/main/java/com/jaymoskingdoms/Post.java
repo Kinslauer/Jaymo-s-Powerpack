@@ -28,6 +28,11 @@ import org.jspecify.annotations.Nullable;
  * family, condolences) is taken out of its inbox the same way. Each is brought ({@link #dispatch}): by a townsman who
  * runs it over when you're in a town ({@link Couriers}), else by a wild pigeon that comes down to you
  * ({@link PigeonPost#wild}). What can't be brought yet waits ({@link #later}) for the next try.
+ * <p>(0.7.424) Andy: "tidings can now be nailed this way and posted on boards in towns, they should be dropped to you by
+ * bird less as those generally come from kingdoms. they would need a good reason to send it straight to you. you may just
+ * not hear of some news." The world's news is kept ({@link #POSTED}) and pinned up on town boards by the townsfolk
+ * ({@link #postable}), not every town hearing every piece ({@link #HEARD_CHANCE}); a bird or a courier brings a piece
+ * straight to you only when it names you or your realm ({@link #concerns}).
  */
 public final class Post {
 	/** How often the post is seen to (ticks); news is held this long before it's written up, at most this many lines a letter. */
@@ -40,6 +45,12 @@ public final class Post {
 	static final double TOWN_RANGE = 128.0, HERALD_RANGE = 40.0;
 	/** At most this many letters wait for anyone (the oldest go). */
 	static final int WAITING_MAX = 12;
+	/** (0.7.424) Pieces of news kept for the boards (the oldest go), how long each stays (ticks), and the chance a town hears of each. */
+	static final int POSTED_MAX = 16;
+	static final long POSTED_LIFE = 24000L * 3;
+	static final float HEARD_CHANCE = 0.7F;
+	/** (0.7.424) Characters to a line on a posted piece of news. */
+	static final int POSTED_WIDTH = 38;
 
 	/** On the Overworld: every player's character name as last seen, by their id. Saved. */
 	static final AttachmentType<Map<String, String>> NAMES = AttachmentRegistry.create(JaymosKingdoms.id("post_names"),
@@ -48,9 +59,18 @@ public final class Post {
 	static final AttachmentType<Map<String, List<ItemStack>>> WAITING = AttachmentRegistry.create(JaymosKingdoms.id("post_waiting"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, ItemStack.OPTIONAL_CODEC.listOf())));
 
-	/** The news not yet written up, and when the first of it came. */
-	private static final List<Component> NEWS = new ArrayList<>();
-	private static long newsSince = -1L;
+	/** (0.7.424) A piece of the world's news, kept for the town boards. */
+	record Posted(String id, Component line, long at) {
+		static final Codec<Posted> CODEC = com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.fieldOf("id").forGetter(Posted::id),
+				net.minecraft.network.chat.ComponentSerialization.CODEC.fieldOf("line").forGetter(Posted::line),
+				Codec.LONG.fieldOf("at").forGetter(Posted::at))
+			.apply(i, Posted::new));
+	}
+
+	/** (0.7.424) On the Overworld: the news kept for the town boards, oldest first. Saved. */
+	static final AttachmentType<List<Posted>> POSTED = AttachmentRegistry.create(JaymosKingdoms.id("post_posted"),
+		builder -> builder.persistent(Posted.CODEC.listOf()));
 	/** (0.7.256) News for one player only (their merchant orders), and when the first of it came. */
 	private static final Map<UUID, List<Component>> MINE = new HashMap<>();
 	private static final Map<UUID, Long> MINE_SINCE = new HashMap<>();
@@ -65,8 +85,6 @@ public final class Post {
 		ServerTickEvents.END_SERVER_TICK.register(Post::tick);
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> current = server);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			NEWS.clear();
-			newsSince = -1L;
 			MINE.clear();
 			MINE_SINCE.clear();
 			LAST.clear();
@@ -122,19 +140,114 @@ public final class Post {
 
 	// ---- news and mail ------------------------------------------------------------------------------------------------
 
-	/** A piece of the world's news (once everyone's chat): it goes out in the next Tidings. */
+	/**
+	 * A piece of the world's news (once everyone's chat): (0.7.424) kept for the town boards ({@link #POSTED}), and in
+	 * the next Tidings only of those it names or whose realm it names ({@link #concerns}).
+	 */
 	public static void news(MinecraftServer server, Component headline) {
 		JaymosKingdoms.LOGGER.info("[news] {}", headline.getString());
-		if (NEWS.isEmpty()) {
-			newsSince = Factions.level(server).getGameTime();
+		ServerLevel overworld = Factions.level(server);
+		long now = overworld.getGameTime();
+		List<Posted> kept = new ArrayList<>(overworld.getAttachedOrElse(POSTED, List.of()));
+		kept.removeIf(e -> now - e.at() > POSTED_LIFE);
+		kept.add(new Posted(Long.toString(now, 36) + Integer.toString(overworld.getRandom().nextInt(1296), 36), headline, now));
+		while (kept.size() > POSTED_MAX) {
+			kept.removeFirst();
 		}
-		NEWS.add(headline);
-		while (NEWS.size() > NEWS_LINES) {
-			NEWS.removeFirst();
+		overworld.setAttached(POSTED, List.copyOf(kept));
+		java.util.Set<UUID> told = new java.util.HashSet<>();
+		for (String id : overworld.getAttachedOrElse(NAMES, Map.of()).keySet()) {
+			try {
+				told.add(UUID.fromString(id));
+			} catch (IllegalArgumentException ignored) {
+				// (a bad entry)
+			}
+		}
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			told.add(p.getUUID());
+		}
+		for (UUID id : told) {
+			if (concerns(server, id, headline)) {
+				tidings(id, headline);
+			}
 		}
 	}
 
-	/** (0.7.256) A line in {@code to}'s own next Tidings, with the world's news if there is any. */
+	/** (0.7.424) {@code headline} names the player {@code id} (by the name they go by) or the realm they belong to. */
+	static boolean concerns(MinecraftServer server, UUID id, Component headline) {
+		String text = headline.getString();
+		Faction f = Factions.of(server, id);
+		return f != null && names(text, f.name()) || names(text, nameOf(server, id).getString());
+	}
+
+	/** {@code name} stands as words of its own in {@code text}. */
+	private static boolean names(String text, String name) {
+		String n = name.strip();
+		return !n.isEmpty() && java.util.regex.Pattern.compile("(?<![\\p{L}\\p{N}])" + java.util.regex.Pattern.quote(n) + "(?![\\p{L}\\p{N}])",
+			java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.UNICODE_CASE).matcher(text).find();
+	}
+
+	/** (0.7.424) The kept piece of news {@code id}, if it's still about (null with no server running). */
+	static @Nullable Posted posted(String id) {
+		return current == null ? null : posted(current, id);
+	}
+
+	/** (0.7.424) The kept piece of news {@code id}, if it's still about. */
+	static @Nullable Posted posted(MinecraftServer server, String id) {
+		long now = Factions.level(server).getGameTime();
+		for (Posted e : Factions.level(server).getAttachedOrElse(POSTED, List.of())) {
+			if (e.id().equals(id) && now - e.at() <= POSTED_LIFE) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * (0.7.424) A piece of news the town board at {@code board} has heard of and hasn't up yet ({@code up}: every key
+	 * pinned or on its way), the newest first; null if none.
+	 */
+	static @Nullable Posted postable(MinecraftServer server, long board, java.util.Set<String> up) {
+		List<Posted> kept = Factions.level(server).getAttachedOrElse(POSTED, List.of());
+		long now = Factions.level(server).getGameTime();
+		for (int i = kept.size() - 1; i >= 0; i--) {
+			Posted e = kept.get(i);
+			String mark = "|tidings." + e.id() + "|" + board + "|";
+			if (now - e.at() <= POSTED_LIFE && heard(e.id(), board) && up.stream().noneMatch(k -> k.contains(mark))) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	/** Whether word of {@code id} reached the town of the board at {@code board} (the same answer every time). */
+	private static boolean heard(String id, long board) {
+		long h = id.hashCode() * 0x9E3779B97F4A7C15L ^ board * 0xC2B2AE3D27D4EB4FL;
+		h ^= h >>> 29;
+		return Math.floorMod(h, 1000L) < HEARD_CHANCE * 1000.0F;
+	}
+
+	/** (0.7.424) {@code line} broken up to {@link #POSTED_WIDTH} characters a line, for a notice's lore. */
+	static List<Component> wrap(Component line) {
+		List<Component> out = new ArrayList<>();
+		StringBuilder at = new StringBuilder();
+		for (String word : line.getString().split("\\s+")) {
+			if (!at.isEmpty() && at.length() + 1 + word.length() > POSTED_WIDTH) {
+				out.add(Component.literal(at.toString()));
+				at.setLength(0);
+			}
+			if (!at.isEmpty()) {
+				at.append(' ');
+			}
+			at.append(word);
+		}
+		if (!at.isEmpty()) {
+			out.add(Component.literal(at.toString()));
+		}
+		return out;
+	}
+
+	/** (0.7.256) A line in {@code to}'s own next Tidings. */
 	public static void tidings(UUID to, Component line) {
 		if (current == null) {
 			return;
@@ -196,15 +309,9 @@ public final class Post {
 		if (fresh != null) {
 			overworld.setAttached(NAMES, Map.copyOf(fresh));
 		}
-		// (the news, written up for everyone on, with (0.7.256) each one's own lines)
-		List<Component> world = List.of();
-		if (!NEWS.isEmpty() && now - newsSince >= NEWS_DELAY) {
-			world = List.copyOf(NEWS);
-			NEWS.clear();
-			newsSince = -1L;
-		}
+		// ((0.7.256) each one's own lines; (0.7.424) the world's news goes on the town boards, and only what concerns you comes here)
 		for (ServerPlayer p : players) {
-			List<Component> lines = new ArrayList<>(world);
+			List<Component> lines = new ArrayList<>();
 			List<Component> mine = MINE.get(p.getUUID());
 			if (mine != null && !mine.isEmpty() && now - MINE_SINCE.getOrDefault(p.getUUID(), now) >= NEWS_DELAY) {
 				lines.addAll(mine);

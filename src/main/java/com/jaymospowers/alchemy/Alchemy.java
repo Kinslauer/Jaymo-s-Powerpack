@@ -60,7 +60,7 @@ public final class Alchemy {
 		com.jaymospowers.alchemy.infusion.Infusion.init();
 		com.jaymospowers.alchemy.gear.AlchemyGear.init();
 		com.jaymospowers.alchemy.cauldron.CauldronBrewing.init();
-		// (0.19.20) the bone-knitting elixir and the draught of vigour
+		// (0.19.24) the bone-knitting elixir and the draught of vigour
 		com.jaymospowers.alchemy.healing.HealingBrews.init();
 		LabEscape.init();
 	}

@@ -41,6 +41,11 @@ public final class XenoformPowerClient implements PowerClient {
 	static int flashColor;
 	/** Ticks left of the slam's burst of light. */
 	static int burst;
+	/** (0.18.91) Each beep of a form's last seconds flashes the screen's edge this colour for this long (the flash fades over FLASH_TICKS). */
+	static final int BEEP_FLASH_COLOR = 0xFF3030, BEEP_FLASH_TICKS = 8;
+	/** The form's ticks left as this client counts them through its end, and whether it was ending last tick. */
+	private static int endingTicks;
+	private static boolean endingWas;
 
 	private XenoformPowerClient() {
 	}
@@ -48,11 +53,23 @@ public final class XenoformPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoDouble.TYPE, XenoDoubleRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoStalker.TYPE, XenoStalkerRenderer::new);
+		// (0.18.125, patch 8) the band hunter, changed
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.RivalAlien.TYPE, RivalAlienRenderer::new);
+		// (0.18.122) the star wrecks' probes
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoFinds.PROBE, StarProbeRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
 		NadirRulesScreen.register();
+		// (0.18.123, patch 7) the band screen
+		BandScreen.register();
+		// (0.18.126, patch 9) the band's looks, painted from the skins
+		XenoLooks.init();
+		XenoEyes.init();
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(SkitterCeiling::tick);
+		PyreComet.init();
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new XenoformLayer(avatar));
@@ -62,14 +79,14 @@ public final class XenoformPowerClient implements PowerClient {
 	}
 
 	/**
-	 * From the scroll mixin: while a band wearer holds Z as themselves, the wheel turns the dial (down: the next alien,
-	 * like the hotbar) and the hotbar stays put. True if the scroll was taken.
+	 * From the scroll mixin: while a band wearer holds Z, the wheel turns the dial (down: the next alien, like the hotbar)
+	 * and the hotbar stays put; as an alien, letting Z go then quick-changes (0.18.92). True if the scroll was taken.
 	 */
 	public static boolean scroll(double amount) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || player.isSpectator() || !XenoformPower.has(player)
-			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown() || player.getAttached(XenoformState.FORM) != null) {
+			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown()) {
 			return false;
 		}
 		ClientPlayNetworking.send(new XenoNet.Dial(amount < 0.0 ? 1 : -1));
@@ -123,11 +140,33 @@ public final class XenoformPowerClient implements PowerClient {
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
 		}
+		// (0.18.91) the last 5 seconds: the screen's edge flashes red on each beep, the server's clock kept from the moment the end began
+		boolean ending = XenoformState.ending(player);
+		if (ending && !endingWas) {
+			endingTicks = XenoformPower.BEEP_TICKS;
+		}
+		endingWas = ending;
+		if (ending && endingTicks > 0) {
+			if (XenoformPower.beepsAt(endingTicks)) {
+				flash = BEEP_FLASH_TICKS;
+				flashColor = BEEP_FLASH_COLOR;
+			}
+			endingTicks--;
+		}
 		if (flash > 0) {
 			flash--;
 		}
 		if (burst > 0) {
 			burst--;
+		}
+		PyreFlightClient.tick(player);
+	}
+
+	/** G as Pyre: the Flame Jet, flown here ({@link PyreFlightClient}); the server toggles it on the same press. */
+	@Override
+	public void onKey(LocalPlayer player, com.jaymospowers.api.PowerKey key, boolean down) {
+		if (down && key == com.jaymospowers.api.PowerKey.ABILITY_2 && "pyre".equals(player.getAttached(XenoformState.FORM))) {
+			PyreFlightClient.toggle(player);
 		}
 	}
 
@@ -154,7 +193,8 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
 	static boolean refused(LocalPlayer player) {
 		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
-		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
+		return dialled != null && dialled.lent() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0
+			|| com.jaymospowers.power.xenoform.XenoJam.jammed(player);
 	}
 
 	@Override
@@ -164,6 +204,7 @@ public final class XenoformPowerClient implements PowerClient {
 		flash = 0;
 		burst = 0;
 		XenoformSlap.clear();
+		PyreFlightClient.reset();
 		com.jaymospowers.client.power.chrono.ChronoSpeedClient.reset();
 	}
 }

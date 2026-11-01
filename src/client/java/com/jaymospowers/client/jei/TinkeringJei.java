@@ -129,6 +129,13 @@ public final class TinkeringJei implements IModPlugin {
 		for (com.jaymospowers.power.zfighter.farworld.FarWorld world : com.jaymospowers.power.zfighter.farworld.FarWorld.values()) {
 			registration.addIngredientInfo(world.ingot(), Component.translatable("jei.jaymospowers.first_metal." + world.molten.id));
 		}
+		// (Havens patch 5) the kings' weapon heads: where each is taken
+		for (String part : WeaponParts.KINGS) {
+			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
+			if (kind != null && kind.loaded()) {
+				registration.addItemStackInfo(WeaponParts.heads(kind).getFirst(), Component.translatable("jei.jaymospowers.king_head." + part));
+			}
+		}
 	}
 
 	/** A pattern and enough of a material: each part of each material that's shaped here (metal parts are cast). */
@@ -216,6 +223,10 @@ public final class TinkeringJei implements IModPlugin {
 	/** (0.11.77) Each weapon head: gold over any of them makes its cast, and metal over the cast makes the head. */
 	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
 		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+			if (WeaponParts.king(kind)) {
+				// (Havens patch 5) a king's head has no cast: it's taken from him (its info page says where)
+				continue;
+			}
 			ItemStack castStack = WeaponParts.cast(kind);
 			// (0.17.110) Sora's Dagger Blade: a rose gold cast that breaks after its one iron blade
 			boolean soras = kind.part().equals(WeaponParts.SORAS_DAGGER_BLADE);

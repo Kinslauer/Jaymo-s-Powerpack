@@ -231,7 +231,22 @@ def band():
     write_json(ROOT / "items" / "xeno_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/xeno_band"}})
 
 
-# ---- the band on the wrist (entity, 32x32): a 5x3x5 box; the dial on its outer face, glowing in a second texture ----
+# (0.18.125, Xeno-Band patch 8) the rival band: the same band, its metal blackened red and its dial lit red
+RIVAL_PALETTE = dict(BAND_PALETTE, d=(30, 12, 14, 255), m=(96, 36, 38, 255), g=(140, 60, 60, 255), l=(70, 16, 16, 255), G=(255, 60, 50, 255))
+
+
+def rival_band():
+    img = Image.new("RGBA", (16, 16))
+    for y, row in enumerate(BAND):
+        for x, ch in enumerate(row):
+            img.putpixel((x, y), RIVAL_PALETTE[ch])
+    save(img, "item/rival_band.png")
+    write_json(ROOT / "models" / "item" / "rival_band.json",
+               {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymospowers:item/rival_band"}})
+    write_json(ROOT / "items" / "rival_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/rival_band"}})
+
+
+# ---- the band on the wrist (entity, 32x32): a 5x3x5 box and a 1x5x5 face plate on its outer face, glowing in a second texture ----
 # Close up in first person every texel shows, so it's kept plain: no outlines or grain, just a lit top row and a
 # shaded bottom row on each side, and one small round dial.
 def band_worn():
@@ -253,6 +268,18 @@ def band_worn():
     for cx, cy in ((x0 + 2, y0), (x0 + 1, y0 + 1), (x0 + 3, y0 + 1), (x0 + 2, y0 + 2)):
         glow.putpixel((cx, cy), (60, 200, 90, 255))
     glow.putpixel((x0 + 2, y0 + 1), PALE_GREEN)
+    # the face plate (a 1x5x5 box at 0,10, proud of the band's outer face): the watch face you look at. A dark rim with
+    # bright metal studs at the corners round a 3x3 green face; the face glows, and while the band is raised the dialled
+    # alien's silhouette stands on it (XenoBand)
+    for name, box in faces(0, 10, 1, 5, 5).items():
+        rect(img, box, shade(metal, LIGHT[name]))
+    x0, y0, x1, y1 = faces(0, 10, 1, 5, 5)["left"]
+    rect(img, (x0, y0, x1, y1), rim)
+    for cx, cy in ((x0, y0), (x1 - 1, y0), (x0, y1 - 1), (x1 - 1, y1 - 1)):
+        img.putpixel((cx, cy), shade(metal, 1.3))
+    rect(img, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (40, 150, 70, 255))
+    rect(glow, (x0 + 1, y0 + 1, x1 - 1, y1 - 1), (92, 240, 122, 255))
+    glow.putpixel((x0 + 2, y0 + 2), PALE_GREEN)
     save(img, "entity/xeno_band.png")
     save(glow, "entity/xeno_band_glow.png")
 
@@ -1146,7 +1173,1118 @@ def duplex():
     save(img, "entity/xenoform_duplex.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex")
+def rivet():
+    """(0.18.95) Rivet, living metal: chrome that runs like quicksilver (bright streaks down every face, a blue-grey
+    sheen), green circuit lines down the limbs, a smooth face with two green slit eyes, the insignia on the chest."""
+    img = new_skin()
+    metal = (158, 176, 190)
+    green = GREEN
+    dark_line = (40, 70, 52, 255)
+    parts(img, metal, 0.08)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), (188, 204, 216), shade(metal, LIGHT[name] * 0.6), 0.08)
+            # quicksilver runs: bright drips down the face
+            if name in ("front", "back", "left", "right"):
+                for _ in range(max(1, (x1 - x0) // 3)):
+                    x = rng.randrange(x0, x1)
+                    top = rng.randrange(y0, max(y0 + 1, y1 - 3))
+                    for y in range(top, min(y1, top + rng.randint(2, 5))):
+                        img.putpixel((x, y), (240, 248, 255, 255))
+    # green circuit lines down the outside of each limb, a ring at the wrist and ankle
+    for part in LIMBS:
+        f = faces(*part)
+        for name in ("left", "right"):
+            x0, y0, x1, y1 = f[name]
+            cx = (x0 + x1) // 2
+            for y in range(y0 + 1, y1 - 1):
+                img.putpixel((cx, y), green)
+            for x in range(x0, x1):
+                img.putpixel((x, y1 - 3), dark_line)
+        x0, y0, x1, y1 = f["front"]
+        for x in range(x0, x1):
+            img.putpixel((x, y1 - 3), green)
+    # the body: a dark seam down each side
+    x0, y0, x1, y1 = faces(*BODY)["front"]
+    for y in range(y0, y1):
+        img.putpixel((x0, y), dark_line)
+        img.putpixel((x1 - 1, y), dark_line)
+    # the face: smooth, two slit eyes, no mouth
+    rect(img, (9, 11, 11, 12), green)
+    rect(img, (13, 11, 15, 12), green)
+    img.putpixel((9, 11), PALE_GREEN)
+    img.putpixel((14, 11), PALE_GREEN)
+    chest_insignia(img, rim=(30, 40, 52, 255))
+    # extras: crest 1x2x6 at (0,64); drips 2x3x2 at (16,64)
+    for part in ((0, 64, 1, 2, 6), (16, 64, 2, 3, 2)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), (236, 244, 250), shade(metal, LIGHT[name]), 0.05)
+    x0, y0, x1, y1 = faces(0, 64, 1, 2, 6)["right"]
+    for x in range(x0, x1):
+        img.putpixel((x, y0), green)
+    clear_hat(img)
+    save(img, "entity/xenoform_rivet.png")
+
+
+def gorger():
+    """(0.18.96) Gorger, the armadillo alien: dusky pink-brown hide, a banded shell of scutes over the back (each band
+    edged dark), a bone horn on the snout, little round ears, beady black eyes, the insignia on its chest."""
+    img = new_skin()
+    hide = (176, 112, 92)
+    scute = (150, 96, 84)
+    dark = (70, 40, 36, 255)
+    parts(img, hide, 0.16)
+    # banded plates on the arms, legs and back: a dark rule every third row
+    for part in LIMBS + (BODY,):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for y in range(y0 + 2, y1, 3):
+                    for x in range(x0, x1):
+                        img.putpixel((x, y), shade(hide + (255,), 0.72))
+    # a softer belly
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (214, 168, 150), (192, 146, 128), 0.08)
+    claws(img, (54, 36, 30, 255))
+    # the face: a long pale snout, beady eyes
+    rect(img, (10, 12, 14, 16), (206, 156, 138, 255))
+    rect(img, (11, 14, 13, 15), dark)
+    img.putpixel((9, 11), (20, 14, 14, 255))
+    img.putpixel((14, 11), (20, 14, 14, 255))
+    chest_insignia(img, rim=(60, 36, 32, 255))
+    # extras: horn 2x4x2 at (0,64); ears 2x3x1 at (8,64); shell 10x10x4 at (0,72)
+    box(img, (0, 64, 2, 4, 2), (226, 214, 190), 0.1)
+    for name, (x0, y0, x1, y1) in faces(0, 64, 2, 4, 2).items():
+        if name not in ("top", "bottom"):
+            img.putpixel((x0, y0), (250, 244, 230, 255))
+    box(img, (8, 64, 2, 3, 1), hide, 0.12)
+    ex0, ey0, ex1, ey1 = front((8, 64, 2, 3, 1))
+    rect(img, (ex0, ey0 + 1, ex1, ey1), (214, 150, 140, 255))
+    shell = (0, 72, 10, 10, 4)
+    box(img, shell, scute, 0.14)
+    for name, (x0, y0, x1, y1) in faces(*shell).items():
+        # scute bands across the shell, each with a pale top edge and a dark seam
+        for y in range(y0, y1, 3):
+            for x in range(x0, x1):
+                img.putpixel((x, y), dark if (y - y0) % 3 == 0 else img.getpixel((x, y)))
+                if y + 1 < y1:
+                    img.putpixel((x, y + 1), shade(scute + (255,), 1.2))
+    sx0, sy0, sx1, sy1 = faces(*shell)["back"]
+    insignia(img, (sx0 + sx1) // 2, sy0 + 2, small=True, rim=dark)
+    clear_hat(img)
+    save(img, "entity/xenoform_gorger.png")
+
+
+def slipfin():
+    """(0.18.96) Slipfin, the axolotl alien: smooth pink skin with a wet sheen, darker spots, a pale belly, feathery
+    magenta gills, a fin down its back, a flat tail, small black eyes and a little smile."""
+    img = new_skin()
+    pink = (238, 150, 186)
+    spot = shade(pink + (255,), 0.78)
+    gill = (214, 56, 132)
+    parts(img, pink, 0.08)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), shade(pink + (255,), LIGHT[name] * 1.08), shade(pink + (255,), LIGHT[name] * 0.9), 0.06)
+            speckle(img, (x0, y0, x1, y1), spot, (x1 - x0) * (y1 - y0) // 14)
+            # a wet shine near the top of each face
+            if name in ("front", "back", "left", "right") and y1 - y0 > 3:
+                rect(img, (x0 + 1, y0 + 1, min(x1, x0 + 2), y0 + 2), (255, 236, 244, 255))
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 2, bx1 - 1, by1), (252, 210, 222), (240, 186, 204), 0.05)
+    # the face: wide-set black eyes, a small smile, pink cheeks
+    img.putpixel((9, 11), (16, 12, 20, 255))
+    img.putpixel((14, 11), (16, 12, 20, 255))
+    rect(img, (11, 14, 13, 15), (150, 60, 96, 255))
+    img.putpixel((10, 13), (150, 60, 96, 255))
+    img.putpixel((13, 13), (150, 60, 96, 255))
+    chest_insignia(img, rim=(120, 40, 80, 255))
+    # extras: gills 4x1x1 at (0,64); fin 1x10x3 at (12,64); tail 3x1x7 at (24,64)
+    box(img, (0, 64, 4, 1, 1), gill, 0.18)
+    for name, (x0, y0, x1, y1) in faces(0, 64, 4, 1, 1).items():
+        for x in range(x0, x1, 2):
+            img.putpixel((x, y0), shade(gill + (255,), 1.3))
+    box(img, (12, 64, 1, 10, 3), shade(pink + (255,), 1.05)[:3], 0.08)
+    for name, (x0, y0, x1, y1) in faces(12, 64, 1, 10, 3).items():
+        if name in ("left", "right"):
+            for y in range(y0, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (250, 196, 216, 255))
+    box(img, (24, 64, 3, 1, 7), pink, 0.08)
+    for name, (x0, y0, x1, y1) in faces(24, 64, 3, 1, 7).items():
+        speckle(img, (x0, y0, x1, y1), spot, 3)
+    clear_hat(img)
+    save(img, "entity/xenoform_slipfin.png")
+
+
+def polestar():
+    """(0.18.96) Polestar, the lodestone alien: dark lodestone grey with a sheen of iron, a magnet's red and white bands
+    on the shoulders and forearms, the prongs of its horseshoe red and silver-tipped, eyes like sparks."""
+    img = new_skin()
+    stone = (78, 80, 88)
+    red = (204, 58, 58, 255)
+    silver = (214, 220, 228, 255)
+    parts(img, stone, 0.2)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, shade(stone + (255,), 1.35), (b[2] - b[0]) * (b[3] - b[1]) // 12)
+    # the magnet's bands: red on the upper arms and thighs, silver at the wrists and ankles
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 4), red)
+                rect(img, (x0, y1 - 3, x1, y1 - 1), silver)
+    # field lines across the chest
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1 - 1, 3):
+        for x in range(bx0, bx1):
+            if (x + y) % 4 == 0:
+                img.putpixel((x, y), (150, 160, 190, 255))
+    # the face: two spark eyes, a hard jaw line
+    rect(img, (9, 11, 11, 12), (170, 220, 255, 255))
+    rect(img, (13, 11, 15, 12), (170, 220, 255, 255))
+    rect(img, (9, 14, 15, 15), (40, 42, 48, 255))
+    chest_insignia(img, rim=(30, 30, 36, 255))
+    # extras: prongs 2x6x2 at (0,64), red with silver tips; shoulder plates 12x3x6 at (0,74)
+    prong = (0, 64, 2, 6, 2)
+    box(img, prong, red[:3], 0.1)
+    for name, (x0, y0, x1, y1) in faces(*prong).items():
+        if name == "top":
+            rect(img, (x0, y0, x1, y1), silver)
+        elif name != "bottom":
+            rect(img, (x0, y0, x1, y0 + 2), silver)
+    plates = (0, 74, 12, 3, 6)
+    box(img, plates, stone, 0.14, edge=0.7)
+    for name, (x0, y0, x1, y1) in faces(*plates).items():
+        if name in ("front", "back"):
+            rect(img, (x0, y0, x0 + (x1 - x0) // 2, y1), red)
+            rect(img, (x0 + (x1 - x0) // 2, y0, x1, y1), silver)
+    clear_hat(img)
+    save(img, "entity/xenoform_polestar.png")
+
+
+def lurk():
+    """(0.18.96) Lurk, the stalker: a bruise-purple dark that drinks the light, faint violet veins, long grey fingers,
+    and a face that is almost all eyes: six pale ones, the two largest ringed in violet."""
+    img = new_skin()
+    dark = (40, 32, 56)
+    vein = (110, 82, 176)
+    parts(img, dark, 0.18)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            veins(img, b, shade(dark + (255,), 0.7), (vein[0], vein[1], vein[2], 255), (b[2] - b[0]) // 3 + 1)
+    # the face: six eyes, two big ones ringed in violet, four small ones round them
+    head = faces(*HEAD)["front"]
+    hx0, hy0 = head[0], head[1]
+    rect(img, (hx0, hy0, hx0 + 8, hy0 + 8), shade(dark + (255,), 0.8))
+    for ex in (hx0 + 1, hx0 + 5):
+        rect(img, (ex, hy0 + 3, ex + 2, hy0 + 5), (110, 82, 176, 255))
+        img.putpixel((ex, hy0 + 3), (236, 232, 248, 255))
+        img.putpixel((ex + 1, hy0 + 4), (236, 232, 248, 255))
+    for ex, ey in ((hx0 + 1, hy0 + 1), (hx0 + 6, hy0 + 1), (hx0 + 3, hy0 + 2), (hx0 + 4, hy0 + 6)):
+        img.putpixel((ex, ey), (214, 206, 236, 255))
+    chest_insignia(img, rim=(24, 18, 34, 255))
+    # extras: the long hands 3x6x3 at (0,64), grey fingers with dark tips
+    hand = (0, 64, 3, 6, 3)
+    box(img, hand, (96, 92, 108), 0.12)
+    for name, (x0, y0, x1, y1) in faces(*hand).items():
+        if name in ("front", "back", "left", "right"):
+            for x in range(x0, x1):
+                img.putpixel((x, y1 - 1), (20, 16, 26, 255))
+                if x % 2 == 0:
+                    rect(img, (x, y0 + 2, x + 1, y1 - 1), (72, 68, 84, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_lurk.png")
+
+
+def gyre():
+    """(0.18.103) Gyre, the wind-shell turtle: sea-green hide with pale scales, a domed shell of dark plates edged in
+    moss, wind vents (pale slots) along its rim, a hooked beak, the insignia on the shell's crown."""
+    img = new_skin()
+    hide = (94, 150, 112)
+    plate = (54, 92, 64)
+    parts(img, hide, 0.16)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (150, 196, 158, 255), (b[2] - b[0]) * (b[3] - b[1]) // 10 + 1)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (214, 206, 150), (188, 178, 120), 0.08)
+    for y in range(by0 + 3, by1, 3):
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (150, 140, 96, 255))
+    claws(img, (40, 50, 40, 255))
+    eyes(img, (20, 24, 20, 255), y=11, wide=True, pupil=(230, 230, 200, 255))
+    # extras: shell 10x10x5 at (0,64); beak 4x2x2 at (32,64)
+    shell = (0, 64, 10, 10, 5)
+    box(img, shell, plate, 0.14)
+    for name, (x0, y0, x1, y1) in faces(*shell).items():
+        outline(img, (x0, y0, x1, y1), (120, 170, 96, 255))
+        if name in ("back", "top"):
+            for y in range(y0 + 3, y1 - 1, 4):
+                for x in range(x0 + 1, x1 - 1):
+                    if (x + y // 4) % 4 == 0:
+                        img.putpixel((x, y), (120, 170, 96, 255))
+        if name in ("left", "right"):
+            for y in range(y0 + 2, y1 - 1, 3):
+                rect(img, (x0 + 1, y, x1 - 1, y + 1), (210, 236, 226, 255))
+    sx0, sy0, sx1, sy1 = faces(*shell)["back"]
+    insignia(img, (sx0 + sx1) // 2, sy0 + 2, small=True, rim=(20, 36, 24, 255))
+    box(img, (32, 64, 4, 2, 2), (204, 190, 120), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_gyre.png")
+
+
+def cortex():
+    """(0.18.103) Cortex, the thinking crab: coral-red plates edged dark, a cream belly, small black eyes, one big claw
+    and one small (pale-tipped), and an open skull where a pink brain shows, laced with glowing teal."""
+    img = new_skin()
+    shell = (196, 78, 62)
+    parts(img, shell, 0.14, edge=0.7)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 2, bx1 - 1, by1 - 1), (236, 212, 180), (214, 186, 150), 0.08)
+    claws(img, (90, 30, 26, 255))
+    eyes(img, (16, 12, 12, 255), y=12)
+    rect(img, (10, 14, 14, 15), (120, 40, 34, 255))
+    chest_insignia(img, rim=(80, 26, 22, 255))
+    # extras: big claw 5x5x5 at (0,64); small claw 3x3x3 at (24,64); brain 6x3x6 at (0,76)
+    for part in ((0, 64, 5, 5, 5), (24, 64, 3, 3, 3)):
+        box(img, part, (214, 90, 70), 0.12, edge=0.7)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "left", "right", "back"):
+                rect(img, (x0, y1 - 1, x1, y1), (244, 226, 200, 255))
+    brain = (0, 76, 6, 3, 6)
+    box(img, brain, (232, 150, 170), 0.12)
+    for name, b in faces(*brain).items():
+        veins(img, b, (200, 110, 140, 255), (110, 240, 230, 255), (b[2] - b[0]) // 2 + 1, length=(2, 5))
+    clear_hat(img)
+    save(img, "entity/xenoform_cortex.png")
+
+
+def locust():
+    """(0.18.103) Locust, the crashing hopper: grass-green with yellow belly segments, darker green wing cases veined
+    lighter, long feelers, red-brown hind spurs, big amber compound eyes."""
+    img = new_skin()
+    green = (120, 176, 58)
+    parts(img, green, 0.14)
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for y in range(y0 + 3, y1, 4):
+                    rect(img, (x0, y, x1, y + 1), shade(green + (255,), 0.7))
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1 - 1):
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (226, 214, 96, 255) if (y - by0) % 3 else (184, 168, 64, 255))
+    claws(img, (60, 44, 24, 255))
+    eyes(img, (232, 160, 40, 255), y=10, wide=True, pupil=(90, 50, 10, 255))
+    rect(img, (11, 14, 13, 15), (60, 80, 30, 255))
+    chest_insignia(img, rim=(40, 56, 20, 255))
+    # extras: wing cases 8x11x1 at (0,64); feelers 1x6x1 at (20,64); hind spurs 2x5x2 at (24,64)
+    wings = (0, 64, 8, 11, 1)
+    box(img, wings, (82, 130, 48), 0.12)
+    for name, b in faces(*wings).items():
+        veins(img, b, (60, 100, 36, 255), (150, 200, 96, 255), 3, length=(3, 8))
+    box(img, (20, 64, 1, 6, 1), (70, 96, 40), 0.1)
+    box(img, (24, 64, 2, 5, 2), (150, 80, 50), 0.12)
+    clear_hat(img)
+    save(img, "entity/xenoform_locust.png")
+
+
+def croaker():
+    """(0.18.103) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow belly and throat sac,
+    gold eyes with black slits on top of the head, webbed feet."""
+    img = new_skin()
+    green = (84, 132, 52)
+    parts(img, green, 0.16)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (54, 92, 32, 255), (b[2] - b[0]) * (b[3] - b[1]) // 8 + 1)
+            speckle(img, b, (140, 186, 84, 255), (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0, bx1 - 1, by1 - 1), (236, 226, 150), (214, 200, 120), 0.08)
+    # a wide mouth line
+    rect(img, (8, 13, 16, 14), (40, 60, 24, 255))
+    claws(img, (40, 60, 24, 255))
+    chest_insignia(img, rim=(40, 60, 24, 255))
+    # extras: eyes 3x3x3 at (0,64); throat sac 6x3x3 at (12,64); webbed feet 4x1x4 at (0,72)
+    eye = (0, 64, 3, 3, 3)
+    box(img, eye, (214, 170, 40), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*eye).items():
+        if name in ("front", "left", "right"):
+            rect(img, ((x0 + x1) // 2, y0, (x0 + x1) // 2 + 1, y1), (16, 12, 8, 255))
+    box(img, (12, 64, 6, 3, 3), (236, 222, 150), 0.08)
+    box(img, (0, 72, 4, 1, 4), (70, 112, 44), 0.12)
+    clear_hat(img)
+    save(img, "entity/xenoform_croaker.png")
+
+
+def dud():
+    """(0.18.103) Dud, the one that can't be hurt: soft pink, round, pale belly, big worried eyes under slanted
+    brows, a wobbly little mouth, two nubs on top of its head."""
+    img = new_skin()
+    pink = (232, 176, 204)
+    parts(img, pink, 0.08)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), (250, 230, 240), (240, 214, 228), 0.05)
+    eyes(img, (250, 250, 250, 255), y=11, wide=True, pupil=(30, 24, 40, 255))
+    # worried brows, sloping up in the middle
+    img.putpixel((9, 10), (120, 70, 100, 255))
+    img.putpixel((10, 9), (120, 70, 100, 255))
+    img.putpixel((14, 10), (120, 70, 100, 255))
+    img.putpixel((13, 9), (120, 70, 100, 255))
+    # a wobbly mouth
+    for x, y in ((10, 14), (11, 15), (12, 14), (13, 15)):
+        img.putpixel((x, y), (140, 70, 100, 255))
+    chest_insignia(img, rim=(140, 90, 120, 255))
+    # extras: nubs 2x2x2 at (0,64)
+    box(img, (0, 64, 2, 2, 2), (214, 150, 186), 0.08)
+    clear_hat(img)
+    save(img, "entity/xenoform_dud.png")
+
+
+def rime():
+    """(0.18.107, Scan B) Rime, the frost alien: pale blue ice, whiter on top, frost cracks in deeper blue, cold
+    white eyes, an icicle crown and two icicle spines down its back."""
+    img = new_skin()
+    ice = (158, 216, 240)
+    parts(img, ice, 0.12, edge=0.85)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            veins(img, b, (90, 150, 200, 255), (220, 244, 255, 255), (b[2] - b[0]) // 3 + 1, length=(2, 6))
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 2, by0 + 1, bx1 - 2, by1 - 2), (226, 244, 252), (176, 222, 242), 0.06)
+    claws(img, (70, 120, 170, 255))
+    eyes(img, (250, 254, 255, 255), y=11, wide=True, pupil=(120, 200, 240, 255))
+    rect(img, (10, 14, 14, 15), (80, 130, 180, 255))
+    chest_insignia(img, rim=(40, 80, 120, 255))
+    # extras: icicle 1x4x1 at (0,64); back spines 2x8x2 at (8,64)
+    vgrad(img, (0, 64, 4, 69), (250, 254, 255), (150, 210, 240), 0.05)
+    spine = (8, 64, 2, 8, 2)
+    box(img, spine, (180, 226, 246), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*spine).items():
+        if name in ("front", "back", "left", "right"):
+            vgrad(img, (x0, y0, x1, y1), (150, 206, 236), (240, 250, 255), 0.05)
+    clear_hat(img)
+    save(img, "entity/xenoform_rime.png")
+
+
+def marrow():
+    """(0.18.107, Scan B) Marrow, the bone alien: old white bone with grey-brown hollows, a skull face (dark sockets
+    with a faint green light), horns, a jutting spine and an open ribcage with dark gaps between the ribs."""
+    img = new_skin()
+    bone = (230, 224, 204)
+    parts(img, bone, 0.1, edge=0.8)
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                # knuckles and joints: a darker band at the elbow or knee
+                rect(img, (x0, y0 + 5, x1, y0 + 6), (150, 140, 116, 255))
+    # the skull: deep sockets, a nose hole, teeth
+    rect(img, (9, 10, 11, 13), (40, 36, 30, 255))
+    rect(img, (13, 10, 15, 13), (40, 36, 30, 255))
+    img.putpixel((10, 11), (150, 230, 160, 255))
+    img.putpixel((13, 11), (150, 230, 160, 255))
+    rect(img, (11, 13, 13, 14), (70, 64, 52, 255))
+    for x in range(9, 15):
+        img.putpixel((x, 15), (70, 64, 52, 255) if x % 2 else (240, 236, 220, 255))
+    claws(img, (110, 100, 84, 255))
+    chest_insignia(img, rim=(70, 64, 52, 255))
+    # extras: horns 1x4x1 at (0,64); spine 2x10x2 at (8,64); ribcage 9x7x5 at (0,80)
+    vgrad(img, (0, 64, 4, 69), (200, 190, 160), (120, 110, 90), 0.06)
+    spine = (8, 64, 2, 10, 2)
+    box(img, spine, (220, 212, 190), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*spine).items():
+        if name in ("front", "back", "left", "right"):
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (130, 120, 100, 255))
+    ribs = (0, 80, 9, 7, 5)
+    box(img, ribs, (236, 230, 212), 0.08)
+    for name, (x0, y0, x1, y1) in faces(*ribs).items():
+        if name in ("front", "back", "left", "right"):
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (34, 30, 26, 255))
+            if name in ("front", "back"):
+                cx = (x0 + x1) // 2
+                rect(img, (cx, y0, cx + 1, y1), (226, 220, 200, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_marrow.png")
+
+
+def swathe():
+    """(0.18.107, Scan B) Swathe, the wrapped one: grey-brown wrappings wound in slanting bands, stained here and
+    there, a dark gap at the face with two pale eyes, loose trailing ends."""
+    img = new_skin()
+    cloth = (184, 168, 140)
+    parts(img, cloth, 0.12)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "top" or name == "bottom":
+                continue
+            # bands of wrapping, slanting a little, a darker seam between each
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    if (y * 2 + x) % 5 == 0:
+                        img.putpixel((x, y), (126, 112, 90, 255))
+            speckle(img, (x0, y0, x1, y1), (140, 112, 80, 255), (x1 - x0) * (y1 - y0) // 16 + 1)
+    # the face: a dark gap between the wrappings, two pale eyes in it
+    rect(img, (8, 10, 16, 13), (30, 26, 22, 255))
+    img.putpixel((10, 11), (236, 228, 190, 255))
+    img.putpixel((13, 11), (236, 228, 190, 255))
+    chest_insignia(img, rim=(90, 76, 56, 255))
+    # extras: loose ends 3x9x1 at (0,64); back trail 2x12x1 at (8,64)
+    for part in ((0, 64, 3, 9, 1), (8, 64, 2, 12, 1)):
+        box(img, part, (176, 160, 132), 0.12)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back"):
+                for y in range(y0 + 2, y1, 3):
+                    rect(img, (x0, y, x1, y + 1), (126, 112, 90, 255))
+                rect(img, (x0, y1 - 1, x1, y1), (110, 96, 74, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_swathe.png")
+
+
+def blight():
+    """(0.18.107, Scan B) Blight, the wither alien: coal-black bone with grey ash on top, a ribbed chest, three
+    skulls (the side ones on the shoulders) with pale glowing eyes, a ribbed tail."""
+    img = new_skin()
+    coal = (58, 52, 64)
+    parts(img, coal, 0.14, edge=0.7)
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1 - 3, 2):
+        rect(img, (bx0 + 1, y, bx1 - 1, y + 1), (96, 90, 104, 255))
+    rect(img, ((bx0 + bx1) // 2 - 1, by0, (bx0 + bx1) // 2 + 1, by1), (86, 80, 94, 255))
+
+    def skull_face(x0, y0):
+        # sockets with pale light, a dark grin
+        rect(img, (x0 + 1, y0 + 2, x0 + 3, y0 + 4), (20, 16, 24, 255))
+        rect(img, (x0 + 5, y0 + 2, x0 + 7, y0 + 4) if x0 == 8 else (x0 + 3, y0 + 2, x0 + 5, y0 + 4), (20, 16, 24, 255))
+        img.putpixel((x0 + 2, y0 + 3), (220, 236, 255, 255))
+        img.putpixel((x0 + 6 if x0 == 8 else x0 + 4, y0 + 3), (220, 236, 255, 255))
+
+    skull_face(8, 8)
+    rect(img, (10, 14, 14, 15), (20, 16, 24, 255))
+    claws(img, (24, 20, 28, 255))
+    chest_insignia(img, rim=(20, 16, 24, 255))
+    # extras: shoulder skulls 6x6x6 at (0,64); tail 3x10x3 at (24,64)
+    skull = (0, 64, 6, 6, 6)
+    box(img, skull, (70, 64, 76), 0.12, edge=0.7)
+    fx0, fy0, fx1, fy1 = faces(*skull)["front"]
+    skull_face(fx0, fy0)
+    rect(img, (fx0 + 2, fy0 + 5, fx1 - 2, fy0 + 6), (20, 16, 24, 255))
+    tail = (24, 64, 3, 10, 3)
+    box(img, tail, (62, 56, 68), 0.12)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("front", "back", "left", "right"):
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (96, 90, 104, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_blight.png")
+
+
+def fur(img, part_list, base, dark, n_div=6):
+    """Fur: a coarse grain, darker flecks."""
+    for part in part_list:
+        for name, b in faces(*part).items():
+            speckle(img, b, dark, (b[2] - b[0]) * (b[3] - b[1]) // n_div + 1)
+
+
+def howl():
+    """(0.18.109, Scan C) Howl, the pack hunter: grey-brown fur, darker saddle down the back, a pale chest and muzzle,
+    amber eyes, tall ears dark at the tips, a bushy tail."""
+    img = new_skin()
+    coat = (138, 122, 102)
+    parts(img, coat, 0.16)
+    fur(img, BASE_PARTS, coat, (96, 84, 70, 255))
+    bx0, by0, bx1, by1 = faces(*BODY)["back"]
+    vgrad(img, (bx0, by0, bx1, by1), (70, 62, 54), (100, 88, 74), 0.1)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1 - 4), (214, 204, 186), (180, 168, 148), 0.08)
+    eyes(img, (240, 170, 40, 255), y=11, pupil=(30, 20, 10, 255))
+    rect(img, (10, 10, 11, 11), (60, 50, 40, 255))
+    rect(img, (13, 10, 14, 11), (60, 50, 40, 255))
+    claws(img, (50, 44, 38, 255))
+    chest_insignia(img, rim=(60, 50, 40, 255))
+    # extras: snout 3x3x4 at (0,64); ears 2x3x1 at (16,64); tail 2x2x8 at (24,64)
+    snout = (0, 64, 3, 3, 4)
+    box(img, snout, (196, 184, 164), 0.1)
+    nx0, ny0, nx1, ny1 = faces(*snout)["front"]
+    rect(img, (nx0, ny0, nx1, ny0 + 1), (30, 26, 24, 255))
+    box(img, (16, 64, 2, 3, 1), (110, 96, 80), 0.12)
+    rect(img, (16, 64, 22, 66), (60, 52, 44, 255))
+    tail = (24, 64, 2, 2, 8)
+    box(img, tail, (120, 106, 88), 0.18)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("left", "right", "top", "bottom"):
+            speckle(img, (x0, y0, x1, y1), (220, 210, 190, 255), 3)
+    clear_hat(img)
+    save(img, "entity/xenoform_howl.png")
+
+
+def prowl():
+    """(0.18.109, Scan C) Prowl, the great cat: tawny orange with dark stripes, a cream belly and muzzle, green eyes with
+    slit pupils, round ears, a long striped tail."""
+    img = new_skin()
+    tawny = (204, 138, 60)
+    parts(img, tawny, 0.12)
+    stripe = (50, 34, 24, 255)
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 1, y1, 3):
+                for x in range(x0, x1):
+                    if (x * 3 + y) % 7 < 3:
+                        img.putpixel((x, y), stripe)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0 + 1, fx1 - 2, fy1), (240, 226, 200), (226, 208, 176), 0.06)
+    rect(img, (9, 13, 15, 16), (236, 222, 196, 255))
+    rect(img, (11, 13, 13, 14), (60, 36, 30, 255))
+    rect(img, (9, 11, 11, 12), (120, 200, 80, 255))
+    rect(img, (13, 11, 15, 12), (120, 200, 80, 255))
+    img.putpixel((10, 11), (10, 10, 10, 255))
+    img.putpixel((13, 11), (10, 10, 10, 255))
+    claws(img, (230, 220, 200, 255))
+    chest_insignia(img, rim=(60, 40, 24, 255))
+    # extras: ears 2x2x1 at (0,64); tail 2x2x10 at (8,64)
+    box(img, (0, 64, 2, 2, 1), (170, 110, 50), 0.1)
+    tail = (8, 64, 2, 2, 10)
+    box(img, tail, tawny, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("left", "right", "top", "bottom"):
+            for x in range(x0 + 1, x1, 3):
+                rect(img, (x, y0, x + 1, y1), stripe)
+    clear_hat(img)
+    save(img, "entity/xenoform_prowl.png")
+
+
+def tusk():
+    """(0.18.109, Scan C) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane, a pink-grey snout, small red
+    eyes, ivory tusks, hooves."""
+    img = new_skin()
+    hide = (107, 74, 50)
+    parts(img, hide, 0.2)
+    fur(img, BASE_PARTS, hide, (70, 46, 30, 255), 4)
+    eyes(img, (200, 40, 30, 255), y=10)
+    claws(img, (40, 30, 24, 255), rows=2)
+    chest_insignia(img, rim=(50, 34, 22, 255))
+    # extras: snout 4x3x2 at (0,64); tusks 1x3x1 at (14,64); mane 2x12x3 at (20,64)
+    snout = (0, 64, 4, 3, 2)
+    box(img, snout, (186, 140, 130), 0.1)
+    sx0, sy0, sx1, sy1 = faces(*snout)["front"]
+    img.putpixel((sx0 + 1, sy0 + 1), (60, 30, 30, 255))
+    img.putpixel((sx1 - 2, sy0 + 1), (60, 30, 30, 255))
+    vgrad(img, (14, 64, 18, 68), (250, 244, 220), (200, 188, 150), 0.04)
+    mane = (20, 64, 2, 12, 3)
+    box(img, mane, (52, 34, 24), 0.25)
+    for name, (x0, y0, x1, y1) in faces(*mane).items():
+        speckle(img, (x0, y0, x1, y1), (90, 64, 44, 255), 4)
+    clear_hat(img)
+    save(img, "entity/xenoform_tusk.png")
+
+
+def talon():
+    """(0.18.109, Scan C) Talon, the raptor: brown feathers barred paler, a white-feathered head, fierce yellow eyes,
+    a hooked yellow beak dark at the tip, broad barred wings, a fanned tail, yellow scaled legs with black talons."""
+    img = new_skin()
+    brown = (130, 88, 52)
+    parts(img, brown, 0.14, which=(BODY, RARM, LARM))
+    for part in (BODY, RARM, LARM):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 2, y1, 3):
+                for x in range(x0, x1, 2):
+                    img.putpixel((x, y), (186, 150, 108, 255))
+    parts(img, (236, 232, 222), 0.06, which=(HEAD,))
+    parts(img, (214, 180, 60), 0.12, which=LEGS)
+    for part in LEGS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name not in ("top", "bottom"):
+                rect(img, (x0, y0, x1, y0 + 4), shade(brown + (255,), 0.9))
+    eyes(img, (250, 210, 40, 255), y=11, wide=True, pupil=(10, 10, 10, 255))
+    rect(img, (8, 10, 16, 11), (110, 96, 80, 255))
+    claws(img, (20, 18, 16, 255), which=LEGS)
+    chest_insignia(img, rim=(70, 46, 26, 255))
+    # extras: beak 2x2x3 at (0,64); wings 1x10x6 at (12,64); tail fan 6x1x5 at (0,82)
+    beak = (0, 64, 2, 2, 3)
+    box(img, beak, (232, 196, 60), 0.08)
+    bx0, by0, bx1, by1 = faces(*beak)["front"]
+    rect(img, (bx0, by1 - 1, bx1, by1), (40, 30, 20, 255))
+    for part in ((12, 64, 1, 10, 6), (0, 82, 6, 1, 5)):
+        box(img, part, (110, 74, 44), 0.12)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), (176, 140, 98, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_talon.png")
+
+
+def murk():
+    """(0.18.111, Scan D) Murk, the ink squid: soft purple-grey, mottled darker, a paler belly, big black eyes with a
+    pale ring, a long mantle and pale-suckered tentacles."""
+    img = new_skin()
+    skin = (106, 88, 120)
+    parts(img, skin, 0.12)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (74, 58, 90, 255), (b[2] - b[0]) * (b[3] - b[1]) // 7 + 1)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1), (176, 160, 186), (150, 134, 162), 0.06)
+    rect(img, (8, 10, 11, 13), (220, 214, 230, 255))
+    rect(img, (13, 10, 16, 13), (220, 214, 230, 255))
+    rect(img, (9, 11, 11, 13), (10, 8, 14, 255))
+    rect(img, (13, 11, 15, 13), (10, 8, 14, 255))
+    claws(img, (70, 56, 86, 255))
+    chest_insignia(img, rim=(50, 38, 64, 255))
+    # extras: mantle 6x8x4 at (0,64); tentacles 1x6x1 at (20,64)
+    mantle = (0, 64, 6, 8, 4)
+    box(img, mantle, (96, 78, 112), 0.14)
+    for name, b in faces(*mantle).items():
+        speckle(img, b, (70, 54, 86, 255), 6)
+    tent = (20, 64, 1, 6, 1)
+    box(img, tent, (120, 100, 134), 0.08)
+    for name, (x0, y0, x1, y1) in faces(*tent).items():
+        if name == "front":
+            for y in range(y0 + 1, y1, 2):
+                img.putpixel((x0, y), (226, 214, 232, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_murk.png")
+
+
+def gnasher():
+    """(0.18.111, Scan D) Gnasher, the shark: grey-blue on top, sharp white underneath, gill slits, flat black eyes, a
+    jaw of white teeth, a tall fin and tail."""
+    img = new_skin()
+    top = (92, 116, 136)
+    parts(img, top, 0.1)
+    for part in BASE_PARTS:
+        fx0, fy0, fx1, fy1 = faces(*part)["front"]
+        rect(img, (fx0 + 1, fy0 + (fy1 - fy0) // 3, fx1 - 1, fy1), (226, 230, 232, 255))
+    rect(img, (8, 8, 16, 12), shade(top + (255,), 1.0))
+    rect(img, (9, 10, 10, 11), (8, 8, 10, 255))
+    rect(img, (14, 10, 15, 11), (8, 8, 10, 255))
+    rect(img, (8, 14, 16, 15), (40, 20, 24, 255))
+    for x in range(8, 16, 2):
+        img.putpixel((x, 13), (250, 250, 250, 255))
+        img.putpixel((x + 1, 15), (250, 250, 250, 255))
+    for x in (16, 17, 18):
+        rect(img, (x * 1, 22, x + 1, 26), (50, 64, 78, 255))
+    claws(img, (60, 76, 90, 255))
+    chest_insignia(img, rim=(50, 64, 78, 255))
+    # extras: fin 1x6x4 at (0,64); snout 6x2x3 at (12,64); tail 2x2x6 at (30,64)
+    box(img, (0, 64, 1, 6, 4), (82, 104, 124), 0.08)
+    snout = (12, 64, 6, 2, 3)
+    box(img, snout, (96, 120, 140), 0.08)
+    sx0, sy0, sx1, sy1 = faces(*snout)["bottom"]
+    rect(img, (sx0, sy0, sx1, sy1), (226, 230, 232, 255))
+    box(img, (30, 64, 2, 2, 6), (86, 108, 128), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_gnasher.png")
+
+
+def lumen():
+    """(0.18.111, Scan D) Lumen, the light: pale sky blue, lighter towards the edges, a bright white-gold core in its
+    chest, soft white eyes, thin pale fins."""
+    img = new_skin()
+    blue = (154, 220, 244)
+    parts(img, blue, 0.06, edge=1.12)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 7), (252, 246, 210, 255))
+    rect(img, (fx0 + 3, fy0 + 3, fx1 - 3, fy0 + 6), (255, 255, 250, 255))
+    eyes(img, (250, 255, 255, 255), y=11, wide=True, pupil=(90, 170, 220, 255))
+    claws(img, (210, 240, 252, 255))
+    chest_insignia(img, rim=(70, 140, 180, 255))
+    # extras: fins 1x5x4 at (0,64)
+    box(img, (0, 64, 1, 5, 4), (210, 240, 252), 0.05)
+    clear_hat(img)
+    save(img, "entity/xenoform_lumen.png")
+
+
+def keen():
+    """(0.18.111, Scan D) Keen, the sonar bat: dark brown-grey fur, a lighter chest, tiny red eyes, a pink pug snout,
+    huge ears with pink insides, leathery near-black wings."""
+    img = new_skin()
+    fur_c = (74, 60, 64)
+    parts(img, fur_c, 0.16)
+    fur(img, BASE_PARTS, fur_c, (50, 40, 44, 255), 5)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    vgrad(img, (fx0 + 2, fy0, fx1 - 2, fy1 - 3), (128, 108, 104), (100, 84, 84), 0.08)
+    rect(img, (10, 11, 11, 12), (220, 40, 40, 255))
+    rect(img, (13, 11, 14, 12), (220, 40, 40, 255))
+    rect(img, (11, 13, 13, 15), (200, 140, 140, 255))
+    claws(img, (30, 24, 26, 255))
+    chest_insignia(img, rim=(40, 30, 32, 255))
+    # extras: ears 2x4x1 at (0,64); wings 1x10x5 at (6,64)
+    ear = (0, 64, 2, 4, 1)
+    box(img, ear, (70, 56, 60), 0.1)
+    ex0, ey0, ex1, ey1 = faces(*ear)["front"]
+    rect(img, (ex0, ey0 + 1, ex1, ey1), (190, 130, 130, 255))
+    wing = (6, 64, 1, 10, 5)
+    box(img, wing, (44, 36, 40), 0.1)
+    for name, (x0, y0, x1, y1) in faces(*wing).items():
+        if name in ("left", "right"):
+            for x in range(x0 + 1, x1, 2):
+                rect(img, (x, y0, x + 1, y1), (30, 24, 28, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_keen.png")
+
+
+def hive():
+    """(0.18.113, Scan E) Hive, the swarm: amber and black bands, a fuzzy black head with big dark compound eyes, black
+    antennae, pale veined wings and a striped abdomen."""
+    img = new_skin()
+    amber = (224, 164, 40)
+    black = (36, 30, 24)
+    parts(img, amber, 0.12)
+    for part in (BODY,) + LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 2, y1, 4):
+                rect(img, (x0, y, x1, min(y + 2, y1)), shade(black + (255,), 1.0))
+    box(img, HEAD, black, 0.12)
+    fur(img, (HEAD,), black, (60, 50, 40, 255), 4)
+    rect(img, (8, 10, 11, 14), (70, 40, 20, 255))
+    rect(img, (13, 10, 16, 14), (70, 40, 20, 255))
+    img.putpixel((9, 11), (200, 150, 90, 255))
+    img.putpixel((14, 11), (200, 150, 90, 255))
+    claws(img, (20, 16, 12, 255))
+    chest_insignia(img, rim=(60, 40, 10, 255))
+    # extras: antennae 1x4x1 at (0,64); wings 1x7x5 at (6,64); abdomen 6x6x6 at (20,64)
+    box(img, (0, 64, 1, 4, 1), black, 0.1)
+    wing = (6, 64, 1, 7, 5)
+    box(img, wing, (214, 228, 236), 0.04)
+    for name, (x0, y0, x1, y1) in faces(*wing).items():
+        if name in ("left", "right"):
+            for x in range(x0 + 1, x1, 2):
+                rect(img, (x, y0, x + 1, y1), (150, 170, 184, 255))
+    belly = (20, 64, 6, 6, 6)
+    box(img, belly, amber, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*belly).items():
+        if name in ("top", "bottom"):
+            continue
+        for y in range(y0 + 1, y1, 3):
+            rect(img, (x0, y, x1, y + 1), black + (255,))
+    clear_hat(img)
+    save(img, "entity/xenoform_hive.png")
+
+
+def skitter():
+    """(0.18.113, Scan E) Skitter, the eight-legged: black-brown and hairy, a paler hourglass on the abdomen, a cluster
+    of red eyes, banded legs."""
+    img = new_skin()
+    hide = (58, 42, 34)
+    parts(img, hide, 0.14)
+    fur(img, BASE_PARTS, hide, (34, 24, 20, 255), 4)
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0 + 5, x1, y0 + 6), (96, 70, 52, 255))
+    for x, y in ((9, 10), (14, 10), (10, 11), (13, 11), (9, 12), (14, 12), (11, 12), (12, 12)):
+        img.putpixel((x, y), (220, 30, 30, 255))
+    rect(img, (10, 14, 14, 15), (20, 12, 10, 255))
+    claws(img, (20, 14, 12, 255))
+    chest_insignia(img, rim=(30, 20, 16, 255))
+    # extras: leg 8x1x1 at (0,64); abdomen 7x6x7 at (20,64)
+    leg = (0, 64, 8, 1, 1)
+    box(img, leg, hide, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*leg).items():
+        for x in range(x0 + 2, x1, 3):
+            rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
+    belly = (20, 64, 7, 6, 7)
+    box(img, belly, (48, 36, 30), 0.14)
+    for name, b in faces(*belly).items():
+        speckle(img, b, (28, 20, 16, 255), 8)
+    bx0, by0, bx1, by1 = faces(*belly)["top"]
+    cx = (bx0 + bx1) // 2
+    for i, w in enumerate((3, 1, 3)):
+        rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_skitter.png")
+
+
+def shade_form():
+    """(0.18.113, Scan E) Shade, the stealer: near-black with a faint violet sheen, and long narrow glowing violet eyes."""
+    img = new_skin()
+    dark = (26, 20, 32)
+    parts(img, dark, 0.08)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, (44, 32, 58, 255), (b[2] - b[0]) * (b[3] - b[1]) // 9 + 1)
+    rect(img, (8, 11, 11, 12), (210, 120, 255, 255))
+    rect(img, (13, 11, 16, 12), (210, 120, 255, 255))
+    img.putpixel((9, 11), (250, 220, 255, 255))
+    img.putpixel((14, 11), (250, 220, 255, 255))
+    claws(img, (10, 8, 14, 255))
+    chest_insignia(img, rim=(20, 14, 30, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_shade.png")
+
+
+def mirage():
+    """(0.18.113, Scan E) Mirage, the illusionist: a deep blue robe trimmed in gold, a pale grey face with bright blue
+    eyes in the hood's shadow."""
+    img = new_skin()
+    robe = (46, 74, 160)
+    gold = (220, 180, 70, 255)
+    parts(img, robe, 0.1)
+    rect(img, (8, 8, 16, 16), (150, 150, 160, 255))
+    rect(img, (8, 8, 16, 10), (30, 40, 80, 255))
+    eyes(img, (120, 200, 255, 255), y=11)
+    rect(img, (11, 14, 13, 15), (100, 100, 110, 255))
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 3, fy0, fx0 + 5, fy1), gold)
+    for part in ARMS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 3, x1, y1 - 2), gold)
+        rect(img, front(part)[:1] + (front(part)[3] - 2,) + front(part)[2:3] + (front(part)[3],), (150, 150, 160, 255))
+    chest_insignia(img, rim=(20, 30, 70, 255))
+    # extras: hood 8x8x8 at (0,64); robe skirt 8x8x4 at (0,82)
+    hood = (0, 64, 8, 8, 8)
+    box(img, hood, (40, 64, 144), 0.1)
+    hx0, hy0, hx1, hy1 = faces(*hood)["front"]
+    rect(img, (hx0 + 1, hy0 + 2, hx1 - 1, hy1), CLEAR)
+    for name, (x0, y0, x1, y1) in faces(*hood).items():
+        if name != "front":
+            rect(img, (x0, y1 - 1, x1, y1), gold)
+    rect(img, (hx0, hy0 + 1, hx1, hy0 + 2), gold)
+    skirt = (0, 82, 8, 8, 4)
+    box(img, skirt, robe, 0.1)
+    for name, (x0, y0, x1, y1) in faces(*skirt).items():
+        if name in ("front", "back", "left", "right"):
+            rect(img, (x0, y1 - 1, x1, y1), gold)
+    sx0, sy0, sx1, sy1 = faces(*skirt)["front"]
+    rect(img, (sx0 + 3, sy0, sx0 + 5, sy1), gold)
+    clear_hat(img)
+    save(img, "entity/xenoform_mirage.png")
+
+
+def ooze_skin(name, base, core, dark, eye):
+    """(0.18.114, Scan F) Ooze: soft jelly lighter at the edges, a darker core in the chest, two dark eyes, a blob on top."""
+    img = new_skin()
+    parts(img, base, 0.08, edge=1.12)
+    fx0, fy0, fx1, fy1 = front(BODY)
+    rect(img, (fx0 + 2, fy0 + 2, fx1 - 2, fy0 + 8), core + (255,))
+    rect(img, (9, 10, 11, 12), eye)
+    rect(img, (13, 10, 15, 12), eye)
+    rect(img, (10, 14, 14, 15), shade(dark + (255,), 1.0))
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            speckle(img, b, shade(dark + (255,), 1.0), (b[2] - b[0]) * (b[3] - b[1]) // 14 + 1)
+    chest_insignia(img, rim=shade(dark + (255,), 0.8))
+    # extras: head blob 6x3x6 at (0,64)
+    box(img, (0, 64, 6, 3, 6), base, 0.08, edge=1.12)
+    clear_hat(img)
+    save(img, f"entity/xenoform_{name}.png")
+
+
+def ooze():
+    ooze_skin("ooze", (108, 192, 96), (60, 130, 56), (40, 90, 40), (20, 40, 20, 255))
+
+
+def magma_ooze():
+    ooze_skin("magma_ooze", (70, 30, 24), (250, 150, 40), (30, 12, 10), (255, 200, 60, 255))
+    img = Image.open(ROOT / "textures" / "entity" / "xenoform_magma_ooze.png").convert("RGBA")
+    # glowing cracks across the dark crust
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            if nm in ("front", "back", "left", "right"):
+                for y in range(b[1] + 2, b[3], 4):
+                    rect(img, (b[0], y, b[2], y + 1), (240, 120, 30, 255))
+    chest_insignia(img, rim=(60, 20, 10, 255))
+    save(img, "entity/xenoform_magma_ooze.png")
+
+
+def fuse():
+    """(0.18.114, Scan F) Fuse: mottled creeper greens, a paler chest, the dark hollow eyes and frown."""
+    img = new_skin()
+    green = (88, 160, 72)
+    parts(img, green, 0.1)
+    for part in BASE_PARTS:
+        for nm, b in faces(*part).items():
+            speckle(img, b, (60, 120, 52, 255), (b[2] - b[0]) * (b[3] - b[1]) // 5 + 1)
+            speckle(img, b, (150, 210, 130, 255), (b[2] - b[0]) * (b[3] - b[1]) // 12 + 1)
+    rect(img, (9, 10, 11, 12), (16, 20, 16, 255))
+    rect(img, (13, 10, 15, 12), (16, 20, 16, 255))
+    rect(img, (11, 12, 13, 15), (16, 20, 16, 255))
+    rect(img, (10, 13, 11, 16), (16, 20, 16, 255))
+    rect(img, (13, 13, 14, 16), (16, 20, 16, 255))
+    claws(img, (40, 70, 36, 255))
+    chest_insignia(img, rim=(30, 60, 26, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_fuse.png")
+
+
+def thornwild():
+    """(0.18.114, Scan F) Thornwild: grey-brown bark in vertical grain, moss on the shoulders, amber eyes, pale thorns."""
+    img = new_skin()
+    bark = (92, 72, 52)
+    parts(img, bark, 0.12)
+    for part in BASE_PARTS:
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm in ("top", "bottom"):
+                continue
+            for x in range(x0, x1, 3):
+                rect(img, (x, y0, x + 1, y1), (66, 50, 36, 255))
+    for part in ARMS + (BODY,):
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm == "top":
+                noise_fill(img, (80, 120, 50, 255), 0.2, (x0, y0, x1, y1))
+            elif nm in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 2), (84, 124, 54, 255))
+    rect(img, (9, 11, 11, 12), (250, 170, 40, 255))
+    rect(img, (13, 11, 15, 12), (250, 170, 40, 255))
+    rect(img, (10, 14, 14, 15), (40, 30, 22, 255))
+    claws(img, (50, 38, 28, 255))
+    chest_insignia(img, rim=(50, 38, 26, 255))
+    # extras: twig 1x5x1 at (0,64); thorn 1x1x2 at (6,64)
+    box(img, (0, 64, 1, 5, 1), (80, 62, 44), 0.1)
+    box(img, (6, 64, 1, 1, 2), (220, 210, 170), 0.05)
+    clear_hat(img)
+    save(img, "entity/xenoform_thornwild.png")
+
+
+def billow():
+    """(0.18.114, Scan F) Billow: soft white cloud, grey underneath, a calm face of dark round eyes and a small smile."""
+    img = new_skin()
+    white = (236, 240, 246)
+    parts(img, white, 0.05, light={"top": 1.05, "bottom": 0.72, "right": 0.92, "left": 0.92, "front": 1.0, "back": 0.86})
+    rect(img, (9, 11, 11, 13), (60, 70, 90, 255))
+    rect(img, (13, 11, 15, 13), (60, 70, 90, 255))
+    rect(img, (11, 14, 13, 15), (150, 160, 180, 255))
+    chest_insignia(img, rim=(150, 160, 180, 255))
+    # extras: body puff 12x8x8 at (0,64); head cap 10x6x10 at (0,82)
+    soft = {"top": 1.05, "bottom": 0.7, "right": 0.9, "left": 0.9, "front": 0.98, "back": 0.86}
+    box(img, (0, 64, 12, 8, 8), white, 0.05, light=soft)
+    box(img, (0, 82, 10, 6, 10), white, 0.05, light=soft)
+    clear_hat(img)
+    save(img, "entity/xenoform_billow.png")
+
+
+def towerback():
+    """(0.18.119, Scan G) Towerback: grey stone in rough courses, cracks, moss on the shoulders and boulders, a heavy brow
+    over pale glowing eyes, and a broken watchtower on its back with dark arrow slits."""
+    img = new_skin()
+    stone = (128, 132, 138)
+    parts(img, stone, 0.14)
+    moss = (86, 124, 58, 255)
+    for part in BASE_PARTS:
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm in ("top", "bottom"):
+                continue
+            # rough courses of stone
+            for y in range(y0 + 3, y1, 4):
+                rect(img, (x0, y, x1, y + 1), (96, 100, 106, 255))
+            speckle(img, (x0, y0, x1, y1), (80, 84, 90, 255), 3)
+    veins(img, faces(*BODY)["front"], (70, 74, 80), (70, 74, 80), 3)
+    for part in ARMS + (BODY,):
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm == "top":
+                noise_fill(img, moss, 0.2, (x0, y0, x1, y1))
+            elif nm in ("front", "back", "left", "right"):
+                rect(img, (x0, y0, x1, y0 + 1), moss)
+    # brow shadow, eyes
+    rect(img, (8, 10, 16, 11), (70, 74, 80, 255))
+    rect(img, (9, 11, 11, 12), (200, 240, 255, 255))
+    rect(img, (13, 11, 15, 12), (200, 240, 255, 255))
+    rect(img, (10, 14, 14, 15), (60, 62, 66, 255))
+    claws(img, (90, 94, 100, 255))
+    chest_insignia(img, rim=(70, 74, 80, 255))
+    # extras: brow 10x2x3 at (0,64); boulder 5x4x5 at (28,64); tower 6x11x5 at (0,74); merlon 2x2x2 at (24,74)
+    box(img, (0, 64, 10, 2, 3), (112, 116, 122), 0.1)
+    boulder = (28, 64, 5, 4, 5)
+    box(img, boulder, (118, 122, 126), 0.18)
+    for nm, (x0, y0, x1, y1) in faces(*boulder).items():
+        if nm == "top":
+            noise_fill(img, moss, 0.25, (x0, y0, x1, y1))
+        elif nm != "bottom":
+            rect(img, (x0, y0, x1, y0 + 1), moss)
+    tower = (0, 74, 6, 11, 5)
+    box(img, tower, (150, 146, 136), 0.1)
+    for nm, (x0, y0, x1, y1) in faces(*tower).items():
+        if nm in ("top", "bottom"):
+            continue
+        for y in range(y0 + 2, y1, 3):
+            rect(img, (x0, y, x1, y + 1), (118, 114, 106, 255))
+        cx = (x0 + x1) // 2
+        rect(img, (cx, y0 + 3, cx + 1, y0 + 6), (30, 30, 34, 255))
+        noise_fill(img, moss, 0.2, (x0, y1 - 2, x1, y1))
+    box(img, (24, 74, 2, 2, 2), (150, 146, 136), 0.1)
+    clear_hat(img)
+    save(img, "entity/xenoform_towerback.png")
+
+
+# (0.18.93, patch 2) the Ultimates: each base skin reworked into an armoured hide, darker and plated, its plate seams
+# glowing in the alien's colour; a second skin holds only the seams (and the base's brightest marks), drawn fullbright.
+# Nadir has no Ultimate form (its C is a film).
+ULTIMATE_COLORS = {
+    "bulwark": (184, 196, 208), "pyre": (255, 138, 42), "blur": (76, 141, 255), "prism": (196, 139, 240),
+    "wisp": (184, 232, 248), "gremlin": (154, 220, 90), "knell": (31, 184, 200), "wyrm": (192, 96, 224),
+    "duplex": (224, 123, 74), "rivet": (159, 180, 192), "gorger": (176, 106, 84), "slipfin": (240, 140, 184),
+    "polestar": (216, 74, 74), "lurk": (110, 82, 176), "gyre": (95, 163, 122), "cortex": (79, 184, 176),
+    "locust": (141, 179, 58), "croaker": (110, 158, 60),
+    "rime": (158, 216, 240), "marrow": (230, 224, 204), "swathe": (196, 170, 120), "blight": (120, 100, 150),
+    "howl": (176, 160, 140), "prowl": (224, 150, 60), "tusk": (150, 100, 70), "talon": (214, 180, 60),
+    "murk": (150, 120, 190), "gnasher": (110, 150, 180), "lumen": (200, 240, 255), "keen": (200, 60, 70),
+    "hive": (240, 180, 50), "skitter": (200, 40, 40), "shade": (200, 110, 255), "mirage": (110, 170, 255),
+    "ooze": (120, 230, 100), "magma_ooze": (255, 140, 40), "fuse": (140, 230, 110), "thornwild": (240, 180, 60), "billow": (150, 200, 255),
+    "towerback": (200, 240, 255),
+}
+ULTIMATE_PLATE, ULTIMATE_WIDTH = 5, 8
+PATCH4 = ("gorger", "slipfin", "polestar", "lurk")
+PATCH5 = ("gyre", "cortex", "locust", "croaker")
+SCAN_B = ("rime", "marrow", "swathe", "blight")
+SCAN_C = ("howl", "prowl", "tusk", "talon")
+SCAN_D = ("murk", "gnasher", "lumen", "keen")
+SCAN_E = ("hive", "skitter", "shade", "mirage")
+SCAN_F = ("ooze", "magma_ooze", "fuse", "thornwild", "billow")
+SCAN_G = ("towerback",)
+
+
+def ultimate(form):
+    base = Image.open(ROOT / "textures" / "entity" / f"xenoform_{form}.png").convert("RGBA")
+    color = ULTIMATE_COLORS[form]
+    metal = tuple(int(c * 0.28) + 18 for c in color)
+    skin = Image.new("RGBA", base.size, CLEAR)
+    glow = Image.new("RGBA", base.size, CLEAR)
+    src, out, lit = base.load(), skin.load(), glow.load()
+    seam = lerp(color, (255, 255, 255), 0.35)
+    for y in range(base.size[1]):
+        for x in range(base.size[0]):
+            r, g, b, a = src[x, y]
+            if a == 0:
+                continue
+            bright = max(r, g, b)
+            # plates: the hide darkened toward the alien's metal, a little of the old marks showing through
+            mixed = tuple(int(metal[i] * 0.5 + (r, g, b)[i] * 0.5) for i in range(3))
+            # a bevel on each plate: lighter on its top-left rows, darker on its bottom-right
+            # laid like bricks: a seam along every fourth row, and across each row every sixth pixel, staggered
+            py = y % ULTIMATE_PLATE
+            px = (x + (y // ULTIMATE_PLATE) % 2 * 4) % ULTIMATE_WIDTH
+            if bright > 225:
+                # eyes, insignia, the brightest marks: they burn through
+                out[x, y] = (r, g, b, 255)
+                lit[x, y] = lerp((r, g, b), color, 0.3)
+                continue
+            if py == 0 or px == 0:
+                out[x, y] = seam
+                if (x // ULTIMATE_WIDTH + y // ULTIMATE_PLATE) % 3 != 0:
+                    # most seams glow; every third plate's edge lies dark, so it reads as armour, not a grid
+                    lit[x, y] = seam
+                else:
+                    out[x, y] = shade(metal + (255,), 0.55)
+                continue
+            k = 1.15 if py == 1 else 0.82 if py == ULTIMATE_PLATE - 1 else 1.0
+            out[x, y] = shade(mixed + (255,), k)
+    save(skin, f"entity/xenoform_{form}_ultimate.png")
+    save(glow, f"entity/xenoform_{form}_ultimate_glow.png")
+
+
+def ultimate_spikes():
+    """The Ultimates' spikes and crests: one plain bone-and-metal strip, tinted per alien when drawn."""
+    img = Image.new("RGBA", (64, 32), CLEAR)
+    vgrad(img, (0, 0, 64, 32), (255, 255, 255, 255), (150, 150, 160, 255))
+    save(img, "entity/xenoform_ultimate_spikes.png")
+
+
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex", "rivet", "gorger", "slipfin", "polestar", "lurk", "gyre", "cortex", "locust", "croaker", "dud", "rime", "marrow", "swathe", "blight", "howl", "prowl", "tusk", "talon", "murk", "gnasher", "lumen", "keen", "hive", "skitter", "shade", "mirage", "ooze", "magma_ooze", "fuse", "thornwild", "billow", "towerback")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1203,6 +2341,7 @@ def preview(out):
 
 if __name__ == "__main__":
     band()
+    rival_band()
     fallen_star()
     bulwark()
     pyre()
@@ -1214,8 +2353,68 @@ if __name__ == "__main__":
     wyrm()
     nadir()
     duplex()
+    rivet()
     band_worn()
     holo_glow()
+    for form in ULTIMATE_COLORS:
+        if form not in PATCH4 + PATCH5 + SCAN_B + SCAN_C + SCAN_D + SCAN_E + SCAN_F + SCAN_G:
+            ultimate(form)
+    ultimate_spikes()
+    # (0.18.96) drawn last, so the older skins' random speckle comes out as it always has
+    gorger()
+    slipfin()
+    polestar()
+    lurk()
+    for form in PATCH4:
+        ultimate(form)
+    # (0.18.103) patch 5, after patch 4 for the same reason; Dud has no Ultimate
+    gyre()
+    cortex()
+    locust()
+    croaker()
+    dud()
+    for form in PATCH5:
+        ultimate(form)
+    # (0.18.107) Scan B, last again so nothing older changes
+    rime()
+    marrow()
+    swathe()
+    blight()
+    for form in SCAN_B:
+        ultimate(form)
+    # (0.18.109) Scan C, last again
+    howl()
+    prowl()
+    tusk()
+    talon()
+    for form in SCAN_C:
+        ultimate(form)
+    # (0.18.111) Scan D, last again
+    murk()
+    gnasher()
+    lumen()
+    keen()
+    for form in SCAN_D:
+        ultimate(form)
+    # (0.18.113) Scan E, last again
+    hive()
+    skitter()
+    shade_form()
+    mirage()
+    for form in SCAN_E:
+        ultimate(form)
+    # (0.18.114) Scan F, last again
+    ooze()
+    magma_ooze()
+    fuse()
+    thornwild()
+    billow()
+    for form in SCAN_F:
+        ultimate(form)
+    # (0.18.119) Scan G, last again
+    towerback()
+    for form in SCAN_G:
+        ultimate(form)
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
         preview(sys.argv[1])

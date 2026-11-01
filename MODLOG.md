@@ -4263,7 +4263,473 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     at his bench; you wake on it as a finished android (`ZFighterAndroid.DONE`: endless ki, full food bar, metal repairs, Overdrive
     open), given the Z Fighter's power if you had none. A written note is in your pocket (`book.jaymospowers.android_note`).
   - Both only compile-checked (javac against the 26.3 jars); not built with Gradle or played.
-- **0.19.20, healing herbs, rag washing, the healer's satchel and sickbed foods (docs/Healing-Plan.md 1-4 and 7):** Andy: "we need
+- **0.18.84, rocks knock people out:** Andy: "throwing rocks should have a chance to knockout unsuspecting mobs and players.
+  you can then lift and carry them if you are strong enough. you may have to remove armor." A thrown rock (`ground/ThrownRocks`)
+  that hits someone unsuspecting (asleep; or no target, not hurt in 5 s, and the thrower outside a 60-degree cone of their sight
+  or out of line of sight) knocks them out 60% of the time on the head (within 0.35 of eye height), 20% elsewhere, for 15-45 s
+  (`Downed.knockOut` with `anyBody`: wild animals and spiders too, through `Downed.stunnable`, not bosses or giants). Out cold
+  they lie still with their eyes shut (Kitchen's `ClosedEyes`, marked in `DownedLivingEntityRendererMixin` for any passed-out
+  body). Knocked out from standing (`Downed.outCold`), a three-heart blow no longer kills outright and a player's blow is real
+  damage. `Downed.KNOCKED` now syncs to its owner: their screen goes black over the HUD (`DownedHud`, fading back as they come
+  round), and each sneak press takes 12 ticks off (`Downed.MASH_TICKS`), with a bar on the action bar. Lifting (`Carry`): anyone
+  lifts a body wearing up to 12 armour + toughness points (leather, gold, chain), each point of Kitchen brawn 6 more
+  (`Carry.FREE_ARMOUR`, `ARMOUR_PER_BRAWN`, brawn through `KitchenCompat.brawn`); too heavy, a finished lift pulls the heaviest
+  piece off a downed body and drops it beside them instead (`Carry.shed`). Gravity users and Wind snatches are exempt.
+  Andy: "the thrown rocks that break leave what looks like an egg splat". That was Subtle Effects' snowball splat, from the
+  snowball's hit event; `RockSnowballMixin` keeps any snowball wearing a rock (ours or Kingdoms' cobblestone) from sending it.
+  A broken rock cracks the block it hit (break stage 3, fading a stage every 12 ticks) and throws 12 stone specks that fall and
+  settle; one that stays lying sheds 3. Compile-checked; not seen in game.
+- **0.18.85, MGSV-style prone, belly slides, a stepping crouch:** Andy: "the crouch above prone, it doesnt animate the legs
+  moving like it used to. it should look like a sneak from a skyrim character", plus slides into prone and a back/belly toggle.
+  - *The crouch's stride* (`client/CrouchPose`): each thigh swings `LOW_STRIDE` either side of `LOW_THIGH`, full stride at a
+    sneak's pace (`STRIDE_GAIN`), and the knee bends `LOW_LIFT` more as the leg comes through so the foot lifts.
+  - *Belly slide* (`freerun/Slide.BELLY`, `client/freerun/RunPose.belly`): a slide out of the fast run is a head-first dive on
+    your stomach, arms out overhead. A slide out of a regular sprint (or within `SPRINT_GRACE_TICKS` of one) is the feet-first
+    slide on your back as before.
+  - *Slide into prone* (`FreerunClient`): hold Sneak through the slide, or scroll down during it (`slideScroll`), and it ends
+    in prone instead of getting up: on your belly from the belly slide, on your back from the back slide. Scrolling holds it
+    as the wheel's stance.
+  - *Back and belly* (`core/Crawl.SUPINE`, synced; `CrawlTaps.turnOver`; `client/CrawlPose` `back`): prone, a tap of Sneak
+    (no scroll) rolls you over onto your back over `BACK_TURN_TICKS`, and again onto your belly. On your back you lie feet
+    toward where you look, head raised, one knee up, arms up to aim. A bow only draws on your back (`mixin/ProneBowMixin`).
+  - Compile-checked (javac against the 26.3 jars); not built with Gradle or played.
+- **0.18.88, the band shows like a watch, and an alien carries no gear:** Andy: in first person the raised band
+  wasn't visible at all, and it should read like a watch face held up to you; and none of your weapons should show on
+  the alien.
+  - The band gets a 5x5 face plate on its outer side (`XenoBand.plate`, texels 0,10 of `xeno_band.png`, from
+    `tools/gen_xenoform.py`): dark rim, metal studs at the corners, a glowing green face. Held up with Z the plate lifts
+    a pixel and grows by half (`PLATE_LIFT_PX`, `PLATE_GROW`), and the dialled alien's silhouette stands dark on the
+    face (`XenoBand.silhouette`: the alien's own model squashed flat onto the face, upright as you see it). The hologram
+    over it stays. The old pop-up cap is gone.
+  - With First-person Model drawing your body, the slam used to play on the body's own arms; the raised forearm came
+    up through the camera and the band never showed. Now the slam's own first-person hands (`XenoformSlamView`) are
+    drawn with it too, and the body's arms are hidden meanwhile (`FirstPersonCompat.hideArms`;
+    `XenoformSlap.FP_BODY_ARMS` turns the old way back on).
+  - As an alien, only the game's own render layers and Xenoform's run on the player
+    (`XenoformLivingEntityRendererMixin.alienLayers`): Weapon Master's holstered weapons, Traveler's Tool Belt, quivers,
+    backpacks, costumes and heritage looks no longer hang off the invisible body. Compile-checked; not seen in game.
+- **0.18.89, Pyre flies like a Z Fighter and leaves a comet:** Andy: "pyre needs a more controllable flight like the z
+  fighters, and the trail should be more like a comet of flame and less repeat particles".
+  - The Flame Jet is a toggle on G, flown on the client (`client/power/xenoform/PyreFlightClient`, after
+    `ZFighterFlightClient`): G lifts you into a hover, WASD moves, Jump rises, Sneak sinks and lands; Sprint streaks along
+    your look, speeding up to 1.4 blocks a tick (Sunheart 2.0, the new flight kind `XenoformState.FLY_SUN`) and turning
+    slower the faster you go; let go to coast back to a hover, S brakes. G again ends it with slow falling. The server
+    (`Pyre`) no longer pushes your velocity; it keeps the jet on, ends it on Sneak on the ground, and syncs the kind.
+  - The jet's server particle spray is gone. `PyreComet` draws one tail of fire on every client: three camera-facing
+    ribbons (red glow, orange flame, white-hot core) along the last 14 ticks of path (20 under Sunheart), tapering and
+    flickering, with a round glowing head round the body and one ember every 3 ticks. It draws in behind you when you
+    stop. Hand and foot jets now only spurt while hovering. Compile-checked; not seen in game.
+- **0.18.90, Aliens tap the insignia on their chest; Wisp floats, made of ki:** Andy: "the aliens should tap the
+  insignia, it should move from the watch to their chest, and they tap that instead of their wrist. they arent wearing a
+  watch" and "wisp should float instead of walk and be made of ki with the current texture overlaid".
+  - As an alien the slap is a tap on the chest (`XenoformSlap.Pose.chest`, `CHEST_*` angles): no wrist comes up, the
+    right hand rises and taps the insignia, which lights with the band's face glow (`XenoBand.submitInsignia`, per-form
+    `FormModel.insigniaY/Z/Size`). First person shows only the right hand pressing in under the view
+    (`XenoformSlamView.chest`). Others see the tap when a player turns alien.
+  - Wisp hovers 0.3 blocks up with a slow bob, its arms drift and trail instead of swinging, no footsteps
+    (`XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
+    texture, scrolling), its own body puffed out (`WispKi`, `XenoFormModels.Wisp.shells`), first-person arm too.
+    Compile-checked; not seen in game.
+- **0.18.91, The last 5 seconds flash; Nadir floats like Wind; the band plan:** Andy's notes on the alien pick page:
+  "the last 5 secs should beep and flash" and "Nadir needs a flight akin to creative on double tap space. he needs the
+  float that wind has on it as well ... Can Fly, In air".
+  - `XenoformPower.BEEP_TICKS` 200 -> 100; beeps quicken to twice a second over the last 2 s (`beepsAt`), and each
+    beep flashes your screen's edge red (`XenoformPowerClient`, counting from `XenoformState.ENDING`).
+  - Nadir's `mayfly` and flying speed are put back every tick while he's Nadir, so double-tap Jump always flies. Off
+    the ground (flying or not) his flight kind is `FLY_VOID`, and `WindHoverSway` gives him Wind's hover float below
+    cruising speed (`XenoformFlightPose.floating`).
+  - `docs/XenoBand-Plan.md`: Andy's 41 picks from the four add-ons as patches 0-9. Compile-checked; not seen in game.
+- **0.18.92, The band's charge; one band in the world (Xeno-Band patch 1):** Andy picked the charge patch first, and
+  ruled "only these two bands will exist in the world, either player killing the other, will remove the band and give it
+  to them", then "you have to tear it off yourself, with a tap". `XenoBands` counts wearers and loose band items on the
+  overworld; stars drop it only when none is out; tapping a downed wearer tears it off into your inventory as an item
+  that keeps its aliens (`Downed.TAPPED_LISTENERS`, fired when use is let go before a revive starts). The random 1-5 minute timer is now a charge
+  (2-5 min by mastery, drained by hits and moves, refills as yourself, kept between changes; knockout empties and locks
+  it a minute). Quick change (Z held + scroll as an alien, a quarter of the charge, dizzy), the band saving you from a
+  killing blow with a fitting alien (10 min), the wild dial (C while Z held), and the Jammed effect with the Potion of
+  Jamming (awkward + echo shard; recipes are data so JEI shows them). HUD charge bar over the dial.
+- **0.18.93, Real Ultimate forms (Xeno-Band patch 2):** Andy: "I'd also like to see real ultimate forms, all we have are
+  a few special attacks". C as an ascended alien now makes it a body of its own: an armoured skin made from its base
+  skin (plates, seams glowing in its colour, fullbright and pulsing), its own spikes, horns, crests and forearm blades
+  (`UltimateSpikes`, a pose-following humanoid model), half again its health on top, fists +50%, 15% bigger, every move's
+  cooldown halved. The Ultimate's own move (Standstill, Geode, Revenant, Swarm's swap, the Tolling, Copper Storm) is on
+  B; C again drops back to the base alien. Lasts until the charge runs out. Textures from `tools/gen_xenoform.py`.
+  Compile-checked; not seen in game.
+- **0.18.94, Self-Destruct and the technique creator (Andy's NOEA picks):**
+  - **Self-Destruct** (`ZFighterSelfDestruct`, technique 23, 3000 TP, charged on sneak+V). Andy: "bio built, android,
+    and rubber should be able to learn the self destruct" and "the self destruct should involve grabbing and tethering
+    to another player or mob, for a large explosion that usually kills both and deals extreme terrain damage depending
+    on power". Only an android, Bio-built or Rubber-folk body can learn it (synced `FIT`, so the training screen knows).
+    Sneak+V grabs the nearest foe within 3.5 blocks (no foe, no start) and pulls them in front of you on a cord of ki
+    while your body glows; letting go blows up everything round you (5-11 blocks, 24-60 damage times ki power, the held
+    one takes 1.6x), spends all your ki, tears up the ground (explosion power 4-10 times ki power, up to 18) and kills
+    you through totems and being downed (not in creative). Andy: "rubber uses the skin colored blob animation to kind of
+    melt onto the grab target": the held foe is synced (`HOLDING`), and for a Rubber-folk Kingdoms draws the pink swallow
+    rope and skin sealing them in, in place of the ki cord.
+  - **Technique creator** (`ZFighterCreator`, `ZFighterCreatorScreen`, the Create button on the training screen): make
+    up to three quick techniques for G and three charged ones for sneak+V. Each has a name (up to 20 letters), a shape
+    (G: bolt, spread, seekers, burst; V: beam, lance, needle, great ball), one of 8 colours and a strength of 1-5, which
+    sets ki, damage and cooldown and costs 1000 TP a point. They use indexes 100-105, go on their key and the wheel, and
+    show their own name on the HUD and wheel. Forget frees the place (no refund). `Data.knows` now only reads the 32
+    learned bits; `ZFighterTraining.owns` covers both.
+  - Compile-checked; not seen in game.
+- **0.18.95, Rivet and the block shells (Xeno-Band patch 3):** the tenth alien, `forms/Rivet`, scanned from Kingdoms'
+  clockwork golem: small (0.6x), liquid metal (falls never hurt it), chrome skin with green lines and drips
+  (`gen_xenoform.rivet`, `XenoFormModels.Rivet`). R melds into a furnace, piston, anvil, stonecutter, smithing table,
+  dispenser or note block you look at; while melded you are drawn as that block (`XenoformLayer.shell`, synced
+  `XenoformState.SHELL`), R G V B are its own moves (28 in all, table in `docs/xenoform.md`) and the HUD and key guide
+  follow; sneak + R pours you out. Base kit: Lash, Pour, and Ride, which drives a minecart, iron or clockwork golem or
+  android mech where you look, sped up, stronger and glowing. Riding a ship's cannon is left for later. As with Duplex,
+  a band now needs Rivet to be complete; anyone already ascended stays so. Compile-checked; not seen in game.
+- **0.18.96, New aliens A (Xeno-Band patch 4):**
+  - **Gorger** (`forms/Gorger`, from an armadillo): Gulp eats blocks into its gut (up to 12), Gut Blast spits them back
+    as a cone of rubble, Horn Charge gores what's ahead and turns into a slam if it runs off a ledge, Roll Up (hold)
+    makes shots glance off.
+  - **Slipfin** (`forms/Slipfin`, from an axolotl): the first swimmer (Dolphin's Grace, water breathing, never drowns),
+    dries out after 30 s on land unless it rains, can't be carried or grabbed by tendrils and slides out of carries and
+    trips (`Slipfin.slippery`, checked in `Carry.canBeCarriedBy` and `WebTendrils.grabbable`). Bubble Jet, Slip, Dart,
+    and Regrow (a lost limb back, breaks knit; `Breaks.clearAll` is public now).
+  - **Polestar** (`forms/Polestar`, from Kingdoms' Magnetic Giant): Pull and Repel go by the iron a creature wears,
+    Lift tears iron blocks out and throws them, Field (hold) turns arrows back at their shooter.
+  - **The stalker** (`XenoStalker`, entity `xeno_stalker`): at night near a monolith it watches band wearers; catch it
+    with your eyes three times and it leaves a shed skin to scan for **Lurk** (`forms/Lurk`, hidden like Nadir but kept:
+    `XenoForm.lent()` now marks what the voices lend, only Nadir). Watch, Behind, Dread, Fade.
+  - **Duplex:** sneak + V looks out through a double's eyes (`XenoformState.EYES`, `client/XenoEyes`).
+  - **Rivet fix:** its C did nothing (no `onUltimate`) and it had no Ultimate skin; now it becomes Ironclad like the rest.
+  - Models in `XenoFormModels`, skins and Ultimate skins from `tools/gen_xenoform.py` (the new skins drawn last so the
+    old ones don't change), spikes in `UltimateSpikes`, HUD icons, lang. Compile-checked; not seen in game.
+- **0.18.97, question or kill (havens patch 0, Kingdoms 0.7.424):** Andy: "you can question downed humanoids, unlocked
+  in the tree, holding [the execution] now has you select either question or kill dragging either left or right". With
+  any of Kingdoms' Rough Questions (Strength), Quiet Word (Stealth) or Interrogation (Will), a full execution hold sends
+  `Finishers.Choose`; the client (`FinisherClient.choose`) shows a slider and sends `Pick` once the view turns 14 degrees
+  (left questions). Questioning plays a hold per weapon (`Kind.Q_BLADE/Q_BLUNT/Q_AIM/Q_GRIP`, 60 s, no blow; poses in
+  `FinisherPose`) and opens Kingdoms' questioning talk (`KingdomsQuestioning`, by reflection); use lets them go, a blow
+  finishes them. Quiet Word: sneak + hold on an unaware humanoid from behind takes them standing (`Kind.Q_CHOKE`,
+  `Finishers.chokeable/unaware`). A held player gets `QuestionScreen` (truth, lie, silence, own words) and the asker one
+  to put questions (`PlayerQuestioning`); Interrogation flags a lie, Rough Questions' threat costs 2 health.
+  Compile-checked; not seen in game.
+- **0.18.98, Scans fixed:** Kingdoms' clockwork golem is built on the iron golem, so scanning it gave Bulwark and Rivet
+  could never be found; Kingdoms' wind dragons and war elephants are built on the horse and scanned as Velox. Bulwark and
+  Velox now skip Kingdoms' creatures (`Bulwark.scans`, `Velox.scans`).
+- **0.18.99, Landings, flips and sitting (Motion patch 0, `docs/Motion-Plan.md`):** ideas from Actions & Stuff (paid
+  Bedrock pack, nothing copied).
+  - **Landing roll for everyone:** `LandingRoll` and `DodgeClient` no longer ask for Sure Footing (Andy: "remove it from
+    the tree, but keep the skillcheck"): double-tap Sneak (or the dodge key) just before or just as you land. Sure
+    Footing left `Freerun.Perk` and Kingdoms' tree (Kingdoms 0.7.426).
+  - **Hero landing:** fall damage of 6+ that you'd live through, not rolled, lands you in the three-point
+    `WebPose.HERO_LAND` (drawn for anyone by `WebBodyPose`) with a thud and a ring of dust (`LandingRoll.dust`); rolling
+    in the late window takes it away. Web's own hero landings kick up the dust too, and every glide (wings) landing is
+    a hero landing now (`WebTrickClient`).
+  - **Air flips** (`freerun/AirFlip`, `client/freerun/AirFlipClient`): one tap of Sneak in the air, 2+ blocks up,
+    flips you: forward (Forward or nothing), backward (Back, new `WebPose.BACK_FLIP`) or a cartwheel (a strafe key).
+    The client waits out the double-tap window so two taps stay the dodge/landing roll. Web slingers and Freerunner 1+;
+    2 Feathers; a little Stealth experience.
+  - **Sit anywhere** (`Meditate`): stand still, sneak and look down past 65 degrees for 5 s and you sit cross-legged,
+    staying sat after letting go until you move, jump or are hurt. With the Meditation perk the sit is meditating; the
+    I key is Shadowbox now, for Z Fighters and Gravity users only (others get a hint on how to sit).
+  - Balancing on chains and end rods was already everyone's (`freerun_narrow`); nothing changed there.
+  - Compile-checked; not seen in game.
+- **0.18.100, Scan A (more DNA):** the first patch of `docs/ScanGaps-Plan.md` (Andy's scan-gap picks). `XenoDna` is a
+  table checked before the forms' own `scans` (`XenoForms.scanOf`): extra carriers by entity id (Wyrm from the Kingdoms
+  wind dragons, the komodo dragon and the Visage of War; Bulwark from bears; Velox from the ostrich; Gremlin from the
+  lizard, rascal and loot goblin; Duplex from Friends & Foes' copper golem; Prism from the tuff golem and gorgon; Pyre
+  from the wildfire; Gorger from the rubblemite and giant isopod; Slipfin from bass, catfish and blobfish; Wisp from the
+  Grim Reaper, ancient cultist, wraiths and haunted stand; Knell from the skulk golem; Rivet from the redstone golem,
+  mimic and our machines), and those who carry no DNA (farm animals, the walking dead, illagers, piglins, villagers and
+  every MCA/Kingdoms folk, hornkin, the Piglin King, our named people, demons, the aerbunny). Mod mobs match by id, so a
+  missing mod never matches. Compile-checked; not seen in game.
+- **0.18.101, Body motion and temperaments (Motion patch 1, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **`client/BodyMotion`**, laid over every player's model (Fresh Animations not paused) only while none of our poses
+    is on: the chest turns about a third of the way after the head (max 22 degrees, shoulders carried round); locked on
+    (`LockOn.LOCKED`, new synced flag), side steps lean the body into the move; a hit tips the body away from where it
+    came from while the red flash lasts (not while downed).
+  - **Player temperaments** (Kingdoms 0.7.428): the life story picks one of the 12 for good. Timid and suspicious
+    players hunch, glance about and draw their hands in when it's dark, they're under 40% health or a monster is within
+    10 blocks; hotheaded ones stand with arms tense and forward; gloomy ones slump with the head hung; cheerful ones
+    bounce as they walk; brave ones show a third of the flinch.
+  - **`client/PanicCam`:** a timid or suspicious player sprinting at half health or less from a monster close behind
+    gets a shake and the first-person view swings round over the shoulder at it for about a second (aim unchanged),
+    at most once every 7 s, with a small rattle while still chased.
+  - Compile-checked; not seen in game.
+
+## 0.18.102: bog iron as a Tinkering material (Havens patch 2, second half)
+- `TinkerMaterial.BOG_IRON` (iron-tier, 340 durability, 2.5 attack, a slower heavier handle; Jagged) and `Molten.BOG_IRON`.
+  Jaymo's Kingdoms' raw bog iron (1 ingot) and its ore (2) melt into it through Kingdoms' data file; the ingot casts
+  and forges like any metal. No grid or furnace recipe.
+- Bog iron armour (helmet, chestplate, leggings, boots: 2/6/5/2, toughness 0.5, durability x18) is hammered out on the
+  Smithing Anvil like iron's (`ArmourForging`), repaired with bog iron ingots.
+- Art: `tools/gen_bog_iron.py` recolours every iron part and tool layer rust-brown, the ingot, molten bog iron, and the
+  armour icons and worn layers from vanilla's iron ones.
+- Compile-checked only; not played.
+- **0.18.103, Xeno-Band patch 5 (new aliens B):** Gyre (turtle or breeze: Shell Spin, Gust that puts out fires,
+  Whirlwind, Shell), Cortex (guardian: chain Arc, a shot-stopping Bubble, Mind Lift, Claw Snap; reads the health and
+  Kingdoms temperament of what it looks at), Locust (goat: charged Crash Leap with a landing ring, Kick, Wall Bounce,
+  Hops; no fall damage), Croaker (frog or tadpole: Tongue that hauls creatures or items, Gulp/Spit for small mobs,
+  Bound, Croak), and Dud (hidden, never scanned: can't be hurt, can't hurt, thrown by every blow, draws monsters; no
+  Ultimate). Each has its own model and skin (`gen_xenoform.py`), and the four with Ultimates armoured skins and spikes.
+  Compile-checked; not seen in game.
+- **0.18.104, Water (Motion patch 2, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **Strokes** (`client/water/SwimStrokePose`): in water over half your height, off the bottom and not
+    sprint-swimming, the body takes the stroke for the way you move against the way you face: breaststroke leaning in
+    going forward, backstroke laid back going backward, side stroke rolled over going sideways, treading water (sculling
+    hands, cycling legs, a little bob) when hardly moving. From positions, so everyone sees it; pauses Fresh Animations.
+  - **The faster kick** only for Tideborn (Dolphin's Grace while sprint-swimming, Kingdoms 0.7.430) and Slipfin (had
+    it already). Nobody else's swimming changed.
+  - **Dives** (`water/Dives`): 4+ blocks into water 2+ deep. Sneak held from well before (8+ ticks) is a cannonball (big
+    splash, a boom, fish within 8 blocks scatter); Sneak pressed just before is a clean dive (small splash, pushed
+    deeper); neither is a belly flop (slap and splash, 1-2 damage from 12+ blocks).
+  - **Wakes** (`client/water/BoatWakes`): a V of foam from the stern and spray off the bow behind any moving boat or
+    raft, and anything whose id names a ship, whale, canoe or raft (Kingdoms' ships and great whales), sized by width
+    and speed; none for a whale deep under.
+  - **Breaking under water** (`TerrainParticleWaterMixin`): block bits drift down slowly, last twice as long, and some
+    trail a bubble.
+  - Compile-checked; not seen in game.
+- **0.18.105, Faces (Motion patch 3, `docs/Motion-Plan.md`):** an idea from Actions & Stuff.
+  - `client/face/PlayerFaces` + `FaceLivingEntityRendererMixin`: players blink every 3-6 s (Kitchen's closed eyes held 3
+    ticks), their pupils shift towards the nearest living thing within 8 blocks once it's well off to one side, and
+    the inner ends of their brows come down while hurt or swinging. Done by painting copies of the skin, only when its
+    head front has a plain two-pixel eye pair (white beside pupil, same row both sides); any other skin is left as it
+    is (the blink still comes from Kitchen's own eye finder). HD skins scale. Knocked out and dead keep their shut eyes.
+  - Compile-checked; not seen in game.
+
+## 0.18.106: a film after your death (Kingdoms' captains)
+- `UltimateFilm.afterDeath`: a film for a player who's just died, their camera on someone (the `Play` packet carries
+  `afterDeath`). It plays on while they're dead, and `DeathScreenFilmMixin` holds the death screen back (not drawn, its
+  clock and buttons waiting) until it ends. Kingdoms 0.7.431 uses it for the captain who killed you: a short scene of him
+  over your body, raised to captain or up a rank, before you can respawn (Andy).
+- Compile-checked; not seen in game.
+- **0.18.107, Scan B (`docs/ScanGaps-Plan.md`), cold and bone:** four new aliens. Rime (stray, snow golem or
+  Iceologer) has the whole Cryokinesis kit lent through `cryo/CryoLent` (breath, shards, Flash Freeze, Ice Wall, Ice
+  Slide while sprinting, the Blizzard as its Ultimate's B) plus frost armour. Marrow (skeleton, silver skeleton,
+  Skeleton Lord): Bone Spikes, boomerang Rib Throw, Bone Shield, Fall Apart, and one rise from a killing blow each
+  change. Swathe (husk): Lash Bind (bolas trip), Lash Pull, Sandstorm (stronger in deserts), Wrap; can't drown or
+  starve. Blight (the Wither, hidden): skulls, a three-skull volley, Rot Touch, Dark Pulse, dark shield at half health.
+  Each has its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.108, Holding and using items (Motion patch 4, `docs/Motion-Plan.md`):** ideas from Actions & Stuff.
+  - **Dual flintlocks** (`armory/DualFlintlocks`, `WeaponModDualFlintlockMixin`): a WeaponMod flintlock in each hand
+    fire in turn, main hand first, and each reloads on its own (fire, fire, reload main, reload off). One alone is
+    unchanged.
+  - **Pistol sights** (`client/armory/MusketSights`): the flintlock held ready comes up to the eye line out at its own
+    side, not onto the crosshair (smooth barrel, Andy); no bow pose. Each hand rises on its own. Added to First-person
+    Model's vanilla-hands list like the musket.
+  - **`client/armory/HeldItems`:** flint and steel (and flint and rock) struck two-handed in third person, a chop in
+    first person, sparks off flint and steel; shears brought in to the middle and snipping; compass and clock held up
+    to read (third person: the arm comes up when you look down); any lantern held out and swinging with your step.
+  - **Worn lanterns** (Andy; `baubles/Baubles`, `client/baubles/WornLanterns`): any lantern fits the belt bauble slot
+    and hangs at your off-hand hip; the new **Lantern Pole** (sticks, chain, lantern, string) fits the body slot and is
+    worn on your back with its lantern hung out over your head. Everyone sees them (`Baubles.SHOWN`, synced); they hang
+    straight down and swing on a spring as you move. With LambDynamicLights they light up around you
+    (`LdlWornLanternMixin`, optional).
+  - Compile-checked; not seen in game. First-person offsets are guesses to tune in game.
+- **0.18.109, Scan C (`docs/ScanGaps-Plan.md`), beasts:** four new aliens. Howl (wolf, werewolf, feral wolf, coyote):
+  Pounce, a Howl that brings wild wolves to hunt beside you, Scent (blood stains and bleeders show), Lockjaw; stronger
+  at night. Prowl (ocelot, tiger, lion): silent, unseen while sneaking, no fall damage under 12 blocks; Long Pounce
+  that pins, Rake, Stalk, Roar. Tusk (hoglin, boar, rhino, wild boar, minotaur, burrukai, kirrid, taegore): Charge,
+  Gore, Root Out (food from the ground), Thick Hide. Talon (parrot, vulture, songbirds): flies and glides, Stoop that
+  snatches and carries a mob, Far Sight, Feather Darts. Each has its own model, skin, Ultimate skin and spikes.
+  Compile-checked; not seen in game.
+- **0.18.110, 3D models (Motion patch 5, `docs/Motion-Plan.md`):** ideas from Actions & Stuff, our own models.
+  - **Built-in pack "Jaymo's Powers: 3D items and plants"** (`resourcepacks/held_3d`, from `tools/gen_held_3d.py`), on
+    by default, switch it off in Resource Packs for the flat look. Held items are voxelised from their own sprites
+    (handles and heavy parts thicker than blades and strings); the inventory, frames, shelves and dropped items keep
+    the flat icon. Repainted sprites from any resource pack still show through.
+    - Every tier of sword, pickaxe, axe, shovel and hoe; bow, crossbow, fishing rod, shears, mace.
+    - Compass, recovery compass, clock (every frame), totem of undying, brush, saddle.
+    - Bottles (potions, splash, lingering, experience, honey, ominous, dragon's breath, glass bottle; our essence
+      phial, phial, purifying draught, milk bottle): potion contents keep their colour and glow a little, an
+      experience bottle glows.
+    - 3D red and brown mushrooms, pointed dripstone as narrowing cuboids, the doubled smooth stone slab as one block.
+  - **Glow:** iron golem eyes (`client/glow/GolemEyes`, our own glow texture); amethyst, redstone, diamond and emerald
+    armour trims at full block light (`GlowingTrimMixin`).
+  - Not done: per-wood carved canoes (Canoe Boats is CC BY-NC and downloaded at install, so we can't ship edits to it).
+  - Compile-checked; not seen in game.
+- **0.18.111, Scan D (`docs/ScanGaps-Plan.md`), water and light:** four new aliens. Murk (squid, anglerfish,
+  barnacle): Ink, Tentacles that hold four, Jet, Lure; a fast swimmer. Gnasher (dolphin, sharks, alligator, piranha,
+  mauler): smells bleeders in water; Clamp, Lunge, Frenzy, Death Roll. Lumen (allay, firefly, glare), the support
+  alien: Mend, Flare, Light (short-lived light blocks), Fetch. Keen (bat, vampire bat, blightwing): flies and hangs
+  from ceilings; Sonar only you see, Screech that downs flyers, Drain, Echo. Each has its own model, skin, Ultimate
+  skin and spikes. Compile-checked; not seen in game.
+- **0.18.112, Mob animation (Motion patch 6, `docs/Motion-Plan.md`; Kingdoms 0.7.434):**
+- Fresh Animations (FreshLX, v1.11.1 for 26.1+) ships unchanged through EMF: its terms allow modpacks. Fetched from
+  Modrinth until the CurseForge ids are filled in. Any mob in one of our poses (downed, tripped, carried, webbed, pet
+  acts) pauses EMF so our pose wins.
+- Pet wolves (`client/pets/PetPoses`): greet an owner back after 2 minutes away, play bow when the owner is close,
+  lie down then doze (eyes shut) after sitting a while, and wake at loud sounds nearby. Wild wolves lie and doze too.
+- Cats: loaf, knead, groom and stretch in turns while sitting.
+- Wet coats (`client/pets/WetCoats`, tag `jaymospowers:furry`): furry mobs darken in water or rain, shake off once
+  out (shudder + splash) and dry over a minute. Wolves keep vanilla's wet shade; sheep wool isn't darkened.
+- Clockwork golems glance around and shift their weight when idle (Kingdoms `ClockworkGolemRenderer`); iron golem
+  idle comes from Fresh Animations.
+- **0.18.113, Scan E (`docs/ScanGaps-Plan.md`), swarm, web and tricks:** four new aliens. Hive (bee, ant, butterfly,
+  caterpillar, dragonfly): Scatter into an insect cloud that blows pass through, Sting, Honey Glue, Swarm. Skitter
+  (spider, cave spider, tarantula): climbs walls and clings to ceilings upside down (drawn turned over, and
+  your camera rolls over with it); Web Line to swing on, Web Tie, poison Bite,
+  Egg Sac (three cave spiders for 30 s). Shade (enderman, drifter): Steal a block and throw it, Stare that holds a
+  mob still, Blink, Wary (the next blow blinks you away); water burns it. Mirage (illusioner): Mirror Images (false
+  copies that draw mobs off and vanish at a blow, Duplex's doubles with a fake flag), Blind, Unseen, Swap. Each has
+  its own model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.114, Kings' weapons (Havens patch 5; Kingdoms 0.7.435):** the Gutting Hook (quick; each hit hooks the foe a
+  step toward you), the Warchief's Cleaver (heavy; knocks a raised shield aside for 6 s) and the Ogre King's Maul (very
+  heavy; throws the struck back and slows them). Their iron heads (`tinkering/WeaponParts.KINGS`) drop only off kings
+  in Kingdoms and are never shaped, cast or forged; they go together at the Tool Station, and JEI shows that route and
+  where each head comes from. Art: `tools/king_spoils_assets.py`. Compile-checked; not played.
+- **0.18.115, Babies and rare pets (Motion patch 7, `docs/Motion-Plan.md`; Kingdoms 0.7.436):**
+- Younglings (`young/Younglings`, tag `jaymospowers:has_young`): spiders, cave spiders, parrots, aerwhales, skyroot
+  lizards and Kingdoms' tarantulas, coyotes, feral wolves, moose, wild boars, great whales and pigeons now have young.
+  One natural spawn in four brings a brood (spiders: 2-4) or a calf or two. Young are the same creature drawn small
+  through the scale attribute (45%, big ones 30%), with health and bite to match. They squeak higher, drop nothing and
+  trail their elders, and grow to full size over a game day.
+- Rare pets (Kingdoms `RarePets`): a realm settlement of 8+ grown comes, in time, to have one villager keeping an
+  animal from far off. That's a snow fox, snow wolf, snow hare, frost frog or woolly pig where it's warm; a sand hare,
+  armadillo, spotted or rust-coat dog, parrot, marsh frog or southern hen where it's cold; a brown mooshroom
+  anywhere. Dogs and parrots are tamed to their keeper; the rest keep about the keeper's spot. Come near the keeper
+  with the animal about and they brag (a bubble, once a day each), and now and then tell an old tale instead. A
+  neighbour takes it in if the keeper dies; a keeper mourns a rare pet that dies.
+- Hidden name-tag looks (`client/pets/NameLooks`), hinted at only in those tales: five names that change how a mob is
+  drawn (size or tint). The game doesn't say which.
+- **0.18.117, Scan F (`docs/ScanGaps-Plan.md`), odd bodies:** five new aliens. Ooze (slime, sulfur cube, swets, mud
+  golem): bounces off falls, splits into fighting blobs as it's hurt that rejoin it after; Engulf, Spit, Squeeze
+  (shrinks for one-block gaps), Split. Magma Ooze (magma cube): the same, burning and fireproof. Fuse (creeper):
+  punches pop; Blast Pod, Fuse Dash, Self-Destruct (hold, blow up, re-form; costs band charge), Defuse. Thornwild
+  (creaking, rustle): heals in sunlight; Roots, Thorn Volley, Hedge (withers after 30 s), Bloom. Billow (happy ghast,
+  aerwhale): floats and carries up to three friends on its back; Downpour, Thunderhead, Gust, Fog. Each has its own
+  model, skin, Ultimate skin and spikes. Compile-checked; not seen in game.
+- **0.18.118, Stuck weapons (Motion patch 8, `docs/Motion-Plan.md`):**
+- Some zombies rise with a weapon stuck in them: a worn sword, axe, dagger or hatchet, shown standing out of the body.
+  On first sight of a player they wrench it out and fight with it. It always drops when they die. (`armory/Lodged`, 7%
+  of natural zombie spawns.)
+- A thrown dagger that hits a zombie without killing it stays in. Anything stuck in a living body is pulled free with an
+  empty hand's use, which hurts them, and drops where they die. Up to three show on a humanoid (`client/armory/LodgedLayer`).
+- A finisher's killing stroke can leave your weapon standing in the body until you go and take it: Run Through 5%,
+  Stabbed Through 8%, Executioner (axes) 12%. The chance halves after 12 bladed finisher kills, thirds after 24, and so
+  on. Never in creative.
+- Andy: dropped weapons. Going down, players and mobs let go of the weapons in their hands, which land a little way off
+  (`core/wounds/DroppedArms`); 1 in 10 hang on and crawl with them, and die still holding them. A mob killed outright
+  drops its weapons too, except for 1 in 5 that die clutching them. Players dying outright drop everything as before.
+- **0.18.119, Scan G (`docs/ScanGaps-Plan.md`), the true giant:** Towerback (Highfield, Arctic and Irradiated
+  Giants, Kingdoms war elephant): a stone giant with a broken watchtower on its back, five times your size. Tap Z to
+  rise to monolith-giant size (16x, about 29 blocks, under open sky only; tap again to come down); up there it walks
+  through what's in its way (never chests or unbreakable blocks). Every step stomps like the Giants' (cracks, a
+  shockwave along the ground, jump it to dodge); falls land as stomps. R Grab (the Giants' wind-up, squeeze and slam,
+  with the letterbox film), G Stomp, V Swat, B Roar. Powers has its own copy of the stomp and grab, so Kingdoms only
+  supplies the mobs. Z tapped as any alien now goes to the form (`XenoForm.onModeTap`). Own model, skin, Ultimate skin
+  and spikes. Compile-checked; not seen in game.
+- **0.18.120, Props (Motion patch 9, `docs/Motion-Plan.md`; Kingdoms 0.7.440):** the last Actions & Stuff patch. Kingdoms
+  gets a scarecrow that sends birds and rabbits off crops, a gravestone, a lamp post, an iron candle stand, four squeaky
+  plushies that MCA children (and the married) love as gifts, and a window box and pot planter that grow small flowers.
+  Kitchen has no herbs, so the planters grow the nine small vanilla flowers.
+
+- **0.18.121, coming back from the afterlife no longer freezes the server:** Andy: "crash on startup". When the Other World
+  let a Z Fighter go (the long wait, the fortune teller, the dragon's wish) and the spot he was sent home to had never been
+  generated, the server built that ground on its main thread. On the Deck that froze it for 52 seconds and every client
+  timed out. Now the ground loads in the background (`ZFighterAfterlife.returnHome`, a loading ticket of our own,
+  `HOME_RADIUS` chunks round the spot) while "The way back is opening" shows, and he is sent the moment it is ready.
+- **0.18.122, Earning aliens (Xeno-Band patch 6, `docs/XenoBand-Plan.md`; Kingdoms 0.7.442):** star tablets (fallen stars,
+  fishing treasure, Ancient Remnants chests, band hunters, Gremlin): hold one as you slam the band and it learns an alien
+  it didn't hold. Alien-only crafting with JEI pages: Gremlin makes tablets at a crafting table, Bulwark grinds ore into
+  two dusts at a grindstone, Pyre smelts what it holds. One fallen star in ten comes down a wreck that sends out probes
+  while a band wearer is near; probes drop circuits, the wreck a wreck core. Android mechs hunt band wearers on some
+  nights and drop tablets. A corrupted band's wrong-alien glitch can teach an alien it never held (Dud only so).
+  Star-readers (`StarReaders`): one fallen star in three draws an MCA villager to its rim a day or so later; their talk
+  trades a tablet for 3 star metal, reads your band, and drops hints about the sky.
+  New art from `tools/gen_xeno_finds.py`. Compile-checked (the JEI page by hand: JEI isn't in the cloud jars); not seen in game.
+- **0.18.123, Upgrading the band (Xeno-Band patch 7, `docs/XenoBand-Plan.md`; Kingdoms 0.7.444):** each save has a Star
+  Forge in a smithy on one far world, picked at random (moon, Rustfall, Glacia, Cinder or Verdant). It is raised the first
+  time a band wearer walks that world, and an unforged band hums toward it there. With MCA a star smith keeps it. 4 star
+  metal, a wreck core and 4 metal dust reforge the band, which gives it 3 module slots. Module plans (from star-readers,
+  and a quarter of mined wrecks) teach the band Cell, Breather, Plating, Steady and Wild. Band points from mastery buy
+  Quick Change, Death Save, Scan Reach, Bigger Charge and Faster Recharge; **quick change and the death save are now bought,
+  not free**. B as yourself opens the band screen: fit modules, buy skills, forget an alien or wipe the band. Star-readers
+  now hint at the forge's world. Art from `tools/gen_xeno_finds.py`. Compile-checked; not seen in game.
+- **0.18.125, The rival band (Xeno-Band patch 8, `docs/XenoBand-Plan.md`; Kingdoms 0.7.446):** the world's only other
+  band, dark red (`XenoBandItem.RIVAL`). It never falls from the stars. While it's out of the world, some night a Xeno-Band
+  wearer in the overworld may draw the band hunter (`RivalHunter`, an MCA villager): he walks them down and, within 12
+  blocks, changes into one of his four darkened aliens (`RivalAlien`: Gyre, Cortex, Locust or Croaker, with that alien's
+  size, life, fists and pace) for 30 s. When it falls he's back, dazed for 15 s: tap him to tear the band off (he runs),
+  or kill him and it drops. Worn, it's a band like the other (its own dial, starting with those four; scans and upgrades
+  go to whichever band you wear; a downed wearer's is torn off with a tap) and counted on its own (`XenoBands.RIVAL_COUNT`).
+  Its aliens are drawn darkened and its band and insignia red (`XenoformClient.DARK`). Band items now carry their
+  reforge, modules and skills. Test: `/powerdebug xenoform hunter`. Art from `tools/gen_xenoform.py` (`rival_band`).
+  Compile-checked (the JEI line by hand); not seen in game.
+- **0.18.126, Looks (Xeno-Band patch 9, `docs/XenoBand-Plan.md`):** the band screen's new Looks tab dresses the band,
+  all for show. Pick a glow (9 colours): it paints the band, every alien's green lines and insignia, the slam's flash and
+  the dial's hologram. Pick a face plate (square, round, diamond, wide, tall) and spikes. Each alien can be plain, armoured
+  or weathered, painted on the client from its own skin (`XenoLooks`), so every alien has all three. Others see your
+  choices; a band taken off keeps them. A preview of you turns beside the rows. Compile-checked; not seen in game.
+
+- **0.18.127, Kingdoms 0.7.447:** a donkey or mule spawning (a caravan's pack animal, say) no longer crashes the server.
+
+- **0.19.0, Kingdoms 0.7.448:** the life story asks each heritage its own way. A Bio-built is asked who took them in
+  after the vats (no noble house, the Mad Tinkerer or the sewer vat-kin instead), and lives "first months" and "full
+  grown" instead of a childhood; every other heritage gets its own raisers, wording and one answer of its own.
+
+- **0.19.1:** a tournament ring only ever goes on proper ground: flat, plain, clear land near the kingdom's seat. If
+  there's none, no tournament is held there (another kingdom near a player is tried, else it waits a quarter day); it
+  used to fall back to any spot at all, a hillside, a roof or the river. Each kingdom's ring is kept and used again (the
+  floor mended, what grew on it cleared) while it stands, so its tournaments are always held in the same place.
+
+- **0.19.2, Kingdoms 0.7.449:** villagers only run up to you with a reason (you're hurt, a monster's behind you, a
+  storm, thanks, your deeds, shared blood, curiosity, news of a beast) and "Ask what's going on" has them explain.
+  "Accuse them of theft" confronts whoever you think robbed you; the wrong person loses you 8 hearts.
+- **0.19.3, Kingdoms 0.7.450:** taking a bout in the fight pit no longer teleports you in: the bell waits for you to walk
+  into the ring, and both fighters square up for a breath before the first blow. A bookie met in town leads you to the
+  den instead of dealing in the street; a guard overhearing it starts a crackdown. Villagers no longer pile up on the
+  speakeasy ladder.
+- **0.19.4, Kingdoms 0.7.451:** a Bio-built's figure on the story screen is drawn whole again; the starts carousel lists
+  only the starts open to you, with the rest under "Locked"; "Let fate decide" tells you the start it picked.
+
+- **0.19.6, Kingdoms 0.7.452:** the land round a new arrival is made ahead in the background, wherever their start put them.
+
+- **0.19.8, Kingdoms 0.7.454:** "Ask the Way" on a villager's Interact page: a healer, butcher, smith, tailor, the
+  tavern, the stables or whoever rules here. They turn and tell you who and where ("about 40 paces to the north-east"),
+  or, if they like you (or they're a child), walk you there. Seeking an audience, a pedlar's wares, offering tribute and
+  a sworn captain's orders moved from the talk menu to the Interact page too, each shown only when it applies.
+
+- **0.19.9, going prone:** going prone (Crawl key, stance wheel) no longer glides: you crouch, then go forward down onto
+  your hands as your legs slide out behind you, landing exactly where the crawl lies; getting up plays it backwards. In
+  first person the view sinks and rises with the head. Turning over onto your back moves the first-person view round
+  with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
+  `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
+  down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
+
+- **0.19.15, Kingdoms 0.7.456:** a tree felled into another tree no longer stands back up: it glances off to a clear
+  side and falls on, or, boxed in, leans a moment and breaks apart.
+
+- **0.19.16, Kingdoms 0.7.457:** left and right clicks fixed on screens that tell them apart. 26.3 numbers the mouse
+  buttons from 1 (left 1, middle 2, right 3), so a check for "left is 0" never matched and "right is 1" caught left
+  clicks. The life story's flaws and switches can be ticked now, and a left click on its Heritage, Class and Look buttons
+  steps forward instead of back. In Powers the Codex's tabs and graph dragging, the Z Fighter star map's clicks, and
+  right-click stepping back on the costume and suit editor buttons work again (`InputConstants.MOUSE_BUTTON_LEFT/RIGHT`).
+  The Bio-built's hunch is no longer laid on twice on MCA's bodies (head sunk into the chest, arms pushed out), on the
+  story's start page and in the world. Seen working in a test game.
+
+- **0.19.20, Kingdoms 0.7.459, executed by your enemies:** lie downed where a hostile can see you (5 s after you fall) and the nearest one
+  within 16 blocks leaves its fight, walks over and finishes you, filmed for you: black bars, a low tilted shot of it
+  standing over you raising its weapon, then the blow and cuts round the killer over your body before the death screen
+  (players nearby see the bars). Its move depends on what it is and holds: an axe takes your head (vindicators), a blade
+  runs you through, a bow or crossbow fires point blank, an evoker's fangs close on you, a witch breaks a potion on you,
+  zombies and spiders feed, a ravager or the warden crushes you, empty hands stamp. Hitting the executioner before the
+  blow breaks it off (it turns on whoever hit it and waits 15 s before trying again); so does a revive, rising, being
+  carried off or crawling away (it follows). Not only monsters: anyone fighting you (they have you as their target, or
+  you struck them in the last 20 s) can do it too: bandits, barbarians, orcs, pirates, wolves. A realm's guards and a village's
+  golems don't: they arrest you as before, unless the guard is hotheaded or spiteful (Kingdoms).
+  No creepers, fliers, slimes or bosses. Kingdoms' captains still get their
+  own scene after the kill (`core/wounds/MobExecutions`, tuning at the top). Compile-checked; not seen in game.
+- **0.19.22, rocks match the ground:** Andy: "way too many sandstone rocks [...] there should be primarily flint and cobble
+  stone on this gravel plain, the rocks should adapt to whats underneath it, except for grass, then it always does
+  cobblestone rock pebbles". A loose rock now takes its stone from the block it lies on (`GroundRocksFeature.surfaceRock`):
+  grass, gravel and stone give the plain (cobblestone) rock, sand and sandstone sandstone, red sand and terracotta red
+  sandstone, granite/diorite/andesite/tuff/deepslate their own. Only on dirt and the like does the column under it decide,
+  and sand buried under dirt no longer makes sandstone; the desert/beach sandstone and badlands fallbacks are gone. Rocks
+  on gravel are loose flint 45% of the time (`GRAVEL_FLINT`). Pebble piles on grass are always the plain rock now
+  (`PebblePilesFeature`). New chunks only.
+- **0.19.23, the false moon:** Andy: "the z fighter users should be able to create a 'fake moon' attack with their
+  creator, any large orb that when thrown into the sky at night, turns any warrior born with an unleashed tail". A made
+  Great Ball at least 1.5 blocks across, thrown about 50 degrees up or steeper into open night sky, climbs 48 blocks,
+  pales into a moon and hangs 2 minutes (`ZFighterFakeMoon`, tuning at the top). Its light counts as a full moon on any
+  phase within 112 blocks: Warrior-born players with the tail out turn into the Great Ape (those without the
+  power still roll, once a night) and stay it while it shines; wrapped Warrior-born villagers get one 35% roll each. Compile-checked; not seen in game.
+- **0.19.24, healing herbs, rag washing, the healer's satchel and sickbed foods (docs/Healing-Plan.md 1-4 and 7):** Andy: "we need
   more healing methods and items", "make the herbs common so you have an early method to treat wounds", "allow an inefficient
   method of purifying rags, to prevent festering, maybe involving water". All in `core/wounds/`; assets from `tools/gen_herbs.py`.
   - *Wild herbs* (`core/wounds/herbs/`): comfrey, yarrow, plantain, wild garlic and chamomile are `HerbBushBlock`s with four ages
@@ -4297,6 +4763,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - *Healing brews* (`alchemy/healing/HealingBrews`): Bone-Knitting Elixir (sets and knits the worst broken limb over 2 min) and
     Draught of Vigour (every part heals over 60 s, past the 60% cap), made in the crucible from herbs (the five herbs dissolve into
     plant/life essences), unlocked by the new Bonesetting and Vigour research.
-  - Jaymo's Kingdoms 0.7.459 adds paid healing from town healers, the infirmary cot and the shrine (its MODLOG).
+  - Jaymo's Kingdoms 0.7.462 adds paid healing from town healers, the infirmary cot and the shrine (its MODLOG).
   - Everything is in JEI's Medicine page, washing and boiling too. Compile-checked with javac against the 26.3 jars; not built with
     Gradle or seen in game.

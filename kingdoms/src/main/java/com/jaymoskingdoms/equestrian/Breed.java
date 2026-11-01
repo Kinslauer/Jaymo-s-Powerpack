@@ -41,7 +41,14 @@ public enum Breed {
 	 */
 	NIGHTMARE(0.30, 0.36, 0.70, 0.95, 28, 34, 1.3, 0.8, 1.0, 1.05F, 1.0F, 1.0F, 1.02F, Gait.GALLOP, "nightmare"),
 	/** (0.5.56) The bat horse (Mo' Creatures'): a leathery-winged horse of the dark woods that flies under its rider ({@link MythicMounts}). */
-	BAT_HORSE(0.26, 0.31, 0.60, 0.80, 22, 28, 1.0, 1.0, 0.7, 1.0F, 0.95F, 1.0F, 1.0F, Gait.GALLOP, "bat");
+	BAT_HORSE(0.26, 0.31, 0.60, 0.80, 22, 28, 1.0, 1.0, 0.7, 1.0F, 0.95F, 1.0F, 1.0F, Gait.GALLOP, "bat"),
+	/**
+	 * (0.7.445, Havens patch 8) The donkey: slow, steady, eats little, never gallops; carries a pack. Drawn by vanilla's
+	 * renderer (and Better Horses), not ours, so its one coat is only a name.
+	 */
+	DONKEY(0.17, 0.21, 0.45, 0.55, 18, 24, 1.3, 0.7, 0.8, 1.0F, 1.0F, 1.0F, 1.0F, Gait.CANTER, "donkey"),
+	/** (0.7.445) The mule, a horse and a donkey's foal (and never a parent): hardier and surer than either, sure on stone; never gallops. */
+	MULE(0.20, 0.25, 0.45, 0.60, 22, 28, 1.4, 0.6, 0.9, 1.0F, 1.0F, 1.0F, 1.0F, Gait.CANTER, "mule");
 
 	/** The horse breeds (every breed but the elephant and the mammoth). */
 	public static final Breed[] HORSES = {DESTRIER, COURSER, PALFREY, DRAFT, STEPPE_PONY, DESERT_HORSE};
@@ -74,6 +81,11 @@ public enum Breed {
 		this.length = length;
 		this.topGait = topGait;
 		this.coats = coats;
+	}
+
+	/** (0.7.445) A donkey or a mule: one of ours, but drawn by vanilla's renderer (Better Horses'), so no coat of ours shows. */
+	public boolean ass() {
+		return this == DONKEY || this == MULE;
 	}
 
 	/** A war elephant or a mammoth (a {@link WarElephant}, not a horse). */

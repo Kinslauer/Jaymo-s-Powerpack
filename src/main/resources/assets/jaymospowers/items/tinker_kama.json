@@ -181,6 +181,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/kama/handle_star_metal"
             }
+          },
+          {
+            "when": "bog_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/handle_bog_iron"
+            }
           }
         ],
         "fallback": {
@@ -371,6 +378,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/kama/head_broken_star_metal"
               }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_broken_bog_iron"
+              }
             }
           ],
           "fallback": {
@@ -556,6 +570,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/kama/head_star_metal"
+              }
+            },
+            {
+              "when": "bog_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/kama/head_bog_iron"
               }
             }
           ],
@@ -764,6 +785,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/kama/binding_star_metal"
+            }
+          },
+          {
+            "when": "bog_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/kama/binding_bog_iron"
             }
           }
         ],

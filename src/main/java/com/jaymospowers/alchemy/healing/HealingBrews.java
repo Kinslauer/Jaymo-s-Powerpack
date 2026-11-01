@@ -27,7 +27,7 @@ import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.19.20) The two healing brews of the apothecary, made in the crucible from herbs (data
+ * (0.19.24) The two healing brews of the apothecary, made in the crucible from herbs (data
  * {@code alchemy/crucible/bone_knitting_elixir.json} and {@code draught_of_vigour.json}) and drunk like a potion; the glass
  * bottle is handed back.
  * <ul>
@@ -41,12 +41,12 @@ import net.minecraft.world.level.Level;
  */
 public final class HealingBrews {
 	// ---- tuning ----
-	/** (0.19.20) How long the elixir works (seconds), and the share of a limb it heals up to. */
+	/** (0.19.24) How long the elixir works (seconds), and the share of a limb it heals up to. */
 	public static final int KNIT_SECONDS = 120;
 	public static final float KNIT_TO = 0.6F;
-	/** (0.19.20) How long the draught works (seconds): every part heals its whole health over this. */
+	/** (0.19.24) How long the draught works (seconds): every part heals its whole health over this. */
 	public static final int VIGOUR_SECONDS = 60;
-	/** (0.19.20) Drink stack size. */
+	/** (0.19.24) Drink stack size. */
 	public static final int STACK = 16;
 
 	/** Game time the elixir wears off at, on whoever drank it. */

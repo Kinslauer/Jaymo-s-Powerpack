@@ -72,6 +72,14 @@ public abstract class XenoForm {
 		return false;
 	}
 
+	/**
+	 * (0.18.96) A form the two voices lend ({@link XenoVoices}: Nadir): slammed only while they're content, and spent when
+	 * it ends. A hidden form found in the world (the stalker's Lurk) is the band's to keep, like any other.
+	 */
+	public boolean lent() {
+		return false;
+	}
+
 	public Component name() {
 		return Component.translatable("xenoform.jaymospowers." + id);
 	}
@@ -93,6 +101,11 @@ public abstract class XenoForm {
 	}
 
 	/** The player, as this alien, just hurt {@code target} (a punch or a move). */
+	/** (0.18.119, Scan G) Z tapped as this alien (let go before the hold turns you back): its own use for it, if any. */
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		return false;
+	}
+
 	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
 	}
 
@@ -119,8 +132,16 @@ public abstract class XenoForm {
 		return false;
 	}
 
-	/** C again while already the Ultimate (Swarm swaps bodies, Standstill starts again, ...). */
+	/**
+	 * The Ultimate's own move (Swarm swaps bodies, Standstill starts again, ...). (0.18.93, patch 2) It sits on B while you're
+	 * the Ultimate, where {@link #ultimateHasMove} says there is one; C again drops back to the base alien.
+	 */
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+	}
+
+	/** (0.18.93) Whether {@link #onUltimateAgain} is a move of its own, taking B's place in the Ultimate's kit. */
+	public boolean ultimateHasMove() {
+		return false;
 	}
 
 	/** Every server tick while the Ultimate holds (after {@link #tick}). */
@@ -204,10 +225,19 @@ public abstract class XenoForm {
 
 	/** Starts {@code slot}'s cooldown, and counts the use toward mastery. */
 	protected static void cooldown(ServerPlayer player, XenoformPower.Live live, int slot, int ticks) {
+		if (live.ultimate) {
+			// (0.18.93) the Ultimate's stronger kit: every move comes back sooner
+			ticks = Math.max(1, Math.round(ticks * XenoformPower.ULT_COOLDOWN));
+		}
 		live.cooldownUntil[slot] = player.level().getGameTime() + ticks;
 		live.cooldownLength[slot] = ticks;
 		live.hudDirty = true;
 		Mastery.used(player);
+		// (0.18.92) a move spends the band's charge; on the wild dial it counts double toward mastery
+		XenoformPower.drain(player, live, XenoformPower.MOVE_DRAIN);
+		if (XenoformPower.wild(player)) {
+			Mastery.practice(player, 1);
+		}
 	}
 
 	/** The creature under the crosshair within {@code reach} blocks (scaled with the form), or null. */
@@ -247,6 +277,21 @@ public abstract class XenoForm {
 
 	protected static void burst(ServerLevel level, ParticleOptions particle, Vec3 at, int count, double spread, double speed) {
 		level.sendParticles(particle, at.x, at.y, at.z, count, spread, spread * 0.5, spread, speed);
+	}
+
+	/** (0.18.96) The block under the crosshair within {@code reach}, or null. */
+	protected static net.minecraft.core.@Nullable BlockPos aimBlock(ServerPlayer player, double reach) {
+		net.minecraft.world.phys.HitResult hit = player.pick(reach, 0.0F, false);
+		return hit instanceof net.minecraft.world.phys.BlockHitResult block && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK ? block.getBlockPos() : null;
+	}
+
+	/** (0.18.96) A line of {@code points} particles from {@code from} to {@code to}. */
+	protected static void beam(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions particle, int points) {
+		Vec3 step = to.subtract(from).scale(1.0 / points);
+		for (int i = 1; i <= points; i++) {
+			Vec3 p = from.add(step.scale(i));
+			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+		}
 	}
 
 	/** A ring of particles on the ground round {@code at}. */

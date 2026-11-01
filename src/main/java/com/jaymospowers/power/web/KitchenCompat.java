@@ -443,6 +443,22 @@ public final class KitchenCompat {
 	static final int ZFIGHTER_BRAWN = 2;
 
 	/**
+	 * (0.18.84) How strong {@code player} is at hauling bodies, by Kitchen's {@code Hauling.brawn} (Strength, size, Might,
+	 * Packhorse, a Z Fighter's): 0 for most, and 0 without Kitchen.
+	 */
+	public static int brawn(Player player) {
+		if (!LOADED) {
+			return 0;
+		}
+		try {
+			return com.jaymoskitchen.corpse.Hauling.brawn(player);
+		} catch (LinkageError e) {
+			// an older Kitchen: nobody is any stronger
+			return 0;
+		}
+	}
+
+	/**
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all ({@code BladeBlood.corpse}).
 	 * Kitchen (0.5.17 on) tells us of each blow that lands on a body with flesh on it.
 	 */

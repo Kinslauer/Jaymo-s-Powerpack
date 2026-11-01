@@ -177,6 +177,7 @@ public final class QuietOne extends Spirit {
 		MOVES.add(new Def("still", 30.0F, 1200, 6, Poses.STILL, Mana.WARD, QuietOne::stillness));
 		MOVES.add(new Def("silent", 40.0F, 24000, 8, Poses.SILENT, Mana.HARM, QuietOne::silentEnd));
 		MOVES.add(SpiritExecutions.move("execute_quiet", Spirits.QUIET));
+		MOVES.add(new InBalm(Spirits.QUIET));
 	}
 
 	QuietOne() {
