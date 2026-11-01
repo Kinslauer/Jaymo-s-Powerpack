@@ -4770,3 +4770,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.25, seeing an Ultimate no longer crashes the game:** Andy: "crash just then". `UltimateSpikes` put the `hat` part at
   the model's root, but 26.3's `HumanoidModel` looks for it inside `head`, so the first Ultimate form with spikes drawn on a
   client threw "Can't find part hat" and crashed that client. It's in the head now.
+
+- **0.19.26, Arsenal can pull a handgun from the future:** Andy: "give arsenal a small chance to pull handguns from the future
+  with only one magazine", then "1 in 600". `ArsenalFutureGun`: 1 in 600 Reach pulls bring one of TaCZ's 12 modern pistols
+  (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
+  pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.

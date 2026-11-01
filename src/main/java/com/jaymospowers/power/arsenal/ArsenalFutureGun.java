@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.25) Andy: "give arsenal a small chance to pull handguns from the future with only one magazine."
+ * (0.19.26) Andy: "give arsenal a small chance to pull handguns from the future with only one magazine."
  * <p>
  * Now and then ({@link #CHANCE}) a Reach (not Rummage) reaches too far and comes back with one of TaCZ's modern
  * handguns from the future (a Glock, an M1911, a Desert Eagle...), loaded with one full magazine and nothing else: no

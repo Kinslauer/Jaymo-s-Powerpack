@@ -158,7 +158,7 @@ public final class FutureGuns {
 	}
 
 	/**
-	 * (0.19.25) A random modern handgun from the future with one full magazine in it (and no spare rounds), for the
+	 * (0.19.26) A random modern handgun from the future with one full magazine in it (and no spare rounds), for the
 	 * Arsenal's rift ({@code power/arsenal/ArsenalFutureGun}). Empty without TaCZ.
 	 */
 	public static ItemStack handgun(RandomSource random) {
