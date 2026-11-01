@@ -1981,20 +1981,43 @@ def skitter():
     rect(img, (10, 14, 14, 15), (20, 12, 10, 255))
     claws(img, (20, 14, 12, 255))
     chest_insignia(img, rim=(30, 20, 16, 255))
-    # extras: leg 8x1x1 at (0,64); abdomen 7x6x7 at (20,64)
-    leg = (0, 64, 8, 1, 1)
-    box(img, leg, hide, 0.12)
-    for name, (x0, y0, x1, y1) in faces(*leg).items():
-        for x in range(x0 + 2, x1, 3):
-            rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
-    belly = (20, 64, 7, 6, 7)
+    # (0.19.29) the spider body: thorax 6x6x6 at (0,64), head 8x8x8 at (24,64), abdomen 10x8x12 at (0,80), fang 1x2x1
+    # at (44,80), legs 16x2x2 at (0,100) (right) and (0,104) (left)
+    thorax = (0, 64, 6, 6, 6)
+    box(img, thorax, hide, 0.14)
+    head = (24, 64, 8, 8, 8)
+    box(img, head, hide, 0.14)
+    for name, b in faces(*head).items():
+        speckle(img, b, (34, 24, 20, 255), 6)
+    fx0, fy0, fx1, fy1 = faces(*head)["front"]
+    # two big red eyes, a row of small ones above, a pair below
+    rect(img, (fx0 + 2, fy0 + 3, fx0 + 3, fy0 + 5), (230, 30, 30, 255))
+    rect(img, (fx0 + 5, fy0 + 3, fx0 + 6, fy0 + 5), (230, 30, 30, 255))
+    for x in (fx0 + 1, fx0 + 3, fx0 + 4, fx0 + 6):
+        img.putpixel((x, fy0 + 1), (200, 24, 24, 255))
+    img.putpixel((fx0 + 1, fy0 + 5), (180, 20, 20, 255))
+    img.putpixel((fx0 + 6, fy0 + 5), (180, 20, 20, 255))
+    rect(img, (fx0 + 2, fy0 + 7, fx0 + 6, fy0 + 8), (20, 12, 10, 255))
+    box(img, (44, 80, 1, 2, 1), (40, 26, 22), 0.1)
+    for leg in ((0, 100, 16, 2, 2), (0, 104, 16, 2, 2)):
+        box(img, leg, hide, 0.12)
+        for name, (x0, y0, x1, y1) in faces(*leg).items():
+            if name in ("top", "bottom"):
+                continue
+            # banded, the joints paler
+            for x in range(x0 + 3, x1, 5):
+                rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
+    belly = (0, 80, 10, 8, 12)
     box(img, belly, (48, 36, 30), 0.14)
     for name, b in faces(*belly).items():
-        speckle(img, b, (28, 20, 16, 255), 8)
-    bx0, by0, bx1, by1 = faces(*belly)["top"]
+        speckle(img, b, (28, 20, 16, 255), 10)
+    # the insignia on the abdomen's back (where the band's plate lights), a red hourglass underneath
+    tx0, ty0, tx1, ty1 = faces(*belly)["top"]
+    insignia(img, (tx0 + tx1) // 2, ty0 + 3, rim=(30, 20, 16, 255))
+    bx0, by0, bx1, by1 = faces(*belly)["bottom"]
     cx = (bx0 + bx1) // 2
     for i, w in enumerate((3, 1, 3)):
-        rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
+        rect(img, (cx - w // 2, by0 + 4 + i, cx - w // 2 + w, by0 + 5 + i), (190, 40, 30, 255))
     clear_hat(img)
     save(img, "entity/xenoform_skitter.png")
 
@@ -2107,6 +2130,11 @@ def fuse():
     rect(img, (10, 13, 11, 16), (16, 20, 16, 255))
     rect(img, (13, 13, 14, 16), (16, 20, 16, 255))
     claws(img, (40, 70, 36, 255))
+    # (0.19.29) four stubby legs use the top 6 rows of the leg skin: dark feet at their bottom
+    for part in LEGS:
+        for nm, (x0, y0, x1, y1) in faces(part[0], part[1], 4, 6, 4).items():
+            if nm in ("front", "back", "left", "right"):
+                rect(img, (x0, y1 - 1, x1, y1), (40, 70, 36, 255))
     chest_insignia(img, rim=(30, 60, 26, 255))
     clear_hat(img)
     save(img, "entity/xenoform_fuse.png")
@@ -2150,10 +2178,21 @@ def billow():
     rect(img, (13, 11, 15, 13), (60, 70, 90, 255))
     rect(img, (11, 14, 13, 15), (150, 160, 180, 255))
     chest_insignia(img, rim=(150, 160, 180, 255))
-    # extras: body puff 12x8x8 at (0,64); head cap 10x6x10 at (0,82)
-    soft = {"top": 1.05, "bottom": 0.7, "right": 0.9, "left": 0.9, "front": 0.98, "back": 0.86}
-    box(img, (0, 64, 12, 8, 8), white, 0.05, light=soft)
-    box(img, (0, 82, 10, 6, 10), white, 0.05, light=soft)
+    # (0.19.29) the cloud: mass 18x7x14 at (0,64), big puffs 10x8x10 at (0,86), small puffs 8x6x8 at (0,104)
+    soft = {"top": 1.05, "bottom": 0.66, "right": 0.9, "left": 0.9, "front": 0.98, "back": 0.86}
+    for part in ((0, 64, 18, 7, 14), (0, 86, 10, 8, 10), (0, 104, 8, 6, 8)):
+        box(img, part, white, 0.05, light=soft)
+        for nm, (x0, y0, x1, y1) in faces(*part).items():
+            if nm in ("front", "back", "left", "right"):
+                # greyer toward the bottom, like a real cloud's belly
+                for y in range(y0 + (y1 - y0) // 2, y1):
+                    t = (y - y0) / max(1, y1 - y0)
+                    for x in range(x0, x1):
+                        r, g, b_, a_ = img.getpixel((x, y))
+                        k = 1.0 - (t - 0.5) * 0.35
+                        img.putpixel((x, y), (int(r * k), int(g * k), int(b_ * k * 1.02) if b_ * k * 1.02 < 255 else 255, 255))
+    mx0, my0, mx1, my1 = faces(0, 64, 18, 7, 14)["front"]
+    insignia(img, (mx0 + mx1) // 2, my0 + 1, small=True, rim=(150, 160, 180, 255))
     clear_hat(img)
     save(img, "entity/xenoform_billow.png")
 

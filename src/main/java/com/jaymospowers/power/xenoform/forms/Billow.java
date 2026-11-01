@@ -31,7 +31,10 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.18.117, Scan F) Billow, the cloud: a big soft body of white cloud, greyer underneath, with a calm round face. 40
  * health, fists of 2, slow. It floats: jump to rise, sneak to sink, and otherwise it hangs where it is; falls never
- * hurt it. Up to {@link #SEATS} friends can ride on its back (right-click it; sneak to get off), sat as on a happy
+ * hurt it. (0.19.29) It's a real cloud now, not a man of cloud, and works like the Smoke power's wholly-smoke: low and
+ * loose (the swimming pose's box, a block high), it seeps through doors, fences, bars, panes and trapdoors, shots fly
+ * through it and creatures pass through it ({@link #cloud}, {@code BillowPoseMixin} and the rest); blows still land.
+ * It sheds wisps as it drifts. Up to {@link #SEATS} friends can ride on its back (right-click it; sneak to get off), sat as on a happy
  * ghast ({@code BillowSeatsMixin}). Scanned from a happy ghast, or the Aether's aerwhale ({@code XenoDna}).
  * <ul>
  * <li>R, Downpour: rain falls round you for {@link #RAIN_TICKS} ticks, putting out fire on blocks and creatures.</li>
@@ -52,6 +55,9 @@ public final class Billow extends XenoForm {
 	public static final int GUST_COOLDOWN = 60;
 	public static final int FOG_TICKS = 200, FOG_COOLDOWN = 500;
 	public static final double FOG_RADIUS = 8.0;
+	/** (0.19.29) Wisps shed as it drifts: one every this many ticks standing, and more the faster it goes. */
+	public static final int WISP_TICKS = 6;
+	public static final double WISP_SPEED = 0.08;
 
 	public Billow() {
 		super("billow", 1.6F, 40.0F, 2.0, -0.03, 0.5, 0.0, Items.GHAST_TEAR, 0xE8F0F8);
@@ -67,6 +73,11 @@ public final class Billow extends XenoForm {
 			}
 			return InteractionResult.PASS;
 		});
+	}
+
+	/** (0.19.29) Whether {@code player} is Billow, a cloud (both sides). */
+	public static boolean cloud(Player player) {
+		return "billow".equals(player.getAttached(XenoformState.FORM));
 	}
 
 	@Override
@@ -160,8 +171,13 @@ public final class Billow extends XenoForm {
 			player.setDeltaMovement(m.x, m.y + (want - m.y) * DRIFT_EASE, m.z);
 			player.syncVelocity = true;
 		}
-		if (player.tickCount % 6 == 0) {
-			level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + player.getBbHeight() * 0.4, player.getZ(), 1, 0.6, 0.4, 0.6, 0.0);
+		// wisps come off it as it drifts, more the faster it goes, trailing behind
+		Vec3 moved = player.getDeltaMovement();
+		double pace = moved.horizontalDistance();
+		if (player.tickCount % WISP_TICKS == 0 || pace > WISP_SPEED && player.tickCount % 2 == 0) {
+			double w = player.getBbWidth() * 0.9;
+			level.sendParticles(ParticleTypes.CLOUD, player.getX() - moved.x * 3.0, player.getY() + player.getBbHeight() * 0.5, player.getZ() - moved.z * 3.0,
+				pace > WISP_SPEED ? 3 : 1, w, player.getBbHeight() * 0.4, w, 0.01);
 		}
 		for (Entity rider : player.getPassengers()) {
 			if (rider instanceof LivingEntity living) {

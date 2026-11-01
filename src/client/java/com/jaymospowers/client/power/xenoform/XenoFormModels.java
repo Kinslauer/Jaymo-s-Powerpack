@@ -888,34 +888,66 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.113, Scan E) Skitter: a round abdomen behind and two more jointless legs down each side that step as it walks. */
+	/**
+	 * (0.18.113, Scan E; 0.19.29 a spider) Skitter: no longer a man with extra legs but a spider, low to the ground: a
+	 * small thorax, a head with fangs that turns where it looks, a big round abdomen behind (the insignia on top), and
+	 * eight long legs. They step in a spider's alternating fours, each pair a quarter out of step with the next, lifting
+	 * as they reach; the body bobs and the abdomen sways as it scuttles, it crouches flat when sneaking, and a bite lunges
+	 * the head and rears the front legs. The humanoid parts stay (the first-person view and the poses use them) but are
+	 * hidden, and the body is laid on the abdomen so the insignia sits on its back.
+	 */
 	static final class Skitter extends FormModel {
-		private final ModelPart[] legs = new ModelPart[4];
+		// ---- tuning ----
+		/** The body's height off the ground (model y), how far it drops when sneaking, how much it bobs a step. */
+		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F, BOB = 0.8F;
+		/** How fast the legs step against the walk, how far they swing and lift. */
+		static final float GAIT = 0.6662F * 1.4F, SWING = 0.4F, LIFT = 0.45F;
+		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop. */
+		private static final float[] REST_YAW = {0.785F, 0.39F, -0.39F, -0.785F};
+		private static final float[] REST_DROOP = {0.785F, 0.58F, 0.58F, 0.785F};
+		/** Each pair's step phase (hind to front): the spider's alternating fours. */
+		private static final float[] PHASE = {0.0F, (float)Math.PI, (float)Math.PI * 0.5F, (float)Math.PI * 1.5F};
+
+		private final ModelPart thorax, spiderHead, abdomen;
+		/** Hind to front: 0-3 right, 4-7 left. */
+		private final ModelPart[] legs = new ModelPart[8];
 
 		Skitter() {
 			super(bake(mesh()), "skitter");
-			this.insigniaZ = -2.0F;
-			for (int i = 0; i < 4; i++) {
-				this.legs[i] = this.body.getChild("leg" + i);
+			ModelPart root = this.root();
+			this.thorax = root.getChild("thorax");
+			this.spiderHead = root.getChild("spider_head");
+			this.abdomen = root.getChild("abdomen");
+			for (int i = 0; i < 8; i++) {
+				this.legs[i] = root.getChild("leg" + i);
 			}
+			// the insignia on top of the abdomen (the body is laid face-up there, see setupAnim)
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -4.0F;
+			this.insigniaSize = 1.3F;
 		}
 
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
-			PartDefinition body = mesh.getRoot().getChild("body");
-			body.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(20, 64).addBox(-3.5F, -3.0F, 0.0F, 7.0F, 6.0F, 7.0F),
-				PartPose.offsetAndRotation(0.0F, 9.0F, 1.5F, 0.3F, 0.0F, 0.0F));
-			// legs 0 and 1 on its right, 2 and 3 on its left, the front pair higher
-			for (int i = 0; i < 4; i++) {
-				boolean left = i >= 2;
-				float y = (i % 2 == 0) ? 3.0F : 6.5F;
-				CubeListBuilder leg = CubeListBuilder.create().texOffs(0, 64);
-				if (left) {
-					leg.mirror().addBox(0.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
-				} else {
-					leg.addBox(-8.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
-				}
-				body.addOrReplaceChild("leg" + i, leg, PartPose.offsetAndRotation(left ? 3.5F : -3.5F, y, 0.0F, 0.0F, 0.0F, left ? 0.6F : -0.6F));
+			PartDefinition root = mesh.getRoot();
+			root.addOrReplaceChild("thorax", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+				PartPose.offset(0.0F, BODY_Y, 0.0F));
+			PartDefinition head = root.addOrReplaceChild("spider_head", CubeListBuilder.create().texOffs(24, 64).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F),
+				PartPose.offset(0.0F, BODY_Y, -3.0F));
+			head.addOrReplaceChild("right_fang", CubeListBuilder.create().texOffs(44, 80).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+				PartPose.offsetAndRotation(-1.5F, 3.5F, -7.0F, -0.3F, 0.0F, 0.15F));
+			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(44, 80).mirror().addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+				PartPose.offsetAndRotation(1.5F, 3.5F, -7.0F, -0.3F, 0.0F, -0.15F));
+			root.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(0, 80).addBox(-5.0F, -4.0F, -6.0F, 10.0F, 8.0F, 12.0F),
+				PartPose.offset(0.0F, BODY_Y - 1.0F, 9.0F));
+			// hind to front along the thorax, right side then left
+			for (int i = 0; i < 8; i++) {
+				boolean left = i >= 4;
+				float z = 2.0F - (i % 4);
+				CubeListBuilder leg = left
+					? CubeListBuilder.create().texOffs(0, 104).mirror().addBox(-1.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F)
+					: CubeListBuilder.create().texOffs(0, 100).addBox(-15.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
+				root.addOrReplaceChild("leg" + i, leg, PartPose.offset(left ? 4.0F : -4.0F, BODY_Y, z));
 			}
 			return mesh;
 		}
@@ -923,15 +955,49 @@ public final class XenoFormModels {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float walk = state.walkAnimationPos * 0.9F;
-			float amount = state.walkAnimationSpeed;
-			for (int i = 0; i < 4; i++) {
-				boolean left = i >= 2;
-				float spread = (i % 2 == 0) ? 0.45F : -0.45F;
-				float step = Mth.cos(walk + i * (float)Math.PI * 0.5F) * 0.4F * amount;
-				this.legs[i].yRot = (left ? -spread : spread) + step;
-				this.legs[i].zRot = (left ? 0.6F : -0.6F) + Mth.abs(Mth.sin(walk + i)) * 0.25F * amount * (left ? -1.0F : 1.0F);
+			// the man's shape is hidden; the body (unseen) lies face-up on the abdomen, carrying the insignia there
+			this.head.visible = this.hat.visible = this.body.visible = false;
+			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			float walk = state.walkAnimationPos * GAIT;
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			float drop = state.isCrouching ? CROUCH_DROP : 0.0F;
+			float bob = Mth.abs(Mth.sin(walk)) * BOB * speed;
+			float y = BODY_Y + drop - bob;
+			// a bite: the head lunges and the fangs open, the front legs rear
+			float bite = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			this.thorax.y = y;
+			this.spiderHead.y = y;
+			this.spiderHead.z = -3.0F - bite * 2.0F;
+			this.spiderHead.yRot = state.yRot * Mth.DEG_TO_RAD;
+			this.spiderHead.xRot = state.xRot * Mth.DEG_TO_RAD - bite * 0.3F;
+			this.abdomen.y = y - 1.0F + Mth.sin(walk + 0.8F) * 0.4F * speed;
+			this.abdomen.yRot = Mth.sin(walk * 0.5F) * 0.12F * speed;
+			this.abdomen.xRot = -0.1F + Mth.sin(state.ageInTicks * 0.1F) * 0.03F;
+			float breathe = 1.0F + Mth.sin(state.ageInTicks * 0.1F) * 0.02F;
+			this.abdomen.xScale = this.abdomen.yScale = this.abdomen.zScale = breathe;
+			for (int i = 0; i < 8; i++) {
+				int pair = i % 4;
+				float side = i >= 4 ? -1.0F : 1.0F;
+				ModelPart leg = this.legs[i];
+				leg.y = y;
+				// the right side's step; the left's runs half a cycle out (alternating fours), mirrored
+				float phase = PHASE[pair] + (i >= 4 ? (float)Math.PI : 0.0F);
+				float swing = -Mth.cos(walk * 2.0F + phase) * SWING * speed;
+				float lift = Mth.abs(Mth.sin(walk + phase)) * LIFT * speed;
+				// idle: the odd leg twitches
+				float twitch = Mth.sin(state.ageInTicks * 0.13F + i * 1.9F) * 0.03F;
+				leg.yRot = side * (REST_YAW[pair] + swing + twitch);
+				leg.zRot = side * (-REST_DROOP[pair] + lift + (drop > 0.0F ? 0.35F : 0.0F));
+				if (pair == 3) {
+					// the front pair rears on a bite
+					leg.zRot += side * bite * 0.6F;
+				}
 			}
+			this.body.x = 0.0F;
+			this.body.y = this.abdomen.y;
+			this.body.z = 9.0F;
+			this.body.xRot = -(float)Math.PI * 0.5F;
+			this.body.yRot = this.body.zRot = 0.0F;
 		}
 	}
 
@@ -987,11 +1053,78 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.117, Scan F) Fuse: nothing but the body; its face does the rest. */
+	/**
+	 * (0.18.117, Scan F; 0.19.29 four-legged) Fuse: a creeper's build, no arms: a blocky head on a tall narrow body
+	 * on four stubby legs. It moves its own way: quick shuffling steps, diagonal legs together, with a side-to-side
+	 * waddle and a bounce, the head nodding a beat behind; when it punches (every punch pops) it swells up for a moment.
+	 */
 	static final class Fuse extends FormModel {
+		// ---- tuning ----
+		/** How fast its little legs shuffle against the walk, and how far they swing. */
+		static final float SHUFFLE = 0.6662F * 1.6F, STEP = 1.2F;
+		/** The waddle (roll), the bounce (pixels) and the head's nod. */
+		static final float WADDLE = 0.12F, BOUNCE = 0.7F, NOD = 0.1F;
+		/** How much it swells on a punch. */
+		static final float PUNCH_SWELL = 0.18F;
+
+		private final ModelPart hindRight, hindLeft;
+
 		Fuse() {
-			super(bake(HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F)), "fuse");
+			super(bake(mesh()), "fuse");
 			this.insigniaZ = -2.0F;
+			this.hindRight = this.root().getChild("hind_right_leg");
+			this.hindLeft = this.root().getChild("hind_left_leg");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F),
+				PartPose.offset(0.0F, 6.0F, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F),
+				PartPose.offset(0.0F, 6.0F, 0.0F));
+			// the front legs are the man's legs (so the pose code still finds them), the hind pair new
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F),
+				PartPose.offset(-2.0F, 18.0F, -4.0F));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F),
+				PartPose.offset(2.0F, 18.0F, -4.0F));
+			root.addOrReplaceChild("hind_right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F),
+				PartPose.offset(-2.0F, 18.0F, 4.0F));
+			root.addOrReplaceChild("hind_left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F),
+				PartPose.offset(2.0F, 18.0F, 4.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.hat.visible = this.rightArm.visible = this.leftArm.visible = false;
+			for (ModelPart part : new ModelPart[] {this.head, this.body, this.rightLeg, this.leftLeg, this.hindRight, this.hindLeft}) {
+				part.resetPose();
+			}
+			float walk = state.walkAnimationPos * SHUFFLE;
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			float step = Mth.cos(walk) * STEP * speed;
+			// diagonal pairs together: front right with hind left
+			this.rightLeg.xRot = step;
+			this.hindLeft.xRot = step;
+			this.leftLeg.xRot = -step;
+			this.hindRight.xRot = -step;
+			float waddle = Mth.sin(walk) * WADDLE * speed;
+			float bounce = Mth.abs(Mth.cos(walk)) * BOUNCE * speed;
+			float crouch = state.isCrouching ? 2.0F : 0.0F;
+			this.body.y = 6.0F - bounce + crouch;
+			this.body.zRot = waddle;
+			this.head.y = 6.0F - bounce + crouch;
+			this.head.zRot = waddle * 1.4F;
+			this.head.yRot = state.yRot * Mth.DEG_TO_RAD;
+			// the nod comes a beat after the step
+			this.head.xRot = state.xRot * Mth.DEG_TO_RAD + Mth.sin(walk * 2.0F - 0.8F) * NOD * speed;
+			float swell = 1.0F + Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI) * PUNCH_SWELL;
+			for (ModelPart part : new ModelPart[] {this.head, this.body}) {
+				part.xScale = part.yScale = part.zScale = swell;
+			}
 		}
 	}
 
@@ -1023,33 +1156,84 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.117, Scan F) Billow: big soft puffs of cloud round its body and head that drift as it breathes. */
+	/**
+	 * (0.18.117, Scan F; 0.19.29 a real cloud) Billow: a cloud, not a man: a broad soft mass low over the ground with
+	 * its calm face in a puff at the front (it turns where it looks), and heaps of smaller puffs churning on top and
+	 * swelling out of its sides, each breathing and drifting on its own. Moving, it leans into the way it goes and its
+	 * top trails behind. Its box is the swimming pose's (it seeps through gaps like smoke: {@code BillowCloudMixins}),
+	 * and its render state is turned back upright ({@code XenoformClient.extract}). The humanoid parts stay, hidden:
+	 * the body is the mass and the head the face puff.
+	 */
 	static final class Billow extends FormModel {
-		private final ModelPart puff, cap;
+		// ---- tuning ----
+		/** How far the puffs bob and breathe, how fast they churn, and how far the top trails when it moves. */
+		static final float BOB = 0.7F, BREATHE = 0.07F, CHURN = 0.06F, TRAIL = 2.0F, LEAN = 0.12F;
+		/** The puffs: where each sits (x, y, z) and which box it is (0 big, 1 small). */
+		private static final float[][] PUFFS = {
+			{-5.5F, 12.5F, 2.0F, 0}, {5.5F, 12.0F, 3.0F, 0}, {0.0F, 11.5F, 6.0F, 1}, {-10.0F, 18.0F, 0.0F, 1}, {10.0F, 18.5F, -1.0F, 1},
+			{0.0F, 13.0F, -2.0F, 1}};
+
+		private final ModelPart[] puffs = new ModelPart[PUFFS.length];
 
 		Billow() {
 			super(bake(mesh()), "billow");
-			this.insigniaZ = -4.2F;
-			this.puff = this.body.getChild("puff");
-			this.cap = this.head.getChild("cap");
+			for (int i = 0; i < PUFFS.length; i++) {
+				this.puffs[i] = this.root().getChild("puff" + i);
+			}
+			// on the front of the mass, under the face
+			this.insigniaY = 1.0F;
+			this.insigniaZ = -9.0F;
+			this.insigniaSize = 0.9F;
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("body").addOrReplaceChild("puff", CubeListBuilder.create().texOffs(0, 64).addBox(-6.0F, 0.0F, -4.0F, 12.0F, 8.0F, 8.0F,
-				new CubeDeformation(0.4F)), PartPose.offset(0.0F, 2.0F, 0.0F));
-			root.getChild("head").addOrReplaceChild("cap", CubeListBuilder.create().texOffs(0, 82).addBox(-5.0F, -3.0F, -5.0F, 10.0F, 6.0F, 10.0F),
-				PartPose.offset(0.0F, -8.0F, 0.0F));
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F,
+				new CubeDeformation(1.5F)), PartPose.offset(0.0F, 15.0F, -4.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 64).addBox(-9.0F, -3.5F, -7.0F, 18.0F, 7.0F, 14.0F,
+				new CubeDeformation(2.0F)), PartPose.offset(0.0F, 18.0F, 0.0F));
+			for (int i = 0; i < PUFFS.length; i++) {
+				float[] p = PUFFS[i];
+				CubeListBuilder puff = p[3] == 0
+					? CubeListBuilder.create().texOffs(0, 86).addBox(-5.0F, -4.0F, -5.0F, 10.0F, 8.0F, 10.0F, new CubeDeformation(1.0F))
+					: CubeListBuilder.create().texOffs(0, 104).addBox(-4.0F, -3.0F, -4.0F, 8.0F, 6.0F, 8.0F, new CubeDeformation(1.0F));
+				root.addOrReplaceChild("puff" + i, puff, PartPose.offset(p[0], p[1], p[2]));
+			}
 			return mesh;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float breath = Mth.sin(state.ageInTicks * 0.08F);
-			this.puff.y = 2.0F + breath * 0.5F;
-			this.cap.y = -8.0F - breath * 0.4F;
+			this.hat.visible = this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			this.head.resetPose();
+			this.body.resetPose();
+			float age = state.ageInTicks;
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			// it leans into the way it goes, the whole mass rolling slowly as it hangs
+			this.body.xRot = speed * LEAN;
+			this.body.zRot = Mth.sin(age * 0.03F) * 0.03F;
+			this.body.y = 18.0F + Mth.sin(age * 0.05F) * 0.4F;
+			float big = 1.0F + Mth.sin(age * 0.04F) * BREATHE * 0.5F;
+			this.body.xScale = this.body.zScale = big;
+			this.head.y = 15.0F + Mth.sin(age * 0.05F + 0.6F) * 0.5F;
+			this.head.yRot = state.yRot * Mth.DEG_TO_RAD;
+			this.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F;
+			for (int i = 0; i < PUFFS.length; i++) {
+				float[] p = PUFFS[i];
+				ModelPart puff = this.puffs[i];
+				float t = age * CHURN + i * 1.7F;
+				// the top ones trail behind as it moves
+				float trail = p[1] < 15.0F ? speed * TRAIL : speed * TRAIL * 0.4F;
+				puff.x = p[0] + Mth.sin(t * 0.7F) * 0.5F;
+				puff.y = p[1] + Mth.sin(t) * BOB;
+				puff.z = p[2] + trail + Mth.cos(t * 0.8F) * 0.4F;
+				puff.yRot = Mth.sin(t * 0.3F) * 0.25F;
+				float swell = 1.0F + Mth.sin(t * 1.3F) * BREATHE;
+				puff.xScale = puff.yScale = puff.zScale = swell;
+			}
 		}
 	}
 

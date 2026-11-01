@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class BillowSeatsMixin {
 	/** Seat offsets across its back (sideways, forward), in blocks at Billow's size. */
 	private static final double[][] SEATS = {{-0.55, 0.15}, {0.55, 0.15}, {0.0, -0.45}};
+	/** (0.19.29) The top of the cloud, in blocks at size 1 (its box is the low swimming one; the cloud is drawn taller). */
+	private static final double SEAT_HEIGHT = 0.7;
 
 	@Inject(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V", at = @At("TAIL"))
 	private void jaymospowers$billowSeats(Entity passenger, Entity.MoveFunction move, CallbackInfo ci) {
@@ -31,6 +33,6 @@ abstract class BillowSeatsMixin {
 		}
 		double scale = cloud.getScale();
 		Vec3 offset = new Vec3(SEATS[seat][0] * scale, 0.0, SEATS[seat][1] * scale).yRot(-cloud.yBodyRot * ((float)Math.PI / 180.0F));
-		move.accept(passenger, cloud.getX() + offset.x, cloud.getY() + cloud.getBbHeight() * 0.8, cloud.getZ() + offset.z);
+		move.accept(passenger, cloud.getX() + offset.x, cloud.getY() + scale * SEAT_HEIGHT, cloud.getZ() + offset.z);
 	}
 }

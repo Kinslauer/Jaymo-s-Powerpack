@@ -4776,8 +4776,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`FutureGuns.handgun`) with one full magazine and no spare rounds, as an ordinary summon that dissolves. Never instead of a
   pinned weapon, a stash relic or the Void Armory flintlocks; not on Rummage; nothing without TaCZ.
 - **0.19.27, Kingdoms 0.7.463:** the infirmary cot's loot table loads, so the server starts again.
-- **0.19.28, Put the band away:** Andy: "right clicking while scrolling the watch should let you put it away". Right
+- **0.19.28, Put the band away; aliens that aren't men:** Andy: "right clicking while scrolling the watch should let you put it away". Right
   click while holding Z drops the wrist, and letting Z go then does nothing (no slam, quick change or turning back); the
   click uses nothing in hand (`XenoNet.PutAway`). Andy: "there should be mechanical sound effects for every scroll": each
   turn of the dial now clicks like a ratchet (a lever's click, higher turning on, lower turning back, over a relay's tick),
-  and a stuck dial (one alien) knocks. Compile-checked; not seen in game.
+  and a stuck dial (one alien) knocks. Andy: "Fuse and skitter should move uniquely, the aliens should not all be
+  humanoid, in fact it should be rare, skitter should move like a spider, and billow should be a real cloud, functioning
+  similar to smoke". Skitter is now a spider (low, eight legs in a spider's alternating fours, the body bobbing, a
+  biting lunge, flat when sneaking, the insignia on its abdomen). Fuse is a creeper's build on four stubby legs that
+  shuffle in diagonal pairs with a waddle and a bounce, swelling on each punch. Billow is a cloud (a soft mass, a face
+  puff that turns, puffs churning on top and trailing as it moves) and works like the Smoke power's wholly-smoke: a
+  block high, it seeps through doors, fences, bars and panes (not what it's resting on), shots fly through it and
+  creatures pass through; riders sit on its top. The rest are planned in `docs/AlienBodies-Plan.md` (five more
+  patches; six aliens stay humanoid). Compile-checked; not seen in game.
