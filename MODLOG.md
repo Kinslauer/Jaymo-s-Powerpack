@@ -4902,3 +4902,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.51, crouch into low gaps:** The grab that pulls you up onto a block and in on your belly under a one-high gap
   now comes from the crouch stance (the wheel's low crouch), not from pressing Sneak: crouched, walk into the block, drop
   into the crouch facing it, or press forward from the knee. Plain Sneak stays vanilla. Not compile-checked; not played.
+- **0.19.52, Kitchen jar:** `libs/` now holds Jaymo's Kitchen 0.5.46 (built from `kitchen/`) in place of 0.5.33.1, which
+  predated `corpse/Hauling` and broke the root build (`KitchenCompat.brawn`). The pack ships the new Kitchen.
+  Compile-checked; not played.
