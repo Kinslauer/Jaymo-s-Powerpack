@@ -4691,6 +4691,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   with your head, so you look down your own body from where your head lies (`client/ProneTransition`,
   `CrawlPose.supineEyeShift`, `ProneCameraMixin`). Lying prone from a slide with Sneak still held, a turn of the wheel
   down now locks you there, so letting go of Sneak no longer stands you up (`StanceScroll`). Compile-checked; not seen in game.
+
 - **0.19.15, Kingdoms 0.7.456:** a tree felled into another tree no longer stands back up: it glances off to a clear
   side and falls on, or, boxed in, leans a moment and breaks apart.
 
@@ -4701,3 +4702,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   right-click stepping back on the costume and suit editor buttons work again (`InputConstants.MOUSE_BUTTON_LEFT/RIGHT`).
   The Bio-built's hunch is no longer laid on twice on MCA's bodies (head sunk into the chest, arms pushed out), on the
   story's start page and in the world. Seen working in a test game.
+
+- **0.19.20, Kingdoms 0.7.459, executed by your enemies:** lie downed where a hostile can see you (5 s after you fall) and the nearest one
+  within 16 blocks leaves its fight, walks over and finishes you, filmed for you: black bars, a low tilted shot of it
+  standing over you raising its weapon, then the blow and cuts round the killer over your body before the death screen
+  (players nearby see the bars). Its move depends on what it is and holds: an axe takes your head (vindicators), a blade
+  runs you through, a bow or crossbow fires point blank, an evoker's fangs close on you, a witch breaks a potion on you,
+  zombies and spiders feed, a ravager or the warden crushes you, empty hands stamp. Hitting the executioner before the
+  blow breaks it off (it turns on whoever hit it and waits 15 s before trying again); so does a revive, rising, being
+  carried off or crawling away (it follows). Not only monsters: anyone fighting you (they have you as their target, or
+  you struck them in the last 20 s) can do it too: bandits, barbarians, orcs, pirates, wolves. A realm's guards and a village's
+  golems don't: they arrest you as before, unless the guard is hotheaded or spiteful (Kingdoms).
+  No creepers, fliers, slimes or bosses. Kingdoms' captains still get their
+  own scene after the kill (`core/wounds/MobExecutions`, tuning at the top). Compile-checked; not seen in game.

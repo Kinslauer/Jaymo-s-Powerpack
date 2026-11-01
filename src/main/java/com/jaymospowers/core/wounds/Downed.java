@@ -757,6 +757,17 @@ public final class Downed {
 		finish(level, entity);
 	}
 
+	/**
+	 * (0.19.20) A hostile's execution of a downed player ({@link MobExecutions}): their death now, credited to {@code by}.
+	 */
+	public static void execute(ServerLevel level, LivingEntity entity, Mob by) {
+		if (!entity.isAlive()) {
+			return;
+		}
+		FELLED_BY.put(entity, level.damageSources().mobAttack(by));
+		finish(level, entity);
+	}
+
 	/** A player hit a downed one: one more wound; the {@link #MAX_WOUNDS}th is its death. */
 	private static void wound(ServerLevel level, LivingEntity entity, DamageSource source) {
 		Long wounds = entity.getAttached(WOUNDS);
