@@ -81,6 +81,8 @@ public final class Bombardment {
 		final Crater crater;
 		final List<int[]> columns;
 		int column, y = Integer.MIN_VALUE, wait, removed;
+		/** (0.7.484) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
+		boolean kept;
 
 		Job(ServerLevel level, BlockPos centre, Crater crater, List<int[]> columns) {
 			this.level = level;
@@ -201,7 +203,13 @@ public final class Bombardment {
 					if (breaks(level, pos, state, c)) {
 						remove(level, pos, state, c, job.removed++);
 						removed++;
+					} else if (dy < 0 && !state.isAir() && !(state.getBlock() instanceof LiquidBlock)) {
+						// (0.7.484) a kept floor or stone below the centre shields what lies under it: no stripping beneath
+						job.kept = true;
 					}
+				} else if (job.kept) {
+					done = true;
+					break;
 				} else if (c.stripDown() && dy < 0 && flat <= c.radius() * STRIP_SHARE) {
 					// below the floor: loose soil goes on down to the stone, and there it stops
 					if (state.isAir() || state.getBlock() instanceof LiquidBlock) {
@@ -219,6 +227,7 @@ public final class Bombardment {
 			if (done || job.y < bottom) {
 				job.column++;
 				job.y = Integer.MIN_VALUE;
+				job.kept = false;
 			}
 		}
 		return new int[] {removed, looked};
