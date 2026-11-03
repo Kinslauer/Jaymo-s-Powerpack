@@ -131,11 +131,9 @@ import org.jspecify.annotations.Nullable;
  * is {@code ZFighterExecutions}'; the hold, roots and poses are the same as every finisher's.
  * <p>
  * (0.19.57) Andy: "executions need a button, or a better indicator. it should be 3 bars that fill ... maybe we try a double
- * left click as the override? im trying to stay away from buttons", then "the execution should be activated by a double
- * click and HOLD, no sneak, and the execution can be cancelled if you let go of the mouse early". The hold's the same
- * 1.5 s, begun by the second press of a double click on them and held ({@code FinisherClient}), drawn as {@link #HOLD_BARS}
- * bars under the crosshair ({@link Charge}) in place of the action-bar dots; the third filled, it plays; let go before,
- * and it's off. No sneak, except for Quiet Word's choke from behind.
+ * left click as the override? im trying to stay away from buttons". The hold's the same 1.5 s, drawn as {@link #HOLD_BARS}
+ * bars under the crosshair ({@link Charge}) in place of the action-bar dots; the third filled, it plays. Sneak + a double
+ * click on them fills it at once ({@link Rush}): the same checks, only no wait, and the kill (questioning still takes the hold).
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -350,6 +348,8 @@ public final class Finishers {
 		long start;
 		/** (0.18.97) When the choice (question or kill) was put to them, or -1 while the hold still fills. */
 		long choosing = -1L;
+		/** (0.19.57) A double click filled it at once: it stands though attack is let go, and ends if it can't go on. */
+		boolean rushed;
 
 		Hold(LivingEntity body, long start) {
 			this.body = body;
@@ -364,6 +364,17 @@ public final class Finishers {
 
 		@Override
 		public Type<Execute> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.19.57) Client → server: attack was double-clicked on this entity (its id): fill the hold at once. */
+	public record Rush(int target) implements CustomPacketPayload {
+		public static final Type<Rush> TYPE = new Type<>(JaymosPowers.id("finisher_rush"));
+		public static final StreamCodec<ByteBuf, Rush> CODEC = ByteBufCodecs.VAR_INT.map(Rush::new, Rush::target);
+
+		@Override
+		public Type<Rush> type() {
 			return TYPE;
 		}
 	}
@@ -441,7 +452,9 @@ public final class Finishers {
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
-		// (0.19.57) the three bars
+		// (0.19.57) the three bars, and the double click that fills them at once
+		PayloadTypeRegistry.serverboundPlay().register(Rush.TYPE, Rush.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Rush.TYPE, (payload, ctx) -> rushed(ctx.player(), payload.target()));
 		PayloadTypeRegistry.clientboundPlay().register(Charge.TYPE, Charge.CODEC);
 		// (0.18.97) question or kill
 		PayloadTypeRegistry.clientboundPlay().register(Choose.TYPE, Choose.CODEC);
@@ -769,11 +782,35 @@ public final class Finishers {
 		if (held != null && held.body.getId() == id) {
 			return;
 		}
-
+		if (id < 0 && held != null && held.rushed) {
+			// (0.19.57) the double click's second press may already be let go: the rushed hold goes on regardless
+			return;
+		}
 		if (player.level().getEntity(id) instanceof LivingEntity body && body != player) {
 			HOLDING.put(player.getUUID(), new Hold(body, player.level().getGameTime()));
 		} else {
 			HOLDING.remove(player.getUUID());
+		}
+	}
+
+	/**
+	 * (0.19.57) Andy: "maybe we try a double left click as the override". Sneak + a double click on someone you could finish
+	 * fills the hold at once: the same checks as a full hold (in reach, sneaking, at the head for the neck snap, the choice
+	 * to question), only no wait.
+	 */
+	private static void rushed(ServerPlayer player, int id) {
+		if (id < 0 || player.isSpectator() || Downed.isDowned(player) || busy(player)
+			|| !(player.level().getEntity(id) instanceof LivingEntity body) || body == player) {
+			return;
+		}
+		Hold held = HOLDING.get(player.getUUID());
+		if (held == null || held.body != body) {
+			held = new Hold(body, 0L);
+			HOLDING.put(player.getUUID(), held);
+		}
+		if (held.choosing < 0L) {
+			held.start = player.level().getGameTime() - HOLD_TICKS;
+			held.rushed = true;
 		}
 	}
 
@@ -793,10 +830,13 @@ public final class Finishers {
 			long now = level.getGameTime();
 			// (0.18.97) Quiet Word: one on their feet who hasn't noticed you, taken from behind
 			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
-			// (0.19.57) Andy: "double click and HOLD, no sneak": the execution's hold needs no sneak; the choke, taken
-			// quietly from behind, still does
-			if (choke && !player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
+			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
+				if (hold.rushed) {
+					// ((0.19.57) a double click that came to nothing: no hold left to count)
+					it.remove();
+					continue;
+				}
 				hold.start = now;
 				continue;
 			}
@@ -817,7 +857,18 @@ public final class Finishers {
 			boolean bare = stack.isEmpty() && !suit && !fighter;
 			if (!suit && move(player, stack) == null) {
 				// (0.15.110) a torch or a loaf finishes nobody
+				if (hold.rushed) {
+					it.remove();
+					continue;
+				}
 				hold.start = now;
+				continue;
+			}
+			if (hold.rushed && bare && (com.jaymospowers.core.wounds.Malfunction.is(hold.body) || !atHead(player, hold.body))) {
+				// ((0.19.57) a double click in the wrong place: the reminder, and no hold left over)
+				it.remove();
+				player.sendOverlayMessage(Component.translatable(com.jaymospowers.core.wounds.Malfunction.is(hold.body)
+					? "message.jaymospowers.finisher.machine" : "message.jaymospowers.finisher.head", hold.body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
 			if (bare && com.jaymospowers.core.wounds.Malfunction.is(hold.body)) {
@@ -835,7 +886,8 @@ public final class Finishers {
 				continue;
 			}
 			long held = now - hold.start;
-			if (held >= HOLD_TICKS && hold.choosing < 0L && mayQuestion(player, hold.body)) {
+			// ((0.19.57) a double click is the kill: questioning takes the full hold, and the turn to choose)
+			if (held >= HOLD_TICKS && hold.choosing < 0L && !hold.rushed && mayQuestion(player, hold.body)) {
 				// (0.18.97) Andy: "holding right click for the execution now has you select either question or kill dragging
 				// either left or right": the hold's full; the client shows the choice and says which way you turned
 				hold.choosing = now;

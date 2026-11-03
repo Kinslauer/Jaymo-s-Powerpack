@@ -1,8 +1,0 @@
--proc:none
--implicit:none
--d
-/tmp/tmp.Hqxuu5IkAA
--Xmaxerrs
-2000
-src/main/java/com/jaymospowers/core/finisher/Finishers.java
-src/client/java/com/jaymospowers/client/finisher/FinisherClient.java
