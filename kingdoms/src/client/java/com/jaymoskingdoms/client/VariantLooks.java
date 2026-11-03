@@ -45,7 +45,9 @@ public final class VariantLooks {
 		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
 		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
 		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks
-		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
+		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F),
+		// (0.7.488) a weedfrond's drifting leaf (used by #879 but never declared, which broke the build)
+		LEAF_MOTE = new DustParticleOptions(0x7FB24A, 0.5F);
 
 	static {
 		// variant, eye colour (0: its heritage's), eyes, particle, every, when

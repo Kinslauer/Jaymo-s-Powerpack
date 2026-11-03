@@ -139,6 +139,12 @@ public final class Planner {
 		int size = size(f);
 		List<Blueprint.Entry> out = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
+		// (0.7.488) plans its people gave it come first ({@link Commissions})
+		for (Blueprint.Entry e : Commissions.next(server, f)) {
+			if (seen.add(e.id())) {
+				out.add(e);
+			}
+		}
 		Blueprint.Entry tavern = null;
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			// (0.5.11) the wall goes up as a whole, round everything, once the rest is built ({@link Enclosure})

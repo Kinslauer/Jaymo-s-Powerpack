@@ -8315,3 +8315,39 @@ and wild-horse stats sit under the crosshair, the awareness eye over it, the for
 belt, spirit line, seizure struggle and the Grue's line in the focus band over the action bar, the valor bar in the left
 dock, and the kin-sense compass (now on a plate, hidden under F3) and party list in the top-left rail under Xaero's
 minimap. Handshake and spirit-clash films and the story and travel curtains hide the zoned HUD.
+
+## 0.7.488: building from schematics
+- **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
+  v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
+  brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on
+  Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
+  26.3 names a palette entry `id`/`properties`; the formats (and tools writing .nbt themselves) still use
+  `Name`/`Properties`, which 26.3 reads as air, so entries are renamed after fixing.
+- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): put files in the game folder's
+  `schematics/` (Litematica's own folder; the screen's Open folder button opens it) and pick one on the mason's table's
+  screen. It goes up in 30 KB pieces (at most about 1.9 MB); the server reads it as NBT within a 64 MB quota and keeps it
+  as the uploader's design (if someone else has that name, it gets `_2`, `_3`...). No commands.
+- **Bigger designs**: up to 96 across, 128 high, 120,000 blocks. Builder crews still take only plot-sized ones
+  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" on the table's screen.
+- **Building plan and mason's table** (`MasonTable`): two paper and a charcoal make a blank plan;
+  the table's screen draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
+  its outline shows while held), then put it in a mason's table (paper, crafting table, stone bricks). The table lays
+  it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
+  in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
+  Laid blocks count as the plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
+  about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
+- **Build a laid plan by hand, like a ship's build kit** (`PlanSites`, client `PlanGhosts`): a laid plan stays
+  standing as see-through pale-blue ghost blocks that everyone within 128 blocks sees (nearest 6,000 within 48 drawn).
+  Place the right blocks yourself (any facing counts; dirt and grass stand in for each other) and each ghost goes as
+  it's filled. Standing in it shows `design: placed / needed blocks`. At 90% of its blocks it's built: ghosts gone,
+  a fanfare and a message. Laying the plan again moves it; drawing a new design takes it down; at most 3 per player.
+  Dev-client test: the Medieval House's ghost showed, half-built showed `704 / 1269`, and at 95% it was built.
+- **Mason's table screen** (`MasonNet`, client `MasonScreen`), opened by using the table: your schematic files on the
+  left, the world's designs on the right (size, author, whether crews can build it). Buttons: Draw on a blank plan,
+  Offer to this settlement, Save marked build (the area marked with a surveyor's rod, under a typed name), Take the
+  plan back, Try skipped blocks again. It shows the plan's progress, the block it waits for and the top materials
+  still needed; answers show at the bottom. The lists shrink to fit at large GUI scales. Sneak-use takes the plan back.
+- **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
+  can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
+  their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
+  the giver gets +40 reputation and a message.
