@@ -14,8 +14,7 @@ and art with the MIT notice; we write our own 26.3 code. Each race has one activ
 | Deep One | Deepborn | Tremorsense; sunlight |
 | Forge One | Emberborn | Forge Blessing; heavy in water |
 | Iron One, Sky One, Runic One | Stoneborn (variants) | Shield Wall / Mountain Leap / Rune of Warding |
-| Dryad | Verdant | Verdant Bloom; triple fire damage |
-| Nymph, Sea Serpen | Tideborn | Siren's Charm / Tidal Breath; bound to water |
+| Sea Serpen | Tideborn | Tidal Breath; landbound |
 | Fire/Terra/Volt Drake, Wind Wyrm | Dragonblood (variants) | breaths; matching weaknesses |
 | Volt Drake | Stormborn | storm speed; grounded and wet |
 | Demon | Powers' demon folk / Nether areas | Infernal Wrath; holy and water |
@@ -34,9 +33,11 @@ One active ability (a left hold, like Powers' `HeritageMoves`), one passive and 
 heritage card. Numbers are tuning constants.
 
 ## Andy's pick (2026-11-03)
-By family, races as variants: three new heritages, **Beastfolk** (Arachnid, Avian, Canine, Feline, Kitsune, Serpen),
-**Fae-touched** (Changeling, Sprite, Faerie) and **Hollow** (Zombie, Skeleton, Wraith, Reaper). Each race is a variant with
-its own ability, passive and weakness. Blood Elf becomes a Sylvan variant. Races we already have fold in as kits.
+By family, races as variants: two new heritages, **Beastfolk** (Arachnid, Avian, Canine, Feline, Kitsune, Serpen) and
+**Hollow** (Zombie, Skeleton, Wraith, Reaper). Each race is a variant with its own ability, passive and weakness.
+Andy (17:30): "Dryad and all the fae are kind of what i intended from sylvan, so wrap all them up into one." So **Sylvan**
+takes every Faeborne race (Dryad, Changeling, Sprite, Nymph, Faerie) as variants, alongside its elves (High, Moon, Blood).
+Races we already have fold in as kits.
 
 ## Checklist
 - [x] Andy picks the shape (by family, races as variants)
