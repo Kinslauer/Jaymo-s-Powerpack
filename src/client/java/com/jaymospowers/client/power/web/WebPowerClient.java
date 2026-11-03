@@ -210,6 +210,8 @@ public final class WebPowerClient implements PowerClient {
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(WebLineRenderer::tick);
+		// a line broke somewhere in sight: it leaves its spent halves behind (anyone sees them, power or not)
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.LineSnap.TYPE, (payload, context) -> WebSpentLines.snapped(payload));
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.SwingReject.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {
 				INSTANCE.swing.rejected(context.player(), payload.hand());

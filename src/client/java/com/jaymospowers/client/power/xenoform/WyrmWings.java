@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
  * be drawn like any other), the wings on a torso of their own.
  * Open in the air they beat, fold back at speed, flare when falling; on the ground they fold along its back.
  * <p>
- * (0.19.67) Wyrm is a four-legged dragon now: the wings' torso copies the dragon model's torso
+ * (0.19.74) Wyrm is a four-legged dragon now: the wings' torso copies the dragon model's torso
  * ({@link XenoFormModels.Wyrm#torso}: on the shoulders, level in flight and through Wind's cruise tilt, which it cancels),
  * and the wings root on its back behind the neck. Both torsos hang off the root, not the man's body, so the poses laid
  * over a man's body after it animates move neither.
@@ -45,7 +45,7 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 	 */
 	static final float FOLD_SCALE = 0.55F, FOLD_ROLL = 1.25F, FOLD_SWEEP = 1.45F, FOLD_TIP = 0.9F;
 	/**
-	 * (0.19.67) Folded: the tips tilt out off the flank this much (radians), and a landing rolls the wings and a turn
+	 * (0.19.74) Folded: the tips tilt out off the flank this much (radians), and a landing rolls the wings and a turn
 	 * swings them only this far, so the draped tips stay clear of the hind thighs and the torso's sides.
 	 */
 	static final float FOLD_TIP_TILT = 0.9F, FOLD_LAND_ROLL = 0.1F, FOLD_TURN_SWING = 0.08F;
@@ -153,7 +153,7 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 		this.rightWing.zRot = Mth.lerp(wrap, openZ, 0.0F);
 		this.leftWing.zRot = Mth.lerp(wrap, -openZ + 2.0F * bank, 0.0F);
 		// the tips: open, they flex behind the stroke (about the wing's length axis it's zRot); folded, they sweep
-		// forward again within the membrane's plane (yRot), (0.19.67) to the side away from the sail (-z), so the roll
+		// forward again within the membrane's plane (yRot), (0.19.74) to the side away from the sail (-z), so the roll
 		// hangs them down the flanks rather than flat over the sails
 		this.rightTip.zRot = Mth.lerp(wrap, openTip, FOLD_TIP_TILT);
 		this.leftTip.zRot = Mth.lerp(wrap, -openTip, -FOLD_TIP_TILT);

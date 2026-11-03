@@ -1466,7 +1466,7 @@ public final class XenoformPower implements Power {
 				case "tusk" -> act = live.rush > 0 ? "charge" : null;
 				case "gorger" -> act = live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
 				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
-				// (0.19.67) Keen hanging from a ceiling by its feet
+				// (0.19.74) Keen hanging from a ceiling by its feet
 				case "keen" -> act = live.perched ? "hang" : null;
 				default -> act = null;
 			}

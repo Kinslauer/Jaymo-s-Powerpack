@@ -377,7 +377,7 @@ public final class WebPower implements Power {
 			for (ServerPlayer caster : level.players()) {
 				State state = caster.getAttached(STATE);
 				if (state != null && state.tetherId == attacker.getId()) {
-					snapTether(caster, state);
+					snapTether(caster, state, null, true);
 				}
 			}
 		});
@@ -647,14 +647,34 @@ public final class WebPower implements Power {
 				continue;
 			}
 			boolean broken = false;
-			if (player.tickCount % WebHeft.BURN_EVERY == 0 && burnsThrough(player, hand)) {
+			// (0.19.70) how it broke, for the spent line it leaves (a plain let-go leaves none)
+			WebLine was = player.getAttached(line(hand));
+			Vec3 burnt = player.tickCount % WebHeft.BURN_EVERY == 0 ? burnsThrough(player, hand) : null;
+			if (burnt != null) {
 				broken = true;
+				if (WebSymbiote.suitShown(player)) {
+					// (0.19.71) a symbiote's cord is alive: it doesn't burn, it recoils into you
+					WebHeft.recoilFx(player.level(), burnt);
+				} else {
+					WebHeft.burnFx(player.level(), burnt);
+					if (was != null) {
+						WebNet.snap(player, hand, lineAnchor(player, was), burnt, WebNet.SNAPPED);
+					}
+				}
 			} else if (state.swingEntity[hand] >= 0) {
+				Entity on = player.level().getEntity(state.swingEntity[hand]);
 				broken = !tickEntityWeb(player, state, hand);
+				if (broken && was != null && on != null && on.isAlive() && !on.isRemoved()) {
+					// stretched past what it holds: it parts somewhere along the middle
+					Vec3 from = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0), to = on.getBoundingBox().getCenter();
+					WebNet.snap(player, hand, to, from.lerp(to, 0.35 + player.getRandom().nextDouble() * 0.3), WebNet.SNAPPED);
+				}
 			} else if (player.tickCount % 10 == 0) {
 				// the block it was stuck to is gone
-				WebLine line = player.getAttached(line(hand));
-				broken = line == null || !WebAnchors.nearSolid(player.level(), line.anchor());
+				broken = was == null || !WebAnchors.nearSolid(player.level(), was.anchor());
+				if (broken && was != null) {
+					WebNet.snap(player, hand, was.anchor(), was.anchor(), WebNet.FREED);
+				}
 			}
 			if (broken || hand == WebNet.OFF && !offHandFree(player)) {
 				dropSwing(player, state, hand);
@@ -786,8 +806,14 @@ public final class WebPower implements Power {
 		}
 	}
 
-	/** Someone punched one of this player's lines (the one ending near {@code end}): it breaks. */
-	static boolean cutLine(ServerPlayer player, Vec3 end) {
+	/** Where a line is stuck now (on a creature: its middle). */
+	private static Vec3 lineAnchor(ServerPlayer player, WebLine line) {
+		Entity on = line.entityId() >= 0 ? player.level().getEntity(line.entityId()) : null;
+		return on != null ? on.getBoundingBox().getCenter() : line.anchor();
+	}
+
+	/** Someone punched one of this player's lines (the one ending near {@code end}) at {@code at}: it breaks there. */
+	static boolean cutLine(ServerPlayer player, Vec3 end, Vec3 at) {
 		State state = player.getAttached(STATE);
 		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
 			WebLine line = player.getAttached(line(hand));
@@ -799,6 +825,7 @@ public final class WebPower implements Power {
 			if (anchor.distanceTo(end) > 2.5) {
 				continue;
 			}
+			WebNet.snap(player, hand, anchor, at, WebNet.SNAPPED);
 			if (state != null && state.swinging[hand]) {
 				dropSwing(player, state, hand);
 				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
@@ -809,7 +836,8 @@ public final class WebPower implements Power {
 				}
 			}
 			if (hand == WebNet.MAIN && state != null && state.tetherId >= 0) {
-				snapTether(player, state);
+				// (the cut above already told everyone where it broke)
+				snapTether(player, state, null, false);
 			}
 			return true;
 		}
@@ -820,6 +848,11 @@ public final class WebPower implements Power {
 	static void snapLines(ServerPlayer player) {
 		State state = player.getAttached(STATE);
 		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			WebLine was = player.getAttached(line(hand));
+			if (was != null) {
+				// what they were stuck to went: the whole line falls
+				WebNet.snap(player, hand, lineAnchor(player, was), lineAnchor(player, was), WebNet.FREED);
+			}
 			if (state != null && state.swinging[hand]) {
 				dropSwing(player, state, hand);
 			} else {
@@ -832,20 +865,16 @@ public final class WebPower implements Power {
 		}
 	}
 
-	/** A swing line from {@code hand} runs through fire (or is stuck to something burning): it burns through. */
-	private static boolean burnsThrough(ServerPlayer player, int hand) {
+	/** A swing line from {@code hand} runs through fire (or is stuck to something burning): it burns through, here (else null). */
+	private static @org.jspecify.annotations.Nullable Vec3 burnsThrough(ServerPlayer player, int hand) {
 		WebLine line = player.getAttached(line(hand));
 		if (line == null) {
-			return false;
+			return null;
 		}
 		Entity stuckTo = line.entityId() >= 0 ? player.level().getEntity(line.entityId()) : null;
 		Vec3 to = stuckTo != null ? stuckTo.getBoundingBox().getCenter() : line.anchor();
 		Vec3 at = WebHeft.burning(player.level(), player.position().add(0.0, player.getBbHeight() * 0.7, 0.0), to, stuckTo);
-		if (at == null) {
-			return false;
-		}
-		WebHeft.burnFx(player.level(), at);
-		return true;
+		return at;
 	}
 
 	/** Adds to {@code player}'s velocity (their motion is theirs to simulate, so it goes to their client). */
@@ -1116,11 +1145,17 @@ public final class WebPower implements Power {
 		Vec3 to = hand.subtract(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		double distance = to.length();
 		if (player.tickCount % WebHeft.BURN_EVERY == 0) {
-			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), WebLead.burnTarget(target));
+			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), target);
 			if (burn != null) {
-				// it burns through
-				WebHeft.burnFx(player.level(), burn);
-				releaseTether(player, state);
+				if (WebSymbiote.suitShown(player)) {
+					// (0.19.71) a symbiote's cord recoils from the fire and lets go
+					WebHeft.recoilFx(player.level(), burn);
+					releaseTether(player, state);
+				} else {
+					// it burns through
+					WebHeft.burnFx(player.level(), burn);
+					snapTether(player, state, burn, true);
+				}
 				return;
 			}
 		}
@@ -1137,14 +1172,14 @@ public final class WebPower implements Power {
 		}
 		if (tooFar || swinging && !state.tetherWasSwinging) {
 			// pulled too far, or a player fought it off
-			snapTether(player, state);
+			snapTether(player, state, null, true);
 			return;
 		}
 		state.tetherWasSwinging = swinging;
 		// a caught player can lean away against the line until it gives
 		if (player2 && distance > TETHER_LENGTH + PLAYER_STRAIN_OVER) {
 			if (++state.tetherStrain >= PLAYER_STRAIN_TICKS) {
-				snapTether(player, state);
+				snapTether(player, state, null, true);
 				return;
 			}
 		} else if (player2 && state.tetherStrain > 0) {
@@ -1187,11 +1222,18 @@ public final class WebPower implements Power {
 		player.removeAttached(TETHER);
 	}
 
-	/** The line breaks under strain. */
-	private static void snapTether(ServerPlayer player, State state) {
+	/**
+	 * The line breaks under strain (somewhere along the middle), or at {@code where} (burnt through there). {@code tell}:
+	 * let everyone see it part (a cut has told them already).
+	 */
+	private static void snapTether(ServerPlayer player, State state, @org.jspecify.annotations.Nullable Vec3 where, boolean tell) {
 		Entity target = player.level().getEntity(state.tetherId);
 		releaseTether(player, state);
 		Vec3 at = target == null ? player.position() : target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
+		if (tell && target != null) {
+			Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0);
+			WebNet.snap(player, WebNet.MAIN, at, where != null ? where : hand.lerp(at, 0.35 + player.getRandom().nextDouble() * 0.3), WebNet.SNAPPED);
+		}
 		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
 		player.level().sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.05);
 	}
