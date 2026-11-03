@@ -219,7 +219,8 @@ final class Brutality {
 		for (Brawl brawl : List.copyOf(BRAWLS.values())) {
 			drive(level, brawl, now);
 		}
-		if (now % START_TICKS != 0) {
+		// (0.7.480) gate starts on the server tick count, the same clock as DRIVE_TICKS: game time has a fixed per-world offset
+		if (server.getTickCount() % START_TICKS != 0) {
 			return;
 		}
 		RandomSource random = level.getRandom();

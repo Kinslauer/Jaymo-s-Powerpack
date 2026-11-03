@@ -671,8 +671,9 @@ public final class Camps {
 		}
 		// (0.7.475) a greenskin realm's vassals are free
 		Hordes.fell(server, camp.id());
+		// (0.7.480) its slaves stay: Slaves.tick sees the camp gone and sends them running
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
-			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
+			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f) && f.role() != Slaves.SLAVE)) {
 			if (folk.isCarrying()) {
 				folk.spawnAtLocation(level, folk.takeCarried());
 			}

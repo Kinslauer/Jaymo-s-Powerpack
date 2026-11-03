@@ -70,6 +70,8 @@ public final class Slaves {
 	static final int WORK_EVERY = 20, REST_TICKS = 100;
 	static final double WORK_SPEED = 0.9, THERE = 2.5;
 	static final int HAUL_MAX = 3;
+	/** (0.7.480) While a slave is on a job its keep moves to the job's site, this many blocks round it, so the camp doesn't pull it back. */
+	static final int JOB_RADIUS = 4;
 	static final double HAUL_RANGE = 40.0;
 	/** What they carry. */
 	static final Item[] LOADS = {Items.DARK_OAK_LOG, Items.DARK_OAK_LOG, Items.BONE, Items.COBBLESTONE};
@@ -243,7 +245,12 @@ public final class Slaves {
 		if (site == null) {
 			slave.setTask("");
 			slave.setCarried(ItemStack.EMPTY);
+			slave.setHomeTo(data.center(), HOME_RADIUS);
 			return;
+		}
+		// (0.7.480) its keep goes with the job, or the camp's keep would pull it back short of a far site
+		if (!site.equals(slave.getHomePosition()) || slave.getHomeRadius() != JOB_RADIUS) {
+			slave.setHomeTo(site, JOB_RADIUS);
 		}
 		if (slave.distanceToSqr(Vec3.atCenterOf(site)) > THERE * THERE) {
 			if (slave.getNavigation().isDone()) {
@@ -260,6 +267,7 @@ public final class Slaves {
 			slave.setCarried(ItemStack.EMPTY);
 			slave.setTask("");
 			slave.setSite(null);
+			slave.setHomeTo(data.center(), HOME_RADIUS);
 			level.playSound(null, slave.getX(), slave.getY(), slave.getZ(), SoundEvents.CHAIN_HIT, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		}
 	}
@@ -277,6 +285,7 @@ public final class Slaves {
 			slave.setCarried(new ItemStack(Items.DARK_OAK_LOG));
 			slave.setTask("haul");
 			slave.setSite(where);
+			slave.setHomeTo(where, JOB_RADIUS);
 			sent++;
 		}
 	}
