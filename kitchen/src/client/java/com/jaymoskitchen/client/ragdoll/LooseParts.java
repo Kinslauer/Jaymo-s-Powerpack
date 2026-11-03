@@ -69,8 +69,13 @@ public final class LooseParts {
 	/**
 	 * (0.5.50) A snake carried, slung or falling: its spine is laid over the carrier's arms (see {@link ChainSpine#drape})
 	 * instead of each segment hanging on its own. {@code across}: the arms' way, as a yaw (degrees); swings as Limp's.
+	 * (0.5.50) {@code hand} above 0: held in one hand that high above the ground instead, hanging from just behind the
+	 * head (see {@link ChainSpine#hang}), the hand at {@code handX, handY, handZ} in the placement's frame.
 	 */
-	public record Drape(float across, float swingBack, float swingLeft) {
+	public record Drape(float across, float swingBack, float swingLeft, float hand, float handX, float handY, float handZ) {
+		public Drape(float across, float swingBack, float swingLeft) {
+			this(across, swingBack, swingLeft, 0.0F, 0.0F, 0.0F, 0.0F);
+		}
 	}
 
 	private static final Map<ModelPart, List<Node>> PLANS = new WeakHashMap<>();
@@ -104,8 +109,9 @@ public final class LooseParts {
 		}
 		Set<String> skip = Set.of();
 		if (frame.drape != null) {
-			Set<String> spine = ChainSpine.drape(root, frame.body, frame.scale, frame.drape.across(), frame.drape.swingBack(),
-				frame.drape.swingLeft());
+			Drape d = frame.drape;
+			Set<String> spine = d.hand() > 0.0F ? ChainSpine.hang(root, frame.body, frame.scale, d.across(), d.swingBack(),
+				d.swingLeft(), d.hand(), d.handX(), d.handY(), d.handZ()) : ChainSpine.drape(root, frame.body, frame.scale, d.across(), d.swingBack(), d.swingLeft());
 			if (spine != null) {
 				skip = spine;
 			}

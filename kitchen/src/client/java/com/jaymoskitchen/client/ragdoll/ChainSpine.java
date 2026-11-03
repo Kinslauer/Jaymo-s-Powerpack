@@ -41,6 +41,11 @@ public final class ChainSpine {
 	 */
 	private static final float DRAPE_REST = 0.12F, DRAPE_BEND = 0.12F, DRAPE_LAG = 0.6F;
 	private static final int DRAPE_POINTS = 24;
+	/**
+	 * (0.5.50) Held in one hand: how far behind the snout it's gripped (pixels of model), and how far above the ground the
+	 * lowest of it stays (blocks, at scale 1) before it lies along it.
+	 */
+	private static final float HOLD_BEHIND = 6.0F, HANG_CLEAR = 0.1F;
 	private static final Map<ModelPart, Spine> SPINES = new WeakHashMap<>();
 	private static final Spine NONE = new Spine(List.of(), 0.0F, Set.of(), new float[0], new float[0]);
 
@@ -180,6 +185,58 @@ public final class ChainSpine {
 			out[i * 3] = middle.x + dx * side * along + ox;
 			out[i * 3 + 1] = middle.y - down;
 			out[i * 3 + 2] = middle.z + dz * side * along + oz;
+		}
+		return apply(root, body, scale, out);
+	}
+
+	/**
+	 * (0.5.50) A snake held in one hand, just behind its head ({@link #HOLD_BEHIND} along from its snout), the hand at
+	 * {@code handX, handY, handZ} in the placement's frame and {@code hand} blocks above the ground: the head sticks up out of the fist, the body hangs
+	 * straight down (swung {@code swingBack} and {@code swingLeft}, more the lower), and whatever reaches the ground
+	 * trails along it behind the carrier ({@code facing}, a yaw in degrees). Returns as {@link #apply}.
+	 */
+	static Set<String> hang(ModelPart root, Matrix4f body, float scale, float facing, float swingBack, float swingLeft,
+		float hand, float handX, float handY, float handZ) {
+		Spine spine = SPINES.computeIfAbsent(root, ChainSpine::find);
+		if (spine.segments.isEmpty()) {
+			return null;
+		}
+		float blocks = scale / 16.0F;
+		float yaw = facing * Mth.DEG_TO_RAD;
+		// the carrier's back and right, level
+		float bx = Mth.sin(yaw), bz = -Mth.cos(yaw), rx = -Mth.cos(yaw), rz = -Mth.sin(yaw);
+		float hold = Math.min(HOLD_BEHIND, spine.length * 0.5F) * blocks;
+		float drop = Math.max(hand - HANG_CLEAR * scale, 0.05F);
+		float back = Mth.clamp(swingBack, -0.8F, 0.8F), side = Mth.clamp(swingLeft, -0.8F, 0.8F);
+		int samples = DRAPE_POINTS;
+		float[] out = new float[samples * 3];
+		for (int i = 0; i < samples; i++) {
+			float u = spine.length * blocks * i / (samples - 1) - hold;
+			float x, y, z;
+			if (u <= 0.0F) {
+				// the head, up out of the fist
+				x = 0.0F;
+				y = -u;
+				z = 0.0F;
+			} else {
+				// hanging, swung the more the lower, down to the ground
+				float h = Math.min(u, drop);
+				float lag = 1.0F + h * DRAPE_LAG;
+				float b = back * lag, l = side * lag;
+				x = (bx * Mth.sin(b) + rx * Mth.sin(l)) * h;
+				z = (bz * Mth.sin(b) + rz * Mth.sin(l)) * h;
+				y = -Mth.cos(b) * Mth.cos(l) * h;
+				if (u > drop) {
+					// on the ground: trailing behind
+					float t = u - drop;
+					x += bx * t;
+					z += bz * t;
+					y = -drop;
+				}
+			}
+			out[i * 3] = handX + x;
+			out[i * 3 + 1] = handY + y;
+			out[i * 3 + 2] = handZ + z;
 		}
 		return apply(root, body, scale, out);
 	}

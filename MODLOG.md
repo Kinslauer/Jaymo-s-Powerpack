@@ -4950,6 +4950,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   palm and their Wave Beam now gathers 16 ticks in cupped hands before firing with a two-hand push and shout; rogue
   fighters and sparring mannequins throw from the palm. Tuning: `ZFighterHands` (hand spots, shout), `ZFighterHandsPose`
   (angles, timing, first-person spots), `FirstPersonArms.KI_*`, `ZFighterKi.BLAST_FORM_*`, `ZFighterGift.WAVE_GATHER`.
-- **0.19.61, Kitchen 0.5.50, carried snakes drape:** A carried (or slung, or falling) snake now lies draped over the
+- **0.19.61, Kitchen 0.5.50, carried snakes drape, small bodies in one hand:** A carried (or slung, or falling) snake now lies draped over the
   arms, its middle across them and its head and tail hanging down either side, swinging as you move, instead of a
-  stiff body with only the tail tip loose (Kitchen MODLOG). Not compile-checked; not played.
+  stiff body with only the tail tip loose. Small bodies (chickens, rabbits, snakes, babies) are now carried
+  in one hand by the neck, a snake's tail trailing on the ground, and the corpse bag that put them in your inventory is
+  gone (Kitchen MODLOG). Not compile-checked; not played.
