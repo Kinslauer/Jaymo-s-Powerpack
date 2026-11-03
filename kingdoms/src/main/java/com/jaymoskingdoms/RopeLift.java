@@ -88,7 +88,7 @@ public final class RopeLift {
 	static final int SHAFT_CHECK_TICKS = 20;
 
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
-	/** (0.7.484) A rope tied to a fence beside it (it holds without anything above). */
+	/** (0.7.485) A rope tied to a fence beside it (it holds without anything above). */
 	public static final BooleanProperty TIED = BooleanProperty.create("tied");
 
 	public static Block ROPE, ANCHOR, PULLEY, PLATFORM;
@@ -137,7 +137,7 @@ public final class RopeLift {
 		return ROPE != null && (above.is(ROPE) || above.is(ANCHOR) || above.is(PULLEY) || above.is(BlockTags.FENCES));
 	}
 
-	/** (0.7.484) A fence beside {@code pos} on any side: a rope tied to it there holds. */
+	/** (0.7.485) A fence beside {@code pos} on any side: a rope tied to it there holds. */
 	static boolean tiedBeside(LevelReader level, BlockPos pos) {
 		for (Direction side : Direction.Plane.HORIZONTAL) {
 			if (level.getBlockState(pos.relative(side)).is(BlockTags.FENCES)) {
@@ -194,7 +194,7 @@ public final class RopeLift {
 		}
 
 		/**
-		 * (0.7.484) Andy (Plant Fibers pick): "a climbable rope you tie to a fence". Set against a fence's side with nothing
+		 * (0.7.485) Andy (Plant Fibers pick): "a climbable rope you tie to a fence". Set against a fence's side with nothing
 		 * to hang from, the rope is tied to it (at a cliff's edge it hangs over the drop); under a fence it hangs from it.
 		 * More rope on the rope lets more down, as from an anchor.
 		 */
