@@ -231,6 +231,13 @@ public class CorpseEntity extends Entity {
 	private long cutLast;
 	private int cutWork;
 	private int burnTicks;
+	/**
+	 * (0.5.51) Hung on a meat hook ({@link Hanging}): the hook (null: not hung), how far the butchering has got
+	 * ({@link Hanging#FRESH} on), the bleeding's length and ticks left, the blood put somewhere so far (grate levels),
+	 * and how much is still to pool on the ground.
+	 */
+	private @Nullable BlockPos hook;
+	private int butcherStage, bleedTotal, bleedLeft, bloodPoured, spilt;
 	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
 	private int firesLit;
 	private int age;
@@ -843,6 +850,132 @@ public class CorpseEntity extends Entity {
 		setYRot(yaw);
 	}
 
+	// ---- (0.5.51) hung on a meat hook (Hanging) -----------------------------------------------------------------------
+
+	public @Nullable BlockPos hook() {
+		return hook;
+	}
+
+	/** Hung on the hook at {@code at} by its hind legs: out of anyone's arms or hands, a ragdoll held at the hook. */
+	public void hangOn(BlockPos at) {
+		if (carrier() != null) {
+			setCarrier(null);
+		}
+		if (this.entityData.get(DRAGGER) >= 0) {
+			this.entityData.set(DRAGGER, -1);
+		}
+		unpin();
+		this.hook = at.immutable();
+		this.ragdoll = null;
+		grabCooldown = GRAB_COOLDOWN;
+		Vec3 hold = Hanging.holdPoint(at);
+		setPos(hold.x, hold.y - Math.max(0.5, getBbHeight()), hold.z);
+		setDeltaMovement(Vec3.ZERO);
+	}
+
+	/** Off the hook (taken down, or the hook's gone): it falls as it hung. */
+	public void unhook() {
+		if (hook != null) {
+			hook = null;
+			if (ragdoll != null) {
+				ragdoll.body.release();
+				ragdoll.body.wake();
+			}
+		}
+	}
+
+	public int butcherStage() {
+		return butcherStage;
+	}
+
+	void setButcherStage(int stage) {
+		this.butcherStage = stage;
+	}
+
+	void startBleeding(int ticks) {
+		this.butcherStage = Hanging.BLEEDING;
+		this.bleedTotal = ticks;
+		this.bleedLeft = ticks;
+		this.bloodPoured = 0;
+	}
+
+	int bleedTotal() {
+		return bleedTotal;
+	}
+
+	int bleedLeft() {
+		return bleedLeft;
+	}
+
+	void setBleedLeft(int left) {
+		this.bleedLeft = left;
+	}
+
+	int bloodPoured() {
+		return bloodPoured;
+	}
+
+	void setBloodPoured(int poured) {
+		this.bloodPoured = poured;
+	}
+
+	int spilt() {
+		return spilt;
+	}
+
+	void addSpilt(int by) {
+		this.spilt = Math.max(0, spilt + by);
+	}
+
+	void addLoot(List<ItemStack> more) {
+		for (ItemStack stack : more) {
+			if (!stack.isEmpty()) {
+				loot.add(stack.copy());
+			}
+		}
+	}
+
+	List<ItemStack> lootView() {
+		return java.util.Collections.unmodifiableList(loot);
+	}
+
+	/** Takes out of its loot everything {@code test} likes. */
+	List<ItemStack> takeLoot(java.util.function.Predicate<ItemStack> test) {
+		List<ItemStack> taken = new ArrayList<>();
+		loot.removeIf(stack -> {
+			if (!stack.isEmpty() && test.test(stack)) {
+				taken.add(stack);
+				return true;
+			}
+			return stack.isEmpty();
+		});
+		return taken;
+	}
+
+	RagdollRig.Shape rigShape() {
+		return rig().shape;
+	}
+
+	/** Where its head is now (its ragdoll's head or snout; else its middle). */
+	Vec3 headPoint() {
+		if (ragdoll != null) {
+			RagdollBody body = ragdoll.body;
+			int head = switch (body.rig.shape) {
+				case QUADRUPED -> RagdollRig.SNOUT;
+				case HUMANOID -> RagdollRig.HEAD;
+				default -> -1;
+			};
+			if (head >= 0) {
+				return new Vec3(body.x[head], body.y[head], body.z[head]);
+			}
+		}
+		return position().add(0.0, getBbHeight() * 0.5, 0.0);
+	}
+
+	CorpseKind kind() {
+		return kind;
+	}
+
 	/** (0.5.23) The way a pinned body faces out from its wall (degrees), or -1 if it isn't pinned. */
 	public int pinned() {
 		return this.entityData.get(PINNED);
@@ -1103,6 +1236,20 @@ public class CorpseEntity extends Entity {
 		}
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
 			return;
+		}
+		if (hook != null && level() instanceof ServerLevel hookLevel) {
+			// (0.5.51) on a meat hook: a ragdoll held there by its hind legs, bleeding if it's being bled
+			ensureRagdoll();
+			Hanging.tick(this, hookLevel, ragdoll.body);
+			if (ragdoll != null) {
+				ragdoll.tick(this, hookLevel);
+			}
+			serverTick(hookLevel);
+			return;
+		}
+		if (butcherStage == Hanging.BLEEDING && level() instanceof ServerLevel groundLevel) {
+			// (0.5.51) bled where it lies
+			Hanging.tickGround(this, groundLevel);
 		}
 		if (pinned() >= 0) {
 			// (0.5.23) nailed to a wall: hangs where it is until the wall goes
@@ -1418,6 +1565,11 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
+		// (0.5.51) on a meat hook, or started on (bled, or being bled): its next step
+		InteractionResult step = Hanging.use(this, level, player, held);
+		if (step != null) {
+			return step;
+		}
 		// (0.5.31) too big to carry anywhere: cut up where it lies, a piece at a time
 		if (held.is(Corpses.BUTCHERING_TOOLS) && tooBigToLift() && !onButcherBlock()) {
 			return cutUp(level, player, held);
@@ -1492,6 +1644,8 @@ public class CorpseEntity extends Entity {
 			unsling(false);
 		}
 		this.entityData.set(TUMBLING, false);
+		// (0.5.51) pulled down off a meat hook
+		unhook();
 		this.entityData.set(DRAGGER, player.getId());
 		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.dragging"));
@@ -1620,6 +1774,13 @@ public class CorpseEntity extends Entity {
 	 * needs a 2x2), else it's let go.
 	 */
 	public void dragOnto(Player player, BlockPos clicked, Vec3 hit) {
+		// (0.5.51) heaved up onto a meat hook near enough
+		if (com.jaymoskitchen.butchery.Butchery.isHook(level().getBlockState(clicked))
+			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= Hanging.DRAG_TO_HOOK + getBbHeight()) {
+			if (Hanging.hang(this, player, clicked)) {
+				return;
+			}
+		}
 		if (Corpses.isButcherBlock(level().getBlockState(clicked)) && position().distanceTo(Vec3.atCenterOf(clicked)) <= DRAG_TO_TABLE) {
 			Vec3 at = tableSpot(level(), clicked, hit, isBigCarcass());
 			if (at == null) {
@@ -1661,6 +1822,10 @@ public class CorpseEntity extends Entity {
 			getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
+			if (butcherStage < Hanging.DRAINED) {
+				// (0.5.51) cut up unbled: spoils in a few days
+				com.jaymoskitchen.butchery.Spoilage.mark(piece, level.getOverworldClockTime() / 24000L);
+			}
 			spawnAtLocation(level, piece, 0.4F);
 		}
 		if (piecesLeft() > 0) {
@@ -1677,7 +1842,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.5.31) One piece off the loot: meat first, then whatever else it has (hide, wool, feathers...). Empty when it's bare. */
-	private ItemStack nextPiece() {
+	ItemStack nextPiece() {
 		loot.removeIf(ItemStack::isEmpty);
 		if (loot.isEmpty()) {
 			return ItemStack.EMPTY;
@@ -1695,7 +1860,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.5.31) How many pieces are still on it. */
-	private int piecesLeft() {
+	int piecesLeft() {
 		int left = 0;
 		for (ItemStack stack : loot) {
 			left += stack.getCount();
@@ -1802,8 +1967,14 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return;
 		}
+		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
+		boolean unbled = butcherStage < Hanging.DRAINED;
+		long day = level.getOverworldClockTime() / 24000L;
 		if (onBlock) {
 			for (ItemStack extra : blockExtras()) {
+				if (unbled) {
+					com.jaymoskitchen.butchery.Spoilage.mark(extra, day);
+				}
 				spawnAtLocation(level, extra, 0.4F);
 			}
 		} else {
@@ -1819,6 +1990,9 @@ public class CorpseEntity extends Entity {
 			}
 			loot = rough;
 		}
+		if (unbled) {
+			com.jaymoskitchen.butchery.Spoilage.mark(loot, day);
+		}
 		dropLoot(level);
 		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
 		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
@@ -1826,7 +2000,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** What butchering on a block adds to the loot: a little extra meat, and the block-only extras ({@link ButcheringBonus}). */
-	private List<ItemStack> blockExtras() {
+	List<ItemStack> blockExtras() {
 		List<ItemStack> extras = new ArrayList<>();
 		for (ItemStack stack : loot) {
 			if (stack.has(DataComponents.FOOD)) {
@@ -2304,6 +2478,8 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		if (carrier != null) {
+			// (0.5.51) taken down off a meat hook
+			this.hook = null;
 			this.ragdoll = null;
 			// (0.5.23) pulled down off the wall
 			this.entityData.set(PINNED, -1);
@@ -2775,6 +2951,12 @@ public class CorpseEntity extends Entity {
 			setNoGravity(true);
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
+		this.hook = input.getLong("Hook").map(BlockPos::of).orElse(null);
+		this.butcherStage = input.getIntOr("ButcherStage", 0);
+		this.bleedTotal = input.getIntOr("BleedTotal", 0);
+		this.bleedLeft = input.getIntOr("BleedLeft", 0);
+		this.bloodPoured = input.getIntOr("BloodPoured", 0);
+		this.spilt = input.getIntOr("Spilt", 0);
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
@@ -2822,6 +3004,16 @@ public class CorpseEntity extends Entity {
 		}
 		if (pinned() >= 0) {
 			output.putInt("Pinned", pinned());
+		}
+		if (hook != null) {
+			output.putLong("Hook", hook.asLong());
+		}
+		if (butcherStage != 0) {
+			output.putInt("ButcherStage", butcherStage);
+			output.putInt("BleedTotal", bleedTotal);
+			output.putInt("BleedLeft", bleedLeft);
+			output.putInt("BloodPoured", bloodPoured);
+			output.putInt("Spilt", spilt);
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

@@ -41,6 +41,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float SIZE = 1.5F;
 	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
 	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
+	/** (0.19.62) A stain drawn smaller by blood magic eases down this share of its size a tick; one restained with fewer than this many ticks left (drawn dry) fades over them. */
+	static final float DRAWN_EASE = 0.12F;
+	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
 	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
@@ -49,6 +52,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	static final float WET_MAX_SCALE = 1.6F;
 
 	private float baseSize;
+	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
+	private float targetSize;
+	private int quickFade;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
 	/** (0.19.63) Whether it's water (rain or drips: never darkens, dries up slowly). */
@@ -85,6 +91,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.yd = 0.0;
 		this.zd = 0.0;
 		this.baseSize = SIZE * scale;
+		this.targetSize = this.baseSize;
 		boolean round = shape == BloodParticles.Puddle.ROUND;
 		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
@@ -110,9 +117,23 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 
 	/** (0.17.182) The server grew this stain (more blood fell on it): its new size, age and the ticks it has left. */
 	void restain(float scale, int age, int life) {
-		this.baseSize = SIZE * scale;
+		this.targetSize = SIZE * scale;
+		if (this.targetSize > this.baseSize) {
+			// (grown: at once; drawn smaller by blood magic: it eases down, tick)
+			this.baseSize = this.targetSize;
+		}
 		this.age = Math.max(this.age, age);
 		this.lifetime = this.age + life;
+		// (0.19.62) drawn dry: it fades over the little time it has left, not all at once (fresh blood on it: as before)
+		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.baseSize > this.targetSize) {
+			this.baseSize = Math.max(this.targetSize, this.baseSize - Math.max(DRAWN_EASE * this.baseSize, 0.01F));
+		}
 	}
 
 	/** (0.19.63) More water fell on this puddle: it lasts at least {@code life} more ticks and grows by {@code grow} (scale). */
@@ -165,7 +186,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		if (age <= SPLAT_IN) {
 			size *= age / (SPLAT_IN * 2.0F) + 0.5F;
 		}
-		int fade = this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
+		int fade = this.quickFade > 0 ? this.quickFade : this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
 		int fadeFrom = this.lifetime - fade;
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
