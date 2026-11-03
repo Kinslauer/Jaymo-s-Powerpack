@@ -385,7 +385,7 @@ public final class TribePacts {
 		Entity first = level.getEntity(members.getFirst());
 		if (first != null) {
 			level.playSound(null, first.getX(), first.getY(), first.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.NEUTRAL, 1.6F, goblins ? 1.5F : 0.8F);
-			Speech.say(level, first, Component.translatable("talk.jaymoskingdoms.tribe.called." + random.nextInt(CALLED_LINES), Identities.shownName(caller),
+			Speech.say(level, first, Dialects.tr(first, "talk.jaymoskingdoms.tribe.called." + random.nextInt(CALLED_LINES), Identities.shownName(caller),
 				Tribes.name(tribe)), Speech.GOLD, 32.0);
 		}
 		JaymosKingdoms.LOGGER.info("{} answers {}'s call: {} to {}", Tribes.name(tribe).getString(), caller.getName().getString(), members.size(), target.name());
@@ -481,7 +481,7 @@ public final class TribePacts {
 			}
 		}
 		if (mob.tickCount % 240 == 0 && mob.getRandom().nextInt(4) == 0) {
-			Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.tribe.ally." + mob.getRandom().nextInt(ALLY_LINES)), Speech.GOLD, 20.0);
+			Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.tribe.ally." + mob.getRandom().nextInt(ALLY_LINES)), Speech.GOLD, 20.0);
 		}
 		return true;
 	}
