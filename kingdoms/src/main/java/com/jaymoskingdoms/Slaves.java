@@ -264,7 +264,7 @@ public final class Slaves {
 		}
 	}
 
-	/** (From {@link OrcCamps#tick}) a building has gone up at {@code where}: the camp's slaves carry logs to it. */
+	/** (From {@link OrcCamps#tick}, and (0.7.480) {@link Hordes}' own building) a building has gone up at {@code where}: the camp's slaves carry logs to it. */
 	static void haul(ServerLevel level, int camp, BlockPos center, BlockPos where) {
 		List<Folk> hands = kept(level, camp, center);
 		hands.removeIf(f -> f.entityTags().contains(FREED));

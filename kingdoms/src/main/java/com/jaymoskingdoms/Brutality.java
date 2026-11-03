@@ -62,8 +62,11 @@ final class Brutality {
 	static final int CHALLENGE_MIN_GRUNTS = 3, BRAWL_MIN_GRUNTS = 2;
 	/** A fighter starts at this share of his health or better. */
 	static final float START_HEALTH = 0.8F;
-	/** A fist's hit: this share of the other's top health, give or take {@link #HIT_SPREAD}; the loser is held at {@link #FLOOR}. */
-	static final float HIT_SHARE = 0.07F, HIT_SPREAD = 0.3F, FLOOR = 0.4F;
+	/** A fist's hit: this share of the other's top health, give or take {@link #HIT_SPREAD}; the loser is held at {@link #FLOOR}.
+	 * ((0.7.480) the floor stays above a chief's rally, {@link Folk#RALLY_AT}: a beaten warchief doesn't call his camp in) */
+	static final float HIT_SHARE = 0.07F, HIT_SPREAD = 0.3F, FLOOR = 0.45F;
+	/** (0.7.480) A new warchief: camp folk this near (blocks) that are after him are called off. */
+	static final double CALL_OFF_RANGE = 48.0;
 	/** A challenger lands this much of a hit against the warchief (below 1: the chief is the harder to beat). */
 	static final float CHALLENGER_EDGE = 0.9F;
 	/** A shove from a fist. */
@@ -470,6 +473,7 @@ final class Brutality {
 		old.removeAttached(Bodies.BODY);
 		// (the camp's leader is a new one; a grunt less and a grunt more, so the roster is as it was)
 		Factions.update(server, campId, f -> f.withLeader(Optional.of(winner.getUUID())));
+		callOff(level, campId, winner);
 		RandomSource random = level.getRandom();
 		Speech.say(level, winner, Component.translatable("speech.jaymoskingdoms.orc.new_chief_" + random.nextInt(NEW_CHIEF_LINES)), Speech.RED, SAY_RANGE);
 		Speech.say(level, old, Component.translatable("speech.jaymoskingdoms.orc.deposed_" + random.nextInt(DEPOSED_LINES)), Speech.RED, SAY_RANGE);
@@ -480,6 +484,17 @@ final class Brutality {
 			player.sendSystemMessage(news);
 		}
 		JaymosKingdoms.LOGGER.info("{} has a new warchief, won in a challenge", camp.name());
+	}
+
+	/** (0.7.480) Camp folk after the new warchief {@code winner} (a rally that fired anyway) are called off him. */
+	private static void callOff(ServerLevel level, int campId, PathfinderMob winner) {
+		AABB box = winner.getBoundingBox().inflate(CALL_OFF_RANGE);
+		for (Folk folk : level.getEntitiesOfClass(Folk.class, box, f -> f != winner && f.factionId() == campId && Rulers.target(f) == winner)) {
+			release(folk);
+		}
+		for (Worker w : Workers.near(level, box, x -> x.factionId() == campId && x.mob() != winner && Rulers.target(x.mob()) == winner)) {
+			release(w.mob());
+		}
 	}
 
 	/** {@code mob} takes {@code role}, a grunt's or the warchief's, in place (a folk by {@link Folk#changeRole}, a villager by its enlistment). */

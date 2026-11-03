@@ -651,7 +651,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.19) his bar: only for the players who've hit him, while they stay near
 			BossBars.show(level, this, this.bar());
 		}
-		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
+		// ((0.7.480) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
+		if (this.leader() && !this.rallied && !Brutality.fighting(this) && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;
 			this.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 20 * 60, 1));
