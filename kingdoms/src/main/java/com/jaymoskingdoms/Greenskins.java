@@ -87,7 +87,7 @@ public final class Greenskins {
 
 	/** What one of {@code camp}'s villager goblins or orcs ({@code role}) goes for: as its folk did. */
 	static boolean prey(int role, int camp, LivingEntity target) {
-		return Goblins.isGoblin(role) ? Goblins.prey(camp, target) : Orcs.prey(target);
+		return Goblins.isGoblin(role) ? Goblins.prey(camp, target) : Orcs.prey(camp, target);
 	}
 
 	// ---- their skin -----------------------------------------------------------------------------------------------------

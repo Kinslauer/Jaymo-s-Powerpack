@@ -867,6 +867,34 @@ final class McaBridge {
 		}
 	}
 
+	/** (0.7.480) {@link McaCompat#reranked}. */
+	static void reranked(PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return;
+		}
+		// the old rank's armour and weapons out of the pack, the new rank's worn gear in (MCA's guards dress from what they carry)
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			net.minecraft.world.item.ItemStack held = pack.getItem(i);
+			var equippable = held.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			boolean armour = equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
+			if (armour || held.is(net.minecraft.tags.ItemTags.AXES) || held.is(net.minecraft.tags.ItemTags.SWORDS)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+			}
+		}
+		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = villager.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				pack.addItem(worn.copy());
+			}
+		}
+		// a chief the biggest and broadest of his brood (as broodBorn); one unmade drawn anew within it
+		BodySizes.Body body = BodySizes.of(kind);
+		var genes = villager.getGenetics();
+		genes.setGene(Genetics.SIZE, chief ? body.maxSize() : BodySizes.spread(villager.getRandom().nextFloat(), body.minSize(), body.maxSize()));
+		genes.setGene(Genetics.WIDTH, chief ? body.maxWidth() : BodySizes.spread(villager.getRandom().nextFloat(), body.minWidth(), body.maxWidth()));
+	}
+
 	/**
 	 * (0.7.242) {@link McaCompat#crewman}: a new grown MCA villager in {@code folk}'s place (a ship's crewman set up for
 	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a

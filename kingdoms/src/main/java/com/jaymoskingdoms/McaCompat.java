@@ -523,6 +523,16 @@ public final class McaCompat {
 		}
 	}
 
+	/**
+	 * (0.7.480) {@code mob} (an MCA villager of {@code kind}'s brood) has just been made or unmade its camp's chief: it carries
+	 * only the gear it now wears, and has a chief's build (the biggest of its brood) or a common one. Anyone else: nothing.
+	 */
+	static void reranked(net.minecraft.world.entity.PathfinderMob mob, Heritage.Kind kind, boolean chief) {
+		if (LOADED) {
+			McaBridge.reranked(mob, kind, chief);
+		}
+	}
+
 	/** (0.7.292) With MCA, a goblin village's or an orc camp's own at home becomes one of MCA's villagers ({@link Greenskins}). True if so (the folk is gone). */
 	static boolean becomeGreenskin(ServerLevel level, Folk folk) {
 		return LOADED && Greenskins.mayConvert(level, folk) && McaBridge.convertGreenskin(level, folk);

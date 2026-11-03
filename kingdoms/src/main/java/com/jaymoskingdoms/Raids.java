@@ -131,6 +131,12 @@ final class Raids {
 		return ACTIVE.containsKey(camp);
 	}
 
+	/** (0.7.480) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
+	static boolean between(int a, int b) {
+		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);
+		return ab != null && ab.target == b || ba != null && ba.target == a;
+	}
+
 	/** (0.7.443) Settlement {@code target} has a raid on it just now. */
 	static boolean raided(int target) {
 		return ACTIVE.values().stream().anyMatch(r -> r.target == target);
@@ -203,7 +209,7 @@ final class Raids {
 		Faction best = null;
 		double bestDist = REACH * REACH;
 		for (Faction f : Factions.all(server)) {
-			if (f.fallen() || f.type() == FactionType.BARBARIAN || now - RAIDED.getOrDefault(f.id(), -TARGET_COOLDOWN_TICKS) < TARGET_COOLDOWN_TICKS) {
+			if (f.fallen() || f.type() == FactionType.BARBARIAN && !Brutality.rival(server, camp, f) || now - RAIDED.getOrDefault(f.id(), -TARGET_COOLDOWN_TICKS) < TARGET_COOLDOWN_TICKS) {
 				continue;
 			}
 			double d = horizontal(f.seat(), camp.seat());
@@ -559,7 +565,7 @@ final class Raids {
 		}
 		raid.party.remove(raider.getUUID());
 		Faction target = Factions.get(level.getServer(), raid.target);
-		if (target != null && source.getEntity() instanceof ServerPlayer player) {
+		if (target != null && target.type() != FactionType.BARBARIAN && source.getEntity() instanceof ServerPlayer player) {
 			Reputation.change(player, target, REP_RAIDER_SLAIN);
 		}
 	}

@@ -147,6 +147,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		CampChiefs.register();
+		// (0.7.480) orc brawls, chief challenges, camp feuds and goblin slaves
+		Brutality.register();
+		Slaves.register();
 		StoryTalk.register();
 		ShipTalk.register();
 		ZFighterFolk.register();

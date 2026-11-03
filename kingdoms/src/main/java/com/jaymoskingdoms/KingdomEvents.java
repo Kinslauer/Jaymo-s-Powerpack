@@ -557,7 +557,7 @@ public final class KingdomEvents {
 			return;
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		if (Corsairs.isCrew(folk) || Pirates.offRoster(folk.role())) {
+		if (Corsairs.isCrew(folk) || Pirates.offRoster(folk.role()) || folk.role() == Slaves.SLAVE) {
 			// (0.7.42) a ship's crew, a harbour's shipwright, a pirate captain ashore: never on a roster; a cove's captain is its
 			// leader (his cove is cleared: Camps)
 			if (faction.leader().isPresent() && faction.leader().get().equals(folk.getUUID())) {

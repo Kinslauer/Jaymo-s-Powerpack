@@ -430,7 +430,12 @@ final class Hordes {
 			if (r != Raise.WAIT) {
 				put(server, camp.id(), h.withBuilt(h.built() + 1));
 				if (r == Raise.PLACED) {
-					OgreHolds.haul(level, camp.id(), data.center(), plan.get(h.built()).placer(data.center(), data.gate()).at(0, 0, 0));
+					BlockPos where = plan.get(h.built()).placer(data.center(), data.gate()).at(0, 0, 0);
+					OgreHolds.haul(level, camp.id(), data.center(), where);
+					if (orc) {
+						// (0.7.480) and an orc camp's goblin slaves carry to it
+						Slaves.haul(level, camp.id(), data.center(), where);
+					}
 				}
 				return true;
 			}

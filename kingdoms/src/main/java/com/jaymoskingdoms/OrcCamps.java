@@ -276,6 +276,8 @@ final class OrcCamps {
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
 		}
+		// (0.7.480) now and then it takes another goblin slave
+		Slaves.restock(level, camp, data);
 		// (0.7.475) past its first stockade: its tier's wall and band
 		if (Hordes.tick(level, camp, data, force)) {
 			return;
@@ -305,6 +307,8 @@ final class OrcCamps {
 		}
 		OrcBuildings.place(level, spot, data.center(), data.gate());
 		OgreHolds.haul(level, camp.id(), data.center(), where);
+		// (0.7.480) and its goblin slaves carry logs to the new building
+		Slaves.haul(level, camp.id(), data.center(), where);
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
 	}
