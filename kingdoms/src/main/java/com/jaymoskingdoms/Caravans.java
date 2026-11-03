@@ -804,8 +804,6 @@ final class Caravans {
 			return;
 		}
 		put(server, c.at(lead.blockPosition()));
-		// ((0.7.484) any player keeping it company on the road is an escort)
-		TradeRoutes.escort(level, c, lead);
 		// ((0.7.294) folk, or MCA guards)
 		List<PathfinderMob> guards = new ArrayList<>();
 		for (UUID id : live.guards) {
@@ -848,6 +846,8 @@ final class Caravans {
 			}
 			return;
 		}
+		// ((0.7.484) any player keeping it company on the road is an escort: only while it is moving, not while it stands loading)
+		TradeRoutes.escort(level, c, lead);
 		if (d <= ARRIVE) {
 			reached(level, c, now);
 			return;

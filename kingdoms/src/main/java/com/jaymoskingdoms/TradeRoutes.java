@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -134,7 +136,7 @@ final class TradeRoutes {
 		}
 	}
 
-	/** What a settlement sends and how: its rig, carts, a cart's load, guards, what it sells and wants, and (kingdoms, towns) a levy to draw on when its storehouse is out of reach. */
+	/** What a settlement sends and how: its rig, carts, a cart's load, guards, what it sells and wants, and a levy to draw on when its storehouse is out of reach ((0.7.484) camps and coves too). */
 	record Profile(int rig, int carts, int cap, int guards, boolean mounted, EnumSet<Ware> sells, EnumSet<Ware> wants, Item @Nullable [] levy) {
 	}
 
@@ -153,6 +155,13 @@ final class TradeRoutes {
 	static final int REALM_CARTS = 1, COVE_SKIFFS = 2, ILLAGER_CARTS = 2, HUMAN_HANDCARTS = 2;
 	/** With its storehouse out of reach, a kingdom or town sends this levy (items), plus this per villager, never more than a rig takes. */
 	static final int LEVY_BASE = 64, LEVY_PER_VILLAGER = 2;
+	/**
+	 * (0.7.484) What a camp or cove draws its levy from while its storehouse is out of reach (it is far from any player as a rule): a
+	 * bandit camp's hides, meat and scrap iron, an illager camp's loot (no emeralds), a cove's powder, fish and iron.
+	 */
+	private static final Item[] HUMAN_LEVY = {Items.LEATHER, Items.LEATHER, Items.BONE, Items.BEEF, Items.COOKED_BEEF, Items.RAW_IRON, Items.COAL};
+	private static final Item[] ILLAGER_LEVY = {Items.IRON_INGOT, Items.RAW_IRON, Items.COAL, Items.LEATHER, Items.LEATHER, Items.BONE, Items.FEATHER};
+	private static final Item[] PIRATE_LEVY = {Items.GUNPOWDER, Items.GUNPOWDER, Items.COD, Items.SALMON, Items.IRON_INGOT, Items.COAL, Items.RAW_COPPER};
 	/** Nothing worth sending below this (items); the least a handcart is sent for. */
 	static final int LOAD_LEAST = 24;
 	/** A town with less than this of a good it wants asks for it; the carts go home with at most this share of what they brought (percent). */
@@ -280,11 +289,11 @@ final class TradeRoutes {
 					new Item[] {Items.WHEAT, Items.BREAD, Items.CARROT, Items.POTATO, Items.STRING, Items.LEATHER});
 			}
 			case HUMAN -> new Profile(HAND, HUMAN_HANDCARTS, HAND_LOAD, CAMP_GUARDS, false, EnumSet.of(Ware.HIDE, Ware.FOOD, Ware.METAL),
-				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.FOOD), null);
+				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.FOOD), HUMAN_LEVY);
 			case ILLAGER -> new Profile(CART, ILLAGER_CARTS, Caravans.CART_LOAD, CAMP_GUARDS, false, EnumSet.of(Ware.METAL, Ware.HIDE),
-				EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE), null);
+				EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE), ILLAGER_LEVY);
 			case PIRATE -> new Profile(BOAT, COVE_SKIFFS, BOAT_LOAD, COVE_GUARDS, false, EnumSet.of(Ware.POWDER, Ware.METAL, Ware.FOOD),
-				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.CLOTH), null);
+				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.CLOTH), PIRATE_LEVY);
 		};
 	}
 
@@ -412,7 +421,14 @@ final class TradeRoutes {
 	/** A levy of {@code f}'s production, sent while its storehouse is out of reach (nothing is taken from it). */
 	private static List<Map<String, Integer>> levy(ServerLevel level, Faction f, Profile p) {
 		int n = Math.min(p.carts() * p.cap(), LEVY_BASE + f.holdings().population() * LEVY_PER_VILLAGER);
-		Item[] goods = p.levy();
+		return levy(level, p.levy(), n, p.cap());
+	}
+
+	/** (0.7.484) {@code n} goods drawn at random from {@code goods}, in carts of {@code cap} each. */
+	private static List<Map<String, Integer>> levy(ServerLevel level, Item[] goods, int n, int cap) {
+		if (goods.length == 0 || n <= 0) {
+			return List.of();
+		}
 		Map<String, Integer> all = new LinkedHashMap<>();
 		for (int i = 0; i < n; i++) {
 			all.merge(Caravans.key(goods[level.getRandom().nextInt(goods.length)]), 1, Integer::sum);
@@ -423,11 +439,11 @@ final class TradeRoutes {
 		for (Map.Entry<String, Integer> e : all.entrySet()) {
 			int left = e.getValue();
 			while (left > 0) {
-				int take = Math.min(left, p.cap() - in);
+				int take = Math.min(left, cap - in);
 				cart.merge(e.getKey(), take, Integer::sum);
 				in += take;
 				left -= take;
-				if (in >= p.cap()) {
+				if (in >= cap) {
 					carts.add(cart);
 					cart = new LinkedHashMap<>();
 					in = 0;
@@ -469,9 +485,17 @@ final class TradeRoutes {
 		EnumSet<Ware> wants = hs == null ? EnumSet.allOf(Ware.class) : wanted(level, home, profile(server, home, hs));
 		int cap = capOf(c);
 		List<Map<String, Integer>> back = List.of();
+		int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * RETURN_SHARE / 100));
 		if (Storage.loaded(level, lord)) {
-			int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * RETURN_SHARE / 100));
 			back = Caravans.loadUp(level, lord, x -> in(wants, x), ls == null ? Sort.REALM.keep : ls.keep, most, cap);
+		} else {
+			// ((0.7.484) its storehouse out of reach: the carts go home with a levy of what it makes that the sender wants, its stock untouched)
+			Sort lk = ls != null ? ls : lord.type() == FactionType.FIEFDOM ? Sort.REALM : null;
+			Item[] levy = lk == null ? null : profile(server, lord, lk).levy();
+			if (levy != null) {
+				Item[] fit = Arrays.stream(levy).filter(i -> in(wants, new ItemStack(i))).toArray(Item[]::new);
+				back = levy(level, fit, most, cap);
+			}
 		}
 		long in = 0L;
 		for (Map<String, Integer> cart : back) {
@@ -759,7 +783,7 @@ final class TradeRoutes {
 
 	// ---- players: escorting, trading, robbing ------------------------------------------------------------------------------
 
-	/** Players near {@code lead} keep {@code c} company (called each time it is moved on while seen). */
+	/** Players near {@code lead} keep {@code c} company (called each time it is moved on while seen; (0.7.484) only while it is on the move, not while it stands loading). */
 	static void escort(ServerLevel level, Caravans.Caravan c, net.minecraft.world.entity.Entity lead) {
 		for (ServerPlayer p : level.players()) {
 			if (!p.isSpectator() && p.isAlive() && p.distanceToSqr(lead) <= ESCORT_RANGE * ESCORT_RANGE) {
@@ -779,6 +803,10 @@ final class TradeRoutes {
 		for (Map.Entry<UUID, Integer> e : who.entrySet()) {
 			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
 			if (p == null || e.getValue() < ESCORT_TICKS) {
+				continue;
+			}
+			if (p.level() != level || p.isSpectator() || !p.isAlive() || p.distanceToSqr(Vec3.atCenterOf(c.at())) > ESCORT_RANGE * ESCORT_RANGE) {
+				// ((0.7.484) he left it on the road: only one still with it at the end is thanked)
 				continue;
 			}
 			if (tribe != null) {
