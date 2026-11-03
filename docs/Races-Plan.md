@@ -33,11 +33,13 @@ and art with the MIT notice; we write our own 26.3 code. Each race has one activ
 One active ability (a left hold, like Powers' `HeritageMoves`), one passive and one weakness, shown as Gift / Flaw on the
 heritage card. Numbers are tuning constants.
 
-## Open question (decision card 2026-11-03)
-New races by family (3 heritages with race variants: recommended), one heritage per race (~20), or kits only.
+## Andy's pick (2026-11-03)
+By family, races as variants: three new heritages, **Beastfolk** (Arachnid, Avian, Canine, Feline, Kitsune, Serpen),
+**Fae-touched** (Changeling, Sprite, Faerie) and **Hollow** (Zombie, Skeleton, Wraith, Reaper). Each race is a variant with
+its own ability, passive and weakness. Blood Elf becomes a Sylvan variant. Races we already have fold in as kits.
 
 ## Checklist
-- [ ] Andy picks the shape
+- [x] Andy picks the shape (by family, races as variants)
 - [ ] New heritages + variants: looks, body sizes, stats, skin ranges, life-story births, tongue lines
 - [ ] Kits (active, passive, weakness) for every heritage
 - [ ] MIT notice for Runic Races in the credits
