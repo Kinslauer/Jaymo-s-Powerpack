@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -49,6 +51,8 @@ public final class BentIngots {
 	static final int OFFER_RELIEF = 1;
 	/** A plain ingot is refused no more than once in this long (ticks), so a held click doesn't flood the chat. */
 	static final int REFUSE_GAP = 40;
+	/** (0.7.480) The most of one kind of bent ingot a single trade cost can ask for (one stack). */
+	static final int STACK = 64;
 	// ================================================================================================================
 
 	public static Item BENT_COPPER, BENT_IRON;
@@ -97,16 +101,26 @@ public final class BentIngots {
 		return worth(stack) * stack.getCount();
 	}
 
-	/** Bent ingots as the price of {@code worth}: iron where it divides evenly, else copper (at most one stack). */
-	public static ItemCost cost(int worth) {
+	/**
+	 * (0.7.480) An offer that sells {@code result} for {@code worth} in bent ingots. Priced in bent copper (the common
+	 * drop), since a vanilla offer wants that exact item and gives no change: a price asked in iron could not be paid in
+	 * copper. Above one stack of copper, the first cost is bent iron and the second the copper that's left over.
+	 */
+	public static MerchantOffer offer(int worth, ItemStack result, int uses, int xp, float multiplier) {
 		int w = Math.max(1, worth);
-		return w % IRON_WORTH == 0 && w / IRON_WORTH >= 1 ? new ItemCost(BENT_IRON, Math.min(64, w / IRON_WORTH)) : new ItemCost(BENT_COPPER, Math.min(64, w));
+		if (w <= STACK) {
+			return new MerchantOffer(new ItemCost(BENT_COPPER, w), result, uses, xp, multiplier);
+		}
+		int irons = Math.min(STACK, (w - STACK + IRON_WORTH - 1) / IRON_WORTH);
+		int coppers = Math.min(STACK, (w - irons * IRON_WORTH) / COPPER_WORTH);
+		Optional<ItemCost> rest = coppers > 0 ? Optional.of(new ItemCost(BENT_COPPER, coppers)) : Optional.empty();
+		return new MerchantOffer(new ItemCost(BENT_IRON, irons), rest, result, uses, xp, multiplier);
 	}
 
-	/** {@code worth} as one stack of bent ingots: the same as {@link #cost} asks (iron where it divides evenly, else copper). */
+	/** {@code worth} as one stack of bent ingots, paid out: iron where it divides evenly, else copper. */
 	public static ItemStack coin(int worth) {
 		int w = Math.max(1, worth);
-		return w % IRON_WORTH == 0 ? new ItemStack(BENT_IRON, Math.min(64, w / IRON_WORTH)) : new ItemStack(BENT_COPPER, Math.min(64, w));
+		return w % IRON_WORTH == 0 ? new ItemStack(BENT_IRON, Math.min(STACK, w / IRON_WORTH)) : new ItemStack(BENT_COPPER, Math.min(STACK, w));
 	}
 
 	/** {@code worth} as stacks of bent ingots: as many iron as fit, the rest copper. */

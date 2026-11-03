@@ -22,7 +22,6 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.Vec3;
@@ -272,7 +271,7 @@ public final class Pedlars {
 	}
 
 	private static MerchantOffer sell(ItemStack what, int bent, int uses) {
-		return new MerchantOffer(BentIngots.cost(bent), what, uses, 0, 0.05F);
+		return BentIngots.offer(bent, what, uses, 0, 0.05F);
 	}
 
 	private static List<PathfinderMob> members(ServerLevel level, Party p) {

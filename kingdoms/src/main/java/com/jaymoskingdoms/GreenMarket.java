@@ -233,7 +233,7 @@ final class GreenMarket {
 			int price = price(g, stock);
 			int spare = (stock - g.keep()) / g.lot();
 			if (spare > 0) {
-				offers.add(new MerchantOffer(BentIngots.cost(price), new ItemStack(g.item(), g.lot()), Math.min(SELL_USES, spare), 0, 0.0F));
+				offers.add(BentIngots.offer(price, new ItemStack(g.item(), g.lot()), Math.min(SELL_USES, spare), 0, 0.0F));
 			}
 			int pay = bounty(g, stock);
 			int short_ = (g.keep() - stock + g.lot() - 1) / g.lot();
