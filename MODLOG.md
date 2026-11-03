@@ -4965,3 +4965,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   under leaves and beside trunks (and sometimes in open hollows), grow while the rain lasts and dry after; under water
   by day `LightShaft`s hang from the surface, leaning away from the sun. Water puddles are `BloodPuddle.water` in the
   blood decals' group (now any `BloodDecals.Decal`). Sprites from `tools/wet_textures.py`. Tuning at the top of each class.
+  Then Andy shared Recrafted's settings (MR_CHOO, Patreon-only, so never in the pack): its light rays, fog, clouds and
+  swaying leaves/grass already come from Complementary Unbound, which every player starts with, so we added only what a
+  shader pack doesn't: bushy leaves, a built-in pack `living_world` ("Jaymo's Powers: bushy leaves", on by default),
+  where every vanilla leaf block also draws two crossed planes of its own texture reaching 3 px past the block
+  (`tools/bushy_leaves.py`; multipart blockstates; they wave with the leaves under Complementary).

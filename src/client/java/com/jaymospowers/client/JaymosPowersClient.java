@@ -135,6 +135,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (0.19.61) bushy leaves (tools/bushy_leaves.py): every vanilla leaf block also draws two crossed planes reaching past
+		// it; on by default, switched off in Resource Packs. Our own take on Recrafted's bushy leaves (nothing copied).
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("living_world"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: bushy leaves"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (Motion patch 5) the iron golem's eyes glow
 		com.jaymospowers.client.glow.GolemEyes.init();
 		// (Motion patch 6) pets acting like pets, and wet coats that shake dry
