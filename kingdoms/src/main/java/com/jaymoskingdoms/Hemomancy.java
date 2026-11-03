@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Vampires</b> ({@link VampirePlayers}) cast it cheaper and harder, but every cast stokes their blood fever.</li>
  * <li>A camp's <b>blood witch</b> ({@link Sorcery#BLOOD_WITCH}) casts the same: bolts that cut, grips, hemorrhages, and
  * she drinks the bleeding round her to heal.</li>
- * <li>(0.7.480) Andy: "Blood magic should draw from stains on ground". Both also draw the spilt blood out of the stains
+ * <li>(0.7.481) Andy: "Blood magic should draw from stains on ground". Both also draw the spilt blood out of the stains
  * round them (Jaymo's Powers' blood trail, {@link PowersCompat#drawStains}): it rises to them in a thread of red and the
  * stain shrinks and fades, gone once drawn dry (a trail drawn up can't be followed any more).</li>
  * </ul>
@@ -56,7 +56,7 @@ public final class Hemomancy {
 	static final float POOL_MAX = 20.0F, DRINK_PER_CUT = 0.25F, DRINK_MOST = 2.0F;
 	static final double DRINK_RANGE = 8.0;
 	/**
-	 * (0.7.480) Drawing from the stains on the ground: how near; how much of each stain a second (stain size: a drip's is
+	 * (0.7.481) Drawing from the stains on the ground: how near; how much of each stain a second (stain size: a drip's is
 	 * about 0.2, a pool 1 to 3); the pool (or a witch's health) each unit of stain is worth. The pool still fills at most
 	 * {@link #DRINK_MOST} a second, the bleeding first.
 	 */
@@ -330,7 +330,7 @@ public final class Hemomancy {
 			drank++;
 		}
 		float heal = WITCH_DRINK * drank;
-		// (0.7.480) and the spilt blood round her (every two seconds: two seconds' worth)
+		// (0.7.481) and the spilt blood round her (every two seconds: two seconds' worth)
 		float room = witch.getMaxHealth() - witch.getHealth() - heal;
 		if (room > 0.0F) {
 			float seconds = WITCH_DRINK_EVERY / 20.0F;
@@ -368,7 +368,7 @@ public final class Hemomancy {
 				}
 			}
 			drank = Math.min(DRINK_MOST, drank);
-			// (0.7.480) and the spilt blood on the ground round them, as much as the pool has room for this second
+			// (0.7.481) and the spilt blood on the ground round them, as much as the pool has room for this second
 			float room = Math.min(DRINK_MOST - drank, POOL_MAX - pool - drank);
 			if (room > 0.0F) {
 				drank += STAIN_BLOOD * PowersCompat.drawStains(level, player.position(), STAIN_RANGE, STAIN_EACH, room / STAIN_BLOOD,
@@ -380,7 +380,7 @@ public final class Hemomancy {
 		}
 	}
 
-	/** (0.7.480) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */
+	/** (0.7.481) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */
 	private static void rise(ServerLevel level, Vec3 from, LivingEntity to) {
 		Vec3 end = to.getBoundingBox().getCenter();
 		Vec3 step = end.subtract(from);

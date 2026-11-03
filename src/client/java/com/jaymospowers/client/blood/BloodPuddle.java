@@ -41,13 +41,13 @@ final class BloodPuddle extends Particle {
 	static final float SIZE = 1.5F;
 	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
 	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
-	/** (0.19.61) A stain drawn smaller by blood magic eases down this share of its size a tick; one restained with fewer than this many ticks left (drawn dry) fades over them. */
+	/** (0.19.62) A stain drawn smaller by blood magic eases down this share of its size a tick; one restained with fewer than this many ticks left (drawn dry) fades over them. */
 	static final float DRAWN_EASE = 0.12F;
 	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
 
 	private float baseSize;
-	/** (0.19.61) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
+	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
 	private float targetSize;
 	private int quickFade;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
@@ -100,7 +100,7 @@ final class BloodPuddle extends Particle {
 		}
 		this.age = Math.max(this.age, age);
 		this.lifetime = this.age + life;
-		// (0.19.61) drawn dry: it fades over the little time it has left, not all at once (fresh blood on it: as before)
+		// (0.19.62) drawn dry: it fades over the little time it has left, not all at once (fresh blood on it: as before)
 		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
 	}
 

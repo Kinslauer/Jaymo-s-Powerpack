@@ -4950,7 +4950,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   palm and their Wave Beam now gathers 16 ticks in cupped hands before firing with a two-hand push and shout; rogue
   fighters and sparring mannequins throw from the palm. Tuning: `ZFighterHands` (hand spots, shout), `ZFighterHandsPose`
   (angles, timing, first-person spots), `FirstPersonArms.KI_*`, `ZFighterKi.BLAST_FORM_*`, `ZFighterGift.WAVE_GATHER`.
-- **0.19.61, Kingdoms 0.7.480, blood magic draws from stains:** Andy: "Blood magic should draw from stains on ground".
+- **0.19.61, Kitchen 0.5.50, carried snakes drape, small bodies in one hand:** A carried (or slung, or falling) snake now lies draped over the
+  arms, its middle across them and its head and tail hanging down either side, swinging as you move, instead of a
+  stiff body with only the tail tip loose. Small bodies (chickens, rabbits, snakes, babies) are now carried
+  in one hand by the neck, a snake's tail trailing on the ground, and the corpse bag that put them in your inventory is
+  gone (Kitchen MODLOG). Not compile-checked; not played.
+- **0.19.62, Kingdoms 0.7.481, blood magic draws from stains:** Andy: "Blood magic should draw from stains on ground".
   `BloodTrail.draw` takes up to a set amount out of each lasting stain near a spot (nearest first, a cap in all); a drawn
   stain is re-sent smaller and the client's `BloodPuddle` eases down to it, and one drawn under 0.08 dries away, fading
   over its last second. Kingdoms' blood magic calls it (kingdoms/MODLOG.md). A drawn-up trail can't be followed any more.

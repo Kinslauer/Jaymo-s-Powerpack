@@ -60,7 +60,22 @@ public final class LooseParts {
 	 */
 	public static final RenderStateDataKey<Frame> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:loose_parts");
 
-	public record Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale) {
+	public record Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale, Drape drape) {
+		public Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale) {
+			this(motion, body, time, grounded, scale, null);
+		}
+	}
+
+	/**
+	 * (0.5.50) A snake carried, slung or falling: its spine is laid over the carrier's arms (see {@link ChainSpine#drape})
+	 * instead of each segment hanging on its own. {@code across}: the arms' way, as a yaw (degrees); swings as Limp's.
+	 * (0.5.50) {@code hand} above 0: held in one hand that high above the ground instead, hanging from just behind the
+	 * head (see {@link ChainSpine#hang}), the hand at {@code handX, handY, handZ} in the placement's frame.
+	 */
+	public record Drape(float across, float swingBack, float swingLeft, float hand, float handX, float handY, float handZ) {
+		public Drape(float across, float swingBack, float swingLeft) {
+			this(across, swingBack, swingLeft, 0.0F, 0.0F, 0.0F, 0.0F);
+		}
 	}
 
 	private static final Map<ModelPart, List<Node>> PLANS = new WeakHashMap<>();
@@ -92,7 +107,16 @@ public final class LooseParts {
 		if (root.hasChild("right_arm") || root.hasChild("body") && root.getChild("body").hasChild("right_arm")) {
 			return;
 		}
-		apply(root, frame.body, frame.scale, frame.motion, frame.time, frame.grounded, Set.of());
+		Set<String> skip = Set.of();
+		if (frame.drape != null) {
+			Drape d = frame.drape;
+			Set<String> spine = d.hand() > 0.0F ? ChainSpine.hang(root, frame.body, frame.scale, d.across(), d.swingBack(),
+				d.swingLeft(), d.hand(), d.handX(), d.handY(), d.handZ()) : ChainSpine.drape(root, frame.body, frame.scale, d.across(), d.swingBack(), d.swingLeft());
+			if (spine != null) {
+				skip = spine;
+			}
+		}
+		apply(root, frame.body, frame.scale, frame.motion, frame.time, frame.grounded, skip);
 	}
 
 	/**

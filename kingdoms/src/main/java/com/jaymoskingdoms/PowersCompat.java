@@ -1762,12 +1762,12 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
-	/** Powers' {@code BloodTrail.draw(ServerLevel, Vec3, double, float, float, Consumer)} (0.19.61). */
+	/** Powers' {@code BloodTrail.draw(ServerLevel, Vec3, double, float, float, Consumer)} (0.19.62). */
 	private static java.lang.invoke.@Nullable MethodHandle drawStains;
 	private static boolean lookedForDraw;
 
 	/**
-	 * (0.7.480) Blood magic draws from the blood stains on the ground (Andy: "Blood magic should draw from stains on
+	 * (0.7.481) Blood magic draws from the blood stains on the ground (Andy: "Blood magic should draw from stains on
 	 * ground"): up to {@code each} of every stain within {@code range} of {@code at}, the nearest first, {@code most} in
 	 * all; each drawn stain shrinks and fades. {@code drawn} hears where each lay. How much was drawn, in stain size (0
 	 * without Powers, or an older one).

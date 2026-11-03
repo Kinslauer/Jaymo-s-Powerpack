@@ -52,7 +52,7 @@ public final class BloodTrail {
 	static final double FALL = 6.0;
 	/** The most stains a level keeps (the oldest go first). */
 	static final int MAX_MARKS = 6000;
-	/** (0.19.61) Blood magic ({@link #draw}): a stain drawn smaller than this dries away, gone this many ticks later. */
+	/** (0.19.62) Blood magic ({@link #draw}): a stain drawn smaller than this dries away, gone this many ticks later. */
 	static final float DRAWN_DRY = 0.08F;
 	static final int DRAWN_GONE = 20;
 
@@ -328,7 +328,7 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.19.61) Andy: "Blood magic should draw from stains on ground". Draws the blood out of the stains within
+	 * (0.19.62) Andy: "Blood magic should draw from stains on ground". Draws the blood out of the stains within
 	 * {@code range} of {@code at}, the nearest first: each gives up to {@code each} of its size, until {@code most} is
 	 * drawn in all. A drawn stain shrinks (each player near is sent it smaller, and it eases down), and one drawn down
 	 * past {@link #DRAWN_DRY} dries away. {@code drawn} hears where each one lay, for the blood's path to whoever drew
