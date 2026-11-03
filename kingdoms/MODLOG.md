@@ -8246,3 +8246,14 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
   in the leggings' dye, mail a linen gambeson with mail sleeves, iron a studded padded gambeson. A WornModel, so it poses.
 - Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
   change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
+
+## 0.7.480: blood magic draws from stains on the ground (pack 0.19.61)
+Andy: "Blood magic should draw from stains on ground". Blood magic here is the Blood Sorcerer's (and the camp blood
+witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`BloodTrail`, the trail decals).
+- **Blood Sorcerers** fill their blood pool from the stains within 6 blocks too, after the bleeding: up to 0.12 of each
+  stain a second, the nearest first, each unit of stain worth 4 pool (a drip's stain about 0.8, a pool 4-12), still at
+  most 2 a second in all and only while the pool has room. The blood rises to them in a thread of red motes and the
+  stain shrinks and fades, gone once drawn dry.
+- **Blood witches** heal from the stains round them the same way while hurt (every 2 s, after the bleeding foes).
+- `PowersCompat.drawStains` (reflection, nothing without Powers 0.19.61+). Tuning: `Hemomancy.STAIN_RANGE`,
+  `STAIN_EACH`, `STAIN_BLOOD`; Powers' `BloodTrail.DRAWN_DRY`, `DRAWN_GONE`, `BloodPuddle.DRAWN_EASE`.

@@ -1762,6 +1762,40 @@ public final class PowersCompat {
 			// no stain
 		}
 	}
+	/** Powers' {@code BloodTrail.draw(ServerLevel, Vec3, double, float, float, Consumer)} (0.19.61). */
+	private static java.lang.invoke.@Nullable MethodHandle drawStains;
+	private static boolean lookedForDraw;
+
+	/**
+	 * (0.7.480) Blood magic draws from the blood stains on the ground (Andy: "Blood magic should draw from stains on
+	 * ground"): up to {@code each} of every stain within {@code range} of {@code at}, the nearest first, {@code most} in
+	 * all; each drawn stain shrinks and fades. {@code drawn} hears where each lay. How much was drawn, in stain size (0
+	 * without Powers, or an older one).
+	 */
+	public static float drawStains(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range, float each,
+		float most, java.util.function.@Nullable Consumer<net.minecraft.world.phys.Vec3> drawn) {
+		if (!lookedForDraw) {
+			lookedForDraw = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					drawStains = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.blood.BloodTrail"), "draw",
+						java.lang.invoke.MethodType.methodType(float.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class,
+							double.class, float.class, float.class, java.util.function.Consumer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers' blood stains can't be drawn from (older Powers?)", e);
+				}
+			}
+		}
+		if (drawStains == null) {
+			return 0.0F;
+		}
+		try {
+			return (float) drawStains.invoke(level, at, range, each, most, drawn);
+		} catch (Throwable e) {
+			return 0.0F;
+		}
+	}
+
 	// ---- (0.7.426) crippling blows: a broken leg ------------------------------------------------------------------------
 
 	private static boolean lookedForBreak;
