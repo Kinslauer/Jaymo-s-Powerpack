@@ -186,7 +186,8 @@ public final class VillagerLooks {
 			}
 			if (kind == HeritageLooks.Kind.TIDEBORN) {
 				HeritageLooks.finTextures(style);
-				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, false, false);
+				SeaParts.Fins keep = SeaParts.fins(style);
+				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, !keep.head, !keep.arms);
 			}
 			if (kind == HeritageLooks.Kind.STONEBORN) {
 				// (0.7.443) cracks over the face and chest, and the heavy brow

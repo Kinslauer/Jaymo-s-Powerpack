@@ -5028,3 +5028,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
 - **0.19.67, Kingdoms 0.7.484, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
   that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.
+- **0.19.69, Kingdoms 0.7.485, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.

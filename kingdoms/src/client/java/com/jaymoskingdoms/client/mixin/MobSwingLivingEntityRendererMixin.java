@@ -44,6 +44,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.VillagerLooks.extract(entity, state);
 		// (0.7.484) the Beastfolk's and the fae's ears, tails and wings: real model parts
 		com.jaymoskingdoms.client.BeastParts.extract(entity, state);
+		// (0.7.485) the sea-blooded Tideborn's fins, tentacles, shells and spines
+		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}

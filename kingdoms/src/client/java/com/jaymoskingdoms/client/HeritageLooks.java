@@ -414,7 +414,9 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == Kind.TIDEBORN) {
 			finTextures(style);
-			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0);
+			// (0.7.485) a sea-blooded look keeps only the fins its own parts leave room for (SeaParts)
+			SeaParts.Fins keep = SeaParts.fins(style);
+			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0, headFinsCovered || !keep.head, armFinsCovered || !keep.arms);
 		}
 		if (kind == Kind.STONEBORN) {
 			// (0.7.443) cracks over the face and chest, and the heavy brow
