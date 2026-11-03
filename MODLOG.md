@@ -5105,13 +5105,26 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
   - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
-- **0.19.76, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
+- **0.19.79, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
   the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
   piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
   zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
   beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
   wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
-  timing), over the crosshair (charge bars, awareness eye), under it (guard, roll pips, horse tag, smithing), right of it
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, execution bars, roll pips, horse tag, smithing), right of it
   (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
   sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
   body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,

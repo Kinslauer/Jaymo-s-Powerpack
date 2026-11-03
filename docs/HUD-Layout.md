@@ -1,4 +1,4 @@
-# HUD layout (pack 0.19.76)
+# HUD layout (pack 0.19.79)
 
 Andy (2026-11-03): "rework the hud so nothing is clashing, there are alot of new elements now, so everything needs to
 feel coherent". Every HUD piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash (vignettes, veins,
@@ -45,6 +45,4 @@ to the table above, and draw with `HudStyle`. Never pick a fixed screen position
 ## Known
 - Z Fighter's HUD editor still measures Spirit Bomb, Ki Wave, ape rage and scouter from their old fixed spots, so a
   custom scale pivots about the old spot (an offset still works).
-- PR #884's execution bars (`FinisherClient.bars`, cy+12) aren't zoned yet: whichever of #884 and this lands second
-  puts them in `BELOW` row 20.
 - Xaero's minimap size isn't read; the rail starts at 112 gui px, which fits its default size.

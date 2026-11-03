@@ -8279,7 +8279,36 @@ or the symbiote suit it isn't drawn (`PowersCover.body`).
 Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
 
-## 0.7.486: one HUD layout (pack 0.19.76, Kitchen 0.5.54)
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
+
+## 0.7.487: one HUD layout (pack 0.19.79, Kitchen 0.5.55)
 Every Kingdoms HUD piece asks the pack's shared zones where to draw (`client/hud/HudZones`, a copy of Powers'; see
 `docs/HUD-Layout.md` in the pack): riding and dragon bars stack in the right dock over the power chips, the horse tag
 and wild-horse stats sit under the crosshair, the awareness eye over it, the forms chain count right of it, the forms
