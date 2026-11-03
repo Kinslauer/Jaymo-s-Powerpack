@@ -427,8 +427,11 @@ public class ZFighterRogue extends Monster {
 
 	/** A ki blast from the palm, straight at his foe. */
 	private void blast(ServerLevel level, LivingEntity target, boolean tyrant) {
-		Vec3 from = this.getEyePosition().add(this.getLookAngle().scale(0.6));
+		// (0.19.60) out of his palm, thrown with a thrust of that arm
 		Vec3 to = target.getBoundingBox().getCenter();
+		Vec3 aim = to.subtract(this.getEyePosition());
+		Vec3 from = ZFighterHands.mainPalm(this, aim.lengthSqr() < 1.0E-6 ? this.getLookAngle() : aim.normalize());
+		ZFighterHands.thrust(this, ZFighterHands.hand(this, true), ZFighterHands.JAB);
 		ZFighterKi.showBeam(level, from, to, tyrant ? 0.5F : 0.3F, tyrant ? TYRANT_COLOR : CHAMPION_COLOR);
 		target.hurtServer(level, this.damageSources().mobAttack(this), tyrant ? TYRANT_BLAST : CHAMPION_BLAST);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.0F, 1.5F);

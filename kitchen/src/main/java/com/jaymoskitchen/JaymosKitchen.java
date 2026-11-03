@@ -83,6 +83,8 @@ public class JaymosKitchen implements ModInitializer {
 		// fat, tallow, bark and tanning (its SOAKS attachment is class-loaded here)
 		com.jaymoskitchen.tanning.Tanning.register();
 		com.jaymoskitchen.tanning.Hides.register();
+		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
+		com.jaymoskitchen.butchery.Butchery.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
@@ -110,6 +112,11 @@ public class JaymosKitchen implements ModInitializer {
 			if (carried != null) {
 				if (!level.isClientSide()) {
 					BlockPos clicked = hit.getBlockPos();
+					if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(clicked))) {
+						// (0.5.51) hung up on a meat hook by its hind legs
+						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
+						return InteractionResult.SUCCESS;
+					}
 					Vec3 at;
 					if (Corpses.isButcherBlock(level.getBlockState(clicked))) {
 						at = CorpseEntity.tableSpot(level, clicked, hit.getLocation(), carried.isBigCarcass());

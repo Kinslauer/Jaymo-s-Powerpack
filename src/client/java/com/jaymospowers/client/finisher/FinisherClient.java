@@ -27,7 +27,7 @@ import net.minecraft.world.phys.EntityHitResult;
  * Now the hands are the hold's ({@link #holdsAttack}, from {@code HeldInputMixin} by way of {@link com.jaymospowers.client.HeldInput}): no click, held swing or digging
  * while you're sneaking with the crosshair on someone you could finish, nor while the finisher or execution plays.
  * <p>
- * (0.19.57) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays ... maybe we try a double
+ * (0.19.78) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays ... maybe we try a double
  * left click as the override?". The server's count ({@link Finishers.Charge}) is drawn as {@link Finishers#HOLD_BARS} bars
  * under the crosshair ({@link #bars}), each filling in turn; and two presses of attack within {@link #DOUBLE_CLICK_TICKS},
  * sneaking with the crosshair on the same one, ask for it at once ({@link Finishers.Rush}), and the second press must stay
@@ -42,21 +42,21 @@ public final class FinisherClient {
 	private static float choiceYaw;
 	/** (0.18.97) The choice's slider: this many marks a side. */
 	private static final int CHOICE_MARKS = 6;
-	/** (0.19.57) Two presses of attack this close (client ticks) are a double click. */
+	/** (0.19.78) Two presses of attack this close (client ticks) are a double click. */
 	static final int DOUBLE_CLICK_TICKS = 6;
-	/** (0.19.57) The bars: each this wide and tall (gui pixels), this far apart, this far under the crosshair. */
+	/** (0.19.78) The bars: each this wide and tall (gui pixels), this far apart, this far under the crosshair. */
 	static final int BAR_WIDTH = 14, BAR_HEIGHT = 3, BAR_GAP = 3, BAR_DROP = 12;
-	/** (0.19.57) A count not renewed for this many ticks is over (let go, or it played). */
+	/** (0.19.78) A count not renewed for this many ticks is over (let go, or it played). */
 	static final int CHARGE_LINGER = 3;
 	static final int BAR_BACK = 0x90000000, BAR_EMPTY = 0x60FFFFFF, BAR_FILLING = 0xFFB02020, BAR_FULL = 0xFFFF4040,
 		BAR_CHOKE_FILLING = 0xFF8A8A8A, BAR_CHOKE_FULL = 0xFFE0E0E0;
-	/** (0.19.57) The server's last count: whom, how far, a choke; when it came (client ticks). */
+	/** (0.19.78) The server's last count: whom, how far, a choke; when it came (client ticks). */
 	private static int chargeTarget = -1, chargeHeld, chargeAt = Integer.MIN_VALUE / 2, ticks;
 	private static boolean chargeChoke;
-	/** (0.19.57) Attack's state last tick, when and on whom it was last pressed; whether the hands are the hold's till release. */
+	/** (0.19.78) Attack's state last tick, when and on whom it was last pressed; whether the hands are the hold's till release. */
 	private static boolean attackWasDown, locked;
 	private static int pressedAt = Integer.MIN_VALUE / 2, pressedOn = -1;
-	/** (0.19.57) A double click was sent and its press is still held: letting go is told to the server (it calls it off). */
+	/** (0.19.78) A double click was sent and its press is still held: letting go is told to the server (it calls it off). */
 	private static boolean rushHeld;
 
 	private FinisherClient() {
@@ -69,7 +69,7 @@ public final class FinisherClient {
 			choosing = payload.target();
 			choiceYaw = context.player().getYRot();
 		});
-		// (0.19.57) the hold's count, drawn as three bars
+		// (0.19.78) the hold's count, drawn as three bars
 		ClientPlayNetworking.registerGlobalReceiver(Finishers.Charge.TYPE, (payload, context) -> {
 			chargeTarget = payload.target();
 			chargeHeld = payload.held();
@@ -89,7 +89,7 @@ public final class FinisherClient {
 		attackWasDown = down;
 		locked = player != null && (charging() || choosing >= 0 || locked && down);
 		if (rushHeld && (!down || player == null)) {
-			// (0.19.57) the double click's press let go: before the kill, the execution's off
+			// (0.19.78) the double click's press let go: before the kill, the execution's off
 			rushHeld = false;
 			if (player != null) {
 				ClientPlayNetworking.send(new Finishers.Rush(-1));
@@ -118,7 +118,7 @@ public final class FinisherClient {
 			}
 		}
 		if (pressed && target >= 0 && choosing < 0) {
-			// (0.19.57) the double click: a second press on the same one, soon after the first
+			// (0.19.78) the double click: a second press on the same one, soon after the first
 			if (target == pressedOn && ticks - pressedAt <= DOUBLE_CLICK_TICKS) {
 				ClientPlayNetworking.send(new Finishers.Rush(target));
 				rushHeld = true;
@@ -131,13 +131,13 @@ public final class FinisherClient {
 		}
 	}
 
-	/** (0.19.57) Whether the server's count is still coming. */
+	/** (0.19.78) Whether the server's count is still coming. */
 	private static boolean charging() {
 		return chargeTarget >= 0 && ticks - chargeAt <= CHARGE_LINGER;
 	}
 
 	/**
-	 * (0.19.57) The three bars under the crosshair: each a third of {@link Finishers#HOLD_TICKS}, filling left to right,
+	 * (0.19.78) The three bars under the crosshair: each a third of {@link Finishers#HOLD_TICKS}, filling left to right,
 	 * bright once full; the third full, the server begins it (and the bars go).
 	 */
 	private static void bars(GuiGraphicsExtractor graphics, DeltaTracker delta) {
@@ -204,7 +204,7 @@ public final class FinisherClient {
 			return false;
 		}
 		if (Finishers.busy(player) || locked) {
-			// ((0.19.57) or the bars are filling, the choice is up, or attack's still held from either)
+			// ((0.19.78) or the bars are filling, the choice is up, or attack's still held from either)
 			return true;
 		}
 		if (!aimingAtHelpless(minecraft)) {

@@ -39,7 +39,11 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
 		com.jaymoskingdoms.client.BioForms.extract(entity, state);
 		com.jaymoskingdoms.client.ManaClient.extract(entity, state);
+		// (0.7.479) a corpse's body, drawn outside the world: found again by its id (MCA's skin colour)
+		com.jaymoskingdoms.client.DrawnBodies.drawn(entity);
 		com.jaymoskingdoms.client.VillagerLooks.extract(entity, state);
+		// (0.7.486) the sea-blooded Tideborn's fins, tentacles, shells and spines
+		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}

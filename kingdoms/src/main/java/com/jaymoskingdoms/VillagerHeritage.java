@@ -152,6 +152,14 @@ public final class VillagerHeritage {
 	/** {@code entity}'s heritage (a villager's or a player's), or null. */
 	public static Heritage.@Nullable Kind of(Entity entity) {
 		String key = entity.getAttached(Heritage.HERITAGE);
+		if (key == null && entity.level().isClientSide()) {
+			// (0.7.479) a body drawn from saved data (a corpse's) carries its blood in its tag too
+			for (String tag : entity.entityTags()) {
+				if (tag.startsWith(Heritage.TAG)) {
+					return Heritage.Kind.byKey(tag.substring(Heritage.TAG.length()));
+				}
+			}
+		}
 		return key == null ? null : Heritage.Kind.byKey(key);
 	}
 

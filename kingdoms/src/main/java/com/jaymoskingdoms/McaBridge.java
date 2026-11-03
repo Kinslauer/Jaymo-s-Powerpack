@@ -430,7 +430,10 @@ final class McaBridge {
 		if (job == null) {
 			return null;
 		}
-		VillagerEntityMCA villager = chosen != null ? chosen : candidate(level, f, role);
+		// (0.7.481) a camp never takes on someone else's spare villager: a newcomer of its own moves in
+		boolean camp = f.type() == FactionType.BARBARIAN;
+		VillagerEntityMCA villager = chosen != null ? chosen : camp ? null : candidate(level, f, role);
+		boolean newcomer = villager == null;
 		if (villager == null) {
 			// nobody to spare: someone new moves in to take the work
 			// (0.7.84) on open ground by {@code at}, not shut in wherever it is (a seat can be indoors)
@@ -439,6 +442,10 @@ final class McaBridge {
 		}
 		if (villager.getProfession() != job) {
 			villager.setProfession(job);
+		}
+		if (camp && Worker.isWork(role)) {
+			// (0.7.481) dressed as the camp dresses its builders (and, if new, born to the blood its folk would have)
+			campDress(level, f, role, villager, home, radius, newcomer);
 		}
 		Enlisted w = worker(villager);
 		w.enlist(role, f.id());
@@ -1096,6 +1103,43 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.486) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
+	static boolean shedPacked(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ServerLevel level) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return false;
+		}
+		boolean any = false;
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			var stack = pack.getItem(i);
+			var held = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+			if (held != null && held.slot() == slot && SeaBodies.armour(stack, slot)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+				villager.spawnAtLocation(level, stack);
+				any = true;
+			}
+		}
+		return any;
+	}
+
+	/** (0.7.486) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
+	static boolean toBow(net.minecraft.world.entity.Mob mob) {
+		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || villager.getProfession() != ProfessionsMCA.GUARD) {
+			return false;
+		}
+		villager.setProfession(ProfessionsMCA.ARCHER);
+		var pack = villager.getInventory();
+		boolean bow = villager.getMainHandItem().getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		for (int i = 0; i < pack.getContainerSize() && !bow; i++) {
+			bow = pack.getItem(i).getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+		}
+		if (!bow) {
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BOW));
+			pack.addItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW, 32));
+		}
+		return true;
+	}
+
 	static void toSea(PathfinderMob mob) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
@@ -1539,6 +1583,12 @@ final class McaBridge {
 		}
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		// (0.7.481) the same blood, and (a camp's) the same hides
+		wearLike(folk, villager, true, f.type() == FactionType.BARBARIAN);
 		Enlisted w = worker(villager);
 		w.enlist(folk.role(), f.id());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
@@ -1548,6 +1598,41 @@ final class McaBridge {
 		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		folk.discard();
 		return true;
+	}
+
+	/**
+	 * (0.7.481) Andy: "Foremen and builders are not villagers". A camp's worker is one of MCA's villagers too: {@code villager}
+	 * is dressed as a folk of {@code role} in {@code f} would be (its hides and caps), and if it's a newcomer, born to the blood
+	 * that folk would have had.
+	 */
+	private static void campDress(ServerLevel level, Faction f, int role, VillagerEntityMCA villager, BlockPos home, int radius, boolean newcomer) {
+		Folk model = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		if (model == null) {
+			return;
+		}
+		model.snapTo(villager.getX(), villager.getY(), villager.getZ(), villager.getYRot(), 0.0F);
+		model.setup(role, f, home, radius);
+		wearLike(model, villager, newcomer, true);
+		model.discard();
+	}
+
+	/** (0.7.481) {@code villager} takes {@code folk}'s heritage ({@code blood}) and its worn gear, head to feet ({@code clothes}). */
+	private static void wearLike(Folk folk, VillagerEntityMCA villager, boolean blood, boolean clothes) {
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (blood && kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		if (!clothes) {
+			return;
+		}
+		for (EquipmentSlot slot : List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				villager.setItemSlot(slot, worn.copy());
+				villager.setDropChance(slot, 0.0F);
+			}
+		}
 	}
 
 	/** (0.7.187) A new grown MCA guard at {@code at}, in the world, for no settlement ({@code nether.AvatarCamps}); null if it failed. */

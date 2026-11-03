@@ -180,6 +180,16 @@ public final class XenoformState {
 	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.19.62) A four-legged alien's ability pose, drawn for everyone: "charge", "roll" or "spin" (see XenoformPower.syncAct). */
+	public static final AttachmentType<String> ACT = AttachmentRegistry.create(JaymosPowers.id("xenoform_act"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.19.62) Skitter crawling up a wall as a spider (prone): the side the wall is on (a horizontal
+	 * {@code Direction}'s 2D data value), so every client draws it on that wall.
+	 */
+	public static final AttachmentType<Integer> CLIMB = AttachmentRegistry.create(JaymosPowers.id("xenoform_climb"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** (0.18.119, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */
 	public static final AttachmentType<Long> GRAB = AttachmentRegistry.create(JaymosPowers.id("xenoform_grab"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
@@ -262,5 +272,14 @@ public final class XenoformState {
 
 	public static boolean transformed(Player player) {
 		return player.hasAttached(FORM);
+	}
+
+	/** (0.19.66) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace). */
+	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker");
+
+	/** (0.19.66) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */
+	public static boolean lowBox(net.minecraft.world.entity.player.Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && LOW_BOX.contains(form);
 	}
 }

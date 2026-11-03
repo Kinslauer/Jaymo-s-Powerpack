@@ -87,7 +87,10 @@ public final class ClimateHud {
 		boolean water = hit.getType() == HitResult.Type.BLOCK
 			&& player.level().getFluidState(((net.minecraft.world.phys.BlockHitResult) hit).getBlockPos()).is(FluidTags.WATER);
 		boolean rain = player.getXRot() < -60.0F && player.level().isRainingAt(player.blockPosition().above());
-		if (water || rain) {
+		// (0.5.48) a fire drinker gulps from open lava too (the server decides who that is)
+		boolean lava = hit.getType() == HitResult.Type.BLOCK
+			&& player.level().getFluidState(((net.minecraft.world.phys.BlockHitResult) hit).getBlockPos()).is(FluidTags.LAVA);
+		if (water || rain || lava) {
 			ClientPlayNetworking.send(new Payloads.Sip());
 			sipWait = SIP_EVERY;
 		}

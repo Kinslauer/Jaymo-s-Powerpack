@@ -581,6 +581,8 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
+		player.removeAttached(XenoformState.ACT);
 		player.removeAttached(XenoformState.GRAB);
 		player.removeAttached(XenoformState.SWAT);
 		player.removeAttached(XenoformState.STEP);
@@ -628,6 +630,7 @@ public final class XenoformPower implements Power {
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 				live.form.tick(player, live);
+				syncAct(player, live);
 				if (live.corrupted && live.form != null) {
 					live.form.corrupt(player, live);
 				}
@@ -1160,6 +1163,8 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
+		player.removeAttached(XenoformState.ACT);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		int left = Math.max(0, live.ticksLeft);
@@ -1447,5 +1452,31 @@ public final class XenoformPower implements Power {
 		player.sendOverlayMessage(Component.translatable(on ? "message.jaymospowers.xenoform.wild_on" : "message.jaymospowers.xenoform.wild_off")
 			.withStyle(on ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.GRAY));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.8F, on ? 1.8F : 0.9F);
+	}
+
+	/**
+	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
+	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin"), Keen hanging
+	 * from a ceiling ("hang").
+	 */
+	private static void syncAct(ServerPlayer player, Live live) {
+		String act = null;
+		if (live.form != null) {
+			switch (live.form.id) {
+				case "tusk" -> act = live.rush > 0 ? "charge" : null;
+				case "gorger" -> act = live.rolled ? "roll" : live.horn > 0 ? "charge" : null;
+				case "gyre" -> act = live.spin > 0 ? "spin" : live.rolled ? "roll" : null;
+				// (0.19.75) Keen hanging from a ceiling by its feet
+				case "keen" -> act = live.perched ? "hang" : null;
+				default -> act = null;
+			}
+		}
+		if (!java.util.Objects.equals(act, player.getAttached(XenoformState.ACT))) {
+			if (act == null) {
+				player.removeAttached(XenoformState.ACT);
+			} else {
+				player.setAttached(XenoformState.ACT, act);
+			}
+		}
 	}
 }

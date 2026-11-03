@@ -34,11 +34,12 @@ public final class Workers {
 
 	/**
 	 * {@code role} is filled in place from {@code f}'s own MCA villagers: MCA's loaded, it isn't a camp, and it's a
-	 * worker's job, or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
+	 * worker's job (a camp's too), or a realm's guard (made an MCA guard or archer; its archers on their posts stay soldiers).
 	 */
 	static boolean inPlace(Faction f, int role) {
 		// ((0.7.293) and its wall archers, WallArchers)
-		return McaCompat.LOADED && f.type() != FactionType.BARBARIAN && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
+		// ((0.7.481) and a camp's builders and other workers too: Andy, "Foremen and builders are not villagers")
+		return McaCompat.LOADED && (Worker.isWork(role) || (role == Folk.GUARD || role == Folk.ARCHER) && f.type().isRealm());
 	}
 
 	/** A worker's day's work (a {@link Folk}'s from its own tick; an MCA villager's from {@link #step}). */

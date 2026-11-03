@@ -4928,3 +4928,193 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Compile-checked (0 errors against the 26.3 jars); not played.
 - **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
   wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
+- **0.19.57, Kingdoms 0.7.477, Kitchen 0.5.48, Gemini handoff pass 1:** Andy's Gemini handoff, taken as design intent and
+  built on what was already here. Kindle grows with you (`EmberKindle.stage`): four stages by experience level
+  (`STAGE_LEVELS` 10/20/30; reach 1.5-2.2, 2.2-3.5, the old 3-5, 4-6.8) and a Flame Avatar's 6-11 block pillar, with
+  damage and heat speed by stage. Ki is seen only by the sensitive (`client/power/zfighter/KiSight`): a Z Fighter's aura
+  and glow are drawn only for viewers attuned in Kingdoms (`Mana.ATTUNED`, read by reflection) and always for yourself;
+  without Kingdoms everyone sees them. Kitchen jar in libs to 0.5.48.
+- **0.19.58, Kingdoms 0.7.478, Gemini handoff passes 2-3:** Kingdoms only: Ignis Vael's Cinder Forge in the Nether (the
+  Writ of Rebirth, cinder-forged reforging, smiths' rumours, the Charred Wayfinder) and under-armour (kingdoms/MODLOG.md).
+- **0.19.60, ki from the hands:** Andy: "the ki blasts from z fighters should originate from their hands or fingers
+  realistically". Every Z Fighter ki technique is made in and thrown from the hands (`ZFighterHands` on the server, synced
+  pose `zfighter_hands` + `HandThrow` packet; `client/power/zfighter/ZFighterHandsPose` draws it). The Ki Wave (and bomb)
+  gathers between hands cupped at the lead hip (shoulders turned, trembling), the Frost Needle at a pointed finger; let go,
+  the hands drive forward into the firing pose with a shout (`ZFighterHands.shout`, a vindicator cry for now) and the beam's
+  root stays in the pushed hands. A tapped Ki Blast forms in the main palm for 3 ticks as the arm draws back, then is thrown
+  with a thrust; the barrage's balls form in both palms held out, then each is thrown by its own arm, the hands taking
+  turns, the next ball already forming in the other palm. Homing volley and the technique creator's shots thrust too.
+  The posed model's hands are read back every frame, so the gathering orbs and the travelling beam's root are drawn in the
+  hands, not in front of the body; in first person `FirstPersonArms` poses your own hands the same way (cup, point, palms,
+  draw-back, thrust, push) and the ki sits in them. NPCs share it by entity: gifted villagers' blasts thrust from the
+  palm and their Wave Beam now gathers 16 ticks in cupped hands before firing with a two-hand push and shout; rogue
+  fighters and sparring mannequins throw from the palm. Tuning: `ZFighterHands` (hand spots, shout), `ZFighterHandsPose`
+  (angles, timing, first-person spots), `FirstPersonArms.KI_*`, `ZFighterKi.BLAST_FORM_*`, `ZFighterGift.WAVE_GATHER`.
+- **0.19.61, Kitchen 0.5.50, carried snakes drape, small bodies in one hand:** A carried (or slung, or falling) snake now lies draped over the
+  arms, its middle across them and its head and tail hanging down either side, swinging as you move, instead of a
+  stiff body with only the tail tip loose. Small bodies (chickens, rabbits, snakes, babies) are now carried
+  in one hand by the neck, a snake's tail trailing on the ground, and the corpse bag that put them in your inventory is
+  gone (Kitchen MODLOG). Not compile-checked; not played.
+- **0.19.62, Skitter stands up again:** Andy: "skitter to be the same model it had before, only going into the crawl
+  when you go prone". Standing, Skitter has its old upright shape back (four thin spider legs off its back, the small
+  abdomen); prone on the stance wheel it drops into the 0.19.34 spider (`SkitterCeiling.CRAWL_KEY`, eased over 5 ticks)
+  and scuttles at `Skitter.SPIDER_PACE` 2.6x a crawl. The spider sticks to whatever it crawls onto with no jump held:
+  up a wall it's turned to face it and tipped head-up against it for everyone (synced `XenoformState.CLIMB`, the wall's
+  side, legs stepping on the clock), and under a ceiling it clings upside down as before; a jump press lets go of the
+  ceiling (it won't grab one again until it lands). Standing up turns it back. The man's
+  crawl pose stays off for it (`CrawlPose.extract`), downed Skitters crawl as men, and the Ultimate's spikes are back on
+  the upright shape. Compile-checked (0 errors against the 26.3 jars); not played.
+- **0.19.62, Patch 2: beasts on four legs** (`docs/AlienBodies-Plan.md`): six aliens are no longer men.
+  - Howl is now a four-legged wolf: a long, level body on four legs that trot in diagonal pairs, a head with a muzzle and tall ears that turns where it looks, a bushy tail that lifts as it runs; it stalks low when crouched, stretches out in a leap and bites with a snapping jaw.
+  - Prowl is now a big cat on four legs: a long low chest and haunch that flex at the spine, round ears, two-jointed legs on flat paws that walk in a cat's lateral order and break into a bounding gallop at a sprint, a long tail that curls and twitches, a belly-low stalk with tucked paws when sneaking, and a forepaw rake on attack.
+  - Tusk is now a heavy boar on four legs: a barrel body, short thick legs, a big low head with snout and curved tusks, a mane ridge and a tail. It trots with a head bob, drops its head and gallops on Charge, and tosses its tusks up on an attack.
+  - Gorger is now a real armadillo on four legs: a horned snout, six shell bands that bob as it scurries, and a dragging tail; it drops its head and horn on a charge, and rolled up (B) the bands close into a hexagonal ball that rolls as it moves.
+  - Gyre is now a turtle on four flippers: a domed shell (carapace, crown and plastron) that rocks as it walks, flippers that paddle in diagonal pairs with feet planted on the ground and row like wings in water, a neck that pokes out and turns, and a short tail; rolled up it pulls in its limbs with only the beak peeking out, in Shell Spin the whole shell spins on the spot, and the insignia sits on the crown.
+  - Velox is now a raptor: a forward-leaning biped with a near-horizontal body on long bird legs that stride long and fast, tucked clawed forearms that slash, a long balancing tail, and a head on an S-neck whose jaw snaps; the visor still drops over its eyes at speed and its insignia sits on its back.
+  - Their ability poses are synced for everyone (`XenoformState.ACT`: charge, roll, spin). The six lost their Ultimate
+    spikes (the spike model is a man's). Each body was written and then checked by a second pass that simulated the
+    poses (feet on the ground, legs attached, no UV overlaps) and fixed what it found. Compile-checked; not played.
+- **0.19.63, dirty armour and wet weather:** Andy: armour "gets dirty when you walk in the desert or swampy muddy areas
+  and washes in the rain or by hand or in bodies of water", plus "subsurface scattering rays underwater and pooling water
+  on the ground near trees, during rain and under wet characters like the blood trail" (Gemini had tried it; nothing of
+  that was used; Andy's Recrafted resource pack noted as the look, nothing taken). `core/wet/ArmourGrime`: each armour
+  piece carries a `jaymospowers:grime` component (amount 0-100, how much is mud). Walking (or lying) on sand, gravel or
+  dry ground in deserts, badlands and dry or sandy biomes throws up dust; mud, clay, soul soil and wet earth (rain, swamps)
+  splash mud; boots first, then greaves, chest, helmet; sprinting doubles it, lying or crawling gets it everywhere. Water
+  washes it (wading: boots and greaves; under water: all of it fast), rain slowly, and by hand: sneak + use an empty hand
+  on a water cauldron (a level each scrub), sneak + use a wet sponge, or use a dirty piece on a water cauldron. Everyone
+  near a player is weathered, so guards come back muddy. The client tints the armour layers toward tan or mud brown
+  (`ArmourGrimeMixin`) and the tooltip says how dirty. `client/wet/WetClient`: wet bodies drip for a while after water
+  (30 s) or rain (15 s) and leave little water puddles under them (a trail as they walk); while it rains, puddles pool
+  under leaves and beside trunks (and sometimes in open hollows), grow while the rain lasts and dry after; under water
+  by day `LightShaft`s hang from the surface, leaning away from the sun. Water puddles are `BloodPuddle.water` in the
+  blood decals' group (now any `BloodDecals.Decal`). Sprites from `tools/wet_textures.py`. Tuning at the top of each class.
+  Then Andy shared Recrafted's settings (MR_CHOO, Patreon-only, so never in the pack): its light rays, fog, clouds and
+  swaying leaves/grass already come from Complementary Unbound, which every player starts with, so we added only what a
+  shader pack doesn't: bushy leaves, a built-in pack `living_world` ("Jaymo's Powers: bushy leaves", on by default),
+  where every vanilla leaf block also draws two crossed planes of its own texture reaching 3 px past the block
+  (`tools/bushy_leaves.py`; multipart blockstates; they wave with the leaves under Complementary).
+  Andy then chose "fill the gaps only" (no Sodium shaders-off versions). The same pack also gives grass blocks lips of
+  their own side-overlay blades leaning out 22.5 degrees over each open side, and snowy ones a lip of snow
+  (`tools/grass_edges.py`; each lip culls when a block stands against that side).
+- **0.19.64, Kingdoms 0.7.482, blood magic draws from stains:** Andy: "Blood magic should draw from stains on ground".
+  `BloodTrail.draw` takes up to a set amount out of each lasting stain near a spot (nearest first, a cap in all); a drawn
+  stain is re-sent smaller and the client's `BloodPuddle` eases down to it, and one drawn under 0.08 dries away, fading
+  over its last second. Kingdoms' blood magic calls it (kingdoms/MODLOG.md). A drawn-up trail can't be followed any more.
+  Kitchen 0.5.51's meat hook (`KitchenCompat.registerCorpseBlood`): a carcass bled on it drips its own blood
+  (`BloodParticles.Spray`), what has no grate under it pools as stains (`HUNG_SPILL_STAIN`), and its head comes off as a
+  `SeveredPart.dropTrophyHead` (a `trophy` part never despawns).
+  Wall trophies (Andy: "yes all of this"): set a carried head down (right-click) while looking at a wall within
+  `Carry.TROPHY_REACH` and it's nailed up there facing out (`SeveredPart.mountOn`), kept for good; pick it up to take it down.
+- **0.19.65, Kingdoms 0.7.483, Kitchen 0.5.52, Excalibur's look:** Andy: "Id like a different artstyle from vanilla
+  entirely", pointing at Excalibur and its Fresh Animations patch. Both are switched on once per install, unchanged,
+  fetched from Modrinth (`PackResourcePacks`). Excalibur 26.3_01 (Maffhew, CC BY-NC-ND: credit it with a link on the
+  pack's page) goes at the bottom of the pack order (`BASE`), so every other pack draws over it. "Excalibur | Fresh
+  Animations" 1.10.5 Hotfix 1 (Ruseki and GrandPappyJay, modpacks allowed) sits just above Fresh Animations and under
+  Better Horses. An add-on switched on before its base pack moves up over it once the base arrives. All 7,707 of our
+  item, block, entity and clothing textures in Powers, Kingdoms, Kitchen and the vanilla_style pack are graded toward
+  Excalibur in place (`tools/excalibur_style`): darker, less saturated, warmer greys. Glows, effects, eyes and
+  see-through art are left alone. `graded.txt` stops a file being graded twice. **Run `tools/excalibur_style/grade.py`
+  after any new or redrawn texture.** Hand repaints of hero items come next. Details: `docs/Excalibur-Style.md`.
+- **0.19.66, Patch 3: small critters** (`docs/AlienBodies-Plan.md`): five more aliens are no longer men.
+  - Croaker is now a squat, low frog (about 9 px tall, 10 px wide) with big eyes on top, a jaw that opens and a throat sac that swells; it hops instead of walking, its hind legs solved by two-bone IK so the feet stay planted through the push, then trail behind in flight and tuck to land.
+  - Slipfin is now an axolotl: long and low, with a wide flat head, waving gill stalks, a two-part trunk, a four-segment finned tail and four splayed legs. On land it belly-crawls on diagonal leg pairs while its body bends side to side in an S; in water it tucks its legs and swims with an up-and-down wave; a bite is a lunge with the jaw open.
+  - Locust is now a six-legged grasshopper. Its walking legs step in a tripod gait and its two huge folded hind legs (IK-posed) kick straight back on a leap or a Kick. Crouching to charge Crash Leap folds them tighter. Its feelers sway and its wings flutter in the air.
+  - Hive is now a big hovering bee: a fuzzy thorax with the insignia on its back, a head with compound eyes and antennae, two pairs of always-buzzing wings, six dangling legs and a striped abdomen whose stinger curls forward under it to sting. It bobs about 4 px off the ground and pitches nose-down as it flies.
+  - Gremlin is now a hunched imp that walks on its knuckles: a small, nearly flat body between long arms planted on the fists and short bowed back legs, with a big eared skull held up in front. It lopes in diagonal pairs, each limb solved so it stays on the ground, the skull bobs and nods a beat behind every footfall, an attack is a snapping bite with a swipe of the right arm, and the insignia sits on its back.
+  - Croaker takes Billow's low swimming-pose box out of water too (`XenoformState.LOW_BOX`), so it fits through
+    one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
+    man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
+    The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
+- **0.19.67, Seats and a Sit key** (`core/Sitting`, `Meditate`, `MeditatePose`): Andy: "add a button as well".
+  - **Seats:** right-click a stair (right way up) or a bottom slab with an empty hand, not sneaking, and you sit on it,
+    on a stair facing away from its back. Blocks in `#jaymospowers:seats` (empty; for modded chairs/benches) work too,
+    sitting on the top of their middle and facing their `facing`. Needs two blocks of room above; one sitter per block.
+  - **Sit key** (`]` by default): sits you on the seat under you or the one you look at (3 blocks), else on the ground,
+    at once. Pressed again while sat it changes how you sit: ground = cross-legged, knees up, leaning back; seat =
+    upright, legs crossed, slouched (kept for next time). Sneak (a fresh press) now gets you up from any sit.
+  - **Held items while sat:** a book is held open to read, anything drunk is raised like a cup, a sword lies across the
+    lap. On a seat the body keeps the seat's way and the head turns up to 80 degrees.
+  - **By the fire:** sitting settled within 4 blocks of a lit campfire heals 1 every 5 s and (with Kitchen) adds 10 body
+    heat. Seats count as meditating with the Meditation perk, like the ground sit.
+  - Compile-checked; not seen in game (pose angles may need a tweak).
+- **0.19.68, Kitchen jar 0.5.52:** `libs/` held Kitchen 0.5.48 while its source had moved on to 0.5.52, so the pack
+  shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
+  Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
+  Compile-checked; not played.
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
+- **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
+  "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
+  alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
+  swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
+  and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
+  symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.
+- **0.19.71, tendril globs keep to the back** (`WebGooGlobs`): Andy: the blobs "should only grow tendrils for living
+  tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
+  ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
+  the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
+- **0.19.75, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
+  - Talon is now a hawk: perched upright on scaly taloned legs, it hops along with the wings folded, its hooked-beak head turning where it looks; in the air the body goes level, the two-part wings spread and beat, hold stiff in a glide and sweep back on a stoop, and a strike rakes the talons forward.
+  - Keen is now a bat: a furry body with the insignia on its back, a pug head with huge ears and fangs, and membrane wings. It crawls on its wrists and feet with the wings folded, beats them fast in flight, holds them out to glide, lies level under Wind's cruise, and hangs head-down from ceilings wrapped in its wings (synced as the "hang" act).
+  - Wyrm is now a small four-legged dragon: a long scaly body trotting in a diagonal lizard gait with solved legs, a long neck to a horned head whose jaw opens on a bite, a spine ridge and a swaying spade-tipped tail; its ender-dragon wings (`WyrmWings`) sit on its shoulders, beat in flight with the body level and the legs tucked, and fold along its back on the ground.
+  - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
+  - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.

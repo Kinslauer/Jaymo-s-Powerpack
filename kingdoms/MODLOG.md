@@ -8216,3 +8216,94 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: ki is magic, Emberborn drink fire, guards of every rank (pack 0.19.57, Kitchen 0.5.48)
+Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
+- **Ki is magic:** a Z Fighter attunes (`Mana.kiAttunes`) the moment the power is theirs, a Wind Controller once it
+  wakes; quietly, the flare and sound only (no chat line). Folk gifted the Z Fighter's ki or the wind are attuned too
+  (`ManaFolk.KI_FIGHTER`/`KI_WIND`). A Wind Controller who isn't a Mage casts through the wind: a gust carries each spell
+  off the staff. Flight stays Mastery's to unlock. Powers draws a Z Fighter's aura only for the attuned.
+- **Emberborn thirst:** `KitchenCompat` hands Kitchen's `Thirst.setFireDrinker` the Emberborn.
+- **Guards:** a realm's guards are a quarter recruits (gambeson in the realm's colour, mail, cap), half footmen (the
+  realm's harness as before), a quarter veterans (full plate), by their id (`Outfits.GUARD_RECRUIT_SHARE`). New guards
+  only; `Outfits.VERSION` is unchanged so nobody already dressed is stripped. No gold.
+
+## 0.7.478: Ignis Vael's Cinder Forge, under-armour (pack 0.19.58; Gemini handoff passes 2 and 3)
+- **The Cinder Forge** (`nether/CinderForge`, built by `FortBuildings.cinderForge`): one per world, 300-700 blocks from
+  the Nether's heart (fixed by the seed), built the first time a player comes within 96 blocks. **Ignis Vael** keeps it:
+  an MCA villager (a plain one without MCA) of Emberborn blood, attuned at power 10, unhurt by anything but the void;
+  back at his anvil a day after he goes missing. His wares (MCA's Wares button; a right-click without MCA), restocked
+  weekly: the existing Writ of Rebirth (`Classes.WRIT`, which already unmakes heritage, class and story alive; Andy:
+  "rare, from the Nether forge") for 40 emeralds + 2 netherite scrap, one a week; and Cinder-forged reforging of iron and
+  mail pieces (piece + 4 blaze rods: Fire Protection III, Unbreaking II, gold name). He greets Emberborn as kin.
+- **Finding him:** Overworld armourers, weaponsmiths and toolsmiths pass on one of four rumours now and then as you talk
+  to them (35%, 5 min apart; speech bubbles, no chat), one giving the way from the Nether's heart. Once told, sneak-use
+  one with 12 emeralds for a **Charred Wayfinder**: a vanilla compass (custom data `jaymoskingdoms_wayfinder`) that points
+  at the forge's spot x8 in the Overworld (where to open a portal) and at the forge in the Nether, re-aimed every 2 s.
+  Your first time in the Nether puts word of the forge in your next Tidings. Ops: `/kingdom cinderforge info|build|wayfinder`.
+- **Under-armour** (client `UnderArmourLayer`, art `tools/gen_under_armour.py`, our own; Armor Reimagined is ARR, idea
+  only): leggings with nothing over the chest (or an elytra) bring their suit on body and arms: leather an arming doublet
+  in the leggings' dye, mail a linen gambeson with mail sleeves, iron a studded padded gambeson. A WornModel, so it poses.
+- Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
+  change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
+
+## 0.7.482: blood magic draws from stains on the ground (pack 0.19.64)
+Andy: "Blood magic should draw from stains on ground". Blood magic here is the Blood Sorcerer's (and the camp blood
+witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`BloodTrail`, the trail decals).
+- **Blood Sorcerers** fill their blood pool from the stains within 6 blocks too, after the bleeding: up to 0.12 of each
+  stain a second, the nearest first, each unit of stain worth 4 pool (a drip's stain about 0.8, a pool 4-12), still at
+  most 2 a second in all and only while the pool has room. The blood rises to them in a thread of red motes and the
+  stain shrinks and fades, gone once drawn dry.
+- **Blood witches** heal from the stains round them the same way while hurt (every 2 s, after the bleeding foes).
+- `PowersCompat.drawStains` (reflection, nothing without Powers 0.19.62+). Tuning: `Hemomancy.STAIN_RANGE`,
+  `STAIN_EACH`, `STAIN_BLOOD`; Powers' `BloodTrail.DRAWN_DRY`, `DRAWN_GONE`, `BloodPuddle.DRAWN_EASE`.
+- **Blood grates** (Kitchen 0.5.51's butchery): Blood Sorcerers also draw a level (250 mB) a second out of the grates within
+  6 blocks, worth 3 pool each (`GRATE_RANGE`, `GRATE_MOST`, `GRATE_BLOOD`; `KitchenCompat.drawGrates`).
+- **Bottle of Blood** (Kitchen): a vampire drinks it (heals 2, 3 food, the blood fever eased as by a bite) and a Blood
+  Sorcerer pours it into their pool (+6); anyone else retches (`Hemomancy.drankBottle`, `BOTTLE_*`).
+
+## 0.7.483: Excalibur's look (pack 0.19.65, Kitchen 0.5.52)
+All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
+redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.

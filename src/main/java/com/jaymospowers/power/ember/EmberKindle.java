@@ -77,6 +77,16 @@ public final class EmberKindle {
 	static final double MOUTH = 0.25, SPREAD = 0.22;
 	/** Ticks from cold to full heat, and from full heat back to cold once let go. */
 	public static final int HEAT_TICKS = 60, COOL_TICKS = 40;
+	/**
+	 * (0.19.70) Kindle grows with you (Andy's Gemini handoff): four stages by experience level, from a spark at the start
+	 * to a long gout at {@code STAGE_LEVELS[2]}+, and a Flame Avatar's ({@link FlameAvatar}) pillar of flame past all of
+	 * them. Each stage's start and full reach (blocks), its damage (times {@link #DAMAGE}) and its ticks to full heat.
+	 * Stage 3 is Kindle as it was before.
+	 */
+	static final int[] STAGE_LEVELS = {10, 20, 30};
+	static final double[][] STAGE_REACH = {{1.5, 2.2}, {2.2, 3.5}, {START_REACH, FULL_REACH}, {4.0, 6.8}, {6.0, 11.0}};
+	static final float[] STAGE_DAMAGE = {0.6F, 0.8F, 1.0F, 1.25F, 1.6F};
+	static final int[] STAGE_HEAT_TICKS = {80, 70, HEAT_TICKS, 50, 40};
 	/** Chilled: the cone is this share as long and heat builds this share as fast. */
 	static final double CHILL_REACH = 0.5;
 	static final float CHILL_HEAT = 0.5F;
@@ -263,7 +273,7 @@ public final class EmberKindle {
 		boolean wet = player.isInWaterOrRain();
 		if (live.on) {
 			if (!wet) {
-				live.heat = Math.min(1.0F, live.heat + (chilled ? CHILL_HEAT : 1.0F) / HEAT_TICKS);
+				live.heat = Math.min(1.0F, live.heat + (chilled ? CHILL_HEAT : 1.0F) / STAGE_HEAT_TICKS[stage(player)]);
 			}
 			flame(player, live, level, now, chilled, wet);
 		} else {
@@ -303,7 +313,8 @@ public final class EmberKindle {
 		// (0.15.136) a broken arm can't hold the stream steady
 		Vec3 look = com.jaymospowers.core.wounds.LimbUse.sway(player, com.jaymospowers.core.wounds.LimbUse.MAIN_ARM, player.getViewVector(1.0F));
 		double grown = Math.min(1.0, (now - live.since) / (double)GROW_TICKS);
-		double reach = (START_REACH + (FULL_REACH - START_REACH) * grown) * (chilled ? CHILL_REACH : 1.0);
+		double[] stage = STAGE_REACH[stage(player)];
+		double reach = (stage[0] + (stage[1] - stage[0]) * grown) * (chilled ? CHILL_REACH : 1.0);
 		if (wet) {
 			// in water or the rain the flame only hisses steam
 			level.sendParticles(ParticleTypes.CLOUD, from.x, from.y, from.z, 2, 0.08, 0.08, 0.08, 0.02);
@@ -406,9 +417,21 @@ public final class EmberKindle {
 			}
 			Flames.touch(level, entity, white ? WHITE_BURN_SECONDS : BURN_SECONDS, player);
 			if (entity instanceof LivingEntity living) {
-				living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, player), seasonal(player, white ? WHITE_DAMAGE : DAMAGE));
+				living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, player), seasonal(player, (white ? WHITE_DAMAGE : DAMAGE) * STAGE_DAMAGE[stage(player)]));
 			}
 		}
+	}
+
+	/** (0.19.70) {@code player}'s Kindle stage: 0-3 by experience level ({@link #STAGE_LEVELS}), 4 as a Flame Avatar. */
+	public static int stage(Player player) {
+		if (FlameAvatar.is(player)) {
+			return STAGE_LEVELS.length + 1;
+		}
+		int stage = 0;
+		while (stage < STAGE_LEVELS.length && player.experienceLevel >= STAGE_LEVELS[stage]) {
+			stage++;
+		}
+		return stage;
 	}
 
 	/**
