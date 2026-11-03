@@ -8267,7 +8267,48 @@ All item, block, entity and clothing textures are graded toward Excalibur's dark
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
 
-## 0.7.484: building from schematics
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
+
+## 0.7.487: building from schematics
 - **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
   v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
   brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on

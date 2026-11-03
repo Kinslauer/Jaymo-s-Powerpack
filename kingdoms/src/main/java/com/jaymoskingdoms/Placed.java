@@ -43,7 +43,7 @@ public final class Placed {
 		placed(player.getUUID(), level, pos, state);
 	}
 
-	/** (0.7.484) {@code state} at {@code pos} was placed for player {@code placer} (by their {@link MasonTable}). */
+	/** (0.7.487) {@code state} at {@code pos} was placed for player {@code placer} (by their {@link MasonTable}). */
 	public static void placed(UUID placer, ServerLevel level, BlockPos pos, BlockState state) {
 		LevelChunk chunk = level.getChunkAt(pos);
 		Map<String, Mark> marks = new HashMap<>(chunk.getAttachedOrElse(MARKS, Map.of()));

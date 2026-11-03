@@ -14,7 +14,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.7.485) The mason's table's screen ({@code MasonScreen} on the client): the server sends the designs on the world,
+ * (0.7.487) The mason's table's screen ({@code MasonScreen} on the client): the server sends the designs on the world,
  * what the table is doing and what it still needs; the screen sends back what's chosen (draw a design on a plan, take the
  * plan back, try skipped blocks again, offer the design to the settlement). The server decides everything and sends the
  * screen again with the result.

@@ -38,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.485) Laid-out plans you build by hand, as a ship's build kit is: a {@link MasonTable building plan} used on the
+ * (0.7.487) Laid-out plans you build by hand, as a ship's build kit is: a {@link MasonTable building plan} used on the
  * ground leaves its building standing there as a see-through ghost of every block (drawn on the client by
  * {@code PlanGhosts}), seen by everyone near it. Put the right blocks where the ghosts are, by hand, with whatever you
  * like (a block counts whichever way it's turned; dirt does for grass and paths), and the ghosts go as they're filled.

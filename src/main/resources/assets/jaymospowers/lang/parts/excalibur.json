@@ -1,0 +1,7 @@
+{
+	"message.jaymospowers.excalibur.on": "Excalibur look on: Excalibur, its Fresh Animations patch and our mods in its colours. /excalibur off to go back.",
+	"message.jaymospowers.excalibur.off": "Excalibur look off: the pack's usual textures are back. /excalibur on to try it again.",
+	"message.jaymospowers.excalibur.is_on": "The Excalibur look is on. /excalibur off to switch it off.",
+	"message.jaymospowers.excalibur.is_off": "The Excalibur look is off. /excalibur on switches on Excalibur, its Fresh Animations patch and our mods in its colours.",
+	"message.jaymospowers.excalibur.missing": "%s isn't downloaded yet. Give it a minute (it needs the internet), then try /excalibur on again."
+}

@@ -22,7 +22,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.7.484) Schematic files sent up from a player's own computer: the mason's table's screen ({@code MasonScreen},
+ * (0.7.487) Schematic files sent up from a player's own computer: the mason's table's screen ({@code MasonScreen},
  * {@code DesignUploadClient}) reads a {@code .nbt}, {@code .schem} or {@code .litematic} from its {@code schematics}
  * folder and sends it in pieces (a packet carries at most 32 KB); once the last piece is in, the server reads it and keeps it
  * as one of the player's designs ({@link Designs#saveUploaded}). Nothing in the file is run: it's only read as NBT, within a

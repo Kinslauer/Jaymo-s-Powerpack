@@ -1,7 +1,7 @@
 # Vanilla style for every modded item
 
-> 2026-11-03 (0.19.65): the pack moved to Excalibur's look (`docs/Excalibur-Style.md`). These redraws stay, graded
-> toward Excalibur in place. After rerunning a painter here, run `tools/excalibur_style/grade.py`.
+> 2026-11-03: Excalibur's look is optional and off by default (`docs/Excalibur-Style.md`, `/excalibur on`). These
+> redraws are the default look; their graded copies are in the built-in `excalibur_style` pack.
 
 Goal: every item in the pack looks like Mojang drew it. Delivered as the built-in resource pack
 `src/main/resources/resourcepacks/vanilla_style` (on by default; switch it off under Resource Packs to compare).

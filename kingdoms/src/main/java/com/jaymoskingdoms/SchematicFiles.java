@@ -14,7 +14,7 @@ import net.minecraft.util.datafix.DataFixTypes;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) Reads the schematic files people share (sites like Structura offer every build in all three) into the shape a
+ * (0.7.487) Reads the schematic files people share (sites like Structura offer every build in all three) into the shape a
  * structure block saves, so {@link Designs} and {@link Blueprint#fromTemplate} need only know that one:
  * <ul>
  * <li><b>.nbt</b>: a structure block's own file (as is).</li>

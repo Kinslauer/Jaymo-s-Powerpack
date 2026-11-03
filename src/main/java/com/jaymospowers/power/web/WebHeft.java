@@ -185,8 +185,36 @@ public final class WebHeft {
 	 * burning creature, or null if it doesn't. A web line burns through there.
 	 */
 	static @Nullable Vec3 burning(ServerLevel level, Vec3 from, Vec3 to, @Nullable Entity stuckTo) {
+		return burning(level, from, to, stuckTo, stuckTo);
+	}
+
+	/**
+	 * (0.19.71, Andy: "weblines should be flammable, giving a counter to web users") As above, and anything alight that
+	 * crosses the line burns it too: a burning creature or player brushing it, a fire arrow or a fireball flying through
+	 * it, the slinger themselves on fire (it goes at their hand), the undead burning in daylight too (Andy: "any
+	 * flammable means flammable"). {@code skip}: one entity the scan leaves to the
+	 * caller (what the line holds).
+	 */
+	static @Nullable Vec3 burning(ServerLevel level, Vec3 from, Vec3 to, @Nullable Entity stuckTo, @Nullable Entity skip) {
 		if (stuckTo != null && stuckTo.isOnFire()) {
 			return to;
+		}
+		net.minecraft.world.phys.AABB around = new net.minecraft.world.phys.AABB(from, to).inflate(1.0);
+		Vec3 nearest = null;
+		double best = Double.MAX_VALUE;
+		for (Entity e : level.getEntities((Entity)null, around, e -> e != skip && (e instanceof net.minecraft.world.entity.projectile.hurtingprojectile.Fireball
+			|| e.isOnFire()))) {
+			java.util.Optional<Vec3> hit = e.getBoundingBox().inflate(0.15).clip(from, to);
+			if (hit.isEmpty() && e.getBoundingBox().inflate(0.15).contains(from)) {
+				hit = java.util.Optional.of(from);
+			}
+			if (hit.isPresent() && hit.get().distanceToSqr(from) < best) {
+				best = hit.get().distanceToSqr(from);
+				nearest = hit.get();
+			}
+		}
+		if (nearest != null) {
+			return nearest;
 		}
 		double length = from.distanceTo(to);
 		int steps = Math.max(1, (int)Math.ceil(length / BURN_STEP));
@@ -200,6 +228,18 @@ public final class WebHeft {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * (0.19.71) A symbiote's cord touched fire at {@code at}: it's alive, so it doesn't burn, it recoils, whipped back
+	 * into its host with a hiss and a shriek (Andy: "their webs dont burn they recoil, as they are alive").
+	 */
+	static void recoilFx(ServerLevel level, Vec3 at) {
+		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 8, 0.12, 0.12, 0.12, 0.03);
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 6, 0.1, 0.1, 0.1, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.9F, 0.5F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.4F, 2.0F);
 	}
 
 	/** A line burns through at {@code at}: a flare of flame and the hiss of it going. */

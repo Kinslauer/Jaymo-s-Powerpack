@@ -139,7 +139,7 @@ public final class Planner {
 		int size = size(f);
 		List<Blueprint.Entry> out = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
-		// (0.7.484) plans its people gave it come first ({@link Commissions})
+		// (0.7.487) plans its people gave it come first ({@link Commissions})
 		for (Blueprint.Entry e : Commissions.next(server, f)) {
 			if (seen.add(e.id())) {
 				out.add(e);

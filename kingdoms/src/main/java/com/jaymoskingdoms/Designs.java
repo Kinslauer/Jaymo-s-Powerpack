@@ -48,7 +48,7 @@ public final class Designs {
 	/** The largest a design a settlement's builders put up may be: across (either way), high, and blocks in all. */
 	static final int MAX_SIDE = Plots.MAX_SIDE, MAX_HEIGHT = 48, MAX_BLOCKS = 16000;
 	/**
-	 * (0.7.484) The largest any design may be (a {@link MasonTable} builds these): across, high, blocks. Bigger files are
+	 * (0.7.487) The largest any design may be (a {@link MasonTable} builds these): across, high, blocks. Bigger files are
 	 * refused when uploaded and left unread in the folder.
 	 */
 	static final int PLAN_SIDE = 96, PLAN_HEIGHT = 128, PLAN_BLOCKS = 120000;
@@ -91,7 +91,7 @@ public final class Designs {
 		return folder(server).resolve(name + ".nbt");
 	}
 
-	/** (0.7.484) A design small enough for a settlement's builders (else only a {@link MasonTable} puts it up). */
+	/** (0.7.487) A design small enough for a settlement's builders (else only a {@link MasonTable} puts it up). */
 	static boolean forCrews(Blueprint bp) {
 		return bp.width() <= MAX_SIDE && bp.depth() <= MAX_SIDE && bp.height() <= MAX_HEIGHT && bp.blocks().size() <= MAX_BLOCKS;
 	}
@@ -130,7 +130,7 @@ public final class Designs {
 			return null;
 		}
 		try {
-			// (0.7.484) .schem and .litematic files too, brought up to date
+			// (0.7.487) .schem and .litematic files too, brought up to date
 			CompoundTag template = SchematicFiles.toTemplate(NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap()), server.getFixerUpper());
 			Blueprint bp = template == null ? null : Blueprint.fromTemplate(PREFIX + name, template);
 			if (bp == null || !fits(bp)) {
@@ -260,7 +260,7 @@ public final class Designs {
 	}
 
 	/**
-	 * (0.7.484) A schematic file {@code player} sent from their own computer ({@link DesignUploads}): read, checked like a
+	 * (0.7.487) A schematic file {@code player} sent from their own computer ({@link DesignUploads}): read, checked like a
 	 * design saved in the world, and kept as design {@code name}, theirs (or the next free name). The name it's kept as, or null.
 	 */
 	static @Nullable String saveUploaded(ServerPlayer player, String name, CompoundTag root) {
@@ -270,7 +270,7 @@ public final class Designs {
 			return null;
 		}
 		boolean creative = player.isCreative();
-		// (0.7.485) a name someone else has: the next free one (house_2, house_3...)
+		// (0.7.487) a name someone else has: the next free one (house_2, house_3...)
 		String base = name;
 		for (int n = 2; Files.isRegularFile(file(server, name)) && !author(server, name).equals(player.getGameProfile().name()) && n < 100; n++) {
 			String suffix = "_" + n;
