@@ -316,7 +316,7 @@ public final class StoryHard {
 		int fine = fine(jail.until() - level.getGameTime());
 		ItemStack held = player.getMainHandItem();
 		if (Approaches.isMoney(held)) {
-			// (0.7.486) the fine is silver from everything carried, not just the coin in hand
+			// (0.7.487) the fine is silver from everything carried, not just the coin in hand
 			if (!Money.canPay(player, Money.silver(fine))) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.cell.short", fine).withStyle(ChatFormatting.RED));
 				return;

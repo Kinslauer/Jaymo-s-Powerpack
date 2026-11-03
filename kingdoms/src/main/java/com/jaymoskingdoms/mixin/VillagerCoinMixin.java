@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.486) A villager or wandering trader saved before the coinage has its offers in emeralds: on load they are made
+ * (0.7.487) A villager or wandering trader saved before the coinage has its offers in emeralds: on load they are made
  * coins ({@link Coinage#convert}), once; the second time round there is nothing left to convert. The money changer's own
  * rates (emeralds for coppers) are left alone: {@link Coinage#convert} skips offers marked as his.
  */
@@ -23,7 +23,7 @@ abstract class VillagerCoinMixin {
 	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
 	private void jaymoskingdoms$coins(ValueInput input, CallbackInfo ci) {
 		// the profession is not read yet here (Villager reads its data after super), so the changer's offers are told by their mark
-		if (this.offers != null) {
+		if (this.offers != null && !Coinage.keepsEmeralds((net.minecraft.world.entity.Entity)(Object)this)) {
 			Coinage.convert(this.offers);
 		}
 	}

@@ -442,7 +442,7 @@ final class WarParties {
 		for (ServerPlayer p : marched) {
 			int each = (int)(cut / marched.size());
 			if (each > 0) {
-				// (0.7.486) their cut in silver: the worn purse first, then the pack, then the ground
+				// (0.7.487) their cut in silver: the worn purse first, then the pack, then the ground
 				Money.pay(p, Money.silver(each));
 			}
 			Reputation.change(p, from, SPOILS_REPUTATION);
@@ -587,7 +587,7 @@ final class WarParties {
 		for (ItemStack stack : party.spoils) {
 			net.minecraft.world.level.block.Block.popResource(level, at, stack);
 		}
-		// (0.7.486) the silver spills as coins (the treasury counts in silver)
+		// (0.7.487) the silver spills as coins (the treasury counts in silver)
 		for (ItemStack coins : Money.stacks(Money.silver(party.spoilsSilver))) {
 			net.minecraft.world.level.block.Block.popResource(level, at, coins);
 		}

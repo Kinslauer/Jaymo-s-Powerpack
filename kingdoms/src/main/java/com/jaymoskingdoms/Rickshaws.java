@@ -684,7 +684,7 @@ public final class Rickshaws {
 		return true;
 	}
 
-	/** {@code player} pays {@code fare} silver coins ((0.7.486), once emeralds) into {@code f}'s treasury (nothing in creative); false if they can't. */
+	/** {@code player} pays {@code fare} silver coins ((0.7.487), once emeralds) into {@code f}'s treasury (nothing in creative); false if they can't. */
 	static boolean pay(ServerPlayer player, Faction f, int fare) {
 		if (player.isCreative()) {
 			return true;

@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
 
 /**
- * (0.7.486) What a coin purse holds: loose coins by kind ({@code jaymoskingdoms:coins}). At most {@value #PURSE_MOST} in
+ * (0.7.487) What a coin purse holds: loose coins by kind ({@code jaymoskingdoms:coins}). At most {@value #PURSE_MOST} in
  * all. Whenever it changes, {@link #set} also writes how full the purse is into {@code custom_model_data} (float 0),
  * which {@code items/coin_purse.json} reads to draw a flat or a bulging purse (and Powers draws the same on the hip).
  */

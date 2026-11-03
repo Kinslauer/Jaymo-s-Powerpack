@@ -776,7 +776,7 @@ final class GreatWars {
 			if (player == null) {
 				continue;
 			}
-			// (0.7.486) the winnings are silver coins, into the worn purse if there's room
+			// (0.7.487) the winnings are silver coins, into the worn purse if there's room
 			Money.pay(player, Money.silver(e.getValue()));
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", e.getValue()).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.6F, 0.8F);

@@ -523,7 +523,7 @@ public final class Classes {
 		if (last != null && now - last < WRIT_EVERY && now >= last) {
 			return true;
 		}
-		Money.charge(player, Money.silver(WRIT_SILVER)); // (0.7.486) silver coins, not emeralds
+		Money.charge(player, Money.silver(WRIT_SILVER)); // (0.7.487) silver coins, not emeralds
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
 		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD);

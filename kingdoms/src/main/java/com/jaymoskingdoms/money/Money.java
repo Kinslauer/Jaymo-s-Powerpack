@@ -14,7 +14,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
 
 /**
- * (0.7.486) The kingdoms' money, counted in copper pieces (cp; a silver coin is 10, a gold coin 100). Server side, and
+ * (0.7.487) The kingdoms' money, counted in copper pieces (cp; a silver coin is 10, a gold coin 100). Server side, and
  * aware of everywhere a player keeps coins: loose coins and coin stacks in the inventory, coin purses in it, coins in
  * bundles, and the purse worn in Jaymo's Powers' belt slot. Every price in the mod goes through here, so no site counts
  * emeralds, handles creative or forgets a bundle on its own. Emeralds are gems now and never count.

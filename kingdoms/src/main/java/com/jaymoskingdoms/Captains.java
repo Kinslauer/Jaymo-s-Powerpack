@@ -1751,7 +1751,7 @@ public final class Captains {
 		if (e == null) {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
 		}
-		// (0.7.486) silver coins from everywhere they are kept (purses and bundles too, which the old loose-emerald count missed)
+		// (0.7.487) silver coins from everywhere they are kept (purses and bundles too, which the old loose-emerald count missed)
 		if (!Money.canPay(player, Money.silver(RUMOUR_PRICE))) {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.price." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
 				Component.literal(Integer.toString(RUMOUR_PRICE)));

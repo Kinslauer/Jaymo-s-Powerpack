@@ -167,7 +167,7 @@ public final class Manacles {
 
 	/** The realm's bounty for a manacled outlaw: silver coins in {@code player}'s purse or pack (the floor if it's full) and a little goodwill. */
 	private static void pay(ServerPlayer player, Faction law) {
-		// (0.7.486) paid in silver coins, into the belt purse if there is room
+		// (0.7.487) paid in silver coins, into the belt purse if there is room
 		Money.pay(player, Money.silver(BOUNTY));
 		Reputation.change(player, law, BOUNTY_REPUTATION);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", BOUNTY, law.name()).withStyle(ChatFormatting.GOLD));

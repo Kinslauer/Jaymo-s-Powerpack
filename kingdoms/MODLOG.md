@@ -8266,3 +8266,40 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.487: coins replace emeralds (pack 0.19.74, Kitchen 0.5.54)
+Andy's Custom Trade Currency pick, and his choice "Coins replace emeralds". Design: `docs/Coins-Plan.md` in the pack.
+- **Coins** (`money/`): copper (1 cp), silver (10 cp, worth what an emerald was, so every price kept its number and the
+  treasury still counts silver) and gold (100 cp), each with a ten-coin stack that sets down as a pile. A **coin purse**
+  (leather, string, a copper coin) holds up to 640 coins and shows how full it is.
+- **Money** (`Money`): every price, fee, fine, toll, bribe, wage, fare, reward, bounty and hoard goes through it. It
+  counts loose coins, stacks, purses carried or worn on the belt (Jaymo's Powers) and bundles, takes small coins first,
+  makes change into the purse, and lets creative players through. `Purse` is a thin wrapper kept for old callers.
+- **Trades:** every villager and wandering trader offer (vanilla, MCA, ours) is turned to coins as it's made
+  (`VillagerTradeCoinMixin`): an emerald becomes a silver coin, over 64 becomes gold with the odd silver in the second
+  slot. Saved villagers' offers are turned once on load. The trade screen breaks larger coins from your purse to fill
+  the payment slot (`MerchantMenuCoinMixin`).
+- **Minting:** the Coin Press strikes coins from copper, silver and gold nuggets, only in a realm's settlement, a daily
+  cap per realm and a cut to its treasury (`CoinPress`). **Money changers** (Counting Table) work in every capital and in
+  the fiefs of prosperous kingdoms: they buy emeralds as a gem and change coins.
+- **Old coin:** Andy: "some you come across will still trade in emeralds. so it is worth it to keep them around."
+  About one villager in seven and two wandering traders in five keep their emerald prices (`Coinage.keepsEmeralds`,
+  fixed by who they are).
+- **Thieves:** crooks go for a visible belt purse first and may take it whole (`Crooks`, `PURSE_LIFT_CHANCE`);
+  pickpocketing a villager mostly lifts a small filled purse or copper (`Pickpocket`).
+- **Loot:** camp, ogre, wreck, corsair and boss hoards hold silver coins; `LootSwap` turns emeralds in chest and mob
+  loot into silver coins (mined emerald ore still drops emeralds).
+- Emeralds stay a gem: ore, enchanting, tinkering's emerald modifier, trims, beacons and caravan gem goods.
+- Compile-checked, each batch reviewed by a separate check, and the dev server boots; not played.

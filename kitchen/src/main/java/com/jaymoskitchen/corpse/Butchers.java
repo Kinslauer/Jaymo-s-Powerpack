@@ -391,7 +391,7 @@ public final class Butchers {
 		}
 		float skill = skill(butcher);
 		int price = price(butcher, body.isBigCarcass());
-		// (0.5.53) paid in silver coins through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
+		// (0.5.54) paid in silver coins through Jaymo's Kingdoms' money (purses and bundles count; emeralds without Kingdoms)
 		long cost = KingdomsMoney.silver(price);
 		if (!KingdomsMoney.charge(player, cost)) {
 			butcher.playSound(SoundEvents.VILLAGER_NO);

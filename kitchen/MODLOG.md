@@ -1353,3 +1353,14 @@ Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery
 ## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
 Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.
+
+## 0.5.53: the Excalibur look made optional (pack 0.19.72, Kingdoms 0.7.485)
+Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.5.54: butchers take coins (pack 0.19.74, Kingdoms 0.7.487)
+Part of Kingdoms' "coins replace emeralds" (`docs/Coins-Plan.md`). A butcher villager's price is now in silver coins
+(one silver is what an emerald used to be). `KingdomsMoney` is a MethodHandles bridge to `com.jaymoskingdoms.money.Money`,
+so loose coins, coin stacks, a purse (the worn belt purse too) and bundles all count, and change comes back as coins.
+The butcher screen shows what you carry, counted by the server. Without Kingdoms the price falls back to emeralds one
+for one.

@@ -317,7 +317,7 @@ final class KingdomCommands {
 			return 0;
 		}
 		int want = IntegerArgumentType.getInteger(c, "silver");
-		// (0.7.486) silver is the treasury's unit; coins, coin stacks, purses (worn too) and bundles all count
+		// (0.7.487) silver is the treasury's unit; coins, coin stacks, purses (worn too) and bundles all count
 		// creative players pay nothing, so they may not deposit (it would mint treasury)
 		if (player.hasInfiniteMaterials() || !Money.charge(player, Money.silver(want))) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_enough", Money.text(Money.count(player))));
@@ -341,7 +341,7 @@ final class KingdomCommands {
 		}
 		int want = (int)Math.min(IntegerArgumentType.getInteger(c, "silver"), k.treasury());
 		Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() - want));
-		// (0.7.486) paid out in silver: into the worn purse if it has room, else the pack, else the ground
+		// (0.7.487) paid out in silver: into the worn purse if it has room, else the pack, else the ground
 		Money.pay(player, Money.silver(want));
 		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.withdrew", Money.text(Money.silver(want)), k.name()), false);
 		return want;

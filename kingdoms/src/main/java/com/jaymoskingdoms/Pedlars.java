@@ -272,7 +272,7 @@ public final class Pedlars {
 		}
 	}
 
-	/** (0.7.486) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
+	/** (0.7.487) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
 	private static MerchantOffer sell(ItemStack what, int silver, int uses) {
 		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), what, uses, 0, 0.05F);
 	}

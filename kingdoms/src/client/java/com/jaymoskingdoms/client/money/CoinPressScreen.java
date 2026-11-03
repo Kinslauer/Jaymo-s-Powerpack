@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
- * (0.7.486) The Coin Press's screen ({@link CoinPressMenu}), drawn like the H screen: a dark panel with a gold stripe, sunken
+ * (0.7.487) The Coin Press's screen ({@link CoinPressMenu}), drawn like the H screen: a dark panel with a gold stripe, sunken
  * slots, an arrow from the metal to the coins, and under them what the realm's mint may still strike today (or "no die"
  * outside a realm, or "the mint is spent").
  */

@@ -26,7 +26,7 @@ final class OffWorldGoods {
 	static final int WANTS_A_DAY = 2;
 
 	/** A good: its key, the world it comes from (a lang key suffix), the item ids to try, how many a notice or sheet asks, and what it pays
-	 * ((0.7.486) in silver coins: it was emeralds, one for one). */
+	 * ((0.7.487) in silver coins: it was emeralds, one for one). */
 	record Good(String key, String world, List<String> ids, int min, int max, int silver) {
 		/** The old name of {@link #silver}, for the notices that still say it. */
 		int emeralds() {

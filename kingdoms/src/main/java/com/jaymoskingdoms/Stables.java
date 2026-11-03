@@ -69,7 +69,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.47) Equestrian stage 3: a settlement's stable at work. Its {@link Folk#STABLEHAND} boards players' horses (fed,
- * watered and brushed while they're away, {@link #WEEKLY_FEE} silver coins ((0.7.486), once emeralds) for each week begun, paid when the horse is
+ * watered and brushed while they're away, {@link #WEEKLY_FEE} silver coins ((0.7.487), once emeralds) for each week begun, paid when the horse is
  * taken back out), sells horses (the breed by the land and the realm's wealth, the quality by its wealth) and buys
  * them back; its {@link Folk#FARRIER} shoes horses and sells tack, better tack in wealthier kingdoms. Walk up to either
  * and they say what they offer (clickable), or use {@code /kingdom stable} and {@code /kingdom farrier} beside them.
@@ -620,7 +620,7 @@ public final class Stables {
 		}
 	}
 
-	/** (0.7.486) {@code n} silver coins' worth to {@code player}: into the worn purse if it has room, else the pack, else the ground. */
+	/** (0.7.487) {@code n} silver coins' worth to {@code player}: into the worn purse if it has room, else the pack, else the ground. */
 	private static void giveSilver(ServerPlayer player, int n) {
 		Money.pay(player, Money.silver(n));
 	}
@@ -1279,7 +1279,7 @@ public final class Stables {
 			withSilver(reward, BREED_PRICE[breed.ordinal()] * (50 + quality) / 100 + 6 + random.nextInt(6)), 0L);
 	}
 
-	/** (0.7.486) {@code r} with a reward of {@code silver} silver coins (the codec key stays {@code emeralds}). */
+	/** (0.7.487) {@code r} with a reward of {@code silver} silver coins (the codec key stays {@code emeralds}). */
 	private static Quest.Reward withSilver(Quest.Reward r, int silver) {
 		return new Quest.Reward(silver, r.items(), r.book(), r.relic(), r.hearts(), r.reputation(), r.standing());
 	}

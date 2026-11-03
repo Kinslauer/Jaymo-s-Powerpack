@@ -22,7 +22,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.486) The Coin Press's rules: what it strikes, where, and how much. It only strikes inside a realm (a kingdom or a
+ * (0.7.487) The Coin Press's rules: what it strikes, where, and how much. It only strikes inside a realm (a kingdom or a
  * fiefdom with a seat, which has its mint with its town hall); anywhere else it has "no die". Each strike pays
  * {@link #MINT_TAX_PERCENT} of its value into the realm's treasury (seigniorage), and a realm's mint strikes at most
  * {@link #MINT_PER_DAY} coins a day, {@link #MINT_PER_FIEF} more for each fiefdom it holds, so a piglin-gold or copper farm

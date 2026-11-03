@@ -56,7 +56,7 @@ public class CostumeScreen extends Screen {
 	private final @Nullable BlockPos pos;
 	/** A tailor's price in silver coins, or -1 at a table. */
 	private final int price;
-	/** (0.19.69) What the player carried when the tailor's order opened, in copper pieces (the server counts it: a purse is hidden from the client). */
+	/** (0.19.74) What the player carried when the tailor's order opened, in copper pieces (the server counts it: a purse is hidden from the client). */
 	private final long have;
 	/** Kept between openings (so a closed screen doesn't lose a half-done design). */
 	private static CostumeDesign design = CostumeDesign.DEFAULT;
@@ -447,7 +447,7 @@ public class CostumeScreen extends Screen {
 		boolean creative = player.isCreative();
 		boolean enough = true;
 		if (tailoring()) {
-			// (0.11.78) the tailor's price; (0.19.69) in silver coins (purses and bundles count), the silver coin's icon
+			// (0.11.78) the tailor's price; (0.19.74) in silver coins (purses and bundles count), the silver coin's icon
 			long have = this.have / KingdomsMoney.SILVER;
 			boolean ok = creative || this.have >= KingdomsMoney.silver(this.price);
 			enough = ok;

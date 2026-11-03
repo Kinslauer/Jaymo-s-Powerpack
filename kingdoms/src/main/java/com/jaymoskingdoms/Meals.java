@@ -85,7 +85,7 @@ public final class Meals {
 	static final int HOME_PORTIONS = 2;
 	/** Servings in the eatery's pot from an item: a cook's dish, a soup or stew, or anything else. */
 	static final int DISH_SERVINGS = 3, STEW_SERVINGS = 4, PLAIN_SERVINGS = 2;
-	/** A meal's price in bits ((0.7.486) a bit is a copper piece: {@link #BITS} to a silver coin, once to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). */
+	/** A meal's price in bits ((0.7.487) a bit is a copper piece: {@link #BITS} to a silver coin, once to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). */
 	static final int MEAL_BITS = 2, BITS = Money.SILVER, TAX_PERCENT = 25;
 	/** The food a town wants in store (items): per head, and at least. The price index's bounds (percent). */
 	static final int WANT_PER_HEAD = 2, WANT_LEAST = 16, INDEX_LEAST = 50, INDEX_MOST = 300;
@@ -93,7 +93,7 @@ public final class Meals {
 	static final int DEAR = 175, CHEAP = 75;
 	static final float SAY_CHANCE = 0.35F;
 	static final int DEAR_MOOD = -1, CHEAP_MOOD = 1, TAVERN_MOOD = 1, WENT_WITHOUT_MOOD = -2;
-	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to a silver coin ((0.7.486) the treasury counts silver). */
+	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to a silver coin ((0.7.487) the treasury counts silver). */
 	static final int SURPLUS_TIMES = 3, TRADE_MOST = 32, SELL_PER_EMERALD = 8;
 	/** ...and short below half the want: bread bought in, this many loaves to a silver coin. */
 	static final int BUY_PER_EMERALD = 4;

@@ -19,7 +19,7 @@ import net.minecraft.world.level.material.MapColor;
 import com.jaymoskingdoms.JaymosKingdoms;
 
 /**
- * (0.7.486) Everything the coinage registers: the three coins and their coin stacks (and the layered piles those place),
+ * (0.7.487) Everything the coinage registers: the three coins and their coin stacks (and the layered piles those place),
  * the coin purse with its {@code jaymoskingdoms:coins} component, the Coin Press and its menu, and the Counting Table the
  * money changer works at ({@link Changer}). The economy itself is {@link Money}.
  */

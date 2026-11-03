@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * Sovereigns are kept on the Overworld, by faction id.
  */
 public final class Crowns {
-	/** (0.7.486) Silver (coins; once emeralds) to found a realm (it seeds the treasury, which counts in silver). */
+	/** (0.7.487) Silver (coins; once emeralds) to found a realm (it seeds the treasury, which counts in silver). */
 	static final int FOUND_COST = 256;
 	/** A ruler slain this close to their throne fell in their own hall. */
 	static final double USURP_RANGE = 16.0;
@@ -340,7 +340,7 @@ public final class Crowns {
 		if (near != null) {
 			return Component.translatable("message.jaymoskingdoms.crown.too_near", near.name(), KingdomEvents.CAPITAL_SPACING);
 		}
-		// (0.7.486) coins, coin stacks, purses (worn too) and bundles all count, and a creative player pays nothing
+		// (0.7.487) coins, coin stacks, purses (worn too) and bundles all count, and a creative player pays nothing
 		if (!Money.charge(player, Money.silver(FOUND_COST))) {
 			return Component.translatable("message.jaymoskingdoms.crown.found_cost", FOUND_COST, Money.count(player) / Money.SILVER);
 		}

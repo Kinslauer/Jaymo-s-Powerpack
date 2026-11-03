@@ -174,7 +174,7 @@ public final class StarFolk {
 		return is(e) && ready();
 	}
 
-	/** (0.7.486) Whole silver coins' worth the player carries (coins, purses, bundles, the worn purse), the unit the prices are in. */
+	/** (0.7.487) Whole silver coins' worth the player carries (coins, purses, bundles, the worn purse), the unit the prices are in. */
 	private static int silver(ServerPlayer player) {
 		return Approaches.silver(player);
 	}

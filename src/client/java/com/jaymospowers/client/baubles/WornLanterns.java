@@ -65,7 +65,7 @@ public final class WornLanterns {
 	/** The pole lantern's size (blocks); the pole sits this much further out over a chestplate, and over a backpack. */
 	static final float POLE_SIZE = 0.55F, OVER_ARMOUR = 1.0F, OVER_BACKPACK = 6.0F;
 	/**
-	 * (0.19.69) A hip item that isn't a lantern (Jaymo's Kingdoms' coin purse, in {@code #jaymospowers:hip_shown}) hangs at the
+	 * (0.19.74) A hip item that isn't a lantern (Jaymo's Kingdoms' coin purse, in {@code #jaymospowers:hip_shown}) hangs at the
 	 * right hip, by its hook (the top of the sprite), at {@code PURSE_SIZE} blocks across. Its model is the item's own, so the
 	 * purse shows how full it is (custom_model_data). {@code FIXED_SCALE}: the scale the fixed display transform applies already.
 	 */
@@ -118,7 +118,7 @@ public final class WornLanterns {
 		}
 		ItemStack hipStack = Baubles.shown(player, 0);
 		BlockState hip = Baubles.hipLantern(hipStack) ? hanging(hipStack) : null;
-		// (0.19.69) a hip item that is no lantern (a coin purse) is drawn with the item renderer
+		// (0.19.74) a hip item that is no lantern (a coin purse) is drawn with the item renderer
 		ItemStackRenderState purse = null;
 		if (hip == null && !hipStack.isEmpty() && Baubles.hipItem(hipStack)) {
 			purse = new ItemStackRenderState();

@@ -174,7 +174,7 @@ public final class ZFighterRaids {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_raid_share_tp", tp).withStyle(ChatFormatting.GOLD));
 			} else {
 				int emeralds = Math.max(8, Math.round(RAID_EMERALDS * share));
-				// (0.19.69) the raid share is silver coins now (1 silver = 1 old emerald)
+				// (0.19.74) the raid share is silver coins now (1 silver = 1 old emerald)
 				KingdomsMoney.pay(player, KingdomsMoney.silver(emeralds));
 				player.giveExperienceLevels(Math.max(5, Math.round(RAID_XP * share)));
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_raid_share", KingdomsMoney.text(KingdomsMoney.silver(emeralds))).withStyle(ChatFormatting.GOLD));

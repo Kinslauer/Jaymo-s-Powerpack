@@ -11,7 +11,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import com.jaymoskingdoms.money.Coin;
 
 /**
- * (0.7.486) Coins for emeralds in the loot of the world. Emeralds are gems now and the kingdoms' money is the coin, so
+ * (0.7.487) Coins for emeralds in the loot of the world. Emeralds are gems now and the kingdoms' money is the coin, so
  * the emeralds in found loot (vanilla's and every other mod's chests, mob drops and the village heroes' gifts) are
  * struck into silver coins on the way out of the loot table, one for one (an emerald was a silver's worth). Only the
  * tables under {@code chests/}, {@code entities/} and {@code gameplay/hero_of_the_village/} are swapped; what is mined

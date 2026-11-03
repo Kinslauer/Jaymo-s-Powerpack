@@ -633,7 +633,7 @@ public final class ZFighterSpaceMissions {
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
 		} else {
-			ZFighterSagas.paySilver(player, tp / 20); // (0.19.69) silver coins (the Glacia loot at 105/639 stays a gem)
+			ZFighterSagas.paySilver(player, tp / 20); // (0.19.74) silver coins (the Glacia loot at 105/639 stays a gem)
 		}
 		float ore = free ? 1.0F : CONQUER_ORE;
 		for (int i = 0; i < info.items().length; i++) {

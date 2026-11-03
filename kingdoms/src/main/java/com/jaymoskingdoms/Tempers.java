@@ -313,7 +313,7 @@ final class Tempers {
 				goods += Storage.take(level, f, e.getKey(), take).getCount();
 			}
 		}
-		long silver = goods / GOODS_PER_EMERALD; // (0.7.486) silver coins, as the treasury counts
+		long silver = goods / GOODS_PER_EMERALD; // (0.7.487) silver coins, as the treasury counts
 		if (silver > 0) {
 			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + silver));
 		}

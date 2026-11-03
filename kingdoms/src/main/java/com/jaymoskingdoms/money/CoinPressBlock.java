@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 
-/** (0.7.486) The Coin Press: an iron-bound press on a stone block. Use it to open {@link CoinPressMenu}. */
+/** (0.7.487) The Coin Press: an iron-bound press on a stone block. Use it to open {@link CoinPressMenu}. */
 public class CoinPressBlock extends Block {
 	private static final Component TITLE = Component.translatable("container.jaymoskingdoms.coin_press");
 	private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 14, 15);

@@ -179,7 +179,7 @@ final class Bookies {
 	}
 
 	/**
-	 * (0.7.486) The silver coins' worth in {@code player}'s hand, whole silver (coins, a coin stack or a coin purse, read
+	 * (0.7.487) The silver coins' worth in {@code player}'s hand, whole silver (coins, a coin stack or a coin purse, read
 	 * with {@link Coinage#held}); null, with a word, if there is none. It was the emeralds in the hand.
 	 */
 	private static @Nullable Integer stake(CommandContext<CommandSourceStack> c, ServerPlayer player) {

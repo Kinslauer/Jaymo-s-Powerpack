@@ -168,7 +168,7 @@ public final class Restoration {
 				lifebloom(level, player);
 			}
 		});
-		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.486)
+		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.487)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
 				|| !(entity instanceof Villager v) || !cleric(v) || CourtWizards.is(v)
@@ -700,7 +700,7 @@ public final class Restoration {
 		switch (kind) {
 			case "heal", "heal_free" -> {
 				if (kind.equals("heal")) {
-					Money.charge(player, Money.silver(HEAL_SILVER)); // (0.7.486)
+					Money.charge(player, Money.silver(HEAL_SILVER)); // (0.7.487)
 					PowersCompat.mend(player, player.getMaxHealth());
 					while (PowersCompat.closeCut(player)) {
 						// (every cut closed)
@@ -718,7 +718,7 @@ public final class Restoration {
 			}
 			case "treatment" -> {
 				// (0.7.462) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
-				Money.charge(player, Money.silver(Healing.treatmentPrice(player))); // (0.7.486)
+				Money.charge(player, Money.silver(Healing.treatmentPrice(player))); // (0.7.487)
 				Healing.treat(player);
 				beam(level, healer, player, GOLD_MOTE);
 				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD_MOTE, 18);
@@ -726,12 +726,12 @@ public final class Restoration {
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.treated"), Speech.GOLD);
 			}
 			case "scroll_mending" -> {
-				Money.charge(player, Money.silver(MENDING_SCROLL_SILVER)); // (0.7.486)
+				Money.charge(player, Money.silver(MENDING_SCROLL_SILVER)); // (0.7.487)
 				player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.SCROLL_MENDING), net.minecraft.util.Prediction.SERVER_ONLY);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.sold"), Speech.GOLD);
 			}
 			case "scroll_restoration" -> {
-				Money.charge(player, Money.silver(RESTORATION_SCROLL_SILVER)); // (0.7.486)
+				Money.charge(player, Money.silver(RESTORATION_SCROLL_SILVER)); // (0.7.487)
 				player.setAttached(RESTORATION_BOUGHT, level.getGameTime());
 				player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.SCROLL_RESTORATION), net.minecraft.util.Prediction.SERVER_ONLY);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.sold_restoration"), Speech.GOLD);

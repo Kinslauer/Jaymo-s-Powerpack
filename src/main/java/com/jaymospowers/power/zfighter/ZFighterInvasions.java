@@ -732,7 +732,7 @@ public final class ZFighterInvasions {
 			}
 			paid++;
 			int emeralds = Math.max(MIN_EMERALDS, Math.round(TOTAL_EMERALDS * share));
-			KingdomsMoney.pay(player, KingdomsMoney.silver(emeralds)); // (0.19.69) silver coins
+			KingdomsMoney.pay(player, KingdomsMoney.silver(emeralds)); // (0.19.74) silver coins
 			Component money = KingdomsMoney.text(KingdomsMoney.silver(emeralds));
 			give(player, new ItemStack(inv.theme.item, inv.theme.itemCount));
 			if (ZFighterItems.HERMIT_BEAN != null) {

@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.486) The Coin Press's screen: metal in on the left, the struck coins out on the right. The output shows what the
+ * (0.7.487) The Coin Press's screen: metal in on the left, the struck coins out on the right. The output shows what the
  * whole input would strike into (as much as the realm's mint may still strike today, and one stack at most); taking it
  * strikes it. Shift-click the output to strike and take it in one go. The screen reads the press's status, what the mint
  * has left today, and its daily cap from three synced numbers ({@link CoinPress#OK}, {@link CoinPress#NO_DIE},

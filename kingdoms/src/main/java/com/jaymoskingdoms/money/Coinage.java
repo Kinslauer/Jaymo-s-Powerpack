@@ -9,7 +9,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 /**
- * (0.7.486) The coinage of villager trades. Every trade a villager or a wandering trader offers is built by
+ * (0.7.487) The coinage of villager trades. Every trade a villager or a wandering trader offers is built by
  * {@code VillagerTrade.getOffer} (vanilla's, MCA's and every mod's trade data alike), and that is hooked to run its offer
  * through {@link #convert}, so no trade file names a coin. Offers saved before the coinage are converted once on load
  * (also {@link #convert}, which leaves nothing to convert the second time).
@@ -21,8 +21,23 @@ import net.minecraft.world.item.trading.MerchantOffers;
 public final class Coinage {
 	/** The most coins one payment slot holds. */
 	static final int MOST = 64;
+	/**
+	 * (0.7.487) Andy: "some you come across will still trade in emeralds. so it is worth it to keep them around." The share
+	 * of villagers, and of wandering traders, who keep their emerald prices (fixed by who they are, so it never changes).
+	 */
+	public static final float OLD_COIN_VILLAGERS = 0.15F, OLD_COIN_WANDERERS = 0.4F;
 
 	private Coinage() {
+	}
+
+	/** Whether {@code trader} still deals in emeralds: an old-fashioned villager or wandering trader, by a lot drawn from their UUID. */
+	public static boolean keepsEmeralds(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity trader) {
+		if (!(trader instanceof net.minecraft.world.entity.npc.villager.AbstractVillager)) {
+			return false;
+		}
+		float share = trader instanceof net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader ? OLD_COIN_WANDERERS : OLD_COIN_VILLAGERS;
+		long bits = trader.getUUID().getLeastSignificantBits() ^ 0x5DEECE66DL;
+		return (Math.floorMod(bits * 0x9E3779B97F4A7C15L >>> 40, 10000L)) < share * 10000.0F;
 	}
 
 	/** {@code offers} with every emerald price made coins (in place). */
@@ -39,7 +54,7 @@ public final class Coinage {
 	/** {@code offer} with its emerald prices made coins; {@code offer} itself if it has none. */
 	public static MerchantOffer convert(MerchantOffer offer) {
 		if (Changer.own(offer)) {
-			// (0.7.486) the money changer's own rates are already in coins
+			// (0.7.487) the money changer's own rates are already in coins
 			return offer;
 		}
 		long a = silverOf(offer.getItemCostA()), b = offer.getItemCostB().map(Coinage::silverOf).orElse(-1L);
@@ -100,7 +115,7 @@ public final class Coinage {
 	}
 
 	/**
-	 * (0.7.486) The trade screen's auto-fill, for a price in coins: when the pack holds the money but not the coin the price
+	 * (0.7.487) The trade screen's auto-fill, for a price in coins: when the pack holds the money but not the coin the price
 	 * asks for (it is in a purse, or in a larger coin), the missing coins are made from the money the player carries
 	 * (change goes back into the purse it came from) and put in the payment slot, which {@code slot} is. {@code price} is the count the offer really asks (demand and
 	 * special prices included), not the base cost's.

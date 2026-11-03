@@ -480,13 +480,13 @@ public final class Lockpicking {
 				worth += ENCHANTED;
 			}
 			worth += PIECE.getOrDefault(stack.getItem(), 0.0F) * stack.getCount();
-			// (0.7.486) coins, coin stacks and what a coin purse holds: a silver coin is worth what an emerald was
+			// (0.7.487) coins, coin stacks and what a coin purse holds: a silver coin is worth what an emerald was
 			worth += (Coin.valueOf(stack) + PurseContents.of(stack).value()) * COPPER_PIECE;
 		}
 		return worth;
 	}
 
-	/** (0.7.486) What a copper piece of loot is worth (a silver coin, 10 cp, is the 1.5 an emerald was). */
+	/** (0.7.487) What a copper piece of loot is worth (a silver coin, 10 cp, is the 1.5 an emerald was). */
 	private static final float COPPER_PIECE = 0.15F;
 
 	/** The valuables, by the piece. */

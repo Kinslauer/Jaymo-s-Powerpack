@@ -152,7 +152,7 @@ Trades in 26.3 are data. `VillagerTrade` has the codec fields `wants`, `addition
 1. **Saved emerald stacks:** players' chests and inventories, `Storage` storehouse stocks (wages are paid from `Storage.take(EMERALD)`), Crooks debts (`owe` ItemStacks), MCA villager packs (Crewmen lays), mailed `Post` parcels.
    - Mitigation: `Storage` converts EMERALD to silver_coin 1:1 on load.
    - `Crooks` converts EMERALD debts when it pays them out.
-   - Player-held emeralds stay gems. For `PAR_DAYS = 14` after first load of the new version (a world flag in Kingdoms saved data), the changer buys them at par (10 cp) so nobody is robbed by the patch.
+   - Player-held emeralds stay gems, and stay worth keeping: some villagers (15%) and wandering traders (40%) still trade in emeralds (`Coinage.keepsEmeralds`, Andy 2026-11-03).
 2. **Numbers, not items, survive unchanged:** `Faction.treasury`, `GreatWars` Ledger debts, `MerchantOrders.paid`, `Journeys.fare`, `Quest.Reward.emeralds` and Bounties prices are all in silver now, at the same value, so they need no conversion. Keep the codec key `emeralds`; renaming it would wipe saved quests.
 3. **Old villager offers:** handled by the `readAdditionalSaveData` hook. Wandering traders already spawned are covered by the same hook. Offers built in code (Haven, Underworld, Remedies, Meals) are changed at source in B3, and the hook catches any saved copies.
 4. **Price above 64** in one trade slot: handled with gold in costA and silver in costB. Check that `MerchantOffer.getCostA()` reputation and special-price math on a gold count doesn't round a 65-silver trade to 0 or 1 gold. Clamp to ≥1 and re-split.
@@ -166,10 +166,10 @@ Trades in 26.3 are data. `VillagerTrade` has the codec fields `wants`, `addition
     - Should the Coin Press be realm-only?
     - Should players be able to pickpocket another player's purse?
     - Should coins hurt vampires (the Garlic rule)?
-    - Should the 14-day par grace for old emeralds go in?
+    - (answered) No par grace: some traders keep emeralds instead.
 ## Defaults taken (Andy can overrule)
 - Ratios as above: 10 copper = 1 silver = 1 old emerald; 10 silver = 1 gold.
 - Coin Press only strikes inside a realm's settlement (tuning in constants).
 - No player-on-player purse lifting yet.
 - Coins don't count as silver for Garlic's anti-vampire rule (excluded).
-- The 14-day par grace for old emeralds goes in.
+- Andy: no par grace; "some you come across will still trade in emeralds".

@@ -254,7 +254,7 @@ public final class TribePacts {
 			if (level.getBlockEntity(pos) instanceof ChestBlockEntity chest) {
 				for (int slot = 0; slot < chest.getContainerSize(); slot++) {
 					ItemStack s = chest.getItem(slot);
-					// (0.7.486) the hoard is silver coins now; they top up a stack of coins or take an empty slot
+					// (0.7.487) the hoard is silver coins now; they top up a stack of coins or take an empty slot
 					if (s.isEmpty() || s.is(coin) && s.getCount() + silver <= s.getMaxStackSize()) {
 						chest.setItem(slot, new ItemStack(coin, s.getCount() + silver));
 						chest.setChanged();

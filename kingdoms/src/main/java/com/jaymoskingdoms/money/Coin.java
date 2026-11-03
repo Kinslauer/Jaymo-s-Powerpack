@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.486) The coins: copper, silver and gold, worth 1, 10 and 100 copper pieces (cp). One silver coin is what one
+ * (0.7.487) The coins: copper, silver and gold, worth 1, 10 and 100 copper pieces (cp). One silver coin is what one
  * emerald used to be, so every price that was "N emeralds" is now N silver. Each coin also comes as a stack of
  * {@value #STACK_COINS} (a placeable pile, used for hoards and big withdrawals).
  */

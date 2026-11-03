@@ -615,13 +615,13 @@ public final class Quests {
 	static List<ItemStack> rewards(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
-		// (0.7.486) the coins (silver, and any copper) are struck as coins now
+		// (0.7.487) the coins (silver, and any copper) are struck as coins now
 		out.addAll(Money.stacks(r.cp()));
 		out.addAll(goods(level, q));
 		return out;
 	}
 
-	/** (0.7.486) What {@code q} pays besides coins: goods, a book, a relic. */
+	/** (0.7.487) What {@code q} pays besides coins: goods, a book, a relic. */
 	private static List<ItemStack> goods(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();

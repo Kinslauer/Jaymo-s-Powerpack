@@ -46,7 +46,7 @@ public class ButcherScreen extends Screen {
 		if (this.minecraft.player == null) {
 			return false;
 		}
-		// (0.5.53) the server counted what you carry (coins, purses, bundles) when it opened this; it checks again on the deal
+		// (0.5.54) the server counted what you carry (coins, purses, bundles) when it opened this; it checks again on the deal
 		return this.minecraft.player.hasInfiniteMaterials() || offer.have() >= KingdomsMoney.silver(offer.price());
 	}
 

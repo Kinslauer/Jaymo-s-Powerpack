@@ -91,7 +91,7 @@ public final class CinderForge {
 	static final double BUILD_RANGE = 96.0;
 	/** Ticks between his restocks (a week), and before he comes back if he's gone (a day). */
 	static final long RESTOCK_TICKS = 24000L * 7L, RETURN_TICKS = 24000L;
-	/** The Writ: silver coins ((0.7.486) once emeralds) and netherite scrap. */
+	/** The Writ: silver coins ((0.7.487) once emeralds) and netherite scrap. */
 	static final int WRIT_EMERALDS = 40, WRIT_SCRAP = 2;
 	/** Reforging a piece: blaze rods, and what it comes back with. */
 	static final int REFORGE_RODS = 4, REFORGE_FIRE_PROTECTION = 3, REFORGE_UNBREAKING = 2, REFORGE_USES = 2;

@@ -90,17 +90,17 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 
 	/**
 	 * What it pays: silver coins (the codec key stays {@code emeralds} so old saved quests still read, and counts silver
-	 * now; (0.7.486) an optional {@code copper} adds loose copper pieces); items as {@code id*count}; an enchanted book as {@code enchantment id@level}; a relic as
+	 * now; (0.7.487) an optional {@code copper} adds loose copper pieces); items as {@code id*count}; an enchanted book as {@code enchantment id@level}; a relic as
 	 * {@code passive@base item id} ({@link Relics}); MCA hearts with the giver; reputation with their settlement; standing
 	 * (for its members).
 	 */
 	public record Reward(int emeralds, List<String> items, Optional<String> book, Optional<String> relic, int hearts, int reputation, int standing, int copper) {
-		/** (0.7.486) The old shape: silver only. */
+		/** (0.7.487) The old shape: silver only. */
 		public Reward(int emeralds, List<String> items, Optional<String> book, Optional<String> relic, int hearts, int reputation, int standing) {
 			this(emeralds, items, book, relic, hearts, reputation, standing, 0);
 		}
 
-		/** (0.7.486) What the coins come to, in copper pieces. */
+		/** (0.7.487) What the coins come to, in copper pieces. */
 		public long cp() {
 			return com.jaymoskingdoms.money.Money.silver(this.emeralds) + this.copper;
 		}

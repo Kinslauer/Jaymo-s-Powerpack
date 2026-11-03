@@ -62,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * <li>A villager of the town pins a <b>Merchant orders</b> sheet on its bounty board ({@link Bounties} errands). It stays
  * up: use or punch it to read what the town's merchants sell ({@link #open}). Nothing to craft: no board, no sack.</li>
  * <li>The catalog is the town's own trades: every grown villager with a trade within {@link #CATALOG_RANGE} of the
- * board, each offer bought with silver coins alone ((0.7.486), once emeralds). One shared catalog; each player may order each ware as often a day as
+ * board, each offer bought with silver coins alone ((0.7.487), once emeralds). One shared catalog; each player may order each ware as often a day as
  * the merchant would trade it ({@link MerchantOffer#getMaxUses}), and it restocks at dawn.</li>
  * <li>Five <b>standings</b> (Novice to Master), earned by the trade experience of what you order
  * ({@link #STANDING_XP}): a merchant's higher-level trades (offers 3-4 are Apprentice, 5-6 Journeyman...) show once
@@ -517,7 +517,7 @@ final class MerchantOrders {
 		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}
 
-	/** (0.7.486) Takes {@code price} silver coins' worth out of {@code player}'s coins, purses and bundles, if they have that much. */
+	/** (0.7.487) Takes {@code price} silver coins' worth out of {@code player}'s coins, purses and bundles, if they have that much. */
 	private static boolean pay(ServerPlayer player, int price) {
 		return Money.charge(player, Money.silver(price));
 	}

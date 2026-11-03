@@ -427,7 +427,7 @@ public final class Skills {
 			}
 			return InteractionResult.SUCCESS;
 		});
-		// (0.5.53) an MCA villager who is a court wizard: sneak and use them (their own menu opens as ever without sneaking;
+		// (0.5.54) an MCA villager who is a court wizard: sneak and use them (their own menu opens as ever without sneaking;
 		// from behind with an empty hand it's a pickpocket, which is registered first)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
@@ -539,7 +539,7 @@ public final class Skills {
 		if (!Money.canPay(player, Money.silver(price))) {
 			return true;
 		}
-		Money.charge(player, Money.silver(price)); // (0.7.486) silver coins, not emeralds
+		Money.charge(player, Money.silver(price)); // (0.7.487) silver coins, not emeralds
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);

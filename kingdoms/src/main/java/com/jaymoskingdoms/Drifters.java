@@ -235,7 +235,7 @@ public final class Drifters {
 		}
 	}
 
-	/** (0.7.486) A coin or a coin purse in the main hand, used on an unhired drifter, hires them (the silver comes from everything carried). */
+	/** (0.7.487) A coin or a coin purse in the main hand, used on an unhired drifter, hires them (the silver comes from everything carried). */
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, net.minecraft.world.phys.@Nullable EntityHitResult hit) {
 		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND || sp.isSpectator()
 			|| !unhired(entity) || !Approaches.isMoney(sp.getMainHandItem())) {

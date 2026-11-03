@@ -24,7 +24,7 @@ public final class Professions {
 	public static final List<String> JOBS = List.of("builder", "farmer", "miner", "woodcutter", "puller", "stablehand", "farrier");
 
 	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER, PULLER, STABLEHAND, FARRIER;
-	/** (0.5.53) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
+	/** (0.5.54) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
 	public static VillagerProfession WIZARD;
 	/** (0.7.291) A court's necromancer, a camp's shaman and blood witch: villagers in the office ({@link Casters}), never a player's pick. */
 	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
@@ -44,7 +44,7 @@ public final class Professions {
 		// (0.5.47)
 		STABLEHAND = register("stablehand", SoundEvents.VILLAGER_WORK_SHEPHERD);
 		FARRIER = register("farrier", SoundEvents.VILLAGER_WORK_ARMORER);
-		// (0.5.53)
+		// (0.5.54)
 		WIZARD = register("wizard", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.291)
 		NECROMANCER = register("necromancer", SoundEvents.VILLAGER_WORK_CLERIC);

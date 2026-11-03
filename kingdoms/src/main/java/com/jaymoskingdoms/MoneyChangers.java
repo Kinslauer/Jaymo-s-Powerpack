@@ -12,7 +12,7 @@ import net.minecraft.world.phys.AABB;
 import com.jaymoskingdoms.money.Changer;
 
 /**
- * (0.7.486) Money changers in the towns: every capital (a kingdom's seat), and every fiefdom whose overlord is at least
+ * (0.7.487) Money changers in the towns: every capital (a kingdom's seat), and every fiefdom whose overlord is at least
  * {@link Wealth.Tier#PROSPEROUS}, keeps one money changer ({@link Changer}), an idle townsperson taken on from the
  * villagers about its seat, the way a cookhouse takes on a cook. They make change at the Counting Table (a villager who
  * finds one takes the job on by himself too) and trade the gems the coinage left behind.

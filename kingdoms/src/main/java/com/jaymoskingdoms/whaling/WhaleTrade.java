@@ -31,7 +31,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * opens; an offer, once made, stays.
  */
 final class WhaleTrade {
-	/** One purchase: what they buy and how many at a time, the silver coins ((0.7.486), once emeralds) they give for it, and how often before a restock. */
+	/** One purchase: what they buy and how many at a time, the silver coins ((0.7.487), once emeralds) they give for it, and how often before a restock. */
 	record Want(Item item, int count, int silver, int uses) {
 	}
 

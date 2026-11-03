@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * <li>(0.5.21) A realm's workers (builders, farmers, miners, woodcutters) are its MCA villagers, promoted where they
  * stand ({@link #enlist}) or through MCA's Professions menu ({@link #promote}); its old {@link Folk} workers become
  * villagers ({@link #becomeVillager}). See {@link Workers}.</li>
- * <li>(0.5.53) A kingdom's court wizard is one of its elders ({@link CourtWizards}).</li>
+ * <li>(0.5.54) A kingdom's court wizard is one of its elders ({@link CourtWizards}).</li>
  * </ul>
  * Everything that names an MCA class is in {@link McaBridge}, which is only touched while MCA is {@link #LOADED}.
  */
@@ -390,7 +390,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.convertGuard(level, folk);
 	}
 
-	/** (0.5.53) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
+	/** (0.5.54) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;
 	}
@@ -405,7 +405,7 @@ public final class McaCompat {
 		return LOADED && Casters.mayConvert(level, folk) && McaBridge.convertCaster(level, folk);
 	}
 
-	/** (0.5.53) The grown MCA villager nearest {@code player} (a few blocks), or null. */
+	/** (0.5.54) The grown MCA villager nearest {@code player} (a few blocks), or null. */
 	static @Nullable PathfinderMob nearestGrown(ServerLevel level, ServerPlayer player) {
 		return LOADED ? McaBridge.nearestGrown(level, player) : null;
 	}

@@ -103,7 +103,7 @@ public final class LifeStory {
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
-	// (0.7.486) the start purses are silver coins in a filled coin purse (1 old emerald = 1 silver)
+	// (0.7.487) the start purses are silver coins in a filled coin purse (1 old emerald = 1 silver)
 	static final int KIT_BREAD = 4, CITY_SILVER = 2, MERCHANT_SILVER = 8, CAVE_TORCHES = 8;
 	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few silver coins. */
 	static final int VILLAGE_BREAD = 4, VILLAGE_SILVER = 4;

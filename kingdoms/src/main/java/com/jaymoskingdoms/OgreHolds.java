@@ -441,7 +441,7 @@ public final class OgreHolds {
 		if (!(level.getBlockEntity(at) instanceof ChestBlockEntity chest)) {
 			return;
 		}
-		// (0.7.486) the coins are silver now (they were emeralds), 1 for 1
+		// (0.7.487) the coins are silver now (they were emeralds), 1 for 1
 		List<ItemStack> loot = new java.util.ArrayList<>();
 		if (hoard) {
 			loot.addAll(Money.stacks(Money.silver(8 + random.nextInt(12))));

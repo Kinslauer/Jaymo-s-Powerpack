@@ -139,7 +139,7 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
-	/** (0.7.486) Powers' {@code Baubles.belt(Player)} and {@code Baubles.setBelt(ServerPlayer, ItemStack)}: where the coin purse hangs. */
+	/** (0.7.487) Powers' {@code Baubles.belt(Player)} and {@code Baubles.setBelt(ServerPlayer, ItemStack)}: where the coin purse hangs. */
 	private static java.lang.invoke.@Nullable MethodHandle getBelt, putBelt;
 	private static boolean lookedForBelt;
 
@@ -164,7 +164,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.486) What {@code player} wears in Powers' belt slot (the live stack, so a purse changed in place is changed), or an
+	 * (0.7.487) What {@code player} wears in Powers' belt slot (the live stack, so a purse changed in place is changed), or an
 	 * empty stack without Powers or an older one.
 	 */
 	public static net.minecraft.world.item.ItemStack belt(Player player) {
@@ -179,7 +179,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.486) Puts {@code stack} in {@code player}'s belt slot (it must fit there; the hip is redrawn). Nothing without Powers. */
+	/** (0.7.487) Puts {@code stack} in {@code player}'s belt slot (it must fit there; the hip is redrawn). Nothing without Powers. */
 	public static void setBelt(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack stack) {
 		lookForBelt();
 		if (putBelt == null) {

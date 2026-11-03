@@ -120,7 +120,7 @@ final class Remedies {
 		}
 	}
 
-	/** One of ours: {@code item} for coins ((0.7.486) a copper, silver or gold coin; emeralds from an old save count too). */
+	/** One of ours: {@code item} for coins ((0.7.487) a copper, silver or gold coin; emeralds from an old save count too). */
 	private static boolean ours(MerchantOffer offer, Item item) {
 		return offer.getResult().is(item) && (Coin.valueOf(offer.getCostA()) > 0L || offer.getCostA().is(Items.EMERALD));
 	}

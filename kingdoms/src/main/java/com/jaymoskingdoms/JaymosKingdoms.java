@@ -42,7 +42,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Attention.register();
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
-		// (0.7.486) coins replace emeralds: the coins, the purse, the Coin Press, the Counting Table and the money changer (and their attachments)
+		// (0.7.487) coins replace emeralds: the coins, the purse, the Coin Press, the Counting Table and the money changer (and their attachments)
 		com.jaymoskingdoms.money.MoneyItems.register();
 		MoneyChangers.register();
 		McaCompat.register();
@@ -73,7 +73,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
-		// (0.7.486) the emeralds in chests, mob drops and hero gifts become silver coins
+		// (0.7.487) the emeralds in chests, mob drops and hero gifts become silver coins
 		LootSwap.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> com.jaymoskingdoms.forms.FormsCommands.register(dispatcher));

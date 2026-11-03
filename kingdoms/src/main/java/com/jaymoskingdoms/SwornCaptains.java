@@ -572,7 +572,7 @@ public final class SwornCaptains {
 			}
 			Captains.raise(level, c, random);
 			if (lordId != null) {
-				// (0.7.486) the lord's share of the loot comes in silver coins
+				// (0.7.487) the lord's share of the loot comes in silver coins
 				for (ItemStack coins : Money.stacks(Money.silver(RAID_LOOT + random.nextInt(RAID_LOOT)))) {
 					Post.later(lordId, coins);
 				}

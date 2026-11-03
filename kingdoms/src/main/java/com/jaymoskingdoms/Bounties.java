@@ -505,7 +505,7 @@ public final class Bounties {
 		} else {
 			objective = Component.translatable("bounty.jaymoskingdoms.objective.offer");
 		}
-		// (0.7.486) the price is shown in coins (silver; the first five stacks)
+		// (0.7.487) the price is shown in coins (silver; the first five stacks)
 		List<ItemStack> rewards = new ArrayList<>(Money.stacks(Money.silver(b.dead() ? head : b.price())));
 		if (rewards.size() > 5) {
 			rewards = new ArrayList<>(rewards.subList(0, 5));
@@ -857,7 +857,7 @@ public final class Bounties {
 
 	/** A player brought in alive: fined what they carry (up to the price), forgiven their wanted time there, got back on their feet. */
 	private static void sentence(ServerLevel level, ServerPlayer target, Faction court, Bounty b) {
-		// (0.7.486) fined in coins: what they carry, up to the price (counted in silver)
+		// (0.7.487) fined in coins: what they carry, up to the price (counted in silver)
 		Component fine = Money.text(Money.chargeUpTo(target, Money.silver(b.price()))); // shows copper and loose change too
 		Map<String, Long> wanted = new HashMap<>(target.getAttachedOrElse(Theft.WANTED, Map.of()));
 		if (wanted.remove(Integer.toString(court.id())) != null) {

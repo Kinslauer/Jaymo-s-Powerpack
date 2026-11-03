@@ -12,7 +12,7 @@ import net.minecraft.world.item.component.BundleContents;
 import com.jaymoskingdoms.money.Money;
 
 /**
- * (0.7.51) What a player can pay with. (0.7.486) Now a thin wrapper over {@link Money}, kept so the old call sites compile
+ * (0.7.51) What a player can pay with. (0.7.487) Now a thin wrapper over {@link Money}, kept so the old call sites compile
  * while they move over: emeralds are gems and no longer money, and one emerald's price is one silver coin, so
  * {@code count(player, EMERALD)} is the silver the player carries (coins, coin stacks, purses, bundles and the worn purse)
  * and {@code take(player, EMERALD, n)} takes {@code n} silver. Any other item is counted loose and in bundles as before.

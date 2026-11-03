@@ -257,7 +257,7 @@ final class QuestFoes {
 		BlockEntity be = level.getBlockEntity(spot);
 		if (be instanceof ChestBlockEntity chest) {
 			chest.setItem(13, keepsake);
-			// (0.7.486) silver coins, as many as the emeralds were
+			// (0.7.487) silver coins, as many as the emeralds were
 			chest.setItem(random.nextInt(9), Money.stacks(Money.silver(1 + random.nextInt(4))).get(0));
 			chest.setItem(18 + random.nextInt(9), new ItemStack(random.nextBoolean() ? Items.BREAD : Items.BONE, 2 + random.nextInt(4)));
 		}

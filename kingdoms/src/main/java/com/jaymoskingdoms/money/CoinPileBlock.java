@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.7.486) A pile of coin stacks: one to eight layers, laid one coin stack at a time like snow (use a stack on a pile
+ * (0.7.487) A pile of coin stacks: one to eight layers, laid one coin stack at a time like snow (use a stack on a pile
  * to add a layer; breaking it gives them all back). Hoards and big withdrawals sit in these. It never melts, which is the
  * one thing a snow layer does that a coin pile mustn't.
  */

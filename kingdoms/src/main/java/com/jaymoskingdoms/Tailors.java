@@ -120,7 +120,7 @@ public final class Tailors {
 		if (fitting == null || level.getGameTime() - fitting.opened() > FITTING_TICKS) {
 			return;
 		}
-		// (0.7.486) as much of the fee as they carry, in silver coins
+		// (0.7.487) as much of the fee as they carry, in silver coins
 		Money.chargeUpTo(player, Money.silver(fitting.fee()));
 		Entity tailor = level.getEntity(fitting.tailor());
 		if (tailor != null) {

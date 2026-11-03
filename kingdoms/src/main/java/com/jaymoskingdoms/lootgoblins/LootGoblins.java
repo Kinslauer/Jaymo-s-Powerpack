@@ -56,7 +56,7 @@ public final class LootGoblins {
 	private LootGoblins() {
 	}
 
-	// (0.7.486) the loot's emeralds are silver coins now ("jaymoskingdoms:silver_coin"), the money of the kingdoms.
+	// (0.7.487) the loot's emeralds are silver coins now ("jaymoskingdoms:silver_coin"), the money of the kingdoms.
 	// ---- the loot tables (item ids, vanilla's unless named; any this game lacks are left out) --------------------------------------------------
 
 	static final String[] GENERIC = {"granite", "andesite", "diorite", "blackstone", "tuff", "stone", "deepslate", "lapis_lazuli",

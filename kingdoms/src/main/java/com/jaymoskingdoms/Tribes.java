@@ -340,7 +340,7 @@ public final class Tribes {
 		boolean gift = g <= 0;
 		int want = gift ? TribePacts.GIFT_EMERALDS : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_EMERALDS;
 		int paid = 0;
-		// (0.7.486) up to what they carry in coins, purses and bundles
+		// (0.7.487) up to what they carry in coins, purses and bundles
 		paid = Approaches.payUpTo(player, want);
 		int steps = paid / TRIBUTE_EMERALDS;
 		String line;

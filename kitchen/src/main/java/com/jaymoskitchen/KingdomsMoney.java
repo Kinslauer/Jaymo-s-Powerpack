@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (0.5.53) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Kitchen never compiles against it) to
+ * (0.5.54) Money, when Jaymo's Kingdoms is loaded: a bridge (MethodHandles, so Kitchen never compiles against it) to
  * {@code com.jaymoskingdoms.money.Money}, which counts coins, coin stacks, purses (the worn belt purse too) and bundles
  * in copper pieces. Prices are given in silver ({@link #silver}: a silver coin is what an emerald used to be, 10 cp). Without
  * Kingdoms it falls back to emeralds one for one, so the butcher still works.

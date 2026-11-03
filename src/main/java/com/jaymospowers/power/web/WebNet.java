@@ -50,6 +50,46 @@ public final class WebNet {
 	}
 
 	/**
+	 * Server → everyone who can see it: a web line broke (it wasn't just let go), so it leaves a spent line behind.
+	 * {@code entity} is the slinger ({@code line} {@link #MAIN} or {@link #OFF}) or, for {@link #HITCH_LINE}, the
+	 * hitched creature with the line tied at {@code anchor}. {@code how}: {@link #SNAPPED} (cut, burnt or pulled apart
+	 * at {@code at}: two broken halves), {@link #FREED} (what it was stuck to is gone: it all falls at once) or
+	 * {@link #WORN} (it wore out and comes loose from where it was stuck).
+	 */
+	public record LineSnap(int entity, byte line, Vec3 anchor, Vec3 at, byte how) implements CustomPacketPayload {
+		public static final Type<LineSnap> TYPE = new Type<>(JaymosPowers.id("web_line_snap"));
+		public static final StreamCodec<ByteBuf, LineSnap> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, LineSnap::entity,
+			ByteBufCodecs.BYTE, LineSnap::line,
+			Vec3.STREAM_CODEC, LineSnap::anchor,
+			Vec3.STREAM_CODEC, LineSnap::at,
+			ByteBufCodecs.BYTE, LineSnap::how,
+			LineSnap::new);
+
+		@Override
+		public Type<LineSnap> type() {
+			return TYPE;
+		}
+	}
+
+	public static final byte HITCH_LINE = 2;
+	public static final byte SNAPPED = 0, FREED = 1, WORN = 2;
+
+	/** Tells everyone tracking {@code owner} (and {@code owner}, if a player) that one of its lines broke. */
+	public static void snap(net.minecraft.world.entity.Entity owner, int line, Vec3 anchor, Vec3 at, byte how) {
+		LineSnap payload = new LineSnap(owner.getId(), (byte)line, anchor, at, how);
+		for (net.minecraft.server.level.ServerPlayer watcher : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(owner)) {
+			if (watcher == owner) {
+				continue;
+			}
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(watcher, payload);
+		}
+		if (owner instanceof net.minecraft.server.level.ServerPlayer self) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(self, payload);
+		}
+	}
+
+	/**
 	 * Server → client: reel yourself in along a web (Zip, or Yank on something too big to move). The line is stuck at
 	 * {@code anchor}; the feet head for {@code target} (or for entity {@code entityId}, if it's not -1). {@code face}
 	 * is the ordinal of the block face that was hit (-1 for none): a side face means "perch on top of the ledge".
@@ -379,5 +419,6 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(Rope.TYPE, Rope.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pull.TYPE, Pull.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(LineSnap.TYPE, LineSnap.CODEC);
 	}
 }

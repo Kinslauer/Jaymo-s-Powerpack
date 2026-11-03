@@ -289,7 +289,7 @@ public final class Temperaments {
 		if (!is(helper, Temperament.GREEDY)) {
 			return;
 		}
-		// (0.7.486) silver from coins, purses and bundles alike (the old loose-emerald counter is gone)
+		// (0.7.487) silver from coins, purses and bundles alike (the old loose-emerald counter is gone)
 		int took = Approaches.payUpTo(player, GREEDY_FEE);
 		if (took > 0) {
 			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), took),

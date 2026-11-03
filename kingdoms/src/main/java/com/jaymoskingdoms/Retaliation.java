@@ -210,7 +210,7 @@ final class Retaliation {
 			return true;
 		}
 		int price = price(brawl);
-		// (0.7.486) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
+		// (0.7.487) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
 		if (!Money.charge(player, Money.silver(price))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.price", price).withStyle(ChatFormatting.GRAY));
 			return true;

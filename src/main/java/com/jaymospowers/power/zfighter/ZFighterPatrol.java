@@ -885,7 +885,7 @@ public final class ZFighterPatrol {
 		int was = rank(owner, member.arrests());
 		Member now = new Member(member.arrests() + 1, member.fuelled());
 		owner.setAttached(MEMBER, now);
-		ZFighterSagas.paySilver(owner, bounty(was)); // (0.19.69) the bounty is silver coins
+		ZFighterSagas.paySilver(owner, bounty(was)); // (0.19.74) the bounty is silver coins
 		int tp = (int)Math.round(BOUNTY_TP * (1.0 + RANK_PAYS * was));
 		if (Powers.has(owner, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(owner, tp);

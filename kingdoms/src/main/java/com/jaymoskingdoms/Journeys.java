@@ -152,7 +152,7 @@ public final class Journeys {
 
 	/**
 	 * {@code player}, aboard {@code wagon}, is off to {@code place}: they're set down by {@code at}, {@code blocks}
-	 * away. {@code fare} silver coins ((0.7.486), once emeralds) were paid into realm {@code paidTo}'s treasury (-1: nobody's), and are given back if
+	 * away. {@code fare} silver coins ((0.7.487), once emeralds) were paid into realm {@code paidTo}'s treasury (-1: nobody's), and are given back if
 	 * they turn back.
 	 */
 	static void begin(ServerLevel level, ServerPlayer player, Wagon wagon, Component place, BlockPos at, int blocks, int fare, int paidTo, Ride ride) {

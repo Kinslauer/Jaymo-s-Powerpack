@@ -179,7 +179,7 @@ public final class HavenWares {
 		return good == TIDE_PEARL ? PEARL_PAID : good == DEEP_FISH ? FISH_PAID : good == CUT_GEM ? GEM_PAID : good == SYLVAN_HERBS ? HERB_PAID : HIDE_PAID;
 	}
 
-	/** (0.7.486) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
+	/** (0.7.487) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
 	private static MerchantOffer sale(int silver, ItemStack ware) {
 		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), ware, SELL_USES, XP, PRICE_MULT);
 	}

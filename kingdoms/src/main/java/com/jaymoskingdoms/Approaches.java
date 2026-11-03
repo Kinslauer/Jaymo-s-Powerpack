@@ -268,7 +268,7 @@ public final class Approaches {
 
 	/** Small gifts a friend brings. */
 	private static final List<Supplier<Item>> GIFTS = List.of(() -> Items.POPPY, () -> Items.DANDELION, () -> Items.CORNFLOWER, () -> Items.BREAD,
-		() -> Items.APPLE, () -> Items.COOKIE, () -> Items.PUMPKIN_PIE, () -> Coin.SILVER.item() /* (0.7.486) a coin, not a gem */, () -> Items.HONEY_BOTTLE,
+		() -> Items.APPLE, () -> Items.COOKIE, () -> Items.PUMPKIN_PIE, () -> Coin.SILVER.item() /* (0.7.487) a coin, not a gem */, () -> Items.HONEY_BOTTLE,
 		() -> Items.CAKE);
 
 	/** Food nobody hands over to the hungry (it's bad for them, or too dear). */
@@ -1586,17 +1586,17 @@ public final class Approaches {
 
 	// ---- the player's pack ---------------------------------------------------------------------------------------------
 
-	/** (0.7.486) Whole silver coins' worth the player carries: coins, coin stacks, purses, bundles and the worn purse ({@link Money}). */
+	/** (0.7.487) Whole silver coins' worth the player carries: coins, coin stacks, purses, bundles and the worn purse ({@link Money}). */
 	static int silver(ServerPlayer player) {
 		return (int)Math.min(Integer.MAX_VALUE, Money.count(player) / Money.SILVER);
 	}
 
-	/** (0.7.486) Whether the player can pay {@code silver} (a price that used to be "N emeralds"); creative always can. */
+	/** (0.7.487) Whether the player can pay {@code silver} (a price that used to be "N emeralds"); creative always can. */
 	static boolean canPay(ServerPlayer player, int silver) {
 		return Money.canPay(player, Money.silver(silver));
 	}
 
-	/** (0.7.486) Takes up to {@code silver} whole silver coins' worth from the player; how much was taken (change is made, never a part-coin lost). */
+	/** (0.7.487) Takes up to {@code silver} whole silver coins' worth from the player; how much was taken (change is made, never a part-coin lost). */
 	static int payUpTo(ServerPlayer player, int silver) {
 		if (player.hasInfiniteMaterials()) {
 			return Math.max(0, silver);
@@ -1605,17 +1605,17 @@ public final class Approaches {
 		return n > 0 && Money.charge(player, Money.silver(n)) ? n : 0;
 	}
 
-	/** (0.7.486) Whether {@code stack} is money held out in a hand: a coin, a coin stack or a coin purse. */
+	/** (0.7.487) Whether {@code stack} is money held out in a hand: a coin, a coin stack or a coin purse. */
 	static boolean isMoney(ItemStack stack) {
 		return Coin.valueOf(stack) > 0L || stack.is(MoneyItems.COIN_PURSE);
 	}
 
-	/** (0.7.486) Old name, kept for callers in other files that still say emeralds: it is the silver the player carries. */
+	/** (0.7.487) Old name, kept for callers in other files that still say emeralds: it is the silver the player carries. */
 	static int emeralds(ServerPlayer player) {
 		return silver(player);
 	}
 
-	/** (0.7.486) Old name: for {@code EMERALD}, takes that much silver; any other item is taken as before ({@link Purse}). */
+	/** (0.7.487) Old name: for {@code EMERALD}, takes that much silver; any other item is taken as before ({@link Purse}). */
 	static void take(ServerPlayer player, Item item, int n) {
 		if (item == Items.EMERALD) {
 			payUpTo(player, n);

@@ -17,7 +17,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.486) The coin purse: a leather bag that holds up to {@link PurseContents#PURSE_MOST} coins in its
+ * (0.7.487) The coin purse: a leather bag that holds up to {@link PurseContents#PURSE_MOST} coins in its
  * {@code jaymoskingdoms:coins} component. Worn in Jaymo's Powers' belt slot it hangs on the hip (and a pickpocket can lift
  * the whole thing); in a pack it is safer but pays second. Use it to pour every loose coin you carry into it; sneak
  * and use to tip it out again. Drop coins on it in an inventory screen to fill it; click it on a pile of coins to scoop

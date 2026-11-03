@@ -28,7 +28,7 @@ import net.minecraft.world.item.DyeColor;
 /**
  * (0.5.37) The casters' look ({@link Sorcery}): the necromancer's hood and black robe (two faces), the shaman's war paint and
  * wolf-skull headdress in his camp's colour, the court wizard's robe in his realm's colour, and the wizard's pointed hat, a
- * model of its own over his head (drawn by {@code tools/gen_sorcery.py}). (0.5.53) An MCA villager who is a court wizard
+ * model of its own over his head (drawn by {@code tools/gen_sorcery.py}). (0.5.54) An MCA villager who is a court wizard
  * (the profession {@code jaymoskingdoms:wizard}) wears the hat too ({@link VillagerHat}); MCA's cleric's robe is theirs.
  */
 public final class SorcerySkins {
@@ -40,9 +40,9 @@ public final class SorcerySkins {
 	private static final Identifier[] WIZARDS = new Identifier[DyeColor.values().length];
 	/** How far the hat's tip leans back (radians). */
 	static final float TIP_LEAN = 0.35F;
-	/** (0.5.53) The colour of a villager wizard's hat (their realm's isn't known to the client). */
+	/** (0.5.54) The colour of a villager wizard's hat (their realm's isn't known to the client). */
 	static final DyeColor VILLAGER_HAT = DyeColor.BLUE;
-	/** (0.5.53) On a villager's render state: they're a court wizard. */
+	/** (0.5.54) On a villager's render state: they're a court wizard. */
 	static final RenderStateDataKey<Boolean> WIZARD = RenderStateDataKey.create(() -> "jaymoskingdoms:court_wizard");
 
 	private SorcerySkins() {
@@ -61,7 +61,7 @@ public final class SorcerySkins {
 		JaymosKingdomsClient.SKINS.put(Sorcery.BLOOD_WITCH, state -> BLOOD_WITCHES[state.variant % NECROMANCER_FACES]);
 		JaymosKingdomsClient.SKINS.put(Sorcery.SHAMAN, state -> SHAMANS[dye(state.color, DyeColor.RED)]);
 		JaymosKingdomsClient.SKINS.put(Sorcery.WIZARD, state -> WIZARDS[dye(state.color, DyeColor.BLUE)]);
-		// (0.5.53) the hat on any humanoid villager in the office (MCA's)
+		// (0.5.54) the hat on any humanoid villager in the office (MCA's)
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(villagerHat(renderer));
@@ -74,7 +74,7 @@ public final class SorcerySkins {
 		return new VillagerHat((RenderLayerParent) renderer);
 	}
 
-	/** (0.5.53) Render-state extraction (any entity): whether it's a villager who is a court wizard. */
+	/** (0.5.54) Render-state extraction (any entity): whether it's a villager who is a court wizard. */
 	public static void extract(Entity entity, EntityRenderState state) {
 		state.setData(WIZARD, entity instanceof Villager v && Professions.WIZARD != null && v.getVillagerData().profession().value() == Professions.WIZARD
 			? Boolean.TRUE : null);
@@ -129,7 +129,7 @@ public final class SorcerySkins {
 	}
 
 	/**
-	 * (0.5.53) A villager wizard's hat ({@link #hat}'s shape, in the blue wizard's skin), over whatever humanoid model
+	 * (0.5.54) A villager wizard's hat ({@link #hat}'s shape, in the blue wizard's skin), over whatever humanoid model
 	 * draws them; it follows their head by setting up the wearer's own model and copying its pose, and takes the same poses
 	 * on top as the rest of the body ({@link WornModel}). Not over a helmet.
 	 */

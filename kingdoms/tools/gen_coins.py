@@ -1,4 +1,4 @@
-"""Draws the coinage (0.7.486): original 16x16 vanilla-style art and the repetitive JSON around it. Run from kingdoms/:
+"""Draws the coinage (0.7.487): original 16x16 vanilla-style art and the repetitive JSON around it. Run from kingdoms/:
 python -I tools/gen_coins.py   (then, from the repo root, python -I tools/excalibur_style/grade.py)
 
 Items: copper_coin, silver_coin, gold_coin (a stamped disc, lit from the top-left, a little mark pressed in), the three

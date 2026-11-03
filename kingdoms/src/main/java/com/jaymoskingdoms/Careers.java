@@ -162,7 +162,7 @@ public final class Careers {
 	/** Master: an apprentice's daily goods (a stack of the job's first good, this many) and cut (silver coins). */
 	static final int APPRENTICE_GOODS = 16, APPRENTICE_CUT = 2;
 	/** Master: a stall sells at most this many silver coins' worth a day, from noon. */
-	// (0.7.486) wages, fares and the stall's takings are silver coins (1 old emerald = 1 silver)
+	// (0.7.487) wages, fares and the stall's takings are silver coins (1 old emerald = 1 silver)
 	static final int STALL_SILVER = 12;
 	static final long STALL_FROM = 6000L;
 
@@ -894,7 +894,7 @@ public final class Careers {
 		}
 		edit(player, k -> k.withSoldDay(today));
 		if (earned > 0) {
-			// (0.7.486) the stall's takings are silver coins left in the box
+			// (0.7.487) the stall's takings are silver coins left in the box
 			ItemStack pay = Coin.SILVER.stack(earned);
 			for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {
 				ItemStack there = box.getItem(slot);

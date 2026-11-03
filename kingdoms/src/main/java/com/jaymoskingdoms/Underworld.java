@@ -818,7 +818,7 @@ public final class Underworld {
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
 	}
 
-	/** (0.7.486) {@code item} for {@code silver} silver coins (the old price in emeralds, one for one). */
+	/** (0.7.487) {@code item} for {@code silver} silver coins (the old price in emeralds, one for one). */
 	private static MerchantOffer sell(Item item, int silver, int uses) {
 		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), new ItemStack(item), uses, XP, PRICE_MULTIPLIER);
 	}
@@ -977,7 +977,7 @@ public final class Underworld {
 			return;
 		}
 		DICE_NEXT.put(player.getUUID(), now + DICE_COOLDOWN);
-		// (0.7.486) the stake is silver out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER
+		// (0.7.487) the stake is silver out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER
 		int wager = (int)Math.min(Coinage.held(player.getMainHandItem()) / Money.SILVER, MOST_WAGER);
 		if (wager < 1 || !Money.charge(player, Money.silver(wager))) {
 			return;
