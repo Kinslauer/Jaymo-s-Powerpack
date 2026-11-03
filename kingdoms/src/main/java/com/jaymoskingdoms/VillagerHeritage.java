@@ -429,6 +429,8 @@ public final class VillagerHeritage {
 		if (kind != Heritage.Kind.WARRIORBORN) {
 			modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		// (0.7.480) and its kit's plain attribute gifts and flaws (never its ability)
+		HeritageKits.attributes(villager);
 	}
 
 	/** Every second: an Emberborn's fire put out and the cold's toll, a Frostborn's frost shed, the dark for a Nightborn, a Warrior-born's fury. */
@@ -444,6 +446,8 @@ public final class VillagerHeritage {
 			if (kind == null) {
 				continue;
 			}
+			// (0.7.480) the kit's gifts and flaws that follow the weather and the land
+			HeritageKits.tick(villager, server.getTickCount());
 			switch (kind) {
 				case EMBERBORN -> {
 					if (villager.isOnFire()) {

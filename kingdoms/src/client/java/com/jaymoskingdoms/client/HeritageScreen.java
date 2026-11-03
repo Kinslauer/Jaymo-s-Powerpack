@@ -285,7 +285,7 @@ final class HeritageScreen extends Screen {
 			List<FormattedCharSequence> split = wrapped.get(i);
 			int rh = split.size() * Ui.LINE + 4;
 			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + rh - 1, i, false);
-			int color = hidden ? Ui.DIM : i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
+			int color = hidden ? Ui.DIM : rowColor(rows.get(i));
 			for (int l = 0; l < split.size(); l++) {
 				graphics.text(this.font, split.get(l), px + 10, ry + 2 + l * Ui.LINE, color);
 			}
@@ -361,6 +361,26 @@ final class HeritageScreen extends Screen {
 	}
 
 	/**
+	 * (0.7.480) A card row's colour by what it is, not where it sits (the shunned line used to push the flaw into the gift's
+	 * green): gifts green, flaws red, an ability gold, the rest plain.
+	 */
+	private static int rowColor(Component row) {
+		if (row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents translatable) {
+			String key = translatable.getKey();
+			if (key.endsWith(".flaw") || key.endsWith(".card.flaw")) {
+				return Ui.BAD;
+			}
+			if (key.endsWith(".gift") || key.endsWith(".card.gift")) {
+				return Ui.GOOD;
+			}
+			if (key.contains(".card.move.")) {
+				return Ui.GOLD;
+			}
+		}
+		return Ui.TEXT;
+	}
+
+	/**
 	 * (0.7.214) {@code kind}'s card with a row for its look on top: the picked one's chosen look, or for any other its
 	 * looks' names.
 	 */
@@ -382,7 +402,8 @@ final class HeritageScreen extends Screen {
 			}
 			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", count, names));
 		}
-		rows.addAll(kind.card());
+		// (0.7.480) the picked look's own kit, when it has one
+		rows.addAll(kind.card(kind == this.picked ? HeritageVariants.at(kind, this.pickedVariant) : null));
 		return rows;
 	}
 

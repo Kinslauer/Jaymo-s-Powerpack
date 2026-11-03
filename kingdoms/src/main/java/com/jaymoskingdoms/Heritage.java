@@ -105,8 +105,8 @@ import org.jspecify.annotations.Nullable;
  * sweet tooth; rubber burns and pops ({@link RubberFolk}).</li>
  * <li><b>Beastfolk:</b> (0.7.480, Andy: missing Runic Races come in by family, races as variants) picked at the start: Arachnid,
  * Avian, Canine, Feline, Kitsune and Serpen are their looks ({@link HeritageVariants}). <b>Hollow:</b> earned: the risen dead (Zombie,
- * Skeleton, Wraith, Reaper) wake in one the undead struck down who got up again ({@link #hollowCheck}). Their abilities come later;
- * see docs/Races-Plan.md.</li>
+ * Skeleton, Wraith, Reaper) wake in one the undead struck down who got up again ({@link #hollowCheck}). (0.7.480) Every heritage and
+ * look has a kit now, an ability, a gift and a flaw ({@link HeritageKits}); see docs/Races-Plan.md.</li>
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
@@ -332,6 +332,11 @@ public final class Heritage {
 
 		/** What the screen lists for it: the free points, the gift, the flaw. */
 		public List<Component> card() {
+			return card(null);
+		}
+
+		/** (0.7.480) The card with the kit of look {@code variant} (null: the first look, the heritage's own kit). */
+		public List<Component> card(HeritageVariants.@Nullable Variant variant) {
 			List<Component> out = new ArrayList<>();
 			if (this.freePoints > 0) {
 				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints));
@@ -344,6 +349,8 @@ public final class Heritage {
 			}
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".gift"));
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
+			// (0.7.480) the kit: its ability, its gift, its flaw (the look's own once a look is picked, see card(Variant))
+			out.addAll(HeritageKits.card(HeritageKits.kit(this, variant)));
 			// (0.7.221) and how far from human folk think it ({@link Prejudice})
 			int shunned = Prejudice.degree(this);
 			if (shunned > 0) {
@@ -441,12 +448,16 @@ public final class Heritage {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer player && taken > 0.0F) {
 				stunned(player, source);
+				// (0.7.480) so the blow isn't read as a heal lost next second (HeritageKits.healing)
+				HeritageKits.settle(player);
 			}
 			if (taken > 0.0F) {
 				struck(entity, source);
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Heritage::died);
+		// (0.7.480) the kits: the abilities, the gifts and the flaws of every heritage and look (HeritageKits)
+		HeritageKits.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			BLINK_READY.remove(handler.player.getUUID());
 			SPARKED.remove(handler.player.getUUID());
@@ -593,6 +604,8 @@ public final class Heritage {
 		RubberFolk.attributes(player, kind);
 		// (0.7.214) the variant's trait
 		HeritageVariants.traits(player);
+		// (0.7.480) and the kit's gifts and flaws that are plain attributes
+		HeritageKits.attributes(player);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -671,6 +684,8 @@ public final class Heritage {
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", inSun(player) ? -DEEP_SUN_WEAK : 0.0,
 					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			}
+			// (0.7.480) the kit's gifts and flaws that follow the weather and the land
+			HeritageKits.tick(player, server.getTickCount());
 			if (server.getTickCount() % UNLOCK_EVERY == 0) {
 				unlockChecks(player);
 			}
@@ -763,7 +778,8 @@ public final class Heritage {
 		if (kind == null) {
 			return 1.0F;
 		}
-		return switch (kind) {
+		// (0.7.480) times the kit's (the Canine's ravenous, the risen's small appetite)
+		return HeritageKits.hunger(player) * switch (kind) {
 			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
 			case VERDANT -> inSun(player) ? (spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER
@@ -829,7 +845,12 @@ public final class Heritage {
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
 		if (kind == Kind.WARRIORBORN) {
-			player.addTag(TAIL_TOGGLE_TAG);
+			if (player.isShiftKeyDown()) {
+				// (0.7.480) sneaking, the key is the war cry instead
+				HeritageKits.press(player);
+			} else {
+				player.addTag(TAIL_TOGGLE_TAG);
+			}
 		} else if (kind == Kind.BIOBUILT) {
 			// (0.7.288) on a downed foe it starts (or stops) absorbing it; else, in the last form, it buds copies
 			BioBuilt.press(player);
@@ -913,7 +934,7 @@ public final class Heritage {
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		Kind mine = VillagerHeritage.of(target);
-		if (mine == Kind.DRAGONBLOOD && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
+		if (mine == Kind.DRAGONBLOOD && HeritageVariants.of(target) != HeritageVariants.Variant.RIMEWYRM && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
 			amount *= DRAGON_FIRE_TAKEN;
 		} else if (mine == Kind.BIOBUILT && (source.is(DamageTypeTags.IS_LIGHTNING) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
 			// (0.7.262) a made body is brittle to lightning and magic
@@ -921,6 +942,11 @@ public final class Heritage {
 		} else if (mine == Kind.RUBBERFOLK) {
 			// (0.7.262) rubber pops
 			amount *= RubberFolk.taken(source);
+		}
+		// (0.7.480) the kits: what each look's flaws and gifts do to a blow taken, and to one dealt
+		amount = HeritageKits.taken(target, source, amount);
+		if (source.getEntity() instanceof LivingEntity striker) {
+			amount = HeritageKits.dealt(striker, target, source, amount);
 		}
 		Entity by = source.getEntity();
 		if (!(by instanceof LivingEntity attacker) || by != source.getDirectEntity() || target.level().isClientSide()) {
