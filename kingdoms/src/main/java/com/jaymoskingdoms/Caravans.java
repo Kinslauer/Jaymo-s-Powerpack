@@ -112,7 +112,7 @@ final class Caravans {
 
 	/** One caravan on the road: whose, to whom, which way ({@code back}), where it is, its carts' loads, its guards. */
 	record Caravan(int id, int home, int lord, boolean back, BlockPos at, List<Map<String, Integer>> carts, int guards, boolean mounted,
-		long started, long stopUntil, int rig, boolean trade) {
+		long started, long stopUntil, int rig, boolean trade, int hold) {
 		static final Codec<Caravan> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("id").forGetter(Caravan::id),
 				Codec.INT.fieldOf("home").forGetter(Caravan::home),
@@ -125,19 +125,21 @@ final class Caravans {
 				Codec.LONG.fieldOf("started").forGetter(Caravan::started),
 				Codec.LONG.optionalFieldOf("stop_until", 0L).forGetter(Caravan::stopUntil),
 				Codec.INT.optionalFieldOf("rig", TradeRoutes.CART).forGetter(Caravan::rig),
-				Codec.BOOL.optionalFieldOf("trade", false).forGetter(Caravan::trade))
+				Codec.BOOL.optionalFieldOf("trade", false).forGetter(Caravan::trade),
+				// ((0.7.484) an ogre hold's haul: its site's id; -1 for everyone else's)
+				Codec.INT.optionalFieldOf("hold", -1).forGetter(Caravan::hold))
 			.apply(i, Caravan::new));
 
 		Caravan at(BlockPos pos) {
-			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade);
+			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold);
 		}
 
 		Caravan carts(List<Map<String, Integer>> carts) {
-			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade);
+			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold);
 		}
 
 		Caravan turned(List<Map<String, Integer>> carts, long stopUntil) {
-			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil, this.rig, this.trade);
+			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil, this.rig, this.trade, this.hold);
 		}
 
 		int load() {
@@ -230,7 +232,8 @@ final class Caravans {
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.remove(Integer.toString(c.id()));
 		Map<String, Long> next = new HashMap<>(l.next());
-		next.put(Integer.toString(c.home()), nextSend);
+		// ((0.7.484) an ogre hold's haul is timed by its hold, not by the camp it hauls to)
+		next.put(c.hold() >= 0 ? TradeRoutes.holdKey(c.hold()) : Integer.toString(c.home()), nextSend);
 		save(server, new Ledger(all, next, l.pending(), l.nextId()));
 	}
 
@@ -264,7 +267,7 @@ final class Caravans {
 		}
 		// ((0.7.484) and the greenskin camps send their surplus to the other camps of their tribe)
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
-			if (f.fallen() || !Hordes.greenskin(server, f.id()) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())
+			if (f.fallen() || !Hordes.greenskin(server, f.id()) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && c.hold() < 0)
 				|| now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
 				continue;
 			}
@@ -276,7 +279,7 @@ final class Caravans {
 
 	/** (0.7.484) How long after {@code c} is done its home waits to send another (ticks). */
 	static long gap(MinecraftServer server, Caravan c) {
-		return c.trade() ? TradeRoutes.every(server, c.home()) : CARAVAN_TICKS;
+		return c.hold() >= 0 ? TradeRoutes.OGRE_EVERY : c.trade() ? TradeRoutes.every(server, c.home()) : CARAVAN_TICKS;
 	}
 
 	/** The camp of {@code f}'s tribe its cart goes to: a hungry one first, else the nearest standing (within {@link #GREEN_REACH}); null if it's alone. */
@@ -338,7 +341,7 @@ final class Caravans {
 		}
 		Ledger l = ledger(server);
 		int id = l.nextId();
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2, TradeRoutes.CART, false);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -397,7 +400,7 @@ final class Caravans {
 		int id = l.nextId();
 		int guards = GUARDS_BASE + carts.size() / CARTS_PER_GUARD;
 		boolean mounted = Wealth.atLeast(server, lord, Wealth.Tier.PROSPEROUS);
-		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false);
+		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -427,7 +430,7 @@ final class Caravans {
 		Ledger l = ledger(server);
 		int id = l.nextId();
 		Caravan c = new Caravan(id, f.id(), to.id(), false, rig == TradeRoutes.BOAT ? TradeRoutes.quay(server, f) : start(f), carts, guards, mounted, now,
-			now + STOP_TICKS / 2, rig, true);
+			now + STOP_TICKS / 2, rig, true, -1);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -441,6 +444,13 @@ final class Caravans {
 
 	/** (0.7.484) Where {@code c} is headed: the far end's door, or home's; a skiff makes for its cove's mooring ({@link TradeRoutes#quay}). */
 	static BlockPos goal(MinecraftServer server, Caravan c, Faction home, Faction lord) {
+		if (c.hold() >= 0 && c.back()) {
+			// ((0.7.484) an ogre hold's haul goes home to its hold)
+			BlockPos hold = OgreHolds.holdAt(server, c.hold());
+			if (hold != null) {
+				return hold;
+			}
+		}
 		Faction end = c.back() ? home : lord;
 		return c.trade() && c.rig() == TradeRoutes.BOAT ? TradeRoutes.quay(server, end) : start(end);
 	}
@@ -598,6 +608,10 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		Faction home = Factions.get(server, c.home());
 		Faction lord = Factions.get(server, c.lord());
+		if (c.hold() >= 0 && home != null) {
+			// ((0.7.484) an ogre hold's haul at the camp it trades with, or back at its hold)
+			return TradeRoutes.arriveOgre(level, c, home, now);
+		}
 		if (c.trade() && home != null && lord != null) {
 			// ((0.7.484) a settlement's trade: villages, towns, camps, coves and kingdoms)
 			return TradeRoutes.arrive(level, c, home, lord, now);
@@ -715,8 +729,10 @@ final class Caravans {
 				reached(level, c, now);
 				continue;
 			}
-			Vec3 road = Roads.ahead(level, at, goal, ROAD_SPEED * TICK);
-			Vec3 next = road != null ? road : at.add(to.subtract(at).scale(Math.min(1.0, ROAD_SPEED * TICK / d)));
+			// ((0.7.484) a handcart, or an ogre's cart, goes slower than a horse: TradeRoutes.pace)
+			double step = ROAD_SPEED * TICK * TradeRoutes.pace(level, c);
+			Vec3 road = Roads.ahead(level, at, goal, step);
+			Vec3 next = road != null ? road : at.add(to.subtract(at).scale(Math.min(1.0, step / d)));
 			put(server, c.at(BlockPos.containing(next)));
 		}
 	}
@@ -787,7 +803,8 @@ final class Caravans {
 		// ((0.7.294) folk, or MCA guards)
 		List<PathfinderMob> guards = new ArrayList<>();
 		for (UUID id : live.guards) {
-			if (level.getEntity(id) instanceof PathfinderMob g && g instanceof Worker && g.isAlive()) {
+			// ((0.7.484) or an illager camp's own illagers: TradeRoutes.crew)
+			if (level.getEntity(id) instanceof PathfinderMob g && (g instanceof Worker || TradeRoutes.crew(g)) && g.isAlive()) {
 				guards.add(g);
 			}
 		}
@@ -973,17 +990,31 @@ final class Caravans {
 				// ((0.7.484) no water at its place in the column: it sets off from the nearest water by it, else from the lead's)
 				spot = water(level, spot, ground(level, at));
 			}
-			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
-			Worker w = home.type() == FactionType.BARBARIAN ? carter(level, home, spot, yaw) : Drivers.hire(level, home, spot, yaw, TASK, 64, null);
-			if (w == null) {
+			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers; (0.7.484) an illager camp's, one of its pillagers; an ogre
+			// hold's, one of its ogres)
+			PathfinderMob carter;
+			if (c.hold() >= 0) {
+				carter = OgreHolds.hauler(level, spot, yaw);
+			} else if (TradeRoutes.illagers(server, home)) {
+				carter = TradeRoutes.illager(level, home, true, spot, yaw);
+			} else {
+				Worker hired = home.type() == FactionType.BARBARIAN ? carter(level, home, spot, yaw) : Drivers.hire(level, home, spot, yaw, TASK, 64, null);
+				carter = hired == null ? null : hired.mob();
+			}
+			if (carter == null) {
 				continue;
 			}
-			PathfinderMob carter = w.mob();
+			Worker w = carter instanceof Worker hired ? hired : null;
 			carter.addTag(TAG);
 			carter.addTag(live.stamp);
 			Entity pull;
 			Wagon wagon;
-			if (rig == TradeRoutes.HAND) {
+			if (c.hold() >= 0) {
+				// ((0.7.484) an ogre between the shafts of a full cart, slow as a handcart: TradeRoutes.HAND_WALK)
+				carter.addTag(TradeRoutes.PULL_TAG);
+				wagon = Wagon.hitch(level, Wagon.CART, home, carter, c.id(), i);
+				pull = carter;
+			} else if (rig == TradeRoutes.HAND) {
 				// (on foot between the handles, the cart behind him)
 				carter.addTag(TradeRoutes.PULL_TAG);
 				wagon = Wagon.hitch(level, Wagon.HANDCART, home, carter, c.id(), i);
@@ -996,7 +1027,8 @@ final class Caravans {
 				carter.startRiding(wagon);
 				pull = wagon;
 			} else {
-				AbstractHorse horse = Cavalry.mount(level, w, home, true);
+				// ((0.7.484) an illager carter on a draft horse of the camp's: TradeRoutes.horse)
+				AbstractHorse horse = w != null ? Cavalry.mount(level, w, home, true) : TradeRoutes.horse(level, carter, home);
 				if (horse == null) {
 					McaCompat.vanish(carter);
 					continue;
@@ -1013,17 +1045,23 @@ final class Caravans {
 			wagon.setLoad(look(c.carts().get(i)));
 			live.carts.add(new UUID[] {carter.getUUID(), pull.getUUID(), wagon.getUUID()});
 		}
-		for (int i = 0; i < c.guards() && rig != TradeRoutes.BOAT; i++) {
+		for (int i = 0; i < c.guards() && rig != TradeRoutes.BOAT && c.hold() < 0; i++) {
 			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 			BlockPos spot = ground(level, at.add(right.scale(i % 2 == 0 ? 3.0 : -3.0)).subtract(facing.scale(i / 2 * SPACING)));
-			Worker w = c.trade() ? TradeRoutes.guard(level, home, spot, yaw) : guard(level, home, spot, yaw);
-			if (w == null) {
+			// ((0.7.484) a trade's guards may be an illager camp's own illagers: no Worker, a mob of the camp's)
+			PathfinderMob guard;
+			if (c.trade()) {
+				guard = TradeRoutes.guard(level, home, spot, yaw);
+			} else {
+				Worker hired = guard(level, home, spot, yaw);
+				guard = hired == null ? null : hired.mob();
+			}
+			if (guard == null) {
 				continue;
 			}
-			PathfinderMob guard = w.mob();
 			guard.addTag(TAG);
 			guard.addTag(live.stamp);
-			if (c.mounted() && rig == TradeRoutes.CART) {
+			if (c.mounted() && rig == TradeRoutes.CART && guard instanceof Worker w) {
 				AbstractHorse horse = Cavalry.mount(level, w, home, true);
 				if (horse != null) {
 					horse.addTag(TAG);
@@ -1342,7 +1380,7 @@ final class Caravans {
 		if (d < 2.0) {
 			mob.getNavigation().stop();
 		} else if (mob.getNavigation().isDone() || mob.tickCount % 10 == 0) {
-			mob.getNavigation().moveTo(to.x, to.y, to.z, w.role() == CARTER || d < 6.0 ? DRIVE_SPEED : 1.0);
+			mob.getNavigation().moveTo(to.x, to.y, to.z, pace(mob, w.role() == CARTER, d));
 		}
 		return true;
 	}
@@ -1395,11 +1433,72 @@ final class Caravans {
 			if (d < 2.0) {
 				this.folk.getNavigation().stop();
 			} else if (this.folk.getNavigation().isDone() || this.folk.tickCount % 10 == 0) {
-				this.folk.getNavigation().moveTo(to.x, to.y, to.z, this.folk.role() == CARTER || d < 6.0 ? DRIVE_SPEED : 1.0);
+				this.folk.getNavigation().moveTo(to.x, to.y, to.z, pace(this.folk, this.folk.role() == CARTER, d));
 			}
 		}
 	}
 
+
+	/**
+	 * (0.7.484) The pace a caravan's man walks at, {@code d} from where he's sent: a carter (in the saddle or at the
+	 * tiller) at {@link #DRIVE_SPEED}, a handcart's puller slower ({@link TradeRoutes#HAND_WALK}, the cart's weight in
+	 * his hands), a guard at his own pace till he's near.
+	 */
+	static double pace(PathfinderMob mob, boolean carter, double d) {
+		if (mob.entityTags().contains(TradeRoutes.PULL_TAG)) {
+			return TradeRoutes.HAND_WALK;
+		}
+		return carter || d < 6.0 ? DRIVE_SPEED : 1.0;
+	}
+
+	/**
+	 * (0.7.484) Steers a caravan's man that is neither folk nor villager (an illager camp's pillager or vindicator, an
+	 * ogre hold's ogre) where its caravan sends it, as {@link Drive} does a folk; it fights first when it has a foe.
+	 */
+	static final class Haul extends Goal {
+		private final PathfinderMob mob;
+		private final boolean carter;
+
+		Haul(PathfinderMob mob, boolean carter) {
+			this.mob = mob;
+			this.carter = carter;
+			this.setFlags(EnumSet.of(Flag.MOVE));
+		}
+
+		@Override
+		public boolean canUse() {
+			return this.mob.getTarget() == null && HEADING.containsKey(this.mob.getUUID());
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.canUse();
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void stop() {
+			this.mob.getNavigation().stop();
+		}
+
+		@Override
+		public void tick() {
+			Vec3 to = HEADING.get(this.mob.getUUID());
+			if (to == null) {
+				return;
+			}
+			double d = this.mob.position().distanceTo(to);
+			if (d < 2.0) {
+				this.mob.getNavigation().stop();
+			} else if (this.mob.getNavigation().isDone() || this.mob.tickCount % 10 == 0) {
+				this.mob.getNavigation().moveTo(to.x, to.y, to.z, pace(this.mob, this.carter, d));
+			}
+		}
+	}
 
 	private static void poof(ServerLevel level, Entity e) {
 		level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 1.0, e.getZ(), 10, 0.4, 0.5, 0.4, 0.02);

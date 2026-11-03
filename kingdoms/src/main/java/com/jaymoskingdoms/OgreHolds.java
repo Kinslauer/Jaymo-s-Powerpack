@@ -239,6 +239,40 @@ public final class OgreHolds {
 		return out;
 	}
 
+	/** (0.7.484) Every standing hold (its king still on his seat): the ones that send their hauls ({@link TradeRoutes#ogres}). */
+	static List<Site> standingHolds(MinecraftServer server) {
+		return sites(server).stream().filter(s -> s.hold() && !s.cleared()).toList();
+	}
+
+	/** (0.7.484) Where hold {@code id} stands, or null when it is gone (cleared, or no such site). */
+	static @Nullable BlockPos holdAt(MinecraftServer server, int id) {
+		for (Site s : sites(server)) {
+			if (s.id() == id && s.hold() && !s.cleared()) {
+				return s.at();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * (0.7.484) An ogre between the shafts of his hold's cart ({@link Caravans#appear}): a plain ogre of no site (his
+	 * caravan sees to him, and he's gone with it), steered by {@link Caravans.Haul}.
+	 */
+	static @Nullable Ogre hauler(ServerLevel level, BlockPos at, float yaw) {
+		Ogre ogre = Monsters.OGRE.create(level, EntitySpawnReason.EVENT);
+		if (ogre == null) {
+			return null;
+		}
+		ogre.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		ogre.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
+		ogre.setPersistenceRequired();
+		ogre.setTwoHeads(false);
+		ogre.setHomeTo(at, 64);
+		((com.jaymoskingdoms.mixin.MobAccessor)ogre).jaymoskingdoms$goals().addGoal(2, new Caravans.Haul(ogre, true));
+		level.addFreshEntity(ogre);
+		return ogre;
+	}
+
 	/** The region's hold, standing or fallen, or null if none rose there yet. */
 	private static @Nullable Site hold(MinecraftServer server, String region) {
 		for (Site s : sites(server)) {
