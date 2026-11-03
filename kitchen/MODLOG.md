@@ -1285,3 +1285,9 @@ run of same-named parts (tail, tail2, tail3...) to its end instead of stopping t
 `tools/ragdoll_sim` gains snake checks (settles flat, drapes over a bump and down a step, bends no further than it can);
 the spine laying was checked against a stand-in of Naturalist's snake model. Not compile-checked against the game; not seen
 in game.
+
+## 0.5.48: fire drinkers (pack 0.19.57, Kingdoms 0.7.477)
+`Thirst.setFireDrinker` (Kingdoms gives it the Emberborn): water only hisses to steam for them (no water, a steam puff,
+an overlay line); sneak-use with an empty hand on a fire or lit campfire drinks it (+4; a loose fire goes out, a campfire
+keeps burning), on lava gulps it (+12, a short regeneration, 3 s apart); soaking in lava gives a point every 3 s; the
+Nether doesn't dry them. Non-water potions, milk, stews and fruit still count. The HUD's sip packet also goes out at open lava.
