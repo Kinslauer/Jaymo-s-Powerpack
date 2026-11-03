@@ -5052,3 +5052,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
   apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
   hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
+- **0.19.71, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
