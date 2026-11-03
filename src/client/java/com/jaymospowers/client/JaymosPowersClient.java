@@ -135,14 +135,15 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
-		// (0.19.69) Excalibur's leaves hang 6-pixel fringes off every leaf block and cross planes on top; deep in a canopy
-		// those repeat block after block like a hall of mirrors. This pack puts plain leaf cubes back (Excalibur's own
-		// leaf textures still show) and turns each one at random so the canopy doesn't tile. On by default; switched off
-		// in Resource Packs for Excalibur's bushy leaves. It sits above Excalibur, which is always at the bottom.
-		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("calm_leaves"),
+		// (0.19.71) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
+		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
+		// block that repeat like a hall of mirrors inside a canopy; plain leaf cubes turned at random instead). Off by
+		// default; /excalibur on switches it on with Excalibur and its Fresh Animations patch, in the right order.
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("excalibur_style"),
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
-			net.minecraft.network.chat.Component.literal("Jaymo's Powers: calmer leaves"),
-			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
+		ExcaliburLook.init();
 		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
 		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
 		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).

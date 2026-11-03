@@ -8266,3 +8266,7 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.71, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).

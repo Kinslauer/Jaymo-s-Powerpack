@@ -1,16 +1,16 @@
-"""Grades our own textures toward Excalibur's look (darker, less saturated, warmer greys), in place.
+"""Builds the optional Excalibur look for our own textures: the built-in pack resourcepacks/excalibur_style.
 
-grade.json (fit.py) holds the shift. Every PNG under textures/{item,block,entity,clothing} of Jaymo's Powers, Kingdoms
-and Kitchen, plus the built-in packs' own textures for those mods, is graded once. graded.txt records each graded
-file's SHA-1, so a rerun only grades files that are new or were redrawn since (a generator rerun, another PR's art):
-nothing is ever graded twice. Glows, effects and see-through textures are left alone (SKIP_WORDS, SEE_THROUGH).
+grade.json (fit.py) holds the shift toward Excalibur's look (darker, less saturated, warmer greys). Every PNG under
+textures/{item,block,entity,clothing} of Jaymo's Powers, Kingdoms and Kitchen, and the vanilla_style pack's redraws of
+them, is graded into the pack at the same assets path (vanilla_style's versions win where both exist); animation
+.mcmeta files are copied beside them. The sources are never changed. Glows, effects and see-through textures are left
+out (SKIP_WORDS, SEE_THROUGH), so the mods' own versions show. The pack is off by default (Andy, 2026-11-03).
 
-    python -I tools/excalibur_style/grade.py            grade whatever is new or changed (run from the repo root)
-    python -I tools/excalibur_style/grade.py --check    list what would be graded, change nothing
+    python -I tools/excalibur_style/grade.py            rebuild the pack's textures (run from the repo root, ~1 min)
+    python -I tools/excalibur_style/grade.py --check    list sources whose graded copy is missing or stale
     python -I tools/excalibur_style/grade.py --one <in.png> <out.png>   grade one file (previews)
 """
 import colorsys
-import hashlib
 import json
 import os
 import re
@@ -22,7 +22,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL = json.load(open(os.path.join(HERE, 'grade.json')))
 BANDS = len(MODEL['bins'])
-LEDGER = os.path.join(HERE, 'graded.txt')
+PACK = 'src/main/resources/resourcepacks/excalibur_style/assets'
 
 ROOTS = [
     'src/main/resources/assets/jaymospowers/textures',
@@ -95,39 +95,49 @@ def wanted(path):
     return vis.any() and ((a > 0) & (a < 250)).sum() <= SEE_THROUGH * vis.sum()
 
 
-def sha1(path):
-    with open(path, 'rb') as f:
-        return hashlib.sha1(f.read()).hexdigest()
+def target(src):
+    """Where a source's graded copy goes: assets/<namespace>/textures/... inside the pack."""
+    rel = src.replace(os.sep, '/').split('/assets/', 1)[1]
+    return os.path.join(PACK, rel)
 
 
-def main(check):
-    ledger = {}
-    if os.path.exists(LEDGER):
-        for line in open(LEDGER):
-            if line.strip():
-                h, p = line.rstrip('\n').split(' ', 1)
-                ledger[p] = h
-    todo = []
+def sources():
+    """Every gradable source, mods first and vanilla_style last, so its redraws win the shared paths."""
+    out = {}
     for root in ROOTS:
         for kind in KINDS:
             for d, _, files in os.walk(os.path.join(root, kind)):
                 for n in sorted(files):
                     p = os.path.join(d, n).replace(os.sep, '/')
-                    if n.endswith('.png') and ledger.get(p) != sha1(p) and wanted(p):
-                        todo.append(p)
+                    if n.endswith('.png') and wanted(p):
+                        out[target(p)] = p
+    return out
+
+
+def main(check):
+    wanted_targets = sources()
     if check:
-        print('\n'.join(todo))
-        print(len(todo), 'to grade')
+        stale = [src for dst, src in wanted_targets.items()
+                 if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src)]
+        print('\n'.join(stale))
+        print(len(stale), 'missing or stale')
         return
-    for p in todo:
-        im = Image.open(p)
-        graded = grade_image(im)
-        graded.save(p, optimize=True)
-        ledger[p] = sha1(p)
-    with open(LEDGER, 'w') as f:
-        for p in sorted(ledger):
-            f.write(f'{ledger[p]} {p}\n')
-    print(len(todo), 'graded')
+    for dst, src in wanted_targets.items():
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        grade_image(Image.open(src)).save(dst, optimize=True)
+        if os.path.exists(src + '.mcmeta'):
+            with open(src + '.mcmeta', 'rb') as a, open(dst + '.mcmeta', 'wb') as b:
+                b.write(a.read())
+    # graded copies whose source is gone or no longer graded
+    removed = 0
+    for d, _, files in os.walk(PACK):
+        for n in files:
+            p = os.path.join(d, n)
+            base = p[:-7] if p.endswith('.mcmeta') else p
+            if '/textures/' in p.replace(os.sep, '/') and base not in wanted_targets:
+                os.remove(p)
+                removed += 1
+    print(len(wanted_targets), 'graded into', PACK, '|', removed, 'stale removed')
 
 
 if __name__ == '__main__':

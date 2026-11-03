@@ -5052,8 +5052,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
   apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
   hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
-- **0.19.69, calmer leaves:** Andy: "the trees and leaves can look too patterened now due to the new bushyness ... it
-  looks like a hall of mirrors". Excalibur's leaf models hang 6-pixel fringes and cross planes off every leaf block, and
-  inside a canopy they repeat block after block. The new built-in pack `calm_leaves` (on by default, above Excalibur)
-  puts vanilla's plain leaf cubes back for the 11 vanilla leaves, with Excalibur's textures still on them, and turns each
-  block at random so the canopy doesn't tile (docs/Excalibur-Style.md).
+- **0.19.71, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on.
