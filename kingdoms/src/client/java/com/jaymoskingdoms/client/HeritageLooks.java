@@ -94,11 +94,16 @@ import org.jspecify.annotations.Nullable;
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/**
 	 * (0.7.480) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
-	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is.
+	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is. (0.7.480) The Sprite's and
+	 * the Faerie's gossamer wings are painted half-clear too, so they are blended the same way (cutout drew them solid).
 	 */
 	static RenderType marksType(Identifier skin, VariantLooks.@Nullable Style style) {
-		return style != null && style.variant() == HeritageVariants.Variant.WRAITH ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
+		return style != null && TRANSLUCENT_MARKS.contains(style.variant()) ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
 	}
+
+	/** (0.7.480) The variants whose marks are painted half-clear (Wraith mist, Sprite and Faerie wings): drawn blended. */
+	private static final java.util.Set<HeritageVariants.Variant> TRANSLUCENT_MARKS = java.util.EnumSet.of(HeritageVariants.Variant.WRAITH,
+		HeritageVariants.Variant.SPRITE, HeritageVariants.Variant.FAERIE);
 
 	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
 	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
