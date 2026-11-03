@@ -20,9 +20,12 @@ spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien d
   swimming pose's low box, seeps through anything short of a full block (not what it rests on), shots and creatures
   pass through, sheds wisps as it drifts.
 
-## Patch 2: beasts on four legs
+## Patch 2 (done, 0.19.60): beasts on four legs
 Howl (wolf), Prowl (cat, stalking crouch), Tusk (boar, head-down charge), Gorger (armadillo, rolls into a ball for its
 roll), Gyre (turtle, shell spin). Velox becomes a raptor: leaning forward on two legs with a long balancing tail.
+Built with a synced `XenoformState.ACT` ("charge" for Tusk's Charge and Gorger's Horn Charge, "roll" for Gorger/Gyre
+rolled up, "spin" for Gyre's Shell Spin, set by `XenoformPower.syncAct`) read as `XenoformClient.ACT`. None of the six
+wears Ultimate spikes now (the spike model is a man's).
 
 ## Patch 3: small critters
 Croaker (squat frog, hops instead of walking), Slipfin (axolotl, belly crawl on land, undulating swim), Locust

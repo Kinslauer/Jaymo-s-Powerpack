@@ -4945,3 +4945,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   ceiling (it won't grab one again until it lands). Standing up turns it back. The man's
   crawl pose stays off for it (`CrawlPose.extract`), downed Skitters crawl as men, and the Ultimate's spikes are back on
   the upright shape. Compile-checked (0 errors against the 26.3 jars); not played.
+- **0.19.60, Patch 2: beasts on four legs** (`docs/AlienBodies-Plan.md`): six aliens are no longer men.
+  - Howl is now a four-legged wolf: a long, level body on four legs that trot in diagonal pairs, a head with a muzzle and tall ears that turns where it looks, a bushy tail that lifts as it runs; it stalks low when crouched, stretches out in a leap and bites with a snapping jaw.
+  - Prowl is now a big cat on four legs: a long low chest and haunch that flex at the spine, round ears, two-jointed legs on flat paws that walk in a cat's lateral order and break into a bounding gallop at a sprint, a long tail that curls and twitches, a belly-low stalk with tucked paws when sneaking, and a forepaw rake on attack.
+  - Tusk is now a heavy boar on four legs: a barrel body, short thick legs, a big low head with snout and curved tusks, a mane ridge and a tail. It trots with a head bob, drops its head and gallops on Charge, and tosses its tusks up on an attack.
+  - Gorger is now a real armadillo on four legs: a horned snout, six shell bands that bob as it scurries, and a dragging tail; it drops its head and horn on a charge, and rolled up (B) the bands close into a hexagonal ball that rolls as it moves.
+  - Gyre is now a turtle on four flippers: a domed shell (carapace, crown and plastron) that rocks as it walks, flippers that paddle in diagonal pairs with feet planted on the ground and row like wings in water, a neck that pokes out and turns, and a short tail; rolled up it pulls in its limbs with only the beak peeking out, in Shell Spin the whole shell spins on the spot, and the insignia sits on the crown.
+  - Velox is now a raptor: a forward-leaning biped with a near-horizontal body on long bird legs that stride long and fast, tucked clawed forearms that slash, a long balancing tail, and a head on an S-neck whose jaw snaps; the visor still drops over its eyes at speed and its insignia sits on its back.
+  - Their ability poses are synced for everyone (`XenoformState.ACT`: charge, roll, spin). The six lost their Ultimate
+    spikes (the spike model is a man's). Each body was written and then checked by a second pass that simulated the
+    poses (feet on the ground, legs attached, no UV overlaps) and fixed what it found. Compile-checked; not played.

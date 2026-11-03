@@ -41,6 +41,8 @@ public final class XenoformClient {
 	 * legs keep to the ground it covers. Null: not Towerback.
 	 */
 	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
+	/** (0.19.60) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
+	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
 
@@ -81,6 +83,7 @@ public final class XenoformClient {
 		state.setData(SHELL, form != null ? player.getAttached(XenoformState.SHELL) : null);
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		state.setData(TOWER_SWAT, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.swatPhase(player, partialTicks) : -1.0F);
+		state.setData(ACT, form != null ? player.getAttached(XenoformState.ACT) : null);
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
