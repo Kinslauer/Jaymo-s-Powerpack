@@ -1358,7 +1358,7 @@ Item and block textures are graded toward Excalibur's darker, earthier palette b
 Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
 
-## 0.5.54: thrown bodies keep their ragdoll (pack 0.19.73)
+## 0.5.54: thrown bodies keep their ragdoll, risen zombies keep their face (pack 0.19.73)
 Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll, so they fall how they fall".
 - Letting go of a carried body (dropped, thrown, tossed into a fire by a guard, its carrier gone, sliding off a horse)
   used to start its physics from `lyingBody`: sprawled flat, limbs splayed, a fresh random way up. So it snapped into
@@ -1372,4 +1372,8 @@ Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll,
   frame where it lay before it was picked up.
 - `tools/ragdoll_sim` checks a player, cow, chicken, snake and giant let go of in each hold: no point off by more
   than a hair on the first tick, bones their length, lands and settles out of the ground. All pass.
+- A zombie (or skeleton) body that gets back up came back with a fresh random id. Excalibur picks each zombie's look
+  (its people: hair, clothes) from that id, so it rose wearing someone else's face, or the plain zombie skin, and died
+  again that way (Andy: "the zombie died and changed skins"). It now gets up with the id it had alive, unless
+  something in the world already has it.
 - Compile-checked; not played.

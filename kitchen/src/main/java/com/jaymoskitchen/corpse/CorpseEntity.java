@@ -1476,7 +1476,11 @@ public class CorpseEntity extends Entity {
 		}
 		Entity risen = rebuild();
 		if (risen instanceof LivingEntity living) {
-			living.setUUID(java.util.UUID.randomUUID());
+			// (0.5.54) it gets up as itself: the same id it had alive, so a texture pack that picks each zombie's look from
+			// its id (Excalibur's people) gives it back the face it died with; a fresh one only if that id is taken
+			if (level.getEntity(living.getUUID()) != null) {
+				living.setUUID(java.util.UUID.randomUUID());
+			}
 			living.snapTo(getX(), getY(), getZ(), getYRot(), 0.0F);
 			living.setHealth(living.getMaxHealth());
 			living.deathTime = 0;

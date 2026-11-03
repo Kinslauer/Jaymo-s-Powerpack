@@ -5076,7 +5076,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
   (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
   own resourcepacks/.
-- **0.19.73, Kitchen 0.5.54, thrown bodies keep their ragdoll:** Andy: "thrown mobs should stop snapping to a pose,
+- **0.19.73, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
   and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
   pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
-  `kitchen/MODLOG.md`). Compile-checked and ragdoll-sim checked; not played.
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
