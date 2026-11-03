@@ -8313,7 +8313,10 @@ turtle).
   traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
   Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
   Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
-  headwear that gives no armour (crowns, pumpkins) still fits. Players only. The trait lines say so.
+  headwear that gives no armour (crowns, pumpkins) still fits. The trait lines say so.
+  Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
+  or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
+  packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
 - Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
   Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
   `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
