@@ -8266,3 +8266,9 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.484: rope ties to fences (pack 0.19.67)
+Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
+to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
+hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,
+3 plant string in a column make a rope.

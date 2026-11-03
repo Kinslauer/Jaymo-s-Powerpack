@@ -1832,6 +1832,8 @@ b330b177c297b43c4d5af3adc3e8d563e724c6a0 src/main/resources/assets/jaymospowers/
 8196a82c0b4fe38f469b8e13eef601dc4429c6d6 src/main/resources/assets/jaymospowers/textures/block/gram_gem.png
 e376b83b63ee7043d96754e62ce6c5df983f8f0b src/main/resources/assets/jaymospowers/textures/block/gram_gold.png
 dbf2da53399f8329eaec346602bc52b96fe6c71b src/main/resources/assets/jaymospowers/textures/block/gram_grip.png
+c3f1d20e5635ec89fa54c1d65361299a03650463 src/main/resources/assets/jaymospowers/textures/block/grass_bed_side.png
+97b6d5ab954aff311c1eaa3fcb27e73fba0aa99a src/main/resources/assets/jaymospowers/textures/block/grass_bed_top.png
 2638b67f0fc358785561f793d0c35eb84f555040 src/main/resources/assets/jaymospowers/textures/block/gravity_machine_bottom.png
 3c4bd5707407df2d5e711e6a5c1db9efe478f332 src/main/resources/assets/jaymospowers/textures/block/gravity_machine_side.png
 59010b0656c5a4a4ceea92232027a4b801d3e3d9 src/main/resources/assets/jaymospowers/textures/block/gravity_machine_side_on.png
@@ -2819,8 +2821,11 @@ a1842ec56dc8dc466fba2bc4277cae458d4a3101 src/main/resources/assets/jaymospowers/
 14b10e63c2065cdcfae8b9b476ec38ad4ebbd2b7 src/main/resources/assets/jaymospowers/textures/item/gram.png
 c263b096b5221d36c6162cc6c14ba3f3a84db07d src/main/resources/assets/jaymospowers/textures/item/grand_shield.png
 e39efac48d2e27ce63e78e90fc57e64efd7112d0 src/main/resources/assets/jaymospowers/textures/item/ground/flint_shard.png
+8c49ffeb1735e1ce6cc657ccccaeb6d42f9981ee src/main/resources/assets/jaymospowers/textures/item/ground/grass_bandage.png
 5a42c8cbbc3c272f3c5dac3b6d223198d530dd08 src/main/resources/assets/jaymospowers/textures/item/ground/plant_fiber.png
+564e2d7e08250b2964fcd659f109f0cdc1e115e3 src/main/resources/assets/jaymospowers/textures/item/ground/plant_mesh.png
 75e841965fdb91a9d7497a6be83ea1c922218048 src/main/resources/assets/jaymospowers/textures/item/ground/plant_string.png
+09e13458a27cb48001512ea5bb1e08da224a81d5 src/main/resources/assets/jaymospowers/textures/item/ground/wet_paper_pulp.png
 f0f717ba877766299184ebb6ed0acc8132de8c5f src/main/resources/assets/jaymospowers/textures/item/healers_satchel.png
 bb37afb3e0fcdb56b6a534f8673cd3dee2e1192c src/main/resources/assets/jaymospowers/textures/item/heavy_training_weights.png
 9a66e94b366374b1b3ef0127961369eb99d6c12c src/main/resources/assets/jaymospowers/textures/item/hermit_bean.png

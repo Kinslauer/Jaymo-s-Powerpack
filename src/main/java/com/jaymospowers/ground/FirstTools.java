@@ -69,6 +69,8 @@ public final class FirstTools {
 	public static Item FLINT_SHARD;
 	public static Item PLANT_FIBRE;
 	public static Item PLANT_STRING;
+	/** (0.19.67) Plant Fibers pick: fibre woven into a mesh, soaked into pulp, dried over a fire into paper. */
+	public static Item PLANT_MESH, WET_PAPER_PULP;
 
 	private FirstTools() {
 	}
@@ -77,10 +79,15 @@ public final class FirstTools {
 		FLINT_SHARD = item("flint_shard");
 		PLANT_FIBRE = item("plant_fiber");
 		PLANT_STRING = item("plant_string");
+		PLANT_MESH = item("plant_mesh");
+		WET_PAPER_PULP = item("wet_paper_pulp");
+		GrassBed.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(FLINT_SHARD);
 			output.accept(PLANT_FIBRE);
 			output.accept(PLANT_STRING);
+			output.accept(PLANT_MESH);
+			output.accept(WET_PAPER_PULP);
 		});
 
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {

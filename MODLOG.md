@@ -5026,3 +5026,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
+- **0.19.67, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.484):** more of the start
+  from plant fibre, our own from the idea (Plant Fibers is All Rights Reserved).
+  - **Grass Bandage** (`MedicineItems.GRASS_BANDAGE`): 3 plant fibre + plant string make 2. It dresses a cut like a
+    clean rag (heals 1.5, never festers), so there is a dressing before linen.
+  - **Grass Bed** (`ground/GrassBed`): plant string over plant fibre (3 + 3). A two-block bedroll three pixels high,
+    a vanilla bed in everything but looks: it sleeps, skips the night and sets your spawn. It burns.
+  - **Paper from fibre:** 4 plant string make a Plant Mesh; 3 mesh and a water bucket make 3 Wet Paper Pulp (the bucket
+    comes back); pulp dries into paper on a campfire (20 s) or in a smoker.
+  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.484).
+  - Art by `tools/fibre_kit_art.py`, graded by `tools/excalibur_style/grade.py`. Compile-checked; not played.
