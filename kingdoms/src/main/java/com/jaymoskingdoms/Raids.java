@@ -75,6 +75,8 @@ final class Raids {
 	static final double LOOT_REACH = 4.0;
 	static final int LOOT_PER_RAIDER = 32;
 	static final long PLUNDER_TICKS = 20 * 120;
+	/** (0.7.484) How far (blocks) from the seat a party looks for loose chests and barrels to break into. */
+	static final int LOOSE_SCAN = 28;
 	/** Golems this near a raider at the seat turn on him. */
 	static final double GOLEM_RANGE = 20.0;
 	/** Going home: a raider is home this near the camp's fire, or once no player is this near him (he's gone off over the land). */
@@ -106,6 +108,10 @@ final class Raids {
 		Phase phase = Phase.MARCH;
 		/** Raiders who made it home. */
 		int home;
+		/** (0.7.484) How many items and coins the party has taken so far. */
+		int looted;
+		/** (0.7.484) Loose chests and barrels on the target's land, looked for once when the party arrives (null until then). */
+		@Nullable List<BlockPos> loose;
 		final long started;
 		long phaseAt;
 
@@ -137,6 +143,12 @@ final class Raids {
 	static boolean between(int a, int b) {
 		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);
 		return ab != null && ab.target == b || ba != null && ba.target == a;
+	}
+
+	/** (0.7.484) The settlement camp {@code camp}'s raid is on just now, or -1. */
+	static int targetOf(int camp) {
+		Raid raid = ACTIVE.get(camp);
+		return raid == null ? -1 : raid.target;
 	}
 
 	/** (0.7.443) Settlement {@code target} has a raid on it just now. */
@@ -421,6 +433,11 @@ final class Raids {
 			case PLUNDER -> {
 				Economy.noteAttack(server, target, party.getFirst());
 				BlockPos depot = Builders.depot(target);
+				if (raid.loose == null) {
+					raid.loose = new ArrayList<>(Plunder.looseAll(level, target, LOOSE_SCAN));
+				}
+				// (0.7.484) once the storehouse is bare they break into the chests and barrels standing about the land
+				boolean bare = !raid.loose.isEmpty() && Storage.contents(level, target).isEmpty();
 				boolean done = true;
 				for (Mob raider : party) {
 					for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, raider.getBoundingBox().inflate(GOLEM_RANGE),
@@ -434,10 +451,15 @@ final class Raids {
 					if (target(raider) != null) {
 						continue;
 					}
-					if (raider.distanceToSqr(Vec3.atCenterOf(depot)) <= LOOT_REACH * LOOT_REACH || nearStorage(raider, target)) {
+					BlockPos aim = bare ? raid.loose.get(Math.floorMod(raider.getUUID().hashCode(), raid.loose.size())) : depot;
+					if (raider.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH || !bare && nearStorage(raider, target)) {
 						plunder(level, raider, target, raid);
+						if (bare && raid.emptyHanded.remove(raider.getUUID())) {
+							// (that one was bare or smashed already: on to the next)
+							raid.loose.remove(aim);
+						}
 					} else {
-						walk(level, raider, depot);
+						walk(level, raider, aim);
 					}
 				}
 				if (done || now - raid.phaseAt > PLUNDER_TICKS) {
@@ -463,6 +485,9 @@ final class Raids {
 				raid.party.removeIf(id -> !(level.getEntity(id) instanceof Mob));
 				raid.home += before - raid.party.size();
 				if (raid.party.isEmpty() && target != null) {
+					if (raid.looted > 0) {
+						tell(level, target.seat(), Component.translatable("message.jaymoskingdoms.raid.looted", camp.name(), raid.looted).withStyle(ChatFormatting.GOLD));
+					}
 					tell(level, target.seat(), raid.home > 0
 						? Component.translatable("message.jaymoskingdoms.raid.withdraw", camp.name()).withStyle(ChatFormatting.GOLD)
 						: Component.translatable("message.jaymoskingdoms.raid.beaten", camp.name()).withStyle(ChatFormatting.GREEN));
@@ -498,25 +523,18 @@ final class Raids {
 		return false;
 	}
 
-	/** A raider at the storage takes what he can carry (the valuables first, half the time). */
+	/**
+	 * A raider at the settlement takes what he can carry ({@link Plunder#take}): coin now and then, valuables from its
+	 * storage first, then the chests and barrels standing loose on its land, which he breaks into (0.7.484).
+	 */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
-		List<ItemStack> contents = Storage.contents(level, target);
-		if (contents.isEmpty()) {
-			raid.emptyHanded.add(raider.getUUID());
-			return;
-		}
-		RandomSource random = level.getRandom();
-		List<ItemStack> valuables = contents.stream()
-			.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
-		ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
-			: contents.get(random.nextInt(contents.size()));
-		ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, pick), LOOT_PER_RAIDER);
+		ItemStack taken = Plunder.take(level, raider, target, LOOT_PER_RAIDER, Plunder.SMASH_CHANCE);
 		if (taken.isEmpty()) {
 			raid.emptyHanded.add(raider.getUUID());
 			return;
 		}
+		raid.looted += taken.getCount();
 		setCarried(raider, taken);
-		level.playSound(null, raider.getX(), raider.getY(), raider.getZ(), SoundEvents.BARREL_OPEN, SoundSource.HOSTILE, 1.0F, 0.8F);
 	}
 
 	/** Sends {@code raider} toward {@code to}, a waypoint at a time (long paths fail). */
@@ -538,7 +556,8 @@ final class Raids {
 	private static void goHome(ServerLevel level, @Nullable Faction camp, Mob raider) {
 		ItemStack load = takeCarried(raider);
 		if (camp != null && !camp.fallen() && !load.isEmpty()) {
-			Camps.deposit(level, camp, load);
+			// ((0.7.484) a greenskin camp bends what it brings home)
+			Camps.deposit(level, camp, Camps.orc(level.getServer(), camp.id()) || Camps.goblin(level.getServer(), camp.id()) ? Plunder.bend(load) : load);
 		} else if (!load.isEmpty()) {
 			raider.spawnAtLocation(level, load);
 		}

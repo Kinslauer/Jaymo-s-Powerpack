@@ -43,7 +43,15 @@ final class IllagerCamps {
 	/** The most the ground may rise and fall across a camp. */
 	static final int MAX_SPREAD = 5;
 	/** A new camp's people, and how its band grows: one more every so many days, up to a most. */
-	static final int START_PILLAGERS = 3, START_VINDICATORS = 2, DAYS_PER_ILLAGER = 2, MAX_FIGHTERS = 12;
+	static final int START_PILLAGERS = 3, START_VINDICATORS = 2, DAYS_PER_ILLAGER = 2;
+	/**
+	 * (0.7.484) Its own caps: the most fighters a camp keeps (the cap climbs with every building it raises, up to this) and the
+	 * most buildings (its ground runs out: the growth list, then outlying tents, poles, towers and ranges outside the palisade).
+	 */
+	static final int MAX_FIGHTERS = 24, MAX_BUILT = 40;
+	/** (0.7.484) Each new illager eats this out of the loot pile; a building waits this long (ticks) after the last. */
+	static final int RATION_BREAD = 2, RATION_ARROWS = 4;
+	static final long BUILD_GAP_TICKS = 9000L;
 	/** Pillagers to each vindicator as the band grows. */
 	static final int PILLAGERS_PER_VINDICATOR = 2;
 	/** Evokers join when the camp is this many days old (one each); a ravager at this age. */
@@ -54,8 +62,13 @@ final class IllagerCamps {
 		DAY_BREAD = 4, DAY_IRON = 1;
 	/** The loot pile a new camp starts with. */
 	static final int START_LOGS = 32, START_ARROWS = 32, START_BREAD = 16, START_EMERALDS = 5;
-	/** Raising a building: one for each day it has grown at most, from this much of its loot pile; never with a player this near. */
-	static final int BUILDS_PER_DAY = 1, BUILD_LOGS = 6, BUILD_PLANKS = 8, BUILD_WOOL = 6;
+	/**
+	 * Raising a building: from this much of its loot pile to begin with, and more for each building already raised (at
+	 * most the most); never with a player this near. (0.7.484) Paced by the pile, not by the day: the plunder it brings home
+	 * pays for the next.
+	 */
+	static final int BUILD_LOGS = 6, BUILD_PLANKS = 8, BUILD_WOOL = 6;
+	static final int BUILD_LOGS_MOST = 24, BUILD_PLANKS_MOST = 32, BUILD_WOOL_MOST = 16;
 	static final double BUILD_HIDE_RANGE = 24.0;
 	/** A warlord missing (his camp loaded, him nowhere) this long (ticks) is replaced: he was taken by something that isn't death. */
 	static final long RESEAT_TICKS = 20 * 120;
@@ -66,6 +79,8 @@ final class IllagerCamps {
 		"hollow"};
 	private static final DyeColor[] COLOURS = {DyeColor.GRAY, DyeColor.BLACK, DyeColor.LIGHT_GRAY, DyeColor.WHITE};
 
+	/** (0.7.484) Camp id → game time it last raised a building. */
+	private static final Map<Integer, Long> BUILT_AT = new HashMap<>();
 	/** Camp id → ticks its warlord has been missing. */
 	private static final Map<Integer, Long> MISSING = new HashMap<>();
 
@@ -179,12 +194,16 @@ final class IllagerCamps {
 		}
 		recount(level, camp, data);
 		long age = data.grown();
-		int cap = (int)Math.min(MAX_FIGHTERS, START_PILLAGERS + START_VINDICATORS + age / DAYS_PER_ILLAGER);
+		int cap = (int)Math.min(MAX_FIGHTERS, START_PILLAGERS + START_VINDICATORS + age / DAYS_PER_ILLAGER + data.built());
 		RandomSource random = level.getRandom();
 		BlockPos fire = data.center();
 		for (int i = 0; i < days; i++) {
 			Faction now = Factions.get(server, camp.id());
 			if (now == null || Illagers.fighters(now) >= cap) {
+				break;
+			}
+			// ((0.7.484) each takes his ration out of the pile: a camp that has been plundered, or has nothing, takes on no more)
+			if (!Storage.loaded(level, now) || Storage.take(level, now, Items.BREAD, RATION_BREAD).isEmpty() || Storage.take(level, now, Items.ARROW, RATION_ARROWS).isEmpty()) {
 				break;
 			}
 			int pillagers = now.holdings().count(Illagers.PILLAGER), vindicators = now.holdings().count(Illagers.VINDICATOR);
@@ -250,13 +269,18 @@ final class IllagerCamps {
 			Illagers.crown(level, camp, IllagerBuildings.warlordSpot(data.center(), data.gate()));
 			JaymosKingdoms.LOGGER.info("{} has a new warlord (the last was lost)", camp.name());
 		}
-		// its next building
-		long age = data.grown();
-		int allowed = (int)Math.min(IllagerBuildings.GROWTH.size(), age * BUILDS_PER_DAY);
-		if (data.built() >= allowed || !Storage.loaded(level, camp)) {
+		// its next building: the growth list, then outlying ones, paced by its loot pile and a wait between
+		int built = data.built();
+		if (built >= MAX_BUILT || !Storage.loaded(level, camp) || !force && now - BUILT_AT.getOrDefault(camp.id(), 0L) < BUILD_GAP_TICKS) {
 			return;
 		}
-		IllagerBuildings.Spot spot = IllagerBuildings.GROWTH.get(data.built());
+		IllagerBuildings.Spot spot = built < IllagerBuildings.GROWTH.size() ? IllagerBuildings.GROWTH.get(built)
+			: IllagerBuildings.outlying(level, data.center(), data.gate(), camp.id(), built - IllagerBuildings.GROWTH.size());
+		if (spot == null) {
+			// (no level ground that way: that one is skipped)
+			Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
+			return;
+		}
 		BlockPos where = spot.placer(data.center(), data.gate()).at(0, 0, 0);
 		if (!force && Raids.playerNear(level, where, BUILD_HIDE_RANGE)) {
 			return;
@@ -266,7 +290,9 @@ final class IllagerCamps {
 			Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 			return;
 		}
-		Map<Item, Integer> cost = Map.of(Items.DARK_OAK_LOG, BUILD_LOGS, Items.DARK_OAK_PLANKS, BUILD_PLANKS, Items.WOOL.pick(DyeColor.WHITE), BUILD_WOOL);
+		Map<Item, Integer> cost = Map.of(Items.DARK_OAK_LOG, Math.min(BUILD_LOGS_MOST, BUILD_LOGS + built / 2),
+			Items.DARK_OAK_PLANKS, Math.min(BUILD_PLANKS_MOST, BUILD_PLANKS + built),
+			Items.WOOL.pick(DyeColor.WHITE), Math.min(BUILD_WOOL_MOST, BUILD_WOOL + built / 3));
 		if (!Storage.has(level, camp, cost)) {
 			return;
 		}
@@ -274,11 +300,13 @@ final class IllagerCamps {
 			Storage.take(level, camp, e.getKey(), e.getValue());
 		}
 		IllagerBuildings.place(level, spot, data.center(), data.gate());
+		BUILT_AT.put(camp.id(), now);
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
 	}
 
 	static void clear() {
 		MISSING.clear();
+		BUILT_AT.clear();
 	}
 }

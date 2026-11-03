@@ -101,3 +101,4 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
 - [ ] Patch 5: walled towns, plundering coves/camps/holds, terrain-wrecking pirate cannons, currencies, caravans for all, haven growth
 - [ ] Structures from Andy's other modpacks (waiting on which packs)
 - [ ] Check the 7 MCA add-ons and Plant Fibers
+- [x] Patch 5, plundering coves, camps and holds (0.7.484): growth paced by stores with per-kind caps (pirate stages, illager outlying buildings, ogre hold stages), raiders break into loose chests and carry off storage and coin, ogre raids, pirate prize cargo, shore bombardment and spread-out cannon craters, re-modelled ship gun

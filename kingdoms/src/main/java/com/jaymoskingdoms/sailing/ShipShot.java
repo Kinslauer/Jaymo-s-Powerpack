@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.sailing;
 
+import com.jaymoskingdoms.Blasts;
 import com.jaymoskingdoms.JaymosKingdoms;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -48,6 +49,8 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 	/** (0.7.18) How far round where it strikes land it smashes blocks out, what holds against it, and the share left as items. */
 	static final double BREACH_RADIUS = 1.6;
 	static final float TOUGHEST = 1200.0F, RUBBLE = 0.3F;
+	/** (0.7.484) The crater a shot digs where it lands on shore (blocks across the middle to the rim). */
+	static final double CRATER_RADIUS = 3.6;
 	/** How finely its flight is tested against ships (blocks). */
 	static final double STEP = 0.25;
 
@@ -148,8 +151,10 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 	}
 
 	/**
-	 * (0.7.18) Smashes the blocks round where it struck land: everything within {@link #BREACH_RADIUS} that can be broken
-	 * at all and is softer than {@link #TOUGHEST} (obsidian and its like hold), some of it left as rubble to pick up.
+	 * (0.7.18) Smashes the blocks round where it struck land. (0.7.484) Now a crater ({@link Blasts#crater}): everything
+	 * within {@link #CRATER_RADIUS} that a shell can break (earth, sand, wood, leaves, cloth: not stone), dug out over a few
+	 * ticks, down to the stone. The old little breach (everything within {@link #BREACH_RADIUS}, all at once, softer than
+	 * {@link #TOUGHEST}) is kept, so a wall is holed at once.
 	 */
 	private void breach(ServerLevel level, @Nullable Entity gunner, BlockPos struck, Vec3 at) {
 		double r2 = BREACH_RADIUS * BREACH_RADIUS;
@@ -164,6 +169,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 			}
 			level.destroyBlock(pos, this.random.nextFloat() < RUBBLE, gunner != null ? gunner : this);
 		}
+		Blasts.crater(level, at, CRATER_RADIUS, Blasts.SOFT, gunner != null ? gunner : this);
 	}
 
 	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct) {

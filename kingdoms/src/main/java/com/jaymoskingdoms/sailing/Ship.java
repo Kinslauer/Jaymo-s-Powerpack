@@ -1026,6 +1026,26 @@ public final class Ship extends Entity {
 		}
 	}
 
+	/**
+	 * (0.7.484) Everything in her chests and barrels, up to {@code most} stacks, taken out of them: a sea rover's prize
+	 * when she is sunk by one. Empty if she carries nothing.
+	 */
+	public List<ItemStack> takeCargo(int most) {
+		List<ItemStack> out = new ArrayList<>();
+		for (BlockEntity be : this.cargo.values()) {
+			if (!(be instanceof Container chest)) {
+				continue;
+			}
+			for (int slot = 0; slot < chest.getContainerSize() && out.size() < most; slot++) {
+				ItemStack stack = chest.removeItemNoUpdate(slot);
+				if (!stack.isEmpty()) {
+					out.add(stack);
+				}
+			}
+		}
+		return out;
+	}
+
 	private void saveCargo(Level level) {
 		for (Map.Entry<Integer, BlockEntity> e : this.cargo.entrySet()) {
 			this.cargoTags.put(e.getKey(), e.getValue().saveWithFullMetadata(level.registryAccess()));

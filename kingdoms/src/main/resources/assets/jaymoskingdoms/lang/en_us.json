@@ -11313,5 +11313,12 @@
 	"kit.jaymoskingdoms.perk.less_healing": "you mend at three quarters of the rate",
 	"kit.jaymoskingdoms.perk.ravenous": "hunger drains 30% faster",
 	"kit.jaymoskingdoms.perk.hungry": "hunger drains 15% faster",
-	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)"
+	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)",
+	"message.jaymoskingdoms.raid.looted": "The raiders of %s carried off %s items and coins. Cut the carriers down to take it back.",
+	"message.jaymoskingdoms.raid.announce.ogre": "The ground shakes! %s leads his ogres down on %s!",
+	"message.jaymoskingdoms.raid.arrive.ogre": "The ogres are at the gates of %s, smashing for loot!",
+	"message.jaymoskingdoms.raid.ogre.beaten": "The ogre raid is beaten off.",
+	"message.jaymoskingdoms.raid.ogre.withdraw": "The ogres lumber home with their plunder.",
+	"message.jaymoskingdoms.raid.ogre.looted": "The ogres carried off %s items and coins. Cut the carriers down to take it back.",
+	"message.jaymoskingdoms.pirate.prize": "The pirates of %s took the cargo of %s!"
 }

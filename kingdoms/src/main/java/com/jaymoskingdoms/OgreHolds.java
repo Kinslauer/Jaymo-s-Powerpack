@@ -100,16 +100,48 @@ public final class OgreHolds {
 	static final String OGRE_TAG = "jaymoskingdoms.ogre_site", KING_TAG = "jaymoskingdoms.ogre_king", SITE_PREFIX = "jaymoskingdoms.ogre_site.",
 		GUARD_TAG = "jaymoskingdoms.ogre_guard";
 
-	/** An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. */
-	record Site(int id, boolean hold, BlockPos at, String region, UUID leader, boolean cleared) {
+	/**
+	 * An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. (0.7.484) A hold
+	 * also keeps its stores ({@code stash}: the chests its raiders fill, the first its hoard), how many growth stages it has
+	 * been through ({@link OgreGrowth}), when it last raided and when it last grew ({@link OgreRaids}), and loot waiting for
+	 * its chests to load (item id to count).
+	 */
+	record Site(int id, boolean hold, BlockPos at, String region, UUID leader, boolean cleared, List<BlockPos> stash, int stage, long lastRaid,
+		long grewAt, Map<String, Integer> pending) {
 		static final Codec<Site> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.INT.fieldOf("id").forGetter(Site::id),
 				Codec.BOOL.fieldOf("hold").forGetter(Site::hold), BlockPos.CODEC.fieldOf("at").forGetter(Site::at),
 				Codec.STRING.fieldOf("region").forGetter(Site::region), net.minecraft.core.UUIDUtil.CODEC.fieldOf("leader").forGetter(Site::leader),
-				Codec.BOOL.fieldOf("cleared").forGetter(Site::cleared))
+				Codec.BOOL.fieldOf("cleared").forGetter(Site::cleared),
+				BlockPos.CODEC.listOf().optionalFieldOf("stash", List.of()).forGetter(Site::stash),
+				Codec.INT.optionalFieldOf("stage", 0).forGetter(Site::stage),
+				Codec.LONG.optionalFieldOf("last_raid", 0L).forGetter(Site::lastRaid),
+				Codec.LONG.optionalFieldOf("grew_at", 0L).forGetter(Site::grewAt),
+				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(Site::pending))
 			.apply(i, Site::new));
 
+		/** A new site with nothing stored yet. */
+		static Site fresh(int id, boolean hold, BlockPos at, String region, UUID leader, List<BlockPos> stash) {
+			return new Site(id, hold, at, region, leader, false, List.copyOf(stash), 0, 0L, 0L, Map.of());
+		}
+
 		Site clear() {
-			return new Site(id, hold, at, region, leader, true);
+			return new Site(id, hold, at, region, leader, true, stash, stage, lastRaid, grewAt, pending);
+		}
+
+		Site withStash(List<BlockPos> stash) {
+			return new Site(id, hold, at, region, leader, cleared, List.copyOf(stash), stage, lastRaid, grewAt, pending);
+		}
+
+		Site withStage(int stage, long grewAt) {
+			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, pending);
+		}
+
+		Site withRaid(long lastRaid) {
+			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, pending);
+		}
+
+		Site withPending(Map<String, Integer> pending) {
+			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, Map.copyOf(pending));
 		}
 	}
 
@@ -144,12 +176,19 @@ public final class OgreHolds {
 			if (server.getTickCount() % 5 == 0) {
 				tend(level);
 			}
+			// (0.7.484) holds forage, build and take on ogres as their stores allow; and they raid
+			if (server.getTickCount() % OgreGrowth.EVERY == 0) {
+				OgreGrowth.grow(level);
+			}
 		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			Site site = siteOf(entity);
 			if (site != null && site.cleared() && !(entity.entityTags().contains(KING_TAG))) {
 				// (its outpost or hold was cleared while it was away: it's gone)
 				entity.discard();
+			} else {
+				// ((0.7.484) a raider left over from a raid that was lost is sent home)
+				OgreRaids.loaded(entity);
 			}
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> dropBar(entity.getUUID()));
@@ -166,11 +205,21 @@ public final class OgreHolds {
 
 	// ---- the sites ---------------------------------------------------------------------------------------------------
 
-	private static List<Site> sites(MinecraftServer server) {
+	static List<Site> sites(MinecraftServer server) {
 		return Factions.level(server).getAttachedOrElse(SITES, List.of());
 	}
 
-	private static void put(MinecraftServer server, Site site) {
+	/** Site {@code id}, or null. */
+	static @Nullable Site site(MinecraftServer server, int id) {
+		for (Site s : sites(server)) {
+			if (s.id() == id) {
+				return s;
+			}
+		}
+		return null;
+	}
+
+	static void put(MinecraftServer server, Site site) {
 		List<Site> all = new ArrayList<>(sites(server));
 		all.removeIf(s -> s.id() == site.id());
 		all.add(site);
@@ -408,7 +457,7 @@ public final class OgreHolds {
 				level.setBlock(p, (random.nextBoolean() ? Blocks.BONE_BLOCK : Blocks.MOSSY_COBBLESTONE).defaultBlockState(), 2);
 			}
 		}
-		chest(level, seat.relative(side, 1).relative(gate.getOpposite()), gate, random, true);
+		BlockPos hoard = chest(level, seat.relative(side, 1).relative(gate.getOpposite()), gate, random, true);
 		int id = nextId(server);
 		Ogre king = ogre(level, Monsters.CAVE_OGRE, seat.relative(gate), back, HOLD_HOME, id);
 		if (king == null) {
@@ -430,15 +479,15 @@ public final class OgreHolds {
 				guard.setCustomName(Component.translatable("entity.jaymoskingdoms.ogre_kings_guard"));
 			}
 		}
-		put(server, new Site(id, true, at, region, king.getUUID(), false));
+		put(server, Site.fresh(id, true, at, region, king.getUUID(), List.of(hoard)));
 		JaymosKingdoms.LOGGER.info("An ogre hold rose at {} ({})", at, king.getCustomName().getString());
 	}
 
 	/** A chest of an ogre site's: bones and scraps, or (a king's) his hoard. */
-	private static void chest(ServerLevel level, BlockPos at, Direction facing, RandomSource random, boolean hoard) {
+	static BlockPos chest(ServerLevel level, BlockPos at, Direction facing, RandomSource random, boolean hoard) {
 		level.setBlock(at, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing), 2);
 		if (!(level.getBlockEntity(at) instanceof ChestBlockEntity chest)) {
-			return;
+			return at;
 		}
 		List<ItemStack> loot = hoard
 			? List.of(new ItemStack(BentIngots.BENT_COPPER, 8 + random.nextInt(12)), new ItemStack(BentIngots.BENT_IRON, 1 + random.nextInt(3)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6)),
@@ -454,10 +503,11 @@ public final class OgreHolds {
 				slot += 1 + random.nextInt(3);
 			}
 		}
+		return at;
 	}
 
 	/** An ogre of {@code type} for site {@code site}, kept near {@code home}. */
-	private static @Nullable Ogre ogre(ServerLevel level, EntityType<Ogre> type, BlockPos at, BlockPos home, int radius, int site) {
+	static @Nullable Ogre ogre(ServerLevel level, EntityType<Ogre> type, BlockPos at, BlockPos home, int radius, int site) {
 		Ogre ogre = type.create(level, EntitySpawnReason.EVENT);
 		if (ogre == null) {
 			return null;
@@ -472,7 +522,7 @@ public final class OgreHolds {
 		return ogre;
 	}
 
-	private static void build(Ogre ogre, double health, double damage, double scale) {
+	static void build(Ogre ogre, double health, double damage, double scale) {
 		set(ogre.getAttribute(Attributes.MAX_HEALTH), health);
 		set(ogre.getAttribute(Attributes.ATTACK_DAMAGE), damage);
 		set(ogre.getAttribute(Attributes.SCALE), scale);
@@ -572,7 +622,7 @@ public final class OgreHolds {
 				o.addTag(CAMP_PREFIX + camp.id());
 			}
 		}
-		put(server, new Site(id, false, fire, region, leader.getUUID(), false));
+		put(server, Site.fresh(id, false, fire, region, leader.getUUID(), List.of()));
 		JaymosKingdoms.LOGGER.info("A band of ogres came to live in {}", camp.name());
 	}
 
@@ -705,6 +755,9 @@ public final class OgreHolds {
 
 	/** A site's leader died: an outpost is cleared; a king's fall clears his region's outposts (and may free the bog iron). */
 	private static void died(LivingEntity entity, DamageSource source) {
+		if (entity.level() instanceof ServerLevel raided) {
+			OgreRaids.raiderDied(raided, entity, source);
+		}
 		dropBar(entity.getUUID());
 		PHASES.remove(entity.getUUID());
 		NEXT_BOULDER.remove(entity.getUUID());
