@@ -102,6 +102,10 @@ import org.jspecify.annotations.Nullable;
  * it hits and, at the last form, buds small copies ({@link BioBuilt}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
  * sweet tooth; rubber burns and pops ({@link RubberFolk}).</li>
+ * <li><b>Beastfolk:</b> (0.7.480, Andy: missing Runic Races come in by family, races as variants) picked at the start: Arachnid,
+ * Avian, Canine, Feline, Kitsune and Serpen are their looks ({@link HeritageVariants}). <b>Hollow:</b> earned: the risen dead (Zombie,
+ * Skeleton, Wraith, Reaper) wake in one the undead struck down who got up again ({@link #hollowCheck}). Their abilities come later;
+ * see docs/Races-Plan.md.</li>
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
@@ -264,7 +268,12 @@ public final class Heritage {
 		// (0.7.292) Andy: goblins and orcs as MCA villagers, "still monstrous with their proportions, Orcs are bigger,
 		// goblins smaller, both green and repulsive with variations" ({@link Greenskins}): broods, never a player's
 		GOBLIN(true, true, 0, Items.ROTTEN_FLESH, Stats.Stat.AGILITY, Stats.Stat.FINESSE),
-		ORC(true, true, 0, Items.BONE, Stats.Stat.MIGHT, Stats.Stat.GRIT);
+		ORC(true, true, 0, Items.BONE, Stats.Stat.MIGHT, Stats.Stat.GRIT),
+		// (0.7.480, Andy: missing Runic Races come in by family, races as variants, docs/Races-Plan.md) the beastfolk are picked at
+		// the start (arachnid, avian, canine, feline, kitsune, serpen); the Hollow, the risen dead, are earned: they wake in one
+		// the dead killed and who got up again ({@link #hollowCheck}). Appended last: ordinals are in packets and life stories.
+		BEASTFOLK(0, Items.RABBIT_FOOT, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE),
+		HOLLOW(true, 0, Items.SKELETON_SKULL, Stats.Stat.ENDURANCE, Stats.Stat.GRIT);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -337,7 +346,8 @@ public final class Heritage {
 			// (0.7.221) and how far from human folk think it ({@link Prejudice})
 			int shunned = Prejudice.degree(this);
 			if (shunned > 0) {
-				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + shunned));
+				// (0.7.480) the Beastfolk and the Hollow have a line each (their degrees repeat another blood's)
+				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + (this == BEASTFOLK || this == HOLLOW ? key() : String.valueOf(shunned))));
 			}
 			return out;
 		}
@@ -1027,6 +1037,7 @@ public final class Heritage {
 		if (!(player.level() instanceof ServerLevel level) || player.isSpectator()) {
 			return;
 		}
+		hollowCheck(player);
 		// (getDragons() leaves out a dying dragon: its health is already 0)
 		for (EnderDragon dragon : level.getEntities(EntityTypes.ENDER_DRAGON, d -> d.dragonDeathTime > 0)) {
 			if (dragon.distanceTo(player) < UNLOCK_DRAGON_RANGE) {
@@ -1053,6 +1064,21 @@ public final class Heritage {
 		}
 	}
 
+	/**
+	 * (0.7.480) The Hollow wake in one who was killed by the undead and got up again, a moment after rising, each of them once.
+	 * Held in memory only: a restart in between forgets who was struck down, so the wake is missed, never given by mistake.
+	 */
+	static final java.util.Set<UUID> RISEN = new java.util.HashSet<>();
+	/** (0.7.480) How long after rising before the Hollow wake (ticks of the check; they must live through it). */
+	static final int HOLLOW_RISE_GRACE = 1;
+
+	private static void hollowCheck(ServerPlayer player) {
+		if (RISEN.contains(player.getUUID()) && player.isAlive() && player.tickCount > HOLLOW_RISE_GRACE) {
+			RISEN.remove(player.getUUID());
+			unlock(player, Kind.HOLLOW);
+		}
+	}
+
 	/** A dragon of any mod (its id says so), the Ender Dragon too. */
 	static boolean dragon(Entity entity) {
 		return entity instanceof EnderDragon || BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("dragon");
@@ -1063,6 +1089,11 @@ public final class Heritage {
 	 * dying again in the afterlife wakes their Divine-born.
 	 */
 	private static void died(LivingEntity entity, DamageSource source) {
+		if (entity instanceof ServerPlayer dead && !unlocked(dead, Kind.HOLLOW) && source.getEntity() instanceof LivingEntity killer
+			&& killer.is(EntityTypeTags.UNDEAD)) {
+			// (0.7.480) struck down by the dead: if you get up again, it is not quite as you were ({@link #hollowCheck})
+			RISEN.add(dead.getUUID());
+		}
 		if (entity instanceof ServerPlayer dead && PowersCompat.amongTheDead(dead)) {
 			unlock(dead, Kind.DIVINE);
 		}

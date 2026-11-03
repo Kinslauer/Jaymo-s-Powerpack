@@ -84,6 +84,9 @@ import org.jspecify.annotations.Nullable;
  * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
  * tint, {@code HeritageVariants#skin}); no glow, no eyes, no particles.</li>
+ * <li><b>Beastfolk, Hollow:</b> (0.7.480, textures from {@code tools/gen_heritage_looks.py}) tawny fur, ears and a tail painted flat
+ * on the skin, eyes that catch the night; a drained grey-blue pallor with sunken eyes and a cold pale glow in the veins. Every
+ * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
@@ -108,7 +111,10 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		// (0.7.262) the Bio-built have three drawings: their forms
 		DIVINE(Heritage.Kind.DIVINE, "divine", 1, 0xFFFFF4D0, Eyes.ALWAYS, 30),
 		BIOBUILT(Heritage.Kind.BIOBUILT, "biobuilt", 3, 0xFFFFB454, Eyes.ALWAYS, 0),
-		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0);
+		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0),
+		// (0.7.480) the beastfolk's fur, ears and tail (their variants add the rest) and the Hollow's drained pallor and cold eyes
+		BEASTFOLK(Heritage.Kind.BEASTFOLK, "beastfolk", 1, 0xFFFFD27A, Eyes.NIGHT, 0),
+		HOLLOW(Heritage.Kind.HOLLOW, "hollow", 1, 0xFFBEEBDC, Eyes.ALWAYS, 0);
 
 		final Heritage.Kind heritage;
 		final Identifier[] skin, glow;

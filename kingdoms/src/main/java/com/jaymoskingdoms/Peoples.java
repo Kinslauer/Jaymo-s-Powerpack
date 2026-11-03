@@ -73,57 +73,61 @@ public final class Peoples {
 	 */
 	enum People {
 		HUMAN, TIDEBORN, STONEBORN, WARRIORBORN, SYLVAN, BIOBUILT, VERDANT, EMBERBORN, FROSTBORN, NIGHTBORN, DAWNBORN,
-		STORMBORN, ENDBORN, DRAGONBLOOD, DEEPBORN, DIVINE, RUBBERFOLK, OTHER, ORC, GOBLIN
+		STORMBORN, ENDBORN, DRAGONBLOOD, DEEPBORN, DIVINE, RUBBERFOLK, OTHER, ORC, GOBLIN, BEASTFOLK, HOLLOW
 	}
 
 	/**
 	 * Row {@code who}, column {@code whom}: how much the one holds the other against them (0 to 3). Order as {@link People}:
 	 * human, Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, Verdant, Emberborn, Frostborn, Nightborn, Dawnborn,
-	 * Stormborn, Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, other, orc, goblin. Only the greenskin rows and
+	 * Stormborn, Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, other, orc, goblin, (0.7.480) Beastfolk, Hollow. Only the greenskin rows and
 	 * columns are used by {@link Prejudice#minds} (the rest of it keeps Prejudice's own degrees); glares and brawls use all
 	 * of it. Every people minds every other at least a little (1); orcs despise goblins (3); goblins fear and resent orcs (3).
 	 */
 	static final int[][] TABLE = {
 		// human: orcs 3, goblins 2 (the Tideborn to Bio-built columns are Prejudice's degrees)
-		{0, 3, 3, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2},
+		{0, 3, 3, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 3},
 		// Tideborn: fire and sea
-		{1, 0, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2},
+		{1, 0, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2},
 		// Stoneborn: kin in craft to the orcs, scornful of goblins
-		{1, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// Warrior-born: respect an orc's strength
-		{1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// Sylvan: fear fire
-		{1, 1, 1, 1, 0, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2},
+		{1, 1, 1, 1, 0, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2},
 		// Bio-built
-		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
 		// Verdant: fear fire; a little kin to the goblins in their green
-		{1, 1, 1, 1, 1, 2, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 2, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
 		// Emberborn: fire minds water and frost
-		{1, 2, 1, 1, 1, 2, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 2, 1, 1, 1, 2, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// Frostborn: frost minds fire
-		{1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// Nightborn: the dawn's opposite
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1},
 		// Dawnborn: the night's opposite
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3},
 		// Stormborn
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// Endborn
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2, 1, 1},
 		// Dragonblood: proud over the common folk, goblins vermin
-		{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 3},
+		{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 3, 1, 2},
 		// Deepborn
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 2, 1, 1},
 		// Divine-born: wary of the End's and the deep's, and of orcs
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 2, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 2, 2, 1, 3},
 		// Rubberfolk
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 2},
 		// other (a fallback for a blood not named here: a little of everything)
-		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2},
 		// orc: despises goblins; thinks humans soft, the pale and the strange worse; respects a dragon
-		{1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 0, 1, 1, 2, 1, 0, 3},
+		{1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 0, 1, 1, 2, 1, 0, 3, 1, 1},
 		// goblin: fears and resents orcs, dreads dragons; the big folk are all to be wary of
-		{1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 3, 1, 2, 1, 1, 3, 0}
+		{1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 3, 1, 2, 1, 1, 3, 0, 1, 1},
+		// (0.7.480) Beastfolk: the folk with ears and tails mind the pale dead a little more
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2},
+		// Hollow: the risen dead mind the sun's and the afterlife's folk
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0}
 	};
 
 	/** On a villager: the players (UUIDs) whose first meeting has been felt, so hearts start lower only once. */
@@ -173,6 +177,8 @@ public final class Peoples {
 			case RUBBERFOLK -> People.RUBBERFOLK;
 			case ORC -> People.ORC;
 			case GOBLIN -> People.GOBLIN;
+			case BEASTFOLK -> People.BEASTFOLK;
+			case HOLLOW -> People.HOLLOW;
 			default -> People.OTHER;
 		};
 	}

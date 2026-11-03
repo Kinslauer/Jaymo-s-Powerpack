@@ -43,7 +43,12 @@ public final class VariantLooks {
 		GLOWCAP_SPORE = new DustParticleOptions(0xE8F05A, 0.5F), AURORA_MOTE = new DustParticleOptions(0x7CF0B4, 0.6F),
 		MOON_MOTE = new DustParticleOptions(0xE6EAFF, 0.5F), LODE_SPARK = new DustParticleOptions(0xA06CE0, 0.5F),
 		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
-		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F);
+		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
+		// (0.7.480) the fae's pollen and leaf-light, a fox's fire, the elves' blood and the dead's chill
+		LEAF_MOTE = new DustParticleOptions(0x7CB84A, 0.6F), POLLEN_MOTE = new DustParticleOptions(0xB8FFD8, 0.5F),
+		WATER_MOTE = new DustParticleOptions(0x8CE0F0, 0.5F), FAE_MOTE = new DustParticleOptions(0xFFA8E8, 0.5F),
+		BLOOD_MOTE = new DustParticleOptions(0xC0182A, 0.6F), FOX_FIRE = new DustParticleOptions(0xFF9A3C, 0.6F),
+		CHILL_MOTE = new DustParticleOptions(0x9AF0FF, 0.5F);
 
 	static {
 		// variant, eye colour (0: its heritage's), eyes, particle, every, when
@@ -84,6 +89,27 @@ public final class VariantLooks {
 		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 60, When.DARK_PLACE);
 		style(Variant.CANDYSTRIPE, 0, null, null, 0, When.ALWAYS);
 		style(Variant.BERRYGLOSS, 0, null, null, 0, When.ALWAYS);
+		// (0.7.480) the Sylvan's fae and elves
+		style(Variant.DRYAD, 0xFFB4E070, HeritageLooks.Eyes.ALWAYS, LEAF_MOTE, 30, When.ALWAYS);
+		style(Variant.CHANGELING, 0xFFC8E0A0, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
+		style(Variant.SPRITE, 0xFFC8FFE0, HeritageLooks.Eyes.ALWAYS, POLLEN_MOTE, 14, When.ALWAYS);
+		style(Variant.NYMPH, 0xFF9CF0F0, HeritageLooks.Eyes.ALWAYS, WATER_MOTE, 30, When.ALWAYS);
+		style(Variant.FAERIE, 0xFFFFC0F0, HeritageLooks.Eyes.ALWAYS, FAE_MOTE, 16, When.ALWAYS);
+		style(Variant.HIGHELF, 0xFFFFE890, HeritageLooks.Eyes.DAY, ParticleTypes.WHITE_ASH, 50, When.ALWAYS);
+		style(Variant.MOONELF, 0xFFB0C0FF, HeritageLooks.Eyes.NIGHT, MOON_MOTE, 18, When.NIGHT);
+		style(Variant.BLOODELF, 0xFFFF5060, HeritageLooks.Eyes.ALWAYS, BLOOD_MOTE, 30, When.DRY);
+		// the Beastfolk's family
+		style(Variant.ARACHNID, 0xFFFF3030, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		style(Variant.AVIAN, 0xFFFFE070, HeritageLooks.Eyes.DAY, ParticleTypes.CLOUD, 70, When.ALWAYS);
+		style(Variant.CANINE, 0xFFFFD060, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
+		style(Variant.FELINE, 0xFFC8FF60, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
+		style(Variant.KITSUNE, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, FOX_FIRE, 24, When.NIGHT);
+		style(Variant.SERPEN, 0xFFE8F060, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		// the Hollow dead
+		style(Variant.ZOMBIE, 0xFFA8FF70, HeritageLooks.Eyes.NIGHT, null, 0, When.ALWAYS);
+		style(Variant.SKELETON, 0xFFF0F4EC, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		style(Variant.WRAITH, 0xFF9CF0FF, HeritageLooks.Eyes.ALWAYS, CHILL_MOTE, 16, When.ALWAYS);
+		style(Variant.REAPER, 0xFFFF4040, HeritageLooks.Eyes.ALWAYS, ParticleTypes.SMOKE, 14, When.ALWAYS);
 	}
 
 	private VariantLooks() {

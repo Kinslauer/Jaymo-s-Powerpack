@@ -339,7 +339,7 @@ final class HeritageScreen extends Screen {
 
 	/**
 	 * (0.7.214) {@code kind}'s card with a row for its look on top: the picked one's chosen look, or for any other its
-	 * three looks' names.
+	 * looks' names.
 	 */
 	private List<Component> withVariant(Heritage.Kind kind) {
 		List<Component> rows = new ArrayList<>();
@@ -348,8 +348,16 @@ final class HeritageScreen extends Screen {
 			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variant_row", HeritageVariants.title(kind, this.pickedVariant),
 				Component.translatable(root + ".desc"), Component.translatable(root + ".trait")));
 		} else {
-			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", HeritageVariants.title(kind, 0), HeritageVariants.title(kind, 1),
-				HeritageVariants.title(kind, 2)));
+			// (0.7.480) any number of looks now (the Sylvan have ten): the count, then every name
+			net.minecraft.network.chat.MutableComponent names = Component.empty();
+			int count = HeritageVariants.of(kind).size() + 1;
+			for (int i = 0; i < count; i++) {
+				if (i > 0) {
+					names.append(i == count - 1 ? Component.translatable("gui.jaymoskingdoms.heritage.variants.and") : Component.literal(", "));
+				}
+				names.append(HeritageVariants.title(kind, i));
+			}
+			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", count, names));
 		}
 		rows.addAll(kind.card());
 		return rows;

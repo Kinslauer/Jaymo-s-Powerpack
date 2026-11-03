@@ -74,6 +74,8 @@ public final class VillagerHeritage {
 	 * Divine-born very rare (the peaks lean them); the Bio-built aren't born to villagers at all, only to a Bio-built parent.
 	 */
 	static final int W_RUBBERFOLK = 20, W_DIVINE = 4;
+	/** (0.7.480) The beastfolk: fairly rare, leaning to the savannas, taigas and jungles; the Hollow are earned, only ever inherited. */
+	static final int W_BEASTFOLK = 18;
 	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
 	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
@@ -223,6 +225,9 @@ public final class VillagerHeritage {
 				case BIOBUILT -> 0;
 				// (0.7.292) goblins and orcs are only ever born to their own (Greenskins)
 				case GOBLIN, ORC -> 0;
+				// (0.7.480) beastfolk like the wild lands; the Hollow are earned, so only inherited
+				case BEASTFOLK -> W_BEASTFOLK * (biome.is(BiomeTags.IS_SAVANNA) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) ? LEAN : 1);
+				case HOLLOW -> 0;
 			};
 			weights[i] = w;
 			total += w;

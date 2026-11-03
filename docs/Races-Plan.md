@@ -39,8 +39,28 @@ Andy (17:30): "Dryad and all the fae are kind of what i intended from sylvan, so
 takes every Faeborne race (Dryad, Changeling, Sprite, Nymph, Faerie) as variants, alongside its elves (High, Moon, Blood).
 Races we already have fold in as kits.
 
+## Built: heritages and variants (Kingdoms 0.7.480 marks; no abilities yet)
+- **Beastfolk** (`BEASTFOLK`, **pickable**, stats Agility + Endurance): base look "Tawny" plus the variants `arachnid`, `avian`,
+  `canine`, `feline`, `kitsune`, `serpen`. Life story: born in a den (`born.den`), raised by the pack (`raised.pack`).
+  Villagers: weight 18, leaning to savanna, taiga and jungle. Shunned degree 2 (own `shunned.beastfolk` line). Lean: zfighter.
+- **Hollow** (`HOLLOW`, **earned**, stats Endurance + Grit): base look "Pallid" plus `zombie`, `skeleton`, `wraith`, `reaper`.
+  It wakes in a player the undead killed who then got up again: the killing blow from an undead mob marks them (in memory), and
+  the next unlock check (every 5 s) after they respawn alive wakes it (`Heritage.hollowCheck`; hint text stays oblique).
+  Villagers are never rolled Hollow, only inherited from a Hollow parent. No birthplace answer (earned), no life-story birth.
+  Shunned degree 4 (own `shunned.hollow` line). Lean: darktide. Not on the lab road or the greenskin road.
+- **Sylvan** now has ten looks: the old `thornrose` and `blossomkin` keep their ids (saves and `LifeStory`), and `dryad`,
+  `changeling`, `sprite`, `nymph`, `faerie`, `highelf`, `moonelf`, `bloodelf` follow. `HeritageVariants` has no cap: the
+  screen lists every look and the first look's birth weight grows with the count (`BASE_SHARE_VARIANTS`).
+- Variant ids are the lowercase enum names and are stable. The Deepborn's own `hollow` variant is unrelated to the Hollow
+  heritage (different enums, different texture folders).
+- Looks: `tools/gen_heritage_looks.py` paints beastfolk and hollow bases and all 18 variants on the flat 64x64 skin (ears and
+  tails are painted on the crown and back, wings on the back; no new model geometry). **Andy to confirm** whether he wants
+  real ear and tail model parts like the Tideborn's fins and the Warrior-born's tail.
+- Z Fighter lineage: none for either (falls back to Earthling, `ZFighterLineage.fromHeritage`). Variants carry no attribute
+  traits yet: the kit track adds them.
+
 ## Checklist
 - [x] Andy picks the shape (by family, races as variants)
-- [ ] New heritages + variants: looks, body sizes, stats, skin ranges, life-story births, tongue lines
+- [x] New heritages + variants: looks, body sizes, stats, skin ranges, life-story births (tongues: none exist per heritage)
 - [ ] Kits (active, passive, weakness) for every heritage
 - [ ] MIT notice for Runic Races in the credits
