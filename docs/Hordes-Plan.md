@@ -50,8 +50,38 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
   board line.
 
 ## Andy's answers (2026-11-01)
-1. **Money:** greenskins get their own coin: orc war teeth and goblin bent coppers. Each needs an item and our own art,
-   with exchange at their markets (Patch 3).
-2. **Caps:** top out near 30: tiers 2–4 hold 20, 25 and 30 folk (the table above).
+1. **Money:** ~~orc war teeth and goblin bent coppers~~ replaced on 2026-11-03: see below.
+2. **Caps:** ~~top out near 30~~ raised to 40 on 2026-11-03.
 3. **Joining:** half-orc and orc players can swear to a greenskin kingdom, and so can any other player who builds a good
    enough reputation with the tribe (Patch 4).
+
+## Andy's answers (2026-11-03)
+4. **Speech:** orcs and goblins speak their own dialects of the same broken English ("we wuz bustin hedz"). Orcs are
+   loud, blunt and brutal; goblins are quicker, greedier and a little cleverer. Today's orc lines sound too smart.
+5. **Money:** bent ingots, a bent copper and a bent iron, simple items. Greenskins take only bent ones and are dumb
+   enough to refuse the same ingot once it is straightened.
+6. **Orcs:** they get by on force and brutality, toward everyone and each other. Orc camps brawl inside and war with
+   each other all the time.
+7. **Goblins:** goblins who stay in orc lands are slaves or "toothpicks" (thrown, worked, used up). The rest branch out
+   into their own territory, more cleverly built, elaborate and close to human towns.
+8. **Living together:** orcs and goblins can live among humans, more easily among the other heritages, and every
+   people has some distaste for the others at its own strength.
+9. **Caps:** 40 for now (tiers 2-4 hold 25, 32, 40), cut back if it lags. Buildings get elaborate; Andy has more
+   modpacks to help generate their structures.
+10. **Every settlement:** all kinds of settlements should work this way too (tiers, growth, economy).
+11. Mods to check: MCA Crime, MCA Mob Compat, MCA Kingdoms, Plant Fibers, MCA Quests, MCA Reputation, MCA Conversations.
+
+## Checklist
+- [x] Patch 1: ogres in orc camps, Jade names, half-orc skin slider, idle weapon loop (PR #849)
+- [x] Patch 2: camps grow in tiers with outer walls and band buildings (PR #851)
+- [ ] Dialects: every orc and goblin line rewritten in its own broken English
+- [ ] Orc brutality: camp brawls, chief challenges, orc camps raiding each other
+- [ ] Goblin slaves in orc camps (chained work, thrown at foes) and runaways founding their own villages
+- [ ] Bent copper and bent iron: items, art, greenskins refuse straightened ingots
+- [ ] Patch 3 economy: jobs, food and hunger, market priced in bent ingots, caravans
+- [ ] Goblin towns: elaborate, human-adjacent buildings for goblin tiers; caps 40
+- [ ] Living together: greenskins in human and heritage settlements, a distaste table between peoples
+- [ ] Patch 4: the greenskin kingdom city (throne hall, arena, market district, pacts, bounty line)
+- [ ] Every settlement kind grows in tiers with its own economy (design first)
+- [ ] Structures from Andy's other modpacks (waiting on which packs)
+- [ ] Check the 7 MCA add-ons and Plant Fibers
