@@ -136,9 +136,14 @@ public final class GreenskinLife {
 		if (!(whom instanceof Player p) || !raised(p) || !halfOrc(p) && Prejudice.masked(p)) {
 			return -1.0F;
 		}
-		if (Greenskins.of(who) != null || Havens.home(who) != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
-			// (their own kind, the havens, and anyone not plainly human: no worse than any)
+		if (Greenskins.of(who) != null) {
+			// (their own kind)
 			return 0.0F;
+		}
+		if (Havens.home(who) != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
+			// ((0.7.480) the havens and anyone not plainly human mind a half-orc or a goblin-raised one as they'd mind an orc or a goblin: Peoples)
+			Heritage.Kind theirs = halfOrc(p) ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
+			return Peoples.minds(who, VillagerHeritage.of(who), theirs, 1.0F);
 		}
 		if (!(who.level() instanceof ServerLevel level)) {
 			return 0.0F;

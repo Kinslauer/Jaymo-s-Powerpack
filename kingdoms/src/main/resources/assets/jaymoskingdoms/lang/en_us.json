@@ -10330,5 +10330,20 @@
 	"rumour.jaymoskingdoms.cinder_forge.1": "A smith down in the Nether, they say, reforges plain iron in fire so it never burns again.",
 	"rumour.jaymoskingdoms.cinder_forge.2": "Ignis Vael, the fire-folk call him. He's older than any kingdom, and he sells writs that let you be born again.",
 	"rumour.jaymoskingdoms.cinder_forge.3": "The monks swear he works his fire with no runes at all. Only those whose eyes are open to ki ever see it.",
-	"tidings.jaymoskingdoms.cinder_forge": "Miners speak of a smith in the Nether, Ignis Vael of the Cinder Forge; the Overworld's smiths sell wayfinders to him."
+	"tidings.jaymoskingdoms.cinder_forge": "Miners speak of a smith in the Nether, Ignis Vael of the Cinder Forge; the Overworld's smiths sell wayfinders to him.",
+	"living.jaymoskingdoms.glare.orc.0": "%s! Orc smell you from far. You go away now.",
+	"living.jaymoskingdoms.glare.orc.1": "Pah. %s no belong here. Orc watch you, small thing.",
+	"living.jaymoskingdoms.glare.orc.2": "You, %s, you make orc sick. Stay out of way.",
+	"living.jaymoskingdoms.glare.orc.3": "Why orc must breathe same air as %s? Ugh.",
+	"living.jaymoskingdoms.glare.orc.4": "%s talk too much, fight too little. Weak. Orc spit.",
+	"living.jaymoskingdoms.glare.goblin.0": "Big %s, big green stomper! Goblin no like you, no no.",
+	"living.jaymoskingdoms.glare.goblin.1": "Stay far, %s! Goblin see you looking. Goblin no forget!",
+	"living.jaymoskingdoms.glare.goblin.2": "Nasty %s. Goblin hide shiny, you no touch.",
+	"living.jaymoskingdoms.glare.goblin.3": "Why %s here? Goblin was here first, yes yes.",
+	"living.jaymoskingdoms.glare.goblin.4": "Grrk. %s step on goblin toes. Goblin remember!",
+	"living.jaymoskingdoms.glare.folk.0": "Of all the neighbours I could have, a %s.",
+	"living.jaymoskingdoms.glare.folk.1": "Keep to your side of the lane, %s.",
+	"living.jaymoskingdoms.glare.folk.2": "Don't look at me like that, %s.",
+	"living.jaymoskingdoms.glare.folk.3": "I know your sort, %s. Keep away from my door.",
+	"living.jaymoskingdoms.glare.folk.4": "Hmph. %s. Mind yourself around me."
 }

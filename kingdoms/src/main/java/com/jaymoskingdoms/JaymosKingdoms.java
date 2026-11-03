@@ -154,6 +154,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Purists.register();
 		Prejudice.register();
 		Havens.register();
+		Peoples.register();
+		LOGGER.debug("peoples attachment: {}", Peoples.MET);
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();

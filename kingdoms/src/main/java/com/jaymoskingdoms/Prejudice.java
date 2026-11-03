@@ -187,6 +187,11 @@ public final class Prejudice {
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
 		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
+		if (Peoples.greenskin(mine, theirs)) {
+			// ((0.7.480) a goblin or an orc on either side: the distaste between peoples, Peoples)
+			float m = Peoples.minds(who, mine, theirs, mine.brood ? 1.0F : edict);
+			return purist && !mine.brood ? m * PURIST_HARSH : m;
+		}
 		if (d == 0) {
 			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else
 			if (degree(mine) == 0) {

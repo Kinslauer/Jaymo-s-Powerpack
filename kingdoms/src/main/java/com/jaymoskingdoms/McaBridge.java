@@ -1620,6 +1620,30 @@ final class McaBridge {
 		return 2;
 	}
 
+	/** (0.7.480) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
+	static void leaveHome(Villager villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			v.getResidency().getHome().ifPresent(home -> v.getResidency().invalidateHome(home));
+		}
+	}
+
+	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
+	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
+
+	/** (0.7.480) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
+	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
+		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
+			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(level.getRandom().nextFloat() < 0.8F ? Gender.MALE : Gender.FEMALE)
+			.withName(name).withPosition(at).withAge(0).withProfession(job).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		broodBorn(villager, kind, false);
+		villager.setPersistenceRequired();
+		return villager;
+	}
+
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getResidency().getHome() : java.util.Optional.empty();
