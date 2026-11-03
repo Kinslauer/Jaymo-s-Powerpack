@@ -5026,3 +5026,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
+- **0.19.67, Seats and a Sit key** (`core/Sitting`, `Meditate`, `MeditatePose`): Andy: "add a button as well".
+  - **Seats:** right-click a stair (right way up) or a bottom slab with an empty hand, not sneaking, and you sit on it,
+    on a stair facing away from its back. Blocks in `#jaymospowers:seats` (empty; for modded chairs/benches) work too,
+    sitting on the top of their middle and facing their `facing`. Needs two blocks of room above; one sitter per block.
+  - **Sit key** (`]` by default): sits you on the seat under you or the one you look at (3 blocks), else on the ground,
+    at once. Pressed again while sat it changes how you sit: ground = cross-legged, knees up, leaning back; seat =
+    upright, legs crossed, slouched (kept for next time). Sneak (a fresh press) now gets you up from any sit.
+  - **Held items while sat:** a book is held open to read, anything drunk is raised like a cup, a sword lies across the
+    lap. On a seat the body keeps the seat's way and the head turns up to 80 degrees.
+  - **By the fire:** sitting settled within 4 blocks of a lit campfire heals 1 every 5 s and (with Kitchen) adds 10 body
+    heat. Seats count as meditating with the Meditation perk, like the ground sit.
+  - Compile-checked; not seen in game (pose angles may need a tweak).
