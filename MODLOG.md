@@ -5076,7 +5076,36 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
   (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
   own resourcepacks/.
-- **0.19.73, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
+- **0.19.75, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
+  - Talon is now a hawk: perched upright on scaly taloned legs, it hops along with the wings folded, its hooked-beak head turning where it looks; in the air the body goes level, the two-part wings spread and beat, hold stiff in a glide and sweep back on a stoop, and a strike rakes the talons forward.
+  - Keen is now a bat: a furry body with the insignia on its back, a pug head with huge ears and fangs, and membrane wings. It crawls on its wrists and feet with the wings folded, beats them fast in flight, holds them out to glide, lies level under Wind's cruise, and hangs head-down from ceilings wrapped in its wings (synced as the "hang" act).
+  - Wyrm is now a small four-legged dragon: a long scaly body trotting in a diagonal lizard gait with solved legs, a long neck to a horned head whose jaw opens on a bite, a spine ridge and a swaying spade-tipped tail; its ender-dragon wings (`WyrmWings`) sit on its shoulders, beat in flight with the body level and the legs tucked, and fold along its back on the ground.
+  - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
+  - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
+    pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
   and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
   pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
   `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the

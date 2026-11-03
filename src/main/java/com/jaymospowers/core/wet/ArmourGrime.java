@@ -48,8 +48,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.19.63) Andy: armour "gets dirty when you walk in the desert or swampy muddy areas, and washes in the rain or by hand
  * or in bodies of water". Each worn armour piece carries its own {@link Grime} (how dirty, and how much of that is mud
- * rather than dust), so it stays on the piece when it's taken off, traded or dropped. The client tints the piece toward
- * dusty tan or mud brown as it gets dirtier ({@code ArmourGrimeMixin}).
+ * rather than dust), so it stays on the piece when it's taken off, traded or dropped. The client paints dusty tan or mud
+ * brown splotches into the piece's texture and its inventory icon, more as it gets dirtier ({@code ArmourGrimeTextures}).
  * <ul>
  * <li><b>Getting dirty</b> (only while moving, or lying on the ground): sand and dry ground in deserts, badlands and other
  * sandy or dry places throw up dust; mud, clay and wet ground (in the rain or in a swamp) splash mud. Boots get it first,
