@@ -17,14 +17,14 @@ public enum Currency {
 	EMERALD(1000),
 	/** The Common realms' (plains) silver penny. */
 	SILVER(500),
-	/** The North's (taiga and snow) chopped hacksilver, weighed more than counted. */
-	HACKSILVER(400),
+	/** The North's (taiga and snow) chopped hacksilver, weighed more than counted. (0.7.484) Four to the emerald, so prices land on whole coins. */
+	HACKSILVER(250),
 	/** The South's (savanna, desert, badlands) gold dinar. */
 	DINAR(2000),
 	/** The Wildwood's (jungle and swamp) strings of shells. */
 	SHELLS(250),
-	/** The Blossom land's copper mon, with the square hole. */
-	MON(333),
+	/** The Blossom land's copper mon, with the square hole. (0.7.484) Five to the emerald, so prices land on whole coins. */
+	MON(200),
 	/** The greenskins' bent copper ({@link BentIngots}); two to the emerald, as {@link TribePacts} has always paid. */
 	BENT(500),
 	/** The pirates' coin: gold in any shape. */

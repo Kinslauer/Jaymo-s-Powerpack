@@ -141,7 +141,10 @@ public final class Production {
 			long coined = 0L;
 			Currency money = Currencies.of(server, f);
 			long coins = (taxes - tribute) * Currencies.TAX_COIN_PERCENT / 100;
-			int n = (int)Math.min(Integer.MAX_VALUE, coins * 1000L / money.base);
+			// (0.7.484) only up to the town's wage reserve: coin already in the storehouse counts against it, and the rest of
+			// the share stays in the treasury, so coin never piles up and crowds out goods (and wealth isn't lost to it)
+			long room = Math.max(0L, Currencies.TAX_COIN_RESERVE * 1000L - Currencies.stored(level, f));
+			int n = (int)Math.min(Integer.MAX_VALUE, Math.min(coins * 1000L, room) / money.base);
 			if (n > 0) {
 				int left = Storage.put(level, f, money.item(), n);
 				lost += left;

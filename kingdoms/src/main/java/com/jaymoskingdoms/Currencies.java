@@ -84,6 +84,15 @@ public final class Currencies {
 	/** A kingdom's taxes: this share (percent) is also paid into the storehouse in its coin, for the town's own wages. */
 	static final int TAX_COIN_PERCENT = 20;
 	/**
+	 * (0.7.484) Coin is only kept in a storehouse up to this much worth (emeralds), the town's wage reserve: past it, the
+	 * coined share of the taxes stays in the treasury, so coin doesn't pile up and crowd the storehouse.
+	 */
+	static final int TAX_COIN_RESERVE = 48;
+	/** (0.7.484) A payout or price split into coin and emerald change may be off its worth by this share at most, to use more of the town's coin. */
+	static final double PAY_SLACK = 0.01;
+	/** (0.7.484) How many coin counts below the most are tried when a sum is split into coin and emerald change. */
+	static final int PAY_TRIES = 12;
+	/**
 	 * (0.7.484) A price is put in a coin only when that many coins come within this share of its worth (asked: never under
 	 * it; paid: never over it); else it stays in emeralds, or its own coin, so rounding to a big coin never makes money.
 	 */
@@ -98,10 +107,12 @@ public final class Currencies {
 	 * (0.7.484) A trader's offer as it was before any town's coin was put on it: its place in the trader's list when last
 	 * set (only a note), the offer as last set (how it is known again, wherever it has moved to in the list or if it was
 	 * put away and brought back), the worth of each of its coin slots (cost A, cost B, result) in thousandths of an emerald
-	 * (0 where the slot isn't coin), and the coin each slot first was ({@link Currency#id}, "" where unknown). Prices are
+	 * (0 where the slot isn't coin), the coin each slot first was ({@link Currency#id}, "" where unknown), and how many of
+	 * each slot's goods it first was (gb 0 where it had no cost B; -1 where unknown), as the goods side may be scaled to
+	 * land on whole coins. Prices are
 	 * always worked out from this, never from the last town's coin, so they don't creep as a town changes coin back and forth.
 	 */
-	record Base(int index, String print, int a, int b, int r, String ca, String cb, String cr) {
+	record Base(int index, String print, int a, int b, int r, String ca, String cb, String cr, int ga, int gb, int gr) {
 		static final Codec<Base> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("index").forGetter(Base::index),
 				Codec.STRING.fieldOf("print").forGetter(Base::print),
@@ -110,7 +121,10 @@ public final class Currencies {
 				Codec.INT.fieldOf("r").forGetter(Base::r),
 				Codec.STRING.optionalFieldOf("ca", "").forGetter(Base::ca),
 				Codec.STRING.optionalFieldOf("cb", "").forGetter(Base::cb),
-				Codec.STRING.optionalFieldOf("cr", "").forGetter(Base::cr))
+				Codec.STRING.optionalFieldOf("cr", "").forGetter(Base::cr),
+				Codec.INT.optionalFieldOf("ga", -1).forGetter(Base::ga),
+				Codec.INT.optionalFieldOf("gb", -1).forGetter(Base::gb),
+				Codec.INT.optionalFieldOf("gr", -1).forGetter(Base::gr))
 			.apply(i, Base::new));
 	}
 
@@ -272,14 +286,138 @@ public final class Currencies {
 		return (int)Math.min(Integer.MAX_VALUE, Math.max(1L, (emeralds * 1000L + c.base - 1L) / c.base));
 	}
 
-	/** {@code emeralds} of worth as a count of {@code c} coins, rounded down but never nothing (what a seller is paid). */
-	public static int coinsPaid(Currency c, long emeralds) {
-		return (int)Math.min(Integer.MAX_VALUE, Math.max(1L, emeralds * 1000L / c.base));
+	/**
+	 * (0.7.484) A sum as it is handed over: whole coins of {@code coin}, and the change in emeralds. What is paid out
+	 * ({@link #pay}) is never worth more than is owed, and what is asked ({@link #owe}) never less, so no rounding to a big
+	 * coin makes money.
+	 */
+	public record Pay(Currency coin, long coins, long emeralds) {
+		/** What it is worth, in thousandths of an emerald. */
+		public long milli() {
+			return this.coins * this.coin.base + this.emeralds * 1000L;
+		}
+
+		public boolean isEmpty() {
+			return this.coins <= 0L && this.emeralds <= 0L;
+		}
+
+		/** As stacks: the coin first, then the emeralds. */
+		public List<ItemStack> stacks() {
+			List<ItemStack> out = new ArrayList<>();
+			for (long left = this.coins; left > 0L; left -= 64L) {
+				out.add(new ItemStack(this.coin.item(), (int)Math.min(64L, left)));
+			}
+			for (long left = this.emeralds; left > 0L; left -= 64L) {
+				out.add(new ItemStack(Items.EMERALD, (int)Math.min(64L, left)));
+			}
+			return out;
+		}
+	}
+
+	/** (0.7.484) {@code milli} of worth paid out in {@code c}: as many whole coins as fit, the change in emeralds, never more than the worth. */
+	public static Pay pay(Currency c, long milli) {
+		return split(c, milli, false, Long.MAX_VALUE);
+	}
+
+	/** (0.7.484) {@code emeralds} of worth paid out in {@code c} ({@link #pay}). */
+	public static Pay payEmeralds(Currency c, long emeralds) {
+		return pay(c, emeralds * 1000L);
+	}
+
+	/** (0.7.484) {@code milli} of worth asked in {@code c}: whole coins, the rest in emeralds, never less than the worth. */
+	public static Pay owe(Currency c, long milli) {
+		return split(c, milli, true, Long.MAX_VALUE);
+	}
+
+	/**
+	 * (0.7.484) {@code milli} split into at most {@code most} of {@code c}'s coins and emerald change, over the worth if
+	 * {@code over} (asked), else under it (paid): the exact split with the most coins, or if there is none, of those
+	 * within {@link #PAY_SLACK} of the worth (or as near as any comes), the one with the most coins.
+	 */
+	static Pay split(Currency c, long milli, boolean over, long most) {
+		if (milli <= 0L) {
+			return new Pay(c, 0L, 0L);
+		}
+		if (c == Currency.EMERALD) {
+			return new Pay(c, 0L, over ? (milli + 999L) / 1000L : milli / 1000L);
+		}
+		long top = Math.min(most, over ? (milli + c.base - 1L) / c.base : milli / c.base);
+		long low = Math.max(0L, top - PAY_TRIES);
+		long least = Long.MAX_VALUE;
+		for (long k = top; k >= low; k--) {
+			least = Math.min(least, splitError(c, milli, over, k));
+		}
+		least = Math.min(least, splitError(c, milli, over, 0L));
+		// (an exact split always wins; only failing one, a little off for more of the town's coin)
+		long allowed = least == 0L ? 0L : Math.max(least, (long)(milli * PAY_SLACK));
+		long k = 0L;
+		for (long at = top; at >= low; at--) {
+			if (splitError(c, milli, over, at) <= allowed) {
+				k = at;
+				break;
+			}
+		}
+		long rest = Math.max(0L, milli - k * c.base);
+		return new Pay(c, k, over ? (rest + 999L) / 1000L : rest / 1000L);
+	}
+
+	private static long splitError(Currency c, long milli, boolean over, long k) {
+		long rest = Math.max(0L, milli - k * c.base);
+		long e = over ? (rest + 999L) / 1000L : rest / 1000L;
+		return Math.abs(k * c.base + e * 1000L - milli);
 	}
 
 	/** {@code n} of {@code c}'s coins, as shown ("12 Realm Silver"). */
 	public static Component amount(Currency c, long n) {
 		return Component.literal(n + " ").append(new ItemStack(c.item()).getHoverName());
+	}
+
+	/** (0.7.484) {@code p} as shown: "12 Realm Silver", or with its change, "1 Gold Dinar, 1 Emerald". */
+	public static Component amount(Pay p) {
+		if (p.coin() == Currency.EMERALD || p.coins() <= 0L && p.emeralds() > 0L) {
+			return amount(Currency.EMERALD, p.emeralds() + (p.coin() == Currency.EMERALD ? p.coins() : 0L));
+		}
+		if (p.emeralds() <= 0L) {
+			return amount(p.coin(), p.coins());
+		}
+		return amount(p.coin(), p.coins()).copy().append(Component.literal(", ")).append(amount(Currency.EMERALD, p.emeralds()));
+	}
+
+	/** (0.7.484) Gives {@code player} {@code p}: its coins and its change. */
+	public static void give(ServerPlayer player, Pay p) {
+		give(player, p.coin(), p.coins());
+		give(player, Currency.EMERALD, p.emeralds());
+	}
+
+	/** (0.7.484) The worth (thousandths of an emerald) {@code player} carries that {@code f} takes: its coin and emeralds. */
+	public static long purse(MinecraftServer server, ServerPlayer player, @Nullable Faction f) {
+		Currency c = of(server, f);
+		long milli = Purse.count(player, Items.EMERALD) * 1000L;
+		if (c != Currency.EMERALD && c.human()) {
+			milli += Purse.count(player, c.item()) * (long)c.base;
+		}
+		return milli;
+	}
+
+	/** (0.7.484) {@code player} carries {@code emeralds} of worth that {@code f} takes ({@link #purse}). */
+	public static boolean canPay(MinecraftServer server, ServerPlayer player, @Nullable Faction f, long emeralds) {
+		return purse(server, player, f) >= emeralds * 1000L;
+	}
+
+	/** (0.7.484) The worth (thousandths of an emerald) of the realms' coin in {@code f}'s storehouse (not its emeralds, which are goods as much as coin). */
+	static long stored(ServerLevel level, Faction f) {
+		long milli = 0L;
+		for (Currency x : Currency.values()) {
+			if (x.human() && x != Currency.EMERALD) {
+				milli += Storage.count(level, f, x.item()) * (long)x.base;
+			}
+		}
+		return milli;
+	}
+
+	/** (0.7.484) {@code emeralds} of worth as {@code f} asks it ({@link #owe}), as shown. */
+	public static Component asked(MinecraftServer server, @Nullable Faction f, long emeralds) {
+		return amount(owe(of(server, f), emeralds * 1000L));
 	}
 
 	/** Gives {@code player} {@code n} of {@code c}'s coins (what doesn't fit in the pack drops at their feet). */
@@ -295,14 +433,15 @@ public final class Currencies {
 	 */
 	public static int fine(MinecraftServer server, ServerPlayer player, @Nullable Faction f, int emeralds) {
 		Currency c = of(server, f);
-		// (0.7.484) counted in thousandths of an emerald, so a few small coins count for what they are worth
+		// (0.7.484) counted in thousandths of an emerald, so a few small coins count for what they are worth: as many whole
+		// coins as fit in the worth, the rest in emeralds, and only when short of emeralds one more coin
 		long owed = emeralds * 1000L, taken = 0L;
-		if (c != Currency.EMERALD) {
-			int coins = Math.min(Purse.count(player, c.item()), coinsFor(c, emeralds));
-			if (coins > 0) {
-				Purse.take(player, c.item(), coins);
-				taken = coins * (long)c.base;
-			}
+		boolean coin = c != Currency.EMERALD && c.human();
+		int have = coin ? Purse.count(player, c.item()) : 0;
+		int coins = (int)Math.min(have, owed / Math.max(1, c.base));
+		if (coins > 0) {
+			Purse.take(player, c.item(), coins);
+			taken = coins * (long)c.base;
 		}
 		long rest = owed - taken;
 		if (rest > 0L) {
@@ -311,6 +450,12 @@ public final class Currencies {
 				Purse.take(player, Items.EMERALD, n);
 				taken += n * 1000L;
 			}
+		}
+		rest = owed - taken;
+		if (rest > 0L && have > coins) {
+			int more = (int)Math.min(have - coins, (rest + c.base - 1L) / c.base);
+			Purse.take(player, c.item(), more);
+			taken += more * (long)c.base;
 		}
 		// (the worth taken, to the nearest emerald)
 		return (int)Math.min(emeralds, (taken + 500L) / 1000L);
@@ -389,14 +534,41 @@ public final class Currencies {
 			if (base == null) {
 				// (new, or not an offer it knows: what it asks now is its worth, in the coin it asks it in)
 				base = new Base(i, "", wa, wb, wr, coinId(o.getItemCostA().item().value()),
-					o.getItemCostB().map(x -> coinId(x.item().value())).orElse(""), coinId(o.getResult().getItem()));
+					o.getItemCostB().map(x -> coinId(x.item().value())).orElse(""), coinId(o.getResult().getItem()),
+					o.getItemCostA().count(), o.getItemCostB().map(ItemCost::count).orElse(0), o.getResult().getCount());
 			}
 			Base was = base;
-			ItemCost a = was.a() > 0 ? asked(was.a(), c, was.ca(), o.getItemCostA()) : o.getItemCostA();
-			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, was.cb(), x)) : o.getItemCostB();
-			ItemStack result = was.r() > 0 ? paid(was.r(), c, was.cr(), o.getResult()) : o.getResult();
+			// (0.7.484) the goods as they first were, before any scaling to a town's coin
+			ItemCost goodsA = was.a() > 0 ? o.getItemCostA() : recount(o.getItemCostA(), was.ga());
+			Optional<ItemCost> goodsB = was.b() > 0 ? o.getItemCostB() : was.gb() == 0 ? Optional.empty() : o.getItemCostB().map(x -> recount(x, was.gb()));
+			ItemStack goodsR = was.r() > 0 ? o.getResult() : recount(o.getResult(), was.gr());
+			ItemCost a = was.a() > 0 ? asked(was.a(), c, was.ca(), o.getItemCostA()) : goodsA;
+			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, was.cb(), x)) : goodsB;
+			ItemStack result = was.r() > 0 ? paid(was.r(), c, was.cr(), o.getResult()) : goodsR;
+			// (0.7.484) a price that won't land on whole town coins: the goods are scaled until it does (2 hacksilver for 16
+			// wheat, not 1 emerald for 20), or else the rest is asked as emerald change in the empty second slot
+			boolean single = was.b() == 0 && was.gb() == 0;
+			if (single && was.a() > 0 && was.r() == 0 && a.item().value() != c.item() && !goodsR.isEmpty()) {
+				int[] scaled = scale(was.a(), c, goodsR.getCount(), goodsR.getMaxStackSize(), true);
+				if (scaled != null) {
+					a = new ItemCost(c.item(), scaled[0]);
+					result = goodsR.copyWithCount(scaled[1]);
+				} else {
+					Pay owed = split(c, was.a(), true, 64L);
+					if (owed.coins() >= 1L && owed.emeralds() >= 1L && owed.emeralds() <= 64L && near(owed.milli(), was.a(), true)) {
+						a = new ItemCost(c.item(), (int)owed.coins());
+						b = Optional.of(new ItemCost(Items.EMERALD, (int)owed.emeralds()));
+					}
+				}
+			} else if (single && was.r() > 0 && was.a() == 0 && !result.is(c.item())) {
+				int[] scaled = scale(was.r(), c, goodsA.count(), goodsA.itemStack().getMaxStackSize(), false);
+				if (scaled != null) {
+					result = new ItemStack(c.item(), scaled[0]);
+					a = recount(goodsA, scaled[1]);
+				}
+			}
 			String print = print(a, b, result);
-			now.add(new Base(i, print, was.a(), was.b(), was.r(), was.ca(), was.cb(), was.cr()));
+			now.add(new Base(i, print, was.a(), was.b(), was.r(), was.ca(), was.cb(), was.cr(), was.ga(), was.gb(), was.gr()));
 			if (print.equals(had)) {
 				continue;
 			}
@@ -420,6 +592,48 @@ public final class Currencies {
 		} else if (villager.hasAttached(BASES)) {
 			villager.removeAttached(BASES);
 		}
+	}
+
+	/** (0.7.484) {@code cost} with {@code n} of its goods ({@code n} of 0 or less: as it is). */
+	private static ItemCost recount(ItemCost cost, int n) {
+		return n <= 0 || n == cost.count() ? cost : new ItemCost(cost.item(), n, cost.components());
+	}
+
+	private static ItemStack recount(ItemStack stack, int n) {
+		return n <= 0 || n == stack.getCount() || stack.isEmpty() ? stack : stack.copyWithCount(n);
+	}
+
+	/**
+	 * (0.7.484) {@code goods} goods worth {@code milli} traded instead as {coins, goods} of {@code c}'s coin, the price per
+	 * good within {@link #ROUND_SLACK} of what it was (asked: never under it; paid: never over it), at most a stack of each:
+	 * the nearest price, then the count of goods nearest what it was. Null if none comes near.
+	 */
+	static int @Nullable [] scale(long milli, Currency c, int goods, int maxStack, boolean over) {
+		if (milli <= 0L || goods <= 0 || !c.human()) {
+			return null;
+		}
+		int most = Math.min(64, Math.max(1, maxStack));
+		int[] best = null;
+		double bestErr = Double.MAX_VALUE;
+		int bestOff = Integer.MAX_VALUE;
+		for (int n = 1; n <= 64; n++) {
+			long coin = (long)n * c.base * goods;
+			long m = over ? coin / milli : (coin + milli - 1L) / milli;
+			if (m < 1L || m > most) {
+				continue;
+			}
+			double err = Math.abs(coin - milli * m) / (double)(milli * m);
+			if (err > ROUND_SLACK) {
+				continue;
+			}
+			int off = (int)Math.abs(m - goods);
+			if (err < bestErr - 1.0E-3 || Math.abs(err - bestErr) <= 1.0E-3 && off < bestOff) {
+				best = new int[] {n, (int)m};
+				bestErr = Math.min(err, bestErr);
+				bestOff = off;
+			}
+		}
+		return best;
 	}
 
 	/** {@code cost}'s worth in thousandths of an emerald, if it is a human coin; else 0. */

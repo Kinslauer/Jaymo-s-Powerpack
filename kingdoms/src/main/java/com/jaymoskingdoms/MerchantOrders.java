@@ -465,15 +465,15 @@ final class MerchantOrders {
 		BlockPos anchor = READING.getOrDefault(player.getUUID(), BlockPos.ZERO);
 		// (0.7.484) paid in the town's coin
 		Currency coin = Currencies.of(level.getServer(), town(level, anchor));
-		int pay = Currencies.coinsPaid(coin, g.emeralds());
+		Currencies.Pay pay = Currencies.payEmeralds(coin, g.emeralds());
 		int count = wanted(g, anchor, today);
 		ItemStack goods = new ItemStack(g.item(), count);
 		boolean done = ledger.boughtToday(WANT + g.key(), today) > 0;
 		return new QuestNet.View(WANT + g.key(), QuestNet.OFFER, done,
 			Component.translatable("orders.jaymoskingdoms.want.title", goods.getHoverName(), count, worldName(g)),
-			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), Currencies.amount(coin, pay)),
+			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), Currencies.amount(pay)),
 			done ? Component.translatable("orders.jaymoskingdoms.want.done") : Component.translatable("orders.jaymoskingdoms.want.objective", count),
-			List.of(goods.copy(), new ItemStack(coin.item(), pay)),
+			java.util.stream.Stream.concat(java.util.stream.Stream.of(goods.copy()), pay.stacks().stream()).toList(),
 			List.of(Component.translatable("orders.jaymoskingdoms.want.standing", FAR_STANDING_XP)));
 	}
 
@@ -519,9 +519,11 @@ final class MerchantOrders {
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
 		Currency coin = Currencies.of(level.getServer(), town);
-		ItemStack pay = new ItemStack(coin.item(), Currencies.coinsPaid(coin, g.emeralds()));
-		if (!player.getInventory().add(pay) && !pay.isEmpty()) {
-			player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		// (0.7.484) whole coins, and the change in emeralds
+		for (ItemStack pay : Currencies.payEmeralds(coin, g.emeralds()).stacks()) {
+			if (!player.getInventory().add(pay) && !pay.isEmpty()) {
+				player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
 		}
 		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
 		Post.tidings(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));

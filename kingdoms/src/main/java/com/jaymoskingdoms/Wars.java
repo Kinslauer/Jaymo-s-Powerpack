@@ -923,7 +923,8 @@ public final class Wars {
 		long paid = emeralds;
 		Factions.update(server, loser.id(), f -> f.withTreasury(Math.max(0L, f.treasury() - paid)));
 		Factions.update(server, winner.id(), f -> f.withTreasury(f.treasury() + paid));
-		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), paid, goods);
+		// (0.7.484) shown in the payer's own coin
+		return Component.translatable(Terms.TRIBUTE.key(), loser.name(), winner.name(), Currencies.amount(Currencies.payEmeralds(Currencies.of(server, loser), paid)), goods);
 	}
 
 	/** {@code loser} cedes land to {@code winner}: the chunks nearest the winner's seat, never those round its own seat. */

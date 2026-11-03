@@ -168,9 +168,9 @@ public final class Manacles {
 	private static void pay(ServerPlayer player, Faction law) {
 		// (0.7.484) in the realm's own coin
 		Currency money = Currencies.of(player.level().getServer(), law);
-		int coins = Currencies.coinsPaid(money, BOUNTY);
-		Currencies.give(player, money, coins);
+		Currencies.Pay coins = Currencies.payEmeralds(money, BOUNTY);
+		Currencies.give(player, coins);
 		Reputation.change(player, law, BOUNTY_REPUTATION);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", Currencies.amount(money, coins), law.name()).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.manacles.bounty", Currencies.amount(coins), law.name()).withStyle(ChatFormatting.GOLD));
 	}
 }

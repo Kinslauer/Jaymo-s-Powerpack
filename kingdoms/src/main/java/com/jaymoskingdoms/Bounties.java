@@ -507,8 +507,11 @@ public final class Bounties {
 			objective = Component.translatable("bounty.jaymoskingdoms.objective.offer");
 		}
 		List<ItemStack> rewards = new ArrayList<>();
-		for (int left = Currencies.coinsPaid(money, b.dead() ? head : b.price()); left > 0 && rewards.size() < 5; left -= 64) {
-			rewards.add(new ItemStack(money.item(), Math.min(64, left)));
+		// (0.7.484) whole coins, and the change in emeralds
+		for (ItemStack stack : Currencies.payEmeralds(money, b.dead() ? head : b.price()).stacks()) {
+			if (rewards.size() < 5) {
+				rewards.add(stack);
+			}
 		}
 		List<Component> extras = new ArrayList<>();
 		if (!b.dead()) {
@@ -558,7 +561,7 @@ public final class Bounties {
 	/** (0.7.484) {@code emeralds} of a bounty as the court's own coin counts it ("12 Realm Silver"): prices are posted, and paid, in it. */
 	private static Component coin(MinecraftServer server, int court, long emeralds) {
 		Currency c = Currencies.of(server, Factions.get(server, court));
-		return Currencies.amount(c, Currencies.coinsPaid(c, emeralds));
+		return Currencies.amount(Currencies.payEmeralds(c, emeralds));
 	}
 
 	private static void send(ServerPlayer player, QuestNet.Open open) {
@@ -808,10 +811,10 @@ public final class Bounties {
 			int emeralds = horns * com.jaymoskingdoms.nether.NetherTrophies.HORN_BOUNTY;
 			held.shrink(horns);
 			Currency money = Currencies.of(server, court);
-			int coins = Currencies.coinsPaid(money, emeralds);
-			Currencies.give(player, money, coins);
+			Currencies.Pay coins = Currencies.payEmeralds(money, emeralds);
+			Currencies.give(player, coins);
 			Reputation.change(player, court, Math.max(1, horns / 4));
-			Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty.horns", horns, Currencies.amount(money, coins)), Speech.GOLD);
+			Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty.horns", horns, Currencies.amount(coins)), Speech.GOLD);
 			level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 			return true;
 		}
@@ -857,12 +860,12 @@ public final class Bounties {
 		unpinAll(level, b.key());
 		// (0.7.484) paid in the court's own coin
 		Currency money = Currencies.of(level.getServer(), court);
-		int coins = Currencies.coinsPaid(money, emeralds);
-		Currencies.give(player, money, coins);
+		Currencies.Pay coins = Currencies.payEmeralds(money, emeralds);
+		Currencies.give(player, coins);
 		Reputation.change(player, court, Math.max(REP_MIN, emeralds / REP_PER));
 		Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty." + how + "." + level.getRandom().nextInt(3),
-			Component.literal(b.name()), Currencies.amount(money, coins)), Speech.GOLD);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.paid", Currencies.amount(money, coins), Component.literal(b.name()))
+			Component.literal(b.name()), Currencies.amount(coins)), Speech.GOLD);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.paid", Currencies.amount(coins), Component.literal(b.name()))
 			.withStyle(ChatFormatting.GREEN));
 		level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 	}
