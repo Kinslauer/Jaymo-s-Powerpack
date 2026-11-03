@@ -228,6 +228,10 @@ public final class BentIngots {
 			return InteractionResult.SUCCESS;
 		}
 		MinecraftServer minecraft = server.getServer();
+		if (!Hordes.greenskin(minecraft, w.factionId())) {
+			// ((0.7.480) a greenskin living in a human or haven settlement has no chief's hoard to take it)
+			return InteractionResult.PASS;
+		}
 		int worth = worth(held);
 		if (!sp.getAbilities().instabuild) {
 			held.shrink(1);

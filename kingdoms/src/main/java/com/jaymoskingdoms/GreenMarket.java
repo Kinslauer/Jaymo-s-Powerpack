@@ -153,7 +153,8 @@ final class GreenMarket {
 		AABB box = new AABB(stall).inflate(Hordes.radius(server, camp.id()) + 8.0);
 		List<Villager> have = level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && v.entityTags().contains(TAG_OF + camp.id()));
 		for (Villager v : have) {
-			if (v.tickCount % 10 == 0 && v.getTradingPlayer() == null) {
+			// ((0.7.480) every pass, not on a tickCount gate: this runs every Camps.CHECK_TICKS, so a gate would skip most merchants forever)
+			if (v.getTradingPlayer() == null) {
 				v.setHomeTo(stall, STALL_RADIUS);
 			}
 		}
@@ -210,6 +211,8 @@ final class GreenMarket {
 			// (all they carry is straightened: refused, and the stall opens all the same)
 			BentIngots.refuse(level, merchant, player);
 		}
+		// ((0.7.480) a trade still waiting to be booked is booked now, before the stall is laid out afresh)
+		settleNow(v);
 		stock(level, camp, data, v);
 		if (v.getOffers().isEmpty()) {
 			Speech.tell(level, merchant, player, Component.translatable("talk.jaymoskingdoms.green.market.empty." + brood + "." + merchant.getRandom().nextInt(3)), Speech.GOLD);
@@ -237,9 +240,12 @@ final class GreenMarket {
 			}
 			int pay = bounty(g, stock);
 			int short_ = (g.keep() - stock + g.lot() - 1) / g.lot();
+			// ((0.7.480) every buy offer draws on one budget, so all of them together never pay out more than the hoard holds)
 			long afford = hoard / pay;
 			if (short_ > 0 && afford > 0) {
-				offers.add(new MerchantOffer(new ItemCost(g.item(), g.lot()), BentIngots.coin(pay), (int)Math.min(Math.min(BUY_USES, short_), afford), 0, 0.0F));
+				int uses = (int)Math.min(Math.min(BUY_USES, short_), afford);
+				hoard -= (long)uses * pay;
+				offers.add(new MerchantOffer(new ItemCost(g.item(), g.lot()), BentIngots.coin(pay), uses, 0, 0.0F));
 			}
 		}
 	}
@@ -251,11 +257,20 @@ final class GreenMarket {
 	 * {@code stocked}: the wares are the camp's store's (a pedlar's are not), so goods move in and out of it too.
 	 */
 	static void watch(Villager v, int camp, boolean stocked) {
+		settleNow(v);
 		List<Integer> uses = new ArrayList<>();
 		for (MerchantOffer o : v.getOffers()) {
 			uses.add(o.getUses());
 		}
 		SESSIONS.put(v.getUUID(), new Session(camp, stocked, uses));
+	}
+
+	/** ((0.7.480)) {@code v}'s last trade, if it's still waiting for settleAll, booked now so a new one can't overwrite it. */
+	private static void settleNow(Villager v) {
+		Session s = SESSIONS.remove(v.getUUID());
+		if (s != null && v.level() instanceof ServerLevel level) {
+			settle(level, v, s);
+		}
 	}
 
 	private static void settleAll(MinecraftServer server) {
