@@ -78,7 +78,7 @@ public final class EmberKindle {
 	/** Ticks from cold to full heat, and from full heat back to cold once let go. */
 	public static final int HEAT_TICKS = 60, COOL_TICKS = 40;
 	/**
-	 * (0.19.57) Kindle grows with you (Andy's Gemini handoff): four stages by experience level, from a spark at the start
+	 * (0.19.70) Kindle grows with you (Andy's Gemini handoff): four stages by experience level, from a spark at the start
 	 * to a long gout at {@code STAGE_LEVELS[2]}+, and a Flame Avatar's ({@link FlameAvatar}) pillar of flame past all of
 	 * them. Each stage's start and full reach (blocks), its damage (times {@link #DAMAGE}) and its ticks to full heat.
 	 * Stage 3 is Kindle as it was before.
@@ -422,7 +422,7 @@ public final class EmberKindle {
 		}
 	}
 
-	/** (0.19.57) {@code player}'s Kindle stage: 0-3 by experience level ({@link #STAGE_LEVELS}), 4 as a Flame Avatar. */
+	/** (0.19.70) {@code player}'s Kindle stage: 0-3 by experience level ({@link #STAGE_LEVELS}), 4 as a Flame Avatar. */
 	public static int stage(Player player) {
 		if (FlameAvatar.is(player)) {
 			return STAGE_LEVELS.length + 1;

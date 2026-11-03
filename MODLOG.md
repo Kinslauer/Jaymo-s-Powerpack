@@ -5047,3 +5047,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
   now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
   locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
