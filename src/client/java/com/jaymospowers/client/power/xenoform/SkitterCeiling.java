@@ -106,7 +106,9 @@ public final class SkitterCeiling {
 	 */
 	public static boolean spiderOrRising(net.minecraft.world.entity.player.Player player) {
 		return !player.isInWater() && (com.jaymospowers.power.xenoform.forms.Skitter.crawling(player)
-			|| player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) == null && !com.jaymospowers.core.wounds.Downed.isDowned(player));
+			|| player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) == null && !com.jaymospowers.core.wounds.Downed.isDowned(player)
+			// (held flat some other way, a trapdoor over it or a slide, it lies as vanilla draws it)
+			&& player.getPose() != net.minecraft.world.entity.Pose.SWIMMING);
 	}
 
 	/** (0.19.60) How far {@code entity} (Skitter) has dropped into its spider shape, smoothed. */
