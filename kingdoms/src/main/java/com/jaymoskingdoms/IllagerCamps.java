@@ -52,6 +52,9 @@ final class IllagerCamps {
 	/** (0.7.484) Each new illager eats this out of the loot pile; a building waits this long (ticks) after the last. */
 	static final int RATION_BREAD = 2, RATION_ARROWS = 4;
 	static final long BUILD_GAP_TICKS = 9000L;
+	/** (0.7.484) Tries at a blocked building spot (each a {@link #BUILD_GAP_TICKS} apart) before it's given up; the wait after giving up a spot with no level ground. */
+	static final int BUILD_TRIES = 3;
+	static final long SKIP_GAP_TICKS = 1200L;
 	/** Pillagers to each vindicator as the band grows. */
 	static final int PILLAGERS_PER_VINDICATOR = 2;
 	/** Evokers join when the camp is this many days old (one each); a ravager at this age. */
@@ -81,6 +84,8 @@ final class IllagerCamps {
 
 	/** (0.7.484) Camp id → game time it last raised a building. */
 	private static final Map<Integer, Long> BUILT_AT = new HashMap<>();
+	/** (0.7.484) Camp id to failed tries at its next building spot. */
+	private static final Map<Integer, Integer> TRIES = new HashMap<>();
 	/** Camp id → ticks its warlord has been missing. */
 	private static final Map<Integer, Long> MISSING = new HashMap<>();
 
@@ -274,20 +279,39 @@ final class IllagerCamps {
 		if (built >= MAX_BUILT || !Storage.loaded(level, camp) || !force && now - BUILT_AT.getOrDefault(camp.id(), 0L) < BUILD_GAP_TICKS) {
 			return;
 		}
-		IllagerBuildings.Spot spot = built < IllagerBuildings.GROWTH.size() ? IllagerBuildings.GROWTH.get(built)
-			: IllagerBuildings.outlying(level, data.center(), data.gate(), camp.id(), built - IllagerBuildings.GROWTH.size());
-		if (spot == null) {
-			// (no level ground that way: that one is skipped)
-			Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
-			return;
+		// ((0.7.484) an unloaded spot is tried again later, a bad one given up after a short wait, a blocked one after a few tries)
+		IllagerBuildings.Spot spot;
+		BlockPos base = data.center();
+		if (built < IllagerBuildings.GROWTH.size()) {
+			spot = IllagerBuildings.GROWTH.get(built);
+		} else {
+			int k = built - IllagerBuildings.GROWTH.size();
+			if (!IllagerBuildings.outlyingLoaded(level, data.center(), data.gate(), k)) {
+				return;
+			}
+			IllagerBuildings.Outlying out = IllagerBuildings.outlying(level, data.center(), data.gate(), camp.id(), k);
+			if (out == null) {
+				// (no level ground that way: that one is skipped, after a short wait)
+				skip(server, camp, now, SKIP_GAP_TICKS);
+				return;
+			}
+			spot = out.spot();
+			base = out.base();
 		}
-		BlockPos where = spot.placer(data.center(), data.gate()).at(0, 0, 0);
+		BlockPos where = spot.placer(base, data.gate()).at(0, 0, 0);
 		if (!force && Raids.playerNear(level, where, BUILD_HIDE_RANGE)) {
 			return;
 		}
-		if (!IllagerBuildings.clear(level, spot, data.center(), data.gate())) {
-			// (something's in the way: that one is skipped)
-			Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
+		if (!IllagerBuildings.footprintLoaded(level, spot, base, data.gate())) {
+			return;
+		}
+		if (!IllagerBuildings.clear(level, spot, base, data.gate())) {
+			// (something's in the way: tried again later, and skipped after a few tries)
+			if (TRIES.merge(camp.id(), 1, Integer::sum) >= BUILD_TRIES) {
+				skip(server, camp, now, BUILD_GAP_TICKS);
+			} else {
+				BUILT_AT.put(camp.id(), now);
+			}
 			return;
 		}
 		Map<Item, Integer> cost = Map.of(Items.DARK_OAK_LOG, Math.min(BUILD_LOGS_MOST, BUILD_LOGS + built / 2),
@@ -299,14 +323,23 @@ final class IllagerCamps {
 		for (var e : cost.entrySet()) {
 			Storage.take(level, camp, e.getKey(), e.getValue());
 		}
-		IllagerBuildings.place(level, spot, data.center(), data.gate());
+		IllagerBuildings.place(level, spot, base, data.gate());
 		BUILT_AT.put(camp.id(), now);
+		TRIES.remove(camp.id());
 		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 		JaymosKingdoms.LOGGER.debug("{} raised a {}", camp.name(), spot.id());
+	}
+
+	/** (0.7.484) Gives up the camp's next building slot, and waits {@code gap} ticks before trying the one after. */
+	private static void skip(MinecraftServer server, Faction camp, long now, long gap) {
+		TRIES.remove(camp.id());
+		BUILT_AT.put(camp.id(), now - BUILD_GAP_TICKS + gap);
+		Camps.updateData(server, camp.id(), d -> d.withBuilt(d.built() + 1));
 	}
 
 	static void clear() {
 		MISSING.clear();
 		BUILT_AT.clear();
+		TRIES.clear();
 	}
 }

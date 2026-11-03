@@ -339,23 +339,29 @@ final class IllagerBuildings {
 
 	/** (0.7.484) Outlying buildings stand outside the palisade: the first this far from the fire, a ring further every few, no further than the most. */
 	static final int OUT_START = RING_RADIUS + 6, OUT_STEP = 7, OUT_PER_RING = 8, OUT_MOST = RING_RADIUS + 40;
+	/** (0.7.484) How far (blocks, up or down) an outlying building's ground may be off the camp's floor. */
+	static final int OUT_FLOOR_SLACK = 1;
 
 	/**
 	 * (0.7.484) Outlying building number {@code k} (counted from the end of {@link #GROWTH}): a tent, a banner pole, a
 	 * watchtower or a practice range in turn, outside the palisade, a turn of the golden angle round the camp from the last,
-	 * its front toward the fire. Null if the ground there is not level with the camp's floor, is wet, or is another
-	 * settlement's. The caller still checks the footprint ({@link #clear}).
+	 * its front toward the fire. Null if the ground there is more than {@link #OUT_FLOOR_SLACK} off the camp's floor, is
+	 * wet, or is another settlement's. The caller checks {@link #outlyingLoaded} first (an unloaded spot is no answer
+	 * yet), builds it from {@link Outlying#base} (the fire's column at that ground's height), and still checks the
+	 * footprint ({@link #clear}).
 	 */
-	static @Nullable Spot outlying(ServerLevel level, BlockPos fire, Direction gate, int campId, int k) {
+	static @Nullable Outlying outlying(ServerLevel level, BlockPos fire, Direction gate, int campId, int k) {
+		BlockPos at = outlyingColumn(fire, gate, k);
 		int ring = Math.min(OUT_MOST, OUT_START + k / OUT_PER_RING * OUT_STEP);
 		double angle = k * Outbuild.GOLDEN;
 		int x = (int)Math.round(Math.cos(angle) * ring), z = (int)Math.round(Math.sin(angle) * ring);
-		BlockPos at = new CampBuildings.Placer(fire, gate, 0).at(x, 0, z);
 		if (!level.isLoaded(at)) {
 			return null;
 		}
 		BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
-		if (top.getY() != fire.getY() || !level.getFluidState(top.below()).isEmpty() || !level.getBlockState(top.below()).isSolid()) {
+		// ((0.7.484) a block up or down from the fire's floor will do: it's built on the ground where it stands)
+		if (Math.abs(top.getY() - fire.getY()) > OUT_FLOOR_SLACK || !level.getFluidState(top.below()).isEmpty()
+			|| !level.getBlockState(top.below()).isSolid()) {
 			return null;
 		}
 		Faction owner = Banners.owner(level.getServer(), net.minecraft.world.level.ChunkPos.containing(top));
@@ -374,12 +380,41 @@ final class IllagerBuildings {
 			}
 			facing = facing.getClockWise();
 		}
-		return switch (k % 4) {
+		Spot spot = switch (k % 4) {
 			case 0 -> new Spot("illager_tent", IllagerBuildings::tent, x, z, best, 5);
 			case 1 -> new Spot("illager_banner_pole", IllagerBuildings::bannerPole, x, z, 0, 1);
 			case 2 -> new Spot("illager_watchtower", IllagerBuildings::watchtower, x, z, best, 5);
 			default -> new Spot("illager_practice_range", IllagerBuildings::practiceRange, x, z, best, 5);
 		};
+		return new Outlying(spot, fire.atY(top.getY()));
+	}
+
+	/** (0.7.484) An outlying building, and the point it's built from: the fire's column at the height of its own ground. */
+	record Outlying(Spot spot, BlockPos base) {
+	}
+
+	/** (0.7.484) The ground column at the middle of outlying building number {@code k}. */
+	static BlockPos outlyingColumn(BlockPos fire, Direction gate, int k) {
+		int ring = Math.min(OUT_MOST, OUT_START + k / OUT_PER_RING * OUT_STEP);
+		double angle = k * Outbuild.GOLDEN;
+		int x = (int)Math.round(Math.cos(angle) * ring), z = (int)Math.round(Math.sin(angle) * ring);
+		return new CampBuildings.Placer(fire, gate, 0).at(x, 0, z);
+	}
+
+	/** (0.7.484) Outlying building number {@code k}'s ground is loaded, so {@link #outlying} can say whether it will do. */
+	static boolean outlyingLoaded(ServerLevel level, BlockPos fire, Direction gate, int k) {
+		return level.isLoaded(outlyingColumn(fire, gate, k));
+	}
+
+	/** (0.7.484) Every block of {@code spot}'s footprint is loaded (so a failed {@link #clear} means something's really in the way). */
+	static boolean footprintLoaded(ServerLevel level, Spot spot, BlockPos fire, Direction gate) {
+		CampBuildings.Placer placer = spot.placer(fire, gate);
+		for (Blueprint.Placement p : spot.design().get().blocks()) {
+			if (!level.isLoaded(placer.at(p.offset()))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** What a new camp's founding built: its fire (the seat), the loot pile's containers and depot, the warlord's spot, the cage, the sentry's post. */

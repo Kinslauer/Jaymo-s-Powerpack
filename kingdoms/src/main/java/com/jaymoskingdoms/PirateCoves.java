@@ -831,18 +831,22 @@ final class PirateCoves {
 		return null;
 	}
 
-	/** {@code crew}'s ship went down (sunk by {@code player}, or anyone): her cove builds another in a while, if it still stands. */
-	static void shipLost(ServerLevel level, Crew crew, @Nullable ServerPlayer player) {
+	/**
+	 * {@code crew}'s ship went down (sunk by {@code player}, or anyone): her cove builds another in a while, if it still
+	 * stands. ((0.7.484) the prizes she was carrying spill where {@code ship} founders; with no ship, where she was last
+	 * seen; if that's not loaded, they stay in the cove's record and the next ship home brings them.)
+	 */
+	static void shipLost(ServerLevel level, Crew crew, @Nullable Ship ship, @Nullable ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		Cove cove = cove(server, crew.faction);
 		if (cove != null) {
-			// ((0.7.484) the prizes she was carrying home go down with her, or float: they are spilled where she was last seen)
 			if (!cove.haul().isEmpty()) {
-				BlockPos seen = cove.seen().orElse(cove.mooring());
-				if (level.isLoaded(seen)) {
-					Plunder.spill(level, net.minecraft.world.phys.Vec3.atCenterOf(seen).add(0.0, 1.0, 0.0), cove.haul());
+				net.minecraft.world.phys.Vec3 at = ship != null ? ship.position()
+					: net.minecraft.world.phys.Vec3.atCenterOf(cove.seen().orElse(cove.mooring()));
+				if (level.isLoaded(BlockPos.containing(at))) {
+					Plunder.spill(level, at.add(0.0, 1.0, 0.0), cove.haul());
+					cove = cove.withHaul(List.of());
 				}
-				cove = cove.withHaul(List.of());
 			}
 			putCove(server, crew.faction, cove.withShip(null, null, level.getGameTime()));
 		}

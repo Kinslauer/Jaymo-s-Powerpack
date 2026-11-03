@@ -765,7 +765,7 @@ final class Corsairs implements Ship.Captaincy {
 				if (FarGrounds.rover(level, ship)) {
 					FarGrounds.roverLost(level, ship);
 				} else {
-					PirateCoves.shipLost(level, crew, player);
+					PirateCoves.shipLost(level, crew, ship, player);
 				}
 			}
 			case NAVY, MERCHANT -> Navies.shipLost(level, crew, player);
