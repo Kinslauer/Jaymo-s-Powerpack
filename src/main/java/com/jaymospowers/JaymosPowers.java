@@ -114,6 +114,9 @@ public class JaymosPowers implements ModInitializer {
 		// (0.18.118) weapons stuck in bodies: zombies rising with one, thrown daggers, a finisher's blade left in
 		com.jaymospowers.armory.Lodged.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
+		// (0.19.63) armour gets dirty and washes clean; wet weather's puddles and underwater light (client/wet)
+		com.jaymospowers.core.wet.WetParticles.init();
+		com.jaymospowers.core.wet.ArmourGrime.init();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
 		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();

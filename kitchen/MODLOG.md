@@ -1312,7 +1312,7 @@ rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm 
 `ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
 Checked headless against the snake stand-in; not compile-checked; not seen in game.
 
-## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.62, Kingdoms 0.7.481)
+## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.64, Kingdoms 0.7.482)
 Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery's hooks and blood grates; GPLv3 Forge
 1.20.1 and needs Alex's Mobs, so ideas only, nothing copied). New package `butchery/`, the steps in `corpse/Hanging`.
 - **Meat Hook** (`MeatHookBlock`; 2 from chain + iron ingot + nugget): hangs under any block with collision. Right-click it

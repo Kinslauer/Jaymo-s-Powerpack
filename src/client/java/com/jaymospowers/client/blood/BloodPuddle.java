@@ -30,7 +30,7 @@ import java.util.TreeSet;
  * <p>(0.17.182) One of the server's lasting stains ({@link BloodTrail}) lies as long as the server says, darkening to a
  * dried brown as it ages (so a trail reads fresh to old), and fades over {@link BloodTrail#FADE}.
  */
-final class BloodPuddle extends Particle {
+public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
 	static final float ALPHA = 0.7F, SPLAT_IN = 1.5F, MAX_DROP = 2.0F;
 	/** How long it lasts (ticks: at least this, up to this many more), the last {@link #FADE} of them fading. */
@@ -45,6 +45,11 @@ final class BloodPuddle extends Particle {
 	static final float DRAWN_EASE = 0.12F;
 	static final int QUICK_FADE_UNDER = 100;
 	private static final double SAME_HEIGHT = 1.0E-4;
+	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
+	static final float WET_ALPHA = 0.5F;
+	static final int WATER = 0x8EA4B6;
+	static final int WET_FADE = 400;
+	static final float WET_MAX_SCALE = 1.6F;
 
 	private float baseSize;
 	/** (0.19.62) The size it's easing to (blood magic drawing it down), and how long its last fade takes once drawn dry (ticks; 0: the usual). */
@@ -52,6 +57,8 @@ final class BloodPuddle extends Particle {
 	private int quickFade;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
+	/** (0.19.63) Whether it's water (rain or drips: never darkens, dries up slowly). */
+	private final boolean wet;
 	private final float yaw;
 	/** (0.19.55) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
 	private final float stretchX, stretchZ;
@@ -65,7 +72,21 @@ final class BloodPuddle extends Particle {
 	}
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life, int shape) {
+		this(level, x, y, z, sprites, color, scale, age, life, shape, false);
+	}
+
+	/**
+	 * (0.19.63) A puddle of water (rain pooling, drips off a wet body) this big, lying {@code life} ticks before it starts to
+	 * dry up; {@link #feed} keeps it (and grows it) while more water falls on it.
+	 */
+	public static BloodPuddle water(ClientLevel level, double x, double y, double z, SpriteSet sprites, float scale, int life) {
+		return new BloodPuddle(level, x, y, z, sprites, WATER, scale, 0, life, BloodParticles.Puddle.ROUND, true);
+	}
+
+	private BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life, int shape,
+		boolean wet) {
 		super(level, x, y, z, 0.0, 0.0, 0.0);
+		this.wet = wet;
 		this.xd = 0.0;
 		this.yd = 0.0;
 		this.zd = 0.0;
@@ -76,8 +97,11 @@ final class BloodPuddle extends Particle {
 		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
 		this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
 		this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;
-		this.stain = life > 0;
-		if (this.stain) {
+		this.stain = !wet && life > 0;
+		if (wet) {
+			this.lifetime = life + WET_FADE;
+			this.alpha = WET_ALPHA;
+		} else if (this.stain) {
 			this.age = age;
 			this.lifetime = age + life;
 		} else {
@@ -112,6 +136,25 @@ final class BloodPuddle extends Particle {
 		}
 	}
 
+	/** (0.19.63) More water fell on this puddle: it lasts at least {@code life} more ticks and grows by {@code grow} (scale). */
+	public void feed(int life, float grow) {
+		if (!this.wet) {
+			return;
+		}
+		this.lifetime = Math.max(this.lifetime, this.age + life + WET_FADE);
+		this.baseSize = Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow);
+	}
+
+	/** (0.19.63) Where it lies. */
+	public Vec3 position() {
+		return new Vec3(this.x, this.y, this.z);
+	}
+
+	/** (0.19.63) Its size now (blocks across). */
+	public float size() {
+		return this.baseSize;
+	}
+
 	static float red(int color) {
 		return (color >> 16 & 0xFF) / 255.0F;
 	}
@@ -130,22 +173,25 @@ final class BloodPuddle extends Particle {
 	}
 
 	/** Whether the camera could see where it lies. */
-	boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
+	@Override
+	public boolean visible(net.minecraft.client.renderer.culling.Frustum frustum) {
 		return frustum.pointInFrustum(this.x, this.y, this.z);
 	}
 
 	/** Lays its pieces into {@code decals} for this frame. */
-	void emit(BloodDecals.State decals, Camera camera, float partialTick) {
+	@Override
+	public void emit(BloodDecals.State decals, Camera camera, float partialTick) {
 		float size = this.baseSize;
 		float age = this.age + partialTick;
 		if (age <= SPLAT_IN) {
 			size *= age / (SPLAT_IN * 2.0F) + 0.5F;
 		}
-		int fade = this.quickFade > 0 ? this.quickFade : this.stain ? BloodTrail.FADE : FADE;
+		int fade = this.quickFade > 0 ? this.quickFade : this.wet ? WET_FADE : this.stain ? BloodTrail.FADE : FADE;
 		int fadeFrom = this.lifetime - fade;
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
-			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - ALPHA, 1.0F);
+			float start = this.wet ? WET_ALPHA : ALPHA;
+			this.alpha = 1.0F - Mth.clamp((age - fadeFrom) / fade, 1.0F - start, 1.0F);
 		}
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);

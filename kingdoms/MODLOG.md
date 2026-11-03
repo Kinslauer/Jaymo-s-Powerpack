@@ -8247,7 +8247,7 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
 - Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
   change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
 
-## 0.7.481: blood magic draws from stains on the ground (pack 0.19.62)
+## 0.7.482: blood magic draws from stains on the ground (pack 0.19.64)
 Andy: "Blood magic should draw from stains on ground". Blood magic here is the Blood Sorcerer's (and the camp blood
 witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`BloodTrail`, the trail decals).
 - **Blood Sorcerers** fill their blood pool from the stains within 6 blocks too, after the bleeding: up to 0.12 of each
