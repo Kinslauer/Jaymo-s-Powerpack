@@ -4974,3 +4974,26 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Their ability poses are synced for everyone (`XenoformState.ACT`: charge, roll, spin). The six lost their Ultimate
     spikes (the spike model is a man's). Each body was written and then checked by a second pass that simulated the
     poses (feet on the ground, legs attached, no UV overlaps) and fixed what it found. Compile-checked; not played.
+- **0.19.63, dirty armour and wet weather:** Andy: armour "gets dirty when you walk in the desert or swampy muddy areas
+  and washes in the rain or by hand or in bodies of water", plus "subsurface scattering rays underwater and pooling water
+  on the ground near trees, during rain and under wet characters like the blood trail" (Gemini had tried it; nothing of
+  that was used; Andy's Recrafted resource pack noted as the look, nothing taken). `core/wet/ArmourGrime`: each armour
+  piece carries a `jaymospowers:grime` component (amount 0-100, how much is mud). Walking (or lying) on sand, gravel or
+  dry ground in deserts, badlands and dry or sandy biomes throws up dust; mud, clay, soul soil and wet earth (rain, swamps)
+  splash mud; boots first, then greaves, chest, helmet; sprinting doubles it, lying or crawling gets it everywhere. Water
+  washes it (wading: boots and greaves; under water: all of it fast), rain slowly, and by hand: sneak + use an empty hand
+  on a water cauldron (a level each scrub), sneak + use a wet sponge, or use a dirty piece on a water cauldron. Everyone
+  near a player is weathered, so guards come back muddy. The client tints the armour layers toward tan or mud brown
+  (`ArmourGrimeMixin`) and the tooltip says how dirty. `client/wet/WetClient`: wet bodies drip for a while after water
+  (30 s) or rain (15 s) and leave little water puddles under them (a trail as they walk); while it rains, puddles pool
+  under leaves and beside trunks (and sometimes in open hollows), grow while the rain lasts and dry after; under water
+  by day `LightShaft`s hang from the surface, leaning away from the sun. Water puddles are `BloodPuddle.water` in the
+  blood decals' group (now any `BloodDecals.Decal`). Sprites from `tools/wet_textures.py`. Tuning at the top of each class.
+  Then Andy shared Recrafted's settings (MR_CHOO, Patreon-only, so never in the pack): its light rays, fog, clouds and
+  swaying leaves/grass already come from Complementary Unbound, which every player starts with, so we added only what a
+  shader pack doesn't: bushy leaves, a built-in pack `living_world` ("Jaymo's Powers: bushy leaves", on by default),
+  where every vanilla leaf block also draws two crossed planes of its own texture reaching 3 px past the block
+  (`tools/bushy_leaves.py`; multipart blockstates; they wave with the leaves under Complementary).
+  Andy then chose "fill the gaps only" (no Sodium shaders-off versions). The same pack also gives grass blocks lips of
+  their own side-overlay blades leaning out 22.5 degrees over each open side, and snowy ones a lip of snow
+  (`tools/grass_edges.py`; each lip culls when a block stands against that side).
