@@ -151,7 +151,8 @@ def wisp(img, seed):
     return img
 
 
-for look in LOOKS:
-    wisp(wing(look, False), len(look)).save(os.path.join(OUT, "wings_" + look + ".png"))
-wing("iron", True).save(os.path.join(OUT, "wings_veins.png"))
-print("wrote", len(LOOKS) + 1, "wing textures to", os.path.normpath(OUT))
+if __name__ == "__main__":
+    for look in LOOKS:
+        wisp(wing(look, False), len(look)).save(os.path.join(OUT, "wings_" + look + ".png"))
+    wing("iron", True).save(os.path.join(OUT, "wings_veins.png"))
+    print("wrote", len(LOOKS) + 1, "wing textures to", os.path.normpath(OUT))
