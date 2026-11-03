@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.482) Every settlement keeps a butcher and a healer (a cleric). Andy: "too many times i get to a kingdom and they
+ * (0.7.483) Every settlement keeps a butcher and a healer (a cleric). Andy: "too many times i get to a kingdom and they
  * have no butcher or healer". Each kingdom, fiefdom and village (never a barbarian camp) is looked at every
  * {@link #EVERY} ticks while its seat is loaded, so the ones already in a world get theirs too. When it has none of a
  * trade, someone takes it up, in this order:
