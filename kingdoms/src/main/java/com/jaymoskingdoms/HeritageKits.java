@@ -319,6 +319,9 @@ public final class HeritageKits {
 			if (entity instanceof ServerPlayer dead) {
 				// (a new life starts at full health: that is not a mend to cut)
 				HEALTH.remove(dead.getUUID());
+			} else {
+				// (0.7.480) a dead villager's dry count goes with it
+				LAST_WET.remove(entity.getUUID());
 			}
 			if (source.getEntity() instanceof LivingEntity killer && killer != entity && killer.isAlive()) {
 				Kit kit = kit(killer);
@@ -339,6 +342,12 @@ public final class HeritageKits {
 			LAST_WET.remove(id);
 			STEAL.remove(id);
 			HEALTH.remove(id);
+		});
+		// (0.7.480) an unloaded villager's dry count is dropped (a player's is kept until they log off)
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (!(entity instanceof ServerPlayer)) {
+				LAST_WET.remove(entity.getUUID());
+			}
 		});
 		// (0.7.480) a risen skeleton left behind in an unloaded chunk (or saved over a restart) falls when it loads again
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
@@ -584,6 +593,8 @@ public final class HeritageKits {
 	/** A bound-to-water one who's been out of water and rain for {@link #DRY_LIMIT_TICKS} (a villager's count starts when it's loaded). */
 	private static boolean dry(LivingEntity entity) {
 		if (entity.isInWaterOrRain()) {
+			// (0.7.480) wetting restarts the count for villagers too, not only players
+			LAST_WET.put(entity.getUUID(), entity.level().getGameTime());
 			return false;
 		}
 		Long last = LAST_WET.get(entity.getUUID());

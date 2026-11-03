@@ -370,7 +370,8 @@ final class HeritageScreen extends Screen {
 			if (key.endsWith(".flaw") || key.endsWith(".card.flaw")) {
 				return Ui.BAD;
 			}
-			if (key.endsWith(".gift") || key.endsWith(".card.gift")) {
+			// (0.7.480) a gift with its own card key (".gift_rimewyrm") is a gift too
+			if (key.endsWith(".gift") || key.endsWith(".card.gift") || key.contains(".gift_")) {
 				return Ui.GOOD;
 			}
 			if (key.contains(".card.move.")) {
