@@ -142,6 +142,11 @@ public class CorpseEntity extends Entity {
 	private static final float POCKET_WIDTH = 0.6F, POCKET_HEIGHT = 0.8F;
 	/** (0.5.50) Held in one hand: the hand this far in front of the carrier, to their right, and up (blocks, at 1.95 tall). */
 	private static final double HAND_FORWARD = 0.3, HAND_RIGHT = 0.36, HAND_HEIGHT = 0.75;
+	/**
+	 * (0.5.50) Where a body held in one hand is held: its neck, this share of its length forward and its height up (the
+	 * client draws it hanging from there; (0.5.53) let go of, its physics starts the same way).
+	 */
+	public static final float NECK_FRONT = 0.45F, NECK_UP = 0.75F;
 	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
 	private static final double CARRY_FORWARD = 0.55, CARRY_HEIGHT = 0.9;
 	/** (0.4.31) The size of carrier the carry spot is set for (a villager); bigger ones hold it further out and higher. */
@@ -558,6 +563,23 @@ public class CorpseEntity extends Entity {
 			// (0.5.24) set down on a butcher table: it stays on it however it flops
 			ragdoll.pinOnTable(this);
 		}
+	}
+
+	/**
+	 * (0.5.53) Server: let go of while held (dropped, thrown, or its carrier gone): its physics starts from the pose it
+	 * was drawn held in, where it was held, moving at {@code velocity}, and falls however it falls from there. It used to
+	 * start sprawled flat (see {@link #lyingBody}), so it snapped into that pose in mid-air. {@code oneHand}: it was
+	 * hanging from one hand by the neck, not lying across the arms. Its facing while held is the carrier's plus 90.
+	 */
+	private void fallFromHold(Vec3 velocity, boolean oneHand) {
+		if (!(level() instanceof ServerLevel)) {
+			return;
+		}
+		RagdollBody made = RagdollBody.held(rig(), getX(), getY(), getZ(), getYRot() - 90.0F, oneHand, NECK_FRONT, NECK_UP);
+		made.setSpeed(velocity.x, velocity.y, velocity.z);
+		this.ragdoll = new CorpseRagdoll(this, made);
+		// at once, so watchers never draw the points it had before it was picked up
+		ragdoll.send(this);
 	}
 
 	/** Free on the server: the body is stepped (made first if there isn't one: loaded, or let go of some other way). */
@@ -1193,7 +1215,9 @@ public class CorpseEntity extends Entity {
 			if (level() instanceof ServerLevel level) {
 				if (!carrier.isAlive() || carrier.level() != level() || carrier.isSpectator()
 					|| carrier.distanceToSqr(this) > CARRY_LEASH_SQ) {
+					boolean oneHand = oneHanded();
 					setCarrier(null);
+					fallFromHold(Vec3.ZERO, oneHand);
 				} else if (carrier instanceof Player player && tickCount % 20 == 0) {
 					// heavy: slows whoever is carrying it, (0.5.36) less the stronger they are
 					Hauling.encumber(player, isBigCarcass() ? Hauling.CARRY_BIG_SLOWNESS : Hauling.CARRY_SLOWNESS);
@@ -1204,7 +1228,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (this.entityData.get(CARRIER) >= 0 && !level().isClientSide()) {
 			// the carrier is gone from this level (logged out, changed dimension, unloaded): it drops
+			boolean oneHand = oneHanded();
 			setCarrier(null);
+			fallFromHold(getDeltaMovement(), oneHand);
 		}
 		if (this.entityData.get(DRAGGER) >= 0) {
 			// (0.5.31) hauled along the ground, (0.5.39) a ragdoll held by the legs
@@ -1930,6 +1956,7 @@ public class CorpseEntity extends Entity {
 		if (carrier == null) {
 			return;
 		}
+		boolean oneHand = oneHanded();
 		setCarrier(null);
 		grabCooldown = GRAB_COOLDOWN;
 		setOnGround(false);
@@ -1940,7 +1967,7 @@ public class CorpseEntity extends Entity {
 		// air drag (0.91 a tick) leaves about 9 ticks' worth of its starting speed
 		double flight = 9.0;
 		setDeltaMovement(off.x / flight, 0.3, off.z / flight);
-		lieDown(getDeltaMovement(), false);
+		fallFromHold(getDeltaMovement(), oneHand);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
 		}
@@ -2578,7 +2605,8 @@ public class CorpseEntity extends Entity {
 			setOnGround(false);
 			this.entityData.set(TUMBLING, true);
 			setDeltaMovement(0.0, 0.1, 0.0);
-			lieDown(getDeltaMovement(), false);
+			// (0.5.53) it slides off as it lay across the horse's back (drawn as across someone's arms, facing the same)
+			fallFromHold(getDeltaMovement(), false);
 		}
 	}
 
@@ -2687,8 +2715,9 @@ public class CorpseEntity extends Entity {
 
 	/** Server: the carrier lets go. It drops from where it was held, carried on by their momentum, tumbling limp. */
 	public void drop(Player player) {
+		boolean oneHand = oneHanded();
 		letGo(player);
-		lieDown(getDeltaMovement(), false);
+		fallFromHold(getDeltaMovement(), oneHand);
 	}
 
 	/** Lets go of the body (see {@link #drop}), without making its physics body yet: toss sets its speed first. */
@@ -2753,10 +2782,11 @@ public class CorpseEntity extends Entity {
 
 	/** Server: thrown a short way ahead of the carrier, tumbling; it lands on the ground or in a cart it hits. */
 	public void toss(Player player) {
+		boolean oneHand = oneHanded();
 		letGo(player);
 		Vec3 ahead = player.getViewVector(1.0F).multiply(1.0, 0.0, 1.0).normalize();
 		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(ahead.x * 0.42, 0.28, ahead.z * 0.42));
-		lieDown(getDeltaMovement(), false);
+		fallFromHold(getDeltaMovement(), oneHand);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
 		}

@@ -48,6 +48,12 @@ public final class RagdollRig {
 	private static final float ARM_CONE = 2.8F, LEG_CONE = 1.45F, HEAD_CONE = 0.9F;
 	/** Legs swing forward (sitting up, curling) much further than back: their cone leans this far forward. */
 	private static final float LEG_LEAN = 0.55F;
+	/**
+	 * (0.5.53) A body on its back across someone's arms: how far its legs hang back from straight along it (radians), and
+	 * its head is thrown back. As far as the leg and head cones let them (a hair inside), so when it's let go the physics
+	 * starts from the pose it was drawn in instead of snapping the legs forward (see RagdollBody#held, client Limp).
+	 */
+	public static final float HELD_LEG_HANG = LEG_CONE - LEG_LEAN - 0.05F, HELD_HEAD_BACK = HEAD_CONE - 0.05F;
 	/** Quadruped legs, and how far their heads nod. */
 	private static final float HOOF_CONE = 1.2F, MUZZLE_CONE = 1.0F;
 	/**

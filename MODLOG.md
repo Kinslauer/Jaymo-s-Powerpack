@@ -5042,3 +5042,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
   Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
   Compile-checked; not played.
+- **0.19.69, Kitchen 0.5.53, thrown bodies keep their ragdoll:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). Compile-checked and ragdoll-sim checked; not played.
