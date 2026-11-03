@@ -647,7 +647,7 @@ public final class WebPower implements Power {
 				continue;
 			}
 			boolean broken = false;
-			// (0.19.57) how it broke, for the spent line it leaves (a plain let-go leaves none)
+			// (0.19.70) how it broke, for the spent line it leaves (a plain let-go leaves none)
 			WebLine was = player.getAttached(line(hand));
 			Vec3 burnt = player.tickCount % WebHeft.BURN_EVERY == 0 ? burnsThrough(player, hand) : null;
 			if (burnt != null) {

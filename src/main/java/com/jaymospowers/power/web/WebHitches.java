@@ -165,7 +165,7 @@ public final class WebHitches {
 				// this line snaps; any others hold
 				it.remove();
 				Vec3 at = center(entity);
-				// (0.19.57) pulled apart, it parts along the middle; worn out, or its block gone, it comes loose whole
+				// (0.19.70) pulled apart, it parts along the middle; worn out, or its block gone, it comes loose whole
 				WebNet.snap(entity, WebNet.HITCH_LINE, hitch.anchor(), at.lerp(hitch.anchor(), 0.35 + level.getRandom().nextDouble() * 0.3),
 					blockGone ? WebNet.FREED : clock >= hitch.until() ? WebNet.WORN : WebNet.SNAPPED);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
