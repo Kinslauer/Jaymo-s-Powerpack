@@ -389,7 +389,7 @@ def packResourcePacks = [
 	// client/PackResourcePacks until its CurseForge file id is added here, [cf: [<project>, <file>], file: "Better Horses v4.3 1.21.11.zip"].
 	// (0.19.65) Excalibur (by Maffhew; CC BY-NC-ND 3.0, shipped unchanged, link to its page on the pack's page) and
 	// "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; modpacks may include it): fetched from Modrinth by
-	// client/PackResourcePacks for now, like Fresh Animations, but never switched on: optional, /excalibur on (0.19.71,
+	// client/PackResourcePacks for now, like Fresh Animations, but never switched on: optional, /excalibur on (0.19.72,
 	// docs/Excalibur-Style.md). Add their CurseForge ids here once known.
 ]
 // shader packs, client-only: the CurseForge import downloads them into shaderpacks/ by id, and Jaymo's Powers chooses

@@ -16,7 +16,7 @@ import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.71) The Excalibur look, optional and off by default (Andy: "make excalibur and all it's additions from here
+ * (0.19.72) The Excalibur look, optional and off by default (Andy: "make excalibur and all it's additions from here
  * optional, and off by default. but keep it in the pack"). Three packs make it up: Excalibur itself and its Fresh
  * Animations patch (PackResourcePacks.OPTIONAL, fetched into resourcepacks/ but never switched on by us), and our
  * built-in excalibur_style pack (our textures graded toward Excalibur, calmer leaves). {@code /excalibur on} switches
@@ -30,7 +30,7 @@ final class ExcaliburLook {
 	private static final String OFF_MARKER = "jaymospowers-excalibur-off-v1";
 	private static final String OURS = "excalibur_style";
 	/**
-	 * (0.19.71) Recrafted (by MR_CHOO) is a paid early-access pack with no licence to redistribute, so it's never shipped
+	 * (0.19.72) Recrafted (by MR_CHOO) is a paid early-access pack with no licence to redistribute, so it's never shipped
 	 * or fetched. A player who has it in their own resourcepacks/ gets it switched on with the look, just above
 	 * Excalibur (so it draws over Excalibur, and Fresh Animations and its patch still draw over both). It's made for
 	 * 1.21.1-1.21.8, so it's accepted as an older-format pack.

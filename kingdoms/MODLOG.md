@@ -8275,6 +8275,6 @@ height, width, build or breasts. On any body MCA draws (players, villagers, folk
 MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
 or the symbiote suit it isn't drawn (`PowersCover.body`).
 
-## 0.7.485: the Excalibur look made optional (pack 0.19.71, Kitchen 0.5.53)
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
 Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).

@@ -2,7 +2,7 @@
 
 Andy (2026-11-03): "I'd like a different artstyle from vanilla entirely", pointing at Excalibur with its Fresh
 Animations patch. 0.19.65 switched it on for everyone; the same evening Andy asked for it to be optional: "make
-excalibur and all it's additions from here optional, and off by default. but keep it in the pack." Since 0.19.71:
+excalibur and all it's additions from here optional, and off by default. but keep it in the pack." Since 0.19.72:
 
 - **`/excalibur on`** switches the look on: Excalibur at the bottom of the pack order, its Fresh Animations patch just
   above Fresh Animations, and our built-in `excalibur_style` pack on top. **`/excalibur off`** takes all three off;
@@ -12,7 +12,7 @@ excalibur and all it's additions from here optional, and off by default. but kee
   fetched. If a player has it in their own resourcepacks/, `/excalibur on` switches it on too, just above Excalibur.
   It's made for 1.21.1-1.21.8, not 26.3, so some of it may not load.
 - Our mods' own textures are the originals again. The graded copies live only in `excalibur_style`.
-- Installs that 0.19.65 had switched on get the look switched off once, on the first launch with 0.19.71.
+- Installs that 0.19.65 had switched on get the look switched off once, on the first launch with 0.19.72.
 
 ## What's shipped (unchanged)
 - **Excalibur** by Matt "Maffhew" Dillow, CC BY-NC-ND 3.0 (its README): ships unchanged, never edited, built on or
@@ -45,7 +45,7 @@ and its outlines are softer.
 look keeps up. Forgetting it isn't harmful: a texture without a graded copy just shows its normal colours under the
 look. It adds about 43 MB to the Powers jar.
 
-**0.19.65 to 0.19.70 graded the sources in place.** 0.19.71 put all 7,713 back. Each restored file was checked:
+**0.19.65 to 0.19.70 graded the sources in place.** 0.19.72 put all 7,713 back. Each restored file was checked:
 grading it again gives the graded file exactly. The 10 xenoform skins whose originals were never committed (#868 graded
 them before committing) were regenerated with `tools/gen_xenoform.py`. If an old branch still carries graded textures,
 take master's version.

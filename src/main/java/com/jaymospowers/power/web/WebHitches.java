@@ -172,6 +172,21 @@ public final class WebHitches {
 				syncLater.add(entity);
 				continue;
 			}
+			if (clock % WebHeft.BURN_EVERY == 0) {
+				// (0.19.71) fire burns it through (a symbiote's cord recoils from it instead)
+				Vec3 burn = WebHeft.burning(level, hitch.anchor(), center(entity), entity);
+				if (burn != null) {
+					it.remove();
+					if (hitch.dark()) {
+						WebHeft.recoilFx(level, burn);
+					} else {
+						WebHeft.burnFx(level, burn);
+						WebNet.snap(entity, WebNet.HITCH_LINE, hitch.anchor(), burn, WebNet.SNAPPED);
+					}
+					syncLater.add(entity);
+					continue;
+				}
+			}
 			if (entity instanceof Mob mob) {
 				mob.getNavigation().stop();
 			}

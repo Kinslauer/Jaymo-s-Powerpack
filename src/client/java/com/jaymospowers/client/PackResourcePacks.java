@@ -84,9 +84,9 @@ final class PackResourcePacks {
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
 			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
 
-	/** (0.19.71) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
+	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
 	static final List<Pack> OPTIONAL = List.of(
-		// (0.19.65; optional and off by default since 0.19.71) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
+		// (0.19.65; optional and off by default since 0.19.72) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
 		// shipped unchanged, never edited or built on, with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
 		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). Downloaded into resourcepacks/ but never
 		// switched on by us: /excalibur on (ExcaliburLook) puts it at the bottom of the pack order, so Fresh Animations,
