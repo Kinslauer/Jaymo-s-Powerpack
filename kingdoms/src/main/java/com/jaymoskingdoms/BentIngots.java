@@ -125,6 +125,12 @@ public final class BentIngots {
 		return w % IRON_WORTH == 0 ? new ItemStack(BENT_IRON, Math.min(STACK, w / IRON_WORTH)) : new ItemStack(BENT_COPPER, Math.min(STACK, w));
 	}
 
+	/** (0.7.480) What {@link #coin} really pays for {@code worth}: one stack holds only so much, and a buyer must never be paid less than was booked. */
+	public static int payable(int worth) {
+		int w = Math.max(1, worth);
+		return w % IRON_WORTH == 0 ? Math.min(STACK, w / IRON_WORTH) * IRON_WORTH : Math.min(STACK, w);
+	}
+
 	/** {@code worth} as stacks of bent ingots: as many iron as fit, the rest copper. */
 	public static List<ItemStack> stacks(long worth) {
 		List<ItemStack> out = new ArrayList<>();

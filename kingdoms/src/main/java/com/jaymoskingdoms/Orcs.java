@@ -214,11 +214,11 @@ public final class Orcs {
 			folk.addEffect(new MobEffectInstance(MobEffects.SPEED, RAGE_TICKS, 0));
 			level.sendParticles(ParticleTypes.ANGRY_VILLAGER, folk.getX(), folk.getY() + 2.0, folk.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.2F, 0.6F);
-			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.orc.rage_" + level.getRandom().nextInt(3)), Speech.RED, 20.0);
+			Speech.say(level, folk, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.rage_" + level.getRandom().nextInt(3)), Speech.RED, 20.0);
 		}
 		if (role == GRUNT && fighting && level.getRandom().nextInt(CRY_ONE_IN / 10) == 0) {
 			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.0F, 0.7F);
-			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.orc.cry_" + level.getRandom().nextInt(6)), Speech.RED, 20.0);
+			Speech.say(level, folk, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.cry_" + level.getRandom().nextInt(6)), Speech.RED, 20.0);
 		}
 		if (role == GRUNT && fighting && !Brutality.fighting(folk)) {
 			// (0.7.480) in a fight an orc grabs a goblin slave and throws it at his foe

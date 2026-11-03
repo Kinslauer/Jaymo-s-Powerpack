@@ -243,7 +243,7 @@ final class GreenMarket {
 			if (spare > 0) {
 				offers.add(BentIngots.offer(price, new ItemStack(g.item(), g.lot()), Math.min(SELL_USES, spare), 0, 0.0F));
 			}
-			int pay = bounty(g, stock);
+			int pay = BentIngots.payable(bounty(g, stock)); // (0.7.480) what the one stack of coin really pays, so the hoard is charged no more or less than that
 			int short_ = (g.keep() - stock + g.lot() - 1) / g.lot();
 			// ((0.7.480) every buy offer draws on one budget, so all of them together never pay out more than the hoard holds)
 			long afford = hoard / pay;

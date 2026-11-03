@@ -170,6 +170,11 @@ public final class Slaves {
 			f -> f.role() == SLAVE && f.factionId() == camp && f.isAlive() && !f.entityTags().contains(RUNAWAY));
 	}
 
+	/** (0.7.480) How many slaves camp {@code camp} keeps in the loaded world: they eat and work (HordeEconomy), yet are no folk of its cap. */
+	static int count(ServerLevel level, int camp, BlockPos center) {
+		return kept(level, camp, center).size();
+	}
+
 	/** (From {@link OrcCamps#tick}) a loaded camp with fewer slaves than it can keep takes another now and then. */
 	static void restock(ServerLevel level, Faction camp, Camps.CampData data) {
 		if (!OrcCamps.wholeCampLoaded(level, data.center()) || level.getRandom().nextFloat() >= RESTOCK_CHANCE) {
@@ -328,8 +333,8 @@ public final class Slaves {
 		orc.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, orc.getX(), orc.getY(), orc.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.HOSTILE, 1.0F, 0.6F);
 		RandomSource random = level.getRandom();
-		Speech.say(level, orc, Component.translatable("speech.jaymoskingdoms.orc.toss_" + random.nextInt(TOSS_LINES)), Speech.RED, SAY_RANGE);
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.squeak_" + random.nextInt(SQUEAK_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, orc, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.toss_" + random.nextInt(TOSS_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.squeak_" + random.nextInt(SQUEAK_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	/** A thrown slave in the air: when it comes down it is hurt and stunned, and a foe under it is hit. */
@@ -378,7 +383,7 @@ public final class Slaves {
 		} else {
 			slave.setSite(farSite(level, slave, RUN_DISTANCE));
 		}
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.run_" + level.getRandom().nextInt(RUN_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.run_" + level.getRandom().nextInt(RUN_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	/** A site {@code distance} blocks off, away from the slave's camp (or any way at all if it has none). */
@@ -392,13 +397,13 @@ public final class Slaves {
 		return BlockPos.containing(slave.getX() + Math.cos(angle) * distance, slave.getY(), slave.getZ() + Math.sin(angle) * distance);
 	}
 
-	/** The nearest standing goblin village (with a king) within {@code reach} of {@code from}. */
+	/** The nearest standing goblin village (with a king, and room under its folk cap) within {@code reach} of {@code from}. */
 	private static @Nullable Faction nearestVillage(MinecraftServer server, BlockPos from, double reach) {
 		Faction best = null;
 		double bestD = reach * reach;
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = f.fallen() ? null : Camps.data(server, f.id());
-			if (data == null || data.clearedAt() >= 0 || f.leader().isEmpty() || !Camps.goblin(server, f.id())) {
+			if (data == null || data.clearedAt() >= 0 || f.leader().isEmpty() || !Camps.goblin(server, f.id()) || !hasRoom(server, f)) {
 				continue;
 			}
 			double d = Raids.horizontal(f.seat(), from);
@@ -408,6 +413,11 @@ public final class Slaves {
 			}
 		}
 		return best;
+	}
+
+	/** (0.7.480) Whether goblin village {@code village} is under its Hordes folk cap, so a runaway may join it. */
+	private static boolean hasRoom(MinecraftServer server, Faction village) {
+		return GoblinVillages.goblins(village) < Hordes.folkCap(server, village.id(), false);
 	}
 
 	/** A runaway on its way: a waypoint at a time toward its site, and what to do when it gets there. */
@@ -451,7 +461,13 @@ public final class Slaves {
 		if (fit && floor != Integer.MIN_VALUE) {
 			Faction founded = GoblinVillages.found(level, at, floor, net.minecraft.core.Direction.Plane.HORIZONTAL.getRandomDirection(random));
 			JaymosKingdoms.LOGGER.info("A runaway goblin slave raised {} at {}", founded.name(), at);
-			join(level, slave, founded);
+			// ((0.7.480) only if its starting goblins left room under the cap; else it runs on)
+			Faction fresh = Factions.get(server, founded.id());
+			if (fresh != null && hasRoom(server, fresh)) {
+				join(level, slave, fresh);
+			} else {
+				slave.setSite(farSite(level, slave, RUN_STEP));
+			}
 		} else if (random.nextFloat() < LOST_CHANCE && !Raids.playerNear(level, at, Raids.VANISH_RANGE)) {
 			// (lost to the wild, unseen)
 			slave.discard();
@@ -482,7 +498,7 @@ public final class Slaves {
 		slave.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 		slave.setup(Goblins.GOBLIN, village, village.seat(), GoblinBuildings.HOME_RADIUS);
 		Factions.update(server, village.id(), f -> f.withHoldings(f.holdings().adjust(Goblins.GOBLIN, 1)));
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.join_" + level.getRandom().nextInt(JOIN_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.join_" + level.getRandom().nextInt(JOIN_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	// ---- freeing one -------------------------------------------------------------------------------------------------------------
@@ -500,10 +516,10 @@ public final class Slaves {
 			Tribes.add(server, player.getUUID(), orcs, FREED_GRUDGE);
 		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.slave.freed"), true);
-		Speech.sayTo(level, slave, player, Component.translatable("speech.jaymoskingdoms.slave.freed_" + random.nextInt(FREED_LINES)), Speech.YELLOW);
+		Speech.sayTo(level, slave, player, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.freed_" + random.nextInt(FREED_LINES)), Speech.YELLOW);
 		for (PathfinderMob orc : level.getEntitiesOfClass(PathfinderMob.class, slave.getBoundingBox().inflate(SHOUT_RANGE),
 			e -> e instanceof Worker w && w.factionId() == slave.factionId() && Orcs.isOrc(w.role()) && e.isAlive() && !e.isSleeping())) {
-			Speech.say(level, orc, Component.translatable("speech.jaymoskingdoms.orc.freed_" + random.nextInt(SHOUT_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, orc, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.freed_" + random.nextInt(SHOUT_LINES)), Speech.RED, SAY_RANGE);
 			Rulers.charge(orc, player);
 			break;
 		}

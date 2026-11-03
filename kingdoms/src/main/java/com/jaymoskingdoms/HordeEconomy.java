@@ -152,11 +152,13 @@ final class HordeEconomy {
 	// ---- jobs ------------------------------------------------------------------------------------------------------------
 
 	/** The camp's working folk: its grunts (an orc camp) or goblins; the rangers and slingers keep watch and have no job. */
-	static int workers(Faction camp, boolean orc) {
-		return camp.holdings().count(orc ? Orcs.GRUNT : Goblins.GOBLIN);
+	static int workers(ServerLevel level, Faction camp, Camps.CampData data, boolean orc) {
+		// ((0.7.480) an orc camp's goblin slaves do its work too, but are no folk of the camp: they are counted from the
+		// world, loaded ones only, and never in its holdings or its cap)
+		return camp.holdings().count(orc ? Orcs.GRUNT : Goblins.GOBLIN) + (orc ? Slaves.count(level, camp.id(), data.center()) : 0);
 	}
 
-	/** {@code workers} folk shared out among the jobs by the rota. */
+	/** {@code workers} folk (and slaves) shared out among the jobs by the rota. */
 	static Map<Job, Integer> assign(int workers, boolean orc) {
 		List<Job> rota = orc ? ORC_ROTA : GOBLIN_ROTA;
 		Map<Job, Integer> out = new EnumMap<>(Job.class);
@@ -235,7 +237,7 @@ final class HordeEconomy {
 
 	/** How many meals the camp's folk need a day ((0.7.480) only the living eat: a dead one's place waiting to be filled doesn't). */
 	static int meals(ServerLevel level, Faction camp, Camps.CampData data, boolean orc) {
-		int folk = orc ? camp.holdings().count(Orcs.GRUNT) + camp.holdings().count(Orcs.RANGER) + 2
+		int folk = orc ? camp.holdings().count(Orcs.GRUNT) + camp.holdings().count(Orcs.RANGER) + 2 + Slaves.count(level, camp.id(), data.center())
 			: camp.holdings().count(Goblins.GOBLIN) + camp.holdings().count(Goblins.SLINGER) + 1;
 		int ogres = orc ? OgreHolds.haulers(level, camp.id(), data.center()).size() : 0;
 		return folk * MEAL + ogres * OGRE_MEALS;
@@ -258,7 +260,7 @@ final class HordeEconomy {
 			int percent = percent(server, camp.id(), orc);
 			Map<Item, Integer> bring = new LinkedHashMap<>();
 			long wages = 0L;
-			for (var e : assign(workers(now, orc), orc).entrySet()) {
+			for (var e : assign(workers(level, now, data, orc), orc).entrySet()) {
 				for (var g : goods(e.getKey(), orc).entrySet()) {
 					bring.merge(g.getKey(), scaled(g.getValue() * e.getValue(), percent), Integer::sum);
 				}
@@ -294,7 +296,7 @@ final class HordeEconomy {
 		boolean orc = data.orc();
 		Book book = book(server, camp.id());
 		StringBuilder jobs = new StringBuilder();
-		for (var e : assign(workers(camp, orc), orc).entrySet()) {
+		for (var e : assign(workers(level, camp, data, orc), orc).entrySet()) {
 			jobs.append(jobs.isEmpty() ? "" : ", ").append(e.getValue()).append(' ').append(e.getKey().name().toLowerCase(java.util.Locale.ROOT));
 		}
 		int food = Storage.loaded(level, camp) ? Storage.count(level, camp, HordeEconomy::eats) : -1;
