@@ -5042,7 +5042,41 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
   Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
   Compile-checked; not played.
-- **0.19.69, Kitchen 0.5.53, thrown bodies keep their ragdoll:** Andy: "thrown mobs should stop snapping to a pose,
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
+- **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
+  "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
+  alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
+  swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
+  and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
+  symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.
+- **0.19.71, tendril globs keep to the back** (`WebGooGlobs`): Andy: the blobs "should only grow tendrils for living
+  tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
+  ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
+  the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
+- **0.19.73, Kitchen 0.5.54, thrown bodies keep their ragdoll:** Andy: "thrown mobs should stop snapping to a pose,
   and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
   pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
   `kitchen/MODLOG.md`). Compile-checked and ragdoll-sim checked; not played.

@@ -1353,7 +1353,12 @@ Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery
 ## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
 Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.
-## 0.5.53: thrown bodies keep their ragdoll (pack 0.19.69)
+
+## 0.5.53: the Excalibur look made optional (pack 0.19.72, Kingdoms 0.7.485)
+Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.5.54: thrown bodies keep their ragdoll (pack 0.19.73)
 Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll, so they fall how they fall".
 - Letting go of a carried body (dropped, thrown, tossed into a fire by a guard, its carrier gone, sliding off a horse)
   used to start its physics from `lyingBody`: sprawled flat, limbs splayed, a fresh random way up. So it snapped into

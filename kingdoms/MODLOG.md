@@ -8266,3 +8266,15 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
