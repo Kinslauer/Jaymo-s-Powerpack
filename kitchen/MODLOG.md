@@ -1291,3 +1291,23 @@ in game.
 an overlay line); sneak-use with an empty hand on a fire or lit campfire drinks it (+4; a loose fire goes out, a campfire
 keeps burning), on lava gulps it (+12, a short regeneration, 3 s apart); soaking in lava gives a point every 3 s; the
 Nether doesn't dry them. Non-water potions, milk, stews and fruit still count. The HUD's sip packet also goes out at open lava.
+
+## 0.5.50: carried snakes drape, small bodies in one hand (pack 0.19.61)
+Andy: "The snake is still very rigid when carried, but the ragdoll looks great." Carried, slung over a horse or falling,
+a corpse has no physics, and `LooseParts` took the snake's neck and first tail segment as the trunk, so only the tail's
+tip hung. Now `ChainSpine.drape` lays the spine over the arms by hand: the middle flat across them (`DRAPE_REST` either
+side), rolling over their edge (`DRAPE_BEND` radius), and both ends hanging down, swung by the corpse's carry swing, more
+the lower they hang (`DRAPE_LAG`). The head hangs off whichever side it already lay. It is drawn through `DRAPE_POINTS`
+(24) points by the same segment laying as the ragdoll. Only chain-tagged bodies (`ragdoll_chain`) drape; old box snake
+corpses drape too. A carried snake is no longer laid back like a tall body (`state.tall`). `LooseParts.Frame` gains a
+`Drape`. The drape was checked headless against the snake stand-in; not compile-checked against the game; not seen in game.
+
+Small bodies in one hand. Andy: "You should carry small mobs like that with one hand, so the snake and chicken would
+be from the neck, you can remove the chicken corpse bag." The pocket pickup (a small corpse turned into a `CorpseItem`
+in your inventory) is gone: an empty-hand click on a small corpse (`fitsInPocket`, now up to 0.6 wide and 0.8 tall:
+chickens, rabbits, snakes, babies; never player corpses or machines) carries it in your right hand
+(`CorpseEntity.handPosition`, `HAND_FORWARD/RIGHT/HEIGHT`). It hangs by the neck (`CorpseRenderer.hangFromHand`,
+`NECK_FRONT/UP`), legs and wings dangling through `LooseParts`; a snake hangs its body down from the hand and trails the
+rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm holds it low and out (`CarryPose`
+`ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
+Checked headless against the snake stand-in; not compile-checked; not seen in game.
