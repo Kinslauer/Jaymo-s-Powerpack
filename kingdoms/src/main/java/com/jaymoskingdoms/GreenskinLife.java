@@ -152,7 +152,7 @@ public final class GreenskinLife {
 		}
 		if (haven != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
 			// ((0.7.480) the havens and anyone not plainly human mind a half-orc or a goblin-raised one as they'd mind an orc or a goblin: Peoples)
-			return Peoples.minds(who, VillagerHeritage.of(who), raisedAs, 1.0F);
+			return Peoples.minds(who, VillagerHeritage.of(who), raisedAs, Prejudice.edict(who));
 		}
 		Faction f = Banners.owner(level.getServer(), net.minecraft.world.level.ChunkPos.containing(who.blockPosition()));
 		if (Purists.is(f)) {

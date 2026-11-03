@@ -63,6 +63,8 @@ public final class Peoples {
 	static final int APART_FROM = 3, APART_EVERY = 20 * 30, APART_REST = 20 * 60 * 5;
 	/** (0.7.480) Two beds this near (same dimension) are one house: MCA's home is each villager's own bed, never shared. */
 	static final double SAME_HOUSE = 7.0;
+	/** (0.7.480) How far from a greenskin a free bed (under another roof) must be for it to leave home: MCA looks this near when it seeks one. */
+	static final int APART_SEEK = 8;
 	// ================================================================================================================
 
 	/**
@@ -129,6 +131,8 @@ public final class Peoples {
 		builder -> builder.persistent(Codec.STRING.listOf()));
 
 	private static final Map<UUID, Long> GLARED = new HashMap<>(), APARTED = new HashMap<>();
+	/** (0.7.480) The bed each greenskin last gave up: back under that roof again, there was no better, so it stays. */
+	private static final Map<UUID, net.minecraft.core.GlobalPos> LEFT = new HashMap<>();
 
 	private Peoples() {
 	}
@@ -138,6 +142,7 @@ public final class Peoples {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			GLARED.clear();
 			APARTED.clear();
+			LEFT.clear();
 		});
 		Settlers.register();
 	}
@@ -234,7 +239,9 @@ public final class Peoples {
 		for (Villager v : level.getEntitiesOfClass(Villager.class, p.getBoundingBox().inflate(MEET_RANGE),
 			x -> x.isAlive() && !x.isBaby() && McaCompat.isMca(x))) {
 			List<String> met = v.getAttached(MET);
-			if (met != null && met.contains(id)) {
+			// ((0.7.480) one who can't see who they are (a mask they don't see through) hasn't truly met them: MCA's hearts
+			// wouldn't move, so leave the first meeting for when they do)
+			if (met != null && met.contains(id) || Identities.hiddenFrom(p, v)) {
 				continue;
 			}
 			// ((0.7.480) only a true first meeting: one who already has MCA memories of them (an old friend from before
@@ -325,6 +332,11 @@ public final class Peoples {
 			if (mine == null || now - APARTED.getOrDefault(g.getUUID(), Long.MIN_VALUE / 2) < APART_REST) {
 				continue;
 			}
+			java.util.Optional<net.minecraft.core.GlobalPos> home = McaCompat.home(g);
+			// ((0.7.480) MCA gave them a bed under the roof they left: there was no other, so they put up with it)
+			if (sameHouse(home, java.util.Optional.ofNullable(LEFT.get(g.getUUID())))) {
+				continue;
+			}
 			for (Villager h : near) {
 				// ((0.7.480) by house, not by bed: each bed holds one, so beds a few steps apart are one roof)
 				if (h == g || !sameHouse(McaCompat.home(g), McaCompat.home(h)) || McaCompat.kin(g, h) != McaCompat.STRANGERS) {
@@ -333,11 +345,25 @@ public final class Peoples {
 				Heritage.Kind theirs = VillagerHeritage.of(h);
 				if (mine != theirs && Math.max(distaste(mine, theirs), distaste(theirs, mine)) >= APART_FROM) {
 					APARTED.put(g.getUUID(), now);
-					McaCompat.leaveHome(g);
+					// ((0.7.480) only for a free bed under another roof nearby, or MCA would just hand back the one let go)
+					if (freeBedElsewhere(level, g, home)) {
+						LEFT.put(g.getUUID(), home.get());
+						McaCompat.leaveHome(g);
+					}
 					break;
 				}
 			}
 		}
+	}
+
+	/** (0.7.480) A bed with room near {@code g}, in their home's dimension but not under its roof (within {@link #APART_SEEK}). */
+	private static boolean freeBedElsewhere(ServerLevel level, Villager g, java.util.Optional<net.minecraft.core.GlobalPos> home) {
+		if (home.isEmpty() || !home.get().dimension().equals(level.dimension())) {
+			return false;
+		}
+		return level.getPoiManager().findAll(type -> type.is(net.minecraft.world.entity.ai.village.poi.PoiTypes.HOME),
+			bed -> !bed.closerThan(home.get().pos(), SAME_HOUSE), g.blockPosition(), APART_SEEK,
+			net.minecraft.world.entity.ai.village.poi.PoiManager.Occupancy.HAS_SPACE).findAny().isPresent();
 	}
 
 	/** (0.7.480) Beds {@code a} and {@code b} lie under one roof: the same dimension, within {@link #SAME_HOUSE}. */
