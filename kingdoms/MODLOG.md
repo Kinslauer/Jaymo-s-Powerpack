@@ -8292,6 +8292,11 @@ turtle).
   MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
 - Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
   colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- **No traditional armour on strange shapes** (`SeaBodies`, Andy: "the ones with nonstandard heads or bodies cannot wear
+  traditional armor"): no helmet for Eightarm, Lanternjaw, Driftbell, Shellclaw, Swordbill, Lionmane, Spinepuff,
+  Frillback, Weedfrond; no chestplate (or elytra) for Greyfin, Mantawing, Shellclaw, Oldshell, Lionmane, Swordbill,
+  Spinepuff, Frillback, Weedfrond, Moray. A piece put on slides back into the pack with a word on the action bar;
+  headwear that gives no armour (crowns, pumpkins) still fits. Players only. The trait lines say so.
 - Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
   Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
   `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
