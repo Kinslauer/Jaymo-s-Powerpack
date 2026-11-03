@@ -1499,7 +1499,7 @@ public final class XenoFormModels {
 			float coil = this.hop[0] * speed;
 			float extend = this.hop[1] * speed;
 			float arc = this.hop[2] * speed;
-			if (state.isCrouching) {
+			if (state.isCrouching || Boolean.TRUE.equals(state.getData(XenoformClient.SNEAK))) {
 				// low and flat, but it still straightens to push off
 				coil = Math.max(coil, 0.9F * (1.0F - extend));
 			}

@@ -148,7 +148,9 @@ public final class StanceScroll {
 
 	/** The stance the local player shows (for {@link StanceHud}): prone, low crouch, crouched, or on their feet. */
 	static int shown(LocalPlayer player) {
-		if (Crawl.crawling(player) || player.getPose() == Pose.SWIMMING && !player.isInWater()) {
+		// (0.19.63) Billow's and Croaker's low box isn't lying down
+		if (Crawl.crawling(player) || player.getPose() == Pose.SWIMMING && !player.isInWater()
+			&& !com.jaymospowers.power.xenoform.XenoformState.lowBox(player)) {
 			return Stance.PRONE;
 		}
 		if (player.isCrouching()) {

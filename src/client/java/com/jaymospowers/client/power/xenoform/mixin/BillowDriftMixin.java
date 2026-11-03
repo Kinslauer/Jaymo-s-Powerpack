@@ -11,8 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class BillowDriftMixin {
 	@Inject(method = "isMovingSlowly", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$billowDrift(CallbackInfoReturnable<Boolean> cir) {
-		if (com.jaymospowers.power.xenoform.XenoformState.lowBox((LocalPlayer)(Object)this)) {
-			cir.setReturnValue(false);
+		LocalPlayer self = (LocalPlayer)(Object)this;
+		if (com.jaymospowers.power.xenoform.XenoformState.lowBox(self)) {
+			// (0.19.63) Croaker sneaks at a sneak's pace all the same (its pose stays the low box's)
+			cir.setReturnValue("croaker".equals(self.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM)) && self.isShiftKeyDown()
+				&& !self.isInWater() && !self.getAbilities().flying);
 		}
 	}
 }

@@ -43,6 +43,8 @@ public final class XenoformClient {
 	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
 	/** (0.19.62) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
 	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
+	/** (0.19.63) A low-box alien (Croaker) holding sneak, which its pose can't show. */
+	public static final RenderStateDataKey<Boolean> SNEAK = RenderStateDataKey.create(() -> "jaymospowers:xenoform_sneak");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
 
@@ -84,6 +86,8 @@ public final class XenoformClient {
 		state.setData(TOWER_GRAB, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.grabPhase(player, partialTicks) : -1.0F);
 		state.setData(TOWER_SWAT, form != null ? com.jaymospowers.power.xenoform.forms.Towerback.swatPhase(player, partialTicks) : -1.0F);
 		state.setData(ACT, form != null ? player.getAttached(XenoformState.ACT) : null);
+		// (0.19.63) a low-box alien's pose never crouches, so its sneak is read off the key (Croaker's flat crouch)
+		state.setData(SNEAK, form != null && XenoformState.lowBox(player) && player.isShiftKeyDown() && !player.isInWater());
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);

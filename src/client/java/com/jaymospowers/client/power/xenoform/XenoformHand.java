@@ -36,6 +36,9 @@ public final class XenoformHand {
 		limb.zRot = right ? 0.1F : -0.1F;
 		if (model instanceof XenoFormModels.Pyre pyre) {
 			pyre.handPose();
+		} else if (model instanceof XenoFormModels.Gremlin gremlin) {
+			// (0.19.63) its knuckle-walking forearm and fist straightened for the first-person arm
+			gremlin.handPose();
 		}
 		poseStack.pushPose();
 		// a slim skin's arm is a pixel thinner; the alien's never is, so nudge it in
