@@ -32,6 +32,8 @@ public final class Settlers {
 	static final float[] WELCOME = {1.0F, 0.6F, 0.25F, 0.08F};
 	/** A human village's share of those odds, plus the same again per edict of tolerance its ruler has made. */
 	static final float HUMAN_SHARE = 0.35F;
+	/** (0.7.480) A human village with no tolerance edict takes none while a greenskin camp at war with it stands this near (or a raid is on it). */
+	static final double HOSTILE_CAMP_RANGE = 192.0;
 	/** A village holds at most this many of them (within {@link #VILLAGE_RANGE}), counted by blood. */
 	static final int CAP = 3;
 	static final double VILLAGE_RANGE = 60.0;
@@ -84,8 +86,14 @@ public final class Settlers {
 		}
 		Spot spot = spots.get(random.nextInt(spots.size()));
 		Heritage.Kind kind = kindFor(server, spot.faction(), random);
-		float odds = odds(server, spot.faction(), kind, random);
-		if (odds <= 0.0F || random.nextFloat() >= odds || crowded(level, spot.center())) {
+		float odds = odds(server, spot.faction(), spot.center(), kind, random);
+		if (odds <= 0.0F || random.nextFloat() >= odds || !level.isLoaded(spot.center()) || crowded(level, spot.center())) {
+			return;
+		}
+		// ((0.7.480) never load or make chunks to look for ground: the whole search square must be in already)
+		int seek = ShutIn.SEEK;
+		BlockPos c = spot.center();
+		if (!level.hasChunksAt(c.getX() - seek, c.getZ() - seek, c.getX() + seek, c.getZ() + seek)) {
 			return;
 		}
 		BlockPos at = ShutIn.openGround(level, spot.center());
@@ -121,10 +129,11 @@ public final class Settlers {
 
 	/**
 	 * The odds {@code f}'s village (null: an MCA village under no banner, a human one) takes in a settler of blood {@code kind}:
-	 * by how much its own people mind that blood ({@link Peoples#distaste}), a human village's only a share of that, and
+	 * by how much its own people mind that blood ({@link Peoples#distaste}), a human village's only a share of that (and (0.7.480) only when
+	 * relations allow: an edict of tolerance, or {@link #atPeace}), and
 	 * none at all a purist's.
 	 */
-	static float odds(MinecraftServer server, @Nullable Faction f, Heritage.Kind kind, RandomSource random) {
+	static float odds(MinecraftServer server, @Nullable Faction f, BlockPos center, Heritage.Kind kind, RandomSource random) {
 		if (f != null && Purists.is(f)) {
 			return 0.0F;
 		}
@@ -137,7 +146,31 @@ public final class Settlers {
 			return WELCOME[Math.min(3, Peoples.distaste(blood, kind))];
 		}
 		float edict = f == null ? 0.0F : Reforms.tolerance(server, Emigrants.ruler(server, f));
+		if (edict <= 0.0F && !atPeace(server, f, center)) {
+			// ((0.7.480) a human village takes them only when relations allow: an edict of tolerance, or no tribe at war with it near)
+			return 0.0F;
+		}
 		return WELCOME[Math.min(3, Peoples.distaste((Heritage.Kind)null, kind))] * Math.min(1.0F, HUMAN_SHARE * (1.0F + edict));
+	}
+
+	/**
+	 * (0.7.480) Village {@code f} about {@code center} (null: an MCA village under no banner) is at peace with the tribes: no raid
+	 * on it now, and no standing goblin or orc camp at war with it within {@link #HOSTILE_CAMP_RANGE}.
+	 */
+	private static boolean atPeace(MinecraftServer server, @Nullable Faction f, BlockPos center) {
+		if (f != null && Raids.raided(f.id())) {
+			return false;
+		}
+		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
+			if (camp.fallen() || Tribes.of(server, camp.id()) == null || f != null && !Relations.atWar(camp, f)) {
+				continue;
+			}
+			double dx = camp.seat().getX() - center.getX(), dz = camp.seat().getZ() - center.getZ();
+			if (dx * dx + dz * dz <= HOSTILE_CAMP_RANGE * HOSTILE_CAMP_RANGE) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** The village about {@code center} already holds all it will of them. */

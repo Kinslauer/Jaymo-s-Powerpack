@@ -61,6 +61,8 @@ public final class Peoples {
 	static final int BRAWL_FROM = 2;
 	/** Homes: the distaste at which neither will sleep under the other's roof, how often it's checked (ticks), how long a greenskin waits to look again. */
 	static final int APART_FROM = 3, APART_EVERY = 20 * 30, APART_REST = 20 * 60 * 5;
+	/** (0.7.480) Two beds this near (same dimension) are one house: MCA's home is each villager's own bed, never shared. */
+	static final double SAME_HOUSE = 7.0;
 	// ================================================================================================================
 
 	/** The peoples the table speaks of; {@code OTHER} is any of the rarer bloods, {@code HUMAN} the common folk. */
@@ -261,7 +263,7 @@ public final class Peoples {
 
 	// ---- homes ----------------------------------------------------------------------------------------------------
 
-	/** Greenskins near {@code p} who share a bed with someone they despise (or are despised by) give it up and look for another. */
+	/** Greenskins near {@code p} who share a house with someone they despise (or are despised by) give it up and look for another. */
 	private static void apart(ServerLevel level, ServerPlayer p, long now) {
 		List<Villager> near = level.getEntitiesOfClass(Villager.class, p.getBoundingBox().inflate(GLARE_HEARD * 2),
 			x -> x.isAlive() && McaCompat.isMca(x) && McaCompat.home(x).isPresent());
@@ -271,7 +273,8 @@ public final class Peoples {
 				continue;
 			}
 			for (Villager h : near) {
-				if (h == g || !McaCompat.home(h).equals(McaCompat.home(g)) || McaCompat.kin(g, h) != McaCompat.STRANGERS) {
+				// ((0.7.480) by house, not by bed: each bed holds one, so beds a few steps apart are one roof)
+				if (h == g || !sameHouse(McaCompat.home(g), McaCompat.home(h)) || McaCompat.kin(g, h) != McaCompat.STRANGERS) {
 					continue;
 				}
 				Heritage.Kind theirs = VillagerHeritage.of(h);
@@ -282,5 +285,11 @@ public final class Peoples {
 				}
 			}
 		}
+	}
+
+	/** (0.7.480) Beds {@code a} and {@code b} lie under one roof: the same dimension, within {@link #SAME_HOUSE}. */
+	private static boolean sameHouse(java.util.Optional<net.minecraft.core.GlobalPos> a, java.util.Optional<net.minecraft.core.GlobalPos> b) {
+		return a.isPresent() && b.isPresent() && a.get().dimension().equals(b.get().dimension())
+			&& a.get().pos().closerThan(b.get().pos(), SAME_HOUSE);
 	}
 }

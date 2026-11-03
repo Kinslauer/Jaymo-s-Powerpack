@@ -188,7 +188,10 @@ public final class Prejudice {
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
 		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
 		if (Peoples.greenskin(mine, theirs)) {
-			// ((0.7.480) a goblin or an orc on either side: the distaste between peoples, Peoples)
+			// ((0.7.480) a goblin or an orc on either side: the distaste between peoples, Peoples; none in a haven that lives alongside the tribes)
+			if (!mine.brood && who.level() instanceof ServerLevel hl && Havens.greenskin(hl.getServer(), Havens.home(who))) {
+				return 0.0F;
+			}
 			float m = Peoples.minds(who, mine, theirs, mine.brood ? 1.0F : edict);
 			return purist && !mine.brood ? m * PURIST_HARSH : m;
 		}
