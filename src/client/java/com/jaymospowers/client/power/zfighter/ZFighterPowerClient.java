@@ -79,6 +79,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
+		ZFighterHandsPose.init();
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
 		ZFighterFakeMoonSky.init();
@@ -231,6 +232,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterFlightPose.applyModel(model, state);
 		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
+		ZFighterHandsPose.applyModel(model, state);
 		ZFighterFiringPose.applyModel(model, state);
 		ZFighterDancePose.applyModel(model, state);
 		ZFighterComboPose.applyModel(model, state);
@@ -241,6 +243,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		com.jaymospowers.client.power.ember.EmberKindleClient.applyModel(model, state);
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.applyModel(model, state);
 		ZFighterStretchPose.applyModel(model, state);
+		// (0.19.60) last: where the hands ended up, for the ki drawn in them
+		ZFighterHandsPose.capture(model, state);
 	}
 
 	@Override
