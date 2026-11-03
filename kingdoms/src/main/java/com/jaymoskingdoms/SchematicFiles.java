@@ -76,7 +76,30 @@ public final class SchematicFiles {
 				template.putString("author", author);
 			}
 		}
+		normalise(template.getListOrEmpty("palette"));
+		ListTag palettes = template.getListOrEmpty("palettes");
+		for (int i = 0; i < palettes.size(); i++) {
+			normalise(palettes.getListOrEmpty(i));
+		}
 		return template;
+	}
+
+	/**
+	 * 26.3 names a palette entry's block {@code id} and its {@code properties}; the schematic formats (and tools that
+	 * write structure files themselves, even marked for this version) still use {@code Name} and {@code Properties}.
+	 */
+	private static void normalise(ListTag palette) {
+		for (int i = 0; i < palette.size(); i++) {
+			CompoundTag e = palette.getCompoundOrEmpty(i);
+			if (!e.contains("id") && e.contains("Name")) {
+				e.putString("id", e.getStringOr("Name", "minecraft:air"));
+				e.remove("Name");
+				e.getCompound("Properties").ifPresent(props -> {
+					e.put("properties", props);
+					e.remove("Properties");
+				});
+			}
+		}
 	}
 
 	// ---- Sponge (.schem) --------------------------------------------------------------------------------------------
@@ -237,7 +260,7 @@ public final class SchematicFiles {
 		private int w, h, l;
 
 		void add(int x, int y, int z, CompoundTag state) {
-			String name = state.getStringOr("Name", "minecraft:air");
+			String name = state.getStringOr("Name", state.getStringOr("id", "minecraft:air"));
 			if (name.equals("minecraft:air") || name.equals("minecraft:cave_air") || name.equals("minecraft:void_air")) {
 				return;
 			}

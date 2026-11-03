@@ -70,7 +70,8 @@ import org.jspecify.annotations.Nullable;
  * holding it. Use it on the ground to lay the building out there (its lowest north-west corner on the block in front of
  * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.</li>
  * <li>A <b>mason's table</b> takes a laid-out plan (use it on the table) and builds it, bottom up, a block at a time,
- * from the chests, barrels and the like touching it: the very block (planks are planks, stairs are stairs; the second
+ * from the chests, barrels and the like touching it: the very block (planks are planks, stairs are stairs, though
+ * dirt does for grass and paths; the second
  * half of a door or bed comes with the first). What's already there is left be: a block in the way is skipped, a
  * matching one only turned to match. Nothing comes with the blocks: chests empty, signs blank, no water or fire.</li>
  * <li>Use the table empty-handed to hear how far it is and what it waits for (and, once finished, to try the skipped
@@ -593,7 +594,7 @@ public final class MasonTable {
 			}
 		}
 
-		/** Takes one {@code item} from a container touching the table; false if none has it. */
+		/** Takes one {@code item} (or what stands in for it) from a container touching the table; false if none has it. */
 		private boolean take(ServerLevel level, Item item) {
 			for (Direction d : Direction.values()) {
 				Container c = HopperBlockEntity.getContainerAt(level, this.worldPosition.relative(d));
@@ -601,7 +602,8 @@ public final class MasonTable {
 					continue;
 				}
 				for (int i = 0; i < c.getContainerSize(); i++) {
-					if (c.getItem(i).is(item)) {
+					ItemStack in = c.getItem(i);
+					if (in.is(item) || SOIL.contains(item) && in.is(Items.DIRT)) {
 						c.removeItem(i, 1);
 						c.setChanged();
 						return true;
@@ -645,6 +647,9 @@ public final class MasonTable {
 			}
 		}
 	}
+
+	/** Ground a block of dirt does for (it greens, or is trodden, once laid): no silk touch needed. */
+	static final java.util.Set<Item> SOIL = java.util.Set.of(Items.GRASS_BLOCK, Items.DIRT_PATH, Items.FARMLAND, Items.PODZOL, Items.MYCELIUM);
 
 	/** The item a block is laid from, or null for one laid from nothing (air, water, fire, a portal). */
 	static @Nullable Item cost(BlockState state) {

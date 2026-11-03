@@ -7,6 +7,8 @@ b3fcf50a255ab19b314c45f8b9a1b9faa3773140 kingdoms/src/main/resources/assets/jaym
 d2e31ca408efca0fefdda9771c0338f5f391891e kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/goblin_kings_crown.png
 bc668b22dcd134fe49d140017e57457930fc315b kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/grate.png
 e7739e5f8751f88e365a4f1e7be5f264a8d7310c kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/infirmary_cot.png
+c172045025838e13ae12507ab6803d5c0baabd6e kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/mason_table_side.png
+b9496b5346820c2279521ac59baea101022c02b7 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/mason_table_top.png
 3eb42c3289233ba38d9669a46d1e6afc89fbcb42 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/ogre_kings_crown.png
 4a8de7528252bde983d5c138af118273ac6ea5c1 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/oil_lamp.png
 5f84dc8348a16ceba3149de5d3fc69def47fb28a kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/oil_lamp_lit.png
@@ -792,6 +794,7 @@ f1fea89f57c039b07f381295ede5e8d3453ff098 kingdoms/src/main/resources/assets/jaym
 e07d2ab3aecf82bbefd1791c7ab12b5e29f7b414 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/bounty_notice.png
 a903ee346eb45798178f2c1e860d66d4c220ba6e kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/bridle.png
 e15f65120acbe40ec96f101410189ab8e185c6c2 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/brig_kit.png
+ca28e131d5a8e68734ac8f1a0a47dc5d1a99c0f2 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/building_plan.png
 b0fc510a2e752cec559ac25d154d31f3c4364d9a kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/captains_tusk.png
 e2e9102cfd0814eff53d254fb27269b8be30e4ae kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/chain_barding.png
 32d8bb6b9dc9b226b22e3603674e98e041f09e1f kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/circlet.png

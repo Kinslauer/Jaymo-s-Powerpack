@@ -8267,11 +8267,13 @@ All item, block, entity and clothing textures are graded toward Excalibur's dark
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
 
-## 0.7.484: building from schematics (pack 0.19.66)
+## 0.7.484: building from schematics
 - **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
   v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
   brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on
   Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
+  26.3 names a palette entry `id`/`properties`; the formats (and tools writing .nbt themselves) still use
+  `Name`/`Properties`, which 26.3 reads as air, so entries are renamed after fixing.
 - **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): `/schematics list | folder |
   upload <file> [name]` reads the game folder's `schematics/` (Litematica's own folder) and sends the file in 30 KB
   pieces (at most about 1.9 MB). The server reads it as NBT within a 64 MB quota and keeps it as the uploader's design
@@ -8284,7 +8286,8 @@ redrawing a texture (`docs/Excalibur-Style.md` in the pack).
   it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
   in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
   Use the table to see progress and what's still needed; sneak-use takes the plan back. Laid blocks count as the
-  plan owner's (`Placed`).
+  plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
+  about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
 - **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
   can `/kingdom design submit <name>` (or `withdraw`). Its builders put it up on open ground of their choosing before
   their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
