@@ -7,7 +7,7 @@ them, is graded into the pack at the same assets path (vanilla_style's versions 
 out (SKIP_WORDS, SEE_THROUGH), so the mods' own versions show. The pack is off by default (Andy, 2026-11-03).
 
     python -I tools/excalibur_style/grade.py            rebuild the pack's textures (run from the repo root, ~1 min)
-    python -I tools/excalibur_style/grade.py --check    list sources whose graded copy is missing or stale
+    python -I tools/excalibur_style/grade.py --check    list sources with no graded copy yet
     python -I tools/excalibur_style/grade.py --one <in.png> <out.png>   grade one file (previews)
 """
 import colorsys
@@ -117,10 +117,9 @@ def sources():
 def main(check):
     wanted_targets = sources()
     if check:
-        stale = [src for dst, src in wanted_targets.items()
-                 if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src)]
-        print('\n'.join(stale))
-        print(len(stale), 'missing or stale')
+        missing = [src for dst, src in wanted_targets.items() if not os.path.exists(dst)]
+        print('\n'.join(missing))
+        print(len(missing), 'without a graded copy (a rebuild also refreshes redrawn ones)')
         return
     for dst, src in wanted_targets.items():
         os.makedirs(os.path.dirname(dst), exist_ok=True)
