@@ -50,6 +50,8 @@ final class Raids {
 	static final float RAID_CHANCE = 0.12F;
 	/** (0.7.123) The raid chance's factor in summer and in winter (Kitchen's seasons). */
 	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
+	/** (0.7.480) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
+	static final float HUNGRY_RAIDS = 3.0F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
 	static final long TARGET_COOLDOWN_TICKS = 24000L;
@@ -190,13 +192,15 @@ final class Raids {
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
-			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < COOLDOWN_TICKS
-				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin()) {
-				// (goblin villages don't raid: they're somewhere to go)
+			// ((0.7.480) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
+			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
+			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < (hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry) {
+				// (goblin villages don't raid: they're somewhere to go, unless they're starving)
 				continue;
 			}
 			Faction target = target(server, level, camp);
-			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level)) {
+			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level) * (hungry ? HUNGRY_RAIDS : 1.0F)) {
 				start(level, camp, target);
 			}
 		}
@@ -263,8 +267,8 @@ final class Raids {
 		// (0.7.443) a tribe that favours one of the raided realm's own may send them a war band
 		TribePacts.called(level, target, camp);
 		Camps.noteRaid(server, camp.id(), now);
-		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id());
-		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : pirates ? PirateCoves.fighters(camp)
+		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id()), goblins = Camps.goblin(server, camp.id());
+		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : goblins ? GoblinVillages.goblins(camp) : pirates ? PirateCoves.fighters(camp)
 			: camp.holdings().count(Folk.BARBARIAN);
 		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
@@ -285,6 +289,7 @@ final class Raids {
 			// (0.5.47) an orc war band: grunts, every third one a ranger
 			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
 					: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
+				: goblins ? i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Goblins.SLINGER : Goblins.GOBLIN
 				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);

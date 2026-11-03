@@ -116,8 +116,8 @@ public final class Captains {
 	static final int FEAR_TICKS = 100, FEAR_AGAIN = 400;
 	/** Bleeding frightens one who fears blood only below this share of his health. */
 	static final float BLOOD_AT = 0.75F;
-	/** The pedlar's rumour of a captain (emeralds). */
-	static final int RUMOUR_PRICE = 2;
+	/** The pedlar's rumour of a captain ((0.7.480) in bent worth). */
+	static final int RUMOUR_PRICE = 4;
 	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
 	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
 	static final double CHEER_RANGE = 20.0;
@@ -1743,7 +1743,7 @@ public final class Captains {
 			told(c, t, Dialects.ofTribe(tribe)));
 	}
 
-	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} emeralds. */
+	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} bent worth. */
 	public static boolean pedlarHears(LivingEntity villager) {
 		return Pedlars.pedlar(villager) && Tribes.of(villager) != null;
 	}
@@ -1756,25 +1756,18 @@ public final class Captains {
 		if (e == null) {
 			return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
 		}
-		var inv = player.getInventory();
-		int have = 0;
-		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
-			if (inv.getItem(slot).is(Items.EMERALD)) {
-				have += inv.getItem(slot).getCount();
+		// ((0.7.480) paid in bent worth, into his tribe's seat's hoard)
+		if (BentIngots.held(player) < RUMOUR_PRICE) {
+			if (BentIngots.plainHeld(player) > 0) {
+				BentIngots.refuse((net.minecraft.server.level.ServerLevel)player.level(), pedlar, player);
 			}
-		}
-		if (have < RUMOUR_PRICE) {
 			return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.price." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
 				Component.literal(Integer.toString(RUMOUR_PRICE)));
 		}
-		int owed = RUMOUR_PRICE;
-		for (int slot = 0; slot < inv.getContainerSize() && owed > 0; slot++) {
-			ItemStack s = inv.getItem(slot);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(owed, s.getCount());
-				s.shrink(take);
-				owed -= take;
-			}
+		int paid = BentIngots.take(player, RUMOUR_PRICE);
+		Faction keeper = HordeEconomy.treasury(player.level().getServer(), tribe);
+		if (keeper != null) {
+			HordeEconomy.deposit(player.level().getServer(), keeper.id(), paid);
 		}
 		learn(player, e.getKey().id(), e.getValue());
 		return Dialects.trBrood(Dialects.GOBLIN, "dialogue.chat.jaymoskingdoms.captain.pedlar.told." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),

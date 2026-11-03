@@ -71,8 +71,9 @@ final class Hordes {
 	static final int[] TIER_DAYS = {0, 10, 25, 50};
 	/** Its land, by tier: chunks out each way from the fire. A tier 4 realm claims as a kingdom does. */
 	static final int[] CLAIM_RADIUS = {Camps.CLAIM_RADIUS, 3, 4, KingdomEvents.CLAIM_RADIUS};
-	/** What it takes in each day, in percent of a war camp's (more hands; Patch 3's jobs replace it). */
-	static final int[] YIELD_PERCENT = {100, 150, 200, 250};
+	/** (0.7.480) What a camp's hoard pays, in bent worth ({@link BentIngots}): each arc of a new wall, each band building, and each tier (to reach tier 2, 3, 4). */
+	static final int ARC_HOARD = 2, BUILD_HOARD = 3;
+	static final int[] TIER_HOARD = {0, 30, 80, 160};
 	/** A new palisade goes up in this many arcs, one a day (ogres in the camp: this many a day), each this many logs. */
 	static final int ARCS = 8, OGRE_ARCS = 2, ARC_LOGS = 6;
 	/** A band building's cost: logs, and hides (orcs) or mud bricks (goblins). */
@@ -97,7 +98,7 @@ final class Hordes {
 	/**
 	 * A camp's tier and its progress in it: {@code since} (its {@link Camps.CampData#grown} days when it reached the tier),
 	 * the arcs of the tier's palisade raised, the band buildings raised (or skipped), whether the old ring has its gates and
-	 * roads, whether the great hall stands (tier 4). {@code hoard}: Patch 3's chief's hoard, kept but not used yet.
+	 * roads, whether the great hall stands (tier 4). {@code hoard}: (0.7.480) the chief's hoard in bent worth ({@link HordeEconomy}), which pays for walls, band buildings and tiers.
 	 */
 	record Horde(int tier, int since, int arcs, int built, boolean opened, boolean hall, long hoard) {
 		static final Horde START = new Horde(1, 0, ARCS, 0, true, false, 0L);
@@ -121,6 +122,10 @@ final class Hordes {
 
 		Horde withOpened() {
 			return new Horde(this.tier, this.since, this.arcs, this.built, true, this.hall, this.hoard);
+		}
+
+		Horde withHoard(long hoard) {
+			return new Horde(this.tier, this.since, this.arcs, this.built, this.opened, this.hall, Math.max(0L, hoard));
 		}
 
 		Horde withHall() {
@@ -181,9 +186,9 @@ final class Hordes {
 		return (orc ? ORC_CAP : GOBLIN_CAP)[tier(server, id) - 1];
 	}
 
-	/** {@code amount} of a war camp's daily takings, at its tier. */
-	static int yield(MinecraftServer server, int id, int amount) {
-		return amount * YIELD_PERCENT[tier(server, id) - 1] / 100;
+	/** (0.7.480) Camp {@code id}'s hoard set to {@code worth} (bent worth). */
+	static void setHoard(MinecraftServer server, int id, long worth) {
+		put(server, id, horde(server, id).withHoard(worth));
 	}
 
 	/** How far its new folk wander from its fire ({@code base} at tier 1). */
@@ -249,7 +254,9 @@ final class Hordes {
 			return;
 		}
 		Horde h = horde(server, id);
-		if (h.tier() < WALL_RADIUS.length && missing(level, camp, data, h).isEmpty()) {
+		// ((0.7.480) a hungry camp climbs no tier, and the climb is paid for out of its hoard)
+		if (h.tier() < WALL_RADIUS.length && !HordeEconomy.hungry(server, id) && missing(level, camp, data, h).isEmpty()
+			&& HordeEconomy.spend(server, id, TIER_HOARD[h.tier()])) {
 			promote(level, camp, data, true);
 		}
 		Faction now = Factions.get(server, id);
@@ -288,9 +295,17 @@ final class Hordes {
 		if (folk < cap) {
 			out.add("folk " + folk + "/" + cap);
 		}
-		long age = (level.getGameTime() - data.founded()) / Camps.DAY_TICKS;
+		// ((0.7.480) a camp in plenty comes of age sooner)
+		long age = (level.getGameTime() - data.founded()) / Camps.DAY_TICKS + HordeEconomy.age(server, camp.id(), 0);
 		if (age < TIER_DAYS[t]) {
 			out.add("age " + age + "/" + TIER_DAYS[t] + " days");
+		}
+		// ((0.7.480) fed, and able to pay for the climb)
+		if (HordeEconomy.hungry(server, camp.id())) {
+			out.add("food (the camp is hungry)");
+		}
+		if (HordeEconomy.hoard(server, camp.id()) < TIER_HOARD[t]) {
+			out.add("hoard " + HordeEconomy.hoard(server, camp.id()) + "/" + TIER_HOARD[t] + " bent");
 		}
 		if (t + 1 == WALL_RADIUS.length) {
 			String tribe = Tribes.of(server, camp.id());
@@ -395,6 +410,10 @@ final class Hordes {
 		MinecraftServer server = level.getServer();
 		Horde h = horde(server, camp.id());
 		if (h.tier() < 2 || !all && !Storage.loaded(level, camp)) {
+			return false;
+		}
+		if (!all && HordeEconomy.hungry(server, camp.id())) {
+			// ((0.7.480) a hungry camp raises nothing)
 			return false;
 		}
 		boolean orc = data.orc();
@@ -543,10 +562,12 @@ final class Hordes {
 		}
 		Item log = (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).asItem();
 		if (!all) {
-			if (!Storage.has(level, camp, Map.of(log, ARC_LOGS))) {
+			// ((0.7.480) logs from the store, bent ingots from the chief's hoard)
+			if (!Storage.has(level, camp, Map.of(log, ARC_LOGS)) || HordeEconomy.hoard(level.getServer(), camp.id()) < ARC_HOARD) {
 				return false;
 			}
 			Storage.take(level, camp, log, ARC_LOGS);
+			HordeEconomy.spend(level.getServer(), camp.id(), ARC_HOARD);
 		}
 		int wallHigh = orc ? OrcBuildings.WALL_HIGH : GoblinBuildings.WALL_HIGH, walk = orc ? OrcBuildings.WALK_HIGH : GoblinBuildings.WALK_HIGH;
 		int gateHalf = orc ? OrcBuildings.GATE_HALF : GoblinBuildings.GATE_HALF;
@@ -1043,12 +1064,14 @@ final class Hordes {
 			Item log = (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).asItem();
 			Item other = orc ? Items.WOOL.pick(DyeColor.BLACK) : Items.MUD_BRICKS;
 			Map<Item, Integer> cost = Map.of(log, BUILD_LOGS, other, orc ? BUILD_HIDES : BUILD_MUD);
-			if (!Storage.has(level, camp, cost)) {
+			if (!Storage.has(level, camp, cost) || HordeEconomy.hoard(level.getServer(), camp.id()) < BUILD_HOARD) {
 				return Raise.WAIT;
 			}
 			for (var e : cost.entrySet()) {
 				Storage.take(level, camp, e.getKey(), e.getValue());
 			}
+			// ((0.7.480) and the work paid for out of the hoard)
+			HordeEconomy.spend(level.getServer(), camp.id(), BUILD_HOARD);
 		}
 		// the ground levelled: raised with dirt, cut down, the air above cleared
 		for (int i = 0; i < columns.size(); i++) {
@@ -1193,6 +1216,7 @@ final class Hordes {
 			List<String> missing = missing(level, camp, data, h);
 			out.append("\nnext tier: ").append(missing.isEmpty() ? "ready (it moves up at its next day)" : "needs " + String.join(", ", missing));
 		}
+		out.append('\n').append(HordeEconomy.describe(level, camp, data));
 		if (camp.overlord() >= 0) {
 			Faction lord = Factions.get(server, camp.overlord());
 			out.append("\nvassal of ").append(lord == null ? "?" : lord.name());
