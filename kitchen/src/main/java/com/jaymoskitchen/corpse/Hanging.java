@@ -53,6 +53,8 @@ public final class Hanging {
 	public static final double DRAG_TO_HOOK = 3.0;
 	/** Bones left over after the last cut (at least one, up to this many more). */
 	static final int BONES_MORE = 2;
+	/** Skinned on the hook: this many more of each skin (a clean, whole one), and leather scraps (at least one, up to this many more). */
+	static final int PRIME_EXTRA = 1, SCRAPS_MORE = 1;
 	/** Animal fat from anything bigger than a chicken after the last cut (at least one, up to this many more). */
 	static final int FAT_MORE = 1;
 	/** Kitchen's own drop, without Jaymo's Powers' blood. */
@@ -325,9 +327,16 @@ public final class Hanging {
 	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
+		boolean prime = corpse.hook() != null;
 		for (ItemStack skin : skins) {
+			if (prime && skin.getMaxStackSize() > 1) {
+				// hung and skinned with a knife, it comes off whole: a prime skin, one more than a rough job gets
+				skin.grow(PRIME_EXTRA);
+			}
 			corpse.spawnAtLocation(level, skin, 0.3F);
 		}
+		// and the trimmings, for mending leather
+		corpse.spawnAtLocation(level, new ItemStack(Butchery.LEATHER_SCRAPS, 1 + level.getRandom().nextInt(SCRAPS_MORE + 1)), 0.3F);
 		corpse.setButcherStage(SKINNED);
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.8F, 0.8F);

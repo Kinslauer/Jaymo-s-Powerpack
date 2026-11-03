@@ -50,6 +50,13 @@ public final class Butchery {
 	public static MeatHookBlock MEAT_HOOK;
 	public static BloodGrateBlock BLOOD_GRATE;
 	public static Item BLOOD_BOTTLE;
+	/**
+	 * (0.5.51, Andy: "Yes all of this") What else comes of it: blood meal (a fertiliser, from bottled blood), blood
+	 * sausage (bottled blood, raw meat and grain, cooked), leather scraps (repair leather), the three leather finishes
+	 * (supple, harness, hardened: each for its own crafts), and a hide rug.
+	 */
+	public static Item BLOOD_MEAL, RAW_BLOOD_SAUSAGE, BLOOD_SAUSAGE, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER;
+	public static Block HIDE_RUG;
 
 	/**
 	 * Someone drank a bottle of blood: each hook is asked in turn, and the first that says it's theirs (a vampire's
@@ -72,11 +79,42 @@ public final class Butchery {
 		ResourceKey<Item> bottleKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("blood_bottle"));
 		BLOOD_BOTTLE = Registry.register(BuiltInRegistries.ITEM, bottleKey, new BloodBottleItem(new Item.Properties()
 			.stacksTo(16).craftRemainder(Items.GLASS_BOTTLE).usingConvertsTo(Items.GLASS_BOTTLE).setId(bottleKey)));
+		BLOOD_MEAL = item("blood_meal", net.minecraft.world.item.BoneMealItem::new, new Item.Properties());
+		RAW_BLOOD_SAUSAGE = item("raw_blood_sausage", Item::new, new Item.Properties().food(food(2, 0.2F)));
+		BLOOD_SAUSAGE = item("blood_sausage", Item::new, new Item.Properties().food(food(7, 0.8F)));
+		LEATHER_SCRAPS = item("leather_scraps", Item::new, new Item.Properties());
+		SUPPLE_LEATHER = item("supple_leather", Item::new, new Item.Properties());
+		HARNESS_LEATHER = item("harness_leather", Item::new, new Item.Properties());
+		HARDENED_LEATHER = item("hardened_leather", Item::new, new Item.Properties());
+		ResourceKey<Block> rugKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("hide_rug"));
+		HIDE_RUG = Registry.register(BuiltInRegistries.BLOCK, rugKey, new net.minecraft.world.level.block.CarpetBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_BROWN).strength(0.1F).sound(SoundType.WOOL).ignitedByLava().setId(rugKey)));
+		blockItem("hide_rug", HIDE_RUG);
+		Spoilage.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(new ItemStack(MEAT_HOOK));
 			output.accept(new ItemStack(BLOOD_GRATE));
+			output.accept(new ItemStack(HIDE_RUG));
 		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(new ItemStack(BLOOD_BOTTLE)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
+			output.accept(new ItemStack(BLOOD_BOTTLE));
+			output.accept(new ItemStack(RAW_BLOOD_SAUSAGE));
+			output.accept(new ItemStack(BLOOD_SAUSAGE));
+		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			for (Item item : List.of(BLOOD_MEAL, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER)) {
+				output.accept(new ItemStack(item));
+			}
+		});
+	}
+
+	private static Item item(String id, java.util.function.Function<Item.Properties, Item> factory, Item.Properties properties) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
+		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
+	}
+
+	private static net.minecraft.world.food.FoodProperties food(int nutrition, float saturation) {
+		return new net.minecraft.world.food.FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build();
 	}
 
 	private static void blockItem(String id, Block block) {

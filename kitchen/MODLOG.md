@@ -1332,5 +1332,20 @@ Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery
 - **Too big to lift** (cow and up): bled where it lies with a cleaver (no sneak), then cut up there as before, with the
   table's extras added.
 - Hooks for the other mods: `Hanging.setOnDrip/setOnSpill/setOnHead`, `Butchery.addOnDrink`, `Butchery.drawGrates`.
+- **Andy: "Yes all of this"** (the follow-up ideas):
+  - **Unbled meat spoils** (`Spoilage`): raw meat cut from a carcass that was never bled (table, ground, cut up where it
+    lay) is marked "Unbled" with the day; after `SPOIL_DAYS` (3) raw in a player's pockets it turns to rotten flesh. Bled on
+    a hook, or cut by a village butcher, it keeps. Fish aren't marked.
+  - **Prime skins**: skinning on the hook gives `PRIME_EXTRA` (1) more of each skin and 1-2 **Leather Scraps**.
+  - **Village butchers use hooks** (`Butchers`): a butcher with a meat hook near the back of the shop hangs the body,
+    bleeds it (`HOOK_CHOP_TICKS`) and works it there instead of on the floor.
+  - **Blood Sausage**: blood bottle + pork/beef/mutton + wheat + animal fat = 3 raw (2 hunger), cooked in a furnace,
+    smoker or campfire (7 hunger). Bottles come back.
+  - **Blood Meal**: blood bottle + bone meal = 3, works as bone meal.
+  - **Leather finishes**: tanned leather + animal fat = **Supple Leather** (book from 3 paper makes 2); + resin =
+    **Harness Leather** (saddle); smelted = **Hardened Leather** (leather horse armour). Leather + a work blade = 4
+    **Leather Scraps**; 4 scraps + resin = leather. Scraps, supple and hardened leather repair leather armour.
+  - **Hide Rug**: 2 hides make 2 rug carpets.
+  - Not done: skeleton displays (need a model per animal) and hide traits (need their own armour items); later if wanted.
 - Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
   `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.

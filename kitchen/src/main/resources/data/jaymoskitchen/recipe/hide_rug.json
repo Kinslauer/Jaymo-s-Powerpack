@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "H": "jaymoskitchen:hide"
+  },
+  "pattern": [
+    "HH"
+  ],
+  "result": {
+    "id": "jaymoskitchen:hide_rug",
+    "count": 2
+  }
+}

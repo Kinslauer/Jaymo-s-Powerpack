@@ -171,6 +171,20 @@ public class SeveredPart extends Entity {
 		return this.entityData.get(LOOK);
 	}
 
+	/**
+	 * (0.19.62) Andy: "wall trophy heads". A carried head set down while looking at a wall goes up on it (see
+	 * {@link Carry}): nailed there facing out, at {@code at} on the face, and kept for good like a hook's trophy head.
+	 */
+	void mountOn(Vec3 at, float yaw) {
+		this.setPos(at.x, at.y - MIDDLE, at.z);
+		this.setDeltaMovement(Vec3.ZERO);
+		this.setYRot(yaw);
+		this.entityData.set(PINNED, true);
+		this.setNoGravity(true);
+		this.trophy = true;
+		this.age = 200;
+	}
+
 	/** (0.15.148) Whether it's nailed to a wall. */
 	public boolean pinned() {
 		return this.entityData.get(PINNED);

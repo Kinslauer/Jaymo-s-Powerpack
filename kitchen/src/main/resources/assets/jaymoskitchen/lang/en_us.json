@@ -964,5 +964,14 @@
 	"message.jaymoskitchen.hook.skinned": "Skinned. Three cleaver cuts left",
 	"message.jaymoskitchen.hook.need_cleaver_cut": "The cuts take a cleaver",
 	"message.jaymoskitchen.hook.cut": "Cut %s of %s",
-	"message.jaymoskitchen.hook.done": "Butchered down to the bones"
+	"message.jaymoskitchen.hook.done": "Butchered down to the bones",
+	"item.jaymoskitchen.blood_meal": "Blood Meal",
+	"item.jaymoskitchen.raw_blood_sausage": "Raw Blood Sausage",
+	"item.jaymoskitchen.blood_sausage": "Blood Sausage",
+	"item.jaymoskitchen.leather_scraps": "Leather Scraps",
+	"item.jaymoskitchen.supple_leather": "Supple Leather",
+	"item.jaymoskitchen.harness_leather": "Harness Leather",
+	"item.jaymoskitchen.hardened_leather": "Hardened Leather",
+	"block.jaymoskitchen.hide_rug": "Hide Rug",
+	"item.jaymoskitchen.unbled": "Unbled: spoils in a few days"
 }

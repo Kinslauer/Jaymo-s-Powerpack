@@ -4962,3 +4962,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Kitchen 0.5.51's meat hook (`KitchenCompat.registerCorpseBlood`): a carcass bled on it drips its own blood
   (`BloodParticles.Spray`), what has no grate under it pools as stains (`HUNG_SPILL_STAIN`), and its head comes off as a
   `SeveredPart.dropTrophyHead` (a `trophy` part never despawns).
+  Wall trophies (Andy: "yes all of this"): set a carried head down (right-click) while looking at a wall within
+  `Carry.TROPHY_REACH` and it's nailed up there facing out (`SeveredPart.mountOn`), kept for good; pick it up to take it down.

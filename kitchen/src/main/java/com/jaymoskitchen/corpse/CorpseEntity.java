@@ -1822,6 +1822,10 @@ public class CorpseEntity extends Entity {
 			getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
+			if (butcherStage < Hanging.DRAINED) {
+				// (0.5.51) cut up unbled: spoils in a few days
+				com.jaymoskitchen.butchery.Spoilage.mark(piece, level.getOverworldClockTime() / 24000L);
+			}
 			spawnAtLocation(level, piece, 0.4F);
 		}
 		if (piecesLeft() > 0) {
@@ -1963,8 +1967,14 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return;
 		}
+		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
+		boolean unbled = butcherStage < Hanging.DRAINED;
+		long day = level.getOverworldClockTime() / 24000L;
 		if (onBlock) {
 			for (ItemStack extra : blockExtras()) {
+				if (unbled) {
+					com.jaymoskitchen.butchery.Spoilage.mark(extra, day);
+				}
 				spawnAtLocation(level, extra, 0.4F);
 			}
 		} else {
@@ -1979,6 +1989,9 @@ public class CorpseEntity extends Entity {
 				}
 			}
 			loot = rough;
+		}
+		if (unbled) {
+			com.jaymoskitchen.butchery.Spoilage.mark(loot, day);
 		}
 		dropLoot(level);
 		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
