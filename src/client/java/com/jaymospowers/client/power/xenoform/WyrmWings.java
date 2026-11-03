@@ -43,7 +43,12 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 	 * (sweep), its tip folded forward again (tip), like a bat's at rest: two sails leaning in over the spine, not meeting
 	 * (roll), the tips draped down the flanks, clear of the body (tip).
 	 */
-	static final float FOLD_SCALE = 0.55F, FOLD_ROLL = 1.25F, FOLD_SWEEP = 1.45F, FOLD_TIP = 1.6F;
+	static final float FOLD_SCALE = 0.55F, FOLD_ROLL = 1.25F, FOLD_SWEEP = 1.45F, FOLD_TIP = 0.9F;
+	/**
+	 * (0.19.67) Folded: the tips tilt out off the flank this much (radians), and a landing rolls the wings and a turn
+	 * swings them only this far, so the draped tips stay clear of the hind thighs and the torso's sides.
+	 */
+	static final float FOLD_TIP_TILT = 0.9F, FOLD_LAND_ROLL = 0.1F, FOLD_TURN_SWING = 0.08F;
 
 	private static WyrmWings instance;
 
@@ -134,8 +139,8 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 
 		// folded (on the ground): the wings breathe, shiver with each step and swing out behind a turn
 		float step = Mth.sin(state.walkAnimationPos * 0.6662F) * walk;
-		float foldRoll = FOLD_ROLL + m.breath() * 0.03F + walk * 0.1F + m.land() * 0.3F;
-		float foldSweep = FOLD_SWEEP + m.breath() * 0.02F + Mth.abs(step) * 0.05F - m.trail() * 0.15F;
+		float foldRoll = FOLD_ROLL + m.breath() * 0.03F + walk * 0.1F + m.land() * FOLD_LAND_ROLL;
+		float foldSweep = FOLD_SWEEP + m.breath() * 0.02F + Mth.abs(step) * 0.05F - m.trail() * FOLD_TURN_SWING;
 		float foldTip = FOLD_TIP + m.breath() * 0.04F - walk * 0.15F + step * 0.05F;
 
 		float size = SCALE * Mth.lerp(wrap, 1.0F, FOLD_SCALE);
@@ -150,8 +155,8 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 		// the tips: open, they flex behind the stroke (about the wing's length axis it's zRot); folded, they sweep
 		// forward again within the membrane's plane (yRot), (0.19.67) to the side away from the sail (-z), so the roll
 		// hangs them down the flanks rather than flat over the sails
-		this.rightTip.zRot = Mth.lerp(wrap, openTip, 0.0F);
-		this.leftTip.zRot = Mth.lerp(wrap, -openTip, 0.0F);
+		this.rightTip.zRot = Mth.lerp(wrap, openTip, FOLD_TIP_TILT);
+		this.leftTip.zRot = Mth.lerp(wrap, -openTip, -FOLD_TIP_TILT);
 		this.rightTip.yRot = Mth.lerp(wrap, 0.0F, -foldTip);
 		this.leftTip.yRot = Mth.lerp(wrap, 0.0F, foldTip);
 	}
