@@ -28,10 +28,13 @@ import net.minecraft.world.phys.EntityHitResult;
  * while you're sneaking with the crosshair on someone you could finish, nor while the finisher or execution plays.
  * <p>
  * (0.19.57) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays ... maybe we try a double
- * left click as the override?". The server's count ({@link Finishers.Charge}) is drawn as {@link Finishers#HOLD_BARS} bars
- * under the crosshair ({@link #bars}), each filling in turn; and two presses of attack within {@link #DOUBLE_CLICK_TICKS},
- * sneaking with the crosshair on the same one, ask for it at once ({@link Finishers.Rush}). The hands stay the hold's till
- * attack is let go after the bars ({@link #locked}), as {@code HeldInput} did for the old action-bar dots.
+ * left click as the override?", then "the execution should be activated by a double click and HOLD, no sneak, and the
+ * execution can be cancelled if you let go of the mouse early". The hold begins on the second of two presses of attack
+ * within {@link #DOUBLE_CLICK_TICKS} on the same helpless one ({@link #armed}), and lasts while that press is held; let go
+ * and it's off. The first press is a blow as ever (sneaking at them, it isn't: the old way, and Quiet Word's choke still
+ * wants sneak); the second is the hold's. The server's count ({@link Finishers.Charge}) is drawn as
+ * {@link Finishers#HOLD_BARS} bars under the crosshair ({@link #bars}), each filling in turn. The hands stay the hold's
+ * till attack is let go after the bars ({@link #locked}), as {@code HeldInput} did for the old action-bar dots.
  */
 public final class FinisherClient {
 	/** Who attack was last said to be held on (entity id), or -1. */
@@ -55,6 +58,8 @@ public final class FinisherClient {
 	/** (0.19.57) Attack's state last tick, when and on whom it was last pressed; whether the hands are the hold's till release. */
 	private static boolean attackWasDown, locked;
 	private static int pressedAt = Integer.MIN_VALUE / 2, pressedOn = -1;
+	/** (0.19.57) The one a double click's second press is held on (entity id), or -1: the hold is going. */
+	private static int armed = -1;
 
 	private FinisherClient() {
 	}
@@ -85,14 +90,32 @@ public final class FinisherClient {
 		boolean pressed = down && !attackWasDown;
 		attackWasDown = down;
 		locked = player != null && (charging() || choosing >= 0 || locked && down);
+		boolean usable = player != null && minecraft.gui.screen() == null && !player.isSpectator();
+		int aimed = usable ? helplessAimed(minecraft) : -1;
+		if (pressed && aimed >= 0) {
+			// (0.19.57) the double click: a second press on the same one, soon after the first, and held
+			if (aimed == pressedOn && ticks - pressedAt <= DOUBLE_CLICK_TICKS) {
+				armed = aimed;
+				pressedAt = Integer.MIN_VALUE / 2;
+				pressedOn = -1;
+			} else {
+				pressedAt = ticks;
+				pressedOn = aimed;
+			}
+		}
+		if (!down || !usable) {
+			// (let go early: it's off)
+			armed = -1;
+		}
 		int target = -1;
-		boolean held = player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null
-			&& !player.isSpectator();
-		if (held && choosing >= 0) {
+		if (armed >= 0 && choosing >= 0) {
 			// (0.18.97) turning to choose takes the crosshair off them: the hold stays on whom it was
 			target = choosing;
-		} else if (held && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
-			target = body.getId();
+		} else if (armed >= 0 && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity().getId() == armed) {
+			target = armed;
+		} else if (armed >= 0) {
+			// (looked away: off too)
+			armed = -1;
 		}
 		if (choosing >= 0 && (player == null || target != choosing)) {
 			// (let go: no choice)
@@ -107,17 +130,19 @@ public final class FinisherClient {
 				ClientPlayNetworking.send(new Finishers.Execute(target));
 			}
 		}
-		if (pressed && target >= 0 && choosing < 0) {
-			// (0.19.57) the double click: a second press on the same one, soon after the first
-			if (target == pressedOn && ticks - pressedAt <= DOUBLE_CLICK_TICKS) {
-				ClientPlayNetworking.send(new Finishers.Rush(target));
-				pressedAt = Integer.MIN_VALUE / 2;
-				pressedOn = -1;
-			} else {
-				pressedAt = ticks;
-				pressedOn = target;
-			}
-		}
+	}
+
+	/** (0.19.57) The entity id of the helpless one (or, with Quiet Word, the one to take from behind) under the crosshair, or -1. */
+	private static int helplessAimed(Minecraft minecraft) {
+		return minecraft.player != null && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
+			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body)) ? body.getId() : -1;
+	}
+
+	/** (0.19.57) Whether a press now, on the one under the crosshair, would be a double click's second. */
+	private static boolean secondClick(Minecraft minecraft) {
+		// (asked mid-tick, from the click: this tick's count isn't in yet)
+		int aimed = helplessAimed(minecraft);
+		return aimed >= 0 && aimed == pressedOn && ticks + 1 - pressedAt <= DOUBLE_CLICK_TICKS;
 	}
 
 	/** (0.19.57) Whether the server's count is still coming. */
@@ -173,19 +198,19 @@ public final class FinisherClient {
 	}
 
 	/**
-	 * Whether you're sneaking with the crosshair on someone helpless enough to execute: sneak + left-click held there is the
-	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
+	 * Whether held attack is the execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds)
+	 * stand aside: sneaking with the crosshair on someone helpless enough to execute, or (0.19.57) a double click's hold
+	 * on them going, or its second press just coming.
 	 */
 	public static boolean aimingAtHelpless(Minecraft minecraft) {
 		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning)
-		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
-			&& (Finishers.helpless(body) || Finishers.chokeable(minecraft.player, body));
+		return minecraft.player != null && (armed >= 0 || helplessAimed(minecraft) >= 0 && (minecraft.player.isShiftKeyDown() || secondClick(minecraft)));
 	}
 
 	/**
 	 * (0.17.97) Whether attack is the execution's just now, not a blow: a finisher or a symbiote execution playing, or you
-	 * sneaking with the crosshair on someone helpless and something in hand that finishes them (a torch or a loaf finishes
-	 * nobody, so it still swings: {@link Finishers#move}).
+	 * sneaking with the crosshair on someone helpless (0.19.57: or pressing a second time on them, or holding that press)
+	 * and something in hand that finishes them (a torch or a loaf finishes nobody, so it still swings: {@link Finishers#move}).
 	 */
 	public static boolean holdsAttack(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
