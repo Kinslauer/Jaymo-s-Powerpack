@@ -4970,3 +4970,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shader pack doesn't: bushy leaves, a built-in pack `living_world` ("Jaymo's Powers: bushy leaves", on by default),
   where every vanilla leaf block also draws two crossed planes of its own texture reaching 3 px past the block
   (`tools/bushy_leaves.py`; multipart blockstates; they wave with the leaves under Complementary).
+  Andy then chose "fill the gaps only" (no Sodium shaders-off versions). The same pack also gives grass blocks lips of
+  their own side-overlay blades leaning out 22.5 degrees over each open side, and snowy ones a lip of snow
+  (`tools/grass_edges.py`; each lip culls when a block stands against that side).

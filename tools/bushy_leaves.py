@@ -55,7 +55,7 @@ def main():
             {"apply": {"model": "minecraft:block/" + name}},
             {"apply": {"model": "jaymospowers:block/bushy/" + name}},
         ]})
-    write(PACK + "pack.mcmeta", {"pack": {"description": "Jaymo's Powers: bushy leaves", "min_format": 97, "max_format": 97}})
+    write(PACK + "pack.mcmeta", {"pack": {"description": "Jaymo's Powers: bushy leaves, grass and snow edges", "min_format": 97, "max_format": 97}})
 
 
 if __name__ == "__main__":

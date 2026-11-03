@@ -1,0 +1,50 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "snowy": "false"
+      },
+      "apply": [
+        {
+          "model": "minecraft:block/grass_block"
+        },
+        {
+          "model": "minecraft:block/grass_block",
+          "y": 90
+        },
+        {
+          "model": "minecraft:block/grass_block",
+          "y": 180
+        },
+        {
+          "model": "minecraft:block/grass_block",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "snowy": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/edges/grass_lips"
+      }
+    },
+    {
+      "when": {
+        "snowy": "true"
+      },
+      "apply": {
+        "model": "minecraft:block/grass_block_snow"
+      }
+    },
+    {
+      "when": {
+        "snowy": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/edges/snow_lips"
+      }
+    }
+  ]
+}
