@@ -569,12 +569,17 @@ public final class Currencies {
 			}
 			String print = print(a, b, result);
 			now.add(new Base(i, print, was.a(), was.b(), was.r(), was.ca(), was.cb(), was.cr(), was.ga(), was.gb(), was.gr()));
+			// (0.7.484) vanilla's discount (and Purists' and Prejudice's) is a count of whatever cost A is now, set afresh on
+			// every open: it is put back in the goods or coin it was first asked in, then into cost A as it now is, every time
+			int diff = discount(o.getSpecialPriceDiff(), was, o.getItemCostA(), a);
 			if (print.equals(had)) {
+				if (diff != o.getSpecialPriceDiff()) {
+					o.setSpecialPriceDiff(diff);
+				}
 				continue;
 			}
 			MerchantOffer fresh = new MerchantOffer(a, b, result, o.getUses(), o.getMaxUses(), o.getXp(), o.getPriceMultiplier(), o.getDemand());
-			int before = o.getItemCostA().count();
-			fresh.setSpecialPriceDiff(before <= 0 ? 0 : Math.round(o.getSpecialPriceDiff() * (float)a.count() / before));
+			fresh.setSpecialPriceDiff(diff);
 			offers.set(i, fresh);
 		}
 		// (the worths of offers put away for now are kept, so they are known again when they come back)
@@ -592,6 +597,25 @@ public final class Currencies {
 		} else if (villager.hasAttached(BASES)) {
 			villager.removeAttached(BASES);
 		}
+	}
+
+	/**
+	 * (0.7.484) A discount (or mark-up) of {@code diff} counted as though cost A were still as it was first asked ({@code was}),
+	 * as a count of {@code a}: coin by worth (each of the coin it was first asked in),
+	 * goods by count. Where the first count isn't known, {@code now} (cost A as it is) stands for it.
+	 */
+	private static int discount(int diff, Base was, ItemCost now, ItemCost a) {
+		if (diff == 0) {
+			return 0;
+		}
+		Currency to = Currency.byItem(a.item().value());
+		if (was.a() > 0 && to != null && to.human()) {
+			Currency from = byId(was.ca());
+			float each = from != null && from.human() ? from.base : was.ga() > 0 ? (float)was.a() / was.ga() : 0.0F;
+			return each <= 0.0F ? diff : Math.round(diff * each / to.base);
+		}
+		int first = was.ga() > 0 ? was.ga() : now.count();
+		return first <= 0 ? diff : Math.round(diff * (float)a.count() / first);
 	}
 
 	/** (0.7.484) {@code cost} with {@code n} of its goods ({@code n} of 0 or less: as it is). */

@@ -45,6 +45,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -78,6 +79,8 @@ final class MerchantOrders {
 	/** Merchants this near the board (blocks) are in its catalog; the most wares shown. */
 	static final double CATALOG_RANGE = 64.0;
 	static final int MOST_WARES = 60;
+	/** (0.7.484) Most emeralds a ware with emerald change is asked in, when its worth won't land on the town's coin. */
+	static final int ORDER_MOST_EMERALDS = 64;
 	/** How long (ticks) a merchant takes to make an order up; how long it waits on an unloaded town before the post takes it. */
 	static final long PREP = 1200L, POST_AFTER = 6000L;
 	/** A courier is found this near the board (blocks). */
@@ -272,14 +275,38 @@ final class MerchantOrders {
 			for (int i = 0; i < offers.size(); i++) {
 				MerchantOffer o = offers.get(i);
 				ItemStack result = o.getResult();
-				if (result.isEmpty() || Currencies.isMoney(result) || !Currencies.isMoney(o.getBaseCostA()) || o.getItemCostB().isPresent()) {
+				if (result.isEmpty() || Currencies.isMoney(result) || !Currencies.isMoney(o.getBaseCostA())) {
 					continue;
 				}
 				int asked = price(o, factor);
 				Currency priced = Currency.byItem(o.getBaseCostA().getItem());
+				// (0.7.484) a price in a town's coin with emerald change in the second slot (set so by Currencies.localize when it
+				// won't land on whole coins): its whole worth, in the town's coin if that comes near, else in whole emeralds
+				int change = 0;
+				if (o.getItemCostB().isPresent()) {
+					ItemCost b = o.getItemCostB().get();
+					if (priced == null || !priced.human() || priced == Currency.EMERALD || !b.item().value().equals(Items.EMERALD)) {
+						continue;
+					}
+					change = Math.max(1, Math.round(b.count() * factor));
+				}
 				Currency sold = coin.human() ? coin : priced == null ? Currency.EMERALD : priced;
 				int price = asked;
-				if (coin.human() && priced != null && priced != coin) {
+				if (change > 0) {
+					long worth = (long)asked * priced.base + change * 1000L;
+					Currency to = coin.human() ? coin : priced;
+					long local = Math.max(1L, (worth + to.base - 1L) / to.base);
+					long emeralds = Math.max(1L, (worth + 999L) / 1000L);
+					if (local <= 64L && Currencies.near(local * to.base, worth, true)) {
+						sold = to;
+						price = (int)local;
+					} else if (emeralds <= ORDER_MOST_EMERALDS) {
+						sold = Currency.EMERALD;
+						price = (int)emeralds;
+					} else {
+						continue;
+					}
+				} else if (coin.human() && priced != null && priced != coin) {
 					// (0.7.484) the same worth in the town's coin, unless that is more than a stack, or rounding to the town's coin
 					// would ask much more than it is worth: then it stays in its own coin
 					long worth = (long)asked * priced.base;
