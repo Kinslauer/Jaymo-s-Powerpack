@@ -5105,3 +5105,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
   - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, Kitchen 0.5.54, thrown bodies keep their ragdoll, risen zombies keep their face:** Andy: "thrown mobs should stop snapping to a pose,
+  and instead keep the ragdoll, so they fall how they fall". A dropped or thrown body now starts its physics from the
+  pose it was held in and falls from there, instead of being rebuilt sprawled flat in mid-air (see
+  `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
+  same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
+  checked; not played.
