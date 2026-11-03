@@ -87,8 +87,9 @@ public final class BeastParts {
 		BEASTFOLK("beastfolk", new Ears(false, 1.0F, 1.0F, 0.2F, 2.6F),
 			new Tail(new float[] {-0.6F, -0.1F, -0.05F, 0.05F, 0.1F}, new float[] {2.4F, 2.4F, 2.4F, 2.2F, 1.8F}, 3.2F, 0.18F, true), Wings.NONE, false, false,
 			false, false),
+		// The bushy tail levels out at the end so its tip stays above the feet when standing (0.7.484).
 		CANINE("canine", new Ears(true, 0.85F, 1.25F, 0.1F, 2.5F),
-			new Tail(new float[] {-0.55F, -0.12F, -0.1F, -0.1F, -0.08F, -0.06F}, new float[] {2.6F, 3.6F, 4.4F, 4.4F, 3.6F, 2.4F}, 3.2F, 0.2F, true), Wings.NONE,
+			new Tail(new float[] {-0.55F, -0.12F, -0.05F, 0.0F, 0.05F, 0.1F}, new float[] {2.6F, 3.6F, 4.4F, 4.4F, 3.6F, 2.4F}, 3.2F, 0.2F, true), Wings.NONE,
 			false, false, false, false),
 		FELINE("feline", new Ears(true, 1.1F, 0.9F, 0.3F, 3.0F),
 			new Tail(new float[] {-0.4F, -0.08F, -0.05F, 0.0F, 0.1F, 0.2F, 0.3F, 0.3F}, new float[] {1.8F, 1.7F, 1.7F, 1.6F, 1.6F, 1.5F, 1.5F, 1.5F}, 3.4F, 0.16F,
