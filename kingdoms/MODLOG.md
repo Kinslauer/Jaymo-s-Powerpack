@@ -8287,6 +8287,12 @@ redrawing a texture (`docs/Excalibur-Style.md` in the pack).
   in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
   Laid blocks count as the plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
   about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
+- **Build a laid plan by hand, like a ship's build kit** (`PlanSites`, client `PlanGhosts`): a laid plan stays
+  standing as see-through pale-blue ghost blocks that everyone within 128 blocks sees (nearest 6,000 within 48 drawn).
+  Place the right blocks yourself (any facing counts; dirt and grass stand in for each other) and each ghost goes as
+  it's filled. Standing in it shows `design: placed / needed blocks`. At 90% of its blocks it's built: ghosts gone,
+  a fanfare and a message. Laying the plan again moves it; drawing a new design takes it down; at most 3 per player.
+  Dev-client test: the Medieval House's ghost showed, half-built showed `704 / 1269`, and at 95% it was built.
 - **Mason's table screen** (`MasonNet`, client `MasonScreen`), opened by using the table: your schematic files on the
   left, the world's designs on the right (size, author, whether crews can build it). Buttons: Draw on a blank plan,
   Offer to this settlement, Save marked build (the area marked with a surveyor's rod, under a typed name), Take the

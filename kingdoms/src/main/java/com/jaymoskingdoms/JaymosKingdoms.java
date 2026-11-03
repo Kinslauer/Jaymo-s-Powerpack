@@ -92,6 +92,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MasonNet.register();
 		MasonTable.register();
 		Commissions.register();
+		PlanSites.register();
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();

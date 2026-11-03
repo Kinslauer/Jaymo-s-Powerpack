@@ -74,7 +74,9 @@ import org.jspecify.annotations.Nullable;
  * you marked with a surveyor's rod as a design, offers a design to the settlement you're in ({@link Commissions}), and
  * shows the table's progress and the materials still needed.</li>
  * <li>Use the plan on the ground to lay the building out there (its lowest north-west corner on the block in front of
- * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.</li>
+ * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.
+ * (0.7.485) A laid plan stays standing as see-through ghost blocks everyone near can see ({@link PlanSites}): fill them
+ * by hand, like a ship's build kit, and once 90% of its blocks are in it's built.</li>
  * <li>Use the plan on the table and it builds it, bottom up, a block at a time, from the chests, barrels and the like
  * touching it: the very block (planks are planks, stairs are stairs, though dirt does for grass and paths; the second
  * half of a door or bed comes with the first). What's already there is left be: a block in the way is skipped, a
@@ -124,7 +126,7 @@ public final class MasonTable {
 	// ---- the plan ---------------------------------------------------------------------------------------------------
 
 	/** A written plan's details: its design, how it's turned, and where it's laid (if it is). */
-	record Laid(String design, Rotation rotation, @Nullable BlockPos anchor, String dimension, int w, int d, int h, int blocks) {
+	record Laid(String design, Rotation rotation, @Nullable BlockPos anchor, String dimension, int w, int d, int h, int blocks, @Nullable UUID site) {
 		static @Nullable Laid of(ItemStack stack) {
 			CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 			if (data == null) {
@@ -137,7 +139,8 @@ public final class MasonTable {
 			}
 			Rotation r = Rotation.values()[Math.floorMod(t.getIntOr("rot", 0), 4)];
 			BlockPos anchor = t.getBooleanOr("laid", false) ? new BlockPos(t.getIntOr("x", 0), t.getIntOr("y", 0), t.getIntOr("z", 0)) : null;
-			return new Laid(design, r, anchor, t.getStringOr("dim", ""), t.getIntOr("w", 0), t.getIntOr("d", 0), t.getIntOr("h", 0), t.getIntOr("n", 0));
+			UUID site = t.read("site", UUIDUtil.CODEC).orElse(null);
+			return new Laid(design, r, anchor, t.getStringOr("dim", ""), t.getIntOr("w", 0), t.getIntOr("d", 0), t.getIntOr("h", 0), t.getIntOr("n", 0), site);
 		}
 
 		void write(ItemStack stack) {
@@ -156,16 +159,19 @@ public final class MasonTable {
 					t.putInt("z", this.anchor.getZ());
 					t.putString("dim", this.dimension);
 				}
+				if (this.site != null) {
+					t.store("site", UUIDUtil.CODEC, this.site);
+				}
 				root.put(TAG, t);
 			});
 		}
 
 		Laid turned() {
-			return new Laid(this.design, this.rotation.getRotated(Rotation.CLOCKWISE_90), this.anchor, this.dimension, this.w, this.d, this.h, this.blocks);
+			return new Laid(this.design, this.rotation.getRotated(Rotation.CLOCKWISE_90), this.anchor, this.dimension, this.w, this.d, this.h, this.blocks, this.site);
 		}
 
 		Laid at(BlockPos anchor, String dimension) {
-			return new Laid(this.design, this.rotation, anchor.immutable(), dimension, this.w, this.d, this.h, this.blocks);
+			return new Laid(this.design, this.rotation, anchor.immutable(), dimension, this.w, this.d, this.h, this.blocks, this.site != null ? this.site : UUID.randomUUID());
 		}
 
 		/** The footprint turned: {width, depth}. */
@@ -204,7 +210,7 @@ public final class MasonTable {
 		if (stack.isEmpty()) {
 			stack = player.getMainHandItem().is(PLAN) ? player.getMainHandItem() : player.getOffhandItem().is(PLAN) ? player.getOffhandItem() : ItemStack.EMPTY;
 		}
-		Laid laid = new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size());
+		Laid laid = new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size(), null);
 		if (stack.isEmpty()) {
 			if (!player.isCreative()) {
 				tell(player, Component.translatable("message.jaymoskingdoms.plan.hold").withStyle(ChatFormatting.RED));
@@ -214,6 +220,11 @@ public final class MasonTable {
 			laid.write(stack);
 			player.getInventory().add(stack);
 		} else {
+			Laid old = Laid.of(stack);
+			if (old != null) {
+				// (its old building comes down)
+				PlanSites.remove(player.level().getServer(), old.site());
+			}
 			laid.write(stack);
 		}
 		player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.9F);
@@ -348,6 +359,7 @@ public final class MasonTable {
 			BlockPos anchor = context.getClickedPos().relative(context.getClickedFace());
 			Laid now = laid.at(anchor, player.level().dimension().identifier().toString());
 			now.write(stack);
+			PlanSites.lay(player, now.site(), now.design(), now.rotation(), anchor);
 			int[] f = now.footprint();
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.laid", laid.design(), f[0], f[1], now.h()).withStyle(ChatFormatting.YELLOW));
 			player.level().playSound(null, anchor, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8F, 1.2F);
@@ -362,6 +374,9 @@ public final class MasonTable {
 			player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.6F, 1.5F);
 			if (now.anchor() != null) {
 				Surveyor.outline(player.level(), now.anchor(), now.max());
+				if (now.site() != null && now.dimension().equals(player.level().dimension().identifier().toString())) {
+					PlanSites.lay(player, now.site(), now.design(), now.rotation(), now.anchor());
+				}
 			}
 		}
 
