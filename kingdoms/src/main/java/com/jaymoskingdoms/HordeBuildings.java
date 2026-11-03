@@ -819,9 +819,10 @@ final class HordeBuildings {
 			}
 		}
 		// the vault: iron bars round gold and a chest, its door a gap bars leave on the counter side
+		// (0.7.480) the gap is (7, 5), opening north toward the counter and onto the empty cell before the chest
 		for (int x = 5; x <= 7; x++) {
 			for (int z = 5; z <= 7; z++) {
-				boolean edge = x == 5 || z == 5;
+				boolean edge = (x == 5 || z == 5) && !(x == 7 && z == 5);
 				for (int y = 0; y <= 1; y++) {
 					t.set(x, y, z, edge ? Blocks.IRON_BARS.defaultBlockState() : y == 0 && (x + z & 1) == 0 ? Blocks.GOLD_BLOCK.defaultBlockState()
 						: Blocks.AIR.defaultBlockState());

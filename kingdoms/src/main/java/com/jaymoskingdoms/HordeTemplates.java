@@ -31,7 +31,8 @@ final class HordeTemplates {
 	/** The most copies of one template a {@code _xN} name asks for. */
 	static final int MAX_COPIES = 6;
 
-	private static final Pattern COPIES = Pattern.compile("_x(\\d+)$");
+	/** (0.7.480) At most two digits, so a long number in a pack's file name can't overflow the parse. */
+	private static final Pattern COPIES = Pattern.compile("_x(\\d{1,2})$");
 	/** "orc/3" → that tier's templates, each repeated as asked (read once per server run). */
 	private static final Map<String, List<Blueprint>> CACHE = new HashMap<>();
 
@@ -88,6 +89,12 @@ final class HordeTemplates {
 				blueprint == null ? 0 : blueprint.width(), blueprint == null ? 0 : blueprint.depth());
 			return null;
 		}
-		return blueprint;
+		// (0.7.480) fromTemplate puts the lowest layer at y=0, but Hordes raises its designs on the first air block with
+		// the floor at y=-1, so lower every block one to keep the template's floor in place of the ground
+		List<Blueprint.Placement> lowered = new ArrayList<>(blueprint.blocks().size());
+		for (Blueprint.Placement pl : blueprint.blocks()) {
+			lowered.add(new Blueprint.Placement(pl.offset().offset(0, -1, 0), pl.state()));
+		}
+		return new Blueprint(blueprint.id(), blueprint.width(), blueprint.depth(), blueprint.height(), List.copyOf(lowered));
 	}
 }
