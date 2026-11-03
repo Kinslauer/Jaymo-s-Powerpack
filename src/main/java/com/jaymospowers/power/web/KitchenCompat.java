@@ -510,6 +510,9 @@ public final class KitchenCompat {
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all ({@code BladeBlood.corpse}).
 	 * Kitchen (0.5.17 on) tells us of each blow that lands on a body with flesh on it.
 	 */
+	/** (0.19.62) The stain a hung carcass's blood leaves on the ground each second it has no grate to run into (it grows as more falls). */
+	static final float HUNG_SPILL_STAIN = 0.35F;
+
 	public static void registerCorpseBlood() {
 		if (!LOADED) {
 			return;
@@ -551,6 +554,37 @@ public final class KitchenCompat {
 				.invoke(null, burst);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen that doesn't blow bodies apart
+		}
+		try {
+			// (0.19.62) Kitchen 0.5.51's meat hook (corpse/Hanging): a carcass bled on it drips real blood, the blood with
+			// no grate under it pools on the ground as lasting stains (blood magic draws them), and its head comes off whole
+			Class<?> hanging = Class.forName("com.jaymoskitchen.corpse.Hanging");
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> drip = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					level.sendParticles(new com.jaymospowers.core.blood.BloodParticles.Spray(com.jaymospowers.core.BladeBlood.color(type), 0.35F, false),
+						true, false, at.x, at.y - 0.05, at.z, 1, 0.02, 0.0, 0.02, 0.0);
+				}
+			};
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> spill = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.blood.BloodTrail.lay(level, null, com.jaymospowers.core.BladeBlood.color(type), at.x, at.y, at.z,
+						HUNG_SPILL_STAIN, 8);
+				}
+			};
+			java.util.function.BiConsumer<Entity, net.minecraft.world.phys.Vec3> head = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				String look = lookOf(corpse);
+				if (type != null && look != null && corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.SeveredPart.dropTrophyHead(level, look, type.getDimensions().height(), corpse.getYRot(), at);
+				}
+			};
+			hanging.getMethod("setOnDrip", java.util.function.BiConsumer.class).invoke(null, drip);
+			hanging.getMethod("setOnSpill", java.util.function.BiConsumer.class).invoke(null, spill);
+			hanging.getMethod("setOnHead", java.util.function.BiConsumer.class).invoke(null, head);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen with no meat hooks
 		}
 	}
 

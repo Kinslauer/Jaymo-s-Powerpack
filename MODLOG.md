@@ -4959,3 +4959,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `BloodTrail.draw` takes up to a set amount out of each lasting stain near a spot (nearest first, a cap in all); a drawn
   stain is re-sent smaller and the client's `BloodPuddle` eases down to it, and one drawn under 0.08 dries away, fading
   over its last second. Kingdoms' blood magic calls it (kingdoms/MODLOG.md). A drawn-up trail can't be followed any more.
+  Kitchen 0.5.51's meat hook (`KitchenCompat.registerCorpseBlood`): a carcass bled on it drips its own blood
+  (`BloodParticles.Spray`), what has no grate under it pools as stains (`HUNG_SPILL_STAIN`), and its head comes off as a
+  `SeveredPart.dropTrophyHead` (a `trophy` part never despawns).

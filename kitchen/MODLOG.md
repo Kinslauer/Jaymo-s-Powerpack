@@ -1311,3 +1311,26 @@ chickens, rabbits, snakes, babies; never player corpses or machines) carries it 
 rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm holds it low and out (`CarryPose`
 `ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
 Checked headless against the snake stand-in; not compile-checked; not seen in game.
+
+## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.62, Kingdoms 0.7.481)
+Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery's hooks and blood grates; GPLv3 Forge
+1.20.1 and needs Alex's Mobs, so ideas only, nothing copied). New package `butchery/`, the steps in `corpse/Hanging`.
+- **Meat Hook** (`MeatHookBlock`; 2 from chain + iron ingot + nugget): hangs under any block with collision. Right-click it
+  while carrying a carcass, or dragging one within 3 blocks (plus its height), and it hangs there by its hind legs: a
+  ragdoll gripped at the hook (`Hanging.held`: both hind feet, a person's feet, a snake's tail tip), so it swings and
+  turns. Picking it up or dragging it takes it down. Hook gone: it falls. Animals only (no fish, machines, iron).
+- **Blood Grate** (`BloodGrateBlock`; iron bars over an iron basin): `level` 0-8, 250 mB a level, the blood drawn rising
+  in it. A glass bottle takes a level as a **Bottle of Blood** (`BloodBottleItem`); right-click shows how full; a
+  comparator reads it.
+- **Steps on the hook** (right-clicks, each wears the tool): a cleaver (`#jaymoskitchen:cleavers`: axes, Armory and
+  Tinkering cleavers, the warchief cleaver) bleeds it out (small 10 s / 250 mB, most 20 s / 1000 mB, big 40 s / 2000 mB)
+  into a grate up to 4 blocks under it, else the blood pools on the ground (Powers lays stains); the cleaver takes the
+  head (the body's drawn headless; Powers drops it as a trophy head that never despawns); a skinning knife
+  (`#jaymoskitchen:skinning_knives`) takes everything in `#jaymoskitchen:skins` (hide, leather, wool, feathers, pelts),
+  skipped if it has none; three cleaver cuts give the rest a third at a time, with the butcher table's extras, then
+  1-3 bones (and 1-2 animal fat from anything bigger than a chicken) and it's gone. Drained, it can be taken down and finished on the ground.
+- **Too big to lift** (cow and up): bled where it lies with a cleaver (no sneak), then cut up there as before, with the
+  table's extras added.
+- Hooks for the other mods: `Hanging.setOnDrip/setOnSpill/setOnHead`, `Butchery.addOnDrink`, `Butchery.drawGrates`.
+- Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
+  `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.

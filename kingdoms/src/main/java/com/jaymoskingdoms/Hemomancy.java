@@ -62,6 +62,14 @@ public final class Hemomancy {
 	 */
 	static final double STAIN_RANGE = 6.0;
 	static final float STAIN_EACH = 0.12F, STAIN_BLOOD = 4.0F;
+	/**
+	 * (0.7.481) Jaymo's Kitchen's blood grates (under a meat hook): how near, the most levels drawn a second, what each
+	 * level (250 mB) is worth to the pool. A bottle of that blood, drunk: what it gives a Blood Sorcerer's pool, and a
+	 * vampire's heal and food.
+	 */
+	static final int GRATE_RANGE = 6, GRATE_MOST = 1;
+	static final float GRATE_BLOOD = 3.0F, BOTTLE_POOL = 6.0F, BOTTLE_HEAL = 2.0F;
+	static final int BOTTLE_FOOD = 3;
 	/** A vampire's costs and power. */
 	static final float VAMPIRE_COST = 0.75F, VAMPIRE_POWER = 1.5F, VAMPIRE_FEVER = 3.0F;
 	/** Hemorrhage: how far, how many bleed ticks each cut bursts for. */
@@ -97,6 +105,8 @@ public final class Hemomancy {
 			FRENZY.clear();
 		});
 		// Frenzy: your blows heal you
+		// (0.7.481) a bottle of Kitchen's blood: a vampire's thirst and a Blood Sorcerer's pool take it; anyone else retches
+		KitchenCompat.onBloodDrunk(Hemomancy::drankBottle);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && entity != player && damageTaken > 0.0F
 				&& !blocked && frenzied(player)) {
@@ -374,10 +384,34 @@ public final class Hemomancy {
 				drank += STAIN_BLOOD * PowersCompat.drawStains(level, player.position(), STAIN_RANGE, STAIN_EACH, room / STAIN_BLOOD,
 					at -> rise(level, at, player));
 			}
+			// (0.7.481) and the blood caught in grates round them (Jaymo's Kitchen's butchery)
+			// (a level at a time, over and above what the bleeding and the stains gave this second)
+			room = POOL_MAX - pool - drank;
+			if (room >= GRATE_BLOOD) {
+				drank += GRATE_BLOOD * KitchenCompat.drawGrates(level, player.position(), GRATE_RANGE, Math.min(GRATE_MOST, (int) (room / GRATE_BLOOD)),
+					at -> rise(level, at, player));
+			}
 			if (drank > 0.0F) {
 				POOL.put(player.getUUID(), Math.min(POOL_MAX, pool + drank));
 			}
 		}
+	}
+
+	/** (0.7.481) {@code player} drank a bottle of blood: theirs if they're a vampire (fed, the fever eased) or a Blood Sorcerer (into the pool). */
+	static boolean drankBottle(ServerPlayer player) {
+		boolean used = false;
+		if (VampirePlayers.vampire(player)) {
+			player.heal(BOTTLE_HEAL);
+			player.getFoodData().eat(BOTTLE_FOOD, 0.6F);
+			BloodFever.bit(player);
+			used = true;
+		}
+		if (bloodMage(player)) {
+			POOL.put(player.getUUID(), Math.min(POOL_MAX, pool(player) + BOTTLE_POOL));
+			splash((ServerLevel) player.level(), player, 6);
+			used = true;
+		}
+		return used;
 	}
 
 	/** (0.7.481) Blood drawn up out of a stain at {@code from}: a thread of red motes rising from the ground to {@code to}. */

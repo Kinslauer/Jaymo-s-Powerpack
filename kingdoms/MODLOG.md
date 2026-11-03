@@ -8257,3 +8257,7 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 - **Blood witches** heal from the stains round them the same way while hurt (every 2 s, after the bleeding foes).
 - `PowersCompat.drawStains` (reflection, nothing without Powers 0.19.62+). Tuning: `Hemomancy.STAIN_RANGE`,
   `STAIN_EACH`, `STAIN_BLOOD`; Powers' `BloodTrail.DRAWN_DRY`, `DRAWN_GONE`, `BloodPuddle.DRAWN_EASE`.
+- **Blood grates** (Kitchen 0.5.51's butchery): Blood Sorcerers also draw a level (250 mB) a second out of the grates within
+  6 blocks, worth 3 pool each (`GRATE_RANGE`, `GRATE_MOST`, `GRATE_BLOOD`; `KitchenCompat.drawGrates`).
+- **Bottle of Blood** (Kitchen): a vampire drinks it (heals 2, 3 food, the blood fever eased as by a bite) and a Blood
+  Sorcerer pours it into their pool (+6); anyone else retches (`Hemomancy.drankBottle`, `BOTTLE_*`).
