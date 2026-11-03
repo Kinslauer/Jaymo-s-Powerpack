@@ -402,6 +402,59 @@ final class KitchenCompat {
 		}
 	}
 
+	// ---- (0.7.481) Kitchen 0.5.51's butchery: blood grates and bottled blood --------------------------------------------
+
+	private static @Nullable Method drawGrates, addOnDrink;
+	private static boolean lookedForButchery;
+
+	private static void butchery() {
+		if (lookedForButchery) {
+			return;
+		}
+		lookedForButchery = true;
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			Class<?> butchery = Class.forName("com.jaymoskitchen.butchery.Butchery");
+			drawGrates = butchery.getMethod("drawGrates", net.minecraft.server.level.ServerLevel.class, Vec3.class, int.class, int.class,
+				java.util.function.Consumer.class);
+			addOnDrink = butchery.getMethod("addOnDrink", java.util.function.Predicate.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Kitchen has no blood grates (older Kitchen?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.481) Blood magic draws from the blood caught in Kitchen's blood grates: up to {@code most} levels from those within
+	 * {@code range} of {@code at}, the nearest first; {@code drawn} hears where each is. How many levels (0 without Kitchen).
+	 */
+	static int drawGrates(net.minecraft.server.level.ServerLevel level, Vec3 at, int range, int most,
+		java.util.function.@Nullable Consumer<Vec3> drawn) {
+		butchery();
+		if (drawGrates == null) {
+			return 0;
+		}
+		try {
+			return (int) drawGrates.invoke(null, level, at, range, most, drawn);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0;
+		}
+	}
+
+	/** (0.7.481) Whoever {@code hook} says has a use for a bottle of Kitchen's blood drinks it without retching. */
+	static void onBloodDrunk(java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> hook) {
+		butchery();
+		if (addOnDrink == null) {
+			return;
+		}
+		try {
+			addOnDrink.invoke(null, hook);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hook Kitchen's bottled blood: {}", e.toString());
+		}
+	}
+
 	private static @Nullable Object call(@Nullable Method method, Entity corpse, Object... args) {
 		if (method == null) {
 			return null;
