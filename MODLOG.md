@@ -5038,3 +5038,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - **By the fire:** sitting settled within 4 blocks of a lit campfire heals 1 every 5 s and (with Kitchen) adds 10 body
     heat. Seats count as meditating with the Meditation perk, like the ground sit.
   - Compile-checked; not seen in game (pose angles may need a tweak).
+- **0.19.68, Kitchen jar 0.5.52:** `libs/` held Kitchen 0.5.48 while its source had moved on to 0.5.52, so the pack
+  shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
+  Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
+  Compile-checked; not played.
