@@ -37,6 +37,8 @@ import org.jspecify.annotations.Nullable;
  * see emeralds in your hand; a coin trader tells you they won't take emeralds when you come to trade with emeralds and
  * no coin. Wandering traders too. Each says it at most once every {@link #REMARK_TICKS} to each player.</li>
  * <li>MCA's chat AI knows which they are ({@link #prompt}).</li>
+ * <li>Andy: "people who use coin generally look down upon emerald traders as outdated luddites". Coin folk's lines sneer
+ * at them, and the keepers know it.</li>
  * </ul>
  */
 public final class MoneyTalk {
@@ -147,13 +149,13 @@ public final class MoneyTalk {
 			sb.append(" You are the money changer: you change coins for free and buy emeralds at ").append(Changer.EMERALD_CP)
 				.append(" copper each, as gems.");
 		} else if (keeper(villager)) {
-			sb.append(" But you still trade only in emeralds, as folk always did, and you distrust the new coin. Say so if money comes up.");
+			sb.append(" But you still trade only in emeralds, as folk always did, and you distrust the new coin. Coin folk look down on you as an outdated fool; you know it and don't care. Say so if money comes up.");
 		} else {
-			sb.append(" You price your goods in coin and don't take emeralds; they're only gems now.");
+			sb.append(" You price your goods in coin and don't take emeralds; they're only gems now. Like most coin folk, you look down on the few who still trade in emeralds as backward, stubborn relics of the last age.");
 			if (villager.level() instanceof ServerLevel level) {
 				AbstractVillager other = nearest(level, villager, o -> o != villager && keeper(o));
 				if (other != null) {
-					sb.append(" ").append(other.getName().getString()).append(" nearby still trades in emeralds.");
+					sb.append(" ").append(other.getName().getString()).append(" nearby still trades in emeralds, the old fool.");
 				}
 			}
 		}

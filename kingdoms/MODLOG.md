@@ -8305,6 +8305,8 @@ Andy's Custom Trade Currency pick, and his choice "Coins replace emeralds". Desi
     trader tells you they don't take emeralds if you come with emeralds and no coin. Wandering traders too. Each
     says it at most once every 5 minutes to the same player (speech bubble).
   - MCA's chat AI is told which they are and who nearby still takes emeralds.
+  - Andy: "people who use coin generally look down upon emerald traders as outdated luddites". Coin folk sneer at
+    them (relics, old fools, the last age) and the keepers know it and don't care.
 - **Thieves:** crooks go for a visible belt purse first and may take it whole (`Crooks`, `PURSE_LIFT_CHANCE`);
   pickpocketing a villager mostly lifts a small filled purse or copper (`Pickpocket`).
 - **Loot:** camp, ogre, wreck, corsair and boss hoards hold silver coins; `LootSwap` turns emeralds in chest and mob
