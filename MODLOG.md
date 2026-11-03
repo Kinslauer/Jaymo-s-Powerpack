@@ -5111,3 +5111,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `kitchen/MODLOG.md`). A zombie body that gets back up keeps the id it had alive, so Excalibur draws it with the
   same face instead of a new random one (Andy: "the zombie died and changed skins"). Compile-checked and ragdoll-sim
   checked; not played.
+- **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
+  kingdoms/MODLOG.md.
