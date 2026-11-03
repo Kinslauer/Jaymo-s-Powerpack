@@ -31,6 +31,8 @@ import org.jspecify.annotations.Nullable;
  * (0.7.184) The Blood Rite's mode is gone: an earned blood passes to your children ({@code Lineage}).
  * (0.7.214) Each heritage comes in three looks ({@link HeritageVariants}): the button at the bottom left steps through
  * the picked one's, and the pane's first row tells of the one shown (its look, its story and its trait).
+ * (0.7.480) When the rows can't all fit even at their smallest, the list scrolls with the mouse wheel, a row a notch,
+ * with a thin bar at its edge, so the last heritages (Beastfolk, the Hollow) can always be reached.
  */
 final class HeritageScreen extends Screen {
 	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
@@ -55,6 +57,8 @@ final class HeritageScreen extends Screen {
 	private int contentH, viewH;
 	/** The slow scroll on hover: when it began, and how far it had got (-1: not running). */
 	private long autoFrom = -1L;
+	/** (0.7.480) The first heritage row shown in the list, when it scrolls. */
+	private int listScroll;
 
 	/** The server asked for a heritage that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
@@ -125,8 +129,24 @@ final class HeritageScreen extends Screen {
 		return Math.clamp(fit, MIN_ROW, LIST_ROW);
 	}
 
+	/** (0.7.480) How many list rows fit at once. */
+	private int listRows() {
+		return Math.max(1, (panelH() - HEADER - 4) / rowH());
+	}
+
+	/** (0.7.480) The furthest the list can scroll (0: every row fits). */
+	private int listMax() {
+		return Math.max(0, Heritage.Kind.playable().length - listRows());
+	}
+
+	/** (0.7.480) The rows shown now: from {@link #listScroll}, as many as fit. */
+	private int listEnd() {
+		this.listScroll = Math.clamp(this.listScroll, 0, listMax());
+		return Math.min(Heritage.Kind.playable().length, this.listScroll + listRows());
+	}
+
 	private int rowY(int index) {
-		return top() + HEADER + index * rowH();
+		return top() + HEADER + (index - this.listScroll) * rowH();
 	}
 
 	/** (0.7.106) An earned heritage the player hasn't woken: a "???" with a hint. */
@@ -179,11 +199,9 @@ final class HeritageScreen extends Screen {
 	private Heritage.@Nullable Kind rowAt(int mouseX, int mouseY) {
 		Heritage.Kind[] all = Heritage.Kind.playable();
 		int rh = rowH();
-		for (int i = 0; i < all.length; i++) {
+		int end = listEnd();
+		for (int i = this.listScroll; i < end; i++) {
 			int ry = rowY(i);
-			if (ry + rh > top() + panelH() - 4) {
-				break;
-			}
 			if (Ui.over(mouseX, mouseY, left() + 4, ry, LIST_W - 8, rh - 2)) {
 				return all[i];
 			}
@@ -294,6 +312,11 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		// (0.7.480) over the list, the wheel scrolls the heritages a row a notch
+		if (mouseX < paneX() && listMax() > 0 && scrollY != 0.0) {
+			this.listScroll = Math.clamp(this.listScroll - (int)Math.signum(scrollY), 0, listMax());
+			return true;
+		}
 		if (this.contentH > this.viewH && mouseX >= paneX()) {
 			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
 			// (the wheel takes over from the slow scroll until the mouse leaves)
@@ -390,12 +413,13 @@ final class HeritageScreen extends Screen {
 		Heritage.Kind hover = rowAt(mouseX, mouseY);
 		int rh = rowH();
 		boolean icons = rh >= ICON_ROW;
-		for (int i = 0; i < all.length; i++) {
+		int end = listEnd();
+		// (0.7.480) a thin bar at the list's edge when it scrolls
+		int shown = listRows() * rh;
+		Ui.scrollbar(graphics, x + LIST_W - 4, y + HEADER, shown - 2, shown, all.length * rh, this.listScroll * rh);
+		for (int i = this.listScroll; i < end; i++) {
 			Heritage.Kind kind = all[i];
 			int ry = rowY(i);
-			if (ry + rh > y + panelH() - 4) {
-				break;
-			}
 			boolean picked = kind == this.picked;
 			boolean open = pickable(kind);
 			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + rh - 2,
