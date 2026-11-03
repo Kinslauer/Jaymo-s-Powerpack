@@ -383,7 +383,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.96; 0.19.63 axolotl) Slipfin: an axolotl, long and low. A wide flat head with a hinged jaw and three
+	 * (0.18.96; 0.19.66 axolotl) Slipfin: an axolotl, long and low. A wide flat head with a hinged jaw and three
 	 * feathery gill stalks each side that wave as it breathes and sweep back as it swims, a soft pink trunk in two
 	 * parts, a deep flat finned tail of four segments, four small splayed legs. On land it belly-crawls the way a
 	 * salamander does: the legs paddle in diagonal pairs (front right with hind left) while the trunk and tail bend
@@ -968,7 +968,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.103, patch 5; 0.19.63 a grasshopper) Locust: lean, wing cases folded down its back, long feelers that twitch,
+	 * (0.18.103, patch 5; 0.19.66 a grasshopper) Locust: lean, wing cases folded down its back, long feelers that twitch,
 	 * spurs on its legs. Now a big grasshopper, not a man: a long level body (head, thorax, two abdomen segments), folded
 	 * wings on its back, feelers that sway and stream back in the air, two short pairs of walking legs that step in an
 	 * insect's tripod gait (front-left, middle-right and hind-left together, then the other three) and two huge folded
@@ -1341,7 +1341,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.103, patch 5; 0.19.63 a hopping frog) Croaker: a squat, low FROG (about nine pixels tall), no longer a man in
+	 * (0.18.103, patch 5; 0.19.66 a hopping frog) Croaker: a squat, low FROG (about nine pixels tall), no longer a man in
 	 * green: a wide flat torso sitting with its nose tipped up, a broad head with a wide mouth and two big eyes on top, a
 	 * throat sac under the jaw, short front legs planted under its chest and big hind legs folded Z-wise along its flanks.
 	 * It hops instead of walking: the walk's clock drives a hop (coil, push, flight, landing) in which the hind legs are
@@ -2662,7 +2662,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.113, Scan E; 0.19.63 a flying insect) Hive: antennae, a striped abdomen behind, and two clear wings that buzz;
+	 * (0.18.113, Scan E; 0.19.66 a flying insect) Hive: antennae, a striped abdomen behind, and two clear wings that buzz;
 	 * now a big bee, not a man. It hovers, never touching down (its lowest part about 4 pixels off the ground, a little
 	 * lower when sneaking), bobbing a pixel and pitched nose-down as it moves: a round fuzzy thorax with the insignia on
 	 * its back, a head with big compound eyes and waving antennae, two pairs of wings that always buzz, six thin legs
@@ -4073,7 +4073,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.xxx, Gremlin: a big-headed imp with long ears that twitch and a thin tail that flicks; 0.19.63 a hunched
+	 * (0.18.xxx, Gremlin: a big-headed imp with long ears that twitch and a thin tail that flicks; 0.19.66 a hunched
 	 * knuckle-walker) A small near-horizontal body carried between long arms planted on the knuckles and short bowed
 	 * hind legs, the huge skull held up and forward on a short neck with its ears flopping. It lopes: arms and legs
 	 * step in diagonal pairs (the legs a beat behind), each limb solved to a foot on the ground (two-bone IK) so

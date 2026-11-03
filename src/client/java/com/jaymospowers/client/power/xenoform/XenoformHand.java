@@ -37,7 +37,7 @@ public final class XenoformHand {
 		if (model instanceof XenoFormModels.Pyre pyre) {
 			pyre.handPose();
 		} else if (model instanceof XenoFormModels.Gremlin gremlin) {
-			// (0.19.63) its knuckle-walking forearm and fist straightened for the first-person arm
+			// (0.19.66) its knuckle-walking forearm and fist straightened for the first-person arm
 			gremlin.handPose();
 		}
 		poseStack.pushPose();

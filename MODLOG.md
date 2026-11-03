@@ -5006,7 +5006,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `SeveredPart.dropTrophyHead` (a `trophy` part never despawns).
   Wall trophies (Andy: "yes all of this"): set a carried head down (right-click) while looking at a wall within
   `Carry.TROPHY_REACH` and it's nailed up there facing out (`SeveredPart.mountOn`), kept for good; pick it up to take it down.
-- **0.19.63, Patch 3: small critters** (`docs/AlienBodies-Plan.md`): five more aliens are no longer men.
+- **0.19.65, Kingdoms 0.7.483, Kitchen 0.5.52, Excalibur's look:** Andy: "Id like a different artstyle from vanilla
+  entirely", pointing at Excalibur and its Fresh Animations patch. Both are switched on once per install, unchanged,
+  fetched from Modrinth (`PackResourcePacks`). Excalibur 26.3_01 (Maffhew, CC BY-NC-ND: credit it with a link on the
+  pack's page) goes at the bottom of the pack order (`BASE`), so every other pack draws over it. "Excalibur | Fresh
+  Animations" 1.10.5 Hotfix 1 (Ruseki and GrandPappyJay, modpacks allowed) sits just above Fresh Animations and under
+  Better Horses. An add-on switched on before its base pack moves up over it once the base arrives. All 7,707 of our
+  item, block, entity and clothing textures in Powers, Kingdoms, Kitchen and the vanilla_style pack are graded toward
+  Excalibur in place (`tools/excalibur_style`): darker, less saturated, warmer greys. Glows, effects, eyes and
+  see-through art are left alone. `graded.txt` stops a file being graded twice. **Run `tools/excalibur_style/grade.py`
+  after any new or redrawn texture.** Hand repaints of hero items come next. Details: `docs/Excalibur-Style.md`.
+- **0.19.66, Patch 3: small critters** (`docs/AlienBodies-Plan.md`): five more aliens are no longer men.
   - Croaker is now a squat, low frog (about 9 px tall, 10 px wide) with big eyes on top, a jaw that opens and a throat sac that swells; it hops instead of walking, its hind legs solved by two-bone IK so the feet stay planted through the push, then trail behind in flight and tuck to land.
   - Slipfin is now an axolotl: long and low, with a wide flat head, waving gill stalks, a two-part trunk, a four-segment finned tail and four splayed legs. On land it belly-crawls on diagonal leg pairs while its body bends side to side in an S; in water it tucks its legs and swims with an up-and-down wave; a bite is a lunge with the jaw open.
   - Locust is now a six-legged grasshopper. Its walking legs step in a tripod gait and its two huge folded hind legs (IK-posed) kick straight back on a leap or a Kick. Crouching to charge Crash Leap folds them tighter. Its feelers sway and its wings flutter in the air.
@@ -5015,4 +5025,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Croaker takes Billow's low swimming-pose box out of water too (`XenoformState.LOW_BOX`), so it fits through
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
-    Compile-checked; not played.
+    The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.

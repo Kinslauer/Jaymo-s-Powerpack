@@ -1349,3 +1349,7 @@ Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery
   - Not done: skeleton displays (need a model per animal) and hide traits (need their own armour items); later if wanted.
 - Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
   `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.
+
+## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
+Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.

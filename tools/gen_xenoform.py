@@ -837,7 +837,7 @@ def wisp():
 
 
 def gremlin():
-    """(0.19.63) A grey, warty imp that goes on its knuckles: mottled hide, a pale belly, spines down the back, black
+    """(0.19.66) A grey, warty imp that goes on its knuckles: mottled hide, a pale belly, spines down the back, black
     claws and calloused fists, a huge skull with yellow eyes and a jagged grin on a hinged jaw, notched pink-lined ears,
     and the insignia on its back. Boxes: skull 10x10x10 at (0,64), jaw 7x3x6 at (0,0), torso 7x6x9 at (16,16), upper
     arm 3x8x3 at (48,16), forearm 2x8x2 at (48,32), fist 3x3x4 at (48,44), thigh 3x6x3 at (0,16), shin 2x7x2 at (0,32),
@@ -1436,7 +1436,7 @@ def gorger():
 
 
 def slipfin():
-    """(0.18.96; 0.19.63 axolotl) Slipfin, the axolotl alien: smooth pink skin with a wet sheen and darker spots, a pale
+    """(0.18.96; 0.19.66 axolotl) Slipfin, the axolotl alien: smooth pink skin with a wet sheen and darker spots, a pale
     belly, feathery magenta gills, a deep flat tail, small black eyes and a little smile. The man's parts keep the
     old paint (the first-person hand); the animal's boxes are in rows 64-97."""
     img = new_skin()
@@ -1464,7 +1464,7 @@ def slipfin():
     img.putpixel((13, 13), rose)
     chest_insignia(img, rim=(120, 40, 80, 255))
 
-    # (0.19.63) the axolotl, every box in rows 64-97: front trunk 6x4x8 (0,64), rear trunk 6x4x8 (28,64), skull 8x3x9
+    # (0.19.66) the axolotl, every box in rows 64-97: front trunk 6x4x8 (0,64), rear trunk 6x4x8 (28,64), skull 8x3x9
     # (0,76), jaw 6x1x5 (34,76), gill 5x1x2 (34,82), leg 2x3x3 (48,82), tail 4x5x5 (0,88), 3x5x5 (18,88), 2x4x5 (34,88),
     # 2x3x4 (48,88)
     def skin(part, tint=1.0, spots=14):
@@ -1762,7 +1762,7 @@ def cortex():
 
 
 def locust():
-    """(0.18.103; 0.19.63 a grasshopper) Locust, the crashing hopper: grass-green with a yellow belly banded in segments,
+    """(0.18.103; 0.19.66 a grasshopper) Locust, the crashing hopper: grass-green with a yellow belly banded in segments,
     darker green wing cases veined lighter, long thin feelers, big amber compound eyes, red-brown spurs on the hind shins.
     Boxes (rows 64-127; left and right of a pair share one): head 6x7x6 at (0,0); thorax 6x5x8 at (0,64); abdomen 5x5x7 at
     (28,64); feeler 1x7x1 at (52,64) and its tip 1x6x1 at (56,64); tail 4x4x6 at (0,78); wing 3x1x9 at (20,78); wing tip
@@ -1888,7 +1888,7 @@ def locust():
 
 
 def croaker():
-    """(0.18.103; 0.19.63 a hopping frog) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow
+    """(0.18.103; 0.19.66 a hopping frog) Croaker, the war frog: deep green, warty (dark and pale bumps), a pale yellow
     belly and throat sac, gold eyes with black slits on top of the head, webbed feet. The frog's boxes reuse the head
     (0,0) and front leg (0,16) / (16,48) regions of the vanilla layout with their own smaller sizes, so those old
     regions are cleared first; the rest are in the extras rows."""
@@ -2666,7 +2666,7 @@ def keen():
 
 
 def hive():
-    """(0.18.113, Scan E; 0.19.63 a flying insect) Hive, the swarm: a fuzzy golden thorax with the insignia on its
+    """(0.18.113, Scan E; 0.19.66 a flying insect) Hive, the swarm: a fuzzy golden thorax with the insignia on its
     back, a banded amber and black abdomen ending in a dark stinger, a black fuzzy head with big faceted compound eyes,
     black antennae, two pairs of pale veined wings and six thin black legs. The man's parts (hidden in the model) keep
     the old amber and black look for the first-person arm."""
