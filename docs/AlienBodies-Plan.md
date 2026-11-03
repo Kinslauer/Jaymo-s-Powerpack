@@ -11,7 +11,9 @@ spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien d
 
 ## Patch 1 (done, 0.19.34): Skitter, Fuse, Billow
 - **Skitter:** a spider, low to the ground, 8 legs in a spider's alternating fours, body bob, abdomen sway, flat crouch,
-  biting lunge.
+  biting lunge. (0.19.35, Andy: "the same model it had before, only going into the crawl when you go prone") Standing it's
+  the old upright shape again; only prone does it drop into the spider, which crawls up walls and along ceilings
+  (tipped against the wall by `SkitterCeiling`, synced `XenoformState.CLIMB`) and turns back when it stands.
 - **Fuse:** a creeper's build, no arms, 4 stubby legs shuffling in diagonal pairs with a waddle, a bounce and a late
   nod; swells on each punch.
 - **Billow:** a cloud mass with a face puff and churning puffs that trail as it moves. Works like wholly-smoke: the

@@ -4914,3 +4914,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.54, Kitchen jar:** `libs/` now holds Jaymo's Kitchen 0.5.47 (built from `kitchen/`) in place of 0.5.33.1, which
   predated `corpse/Hauling` and broke the root build (`KitchenCompat.brawn`). The pack ships the new Kitchen.
   Compile-checked; not played.
+- **0.19.35, Skitter stands up again:** Andy: "skitter to be the same model it had before, only going into the crawl
+  when you go prone". Standing, Skitter has its old upright shape back (four thin spider legs off its back, the small
+  abdomen); prone on the stance wheel it drops into the 0.19.34 spider (`SkitterCeiling.CRAWL_KEY`, eased over 5 ticks)
+  and scuttles at `Skitter.SPIDER_PACE` 2.6x a crawl. The spider sticks to whatever it crawls onto with no jump held:
+  up a wall it's tipped head-up against it for everyone (synced `XenoformState.CLIMB`, legs stepping on the clock), and
+  under a ceiling it clings upside down as before. Standing up turns it back (and drops it off a ceiling). The man's
+  crawl pose stays off for it (`CrawlPose.extract`), downed Skitters crawl as men, and the Ultimate's spikes are back on
+  the upright shape. Compile-checked (0 errors against the 26.3 jars); not played.

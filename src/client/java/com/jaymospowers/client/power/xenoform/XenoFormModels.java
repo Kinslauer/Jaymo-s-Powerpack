@@ -889,28 +889,36 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.113, Scan E; 0.19.34 a spider) Skitter: no longer a man with extra legs but a spider, low to the ground: a
-	 * small thorax, a head with fangs that turns where it looks, a big round abdomen behind (the insignia on top), and
-	 * eight long legs. They step in a spider's alternating fours, each pair a quarter out of step with the next, lifting
-	 * as they reach; the body bobs and the abdomen sways as it scuttles, it crouches flat when sneaking, and a bite lunges
-	 * the head and rears the front legs. The humanoid parts stay (the first-person view and the poses use them) but are
-	 * hidden, and the body is laid on the abdomen so the insignia sits on its back.
+	 * (0.18.113, Scan E; 0.19.35 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
+	 * four thin spider legs off its back and a small abdomen behind. Prone (the stance wheel's crawl) it drops into a
+	 * spider ({@link SkitterCeiling#CRAWL_KEY}): a small thorax, a head with fangs that turns where it looks, a big round
+	 * abdomen behind (the insignia on top) and eight long legs stepping in a spider's alternating fours, the body bobbing
+	 * and the abdomen swaying; it crouches flat when sneaking, a bite lunges the head and rears the front legs, and up a
+	 * wall (tipped head-up by SkitterCeiling) the legs keep climbing. Standing back up turns it back. In the spider the
+	 * man's parts are hidden and the body is laid on the abdomen, so the insignia sits on its back.
 	 */
 	static final class Skitter extends FormModel {
 		// ---- tuning ----
-		/** The body's height off the ground (model y), how far it drops when sneaking, how much it bobs a step. */
+		/** The spider's body height off the ground (model y), how far it drops when sneaking, how much it bobs a step. */
 		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F, BOB = 0.8F;
 		/** How fast the legs step against the walk, how far they swing and lift. */
 		static final float GAIT = 0.6662F * 1.4F, SWING = 0.4F, LIFT = 0.45F;
+		/** (0.19.35) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
+		static final float CLIMB_GAIT = 0.35F;
 		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop. */
 		private static final float[] REST_YAW = {0.785F, 0.39F, -0.39F, -0.785F};
 		private static final float[] REST_DROOP = {0.785F, 0.58F, 0.58F, 0.785F};
 		/** Each pair's step phase (hind to front): the spider's alternating fours. */
 		private static final float[] PHASE = {0.0F, (float)Math.PI, (float)Math.PI * 0.5F, (float)Math.PI * 1.5F};
+		/** (0.19.35) Past this far into the crawl it's drawn as the spider. */
+		static final float SPIDER_AT = 0.5F;
 
 		private final ModelPart thorax, spiderHead, abdomen;
 		/** Hind to front: 0-3 right, 4-7 left. */
 		private final ModelPart[] legs = new ModelPart[8];
+		/** (0.19.35) Upright: the four thin legs off its back, and the small abdomen behind. */
+		private final ModelPart[] backLegs = new ModelPart[4];
+		private final ModelPart backAbdomen;
 
 		Skitter() {
 			super(bake(mesh()), "skitter");
@@ -921,32 +929,49 @@ public final class XenoFormModels {
 			for (int i = 0; i < 8; i++) {
 				this.legs[i] = root.getChild("leg" + i);
 			}
-			// the insignia on top of the abdomen (the body is laid face-up there, see setupAnim)
-			this.insigniaY = 0.0F;
-			this.insigniaZ = -4.0F;
-			this.insigniaSize = 1.3F;
+			this.backAbdomen = this.body.getChild("back_abdomen");
+			for (int i = 0; i < 4; i++) {
+				this.backLegs[i] = this.body.getChild("back_leg" + i);
+			}
 		}
 
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.addOrReplaceChild("thorax", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F),
+			// upright: the shape it always had, a man with four spider legs off its back and an abdomen behind
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("back_abdomen", CubeListBuilder.create().texOffs(20, 64).addBox(-3.5F, -3.0F, 0.0F, 7.0F, 6.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, 9.0F, 1.5F, 0.3F, 0.0F, 0.0F));
+			// legs 0 and 1 on its right, 2 and 3 on its left, the front pair higher
+			for (int i = 0; i < 4; i++) {
+				boolean left = i >= 2;
+				float y = (i % 2 == 0) ? 3.0F : 6.5F;
+				CubeListBuilder leg = CubeListBuilder.create().texOffs(0, 64);
+				if (left) {
+					leg.mirror().addBox(0.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
+				} else {
+					leg.addBox(-8.0F, -0.5F, -0.5F, 8.0F, 1.0F, 1.0F);
+				}
+				body.addOrReplaceChild("back_leg" + i, leg, PartPose.offsetAndRotation(left ? 3.5F : -3.5F, y, 0.0F, 0.0F, 0.0F, left ? 0.6F : -0.6F));
+			}
+			// prone: the spider
+			root.addOrReplaceChild("thorax", CubeListBuilder.create().texOffs(32, 98).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F),
 				PartPose.offset(0.0F, BODY_Y, 0.0F));
-			PartDefinition head = root.addOrReplaceChild("spider_head", CubeListBuilder.create().texOffs(24, 64).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F),
+			PartDefinition head = root.addOrReplaceChild("spider_head", CubeListBuilder.create().texOffs(0, 98).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F),
 				PartPose.offset(0.0F, BODY_Y, -3.0F));
-			head.addOrReplaceChild("right_fang", CubeListBuilder.create().texOffs(44, 80).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+			head.addOrReplaceChild("right_fang", CubeListBuilder.create().texOffs(44, 78).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
 				PartPose.offsetAndRotation(-1.5F, 3.5F, -7.0F, -0.3F, 0.0F, 0.15F));
-			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(44, 80).mirror().addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(44, 78).mirror().addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
 				PartPose.offsetAndRotation(1.5F, 3.5F, -7.0F, -0.3F, 0.0F, -0.15F));
-			root.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(0, 80).addBox(-5.0F, -4.0F, -6.0F, 10.0F, 8.0F, 12.0F),
+			root.addOrReplaceChild("abdomen", CubeListBuilder.create().texOffs(0, 78).addBox(-5.0F, -4.0F, -6.0F, 10.0F, 8.0F, 12.0F),
 				PartPose.offset(0.0F, BODY_Y - 1.0F, 9.0F));
 			// hind to front along the thorax, right side then left
 			for (int i = 0; i < 8; i++) {
 				boolean left = i >= 4;
 				float z = 2.0F - (i % 4);
 				CubeListBuilder leg = left
-					? CubeListBuilder.create().texOffs(0, 104).mirror().addBox(-1.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F)
-					: CubeListBuilder.create().texOffs(0, 100).addBox(-15.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
+					? CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-1.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F)
+					: CubeListBuilder.create().texOffs(0, 114).addBox(-15.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
 				root.addOrReplaceChild("leg" + i, leg, PartPose.offset(left ? 4.0F : -4.0F, BODY_Y, z));
 			}
 			return mesh;
@@ -955,12 +980,49 @@ public final class XenoFormModels {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			// the man's shape is hidden; the body (unseen) lies face-up on the abdomen, carrying the insignia there
-			this.head.visible = this.hat.visible = this.body.visible = false;
-			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
-			float walk = state.walkAnimationPos * GAIT;
-			float speed = Math.min(1.0F, state.walkAnimationSpeed);
-			float drop = state.isCrouching ? CROUCH_DROP : 0.0F;
+			Float crawl = state.getData(SkitterCeiling.CRAWL_KEY);
+			boolean spider = crawl != null && crawl > SPIDER_AT;
+			this.thorax.visible = this.spiderHead.visible = this.abdomen.visible = spider;
+			for (ModelPart leg : this.legs) {
+				leg.visible = spider;
+			}
+			this.head.visible = this.hat.visible = this.body.visible = !spider;
+			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = !spider;
+			if (spider) {
+				this.spider(state);
+			} else {
+				this.upright(state);
+			}
+		}
+
+		/** Standing: the old upright gait, its back legs stepping as it walks. */
+		private void upright(AvatarRenderState state) {
+			this.insigniaY = 7.5F;
+			this.insigniaZ = -2.0F;
+			this.insigniaSize = 1.0F;
+			float walk = state.walkAnimationPos * 0.9F;
+			float amount = state.walkAnimationSpeed;
+			for (int i = 0; i < 4; i++) {
+				boolean left = i >= 2;
+				float spread = (i % 2 == 0) ? 0.45F : -0.45F;
+				float step = Mth.cos(walk + i * (float)Math.PI * 0.5F) * 0.4F * amount;
+				this.backLegs[i].yRot = (left ? -spread : spread) + step;
+				this.backLegs[i].zRot = (left ? 0.6F : -0.6F) + Mth.abs(Mth.sin(walk + i)) * 0.25F * amount * (left ? -1.0F : 1.0F);
+			}
+		}
+
+		/** Prone: the spider, on eight legs stepping in alternating fours (on a wall too, see SkitterCeiling). */
+		private void spider(AvatarRenderState state) {
+			// the insignia on top of the abdomen: the man's (hidden) body lies face-up there
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -4.0F;
+			this.insigniaSize = 1.3F;
+			Float climb = state.getData(SkitterCeiling.CLIMB_KEY);
+			boolean climbing = climb != null && climb > 0.5F;
+			// up a wall the walk hardly moves, so the legs run on the clock instead
+			float walk = climbing ? state.ageInTicks * CLIMB_GAIT : state.walkAnimationPos * GAIT;
+			float speed = climbing ? 1.0F : Math.min(1.0F, state.walkAnimationSpeed);
+			float drop = state.isCrouching && !climbing ? CROUCH_DROP : 0.0F;
 			float bob = Mth.abs(Mth.sin(walk)) * BOB * speed;
 			float y = BODY_Y + drop - bob;
 			// a bite: the head lunges and the fangs open, the front legs rear
@@ -969,7 +1031,7 @@ public final class XenoFormModels {
 			this.spiderHead.y = y;
 			this.spiderHead.z = -3.0F - bite * 2.0F;
 			this.spiderHead.yRot = state.yRot * Mth.DEG_TO_RAD;
-			this.spiderHead.xRot = state.xRot * Mth.DEG_TO_RAD - bite * 0.3F;
+			this.spiderHead.xRot = (climbing ? 0.0F : state.xRot * Mth.DEG_TO_RAD) - bite * 0.3F;
 			this.abdomen.y = y - 1.0F + Mth.sin(walk + 0.8F) * 0.4F * speed;
 			this.abdomen.yRot = Mth.sin(walk * 0.5F) * 0.12F * speed;
 			this.abdomen.xRot = -0.1F + Mth.sin(state.ageInTicks * 0.1F) * 0.03F;
@@ -989,7 +1051,6 @@ public final class XenoFormModels {
 				leg.yRot = side * (REST_YAW[pair] + swing + twitch);
 				leg.zRot = side * (-REST_DROOP[pair] + lift + (drop > 0.0F ? 0.35F : 0.0F));
 				if (pair == 3) {
-					// the front pair rears on a bite
 					leg.zRot += side * bite * 0.6F;
 				}
 			}

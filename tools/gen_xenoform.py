@@ -1981,11 +1981,25 @@ def skitter():
     rect(img, (10, 14, 14, 15), (20, 12, 10, 255))
     claws(img, (20, 14, 12, 255))
     chest_insignia(img, rim=(30, 20, 16, 255))
-    # (0.19.34) the spider body: thorax 6x6x6 at (0,64), head 8x8x8 at (24,64), abdomen 10x8x12 at (0,80), fang 1x2x1
-    # at (44,80), legs 16x2x2 at (0,100) (right) and (0,104) (left)
-    thorax = (0, 64, 6, 6, 6)
+    # upright extras (as before 0.19.34): back leg 8x1x1 at (0,64); small abdomen 7x6x7 at (20,64)
+    leg = (0, 64, 8, 1, 1)
+    box(img, leg, hide, 0.12)
+    for name, (x0, y0, x1, y1) in faces(*leg).items():
+        for x in range(x0 + 2, x1, 3):
+            rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
+    small = (20, 64, 7, 6, 7)
+    box(img, small, (48, 36, 30), 0.14)
+    for name, b in faces(*small).items():
+        speckle(img, b, (28, 20, 16, 255), 8)
+    bx0, by0, bx1, by1 = faces(*small)["top"]
+    cx = (bx0 + bx1) // 2
+    for i, w in enumerate((3, 1, 3)):
+        rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
+    # (0.19.35) the prone spider: abdomen 10x8x12 at (0,78), fang 1x2x1 at (44,78), head 8x8x8 at (0,98), thorax
+    # 6x6x6 at (32,98), legs 16x2x2 at (0,114) (right) and (0,118) (left)
+    thorax = (32, 98, 6, 6, 6)
     box(img, thorax, hide, 0.14)
-    head = (24, 64, 8, 8, 8)
+    head = (0, 98, 8, 8, 8)
     box(img, head, hide, 0.14)
     for name, b in faces(*head).items():
         speckle(img, b, (34, 24, 20, 255), 6)
@@ -1998,8 +2012,8 @@ def skitter():
     img.putpixel((fx0 + 1, fy0 + 5), (180, 20, 20, 255))
     img.putpixel((fx0 + 6, fy0 + 5), (180, 20, 20, 255))
     rect(img, (fx0 + 2, fy0 + 7, fx0 + 6, fy0 + 8), (20, 12, 10, 255))
-    box(img, (44, 80, 1, 2, 1), (40, 26, 22), 0.1)
-    for leg in ((0, 100, 16, 2, 2), (0, 104, 16, 2, 2)):
+    box(img, (44, 78, 1, 2, 1), (40, 26, 22), 0.1)
+    for leg in ((0, 114, 16, 2, 2), (0, 118, 16, 2, 2)):
         box(img, leg, hide, 0.12)
         for name, (x0, y0, x1, y1) in faces(*leg).items():
             if name in ("top", "bottom"):
@@ -2007,7 +2021,7 @@ def skitter():
             # banded, the joints paler
             for x in range(x0 + 3, x1, 5):
                 rect(img, (x, y0, x + 1, y1), (96, 70, 52, 255))
-    belly = (0, 80, 10, 8, 12)
+    belly = (0, 78, 10, 8, 12)
     box(img, belly, (48, 36, 30), 0.14)
     for name, b in faces(*belly).items():
         speckle(img, b, (28, 20, 16, 255), 10)

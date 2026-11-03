@@ -581,6 +581,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
 		player.removeAttached(XenoformState.GRAB);
 		player.removeAttached(XenoformState.SWAT);
 		player.removeAttached(XenoformState.STEP);
@@ -1160,6 +1161,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.FLIGHT);
 		player.removeAttached(XenoformState.CEILING);
+		player.removeAttached(XenoformState.CLIMB);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		int left = Math.max(0, live.ticksLeft);
