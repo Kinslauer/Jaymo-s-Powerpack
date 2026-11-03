@@ -1098,6 +1098,11 @@ final class Caravans {
 		if (wagon.caravan() == Wagon.WAR_CART) {
 			WarParties.cartBroken(level, wagon);
 		}
+		// ((0.7.480) a greenskin cart may have a war journal among its goods)
+		Faction owner = Factions.get(server, wagon.faction());
+		if (owner != null) {
+			LoreBooks.cart(level, owner, wagon.blockPosition());
+		}
 		if (c != null && wagon.slot() < c.carts().size()) {
 			for (Map.Entry<String, Integer> e : c.carts().get(wagon.slot()).entrySet()) {
 				Item item = item(e.getKey());

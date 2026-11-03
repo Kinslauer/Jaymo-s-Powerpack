@@ -93,6 +93,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		// (0.7.480) Hordes, Orc war journals: the Lore Codex screen
+		LoreCodexClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)

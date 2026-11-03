@@ -897,6 +897,8 @@ public final class Captains {
 		CompoundTag tag = new CompoundTag();
 		tag.putString(ORDERS_CAPTAIN, c.id());
 		tag.putString(ORDERS_TRAIT, t.key());
+		// ((0.7.480) the Lore Codex files it, one of each)
+		tag.putString(LoreBooks.KEY, "orders:" + c.id() + ":" + t.key());
 		book.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return book;
 	}

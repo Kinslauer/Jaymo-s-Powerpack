@@ -264,6 +264,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tribes.register();
 		Pedlars.register();
 		Bestiary.register();
+		// (0.7.480) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
+		WarJournal.register();
+		LoreCodex.register();
+		LoreBooks.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();

@@ -249,6 +249,8 @@ final class HordeEconomy {
 		if (!Storage.loaded(level, camp)) {
 			return;
 		}
+		// ((0.7.480) now and then it leaves a war journal in the store)
+		LoreBooks.camp(level, camp, orc, days);
 		for (int d = 0; d < days; d++) {
 			Faction now = Factions.get(server, camp.id());
 			Camps.CampData data = Camps.data(server, camp.id());
