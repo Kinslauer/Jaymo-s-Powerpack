@@ -28,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -79,6 +80,8 @@ final class Brutality {
 	static final double DISTURB_RANGE = 28.0;
 	/** The crowd: how far from the fight it comes from, how many, how close it stands, how fast it comes. */
 	static final double CROWD_RANGE = 18.0, CROWD_RING = 5.0, CROWD_SPEED = 1.0;
+	/** (0.7.480) An MCA villager's pace to the ring, as its brain's walk target (its own wandering pace is 0.6). */
+	static final float CROWD_WALK_SPEED = 0.6F;
 	static final int CROWD_MAX = 6;
 	/** A jeer from the crowd about this often (ticks, and as much again at random); heard this far (blocks). */
 	static final int JEER_EVERY = 50;
@@ -393,8 +396,16 @@ final class Brutality {
 				continue;
 			}
 			watchers.add(orc);
-			if (orc.distanceToSqr(mid) > CROWD_RING * CROWD_RING && orc.getNavigation().isDone()) {
-				orc.getNavigation().moveTo(mid.x, mid.y, mid.z, CROWD_SPEED);
+			if (orc.distanceToSqr(mid) > CROWD_RING * CROWD_RING) {
+				if (orc instanceof Folk) {
+					if (orc.getNavigation().isDone()) {
+						orc.getNavigation().moveTo(mid.x, mid.y, mid.z, CROWD_SPEED);
+					}
+				} else if (!orc.getBrain().getMemory(MemoryModuleType.WALK_TARGET)
+					.map(t -> t.getTarget().currentPosition().distanceToSqr(mid) <= CROWD_RING * CROWD_RING).orElse(false)) {
+					// (0.7.480) an MCA villager walks where its brain is told to (as in Tempers); a path of our own is taken over by its wandering
+					orc.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(mid, CROWD_WALK_SPEED, (int) CROWD_RING));
+				}
 			}
 		}
 		if (!watchers.isEmpty() && now >= brawl.jeerAt) {

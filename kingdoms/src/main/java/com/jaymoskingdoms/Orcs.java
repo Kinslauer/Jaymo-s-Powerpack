@@ -271,10 +271,13 @@ public final class Orcs {
 		mob.setItemSlot(EquipmentSlot.HEAD, chief ? new ItemStack(Items.IRON_HELMET) : ItemStack.EMPTY);
 		mob.setItemSlot(EquipmentSlot.CHEST, chief ? new ItemStack(Items.CHAINMAIL_CHESTPLATE) : dyed(Items.LEATHER_CHESTPLATE, BLACK_HIDE));
 		mob.setItemSlot(EquipmentSlot.FEET, chief ? new ItemStack(Items.IRON_BOOTS) : ItemStack.EMPTY);
-		mob.setCustomName(Component.literal(chief ? warchiefName(mob.getUUID().getLeastSignificantBits() ^ camp) : commonName(mob.getUUID().getLeastSignificantBits())));
+		// (0.7.480) MCA's own villager name (a name tag of our own would sit over it)
+		McaCompat.rename(mob, chief ? warchiefName(mob.getUUID().getLeastSignificantBits() ^ camp) : commonName(mob.getUUID().getLeastSignificantBits()));
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			mob.setDropChance(slot, 0.0F);
 		}
+		// (0.7.480) MCA's guards dress from what they carry, and a warchief is born the biggest: his pack and build go with the title
+		McaCompat.reranked(mob, Heritage.Kind.ORC, chief);
 	}
 
 	static void clear() {
