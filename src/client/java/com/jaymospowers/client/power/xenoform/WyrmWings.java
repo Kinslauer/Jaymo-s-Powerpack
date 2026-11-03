@@ -148,10 +148,11 @@ public final class WyrmWings extends HumanoidModel<AvatarRenderState> {
 		this.rightWing.zRot = Mth.lerp(wrap, openZ, 0.0F);
 		this.leftWing.zRot = Mth.lerp(wrap, -openZ + 2.0F * bank, 0.0F);
 		// the tips: open, they flex behind the stroke (about the wing's length axis it's zRot); folded, they sweep
-		// forward again within the membrane's plane (yRot)
+		// forward again within the membrane's plane (yRot), (0.19.67) to the side away from the sail (-z), so the roll
+		// hangs them down the flanks rather than flat over the sails
 		this.rightTip.zRot = Mth.lerp(wrap, openTip, 0.0F);
 		this.leftTip.zRot = Mth.lerp(wrap, -openTip, 0.0F);
-		this.rightTip.yRot = Mth.lerp(wrap, 0.0F, foldTip);
-		this.leftTip.yRot = Mth.lerp(wrap, 0.0F, -foldTip);
+		this.rightTip.yRot = Mth.lerp(wrap, 0.0F, -foldTip);
+		this.leftTip.yRot = Mth.lerp(wrap, 0.0F, foldTip);
 	}
 }

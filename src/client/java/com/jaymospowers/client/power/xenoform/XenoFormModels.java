@@ -3039,8 +3039,12 @@ public final class XenoFormModels {
 		static final float GLIDE_COUNTER = 1.0F;
 		/** A bite lunges the body this far (pixels), and the head this much further out of the torso (kept under its 0.5 pixel overlap so it stays on). */
 		static final float LUNGE = 2.0F, NECK_LUNGE = 0.4F;
-		/** Hanging: the ceiling (model y), how far the body hangs below the grip of its feet, the sway (radians) and how far the belly sheets reach in. */
-		static final float CEILING_Y = -4.8F, HANG_REACH = 7.7F, HANG_SWAY = 0.07F, HANG_SHEET = 6.2F;
+		/**
+		 * Hanging: the ceiling (model y: the top of the player box, standing 1.8 and crouching 1.5 tall, drawn at
+		 * AvatarRenderer's 0.9375; the server holds the bat flush against it), how far the body hangs below the grip of its
+		 * feet, the sway (radians) and how far the belly sheets reach in.
+		 */
+		static final float CEILING_Y = 24.0F - 1.8F * 16.0F / 0.9375F, CEILING_CROUCH_Y = 24.0F - 1.5F * 16.0F / 0.9375F, HANG_REACH = 7.7F, HANG_SWAY = 0.07F, HANG_SHEET = 6.2F;
 		/** Hanging: how far each wing's sheet sits in from its root (pixels, toward the belly) so it lies on the belly, not a hair off it. */
 		static final float HANG_SHEET_IN = 0.65F;
 		/** Wind's air brake leans the body back this much (degrees); WindPose keeps it private. */
@@ -3226,7 +3230,7 @@ public final class XenoFormModels {
 				float sway = Mth.sin(age * 0.045F) * HANG_SWAY;
 				this.body.xRot = sway;
 				this.body.yRot = (float)Math.PI;
-				this.body.y = CEILING_Y + HANG_REACH * Mth.cos(sway) + sinkFix;
+				this.body.y = (state.isCrouching ? CEILING_CROUCH_Y : CEILING_Y) + HANG_REACH * Mth.cos(sway) + sinkFix;
 				this.body.z = -HANG_REACH * Mth.sin(sway);
 			}
 			// ---- the head ----

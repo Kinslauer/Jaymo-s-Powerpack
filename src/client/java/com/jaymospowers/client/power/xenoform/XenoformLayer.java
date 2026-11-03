@@ -65,6 +65,12 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			renderColoredCutoutModel(model, skin(model, state, ultimate), poseStack, collector, lightCoords, state,
 				Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, 1);
 		}
+		if (model instanceof XenoFormModels.Lumen) {
+			// (0.19.67) Lumen is an orb of light: its own skin again, fullbright (the Ultimate's armoured one when it is),
+			// darkened like the base pass for the rival band, and before the Ultimate's seams so they glow over it
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, ultimate)), lightCoords,
+				OverlayTexture.NO_OVERLAY, Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, null, 0);
+		}
 		if (ultimate) {
 			ultimate(model, poseStack, collector, lightCoords, state);
 		}
@@ -72,11 +78,6 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// Pyre is fire: its glow skin again, fullbright, so it shines in the dark
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, 0);
-		}
-		if (model instanceof XenoFormModels.Lumen) {
-			// (0.19.67) Lumen is an orb of light: its own skin again, fullbright (the Ultimate's armoured one when it is)
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, ultimate)), lightCoords,
-				OverlayTexture.NO_OVERLAY, -1, null, 0);
 		}
 		XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 		if (slap != null && slap.chest()) {
