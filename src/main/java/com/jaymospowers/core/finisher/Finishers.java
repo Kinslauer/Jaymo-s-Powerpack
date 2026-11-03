@@ -134,6 +134,9 @@ import org.jspecify.annotations.Nullable;
  * left click as the override? im trying to stay away from buttons". The hold's the same 1.5 s, drawn as {@link #HOLD_BARS}
  * bars under the crosshair ({@link Charge}) in place of the action-bar dots; the third filled, it plays. Sneak + a double
  * click on them fills it at once ({@link Rush}): the same checks, only no wait, and the kill (questioning still takes the hold).
+ * Andy: "you must sneak and double click + hold, now releasing the hold before the execution kills, will cancel it": the
+ * double click's execution goes on only while its second press is held ({@link Playing#held}); let go before the killing
+ * blow and it's off, the body spared.
  */
 public final class Finishers {
 	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
@@ -368,7 +371,10 @@ public final class Finishers {
 		}
 	}
 
-	/** (0.19.57) Client → server: attack was double-clicked on this entity (its id): fill the hold at once. */
+	/**
+	 * (0.19.57) Client → server: attack was double-clicked on this entity (its id): fill the hold at once. -1: the double
+	 * click's press was let go (before the kill, that calls the execution off).
+	 */
 	public record Rush(int target) implements CustomPacketPayload {
 		public static final Type<Rush> TYPE = new Type<>(JaymosPowers.id("finisher_rush"));
 		public static final StreamCodec<ByteBuf, Rush> CODEC = ByteBufCodecs.VAR_INT.map(Rush::new, Rush::target);
@@ -433,7 +439,32 @@ public final class Finishers {
 	}
 
 	/** A finisher playing: who, on whom. */
-	private record Playing(ServerPlayer player, LivingEntity body, boolean downed) {
+	/** A finisher playing; (0.19.57) {@code held}: begun by a double click, and only goes on while that click is held. */
+	private static final class Playing {
+		final ServerPlayer player;
+		final LivingEntity body;
+		final boolean downed;
+		boolean held;
+		/** (0.19.57) The double click's press was let go before the kill. */
+		boolean released;
+
+		Playing(ServerPlayer player, LivingEntity body, boolean downed) {
+			this.player = player;
+			this.body = body;
+			this.downed = downed;
+		}
+
+		ServerPlayer player() {
+			return this.player;
+		}
+
+		LivingEntity body() {
+			return this.body;
+		}
+
+		boolean downed() {
+			return this.downed;
+		}
 	}
 
 	private static final Map<UUID, Hold> HOLDING = new HashMap<>();
@@ -799,7 +830,19 @@ public final class Finishers {
 	 * to question), only no wait.
 	 */
 	private static void rushed(ServerPlayer player, int id) {
-		if (id < 0 || player.isSpectator() || Downed.isDowned(player) || busy(player)
+		if (id < 0) {
+			// (0.19.57) Andy: "you must sneak and double click + hold, now releasing the hold before the execution kills, will cancel it"
+			Hold waiting = HOLDING.get(player.getUUID());
+			if (waiting != null && waiting.rushed) {
+				HOLDING.remove(player.getUUID());
+			}
+			Playing playing = PLAYING.get(player.getUUID());
+			if (playing != null && playing.held) {
+				playing.released = true;
+			}
+			return;
+		}
+		if (player.isSpectator() || Downed.isDowned(player) || busy(player)
 			|| !(player.level().getEntity(id) instanceof LivingEntity body) || body == player) {
 			return;
 		}
@@ -905,6 +948,11 @@ public final class Finishers {
 			if (held >= HOLD_TICKS) {
 				it.remove();
 				kill(level, player, hold.body);
+				Playing playing = PLAYING.get(player.getUUID());
+				if (hold.rushed && playing != null && playing.body == hold.body) {
+					// (0.19.57) the double click's: it plays only while that click is held
+					playing.held = true;
+				}
 				continue;
 			}
 			// (0.19.57) the three bars, from the first tick: the client draws them
@@ -1087,6 +1135,13 @@ public final class Finishers {
 			// (0.15.114) a crippled one stays held till it's over; a downed one that gets up is spared
 			boolean present = body.isAlive() && !body.isRemoved() && body.level() == level && (!p.downed() || Downed.isDowned(body)) && !Carry.isCarried(body)
 				&& player.distanceTo(body) <= MAX_DISTANCE;
+			if (p.released && t < kind.kill() && !kind.questioning()) {
+				// (0.19.57) the double click let go before the kill: called off, they're spared
+				it.remove();
+				end(player, body);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.called_off", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				continue;
+			}
 			if (t < kind.kill() && !present) {
 				// (up, carried off or gone: spared)
 				it.remove();

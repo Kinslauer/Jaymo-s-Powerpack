@@ -30,7 +30,8 @@ import net.minecraft.world.phys.EntityHitResult;
  * (0.19.57) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays ... maybe we try a double
  * left click as the override?". The server's count ({@link Finishers.Charge}) is drawn as {@link Finishers#HOLD_BARS} bars
  * under the crosshair ({@link #bars}), each filling in turn; and two presses of attack within {@link #DOUBLE_CLICK_TICKS},
- * sneaking with the crosshair on the same one, ask for it at once ({@link Finishers.Rush}). The hands stay the hold's till
+ * sneaking with the crosshair on the same one, ask for it at once ({@link Finishers.Rush}), and the second press must stay
+ * held till the killing blow: let go before and it's called off ({@link #rushHeld}). The hands stay the hold's till
  * attack is let go after the bars ({@link #locked}), as {@code HeldInput} did for the old action-bar dots.
  */
 public final class FinisherClient {
@@ -55,6 +56,8 @@ public final class FinisherClient {
 	/** (0.19.57) Attack's state last tick, when and on whom it was last pressed; whether the hands are the hold's till release. */
 	private static boolean attackWasDown, locked;
 	private static int pressedAt = Integer.MIN_VALUE / 2, pressedOn = -1;
+	/** (0.19.57) A double click was sent and its press is still held: letting go is told to the server (it calls it off). */
+	private static boolean rushHeld;
 
 	private FinisherClient() {
 	}
@@ -85,6 +88,13 @@ public final class FinisherClient {
 		boolean pressed = down && !attackWasDown;
 		attackWasDown = down;
 		locked = player != null && (charging() || choosing >= 0 || locked && down);
+		if (rushHeld && (!down || player == null)) {
+			// (0.19.57) the double click's press let go: before the kill, the execution's off
+			rushHeld = false;
+			if (player != null) {
+				ClientPlayNetworking.send(new Finishers.Rush(-1));
+			}
+		}
 		int target = -1;
 		boolean held = player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null
 			&& !player.isSpectator();
@@ -111,6 +121,7 @@ public final class FinisherClient {
 			// (0.19.57) the double click: a second press on the same one, soon after the first
 			if (target == pressedOn && ticks - pressedAt <= DOUBLE_CLICK_TICKS) {
 				ClientPlayNetworking.send(new Finishers.Rush(target));
+				rushHeld = true;
 				pressedAt = Integer.MIN_VALUE / 2;
 				pressedOn = -1;
 			} else {
