@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Ship;
@@ -64,9 +65,9 @@ final class PirateCoves {
 	static final int START_HANDS = 3, MAX_HANDS = 6, DAYS_PER_HAND = 2;
 	/** (0.7.107) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
 	static final int BOMBARDIERS = 1, MAX_BOMBARDIERS = 2, DAYS_TO_SECOND_BOMBARDIER = 4;
-	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
+	static final int START_GOLD = 8, START_SILVER = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
 	/** What it takes in each day (smuggling, wrecking). */
-	static final int DAY_GOLD = 2, DAY_EMERALDS = 1, DAY_GUNPOWDER = 2, DAY_FISH = 4;
+	static final int DAY_GOLD = 2, DAY_SILVER = 1, DAY_GUNPOWDER = 2, DAY_FISH = 4;
 	/** Its ship: lost, another is built after this long (ticks: two days); her captain ashore after this long missing. */
 	static final long REBUILD_TICKS = 48000L, MISSING_TICKS = 20 * 180;
 	/** She's never launched with a player this near her mooring. */
@@ -199,7 +200,7 @@ final class PirateCoves {
 		Storage.register(server, id, layout.storage(), layout.depot());
 		Faction stocked = Factions.get(server, id);
 		Storage.put(level, stocked, Items.GOLD_INGOT, START_GOLD);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, stocked, Coin.SILVER.item(), START_SILVER);
 		Storage.put(level, stocked, Items.GUNPOWDER, START_GUNPOWDER);
 		Storage.put(level, stocked, com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, START_SHOT);
 		Storage.put(level, stocked, Items.HONEY_BOTTLE, START_RUM);
@@ -512,7 +513,7 @@ final class PirateCoves {
 	static void grow(ServerLevel level, Faction camp, int days) {
 		if (Storage.loaded(level, camp)) {
 			Storage.put(level, camp, Items.GOLD_NUGGET, DAY_GOLD * 9 * days);
-			Storage.put(level, camp, Items.EMERALD, DAY_EMERALDS * days);
+			Storage.put(level, camp, Coin.SILVER.item(), DAY_SILVER * days);
 			Storage.put(level, camp, Items.GUNPOWDER, DAY_GUNPOWDER * days);
 			Storage.put(level, camp, Items.COOKED_COD, DAY_FISH * days);
 		}

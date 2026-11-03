@@ -313,10 +313,11 @@ def entry(item, lo, hi, looting=True):
 
 
 def loot():
+    # (0.7.486) the emerald drops are silver coins now (the kingdoms' money)
     write(DATA + 'jaymoskingdoms/loot_table/entities/night_bleeder.json', {
         'type': 'minecraft:entity',
         'pools': [
-            {'rolls': 1, 'entries': [entry('minecraft:emerald', 3, 5)]},
+            {'rolls': 1, 'entries': [entry('jaymoskingdoms:silver_coin', 3, 5)]},
             {'rolls': 1, 'entries': [entry('jaymoskingdoms:cursed_tusk', 1, 2)]},
             {'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'minecraft:totem_of_undying'}],
              'condition': {'type': 'minecraft:all_of', 'terms': [{'type': 'minecraft:killed_by_player'},
@@ -325,7 +326,7 @@ def loot():
     write(DATA + 'jaymoskingdoms/loot_table/entities/blightwing.json', {
         'type': 'minecraft:entity',
         'pools': [
-            {'rolls': 1, 'entries': [entry('minecraft:emerald', 1, 3)]},
+            {'rolls': 1, 'entries': [entry('jaymoskingdoms:silver_coin', 1, 3)]},
             {'rolls': 1, 'entries': [entry('jaymoskingdoms:cursed_tusk', 0, 1)]}],
         'random_sequence': 'jaymoskingdoms:entities/blightwing'})
 

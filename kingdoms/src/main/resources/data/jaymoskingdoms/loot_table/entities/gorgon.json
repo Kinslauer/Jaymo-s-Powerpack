@@ -62,7 +62,7 @@
 			"entries": [
 				{
 					"type": "minecraft:item",
-					"name": "minecraft:emerald",
+					"name": "jaymoskingdoms:silver_coin",
 					"conditions": [
 						{
 							"condition": "minecraft:random_chance",

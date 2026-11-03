@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,17 +85,17 @@ public final class Meals {
 	static final int HOME_PORTIONS = 2;
 	/** Servings in the eatery's pot from an item: a cook's dish, a soup or stew, or anything else. */
 	static final int DISH_SERVINGS = 3, STEW_SERVINGS = 4, PLAIN_SERVINGS = 2;
-	/** A meal's price in bits ({@link #BITS} to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). */
-	static final int MEAL_BITS = 2, BITS = 16, TAX_PERCENT = 25;
+	/** A meal's price in bits ((0.7.486) a bit is a copper piece: {@link #BITS} to a silver coin, once to an emerald) when food is as it should be; the realm's tax on townsfolk's meals (percent). */
+	static final int MEAL_BITS = 2, BITS = Money.SILVER, TAX_PERCENT = 25;
 	/** The food a town wants in store (items): per head, and at least. The price index's bounds (percent). */
 	static final int WANT_PER_HEAD = 2, WANT_LEAST = 16, INDEX_LEAST = 50, INDEX_MOST = 300;
 	/** Dear from this index (percent; they grumble), cheap below this (they're content); the chance of saying so. */
 	static final int DEAR = 175, CHEAP = 75;
 	static final float SAY_CHANCE = 0.35F;
 	static final int DEAR_MOOD = -1, CHEAP_MOOD = 1, TAVERN_MOOD = 1, WENT_WITHOUT_MOOD = -2;
-	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to an emerald. */
+	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to a silver coin ((0.7.486) the treasury counts silver). */
 	static final int SURPLUS_TIMES = 3, TRADE_MOST = 32, SELL_PER_EMERALD = 8;
-	/** ...and short below half the want: bread bought in, this many loaves to an emerald. */
+	/** ...and short below half the want: bread bought in, this many loaves to a silver coin. */
 	static final int BUY_PER_EMERALD = 4;
 	/** The food trade's hour (time of day). */
 	static final long TRADE_AT = 1000L;
@@ -220,7 +222,7 @@ public final class Meals {
 		return Math.max(INDEX_LEAST, Math.min(INDEX_MOST, want(f) * 100 / Math.max(1, stock)));
 	}
 
-	/** {@code bits} paid to {@code f}'s till; whole emeralds go to its treasury (a realm's: a village keeps no purse). */
+	/** {@code bits} paid to {@code f}'s till; whole silver coins go to its treasury (a realm's: a village keeps no purse). */
 	static void pay(MinecraftServer server, Faction f, int bits) {
 		if (!f.type().isRealm() || bits <= 0) {
 			return;
@@ -703,25 +705,25 @@ public final class Meals {
 	}
 
 	/**
-	 * A cook's wares at today's prices: meals for an emerald (more when food is cheap), and while the town is short, the
-	 * town's want of players' produce (wheat, potatoes, carrots, meat) for an emerald, fewer the shorter it is.
+	 * A cook's wares at today's prices (0.7.486: in silver coins, one for the emerald they cost): meals for a silver (more when food is cheap), and while the town is short, the
+	 * town's want of players' produce (wheat, potatoes, carrots, meat) for a silver, fewer the shorter it is.
 	 */
 	static void wares(ServerLevel level, Faction f, Villager v) {
 		int index = index(level, f);
 		MerchantOffers offers = new MerchantOffers();
 		int loaves = Math.max(1, Math.min(12, 600 / index));
-		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 1), new ItemStack(Items.BREAD, loaves), WARES_USES, WARES_XP, 0.05F));
-		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 1), new ItemStack(Items.BAKED_POTATO, Math.max(1, Math.min(16, 800 / index))), WARES_USES,
+		offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), 1), new ItemStack(Items.BREAD, loaves), WARES_USES, WARES_XP, 0.05F));
+		offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), 1), new ItemStack(Items.BAKED_POTATO, Math.max(1, Math.min(16, 800 / index))), WARES_USES,
 			WARES_XP, 0.05F));
-		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, 1), new ItemStack(Items.COOKED_BEEF, Math.max(1, Math.min(8, 400 / index))), WARES_USES,
+		offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), 1), new ItemStack(Items.COOKED_BEEF, Math.max(1, Math.min(8, 400 / index))), WARES_USES,
 			WARES_XP, 0.05F));
-		offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, Math.max(1, index / 100)), new ItemStack(Items.MUSHROOM_STEW), WARES_USES, WARES_XP, 0.05F));
+		offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), Math.max(1, index / 100)), new ItemStack(Items.MUSHROOM_STEW), WARES_USES, WARES_XP, 0.05F));
 		if (index > 100) {
 			int crops = Math.max(4, Math.min(24, 2000 / index));
-			offers.add(new MerchantOffer(new ItemCost(Items.WHEAT, crops), new ItemStack(Items.EMERALD), WARES_USES, WARES_XP, 0.05F));
-			offers.add(new MerchantOffer(new ItemCost(Items.POTATO, crops), new ItemStack(Items.EMERALD), WARES_USES, WARES_XP, 0.05F));
-			offers.add(new MerchantOffer(new ItemCost(Items.CARROT, crops), new ItemStack(Items.EMERALD), WARES_USES, WARES_XP, 0.05F));
-			offers.add(new MerchantOffer(new ItemCost(Items.BEEF, Math.max(2, crops / 2)), new ItemStack(Items.EMERALD), WARES_USES, WARES_XP, 0.05F));
+			offers.add(new MerchantOffer(new ItemCost(Items.WHEAT, crops), Coin.SILVER.stack(1), WARES_USES, WARES_XP, 0.05F));
+			offers.add(new MerchantOffer(new ItemCost(Items.POTATO, crops), Coin.SILVER.stack(1), WARES_USES, WARES_XP, 0.05F));
+			offers.add(new MerchantOffer(new ItemCost(Items.CARROT, crops), Coin.SILVER.stack(1), WARES_USES, WARES_XP, 0.05F));
+			offers.add(new MerchantOffer(new ItemCost(Items.BEEF, Math.max(2, crops / 2)), Coin.SILVER.stack(1), WARES_USES, WARES_XP, 0.05F));
 		}
 		v.setOffers(offers);
 	}

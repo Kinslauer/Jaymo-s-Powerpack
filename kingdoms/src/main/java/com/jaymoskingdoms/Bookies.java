@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.WarData.War;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -30,8 +32,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -40,7 +40,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.224) Andy (2026-10-26): "War wagers can only be done with bookie npcs in speakeasies." Every den keeps a bookie
  * ({@link Underworld}). Right-click him and he reads you his book: the wars still taking wagers (each side at his odds,
  * by the armies and sellswords behind it) and, while the pit's card is called, the next bout ({@link FightPit}). Hold
- * the emeralds you mean to stake and click a line. Winnings come to you when the war or the bout is decided
+ * the coins (or a purse) you mean to stake and click a line. Winnings come to you when the war or the bout is decided
  * ({@link GreatWars#owe}).
  *
  * <p>(0.7.450) Andy (2026-10-31): "if you pay the bookie outside of the speakeasy, he should lead you to it." Now and
@@ -178,20 +178,23 @@ final class Bookies {
 		return outside(player.level(), player, bookie) ? null : bookie;
 	}
 
-	/** The emeralds in {@code player}'s hand (null, with a word, if none). */
-	private static @Nullable ItemStack stake(CommandContext<CommandSourceStack> c, ServerPlayer player) {
-		ItemStack held = player.getMainHandItem();
-		if (!held.is(Items.EMERALD)) {
+	/**
+	 * (0.7.486) The silver coins' worth in {@code player}'s hand, whole silver (coins, a coin stack or a coin purse, read
+	 * with {@link Coinage#held}); null, with a word, if there is none. It was the emeralds in the hand.
+	 */
+	private static @Nullable Integer stake(CommandContext<CommandSourceStack> c, ServerPlayer player) {
+		long silver = Coinage.held(player.getMainHandItem()) / Money.SILVER;
+		if (silver < 1L) {
 			c.getSource().sendFailure(Component.translatable("bookie.jaymoskingdoms.hold"));
 			return null;
 		}
-		return held;
+		return (int)Math.min(Integer.MAX_VALUE, silver);
 	}
 
 	private static int betWar(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Villager bookie = reach(c, player);
-		ItemStack held = bookie == null ? null : stake(c, player);
+		Integer held = bookie == null ? null : stake(c, player);
 		if (held == null) {
 			return 0;
 		}
@@ -202,15 +205,15 @@ final class Bookies {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.wager.closed"));
 			return 0;
 		}
-		int stake = Math.min(held.getCount(), GreatWars.WAGER_MOST);
+		int stake = Math.min(held, GreatWars.WAGER_MOST);
 		GreatWars.Taken taken = GreatWars.wager(player, war, side, stake, (float)warOdds(server, war, side));
-		return settle(player, bookie, held, taken);
+		return settle(player, bookie, taken);
 	}
 
 	private static int betBout(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Villager bookie = reach(c, player);
-		ItemStack held = bookie == null ? null : stake(c, player);
+		Integer held = bookie == null ? null : stake(c, player);
 		if (held == null) {
 			return 0;
 		}
@@ -219,16 +222,16 @@ final class Bookies {
 			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.bet.closed"));
 			return 0;
 		}
-		int stake = Math.min(held.getCount(), FightPit.MOST_STAKE);
+		int stake = Math.min(held, FightPit.MOST_STAKE);
 		GreatWars.Taken taken = FightPit.bet(player.level(), player, here.id(), IntegerArgumentType.getInteger(c, "fighter"), stake);
-		return settle(player, bookie, held, taken);
+		return settle(player, bookie, taken);
 	}
 
 	/** A place on the pit's card for {@code player}, the entry paid from their hand. */
 	private static int fight(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Villager bookie = reach(c, player);
-		ItemStack held = bookie == null ? null : stake(c, player);
+		Integer held = bookie == null ? null : stake(c, player);
 		if (held == null) {
 			return 0;
 		}
@@ -237,11 +240,11 @@ final class Bookies {
 			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.no_pit"));
 			return 0;
 		}
-		if (held.getCount() < FightPit.ENTRY) {
+		if (held < FightPit.ENTRY) {
 			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.fee", FightPit.ENTRY));
 			return 0;
 		}
-		return settle(player, bookie, held, FightPit.enter(player.level(), player, here));
+		return settle(player, bookie, FightPit.enter(player.level(), player, here));
 	}
 
 	/** {@code player} answers the pit's attendant's offer ({@link FightPit#answer}). */
@@ -252,10 +255,10 @@ final class Bookies {
 	}
 
 	/** The bookie pockets what he took and says so. */
-	private static int settle(ServerPlayer player, Villager bookie, ItemStack held, GreatWars.Taken taken) {
+	private static int settle(ServerPlayer player, Villager bookie, GreatWars.Taken taken) {
 		ServerLevel level = player.level();
 		if (taken.kept() > 0) {
-			held.shrink(taken.kept());
+			Money.charge(player, Money.silver(taken.kept()));
 			level.playSound(null, bookie.getX(), bookie.getY(), bookie.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.0F);
 		}
 		Speech.tell(level, bookie, player, taken.said(), taken.kept() > 0 ? Speech.GOLD : Speech.WHITE);

@@ -24,10 +24,9 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.121) Villagers fight back, our own take on the idea of the Villager Retaliation mod (which is all rights reserved:
@@ -37,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * leave you be once you've stopped hitting them for {@link #COOL_TICKS}, or once you're down.
  * <p>
  * Someone who fears you (reputation at or under {@link #FEARED}, or an outlaw there) runs instead of fighting, and so do
- * those who see it. Emeralds in hand, use a brawler to pay them off ({@link #price}): that one stops, and paying the
+ * those who see it. Coins (or a purse) in hand, use a brawler to pay them off ({@link #price}): that one stops, and paying the
  * one you first struck ends the whole fight. It doesn't make them forget it ({@link Recollections}), and those who
  * think you no better than an enemy ({@link Reputation#HOSTILE} or worse) won't take your coin.
  */
@@ -59,7 +58,7 @@ final class Retaliation {
 	static final double FOLK_SPEED = 1.15;
 	/** A brawler under this share of their health runs off. */
 	static final float FLEE_SHARE = 0.3F;
-	/** Paying one off: emeralds to start with, more for each blow you've landed in the fight, and never more than this. */
+	/** Paying one off: silver coins to start with, more for each blow you've landed in the fight, and never more than this. */
 	static final int PRICE_BASE = 3, PRICE_PER_BLOW = 3, PRICE_MOST = 32;
 	/** Lines for squaring up, running, being paid off and refusing the coin. */
 	static final int LINES = 3;
@@ -92,7 +91,7 @@ final class Retaliation {
 	static void register() {
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(world instanceof ServerLevel level)
-				|| !(entity instanceof LivingEntity who) || !player.getItemInHand(hand).is(Items.EMERALD)) {
+				|| !(entity instanceof LivingEntity who) || !Approaches.isMoney(player.getItemInHand(hand))) {
 				return InteractionResult.PASS;
 			}
 			return payOff(sp, level, who) ? InteractionResult.SUCCESS : InteractionResult.PASS;
@@ -197,7 +196,7 @@ final class Retaliation {
 		return Math.min(PRICE_MOST, PRICE_BASE + PRICE_PER_BLOW * Math.max(0, brawl.blows - 1));
 	}
 
-	/** {@code player}, emeralds in hand, used {@code who}: if they're after them, they try to pay them off. */
+	/** {@code player}, coins or a purse in hand, used {@code who}: if they're after them, they try to pay them off. */
 	private static boolean payOff(ServerPlayer player, ServerLevel level, LivingEntity who) {
 		Brawl brawl = BRAWLS.get(player.getUUID());
 		if (brawl == null || !brawl.brawlers.containsKey(who.getUUID())) {
@@ -211,12 +210,11 @@ final class Retaliation {
 			return true;
 		}
 		int price = price(brawl);
-		ItemStack held = player.getMainHandItem();
-		if (held.getCount() < price) {
+		// (0.7.486) the payoff comes from everything carried, change given back, so a purse in hand pays as well as a coin
+		if (!Money.charge(player, Money.silver(price))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retaliation.price", price).withStyle(ChatFormatting.GRAY));
 			return true;
 		}
-		held.shrink(price);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		say(level, who, "paid");
 		if (Recollections.rememberer(who)) {

@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * on and yields (nobody's hurt for real: it's a show). Winning bets are paid at the odds. The winner stays on as the
  * house champion for the next bout, until {@link #RETIRE_WINS} wins see him retire rich; the beaten go back up to town.
  *
- * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} emeralds): you
+ * <p><b>Fighting yourself.</b> Ask the bookie for a place on the card ({@link #enter}, {@link #ENTRY} silver coins): you
  * take the newcomer's place (or a card is called for you), and at the bell you're put in your corner. Punch with an
  * empty hand (anything in it is a foul, and the bout's lost); sneak to cover up and turn half his blows; step out of the
  * ring and you've thrown it. Win and the purse is yours ({@link #PURSE} and more for each win the beaten had), and
@@ -90,7 +90,7 @@ public final class FightPit {
 	/** The loser is led out, the winner rests, this long after (ticks). */
 	static final long AFTER_TICKS = 160L;
 	/**
-	 * A player in the ring: the entry (emeralds), their wind, how they're measured for the odds (power, guard); a full
+	 * A player in the ring: the entry (silver coins), their wind, how they're measured for the odds (power, guard); a full
 	 * punch lands for {@link #PLAYER_POWER} + 0-1 (a half-charged one for less); covering up (sneaking) turns this share
 	 * of blows (percent). The purse: this much, and this much more for each win the beaten had.
 	 */

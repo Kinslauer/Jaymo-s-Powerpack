@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,8 @@ import org.jspecify.annotations.Nullable;
  * before the trading screen opens, so no villager's trades are touched unless someone comes to trade.
  */
 final class Remedies {
-	/** One ware: its item's id, its price (emeralds), how many come for it, and how many times it's sold before a restock. */
-	record Ware(String id, int emeralds, int count, int uses) {
+	/** One ware: its item's id, its price (silver coins, once emeralds), how many come for it, and how many times it's sold before a restock. */
+	record Ware(String id, int silver, int count, int uses) {
 	}
 
 	/** (0.7.102) What a barber-surgeon (a cleric) sells. */
@@ -112,16 +113,16 @@ final class Remedies {
 			}
 			Ware w = wanted.get(id);
 			if (w != null && !sold) {
-				offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, w.emeralds()), new ItemStack(item, w.count()), w.uses(),
+				offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), w.silver()), new ItemStack(item, w.count()), w.uses(),
 					surgeon ? SURGEON_XP : DRINK_XP, PRICE_MULTIPLIER));
 			}
 			// (an offer, once made, stays: taking it away and adding it back would restock it for free)
 		}
 	}
 
-	/** One of ours: {@code item} for emeralds. */
+	/** One of ours: {@code item} for coins ((0.7.486) a copper, silver or gold coin; emeralds from an old save count too). */
 	private static boolean ours(MerchantOffer offer, Item item) {
-		return offer.getResult().is(item) && offer.getCostA().is(Items.EMERALD);
+		return offer.getResult().is(item) && (Coin.valueOf(offer.getCostA()) > 0L || offer.getCostA().is(Items.EMERALD));
 	}
 
 	/** The item by its id, or null if no mod here has it. */

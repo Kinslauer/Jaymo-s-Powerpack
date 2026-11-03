@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -60,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * <li>A villager of the town pins a <b>Merchant orders</b> sheet on its bounty board ({@link Bounties} errands). It stays
  * up: use or punch it to read what the town's merchants sell ({@link #open}). Nothing to craft: no board, no sack.</li>
  * <li>The catalog is the town's own trades: every grown villager with a trade within {@link #CATALOG_RANGE} of the
- * board, each offer bought with emeralds alone. One shared catalog; each player may order each ware as often a day as
+ * board, each offer bought with silver coins alone ((0.7.486), once emeralds). One shared catalog; each player may order each ware as often a day as
  * the merchant would trade it ({@link MerchantOffer#getMaxUses}), and it restocks at dawn.</li>
  * <li>Five <b>standings</b> (Novice to Master), earned by the trade experience of what you order
  * ({@link #STANDING_XP}): a merchant's higher-level trades (offers 3-4 are Apprentice, 5-6 Journeyman...) show once
@@ -70,7 +72,7 @@ import org.jspecify.annotations.Nullable;
  * wherever you are ({@link Couriers}: on foot, or riding if you're far). If the town is out of everyone's reach for
  * {@link #POST_AFTER}, the post takes it ({@link Post#later}). Either way a line goes in your next Tidings
  * ({@link Post#tidings}): who's bringing it, and if the courier is cut down on the road, where the goods lie.</li>
- * <li>An order not yet sent can be cancelled for the emeralds back.</li>
+ * <li>An order not yet sent can be cancelled for the silver back.</li>
  * </ul>
  */
 final class MerchantOrders {
@@ -100,7 +102,7 @@ final class MerchantOrders {
 	static final String SHEET = "orders|";
 	/**
 	 * (0.7.385, Off-World Orders) The sheet also lists what the town's merchants want from the far worlds
-	 * ({@link OffWorldGoods}): hand in a good, get its listed price in emeralds at once, and
+	 * ({@link OffWorldGoods}): hand in a good, get its listed price in silver coins at once, and
 	 * {@link #FAR_STANDING_XP} standing, which is faster than ordering wares earns it (one ware earns its trade's 1 to 30,
 	 * mostly under 10). Each want can be answered once a day by each player.
 	 */
@@ -242,7 +244,7 @@ final class MerchantOrders {
 	private static int price(MerchantOffer offer) {
 		int base = offer.getBaseCostA().getCount();
 		int demand = Math.max(0, Mth.floor(base * offer.getDemand() * offer.getPriceMultiplier()));
-		return Mth.clamp(base + demand, 1, Items.EMERALD.getDefaultMaxStackSize());
+		return Mth.clamp(base + demand, 1, Coin.SILVER.item().getDefaultMaxStackSize());
 	}
 
 	/** The wares of the merchants about the board at {@code anchor}, cheapest standing first. */
@@ -259,7 +261,7 @@ final class MerchantOrders {
 			for (int i = 0; i < offers.size(); i++) {
 				MerchantOffer o = offers.get(i);
 				ItemStack result = o.getResult();
-				if (result.isEmpty() || result.is(Items.EMERALD) || !o.getBaseCostA().is(Items.EMERALD) || o.getItemCostB().isPresent()) {
+				if (result.isEmpty() || result.is(Items.EMERALD) || Coin.valueOf(result) > 0L || !o.getBaseCostA().is(Coin.SILVER.item()) || o.getItemCostB().isPresent()) {
 					continue;
 				}
 				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price(o, factor), Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1)));
@@ -335,7 +337,7 @@ final class MerchantOrders {
 				Component.translatable("orders.jaymoskingdoms.text", w.merchant().getDisplayName(), professionName(w.merchant()), town.name(), w.price()),
 				left == 0 ? Component.translatable("orders.jaymoskingdoms.objective.sold_out")
 					: Component.translatable("orders.jaymoskingdoms.objective.left", left),
-				List.of(result.copy(), new ItemStack(Items.EMERALD, w.price())),
+				List.of(result.copy(), Coin.SILVER.stack(w.price())),
 				List.of(Component.translatable("orders.jaymoskingdoms.extra.standing", job, w.offer().getXp()))));
 		}
 		Component note = Component.translatable("orders.jaymoskingdoms.standing", Component.translatable("orders.jaymoskingdoms.job." + standing), ledger.xp(),
@@ -399,8 +401,8 @@ final class MerchantOrders {
 			player.sendSystemMessage(Component.translatable("orders.jaymoskingdoms.poor", w.price()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		// (the emeralds go into the town's storehouse, where its wages come from)
-		Storage.put(Factions.level(level.getServer()), town, new ItemStack(Items.EMERALD, w.price()));
+		// (the silver goes into the town's storehouse, where its wages come from)
+		Storage.put(Factions.level(level.getServer()), town, Coin.SILVER.stack(w.price()));
 		Order o = new Order(UUID.randomUUID().toString(), player.getUUID(), w.offer().getResult().copy(), w.price(), w.merchant().getName().getString(),
 			town.name(), town.id(), at.immutable(), level.getGameTime() + PREP, w.id(), w.offer().getXp());
 		put(level.getServer(), o);
@@ -439,9 +441,9 @@ final class MerchantOrders {
 		boolean done = ledger.boughtToday(WANT + g.key(), today) > 0;
 		return new QuestNet.View(WANT + g.key(), QuestNet.OFFER, done,
 			Component.translatable("orders.jaymoskingdoms.want.title", goods.getHoverName(), count, worldName(g)),
-			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), g.emeralds()),
+			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), g.silver()),
 			done ? Component.translatable("orders.jaymoskingdoms.want.done") : Component.translatable("orders.jaymoskingdoms.want.objective", count),
-			List.of(goods.copy(), new ItemStack(Items.EMERALD, g.emeralds())),
+			List.of(goods.copy(), Coin.SILVER.stack(g.silver())),
 			List.of(Component.translatable("orders.jaymoskingdoms.want.standing", FAR_STANDING_XP)));
 	}
 
@@ -486,10 +488,7 @@ final class MerchantOrders {
 			// a full storehouse hands the rest back rather than losing it
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
-		ItemStack pay = new ItemStack(Items.EMERALD, g.emeralds());
-		if (!player.getInventory().add(pay) && !pay.isEmpty()) {
-			player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
-		}
+		Money.pay(player, Money.silver(g.silver()));
 		player.setAttached(LEDGER, ledger.bought(WANT + key, today, 1, FAR_STANDING_XP));
 		Post.tidings(player.getUUID(), Component.translatable("orders.jaymoskingdoms.tidings.want", town.name(), worldName(g)));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.1F);
@@ -518,28 +517,9 @@ final class MerchantOrders {
 		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}
 
-	/** Takes {@code price} emeralds out of {@code player}'s pack, if they have that many. */
+	/** (0.7.486) Takes {@code price} silver coins' worth out of {@code player}'s coins, purses and bundles, if they have that much. */
 	private static boolean pay(ServerPlayer player, int price) {
-		var inv = player.getInventory();
-		int have = 0;
-		for (int i = 0; i < inv.getContainerSize(); i++) {
-			if (inv.getItem(i).is(Items.EMERALD)) {
-				have += inv.getItem(i).getCount();
-			}
-		}
-		if (have < price) {
-			return false;
-		}
-		for (int i = 0, left = price; i < inv.getContainerSize() && left > 0; i++) {
-			ItemStack s = inv.getItem(i);
-			if (s.is(Items.EMERALD)) {
-				int n = Math.min(left, s.getCount());
-				s.shrink(n);
-				left -= n;
-			}
-		}
-		inv.setChanged();
-		return true;
+		return Money.charge(player, Money.silver(price));
 	}
 
 	private static void cancel(ServerLevel level, ServerPlayer player, String id) {
@@ -549,10 +529,7 @@ final class MerchantOrders {
 		}
 		remove(level.getServer(), id);
 		player.setAttached(LEDGER, ledger(player).bought(o.ware(), Quests.day(level), -1, -o.xp()));
-		ItemStack refund = new ItemStack(Items.EMERALD, o.paid());
-		if (!player.getInventory().add(refund) && !refund.isEmpty()) {
-			player.drop(refund, false, net.minecraft.util.Prediction.SERVER_ONLY);
-		}
+		Money.pay(player, Money.silver(o.paid()));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4F, 1.2F);
 	}
 

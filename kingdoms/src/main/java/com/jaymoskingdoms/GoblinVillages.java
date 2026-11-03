@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ final class GoblinVillages {
 	/** What a village takes in each day by its own hands (foraging, felling, digging, pilfering). */
 	static final int DAY_LOGS = 6, DAY_MUD = 6, DAY_MUSHROOMS = 6, DAY_NUGGETS = 4, DAY_BREAD = 3, DAY_ARROWS = 6, DAY_BONES = 2;
 	/** The junk heap a new village starts with. */
-	static final int START_LOGS = 24, START_MUD = 16, START_MUSHROOMS = 12, START_ARROWS = 24, START_NUGGETS = 12, START_EMERALDS = 3;
+	static final int START_LOGS = 24, START_MUD = 16, START_MUSHROOMS = 12, START_ARROWS = 24, START_NUGGETS = 12, START_SILVER = 3;
 	/** Raising a building: one a day at most, from this much of its heap; never with a player this near (a hut doesn't appear before your eyes). */
 	static final int BUILD_LOGS = 4, BUILD_MUD = 6;
 	static final double BUILD_HIDE_RANGE = 24.0;
@@ -98,7 +99,7 @@ final class GoblinVillages {
 		Storage.put(level, stocked, Items.BROWN_MUSHROOM, START_MUSHROOMS);
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.GOLD_NUGGET, START_NUGGETS);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, stocked, Coin.SILVER.item(), START_SILVER);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
 		// slingers on the lookout and up the gate towers, drinkers in the tavern, the rest about the fire

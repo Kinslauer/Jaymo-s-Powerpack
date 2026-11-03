@@ -29,6 +29,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.5.59) How a ruler's guards take a stranger (a player) about him, by his temper ({@link Tempers.Temper}). Each
@@ -96,7 +97,7 @@ final class Retinue {
 	static final double WALK_SPEED = 0.9, DRIVE_SPEED = 1.1;
 	/** How far guards' words carry. */
 	static final double SPEECH_RANGE = 16.0;
-	/** The tyrant: a slap's damage (only above {@link #SLAP_SPARES} health) and the fine for insolence (emeralds, to his treasury). */
+	/** The tyrant: a slap's damage (only above {@link #SLAP_SPARES} health) and the fine for insolence (silver coins, to his treasury). */
 	static final float SLAP_DAMAGE = 1.0F, SLAP_SPARES = 10.0F;
 	static final int FINE = 1;
 	/** The warlord salutes a stranger with at least this much armour. */
@@ -396,7 +397,7 @@ final class Retinue {
 				if (p.getHealth() > SLAP_SPARES) {
 					p.hurtServer(level, level.damageSources().mobAttack(guard != null ? guard : king), SLAP_DAMAGE);
 				}
-				if (takeEmeralds(p, FINE)) {
+				if (takeSilver(p, FINE)) {
 					Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + FINE));
 					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue.tyrant.fined", FINE, king.getDisplayName())
 						.withStyle(ChatFormatting.RED));
@@ -502,13 +503,9 @@ final class Retinue {
 		}
 	}
 
-	/** Takes {@code n} emeralds from {@code p} if they have that many. */
-	private static boolean takeEmeralds(ServerPlayer p, int n) {
-		if (Purse.count(p, Items.EMERALD) < n) {
-			return false;
-		}
-		Purse.take(p, Items.EMERALD, n);
-		return true;
+	/** (0.7.486) Takes {@code n} silver coins' worth from {@code p} if they have that much. */
+	private static boolean takeSilver(ServerPlayer p, int n) {
+		return Money.charge(p, Money.silver(n));
 	}
 
 	/** {@code player} is still someone a guard should be after. */

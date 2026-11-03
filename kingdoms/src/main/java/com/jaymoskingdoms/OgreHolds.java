@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.monsters.Monsters;
 import com.jaymoskingdoms.monsters.Ogre;
 import com.mojang.serialization.Codec;
@@ -440,13 +441,18 @@ public final class OgreHolds {
 		if (!(level.getBlockEntity(at) instanceof ChestBlockEntity chest)) {
 			return;
 		}
-		List<ItemStack> loot = hoard
-			? List.of(new ItemStack(Items.EMERALD, 8 + random.nextInt(12)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6)),
+		// (0.7.486) the coins are silver now (they were emeralds), 1 for 1
+		List<ItemStack> loot = new java.util.ArrayList<>();
+		if (hoard) {
+			loot.addAll(Money.stacks(Money.silver(8 + random.nextInt(12))));
+			loot.addAll(List.of(new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6)),
 				new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(8)), new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
-				new ItemStack(Items.DIAMOND, 1 + random.nextInt(2)), new ItemStack(Items.SADDLE))
-			: List.of(new ItemStack(Items.BONE, 4 + random.nextInt(8)), new ItemStack(Items.ROTTEN_FLESH, 3 + random.nextInt(6)),
-				new ItemStack(Items.IRON_NUGGET, 4 + random.nextInt(10)), new ItemStack(Items.LEATHER, 1 + random.nextInt(4)),
-				new ItemStack(Items.EMERALD, random.nextInt(3)));
+				new ItemStack(Items.DIAMOND, 1 + random.nextInt(2)), new ItemStack(Items.SADDLE)));
+		} else {
+			loot.addAll(List.of(new ItemStack(Items.BONE, 4 + random.nextInt(8)), new ItemStack(Items.ROTTEN_FLESH, 3 + random.nextInt(6)),
+				new ItemStack(Items.IRON_NUGGET, 4 + random.nextInt(10)), new ItemStack(Items.LEATHER, 1 + random.nextInt(4))));
+			loot.addAll(Money.stacks(Money.silver(random.nextInt(3))));
+		}
 		int slot = 0;
 		for (ItemStack s : loot) {
 			if (!s.isEmpty()) {

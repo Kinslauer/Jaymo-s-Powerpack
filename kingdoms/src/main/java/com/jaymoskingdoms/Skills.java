@@ -40,6 +40,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.5.52) The skill tree: three pillars, Survival, Stealth and Strength. Each pillar has its own experience, earned by
@@ -52,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * to pin. Survival ({@link SurvivalSkill}) grows as you live off the land and through the night; Strength
  * ({@link StrengthSkill}) as you fight, mine and fell. The plan: {@code docs/Skills-Plan.md}.
  *
- * <p>Points come back for reinvesting ({@link #respec}) from a kingdom's court wizard, for emeralds, or by drinking a
+ * <p>Points come back for reinvesting ({@link #respec}) from a kingdom's court wizard, for silver, or by drinking a
  * bottle o' enchanting (sneak and use it). A pillar you've made your own shows over your head as your alignment, and
  * word of it gets round the villages ({@link Renown}).
  */
@@ -132,8 +133,8 @@ public final class Skills {
 	 */
 	static final double QUICK_HANDS_COS = 0.35, QUICK_HANDS_TURN_COS = 0.6;
 
-	/** Respec: a court wizard asks this many emeralds, and this many more per rank you've learned. */
-	static final int RESPEC_EMERALDS = 5, RESPEC_PER_RANK = 1;
+	/** Respec: a court wizard asks this much silver, and this many more per rank you've learned. */
+	static final int RESPEC_SILVER = 5, RESPEC_PER_RANK = 1;
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
@@ -508,7 +509,7 @@ public final class Skills {
 
 	/** What a court wizard asks to unmake what {@code player} has learned. */
 	static int respecPrice(Player player) {
-		return RESPEC_EMERALDS + RESPEC_PER_RANK * of(player).spent();
+		return RESPEC_SILVER + RESPEC_PER_RANK * of(player).spent();
 	}
 
 	/** A player spoke to a court wizard: if they've learned anything, the wizard offers to unmake it, for a price. */
@@ -521,7 +522,7 @@ public final class Skills {
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
 			Component.translatable("talk.jaymoskingdoms.wizard.respec", price),
 			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", price), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
-			List.of(Approaches.emeralds(player) >= price, true)));
+			List.of(Money.canPay(player, Money.silver(price)), true)));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (it's some other talk). */
@@ -535,10 +536,10 @@ public final class Skills {
 			return true;
 		}
 		int price = respecPrice(player);
-		if (Approaches.emeralds(player) < price) {
+		if (!Money.canPay(player, Money.silver(price))) {
 			return true;
 		}
-		Approaches.take(player, Items.EMERALD, price);
+		Money.charge(player, Money.silver(price)); // (0.7.486) silver coins, not emeralds
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);

@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * they're in the pack), found as {@code /locate} finds them.
  */
 final class QuestBoard {
-	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
-	static final int BEAST_EMERALDS = 10;
+	/** (0.5.56) What a beast quest pays at least (silver coins; up to 6 more). */
+	static final int BEAST_SILVER = 10;
 	/** How far a villager's (and a king's) fetch or champion quest looks for its ruin (chunks). */
 	static final int VILLAGER_SEARCH_CHUNKS = 32, KING_SEARCH_CHUNKS = 56;
 	/** A ruin nearer any settlement's seat than this is lived in. */
@@ -62,9 +62,9 @@ final class QuestBoard {
 	 * near), a camp that preys on them cleared, or (asked at once, {@link BorderClashes}) a child carried off brought home.
 	 */
 	static final float HAVEN_QUEST_CHANCE = 0.4F, HAVEN_RAIDERS_SHARE = 0.5F;
-	/** Raiders to drive off (least, most); what each haven bounty pays (emeralds, least then the spread), and its hearts on top. */
+	/** Raiders to drive off (least, most); what each haven bounty pays (silver coins, least then the spread), and its hearts on top. */
 	static final int HAVEN_RAIDERS_MIN = 3, HAVEN_RAIDERS_MAX = 5;
-	static final int HAVEN_RAIDERS_EMERALDS = 8, HAVEN_CAMP_EMERALDS = 14, HAVEN_CHILD_EMERALDS = 12, HAVEN_SPREAD = 7, HAVEN_HEARTS = 10;
+	static final int HAVEN_RAIDERS_SILVER = 8, HAVEN_CAMP_SILVER = 14, HAVEN_CHILD_SILVER = 12, HAVEN_SPREAD = 7, HAVEN_HEARTS = 10;
 	/** A haven asks after a preying camp this near it. */
 	static final double HAVEN_CAMP_RANGE = 600.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
@@ -283,7 +283,7 @@ final class QuestBoard {
 		}
 		if (random.nextFloat() < Sightings.QUEST_CHANCE) {
 			// (0.5.56) after a monster of legend seen near here
-			Quest q = Sightings.quest(giver, who, reward(level, job, Quest.SLAY, BEAST_EMERALDS + random.nextInt(7), HEARTS + 6, trade, random), random);
+			Quest q = Sightings.quest(giver, who, reward(level, job, Quest.SLAY, BEAST_SILVER + random.nextInt(7), HEARTS + 6, trade, random), random);
 			if (q != null) {
 				return q;
 			}
@@ -314,7 +314,7 @@ final class QuestBoard {
 			int count = HAVEN_RAIDERS_MIN + random.nextInt(HAVEN_RAIDERS_MAX - HAVEN_RAIDERS_MIN + 1);
 			Quest.Objective o = new Quest.Objective("*purist_raider", count, 0, Optional.empty(), Optional.empty(), "", "", false);
 			return new Quest(UUID.randomUUID().toString(), Quest.SLAY, "haven.raiders", who, o,
-				reward(level, who.job(), Quest.SLAY, HAVEN_RAIDERS_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+				reward(level, who.job(), Quest.SLAY, HAVEN_RAIDERS_SILVER + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
 		}
 		Faction best = null;
 		double bestD = HAVEN_CAMP_RANGE * HAVEN_CAMP_RANGE;
@@ -330,7 +330,7 @@ final class QuestBoard {
 		}
 		Quest.Objective o = new Quest.Objective("camp:" + best.id(), 1, 0, Optional.of(best.seat()), best.leader(), "", best.name(), false);
 		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, "haven.camp", who, o,
-			reward(level, who.job(), Quest.CHIEF, HAVEN_CAMP_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+			reward(level, who.job(), Quest.CHIEF, HAVEN_CAMP_SILVER + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
 	}
 
 	/** (0.7.439) {@code giver} of haven {@code f} asks for its carried-off child back; null if none is held. */
@@ -352,7 +352,7 @@ final class QuestBoard {
 		}
 		Quest.Objective o = new Quest.Objective("captive:" + child, 1, 0, Optional.of(at), Optional.of(child), taken[1], taken[5], false);
 		return new Quest(UUID.randomUUID().toString(), Quest.RESCUE, "haven.child", who, o,
-			reward(level, job, Quest.RESCUE, HAVEN_CHILD_EMERALDS + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
+			reward(level, job, Quest.RESCUE, HAVEN_CHILD_SILVER + random.nextInt(HAVEN_SPREAD), HEARTS + HAVEN_HEARTS, trade, random), 0L);
 	}
 
 	/** (Testing) A villager's fetch quest at the nearest trail ruins: a dig. Null if their trade has no fetch, or none are near. */
@@ -385,13 +385,13 @@ final class QuestBoard {
 			}
 			objective = new Quest.Objective(t.target(), count, 0, Optional.empty(), Optional.empty(), "", "", false);
 		}
-		int emeralds = switch (t.kind()) {
+		int silver = switch (t.kind()) {
 			case Quest.FETCH -> 8 + random.nextInt(7);
 			case Quest.SLAY -> 2 + Math.round(count * 0.6F) + random.nextInt(3);
 			default -> 3 + random.nextInt(6);
 		};
 		int hearts = HEARTS + (t.kind() == Quest.FETCH ? 8 : t.kind() == Quest.SLAY ? 4 : 0);
-		return new Quest(UUID.randomUUID().toString(), t.kind(), t.key(), who, objective, reward(level, who.job(), t.kind(), emeralds, hearts, trade, random), 0L);
+		return new Quest(UUID.randomUUID().toString(), t.kind(), t.key(), who, objective, reward(level, who.job(), t.kind(), silver, hearts, trade, random), 0L);
 	}
 
 	/** A letter to carry: to someone else in the settlement, or to another settlement's ruler. */
@@ -426,12 +426,12 @@ final class QuestBoard {
 			Villager to = folk.get(random.nextInt(folk.size()));
 			objective = new Quest.Objective("", 1, 0, Optional.of(to.blockPosition()), Optional.of(to.getUUID()), to.getName().getString(), f.name(), false);
 		}
-		int emeralds = far ? 8 + random.nextInt(6) : 3 + random.nextInt(3);
+		int silver = far ? 8 + random.nextInt(6) : 3 + random.nextInt(3);
 		return new Quest(UUID.randomUUID().toString(), Quest.DELIVER, far ? "mail.far" : "mail.near", who, objective,
-			reward(level, who.job(), Quest.DELIVER, emeralds, HEARTS, trade, random), 0L);
+			reward(level, who.job(), Quest.DELIVER, silver, HEARTS, trade, random), 0L);
 	}
 
-	private static Quest.Reward reward(ServerLevel level, String job, int kind, int emeralds, int hearts, Trade trade, RandomSource random) {
+	private static Quest.Reward reward(ServerLevel level, String job, int kind, int silver, int hearts, Trade trade, RandomSource random) {
 		List<String> items = new ArrayList<>();
 		List<String> pool = new ArrayList<>(trade.pays());
 		pool.removeIf(s -> BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(s.substring(0, s.indexOf('*')))).isEmpty());
@@ -455,7 +455,7 @@ final class QuestBoard {
 			boolean weapon = job.equals("armorer") ? false : smith || arms || random.nextBoolean();
 			relic = Optional.of(Relics.roll(random, weapon, false));
 		}
-		return new Quest.Reward(emeralds, items, book, relic, hearts, REPUTATION + random.nextInt(11), STANDING);
+		return new Quest.Reward(silver, items, book, relic, hearts, REPUTATION + random.nextInt(11), STANDING);
 	}
 
 	/** {@code id*min-max} rolled to {@code id*n}. */

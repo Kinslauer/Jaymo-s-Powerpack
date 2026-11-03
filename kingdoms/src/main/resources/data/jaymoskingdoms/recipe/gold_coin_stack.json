@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:coin_stack",
+  "ingredients": [
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin",
+    "jaymoskingdoms:gold_coin"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:gold_coin_stack",
+    "count": 1
+  }
+}

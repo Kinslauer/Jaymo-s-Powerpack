@@ -37,7 +37,6 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
@@ -47,6 +46,7 @@ import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.425) Havens patch 1, the tribes and their grudge (ideas from King's Monsters, ARR, and Shadow of War: our own names
@@ -69,9 +69,9 @@ public final class Tribes {
 	static final int REGION = 1536;
 	/** The grudge: its most, and what raises or lowers it. */
 	static final int MOST = 100, KILL = 4, CHIEF = 30, RIVAL = -2, DAILY = 3;
-	/** Tribute: emeralds for each {@link #TRIBUTE_STEP} of grudge paid off. */
+	/** Tribute: silver coins for each {@link #TRIBUTE_STEP} of grudge paid off. */
 	static final int TRIBUTE_EMERALDS = 3, TRIBUTE_STEP = 10;
-	/** A truce token's truce (days), and what it costs at the pedlar (emeralds). */
+	/** A truce token's truce (days), and what it costs at the pedlar (silver coins). */
 	static final int TRUCE_DAYS = 3, TOKEN_PRICE = 16;
 	/** A hunting band: sent at this grudge, at most once in this long (ticks) for a player, while they're this near the tribe's camps. */
 	static final int HUNT_AT = 60;
@@ -328,7 +328,7 @@ public final class Tribes {
 			&& grudge(player.level().getServer(), player.getUUID(), tribe) > -TribePacts.FAVOUR_MOST;
 	}
 
-	/** {@code player} offers tribute to {@code villager}: emeralds from their pack pay the grudge off. What they say. */
+	/** {@code player} offers tribute to {@code villager}: silver coins from their pack pay the grudge off. What they say. */
 	public static Component tribute(ServerPlayer player, LivingEntity villager) {
 		String tribe = of(villager);
 		MinecraftServer server = player.level().getServer();
@@ -340,22 +340,15 @@ public final class Tribes {
 		boolean gift = g <= 0;
 		int want = gift ? TribePacts.GIFT_EMERALDS : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_EMERALDS;
 		int paid = 0;
-		var inv = player.getInventory();
-		for (int slot = 0; slot < inv.getContainerSize() && paid < want; slot++) {
-			ItemStack s = inv.getItem(slot);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(s.getCount(), want - paid);
-				s.shrink(take);
-				paid += take;
-			}
-		}
+		// (0.7.486) up to what they carry in coins, purses and bundles
+		paid = Approaches.payUpTo(player, want);
 		int steps = paid / TRIBUTE_EMERALDS;
 		String line;
 		if (gift) {
 			if (paid < want) {
 				// (short: handed back)
 				if (paid > 0) {
-					player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, paid), net.minecraft.util.Prediction.SERVER_ONLY);
+					Money.pay(player, Money.silver(paid));
 				}
 				line = "none";
 			} else {

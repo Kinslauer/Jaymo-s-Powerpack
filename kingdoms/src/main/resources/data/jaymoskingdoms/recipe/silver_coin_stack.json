@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:coin_stack",
+  "ingredients": [
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin",
+    "jaymoskingdoms:silver_coin"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:silver_coin_stack",
+    "count": 1
+  }
+}

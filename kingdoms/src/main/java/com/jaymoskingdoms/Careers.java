@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
+import com.jaymoskingdoms.money.Money;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -82,7 +84,7 @@ import org.jspecify.annotations.Nullable;
  * morning a job's employer has a few <b>orders</b> drawn from what the town is short of: goods brought to its
  * storehouse (handed over in the same talk), or work done in the town (trees felled, crops harvested, blocks placed,
  * ore mined, ingots smelted, monsters slain, a night on watch, a parcel carried to another town). At dusk the day's
- * finished orders are paid out of the storehouse's emeralds (a poor town pays at least {@link #WAGE_FLOOR} an order),
+ * finished orders are paid out of the storehouse's silver coins (a poor town pays at least {@link #WAGE_FLOOR} an order),
  * and each order earns job experience and a little reputation. Experience makes an Apprentice a Journeyman and then a
  * Master; each rank opens the job's perk ({@link Job}). A Master may take a villager as their apprentice (goods and a
  * cut every day) and open a stall of their own (a chest whose goods villagers buy). Your rank in every job is kept if
@@ -97,7 +99,7 @@ public final class Careers {
 	public static final int JOURNEYMAN_XP = 100, MASTER_XP = 350;
 	/** Experience and reputation an order earns. */
 	static final int ORDER_XP = 10, ORDER_REPUTATION = 3;
-	/** Emeralds an order pays by rank (Apprentice, Journeyman, Master), and the least a poor town pays one. */
+	/** Silver coins an order pays by rank (Apprentice, Journeyman, Master), and the least a poor town pays one. */
 	static final int[] WAGES = {2, 3, 5};
 	static final int WAGE_FLOOR = 1;
 	/** Each other job held at once takes this off every order's wage (never below the floor). */
@@ -157,20 +159,21 @@ public final class Careers {
 	/** Watch: guards this near come to your aid; a Master calls this many to follow. */
 	static final double AID_RANGE = 32.0;
 	static final int FOLLOWERS = 3;
-	/** Master: an apprentice's daily goods (a stack of the job's first good, this many) and cut (emeralds). */
+	/** Master: an apprentice's daily goods (a stack of the job's first good, this many) and cut (silver coins). */
 	static final int APPRENTICE_GOODS = 16, APPRENTICE_CUT = 2;
-	/** Master: a stall sells at most this many emeralds' worth a day, from noon. */
-	static final int STALL_EMERALDS = 12;
+	/** Master: a stall sells at most this many silver coins' worth a day, from noon. */
+	// (0.7.486) wages, fares and the stall's takings are silver coins (1 old emerald = 1 silver)
+	static final int STALL_SILVER = 12;
 	static final long STALL_FROM = 6000L;
 
 	// (0.7.385, Andy's SevTech picks: the Pilot and Prospector careers)
-	/** Pilot: a fare in emeralds (Apprentice, Journeyman, Master) for each trip flown with a passenger or a parcel aboard; trips an order asks for (at most). */
+	/** Pilot: a fare in silver coins (Apprentice, Journeyman, Master) for each trip flown with a passenger or a parcel aboard; trips an order asks for (at most). */
 	static final int[] PILOT_FARE = {0, 1, 3};
 	static final int FLY_ORDERS_MOST = 2;
 	/** Pilot: a ferried parcel must come down within this of the yard it is for (blocks); a ferry order counts as this many orders. */
 	static final double FERRY_AT = LandingYard.RANGE;
 	static final int FERRY_ORDERS = 3;
-	/** Prospector: a bonus in emeralds (Apprentice, Journeyman, Master) for each first find. */
+	/** Prospector: a bonus in silver coins (Apprentice, Journeyman, Master) for each first find. */
 	static final int[] FIND_BONUS = {0, 2, 5};
 
 	public static final int APPRENTICE = 0, JOURNEYMAN = 1, MASTER = 2;
@@ -200,8 +203,8 @@ public final class Careers {
 		PROSPECTOR("prospector", 0, List.of(), List.of("find"), LandingYard.ENTRY);
 
 		public final String key;
-		/** How many of its goods a stall sells for an emerald (0: it has nothing to sell). */
-		final int perEmerald;
+		/** How many of its goods a stall sells for a silver coin (0: it has nothing to sell). */
+		final int perSilver;
 		final List<String> goods, works;
 		/**
 		 * (0.7.250) The building it works out of ({@link Buildings}' entry: the butcher's shop, the fishery, the hunting
@@ -210,9 +213,9 @@ public final class Careers {
 		 */
 		final @Nullable String hall;
 
-		Job(String key, int perEmerald, List<String> goods, List<String> works, @Nullable String hall) {
+		Job(String key, int perSilver, List<String> goods, List<String> works, @Nullable String hall) {
 			this.key = key;
-			this.perEmerald = perEmerald;
+			this.perSilver = perSilver;
 			this.goods = goods;
 			this.works = works;
 			this.hall = hall;
@@ -813,7 +816,7 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
-			int fromStore = Storage.take(store, f, Items.EMERALD, owed).getCount();
+			int fromStore = Storage.take(store, f, Coin.SILVER.item(), owed).getCount();
 			int fresh = Math.max(0, Math.min(owed - fromStore, p.done() * WAGE_FLOOR - fromStore));
 			int paid = fromStore + fresh;
 			if (apprentice && p.kind() != null && !p.kind().goods.isEmpty()) {
@@ -824,7 +827,7 @@ public final class Careers {
 				}
 			}
 			if (paid > 0) {
-				give(player, new ItemStack(Items.EMERALD, paid));
+				Money.pay(player, Money.silver(paid));
 			}
 			player.sendSystemMessage(Component.translatable(fromStore < owed ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
 				paid, f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
@@ -852,7 +855,7 @@ public final class Careers {
 		return true;
 	}
 
-	/** A Master's stall sells from noon, once a day, while it's loaded: villagers buy its goods (into the town's storehouse) for emeralds left in it. */
+	/** A Master's stall sells from noon, once a day, while it's loaded: villagers buy its goods (into the town's storehouse) for silver coins left in it. */
 	private static void stall(ServerLevel level, ServerPlayer player, long today, long time) {
 		Career c = of(player);
 		if (c.stall().isEmpty() || c.soldDay() >= today || time < STALL_FROM) {
@@ -875,29 +878,30 @@ public final class Careers {
 			return;
 		}
 		int earned = 0;
-		for (int slot = 0; slot < box.getContainerSize() && earned < STALL_EMERALDS; slot++) {
+		for (int slot = 0; slot < box.getContainerSize() && earned < STALL_SILVER; slot++) {
 			ItemStack stack = box.getItem(slot);
 			Job job = stack.isEmpty() ? null : mastered(c, stack);
 			if (job == null) {
 				continue;
 			}
-			int lots = Math.min(stack.getCount() / job.perEmerald, STALL_EMERALDS - earned);
+			int lots = Math.min(stack.getCount() / job.perSilver, STALL_SILVER - earned);
 			if (lots <= 0) {
 				continue;
 			}
-			ItemStack sold = stack.split(lots * job.perEmerald);
+			ItemStack sold = stack.split(lots * job.perSilver);
 			Storage.put(store, f, sold);
 			earned += lots;
 		}
 		edit(player, k -> k.withSoldDay(today));
 		if (earned > 0) {
-			ItemStack pay = new ItemStack(Items.EMERALD, earned);
+			// (0.7.486) the stall's takings are silver coins left in the box
+			ItemStack pay = Coin.SILVER.stack(earned);
 			for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {
 				ItemStack there = box.getItem(slot);
 				if (there.isEmpty()) {
 					box.setItem(slot, pay.copy());
 					pay = ItemStack.EMPTY;
-				} else if (there.is(Items.EMERALD) && there.getCount() < there.getMaxStackSize()) {
+				} else if (there.is(Coin.SILVER.item()) && there.getCount() < there.getMaxStackSize()) {
 					int n = Math.min(pay.getCount(), there.getMaxStackSize() - there.getCount());
 					there.grow(n);
 					pay.shrink(n);
@@ -914,7 +918,7 @@ public final class Careers {
 	/** The mastered job {@code stack} is the goods of (one that sells), or null. */
 	private static @Nullable Job mastered(Career c, ItemStack stack) {
 		for (Job job : Job.values()) {
-			if (job.perEmerald > 0 && c.rank(job.key) == MASTER && job.goods.stream().anyMatch(g -> matches(stack, g))) {
+			if (job.perSilver > 0 && c.rank(job.key) == MASTER && job.goods.stream().anyMatch(g -> matches(stack, g))) {
 				return job;
 			}
 		}
@@ -1218,11 +1222,11 @@ public final class Careers {
 		}
 	}
 
-	private static void fare(ServerPlayer player, int emeralds, String message) {
-		if (emeralds > 0) {
-			give(player, new ItemStack(Items.EMERALD, emeralds));
+	private static void fare(ServerPlayer player, int silver, String message) {
+		if (silver > 0) {
+			Money.pay(player, Money.silver(silver));
 		}
-		player.sendOverlayMessage(Component.translatable(message, emeralds).withStyle(ChatFormatting.GREEN));
+		player.sendOverlayMessage(Component.translatable(message, silver).withStyle(ChatFormatting.GREEN));
 	}
 
 	/**
@@ -1833,7 +1837,7 @@ public final class Careers {
 			return;
 		}
 		edit(player, k -> k.withStall(Optional.of(pos.immutable()), f.id()).withSoldDay(day(level)));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_opened", f.name(), STALL_EMERALDS).withStyle(ChatFormatting.GREEN));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_opened", f.name(), STALL_SILVER).withStyle(ChatFormatting.GREEN));
 	}
 
 	private static void buildings(ServerPlayer player, LivingEntity speaker, Faction f) {

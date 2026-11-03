@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:coin_unstack",
+  "ingredients": [
+    "jaymoskingdoms:copper_coin_stack"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:copper_coin",
+    "count": 10
+  }
+}

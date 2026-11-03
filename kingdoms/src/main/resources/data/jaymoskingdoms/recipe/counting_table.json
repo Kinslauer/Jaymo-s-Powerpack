@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " E ",
+    "SSS",
+    "P P"
+  ],
+  "key": {
+    "E": "minecraft:emerald",
+    "S": "#minecraft:wooden_slabs",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymoskingdoms:counting_table",
+    "count": 1
+  }
+}

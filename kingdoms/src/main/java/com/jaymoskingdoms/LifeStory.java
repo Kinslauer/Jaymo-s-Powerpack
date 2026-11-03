@@ -1,5 +1,8 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.PurseContents;
 import com.jaymoskingdoms.remnants.Monoliths;
 import com.jaymoskingdoms.whaling.Whaling;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -100,9 +103,10 @@ public final class LifeStory {
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
-	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
-	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few emeralds. */
-	static final int VILLAGE_BREAD = 4, VILLAGE_EMERALDS = 4;
+	// (0.7.486) the start purses are silver coins in a filled coin purse (1 old emerald = 1 silver)
+	static final int KIT_BREAD = 4, CITY_SILVER = 2, MERCHANT_SILVER = 8, CAVE_TORCHES = 8;
+	/** (0.7.381) The village start, the easiest: more bread on top of the kit's, and a few silver coins. */
+	static final int VILLAGE_BREAD = 4, VILLAGE_SILVER = 4;
 	/**
 	 * (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal
 	 * guardsman"). (0.7.412) The evicted keep the tools of their trade.
@@ -129,10 +133,10 @@ public final class LifeStory {
 	static final int SENTENCED_REPUTATION = -30;
 	static final int HIDEOUT_CAMP_MIN = 2, HIDEOUT_CAMP_MAX = 8;
 	static final int CAST_OUT_MIN = 40, CAST_OUT_MAX = 64;
-	/** (0.7.412) The purses (emeralds) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
-	static final int SENTENCED_EMERALDS = 4, EVICTED_EMERALDS = 6, HIDEOUT_EMERALDS = 3;
-	/** (0.7.414) The kit roads: a trader's pocket money (emeralds), a pup's bones and a sworn recruit's manacles. */
-	static final int TRADER_EMERALDS = 6, PUP_BONES = 4;
+	/** (0.7.412) The purses (silver coins, in a coin purse) the hard roads come with: a sentenced prisoner's few coins, an evicted one's fuller purse, a hideout's cut. */
+	static final int SENTENCED_SILVER = 4, EVICTED_SILVER = 6, HIDEOUT_SILVER = 3;
+	/** (0.7.414) The kit roads: a trader's pocket money (silver coins), a pup's bones and a sworn recruit's manacles. */
+	static final int TRADER_SILVER = 6, PUP_BONES = 4;
 	/** (0.7.414) A trader wakes this far from the milestone's post (blocks). */
 	static final int TRADER_NEAR_MIN = 2, TRADER_NEAR_MAX = 5;
 	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
@@ -197,20 +201,20 @@ public final class LifeStory {
 		}
 	}
 
-	/** (0.7.412) A start's difficulty mark and the emeralds it starts with (not counting a merchant child's extra purse). */
+	/** (0.7.412) A start's difficulty mark and the silver coins it starts with (not counting a merchant child's extra purse). */
 	public record Terms(Mark mark, int purse) {
 	}
 
 	/**
 	 * (0.7.412, Andy's picks: "difficulty and purse on every road") Every start's difficulty and starting purse, in one
-	 * table: the village the easiest, rock bottom the hardest. The purse is what {@link #kit} gives in emeralds.
+	 * table: the village the easiest, rock bottom the hardest. The purse is what {@link #kit} gives in silver coins.
 	 */
 	static final java.util.Map<Start, Terms> TERMS = new java.util.EnumMap<>(Start.class);
 
 	static {
-		TERMS.put(Start.VILLAGE, new Terms(Mark.EASY, VILLAGE_EMERALDS));
+		TERMS.put(Start.VILLAGE, new Terms(Mark.EASY, VILLAGE_SILVER));
 		TERMS.put(Start.SWORN, new Terms(Mark.EASY, 0));
-		TERMS.put(Start.CITY, new Terms(Mark.FAIR, CITY_EMERALDS));
+		TERMS.put(Start.CITY, new Terms(Mark.FAIR, CITY_SILVER));
 		TERMS.put(Start.WILD, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.MONOLITH, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.SHIPWRECK, new Terms(Mark.FAIR, 0));
@@ -224,9 +228,9 @@ public final class LifeStory {
 		TERMS.put(Start.UNARMED, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.DEMON, new Terms(Mark.HARD, 0));
 		TERMS.put(Start.AFTERLIFE, new Terms(Mark.HARD, 0));
-		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_EMERALDS));
-		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_EMERALDS));
-		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_EMERALDS));
+		TERMS.put(Start.EVICTED, new Terms(Mark.HARD, EVICTED_SILVER));
+		TERMS.put(Start.SENTENCED, new Terms(Mark.HARD, SENTENCED_SILVER));
+		TERMS.put(Start.HIDEOUT, new Terms(Mark.HARD, HIDEOUT_SILVER));
 		TERMS.put(Start.CAPTIVE, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.TIMELOST, new Terms(Mark.VERY_HARD, 0));
 		TERMS.put(Start.MOON, new Terms(Mark.VERY_HARD, 0));
@@ -238,7 +242,7 @@ public final class LifeStory {
 		TERMS.put(Start.ROCK_BOTTOM, new Terms(Mark.CRUEL, 0));
 		// (0.7.414) the kit roads
 		TERMS.put(Start.HEIRLOOM, new Terms(Mark.HARD, 0));
-		TERMS.put(Start.TRADER, new Terms(Mark.FAIR, TRADER_EMERALDS));
+		TERMS.put(Start.TRADER, new Terms(Mark.FAIR, TRADER_SILVER));
 		TERMS.put(Start.PUP, new Terms(Mark.FAIR, 0));
 		TERMS.put(Start.NOBODIES, new Terms(Mark.FAIR, 0));
 		// (0.7.417) the powered roads
@@ -399,7 +403,7 @@ public final class LifeStory {
 				Answer.raised("smiths", Items.ANVIL, Stats.Stat.MIGHT, false),
 				Answer.raised("fisherfolk", Items.FISHING_ROD, Stats.Stat.AGILITY, false),
 				Answer.raised("hunters", Items.BOW, Stats.Stat.FINESSE, false),
-				Answer.raised("merchants", Items.EMERALD, Stats.Stat.WITS, false),
+				Answer.raised("merchants", Coin.SILVER.item(), Stats.Stat.WITS, false),
 				Answer.raised("soldiers", Items.IRON_SWORD, Stats.Stat.MIGHT, false),
 				Answer.raised("healers", Items.GLISTERING_MELON_SLICE, Stats.Stat.WITS, false),
 				Answer.raised("wizard", Items.ENCHANTED_BOOK, Stats.Stat.WITS, false),
@@ -1737,7 +1741,7 @@ public final class LifeStory {
 		if (landed == Start.SENTENCED) {
 			// bread through the bars, a few coins they let you keep, a pick in your boot
 			give(player, new ItemStack(Items.BREAD, KIT_BREAD / 2));
-			give(player, new ItemStack(Items.EMERALD, SENTENCED_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(SENTENCED_SILVER)));
 			give(player, new ItemStack(Lockpicking.LOCKPICK, StoryHard.CELL_PICKS));
 			return;
 		}
@@ -1765,13 +1769,13 @@ public final class LifeStory {
 			}
 		}
 		if (landed == Start.CITY) {
-			give(player, new ItemStack(Items.EMERALD, CITY_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(CITY_SILVER)));
 		}
 		if (landed == Start.EVICTED) {
-			give(player, new ItemStack(Items.EMERALD, EVICTED_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(EVICTED_SILVER)));
 		}
 		if (landed == Start.HIDEOUT) {
-			give(player, new ItemStack(Items.EMERALD, HIDEOUT_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(HIDEOUT_SILVER)));
 		}
 		if (landed == Start.GREENSKIN) {
 			// (0.7.443) what the camp gave you: hide on your back, a stone axe, and a goblin's mask (theirs know you by it)
@@ -1800,7 +1804,7 @@ public final class LifeStory {
 			// (0.7.381) the easiest start: a bed of your own, more to eat, a little to spend
 			give(player, new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.WHITE)));
 			give(player, new ItemStack(Items.BREAD, VILLAGE_BREAD));
-			give(player, new ItemStack(Items.EMERALD, VILLAGE_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(VILLAGE_SILVER)));
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
 				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
@@ -1810,7 +1814,7 @@ public final class LifeStory {
 		}
 		if (landed == Start.TRADER) {
 			// (0.7.414) a pack mule and its goods (StoryKit), and a little money
-			give(player, new ItemStack(Items.EMERALD, TRADER_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(TRADER_SILVER)));
 			StoryKit.pack(player);
 		}
 		if (landed == Start.PUP) {
@@ -1827,7 +1831,7 @@ public final class LifeStory {
 			give(player, new ItemStack(Manacles.ITEM, Manacles.RECRUIT_PAIRS));
 		}
 		if (raised.key.equals("merchants")) {
-			give(player, new ItemStack(Items.EMERALD, MERCHANT_EMERALDS));
+			give(player, PurseContents.filled(Money.silver(MERCHANT_SILVER)));
 		}
 	}
 

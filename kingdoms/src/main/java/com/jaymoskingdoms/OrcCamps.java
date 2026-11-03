@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ final class OrcCamps {
 	/** What a camp takes in each day by its own hands (hunting, felling, smithing, tanning). */
 	static final int DAY_LOGS = 6, DAY_HIDES = 6, DAY_BONES = 3, DAY_MEAT = 6, DAY_IRON = 6, DAY_ARROWS = 8, DAY_LEATHER = 2;
 	/** The plunder a new camp starts with. */
-	static final int START_LOGS = 24, START_HIDES = 16, START_MEAT = 16, START_ARROWS = 32, START_IRON = 8, START_EMERALDS = 3;
+	static final int START_LOGS = 24, START_HIDES = 16, START_MEAT = 16, START_ARROWS = 32, START_IRON = 8, START_SILVER = 3;
 	/** Raising a building: one a day at most, from this much of its pile; never with a player this near. */
 	static final int BUILD_LOGS = 4, BUILD_HIDES = 4;
 	static final double BUILD_HIDE_RANGE = 24.0;
@@ -99,7 +100,7 @@ final class OrcCamps {
 		Storage.put(level, stocked, Items.COOKED_BEEF, START_MEAT);
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.IRON_INGOT, START_IRON);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, stocked, Coin.SILVER.item(), START_SILVER);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
 		// rangers on the watchtower and the gate towers, grunts in the pit and at the forge, the rest about the fire, the shaman by it

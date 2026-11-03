@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -87,7 +88,7 @@ public final class Camps {
 	static final int DAY_HIDES = 8, DAY_DARK_HIDES = 4, DAY_PAINTED = 2, DAY_FENCES = 6, DAY_PLANKS = 8, DAY_LADDERS = 3, DAY_GATES = 1,
 		DAY_HAY = 2, DAY_BONE = 1, DAY_MEAT = 6, DAY_LEATHER = 2;
 	/** The loot pile a new camp starts with. */
-	static final int START_LOGS = 32, START_HIDES = 16, START_MEAT = 16, START_EMERALDS = 3;
+	static final int START_LOGS = 32, START_HIDES = 16, START_MEAT = 16, START_SILVER = 3;
 	/** Clearing a camp: reputation with every settlement for the one who killed its chief, and for those who fought beside them. */
 	static final int REP_CLEAR = 100, REP_CLEAR_HELPER = 40;
 	static final double HELPER_RANGE = 48.0;
@@ -318,7 +319,7 @@ public final class Camps {
 		return Factions.get(server, id);
 	}
 
-	/** What a new camp's storage starts with (its land's logs, hides, meat, a few emeralds). */
+	/** What a new camp's storage starts with (its land's logs, hides, meat, a few silver coins). */
 	static void stock(ServerLevel level, @Nullable Faction camp) {
 		if (camp == null || camp.holdings().storage().isEmpty()) {
 			return;
@@ -327,7 +328,7 @@ public final class Camps {
 		Storage.put(level, camp, p.log().getBlock().asItem(), START_LOGS);
 		Storage.put(level, camp, hide(camp), START_HIDES);
 		Storage.put(level, camp, Items.COOKED_MUTTON, START_MEAT);
-		Storage.put(level, camp, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, camp, Coin.SILVER.item(), START_SILVER);
 	}
 
 	/** Camps of a kind stand together (barbarians help barbarians, illagers illagers), and the two kinds are at war. */

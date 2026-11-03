@@ -1,0 +1,64 @@
+{
+  "textures": {
+    "pile": "jaymoskingdoms:block/silver_coin_pile",
+    "particle": "jaymoskingdoms:block/silver_coin_pile"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        14,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#pile"
+        },
+        "up": {
+          "texture": "#pile"
+        },
+        "north": {
+          "texture": "#pile",
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#pile",
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#pile",
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#pile",
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ]
+        }
+      }
+    }
+  ]
+}

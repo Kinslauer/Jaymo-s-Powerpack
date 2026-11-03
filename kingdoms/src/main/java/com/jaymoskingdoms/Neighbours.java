@@ -455,7 +455,7 @@ final class Neighbours {
 			case GIFT -> {
 				if (opener) {
 					m.a.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-					Item gift = List.of(Items.POPPY, Items.DANDELION, Items.CORNFLOWER, Items.BREAD, Items.APPLE, Items.COOKIE, Items.EMERALD, Items.CAKE)
+					Item gift = List.of(Items.POPPY, Items.DANDELION, Items.CORNFLOWER, Items.BREAD, Items.APPLE, Items.COOKIE, com.jaymoskingdoms.money.Coin.SILVER.item(), Items.CAKE)
 						.get(random.nextInt(8));
 					Vec3 mid = m.a.position().add(m.b.position()).scale(0.5);
 					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, gift), mid.x, m.a.getEyeY() - 0.4, mid.z, 6, 0.15, 0.1, 0.15, 0.03);

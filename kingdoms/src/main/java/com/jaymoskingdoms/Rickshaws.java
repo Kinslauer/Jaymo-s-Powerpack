@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -683,16 +684,15 @@ public final class Rickshaws {
 		return true;
 	}
 
-	/** {@code player} pays {@code fare} emeralds into {@code f}'s treasury (nothing in creative); false if they can't. */
+	/** {@code player} pays {@code fare} silver coins ((0.7.486), once emeralds) into {@code f}'s treasury (nothing in creative); false if they can't. */
 	static boolean pay(ServerPlayer player, Faction f, int fare) {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (Purse.count(player, Items.EMERALD) < fare) {
+		if (!Money.charge(player, Money.silver(fare))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		Purse.take(player, Items.EMERALD, fare);
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + fare));
 		return true;
 	}
@@ -732,7 +732,7 @@ public final class Rickshaws {
 		if (Cabs.of(level, f) != null) {
 			return 0;
 		}
-		if (!player.isCreative() && player.getInventory().countItem(Items.EMERALD) < fare) {
+		if (!Money.canPay(player, Money.silver(fare))) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
 			return 0;
 		}

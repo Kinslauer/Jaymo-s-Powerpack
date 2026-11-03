@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public final class Pedlars {
 	static final double ARRIVE = 20.0, STOP_FOR = 6.0;
 	/** Walking pace (his and his guards'), and how far his guards let him get. */
 	static final double PACE = 0.55, GUARD_PACE = 0.7, GUARD_SLACK = 5.0;
-	/** Prices (emeralds): his odd wares (each), the mask, a seat map, the bestiary. */
+	/** Prices (silver coins, once emeralds): his odd wares (each), the mask, a seat map, the bestiary. */
 	static final int WARES = 3, WARE_PRICE_MIN = 1, WARE_PRICE_MAX = 4, MASK_PRICE = 10, MAP_PRICE = 8, BESTIARY_PRICE = 6;
 	// ================================================================================================================
 
@@ -271,8 +272,9 @@ public final class Pedlars {
 		}
 	}
 
-	private static MerchantOffer sell(ItemStack what, int emeralds, int uses) {
-		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), what, uses, 0, 0.05F);
+	/** (0.7.486) A ware for {@code silver} silver coins (the old price in emeralds, one for one). */
+	private static MerchantOffer sell(ItemStack what, int silver, int uses) {
+		return new MerchantOffer(new ItemCost(Coin.SILVER.item(), silver), what, uses, 0, 0.05F);
 	}
 
 	private static List<PathfinderMob> members(ServerLevel level, Party p) {

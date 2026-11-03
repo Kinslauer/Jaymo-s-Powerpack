@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.sailing.Crew;
 import com.jaymoskingdoms.sailing.Deck;
 import com.jaymoskingdoms.sailing.Fleet;
@@ -746,10 +747,11 @@ final class Corsairs implements Ship.Captaincy {
 
 	/** What a share of her hold holds, by who she is. */
 	static void stock(ServerLevel level, Crew crew, List<ItemStack> share, RandomSource random) {
+		// (0.7.486) the coin hauls below are silver coins (they were emeralds), 1 for 1
 		List<ItemStack> loot = new ArrayList<>();
 		switch (crew.side) {
 			case PIRATE -> {
-				loot.add(new ItemStack(Items.EMERALD, 4 + random.nextInt(9)));
+				loot.addAll(Money.stacks(Money.silver(4 + random.nextInt(9))));
 				loot.add(new ItemStack(Items.GOLD_INGOT, 2 + random.nextInt(5)));
 				loot.add(new ItemStack(Items.GOLD_NUGGET, 8 + random.nextInt(17)));
 				loot.add(new ItemStack(Items.GUNPOWDER, 4 + random.nextInt(7)));
@@ -776,21 +778,21 @@ final class Corsairs implements Ship.Captaincy {
 				loot.add(new ItemStack(Items.IRON_INGOT, 3 + random.nextInt(6)));
 				loot.add(new ItemStack(Items.ARROW, 16 + random.nextInt(17)));
 				loot.add(new ItemStack(Items.BREAD, 6 + random.nextInt(8)));
-				loot.add(new ItemStack(Items.EMERALD, 2 + random.nextInt(5)));
+				loot.addAll(Money.stacks(Money.silver(2 + random.nextInt(5))));
 			}
 			case WHALER -> {
 				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_OIL, 4 + random.nextInt(9)));
 				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_BLUBBER, 8 + random.nextInt(17)));
 				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_BONE, 2 + random.nextInt(5)));
 				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, 2 + random.nextInt(4)));
-				loot.add(new ItemStack(Items.EMERALD, 2 + random.nextInt(5)));
+				loot.addAll(Money.stacks(Money.silver(2 + random.nextInt(5))));
 			}
 			case MERCHANT -> {
 				Item[] goods = {Items.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), Items.WHEAT, Items.SUGAR, Items.COCOA_BEANS, Items.LEATHER, Items.PAPER, Items.GLASS_BOTTLE, Items.HONEYCOMB};
 				for (int i = 0; i < 4; i++) {
 					loot.add(new ItemStack(goods[random.nextInt(goods.length)], 8 + random.nextInt(25)));
 				}
-				loot.add(new ItemStack(Items.EMERALD, 6 + random.nextInt(11)));
+				loot.addAll(Money.stacks(Money.silver(6 + random.nextInt(11))));
 				loot.add(new ItemStack(Items.IRON_INGOT, 2 + random.nextInt(5)));
 			}
 		}

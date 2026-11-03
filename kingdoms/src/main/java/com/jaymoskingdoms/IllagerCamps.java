@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,7 +54,7 @@ final class IllagerCamps {
 	static final int DAY_LOGS = 8, DAY_PLANKS = 8, DAY_WOOL = 6, DAY_GREY_WOOL = 4, DAY_FENCES = 4, DAY_COBBLE = 8, DAY_ARROWS = 8,
 		DAY_BREAD = 4, DAY_IRON = 1;
 	/** The loot pile a new camp starts with. */
-	static final int START_LOGS = 32, START_ARROWS = 32, START_BREAD = 16, START_EMERALDS = 5;
+	static final int START_LOGS = 32, START_ARROWS = 32, START_BREAD = 16, START_SILVER = 5;
 	/** Raising a building: one for each day it has grown at most, from this much of its loot pile; never with a player this near. */
 	static final int BUILDS_PER_DAY = 1, BUILD_LOGS = 6, BUILD_PLANKS = 8, BUILD_WOOL = 6;
 	static final double BUILD_HIDE_RANGE = 24.0;
@@ -103,7 +104,7 @@ final class IllagerCamps {
 		Storage.put(level, stocked, Items.DARK_OAK_LOG, START_LOGS);
 		Storage.put(level, stocked, Items.ARROW, START_ARROWS);
 		Storage.put(level, stocked, Items.BREAD, START_BREAD);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		Storage.put(level, stocked, Coin.SILVER.item(), START_SILVER);
 		Camps.takeSides(server, id, KIND);
 		Illagers.crown(level, Factions.get(server, id), layout.warlordSpot());
 		// a sentry on the watchtower, the rest about the fire

@@ -362,7 +362,7 @@ public final class SharedHistory {
 		cheer(who);
 		if (first && random.nextFloat() < KEEPSAKE_CHANCE) {
 			ItemStack gift = switch (random.nextInt(3)) {
-				case 0 -> new ItemStack(Items.EMERALD, 1 + random.nextInt(2));
+				case 0 -> com.jaymoskingdoms.money.Coin.SILVER.stack(1 + random.nextInt(2));
 				case 1 -> new ItemStack(Items.BREAD, 3);
 				default -> new ItemStack(Items.COOKED_MUTTON, 2);
 			};

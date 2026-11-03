@@ -139,6 +139,59 @@ public final class PowersCompat {
 		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
+	/** (0.7.486) Powers' {@code Baubles.belt(Player)} and {@code Baubles.setBelt(ServerPlayer, ItemStack)}: where the coin purse hangs. */
+	private static java.lang.invoke.@Nullable MethodHandle getBelt, putBelt;
+	private static boolean lookedForBelt;
+
+	private static void lookForBelt() {
+		if (lookedForBelt) {
+			return;
+		}
+		lookedForBelt = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				Class<?> baubles = Class.forName("com.jaymospowers.baubles.Baubles");
+				getBelt = java.lang.invoke.MethodHandles.publicLookup().findStatic(baubles, "belt",
+					java.lang.invoke.MethodType.methodType(net.minecraft.world.item.ItemStack.class, Player.class));
+				putBelt = java.lang.invoke.MethodHandles.publicLookup().findStatic(baubles, "setBelt",
+					java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.item.ItemStack.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' belt slot (older Powers?)", e);
+				getBelt = null;
+				putBelt = null;
+			}
+		}
+	}
+
+	/**
+	 * (0.7.486) What {@code player} wears in Powers' belt slot (the live stack, so a purse changed in place is changed), or an
+	 * empty stack without Powers or an older one.
+	 */
+	public static net.minecraft.world.item.ItemStack belt(Player player) {
+		lookForBelt();
+		if (getBelt == null) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		try {
+			return (net.minecraft.world.item.ItemStack)getBelt.invoke(player);
+		} catch (Throwable e) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+	}
+
+	/** (0.7.486) Puts {@code stack} in {@code player}'s belt slot (it must fit there; the hip is redrawn). Nothing without Powers. */
+	public static void setBelt(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack stack) {
+		lookForBelt();
+		if (putBelt == null) {
+			return;
+		}
+		try {
+			putBelt.invoke(player, stack);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't set the belt slot", e);
+		}
+	}
+
 	/** (Havens patch 5) Powers' {@code Baubles.worn(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle wornBaubles;
 	private static boolean lookedForBaubles;

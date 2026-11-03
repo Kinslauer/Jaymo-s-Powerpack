@@ -1,12 +1,11 @@
 package com.jaymospowers.costume;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.KingdomsMoney;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.ByteBuf;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +16,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,11 +25,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.BundleContents;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -40,7 +33,9 @@ import org.jspecify.annotations.Nullable;
  * {@code /costume tailor <player> <price> [<tailor>]} as the server; that opens the designer in its paid mode
  * ({@link Open}) and keeps an order here. Sewing it ({@link Sew}) is checked against the order: still open
  * ({@link #ORDER_TICKS}), the tailor still alive and near ({@link #TAILOR_REACH}), the design one you may sew
- * ({@link CostumeSets}), and the emeralds in your inventory (bundles count; free in creative). One costume per order.
+ * ({@link CostumeSets}), and the silver you carry (0.19.69: coins, purses and bundles, through {@link KingdomsMoney}, which
+ * falls back to emeralds one for one without Jaymo's Kingdoms; free in creative). One costume per order. The price is in
+ * silver coins, which is what it was in emeralds.
  */
 public final class CostumeTailoring {
 	/** How long an order stays open (ticks; 5 minutes). */
@@ -56,10 +51,14 @@ public final class CostumeTailoring {
 
 	private static final Map<UUID, Order> ORDERS = new ConcurrentHashMap<>();
 
-	/** Server → client: open the designer for a tailor to sew, at {@code price} emeralds. */
-	public record Open(int price) implements CustomPacketPayload {
+	/**
+	 * Server → client: open the designer for a tailor to sew, at {@code price} silver. {@code have} is what the player
+	 * carries in copper pieces when it opens (0.19.69: the client can't count a purse, so the server says), for the cost line.
+	 */
+	public record Open(int price, long have) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosPowers.id("costume_tailor_open"));
-		public static final StreamCodec<ByteBuf, Open> CODEC = ByteBufCodecs.VAR_INT.map(Open::new, Open::price);
+		public static final StreamCodec<ByteBuf, Open> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Open::price,
+			ByteBufCodecs.VAR_LONG, Open::have, Open::new);
 
 		@Override
 		public Type<Open> type() {
@@ -104,7 +103,7 @@ public final class CostumeTailoring {
 			return 0;
 		}
 		ORDERS.put(player.getUUID(), new Order(price, tailor != null ? tailor.getUUID() : null, player.level().getGameTime()));
-		ServerPlayNetworking.send(player, new Open(price));
+		ServerPlayNetworking.send(player, new Open(price, KingdomsMoney.count(player)));
 		return 1;
 	}
 
@@ -127,66 +126,14 @@ public final class CostumeTailoring {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.not_your_set"));
 			return;
 		}
-		if (!player.isCreative()) {
-			if (emeralds(player) < order.price()) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.tailor.cant_pay", order.price()));
-				return;
-			}
-			takeEmeralds(player, order.price());
+		long price = KingdomsMoney.silver(order.price());
+		if (!KingdomsMoney.charge(player, price)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.tailor.cant_pay", KingdomsMoney.text(price)));
+			return;
 		}
 		ORDERS.remove(player.getUUID());
 		player.getInventory().placeItemBackInInventory(CostumeItem.of(design), Prediction.SERVER_ONLY);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_LOOM_TAKE_RESULT, SoundSource.PLAYERS, 1.0F, 1.0F);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.tailor.sewn", CostumeItem.label(design), order.price()));
-	}
-
-	/** How many emeralds {@code player} carries, bundles included (either side, for the designer's cost line). */
-	public static int emeralds(Player player) {
-		Inventory inv = player.getInventory();
-		int n = 0;
-		for (int i = 0; i < inv.getContainerSize(); i++) {
-			ItemStack stack = inv.getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				n += stack.getCount();
-			}
-			BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
-			if (bundle != null) {
-				n += bundle.itemCopies().filter(s -> s.is(Items.EMERALD)).mapToInt(ItemStack::getCount).sum();
-			}
-		}
-		return n;
-	}
-
-	/** Takes {@code n} emeralds: loose ones first, then from bundles (as Kingdoms' prices do). */
-	private static void takeEmeralds(ServerPlayer player, int n) {
-		Inventory inv = player.getInventory();
-		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
-			ItemStack stack = inv.getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				int k = Math.min(n, stack.getCount());
-				stack.shrink(k);
-				n -= k;
-			}
-		}
-		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
-			ItemStack stack = inv.getItem(i);
-			BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
-			if (bundle == null || bundle.itemCopies().noneMatch(s -> s.is(Items.EMERALD))) {
-				continue;
-			}
-			List<ItemStack> kept = new ArrayList<>();
-			for (ItemStack inside : bundle.itemCopies().toList()) {
-				if (n > 0 && inside.is(Items.EMERALD)) {
-					int k = Math.min(n, inside.getCount());
-					inside.shrink(k);
-					n -= k;
-				}
-				if (!inside.isEmpty()) {
-					kept.add(inside);
-				}
-			}
-			stack.set(DataComponents.BUNDLE_CONTENTS, bundle.copyWithContents(kept.stream()));
-		}
-		inv.setChanged();
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.tailor.sewn", CostumeItem.label(design), KingdomsMoney.text(price)));
 	}
 }

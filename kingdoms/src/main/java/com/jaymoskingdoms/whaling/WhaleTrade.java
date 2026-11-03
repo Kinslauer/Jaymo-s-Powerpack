@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.whaling;
 
+import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.Downed;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,8 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * opens; an offer, once made, stays.
  */
 final class WhaleTrade {
-	/** One purchase: what they buy and how many at a time, the emeralds they give for it, and how often before a restock. */
-	record Want(Item item, int count, int emeralds, int uses) {
+	/** One purchase: what they buy and how many at a time, the silver coins ((0.7.486), once emeralds) they give for it, and how often before a restock. */
+	record Want(Item item, int count, int silver, int uses) {
 	}
 
 	/** The trading experience a villager earns per purchase, and how the price shifts with demand (the game's own use 0.05). */
@@ -96,11 +97,11 @@ final class WhaleTrade {
 
 	private static void offer(MerchantOffers offers, Want w) {
 		for (MerchantOffer offer : offers) {
-			if (offer.getCostA().is(w.item()) && offer.getResult().is(Items.EMERALD)) {
+			if (offer.getCostA().is(w.item()) && (Coin.valueOf(offer.getResult()) > 0L || offer.getResult().is(Items.EMERALD))) {
 				// (they already buy it: their trade's dearer price, added first, stands)
 				return;
 			}
 		}
-		offers.add(new MerchantOffer(new ItemCost(w.item(), w.count()), new ItemStack(Items.EMERALD, w.emeralds()), w.uses(), XP, PRICE_MULTIPLIER));
+		offers.add(new MerchantOffer(new ItemCost(w.item(), w.count()), Coin.SILVER.stack(w.silver()), w.uses(), XP, PRICE_MULTIPLIER));
 	}
 }

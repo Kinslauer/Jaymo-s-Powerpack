@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -487,7 +488,7 @@ final class Raids {
 		return false;
 	}
 
-	/** A raider at the storage takes what he can carry (the valuables first, half the time). */
+	/** A raider at the storage takes what he can carry (the valuables, coins among them, first, half the time). */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
 		List<ItemStack> contents = Storage.contents(level, target);
 		if (contents.isEmpty()) {
@@ -496,7 +497,7 @@ final class Raids {
 		}
 		RandomSource random = level.getRandom();
 		List<ItemStack> valuables = contents.stream()
-			.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
+			.filter(s -> Coin.valueOf(s) > 0L || s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
 		ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 			: contents.get(random.nextInt(contents.size()));
 		ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, pick), LOOT_PER_RAIDER);

@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.AetherBlocks;
+import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.aether.WindAether;
 import com.mojang.serialization.Codec;
@@ -53,7 +54,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -86,7 +86,7 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The tournament of the dead</b>, a ring east of the pavilion: ring its bell for {@link #ROUNDS} bouts against spirit
  * fighters, one after the other, each harder and each paying TP. Win all of them and the fortune teller sends you back free.</li>
  * <li><b>The fortune teller</b>, west of the pavilion, who sends you back to where you woke in the world: free after the
- * tournament, for {@link #PRICE_EMERALDS} emeralds in your hand or {@link #PRICE_TP} TP (sneak and right-click), or by the
+ * tournament, for {@link #PRICE_SILVER} silver coins or {@link #PRICE_TP} TP (sneak and right-click), or by the
  * Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}). Nobody is stuck: after {@link #STAY_TICKS} the Other World lets go.</li>
  * </ul>
  * (0.17.108, Andy: "you respawn in the afterlife, you can only leave with one of those ways") The dead are held: a death at the
@@ -150,8 +150,8 @@ public final class ZFighterAfterlife {
 	static final double SPIRIT_DAMAGE_PER_ROUND = 1.5;
 	/** The gauntlet is called off if the fighter wanders this far from the ring (blocks). */
 	static final double RING_LEASH = 48.0;
-	/** The fortune teller's price. */
-	static final int PRICE_EMERALDS = 24;
+	/** The fortune teller's price in silver coins (0.19.69: was emeralds, 1 silver = 1 old emerald). */
+	static final int PRICE_SILVER = 24;
 	static final int PRICE_TP = 400;
 	/** The effects of waking up again. */
 	static final int WAKE_REGEN = 200;
@@ -651,7 +651,7 @@ public final class ZFighterAfterlife {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.0F);
 	}
 
-	/** The fortune teller: free after the tournament, or sneak and right-click to pay (emeralds in hand first, else TP). */
+	/** The fortune teller: free after the tournament, or sneak and right-click to pay (silver coins first, else TP). */
 	private static void tell(ServerPlayer player, net.minecraft.world.entity.Entity teller) {
 		if (!among(player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_alive", teller.getDisplayName())
@@ -666,17 +666,15 @@ public final class ZFighterAfterlife {
 		}
 		if (!player.isShiftKeyDown()) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_offer", teller.getDisplayName(),
-				PRICE_EMERALDS, PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+				KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
-		ItemStack held = player.getMainHandItem();
-		if (held.is(Items.EMERALD) && held.getCount() >= PRICE_EMERALDS) {
-			held.shrink(PRICE_EMERALDS);
-		} else {
+		// (0.19.69) the silver comes from anywhere you carry it (coins, purses, bundles), no longer only the held stack
+		if (!KingdomsMoney.charge(player, KingdomsMoney.silver(PRICE_SILVER))) {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
 			if (data.tp() < PRICE_TP) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_poor", teller.getDisplayName(),
-					PRICE_EMERALDS, PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
+					KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
 				return;
 			}
 			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
@@ -726,32 +724,23 @@ public final class ZFighterAfterlife {
 						})) : List.of());
 					return;
 				}
-				boolean emeralds = count(player, Items.EMERALD) >= PRICE_EMERALDS;
+				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.silver(PRICE_SILVER));
 				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
-				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", PRICE_EMERALDS, PRICE_TP), List.of(
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), PRICE_EMERALDS),
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER)), PRICE_TP), List.of(
+					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(KingdomsMoney.silver(PRICE_SILVER))),
 					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> paid(player, npc, false, back), PRICE_TP)));
 			}
 		}
 	}
 
-	/** (0.17.146) Paid from the talk screen: {@link #PRICE_EMERALDS} emeralds from anywhere in the pack, or {@link #PRICE_TP} TP. */
+	/** (0.17.146) Paid from the talk screen: {@link #PRICE_SILVER} silver from anywhere you carry it, or {@link #PRICE_TP} TP. */
 	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
 		if (!among(player)) {
 			return;
 		}
 		if (emeralds) {
-			if (count(player, Items.EMERALD) < PRICE_EMERALDS) {
+			if (!KingdomsMoney.charge(player, KingdomsMoney.silver(PRICE_SILVER))) {
 				return;
-			}
-			int left = PRICE_EMERALDS;
-			for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
-				ItemStack stack = player.getInventory().getItem(i);
-				if (stack.is(Items.EMERALD)) {
-					int take = Math.min(left, stack.getCount());
-					stack.shrink(take);
-					left -= take;
-				}
 			}
 		} else {
 			ZFighterTraining.Data data = ZFighterTraining.of(player);
@@ -774,17 +763,6 @@ public final class ZFighterAfterlife {
 		} else {
 			ZFighterNpcs.reply(player, teller, () -> pay(player, teller, emeralds), back);
 		}
-	}
-
-	private static int count(ServerPlayer player, net.minecraft.world.item.Item item) {
-		int n = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(item)) {
-				n += stack.getCount();
-			}
-		}
-		return n;
 	}
 
 	// ---------------------------------------------------------------- the tournament of the dead

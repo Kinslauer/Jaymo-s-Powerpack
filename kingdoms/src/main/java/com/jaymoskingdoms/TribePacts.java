@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Coin;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,14 +55,14 @@ public final class TribePacts {
 	// Tuning
 	/** A tribe's favour: its most (as a negative grudge), what calls a war band, what opens the greenskin road, how fast it fades (a day). */
 	public static final int FAVOUR_MOST = 60, ALLY_AT = -30, FRIEND_AT = -20, FAVOUR_DAILY = 1;
-	/** A gift to a chief or pedlar once the grudge is paid off: emeralds, and the favour it wins. */
+	/** A gift to a chief or pedlar once the grudge is paid off: silver (the constant keeps its name; Tribes reads it), and the favour it wins. */
 	public static final int GIFT_EMERALDS = 6, GIFT_FAVOUR = 10;
 	/** A non-human's grudge rises at this share of the usual (at least 1). */
 	static final float NONHUMAN_SHARE = 0.5F;
-	/** Havens' tribute to the tribes: emeralds a day to each tribe whose nearest camp is this near; spared this many days after paying. */
+	/** Havens' tribute to the tribes: silver a day to each tribe whose nearest camp is this near; spared this many days after paying. */
 	static final int HAVEN_TRIBUTE = 4, PAID_DAYS = 2;
 	static final double TRIBUTE_REACH = 1200.0;
-	/** An Ogre King's tribute from the nearest haven this near his hold: emeralds a day. */
+	/** An Ogre King's tribute from the nearest haven this near his hold: silver a day. */
 	static final int OGRE_TRIBUTE = 3;
 	static final double OGRE_REACH = 1200.0;
 	/** A called war band: from a tribe camp this near the raided seat; its size (a base, one more per so much favour, the most). */
@@ -232,18 +233,19 @@ public final class TribePacts {
 		level.setAttached(PAID, Map.copyOf(paid));
 	}
 
-	/** Takes {@code emeralds} from settlement {@code id}'s treasury; false (and nothing taken) if it hasn't them. */
-	private static boolean pay(MinecraftServer server, int id, int emeralds) {
+	/** Takes {@code silver} from settlement {@code id}'s treasury; false (and nothing taken) if it hasn't them. */
+	private static boolean pay(MinecraftServer server, int id, int silver) {
 		Faction f = Factions.get(server, id);
-		if (f == null || f.treasury() < emeralds) {
+		if (f == null || f.treasury() < silver) {
 			return false;
 		}
-		Factions.update(server, id, x -> x.withTreasury(Math.max(0L, x.treasury() - emeralds)));
+		Factions.update(server, id, x -> x.withTreasury(Math.max(0L, x.treasury() - silver)));
 		return true;
 	}
 
 	/** The tribute goes into a chest of the king's hold, if it's loaded. */
-	private static void hoard(ServerLevel level, BlockPos at, int emeralds) {
+	private static void hoard(ServerLevel level, BlockPos at, int silver) {
+		net.minecraft.world.item.Item coin = Coin.SILVER.item();
 		if (!level.isLoaded(at)) {
 			return;
 		}
@@ -252,8 +254,9 @@ public final class TribePacts {
 			if (level.getBlockEntity(pos) instanceof ChestBlockEntity chest) {
 				for (int slot = 0; slot < chest.getContainerSize(); slot++) {
 					ItemStack s = chest.getItem(slot);
-					if (s.isEmpty() || s.is(Items.EMERALD) && s.getCount() + emeralds <= s.getMaxStackSize()) {
-						chest.setItem(slot, new ItemStack(Items.EMERALD, s.getCount() + emeralds));
+					// (0.7.486) the hoard is silver coins now; they top up a stack of coins or take an empty slot
+					if (s.isEmpty() || s.is(coin) && s.getCount() + silver <= s.getMaxStackSize()) {
+						chest.setItem(slot, new ItemStack(coin, s.getCount() + silver));
 						chest.setChanged();
 						return;
 					}

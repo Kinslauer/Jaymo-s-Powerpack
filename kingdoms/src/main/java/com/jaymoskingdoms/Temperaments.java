@@ -30,8 +30,6 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -57,7 +55,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Proud</b> (pride): helps only those of real standing ({@link #PROUD_REP}); won't take a bribe to end a
  * brawl.</li>
  * <li><b>Greedy</b> (avarice): helps anyone not an enemy, anywhere, if they've the coin, and takes
- * {@link #GREEDY_FEE} emeralds for it; takes a bribe even from an enemy.</li>
+ * {@link #GREEDY_FEE} silver for it; takes a bribe even from an enemy.</li>
  * <li><b>Suspicious</b> (distrust): helps only those who've introduced themselves ({@link Introductions}), and then
  * as the settlement would.</li>
  * <li><b>Timid</b> (fear): helps as the settlement would, only with no monster near; frightened from farther and hides
@@ -117,7 +115,7 @@ public final class Temperaments {
 	static final int CHEERFUL_FORGIVES = -50;
 	/** A proud one helps only someone whose name with the place is above this. */
 	static final int PROUD_REP = 100;
-	/** What a greedy one asks for getting you up (emeralds); they help for coin only if you have this much. */
+	/** What a greedy one asks for getting you up (silver coins); they help for coin only if you have this much. */
 	static final int GREEDY_FEE = 3;
 	/** A timid one won't come over with a monster this near the downed. */
 	static final double TIMID_DANGER = 16.0;
@@ -225,7 +223,7 @@ public final class Temperaments {
 			case KINDHEARTED -> true;
 			case DEVOUT -> wild || rep > Reputation.HOSTILE;
 			case CHEERFUL -> wild || rep > CHEERFUL_FORGIVES && !wanted;
-			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && emeralds(player) >= GREEDY_FEE;
+			case GREEDY -> welcome || (wild || rep > Reputation.HOSTILE) && Approaches.canPay(player, GREEDY_FEE);
 			case PROUD -> !wild && rep > PROUD_REP && !wanted;
 			case SUSPICIOUS -> welcome && Introductions.knows(player, helper);
 			case TIMID -> welcome && !danger(level, player);
@@ -291,15 +289,8 @@ public final class Temperaments {
 		if (!is(helper, Temperament.GREEDY)) {
 			return;
 		}
-		int took = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize() && took < GREEDY_FEE; i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(stack.getCount(), GREEDY_FEE - took);
-				stack.shrink(n);
-				took += n;
-			}
-		}
+		// (0.7.486) silver from coins, purses and bundles alike (the old loose-emerald counter is gone)
+		int took = Approaches.payUpTo(player, GREEDY_FEE);
 		if (took > 0) {
 			Speech.sayTo(level, helper, player, Component.translatable("temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), took),
 				Speech.GOLD);
@@ -375,17 +366,6 @@ public final class Temperaments {
 	static String prompt(LivingEntity e) {
 		Temperament t = of(e);
 		return t == null ? "" : "Your temperament: " + t.prompt + ".";
-	}
-
-	private static int emeralds(ServerPlayer player) {
-		int n = 0;
-		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-			ItemStack stack = player.getInventory().getItem(i);
-			if (stack.is(Items.EMERALD)) {
-				n += stack.getCount();
-			}
-		}
-		return n;
 	}
 
 	// ---- the test command ------------------------------------------------------------------------------------------------

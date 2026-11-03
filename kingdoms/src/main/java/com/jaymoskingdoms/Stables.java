@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.equestrian.Bond;
 import com.jaymoskingdoms.equestrian.Bonding;
 import com.jaymoskingdoms.equestrian.Breed;
@@ -68,7 +69,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.47) Equestrian stage 3: a settlement's stable at work. Its {@link Folk#STABLEHAND} boards players' horses (fed,
- * watered and brushed while they're away, {@link #WEEKLY_FEE} emeralds for each week begun, paid when the horse is
+ * watered and brushed while they're away, {@link #WEEKLY_FEE} silver coins ((0.7.486), once emeralds) for each week begun, paid when the horse is
  * taken back out), sells horses (the breed by the land and the realm's wealth, the quality by its wealth) and buys
  * them back; its {@link Folk#FARRIER} shoes horses and sells tack, better tack in wealthier kingdoms. Walk up to either
  * and they say what they offer (clickable), or use {@code /kingdom stable} and {@code /kingdom farrier} beside them.
@@ -89,7 +90,7 @@ public final class Stables {
 	static final int GREET_COOLDOWN = 3600;
 	/** The stable commands work this close to a stable worker; your horse must be this close to you. */
 	static final double MENU_RANGE = 8.0, HORSE_RANGE = 12.0;
-	/** Boarding: emeralds for each week begun, the days in a week. */
+	/** Boarding: silver coins for each week begun, the days in a week. */
 	static final int WEEKLY_FEE = 4, WEEK_DAYS = 7;
 	/** A boarded horse further than this from its stall is walked back; further than {@link #STALL_FAR} it's put back. */
 	static final double STALL_NEAR = 3.0, STALL_FAR = 8.0;
@@ -110,7 +111,7 @@ public final class Stables {
 	/** Cavalry with stables: speed added per stable (on the realm's {@link Cavalry#HORSE_SPEED}), the most stables that count. */
 	static final double STABLE_SPEED = 0.015;
 	static final int MAX_LEVEL = 3;
-	/** A caravan horse's saddlebags: emeralds in them (up to), and the goods. */
+	/** A caravan horse's saddlebags: silver coins in them (up to), and the goods. */
 	static final int BAG_EMERALDS = 4;
 	static final List<String> BAG_GOODS = List.of("minecraft:bread*2-5", "minecraft:wheat*4-12", "minecraft:leather*1-4", "minecraft:iron_ingot*1-3",
 		"minecraft:cooked_beef*2-4", "minecraft:apple*2-6", "minecraft:string*2-6", "minecraft:gold_nugget*3-9");
@@ -600,16 +601,15 @@ public final class Stables {
 		}
 	}
 
-	/** {@code player} pays {@code cost} emeralds into {@code f}'s treasury (nothing in creative); false (and told) if they can't. */
+	/** {@code player} pays {@code cost} silver coins into {@code f}'s treasury (nothing in creative); false (and told) if they can't. */
 	static boolean pay(ServerPlayer player, Faction f, int cost) {
 		if (player.isCreative() || cost <= 0) {
 			return true;
 		}
-		if (Purse.count(player, Items.EMERALD) < cost) {
+		if (!Money.charge(player, Money.silver(cost))) {
 			tell(player, Component.translatable("message.jaymoskingdoms.stable.cant_pay", cost).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		Purse.take(player, Items.EMERALD, cost);
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + cost));
 		return true;
 	}
@@ -620,12 +620,9 @@ public final class Stables {
 		}
 	}
 
-	private static void giveEmeralds(ServerPlayer player, int n) {
-		while (n > 0) {
-			int k = Math.min(64, n);
-			give(player, new ItemStack(Items.EMERALD, k));
-			n -= k;
-		}
+	/** (0.7.486) {@code n} silver coins' worth to {@code player}: into the worn purse if it has room, else the pack, else the ground. */
+	private static void giveSilver(ServerPlayer player, int n) {
+		Money.pay(player, Money.silver(n));
 	}
 
 	// ---- the market -------------------------------------------------------------------------------------------------
@@ -783,7 +780,7 @@ public final class Stables {
 			return 0;
 		}
 		Factions.update(level.getServer(), f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - price)));
-		giveEmeralds(player, price);
+		giveSilver(player, price);
 		Component name = Bonding.name(horse);
 		handOver(level, player, horse, f, w.blockPosition());
 		tell(player, Component.translatable("message.jaymoskingdoms.stable.sold", name, price).withStyle(ChatFormatting.YELLOW));
@@ -988,7 +985,7 @@ public final class Stables {
 		ServerLevel level = player.level();
 		boolean farrier = w.role() == Folk.FARRIER;
 		Component title = Component.translatable("gui.jaymoskingdoms." + (farrier ? "farrier" : "stable") + ".title", w.mob().getName(), f.name());
-		int purse = player.getInventory().countItem(Items.EMERALD);
+		int purse = (int)Math.min(Integer.MAX_VALUE, Money.count(player) / Money.SILVER);
 		Component subtitle = farrier ? Component.translatable("gui.jaymoskingdoms.farrier.subtitle", SHOE_PRICE, purse)
 			: Component.translatable("gui.jaymoskingdoms.stable.subtitle", WEEKLY_FEE, purse);
 		MutableComponent note = Component.empty();
@@ -1237,7 +1234,7 @@ public final class Stables {
 		RandomSource random = level.getRandom();
 		int emeralds = random.nextInt(BAG_EMERALDS + 1);
 		if (emeralds > 0) {
-			give(player, new ItemStack(Items.EMERALD, emeralds));
+			giveSilver(player, emeralds);
 		}
 		for (int i = 0, n = 1 + random.nextInt(2); i < n; i++) {
 			String spec = BAG_GOODS.get(random.nextInt(BAG_GOODS.size()));
@@ -1273,17 +1270,18 @@ public final class Stables {
 		if (random.nextBoolean()) {
 			Quest.Objective o = new Quest.Objective("", 1, 0, Optional.empty(), Optional.empty(), "", f.name(), false);
 			return new Quest(UUID.randomUUID().toString(), Quest.BREAK_IN, "stable.break_in", who, o,
-				withEmeralds(reward, 10 + random.nextInt(7)), 0L);
+				withSilver(reward, 10 + random.nextInt(7)), 0L);
 		}
 		Breed breed = Breed.HORSES[random.nextInt(Breed.HORSES.length)];
 		int quality = STUD_MIN + random.nextInt(STUD_SPREAD + 1);
 		Quest.Objective o = new Quest.Objective(breed.id(), quality, 0, Optional.empty(), Optional.empty(), "", f.name(), false);
 		return new Quest(UUID.randomUUID().toString(), Quest.STUD, "stable.stud", who, o,
-			withEmeralds(reward, BREED_PRICE[breed.ordinal()] * (50 + quality) / 100 + 6 + random.nextInt(6)), 0L);
+			withSilver(reward, BREED_PRICE[breed.ordinal()] * (50 + quality) / 100 + 6 + random.nextInt(6)), 0L);
 	}
 
-	private static Quest.Reward withEmeralds(Quest.Reward r, int emeralds) {
-		return new Quest.Reward(emeralds, r.items(), r.book(), r.relic(), r.hearts(), r.reputation(), r.standing());
+	/** (0.7.486) {@code r} with a reward of {@code silver} silver coins (the codec key stays {@code emeralds}). */
+	private static Quest.Reward withSilver(Quest.Reward r, int silver) {
+		return new Quest.Reward(silver, r.items(), r.book(), r.relic(), r.hearts(), r.reputation(), r.standing());
 	}
 
 	/** A king's horse quest: a race against the clock to another town, else a wild horse broken in for him. Null if there's no stable. */

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.monsters.Monsters;
+import com.jaymoskingdoms.money.Money;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -99,8 +100,8 @@ public final class Quests {
 	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
 	/** A delivered letter: hearts with whoever gets it. */
 	static final int LETTER_HEARTS = 5;
-	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): emeralds this much more (percent), and this much more good name with the giver's realm. */
-	static final int CUNNING_EMERALDS = 50, CUNNING_REPUTATION = 50;
+	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): silver this much more (percent), and this much more good name with the giver's realm. */
+	static final int CUNNING_SILVER = 50, CUNNING_REPUTATION = 50;
 	/** (0.5.29) A noble king out on his round stops for one who's been sent for him, when they come this close; once per this many ticks, held this long. */
 	static final double ALMS_RANGE = 5.0;
 	static final int ALMS_EVERY = 20 * 120, ALMS_HOLD = 20 * 8;
@@ -502,7 +503,8 @@ public final class Quests {
 		remove(player, q.id());
 		// (0.7.0) a priest's hunt: the rite, there and then
 		Cures.rite(level, player, giver, q);
-		for (ItemStack stack : rewards(level, q)) {
+		Money.pay(player, q.reward().cp());
+		for (ItemStack stack : goods(level, q)) {
 			give(player, stack);
 		}
 		Quest.Reward r = q.reward();
@@ -613,12 +615,16 @@ public final class Quests {
 	static List<ItemStack> rewards(ServerLevel level, Quest q) {
 		List<ItemStack> out = new ArrayList<>();
 		Quest.Reward r = q.reward();
-		int emeralds = r.emeralds();
-		while (emeralds > 0) {
-			int n = Math.min(64, emeralds);
-			out.add(new ItemStack(Items.EMERALD, n));
-			emeralds -= n;
-		}
+		// (0.7.486) the coins (silver, and any copper) are struck as coins now
+		out.addAll(Money.stacks(r.cp()));
+		out.addAll(goods(level, q));
+		return out;
+	}
+
+	/** (0.7.486) What {@code q} pays besides coins: goods, a book, a relic. */
+	private static List<ItemStack> goods(ServerLevel level, Quest q) {
+		List<ItemStack> out = new ArrayList<>();
+		Quest.Reward r = q.reward();
 		for (String spec : r.items()) {
 			int star = spec.indexOf('*');
 			Item item = item(star < 0 ? spec : spec.substring(0, star));
@@ -891,8 +897,8 @@ public final class Quests {
 					.withStyle(ChatFormatting.GOLD));
 				if (oath || out) {
 					Quest.Reward r = done.reward();
-					done = done.withReward(new Quest.Reward(r.emeralds() * (100 + CUNNING_EMERALDS) / 100, r.items(), r.book(), r.relic(), r.hearts(),
-						r.reputation() + CUNNING_REPUTATION, r.standing()));
+					done = done.withReward(new Quest.Reward(r.emeralds() * (100 + CUNNING_SILVER) / 100, r.items(), r.book(), r.relic(), r.hearts(),
+						r.reputation() + CUNNING_REPUTATION, r.standing(), r.copper() * (100 + CUNNING_SILVER) / 100));
 					p.sendSystemMessage(Component.translatable(oath ? "quest.jaymoskingdoms.regicide.cunning.oath" : "quest.jaymoskingdoms.regicide.cunning.round")
 						.withStyle(ChatFormatting.DARK_RED));
 				}
@@ -1348,7 +1354,7 @@ public final class Quests {
 			extras.add(Component.translatable("quest.jaymoskingdoms.reward.standing", r.standing()));
 		}
 		if (q.kind() == Quest.REGICIDE && state != QuestNet.READY) {
-			extras.add(Component.translatable("quest.jaymoskingdoms.regicide.hint." + q.objective().otherName(), CUNNING_EMERALDS));
+			extras.add(Component.translatable("quest.jaymoskingdoms.regicide.hint." + q.objective().otherName(), CUNNING_SILVER));
 		}
 		MutableComponent title = title(q).copy();
 		return new QuestNet.View(q.id(), state, q.royal(), title, text(q), objective(level, player, q), rewards(level, q), extras);

@@ -195,6 +195,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GreenskinLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
+		// (0.7.486) the Coin Press's screen
+		com.jaymoskingdoms.client.money.MoneyClient.register();
 		// 0.7.137: the wind dragons (Notus: its model, flight, breath key, trust and stamina HUD)
 		com.jaymoskingdoms.client.dragons.DragonsClient.register();
 		// 0.6.12: storm clouds, tornado funnels and the rain under a storm

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:coin_unstack",
+  "ingredients": [
+    "jaymoskingdoms:gold_coin_stack"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:gold_coin",
+    "count": 10
+  }
+}

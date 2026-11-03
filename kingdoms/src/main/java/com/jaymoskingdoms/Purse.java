@@ -7,19 +7,37 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BundleContents;
+import com.jaymoskingdoms.money.Money;
 
 /**
- * (0.7.51) What a player can pay with: the {@code item}s loose in their inventory and those carried in a bundle there.
- * Every price the kingdoms ask (bargains, tolls, writs, skills, stables, rickshaws, a retinue, a lost coach fare) is
- * counted and taken here, so emeralds in a bundle spend like any others. Loose ones go first.
+ * (0.7.51) What a player can pay with. (0.7.486) Now a thin wrapper over {@link Money}, kept so the old call sites compile
+ * while they move over: emeralds are gems and no longer money, and one emerald's price is one silver coin, so
+ * {@code count(player, EMERALD)} is the silver the player carries (coins, coin stacks, purses, bundles and the worn purse)
+ * and {@code take(player, EMERALD, n)} takes {@code n} silver. Any other item is counted loose and in bundles as before.
+ * New code calls {@link Money} directly.
  */
 public final class Purse {
+	private static boolean warned;
+
 	private Purse() {
 	}
 
-	/** How many {@code item}s {@code player} carries, bundles included. */
+	private static void deprecated() {
+		if (!warned) {
+			warned = true;
+			JaymosKingdoms.LOGGER.warn("Purse.count/take(EMERALD) is deprecated: use Money.canPay/charge (a price in emeralds is a price in silver)",
+				new Throwable("first caller"));
+		}
+	}
+
+	/** How many {@code item}s {@code player} carries, bundles included; for emeralds, how many silver coins' worth of money. */
 	public static int count(ServerPlayer player, Item item) {
+		if (item == Items.EMERALD) {
+			deprecated();
+			return (int)Math.min(Integer.MAX_VALUE, Money.count(player) / Money.SILVER);
+		}
 		Inventory inv = player.getInventory();
 		int n = 0;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -35,8 +53,13 @@ public final class Purse {
 		return n;
 	}
 
-	/** Takes up to {@code n} {@code item}s from {@code player}: loose ones first, then from their bundles. */
+	/** Takes up to {@code n} {@code item}s from {@code player}: loose ones first, then from their bundles; for emeralds, {@code n} silver. */
 	public static void take(ServerPlayer player, Item item, int n) {
+		if (item == Items.EMERALD) {
+			deprecated();
+			Money.chargeUpTo(player, Money.silver(n));
+			return;
+		}
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize() && n > 0; i++) {
 			ItemStack stack = inv.getItem(i);

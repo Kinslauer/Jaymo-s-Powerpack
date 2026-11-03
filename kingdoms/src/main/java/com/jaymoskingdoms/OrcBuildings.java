@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -579,15 +580,16 @@ final class OrcBuildings {
 		return containers;
 	}
 
-	/** The warchief's hoard: iron (lots), gold, emeralds, a golden apple, an iron axe, meat, and now and then a diamond. */
+	/** The warchief's hoard: iron (lots), gold, silver coins (0.7.486; once emeralds), a golden apple, an iron axe, meat, and now and then a diamond. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = List.of(new ItemStack(Items.IRON_INGOT, 10 + random.nextInt(13)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
-			new ItemStack(Items.EMERALD, 6 + random.nextInt(9)), new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.silver(6 + random.nextInt(9))));
+		hoard.addAll(List.of(new ItemStack(Items.IRON_INGOT, 10 + random.nextInt(13)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(7)),
+			new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
 			new ItemStack(Items.IRON_AXE), new ItemStack(Items.COOKED_BEEF, 8 + random.nextInt(9)), new ItemStack(Items.BONE, 6 + random.nextInt(10)),
-			random.nextInt(3) == 0 ? new ItemStack(Items.DIAMOND, 1 + random.nextInt(3)) : new ItemStack(Items.CHAINMAIL_CHESTPLATE));
+			random.nextInt(3) == 0 ? new ItemStack(Items.DIAMOND, 1 + random.nextInt(3)) : new ItemStack(Items.CHAINMAIL_CHESTPLATE)));
 		for (ItemStack stack : hoard) {
 			for (int tries = 0; tries < 10; tries++) {
 				int slot = random.nextInt(c.getContainerSize());

@@ -37,13 +37,13 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.462) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for emeralds, the infirmary cot
+ * (0.7.462) More ways to heal (Healing-Plan 9 to 11): the town healer's full treatment for silver coins, the infirmary cot
  * ({@link InfirmaryCot}) and the shrine ({@link Shrine}). All of them reach the body's parts through Jaymo's Powers' wounds
  * ({@link PowersCompat}); without Powers they heal the hearts. This class holds what they share: the treatment itself, its
  * price, what makes a place an infirmary, and the blocks' registration.
  */
 public final class Healing {
-	// ---- the healer's price (emeralds) ----
+	// ---- the healer's price (silver coins, (0.7.486) was emeralds) ----
 	/** (0.7.462) A full treatment: a base, then so much for each break, each open cut, each festering part, and for every quarter of health lost. */
 	static final int TREATMENT_BASE = 4, PER_BREAK = 5, PER_CUT = 1, PER_FESTER = 3, PER_QUARTER_LOST = 2;
 	/** (0.7.462) The most a treatment ever costs. */
@@ -103,7 +103,7 @@ public final class Healing {
 		return PowersCompat.injuries(body).any() || body.getHealth() < body.getMaxHealth() - 0.01F;
 	}
 
-	/** What a full treatment of {@code body} costs, in emeralds (see the constants above). */
+	/** What a full treatment of {@code body} costs, in silver coins (see the constants above). */
 	static int treatmentPrice(LivingEntity body) {
 		PowersCompat.Injuries hurt = PowersCompat.injuries(body);
 		float lost = Math.max(0.0F, 1.0F - body.getHealth() / body.getMaxHealth());

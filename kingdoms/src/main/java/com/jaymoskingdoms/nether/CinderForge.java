@@ -1,5 +1,8 @@
 package com.jaymoskingdoms.nether;
 
+import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.Coinage;
+import com.jaymoskingdoms.money.Coin;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
@@ -74,7 +77,7 @@ import org.jspecify.annotations.Nullable;
  * piece coming back Cinder-forged (fire protection, unbreaking) for blaze rods.</li>
  * <li><b>Finding him:</b> smiths in the Overworld (armourers, weaponsmiths, toolsmiths) now and then pass on the rumour as
  * you talk to them, in a speech bubble, never in chat ({@link #RUMOURS}); one who has told you sells a Charred
- * Wayfinder for {@link #WAYFINDER_PRICE} emeralds (sneak and use them with the emeralds in hand). The wayfinder is a
+ * Wayfinder for {@link #WAYFINDER_PRICE} silver coins (0.7.486, once emeralds; sneak and use them with coins or a purse in hand). The wayfinder is a
  * compass: in the Overworld it points where a portal should go (the forge's spot times eight), in the Nether at the
  * forge itself. The first time you set foot in the Nether, your next Tidings carries word of it too.</li>
  * </ul>
@@ -88,7 +91,7 @@ public final class CinderForge {
 	static final double BUILD_RANGE = 96.0;
 	/** Ticks between his restocks (a week), and before he comes back if he's gone (a day). */
 	static final long RESTOCK_TICKS = 24000L * 7L, RETURN_TICKS = 24000L;
-	/** The Writ: emeralds and netherite scrap. */
+	/** The Writ: silver coins ((0.7.486) once emeralds) and netherite scrap. */
 	static final int WRIT_EMERALDS = 40, WRIT_SCRAP = 2;
 	/** Reforging a piece: blaze rods, and what it comes back with. */
 	static final int REFORGE_RODS = 4, REFORGE_FIRE_PROTECTION = 3, REFORGE_UNBREAKING = 2, REFORGE_USES = 2;
@@ -305,7 +308,7 @@ public final class CinderForge {
 		MerchantOffers offers = v.getOffers();
 		offers.clear();
 		if (Classes.WRIT != null) {
-			offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, WRIT_EMERALDS), Optional.of(new ItemCost(Items.NETHERITE_SCRAP, WRIT_SCRAP)),
+			offers.add(new MerchantOffer(new ItemCost(Coin.SILVER.item(), WRIT_EMERALDS), Optional.of(new ItemCost(Items.NETHERITE_SCRAP, WRIT_SCRAP)),
 				new ItemStack(Classes.WRIT), 1, 0, 0.0F));
 		}
 		for (Item piece : new Item[] {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS,
@@ -330,17 +333,14 @@ public final class CinderForge {
 
 	// ---- the Overworld's smiths ----------------------------------------------------------------------------------------
 
-	/** Talking to a smith: a rumour now and then; sneaking with emeralds once they've told you, a wayfinder. */
+	/** Talking to a smith: a rumour now and then; sneaking with coins once they've told you, a wayfinder. */
 	private static InteractionResult useSmith(ServerPlayer player, Villager v) {
 		ServerLevel level = (ServerLevel)v.level();
 		ItemStack held = player.getMainHandItem();
-		if (player.isShiftKeyDown() && held.is(Items.EMERALD) && player.entityTags().contains(HEARD_TAG)) {
-			if (held.getCount() < WAYFINDER_PRICE && !player.isCreative()) {
+		if (player.isShiftKeyDown() && Coinage.held(held) > 0L && player.entityTags().contains(HEARD_TAG)) {
+			if (!Money.charge(player, Money.silver(WAYFINDER_PRICE))) {
 				Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.wayfinder.price", WAYFINDER_PRICE), Speech.WHITE);
 				return InteractionResult.SUCCESS;
-			}
-			if (!player.isCreative()) {
-				held.shrink(WAYFINDER_PRICE);
 			}
 			ServerLevel nether = level.getServer().getLevel(Level.NETHER);
 			if (nether != null) {

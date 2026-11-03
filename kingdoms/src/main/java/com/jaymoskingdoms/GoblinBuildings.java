@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -501,15 +502,16 @@ final class GoblinBuildings {
 		return containers;
 	}
 
-	/** The king's hoard: gold (lots), emeralds, a golden apple, mushroom stew, and a spare mask. */
+	/** The king's hoard: gold (lots), silver coins (0.7.486; once emeralds), a golden apple, mushroom stew, and a spare mask. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;
 		}
-		List<ItemStack> hoard = List.of(new ItemStack(Items.GOLD_INGOT, 8 + random.nextInt(9)), new ItemStack(Items.GOLD_NUGGET, 16 + random.nextInt(33)),
-			new ItemStack(Items.EMERALD, 4 + random.nextInt(9)), new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
+		List<ItemStack> hoard = new java.util.ArrayList<>(Money.stacks(Money.silver(4 + random.nextInt(9))));
+		hoard.addAll(List.of(new ItemStack(Items.GOLD_INGOT, 8 + random.nextInt(9)), new ItemStack(Items.GOLD_NUGGET, 16 + random.nextInt(33)),
+			new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
 			new ItemStack(Items.MUSHROOM_STEW), new ItemStack(Items.RAW_GOLD, 3 + random.nextInt(6)), new ItemStack(Disguise.MASK),
-			random.nextInt(4) == 0 ? new ItemStack(Items.ENCHANTED_GOLDEN_APPLE) : new ItemStack(Items.GOLDEN_CARROT, 4 + random.nextInt(5)));
+			random.nextInt(4) == 0 ? new ItemStack(Items.ENCHANTED_GOLDEN_APPLE) : new ItemStack(Items.GOLDEN_CARROT, 4 + random.nextInt(5))));
 		for (ItemStack stack : hoard) {
 			for (int tries = 0; tries < 10; tries++) {
 				int slot = random.nextInt(c.getContainerSize());

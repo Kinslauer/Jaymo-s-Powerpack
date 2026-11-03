@@ -4,7 +4,13 @@ b17ef33c645e056ac457a3469f391e95e6a44e35 kingdoms/src/main/resources/assets/jaym
 b7b049f2e223c2ec6657fc147196a690f3def738 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/bounty_notice_1.png
 17c34dc9c60e306a9127d0a07b2155412948b596 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/bounty_notice_2.png
 b3fcf50a255ab19b314c45f8b9a1b9faa3773140 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/burnt_torch.png
+d7c5e41bf24886037e50903a489678c9a015e92a kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/coin_press_base.png
+89574471b36286b9a72aa66bc7fb7fd3730da547 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/coin_press_metal.png
+b6967f3c604fdcdb666a451fd12a5b4ab607318b kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/copper_coin_pile.png
+d7b564bfce33d0ea21ceff864b52aa9a883c1735 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/counting_table_side.png
+a9774529c76038963ddc92014350ac3d444679f1 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/counting_table_top.png
 d2e31ca408efca0fefdda9771c0338f5f391891e kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/goblin_kings_crown.png
+637ce3569cd3d2f3a2d3584bed814e7988756171 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/gold_coin_pile.png
 bc668b22dcd134fe49d140017e57457930fc315b kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/grate.png
 e7739e5f8751f88e365a4f1e7be5f264a8d7310c kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/infirmary_cot.png
 3eb42c3289233ba38d9669a46d1e6afc89fbcb42 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/ogre_kings_crown.png
@@ -23,6 +29,7 @@ a4d3ca395dc669f33ee3c96a1aad61ff880fe77c kingdoms/src/main/resources/assets/jaym
 b033735786127cb0493322b8591bac2af9fb4de3 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/sandbag.png
 a2e406176d2f61b4a4603c7ad75326155cf77f87 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/sandbag_end.png
 8622da01251f542666f66915a186d78a7533c048 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/shrine.png
+5ad4c4f98a1babaebc3c281d56a7a7c25b1ab498 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/silver_coin_pile.png
 af8c3b45f86749c0536e5d0b8ec3ab7227b414cd kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/slats.png
 bd5d8cba5b12d1df1eb73e530a5cfa614f76b8a8 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/town_notice_0.png
 026573c635177ff3bb05006deca0912df8aed26b kingdoms/src/main/resources/assets/jaymoskingdoms/textures/block/town_notice_1.png
@@ -796,7 +803,14 @@ b0fc510a2e752cec559ac25d154d31f3c4364d9a kingdoms/src/main/resources/assets/jaym
 e2e9102cfd0814eff53d254fb27269b8be30e4ae kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/chain_barding.png
 32d8bb6b9dc9b226b22e3603674e98e041f09e1f kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/circlet.png
 059be89a676b781151720a301f7023ed66b21847 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/clockwork_golem.png
+013b330324e2dd10a83615b2bd704e1ad8a0a010 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coin_purse_0.png
+308f03467ed2a4f2596b5667539a5b54a9b2ea80 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coin_purse_1.png
+ef878e96f5c7065755c53b8dcbfb82931a534f18 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coin_purse_2.png
+31ad4e68ce8520313fe7b0eccc5dde05f0cc7878 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coin_purse_3.png
+3c5cc494da7944b4a02a0c7fc698ca2b5240fd09 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coin_purse_4.png
 58e4cac4a12a2f10639712ebcab282df8af5205e kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/cooked_whale_meat.png
+c1bfd1a318a367da4e2290a6390d5181507dcc3d kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/copper_coin.png
+fb301c19cadd2ecf96df8d86c7a7332936954e3a kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/copper_coin_stack.png
 31ec9eefeb3d571e88090e69731ea01dee834422 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/coronet.png
 26a1d507cf6327cb14cbff7b8d7a36546c9992ae kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/cursed_card.png
 871e8ae1ed4b5d1b8553fd25eec095a2c7558f69 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/cursed_tusk.png
@@ -817,6 +831,8 @@ c6dd31c37d5feb6f3b98808c4f0af3b67435fe11 kingdoms/src/main/resources/assets/jaym
 21c6a889589358ea4a947dffbf0d100489d593e8 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/gladiator_leggings.png
 7a5bba1cf2f32599949eb708f81a444bcb633128 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/goblin_kings_ring.png
 7d7c6993d192c5d8baf5f54e10e484991fe721d8 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/goblin_mask.png
+8b2a703032dd01319e6b4bb8a9411be349fe14ed kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/gold_coin.png
+e50b4f4041929d67a16d5b6edfb05dc8da429835 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/gold_coin_stack.png
 f48376b526078c63c2e991dce769603c2dda5380 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/gorgon_spawn_egg.png
 d4e8142dce53576b3a6b47238783f8060f1929e7 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/great_whale_spawn_egg.png
 8b8475636c4c7b6a026afd47c4b2c1b2c705e183 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/harpoon.png
@@ -916,6 +932,8 @@ f1f60c4b36b4033e4852501e42bfe61e879a48d8 kingdoms/src/main/resources/assets/jaym
 e4cf1c6921563856305ad067f1ac812bdea14708 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/sealed_letter.png
 7f6f6b73b2fad36c0ab3a25e21a194a1969ffd03 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/shash_brick.png
 b89047e034b22393291674845fc5cb6dd0cce56a kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/ship_plans.png
+20ded157d1318a2c00173f26eea134c19d4c7402 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/silver_coin.png
+25b5d22fa8a8809c813612df40cba4f526a8caca kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/silver_coin_stack.png
 e4444fef7c7fe9d4fa1402519b56da1c0f2644c4 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/silver_sword.png
 7c7f05357272ad8debe0e2f0bd10eb586ca6ccb0 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/skeleton_lord_spawn_egg.png
 4bccbe5e20283ad897d4a66aa905727c02747369 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/item/skulk_golem_spawn_egg.png

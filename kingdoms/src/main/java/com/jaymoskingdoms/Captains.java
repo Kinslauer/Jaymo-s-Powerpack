@@ -59,6 +59,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.money.Money;
 
 /**
  * (0.7.431) Havens patch 3, <b>captains</b> (ideas from Shadow of War, a commercial game, and King's Monsters, ARR: our own
@@ -116,7 +117,7 @@ public final class Captains {
 	static final int FEAR_TICKS = 100, FEAR_AGAIN = 400;
 	/** Bleeding frightens one who fears blood only below this share of his health. */
 	static final float BLOOD_AT = 0.75F;
-	/** The pedlar's rumour of a captain (emeralds). */
+	/** The pedlar's rumour of a captain (silver coins). */
 	static final int RUMOUR_PRICE = 2;
 	/** (Andy) The scene before you respawn: how long it runs, and when in it the killer's raised (ticks). */
 	static final int SCENE_TICKS = 90, SCENE_RAISED = 45;
@@ -1737,7 +1738,7 @@ public final class Captains {
 		return Component.translatable("dialogue.chat.jaymoskingdoms.captain.told." + random.nextInt(LINES), Recollections.nameTo(player, body), told(c, t));
 	}
 
-	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} emeralds. */
+	/** (MCA's talk) a tribe's pedlar: what he's heard of its captains, for {@link #RUMOUR_PRICE} silver. */
 	public static boolean pedlarHears(LivingEntity villager) {
 		return Pedlars.pedlar(villager) && Tribes.of(villager) != null;
 	}
@@ -1750,26 +1751,12 @@ public final class Captains {
 		if (e == null) {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.none." + random.nextInt(LINES), Recollections.nameTo(player, pedlar));
 		}
-		var inv = player.getInventory();
-		int have = 0;
-		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
-			if (inv.getItem(slot).is(Items.EMERALD)) {
-				have += inv.getItem(slot).getCount();
-			}
-		}
-		if (have < RUMOUR_PRICE) {
+		// (0.7.486) silver coins from everywhere they are kept (purses and bundles too, which the old loose-emerald count missed)
+		if (!Money.canPay(player, Money.silver(RUMOUR_PRICE))) {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.price." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
 				Component.literal(Integer.toString(RUMOUR_PRICE)));
 		}
-		int owed = RUMOUR_PRICE;
-		for (int slot = 0; slot < inv.getContainerSize() && owed > 0; slot++) {
-			ItemStack s = inv.getItem(slot);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(owed, s.getCount());
-				s.shrink(take);
-				owed -= take;
-			}
-		}
+		Money.charge(player, Money.silver(RUMOUR_PRICE));
 		learn(player, e.getKey().id(), e.getValue());
 		return Component.translatable("dialogue.chat.jaymoskingdoms.captain.pedlar.told." + random.nextInt(LINES), Recollections.nameTo(player, pedlar),
 			told(e.getKey(), e.getValue()));
