@@ -290,7 +290,8 @@ def deepborn(rng, solid, glow):
 
 
 # ---- (Kingdoms 0.7.484) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
-# flat on the 64x64 skin: ears sit on the crown and the front's top corners, tails down the back of the body and legs.
+# flat on the 64x64 skin. (0.7.484, later) The ears, tails, wings and legs that used to be painted here are real model parts now
+# (client BeastParts, textures from tools/gen_heritage_parts.py); the skins keep the fur, the faces and the glow.
 # Head: front (8-16, 8-16, eyes on row 12), top (8-16, 0-8, its front edge the bottom), sides (0-8 / 16-24, 8-16), back (24-32).
 # Body: front (20-28, 20-32), back (32-40, 20-32). Legs' backs: (12-16, 20-32) and (28-32, 52-64).
 HEAD_FRONT = (8, 8, 16, 16)
@@ -309,28 +310,6 @@ def dots(img, pts, c):
         put(img, x, y, c)
 
 
-def ears(solid, glow, outer, inner, tall=3, tip=None, spread=0):
-    """Pointed ears: two wedges on the crown (x 8-9 and 14-15 of the top face), their bases carried down onto the front's
-    top corners, and their backs on the sides of the head."""
-    for side in (0, 1):
-        x0 = 8 - spread if side == 0 else 14 + spread
-        for r in range(tall):
-            for dx in range(2):
-                put(solid, x0 + dx, 6 - r, outer)
-            if r < tall - 1:
-                put(solid, x0 + (1 if side == 0 else 0), 6 - r, inner)
-        if tip:
-            put(solid, x0 + (0 if side == 0 else 1), 6 - (tall - 1), tip)
-        # the base drops over the front's top corners and onto the sides
-        cx = 8 if side == 0 else 15
-        put(solid, cx, 8, outer)
-        put(solid, cx, 9, inner if tall > 2 else outer)
-        sx = 6 if side == 0 else 17
-        for dy in range(2):
-            put(solid, sx, 8 + dy, outer)
-            put(solid, sx + (1 if side == 0 else -1), 8 + dy, inner)
-
-
 def fur_arms(rng, solid, colours, reach=8, ragged=0.5):
     """Fur creeping up the forearms from the hand."""
     def fur(x, y, r, x0, x1):
@@ -339,39 +318,19 @@ def fur_arms(rng, solid, colours, reach=8, ragged=0.5):
     arm_pixels(fur)
 
 
-def tail(solid, glow, colours, tip, width=2, tip_glow=None, centre=35):
-    """A tail down the back of the body and legs: a stripe, its tip the last rows of the back and legs."""
-    x0 = centre
-    for y in range(24, 32):
-        for dx in range(width):
-            put(solid, x0 + dx, y, colours[(y + dx) % len(colours)])
-    for dx in range(width):
-        put(solid, x0 + dx, 31, tip)
-        if tip_glow:
-            put(glow, x0 + dx, 31, tip_glow)
-    for lx0, ly0, lx1, ly1 in LEG_BACKS:
-        mid = (lx0 + lx1) // 2
-        for y in range(ly0 + 7, ly1):
-            for dx in range(width):
-                put(solid, mid - 1 + dx, y, colours[(y + dx) % len(colours)])
-        for dx in range(width):
-            put(solid, mid - 1 + dx, ly1 - 1, tip)
-
-
 def muzzle(solid, light, dark):
     dots(solid, ((10, 14), (11, 14), (12, 14), (13, 14), (10, 15), (11, 15), (12, 15), (13, 15)), light)
     dots(solid, ((11, 13), (12, 13)), dark)
 
 
 def beastfolk(rng, solid, glow):
-    """The plain beastfolk: short tawny fur up the forearms, dark claws, a pair of rounded ears, a nose and a tail."""
+    """The plain beastfolk: short tawny fur up the forearms, dark claws and a nose (its ears and tail are model parts)."""
     FUR = [(166, 120, 72, 255), (146, 102, 60, 255), (184, 140, 88, 255)]
     CLAW = (52, 40, 34, 255)
     fur_arms(rng, solid, FUR)
     hands(lambda x, y: put(solid, x, y, CLAW if rng.random() < 0.6 else FUR[1]))
-    ears(solid, glow, FUR[1], (214, 160, 150, 255), tall=3)
     muzzle(solid, (226, 200, 160, 255), (52, 36, 36, 255))
-    tail(solid, glow, FUR[:2], (226, 200, 160, 255))
+    # (0.7.484) the ears and the tail are model parts now (client BeastParts; tools/gen_heritage_parts.py)
 
 
 def hollow_heritage(rng, solid, glow):
@@ -908,33 +867,6 @@ def geode(rng, solid, glow):
 # ---- (Kingdoms 0.7.484) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
 # first look (beastfolk_skin / hollow_skin / sylvan_<n>_skin), so a variant paints only what is its own.
 
-def wings(rng, solid, glow, upper, lower, vein, shine, alpha, span=4, drop=9):
-    """Gossamer wings painted on the back (flat, so seen from behind): from the spine out, an upper lobe and a smaller lower
-    one on each side with veins, translucent (alpha), their edges lit. span: the upper lobe's width (3 to 4); drop: rows."""
-    x0, y0, x1, _ = BODY_BACK
-    mid = (x0 + x1) // 2
-    up_rows = max(4, drop * 5 // 9)
-    for side in (-1, 1):
-        for r in range(drop):
-            if r < up_rows:
-                w = min(span, 1 + r) if r < 2 else max(2, span - (1 if r == up_rows - 1 else 0))
-                col = upper
-            else:
-                k = r - up_rows
-                w = max(1, span - 1 - k)
-                col = lower
-            col = col[:3] + (alpha,)
-            for c in range(w):
-                x = mid + (c if side > 0 else -1 - c)
-                edge = c == w - 1 or r in (0, up_rows - 1, drop - 1)
-                put(solid, x, y0 + r, vein if edge and c != 0 and rng.random() < 0.5 else col)
-                if edge:
-                    put(glow, x, y0 + r, shine)
-    for r in range(0, drop, 2):  # the spine between the wings
-        put(solid, mid - 1, y0 + r, vein)
-        put(solid, mid, y0 + r, vein)
-
-
 def dryad(rng, solid, glow):
     """Bark in rough patches up the forearms and over the shoulders, ringed knots, moss, and leaves for hair."""
     BARK = [(98, 72, 48, 255), (80, 58, 38, 255), (116, 88, 58, 255)]
@@ -993,8 +925,7 @@ def changeling(rng, solid, glow):
 
 
 def sprite(rng, solid, glow):
-    """Dragonfly wings on the back, dusted with pollen glow; sparkles in the hair."""
-    wings(rng, solid, glow, (190, 240, 250, 255), (170, 224, 240, 255), (96, 168, 190, 255), (200, 255, 240, 255), 150, span=5, drop=10)
+    """Pollen glow and sparkles in the hair (the dragonfly wings are model parts)."""
     for _ in range(8):
         put(glow, rng.randrange(8, 16), rng.randrange(0, 8), (230, 255, 220, 255))
     for x0, x1, y0 in ARMS:
@@ -1027,11 +958,7 @@ def nymph(rng, solid, glow):
 
 
 def faerie(rng, solid, glow):
-    """Butterfly wings, pink to violet and spotted, a flower crown, glitter on the cheeks and arms."""
-    wings(rng, solid, glow, (244, 168, 220, 255), (190, 150, 240, 255), (120, 70, 150, 255), (255, 210, 250, 255), 190, span=5, drop=10)
-    for sx, sy in ((34, 23), (37, 23), (33, 28), (38, 28)):  # wing spots
-        put(solid, sx, sy, (255, 240, 200, 255))
-        put(glow, sx, sy, (255, 240, 200, 255))
+    """A flower crown, glitter on the cheeks and arms (the butterfly wings are model parts)."""
     FLOWER = [(250, 150, 190, 255), (250, 220, 120, 255), (190, 150, 240, 255)]
     for x in range(8, 16):
         put(solid, x, 8, FLOWER[x % 2 * 2 if x % 3 else 1])
@@ -1147,7 +1074,7 @@ def arachnid(rng, solid, glow):
 
 
 def avian(rng, solid, glow):
-    """Feathers in scalloped rows up the forearms, wing-feathers across the shoulder blades, a feathered crest, a beak."""
+    """Feathers in scalloped rows up the forearms, a beak (the folded wings, crest and tail feathers are model parts)."""
     PRIMARY = [(92, 70, 52, 255), (120, 92, 64, 255), (70, 52, 40, 255)]
     COVERT = [(188, 156, 110, 255), (214, 184, 134, 255)]
     TIP = (240, 232, 214, 255)
@@ -1161,31 +1088,17 @@ def avian(rng, solid, glow):
                 put(solid, x, y, TIP)
     arm_pixels(feathers)
     hands(lambda x, y: put(solid, x, y, (214, 176, 70, 255)))  # yellow talons
-    x0, y0, x1, y1 = BODY_BACK
-    for y in range(y0, y0 + 9):  # folded wings, long feathers pointing down
-        for x in range(x0, x1):
-            if (x - x0) in (0, 7) and y > y0 + 6:
-                continue
-            col = PRIMARY[(x // 2) % 3] if y > y0 + 3 else COVERT[(x + y) % 2]
-            if y > y0 + 4 and (x + y) % 3 == 0:
-                col = TIP
-            put(solid, x, y, col)
-    for x in range(8, 16):  # a feathered crest
-        for y in range(0, 4):
-            if rng.random() < 0.8:
-                put(solid, x, y, rng.choice(PRIMARY))
+    # (0.7.484) the folded wings, the crest and the tail feathers are model parts now (client BeastParts)
     dots(solid, ((11, 13), (12, 13), (11, 14), (12, 14)), (232, 188, 60, 255))  # beak
     dots(solid, ((11, 15), (12, 15)), (200, 150, 40, 255))
-    tail(solid, glow, PRIMARY[:2], TIP, centre=35)
 
 
 def canine(rng, solid, glow):
-    """A wolf's grey fur with a pale muzzle and chest, pointed ears, dark paws, a bushy grey tail."""
+    """A wolf's grey fur with a pale muzzle and chest, dark paws (its ears and bushy tail are model parts)."""
     FUR = [(112, 112, 116, 255), (92, 92, 98, 255), (136, 134, 132, 255)]
     PALE = (208, 204, 196, 255)
     fur_arms(rng, solid, FUR, reach=9, ragged=0.6)
     hands(lambda x, y: put(solid, x, y, (50, 46, 46, 255)))
-    ears(solid, glow, FUR[1], (70, 60, 64, 255), tall=4)
     muzzle(solid, PALE, (30, 28, 30, 255))
     for y in range(20, 26):  # pale ruff on the chest
         for x in range(22, 26):
@@ -1194,11 +1107,10 @@ def canine(rng, solid, glow):
     for x in range(8, 16):  # a darker saddle across the brow
         if rng.random() < 0.6:
             put(solid, x, 8, FUR[1])
-    tail(solid, glow, FUR[:2], PALE, width=3, centre=34)
 
 
 def feline(rng, solid, glow):
-    """Tabby stripes on the forearms and tail, tufted ears, whisker marks, a pink nose."""
+    """Tabby stripes on the forearms and back, whisker marks, a pink nose (ears and tail are model parts)."""
     FUR = (190, 144, 84, 255)
     STRIPE = (96, 64, 40, 255)
     CREAM = (234, 214, 176, 255)
@@ -1208,17 +1120,15 @@ def feline(rng, solid, glow):
             put(solid, x, y, STRIPE if r % 3 == 1 else FUR)
     arm_pixels(tabby)
     hands(lambda x, y: put(solid, x, y, CREAM))
-    ears(solid, glow, FUR, (228, 150, 156, 255), tall=3, tip=STRIPE)
     muzzle(solid, CREAM, (222, 120, 132, 255))
     dots(solid, ((8, 13), (8, 14), (15, 13), (15, 14), (9, 9), (14, 9), (10, 8), (13, 8)), STRIPE)  # whiskers and brow stripes
-    tail(solid, glow, [FUR, STRIPE], STRIPE, width=2)
     for y in range(20, 32, 3):  # stripes across the back
         for x in range(33, 39):
             put(solid, x, y, STRIPE)
 
 
 def kitsune(rng, solid, glow):
-    """A fox: russet fur with white socks, tall white-tipped ears, red whisker marks, three fire-tipped tails on the back,
+    """A fox: russet fur with white socks, red whisker marks (the tall ears and the one to three tails are model parts),
     and blue fox-fire sparking up the forearms."""
     FUR = [(214, 106, 40, 255), (190, 84, 30, 255)]
     WHITE = (246, 238, 226, 255)
@@ -1233,22 +1143,14 @@ def kitsune(rng, solid, glow):
             put(glow, x, y, FIRE)
     arm_pixels(fox)
     hands(lambda x, y: put(solid, x, y, WHITE))
-    ears(solid, glow, FUR[1], (60, 36, 36, 255), tall=4, tip=WHITE)
     muzzle(solid, WHITE, (30, 24, 24, 255))
     dots(solid, ((8, 13), (9, 14), (15, 13), (14, 14), (10, 8), (13, 8)), MARK)
-    for off in (0, 3, 6):  # three tails, their tips alight
-        for y in range(22, 32):
-            put(solid, 33 + off, y, FUR[y % 2])
-            put(solid, 34 + off, y, FUR[(y + 1) % 2])
-        for dx in (0, 1):
-            put(solid, 33 + off + dx, 30, WHITE)
-            put(solid, 33 + off + dx, 31, WHITE)
-            put(glow, 33 + off + dx, 31, FIRE)
+    # the tails (one to three, by player) are model parts now (client BeastParts)
 
 
 def serpen(rng, solid, glow):
-    """Green scales in diamonds up the forearms, across the chest and over the cheeks and neck, a pale belly, slit eyes,
-    a long tail down the back and legs."""
+    """Green scales in diamonds up the forearms, across the chest and over the cheeks and neck, a pale belly, slit eyes
+    (the long scaled tail is a model part)."""
     SCALE = [(70, 130, 68, 255), (52, 104, 56, 255), (92, 154, 80, 255)]
     BELLY = (216, 208, 150, 255)
     EDGE = (34, 72, 44, 255)
@@ -1270,7 +1172,6 @@ def serpen(rng, solid, glow):
     for x, y in ((8, 14), (8, 15), (9, 15), (15, 14), (15, 15), (14, 15), (8, 10), (15, 10), (9, 8), (14, 8), (11, 8), (12, 8)):
         put(solid, x, y, SCALE[(x + y) % 3])  # scales on the cheeks and brow
     dots(solid, ((9, 11), (14, 11), (9, 13), (14, 13)), EDGE)  # lids: slit pupils
-    tail(solid, glow, SCALE[:2], BELLY, width=4, centre=34)
 
 
 # ---- Hollow
