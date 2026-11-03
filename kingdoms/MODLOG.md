@@ -8261,3 +8261,8 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
   6 blocks, worth 3 pool each (`GRATE_RANGE`, `GRATE_MOST`, `GRATE_BLOOD`; `KitchenCompat.drawGrates`).
 - **Bottle of Blood** (Kitchen): a vampire drinks it (heals 2, 3 food, the blood fever eased as by a bite) and a Blood
   Sorcerer pours it into their pool (+6); anyone else retches (`Hemomancy.drankBottle`, `BOTTLE_*`).
+
+## 0.7.483: Excalibur's look (pack 0.19.65, Kitchen 0.5.52)
+All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
+redrawing a texture (`docs/Excalibur-Style.md` in the pack).

@@ -5006,3 +5006,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `SeveredPart.dropTrophyHead` (a `trophy` part never despawns).
   Wall trophies (Andy: "yes all of this"): set a carried head down (right-click) while looking at a wall within
   `Carry.TROPHY_REACH` and it's nailed up there facing out (`SeveredPart.mountOn`), kept for good; pick it up to take it down.
+- **0.19.65, Kingdoms 0.7.483, Kitchen 0.5.52, Excalibur's look:** Andy: "Id like a different artstyle from vanilla
+  entirely", pointing at Excalibur and its Fresh Animations patch. Both are switched on once per install, unchanged,
+  fetched from Modrinth (`PackResourcePacks`). Excalibur 26.3_01 (Maffhew, CC BY-NC-ND: credit it with a link on the
+  pack's page) goes at the bottom of the pack order (`BASE`), so every other pack draws over it. "Excalibur | Fresh
+  Animations" 1.10.5 Hotfix 1 (Ruseki and GrandPappyJay, modpacks allowed) sits just above Fresh Animations and under
+  Better Horses. An add-on switched on before its base pack moves up over it once the base arrives. All 7,707 of our
+  item, block, entity and clothing textures in Powers, Kingdoms, Kitchen and the vanilla_style pack are graded toward
+  Excalibur in place (`tools/excalibur_style`): darker, less saturated, warmer greys. Glows, effects, eyes and
+  see-through art are left alone. `graded.txt` stops a file being graded twice. **Run `tools/excalibur_style/grade.py`
+  after any new or redrawn texture.** Hand repaints of hero items come next. Details: `docs/Excalibur-Style.md`.
