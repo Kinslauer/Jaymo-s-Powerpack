@@ -186,7 +186,15 @@ public final class Prejudice {
 		Faction f = faction(who);
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
 		// ((0.7.221) less where the ruler has decreed tolerance: Reforms)
-		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
+		float edict = edict(who, f);
+		if (Peoples.greenskin(mine, theirs)) {
+			// ((0.7.480) a goblin or an orc on either side: the distaste between peoples, Peoples; none in a haven that lives alongside the tribes)
+			if (!mine.brood && who.level() instanceof ServerLevel hl && Havens.greenskin(hl.getServer(), Havens.home(who))) {
+				return 0.0F;
+			}
+			float m = Peoples.minds(who, mine, theirs, mine.brood ? 1.0F : edict);
+			return purist && !mine.brood ? m * PURIST_HARSH : m;
+		}
 		if (d == 0) {
 			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else
 			if (degree(mine) == 0) {
@@ -201,6 +209,15 @@ public final class Prejudice {
 		}
 		// (a purist's own: always, and harder; (0.7.357) the tolerant still mind the Bio-built, if less)
 		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? (theirs == Heritage.Kind.BIOBUILT ? d * BIO_TOLERANT : 0.0F) : d);
+	}
+
+	/** (0.7.480) The share of their distaste {@code who} keeps under their ruler's tolerance edicts (1: none decreed; {@link Reforms}). */
+	static float edict(LivingEntity who) {
+		return edict(who, faction(who));
+	}
+
+	private static float edict(LivingEntity who, @Nullable Faction f) {
+		return who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
 	}
 
 	/** {@code who} doesn't mind blood at all, by nature: kindhearted, cheerful or devout, or the luck of who they are. */

@@ -1649,6 +1649,41 @@ final class McaBridge {
 		return 2;
 	}
 
+	/** (0.7.480) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
+	static void leaveHome(Villager villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			v.getResidency().getHome().ifPresent(home -> {
+				// ((0.7.480) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
+				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
+				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+				v.getResidency().invalidateHome(home);
+				v.getResidency().getHomeVillage().ifPresent(village -> village.removeResident(v));
+			});
+		}
+	}
+
+	/** (0.7.480) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
+	}
+
+	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
+	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
+
+	/** (0.7.480) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
+	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
+		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
+			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(level.getRandom().nextFloat() < 0.8F ? Gender.MALE : Gender.FEMALE)
+			.withName(name).withPosition(at).withAge(0).withProfession(job).spawn(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		broodBorn(villager, kind, false);
+		villager.setPersistenceRequired();
+		return villager;
+	}
+
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getResidency().getHome() : java.util.Optional.empty();

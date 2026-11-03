@@ -183,6 +183,23 @@ public final class McaCompat {
 		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
 	}
 
+	/** (0.7.480) {@code villager} gives up their bed (to look for another, {@link Peoples}); nothing without MCA. */
+	static void leaveHome(Villager villager) {
+		if (LOADED) {
+			McaBridge.leaveHome(villager);
+		}
+	}
+
+	/** (0.7.480) {@link Peoples#meet}: {@code villager} already knows {@code player} (MCA has memories of them), so a first meeting is long past. */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.knows(villager, player);
+	}
+
+	/** (0.7.480) {@link Settlers}: a lone goblin or orc ({@code kind}) named {@code name} with trade {@code trade}, new to a village, at {@code at}; null without a body made. */
+	static net.minecraft.world.entity.@Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, net.minecraft.world.phys.Vec3 at, int trade) {
+		return LOADED ? McaBridge.settler(level, kind, name, at, trade) : null;
+	}
+
 	/** (0.6.9) Where {@code villager} lives (their bed): MCA's home, else the vanilla villager's. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		if (LOADED) {
