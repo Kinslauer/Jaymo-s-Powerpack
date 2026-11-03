@@ -3723,7 +3723,7 @@
 	"talk.jaymoskingdoms.vampire.cry.11": "Stay away from %s, they're cursed!",
 	"key.jaymoskingdoms.werewolf_shift": "Werewolf / Vampire Change",
 	"key.category.jaymoskingdoms.werewolf": "Jaymo's Werewolves",
-	"key.jaymoskingdoms.frost_prison": "Warrior-born: Tail Wrap",
+	"key.jaymoskingdoms.frost_prison": "Heritage ability",
 	"key.category.jaymoskingdoms.heritage": "Jaymo's Heritages",
 	"message.jaymoskingdoms.frost_prison.wait": "The frost in you needs time to gather again (about %s min).",
 	"message.jaymoskingdoms.frost_prison.none": "Look at something living to lock it in ice.",
@@ -11160,5 +11160,6 @@
 	"kit.jaymoskingdoms.perk.half_healing": "you mend at half the rate (potions, food, regeneration)",
 	"kit.jaymoskingdoms.perk.less_healing": "you mend at three quarters of the rate",
 	"kit.jaymoskingdoms.perk.ravenous": "hunger drains 30% faster",
-	"kit.jaymoskingdoms.perk.hungry": "hunger drains 15% faster"
+	"kit.jaymoskingdoms.perk.hungry": "hunger drains 15% faster",
+	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)"
 }

@@ -310,6 +310,8 @@ public final class HeritageKits {
 			Entity by = source.getEntity();
 			return !(entity instanceof Player && by != null && CONSCRIPTS.containsKey(by.getUUID()));
 		});
+		// (0.7.480) venom, the pounce and lifesteal: only for a blow that got through
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> landed(entity, source, taken, blocked));
 		// Nine Lives: the Feline gets up at one health, now and then
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> !(entity instanceof ServerPlayer player) || !nineLives(player, source));
 		// Soul Taker: a kill mends the Reaper
@@ -705,24 +707,40 @@ public final class HeritageKits {
 		if (kit.has(Perk.ARCHER) && source.is(DamageTypeTags.IS_PROJECTILE)) {
 			amount *= ARCHER_DEALT;
 		}
-		if (striker != target && source.getEntity() == source.getDirectEntity() && source.getDirectEntity() == striker) {
-			if (kit.has(Perk.VENOM)) {
-				target.addEffect(new MobEffectInstance(MobEffects.POISON, VENOM_TICKS, 0), striker);
-			}
-			long now = striker.level().getGameTime();
+		if (melee(striker, target, source)) {
+			// (0.7.480) only the factor here: the pounce is spent by a blow that lands (landed)
 			Long pounce = POUNCED.get(striker.getUUID());
-			if (pounce != null) {
-				POUNCED.remove(striker.getUUID());
-				if (now < pounce) {
-					amount *= POUNCE_DAMAGE;
-				}
-			}
-			long[] steal = STEAL.get(striker.getUUID());
-			if (steal != null && now < steal[0]) {
-				striker.heal(amount * steal[1] / 100.0F);
+			if (pounce != null && striker.level().getGameTime() < pounce) {
+				amount *= POUNCE_DAMAGE;
 			}
 		}
 		return amount;
+	}
+
+	private static boolean melee(LivingEntity striker, LivingEntity target, DamageSource source) {
+		return striker != target && source.getEntity() == source.getDirectEntity() && source.getDirectEntity() == striker;
+	}
+
+	/**
+	 * (0.7.480) A blow by {@code striker} that {@code target} has actually taken ({@code taken} after armour, past the
+	 * invulnerable ticks and the shield): the venom, the pounce spent, and the lifesteal on what got through.
+	 */
+	private static void landed(LivingEntity target, DamageSource source, float taken, boolean blocked) {
+		if (blocked || taken <= 0.0F || !(source.getEntity() instanceof LivingEntity striker) || !melee(striker, target, source)) {
+			return;
+		}
+		Kit kit = kit(striker);
+		if (kit == null) {
+			return;
+		}
+		if (kit.has(Perk.VENOM) && target.isAlive()) {
+			target.addEffect(new MobEffectInstance(MobEffects.POISON, VENOM_TICKS, 0), striker);
+		}
+		POUNCED.remove(striker.getUUID());
+		long[] steal = STEAL.get(striker.getUUID());
+		if (steal != null && striker.level().getGameTime() < steal[0] && striker.isAlive()) {
+			striker.heal(taken * steal[1] / 100.0F);
+		}
 	}
 
 	private static boolean ironBlow(DamageSource source) {
@@ -1275,6 +1293,8 @@ public final class HeritageKits {
 			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.MOB_SUMMONED, null);
 			mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 			mob.setDropChance(EquipmentSlot.HEAD, 0.0F);
+			// (0.7.480) the risen keep their 30 seconds in daylight: they don't burn
+			mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, CONSCRIPT_TICKS + 40, 0, false, false));
 			// (0.7.480) not kept for good, tagged (so a stray one is dropped on load), and blind to players: they pick foes only by conscripts()
 			mob.addTag(CONSCRIPT_TAG);
 			((MobAccessor) mob).jaymoskingdoms$targets().removeAllGoals(g -> g instanceof NearestAttackableTargetGoal<?>);
@@ -1302,6 +1322,10 @@ public final class HeritageKits {
 				dismiss(id);
 				CONSCRIPTS.remove(id);
 				continue;
+			}
+			// (0.7.480) the sun sets them alight each tick; the fire resistance keeps it harmless, and this puts it out
+			if (mob.isOnFire()) {
+				mob.clearFire();
 			}
 			LivingEntity prey = null;
 			double d = CONSCRIPT_REACH * CONSCRIPT_REACH;

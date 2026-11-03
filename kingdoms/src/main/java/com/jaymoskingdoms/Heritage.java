@@ -347,7 +347,8 @@ public final class Heritage {
 					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n, Component.translatable("stat.jaymoskingdoms." + stat.key())));
 				}
 			}
-			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".gift"));
+			// (0.7.480) a Rimewyrm takes no halving from fire (dealt), so its card leaves that out
+			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + (this == DRAGONBLOOD && variant == HeritageVariants.Variant.RIMEWYRM ? ".gift_rimewyrm" : ".gift")));
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
 			// (0.7.480) the kit: its ability, its gift, its flaw (the look's own once a look is picked, see card(Variant))
 			out.addAll(HeritageKits.card(HeritageKits.kit(this, variant)));

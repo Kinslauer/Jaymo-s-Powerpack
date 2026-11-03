@@ -315,6 +315,8 @@ public final class HeritageVariants {
 	public static void set(LivingEntity entity, @Nullable Variant v) {
 		entity.setAttached(VARIANT, v == null ? BASE : v.key());
 		traits(entity);
+		// (0.7.480) and the look's own kit attributes (the heritage's were put on before the look was)
+		HeritageKits.attributes(entity);
 	}
 
 	/** The look name of {@code kind}'s first. */
@@ -435,12 +437,15 @@ public final class HeritageVariants {
 		if (kind == null) {
 			villager.removeAttached(VARIANT);
 			traits(villager);
+			HeritageKits.attributes(villager);
 			return;
 		}
 		String key = villager.getAttached(VARIANT);
 		Variant had = key == null ? null : Variant.byKey(key);
 		if (BASE.equals(key) || had != null && had.heritage == kind) {
 			traits(villager);
+			// (0.7.480) the kit attributes of the look it keeps
+			HeritageKits.attributes(villager);
 			return;
 		}
 		set(villager, roll(villager.level(), villager.blockPosition(), kind, villager.getRandom()));
