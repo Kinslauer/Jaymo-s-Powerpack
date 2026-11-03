@@ -273,4 +273,13 @@ public final class XenoformState {
 	public static boolean transformed(Player player) {
 		return player.hasAttached(FORM);
 	}
+
+	/** (0.19.63) The aliens that take the swimming pose's low box out of water too (drawn level, at their own pace). */
+	public static final java.util.Set<String> LOW_BOX = java.util.Set.of("billow", "croaker");
+
+	/** (0.19.63) Whether {@code player} is one of the {@link #LOW_BOX} aliens (both sides). */
+	public static boolean lowBox(net.minecraft.world.entity.player.Player player) {
+		String form = player.getAttached(FORM);
+		return form != null && LOW_BOX.contains(form);
+	}
 }
