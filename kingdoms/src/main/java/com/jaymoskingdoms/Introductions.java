@@ -224,7 +224,8 @@ public final class Introductions {
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
 	public static Component askName(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player)) {
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_refused");
+			// (0.7.480) an orc or goblin with a grudge refuses in its own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
