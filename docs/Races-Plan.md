@@ -7,7 +7,8 @@ and art with the MIT notice; we write our own 26.3 code. Each race has one activ
 ## Races we already have (fold their kit into our heritage)
 | Runic race | Our heritage | Their kit we borrow |
 |---|---|---|
-| Primian, Celeron, Valen, Magi (Human) | Heartlander (variants) | Stroke of Fortune / Messenger's Dash / Unbreakable Stand / Arcane Overflow |
+| Primian, Celeron, Valen (Human) | Heartlander (variants) | Stroke of Fortune / Messenger's Dash / Unbreakable Stand |
+| Magi (Human) | Earthling (Inkmarked look) | Arcane Overflow; warded / frail. Folded into the Earthling's Inkmarked rather than a fourth Heartlander look (0.7.480) |
 | High Elf, Moon Elf | Sylvan | Arcane Reflex, Moonlit Veil; weak by day / frail |
 | Dark Elf | Nightborn | Shadowmeld; sunlight weakness |
 | Ice Elf, Frost One, Ice Drake | Frostborn | Frostbind / Glacial Resolve; fire weakness |

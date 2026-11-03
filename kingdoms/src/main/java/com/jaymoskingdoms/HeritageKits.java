@@ -31,6 +31,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
@@ -50,7 +51,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
@@ -107,6 +112,8 @@ public final class HeritageKits {
 	/** Arcane Reflex: how long (ticks) blows land at {@code REFLEX_TAKEN}. */
 	static final int REFLEX_TICKS = 60;
 	static final float REFLEX_TAKEN = 0.3F;
+	/** (0.7.480) Arcane Reflex: how hard a blow that lands throws its striker back, and up. */
+	static final double REFLEX_SHOVE = 0.6, REFLEX_LIFT = 0.2;
 	/** Faerie Bargain: the health paid (it needs more than {@code BARGAIN_FLOOR} to strike) and the seconds of strength bought. */
 	static final float BARGAIN_COST = 4.0F, BARGAIN_FLOOR = 8.0F;
 	static final int BARGAIN_SECONDS = 15, MIRROR_RANGE = 16, VEIL_SECONDS = 8, VEIL_NIGHT_SECONDS = 12;
@@ -249,7 +256,8 @@ public final class HeritageKits {
 		kind(Heritage.Kind.BEASTFOLK, Move.FERAL_SPRINT, Perk.SWIFT, Perk.HUNGRY);
 		kind(Heritage.Kind.HOLLOW, Move.GRAVE_CHILL, Perk.UNDEAD_STOMACH, Perk.LESS_HEALING);
 		// the looks with a race of their own
-		look(HeritageVariants.Variant.SUNFRECKLED, Move.MESSENGERS_DASH, Perk.SWIFT, Perk.HUNGRY);
+		// (0.7.480) the look's own +3% speed is its gift: no second SWIFT on top
+		look(HeritageVariants.Variant.SUNFRECKLED, Move.MESSENGERS_DASH, Perk.NONE, Perk.HUNGRY);
 		look(HeritageVariants.Variant.SKYMARKED, Move.UNBREAKABLE_STAND, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.OBSIDIAN, Move.RUNE_OF_WARDING, Perk.WARDED, Perk.NONE);
 		look(HeritageVariants.Variant.MAGMAVEIN, Move.MOUNTAIN_LEAP, Perk.FEATHERFALL, Perk.NONE);
@@ -311,9 +319,21 @@ public final class HeritageKits {
 			return !(entity instanceof Player && by != null && CONSCRIPTS.containsKey(by.getUUID()));
 		});
 		// (0.7.480) venom, the pounce and lifesteal: only for a blow that got through
-		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> landed(entity, source, taken, blocked));
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			landed(entity, source, taken, blocked);
+			reflexed(entity, source, taken, blocked);
+		});
 		// Nine Lives: the Feline gets up at one health, now and then
-		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> !(entity instanceof ServerPlayer player) || !nineLives(player, source));
+		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			// (0.7.480) a risen skeleton cut down crumbles: no bones, arrows or experience for its caller to farm
+			if (entity.entityTags().contains(CONSCRIPT_TAG)) {
+				dismiss(entity.getUUID());
+				CONSCRIPTS.remove(entity.getUUID());
+				entity.discard();
+				return false;
+			}
+			return !(entity instanceof ServerPlayer player) || !nineLives(player, source);
+		});
 		// Soul Taker: a kill mends the Reaper
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer dead) {
@@ -691,13 +711,8 @@ public final class HeritageKits {
 		if (target instanceof ServerPlayer player) {
 			Long until = REFLEX.get(player.getUUID());
 			if (until != null && player.level().getGameTime() < until) {
+				// (0.7.480) only the factor here: the shove is for a blow that lands (reflexed)
 				amount *= REFLEX_TAKEN;
-				if (source.getEntity() instanceof LivingEntity striker && striker != player) {
-					Vec3 away = striker.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
-					away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize().scale(0.6);
-					striker.setDeltaMovement(striker.getDeltaMovement().add(away.x, 0.2, away.z));
-					striker.syncVelocity = true;
-				}
 			}
 		}
 		return amount;
@@ -752,6 +767,21 @@ public final class HeritageKits {
 		if (steal != null && striker.level().getGameTime() < steal[0] && striker.isAlive()) {
 			striker.heal(taken * steal[1] / 100.0F);
 		}
+	}
+
+	/** (0.7.480) Arcane Reflex: a blow that got through inside the window throws its striker back. */
+	private static void reflexed(LivingEntity target, DamageSource source, float taken, boolean blocked) {
+		if (blocked || taken <= 0.0F || !(target instanceof ServerPlayer player)) {
+			return;
+		}
+		Long until = REFLEX.get(player.getUUID());
+		if (until == null || player.level().getGameTime() >= until || !(source.getEntity() instanceof LivingEntity striker) || striker == player) {
+			return;
+		}
+		Vec3 away = striker.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+		away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize().scale(REFLEX_SHOVE);
+		striker.setDeltaMovement(striker.getDeltaMovement().add(away.x, REFLEX_LIFT, away.z));
+		striker.syncVelocity = true;
 	}
 
 	private static boolean ironBlow(DamageSource source) {
@@ -1090,11 +1120,15 @@ public final class HeritageKits {
 			}
 			case MIRROR_SHIFT -> {
 				LivingEntity target = Arcana.sighted(p);
-				if (target == null || target.distanceTo(p) > MIRROR_RANGE) {
+				Vec3 mine = p.position();
+				// (0.7.480) only a mob, never a player or a great one, and only where each fits in the other's place
+				if (!(target instanceof Mob) || unmirrorable(target) || target.distanceTo(p) > MIRROR_RANGE
+					|| !level.noCollision(target, target.getBoundingBox().move(mine.subtract(target.position())))
+					|| !level.noCollision(p, p.getBoundingBox().move(target.position().subtract(mine)))) {
 					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.nothing").withStyle(ChatFormatting.GRAY), true);
 					return false;
 				}
-				Vec3 mine = p.position(), theirs = target.position();
+				Vec3 theirs = target.position();
 				target.teleportTo(level, mine.x, mine.y, mine.z, Set.<Relative>of(), target.getYRot(), target.getXRot(), false);
 				p.teleportTo(level, theirs.x, theirs.y, theirs.z, Set.<Relative>of(), p.getYRot(), p.getXRot(), false);
 				fx(p, MobEffects.INVISIBILITY, 2, 0);
@@ -1290,9 +1324,20 @@ public final class HeritageKits {
 		}
 	}
 
+	/** (0.7.480) Mirror Shift: the great ones (and anything a player rides or is riding) are not to be swapped. */
+	private static boolean unmirrorable(LivingEntity target) {
+		return target instanceof WitherBoss || target instanceof EnderDragon || target instanceof ElderGuardian || target instanceof Warden
+			|| target.isVehicle() || target.isPassenger();
+	}
+
 	// ---- conscripts ---------------------------------------------------------------------------------------------------------------
 
 	private static boolean conscript(ServerPlayer p, ServerLevel level, long now) {
+		// (0.7.480) on Peaceful a skeleton is gone the moment it rises: the call fails and costs nothing
+		if (level.getDifficulty() == Difficulty.PEACEFUL) {
+			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.nothing").withStyle(ChatFormatting.GRAY), true);
+			return false;
+		}
 		int risen = 0;
 		for (int i = 0; i < CONSCRIPT_COUNT; i++) {
 			if (!(EntityTypes.SKELETON.create(level, EntitySpawnReason.MOB_SUMMONED) instanceof Mob mob)) {
