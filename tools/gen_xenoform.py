@@ -1008,7 +1008,7 @@ def knell():
 
 
 def wyrm():
-    """(0.19.74) Wyrm, a small four-legged dragon: dark violet scales in a brick pattern, pale belly plates under the
+    """(0.19.75) Wyrm, a small four-legged dragon: dark violet scales in a brick pattern, pale belly plates under the
     chest, belly, neck and tail, bone horns, teeth and claws, violet slit eyes, a ridge of bone spines, a tail ending in a
     violet spade, and the insignia on the front of the chest. The man's parts are still painted (the first-person hand
     is his arm). Drawn on its own random stream, then the shared one is left exactly where the old skin left it
@@ -2587,7 +2587,7 @@ def tusk():
 
 
 def talon():
-    """(0.18.109, Scan C; 0.19.74 a hawk) Talon, the raptor: brown feathers barred paler, a cream barred breast with the
+    """(0.18.109, Scan C; 0.19.75 a hawk) Talon, the raptor: brown feathers barred paler, a cream barred breast with the
     insignia on it, a white-feathered head with a dark brow and fierce yellow eyes, a hooked yellow beak dark at the tip,
     broad barred wings with long dark-tipped flight feathers, a fanned barred tail, feathered thighs and yellow scaled
     legs with black talons. The man's parts (rows 0-63) stay, hidden, for the first-person arm (his wing). Boxes: torso
@@ -2840,7 +2840,7 @@ def gnasher():
 
 def lumen():
     """(0.18.111, Scan D) Lumen, the light: pale sky blue, lighter towards the edges, a bright white-gold core in its
-    chest, soft white eyes, thin pale fins. (0.19.74) An orb of light: a white-gold core (a 7x7x8 head box with two
+    chest, soft white eyes, thin pale fins. (0.19.75) An orb of light: a white-gold core (a 7x7x8 head box with two
     crossed 8x7x7 / 7x8x7 boxes to round its corners) inside a dithered pale-blue halo shell whose front is left clear,
     and eight tiny motes. The base humanoid parts are still painted (the first-person hand)."""
     img = new_skin()
@@ -2881,7 +2881,7 @@ def lumen():
 
 
 def keen():
-    """(0.18.111, Scan D; 0.19.74 a real bat) Keen, the sonar bat: dark brown-grey fur, a paler belly (it hangs belly to
+    """(0.18.111, Scan D; 0.19.75 a real bat) Keen, the sonar bat: dark brown-grey fur, a paler belly (it hangs belly to
     the front), the insignia on its back, tiny red eyes, a pink pug snout over a pale jaw with two white fangs, huge ears
     with pink insides, hind legs, and near-black leathery wings: bones in a dark fur brown, veined membrane between
     them, a dark thumb claw at each wrist. The man's parts (hidden in the model) keep the old look for the first-person arm."""
@@ -2898,7 +2898,7 @@ def keen():
     rect(img, (11, 13, 13, 15), (200, 140, 140, 255))
     claws(img, (30, 24, 26, 255))
     chest_insignia(img, rim=(40, 30, 32, 255))
-    # (0.19.74) the bat, every box in rows 64-127: torso 6x7x5 at (0,64), head 5x3x4 at (22,64), nose 3x2x1 at (40,64),
+    # (0.19.75) the bat, every box in rows 64-127: torso 6x7x5 at (0,64), head 5x3x4 at (22,64), nose 3x2x1 at (40,64),
     # jaw 4x1x3 at (48,64), ear 3x6x1 at (0,76), fang 1x2x1 at (8,76), hind leg 2x5x2 at (12,76), foot 2x1x3 at (20,76),
     # humerus 6x2x2 at (30,76), forearm 11x1x1 at (0,84), fingers 11x1x1 at (24,84), 10x1x1 at (0,86) and 8x1x1 at (22,86),
     # wrist knob 2x2x2 at (40,86), thumb 1x3x1 at (48,84), tail membrane 7x5x1 at (0,90), wing membrane 16x9x1 at

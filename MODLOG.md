@@ -5090,7 +5090,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
   75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
   resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
-- **0.19.74, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
+- **0.19.75, Patch 4: fliers** (`docs/AlienBodies-Plan.md`): four more aliens are no longer men.
   - Talon is now a hawk: perched upright on scaly taloned legs, it hops along with the wings folded, its hooked-beak head turning where it looks; in the air the body goes level, the two-part wings spread and beat, hold stiff in a glide and sweep back on a stoop, and a strike rakes the talons forward.
   - Keen is now a bat: a furry body with the insignia on its back, a pug head with huge ears and fangs, and membrane wings. It crawls on its wrists and feet with the wings folded, beats them fast in flight, holds them out to glide, lies level under Wind's cruise, and hangs head-down from ceilings wrapped in its wings (synced as the "hang" act).
   - Wyrm is now a small four-legged dragon: a long scaly body trotting in a diagonal lizard gait with solved legs, a long neck to a horned head whose jaw opens on a bite, a spine ridge and a swaying spade-tipped tail; its ender-dragon wings (`WyrmWings`) sit on its shoulders, beat in flight with the body level and the legs tucked, and fold along its back on the ground.

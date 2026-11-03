@@ -2497,7 +2497,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.109, Scan C; 0.19.74 a bird of prey) Talon: a hooked beak, broad feathered wings and a tail fan, scaly legs
+	 * (0.18.109, Scan C; 0.19.75 a bird of prey) Talon: a hooked beak, broad feathered wings and a tail fan, scaly legs
 	 * with hooked talons; now a hawk, not a man. On the ground it perches upright (the body leaning 60 degrees up from
 	 * level, the wings folded at its sides, the tail hanging behind), the head turning where it looks with the beak
 	 * hooked below it, and it walks in short two-footed hops. Flying, the body goes level, the wings spread (two parts,
@@ -2887,7 +2887,7 @@ public final class XenoFormModels {
 	/**
 	 * (0.18.111, Scan D) Lumen: small and slight, two thin wing-fins on its back that flutter.
 	 * <p>
-	 * (0.19.74) An orb of light: no body or limbs. A white-gold core (the head box, 7x7x8, with two crossed boxes to round
+	 * (0.19.75) An orb of light: no body or limbs. A white-gold core (the head box, 7x7x8, with two crossed boxes to round
 	 * its corners) inside a dithered halo shell (its front left clear, so the core and the insignia on its front show),
 	 * hovering {@link #HOVER} pixels above the ground and bobbing slowly, with {@link #MOTES} tiny motes orbiting it on
 	 * tilted rings. Moving, the motes tighten and stream out behind it (+z), swinging away from its turns and rising as it
@@ -3003,7 +3003,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.111, Scan D; 0.19.74 a real bat) Keen: a small furry bat, not a man: a round fur body with the insignia on
+	 * (0.18.111, Scan D; 0.19.75 a real bat) Keen: a small furry bat, not a man: a round fur body with the insignia on
 	 * its back, a pug head with huge ears, a jaw and fangs, two hind legs and two long membrane wings (a humerus, a
 	 * long forearm, three finger bones fanned from the wrist, a thumb claw, and the membrane stretched between them).
 	 * On the ground the wings fold up against it and it crawls on its wrists and feet (a diagonal gait, the arms
@@ -5246,7 +5246,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Wyrm: horned, winged and long-tailed (0.19.74 a small dragon on four legs). A long low scaly body on four clawed
+	 * Wyrm: horned, winged and long-tailed (0.19.75 a small dragon on four legs). A long low scaly body on four clawed
 	 * legs that trot in a lizard's diagonal gait (each leg two bones and a foot, solved so the planted feet never slide off
 	 * the ground), a neck that rises to a horned head with a hinged jaw (a bite throws the head forward and opens the jaw),
 	 * a spine ridge, and a tail in three joints to a spade tip that sways behind each turn. The dragon hangs off its own

@@ -36,7 +36,7 @@ public final class Keen extends XenoForm {
 	// ---- tuning ----
 	public static final double FLAP_SPEED = 0.7, FLAP_EASE = 0.25, FLAP_LIFT = 0.15;
 	public static final double GLIDE_FALL = -0.1, GLIDE_DRIFT = 0.05;
-	/** (0.19.74) Hanging: the little push up (blocks a tick) that keeps it flush against the ceiling. */
+	/** (0.19.75) Hanging: the little push up (blocks a tick) that keeps it flush against the ceiling. */
 	public static final double CEILING_GRIP = 0.08;
 	public static final double SONAR_RANGE = 24.0;
 	public static final int SONAR_TICKS = 120, SONAR_COOLDOWN = 200;
@@ -144,7 +144,7 @@ public final class Keen extends XenoForm {
 		return !live.perched && !player.onGround() && !player.getLastClientInput().shift() && !player.isInWater() && player.getDeltaMovement().y < 0.0;
 	}
 
-	/** (0.19.74) Bats that let go of a ceiling with jump: they don't grab one again until they land or let go of sneak. */
+	/** (0.19.75) Bats that let go of a ceiling with jump: they don't grab one again until they land or let go of sneak. */
 	private static final java.util.Set<java.util.UUID> LET_GO = new java.util.HashSet<>();
 
 	/** A solid ceiling right over its head. */
@@ -162,7 +162,7 @@ public final class Keen extends XenoForm {
 			player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 320, 0, false, false));
 		}
 		// hang from a ceiling: sneak under one; jump to let go
-		// (0.19.74) one that let go with jump doesn't grab again until it lands or lets go of sneak, so holding both
+		// (0.19.75) one that let go with jump doesn't grab again until it lands or lets go of sneak, so holding both
 		// doesn't flick it on and off the ceiling every tick
 		boolean shift = player.getLastClientInput().shift();
 		if (player.onGround() || !shift) {
@@ -175,7 +175,7 @@ public final class Keen extends XenoForm {
 					LET_GO.add(player.getUUID());
 				}
 			} else {
-				// (0.19.74) pressed up flush against the ceiling, so its feet are drawn on it (not in it or under it)
+				// (0.19.75) pressed up flush against the ceiling, so its feet are drawn on it (not in it or under it)
 				player.setDeltaMovement(0.0, CEILING_GRIP, 0.0);
 				player.syncVelocity = true;
 			}
