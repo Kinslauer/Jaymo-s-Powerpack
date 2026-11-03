@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.18.57) The low crouch walks slower than a sneak ({@link Stance#LOW_SPEED}). (0.19.30) Prone on the back, shuffling on
- * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}). (0.19.60) Skitter prone is a spider: it
+ * the hips is slower than crawling on the belly ({@link Crawl#SUPINE_SPEED}). (0.19.62) Skitter prone is a spider: it
  * scuttles much faster than a man crawls ({@code Skitter.SPIDER_PACE}).
  */
 @Mixin(LocalPlayer.class)

@@ -589,7 +589,7 @@ def chevrons(img, face, color, step=3, skip=0):
 
 
 def blur():
-    """(0.19.60) Velox, the raptor: a dark blue-black hide with pale chevron stripes down the back, legs and neck, a pale
+    """(0.19.62) Velox, the raptor: a dark blue-black hide with pale chevron stripes down the back, legs and neck, a pale
     belly and throat, a pale cyan glass visor, glossy near-black clawed feet, a swept crest, and the insignia on its back."""
     img = new_skin()
     hide = (28, 40, 72)
@@ -1293,7 +1293,7 @@ def rivet():
 
 
 def gorger():
-    """(0.18.96; 0.19.60 a real armadillo) Gorger, the armadillo alien: dusky pink-brown hide, a pale belly, a shell of
+    """(0.18.96; 0.19.62 a real armadillo) Gorger, the armadillo alien: dusky pink-brown hide, a pale belly, a shell of
     six scute bands (each edged dark, ruled across, the tips laid in bricks), a bone horn on a pale snout, little round
     ears, beady black eyes, the insignia on the back of the rump shield."""
     img = new_skin()
@@ -1523,7 +1523,7 @@ def lurk():
 
 
 def gyre():
-    """(0.18.103; 0.19.60 a turtle on four flippers) Gyre, the wind-shell turtle: sea-green hide with pale scales, a
+    """(0.18.103; 0.19.62 a turtle on four flippers) Gyre, the wind-shell turtle: sea-green hide with pale scales, a
     domed shell of dark plates edged in moss, wind vents (pale slots) along its rim, a cream plastron, a small hooked
     beak, the insignia on the shell's crown."""
     img = new_skin()
@@ -1873,7 +1873,7 @@ def fur(img, part_list, base, dark, n_div=6):
 
 
 def howl():
-    """(0.18.109, Scan C; 0.19.60 a four-legged wolf) Howl, the pack hunter: grey-brown fur, a darker saddle down the
+    """(0.18.109, Scan C; 0.19.62 a four-legged wolf) Howl, the pack hunter: grey-brown fur, a darker saddle down the
     back (the insignia on the rump), a pale chest, cheeks and muzzle, amber eyes, tall ears dark at the tips, a bushy
     tail with a pale tip, dark paws. The man's parts (rows 0-63) stay, hidden, for the first-person arm; the head and the
     legs reshape his head and legs in his own skin regions, the rest are extras in the rows below."""
@@ -2012,7 +2012,7 @@ def howl():
 
 
 def prowl():
-    """(0.18.109, Scan C; 0.19.60 four-legged) Prowl, the great cat: tawny orange with dark stripes, a cream belly and
+    """(0.18.109, Scan C; 0.19.62 four-legged) Prowl, the great cat: tawny orange with dark stripes, a cream belly and
     muzzle, green eyes with slit pupils, round ears, a long ringed tail with a dark curled tip. The man's parts keep
     their old look (the first-person hand); the cat's own boxes are laid out in rows 64-127."""
     img = new_skin()
@@ -2159,7 +2159,7 @@ def prowl():
 
 
 def tusk():
-    """(0.18.109, Scan C; 0.19.60 a boar on four legs) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane,
+    """(0.18.109, Scan C; 0.19.62 a boar on four legs) Tusk, the war boar: dark-brown bristly hide, a darker stiff mane,
     a pink-grey snout, small red eyes, ivory tusks, hooves. Extras: barrel 10x16x8 at (0,64), mane 2x7x3 at (0,88),
     snout 6x4x4 at (0,98), tusk 1x2x4 at (20,98), tusk tip 1x1x4 at (30,98), ear 2x2x1 at (40,98), tail 1x4x1 at (48,98),
     leg 5x10x5 at (0,106); the head is the man's 8x8x8 head."""
@@ -2453,7 +2453,7 @@ def skitter():
     cx = (bx0 + bx1) // 2
     for i, w in enumerate((3, 1, 3)):
         rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
-    # (0.19.60) the prone spider: abdomen 10x8x12 at (0,78), fang 1x2x1 at (44,78), head 8x8x8 at (0,98), thorax
+    # (0.19.62) the prone spider: abdomen 10x8x12 at (0,78), fang 1x2x1 at (44,78), head 8x8x8 at (0,98), thorax
     # 6x6x6 at (32,98), legs 16x2x2 at (0,114) (right) and (0,118) (left)
     thorax = (32, 98, 6, 6, 6)
     box(img, thorax, hide, 0.14)

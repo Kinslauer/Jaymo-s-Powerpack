@@ -1455,7 +1455,7 @@ public final class XenoformPower implements Power {
 	}
 
 	/**
-	 * (0.19.60) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
+	 * (0.19.62) What the four-legged aliens' bodies show for everyone ({@link XenoformState#ACT}): Tusk's Charge and
 	 * Gorger's Horn Charge ("charge"), Gorger or Gyre rolled up ("roll"), Gyre's Shell Spin ("spin").
 	 */
 	private static void syncAct(ServerPlayer player, Live live) {

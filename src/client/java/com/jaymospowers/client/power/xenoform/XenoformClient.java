@@ -41,7 +41,7 @@ public final class XenoformClient {
 	 * legs keep to the ground it covers. Null: not Towerback.
 	 */
 	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
-	/** (0.19.60) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
+	/** (0.19.62) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
 	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
@@ -92,7 +92,7 @@ public final class XenoformClient {
 		}
 		if ("billow".equals(form) || "skitter".equals(form) && player != null && SkitterCeiling.spiderOrRising(player)
 			&& (state.getData(SkitterCeiling.CRAWL_KEY) != null || state.swimAmount > 0.0F)) {
-			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.60, and
+			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.62, and
 			// Skitter's spider, prone, and the swim tilt still easing out once it stands)
 			state.swimAmount = 0.0F;
 			state.isVisuallySwimming = false;

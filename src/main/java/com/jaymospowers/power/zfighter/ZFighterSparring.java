@@ -232,9 +232,11 @@ final class ZFighterSparring {
 			level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.7F, 1.2F);
 		}
 		if (distance > BLAST_RANGE && bout.age % BLAST_EVERY == 0 && partner.hasLineOfSight(owner)) {
-			Vec3 from = partner.getEyePosition();
-			bout.blasts.add(new Vec3[] {from, owner.getEyePosition().subtract(from).normalize().scale(BLAST_SPEED)});
-			partner.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			// (0.19.60) out of the palm, thrown with a thrust
+			Vec3 dir = owner.getEyePosition().subtract(partner.getEyePosition()).normalize();
+			Vec3 from = ZFighterHands.mainPalm(partner, dir);
+			bout.blasts.add(new Vec3[] {from, dir.scale(BLAST_SPEED)});
+			ZFighterHands.thrust(partner, ZFighterHands.hand(partner, true), ZFighterHands.JAB);
 			level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.8F);
 		}
 		if (bout.age % STEP_EVERY == STEP_EVERY / 2 && distance > 1.5) {

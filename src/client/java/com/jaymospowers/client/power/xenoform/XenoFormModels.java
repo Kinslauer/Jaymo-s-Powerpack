@@ -148,7 +148,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.96; 0.19.60 a real armadillo) Gorger: a squat armadillo on four short legs: a pointed snout with a bone horn,
+	 * (0.18.96; 0.19.62 a real armadillo) Gorger: a squat armadillo on four short legs: a pointed snout with a bone horn,
 	 * little ears, a domed shell of six bands over its back (the bands bob one after another as it scurries, diagonal legs
 	 * together in quick little steps) and a tail dragging behind. Its head nods a beat behind the step and butts down
 	 * on an attack; charging, it drops its head with the horn levelled and scrabbles faster; rolled up (B) it tucks head,
@@ -489,7 +489,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.103, patch 5; 0.19.60 a turtle on four flippers) Gyre: a broad domed shell over a pale plastron, four
+	 * (0.18.103, patch 5; 0.19.62 a turtle on four flippers) Gyre: a broad domed shell over a pale plastron, four
 	 * flippers that paddle in diagonal pairs and rock the shell as it waddles, a neck that pokes out and turns with the
 	 * head and a short tail. Swimming it flaps its front flippers like wings. Rolled up (holding B) the head peeks from
 	 * the shell and the limbs are drawn in; in Shell Spin the shell spins fast about its middle. In the turtle the man's
@@ -988,7 +988,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.109, Scan C; 0.19.60 a four-legged wolf) Howl: a wolf's muzzle and tall ears, a bushy tail that swings as it
+	 * (0.18.109, Scan C; 0.19.62 a four-legged wolf) Howl: a wolf's muzzle and tall ears, a bushy tail that swings as it
 	 * runs. Now a wolf, not a man: a long body level with the ground (a deep chest and mane in front, a lean rump
 	 * behind) on four legs in a trot, diagonal pairs together, the spine flexing a little and the body bobbing with each
 	 * stride. The head, with its muzzle, jaw, ruff and tall ears, turns where it looks; the bushy two-part tail hangs
@@ -1199,7 +1199,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.109, Scan C; 0.19.60 a cat on four legs) Prowl: a big cat, long and low: a chest and a haunch that flex
+	 * (0.18.109, Scan C; 0.19.62 a cat on four legs) Prowl: a big cat, long and low: a chest and a haunch that flex
 	 * about the spine, a round-eared head, four two-jointed legs on paws that stay flat on the ground, walking in a
 	 * cat's lateral order and falling into a bounding gallop at speed (the spine arching, forepaws together, hindpaws
 	 * together), and a long tail that droops, curls up at the tip and twitches. Sneaking is a stalk: belly low, paws
@@ -1517,7 +1517,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.109, Scan C) Tusk: a flat snout with two curved tusks, and a stiff mane down its back; (0.19.60) a boar on
+	 * (0.18.109, Scan C) Tusk: a flat snout with two curved tusks, and a stiff mane down its back; (0.19.62) a boar on
 	 * four legs: a barrel body lying along the ground, short thick legs, a big low head that bobs as it trots, a curly
 	 * tail. Its Charge drops the head and gallops; an attack tosses the tusks up. The man's body, head and legs are the
 	 * barrel, the head and the front pair (so the pose code finds them), the hind pair new; the arms and hat are hidden.
@@ -1900,7 +1900,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.113, Scan E; 0.19.60 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
+	 * (0.18.113, Scan E; 0.19.62 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
 	 * four thin spider legs off its back and a small abdomen behind. Prone (the stance wheel's crawl) it drops into a
 	 * spider ({@link SkitterCeiling#CRAWL_KEY}): a small thorax, a head with fangs that turns where it looks, a big round
 	 * abdomen behind (the insignia on top) and eight long legs stepping in a spider's alternating fours, the body bobbing
@@ -1914,20 +1914,20 @@ public final class XenoFormModels {
 		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F, BOB = 0.8F;
 		/** How fast the legs step against the walk, how far they swing and lift. */
 		static final float GAIT = 0.6662F * 1.4F, SWING = 0.4F, LIFT = 0.45F;
-		/** (0.19.60) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
+		/** (0.19.62) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
 		static final float CLIMB_GAIT = 0.35F;
 		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop. */
 		private static final float[] REST_YAW = {0.785F, 0.39F, -0.39F, -0.785F};
 		private static final float[] REST_DROOP = {0.785F, 0.58F, 0.58F, 0.785F};
 		/** Each pair's step phase (hind to front): the spider's alternating fours. */
 		private static final float[] PHASE = {0.0F, (float)Math.PI, (float)Math.PI * 0.5F, (float)Math.PI * 1.5F};
-		/** (0.19.60) Past this far into the crawl it's drawn as the spider. */
+		/** (0.19.62) Past this far into the crawl it's drawn as the spider. */
 		static final float SPIDER_AT = 0.5F;
 
 		private final ModelPart thorax, spiderHead, abdomen;
 		/** Hind to front: 0-3 right, 4-7 left. */
 		private final ModelPart[] legs = new ModelPart[8];
-		/** (0.19.60) Upright: the four thin legs off its back, and the small abdomen behind. */
+		/** (0.19.62) Upright: the four thin legs off its back, and the small abdomen behind. */
 		private final ModelPart[] backLegs = new ModelPart[4];
 		private final ModelPart backAbdomen;
 
@@ -2618,7 +2618,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.19.60 a raptor) Velox: slight, a swept-back crest, a visor that drops over the eyes at speed, a short snout and
+	 * (0.19.62 a raptor) Velox: slight, a swept-back crest, a visor that drops over the eyes at speed, a short snout and
 	 * a long tail. A bird-legged biped leaning forward, its body near horizontal on long digitigrade legs (thigh, shin,
 	 * tarsus, toes: the ankle bends backward, the thigh and tarsus kept parallel so the knee never rises into the body)
 	 * that stride long and fast, tucked clawed forearms that slash, a four-part tail held out to balance it, a long

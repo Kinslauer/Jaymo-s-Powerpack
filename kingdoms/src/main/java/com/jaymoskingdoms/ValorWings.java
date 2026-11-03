@@ -26,8 +26,8 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Flight</b> (Kindled on): double-tap jump in the air and they spread; fly where you look, jump to climb, sneak to
  * drop, sprint for speed. It drains the pool ({@value #DRAIN_FLIGHT} a second); touch down and they fold away; run dry in
  * the air and they fade out from under you (a slow fall as they go, and Spent like any coating).</li>
- * <li><b>Guarding</b>: with the coating up they wrap round you like Xenoform Wyrm's cloak, armour over armour, and swing out
- * of the way of your own blows.</li>
+ * <li><b>Guarding</b>: with the coating up they lie wound round your arms like a coating, armour over armour, and unfurl
+ * from your back when they're used (0.7.480, Andy).</li>
  * <li><b>Designs</b>: each Valor's wings take one of the pack's dragons' ({@link #DESIGNS}), from when it woke.</li>
  * <li><b>Beating back</b>: out (guarding or flying), they sometimes catch a blow or a shot on their own, and a flap throws
  * the striker back: as long as there's meter for it.</li>

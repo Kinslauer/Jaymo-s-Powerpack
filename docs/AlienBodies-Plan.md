@@ -11,7 +11,7 @@ spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien d
 
 ## Patch 1 (done, 0.19.34): Skitter, Fuse, Billow
 - **Skitter:** a spider, low to the ground, 8 legs in a spider's alternating fours, body bob, abdomen sway, flat crouch,
-  biting lunge. (0.19.60, Andy: "the same model it had before, only going into the crawl when you go prone") Standing it's
+  biting lunge. (0.19.62, Andy: "the same model it had before, only going into the crawl when you go prone") Standing it's
   the old upright shape again; only prone does it drop into the spider, which crawls up walls and along ceilings
   (tipped against the wall by `SkitterCeiling`, synced `XenoformState.CLIMB`) and turns back when it stands.
 - **Fuse:** a creeper's build, no arms, 4 stubby legs shuffling in diagonal pairs with a waddle, a bounce and a late
@@ -20,7 +20,7 @@ spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien d
   swimming pose's low box, seeps through anything short of a full block (not what it rests on), shots and creatures
   pass through, sheds wisps as it drifts.
 
-## Patch 2 (done, 0.19.60): beasts on four legs
+## Patch 2 (done, 0.19.62): beasts on four legs
 Howl (wolf), Prowl (cat, stalking crouch), Tusk (boar, head-down charge), Gorger (armadillo, rolls into a ball for its
 roll), Gyre (turtle, shell spin). Velox becomes a raptor: leaning forward on two legs with a long balancing tail.
 Built with a synced `XenoformState.ACT` ("charge" for Tusk's Charge and Gorger's Horn Charge, "roll" for Gorger/Gyre
