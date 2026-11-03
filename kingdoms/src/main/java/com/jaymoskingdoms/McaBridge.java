@@ -1623,8 +1623,19 @@ final class McaBridge {
 	/** (0.7.480) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
 	static void leaveHome(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
-			v.getResidency().getHome().ifPresent(home -> v.getResidency().invalidateHome(home));
+			v.getResidency().getHome().ifPresent(home -> {
+				// ((0.7.480) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
+				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
+				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+				v.getResidency().invalidateHome(home);
+				v.getResidency().getHomeVillage().ifPresent(village -> village.removeResident(v));
+			});
 		}
+	}
+
+	/** (0.7.480) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
+	static boolean knows(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
 	}
 
 	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */

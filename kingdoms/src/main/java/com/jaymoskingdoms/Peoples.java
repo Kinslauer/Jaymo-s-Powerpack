@@ -65,36 +65,63 @@ public final class Peoples {
 	static final double SAME_HOUSE = 7.0;
 	// ================================================================================================================
 
-	/** The peoples the table speaks of; {@code OTHER} is any of the rarer bloods, {@code HUMAN} the common folk. */
+	/**
+	 * The peoples the table speaks of: ((0.7.480) each blood its own row and column) {@code HUMAN} the common folk
+	 * (Heartlanders, Earthlings, no blood); {@code OTHER} only a fallback for a blood not named here.
+	 */
 	enum People {
-		HUMAN, TIDEBORN, STONEBORN, WARRIORBORN, SYLVAN, BIOBUILT, OTHER, ORC, GOBLIN
+		HUMAN, TIDEBORN, STONEBORN, WARRIORBORN, SYLVAN, BIOBUILT, VERDANT, EMBERBORN, FROSTBORN, NIGHTBORN, DAWNBORN,
+		STORMBORN, ENDBORN, DRAGONBLOOD, DEEPBORN, DIVINE, RUBBERFOLK, OTHER, ORC, GOBLIN
 	}
 
 	/**
 	 * Row {@code who}, column {@code whom}: how much the one holds the other against them (0 to 3). Order as {@link People}:
-	 * human, Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, other bloods, orc, goblin. Only the greenskin rows and
-	 * columns are used by {@link Prejudice#minds} (the rest of it keeps Prejudice's own degrees). Orcs despise goblins (3);
-	 * goblins fear and resent orcs (3).
+	 * human, Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, Verdant, Emberborn, Frostborn, Nightborn, Dawnborn,
+	 * Stormborn, Endborn, Dragonblood, Deepborn, Divine-born, Rubberfolk, other, orc, goblin. Only the greenskin rows and
+	 * columns are used by {@link Prejudice#minds} (the rest of it keeps Prejudice's own degrees); glares and brawls use all
+	 * of it. Every people minds every other at least a little (1); orcs despise goblins (3); goblins fear and resent orcs (3).
 	 */
 	static final int[][] TABLE = {
-		// human: orcs 3, goblins 2 (the heritage columns are Prejudice's degrees)
-		{0, 3, 3, 2, 1, 3, 0, 3, 2},
-		// Tideborn
-		{1, 0, 1, 1, 1, 2, 1, 2, 2},
+		// human: orcs 3, goblins 2 (the Tideborn to Bio-built columns are Prejudice's degrees)
+		{0, 3, 3, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2},
+		// Tideborn: fire and sea
+		{1, 0, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2},
 		// Stoneborn: kin in craft to the orcs, scornful of goblins
-		{1, 1, 0, 1, 1, 2, 1, 1, 2},
+		{1, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
 		// Warrior-born: respect an orc's strength
-		{1, 1, 1, 0, 1, 2, 1, 1, 2},
-		// Sylvan
-		{1, 1, 1, 1, 0, 2, 1, 2, 2},
+		{1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Sylvan: fear fire
+		{1, 1, 1, 1, 0, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2},
 		// Bio-built
-		{1, 1, 1, 1, 1, 0, 1, 1, 1},
-		// other bloods
-		{0, 1, 1, 1, 1, 2, 0, 1, 2},
-		// orc: despises goblins; thinks humans soft, the pale and the strange worse
-		{1, 1, 1, 0, 2, 2, 1, 0, 3},
-		// goblin: fears and resents orcs; the big folk are all to be wary of
-		{1, 1, 1, 2, 1, 2, 1, 3, 0}
+		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		// Verdant: fear fire; a little kin to the goblins in their green
+		{1, 1, 1, 1, 1, 2, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		// Emberborn: fire minds water and frost
+		{1, 2, 1, 1, 1, 2, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Frostborn: frost minds fire
+		{1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Nightborn: the dawn's opposite
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Dawnborn: the night's opposite
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Stormborn
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 2},
+		// Endborn
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2},
+		// Dragonblood: proud over the common folk, goblins vermin
+		{2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 3},
+		// Deepborn
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 2},
+		// Divine-born: wary of the End's and the deep's, and of orcs
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 0, 1, 1, 2, 2},
+		// Rubberfolk
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2},
+		// other (a fallback for a blood not named here: a little of everything)
+		{1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2},
+		// orc: despises goblins; thinks humans soft, the pale and the strange worse; respects a dragon
+		{1, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 0, 1, 1, 2, 1, 0, 3},
+		// goblin: fears and resents orcs, dreads dragons; the big folk are all to be wary of
+		{1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 3, 1, 2, 1, 1, 3, 0}
 	};
 
 	/** On a villager: the players (UUIDs) whose first meeting has been felt, so hearts start lower only once. */
@@ -128,6 +155,17 @@ public final class Peoples {
 			case WARRIORBORN -> People.WARRIORBORN;
 			case SYLVAN -> People.SYLVAN;
 			case BIOBUILT -> People.BIOBUILT;
+			case VERDANT -> People.VERDANT;
+			case EMBERBORN -> People.EMBERBORN;
+			case FROSTBORN -> People.FROSTBORN;
+			case NIGHTBORN -> People.NIGHTBORN;
+			case DAWNBORN -> People.DAWNBORN;
+			case STORMBORN -> People.STORMBORN;
+			case ENDBORN -> People.ENDBORN;
+			case DRAGONBLOOD -> People.DRAGONBLOOD;
+			case DEEPBORN -> People.DEEPBORN;
+			case DIVINE -> People.DIVINE;
+			case RUBBERFOLK -> People.RUBBERFOLK;
 			case ORC -> People.ORC;
 			case GOBLIN -> People.GOBLIN;
 			default -> People.OTHER;
@@ -199,8 +237,11 @@ public final class Peoples {
 			if (met != null && met.contains(id)) {
 				continue;
 			}
-			float m = Prejudice.minds(v, p);
-			if (m <= 0.0F) {
+			// ((0.7.480) only a true first meeting: one who already has MCA memories of them (an old friend from before
+			// this patch, or one pushed out of a full MET list) is only noted, never cooled)
+			boolean known = McaCompat.knows(v, p);
+			float m = known ? 0.0F : Prejudice.minds(v, p);
+			if (m <= 0.0F && !known) {
 				continue;
 			}
 			List<String> next = new ArrayList<>(met == null ? List.of() : met);
@@ -209,7 +250,9 @@ public final class Peoples {
 				next.remove(0);
 			}
 			v.setAttached(MET, next);
-			McaCompat.hearts(v, p, -Math.round(START_HEARTS_PER_DEGREE * m));
+			if (m > 0.0F) {
+				McaCompat.hearts(v, p, -Math.round(START_HEARTS_PER_DEGREE * m));
+			}
 		}
 	}
 
@@ -233,8 +276,10 @@ public final class Peoples {
 			if (b == a || b.distanceTo(a) > GLARE_RANGE || theirs == null || mine == theirs) {
 				continue;
 			}
-			int d = distaste(mine, theirs);
-			if (d < GLARE_FROM || random.nextFloat() >= GLARE_CHANCE * d) {
+			// ((0.7.480) as Prejudice sees it: the tolerant and a ruler's edicts ease it, and a haven that lives alongside
+			// the tribes minds no greenskin)
+			float d = glareMinds(level, a, mine, theirs);
+			if (d < GLARE_FROM * DEGREE_STEP || random.nextFloat() >= GLARE_CHANCE * d / DEGREE_STEP) {
 				continue;
 			}
 			GLARED.put(a.getUUID(), now);
@@ -244,6 +289,14 @@ public final class Peoples {
 				b.getName()), Speech.YELLOW, GLARE_HEARD);
 			return;
 		}
+	}
+
+	/** (0.7.480) How much {@code a} (of blood {@code mine}) minds a neighbour of blood {@code theirs}, for a glare: {@link #minds}, with Prejudice's haven exemption. */
+	private static float glareMinds(ServerLevel level, Villager a, Heritage.Kind mine, Heritage.Kind theirs) {
+		if (!mine.brood && theirs.brood && Havens.greenskin(level.getServer(), Havens.home(a))) {
+			return 0.0F;
+		}
+		return minds(a, mine, theirs, mine.brood ? 1.0F : Prejudice.edict(a));
 	}
 
 	// ---- brawls ---------------------------------------------------------------------------------------------------
