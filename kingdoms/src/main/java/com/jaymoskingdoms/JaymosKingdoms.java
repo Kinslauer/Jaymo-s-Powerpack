@@ -158,6 +158,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
 		Visitors.register();
+		// 0.7.482: every settlement keeps a butcher and a healer
+		TownTrades.register();
 		LOGGER.debug("visitor attachment: {}", Visitors.VISIT);
 		Reforms.register();
 		LOGGER.debug("reform attachment: {}", Reforms.GRIEVANCES);
