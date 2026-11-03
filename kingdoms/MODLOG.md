@@ -8216,3 +8216,14 @@ beneath it, and flap gently as they hover."
   them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
 - **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
   and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: ki is magic, Emberborn drink fire, guards of every rank (pack 0.19.57, Kitchen 0.5.48)
+Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
+- **Ki is magic:** a Z Fighter attunes (`Mana.kiAttunes`) the moment the power is theirs, a Wind Controller once it
+  wakes; quietly, the flare and sound only (no chat line). Folk gifted the Z Fighter's ki or the wind are attuned too
+  (`ManaFolk.KI_FIGHTER`/`KI_WIND`). A Wind Controller who isn't a Mage casts through the wind: a gust carries each spell
+  off the staff. Flight stays Mastery's to unlock. Powers draws a Z Fighter's aura only for the attuned.
+- **Emberborn thirst:** `KitchenCompat` hands Kitchen's `Thirst.setFireDrinker` the Emberborn.
+- **Guards:** a realm's guards are a quarter recruits (gambeson in the realm's colour, mail, cap), half footmen (the
+  realm's harness as before), a quarter veterans (full plate), by their id (`Outfits.GUARD_RECRUIT_SHARE`). New guards
+  only; `Outfits.VERSION` is unchanged so nobody already dressed is stripped. No gold.
