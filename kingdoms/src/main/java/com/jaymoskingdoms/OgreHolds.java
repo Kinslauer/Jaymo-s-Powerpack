@@ -540,7 +540,7 @@ public final class OgreHolds {
 	}
 
 	/** The standing band living round the fire at {@code fire}, or null. */
-	private static @Nullable Site band(MinecraftServer server, BlockPos fire) {
+	static @Nullable Site band(MinecraftServer server, BlockPos fire) {
 		for (Site s : sites(server)) {
 			if (!s.hold() && !s.cleared() && s.at().equals(fire)) {
 				return s;

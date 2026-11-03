@@ -108,7 +108,7 @@ final class Caravans {
 
 	/** One caravan on the road: whose, to whom, which way ({@code back}), where it is, its carts' loads, its guards. */
 	record Caravan(int id, int home, int lord, boolean back, BlockPos at, List<Map<String, Integer>> carts, int guards, boolean mounted,
-		long started, long stopUntil) {
+		long started, long stopUntil, int rig, boolean trade) {
 		static final Codec<Caravan> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("id").forGetter(Caravan::id),
 				Codec.INT.fieldOf("home").forGetter(Caravan::home),
@@ -119,19 +119,21 @@ final class Caravans {
 				Codec.INT.fieldOf("guards").forGetter(Caravan::guards),
 				Codec.BOOL.fieldOf("mounted").forGetter(Caravan::mounted),
 				Codec.LONG.fieldOf("started").forGetter(Caravan::started),
-				Codec.LONG.optionalFieldOf("stop_until", 0L).forGetter(Caravan::stopUntil))
+				Codec.LONG.optionalFieldOf("stop_until", 0L).forGetter(Caravan::stopUntil),
+				Codec.INT.optionalFieldOf("rig", TradeRoutes.CART).forGetter(Caravan::rig),
+				Codec.BOOL.optionalFieldOf("trade", false).forGetter(Caravan::trade))
 			.apply(i, Caravan::new));
 
 		Caravan at(BlockPos pos) {
-			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil);
+			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade);
 		}
 
 		Caravan carts(List<Map<String, Integer>> carts) {
-			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil);
+			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade);
 		}
 
 		Caravan turned(List<Map<String, Integer>> carts, long stopUntil) {
-			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil);
+			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil, this.rig, this.trade);
 		}
 
 		int load() {
@@ -158,6 +160,8 @@ final class Caravans {
 		final String stamp;
 		final List<UUID[]> carts = new ArrayList<>();
 		final List<UUID> guards = new ArrayList<>();
+		/** (0.7.484) How it's seen on the road just now: {@link TradeRoutes#CART}, {@link TradeRoutes#HAND} or {@link TradeRoutes#BOAT}. */
+		int rig = TradeRoutes.CART;
 		double best = Double.MAX_VALUE;
 		long improvedAt;
 
@@ -194,6 +198,7 @@ final class Caravans {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LIVE.clear();
 			HEADING.clear();
+			TradeRoutes.clear();
 		});
 	}
 
@@ -203,18 +208,18 @@ final class Caravans {
 		return Factions.level(server).getAttachedOrElse(CARAVANS, Ledger.EMPTY);
 	}
 
-	private static void save(MinecraftServer server, Ledger ledger) {
+	static void save(MinecraftServer server, Ledger ledger) {
 		Factions.level(server).setAttached(CARAVANS, ledger);
 	}
 
-	private static void put(MinecraftServer server, Caravan c) {
+	static void put(MinecraftServer server, Caravan c) {
 		Ledger l = ledger(server);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(c.id()), c);
 		save(server, new Ledger(all, l.next(), l.pending(), l.nextId()));
 	}
 
-	private static void remove(MinecraftServer server, Caravan c, long nextSend) {
+	static void remove(MinecraftServer server, Caravan c, long nextSend) {
 		Ledger l = ledger(server);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.remove(Integer.toString(c.id()));
@@ -259,6 +264,13 @@ final class Caravans {
 			}
 			startGreen(level, f, false);
 		}
+		// ((0.7.484) and everyone else: kingdoms, villages and towns, havens, bandit, illager and pirate camps)
+		TradeRoutes.send(level, now);
+	}
+
+	/** (0.7.484) How long after {@code c} is done its home waits to send another (ticks). */
+	static long gap(MinecraftServer server, Caravan c) {
+		return c.trade() ? TradeRoutes.every(server, c.home()) : CARAVAN_TICKS;
 	}
 
 	/** The camp of {@code f}'s tribe its cart goes to: a hungry one first, else the nearest standing (within {@link #GREEN_REACH}); null if it's alone. */
@@ -304,7 +316,8 @@ final class Caravans {
 			later(server, f, now + GREEN_RETRY);
 			return null;
 		}
-		List<Map<String, Integer>> carts = loadUp(level, f, greenGoods(data.orc(), HordeEconomy.hungry(server, to.id())), GREEN_KEEPS, GREEN_LOAD_MOST);
+		List<Map<String, Integer>> carts = loadUp(level, f, greenGoods(data.orc(), HordeEconomy.hungry(server, to.id())), GREEN_KEEPS,
+			GREEN_LOAD_MOST * TradeRoutes.ogreLoad(server, data));
 		int load = carts.stream().mapToInt(c -> c.values().stream().mapToInt(Integer::intValue).sum()).sum();
 		if (load < LOAD_LEAST && !force || carts.size() > GREEN_CARTS) {
 			// (nothing worth the road, or more than it can carry: back what was taken, and wait)
@@ -319,7 +332,7 @@ final class Caravans {
 		}
 		Ledger l = ledger(server);
 		int id = l.nextId();
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2, TradeRoutes.CART, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -378,7 +391,7 @@ final class Caravans {
 		int id = l.nextId();
 		int guards = GUARDS_BASE + carts.size() / CARTS_PER_GUARD;
 		boolean mounted = Wealth.atLeast(server, lord, Wealth.Tier.PROSPEROUS);
-		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2);
+		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -391,11 +404,39 @@ final class Caravans {
 		return c;
 	}
 
-	private static void later(MinecraftServer server, Faction f, long when) {
+	static void later(MinecraftServer server, Faction f, long when) {
 		Ledger l = ledger(server);
 		Map<String, Long> next = new HashMap<>(l.next());
 		next.put(Integer.toString(f.id()), when);
 		save(server, new Ledger(l.caravans(), next, l.pending(), l.nextId()));
+	}
+
+	/**
+	 * (0.7.484) {@code f} sends a trade caravan of {@code carts} to {@code to} ({@link TradeRoutes}), in {@code rig}; it may send again at
+	 * {@code nextSend}. It appears at once if anyone is near enough to see.
+	 */
+	static Caravan launch(ServerLevel level, Faction f, Faction to, List<Map<String, Integer>> carts, int guards, boolean mounted, int rig, long nextSend) {
+		MinecraftServer server = level.getServer();
+		long now = level.getGameTime();
+		Ledger l = ledger(server);
+		int id = l.nextId();
+		Caravan c = new Caravan(id, f.id(), to.id(), false, rig == TradeRoutes.BOAT ? TradeRoutes.quay(server, f) : start(f), carts, guards, mounted, now,
+			now + STOP_TICKS / 2, rig, true);
+		Map<String, Caravan> all = new HashMap<>(l.caravans());
+		all.put(Integer.toString(id), c);
+		Map<String, Long> next = new HashMap<>(l.next());
+		next.put(Integer.toString(f.id()), nextSend);
+		save(server, new Ledger(all, next, l.pending(), id + 1));
+		if (level.isPositionEntityTicking(c.at())) {
+			appear(level, c);
+		}
+		return c;
+	}
+
+	/** (0.7.484) Where {@code c} is headed: the far end's door, or home's; a skiff makes for its cove's mooring ({@link TradeRoutes#quay}). */
+	static BlockPos goal(MinecraftServer server, Caravan c, Faction home, Faction lord) {
+		Faction end = c.back() ? home : lord;
+		return c.trade() && c.rig() == TradeRoutes.BOAT ? TradeRoutes.quay(server, end) : start(end);
 	}
 
 	/** Where a faction's caravans load and unload: its storehouse door, else its seat. */
@@ -404,7 +445,12 @@ final class Caravans {
 	}
 
 	/** Takes from {@code f}'s storage what it has of {@code what} beyond {@code keep} of each, at most {@code most}, a cart's load at a time. */
-	private static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, int keep, int most) {
+	static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, int keep, int most) {
+		return loadUp(level, f, what, keep, most, CART_LOAD);
+	}
+
+	/** (0.7.484) {@link #loadUp} into carts of {@code cap} items each (a handcart takes less than a wagon). */
+	static List<Map<String, Integer>> loadUp(ServerLevel level, Faction f, Predicate<ItemStack> what, int keep, int most, int cap) {
 		List<Map<String, Integer>> carts = new ArrayList<>();
 		Map<String, Integer> cart = new LinkedHashMap<>();
 		int inCart = 0, total = 0;
@@ -415,7 +461,7 @@ final class Caravans {
 				continue;
 			}
 			while (spare > 0 && total < most) {
-				int take = Math.min(64, Math.min(spare, Math.min(CART_LOAD - inCart, most - total)));
+				int take = Math.min(64, Math.min(spare, Math.min(cap - inCart, most - total)));
 				ItemStack taken = Storage.take(level, f, e.getKey(), take);
 				if (taken.isEmpty()) {
 					break;
@@ -424,7 +470,7 @@ final class Caravans {
 				inCart += taken.getCount();
 				total += taken.getCount();
 				spare -= taken.getCount();
-				if (inCart >= CART_LOAD) {
+				if (inCart >= cap) {
 					carts.add(cart);
 					cart = new LinkedHashMap<>();
 					inCart = 0;
@@ -491,7 +537,7 @@ final class Caravans {
 	// ---- delivering -------------------------------------------------------------------------------------------------
 
 	/** Into {@code f}'s storage if it's loaded (what doesn't fit is lost), else kept waiting for it. */
-	private static void deliver(ServerLevel level, Faction f, Map<String, Integer> goods) {
+	static void deliver(ServerLevel level, Faction f, Map<String, Integer> goods) {
 		if (goods.isEmpty()) {
 			return;
 		}
@@ -546,6 +592,13 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		Faction home = Factions.get(server, c.home());
 		Faction lord = Factions.get(server, c.lord());
+		if (c.trade() && home != null && lord != null) {
+			// ((0.7.484) a settlement's trade: villages, towns, camps, coves and kingdoms)
+			return TradeRoutes.arrive(level, c, home, lord, now);
+		}
+		if (home != null && lord != null) {
+			TradeRoutes.reward(level, c, home, lord);
+		}
 		if (!c.back() && home != null && lord != null && home.type() == FactionType.BARBARIAN) {
 			return arriveGreen(level, c, home, lord, now);
 		}
@@ -632,10 +685,10 @@ final class Caravans {
 			if (home == null || lord == null || home.fallen() || lord.fallen() || now - c.started() > LONGEST) {
 				// (its fiefdom or its kingdom is gone: the caravan breaks up)
 				vanish(level, c);
-				remove(server, c, now + CARAVAN_TICKS);
+				remove(server, c, now + gap(server, c));
 				continue;
 			}
-			BlockPos goal = c.back() ? start(home) : start(lord);
+			BlockPos goal = goal(server, c, home, lord);
 			Live live = LIVE.get(c.id());
 			if (live != null) {
 				drive(level, c, live, goal, now);
@@ -669,7 +722,7 @@ final class Caravans {
 		if (turned == null) {
 			// home: the carters see to their horses, the guards go back to their posts
 			vanish(level, c);
-			remove(server, c, now + CARAVAN_TICKS);
+			remove(server, c, now + gap(server, c));
 			return;
 		}
 		put(server, turned);
@@ -696,8 +749,10 @@ final class Caravans {
 				continue;
 			}
 			if (carter != null && carter.isAlive() && horse != null && horse.isAlive() && wagon != null && !wagon.isRemoved()) {
-				remount(carter, horse);
-				if (!level.isPositionEntityTicking(wagon.blockPosition()) && level.isPositionEntityTicking(horse.blockPosition())) {
+				if (horse != carter) {
+					remount(carter, horse);
+				}
+				if (horse != wagon && !level.isPositionEntityTicking(wagon.blockPosition()) && level.isPositionEntityTicking(horse.blockPosition())) {
 					((Wagon)wagon).trail(horse);
 				}
 				carts.add(new Entity[] {carter, horse, wagon});
@@ -721,6 +776,8 @@ final class Caravans {
 			return;
 		}
 		put(server, c.at(lead.blockPosition()));
+		// ((0.7.484) any player keeping it company on the road is an escort)
+		TradeRoutes.escort(level, c, lead);
 		// ((0.7.294) folk, or MCA guards)
 		List<PathfinderMob> guards = new ArrayList<>();
 		for (UUID id : live.guards) {
@@ -743,7 +800,15 @@ final class Caravans {
 		if (now < c.stopUntil()) {
 			// unloading, loading: they stand
 			for (Entity[] cart : carts) {
-				HEADING.remove(cart[0].getUUID());
+				if (live.rig == TradeRoutes.HAND) {
+					// (a handcart's puller holds where he is)
+					HEADING.put(cart[0].getUUID(), cart[0].position());
+				} else {
+					HEADING.remove(cart[0].getUUID());
+				}
+				if (live.rig == TradeRoutes.BOAT && cart[2] instanceof Wagon skiff) {
+					skiff.sailTo(null);
+				}
 			}
 			for (PathfinderMob g : guards) {
 				HEADING.remove(g.getUUID());
@@ -762,10 +827,27 @@ final class Caravans {
 			live.best = d;
 			live.improvedAt = now;
 		} else if (now - live.improvedAt > STUCK_TICKS) {
+			if (live.rig == TradeRoutes.BOAT) {
+				// (0.7.484) a skiff with no water ahead sails on out of sight, over the headland, in the record
+				put(server, c.at(lead.blockPosition()));
+				vanish(level, c);
+				return;
+			}
 			// (a river, a cliff, a wall: helped over it, the column with it)
 			hop(level, carts, guards, to);
 			live.improvedAt = now;
 			live.best = Double.MAX_VALUE;
+		}
+		if (live.rig == TradeRoutes.BOAT) {
+			// (0.7.484) skiffs keep to the water: each sails toward the one before it, the first toward the quay
+			Entity before = null;
+			for (Entity[] cart : carts) {
+				if (cart[2] instanceof Wagon skiff) {
+					skiff.sailTo(before == null ? to : before.position().add(Vec3.directionFromRotation(0.0F, before.getYRot()).scale(-3.5)));
+				}
+				before = cart[2];
+			}
+			return;
 		}
 		// the lead makes for a point ahead on the road; each cart behind follows the one before it
 		Vec3 here = lead.position();
@@ -856,7 +938,7 @@ final class Caravans {
 	}
 
 	/** Comes into the world where it's got to: its carts in a column along its road, its guards beside them. */
-	private static void appear(ServerLevel level, Caravan c) {
+	static void appear(ServerLevel level, Caravan c) {
 		MinecraftServer server = level.getServer();
 		Faction home = Factions.get(server, c.home());
 		Faction lord = Factions.get(server, c.lord());
@@ -866,11 +948,14 @@ final class Caravans {
 		Live live = new Live(TAG_OF + c.id() + "." + Long.toHexString(level.getRandom().nextLong()));
 		LIVE.put(c.id(), live);
 		live.improvedAt = level.getGameTime();
-		BlockPos goal = c.back() ? start(home) : start(lord);
+		BlockPos goal = goal(server, c, home, lord);
 		Vec3 at = Vec3.atBottomCenterOf(c.at());
 		Vec3 flat = new Vec3(goal.getX() + 0.5 - at.x, 0.0, goal.getZ() + 0.5 - at.z);
 		Vec3 facing = flat.length() < 1.0E-3 ? new Vec3(0.0, 0.0, 1.0) : flat.normalize();
 		float yaw = (float)(Math.atan2(facing.z, facing.x) * (180.0 / Math.PI)) - 90.0F;
+		// ((0.7.484) a trade's carts go by the rig it travels in: wagons, handcarts, or skiffs where there is water under it)
+		int rig = TradeRoutes.rigNow(level, c);
+		live.rig = rig;
 		for (int i = 0; i < c.carts().size(); i++) {
 			BlockPos spot = ground(level, at.subtract(facing.scale(i * SPACING)));
 			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
@@ -881,32 +966,49 @@ final class Caravans {
 			PathfinderMob carter = w.mob();
 			carter.addTag(TAG);
 			carter.addTag(live.stamp);
-			AbstractHorse horse = Cavalry.mount(level, w, home, true);
-			if (horse == null) {
-				McaCompat.vanish(carter);
-				continue;
+			Entity pull;
+			Wagon wagon;
+			if (rig == TradeRoutes.HAND) {
+				// (on foot between the handles, the cart behind him)
+				carter.addTag(TradeRoutes.PULL_TAG);
+				wagon = Wagon.hitch(level, Wagon.HANDCART, home, carter, c.id(), i);
+				wagon.setTired(Math.min(1.0F, c.carts().get(i).values().stream().mapToInt(Integer::intValue).sum() / (float)TradeRoutes.HAND_LOAD));
+				pull = carter;
+			} else if (rig == TradeRoutes.BOAT) {
+				// (a deckhand at the tiller of a skiff riding the water)
+				wagon = Wagon.hitch(level, Wagon.SKIFF, home, carter, c.id(), i);
+				wagon.snapTo(spot.getX() + 0.5, spot.getY() - 0.2, spot.getZ() + 0.5, yaw, 0.0F);
+				carter.startRiding(wagon);
+				pull = wagon;
+			} else {
+				AbstractHorse horse = Cavalry.mount(level, w, home, true);
+				if (horse == null) {
+					McaCompat.vanish(carter);
+					continue;
+				}
+				horse.addTag(TAG);
+				horse.addTag(live.stamp);
+				horse.setYRot(yaw);
+				horse.setYBodyRot(yaw);
+				wagon = Wagon.hitch(level, Wagon.CART, home, horse, c.id(), i);
+				pull = horse;
 			}
-			horse.addTag(TAG);
-			horse.addTag(live.stamp);
-			horse.setYRot(yaw);
-			horse.setYBodyRot(yaw);
-			Wagon wagon = Wagon.hitch(level, Wagon.CART, home, horse, c.id(), i);
 			wagon.addTag(TAG);
 			wagon.addTag(live.stamp);
 			wagon.setLoad(look(c.carts().get(i)));
-			live.carts.add(new UUID[] {carter.getUUID(), horse.getUUID(), wagon.getUUID()});
+			live.carts.add(new UUID[] {carter.getUUID(), pull.getUUID(), wagon.getUUID()});
 		}
-		for (int i = 0; i < c.guards(); i++) {
+		for (int i = 0; i < c.guards() && rig != TradeRoutes.BOAT; i++) {
 			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 			BlockPos spot = ground(level, at.add(right.scale(i % 2 == 0 ? 3.0 : -3.0)).subtract(facing.scale(i / 2 * SPACING)));
-			Worker w = guard(level, home, spot, yaw);
+			Worker w = c.trade() ? TradeRoutes.guard(level, home, spot, yaw) : guard(level, home, spot, yaw);
 			if (w == null) {
 				continue;
 			}
 			PathfinderMob guard = w.mob();
 			guard.addTag(TAG);
 			guard.addTag(live.stamp);
-			if (c.mounted()) {
+			if (c.mounted() && rig == TradeRoutes.CART) {
 				AbstractHorse horse = Cavalry.mount(level, w, home, true);
 				if (horse != null) {
 					horse.addTag(TAG);
@@ -922,7 +1024,7 @@ final class Caravans {
 	 * (raised as its grunt or goblin, then set to drive), else the folk carter {@link Drivers#hire} gives.
 	 */
 	static @Nullable Worker carter(ServerLevel level, Faction f, BlockPos at, float yaw) {
-		if (McaCompat.LOADED) {
+		if (McaCompat.LOADED && Hordes.greenskin(level.getServer(), f.id())) {
 			Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
 			if (brute != null) {
 				brute.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
@@ -1014,13 +1116,13 @@ final class Caravans {
 	}
 
 	/** Out of the world (it goes on in the record, or it's done): its folk, horses and carts gone. */
-	private static void vanish(ServerLevel level, Caravan c) {
+	static void vanish(ServerLevel level, Caravan c) {
 		Live live = LIVE.remove(c.id());
 		if (live == null) {
 			return;
 		}
 		for (UUID[] ids : live.carts) {
-			for (UUID id : ids) {
+			for (UUID id : new java.util.LinkedHashSet<>(List.of(ids))) {
 				Entity e = level.getEntity(id);
 				if (e != null) {
 					HEADING.remove(id);
@@ -1042,7 +1144,7 @@ final class Caravans {
 	private static void lost(ServerLevel level, Caravan c) {
 		MinecraftServer server = level.getServer();
 		vanish(level, c);
-		remove(server, c, level.getGameTime() + CARAVAN_TICKS);
+		remove(server, c, level.getGameTime() + gap(server, c));
 		JaymosKingdoms.LOGGER.info("The caravan from {} was lost on the road", nameOf(server, c.home()));
 	}
 
@@ -1062,7 +1164,7 @@ final class Caravans {
 		Economy.noteAttack(level.getServer(), f, player);
 		// ((0.7.294) folk or MCA guards)
 		for (Worker g : Workers.near(level, wagon.getBoundingBox().inflate(24.0), x -> x.factionId() == f.id()
-			&& (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD || x.role() == Folk.ARCHER || Greenskins.isRole(x.role())))) {
+			&& (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD || x.role() == Folk.ARCHER || Greenskins.isRole(x.role()) || Barbarians.villagerRole(x.role())))) {
 			if (Rulers.target(g.mob()) == null) {
 				Rulers.charge(g.mob(), player);
 			}
@@ -1078,6 +1180,9 @@ final class Caravans {
 			// ((0.7.484) a greenskin cart: the tribe's grudge against him rises)
 			Tribes.add(server, player.getUUID(), tribe, GREEN_ROB_GRUDGE);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.caravan.robbed.green", Tribes.name(tribe)).withStyle(ChatFormatting.RED));
+		} else if (f != null && get(server, wagon.caravan()) instanceof Caravan trade && trade.trade()) {
+			// ((0.7.484) a settlement's trade: the cart's rig and its owner's kind say what it costs him)
+			TradeRoutes.robbed(level, wagon, player, f, trade);
 		} else if (f != null) {
 			Reputation.change(player, f, REP_ROB);
 			Faction lord = Relations.overlord(server, f);
@@ -1147,7 +1252,10 @@ final class Caravans {
 			}
 		}
 		String where = nameOf(server, c.back() ? c.home() : c.lord());
-		return Component.translatable("message.jaymoskingdoms.caravan.cart", nameOf(server, wagon.faction()), where, String.join(", ", parts));
+		// ((0.7.484) a handcart, a skiff: said as what it is)
+		String what = wagon.kind() == Wagon.HANDCART ? "message.jaymoskingdoms.caravan.handcart" : wagon.kind() == Wagon.SKIFF ? "message.jaymoskingdoms.caravan.skiff"
+			: "message.jaymoskingdoms.caravan.cart";
+		return Component.translatable(what, nameOf(server, wagon.faction()), where, String.join(", ", parts));
 	}
 
 	// ---- its folk ---------------------------------------------------------------------------------------------------
@@ -1191,7 +1299,7 @@ final class Caravans {
 		// (a guard's brain has him for a fight: a foe on him, or near, which only his brain's senses would find)
 		if (mob instanceof Folk || to == null || w.role() != CARTER && (Rulers.target(mob) != null || Rulers.foeNear(level, mob))
 			|| McaCompat.busy(mob)) {
-			return w.role() == CARTER && mob.isPassenger();
+			return w.role() == CARTER && (mob.isPassenger() || mob.entityTags().contains(TradeRoutes.PULL_TAG));
 		}
 		double d = mob.position().distanceTo(to);
 		if (d < 2.0) {

@@ -1,0 +1,676 @@
+package com.jaymoskingdoms;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * (0.7.484) Caravans for all (Andy, 2026-11-03: "everyone can trade in their own way, even down to using handcarts if they
+ * have to"). Every settlement sends its surplus to a trading partner and gets back what it lacks, in the way it can afford:
+ * <ul>
+ * <li><b>Kingdoms</b> send wagons to other realms and towns (more of them, and mounted guards, the richer they are);</li>
+ * <li><b>Villages and towns</b> (blossom villages and havens too) send a villager pushing a {@link Wagon#HANDCART}, slow and with
+ * a small load, till they are rich enough in folk and coin for a horse and wagon; a haven, which expands hard to make the
+ * most of its output, sends more, and its sworn defenders always go along;</li>
+ * <li><b>Bandit and illager camps</b> send their loot to camps of their own kind, a cart or two guarded by their own;</li>
+ * <li><b>Pirate coves</b> send skiffs: a deckhand at the tiller sailing the open water to another cove or a bandit camp, and
+ * on foot with handcarts where the way runs over land;</li>
+ * <li>fiefdoms ({@link Caravans#start}) and greenskin camps ({@link Caravans#startGreen}) keep the caravans they had;
+ * camps that shelter an ogre band load bigger ({@link #OGRE_LOAD}), as their ogres do the hauling.</li>
+ * </ul>
+ * The caravans are {@link Caravans}' own (its ledger, its road, its robbery); only what a settlement sends, to whom, and
+ * what comes of it is here. At the far end the goods go into the partner's storage, the partner's surplus of what the
+ * sender is short in comes home, and the difference in worth is paid between their treasuries ({@link #settle}). A player
+ * meets a cart by right-clicking it, buys from it with emeralds in hand ({@link #deal}), escorts it by keeping company on
+ * its road ({@link #escort}, {@link #reward}), or robs it ({@link #robbed}): the better off the owner, the dearer his good
+ * name.
+ */
+final class TradeRoutes {
+	/** How a trade caravan travels: horse and wagon, a handcart on foot, a skiff on the water. */
+	static final int CART = 0, HAND = 1, BOAT = 2;
+
+	/** A settlement's trade, by kind: the realm (kingdom), the town (village, haven, blossom village), and the camps. */
+	enum Sort {
+		REALM(1100.0, 18000L, 64), TOWN(700.0, 14000L, 24), HUMAN(900.0, 24000L, 20), ILLAGER(900.0, 24000L, 20), PIRATE(1200.0, 20000L, 16);
+
+		/** How far a partner may be (blocks), how long between caravans (ticks), and how much of each good it keeps back. */
+		final double reach;
+		final long every;
+		final int keep;
+
+		Sort(double reach, long every, int keep) {
+			this.reach = reach;
+			this.every = every;
+			this.keep = keep;
+		}
+
+		boolean camp() {
+			return this == HUMAN || this == ILLAGER || this == PIRATE;
+		}
+	}
+
+	/** What they trade in. */
+	enum Ware {
+		FOOD(1), TIMBER(1), STONE(1), METAL(5), CLOTH(3), HIDE(3), POWDER(4);
+
+		/** A good's worth in coppers, unless it has a price of its own ({@link #unit}). */
+		final int worth;
+
+		Ware(int worth) {
+			this.worth = worth;
+		}
+
+		boolean test(ItemStack x) {
+			Item i = x.getItem();
+			return switch (this) {
+				case FOOD -> Storage.isFood(x) || x.is(Items.WHEAT);
+				case TIMBER -> x.is(ItemTags.LOGS) || x.is(ItemTags.PLANKS);
+				case STONE -> i == Items.COBBLESTONE || i == Items.STONE || i == Items.COBBLED_DEEPSLATE || i == Items.ANDESITE || i == Items.DIORITE
+					|| i == Items.GRANITE || i == Items.TUFF || i == Items.GRAVEL || i == Items.FLINT || i == Items.CLAY_BALL || i == Items.BRICK;
+				case METAL -> i == Items.IRON_INGOT || i == Items.COPPER_INGOT || i == Items.GOLD_INGOT || i == Items.RAW_IRON || i == Items.RAW_COPPER
+					|| i == Items.RAW_GOLD || i == Items.COAL || i == Items.REDSTONE || i == Items.LAPIS_LAZULI || i == Items.DIAMOND;
+				case CLOTH -> x.is(ItemTags.WOOL) || i == Items.STRING || i == Items.PAPER;
+				case HIDE -> i == Items.LEATHER || i == Items.BONE || i == Items.FEATHER || i == Items.RABBIT_HIDE;
+				case POWDER -> i == Items.GUNPOWDER;
+			};
+		}
+
+		static @Nullable Ware of(ItemStack x) {
+			for (Ware w : values()) {
+				if (w.test(x)) {
+					return w;
+				}
+			}
+			return null;
+		}
+
+		/** What one {@code x} is worth (coppers): by its kind, but ore and gems have their own prices. */
+		static int unit(ItemStack x) {
+			Item i = x.getItem();
+			if (i == Items.DIAMOND) {
+				return 48;
+			} else if (i == Items.GOLD_INGOT) {
+				return 10;
+			} else if (i == Items.IRON_INGOT) {
+				return 6;
+			} else if (i == Items.COAL || i == Items.COPPER_INGOT || i == Items.RAW_IRON || i == Items.RAW_COPPER || i == Items.RAW_GOLD || i == Items.REDSTONE
+				|| i == Items.LAPIS_LAZULI) {
+				return 3;
+			}
+			Ware w = of(x);
+			return w == null ? 1 : w.worth;
+		}
+	}
+
+	/** What a settlement sends and how: its rig, carts, a cart's load, guards, what it sells and wants, and (kingdoms, towns) a levy to draw on when its storehouse is out of reach. */
+	record Profile(int rig, int carts, int cap, int guards, boolean mounted, EnumSet<Ware> sells, EnumSet<Ware> wants, Item @Nullable [] levy) {
+	}
+
+	// ---- tuning ---------------------------------------------------------------------------------------------------------
+
+	/** A handcart's load (items) and a skiff's; a wagon's is {@link Caravans#CART_LOAD}. The most handcarts a town sends. */
+	static final int HAND_LOAD = 96, BOAT_LOAD = 320, MOST_HANDCARTS = 2;
+	/** A town sends wagons rather than handcarts with this many folk and this many emeralds in its purse. */
+	static final int TOWN_WAGON_FOLK = 10;
+	static final long TOWN_WAGON_PURSE = 60L;
+	/** A haven, which expands to make the most of its output, sends this many more carts, and its sworn defenders go with them. */
+	static final int HAVEN_CARTS = 1, HAVEN_GUARDS = 1;
+	/** A camp's cart-guards (a pirate cove's go only where there is land under it). */
+	static final int CAMP_GUARDS = 2, COVE_GUARDS = 1;
+	/** A realm's carts: one, plus one for each wealth tier above poor. */
+	static final int REALM_CARTS = 1, COVE_SKIFFS = 2, ILLAGER_CARTS = 2, HUMAN_HANDCARTS = 2;
+	/** With its storehouse out of reach, a kingdom or town sends this levy (items), plus this per villager, never more than a rig takes. */
+	static final int LEVY_BASE = 64, LEVY_PER_VILLAGER = 2;
+	/** Nothing worth sending below this (items); the least a handcart is sent for. */
+	static final int LOAD_LEAST = 24;
+	/** A town with less than this of a good it wants asks for it; the carts go home with at most this share of what they brought (percent). */
+	static final int LOW = 64, RETURN_SHARE = 60;
+	/** Tried again after this long (ticks) when nothing could be sent. */
+	static final long RETRY = 3600L;
+	/** An ogre band in a camp doubles its carts' load. */
+	static final int OGRE_LOAD = 2;
+	/** A copper's worth: this many coppers to an emerald. A player pays this much over a good's worth (percent), buys at most this many at once. */
+	static final int COPPER_PER_EMERALD = 12, MARKUP = 130, BUY_MOST = 32;
+	/** Reputation: robbing a realm's cart (with it, and half with its partner), a town's, a handcart; plundering a camp's (with the nearest settlement); a deal; an escort. */
+	static final int REP_ROB_REALM = -60, REP_ROB_TOWN = -45, REP_ROB_HAND = -35, REP_PLUNDER = 8, REP_TRADE = 1, REP_ESCORT = 12;
+	/** An escort keeps company this long (ticks) at most this far (blocks) to count; his tip (emeralds, at most); a greenskin cart seen safely along eases the tribe's grudge by this. */
+	static final int ESCORT_TICKS = 600, ESCORT_TIP = 3, GREEN_EASE = 4;
+	static final double ESCORT_RANGE = 28.0, PLUNDER_RANGE = 500.0;
+
+	static final String PULL_TAG = "jaymoskingdoms.handcart_puller";
+
+	/** Caravan id → who has kept it company on the road (player → ticks). Not saved. */
+	private static final Map<Integer, Map<UUID, Integer>> ESCORTS = new HashMap<>();
+
+	private TradeRoutes() {
+	}
+
+	static void clear() {
+		ESCORTS.clear();
+	}
+
+	// ---- who trades, with whom --------------------------------------------------------------------------------------
+
+	/** {@code f}'s kind of trade; null for what trades another way (fiefdoms, greenskin camps) or is gone. */
+	static @Nullable Sort sortOf(MinecraftServer server, @Nullable Faction f) {
+		if (f == null || f.fallen()) {
+			return null;
+		}
+		return switch (f.type()) {
+			case KINGDOM -> Sort.REALM;
+			case VILLAGE -> Sort.TOWN;
+			case FIEFDOM -> null;
+			case BARBARIAN -> {
+				Camps.CampData data = Camps.data(server, f.id());
+				if (data == null || data.clearedAt() >= 0 || Hordes.greenskin(server, f.id())) {
+					yield null;
+				}
+				yield data.pirate() ? Sort.PIRATE : data.illager() ? Sort.ILLAGER : Sort.HUMAN;
+			}
+		};
+	}
+
+	/** Who a partner of kind {@code b} is to a sender of kind {@code a}: settled places trade with settled places, camps with their own kind (pirates and bandits with each other). */
+	static boolean friendly(Sort a, Sort b) {
+		return switch (a) {
+			case REALM, TOWN -> b == Sort.REALM || b == Sort.TOWN;
+			case HUMAN, PIRATE -> b == Sort.HUMAN || b == Sort.PIRATE;
+			case ILLAGER -> b == Sort.ILLAGER;
+		};
+	}
+
+	/**
+	 * The partner {@code f}'s caravan goes to: one of the nearest few it could trade with (one that is at peace, with a storehouse and in reach),
+	 * drawn by chance so a settlement has several, kingdoms drawing a little more than their share of the road.
+	 */
+	static @Nullable Faction partner(ServerLevel level, Faction f, Sort sort) {
+		MinecraftServer server = level.getServer();
+		List<Faction> near = new ArrayList<>();
+		for (Faction g : Factions.all(server)) {
+			if (g.id() == f.id() || g.fallen() || g.holdings().storage().isEmpty() || g.id() == f.overlord()) {
+				continue;
+			}
+			Sort gs = g.type() == FactionType.FIEFDOM ? Sort.REALM : sortOf(server, g);
+			if (gs == null || !friendly(sort, gs) || Raids.horizontal(f.seat(), g.seat()) > sort.reach * sort.reach) {
+				continue;
+			}
+			if (!sort.camp() && (Relations.atWar(f, g) || Economy.atWar(server, g))) {
+				continue;
+			}
+			near.add(g);
+		}
+		near.sort(Comparator.comparingDouble(g -> Raids.horizontal(f.seat(), g.seat()) / (g.type() == FactionType.KINGDOM ? 1.6 : 1.0)));
+		return near.isEmpty() ? null : near.get(level.getRandom().nextInt(Math.min(3, near.size())));
+	}
+
+	/** What {@code f} of kind {@code sort} sends and how, by its riches, its people and its blood. */
+	static Profile profile(MinecraftServer server, Faction f, Sort sort) {
+		boolean haven = !Havens.of(server, f).isEmpty();
+		int folk = f.holdings().population();
+		return switch (sort) {
+			case REALM -> {
+				Wealth.Tier tier = Wealth.of(server, f);
+				int carts = REALM_CARTS + tier.ordinal();
+				yield new Profile(CART, carts, Caravans.CART_LOAD, 1 + carts / 2, tier != Wealth.Tier.POOR,
+					EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE, Ware.METAL, Ware.CLOTH, Ware.HIDE),
+					EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE, Ware.METAL, Ware.CLOTH, Ware.HIDE),
+					new Item[] {Items.WHEAT, Items.BREAD, Items.COBBLESTONE, Items.OAK_LOG, Items.IRON_INGOT, Items.STRING, Items.LEATHER});
+			}
+			case TOWN -> {
+				boolean wagons = folk >= TOWN_WAGON_FOLK && f.treasury() >= TOWN_WAGON_PURSE;
+				int carts = wagons ? 1 : Math.min(MOST_HANDCARTS, 1 + folk / 16);
+				yield new Profile(wagons ? CART : HAND, carts + (haven ? HAVEN_CARTS : 0), wagons ? Caravans.CART_LOAD : HAND_LOAD,
+					(wagons ? 1 : 0) + (haven ? HAVEN_GUARDS : 0), false, EnumSet.of(Ware.FOOD, Ware.CLOTH, Ware.HIDE, Ware.TIMBER),
+					EnumSet.of(Ware.STONE, Ware.METAL, Ware.TIMBER, Ware.FOOD),
+					new Item[] {Items.WHEAT, Items.BREAD, Items.CARROT, Items.POTATO, Items.STRING, Items.LEATHER});
+			}
+			case HUMAN -> new Profile(HAND, HUMAN_HANDCARTS, HAND_LOAD, CAMP_GUARDS, false, EnumSet.of(Ware.HIDE, Ware.FOOD, Ware.METAL),
+				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.FOOD), null);
+			case ILLAGER -> new Profile(CART, ILLAGER_CARTS, Caravans.CART_LOAD, CAMP_GUARDS, false, EnumSet.of(Ware.METAL, Ware.HIDE),
+				EnumSet.of(Ware.FOOD, Ware.TIMBER, Ware.STONE), null);
+			case PIRATE -> new Profile(BOAT, COVE_SKIFFS, BOAT_LOAD, COVE_GUARDS, false, EnumSet.of(Ware.POWDER, Ware.METAL, Ware.FOOD),
+				EnumSet.of(Ware.TIMBER, Ware.METAL, Ware.CLOTH), null);
+		};
+	}
+
+	/** How long {@code home} waits between caravans (ticks). */
+	static long every(MinecraftServer server, int home) {
+		Sort sort = sortOf(server, Factions.get(server, home));
+		return sort == null ? Caravans.CARAVAN_TICKS : sort.every;
+	}
+
+	/** Ogre bands in a camp do its hauling: its carts load bigger. */
+	static int ogreLoad(MinecraftServer server, Camps.CampData data) {
+		return OgreHolds.band(server, data.center()) != null ? OGRE_LOAD : 1;
+	}
+
+	/** The rig a trade caravan is seen in at its place on the road: a cove's skiffs where there is water, its handcarts where there is land. */
+	static int rigNow(ServerLevel level, Caravans.Caravan c) {
+		if (c.rig() == BOAT) {
+			return Wagon.water(level, c.at().getX() + 0.5, c.at().getZ() + 0.5) ? BOAT : HAND;
+		}
+		return c.rig();
+	}
+
+	/** Where a skiff ties up at {@code f}: a cove's mooring, else its door. */
+	static BlockPos quay(MinecraftServer server, Faction f) {
+		PirateCoves.Cove cove = PirateCoves.cove(server, f.id());
+		return cove != null ? cove.mooring() : Caravans.start(f);
+	}
+
+	private static int capOf(Caravans.Caravan c) {
+		return c.rig() == HAND ? HAND_LOAD : c.rig() == BOAT ? BOAT_LOAD : Caravans.CART_LOAD;
+	}
+
+	private static boolean in(EnumSet<Ware> set, ItemStack x) {
+		Ware w = Ware.of(x);
+		return w != null && set.contains(w);
+	}
+
+	// ---- sending ------------------------------------------------------------------------------------------------------
+
+	/** Each settlement (not a fiefdom or a greenskin camp: {@link Caravans} has theirs) whose time has come sends its caravan. */
+	static void send(ServerLevel level, long now) {
+		MinecraftServer server = level.getServer();
+		Caravans.Ledger l = Caravans.ledger(server);
+		for (Faction f : Factions.all(server)) {
+			Sort sort = sortOf(server, f);
+			if (sort == null) {
+				continue;
+			}
+			String key = Integer.toString(f.id());
+			Long due = l.next().get(key);
+			if (due == null) {
+				// (first sight of it: its first caravan is spread over its interval, so they don't all set out at once)
+				Caravans.later(server, f, now + Math.floorMod(f.id() * 7919L, sort.every));
+				l = Caravans.ledger(server);
+				continue;
+			}
+			if (now < due || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())) {
+				continue;
+			}
+			start(level, f, false);
+			l = Caravans.ledger(server);
+		}
+	}
+
+	/** {@code f} sends a caravan now, if it has a partner and goods to send. {@code force}: whatever the time and the load. */
+	static Caravans.@Nullable Caravan start(ServerLevel level, Faction f, boolean force) {
+		MinecraftServer server = level.getServer();
+		long now = level.getGameTime();
+		Sort sort = sortOf(server, f);
+		Faction to = sort == null || Economy.atWar(server, f) && !sort.camp() ? null : partner(level, f, sort);
+		if (to == null) {
+			Caravans.later(server, f, now + RETRY);
+			return null;
+		}
+		Profile p = profile(server, f, sort);
+		List<Map<String, Integer>> carts;
+		if (Storage.loaded(level, f)) {
+			carts = Caravans.loadUp(level, f, x -> in(p.sells(), x), sort.keep, p.carts() * p.cap(), p.cap());
+		} else if (p.levy() != null) {
+			carts = levy(level, f, p);
+		} else {
+			Caravans.later(server, f, now + RETRY);
+			return null;
+		}
+		int load = carts.stream().mapToInt(c -> c.values().stream().mapToInt(Integer::intValue).sum()).sum();
+		if (load < LOAD_LEAST && !force || carts.size() > p.carts()) {
+			// (nothing worth the road, or more than it can carry: back what was taken, and wait)
+			for (Map<String, Integer> cart : carts) {
+				Caravans.deliver(level, f, cart);
+			}
+			Caravans.later(server, f, now + RETRY);
+			return null;
+		}
+		if (carts.isEmpty()) {
+			carts = List.of(Map.of());
+		}
+		Caravans.Caravan c = Caravans.launch(level, f, to, carts, p.guards(), p.mounted(), p.rig(), now + sort.every);
+		JaymosKingdoms.LOGGER.info("{} sends {} {} ({} goods) to {}", f.name(), carts.size(), p.rig() == HAND ? "handcarts" : p.rig() == BOAT ? "skiffs" : "carts", load,
+			to.name());
+		return c;
+	}
+
+	/** A levy of {@code f}'s production, sent while its storehouse is out of reach (nothing is taken from it). */
+	private static List<Map<String, Integer>> levy(ServerLevel level, Faction f, Profile p) {
+		int n = Math.min(p.carts() * p.cap(), LEVY_BASE + f.holdings().population() * LEVY_PER_VILLAGER);
+		Item[] goods = p.levy();
+		Map<String, Integer> all = new LinkedHashMap<>();
+		for (int i = 0; i < n; i++) {
+			all.merge(Caravans.key(goods[level.getRandom().nextInt(goods.length)]), 1, Integer::sum);
+		}
+		List<Map<String, Integer>> carts = new ArrayList<>();
+		Map<String, Integer> cart = new LinkedHashMap<>();
+		int in = 0;
+		for (Map.Entry<String, Integer> e : all.entrySet()) {
+			int left = e.getValue();
+			while (left > 0) {
+				int take = Math.min(left, p.cap() - in);
+				cart.merge(e.getKey(), take, Integer::sum);
+				in += take;
+				left -= take;
+				if (in >= p.cap()) {
+					carts.add(cart);
+					cart = new LinkedHashMap<>();
+					in = 0;
+				}
+			}
+		}
+		if (!cart.isEmpty()) {
+			carts.add(cart);
+		}
+		return carts;
+	}
+
+	// ---- arriving ----------------------------------------------------------------------------------------------------
+
+	/**
+	 * At the far end its goods are handed over (a realm partner takes its market dues), the partner's surplus of what the sender is short
+	 * in is loaded for home, and the difference is paid between their treasuries; back home, what it brought is put in the storehouse.
+	 * Null when the round is done.
+	 */
+	static Caravans.@Nullable Caravan arrive(ServerLevel level, Caravans.Caravan c, Faction home, Faction lord, long now) {
+		MinecraftServer server = level.getServer();
+		reward(level, c, home, lord);
+		if (c.back()) {
+			for (Map<String, Integer> cart : c.carts()) {
+				Caravans.deliver(level, home, cart);
+			}
+			return null;
+		}
+		long out = 0L;
+		for (Map<String, Integer> cart : c.carts()) {
+			Caravans.deliver(level, lord, cart);
+			out += worth(cart);
+		}
+		if (lord.type().isRealm()) {
+			Treasuries.dues(server, lord, c.load());
+		}
+		Sort hs = sortOf(server, home);
+		Sort ls = sortOf(server, lord);
+		EnumSet<Ware> wants = hs == null ? EnumSet.allOf(Ware.class) : wanted(level, home, profile(server, home, hs));
+		int cap = capOf(c);
+		List<Map<String, Integer>> back = List.of();
+		if (Storage.loaded(level, lord)) {
+			int most = Math.min(c.carts().size() * cap, Math.max(0, c.load() * RETURN_SHARE / 100));
+			back = Caravans.loadUp(level, lord, x -> in(wants, x), ls == null ? Sort.REALM.keep : ls.keep, most, cap);
+		}
+		long in = 0L;
+		for (Map<String, Integer> cart : back) {
+			in += worth(cart);
+		}
+		settle(server, home, lord, out, in);
+		return c.turned(fit(back, c.carts().size()), now + Caravans.STOP_TICKS);
+	}
+
+	/** The goods {@code home} asks for: those of its wants that it holds little of (all of them while its storehouse is out of reach, or if it is well stocked in every one). */
+	private static EnumSet<Ware> wanted(ServerLevel level, Faction home, Profile p) {
+		if (!Storage.loaded(level, home)) {
+			return p.wants();
+		}
+		EnumSet<Ware> low = EnumSet.noneOf(Ware.class);
+		for (Ware w : p.wants()) {
+			if (Storage.count(level, home, w::test) < LOW) {
+				low.add(w);
+			}
+		}
+		return low.isEmpty() ? p.wants() : low;
+	}
+
+	/** The carts going home: {@code back}, made up to {@code n} (empty ones), or squeezed into {@code n}. */
+	private static List<Map<String, Integer>> fit(List<Map<String, Integer>> back, int n) {
+		List<Map<String, Integer>> carts = new ArrayList<>(back);
+		while (carts.size() < n) {
+			carts.add(Map.of());
+		}
+		while (carts.size() > n) {
+			Map<String, Integer> extra = carts.removeLast();
+			Map<String, Integer> merged = new HashMap<>(carts.getLast());
+			extra.forEach((k, v) -> merged.merge(k, v, Integer::sum));
+			carts.set(carts.size() - 1, merged);
+		}
+		return carts;
+	}
+
+	/** What a cart's load is worth (coppers). */
+	static long worth(Map<String, Integer> cart) {
+		long worth = 0L;
+		for (Map.Entry<String, Integer> e : cart.entrySet()) {
+			Item item = Caravans.item(e.getKey());
+			if (item != null) {
+				worth += (long)e.getValue() * Ware.unit(new ItemStack(item));
+			}
+		}
+		return worth;
+	}
+
+	/** The one who came out ahead is paid the difference in worth by the other, as far as that one's treasury goes. */
+	static void settle(MinecraftServer server, Faction home, Faction lord, long out, long back) {
+		long diff = (out - back) / COPPER_PER_EMERALD;
+		if (diff == 0L) {
+			return;
+		}
+		Faction payer = Factions.get(server, diff > 0 ? lord.id() : home.id());
+		Faction payee = Factions.get(server, diff > 0 ? home.id() : lord.id());
+		if (payer == null || payee == null) {
+			return;
+		}
+		long sum = Math.min(Math.abs(diff), payer.treasury());
+		if (sum <= 0L) {
+			return;
+		}
+		Factions.update(server, payer.id(), x -> x.withTreasury(x.treasury() - sum));
+		Factions.update(server, payee.id(), x -> x.withTreasury(x.treasury() + sum));
+	}
+
+	// ---- its folk -----------------------------------------------------------------------------------------------------
+
+	/** One of a trade caravan's guards for {@code f} at {@code at}: its own kind of fighter (a camp's own raiders, deckhands or vindicators; a town's or realm's guards, MCA's with MCA). */
+	static @Nullable Worker guard(ServerLevel level, Faction f, BlockPos at, float yaw) {
+		MinecraftServer server = level.getServer();
+		Sort sort = sortOf(server, f);
+		if (sort == null || !sort.camp()) {
+			if (f.type() == FactionType.VILLAGE) {
+				Worker w = McaCompat.escort(level, f, at, yaw, Caravans.TASK, 64);
+				if (w != null) {
+					return w;
+				}
+			}
+			return Caravans.guard(level, f, at, yaw);
+		}
+		int role = sort == Sort.ILLAGER ? Illagers.VINDICATOR : sort == Sort.PIRATE ? Pirates.DECKHAND : Folk.BARBARIAN;
+		Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		if (brute == null) {
+			return null;
+		}
+		brute.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		brute.setup(role, f, at, 64);
+		brute.setTask(Caravans.TASK);
+		level.addFreshEntity(brute);
+		Worker man = brute;
+		if (McaCompat.raider(level, brute) instanceof Worker v) {
+			v.setTask(Caravans.TASK);
+			man = v;
+		}
+		return man;
+	}
+
+	// ---- players: escorting, trading, robbing ------------------------------------------------------------------------------
+
+	/** Players near {@code lead} keep {@code c} company (called each time it is moved on while seen). */
+	static void escort(ServerLevel level, Caravans.Caravan c, net.minecraft.world.entity.Entity lead) {
+		for (ServerPlayer p : level.players()) {
+			if (!p.isSpectator() && p.isAlive() && p.distanceToSqr(lead) <= ESCORT_RANGE * ESCORT_RANGE) {
+				ESCORTS.computeIfAbsent(c.id(), k -> new HashMap<>()).merge(p.getUUID(), Caravans.TICK, Integer::sum);
+			}
+		}
+	}
+
+	/** {@code c} has got to one end of its road: whoever kept it company all the way there is thanked (a settled owner's and partner's good name, a tip; a greenskin tribe's grudge eased). */
+	static void reward(ServerLevel level, Caravans.Caravan c, Faction home, Faction lord) {
+		MinecraftServer server = level.getServer();
+		Map<UUID, Integer> who = ESCORTS.remove(c.id());
+		if (who == null) {
+			return;
+		}
+		String tribe = home.type() == FactionType.BARBARIAN ? Tribes.of(server, home.id()) : null;
+		Sort sort = sortOf(server, home);
+		for (Map.Entry<UUID, Integer> e : who.entrySet()) {
+			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+			if (p == null || e.getValue() < ESCORT_TICKS) {
+				continue;
+			}
+			if (tribe != null) {
+				Tribes.add(server, p.getUUID(), tribe, -GREEN_EASE);
+			} else if (sort != null && !sort.camp()) {
+				Reputation.change(p, home, REP_ESCORT);
+				if (lord.id() != home.id() && (lord.type().isRealm() || lord.type() == FactionType.VILLAGE)) {
+					Reputation.change(p, lord, REP_ESCORT / 2);
+				}
+				long tip = Math.min(ESCORT_TIP, home.treasury());
+				if (tip > 0L) {
+					Factions.update(server, home.id(), x -> x.withTreasury(x.treasury() - tip));
+					Block.popResource(level, p.blockPosition(), new ItemStack(Items.EMERALD, (int)tip));
+				}
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.escorted", home.name(), lord.name()).withStyle(ChatFormatting.GREEN));
+			}
+		}
+	}
+
+	/**
+	 * A player with emeralds in hand right-clicks a cart: he buys what it carries, a handful at a time, at a markup, the emeralds going to the
+	 * cart's owner. True if that was what he did (or was refused); false to let it be looked at.
+	 */
+	static boolean deal(ServerLevel level, Wagon wagon, ServerPlayer player) {
+		ItemStack held = player.getMainHandItem();
+		if (!held.is(Items.EMERALD)) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		Caravans.Caravan c = Caravans.get(server, wagon.caravan());
+		Faction f = Factions.get(server, wagon.faction());
+		if (c == null || f == null || wagon.slot() >= c.carts().size()) {
+			return false;
+		}
+		if (f.type() == FactionType.BARBARIAN && Hordes.greenskin(server, f.id())) {
+			// (they count in bent copper, and do not sell to a stranger)
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.refused", f.name()).withStyle(ChatFormatting.GRAY), true);
+			return true;
+		}
+		boolean settled = f.type().isRealm() || f.type() == FactionType.VILLAGE;
+		if (settled && Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.refused", f.name()).withStyle(ChatFormatting.GRAY), true);
+			return true;
+		}
+		Map<String, Integer> cart = new LinkedHashMap<>(c.carts().get(wagon.slot()));
+		Map.Entry<String, Integer> pick = null;
+		Item item = null;
+		for (Map.Entry<String, Integer> e : cart.entrySet()) {
+			item = Caravans.item(e.getKey());
+			if (item != null && e.getValue() > 0) {
+				pick = e;
+				break;
+			}
+			item = null;
+		}
+		if (pick == null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.nothing", f.name()).withStyle(ChatFormatting.GRAY), true);
+			return true;
+		}
+		long unit = Math.max(1L, (long)Ware.unit(new ItemStack(item)) * MARKUP / 100L);
+		long n = Math.min(Math.min(pick.getValue(), BUY_MOST), (long)held.getCount() * COPPER_PER_EMERALD / unit);
+		long cost = (n * unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD;
+		while (n > 0L && cost > held.getCount()) {
+			n--;
+			cost = (n * unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD;
+		}
+		if (n <= 0L) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.dear", (unit + COPPER_PER_EMERALD - 1) / COPPER_PER_EMERALD, new ItemStack(item).getHoverName())
+				.withStyle(ChatFormatting.GRAY), true);
+			return true;
+		}
+		held.shrink((int)cost);
+		for (long left = n; left > 0L; ) {
+			int stack = (int)Math.min(left, item.getDefaultMaxStackSize());
+			ItemStack give = new ItemStack(item, stack);
+			if (!player.getInventory().add(give)) {
+				Block.popResource(level, player.blockPosition(), give);
+			}
+			left -= stack;
+		}
+		int remaining = (int)(pick.getValue() - n);
+		if (remaining > 0) {
+			cart.put(pick.getKey(), remaining);
+		} else {
+			cart.remove(pick.getKey());
+		}
+		List<Map<String, Integer>> carts = new ArrayList<>(c.carts());
+		carts.set(wagon.slot(), cart);
+		Caravans.put(server, c.carts(carts));
+		wagon.setLoad(Caravans.look(cart));
+		long paid = cost;
+		Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + paid));
+		if (settled) {
+			Reputation.change(player, f, REP_TRADE);
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.bought", n, new ItemStack(item).getHoverName(), f.name(), cost).withStyle(ChatFormatting.GREEN), true);
+		return true;
+	}
+
+	/**
+	 * A player broke a trade cart open. A realm's, a town's or a poor man's handcart costs him its owner's good name (and half as much with the
+	 * partner it was bound for or came from); a camp's is plundering, and the nearest settlement is glad of it.
+	 */
+	static void robbed(ServerLevel level, Wagon wagon, ServerPlayer player, Faction f, Caravans.Caravan c) {
+		MinecraftServer server = level.getServer();
+		Sort sort = sortOf(server, f);
+		if (sort == null && f.type() != FactionType.KINGDOM && f.type() != FactionType.VILLAGE) {
+			sort = Sort.HUMAN;
+		}
+		if (sort != null && sort.camp()) {
+			Faction near = null;
+			double bestD = PLUNDER_RANGE * PLUNDER_RANGE;
+			for (Faction g : Factions.all(server)) {
+				double d = Raids.horizontal(g.seat(), f.seat());
+				if (!g.fallen() && (g.type() == FactionType.KINGDOM || g.type() == FactionType.VILLAGE) && d < bestD) {
+					near = g;
+					bestD = d;
+				}
+			}
+			if (near != null) {
+				Reputation.change(player, near, REP_PLUNDER);
+			}
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.trade.plundered", f.name()).withStyle(ChatFormatting.GOLD));
+			return;
+		}
+		boolean hand = wagon.kind() == Wagon.HANDCART;
+		int by = hand ? REP_ROB_HAND : sort == Sort.TOWN ? REP_ROB_TOWN : REP_ROB_REALM;
+		Reputation.change(player, f, by);
+		Faction other = Factions.get(server, c.lord() == f.id() ? c.home() : c.lord());
+		if (other != null && other.id() != f.id() && !other.fallen() && (other.type().isRealm() || other.type() == FactionType.VILLAGE)) {
+			Reputation.change(player, other, by / 2);
+		}
+		player.sendSystemMessage(Component.translatable(hand ? "message.jaymoskingdoms.trade.robbed.hand" : "message.jaymoskingdoms.caravan.robbed", f.name())
+			.withStyle(ChatFormatting.RED));
+	}
+}

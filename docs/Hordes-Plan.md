@@ -99,5 +99,6 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
 - [ ] Living together: greenskins in human and heritage settlements, a distaste table between peoples
 - [ ] Patch 4: the greenskin kingdom city (throne hall, arena, market district, pacts, bounty line)
 - [ ] Patch 5: walled towns, plundering coves/camps/holds, terrain-wrecking pirate cannons, currencies, caravans for all, haven growth
+  - [x] caravans for all (branch settle/caravans): TradeRoutes, handcarts, skiffs, escorts, deals, robbery by kind
 - [ ] Structures from Andy's other modpacks (waiting on which packs)
 - [ ] Check the 7 MCA add-ons and Plant Fibers
