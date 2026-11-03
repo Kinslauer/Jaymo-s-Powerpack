@@ -5076,3 +5076,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
   (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
   own resourcepacks/.
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
