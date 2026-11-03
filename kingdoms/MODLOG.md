@@ -8227,3 +8227,22 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
 - **Guards:** a realm's guards are a quarter recruits (gambeson in the realm's colour, mail, cap), half footmen (the
   realm's harness as before), a quarter veterans (full plate), by their id (`Outfits.GUARD_RECRUIT_SHARE`). New guards
   only; `Outfits.VERSION` is unchanged so nobody already dressed is stripped. No gold.
+
+### Same release, passes 2 and 3: Ignis Vael's Cinder Forge, under-armour
+- **The Cinder Forge** (`nether/CinderForge`, built by `FortBuildings.cinderForge`): one per world, 300-700 blocks from
+  the Nether's heart (fixed by the seed), built the first time a player comes within 96 blocks. **Ignis Vael** keeps it:
+  an MCA villager (a plain one without MCA) of Emberborn blood, attuned at power 10, unhurt by anything but the void;
+  back at his anvil a day after he goes missing. His wares (MCA's Wares button; a right-click without MCA), restocked
+  weekly: the existing Writ of Rebirth (`Classes.WRIT`, which already unmakes heritage, class and story alive; Andy:
+  "rare, from the Nether forge") for 40 emeralds + 2 netherite scrap, one a week; and Cinder-forged reforging of iron and
+  mail pieces (piece + 4 blaze rods: Fire Protection III, Unbreaking II, gold name). He greets Emberborn as kin.
+- **Finding him:** Overworld armourers, weaponsmiths and toolsmiths pass on one of four rumours now and then as you talk
+  to them (35%, 5 min apart; speech bubbles, no chat), one giving the way from the Nether's heart. Once told, sneak-use
+  one with 12 emeralds for a **Charred Wayfinder**: a vanilla compass (custom data `jaymoskingdoms_wayfinder`) that points
+  at the forge's spot x8 in the Overworld (where to open a portal) and at the forge in the Nether, re-aimed every 2 s.
+  Your first time in the Nether puts word of the forge in your next Tidings. Ops: `/kingdom cinderforge info|build|wayfinder`.
+- **Under-armour** (client `UnderArmourLayer`, art `tools/gen_under_armour.py`, our own; Armor Reimagined is ARR, idea
+  only): leggings with nothing over the chest (or an elytra) bring their suit on body and arms: leather an arming doublet
+  in the leggings' dye, mail a linen gambeson with mail sleeves, iron a studded padded gambeson. A WornModel, so it poses.
+- Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
+  change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
