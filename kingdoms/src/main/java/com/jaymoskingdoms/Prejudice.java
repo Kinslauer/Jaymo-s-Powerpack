@@ -57,6 +57,8 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
+	/** (0.7.480) The beastfolk's ears and tails show; the Hollow are the dead walking, the furthest folk shun. */
+	static final int BEASTFOLK = 2, HOLLOW = 4;
 	/** (0.7.357) The Bio-built: made, not born, and plainly so; worse than any. */
 	static final int BIOBUILT = 6;
 	/** (0.7.357) A human who minds no other blood still minds the Bio-built's this much (a share of the full degree). */
@@ -131,6 +133,8 @@ public final class Prejudice {
 			case WARRIORBORN -> WARRIORBORN;
 			case SYLVAN -> SYLVAN;
 			case BIOBUILT -> BIOBUILT;
+			case BEASTFOLK -> BEASTFOLK;
+			case HOLLOW -> HOLLOW;
 			default -> 0;
 		};
 	}
