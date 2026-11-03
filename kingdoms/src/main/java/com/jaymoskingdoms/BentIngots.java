@@ -35,7 +35,9 @@ import org.jspecify.annotations.Nullable;
  * Greenskins take only bent ones and are dumb enough to refuse the same ingot once it is straightened."
  * <ul>
  * <li>A player bends a copper or iron ingot by using it on an anvil, sneaking, one at a time (sneaking so an iron ingot
- * can still open the anvil to repair with); a bent ingot used on an anvil is straightened again, and needs no sneak.</li>
+ * can still open the anvil to repair with). Cold hammering won't straighten one again (Andy, 2026-11-03): it has to be
+ * melted back down (furnace or blast furnace) or superheated first (Powers' Forge Hearth, where it comes off a Hot
+ * Ingot that cools to a plain one).</li>
  * <li>Greenskins pay, are paid and trade in bent ingots only ({@link GreenMarket}, {@link Tribes#tribute}); offered a
  * plain ingot (sneaking, in hand) they refuse it in their broken English, and the same ingot bent they take.</li>
  * <li>A bent copper is worth {@link #COPPER_WORTH}, a bent iron {@link #IRON_WORTH}; prices and hoards ({@link HordeEconomy})
@@ -183,7 +185,7 @@ public final class BentIngots {
 
 	// ---- the anvil -----------------------------------------------------------------------------------------------------
 
-	/** A copper or iron ingot used (sneaking) on an anvil is bent, one at a time; a bent one is straightened. */
+	/** A copper or iron ingot used (sneaking) on an anvil is bent, one at a time; a cold bent one only rings off it. */
 	private static InteractionResult onAnvil(Player player, net.minecraft.world.level.Level level, InteractionHand hand,
 		net.minecraft.world.phys.BlockHitResult hit) {
 		ItemStack held = player.getItemInHand(hand);
@@ -197,13 +199,18 @@ public final class BentIngots {
 		if (level.isClientSide()) {
 			return InteractionResult.SUCCESS;
 		}
-		Item result = held.is(Items.COPPER_INGOT) ? BENT_COPPER : held.is(Items.IRON_INGOT) ? BENT_IRON
-			: held.is(BENT_COPPER) ? Items.COPPER_INGOT : Items.IRON_INGOT;
+		if (!bending) {
+			// ((0.7.480) cold, it just rings: melt it down or superheat it first)
+			level.playSound(null, hit.getBlockPos(), SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3F, 1.6F);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bent.cold"));
+			return InteractionResult.SUCCESS;
+		}
+		Item result = held.is(Items.COPPER_INGOT) ? BENT_COPPER : BENT_IRON;
 		if (!player.getAbilities().instabuild) {
 			held.shrink(1);
 		}
 		player.getInventory().placeItemBackInInventory(new ItemStack(result), net.minecraft.util.Prediction.SERVER_ONLY);
-		float pitch = bending ? 0.9F + level.getRandom().nextFloat() * 0.2F : 1.2F + level.getRandom().nextFloat() * 0.2F;
+		float pitch = 0.9F + level.getRandom().nextFloat() * 0.2F;
 		level.playSound(null, hit.getBlockPos(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.6F, pitch);
 		return InteractionResult.SUCCESS;
 	}

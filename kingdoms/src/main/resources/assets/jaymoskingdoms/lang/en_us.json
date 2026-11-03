@@ -5603,6 +5603,7 @@
 	"disguise.jaymoskingdoms.aeolus.after": "Lie there and think on it. The young never listen until they're on the ground.",
 	"block.jaymoskingdoms.plot_stake": "Plot Stake",
 	"message.jaymoskingdoms.stake.tied": "Line tied. Now string it to the next stake, straight along the ground (at most %s blocks).",
+	"message.jaymoskingdoms.bent.cold": "Cold, it just rings off the anvil. Melt it down or heat it in a forge first.",
 	"message.jaymoskingdoms.stake.strung": "Strung: a side of %s blocks, stake to stake.",
 	"message.jaymoskingdoms.stake.not_straight": "A line runs straight north-south or east-west, from stake to stake.",
 	"message.jaymoskingdoms.stake.too_far": "The string won't stretch that far: %s blocks at most.",
