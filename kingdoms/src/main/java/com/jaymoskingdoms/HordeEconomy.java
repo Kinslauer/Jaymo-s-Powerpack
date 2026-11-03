@@ -233,9 +233,10 @@ final class HordeEconomy {
 		return Storage.isFood(stack) || stack.is(Items.BROWN_MUSHROOM) || stack.is(Items.RED_MUSHROOM);
 	}
 
-	/** How many meals the camp's folk need a day. */
+	/** How many meals the camp's folk need a day ((0.7.480) only the living eat: a dead one's place waiting to be filled doesn't). */
 	static int meals(ServerLevel level, Faction camp, Camps.CampData data, boolean orc) {
-		int folk = orc ? OrcCamps.fighters(camp) + 2 : GoblinVillages.goblins(camp) + 1;
+		int folk = orc ? camp.holdings().count(Orcs.GRUNT) + camp.holdings().count(Orcs.RANGER) + 2
+			: camp.holdings().count(Goblins.GOBLIN) + camp.holdings().count(Goblins.SLINGER) + 1;
 		int ogres = orc ? OgreHolds.haulers(level, camp.id(), data.center()).size() : 0;
 		return folk * MEAL + ogres * OGRE_MEALS;
 	}

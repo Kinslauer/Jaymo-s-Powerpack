@@ -874,7 +874,7 @@ final class Caravans {
 		for (int i = 0; i < c.carts().size(); i++) {
 			BlockPos spot = ground(level, at.subtract(facing.scale(i * SPACING)));
 			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
-			Worker w = Drivers.hire(level, home, spot, yaw, TASK, 64, null);
+			Worker w = home.type() == FactionType.BARBARIAN ? carter(level, home, spot, yaw) : Drivers.hire(level, home, spot, yaw, TASK, 64, null);
 			if (w == null) {
 				continue;
 			}
@@ -915,6 +915,31 @@ final class Caravans {
 			}
 			live.guards.add(guard.getUUID());
 		}
+	}
+
+	/**
+	 * (0.7.480) A greenskin cart's carter for camp {@code f} at {@code at}: with MCA one of the camp's own goblins or orcs
+	 * (raised as its grunt or goblin, then set to drive), else the folk carter {@link Drivers#hire} gives.
+	 */
+	static @Nullable Worker carter(ServerLevel level, Faction f, BlockPos at, float yaw) {
+		if (McaCompat.LOADED) {
+			Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (brute != null) {
+				brute.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+				brute.setup(Camps.orc(level.getServer(), f.id()) ? Orcs.GRUNT : Goblins.GOBLIN, f, at, 64);
+				level.addFreshEntity(brute);
+				if (McaCompat.raider(level, brute) instanceof Worker v && v.mob() instanceof Enlisted e) {
+					// (his body the camp's, his job the cart's: Drivers.of knows him by the carter's role)
+					e.enlist(CARTER, f.id());
+					v.setTask(TASK);
+					return v;
+				}
+				if (brute.isAlive()) {
+					brute.discard();
+				}
+			}
+		}
+		return Drivers.hire(level, f, at, yaw, TASK, 64, null);
 	}
 
 	/** (0.7.294) One of a caravan's guards for {@code f} at {@code at}: with MCA an MCA guard of its people, else a folk. */

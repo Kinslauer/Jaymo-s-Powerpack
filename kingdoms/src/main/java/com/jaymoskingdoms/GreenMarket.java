@@ -315,6 +315,9 @@ final class GreenMarket {
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, s.camp());
 		if (camp == null) {
+			if (s.stocked()) {
+				v.getOffers().clear();
+			}
 			return;
 		}
 		boolean loaded = s.stocked() && Storage.loaded(level, camp);
@@ -337,6 +340,10 @@ final class GreenMarket {
 					Storage.put(level, camp, cost.getItem(), cost.getCount() * times);
 				}
 			}
+		}
+		if (s.stocked()) {
+			// ((0.7.480) nothing priced is left on him between stall visits, so no other path can open an unbooked trade)
+			offers.clear();
 		}
 	}
 }
