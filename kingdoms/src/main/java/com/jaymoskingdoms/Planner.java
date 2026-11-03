@@ -252,7 +252,8 @@ public final class Planner {
 		}
 		// (0.5.11) once every other kind of building is up to its full count, the builders wall the settlement in
 		// (0.5.14) not a fiefdom: it lives to supply its overlord, not to hold out ({@link Focus})
-		if (only == null && Focus.walled(server, f) && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
+		// (0.7.484) not a walled town past its first tier: its own rings wall it in ({@link WalledTowns})
+		if (only == null && Focus.walled(server, f) && !WalledTowns.walled(server, f) && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
 			Enclosure.Piece piece = Enclosure.next(level, f);
 			Blueprint.Entry wallEntry = piece == null ? null : entry(f, piece.entry());
 			if (piece != null && wallEntry != null) {
@@ -400,6 +401,7 @@ public final class Planner {
 		int firstRing = -1, candidates = 0, ringIndex = 0;
 		double start = (f.id() * 0.618) % 1.0 * Math.PI * 2.0;
 		Works.Site works = Works.of(level.getServer(), f.id());
+		boolean town = WalledTowns.walled(level.getServer(), f);
 		for (int r = Math.max(rings[0], SEAT_CLEAR + Math.max(bp.width(), bp.depth())); r <= reach; r += RING_STEP, ringIndex++) {
 			if (firstRing >= 0 && ringIndex > firstRing + RING_LOOKAHEAD) {
 				break;
@@ -415,7 +417,9 @@ public final class Planner {
 				Rotation rotation = facing(Direction.getApproximateNearest(f.seat().getX() - center.getX(), 0, f.seat().getZ() - center.getZ()));
 				int[] size = turned(bp, rotation);
 				BlockPos corner = center.offset(-size[0] / 2, 0, -size[1] / 2);
-				if (!Enclosure.inside(works, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
+				// (0.7.484) a walled town's builders keep inside its newest wall and off its band's plots, whatever rectangle it had
+				if (town ? !WalledTowns.plannable(level, f, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
+					corner.getZ() + size[1] + GAP) : !Enclosure.inside(works, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
 					corner.getZ() + size[1] + GAP)) {
 					continue;
 				}

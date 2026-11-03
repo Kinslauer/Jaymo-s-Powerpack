@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -99,6 +100,8 @@ final class WalledTowns {
 	static final int ROAD_HALF = 1;
 	/** (0.7.484) Folk and golems are counted this far past the town's wall radius. */
 	static final int HOME_MARGIN = 4;
+	/** (0.7.484) The settlement's own builders ({@link Planner}) keep this far inside a walled town's newest wall. */
+	static final int PLAN_MARGIN = 4;
 	// ================================================================================================================
 
 	/** Which way a settlement builds. */
@@ -232,6 +235,66 @@ final class WalledTowns {
 	/** (0.7.484) Where a town's folk and golems are counted: the bell's box, or out to its own wall, whichever is wider. */
 	private static AABB home(Faction f, Kind kind, int tier) {
 		return new AABB(f.seat()).inflate(Math.max(Villages.VILLAGE_RADIUS, kind.wall[tier - 1] + HOME_MARGIN));
+	}
+
+	/** (0.7.484) How far round its seat village {@code f}'s folk and golems are counted ({@link Villages}): out to its wall. */
+	static double reach(ServerLevel level, Faction f) {
+		MinecraftServer server = level.getServer();
+		if (!grows(server, f)) {
+			return Villages.VILLAGE_RADIUS;
+		}
+		int tier = tier(server, f.id());
+		return tier < 2 ? Villages.VILLAGE_RADIUS : Math.max(Villages.VILLAGE_RADIUS, kind(level, f).wall[tier - 1] + HOME_MARGIN);
+	}
+
+	/** (0.7.484) Village {@code f} has its tier's folk: no newcomer moves into a new house, however many beds stand spare. */
+	static boolean full(ServerLevel level, Faction f) {
+		MinecraftServer server = level.getServer();
+		if (!grows(server, f)) {
+			return false;
+		}
+		int tier = tier(server, f.id());
+		Kind kind = kind(level, f);
+		return level.getEntitiesOfClass(Villager.class, home(f, kind, tier), Villager::isAlive).size() >= kind.folk[tier - 1];
+	}
+
+	/** (0.7.484) Village {@code f} has climbed past tier 1: its own rings wall it in, not the builders' rectangle ({@link Enclosure}). */
+	static boolean walled(MinecraftServer server, Faction f) {
+		return grows(server, f) && tier(server, f.id()) >= 2;
+	}
+
+	/**
+	 * (0.7.484) Whether the builders ({@link Planner}) may put up a building over {@code minX..maxX, minZ..maxZ}: well
+	 * inside a walled town's newest wall, and on none of its band's planned plots still to rise. True for any other place.
+	 */
+	static boolean plannable(ServerLevel level, Faction f, int minX, int minZ, int maxX, int maxZ) {
+		MinecraftServer server = level.getServer();
+		if (!walled(server, f)) {
+			return true;
+		}
+		double most = radius(level, f) - PLAN_MARGIN;
+		BlockPos seat = f.seat();
+		for (int x : new int[] {minX, maxX}) {
+			for (int z : new int[] {minZ, maxZ}) {
+				double dx = x + 0.5 - seat.getX(), dz = z + 0.5 - seat.getZ();
+				if (dx * dx + dz * dz > most * most) {
+					return false;
+				}
+			}
+		}
+		Town t = town(server, f.id());
+		List<IllagerBuildings.Spot> band = plan(level, f, kind(level, f), t.tier());
+		for (int i = t.built(); i < band.size(); i++) {
+			IllagerBuildings.Spot spot = band.get(i);
+			CampBuildings.Placer flat = spot.placer(seat, gateOf(t, f));
+			int[] b = Hordes.bounds(new Hordes.Piece(spot.id(), spot.design()));
+			BlockPos a = flat.at(b[0], 0, b[1]), c = flat.at(b[2], 0, b[3]);
+			if (maxX >= Math.min(a.getX(), c.getX()) && minX <= Math.max(a.getX(), c.getX()) && maxZ >= Math.min(a.getZ(), c.getZ())
+				&& minZ <= Math.max(a.getZ(), c.getZ())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Its folk cap at its tier. */
@@ -503,12 +566,22 @@ final class WalledTowns {
 				return this.post;
 			}
 			int h = Math.floorMod(x * 73428767 ^ y * 912931 ^ z * 42317861, 7);
-			return switch (h) {
+			BlockState s = switch (h) {
 				case 0, 1, 2 -> this.land.wall();
 				case 3, 4 -> this.land.mossy();
 				case 5 -> this.land.cracked();
 				default -> Blocks.COBBLESTONE.defaultBlockState();
 			};
+			// (0.7.484) none of the land's own stone in the wall, so a gate cut tells the wall from the ground
+			if (earthy(s)) {
+				for (BlockState other : new BlockState[] {this.land.wall(), this.land.mossy(), this.land.cracked()}) {
+					if (!earthy(other)) {
+						return other;
+					}
+				}
+				return Blocks.COBBLESTONE.defaultBlockState();
+			}
+			return s;
 		}
 
 		/** The block over a gate's lintel. */
@@ -519,6 +592,11 @@ final class WalledTowns {
 		boolean part(BlockState s) {
 			return this.parts.contains(s.getBlock());
 		}
+	}
+
+	/** (0.7.484) {@code s} is a block the land itself is made of (stone, sandstone, terracotta): never part of a wall. */
+	private static boolean earthy(BlockState s) {
+		return s.is(Blocks.STONE) || s.is(Blocks.SANDSTONE) || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.TERRACOTTA);
 	}
 
 	private static BlockState plaster() {
@@ -545,7 +623,8 @@ final class WalledTowns {
 		} else {
 			post = land.log();
 			beam = land.log();
-			walk = t.stone() ? land.slab() : land.woodSlab();
+			// (0.7.484) the walkway is timber in a stone wall too, so ladders and gate towers find the ground through it
+			walk = land.woodSlab();
 			if (walk.hasProperty(BlockStateProperties.SLAB_TYPE)) {
 				walk = walk.setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP);
 			}
@@ -554,7 +633,10 @@ final class WalledTowns {
 			for (BlockState s : new BlockState[] {land.log(), land.fence(), land.woodSlab(), land.slab(), land.wall(), land.mossy(), land.cracked(),
 				Blocks.COBBLESTONE.defaultBlockState(), Blocks.STONE_BRICK_WALL.defaultBlockState(), Blocks.MOSSY_STONE_BRICK_WALL.defaultBlockState(),
 				Blocks.LADDER.defaultBlockState(), land.planks()}) {
-				parts.add(s.getBlock());
+				// (0.7.484) never the land's own stone, sandstone or terracotta: a gate cut would dig into the ground
+				if (!earthy(s)) {
+					parts.add(s.getBlock());
+				}
 			}
 		}
 		return new Look(kind, t.stone(), land, post, beam, walk, stake, parts);
@@ -737,9 +819,15 @@ final class WalledTowns {
 				if (!Hordes.ours(level, f, column)) {
 					continue;
 				}
-				// the column's own wall: from its lowest part, up to under a lintel
+				// (0.7.484) the column's own wall: its lowest part from the land's surface up (never in the ground under
+				// it), up to under a lintel; a gate already open there (a lintel over clear ground) is left as it stands
+				boolean walkway = d < old - 0.5;
+				int land = surface(level, column, look);
+				if (Math.abs(land - floor) > Hordes.MAX_DROP) {
+					continue;
+				}
 				int bottom = Integer.MIN_VALUE;
-				for (int y = floor - Hordes.MAX_DROP - 1; y <= floor + Hordes.MAX_DROP + WALL_HIGH; y++) {
+				for (int y = land; y <= land + (walkway ? WALK_HIGH : WALL_HIGH - 2); y++) {
 					BlockPos at = column.atY(y);
 					if (look.part(level.getBlockState(at)) && !Placed.any(level, at)) {
 						bottom = y;
@@ -749,7 +837,6 @@ final class WalledTowns {
 				if (bottom == Integer.MIN_VALUE) {
 					continue;
 				}
-				boolean walkway = d < old - 0.5;
 				for (int y = bottom; y <= bottom + (walkway ? WALK_HIGH : WALL_HIGH - 2); y++) {
 					BlockPos at = column.atY(y);
 					if (look.part(level.getBlockState(at)) && !Placed.any(level, at)) {
@@ -798,6 +885,27 @@ final class WalledTowns {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * (0.7.484) The land's surface under a wall's column (the first air over the ground), down through the wall's own
+	 * parts, trees and plants from the top. The wall holds none of the land's own blocks ({@link #earthy}), so this stops
+	 * on the ground, never under it.
+	 */
+	private static int surface(ServerLevel level, BlockPos column, Look look) {
+		int y = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).getY();
+		int min = level.getMinY();
+		while (y > min + 1) {
+			BlockPos below = column.atY(y - 1);
+			BlockState s = level.getBlockState(below);
+			boolean mine = !Placed.any(level, below);
+			if (s.isAir() || s.canBeReplaced() && s.getFluidState().isEmpty() || mine && (look.part(s) || s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES))) {
+				y--;
+			} else {
+				break;
+			}
+		}
+		return y;
 	}
 
 	// ---- the band: what each kind builds -----------------------------------------------------------------------------------------
