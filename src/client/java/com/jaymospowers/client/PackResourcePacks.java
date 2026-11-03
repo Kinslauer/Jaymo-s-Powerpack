@@ -39,14 +39,14 @@ final class PackResourcePacks {
 	 * full retexture other packs build on). Anything else: the prefix of a resource pack file it sits just above
 	 * (an add-on to that pack), or on top when that one isn't switched on.
 	 */
-	private record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
+	record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
 			@Nullable String place) {
 		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
 			this(what, marker, prefix, file, url, sha1, olderFormat, null);
 		}
 	}
 
-	private static final String BASE = "<base>";
+	static final String BASE = "<base>";
 
 	private static final List<Pack> PACKS = List.of(
 		// "MCA - Default Medieval" (by DE4THR4SH, CurseForge 667175) dresses MCA's villagers in vanilla-style medieval
@@ -82,12 +82,16 @@ final class PackResourcePacks {
 		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
-			"fea54f680dc959e122189b2005d11adebcd18b5b", true),
-		// (0.19.65) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0: shipped unchanged, never edited or built on,
-		// with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
-		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). It goes at the bottom of the pack order, so
-		// Fresh Animations, its patch below, our 3D items and every other pack draw over it. Our own textures are graded
-		// toward its look by tools/excalibur_style (docs/Excalibur-Style.md); none of its pixels are in them.
+			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
+
+	/** (0.19.72) Andy: Excalibur and its additions optional and off by default. Fetched, never switched on here. */
+	static final List<Pack> OPTIONAL = List.of(
+		// (0.19.65; optional and off by default since 0.19.72) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0:
+		// shipped unchanged, never edited or built on, with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
+		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). Downloaded into resourcepacks/ but never
+		// switched on by us: /excalibur on (ExcaliburLook) puts it at the bottom of the pack order, so Fresh Animations,
+		// its patch below, our 3D items and every other pack draw over it. Our own textures' graded copies are the
+		// built-in excalibur_style pack (tools/excalibur_style, docs/Excalibur-Style.md); none of its pixels are in them.
 		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
 			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
 			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
@@ -95,7 +99,8 @@ final class PackResourcePacks {
 		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
 		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
 		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits
-		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look.
+		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look. Also only switched
+		// on by /excalibur on.
 		new Pack("Excalibur's Fresh Animations", "jaymospowers-excalibur-fa-v1", "EFA_", "EFA_1.10.5 Hotfix 1.zip",
 			"https://cdn.modrinth.com/data/yiTthr0O/versions/UmkPWet8/EFA_1.10.5%20Hotfix%201.zip",
 			"0380c78d4e0086b6cade7597a4b57f14d06616ec", false, "FreshAnimations"));
@@ -107,6 +112,7 @@ final class PackResourcePacks {
 		for (Pack pack : PACKS) {
 			enableOnce(minecraft, pack);
 		}
+		ExcaliburLook.start(minecraft);
 	}
 
 	private static void enableOnce(Minecraft minecraft, Pack pack) {
@@ -165,7 +171,7 @@ final class PackResourcePacks {
 	 * lowest resource pack file or pack of ours, so the game's and mods' own packs stay beneath it; a file prefix goes
 	 * just above that file.
 	 */
-	private static int placeAt(List<String> selected, @Nullable String place) {
+	static int placeAt(List<String> selected, @Nullable String place) {
 		if (place == null) {
 			return selected.size();
 		}
@@ -179,7 +185,7 @@ final class PackResourcePacks {
 		return selected.size();
 	}
 
-	private static @Nullable String download(Path dir, Pack pack) {
+	static @Nullable String download(Path dir, Pack pack) {
 		Path target = dir.resolve(pack.file());
 		Path part = dir.resolve(pack.file() + ".part");
 		try {
@@ -210,7 +216,7 @@ final class PackResourcePacks {
 		}
 	}
 
-	private static @Nullable String find(Path dir, Pack pack) {
+	static @Nullable String find(Path dir, Pack pack) {
 		if (!Files.isDirectory(dir)) {
 			return null;
 		}

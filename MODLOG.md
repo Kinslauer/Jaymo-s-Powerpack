@@ -5063,3 +5063,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
   ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
   the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
