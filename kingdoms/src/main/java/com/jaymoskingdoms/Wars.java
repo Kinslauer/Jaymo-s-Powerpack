@@ -902,8 +902,8 @@ public final class Wars {
 				if (contents.isEmpty()) {
 					break;
 				}
-				List<ItemStack> valuables = contents.stream()
-					.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
+				// (0.7.484) any realm's coin, and anything gold, among the valuables
+				List<ItemStack> valuables = contents.stream().filter(Raids::valuable).toList();
 				ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 					: contents.get(random.nextInt(contents.size()));
 				ItemStack taken = Storage.take(level, loser, s -> ItemStack.isSameItemSameComponents(s, pick), TRIBUTE_LOAD_MAX);

@@ -277,9 +277,18 @@ final class MerchantOrders {
 				}
 				int asked = price(o, factor);
 				Currency priced = Currency.byItem(o.getBaseCostA().getItem());
-				int price = coin.human() && priced != null && priced != coin ? Math.min(64, Currencies.coinsFor(coin, (long)asked * priced.base / 1000L)) : asked;
-				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price, Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1),
-					coin.human() ? coin : priced == null ? Currency.EMERALD : priced));
+				Currency sold = coin.human() ? coin : priced == null ? Currency.EMERALD : priced;
+				int price = asked;
+				if (coin.human() && priced != null && priced != coin) {
+					// (0.7.484) the same worth in the town's coin, unless that is more than a stack: then it stays in its own coin
+					long local = Math.max(1L, ((long)asked * priced.base + coin.base - 1L) / coin.base);
+					if (local <= 64L) {
+						price = (int)local;
+					} else {
+						sold = priced;
+					}
+				}
+				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price, Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1), sold));
 			}
 		}
 		out.sort(Comparator.comparingInt(Ware::tier).thenComparing(w -> w.merchant().getStringUUID()).thenComparingInt(Ware::index));

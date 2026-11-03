@@ -1,11 +1,16 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -68,6 +73,8 @@ public final class Currencies {
 	static final double SPREAD = 0.06;
 	/** A money-changer's offers: the worth (emeralds) of the coin a trade pays out, their uses before restocking. */
 	static final int CHANGE_WORTH = 6, CHANGE_USES = 16;
+	/** A money-changer's counter restocks once this many days have passed (it has no job site to restock at). */
+	static final long CHANGE_RESTOCK_DAYS = 1L;
 	/** Money-changers: a town needs this many folk to have one, and another for every this many; at most this many. */
 	static final int CHANGER_POPULATION = 8, CHANGER_PER = 24, CHANGERS_MOST = 2;
 	/** How often (ticks) towns are looked at for a changer, and how far from the seat one is looked for. */
@@ -78,6 +85,28 @@ public final class Currencies {
 	// ================================================================================================================
 
 	public static Item REALM_SILVER, HACKSILVER, GOLD_DINAR, SHELL_STRING, MON_COIN;
+
+	/**
+	 * (0.7.484) A trader's offer as it was before any town's coin was put on it: its place in the trader's list, the offer
+	 * as last set (to know it is still that offer), and the worth of each of its coin slots (cost A, cost B, result) in
+	 * thousandths of an emerald (0 where the slot isn't coin). Prices are always worked out from this, never from the last
+	 * town's coin, so they don't creep as a town changes coin back and forth.
+	 */
+	record Base(int index, String print, int a, int b, int r) {
+		static final Codec<Base> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.fieldOf("index").forGetter(Base::index),
+				Codec.STRING.fieldOf("print").forGetter(Base::print),
+				Codec.INT.fieldOf("a").forGetter(Base::a),
+				Codec.INT.fieldOf("b").forGetter(Base::b),
+				Codec.INT.fieldOf("r").forGetter(Base::r))
+			.apply(i, Base::new));
+	}
+
+	/** (0.7.484) A trader's offers in their own coin ({@link Base}), the ones with coin in them. */
+	static final AttachmentType<List<Base>> BASES = AttachmentRegistry.create(JaymosKingdoms.id("trade_bases"),
+		b -> b.persistent(Base.CODEC.listOf()));
+	/** (0.7.484) The day a money-changer's counter last restocked. */
+	static final AttachmentType<Long> CHANGER_DAY = AttachmentRegistry.create(JaymosKingdoms.id("changer_day"), b -> b.persistent(Codec.LONG));
 
 	/** Faction id → (its coin, when it was worked out). */
 	private static final Map<Integer, Object[]> RESOLVED = new HashMap<>();
@@ -241,24 +270,11 @@ public final class Currencies {
 		return Component.literal(n + " ").append(new ItemStack(c.item()).getHoverName());
 	}
 
-	/** {@code n} of {@code c}'s coins as a stack of at most one stack. */
-	public static ItemStack coins(Currency c, int n) {
-		return new ItemStack(c.item(), Mth.clamp(n, 1, 64));
-	}
-
 	/** Gives {@code player} {@code n} of {@code c}'s coins (what doesn't fit in the pack drops at their feet). */
 	public static void give(ServerPlayer player, Currency c, long n) {
 		for (long left = n; left > 0L; left -= 64L) {
 			player.getInventory().placeItemBackInInventory(new ItemStack(c.item(), (int)Math.min(64L, left)), net.minecraft.util.Prediction.SERVER_ONLY);
 		}
-	}
-
-	/** Pays {@code player} {@code emeralds} of worth in the coin of {@code f}. Returns the coins paid. */
-	public static int pay(MinecraftServer server, ServerPlayer player, @Nullable Faction f, long emeralds) {
-		Currency c = of(server, f);
-		int n = coinsPaid(c, emeralds);
-		give(player, c, n);
-		return n;
 	}
 
 	/**
@@ -267,33 +283,25 @@ public final class Currencies {
 	 */
 	public static int fine(MinecraftServer server, ServerPlayer player, @Nullable Faction f, int emeralds) {
 		Currency c = of(server, f);
-		long taken = 0L;
+		// (0.7.484) counted in thousandths of an emerald, so a few small coins count for what they are worth
+		long owed = emeralds * 1000L, taken = 0L;
 		if (c != Currency.EMERALD) {
 			int coins = Math.min(Purse.count(player, c.item()), coinsFor(c, emeralds));
 			if (coins > 0) {
 				Purse.take(player, c.item(), coins);
-				taken = coins * (long)c.base / 1000L;
+				taken = coins * (long)c.base;
 			}
 		}
-		long rest = emeralds - taken;
+		long rest = owed - taken;
 		if (rest > 0L) {
-			int n = (int)Math.min(rest, Purse.count(player, Items.EMERALD));
+			int n = (int)Math.min((rest + 999L) / 1000L, Purse.count(player, Items.EMERALD));
 			if (n > 0) {
 				Purse.take(player, Items.EMERALD, n);
-				taken += n;
+				taken += n * 1000L;
 			}
 		}
-		return (int)Math.min(emeralds, taken);
-	}
-
-	/** What {@code player} carries in coin that {@code f} takes, as emeralds of worth (its coin and emeralds). */
-	public static long held(MinecraftServer server, ServerPlayer player, @Nullable Faction f) {
-		Currency c = of(server, f);
-		long worth = Purse.count(player, Items.EMERALD);
-		if (c != Currency.EMERALD) {
-			worth += Purse.count(player, c.item()) * (long)c.base / 1000L;
-		}
-		return worth;
+		// (the worth taken, to the nearest emerald)
+		return (int)Math.min(emeralds, (taken + 500L) / 1000L);
 	}
 
 	/** {@code stack}'s worth (emeralds), if it is a human coin; 0 for anything else. Used to count a trade for its toll. */
@@ -342,46 +350,87 @@ public final class Currencies {
 		MinecraftServer server = level.getServer();
 		Currency c = of(server, f);
 		if (changer(villager)) {
-			villager.setOffers(changes(server, c));
+			counter(level, villager, c);
 			return;
 		}
 		if (Underworld.blackMarket(villager) || !c.human()) {
 			return;
 		}
+		// (0.7.484) each price worked out from the offer's own worth (Base), never from the coin it was last set in
+		Map<Integer, Base> known = new HashMap<>();
+		for (Base base : villager.getAttachedOrElse(BASES, List.<Base>of())) {
+			known.put(base.index(), base);
+		}
+		List<Base> now = new ArrayList<>();
 		MerchantOffers offers = villager.getOffers();
 		for (int i = 0; i < offers.size(); i++) {
 			MerchantOffer o = offers.get(i);
-			ItemCost a = convert(o.getItemCostA(), c);
-			Optional<ItemCost> b = o.getItemCostB().map(x -> convert(x, c));
-			ItemStack result = convert(o.getResult(), c);
-			if (a == o.getItemCostA() && b.equals(o.getItemCostB()) && result == o.getResult()) {
+			int wa = worth(o.getItemCostA()), wb = o.getItemCostB().map(Currencies::worth).orElse(0), wr = worth(o.getResult());
+			if (wa == 0 && wb == 0 && wr == 0) {
+				continue;
+			}
+			Base base = known.get(i);
+			if (base == null || !base.print().equals(print(o.getItemCostA(), o.getItemCostB(), o.getResult()))) {
+				// (new, or not the offer it was: what it asks now is its worth)
+				base = new Base(i, "", wa, wb, wr);
+			}
+			Base was = base;
+			ItemCost a = was.a() > 0 ? asked(was.a(), c, o.getItemCostA()) : o.getItemCostA();
+			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, x)) : o.getItemCostB();
+			ItemStack result = was.r() > 0 ? paid(was.r(), c, o.getResult()) : o.getResult();
+			String print = print(a, b, result);
+			now.add(new Base(i, print, was.a(), was.b(), was.r()));
+			if (print.equals(print(o.getItemCostA(), o.getItemCostB(), o.getResult()))) {
 				continue;
 			}
 			MerchantOffer fresh = new MerchantOffer(a, b, result, o.getUses(), o.getMaxUses(), o.getXp(), o.getPriceMultiplier(), o.getDemand());
-			int was = o.getItemCostA().count();
-			fresh.setSpecialPriceDiff(was <= 0 ? 0 : Math.round(o.getSpecialPriceDiff() * (float)a.count() / was));
+			int before = o.getItemCostA().count();
+			fresh.setSpecialPriceDiff(before <= 0 ? 0 : Math.round(o.getSpecialPriceDiff() * (float)a.count() / before));
 			offers.set(i, fresh);
 		}
+		if (!now.isEmpty()) {
+			villager.setAttached(BASES, List.copyOf(now));
+		} else if (villager.hasAttached(BASES)) {
+			villager.removeAttached(BASES);
+		}
 	}
 
-	/** {@code cost} asked in {@code c}'s coin instead (the same worth, rounded up), or {@code cost} itself if it is not money or can't be. */
-	private static ItemCost convert(ItemCost cost, Currency c) {
+	/** {@code cost}'s worth in thousandths of an emerald, if it is a human coin; else 0. */
+	private static int worth(ItemCost cost) {
 		Currency from = Currency.byItem(cost.item().value());
-		if (from == null || !from.human() || from == c) {
-			return cost;
-		}
-		long n = (cost.count() * (long)from.base + c.base - 1L) / c.base;
-		return n < 1L || n > 64L ? cost : new ItemCost(c.item(), (int)n);
+		return from == null || !from.human() ? 0 : cost.count() * from.base;
 	}
 
-	/** {@code stack} paid out in {@code c}'s coin instead (the same worth, rounded down but never nothing), else {@code stack} itself. */
-	private static ItemStack convert(ItemStack stack, Currency c) {
+	private static int worth(ItemStack stack) {
 		Currency from = stack.isEmpty() ? null : Currency.byItem(stack.getItem());
-		if (from == null || !from.human() || from == c) {
-			return stack;
+		return from == null || !from.human() ? 0 : stack.getCount() * from.base;
+	}
+
+	/** An offer's three slots, as items and counts (to know an offer again). */
+	private static String print(ItemCost a, Optional<ItemCost> b, ItemStack result) {
+		return BuiltInRegistries.ITEM.getKey(a.item().value()) + "*" + a.count() + "|"
+			+ b.map(x -> BuiltInRegistries.ITEM.getKey(x.item().value()) + "*" + x.count()).orElse("-") + "|"
+			+ BuiltInRegistries.ITEM.getKey(result.getItem()) + "*" + result.getCount();
+	}
+
+	/** {@code milli} of worth asked in {@code c}'s coin (rounded up); in emeralds if that is more than a stack; else {@code fallback}. */
+	private static ItemCost asked(int milli, Currency c, ItemCost fallback) {
+		long n = (milli + c.base - 1L) / c.base;
+		if (n >= 1L && n <= 64L) {
+			return new ItemCost(c.item(), (int)n);
 		}
-		long n = Math.max(1L, stack.getCount() * (long)from.base / c.base);
-		return n > 64L ? stack : new ItemStack(c.item(), (int)n);
+		long e = (milli + 999L) / 1000L;
+		return e >= 1L && e <= 64L ? new ItemCost(Items.EMERALD, (int)e) : fallback;
+	}
+
+	/** {@code milli} of worth paid in {@code c}'s coin (rounded down, never nothing); in emeralds if that is more than a stack; else {@code fallback}. */
+	private static ItemStack paid(int milli, Currency c, ItemStack fallback) {
+		long n = Math.max(1L, milli / c.base);
+		if (n <= 64L) {
+			return new ItemStack(c.item(), (int)n);
+		}
+		long e = Math.max(1L, milli / 1000L);
+		return e <= 64L ? new ItemStack(Items.EMERALD, (int)e) : fallback;
 	}
 
 	// ---- money-changers --------------------------------------------------------------------------------------------------------
@@ -390,11 +439,41 @@ public final class Currencies {
 		return v.getVillagerData().profession().value() == Professions.CHANGER;
 	}
 
-	/** A changer's counter in town coin {@code local}: every other coin bought and sold at the going rate, less its spread. */
+	/**
+	 * (0.7.484) A changer's counter set at today's rates in town coin {@code local}, each trade keeping the uses it has had
+	 * since it last restocked (once every {@link #CHANGE_RESTOCK_DAYS}), so opening the trade again doesn't restock it.
+	 */
+	private static void counter(ServerLevel level, Villager v, Currency local) {
+		if (!local.human()) {
+			return;
+		}
+		long day = Quests.day(level);
+		Long last = v.getAttached(CHANGER_DAY);
+		boolean restock = last == null || day - last >= CHANGE_RESTOCK_DAYS;
+		MerchantOffers fresh = changes(level.getServer(), local);
+		if (!restock) {
+			for (int i = 0; i < fresh.size(); i++) {
+				MerchantOffer o = fresh.get(i);
+				for (MerchantOffer had : v.getOffers()) {
+					if (had.getItemCostA().item().value() == o.getItemCostA().item().value() && had.getResult().is(o.getResult().getItem())) {
+						fresh.set(i, new MerchantOffer(o.getItemCostA(), o.getItemCostB(), o.getResult(), Math.min(had.getUses(), o.getMaxUses()), o.getMaxUses(),
+							o.getXp(), o.getPriceMultiplier(), o.getDemand()));
+						break;
+					}
+				}
+			}
+		} else {
+			v.setAttached(CHANGER_DAY, day);
+		}
+		v.setOffers(fresh);
+	}
+
+	/** A changer's counter in town coin {@code local}: every other realm's coin bought and sold at the going rate, less its spread. */
 	static MerchantOffers changes(MinecraftServer server, Currency local) {
 		MerchantOffers offers = new MerchantOffers();
 		for (Currency other : Currency.values()) {
-			if (other == local) {
+			// (0.7.484) only the realms' coins: no gold or bent copper over a town's counter
+			if (other == local || !other.human()) {
 				continue;
 			}
 			add(offers, changeOffer(server, other, local));
@@ -453,6 +532,7 @@ public final class Currencies {
 				v.setVillagerXp(Math.max(1, v.getVillagerXp()));
 				v.setPersistenceRequired();
 				v.setOffers(changes(level.getServer(), of(level.getServer(), f)));
+				v.setAttached(CHANGER_DAY, Quests.day(level));
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 2.1, v.getZ(), 5, 0.3, 0.2, 0.3, 0.0);
 				return;
 			}

@@ -498,6 +498,11 @@ final class Raids {
 		return false;
 	}
 
+	/** (0.7.484) What a raider (or a war's victor) takes first: coin of any realm, anything gold, iron and diamonds. */
+	static boolean valuable(ItemStack s) {
+		return s.is(Items.EMERALD) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND) || Currencies.isMoney(s) || Currencies.gold(s);
+	}
+
 	/** A raider at the storage takes what he can carry (the valuables first, half the time). */
 	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
 		List<ItemStack> contents = Storage.contents(level, target);
@@ -506,11 +511,19 @@ final class Raids {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		List<ItemStack> valuables = contents.stream()
-			.filter(s -> s.is(Items.EMERALD) || s.is(Items.GOLD_INGOT) || s.is(Items.IRON_INGOT) || s.is(Items.DIAMOND)).toList();
+		// (0.7.484) any realm's coin counts among the valuables, and anything gold
+		List<ItemStack> valuables = contents.stream().filter(Raids::valuable).toList();
 		ItemStack pick = !valuables.isEmpty() && random.nextBoolean() ? valuables.get(random.nextInt(valuables.size()))
 			: contents.get(random.nextInt(contents.size()));
-		ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, pick), LOOT_PER_RAIDER);
+		// (0.7.484) pirates take anything gold, and the richest gold first
+		if (PirateCoves.is(level.getServer(), raid.camp)) {
+			ItemStack richest = contents.stream().filter(Currencies::gold).max(java.util.Comparator.comparingLong(Currencies::goldWorth)).orElse(null);
+			if (richest != null) {
+				pick = richest;
+			}
+		}
+		ItemStack chosen = pick;
+		ItemStack taken = Storage.take(level, target, s -> ItemStack.isSameItemSameComponents(s, chosen), LOOT_PER_RAIDER);
 		if (taken.isEmpty()) {
 			raid.emptyHanded.add(raider.getUUID());
 			return;
