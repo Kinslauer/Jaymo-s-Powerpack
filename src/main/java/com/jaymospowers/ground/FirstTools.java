@@ -69,7 +69,7 @@ public final class FirstTools {
 	public static Item FLINT_SHARD;
 	public static Item PLANT_FIBRE;
 	public static Item PLANT_STRING;
-	/** (0.19.68) Plant Fibers pick: fibre woven into a mesh, soaked into pulp, dried over a fire into paper. */
+	/** (0.19.73) Plant Fibers pick: fibre woven into a mesh, soaked into pulp, dried over a fire into paper. */
 	public static Item PLANT_MESH, WET_PAPER_PULP;
 
 	private FirstTools() {

@@ -36,7 +36,7 @@ import net.minecraft.world.level.Level;
  */
 public final class MedicineItems {
 	public static Item LINEN_BANDAGE;
-	/** (0.19.68) Plant Fibers pick: woven grass, the first dressing (a clean rag's worth, never festers). */
+	/** (0.19.73) Plant Fibers pick: woven grass, the first dressing (a clean rag's worth, never festers). */
 	public static Item GRASS_BANDAGE;
 	public static Item RAG;
 	public static Item SPLINT;

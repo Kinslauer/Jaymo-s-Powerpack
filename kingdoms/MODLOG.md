@@ -8267,7 +8267,19 @@ All item, block, entity and clothing textures are graded toward Excalibur's dark
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
 
-## 0.7.485: rope ties to fences (pack 0.19.68)
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
+
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: rope ties to fences (pack 0.19.73)
 Andy's Plant Fibers pick: "a climbable rope you tie to a fence". Rope placed against a fence's side with nothing above
 to hang from is tied to the fence (`RopeLift.TIED`) and holds while a fence stands beside it, so at a cliff's edge it
 hangs over the drop; rope also hangs under a fence. Rope in hand on it lets more down as before. With Jaymo's Powers,

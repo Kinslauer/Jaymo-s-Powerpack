@@ -5026,7 +5026,57 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
-- **0.19.68, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.485):** more of the start
+- **0.19.67, Seats and a Sit key** (`core/Sitting`, `Meditate`, `MeditatePose`): Andy: "add a button as well".
+  - **Seats:** right-click a stair (right way up) or a bottom slab with an empty hand, not sneaking, and you sit on it,
+    on a stair facing away from its back. Blocks in `#jaymospowers:seats` (empty; for modded chairs/benches) work too,
+    sitting on the top of their middle and facing their `facing`. Needs two blocks of room above; one sitter per block.
+  - **Sit key** (`]` by default): sits you on the seat under you or the one you look at (3 blocks), else on the ground,
+    at once. Pressed again while sat it changes how you sit: ground = cross-legged, knees up, leaning back; seat =
+    upright, legs crossed, slouched (kept for next time). Sneak (a fresh press) now gets you up from any sit.
+  - **Held items while sat:** a book is held open to read, anything drunk is raised like a cup, a sword lies across the
+    lap. On a seat the body keeps the seat's way and the head turns up to 80 degrees.
+  - **By the fire:** sitting settled within 4 blocks of a lit campfire heals 1 every 5 s and (with Kitchen) adds 10 body
+    heat. Seats count as meditating with the Meditation perk, like the ground sit.
+  - Compile-checked; not seen in game (pose angles may need a tweak).
+- **0.19.68, Kitchen jar 0.5.52:** `libs/` held Kitchen 0.5.48 while its source had moved on to 0.5.52, so the pack
+  shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
+  Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
+  Compile-checked; not played.
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
+- **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
+  "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
+  alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
+  swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
+  and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
+  symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.
+- **0.19.71, tendril globs keep to the back** (`WebGooGlobs`): Andy: the blobs "should only grow tendrils for living
+  tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
+  ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
+  the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
+- **0.19.73, Fibre kit (Andy's Plant Fibers pick, `docs/Otectus-Plan.md` patch 2; Kingdoms 0.7.486):** more of the start
   from plant fibre, our own from the idea (Plant Fibers is All Rights Reserved).
   - **Grass Bandage** (`MedicineItems.GRASS_BANDAGE`): 3 plant fibre + plant string make 2. It dresses a cut like a
     clean rag (heals 1.5, never festers), so there is a dressing before linen.
@@ -5034,5 +5084,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     a vanilla bed in everything but looks: it sleeps, skips the night and sets your spawn. It burns.
   - **Paper from fibre:** 4 plant string make a Plant Mesh; 3 mesh and a water bucket make 3 Wet Paper Pulp (the bucket
     comes back); pulp dries into paper on a campfire (20 s) or in a smoker.
-  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.485).
-  - Art by `tools/fibre_kit_art.py`, graded by `tools/excalibur_style/grade.py`. Compile-checked; not played.
+  - **Rope from fibre:** 3 plant string in a column make Kingdoms rope, and rope now ties to fences (Kingdoms 0.7.486).
+  - Art by `tools/fibre_kit_art.py` (the optional Excalibur pack rebuilt with `tools/excalibur_style/grade.py`). Compile-checked; not played.

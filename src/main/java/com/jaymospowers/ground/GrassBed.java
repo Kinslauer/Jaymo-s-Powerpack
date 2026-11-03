@@ -25,7 +25,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.19.68) Andy's Plant Fibers pick: "a grass bed". A bedroll of woven grass on the ground, the first bed before wool:
+ * (0.19.73) Andy's Plant Fibers pick: "a grass bed". A bedroll of woven grass on the ground, the first bed before wool:
  * two blocks long and only {@link #HEIGHT} sixteenths high. It is a vanilla {@link BedBlock} in everything but looks, as
  * Kingdoms' infirmary cot is: it sleeps, skips the night and sets the spawn like any bed, so the sleep code needs nothing
  * new. No colour and no block entity (drawn by its block model, not the bed renderer). Made of plant fibre and plant
