@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).
  * (0.19.60) Standing it keeps its upright shape; prone (the stance wheel's crawl) it drops into a spider that scuttles
  * at {@link #SPIDER_PACE} times a crawl and sticks to whatever it crawls onto, up walls ({@link XenoformState#CLIMB})
- * and along ceilings with no jump held; standing up turns it back, and drops it off a ceiling.
+ * and along ceilings with no jump held (a jump press lets go of a ceiling); standing up turns it back.
  * Scanned from a spider or cave spider, or Kingdoms' tarantula ({@code XenoDna}).
  * <ul>
  * <li>R, Web Line: a line shot to the block you look at to swing on; R again lets go (keeping the swing).</li>
@@ -70,6 +70,7 @@ public final class Skitter extends XenoForm {
 		live.brood = 0;
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.CLIMB);
+		LET_GO.remove(player.getUUID());
 		dismiss(player.level(), live.minions);
 	}
 
@@ -159,9 +160,34 @@ public final class Skitter extends XenoForm {
 	/** (0.19.60) Prone, the spider's pace against a man's crawl (the crawl moves at about 0.3 of a walk). */
 	public static final float SPIDER_PACE = 2.6F;
 
-	/** (0.19.60) Prone (the stance wheel's crawl): a spider, not a man. */
+	/** (0.19.60) Spiders that let go of a ceiling with jump: they don't grab it again until they've landed. */
+	private static final java.util.Set<java.util.UUID> LET_GO = new java.util.HashSet<>();
+
+	/**
+	 * (0.19.60) Prone (the stance wheel's crawl): a spider, not a man. Not the downed state's crawl or two broken legs',
+	 * which hold it flat as a man.
+	 */
 	public static boolean crawling(Player player) {
-		return player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) != null;
+		return player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) != null && !com.jaymospowers.core.wounds.Downed.isDowned(player)
+			&& !com.jaymospowers.core.wounds.Breaks.crawlOnly(player);
+	}
+
+	/** (0.19.60) The side of the wall it's pressed against, the one nearest where it faces; null if none. */
+	private static @org.jspecify.annotations.Nullable Direction wall(ServerPlayer player) {
+		AABB box = player.getBoundingBox();
+		Direction best = null;
+		float bestTurn = Float.MAX_VALUE;
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			if (player.level().noCollision(player, box.move(side.getStepX() * 0.05, 0.0, side.getStepZ() * 0.05))) {
+				continue;
+			}
+			float turn = Math.abs(net.minecraft.util.Mth.wrapDegrees(side.toYRot() - player.getYRot()));
+			if (turn < bestTurn) {
+				bestTurn = turn;
+				best = side;
+			}
+		}
+		return best;
 	}
 
 	/** A solid underside right over its head. */
@@ -174,10 +200,17 @@ public final class Skitter extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		// (0.19.60) prone, it's a spider: it keeps to any surface it crawls onto, ceilings too, with no jump held
+		// (0.19.60) prone, it's a spider: it keeps to any surface it crawls onto, ceilings too, with no jump held; a jump
+		// press lets go of a ceiling (standing needs room it hasn't got up there), and it won't grab one again until it lands
 		boolean prone = crawling(player);
-		boolean jump = player.getLastClientInput().jump() || prone;
-		boolean climbing = false;
+		boolean pressed = player.getLastClientInput().jump();
+		if (player.onGround() || !prone) {
+			LET_GO.remove(player.getUUID());
+		} else if (prone && live.perched && pressed) {
+			LET_GO.add(player.getUUID());
+		}
+		boolean jump = prone ? !LET_GO.contains(player.getUUID()) : pressed;
+		Direction climbing = null;
 		// clinging to a ceiling: hold jump under one; let go of jump to drop
 		if (live.perched) {
 			if (!jump || !ceiling(player) || player.isInWater()) {
@@ -197,7 +230,7 @@ public final class Skitter extends XenoForm {
 			sound(player, SoundEvents.SPIDER_STEP, 0.8F, 1.2F);
 		} else if (player.horizontalCollision && !player.isShiftKeyDown() && !player.isInWater()) {
 			// up the wall it walks into
-			climbing = prone;
+			climbing = prone ? wall(player) : null;
 			Vec3 m = player.getDeltaMovement();
 			player.setDeltaMovement(m.x, CLIMB_SPEED, m.z);
 			player.syncVelocity = true;
@@ -207,12 +240,12 @@ public final class Skitter extends XenoForm {
 			}
 		}
 		// (0.19.60) every client draws the crawling spider on the wall while it climbs one
-		if (climbing != Boolean.TRUE.equals(player.getAttached(XenoformState.CLIMB))) {
-			if (climbing) {
-				player.setAttached(XenoformState.CLIMB, true);
-			} else if (player.onGround() || live.perched || !prone || !player.horizontalCollision) {
-				player.removeAttached(XenoformState.CLIMB);
-			}
+		Integer side = climbing != null ? climbing.get2DDataValue() : null;
+		Integer was = player.getAttached(XenoformState.CLIMB);
+		if (side != null && !side.equals(was)) {
+			player.setAttached(XenoformState.CLIMB, side);
+		} else if (side == null && was != null && (player.onGround() || live.perched || !prone || !player.horizontalCollision)) {
+			player.removeAttached(XenoformState.CLIMB);
 		}
 		// every client draws it upside down while it clings (and its own camera turns over)
 		if (live.perched != Boolean.TRUE.equals(player.getAttached(XenoformState.CEILING))) {

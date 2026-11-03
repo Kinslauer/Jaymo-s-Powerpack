@@ -1030,7 +1030,7 @@ public final class XenoFormModels {
 			this.thorax.y = y;
 			this.spiderHead.y = y;
 			this.spiderHead.z = -3.0F - bite * 2.0F;
-			this.spiderHead.yRot = state.yRot * Mth.DEG_TO_RAD;
+			this.spiderHead.yRot = climbing ? 0.0F : state.yRot * Mth.DEG_TO_RAD;
 			this.spiderHead.xRot = (climbing ? 0.0F : state.xRot * Mth.DEG_TO_RAD) - bite * 0.3F;
 			this.abdomen.y = y - 1.0F + Mth.sin(walk + 0.8F) * 0.4F * speed;
 			this.abdomen.yRot = Mth.sin(walk * 0.5F) * 0.12F * speed;

@@ -41,6 +41,10 @@ public final class SkitterCeiling {
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
 	/** (0.19.60) The same for the crawl and the wall. */
 	private static final Map<Integer, float[]> CRAWLS = new HashMap<>(), CLIMBS = new HashMap<>();
+	/** (0.19.60) Entity id → the yaw facing the wall it's on (or was last on). */
+	private static final Map<Integer, Float> WALLS = new HashMap<>();
+	/** (0.19.60) The yaw facing the wall it's climbing; read by {@link #rotate}. */
+	public static final RenderStateDataKey<Float> WALL_KEY = RenderStateDataKey.create(() -> "jaymospowers:skitter_wall");
 
 	private SkitterCeiling() {
 	}
@@ -51,6 +55,7 @@ public final class SkitterCeiling {
 			AMOUNTS.clear();
 			CRAWLS.clear();
 			CLIMBS.clear();
+			WALLS.clear();
 			return;
 		}
 		if (minecraft.isPaused()) {
@@ -58,14 +63,19 @@ public final class SkitterCeiling {
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			step(AMOUNTS, player, Boolean.TRUE.equals(player.getAttached(XenoformState.CEILING)), TURN_TICKS);
-			boolean crawl = "skitter".equals(player.getAttached(XenoformState.FORM)) && com.jaymospowers.power.xenoform.forms.Skitter.crawling(player)
-				&& !com.jaymospowers.core.wounds.Downed.isDowned(player);
+			boolean crawl = "skitter".equals(player.getAttached(XenoformState.FORM)) && com.jaymospowers.power.xenoform.forms.Skitter.crawling(player);
 			step(CRAWLS, player, crawl, CRAWL_TICKS);
-			step(CLIMBS, player, crawl && Boolean.TRUE.equals(player.getAttached(XenoformState.CLIMB)), CLIMB_TICKS);
+			Integer wall = crawl ? player.getAttached(XenoformState.CLIMB) : null;
+			step(CLIMBS, player, wall != null, CLIMB_TICKS);
+			if (wall != null) {
+				// the way the wall is, kept while it eases off it
+				WALLS.put(player.getId(), net.minecraft.core.Direction.from2DDataValue(wall).toYRot());
+			}
 		}
 		prune(AMOUNTS, level);
 		prune(CRAWLS, level);
 		prune(CLIMBS, level);
+		WALLS.keySet().removeIf(id -> !CLIMBS.containsKey(id));
 	}
 
 	private static void step(Map<Integer, float[]> amounts, Entity entity, boolean on, float ticks) {
@@ -88,6 +98,15 @@ public final class SkitterCeiling {
 	private static float eased(Map<Integer, float[]> amounts, @Nullable Entity entity, float partialTicks) {
 		float[] a = entity == null ? null : amounts.get(entity.getId());
 		return a == null ? 0.0F : XenoformFlightPose.smooth(Mth.lerp(partialTicks, a[1], a[0]));
+	}
+
+	/**
+	 * (0.19.60) A Skitter drawn as itself rather than as a man crawling: prone as the spider, or just stood up from it
+	 * (not downed, not held flat by broken legs, not in water).
+	 */
+	public static boolean spiderOrRising(net.minecraft.world.entity.player.Player player) {
+		return !player.isInWater() && (com.jaymospowers.power.xenoform.forms.Skitter.crawling(player)
+			|| player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) == null && !com.jaymospowers.core.wounds.Downed.isDowned(player));
 	}
 
 	/** (0.19.60) How far {@code entity} (Skitter) has dropped into its spider shape, smoothed. */
@@ -113,13 +132,19 @@ public final class SkitterCeiling {
 		state.setData(CRAWL_KEY, crawl > 0.001F ? crawl : null);
 		float climb = eased(CLIMBS, entity, partialTicks);
 		state.setData(CLIMB_KEY, climb > 0.001F ? climb : null);
+		state.setData(WALL_KEY, climb > 0.001F ? WALLS.get(entity.getId()) : null);
 	}
 
 	/** After the body's turned to face its way: rolled over about its middle. */
 	public static void rotate(AvatarRenderState state, PoseStack poseStack, float entityScale) {
 		Float climb = state.getData(CLIMB_KEY);
 		if (climb != null && state.deathTime <= 0.0F) {
-			// (0.19.60) up a wall: tipped head-up, the belly (and legs) to the wall in front
+			// (0.19.60) up a wall: turned to face it (whichever way it walked or backed into it), then tipped head-up,
+			// the belly (and legs) to the wall in front
+			Float wall = state.getData(WALL_KEY);
+			if (wall != null) {
+				poseStack.rotateDegrees(Axis.YP, Mth.wrapDegrees(state.bodyRot - wall) * climb);
+			}
 			float pivot = WALL_PIVOT / Math.max(entityScale, 0.01F);
 			poseStack.translate(0.0F, pivot, 0.0F);
 			poseStack.rotateDegrees(Axis.XP, 90.0F * climb);
