@@ -4934,3 +4934,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   damage and heat speed by stage. Ki is seen only by the sensitive (`client/power/zfighter/KiSight`): a Z Fighter's aura
   and glow are drawn only for viewers attuned in Kingdoms (`Mana.ATTUNED`, read by reflection) and always for yourself;
   without Kingdoms everyone sees them. Kitchen jar in libs to 0.5.48.
+- **0.19.58, Kingdoms 0.7.478, Gemini handoff passes 2-3:** Kingdoms only: Ignis Vael's Cinder Forge in the Nether (the
+  Writ of Rebirth, cinder-forged reforging, smiths' rumours, the Charred Wayfinder) and under-armour (kingdoms/MODLOG.md).

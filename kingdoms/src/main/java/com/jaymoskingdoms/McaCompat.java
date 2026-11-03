@@ -517,7 +517,7 @@ public final class McaCompat {
 	}
 
 	/** (0.7.431) {@code mob} goes by {@code name}: an MCA villager's own name, or else a name of its own (a captain, {@link Captains}). */
-	static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
+	public static void rename(net.minecraft.world.entity.LivingEntity mob, String name) {
 		if (!LOADED || !McaBridge.rename(mob, name)) {
 			mob.setCustomName(net.minecraft.network.chat.Component.literal(name));
 		}
