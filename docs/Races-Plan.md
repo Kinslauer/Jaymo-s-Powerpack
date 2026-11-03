@@ -68,3 +68,6 @@ Races we already have fold in as kits.
 - [x] New heritages + variants: looks, body sizes, stats, skin ranges, life-story births (tongues: none exist per heritage)
 - [ ] Kits (active, passive, weakness) for every heritage
 - [ ] MIT notice for Runic Races in the credits
+- [ ] Voice the Beastfolk life-story tales (`born.den`, `raised.pack`): run `tools/voices/make_voices.py narrator` on a machine
+  with the VoxCPM2 model (makes the clips and the `sounds.json` entries). Until then both are read in silence (`Voices.register`
+  skips an answer tale with no clip).
