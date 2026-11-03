@@ -217,7 +217,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				&& living.getModel().root().hasChild("right_front_leg");
 			boolean humanoid = kindOfRenderer instanceof LivingEntityRenderer<?, ?, ?> living
 				&& living.getModel().root().hasChild("right_arm");
-			state.tall = !fourLegged && (humanoid || body.getBbHeight() > body.getBbWidth() * 1.1F);
+			state.tall = !fourLegged && !chainBody(corpse) && (humanoid || body.getBbHeight() > body.getBbWidth() * 1.1F);
 			// tall bodies face away before being laid back; long bodies lie across the arms
 			corpse.placeBody(body, state.tall ? yaw : yaw + 90.0F);
 		}
@@ -480,7 +480,16 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		// placed as the body's own renderer would stand it (it turns it half round itself)
 		bodyState.setData(com.jaymoskitchen.client.ragdoll.LooseParts.KEY, new com.jaymoskitchen.client.ragdoll.LooseParts.Frame(
 			com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), new Matrix4f(placement).rotateY(-Mth.PI), state.age,
-			layout == Flop.Layout.LYING, bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F));
+			layout == Flop.Layout.LYING, bodyState instanceof LivingEntityRenderState living ? living.scale : 1.0F,
+			// (0.5.50) a snake off the ground lies draped over the arms (or the horse, or nothing as it falls)
+			state.carried && chainBody(corpse) ? new com.jaymoskitchen.client.ragdoll.LooseParts.Drape(state.carryYaw,
+				corpse.swingBack(partialTicks), corpse.swingLeft(partialTicks)) : null));
+	}
+
+	/** (0.5.50) A body with a chain ragdoll (a snake): long and bendy, see {@code RagdollShapes.CHAIN}. */
+	private static boolean chainBody(CorpseEntity corpse) {
+		net.minecraft.world.entity.EntityType<?> type = corpse.isPlayerCorpse() ? null : corpse.sourceType();
+		return type != null && type.builtInRegistryHolder().is(com.jaymoskitchen.ragdoll.RagdollShapes.CHAIN);
 	}
 
 	/** Where the body is placed (its feet, facing as drawn), relative to the corpse's own spot. */

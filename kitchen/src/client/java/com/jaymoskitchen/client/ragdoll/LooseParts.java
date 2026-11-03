@@ -60,7 +60,17 @@ public final class LooseParts {
 	 */
 	public static final RenderStateDataKey<Frame> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:loose_parts");
 
-	public record Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale) {
+	public record Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale, Drape drape) {
+		public Frame(Motion motion, Matrix4f body, float time, boolean grounded, float scale) {
+			this(motion, body, time, grounded, scale, null);
+		}
+	}
+
+	/**
+	 * (0.5.50) A snake carried, slung or falling: its spine is laid over the carrier's arms (see {@link ChainSpine#drape})
+	 * instead of each segment hanging on its own. {@code across}: the arms' way, as a yaw (degrees); swings as Limp's.
+	 */
+	public record Drape(float across, float swingBack, float swingLeft) {
 	}
 
 	private static final Map<ModelPart, List<Node>> PLANS = new WeakHashMap<>();
@@ -92,7 +102,15 @@ public final class LooseParts {
 		if (root.hasChild("right_arm") || root.hasChild("body") && root.getChild("body").hasChild("right_arm")) {
 			return;
 		}
-		apply(root, frame.body, frame.scale, frame.motion, frame.time, frame.grounded, Set.of());
+		Set<String> skip = Set.of();
+		if (frame.drape != null) {
+			Set<String> spine = ChainSpine.drape(root, frame.body, frame.scale, frame.drape.across(), frame.drape.swingBack(),
+				frame.drape.swingLeft());
+			if (spine != null) {
+				skip = spine;
+			}
+		}
+		apply(root, frame.body, frame.scale, frame.motion, frame.time, frame.grounded, skip);
 	}
 
 	/**
