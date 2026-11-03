@@ -8296,7 +8296,15 @@ Andy's Custom Trade Currency pick, and his choice "Coins replace emeralds". Desi
   the fiefs of prosperous kingdoms: they buy emeralds as a gem and change coins.
 - **Old coin:** Andy: "some you come across will still trade in emeralds. so it is worth it to keep them around."
   About one villager in seven and two wandering traders in five keep their emerald prices (`Coinage.keepsEmeralds`,
-  fixed by who they are).
+  fixed by who they are). Only folk who really trade can be one (not guards, archers, workers, pedlars or Ignis Vael).
+- **They talk about it** (`MoneyTalk`). Andy: "they must speak about this and answer you if asked".
+  - Interact has Ask about Money. One who keeps emeralds says so. The money changer gives his rate. Anyone else
+    says it's coin, and points you to the nearest neighbour who still takes emeralds, or else the money changer.
+  - Ask the Way has Who Takes Emeralds and A Money Changer.
+  - Unasked: a keeper says it as you open their trades, and calls out when they see emeralds in your hand. A coin
+    trader tells you they don't take emeralds if you come with emeralds and no coin. Wandering traders too. Each
+    says it at most once every 5 minutes to the same player (speech bubble).
+  - MCA's chat AI is told which they are and who nearby still takes emeralds.
 - **Thieves:** crooks go for a visible belt purse first and may take it whole (`Crooks`, `PURSE_LIFT_CHANCE`);
   pickpocketing a villager mostly lifts a small filled purse or copper (`Pickpocket`).
 - **Loot:** camp, ogre, wreck, corsair and boss hoards hold silver coins; `LootSwap` turns emeralds in chest and mob

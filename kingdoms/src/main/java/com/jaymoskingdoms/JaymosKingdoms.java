@@ -450,6 +450,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		SharedHistory.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
+		// (0.7.487) emeralds or coin: asked, and said unasked
+		MoneyTalk.register();
 		Rescues.register();
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);

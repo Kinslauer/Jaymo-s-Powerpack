@@ -41,7 +41,7 @@ abstract class McaScreensMixin {
 
 	/** (0.7.454) Interact's Ask the Way, the page it opens, and the places on it ({@code Directions.Place}). */
 	private static final String WAY = "gui.button.way", WAY_PAGE = "way";
-	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler"};
+	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler", "changer", "emeralds"};
 	/** The Interact row Ask the Way goes on: under MCA's own (gift ... professions on row 8). */
 	private static final int WAY_ROW = 9;
 

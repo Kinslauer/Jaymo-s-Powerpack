@@ -420,6 +420,11 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
 	}
 
+	/** (0.7.487) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
+	static boolean cannotTrade(Villager v) {
+		return v.getVillagerData().profession().unwrapKey().map(ProfessionsMCA.CAN_NOT_TRADE::contains).orElse(false);
+	}
+
 	private static Enlisted worker(VillagerEntityMCA villager) {
 		return (Enlisted)(Object)villager;
 	}

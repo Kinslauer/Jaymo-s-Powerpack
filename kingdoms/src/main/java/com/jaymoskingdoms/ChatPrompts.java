@@ -51,6 +51,11 @@ public final class ChatPrompts {
 			if (!blood.isEmpty()) {
 				sb.append(blood).append('\n');
 			}
+			// (0.7.487) coin or emeralds
+			String money = MoneyTalk.prompt(villager);
+			if (!money.isEmpty()) {
+				sb.append(money).append('\n');
+			}
 			String neighbours = neighbours(villager);
 			if (!neighbours.isEmpty()) {
 				sb.append("Your neighbours: ").append(neighbours).append('\n');
