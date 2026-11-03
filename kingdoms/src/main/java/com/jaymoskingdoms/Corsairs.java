@@ -32,6 +32,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -74,6 +75,11 @@ final class Corsairs implements Ship.Captaincy {
 	 * the raid's landing she lies to lay her broadside on it, and the sail she keeps to hold her station.
 	 */
 	static final double SHORE_SIGHT = 52.0, GRAPE_RANGE = 20.0, SHORE_STATION = 36.0, SHORE_SAIL = 0.15;
+	/**
+	 * (0.7.484) Her guns hold off anywhere one of her own landing party is within this (blocks: past a shell's burst and
+	 * its crater), and lay on the ground ashore this far apart (blocks) as they look along the line in for clear ground.
+	 */
+	static final double SHORE_CLEAR = 8.0, SHORE_STEP = 3.0;
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
 	/** How often (ticks) her captain looks about; how many looks she may lie stuck before she backs off; how long she backs. */
 	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 10;
@@ -390,7 +396,9 @@ final class Corsairs implements Ship.Captaincy {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, ship.getBoundingBox().inflate(SHORE_SIGHT, 24.0, SHORE_SIGHT),
 			e -> e.isAlive() && !e.isSpectator() && !e.isInWater() && !e.isPassenger())) {
 			boolean foe = Pirates.prey(crew.faction, e) || target >= 0 && e instanceof Worker w && w.factionId() == target;
-			if (!foe || e instanceof Worker w && w.factionId() == crew.faction || ship.getBoundingBox().inflate(1.0).contains(e.position())) {
+			if (!foe || e instanceof Worker w && w.factionId() == crew.faction || ship.getBoundingBox().inflate(1.0).contains(e.position())
+				// (0.7.484) not on a foe her own landing party's fighting hand to hand
+				|| ownNear(level, crew.faction, e.position())) {
 				continue;
 			}
 			double d = Raids.horizontal(e.blockPosition(), ship.blockPosition());
@@ -406,23 +414,36 @@ final class Corsairs implements Ship.Captaincy {
 		if (target < 0 || !(Factions.get(level.getServer(), target) instanceof Faction raided)) {
 			return null;
 		}
-		// the settlement itself, or the near edge of it that her guns reach
+		// the settlement itself, or the near edge of it that her guns reach. (0.7.484) Not where her own landing party is
+		// plundering: she looks in along the line from the farthest her guns reach back to the shore for dry ground clear of
+		// them, so she strips the shore in front of the raid (or the far side of it), never the ground under their feet
 		double dx = raided.seat().getX() + 0.5 - from.x, dz = raided.seat().getZ() + 0.5 - from.z;
 		double flat = Math.sqrt(dx * dx + dz * dz);
 		if (flat < GUN_NEAREST) {
 			return null;
 		}
-		double reach = Math.min(flat, SHORE_SIGHT - 6.0);
-		BlockPos column = BlockPos.containing(from.x + dx / flat * reach, from.y, from.z + dz / flat * reach);
-		if (!level.hasChunkAt(column)) {
-			return null;
+		for (double reach = Math.min(flat, SHORE_SIGHT - 6.0); reach >= GUN_NEAREST; reach -= SHORE_STEP) {
+			BlockPos column = BlockPos.containing(from.x + dx / flat * reach, from.y, from.z + dz / flat * reach);
+			if (!level.hasChunkAt(column)) {
+				continue;
+			}
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+			if (!level.getFluidState(top.below()).isEmpty() || !level.getFluidState(top).isEmpty()) {
+				// open water from here in: nothing ashore to hit that's clear of the raid
+				return null;
+			}
+			Vec3 at = Vec3.atBottomCenterOf(top);
+			if (!ownNear(level, crew.faction, at)) {
+				return at;
+			}
 		}
-		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-		if (!level.getFluidState(top.below()).isEmpty() || !level.getFluidState(top).isEmpty()) {
-			// still open water at that range: nothing ashore to hit yet
-			return null;
-		}
-		return Vec3.atBottomCenterOf(top);
+		return null;
+	}
+
+	/** (0.7.484) Whether one of {@code faction}'s own (her landing party) is within {@link #SHORE_CLEAR} of {@code at}. */
+	private static boolean ownNear(ServerLevel level, int faction, Vec3 at) {
+		return faction >= 0 && !level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(SHORE_CLEAR),
+			e -> e.isAlive() && e instanceof Worker w && w.factionId() == faction && e.distanceToSqr(at) < SHORE_CLEAR * SHORE_CLEAR).isEmpty();
 	}
 
 	/**

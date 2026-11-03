@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.sailing;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Worker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -142,7 +143,9 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(level, this, pos, next, new AABB(pos, next).inflate(0.6),
 			e -> e != gunner && e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && !(gunner != null && e == gunner.getVehicle())
 				// (0.7.42) nor her own crew, firing out past them
-				&& !(e.getVehicle() != null && e.getVehicle().getId() == this.fromShip), 0.3F);
+				&& !(e.getVehicle() != null && e.getVehicle().getId() == this.fromShip)
+				// (0.7.484) nor her own landing party ashore
+				&& !own(gunner, e), 0.3F);
 		if (entityHit != null) {
 			this.burst(level, gunner, entityHit.getLocation(), entityHit.getEntity(), true);
 			return;
@@ -211,6 +214,11 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		return null;
 	}
 
+	/** (0.7.484) Whether {@code e} is one of the gunner's own folk (a pirate gun's landing party ashore): her shot spares them. */
+	private static boolean own(@Nullable Entity gunner, Entity e) {
+		return gunner instanceof Worker g && g.factionId() >= 0 && e instanceof Worker w && w.factionId() == g.factionId();
+	}
+
 	/**
 	 * (0.7.484) Where it bursts: everyone near is hurt, and if it's ashore, the ground is blasted (queued, {@link Bombardment}).
 	 */
@@ -219,7 +227,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		double radius = kind.burst;
 		DamageSource source = this.damageSources().explosion(this, gunner);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
-			e -> e != gunner && e.isAlive() && !e.isSpectator())) {
+			e -> e != gunner && e.isAlive() && !e.isSpectator() && !own(gunner, e))) {
 			double d = victim == direct ? 0.0 : victim.getBoundingBox().getCenter().distanceTo(at);
 			if (d > radius) {
 				continue;

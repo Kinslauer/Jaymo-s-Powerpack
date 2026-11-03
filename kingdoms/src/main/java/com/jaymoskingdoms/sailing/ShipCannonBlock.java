@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -65,21 +67,28 @@ public final class ShipCannonBlock extends Block {
 	static final double MUZZLE = 0.9;
 	/** (0.7.484) How hard a ship is shoved back by a gun firing (blocks, taken up at her next move). */
 	static final double RECOIL = 0.04;
+	/**
+	 * (0.7.484) How long (ticks) a gun that's fired stays run back on its carriage ({@link #RECOILED}, its model slid back
+	 * along the deck) before it's run out again.
+	 */
+	static final int RECOIL_TICKS = 12;
 	/** Balkon's WeaponMod, whose cannonball it also takes (only by its name, so it needn't be loaded). */
 	static final String WEAPONMOD_BALL = "weaponmod:cannonball";
 
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<Load> LOAD = EnumProperty.create("load", Load.class);
+	/** (0.7.484) Just fired: run back on its carriage by the recoil (a model slid back), for {@link #RECOIL_TICKS}. */
+	public static final BooleanProperty RECOILED = BooleanProperty.create("recoiled");
 	private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 10, 14);
 
 	public ShipCannonBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, Load.EMPTY));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LOAD, Load.EMPTY).setValue(RECOILED, false));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, LOAD);
+		builder.add(FACING, LOAD, RECOILED);
 	}
 
 	@Override
@@ -141,7 +150,7 @@ public final class ShipCannonBlock extends Block {
 			} else {
 				stack.hurtAndBreak(1, player, hand);
 			}
-			return new Handled(state.setValue(LOAD, Load.EMPTY), true);
+			return new Handled(state.setValue(LOAD, Load.EMPTY).setValue(RECOILED, true), true);
 		}
 		tell(player, switch (load) {
 			case EMPTY -> "cannon.powder_first";
@@ -204,6 +213,7 @@ public final class ShipCannonBlock extends Block {
 		}
 		level.setBlock(pos, done.next(), Block.UPDATE_ALL);
 		if (done.fires()) {
+			level.scheduleTick(pos, this, RECOIL_TICKS);
 			Direction f = state.getValue(FACING);
 			fire(server, Vec3.atCenterOf(pos), f.getStepX(), f.getStepZ(), player, null, ShotKind.of(state.getValue(LOAD)) == null ? ShotKind.ROUND
 				: ShotKind.of(state.getValue(LOAD)));
@@ -211,6 +221,23 @@ public final class ShipCannonBlock extends Block {
 			level.playSound(null, pos, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** (0.7.484) A gun set down still run back (off a ship broken up just after she fired) is run out again soon. */
+	@Override
+	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moved) {
+		super.onPlace(state, level, pos, old, moved);
+		if (state.getValue(RECOILED) && !level.isClientSide()) {
+			level.scheduleTick(pos, this, RECOIL_TICKS);
+		}
+	}
+
+	/** (0.7.484) The gun's crew run it out again after its recoil. */
+	@Override
+	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		if (state.getValue(RECOILED)) {
+			level.setBlock(pos, state.setValue(RECOILED, false), Block.UPDATE_ALL);
+		}
 	}
 
 	@Override

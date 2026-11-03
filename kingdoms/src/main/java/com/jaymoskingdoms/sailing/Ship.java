@@ -180,6 +180,8 @@ public final class Ship extends Entity {
 	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
 	private int sinking;
 	private final List<int[]> volley = new ArrayList<>();
+	/** (0.7.484) Guns run back by their recoil: {piece index, tick they're run out again}. */
+	private final List<int[]> recoiled = new ArrayList<>();
 	private float turn;
 	private int adrift;
 	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
@@ -548,6 +550,7 @@ public final class Ship extends Entity {
 			wanted = Mth.clamp(wanted + blown, -FASTEST, FASTEST);
 		}
 		this.fireVolley(level, h);
+		this.runOut(h);
 		double gather = GATHER;
 		if (this.kedging > 0) {
 			this.kedging--;
@@ -1161,6 +1164,46 @@ public final class Ship extends Entity {
 		this.setAttached(PIECES, List.copyOf(pieces));
 	}
 
+	/**
+	 * (0.7.484) Gun {@code i} has just fired and is now {@code state} (emptied): it's run back on its carriage (its model slid
+	 * back, {@link ShipCannonBlock#RECOILED}) and run out again {@link ShipCannonBlock#RECOIL_TICKS} later ({@link #runOut}).
+	 */
+	private void recoil(int i, BlockState state) {
+		this.setPiece(i, state.setValue(ShipCannonBlock.RECOILED, true));
+		this.recoiled.add(new int[] {i, this.tickCount + ShipCannonBlock.RECOIL_TICKS});
+	}
+
+	/** (0.7.484) The guns whose recoil is over are run out again. */
+	private void runOut(Hull h) {
+		if (this.recoiled.isEmpty()) {
+			if (this.tickCount % 100 == 0) {
+				// one saved still run back (she was unloaded just after firing) is run out too
+				for (int i : h.cannons) {
+					BlockState state = h.pieces.get(i).blockState();
+					if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.RECOILED)) {
+						this.setPiece(i, state.setValue(ShipCannonBlock.RECOILED, false));
+					}
+				}
+			}
+			return;
+		}
+		for (java.util.Iterator<int[]> it = this.recoiled.iterator(); it.hasNext(); ) {
+			int[] r = it.next();
+			if (r[1] > this.tickCount) {
+				continue;
+			}
+			it.remove();
+			Hull now = this.hull();
+			if (now == null || r[0] >= now.pieces.size()) {
+				continue;
+			}
+			BlockState state = now.pieces.get(r[0]).blockState();
+			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.RECOILED)) {
+				this.setPiece(r[0], state.setValue(ShipCannonBlock.RECOILED, false));
+			}
+		}
+	}
+
 	/** The way a gun aboard points, in the world (x, z), its muzzle facing {@code facing} in her frame. */
 	private double[] worldWay(Direction facing) {
 		float c = Mth.cos(this.getYRot() * Mth.DEG_TO_RAD), s = Mth.sin(this.getYRot() * Mth.DEG_TO_RAD);
@@ -1236,7 +1279,7 @@ public final class Ship extends Entity {
 		if (state == null || kind == null) {
 			return false;
 		}
-		this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
+		this.recoil(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
 		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this, kind);
 		return true;
 	}
@@ -1384,7 +1427,7 @@ public final class Ship extends Entity {
 			BlockState state = now.pieces.get(v[0]).blockState();
 			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.LOAD).loaded()) {
 				BlockState empty = state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY);
-				this.setPiece(v[0], empty);
+				this.recoil(v[0], empty);
 				this.fireGun(level, v[0], state, this.pilot());
 			}
 		}

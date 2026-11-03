@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
@@ -261,8 +263,9 @@ public final class Bombardment {
 		if (state.getDestroySpeed(level, pos) < 0.0F || state.getBlock().getExplosionResistance() >= TOUGHEST) {
 			return false;
 		}
-		if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.BASE_STONE_NETHER) || state.getBlock() instanceof DropExperienceBlock
-			|| state.getBlock() instanceof EntityBlock) {
+		// (0.7.484) ore by its tags (redstone ore isn't a DropExperienceBlock), and anything else that drops experience
+		if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.BASE_STONE_NETHER) || state.is(ConventionalBlockTags.ORES)
+			|| state.is(BlockTags.ORES) || state.getBlock() instanceof DropExperienceBlock || state.getBlock() instanceof EntityBlock) {
 			return false;
 		}
 		return !(level instanceof ServerLevel server && Placed.any(server, pos));
@@ -281,8 +284,17 @@ public final class Bombardment {
 			|| state.is(BlockTags.BANNERS) || state.is(BlockTags.IMPERMEABLE) || state.getDestroySpeed(level, pos) <= 0.5F;
 	}
 
-	/** Worked stone that a heavy shot shatters: anything a pick mines that isn't natural stone (already ruled out). */
+	/**
+	 * Worked stone that a heavy shot shatters: anything a pick mines that isn't natural stone (already ruled out), nor
+	 * (0.7.484) metal or gem: blocks of iron, gold, diamond, emerald, copper, redstone and the like, bars and chains.
+	 */
 	private static boolean masonry(BlockState state) {
-		return state.is(BlockTags.MINEABLE_WITH_PICKAXE);
+		if (!state.is(BlockTags.MINEABLE_WITH_PICKAXE) || state.is(BlockTags.BEACON_BASE_BLOCKS) || state.is(ConventionalBlockTags.STORAGE_BLOCKS)
+			|| state.is(BlockTags.BARS)) {
+			return false;
+		}
+		SoundType sound = state.getSoundType();
+		return sound != SoundType.METAL && sound != SoundType.COPPER && sound != SoundType.CHAIN && sound != SoundType.COPPER_BULB
+			&& sound != SoundType.COPPER_GRATE && sound != SoundType.AMETHYST && sound != SoundType.NETHERITE_BLOCK;
 	}
 }
