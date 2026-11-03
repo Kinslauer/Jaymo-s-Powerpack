@@ -441,12 +441,12 @@ public final class OgreHolds {
 			return;
 		}
 		List<ItemStack> loot = hoard
-			? List.of(new ItemStack(Items.EMERALD, 8 + random.nextInt(12)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6)),
+			? List.of(new ItemStack(BentIngots.BENT_COPPER, 8 + random.nextInt(12)), new ItemStack(BentIngots.BENT_IRON, 1 + random.nextInt(3)), new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6)),
 				new ItemStack(Items.IRON_INGOT, 6 + random.nextInt(8)), new ItemStack(Items.GOLDEN_APPLE, 1 + random.nextInt(2)),
 				new ItemStack(Items.DIAMOND, 1 + random.nextInt(2)), new ItemStack(Items.SADDLE))
 			: List.of(new ItemStack(Items.BONE, 4 + random.nextInt(8)), new ItemStack(Items.ROTTEN_FLESH, 3 + random.nextInt(6)),
 				new ItemStack(Items.IRON_NUGGET, 4 + random.nextInt(10)), new ItemStack(Items.LEATHER, 1 + random.nextInt(4)),
-				new ItemStack(Items.EMERALD, random.nextInt(3)));
+				new ItemStack(BentIngots.BENT_COPPER, random.nextInt(3)));
 		int slot = 0;
 		for (ItemStack s : loot) {
 			if (!s.isEmpty()) {
