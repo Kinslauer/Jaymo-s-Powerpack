@@ -29,9 +29,10 @@ final class Outbuild {
 	/**
 	 * The ground for a footprint of {@code half} either side of the column {@code ring} blocks from {@code centre} at
 	 * {@code angle}: loaded, dry, not on a tree, within {@code spread} of level across the footprint, within
-	 * {@code floorSpread} of {@code refY}, and no settlement's. Its floor (the first free block above the ground), or null.
+	 * {@code floorSpread} of {@code refY}, and no other settlement's: land claimed by faction {@code selfId} (the builder's own;
+	 * -1 for none) is its own to build on (0.7.484). Its floor (the first free block above the ground), or null.
 	 */
-	static @Nullable BlockPos ground(ServerLevel level, BlockPos centre, double angle, int ring, int half, int refY, int spread, int floorSpread) {
+	static @Nullable BlockPos ground(ServerLevel level, BlockPos centre, double angle, int ring, int half, int refY, int spread, int floorSpread, int selfId) {
 		BlockPos column = centre.offset((int)Math.round(Math.cos(angle) * ring), 0, (int)Math.round(Math.sin(angle) * ring));
 		for (int dx = -half - 1; dx <= half + 1; dx += half + 1) {
 			for (int dz = -half - 1; dz <= half + 1; dz += half + 1) {
@@ -56,7 +57,11 @@ final class Outbuild {
 				high = Math.max(high, y);
 			}
 		}
-		if (high - low > spread || Banners.owner(level.getServer(), ChunkPos.containing(ground)) != null) {
+		if (high - low > spread) {
+			return null;
+		}
+		Faction owner = Banners.owner(level.getServer(), ChunkPos.containing(ground));
+		if (owner != null && owner.id() != selfId) {
 			return null;
 		}
 		return ground;
@@ -81,9 +86,9 @@ final class Outbuild {
 	 * The first of a few turns ({@code skews}, each a little further round) of {@code angle} whose ground is level and whose
 	 * footprint of {@code half} by {@code height} is clear, or null.
 	 */
-	static @Nullable BlockPos find(ServerLevel level, BlockPos centre, double angle, int skews, int ring, int half, int height, int refY, int spread, int floorSpread) {
+	static @Nullable BlockPos find(ServerLevel level, BlockPos centre, double angle, int skews, int ring, int half, int height, int refY, int spread, int floorSpread, int selfId) {
 		for (int skew = 0; skew < skews; skew++) {
-			BlockPos at = ground(level, centre, angle + skew * 0.35, ring, half, refY, spread, floorSpread);
+			BlockPos at = ground(level, centre, angle + skew * 0.35, ring, half, refY, spread, floorSpread, selfId);
 			if (at != null && clear(level, at, half, height)) {
 				return at;
 			}

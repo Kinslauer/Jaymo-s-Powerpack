@@ -451,6 +451,8 @@ final class Raids {
 					if (target(raider) != null) {
 						continue;
 					}
+					// (0.7.484) the last loose chest may have gone to an earlier raider this pass: back to the depot then
+					bare &= !raid.loose.isEmpty();
 					BlockPos aim = bare ? raid.loose.get(Math.floorMod(raider.getUUID().hashCode(), raid.loose.size())) : depot;
 					if (raider.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH || !bare && nearStorage(raider, target)) {
 						plunder(level, raider, target, raid);

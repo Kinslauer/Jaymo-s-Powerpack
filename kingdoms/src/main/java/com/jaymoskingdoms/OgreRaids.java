@@ -360,6 +360,8 @@ final class OgreRaids {
 			if (ogre.getTarget() != null) {
 				continue;
 			}
+			// (0.7.484) the last loose chest may have gone to an earlier ogre this pass: back to the depot then
+			bare &= !raid.loose.isEmpty();
 			BlockPos aim = bare ? raid.loose.get(Math.floorMod(ogre.getUUID().hashCode(), raid.loose.size())) : depot;
 			boolean near = ogre.distanceToSqr(Vec3.atCenterOf(aim)) <= LOOT_REACH * LOOT_REACH;
 			if (!near && !bare) {

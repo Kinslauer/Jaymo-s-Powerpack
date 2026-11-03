@@ -65,9 +65,18 @@ final class OgreGrowth {
 	static final double HIDE_RANGE = 24.0;
 	/** A hut: its inner width (odd), its wall height (ogres are tall) and the doorway's width. */
 	static final int HUT_HALF = 2, HUT_WALL = 4;
+	/** (0.7.484) Rounds a stage may find no ground before the hold lets it go, unpaid, and tries the next stage's spot. */
+	static final int STAGE_TRIES = 3;
 	// ================================================================================================================
 
 		private OgreGrowth() {
+	}
+
+	/** (0.7.484) Failed rounds at the current stage, by hold id. */
+	private static final Map<Integer, Integer> TRIES = new HashMap<>();
+
+	static void clear() {
+		TRIES.clear();
 	}
 
 	/** Every {@link #EVERY} ticks: each standing, loaded hold forages, flushes its waiting loot, and grows a stage if it can pay. */
@@ -163,9 +172,12 @@ final class OgreGrowth {
 		}
 		MinecraftServer server = level.getServer();
 		String key = BuiltInRegistries.ITEM.getKey(left.getItem()).toString();
-		Map<String, Integer> pending = new HashMap<>(site.pending());
+		// (0.7.484) the record as it now stands: an ogre home before this one may have left loot waiting too
+		OgreHolds.Site current = OgreHolds.site(server, site.id());
+		OgreHolds.Site base = current != null ? current : site;
+		Map<String, Integer> pending = new HashMap<>(base.pending());
 		pending.merge(key, left.getCount(), Integer::sum);
-		OgreHolds.put(server, site.withPending(pending));
+		OgreHolds.put(server, base.withPending(pending));
 	}
 
 	/** Loot that waited for the stash goes in. */
@@ -279,10 +291,15 @@ final class OgreGrowth {
 			default -> totem(level, site, n);
 		};
 		if (!done) {
-			// (nowhere good for it this time: the next round tries again, a little round the ring)
-			OgreHolds.put(server, site.withStage(n, now));
+			// (nowhere good for it this time: the next round tries again; after a few, that stage is let go, unpaid)
+			boolean skip = TRIES.merge(site.id(), 1, Integer::sum) >= STAGE_TRIES;
+			if (skip) {
+				TRIES.remove(site.id());
+			}
+			OgreHolds.put(server, site.withStage(skip ? n + 1 : n, now));
 			return;
 		}
+		TRIES.remove(site.id());
 		for (var e : cost.entrySet()) {
 			take(stash, e.getKey(), e.getValue());
 		}
@@ -301,7 +318,7 @@ final class OgreGrowth {
 	/** Where stage {@code n} goes: a turn of the golden angle round the hold, further out every few stages; {@code skew} turns it a little. Its ground, or null. */
 	static @Nullable BlockPos spot(ServerLevel level, OgreHolds.Site site, int n, int skew) {
 		int ring = Outbuild.ring(n, RING_START, RING_STEP, STAGES_PER_RING, RING_MOST);
-		return Outbuild.ground(level, site.at(), n * Outbuild.GOLDEN + skew * 0.35, ring, HUT_HALF, site.at().getY(), LEVEL_SPREAD, FLOOR_SPREAD);
+		return Outbuild.ground(level, site.at(), n * Outbuild.GOLDEN + skew * 0.35, ring, HUT_HALF, site.at().getY(), LEVEL_SPREAD, FLOOR_SPREAD, -1);
 	}
 
 	private static void set(ServerLevel level, BlockPos at, BlockState state) {
@@ -310,7 +327,7 @@ final class OgreGrowth {
 
 	private static @Nullable BlockPos find(ServerLevel level, OgreHolds.Site site, int n, int half, int height) {
 		int ring = Outbuild.ring(n, RING_START, RING_STEP, STAGES_PER_RING, RING_MOST);
-		return Outbuild.find(level, site.at(), n * Outbuild.GOLDEN, 6, ring, half, height, site.at().getY(), LEVEL_SPREAD, FLOOR_SPREAD);
+		return Outbuild.find(level, site.at(), n * Outbuild.GOLDEN, 6, ring, half, height, site.at().getY(), LEVEL_SPREAD, FLOOR_SPREAD, -1);
 	}
 
 	/** A hut of old stone with a roof, a bone bed, a doorway toward the hold. */

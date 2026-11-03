@@ -209,6 +209,7 @@ public final class Camps {
 			Raids.clear();
 			Blasts.clear();
 			OgreRaids.clear();
+			OgreGrowth.clear();
 			IllagerCamps.clear();
 			GoblinVillages.clear();
 			OrcCamps.clear();

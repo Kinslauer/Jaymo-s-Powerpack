@@ -609,7 +609,7 @@ final class PirateCoves {
 		double back = Math.atan2(cove.seaward().getOpposite().getStepZ(), cove.seaward().getOpposite().getStepX());
 		double angle = back + (n * Outbuild.GOLDEN) % 2.4 - 1.2;
 		int ring = Outbuild.ring(n, RING_START, RING_STEP, STAGES_PER_RING, RING_MOST);
-		BlockPos floor = kind == 3 ? null : Outbuild.find(level, data.center(), angle, 6, ring, half, height, data.center().getY(), 2, 4);
+		BlockPos floor = kind == 3 ? null : Outbuild.find(level, data.center(), angle, 6, ring, half, height, data.center().getY(), 2, 4, camp.id());
 		if (!force && Raids.playerNear(level, floor != null ? floor : data.center(), STAGE_HIDE)) {
 			return;
 		}
