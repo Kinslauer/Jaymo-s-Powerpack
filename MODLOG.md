@@ -5090,3 +5090,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
   75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
   resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+  Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
+  it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
+  splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
+  gathers low first (boots, shins, chest hem) and each wash takes splotches away, edges first. Where it goes comes
+  from our masks in `textures/grime/` (`tools/grime_textures.py`; alpha = how early, grey = how dark). The armour's
+  outline stays clean. Grime colours suit the normal textures; with the optional Excalibur pack on they take its
+  grade. Compile-checked; not played.
