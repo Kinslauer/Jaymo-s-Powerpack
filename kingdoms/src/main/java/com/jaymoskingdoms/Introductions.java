@@ -244,7 +244,8 @@ public final class Introductions {
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;
 		if (f != null) {
 			Component title = Rulers.title(player.level().getServer(), f, Rulers.role(villager), McaCompat.female(villager));
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
+			// (0.7.480) an orc king (or a goblin one) names himself in his own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
 		// (0.7.254) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
 		// might be awkward": one whose first dealing with you was like that says so (SharedHistory)
@@ -252,7 +253,8 @@ public final class Introductions {
 		if (met != null) {
 			return met;
 		}
-		return Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
+		// (0.7.480) a greenskin gives its name in its own dialect
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
 	}
 
 	/**

@@ -28,6 +28,14 @@ public final class Dialects {
 		if (kind != null) {
 			return kind == Heritage.Kind.GOBLIN ? GOBLIN : ORC;
 		}
+		// (0.7.480) a Folk orc or goblin carries no heritage (no MCA, or a shaman not yet handed to a villager): its role
+		// tells its brood, the orc shaman's too (Tribes.of leaves him out)
+		if (e instanceof Worker w) {
+			Heritage.Kind role = Greenskins.brood(w.role());
+			if (role != null) {
+				return role == Heritage.Kind.GOBLIN ? GOBLIN : ORC;
+			}
+		}
 		String tribe = Tribes.of(e);
 		return tribe == null ? null : ofTribe(tribe);
 	}
