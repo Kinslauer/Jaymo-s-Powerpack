@@ -180,7 +180,7 @@ public final class XenoformState {
 	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
-	/** (0.19.35) Skitter crawling up a wall as a spider (prone): every client draws it on the wall. */
+	/** (0.19.60) Skitter crawling up a wall as a spider (prone): every client draws it on the wall. */
 	public static final AttachmentType<Boolean> CLIMB = AttachmentRegistry.create(JaymosPowers.id("xenoform_climb"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** (0.18.119, Scan G) Towerback's grab: when it began (game time), so every client poses its arm. Absent: not grabbing. */

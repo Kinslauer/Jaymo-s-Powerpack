@@ -133,7 +133,7 @@ public final class DownedCrawl {
 		} else if (threat != null && !(mob instanceof PathfinderMob)) {
 			// (no way to path: straight away from it, as before 0.15.142)
 			face(mob, threat.getX(), threat.getZ(), false);
-			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * Downed.CRAWL_SPEED));
+			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * Downed.crawlPace(mob)));
 		} else {
 			mob.getNavigation().stop();
 		}
@@ -165,11 +165,11 @@ public final class DownedCrawl {
 		s.away = null;
 		if (ally != null) {
 			if (mob.distanceToSqr(ally) > ALLY_REACH * ALLY_REACH) {
-				mob.getNavigation().moveTo(ally, Downed.CRAWL_SPEED);
+				mob.getNavigation().moveTo(ally, Downed.crawlPace(mob));
 			}
 		} else if (threat != null && mob instanceof PathfinderMob crawler) {
 			Vec3 away = DefaultRandomPos.getPosAway(crawler, FLEE_DISTANCE, FLEE_HEIGHT, threat.position());
-			if (away != null && mob.getNavigation().moveTo(away.x, away.y, away.z, Downed.CRAWL_SPEED)) {
+			if (away != null && mob.getNavigation().moveTo(away.x, away.y, away.z, Downed.crawlPace(mob))) {
 				s.away = away;
 			}
 		}

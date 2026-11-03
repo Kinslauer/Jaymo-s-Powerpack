@@ -88,7 +88,7 @@ public final class XenoformClient {
 			return;
 		}
 		if ("billow".equals(form) || "skitter".equals(form) && state.getData(SkitterCeiling.CRAWL_KEY) != null) {
-			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.35, and
+			// (0.19.34) the cloud's low box is the swimming pose's, but it isn't swimming: draw it level (0.19.60, and
 			// Skitter's spider, prone)
 			state.swimAmount = 0.0F;
 			state.isVisuallySwimming = false;

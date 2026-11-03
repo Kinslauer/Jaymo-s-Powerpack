@@ -63,6 +63,8 @@ public final class BloodTrail {
 		final int color;
 		final @Nullable UUID by;
 		float scale;
+		/** (0.19.55) Round, or a smear along one axis ({@link BloodParticles.Puddle#shape}). */
+		final int shape;
 		/** When it was spilt (or last bled on), and the game time players may first see it (a drop still falling). */
 		public long laid;
 		long showFrom;
@@ -70,8 +72,9 @@ public final class BloodTrail {
 		/** Counts its changes, so a grown stain is sent again. */
 		int version;
 
-		Mark(long id, double x, double y, double z, int color, @Nullable UUID by, float scale, long now, long delay) {
+		Mark(long id, double x, double y, double z, int color, @Nullable UUID by, float scale, long now, long delay, int shape) {
 			this.id = id;
+			this.shape = shape;
 			this.x = x;
 			this.y = y;
 			this.z = z;
@@ -140,6 +143,24 @@ public final class BloodTrail {
 
 	/** A stain of this colour and size on the ground under (x, from, z), bled by {@code by}; null if it found no ground. */
 	public static @Nullable Mark lay(ServerLevel level, @Nullable UUID by, int color, double x, double from, double z, float scale, int delay) {
+		return lay(level, by, color, x, from, z, scale, delay, BloodParticles.Puddle.ROUND);
+	}
+
+	/**
+	 * (0.19.55) Andy liked Death Engine's blood trail behind a dragged body (ideas only). A smear of {@code body}'s blood
+	 * (tracked like any stain if it's alive) dragged along the ground from {@code from} to {@code to}: one long, narrow
+	 * stain lying the way it was dragged, this wide. Smears never soak into the stains around them, so a dragged body
+	 * leaves an unbroken streak rather than one growing pool.
+	 */
+	public static @Nullable Mark smear(ServerLevel level, Entity body, int color, Vec3 from, Vec3 to, float scale) {
+		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		double dx = to.x - from.x, dz = to.z - from.z;
+		int shape = Math.abs(dx) >= Math.abs(dz) ? BloodParticles.Puddle.SMEAR_X : BloodParticles.Puddle.SMEAR_Z;
+		return lay(level, by, color, (from.x + to.x) * 0.5, Math.max(from.y, to.y) + 0.5, (from.z + to.z) * 0.5, scale, 0, shape);
+	}
+
+	private static @Nullable Mark lay(ServerLevel level, @Nullable UUID by, int color, double x, double from, double z, float scale, int delay,
+		int shape) {
 		Vec3 top = new Vec3(x, from, z);
 		BlockHitResult hit = level.clip(new ClipContext(top, top.subtract(0.0, FALL, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY,
 			CollisionContext.empty()));
@@ -150,8 +171,8 @@ public final class BloodTrail {
 		long now = level.getGameTime();
 		Marks marks = LEVELS.computeIfAbsent(level, l -> new Marks());
 		List<Mark> chunk = marks.byChunk.computeIfAbsent(ChunkPos.pack(BlockPos.containing(at)), c -> new ArrayList<>());
-		for (Mark mark : chunk) {
-			if (Math.abs(mark.x - at.x) < MERGE && Math.abs(mark.z - at.z) < MERGE && Math.abs(mark.y - at.y) < MERGE_UP
+		for (Mark mark : shape != BloodParticles.Puddle.ROUND ? List.<Mark>of() : chunk) {
+			if (mark.shape == BloodParticles.Puddle.ROUND && Math.abs(mark.x - at.x) < MERGE && Math.abs(mark.z - at.z) < MERGE && Math.abs(mark.y - at.y) < MERGE_UP
 				&& java.util.Objects.equals(mark.by, by)) {
 				mark.scale = Math.max(Math.max(mark.scale, scale), Math.min(MAX_SCALE, mark.scale + GROW * scale));
 				mark.laid = now;
@@ -160,7 +181,7 @@ public final class BloodTrail {
 				return mark;
 			}
 		}
-		Mark mark = new Mark(marks.nextId++, at.x, at.y, at.z, color, by, scale, now, delay);
+		Mark mark = new Mark(marks.nextId++, at.x, at.y, at.z, color, by, scale, now, delay, shape);
 		chunk.add(mark);
 		marks.order.addLast(mark);
 		while (marks.order.size() > MAX_MARKS) {
@@ -259,7 +280,7 @@ public final class BloodTrail {
 			sent.versions.put(mark.id, mark.version);
 			int age = (int) Math.max(0L, now - mark.showFrom);
 			int life = (int) Math.max(1L, mark.expires - now);
-			level.sendParticles(player, new BloodParticles.Puddle(mark.color, mark.scale, mark.id, age, life), true, true, mark.x, mark.y,
+			level.sendParticles(player, new BloodParticles.Puddle(mark.color, mark.scale, mark.id, age, life, mark.shape), true, true, mark.x, mark.y,
 				mark.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}

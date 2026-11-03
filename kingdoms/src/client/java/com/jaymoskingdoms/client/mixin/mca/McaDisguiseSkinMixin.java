@@ -19,7 +19,7 @@ abstract class McaDisguiseSkinMixin {
 	@Inject(method = "getSkin(Lnet/conczin/mca/client/render/VillagerVisuals;)Lnet/minecraft/resources/Identifier;", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$disguiseSkin(VillagerVisuals visuals, CallbackInfoReturnable<Identifier> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
-		Identifier skin = minecraft.level == null ? null : Disguises.skin(minecraft.level.getEntity(visuals.entityId()));
+		Identifier skin = minecraft.level == null ? null : Disguises.skin(com.jaymoskingdoms.client.DrawnBodies.get(visuals.entityId()));
 		if (skin != null) {
 			cir.setReturnValue(skin);
 		}
@@ -28,7 +28,7 @@ abstract class McaDisguiseSkinMixin {
 	@Inject(method = "getColor(Lnet/conczin/mca/client/render/VillagerVisuals;F)I", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$disguiseColor(VillagerVisuals visuals, float partialTicks, CallbackInfoReturnable<Integer> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.level != null && Disguises.skin(minecraft.level.getEntity(visuals.entityId())) != null) {
+		if (minecraft.level != null && Disguises.skin(com.jaymoskingdoms.client.DrawnBodies.get(visuals.entityId())) != null) {
 			// (opaque white: the skin as painted)
 			cir.setReturnValue(0xFFFFFFFF);
 		}

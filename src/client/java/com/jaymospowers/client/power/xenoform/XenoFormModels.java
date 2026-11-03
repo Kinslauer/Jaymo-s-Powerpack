@@ -889,7 +889,7 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * (0.18.113, Scan E; 0.19.35 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
+	 * (0.18.113, Scan E; 0.19.60 upright, a spider when prone) Skitter: standing, the shape it always had, a man with
 	 * four thin spider legs off its back and a small abdomen behind. Prone (the stance wheel's crawl) it drops into a
 	 * spider ({@link SkitterCeiling#CRAWL_KEY}): a small thorax, a head with fangs that turns where it looks, a big round
 	 * abdomen behind (the insignia on top) and eight long legs stepping in a spider's alternating fours, the body bobbing
@@ -903,20 +903,20 @@ public final class XenoFormModels {
 		static final float BODY_Y = 15.0F, CROUCH_DROP = 3.0F, BOB = 0.8F;
 		/** How fast the legs step against the walk, how far they swing and lift. */
 		static final float GAIT = 0.6662F * 1.4F, SWING = 0.4F, LIFT = 0.45F;
-		/** (0.19.35) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
+		/** (0.19.60) Up a wall, the legs step this much faster (the walk barely moves while climbing). */
 		static final float CLIMB_GAIT = 0.35F;
 		/** Rest: each leg pair's yaw (hind to front, the right side's; the left mirrors) and droop. */
 		private static final float[] REST_YAW = {0.785F, 0.39F, -0.39F, -0.785F};
 		private static final float[] REST_DROOP = {0.785F, 0.58F, 0.58F, 0.785F};
 		/** Each pair's step phase (hind to front): the spider's alternating fours. */
 		private static final float[] PHASE = {0.0F, (float)Math.PI, (float)Math.PI * 0.5F, (float)Math.PI * 1.5F};
-		/** (0.19.35) Past this far into the crawl it's drawn as the spider. */
+		/** (0.19.60) Past this far into the crawl it's drawn as the spider. */
 		static final float SPIDER_AT = 0.5F;
 
 		private final ModelPart thorax, spiderHead, abdomen;
 		/** Hind to front: 0-3 right, 4-7 left. */
 		private final ModelPart[] legs = new ModelPart[8];
-		/** (0.19.35) Upright: the four thin legs off its back, and the small abdomen behind. */
+		/** (0.19.60) Upright: the four thin legs off its back, and the small abdomen behind. */
 		private final ModelPart[] backLegs = new ModelPart[4];
 		private final ModelPart backAbdomen;
 

@@ -1995,7 +1995,7 @@ def skitter():
     cx = (bx0 + bx1) // 2
     for i, w in enumerate((3, 1, 3)):
         rect(img, (cx - w // 2, by0 + 2 + i, cx - w // 2 + w, by0 + 3 + i), (190, 60, 40, 255))
-    # (0.19.35) the prone spider: abdomen 10x8x12 at (0,78), fang 1x2x1 at (44,78), head 8x8x8 at (0,98), thorax
+    # (0.19.60) the prone spider: abdomen 10x8x12 at (0,78), fang 1x2x1 at (44,78), head 8x8x8 at (0,98), thorax
     # 6x6x6 at (32,98), legs 16x2x2 at (0,114) (right) and (0,118) (left)
     thorax = (32, 98, 6, 6, 6)
     box(img, thorax, hide, 0.14)

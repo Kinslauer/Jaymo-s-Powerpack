@@ -76,7 +76,7 @@ public final class InteractActions {
 	static boolean offers(ServerPlayer player, LivingEntity v, String action) {
 		return switch (action) {
 			case AUDIENCE -> Rulers.is(v) || Audiences.canAsk(v);
-			case WARES -> Pedlars.pedlar(v);
+			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v);
 			case TRIBUTE -> Tribes.takesTribute(player, v);
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
 			default -> false;
@@ -101,6 +101,11 @@ public final class InteractActions {
 				return null;
 			}
 			case WARES -> {
+				if (com.jaymoskingdoms.nether.CinderForge.ignis(v) && v instanceof Villager villager) {
+					// (0.7.478) Ignis Vael's wares
+					com.jaymoskingdoms.nether.CinderForge.trade(player, villager);
+					return null;
+				}
 				Pedlars.trade(player, v);
 				return null;
 			}

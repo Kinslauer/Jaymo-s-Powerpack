@@ -80,6 +80,8 @@ public final class Nether {
 		PortalRaids.register();
 		// (0.7.187) the third side: the Flame Avatars' camps
 		AvatarCamps.register();
+		// (0.7.478) Ignis Vael and the Cinder Forge
+		CinderForge.register();
 		// (0.7.351) the possessed who walk the fortress halls, in Kintsugi
 		FortressHaunts.register();
 	}

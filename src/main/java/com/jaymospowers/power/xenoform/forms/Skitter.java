@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
  * down each side and a cluster of red eyes. A body, not a suit like the Web power. 22 health, fists of 4. It runs up
  * walls by walking into them (sneak to stop), and with jump held under a ceiling it clings there upside down and
  * crawls along: drawn upside down for everyone, its own view turned over too ({@code SkitterCeiling}).
- * (0.19.35) Standing it keeps its upright shape; prone (the stance wheel's crawl) it drops into a spider that scuttles
+ * (0.19.60) Standing it keeps its upright shape; prone (the stance wheel's crawl) it drops into a spider that scuttles
  * at {@link #SPIDER_PACE} times a crawl and sticks to whatever it crawls onto, up walls ({@link XenoformState#CLIMB})
  * and along ceilings with no jump held; standing up turns it back, and drops it off a ceiling.
  * Scanned from a spider or cave spider, or Kingdoms' tarantula ({@code XenoDna}).
@@ -156,10 +156,10 @@ public final class Skitter extends XenoForm {
 		}
 	}
 
-	/** (0.19.35) Prone, the spider's pace against a man's crawl (the crawl moves at about 0.3 of a walk). */
+	/** (0.19.60) Prone, the spider's pace against a man's crawl (the crawl moves at about 0.3 of a walk). */
 	public static final float SPIDER_PACE = 2.6F;
 
-	/** (0.19.35) Prone (the stance wheel's crawl): a spider, not a man. */
+	/** (0.19.60) Prone (the stance wheel's crawl): a spider, not a man. */
 	public static boolean crawling(Player player) {
 		return player.getAttached(com.jaymospowers.core.Crawl.CRAWLING) != null;
 	}
@@ -174,7 +174,7 @@ public final class Skitter extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		// (0.19.35) prone, it's a spider: it keeps to any surface it crawls onto, ceilings too, with no jump held
+		// (0.19.60) prone, it's a spider: it keeps to any surface it crawls onto, ceilings too, with no jump held
 		boolean prone = crawling(player);
 		boolean jump = player.getLastClientInput().jump() || prone;
 		boolean climbing = false;
@@ -206,7 +206,7 @@ public final class Skitter extends XenoForm {
 				sound(player, SoundEvents.SPIDER_STEP, 0.5F, 1.3F);
 			}
 		}
-		// (0.19.35) every client draws the crawling spider on the wall while it climbs one
+		// (0.19.60) every client draws the crawling spider on the wall while it climbs one
 		if (climbing != Boolean.TRUE.equals(player.getAttached(XenoformState.CLIMB))) {
 			if (climbing) {
 				player.setAttached(XenoformState.CLIMB, true);

@@ -8194,3 +8194,55 @@ a large goblin camp the size of a kingdom even".
 - A `hoard` field waits on each camp's tier for Patch 3's chief's hoard. Coins, jobs, markets' traders, caravans and the
   city buildings are Patches 3 and 4.
 - Compile-checked against the 26.3 jars; not played.
+
+## 0.7.476: Thessaly's mana wings (pack 0.19.56)
+Andy: "Thelassy should grow mana wings for users, that allow them to hover, with the wind hover animation, and increases
+height and speed as they master it. the mana wings animate like angelic wispy 2-3 player wide hands with wings that extend
+beneath it, and flap gently as they hover."
+- **Mana wings** (`wings`, Thessaly's, level 1, cost 6, a toggle bit `SpiritState.WINGS`): spread, you hover whenever you
+  are off the ground (WASD drifts, Jump rises, Sneak sinks to land); spread on the ground they lift you, and Jump takes off
+  again. Everything grows with the spirit's level (`ThessalyWings`): the most height above the ground 4 to 24 blocks (over
+  a drop they settle down to it), drift 0.22 to 0.5 blocks a tick, rise 0.16 to 0.36, the hands from about two to three
+  player-widths across; the upkeep falls from 2 to 0.8 mana a second aloft. No fall damage while spread, 1 spirit xp per
+  5 s aloft, no flying kick (`ValorFlightMixin`); out of mana they fade into a short slow fall. Put away, they fold.
+- **The look** (`client/spirits/ManaWings`): at your shoulder blades two great open hands of her light, palms back and
+  fingers fanned like a wing's tips, with seven feathers of light hanging beneath each, longer further out; drawn as the
+  arms are (the ki glow's wisps in hollow shells, her rose in mana's blue taken toward white). While you hover they beat
+  like an eagle's (Andy sent a fish eagle gif: "flap beside and down you"): a full stroke from high over your back down
+  past your sides, the downstroke quicker than the recovery, about one beat in two seconds and faster as you climb; the
+  hands lag the stroke (tips up on the way down, trailing on the way up), the fingers spread on the downstroke, and the
+  feathers trail each beat and keep hanging down beside you at the bottom;
+  on the ground they rest half spread, and folding away they sweep back, droop and fade. Motes of light drift down off
+  them. Only the attuned (and those who read magic) see them, like the rest of the spirit.
+- **The hover's body** is Jaymo's Powers' wind hover sway (Powers reads `ManaWings.hovering` by reflection), so you hang
+  and sway in the air the way the wind's hover does, for anyone watching.
+
+## 0.7.477: ki is magic, Emberborn drink fire, guards of every rank (pack 0.19.57, Kitchen 0.5.48)
+Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
+- **Ki is magic:** a Z Fighter attunes (`Mana.kiAttunes`) the moment the power is theirs, a Wind Controller once it
+  wakes; quietly, the flare and sound only (no chat line). Folk gifted the Z Fighter's ki or the wind are attuned too
+  (`ManaFolk.KI_FIGHTER`/`KI_WIND`). A Wind Controller who isn't a Mage casts through the wind: a gust carries each spell
+  off the staff. Flight stays Mastery's to unlock. Powers draws a Z Fighter's aura only for the attuned.
+- **Emberborn thirst:** `KitchenCompat` hands Kitchen's `Thirst.setFireDrinker` the Emberborn.
+- **Guards:** a realm's guards are a quarter recruits (gambeson in the realm's colour, mail, cap), half footmen (the
+  realm's harness as before), a quarter veterans (full plate), by their id (`Outfits.GUARD_RECRUIT_SHARE`). New guards
+  only; `Outfits.VERSION` is unchanged so nobody already dressed is stripped. No gold.
+
+## 0.7.478: Ignis Vael's Cinder Forge, under-armour (pack 0.19.58; Gemini handoff passes 2 and 3)
+- **The Cinder Forge** (`nether/CinderForge`, built by `FortBuildings.cinderForge`): one per world, 300-700 blocks from
+  the Nether's heart (fixed by the seed), built the first time a player comes within 96 blocks. **Ignis Vael** keeps it:
+  an MCA villager (a plain one without MCA) of Emberborn blood, attuned at power 10, unhurt by anything but the void;
+  back at his anvil a day after he goes missing. His wares (MCA's Wares button; a right-click without MCA), restocked
+  weekly: the existing Writ of Rebirth (`Classes.WRIT`, which already unmakes heritage, class and story alive; Andy:
+  "rare, from the Nether forge") for 40 emeralds + 2 netherite scrap, one a week; and Cinder-forged reforging of iron and
+  mail pieces (piece + 4 blaze rods: Fire Protection III, Unbreaking II, gold name). He greets Emberborn as kin.
+- **Finding him:** Overworld armourers, weaponsmiths and toolsmiths pass on one of four rumours now and then as you talk
+  to them (35%, 5 min apart; speech bubbles, no chat), one giving the way from the Nether's heart. Once told, sneak-use
+  one with 12 emeralds for a **Charred Wayfinder**: a vanilla compass (custom data `jaymoskingdoms_wayfinder`) that points
+  at the forge's spot x8 in the Overworld (where to open a portal) and at the forge in the Nether, re-aimed every 2 s.
+  Your first time in the Nether puts word of the forge in your next Tidings. Ops: `/kingdom cinderforge info|build|wayfinder`.
+- **Under-armour** (client `UnderArmourLayer`, art `tools/gen_under_armour.py`, our own; Armor Reimagined is ARR, idea
+  only): leggings with nothing over the chest (or an elytra) bring their suit on body and arms: leather an arming doublet
+  in the leggings' dye, mail a linen gambeson with mail sleeves, iron a studded padded gambeson. A WornModel, so it poses.
+- Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
+  change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.

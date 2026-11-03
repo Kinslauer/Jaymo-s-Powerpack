@@ -19,27 +19,27 @@ import org.jspecify.annotations.Nullable;
  * (feet to the ceiling, head down) and the clinging player's own camera rolls over with it, its eyes moved down to
  * where the upside-down head is. Both ease in and out over {@link #TURN_TICKS} ticks.
  * <p>
- * (0.19.35) Also Skitter's crawl: prone, it drops from its upright shape into the spider ({@link #CRAWL_KEY}), and
+ * (0.19.60) Also Skitter's crawl: prone, it drops from its upright shape into the spider ({@link #CRAWL_KEY}), and
  * crawling up a wall ({@link XenoformState#CLIMB}) its body tips head-up against the wall ({@link #CLIMB_KEY}).
  */
 public final class SkitterCeiling {
 	/** Ticks to turn right over. */
 	static final float TURN_TICKS = 6.0F;
 
-	/** (0.19.35) Ticks to drop into the spider (or rise back to the upright shape), and to tip up onto a wall. */
+	/** (0.19.60) Ticks to drop into the spider (or rise back to the upright shape), and to tip up onto a wall. */
 	static final float CRAWL_TICKS = 5.0F, CLIMB_TICKS = 5.0F;
-	/** (0.19.35) How far in front of the feet the wall is (blocks): the spider tips up about this high, its legs on the wall. */
+	/** (0.19.60) How far in front of the feet the wall is (blocks): the spider tips up about this high, its legs on the wall. */
 	static final float WALL_PIVOT = 0.3F;
 
 	public static final RenderStateDataKey<Float> KEY = RenderStateDataKey.create(() -> "jaymospowers:skitter_ceiling");
-	/** (0.19.35) Skitter in its spider shape, 0 (upright) to 1 (spider). */
+	/** (0.19.60) Skitter in its spider shape, 0 (upright) to 1 (spider). */
 	public static final RenderStateDataKey<Float> CRAWL_KEY = RenderStateDataKey.create(() -> "jaymospowers:skitter_crawl");
-	/** (0.19.35) Skitter's spider tipped up a wall, 0 to 1. */
+	/** (0.19.60) Skitter's spider tipped up a wall, 0 to 1. */
 	public static final RenderStateDataKey<Float> CLIMB_KEY = RenderStateDataKey.create(() -> "jaymospowers:skitter_climb");
 
 	/** entity id → {amount, amount before}. */
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
-	/** (0.19.35) The same for the crawl and the wall. */
+	/** (0.19.60) The same for the crawl and the wall. */
 	private static final Map<Integer, float[]> CRAWLS = new HashMap<>(), CLIMBS = new HashMap<>();
 
 	private SkitterCeiling() {
@@ -90,7 +90,7 @@ public final class SkitterCeiling {
 		return a == null ? 0.0F : XenoformFlightPose.smooth(Mth.lerp(partialTicks, a[1], a[0]));
 	}
 
-	/** (0.19.35) How far {@code entity} (Skitter) has dropped into its spider shape, smoothed. */
+	/** (0.19.60) How far {@code entity} (Skitter) has dropped into its spider shape, smoothed. */
 	public static float crawl(@Nullable Entity entity, float partialTicks) {
 		return eased(CRAWLS, entity, partialTicks);
 	}
@@ -119,7 +119,7 @@ public final class SkitterCeiling {
 	public static void rotate(AvatarRenderState state, PoseStack poseStack, float entityScale) {
 		Float climb = state.getData(CLIMB_KEY);
 		if (climb != null && state.deathTime <= 0.0F) {
-			// (0.19.35) up a wall: tipped head-up, the belly (and legs) to the wall in front
+			// (0.19.60) up a wall: tipped head-up, the belly (and legs) to the wall in front
 			float pivot = WALL_PIVOT / Math.max(entityScale, 0.01F);
 			poseStack.translate(0.0F, pivot, 0.0F);
 			poseStack.rotateDegrees(Axis.XP, 90.0F * climb);

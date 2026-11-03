@@ -164,6 +164,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
+		// (0.7.478) the suit leggings bring with them when nothing covers the chest
+		UnderArmourLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();
 		// (Andy, 2026-10-29) the Mad Tinkerer's sanguine outfit (an MCA villager's)
@@ -181,6 +183,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		MoonCurseClient.register();
 		com.jaymoskingdoms.client.spirits.SpiritKey.register();
 		com.jaymoskingdoms.client.spirits.SpiritArms.register();
+		com.jaymoskingdoms.client.spirits.ManaWings.register();
 		com.jaymoskingdoms.client.spirits.SpiritHud.register();
 		com.jaymoskingdoms.client.spirits.SpiritVoiceSound.register();
 		com.jaymoskingdoms.client.spirits.ClashCinematic.register();

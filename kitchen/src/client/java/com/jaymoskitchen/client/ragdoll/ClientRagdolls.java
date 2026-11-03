@@ -97,8 +97,13 @@ public final class ClientRagdolls {
 			sideUp = frame[1] >= 0.0F ? 1 : -1;
 		}
 
-		/** Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves. */
-		void settle() {
+		/**
+		 * Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves.
+		 * (0.5.49) Never while it's held ({@code held}: dragged): a slow drag (you're slowed hauling it) read as lying
+		 * still, so the body was drawn flat on its side on the ground and the leg left your hand. Andy: "dragging isnt
+		 * tethered hand to animal, it still floats in space oddly".
+		 */
+		void settle(boolean held) {
 			sideBefore = side;
 			if (rig.shape == RagdollRig.Shape.HUMANOID) {
 				return;
@@ -108,7 +113,7 @@ public final class ClientRagdolls {
 				double dx = now[i * 3] - before[i * 3], dy = now[i * 3 + 1] - before[i * 3 + 1], dz = now[i * 3 + 2] - before[i * 3 + 2];
 				fastest = Math.max(fastest, dx * dx + dy * dy + dz * dz);
 			}
-			boolean still = Math.sqrt(fastest) < SIDE_SPEED;
+			boolean still = !held && Math.sqrt(fastest) < SIDE_SPEED;
 			if (still && sideUp == 0) {
 				pickSide();
 			}
@@ -213,7 +218,7 @@ public final class ClientRagdolls {
 		while (it.hasNext()) {
 			Int2ObjectMap.Entry<Track> entry = it.next();
 			Track track = entry.getValue();
-			track.settle();
+			track.settle(DragSim.active(entry.getIntKey()));
 			if (!track.fresh) {
 				System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 				if (++track.unseen > FORGET_TICKS && minecraft.level.getEntity(entry.getIntKey()) == null) {

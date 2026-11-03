@@ -4914,7 +4914,29 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.54, Kitchen jar:** `libs/` now holds Jaymo's Kitchen 0.5.47 (built from `kitchen/`) in place of 0.5.33.1, which
   predated `corpse/Hauling` and broke the root build (`KitchenCompat.brawn`). The pack ships the new Kitchen.
   Compile-checked; not played.
-- **0.19.35, Skitter stands up again:** Andy: "skitter to be the same model it had before, only going into the crawl
+- **0.19.55, downed upgrades from Death Engine's ideas:** Andy liked Death Engine's crawl, blood trail and downed state
+  (All Rights Reserved and Forge only, so ideas only, rebuilt here). Going down gives 10 s of adrenaline (a quicker crawl),
+  then strength fades steadily to pass-out at 2 min, the crawl slowing from -50% to -85% (mobs too, `Downed.strength`,
+  `crawlPace`). The crawl animation follows it: on adrenaline quick even strokes with the head up, weakening to a shorter
+  reach, hands sliding along the ground, longer hitches, a hanging head, trembling arms and slow deep gasps (`CrawlPose`).
+  Crawling and dragged bodies, and Kitchen carcasses dragged behind you, leave long blood smears along the ground every
+  half block (`BloodSmears`, `BloodTrail.smear`, stretched stains in `BloodPuddle`); a living crawler's smears are tracked
+  like any blood. The downed screen gets a dark red ring that closes in as strength fades and a heartbeat that races, then
+  slows. Sneak + held use on someone downed now takes them by the shoulder and drags them along the ground (`Carry.DRAG`):
+  the body slopes from your hand to the hips, the legs ragdoll (kicked up by bumps, swung on turns, bouncing back down),
+  arms trail and the head lolls; right-click lets go, sneak + right-click lifts them into your arms (armour permitting).
+  Compile-checked (0 errors against the 26.3 jars); not played.
+- **0.19.56, Kingdoms 0.7.476, Thessaly's mana wings:** The wind hover sway also hangs a player held up by Thessaly's mana
+  wings (Kingdoms, read by reflection in `client/power/wind/ManaWingsCompat`), so they sway in the air like a wind hover.
+- **0.19.57, Kingdoms 0.7.477, Kitchen 0.5.48, Gemini handoff pass 1:** Andy's Gemini handoff, taken as design intent and
+  built on what was already here. Kindle grows with you (`EmberKindle.stage`): four stages by experience level
+  (`STAGE_LEVELS` 10/20/30; reach 1.5-2.2, 2.2-3.5, the old 3-5, 4-6.8) and a Flame Avatar's 6-11 block pillar, with
+  damage and heat speed by stage. Ki is seen only by the sensitive (`client/power/zfighter/KiSight`): a Z Fighter's aura
+  and glow are drawn only for viewers attuned in Kingdoms (`Mana.ATTUNED`, read by reflection) and always for yourself;
+  without Kingdoms everyone sees them. Kitchen jar in libs to 0.5.48.
+- **0.19.58, Kingdoms 0.7.478, Gemini handoff passes 2-3:** Kingdoms only: Ignis Vael's Cinder Forge in the Nether (the
+  Writ of Rebirth, cinder-forged reforging, smiths' rumours, the Charred Wayfinder) and under-armour (kingdoms/MODLOG.md).
+- **0.19.60, Skitter stands up again:** Andy: "skitter to be the same model it had before, only going into the crawl
   when you go prone". Standing, Skitter has its old upright shape back (four thin spider legs off its back, the small
   abdomen); prone on the stance wheel it drops into the 0.19.34 spider (`SkitterCeiling.CRAWL_KEY`, eased over 5 ticks)
   and scuttles at `Skitter.SPIDER_PACE` 2.6x a crawl. The spider sticks to whatever it crawls onto with no jump held:

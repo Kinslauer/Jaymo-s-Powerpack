@@ -73,6 +73,8 @@
 	"screen.jaymospowers.passive": "(always)",
 	"message.jaymospowers.carry.carrying": "Right-click to put them down, sneak + right-click to throw",
 	"message.jaymospowers.carry.carried": "%s has picked you up. Jump to break free!",
+	"message.jaymospowers.carry.dragging": "Dragging %s by the shoulder. Right-click to let go, sneak + right-click to lift them",
+	"message.jaymospowers.carry.dragged": "%s has you by the shoulder and is dragging you",
 	"message.jaymospowers.carry.lift": "Lifting %s... [%s] keep holding",
 	"message.jaymospowers.carry.too_heavy": "%s is too heavy for you to lift",
 	"message.jaymospowers.carry.shed": "You pull the %s off %s. Lift again to carry them",

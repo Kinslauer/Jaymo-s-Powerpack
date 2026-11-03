@@ -16,6 +16,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.jaymospowers.core.blood.BloodParticles;
 import com.jaymospowers.core.blood.BloodTrail;
 import java.util.List;
 import java.util.TreeSet;
@@ -38,24 +39,36 @@ final class BloodPuddle extends Particle {
 	static final float DRIED_AT = 0.5F, DRIED = 0.45F;
 	/** A puddle is this many blocks across at scale 1. */
 	static final float SIZE = 1.5F;
+	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
+	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
 	private static final double SAME_HEIGHT = 1.0E-4;
 
 	private float baseSize;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
 	private final float yaw;
+	/** (0.19.55) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
+	private final float stretchX, stretchZ;
 	private final float r, g, b;
 	private final float zFight;
 	private final TextureAtlasSprite sprite;
 	private float alpha = ALPHA;
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life) {
+		this(level, x, y, z, sprites, color, scale, age, life, BloodParticles.Puddle.ROUND);
+	}
+
+	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life, int shape) {
 		super(level, x, y, z, 0.0, 0.0, 0.0);
 		this.xd = 0.0;
 		this.yd = 0.0;
 		this.zd = 0.0;
 		this.baseSize = SIZE * scale;
-		this.yaw = this.random.nextInt(4) * Mth.HALF_PI;
+		boolean round = shape == BloodParticles.Puddle.ROUND;
+		// (0.19.55) a smear is only ever turned end for end, so its sprite stays drawn out along its length
+		this.yaw = (round ? this.random.nextInt(4) : this.random.nextInt(2) * 2) * Mth.HALF_PI;
+		this.stretchX = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_X ? SMEAR_LONG : SMEAR_NARROW;
+		this.stretchZ = round ? 1.0F : shape == BloodParticles.Puddle.SMEAR_Z ? SMEAR_LONG : SMEAR_NARROW;
 		this.stain = life > 0;
 		if (this.stain) {
 			this.age = age;
@@ -116,8 +129,8 @@ final class BloodPuddle extends Particle {
 		double cx = Mth.lerp(partialTick, this.xo, this.x);
 		double cy = Mth.lerp(partialTick, this.yo, this.y);
 		double cz = Mth.lerp(partialTick, this.zo, this.z);
-		float half = size * 0.5F;
-		double minX = cx - half, maxX = cx + half, minZ = cz - half, maxZ = cz + half;
+		double halfX = size * this.stretchX * 0.5, halfZ = size * this.stretchZ * 0.5;
+		double minX = cx - halfX, maxX = cx + halfX, minZ = cz - halfZ, maxZ = cz + halfZ;
 		int light = this.getLightCoords(partialTick);
 		int top = Mth.floor(cy + 1.0), bottom = Mth.floor(cy - MAX_DROP);
 		for (int bx = Mth.floor(minX); bx <= Mth.floor(maxX); bx++) {
@@ -194,8 +207,9 @@ final class BloodPuddle extends Particle {
 		for (double[] corner : corners) {
 			float dx = (float) (corner[0] - cx), dz = (float) (corner[1] - cz);
 			float lx = dx * cos - dz * sin, lz = dx * sin + dz * cos;
-			float u = (lx / size + 0.5F) * (u1 - u0) + u0;
-			float v = (lz / size + 0.5F) * (v1 - v0) + v0;
+			// (the yaw is a quarter turn: a smear's is half turns, so its local axes stay its world ones)
+			float u = (lx / (size * this.stretchX) + 0.5F) * (u1 - u0) + u0;
+			float v = (lz / (size * this.stretchZ) + 0.5F) * (v1 - v0) + v0;
 			decals.add(SingleQuadParticle.Layer.TRANSLUCENT, (float) (corner[0] - cam.x), (float) (y - cam.y) + lift,
 				(float) (corner[1] - cam.z), u, v, color, light);
 		}

@@ -56,6 +56,12 @@ public final class Outfits {
 	static final float GUARD_SPEAR_CHANCE = 0.3F, JUNGLE_SPEAR_CHANCE = 0.7F;
 	/** A guard's chance of the other helmet of his realm's harness (some variety within a rank). */
 	static final float GUARD_HELM_SWAP_CHANCE = 0.2F;
+	/**
+	 * (0.7.477) Guards of one realm aren't all alike (Andy's Gemini handoff): this share are raw recruits in a quilted
+	 * gambeson (the realm's colour, trimmed) over mail, a leather cap and boots; this share veterans in full plate. The
+	 * rest are footmen in the realm's harness. The land's gear (desert linen, snow hoods...) still goes over all three.
+	 */
+	static final float GUARD_RECRUIT_SHARE = 0.25F, GUARD_VETERAN_SHARE = 0.25F;
 	/** An archer's chance of a hood of his realm's colour rather than a mail coif (where the land doesn't decide). */
 	static final float ARCHER_HOOD_CHANCE = 0.6F;
 	/** A barbarian's chance his hides are marked with his camp's trim. */
@@ -232,6 +238,18 @@ public final class Outfits {
 		};
 		ItemStack legs = trimmed(folk, arms.harness() == HALF_PLATE ? Items.IRON_LEGGINGS : Items.CHAINMAIL_LEGGINGS, arms.pattern(), arms.material());
 		ItemStack feet = new ItemStack(Items.IRON_BOOTS);
+		// (0.7.477) recruit, footman or veteran: fixed by who they are, so a redress keeps their rank
+		float rank = Math.floorMod(folk.getUUID().hashCode(), 1000) / 1000.0F;
+		if (rank < GUARD_RECRUIT_SHARE) {
+			head = trimmed(folk, dyed(Items.LEATHER_HELMET, BOOT_BROWN), arms.pattern(), arms.material());
+			chest = trimmed(folk, dyed(Items.LEATHER_CHESTPLATE, rgb(arms.field())), arms.pattern(), arms.material());
+			legs = trimmed(folk, Items.CHAINMAIL_LEGGINGS, arms.pattern(), arms.material());
+			feet = dyed(Items.LEATHER_BOOTS, BOOT_BROWN);
+		} else if (rank >= 1.0F - GUARD_VETERAN_SHARE) {
+			head = trimmed(folk, Items.IRON_HELMET, arms.pattern(), arms.material());
+			chest = trimmed(folk, Items.IRON_CHESTPLATE, arms.pattern(), arms.material());
+			legs = trimmed(folk, Items.IRON_LEGGINGS, arms.pattern(), arms.material());
+		}
 		switch (climate) {
 			case DESERT, BADLANDS -> {
 				head = trimmed(folk, dyed(Items.LEATHER_HELMET, LINEN), arms.pattern(), TrimMaterials.GOLD);
