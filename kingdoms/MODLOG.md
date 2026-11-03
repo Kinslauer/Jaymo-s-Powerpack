@@ -8267,36 +8267,19 @@ All item, block, entity and clothing textures are graded toward Excalibur's dark
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
 
-## 0.7.484: greenskin hordes patches 3+, Beastfolk and Hollow, heritage kits, war journals (pack 0.19.67)
-Andy's answers of 2026-11-03 are in `docs/Hordes-Plan.md`; the races in `docs/Races-Plan.md`. Built as parallel tracks,
-each reviewed with every finding independently verified; compile-checked only, not yet seen in game.
-- **Dialects** (`Dialects`): orcs and goblins speak their own broken English (orcs blunt and brutal, goblins quick, greedy
-  and sly). Lines only greenskins say were rewritten; shared ones split into `dialect.jaymoskingdoms.<orc|goblin>.<key>`.
-- **Brutality** (`Brutality`): camp brawls with jeering crowds, the strongest grunt challenging the chief, orc camps raiding
-  other tribes' camps and goblin villages. **Slaves** (`Slaves`): collared goblins do an orc camp's hauling and jobs (not
-  counted in the folk cap), get thrown at foes in a fight, run off to goblin villages, and can be freed for goodwill.
-- **Bent ingots** (`BentIngots`, art `tools/gen_bent.py`): bent copper (1) and bent iron (3) are greenskin money. Sneak-use
-  an ingot on an anvil to bend it. Greenskins refuse plain ingots. A cold anvil won't straighten one (Andy): melt it in a
-  furnace or blast furnace, or superheat it on Powers' Forge Hearth.
-- **Economy** (`HordeEconomy`, `GreenMarket`, `Caravans`): folk work jobs for the camp's daily take, everyone eats, a hungry
-  camp stops growing and raids more, surplus grows faster; greenskin merchants price in bent ingots by stock, only for those
-  the camp spares; tribute and trade fill the chief's hoard, which pays for walls and tiers; carts haul surplus between a
-  tribe's camps and can be raided.
-- **Goblin towns + caps** (`HordeBuildings`, `Hordes`): tier caps 25/32/40; goblin tiers raise stone-and-timber houses,
-  two-storey homes, a tinker workshop, smelter, stalls, counting house, walkways, gardens and stone walls from tier 3; orc
-  tiers bigger and cruder. Structure templates under `data/jaymoskingdoms/structure/horde/<orc|goblin>/<tier>/` are used when
-  present (for Andy's modpack structures).
-- **Living together** (`Peoples`, `Settlers`): a distaste table between every people (orc-goblin at 3) lowers starting
-  hearts, brings glares and insults and brawls; lone orcs and goblins settle in heritage villages and havens, rarely human ones.
-- **War journals + Lore Codex** (`WarJournal`, `LoreBooks`, `LoreCodex`, after RPG Lore, MIT): orcs and goblins drop
-  journals in their dialect built from the real world plus oblique fragments; also in camp stores and broken carts. Extra
-  books as JSON in `data/jaymoskingdoms/lore/`. The soul-bound codex files every lore book.
-- **Beastfolk** (pickable) and **Hollow** (earned by being cut down by the undead and getting up) heritages, after Runic
-  Races (MIT): Arachnid, Avian, Canine, Feline, Kitsune, Serpen; Zombie, Skeleton, Wraith, Reaper. Sylvan takes every fae
-  (Dryad, Changeling, Sprite, Nymph, Faerie) and High, Moon and Blood elves. Heritages may have any number of looks.
-- **Heritage kits** (`HeritageKits`): every heritage and look has an ability (heritage key), a gift and a flaw on its card.
+## 0.7.484: under-armour fits MCA bodies
+Andy (2026-11-03): skins clipping again, like the old MCA drawing-layer trouble. The under-armour suit (leggings with
+nothing on the chest bring a doublet or gambeson) was drawn on the vanilla-sized body 0.3 out, while MCA's clothes and
+their jacket layer end at 0.3125: the doublet and the shirt fought pixel for pixel, and the suit didn't take MCA's
+height, width, build or breasts. On any body MCA draws (players, villagers, folk) it now goes on MCA's armour model, as
+MCA draws a chestplate, 0.4 out: over the clothes, under the leggings' belt (`McaUnderArmour`). Under a Powers costume
+or the symbiote suit it isn't drawn (`PowersCover.body`).
 
-## 0.7.485: thirteen sea-blooded Tideborn looks (pack 0.19.69)
+## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
+Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
+off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
 Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
 can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
 Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff

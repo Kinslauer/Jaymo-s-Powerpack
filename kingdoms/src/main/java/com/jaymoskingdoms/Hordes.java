@@ -33,7 +33,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -67,18 +66,15 @@ final class Hordes {
 	/** Each tier's wall radius round the fire (tier 1's is the camp's first stockade, {@link OrcBuildings#RING_RADIUS}). */
 	static final int[] WALL_RADIUS = {OrcBuildings.RING_RADIUS, 36, 52, 72};
 	/** Each tier's folk cap (grunts and rangers; goblins and slingers): a big camp looks big by its walls, not its crowds. */
-	static final int[] ORC_CAP = {OrcCamps.MAX_ORCS, 25, 32, 40}, GOBLIN_CAP = {GoblinVillages.MAX_GOBLINS, 25, 32, 40};
+	static final int[] ORC_CAP = {OrcCamps.MAX_ORCS, 20, 25, 30}, GOBLIN_CAP = {GoblinVillages.MAX_GOBLINS, 20, 25, 30};
 	/** How old (days) a camp must be to reach each tier. */
 	static final int[] TIER_DAYS = {0, 10, 25, 50};
 	/** Its land, by tier: chunks out each way from the fire. A tier 4 realm claims as a kingdom does. */
 	static final int[] CLAIM_RADIUS = {Camps.CLAIM_RADIUS, 3, 4, KingdomEvents.CLAIM_RADIUS};
-	/** (0.7.484) What a camp's hoard pays, in bent worth ({@link BentIngots}): each arc of a new wall, each band building, and each tier (to reach tier 2, 3, 4). */
-	static final int ARC_HOARD = 2, BUILD_HOARD = 3;
-	static final int[] TIER_HOARD = {0, 30, 80, 160};
+	/** What it takes in each day, in percent of a war camp's (more hands; Patch 3's jobs replace it). */
+	static final int[] YIELD_PERCENT = {100, 150, 200, 250};
 	/** A new palisade goes up in this many arcs, one a day (ogres in the camp: this many a day), each this many logs. */
 	static final int ARCS = 8, OGRE_ARCS = 2, ARC_LOGS = 6;
-	/** (0.7.484) A goblin palisade is raised in stone (mud brick and cobble on timber posts) from this tier; an arc then costs mud bricks. */
-	static final int STONE_WALL_TIER = 3, ARC_BRICKS = 10;
 	/** A band building's cost: logs, and hides (orcs) or mud bricks (goblins). */
 	static final int BUILD_LOGS = 4, BUILD_HIDES = 4, BUILD_MUD = 6;
 	/** The band: its buildings stay this far inside the new wall and outside the old, and this far from each other. */
@@ -101,7 +97,7 @@ final class Hordes {
 	/**
 	 * A camp's tier and its progress in it: {@code since} (its {@link Camps.CampData#grown} days when it reached the tier),
 	 * the arcs of the tier's palisade raised, the band buildings raised (or skipped), whether the old ring has its gates and
-	 * roads, whether the great hall stands (tier 4). {@code hoard}: (0.7.484) the chief's hoard in bent worth ({@link HordeEconomy}), which pays for walls, band buildings and tiers.
+	 * roads, whether the great hall stands (tier 4). {@code hoard}: Patch 3's chief's hoard, kept but not used yet.
 	 */
 	record Horde(int tier, int since, int arcs, int built, boolean opened, boolean hall, long hoard) {
 		static final Horde START = new Horde(1, 0, ARCS, 0, true, false, 0L);
@@ -125,10 +121,6 @@ final class Hordes {
 
 		Horde withOpened() {
 			return new Horde(this.tier, this.since, this.arcs, this.built, true, this.hall, this.hoard);
-		}
-
-		Horde withHoard(long hoard) {
-			return new Horde(this.tier, this.since, this.arcs, this.built, this.opened, this.hall, Math.max(0L, hoard));
 		}
 
 		Horde withHall() {
@@ -160,11 +152,7 @@ final class Hordes {
 	}
 
 	static void register() {
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			PLANS.clear();
-			BOUNDS.clear();
-			HordeTemplates.clear();
-		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> PLANS.clear());
 	}
 
 	// ---- state ---------------------------------------------------------------------------------------------------------
@@ -193,9 +181,9 @@ final class Hordes {
 		return (orc ? ORC_CAP : GOBLIN_CAP)[tier(server, id) - 1];
 	}
 
-	/** (0.7.484) Camp {@code id}'s hoard set to {@code worth} (bent worth). */
-	static void setHoard(MinecraftServer server, int id, long worth) {
-		put(server, id, horde(server, id).withHoard(worth));
+	/** {@code amount} of a war camp's daily takings, at its tier. */
+	static int yield(MinecraftServer server, int id, int amount) {
+		return amount * YIELD_PERCENT[tier(server, id) - 1] / 100;
 	}
 
 	/** How far its new folk wander from its fire ({@code base} at tier 1). */
@@ -261,9 +249,7 @@ final class Hordes {
 			return;
 		}
 		Horde h = horde(server, id);
-		// ((0.7.484) a hungry camp climbs no tier, and the climb is paid for out of its hoard)
-		if (h.tier() < WALL_RADIUS.length && !HordeEconomy.hungry(server, id) && missing(level, camp, data, h).isEmpty()
-			&& HordeEconomy.spend(server, id, TIER_HOARD[h.tier()])) {
+		if (h.tier() < WALL_RADIUS.length && missing(level, camp, data, h).isEmpty()) {
 			promote(level, camp, data, true);
 		}
 		Faction now = Factions.get(server, id);
@@ -302,17 +288,9 @@ final class Hordes {
 		if (folk < cap) {
 			out.add("folk " + folk + "/" + cap);
 		}
-		// ((0.7.484) a camp in plenty comes of age sooner)
-		long age = (level.getGameTime() - data.founded()) / Camps.DAY_TICKS + HordeEconomy.age(server, camp.id(), 0);
+		long age = (level.getGameTime() - data.founded()) / Camps.DAY_TICKS;
 		if (age < TIER_DAYS[t]) {
 			out.add("age " + age + "/" + TIER_DAYS[t] + " days");
-		}
-		// ((0.7.484) fed, and able to pay for the climb)
-		if (HordeEconomy.hungry(server, camp.id())) {
-			out.add("food (the camp is hungry)");
-		}
-		if (HordeEconomy.hoard(server, camp.id()) < TIER_HOARD[t]) {
-			out.add("hoard " + HordeEconomy.hoard(server, camp.id()) + "/" + TIER_HOARD[t] + " bent");
 		}
 		if (t + 1 == WALL_RADIUS.length) {
 			String tribe = Tribes.of(server, camp.id());
@@ -419,10 +397,6 @@ final class Hordes {
 		if (h.tier() < 2 || !all && !Storage.loaded(level, camp)) {
 			return false;
 		}
-		if (!all && HordeEconomy.hungry(server, camp.id())) {
-			// ((0.7.484) a hungry camp raises nothing)
-			return false;
-		}
 		boolean orc = data.orc();
 		int ogres = orc ? OgreHolds.haulers(level, camp.id(), data.center()).size() : 0;
 		int days = Math.max(0, data.grown() - h.since());
@@ -456,12 +430,7 @@ final class Hordes {
 			if (r != Raise.WAIT) {
 				put(server, camp.id(), h.withBuilt(h.built() + 1));
 				if (r == Raise.PLACED) {
-					BlockPos where = plan.get(h.built()).placer(data.center(), data.gate()).at(0, 0, 0);
-					OgreHolds.haul(level, camp.id(), data.center(), where);
-					if (orc) {
-						// (0.7.484) and an orc camp's goblin slaves carry to it
-						Slaves.haul(level, camp.id(), data.center(), where);
-					}
+					OgreHolds.haul(level, camp.id(), data.center(), plan.get(h.built()).placer(data.center(), data.gate()).at(0, 0, 0));
 				}
 				return true;
 			}
@@ -567,17 +536,12 @@ final class Hordes {
 		if (!unseen && Raids.playerNear(level, middle, BUILD_HIDE_RANGE)) {
 			return false;
 		}
-		// (0.7.484) a goblin town's stone wall costs mud bricks, not logs
-		boolean stone = stoneWall(orc, h.tier());
-		Item log = stone ? Items.MUD_BRICKS : (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).asItem();
-		int cost = stone ? ARC_BRICKS : ARC_LOGS;
+		Item log = (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).asItem();
 		if (!all) {
-			// ((0.7.484) logs (or stone, for a goblin town's stone wall) from the store, bent ingots from the chief's hoard)
-			if (!Storage.has(level, camp, Map.of(log, cost)) || HordeEconomy.hoard(level.getServer(), camp.id()) < ARC_HOARD) {
+			if (!Storage.has(level, camp, Map.of(log, ARC_LOGS))) {
 				return false;
 			}
-			Storage.take(level, camp, log, cost);
-			HordeEconomy.spend(level.getServer(), camp.id(), ARC_HOARD);
+			Storage.take(level, camp, log, ARC_LOGS);
 		}
 		int wallHigh = orc ? OrcBuildings.WALL_HIGH : GoblinBuildings.WALL_HIGH, walk = orc ? OrcBuildings.WALK_HIGH : GoblinBuildings.WALK_HIGH;
 		int gateHalf = orc ? OrcBuildings.GATE_HALF : GoblinBuildings.GATE_HALF;
@@ -605,7 +569,7 @@ final class Hordes {
 					}
 					continue;
 				}
-				wallColumn(level, frame, column, x, z, base, r, orc, stone, inGate, wallHigh);
+				wallColumn(level, frame, column, x, z, base, r, orc, inGate, wallHigh);
 			}
 		}
 		// ladders up beside the side and back gates, and the front gate's towers
@@ -615,8 +579,8 @@ final class Hordes {
 			}
 		}
 		if (arc == 0) {
-			tower(level, camp, frame, -gateHalf - 2, -r + 1, orc, stone, wallHigh);
-			tower(level, camp, frame, gateHalf + 2, -r + 1, orc, stone, wallHigh);
+			tower(level, camp, frame, -gateHalf - 2, -r + 1, orc, wallHigh);
+			tower(level, camp, frame, gateHalf + 2, -r + 1, orc, wallHigh);
 		}
 		return true;
 	}
@@ -636,22 +600,6 @@ final class Hordes {
 		return (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).defaultBlockState();
 	}
 
-	/** (0.7.484) This tier's palisade of this camp is stone: a goblin town's, from {@link #STONE_WALL_TIER} (orcs keep their stockade of logs and bone). */
-	static boolean stoneWall(boolean orc, int tier) {
-		return !orc && tier >= STONE_WALL_TIER;
-	}
-
-	/** (0.7.484) A stone wall's block at {@code y} up the column at {@code (x, z)}: mud brick and mossy cobble, patched the same way every time. */
-	private static BlockState wallStone(int x, int y, int z) {
-		int h = Math.floorMod(x * 73428767 ^ y * 912931 ^ z * 42317861, 7);
-		return switch (h) {
-			case 0, 1, 2 -> Blocks.MUD_BRICKS.defaultBlockState();
-			case 3, 4 -> Blocks.MOSSY_COBBLESTONE.defaultBlockState();
-			case 5 -> Blocks.STONE_BRICKS.defaultBlockState();
-			default -> Blocks.COBBLESTONE.defaultBlockState();
-		};
-	}
-
 	private static BlockState stake(boolean orc) {
 		return (orc ? Blocks.DARK_OAK_FENCE : Blocks.SPRUCE_FENCE).defaultBlockState();
 	}
@@ -663,7 +611,7 @@ final class Hordes {
 	 * left as a gap.
 	 */
 	private static void wallColumn(ServerLevel level, CampBuildings.Placer frame, BlockPos column, int x, int z, int base, int r, boolean orc,
-		boolean stone, boolean inGate, int wallHigh) {
+		boolean inGate, int wallHigh) {
 		int postHigh = orc ? OrcBuildings.POST_HIGH : GoblinBuildings.POST_HIGH;
 		for (int y = 0; y <= postHigh; y++) {
 			if (!clearable(level, column.atY(base + y))) {
@@ -684,22 +632,12 @@ final class Hordes {
 		boolean post = angle % every < Math.toDegrees(1.0 / r);
 		int high = post ? postHigh : wallHigh;
 		for (int y = 0; y < high; y++) {
-			if (stone) {
-				// (0.7.484) stone between timber posts; a post is a spruce log
-				level.setBlock(column.atY(base + y), post ? wallLog(false) : wallStone(x, y, z), QUIET);
-				continue;
-			}
 			BlockState s = orc ? (y == 0 ? Blocks.BLACKSTONE.defaultBlockState() : post && y >= wallHigh - 1 ? Blocks.BONE_BLOCK.defaultBlockState() : wallLog(true))
 				: wallLog(false);
 			level.setBlock(column.atY(base + y), s, QUIET);
 		}
 		if (post) {
 			level.setBlock(column.atY(base + postHigh), Blocks.SKELETON_SKULL.defaultBlockState(), QUIET);
-		} else if (stone) {
-			// (0.7.484) battlements: a cobble wall on every other column
-			if ((x + z & 1) == 0) {
-				level.setBlock(column.atY(base + wallHigh), (x % 3 == 0 ? Blocks.MOSSY_COBBLESTONE_WALL : Blocks.COBBLESTONE_WALL).defaultBlockState(), QUIET);
-			}
 		} else {
 			int stakes = (x + z & 1) == 0 ? 2 : 1;
 			for (int y = 0; y < stakes; y++) {
@@ -737,7 +675,7 @@ final class Hordes {
 	}
 
 	/** A gate tower (3 x 3, its camp's {@code TOWER_HIGH}) at camp-frame {@code (x, z)}, on the land there, as the first stockade's. */
-	private static void tower(ServerLevel level, Faction camp, CampBuildings.Placer frame, int x, int z, boolean orc, boolean stone, int wallHigh) {
+	private static void tower(ServerLevel level, Faction camp, CampBuildings.Placer frame, int x, int z, boolean orc, int wallHigh) {
 		int high = orc ? OrcBuildings.TOWER_HIGH : GoblinBuildings.TOWER_HIGH;
 		BlockPos centre = frame.at(x, 0, z);
 		if (!ours(level, camp, centre)) {
@@ -751,7 +689,7 @@ final class Hordes {
 					BlockState s = level.getBlockState(column.atY(base + y));
 					// (its own wall may already stand there: that's taken into the tower)
 					if (!clearable(level, column.atY(base + y)) && !(s.is(BlockTags.LOGS) || s.is(BlockTags.FENCES) || s.is(BlockTags.WOODEN_SLABS)
-						|| s.is(Blocks.SKELETON_SKULL) || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.BLACKSTONE) || wallPart(s, orc))) {
+						|| s.is(Blocks.SKELETON_SKULL) || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.BLACKSTONE))) {
 						return;
 					}
 				}
@@ -761,8 +699,7 @@ final class Hordes {
 			for (int dz = -1; dz <= 1; dz++) {
 				for (int y = 0; y < high; y++) {
 					level.setBlock(frame.at(x + dx, base - frame.anchor().getY() + y, z + dz),
-						orc && y < 2 ? Blocks.BLACKSTONE.defaultBlockState() : stone && dx != 0 && dz != 0 ? wallLog(false)
-						: stone ? wallStone(x + dx, y, z + dz) : wallLog(orc), QUIET);
+						orc && y < 2 ? Blocks.BLACKSTONE.defaultBlockState() : wallLog(orc), QUIET);
 				}
 				level.setBlock(frame.at(x + dx, base - frame.anchor().getY() + high, z + dz),
 					(orc ? Blocks.DARK_OAK_PLANKS : Blocks.SPRUCE_PLANKS).defaultBlockState(), QUIET);
@@ -791,10 +728,7 @@ final class Hordes {
 	private static boolean wallPart(BlockState s, boolean orc) {
 		return s.is(orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG) || s.is(orc ? Blocks.DARK_OAK_FENCE : Blocks.SPRUCE_FENCE)
 			|| s.is(orc ? Blocks.DARK_OAK_SLAB : Blocks.SPRUCE_SLAB) || s.is(Blocks.LADDER) || s.is(Blocks.SKELETON_SKULL)
-			|| orc && (s.is(Blocks.BLACKSTONE) || s.is(Blocks.BONE_BLOCK))
-			// (0.7.484) a goblin town's stone wall and its battlements
-			|| !orc && (s.is(Blocks.MUD_BRICKS) || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.STONE_BRICKS) || s.is(Blocks.COBBLESTONE)
-				|| s.is(Blocks.COBBLESTONE_WALL) || s.is(Blocks.MOSSY_COBBLESTONE_WALL));
+			|| orc && (s.is(Blocks.BLACKSTONE) || s.is(Blocks.BONE_BLOCK));
 	}
 
 	/**
@@ -888,15 +822,7 @@ final class Hordes {
 	// ---- the band: the planner -------------------------------------------------------------------------------------------
 
 	/** What goes up in tier {@code tier}'s band, before the planner shuffles and places it. */
-	private static List<Piece> list(MinecraftServer server, boolean orc, int tier) {
-		// (0.7.484) structure templates dropped into the tier's folder replace the coded designs
-		List<Piece> templated = new ArrayList<>();
-		for (Blueprint template : HordeTemplates.load(server, orc, tier)) {
-			templated.add(new Piece(template.id(), () -> template));
-		}
-		if (!templated.isEmpty()) {
-			return templated;
-		}
+	private static List<Piece> list(boolean orc, int tier) {
 		List<Piece> out = new ArrayList<>();
 		if (orc) {
 			Piece tentBlack = new Piece("orc_tent_black", () -> OrcBuildings.tent(true)), tentBrown = new Piece("orc_tent_brown", () -> OrcBuildings.tent(false));
@@ -905,11 +831,10 @@ final class Hordes {
 			Piece forge = new Piece("orc_forge", OrcBuildings::forge), spit = new Piece("orc_spit", OrcBuildings::spit);
 			Piece market = new Piece("orc_market_square", () -> HordeBuildings.marketSquare(true)), den = new Piece("orc_ogre_den", HordeBuildings::ogreDen);
 			Piece smelter = new Piece("orc_smelter", () -> HordeBuildings.smelter(true)), pens = new Piece("orc_war_beast_pens", () -> HordeBuildings.warBeastPens(true));
-			Piece boneHall = new Piece("orc_bone_hall", HordeBuildings::boneHall), ring = new Piece("orc_war_ring", HordeBuildings::warRing);
 			switch (tier) {
-				case 2 -> add(out, pens, 1, boneHall, 1, forge, 1, tentBlack, 2, tentBrown, 1, tower, 1, pit, 1, rack, 1, spit, 1, totem, 2);
-				case 3 -> add(out, market, 1, den, 1, smelter, 1, pens, 1, boneHall, 2, ring, 1, tentBlack, 3, tentBrown, 2, tower, 2, rack, 2, totem, 3);
-				default -> add(out, market, 1, smelter, 1, den, 2, pens, 2, forge, 1, boneHall, 3, ring, 2, tentBlack, 3, tentBrown, 3, tower, 3, pit, 2, rack, 2, totem, 4);
+				case 2 -> add(out, pens, 1, forge, 1, tentBlack, 2, tentBrown, 2, tower, 1, pit, 1, rack, 1, spit, 1, totem, 2);
+				case 3 -> add(out, market, 1, den, 1, smelter, 1, pens, 1, tentBlack, 3, tentBrown, 2, tower, 2, rack, 2, totem, 3);
+				default -> add(out, market, 1, smelter, 1, den, 2, pens, 2, forge, 1, tentBlack, 3, tentBrown, 3, tower, 3, pit, 2, rack, 2, totem, 4);
 			}
 		} else {
 			Piece hutRed = new Piece("goblin_hut_red", () -> GoblinBuildings.hut(true)), hutBrown = new Piece("goblin_hut_brown", () -> GoblinBuildings.hut(false));
@@ -918,18 +843,10 @@ final class Hordes {
 			Piece stewpot = new Piece("goblin_stewpot", GoblinBuildings::stewpot);
 			Piece market = new Piece("goblin_market_square", () -> HordeBuildings.marketSquare(false)), brewery = new Piece("goblin_brewery", HordeBuildings::brewery);
 			Piece smelter = new Piece("goblin_smelter", () -> HordeBuildings.smelter(false)), pens = new Piece("goblin_war_beast_pens", () -> HordeBuildings.warBeastPens(false));
-			// (0.7.484) the goblin town: stone-and-timber houses, a two-storey home, a tinker's workshop, a smelter with chimneys, stalls, a counting house, gardens, a footbridge
-			Piece houseRed = new Piece("goblin_town_house_red", () -> HordeBuildings.townHouse(true)), houseBrown = new Piece("goblin_town_house_brown", () -> HordeBuildings.townHouse(false));
-			Piece home = new Piece("goblin_town_home", HordeBuildings::townHome), workshop = new Piece("goblin_tinker_workshop", HordeBuildings::tinkerWorkshop);
-			Piece townSmelter = new Piece("goblin_town_smelter", HordeBuildings::townSmelter), stalls = new Piece("goblin_market_stalls", HordeBuildings::marketStalls);
-			Piece counting = new Piece("goblin_counting_house", HordeBuildings::countingHouse), garden = new Piece("goblin_garden", HordeBuildings::garden);
-			Piece bridge = new Piece("goblin_footbridge", HordeBuildings::footbridge);
 			switch (tier) {
-				case 2 -> add(out, pens, 1, tavern, 1, houseRed, 2, houseBrown, 2, hutBrown, 1, lookout, 1, patch, 2, stewpot, 1, totem, 2);
-				case 3 -> add(out, market, 1, stalls, 1, workshop, 1, townSmelter, 1, brewery, 1, pens, 1, home, 2, houseRed, 2, houseBrown, 1, garden, 1, bridge, 1,
-					lookout, 1, patch, 2, totem, 2);
-				default -> add(out, market, 1, stalls, 2, workshop, 1, townSmelter, 1, counting, 1, brewery, 1, tavern, 1, pens, 1, home, 3, houseRed, 2, houseBrown, 2,
-					garden, 2, bridge, 1, lookout, 2, patch, 2, totem, 3);
+				case 2 -> add(out, pens, 1, tavern, 1, hutRed, 2, hutBrown, 2, lookout, 1, patch, 2, stewpot, 1, totem, 2);
+				case 3 -> add(out, market, 1, brewery, 1, smelter, 1, pens, 1, hutRed, 3, hutBrown, 2, lookout, 2, patch, 3, totem, 3);
+				default -> add(out, market, 1, smelter, 1, brewery, 2, tavern, 1, pens, 2, hutRed, 4, hutBrown, 3, lookout, 3, patch, 4, totem, 4);
 			}
 		}
 		return out;
@@ -949,7 +866,7 @@ final class Hordes {
 		if (cached != null && cached.tier() == tier) {
 			return cached.spots();
 		}
-		List<IllagerBuildings.Spot> spots = tier < 2 ? List.of() : planBand(server, data.orc(), tier,
+		List<IllagerBuildings.Spot> spots = tier < 2 ? List.of() : planBand(data.orc(), tier,
 			id * 0x9E3779B97F4A7C15L ^ data.center().asLong() ^ tier * 0x632BE59BD9B4E019L);
 		PLANS.put(id, new Plan(tier, spots));
 		return spots;
@@ -961,10 +878,10 @@ final class Hordes {
 	 * its whole footprint lies in the band, off the four ways out and clear of the others by {@link #GAP} is its. What finds
 	 * no room is left out.
 	 */
-	private static List<IllagerBuildings.Spot> planBand(MinecraftServer server, boolean orc, int tier, long seed) {
+	private static List<IllagerBuildings.Spot> planBand(boolean orc, int tier, long seed) {
 		Random random = new Random(seed);
 		int inner = WALL_RADIUS[tier - 2] + BAND_INNER, outer = WALL_RADIUS[tier - 1] - BAND_OUTER;
-		List<Piece> items = new ArrayList<>(list(server, orc, tier));
+		List<Piece> items = new ArrayList<>(list(orc, tier));
 		java.util.Collections.shuffle(items, random);
 		List<Integer> order = new ArrayList<>();
 		for (int i = 0; i < items.size(); i++) {
@@ -1121,14 +1038,12 @@ final class Hordes {
 			Item log = (orc ? Blocks.DARK_OAK_LOG : Blocks.SPRUCE_LOG).asItem();
 			Item other = orc ? Items.WOOL.pick(DyeColor.BLACK) : Items.MUD_BRICKS;
 			Map<Item, Integer> cost = Map.of(log, BUILD_LOGS, other, orc ? BUILD_HIDES : BUILD_MUD);
-			if (!Storage.has(level, camp, cost) || HordeEconomy.hoard(level.getServer(), camp.id()) < BUILD_HOARD) {
+			if (!Storage.has(level, camp, cost)) {
 				return Raise.WAIT;
 			}
 			for (var e : cost.entrySet()) {
 				Storage.take(level, camp, e.getKey(), e.getValue());
 			}
-			// ((0.7.484) and the work paid for out of the hoard)
-			HordeEconomy.spend(level.getServer(), camp.id(), BUILD_HOARD);
 		}
 		// the ground levelled: raised with dirt, cut down, the air above cleared
 		for (int i = 0; i < columns.size(); i++) {
@@ -1161,8 +1076,7 @@ final class Hordes {
 
 	private static void joinFence(ServerLevel level, BlockPos at) {
 		BlockState state = level.getBlockState(at);
-		// (0.7.484) fences, window panes, bars and stone walls all join their neighbours
-		if (state.is(BlockTags.FENCES) || state.getBlock() instanceof CrossCollisionBlock || state.is(BlockTags.WALLS)) {
+		if (state.is(BlockTags.FENCES)) {
 			level.setBlock(at, Block.updateFromNeighbourShapes(state, level, at), Block.UPDATE_CLIENTS);
 		}
 	}
@@ -1274,7 +1188,6 @@ final class Hordes {
 			List<String> missing = missing(level, camp, data, h);
 			out.append("\nnext tier: ").append(missing.isEmpty() ? "ready (it moves up at its next day)" : "needs " + String.join(", ", missing));
 		}
-		out.append('\n').append(HordeEconomy.describe(level, camp, data));
 		if (camp.overlord() >= 0) {
 			Faction lord = Factions.get(server, camp.overlord());
 			out.append("\nvassal of ").append(lord == null ? "?" : lord.name());

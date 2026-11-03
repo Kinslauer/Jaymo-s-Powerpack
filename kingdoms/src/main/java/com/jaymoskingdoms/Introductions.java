@@ -224,13 +224,11 @@ public final class Introductions {
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
 	public static Component askName(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player)) {
-			// (0.7.484) an orc or goblin with a grudge refuses in its own dialect
-			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_refused");
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
-			// (0.7.484) an orc or goblin refuses in its own dialect
-			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {
@@ -244,8 +242,7 @@ public final class Introductions {
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;
 		if (f != null) {
 			Component title = Rulers.title(player.level().getServer(), f, Rulers.role(villager), McaCompat.female(villager));
-			// (0.7.484) an orc king (or a goblin one) names himself in his own dialect
-			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
 		// (0.7.254) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
 		// might be awkward": one whose first dealing with you was like that says so (SharedHistory)
@@ -253,8 +250,7 @@ public final class Introductions {
 		if (met != null) {
 			return met;
 		}
-		// (0.7.484) a greenskin gives its name in its own dialect
-		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
+		return Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
 	}
 
 	/**

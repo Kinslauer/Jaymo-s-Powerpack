@@ -30,7 +30,6 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -85,25 +84,10 @@ import org.jspecify.annotations.Nullable;
  * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
  * tint, {@code HeritageVariants#skin}); no glow, no eyes, no particles.</li>
- * <li><b>Beastfolk, Hollow:</b> (0.7.484, textures from {@code tools/gen_heritage_looks.py}) tawny fur painted on the skin (its ears and tail are
- * real model parts, {@link BeastParts}), eyes that catch the night; a drained grey-blue pallor with sunken eyes and a cold pale glow in the veins. Every
- * variant of theirs, like the Sylvan's new fae and elves, draws its own marks over these ({@link VariantLooks}).</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
-	/**
-	 * (0.7.484) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
-	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is. (0.7.484) The Sprite's and
-	 * the Faerie's gossamer wings are model parts now ({@link BeastParts}, blended there), no longer painted on the skin.
-	 */
-	static RenderType marksType(Identifier skin, VariantLooks.@Nullable Style style) {
-		return style != null && TRANSLUCENT_MARKS.contains(style.variant()) ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
-	}
-
-	/** (0.7.484) The variants whose marks are painted half-clear (the Wraith's mist): drawn blended. */
-	private static final java.util.Set<HeritageVariants.Variant> TRANSLUCENT_MARKS = java.util.EnumSet.of(HeritageVariants.Variant.WRAITH);
-
 	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
 	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
@@ -124,10 +108,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		// (0.7.262) the Bio-built have three drawings: their forms
 		DIVINE(Heritage.Kind.DIVINE, "divine", 1, 0xFFFFF4D0, Eyes.ALWAYS, 30),
 		BIOBUILT(Heritage.Kind.BIOBUILT, "biobuilt", 3, 0xFFFFB454, Eyes.ALWAYS, 0),
-		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0),
-		// (0.7.484) the beastfolk's fur, ears and tail (their variants add the rest) and the Hollow's drained pallor and cold eyes
-		BEASTFOLK(Heritage.Kind.BEASTFOLK, "beastfolk", 1, 0xFFFFD27A, Eyes.NIGHT, 0),
-		HOLLOW(Heritage.Kind.HOLLOW, "hollow", 1, 0xFFBEEBDC, Eyes.ALWAYS, 0);
+		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0);
 
 		final Heritage.Kind heritage;
 		final Identifier[] skin, glow;
@@ -372,7 +353,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		Identifier skin = look.blood() ? BLOOD_SKIN : style != null ? style.skin() : kind.skin[look.variant()];
 		Identifier glow = look.blood() ? BLOOD_GLOW : style != null ? style.glow() : kind.glow[look.variant()];
 		if (!armFinsCovered) {
-			collector.order(1).submitModel(marks, state, poseStack, marksType(skin, look.blood() ? null : style), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 		if (look.glow() != 0 && !armFinsCovered) {
@@ -414,7 +395,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		if (kind == Kind.TIDEBORN) {
 			finTextures(style);
-			// (0.7.485) a sea-blooded look keeps only the fins its own parts leave room for (SeaParts)
+			// (0.7.486) a sea-blooded look keeps only the fins its own parts leave room for (SeaParts)
 			SeaParts.Fins keep = SeaParts.fins(style);
 			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0, headFinsCovered || !keep.head, armFinsCovered || !keep.arms);
 		}

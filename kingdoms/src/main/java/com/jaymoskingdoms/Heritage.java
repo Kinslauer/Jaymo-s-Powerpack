@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -103,10 +102,6 @@ import org.jspecify.annotations.Nullable;
  * it hits and, at the last form, buds small copies ({@link BioBuilt}).</li>
  * <li><b>Rubber-folk:</b> (0.7.262) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
  * sweet tooth; rubber burns and pops ({@link RubberFolk}).</li>
- * <li><b>Beastfolk:</b> (0.7.484, Andy: missing Runic Races come in by family, races as variants) picked at the start: Arachnid,
- * Avian, Canine, Feline, Kitsune and Serpen are their looks ({@link HeritageVariants}). <b>Hollow:</b> earned: the risen dead (Zombie,
- * Skeleton, Wraith, Reaper) wake in one the undead struck down who got up again ({@link #hollowCheck}). (0.7.484) Every heritage and
- * look has a kit now, an ability, a gift and a flaw ({@link HeritageKits}); see docs/Races-Plan.md.</li>
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
@@ -269,12 +264,7 @@ public final class Heritage {
 		// (0.7.292) Andy: goblins and orcs as MCA villagers, "still monstrous with their proportions, Orcs are bigger,
 		// goblins smaller, both green and repulsive with variations" ({@link Greenskins}): broods, never a player's
 		GOBLIN(true, true, 0, Items.ROTTEN_FLESH, Stats.Stat.AGILITY, Stats.Stat.FINESSE),
-		ORC(true, true, 0, Items.BONE, Stats.Stat.MIGHT, Stats.Stat.GRIT),
-		// (0.7.484, Andy: missing Runic Races come in by family, races as variants, docs/Races-Plan.md) the beastfolk are picked at
-		// the start (arachnid, avian, canine, feline, kitsune, serpen); the Hollow, the risen dead, are earned: they wake in one
-		// the dead killed and who got up again ({@link #hollowCheck}). Appended last: ordinals are in packets and life stories.
-		BEASTFOLK(0, Items.RABBIT_FOOT, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE),
-		HOLLOW(true, 0, Items.SKELETON_SKULL, Stats.Stat.ENDURANCE, Stats.Stat.GRIT);
+		ORC(true, true, 0, Items.BONE, Stats.Stat.MIGHT, Stats.Stat.GRIT);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -332,11 +322,6 @@ public final class Heritage {
 
 		/** What the screen lists for it: the free points, the gift, the flaw. */
 		public List<Component> card() {
-			return card(null);
-		}
-
-		/** (0.7.484) The card with the kit of look {@code variant} (null: the first look, the heritage's own kit). */
-		public List<Component> card(HeritageVariants.@Nullable Variant variant) {
 			List<Component> out = new ArrayList<>();
 			if (this.freePoints > 0) {
 				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints));
@@ -347,16 +332,12 @@ public final class Heritage {
 					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n, Component.translatable("stat.jaymoskingdoms." + stat.key())));
 				}
 			}
-			// (0.7.484) a Rimewyrm takes no halving from fire (dealt), so its card leaves that out
-			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + (this == DRAGONBLOOD && variant == HeritageVariants.Variant.RIMEWYRM ? ".gift_rimewyrm" : ".gift")));
+			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".gift"));
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
-			// (0.7.484) the kit: its ability, its gift, its flaw (the look's own once a look is picked, see card(Variant))
-			out.addAll(HeritageKits.card(HeritageKits.kit(this, variant)));
 			// (0.7.221) and how far from human folk think it ({@link Prejudice})
 			int shunned = Prejudice.degree(this);
 			if (shunned > 0) {
-				// (0.7.484) the Beastfolk and the Hollow have a line each (their degrees repeat another blood's)
-				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + (this == BEASTFOLK || this == HOLLOW ? key() : String.valueOf(shunned))));
+				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + shunned));
 			}
 			return out;
 		}
@@ -437,8 +418,6 @@ public final class Heritage {
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind(), payload.variant()));
 		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
-		// (0.7.484) the risen are forgotten with the world, so singleplayer's next world never wakes a Hollow from this one
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> RISEN.clear());
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
 			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
@@ -449,16 +428,12 @@ public final class Heritage {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer player && taken > 0.0F) {
 				stunned(player, source);
-				// (0.7.484) so the blow isn't read as a heal lost next second (HeritageKits.healing)
-				HeritageKits.settle(player);
 			}
 			if (taken > 0.0F) {
 				struck(entity, source);
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Heritage::died);
-		// (0.7.484) the kits: the abilities, the gifts and the flaws of every heritage and look (HeritageKits)
-		HeritageKits.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			BLINK_READY.remove(handler.player.getUUID());
 			SPARKED.remove(handler.player.getUUID());
@@ -605,8 +580,6 @@ public final class Heritage {
 		RubberFolk.attributes(player, kind);
 		// (0.7.214) the variant's trait
 		HeritageVariants.traits(player);
-		// (0.7.484) and the kit's gifts and flaws that are plain attributes
-		HeritageKits.attributes(player);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -685,8 +658,6 @@ public final class Heritage {
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", inSun(player) ? -DEEP_SUN_WEAK : 0.0,
 					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			}
-			// (0.7.484) the kit's gifts and flaws that follow the weather and the land
-			HeritageKits.tick(player, server.getTickCount());
 			if (server.getTickCount() % UNLOCK_EVERY == 0) {
 				unlockChecks(player);
 			}
@@ -779,8 +750,7 @@ public final class Heritage {
 		if (kind == null) {
 			return 1.0F;
 		}
-		// (0.7.484) times the kit's (the Canine's ravenous, the risen's small appetite)
-		return HeritageKits.hunger(player) * switch (kind) {
+		return switch (kind) {
 			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
 			case VERDANT -> inSun(player) ? (spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER
@@ -842,25 +812,17 @@ public final class Heritage {
 		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
 	}
 
-	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
+	/** The heritage key: a Warrior-born's tail (a Frostborn's ice prison is their left mouse held, through Jaymo's Powers). */
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
 		if (kind == Kind.WARRIORBORN) {
-			if (player.isShiftKeyDown()) {
-				// (0.7.484) sneaking, the key is the war cry instead
-				HeritageKits.press(player);
-			} else {
-				player.addTag(TAIL_TOGGLE_TAG);
-			}
+			player.addTag(TAIL_TOGGLE_TAG);
 		} else if (kind == Kind.BIOBUILT) {
 			// (0.7.288) on a downed foe it starts (or stops) absorbing it; else, in the last form, it buds copies
 			BioBuilt.press(player);
 		} else if (kind == Kind.RUBBERFOLK) {
 			// (0.7.288) starts (or stops) swallowing a weak foe
 			RubberFolk.press(player);
-		} else {
-			// (0.7.484) every other heritage and look: its kit's ability (or, for a left-mouse hold, a word on how to use it)
-			HeritageKits.press(player);
 		}
 	}
 
@@ -938,7 +900,7 @@ public final class Heritage {
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		Kind mine = VillagerHeritage.of(target);
-		if (mine == Kind.DRAGONBLOOD && HeritageVariants.of(target) != HeritageVariants.Variant.RIMEWYRM && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
+		if (mine == Kind.DRAGONBLOOD && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
 			amount *= DRAGON_FIRE_TAKEN;
 		} else if (mine == Kind.BIOBUILT && (source.is(DamageTypeTags.IS_LIGHTNING) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
 			// (0.7.262) a made body is brittle to lightning and magic
@@ -946,11 +908,6 @@ public final class Heritage {
 		} else if (mine == Kind.RUBBERFOLK) {
 			// (0.7.262) rubber pops
 			amount *= RubberFolk.taken(source);
-		}
-		// (0.7.484) the kits: what each look's flaws and gifts do to a blow taken, and to one dealt
-		amount = HeritageKits.taken(target, source, amount);
-		if (source.getEntity() instanceof LivingEntity striker) {
-			amount = HeritageKits.dealt(striker, target, source, amount);
 		}
 		Entity by = source.getEntity();
 		if (!(by instanceof LivingEntity attacker) || by != source.getDirectEntity() || target.level().isClientSide()) {
@@ -1070,7 +1027,6 @@ public final class Heritage {
 		if (!(player.level() instanceof ServerLevel level) || player.isSpectator()) {
 			return;
 		}
-		hollowCheck(player);
 		// (getDragons() leaves out a dying dragon: its health is already 0)
 		for (EnderDragon dragon : level.getEntities(EntityTypes.ENDER_DRAGON, d -> d.dragonDeathTime > 0)) {
 			if (dragon.distanceTo(player) < UNLOCK_DRAGON_RANGE) {
@@ -1097,21 +1053,6 @@ public final class Heritage {
 		}
 	}
 
-	/**
-	 * (0.7.484) The Hollow wake in one who was killed by the undead and got up again, a moment after rising, each of them once.
-	 * Held in memory only, and cleared when the server stops: a restart in between forgets who was struck down, so the wake is missed, never given by mistake.
-	 */
-	static final java.util.Set<UUID> RISEN = new java.util.HashSet<>();
-	/** (0.7.484) How long after rising before the Hollow wake (ticks of the check; they must live through it). */
-	static final int HOLLOW_RISE_GRACE = 1;
-
-	private static void hollowCheck(ServerPlayer player) {
-		if (RISEN.contains(player.getUUID()) && player.isAlive() && player.tickCount > HOLLOW_RISE_GRACE) {
-			RISEN.remove(player.getUUID());
-			unlock(player, Kind.HOLLOW);
-		}
-	}
-
 	/** A dragon of any mod (its id says so), the Ender Dragon too. */
 	static boolean dragon(Entity entity) {
 		return entity instanceof EnderDragon || BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("dragon");
@@ -1122,11 +1063,6 @@ public final class Heritage {
 	 * dying again in the afterlife wakes their Divine-born.
 	 */
 	private static void died(LivingEntity entity, DamageSource source) {
-		if (entity instanceof ServerPlayer dead && !unlocked(dead, Kind.HOLLOW) && source.getEntity() instanceof LivingEntity killer
-			&& killer.is(EntityTypeTags.UNDEAD)) {
-			// (0.7.484) struck down by the dead: if you get up again, it is not quite as you were ({@link #hollowCheck})
-			RISEN.add(dead.getUUID());
-		}
 		if (entity instanceof ServerPlayer dead && PowersCompat.amongTheDead(dead)) {
 			unlock(dead, Kind.DIVINE);
 		}

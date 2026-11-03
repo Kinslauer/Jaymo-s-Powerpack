@@ -93,14 +93,6 @@ final class Caravans {
 	static final long LONGEST = 24000L * 2;
 	/** Reputation: a cart broken open by a player (with the fiefdom, and its overlord). */
 	static final int REP_ROB = -60;
-	/**
-	 * (0.7.484) Greenskin carts: a camp keeps this much of each good back, sends at most this many items, in this many carts, with this many
-	 * guards (and one more per {@link #CARTS_PER_GUARD} carts); it sends once in this long (ticks), and retries after the other; its tribe's
-	 * camp it sends to is this near at most (blocks); a cart robbed raises the tribe's grudge by this much.
-	 */
-	static final int GREEN_KEEPS = 40, GREEN_LOAD_MOST = 192, GREEN_CARTS = 2, GREEN_GUARDS = 2, GREEN_ROB_GRUDGE = 12;
-	static final long GREEN_TICKS = 24000L, GREEN_RETRY = 4800L;
-	static final double GREEN_REACH = 900.0;
 
 	static final String TAG = "jaymoskingdoms.caravan", TAG_OF = "jaymoskingdoms.caravan_of.";
 	/** A caravan folk's task. */
@@ -251,99 +243,6 @@ final class Caravans {
 			}
 			start(level, f, false);
 		}
-		// ((0.7.484) and the greenskin camps send their surplus to the other camps of their tribe)
-		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
-			if (f.fallen() || !Hordes.greenskin(server, f.id()) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())
-				|| now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
-				continue;
-			}
-			startGreen(level, f, false);
-		}
-	}
-
-	/** The camp of {@code f}'s tribe its cart goes to: a hungry one first, else the nearest standing (within {@link #GREEN_REACH}); null if it's alone. */
-	static @Nullable Faction greenGoal(MinecraftServer server, Faction f) {
-		String tribe = Tribes.of(server, f.id());
-		if (tribe == null) {
-			return null;
-		}
-		Faction best = null;
-		double bestD = GREEN_REACH * GREEN_REACH;
-		boolean bestHungry = false;
-		for (Faction g : Tribes.camps(server, tribe)) {
-			Camps.CampData data = Camps.data(server, g.id());
-			double d = Raids.horizontal(g.seat(), f.seat());
-			if (g.id() == f.id() || g.fallen() || data == null || data.clearedAt() >= 0 || d > GREEN_REACH * GREEN_REACH) {
-				continue;
-			}
-			boolean hungry = HordeEconomy.hungry(server, g.id());
-			if (hungry && !bestHungry || hungry == bestHungry && d < bestD) {
-				best = g;
-				bestD = d;
-				bestHungry = hungry;
-			}
-		}
-		return best;
-	}
-
-	/** (0.7.484) The goods a greenskin camp of {@code orc}'s kind trades in. */
-	private static Predicate<ItemStack> greenGoods(boolean orc, boolean food) {
-		return x -> food ? HordeEconomy.eats(x) : GreenMarket.goods(orc).stream().anyMatch(g -> x.is(g.item()));
-	}
-
-	/**
-	 * (0.7.484) Greenskin camp {@code f} sends a cart or two of its surplus to a camp of its tribe (food, if that camp is hungry),
-	 * along their road, guarded by its own folk; not while it is hungry itself. {@code force}: whatever the time and the load.
-	 */
-	static @Nullable Caravan startGreen(ServerLevel level, Faction f, boolean force) {
-		MinecraftServer server = level.getServer();
-		long now = level.getGameTime();
-		Camps.CampData data = Camps.data(server, f.id());
-		Faction to = data == null || data.clearedAt() >= 0 || f.fallen() ? null : greenGoal(server, f);
-		if (to == null || !Storage.loaded(level, f) || HordeEconomy.hungry(server, f.id())) {
-			later(server, f, now + GREEN_RETRY);
-			return null;
-		}
-		List<Map<String, Integer>> carts = loadUp(level, f, greenGoods(data.orc(), HordeEconomy.hungry(server, to.id())), GREEN_KEEPS, GREEN_LOAD_MOST);
-		int load = carts.stream().mapToInt(c -> c.values().stream().mapToInt(Integer::intValue).sum()).sum();
-		if (load < LOAD_LEAST && !force || carts.size() > GREEN_CARTS) {
-			// (nothing worth the road, or more than it can carry: back what was taken, and wait)
-			for (Map<String, Integer> cart : carts) {
-				deliver(level, f, cart);
-			}
-			later(server, f, now + GREEN_RETRY);
-			return null;
-		}
-		if (carts.isEmpty()) {
-			carts = List.of(Map.of());
-		}
-		Ledger l = ledger(server);
-		int id = l.nextId();
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2);
-		Map<String, Caravan> all = new HashMap<>(l.caravans());
-		all.put(Integer.toString(id), c);
-		Map<String, Long> next = new HashMap<>(l.next());
-		next.put(Integer.toString(f.id()), now + GREEN_TICKS);
-		save(server, new Ledger(all, next, l.pending(), id + 1));
-		JaymosKingdoms.LOGGER.info("{} sends a cart of {} goods to {}", f.name(), load, to.name());
-		if (level.isPositionEntityTicking(c.at())) {
-			appear(level, c);
-		}
-		return c;
-	}
-
-	/** (0.7.484) What a cart's {@code cargo} is worth in bent ingots at a camp's prices (a lot of each good at its base price). */
-	private static long cargoWorth(Map<String, Integer> cargo, boolean orc) {
-		long worth = 0L;
-		for (Map.Entry<String, Integer> e : cargo.entrySet()) {
-			Item item = item(e.getKey());
-			for (GreenMarket.Good g : GreenMarket.goods(orc)) {
-				if (item != null && g.item() == item) {
-					worth += (long)e.getValue() * g.base() / g.lot();
-				}
-			}
-		}
-		return worth;
 	}
 
 	/** {@code f} sends a caravan now (if it can: an overlord standing, at peace, goods to send). {@code force}: whatever the time. */
@@ -546,9 +445,6 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		Faction home = Factions.get(server, c.home());
 		Faction lord = Factions.get(server, c.lord());
-		if (!c.back() && home != null && lord != null && home.type() == FactionType.BARBARIAN) {
-			return arriveGreen(level, c, home, lord, now);
-		}
 		if (!c.back()) {
 			int load = c.load();
 			if (lord != null) {
@@ -583,42 +479,6 @@ final class Caravans {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * (0.7.484) A greenskin cart at its tribe's other camp: the goods handed over, the camp paying for them out of its hoard into the
-	 * sender's (as much as it holds), and the carts loaded again for home with some of what that camp has in plenty.
-	 */
-	private static Caravan arriveGreen(ServerLevel level, Caravan c, Faction home, Faction lord, long now) {
-		MinecraftServer server = level.getServer();
-		Camps.CampData homeData = Camps.data(server, home.id());
-		boolean homeOrc = homeData != null && homeData.orc();
-		Camps.CampData lordData = Camps.data(server, lord.id());
-		long worth = 0L;
-		for (Map<String, Integer> cart : c.carts()) {
-			deliver(level, lord, cart);
-			worth += cargoWorth(cart, homeOrc);
-		}
-		long paid = Math.min(worth, HordeEconomy.hoard(server, lord.id()));
-		if (paid > 0L && HordeEconomy.spend(server, lord.id(), paid)) {
-			HordeEconomy.deposit(server, home.id(), paid);
-		}
-		List<Map<String, Integer>> back = List.of();
-		if (lordData != null && Storage.loaded(level, lord)) {
-			back = loadUp(level, lord, greenGoods(lordData.orc(), HordeEconomy.hungry(server, home.id())), GREEN_KEEPS,
-				Math.min(c.carts().size() * CART_LOAD, GREEN_LOAD_MOST * RETURN_SHARE / 100));
-		}
-		List<Map<String, Integer>> carts = new ArrayList<>(back);
-		while (carts.size() < c.carts().size()) {
-			carts.add(Map.of());
-		}
-		while (carts.size() > c.carts().size()) {
-			Map<String, Integer> extra = carts.removeLast();
-			Map<String, Integer> merged = new HashMap<>(carts.getLast());
-			extra.forEach((k, v) -> merged.merge(k, v, Integer::sum));
-			carts.set(carts.size() - 1, merged);
-		}
-		return c.turned(carts, now + STOP_TICKS);
 	}
 
 	// ---- on the road --------------------------------------------------------------------------------------------------
@@ -874,7 +734,7 @@ final class Caravans {
 		for (int i = 0; i < c.carts().size(); i++) {
 			BlockPos spot = ground(level, at.subtract(facing.scale(i * SPACING)));
 			// ((0.7.294) with MCA, one of the fiefdom's people: Drivers)
-			Worker w = home.type() == FactionType.BARBARIAN ? carter(level, home, spot, yaw) : Drivers.hire(level, home, spot, yaw, TASK, 64, null);
+			Worker w = Drivers.hire(level, home, spot, yaw, TASK, 64, null);
 			if (w == null) {
 				continue;
 			}
@@ -917,50 +777,8 @@ final class Caravans {
 		}
 	}
 
-	/**
-	 * (0.7.484) A greenskin cart's carter for camp {@code f} at {@code at}: with MCA one of the camp's own goblins or orcs
-	 * (raised as its grunt or goblin, then set to drive), else the folk carter {@link Drivers#hire} gives.
-	 */
-	static @Nullable Worker carter(ServerLevel level, Faction f, BlockPos at, float yaw) {
-		if (McaCompat.LOADED) {
-			Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
-			if (brute != null) {
-				brute.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
-				brute.setup(Camps.orc(level.getServer(), f.id()) ? Orcs.GRUNT : Goblins.GOBLIN, f, at, 64);
-				level.addFreshEntity(brute);
-				if (McaCompat.raider(level, brute) instanceof Worker v && v.mob() instanceof Enlisted e) {
-					// (his body the camp's, his job the cart's: Drivers.of knows him by the carter's role)
-					e.enlist(CARTER, f.id());
-					v.setTask(TASK);
-					return v;
-				}
-				if (brute.isAlive()) {
-					brute.discard();
-				}
-			}
-		}
-		return Drivers.hire(level, f, at, yaw, TASK, 64, null);
-	}
-
 	/** (0.7.294) One of a caravan's guards for {@code f} at {@code at}: with MCA an MCA guard of its people, else a folk. */
 	static @Nullable Worker guard(ServerLevel level, Faction f, BlockPos at, float yaw) {
-		if (f.type() == FactionType.BARBARIAN) {
-			// ((0.7.484) a greenskin cart's guards are the camp's own goblins or orcs, MCA villagers with MCA)
-			Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-			if (brute == null) {
-				return null;
-			}
-			brute.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
-			brute.setup(Camps.orc(level.getServer(), f.id()) ? Orcs.GRUNT : Goblins.GOBLIN, f, at, 64);
-			brute.setTask(TASK);
-			level.addFreshEntity(brute);
-			Worker man = brute;
-			if (McaCompat.raider(level, brute) instanceof Worker v) {
-				v.setTask(TASK);
-				man = v;
-			}
-			return man;
-		}
 		if (f.type().isRealm()) {
 			Worker w = McaCompat.escort(level, f, at, yaw, TASK, 64);
 			if (w != null) {
@@ -1062,7 +880,7 @@ final class Caravans {
 		Economy.noteAttack(level.getServer(), f, player);
 		// ((0.7.294) folk or MCA guards)
 		for (Worker g : Workers.near(level, wagon.getBoundingBox().inflate(24.0), x -> x.factionId() == f.id()
-			&& (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD || x.role() == Folk.ARCHER || Greenskins.isRole(x.role())))) {
+			&& (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD || x.role() == Folk.ARCHER))) {
 			if (Rulers.target(g.mob()) == null) {
 				Rulers.charge(g.mob(), player);
 			}
@@ -1073,12 +891,7 @@ final class Caravans {
 	static void robbed(ServerLevel level, Wagon wagon, ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, wagon.faction());
-		String tribe = f != null && f.type() == FactionType.BARBARIAN ? Tribes.of(server, f.id()) : null;
-		if (tribe != null) {
-			// ((0.7.484) a greenskin cart: the tribe's grudge against him rises)
-			Tribes.add(server, player.getUUID(), tribe, GREEN_ROB_GRUDGE);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.caravan.robbed.green", Tribes.name(tribe)).withStyle(ChatFormatting.RED));
-		} else if (f != null) {
+		if (f != null) {
 			Reputation.change(player, f, REP_ROB);
 			Faction lord = Relations.overlord(server, f);
 			if (lord != null) {
@@ -1097,11 +910,6 @@ final class Caravans {
 		level.levelEvent(2001, wagon.blockPosition(), Block.getId(net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState()));
 		if (wagon.caravan() == Wagon.WAR_CART) {
 			WarParties.cartBroken(level, wagon);
-		}
-		// ((0.7.484) a greenskin cart may have a war journal among its goods)
-		Faction owner = Factions.get(server, wagon.faction());
-		if (owner != null) {
-			LoreBooks.cart(level, owner, wagon.blockPosition());
 		}
 		if (c != null && wagon.slot() < c.carts().size()) {
 			for (Map.Entry<String, Integer> e : c.carts().get(wagon.slot()).entrySet()) {

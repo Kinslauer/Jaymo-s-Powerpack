@@ -728,7 +728,7 @@ public final class Sorcery {
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 3.0F, 0.6F);
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.6F, 1.4F);
-		Speech.say(level, folk, Dialects.trShared(folk, "speech.jaymoskingdoms.chant_" + level.getRandom().nextInt(4)), Speech.RED, 24.0);
+		Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.chant_" + level.getRandom().nextInt(4)), Speech.RED, 24.0);
 	}
 
 	/** Mending: the worst hurt of {@code side} (the caster's own, near him) is healed. */

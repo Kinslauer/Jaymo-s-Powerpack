@@ -211,7 +211,7 @@
 	"gui.jaymospowers.web_symbiote.tendrils_locked": "Locked until bond 30",
 	"gui.jaymospowers.web_symbiote.suit_wait": "Comes once it has given you %s of %s abilities",
 	"gui.jaymospowers.web_symbiote.suit_pick": "Pick: %s",
-	"gui.jaymospowers.web_symbiote.suit_climb": "Pick: %s. Sneak and pick: %s",
+	"gui.jaymospowers.web_symbiote.suit_climb": "Pick: %s. Sneak-pick or right-click: %s",
 	"gui.jaymospowers.web_symbiote.suit_top": "Your top form. Pick: %s",
 	"gui.jaymospowers.web_symbiote.suit_top_bond": "Your top form (%2$s at bond %3$s). Pick: %1$s",
 	"gui.jaymospowers.web_symbiote.form.skin": "off",

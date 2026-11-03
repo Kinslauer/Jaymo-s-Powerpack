@@ -34,7 +34,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.485, Andy: "tideborn need to vary wildly ... they are fish people so they can draw from any sealife") The thirteen
+ * (0.7.486, Andy: "tideborn need to vary wildly ... they are fish people so they can draw from any sealife") The thirteen
  * sea-blooded Tideborn looks' real model parts, the way the Beastfolk's ears and tails are ({@link BeastParts}): a shark's
  * dorsal fin and tail, a manta's back-wings and whip tail, an octopus's mantle and tentacles, an anglerfish's lure and fangs,
  * a jellyfish's clear bell and trailing threads, a moray's ribbon fins and eel tail, a crab's shell, claws and eyestalks, a

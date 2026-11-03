@@ -113,10 +113,8 @@ public final class Tails {
 			String kind = smells(who, p);
 			if (kind != null && who.hasLineOfSight(p)) {
 				SNIFFED.put(p.getUUID(), now);
-				String key = "tail.jaymoskingdoms.smelled." + kind + "." + level.getRandom().nextInt(SMELL_LINES);
-				// (0.7.484) an orc or a goblin of a tribe says it in its own dialect
-				Speech.sayTo(level, who, p, "tribe".equals(kind) ? Dialects.tr(who, key, Identities.shownName(p))
-					: net.minecraft.network.chat.Component.translatable(key, Identities.shownName(p)), Speech.WHITE);
+				Speech.sayTo(level, who, p, net.minecraft.network.chat.Component.translatable("tail.jaymoskingdoms.smelled." + kind + "."
+					+ level.getRandom().nextInt(SMELL_LINES), Identities.shownName(p)), Speech.WHITE);
 				return;
 			}
 		}

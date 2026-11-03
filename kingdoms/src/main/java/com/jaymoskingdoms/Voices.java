@@ -136,17 +136,12 @@ public final class Voices {
 
 	public static void register() {
 		for (String key : voiced()) {
-			String path = soundPath(key);
-			// (0.7.484) an answer's tale not yet recorded (born.den, raised.pack) is read in silence, not registered without a clip
-			if (key.startsWith("story.jaymoskingdoms.") && key.endsWith(".tale") && !hasNarratorClip(path)) {
-				continue;
-			}
-			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, path);
+			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, soundPath(key));
 			SOUNDS.put(key, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
 		}
 		for (String key : heritageVoiced()) {
 			String path = soundPath(key);
-			if (!hasNarratorClip(path)) {
+			if (Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/narrator/" + path.substring("voice.narrator.".length()).replace('.', '_') + ".ogg") == null) {
 				continue;
 			}
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, path);
@@ -166,11 +161,6 @@ public final class Voices {
 			}
 		}
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
-	}
-
-	/** (0.7.484) Whether the narrator's clip for {@code path} ({@code voice.narrator.<rest>}) is in the jar. */
-	private static boolean hasNarratorClip(String path) {
-		return Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/narrator/" + path.substring("voice.narrator.".length()).replace('.', '_') + ".ogg") != null;
 	}
 
 	/** (0.7.348) {@code line} ({@link #TONGUE_LINES}) said in {@code tongue} by a woman or a man; null for a line it has none of. */

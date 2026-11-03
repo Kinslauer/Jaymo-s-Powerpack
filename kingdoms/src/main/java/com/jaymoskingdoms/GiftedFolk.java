@@ -167,9 +167,6 @@ public final class GiftedFolk {
 			case WARRIORBORN -> "zfighter";
 			case STORMBORN -> "wind";
 			case HEARTLANDER, EARTHLING -> "arsenal";
-			// (0.7.484) the beastfolk lean to the hunt's tools, the Hollow to the dark water's quiet
-			case BEASTFOLK -> "zfighter";
-			case HOLLOW -> "darktide";
 			default -> null;
 		};
 	}

@@ -76,7 +76,7 @@ public final class InteractActions {
 	static boolean offers(ServerPlayer player, LivingEntity v, String action) {
 		return switch (action) {
 			case AUDIENCE -> Rulers.is(v) || Audiences.canAsk(v);
-			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v) || GreenMarket.merchant(v);
+			case WARES -> Pedlars.pedlar(v) || com.jaymoskingdoms.nether.CinderForge.ignis(v);
 			case TRIBUTE -> Tribes.takesTribute(player, v);
 			case SPY, RAID -> SwornCaptains.takesOrders(player, v);
 			default -> false;
@@ -104,11 +104,6 @@ public final class InteractActions {
 				if (com.jaymoskingdoms.nether.CinderForge.ignis(v) && v instanceof Villager villager) {
 					// (0.7.478) Ignis Vael's wares
 					com.jaymoskingdoms.nether.CinderForge.trade(player, villager);
-					return null;
-				}
-				if (GreenMarket.merchant(v)) {
-					// (0.7.484) a greenskin camp's market stall, priced in bent ingots
-					GreenMarket.trade(player, v);
 					return null;
 				}
 				Pedlars.trade(player, v);

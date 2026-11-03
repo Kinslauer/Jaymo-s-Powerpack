@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * entire world."
  * <p>
  * A haven is a settlement of non-humans only ({@link Prejudice#degree}): of one blood (the one its land suits: Tideborn
- * by water (0.7.485: anywhere by the shore, and never inland), Stoneborn in the hills, Sylvan in the woods, else any of
+ * by water (0.7.486: anywhere by the shore, and never inland), Stoneborn in the hills, Sylvan in the woods, else any of
  * the other three) or a mix of all four. Every one born
  * there is of it ({@link #lean}, from {@link VillagerHeritage#roll}), and so are its own folk ({@link #folk}). Whether a
  * settlement is a haven is drawn once, when it's first looked at, and kept ({@link #HAVENS}). Settlements that were
@@ -119,7 +119,7 @@ public final class Havens {
 			return MIXED;
 		}
 		Holder<Biome> biome = level.getBiome(f.seat());
-		// (0.7.485, Andy: "it just makes sense for their havens or settlements to be by the shore") a seat with the sea,
+		// (0.7.486, Andy: "it just makes sense for their havens or settlements to be by the shore") a seat with the sea,
 		// a river or a beach anywhere round it is the Tideborn's; and inland, never theirs
 		if (shore(level, f.seat())) {
 			return Heritage.Kind.TIDEBORN.key();
@@ -134,10 +134,10 @@ public final class Havens {
 		return three[(int)Math.floorMod(mix >>> 23, 3L)].key();
 	}
 
-	/** (0.7.485) How far round a place the shore is looked for (blocks), in rings this far apart, this many points each. */
+	/** (0.7.486) How far round a place the shore is looked for (blocks), in rings this far apart, this many points each. */
 	static final int SHORE_REACH = 72, SHORE_STEP = 24, SHORE_POINTS = 8;
 
-	/** (0.7.485) Whether {@code pos} is by the shore: the sea, a river or a beach at it or within {@link #SHORE_REACH}. */
+	/** (0.7.486) Whether {@code pos} is by the shore: the sea, a river or a beach at it or within {@link #SHORE_REACH}. */
 	public static boolean shore(ServerLevel level, BlockPos pos) {
 		for (int r = 0; r <= SHORE_REACH; r += SHORE_STEP) {
 			for (int i = 0; i < (r == 0 ? 1 : SHORE_POINTS); i++) {
@@ -247,10 +247,6 @@ public final class Havens {
 	static Heritage.@Nullable Kind settle(ServerLevel level, LivingEntity villager, Heritage.@Nullable Kind kind) {
 		Faction f = villager instanceof Folk folk ? Factions.get(level.getServer(), folk.factionId()) : at(level, villager.blockPosition());
 		if (f == null || fits(level.getServer(), f, kind)) {
-			return null;
-		}
-		if (kind != null && kind.brood) {
-			// (0.7.484) an orc or goblin here came as a Settler (whatever the haven's blood): it keeps its brood
 			return null;
 		}
 		String entry = entry(level.getServer(), f);

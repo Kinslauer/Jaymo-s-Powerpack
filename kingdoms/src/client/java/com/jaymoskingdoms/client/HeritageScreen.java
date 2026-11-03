@@ -31,8 +31,6 @@ import org.jspecify.annotations.Nullable;
  * (0.7.184) The Blood Rite's mode is gone: an earned blood passes to your children ({@code Lineage}).
  * (0.7.214) Each heritage comes in three looks ({@link HeritageVariants}): the button at the bottom left steps through
  * the picked one's, and the pane's first row tells of the one shown (its look, its story and its trait).
- * (0.7.484) When the rows can't all fit even at their smallest, the list scrolls with the mouse wheel, a row a notch,
- * with a thin bar at its edge, so the last heritages (Beastfolk, the Hollow) can always be reached.
  */
 final class HeritageScreen extends Screen {
 	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
@@ -57,8 +55,6 @@ final class HeritageScreen extends Screen {
 	private int contentH, viewH;
 	/** The slow scroll on hover: when it began, and how far it had got (-1: not running). */
 	private long autoFrom = -1L;
-	/** (0.7.484) The first heritage row shown in the list, when it scrolls. */
-	private int listScroll;
 
 	/** The server asked for a heritage that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
@@ -129,24 +125,8 @@ final class HeritageScreen extends Screen {
 		return Math.clamp(fit, MIN_ROW, LIST_ROW);
 	}
 
-	/** (0.7.484) How many list rows fit at once. */
-	private int listRows() {
-		return Math.max(1, (panelH() - HEADER - 4) / rowH());
-	}
-
-	/** (0.7.484) The furthest the list can scroll (0: every row fits). */
-	private int listMax() {
-		return Math.max(0, Heritage.Kind.playable().length - listRows());
-	}
-
-	/** (0.7.484) The rows shown now: from {@link #listScroll}, as many as fit. */
-	private int listEnd() {
-		this.listScroll = Math.clamp(this.listScroll, 0, listMax());
-		return Math.min(Heritage.Kind.playable().length, this.listScroll + listRows());
-	}
-
 	private int rowY(int index) {
-		return top() + HEADER + (index - this.listScroll) * rowH();
+		return top() + HEADER + index * rowH();
 	}
 
 	/** (0.7.106) An earned heritage the player hasn't woken: a "???" with a hint. */
@@ -199,9 +179,11 @@ final class HeritageScreen extends Screen {
 	private Heritage.@Nullable Kind rowAt(int mouseX, int mouseY) {
 		Heritage.Kind[] all = Heritage.Kind.playable();
 		int rh = rowH();
-		int end = listEnd();
-		for (int i = this.listScroll; i < end; i++) {
+		for (int i = 0; i < all.length; i++) {
 			int ry = rowY(i);
+			if (ry + rh > top() + panelH() - 4) {
+				break;
+			}
 			if (Ui.over(mouseX, mouseY, left() + 4, ry, LIST_W - 8, rh - 2)) {
 				return all[i];
 			}
@@ -285,7 +267,7 @@ final class HeritageScreen extends Screen {
 			List<FormattedCharSequence> split = wrapped.get(i);
 			int rh = split.size() * Ui.LINE + 4;
 			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + rh - 1, i, false);
-			int color = hidden ? Ui.DIM : rowColor(rows.get(i));
+			int color = hidden ? Ui.DIM : i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
 			for (int l = 0; l < split.size(); l++) {
 				graphics.text(this.font, split.get(l), px + 10, ry + 2 + l * Ui.LINE, color);
 			}
@@ -312,11 +294,6 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		// (0.7.484) over the list, the wheel scrolls the heritages a row a notch
-		if (mouseX < paneX() && listMax() > 0 && scrollY != 0.0) {
-			this.listScroll = Math.clamp(this.listScroll - (int)Math.signum(scrollY), 0, listMax());
-			return true;
-		}
 		if (this.contentH > this.viewH && mouseX >= paneX()) {
 			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
 			// (the wheel takes over from the slow scroll until the mouse leaves)
@@ -361,29 +338,8 @@ final class HeritageScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.484) A card row's colour by what it is, not where it sits (the shunned line used to push the flaw into the gift's
-	 * green): gifts green, flaws red, an ability gold, the rest plain.
-	 */
-	private static int rowColor(Component row) {
-		if (row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents translatable) {
-			String key = translatable.getKey();
-			if (key.endsWith(".flaw") || key.endsWith(".card.flaw")) {
-				return Ui.BAD;
-			}
-			// (0.7.484) a gift with its own card key (".gift_rimewyrm") is a gift too
-			if (key.endsWith(".gift") || key.endsWith(".card.gift") || key.contains(".gift_")) {
-				return Ui.GOOD;
-			}
-			if (key.contains(".card.move.")) {
-				return Ui.GOLD;
-			}
-		}
-		return Ui.TEXT;
-	}
-
-	/**
 	 * (0.7.214) {@code kind}'s card with a row for its look on top: the picked one's chosen look, or for any other its
-	 * looks' names.
+	 * three looks' names.
 	 */
 	private List<Component> withVariant(Heritage.Kind kind) {
 		List<Component> rows = new ArrayList<>();
@@ -392,19 +348,10 @@ final class HeritageScreen extends Screen {
 			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variant_row", HeritageVariants.title(kind, this.pickedVariant),
 				Component.translatable(root + ".desc"), Component.translatable(root + ".trait")));
 		} else {
-			// (0.7.484) any number of looks now (the Sylvan have ten): the count, then every name
-			net.minecraft.network.chat.MutableComponent names = Component.empty();
-			int count = HeritageVariants.of(kind).size() + 1;
-			for (int i = 0; i < count; i++) {
-				if (i > 0) {
-					names.append(i == count - 1 ? Component.translatable("gui.jaymoskingdoms.heritage.variants.and") : Component.literal(", "));
-				}
-				names.append(HeritageVariants.title(kind, i));
-			}
-			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", count, names));
+			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", HeritageVariants.title(kind, 0), HeritageVariants.title(kind, 1),
+				HeritageVariants.title(kind, 2)));
 		}
-		// (0.7.484) the picked look's own kit, when it has one
-		rows.addAll(kind.card(kind == this.picked ? HeritageVariants.at(kind, this.pickedVariant) : null));
+		rows.addAll(kind.card());
 		return rows;
 	}
 
@@ -435,13 +382,12 @@ final class HeritageScreen extends Screen {
 		Heritage.Kind hover = rowAt(mouseX, mouseY);
 		int rh = rowH();
 		boolean icons = rh >= ICON_ROW;
-		int end = listEnd();
-		// (0.7.484) a thin bar at the list's edge when it scrolls
-		int shown = listRows() * rh;
-		Ui.scrollbar(graphics, x + LIST_W - 4, y + HEADER, shown - 2, shown, all.length * rh, this.listScroll * rh);
-		for (int i = this.listScroll; i < end; i++) {
+		for (int i = 0; i < all.length; i++) {
 			Heritage.Kind kind = all[i];
 			int ry = rowY(i);
+			if (ry + rh > y + panelH() - 4) {
+				break;
+			}
 			boolean picked = kind == this.picked;
 			boolean open = pickable(kind);
 			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + rh - 2,

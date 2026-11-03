@@ -147,9 +147,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crewmen.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		CampChiefs.register();
-		// (0.7.484) orc brawls, chief challenges, camp feuds and goblin slaves
-		Brutality.register();
-		Slaves.register();
 		StoryTalk.register();
 		ShipTalk.register();
 		ZFighterFolk.register();
@@ -157,8 +154,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Purists.register();
 		Prejudice.register();
 		Havens.register();
-		Peoples.register();
-		LOGGER.debug("peoples attachment: {}", Peoples.MET);
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
@@ -266,10 +261,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tribes.register();
 		Pedlars.register();
 		Bestiary.register();
-		// (0.7.484) Hordes, Orc war journals: the journals orcs and goblins leave, the data books, the Lore Codex that keeps them
-		WarJournal.register();
-		LoreCodex.register();
-		LoreBooks.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();
@@ -281,10 +272,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
-		// (0.7.484) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
-		BentIngots.register();
-		HordeEconomy.register();
-		GreenMarket.register();
 		BorderClashes.register();
 		TribePacts.register();
 		Tails.register();
@@ -302,7 +289,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
-		// (0.7.485) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
+		// (0.7.486) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
 		SeaBodies.register();
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);

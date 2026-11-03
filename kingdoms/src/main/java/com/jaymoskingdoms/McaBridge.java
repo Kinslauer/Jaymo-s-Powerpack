@@ -874,34 +874,6 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.484) {@link McaCompat#reranked}. */
-	static void reranked(PathfinderMob mob, Heritage.Kind kind, boolean chief) {
-		if (!(mob instanceof VillagerEntityMCA villager)) {
-			return;
-		}
-		// the old rank's armour and weapons out of the pack, the new rank's worn gear in (MCA's guards dress from what they carry)
-		var pack = villager.getInventory();
-		for (int i = 0; i < pack.getContainerSize(); i++) {
-			net.minecraft.world.item.ItemStack held = pack.getItem(i);
-			var equippable = held.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
-			boolean armour = equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
-			if (armour || held.is(net.minecraft.tags.ItemTags.AXES) || held.is(net.minecraft.tags.ItemTags.SWORDS)) {
-				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
-			}
-		}
-		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
-			net.minecraft.world.item.ItemStack worn = villager.getItemBySlot(slot);
-			if (!worn.isEmpty()) {
-				pack.addItem(worn.copy());
-			}
-		}
-		// a chief the biggest and broadest of his brood (as broodBorn); one unmade drawn anew within it
-		BodySizes.Body body = BodySizes.of(kind);
-		var genes = villager.getGenetics();
-		genes.setGene(Genetics.SIZE, chief ? body.maxSize() : BodySizes.spread(villager.getRandom().nextFloat(), body.minSize(), body.maxSize()));
-		genes.setGene(Genetics.WIDTH, chief ? body.maxWidth() : BodySizes.spread(villager.getRandom().nextFloat(), body.minWidth(), body.maxWidth()));
-	}
-
 	/**
 	 * (0.7.242) {@link McaCompat#crewman}: a new grown MCA villager in {@code folk}'s place (a ship's crewman set up for
 	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a
@@ -1025,8 +997,7 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Languages.understands(player, villager)
-			// (0.7.484) an orc or goblin opens in its own dialect
-			? Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
+			? Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
@@ -1132,7 +1103,7 @@ final class McaBridge {
 		return true;
 	}
 
-	/** (0.7.485) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
+	/** (0.7.486) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
 	static boolean shedPacked(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ServerLevel level) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return false;
@@ -1151,7 +1122,7 @@ final class McaBridge {
 		return any;
 	}
 
-	/** (0.7.485) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
+	/** (0.7.486) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
 	static boolean toBow(net.minecraft.world.entity.Mob mob) {
 		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || villager.getProfession() != ProfessionsMCA.GUARD) {
 			return false;
@@ -1732,41 +1703,6 @@ final class McaBridge {
 		}
 		level.sendParticles(ParticleTypes.HEART, toddler.getX(), toddler.getY() + 1.0, toddler.getZ(), 5, 0.3, 0.3, 0.3, 0.0);
 		return 2;
-	}
-
-	/** (0.7.484) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
-	static void leaveHome(Villager villager) {
-		if (villager instanceof VillagerEntityMCA v) {
-			v.getResidency().getHome().ifPresent(home -> {
-				// ((0.7.484) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
-				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
-				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
-				v.getResidency().invalidateHome(home);
-				v.getResidency().getHomeVillage().ifPresent(village -> village.removeResident(v));
-			});
-		}
-	}
-
-	/** (0.7.484) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
-	static boolean knows(Villager villager, ServerPlayer player) {
-		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
-	}
-
-	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
-	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
-
-	/** (0.7.484) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
-	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
-		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
-			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();
-		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(level.getRandom().nextFloat() < 0.8F ? Gender.MALE : Gender.FEMALE)
-			.withName(name).withPosition(at).withAge(0).withProfession(job).spawn(EntitySpawnReason.EVENT);
-		if (villager == null) {
-			return null;
-		}
-		broodBorn(villager, kind, false);
-		villager.setPersistenceRequired();
-		return villager;
 	}
 
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */

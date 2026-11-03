@@ -171,7 +171,7 @@ public final class VillagerLooks {
 			if (kind == null && style == null) {
 				return;
 			}
-			collector.order(1).submitModel(marks, state, poseStack, HeritageLooks.marksType(style != null ? style.skin() : kind.skin[look.variant()], style), lightCoords,
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(style != null ? style.skin() : kind.skin[look.variant()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			if (look.glow() != 0) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(style != null ? style.glow() : kind.glow[look.variant()]), lightCoords,

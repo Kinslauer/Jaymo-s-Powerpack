@@ -19,7 +19,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.entity.EntityTypeTest;
 
 /**
- * (0.7.485, Andy: "the ones with nonstandard heads or bodies cannot wear traditional armor") The sea-blooded Tideborn whose
+ * (0.7.486, Andy: "the ones with nonstandard heads or bodies cannot wear traditional armor") The sea-blooded Tideborn whose
  * heads or backs are their own shape (client SeaParts) can't wear a helmet or a chestplate: a piece put on slides off into
  * the pack (or drops when the pack is full), with a word on the action bar. "Traditional armour" is any piece that gives
  * armour in that slot, and on the back an elytra too; crowns, pumpkins and other headwear that give no armour still fit.

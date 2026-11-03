@@ -12,12 +12,10 @@ variant/<key>_glow.png     the marks' emissive twin (lit as the Tideborn's are)
 variant/<key>_eyes.png     the stock eye spots in the look's eye colour (VariantLooks has the same colours)
 variant/<key>_fins.png     the Tideborn's own fins in the look's colours (+ _fins_glow), for the looks that keep them
 
-Then grades what it wrote toward the Excalibur look (tools/excalibur_style/grade.py, same rules: glows and see-through
-sheets are left alone) and records them in its ledger. Nothing is copied; all pixel art is drawn here.
+The sources stay ungraded; the optional Excalibur look grades them into its own pack (python -I
+tools/excalibur_style/grade.py). Nothing is copied; all pixel art is drawn here.
 Run from the project root:  python -I tools/gen_tideborn_sea.py
 """
-import hashlib
-import importlib.util
 import math
 import os
 import random
@@ -734,15 +732,6 @@ def fins_for(key):
     return vf, vg
 
 
-# ---- grading (tools/excalibur_style/grade.py's own rules and ledger)
-
-def grader():
-    spec = importlib.util.spec_from_file_location("grade", os.path.join(ROOT, "tools", "excalibur_style", "grade.py"))
-    g = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(g)
-    return g
-
-
 def main():
     os.makedirs(PARTS, exist_ok=True)
     os.makedirs(VARIANT, exist_ok=True)
@@ -766,24 +755,7 @@ def main():
             path = os.path.join(VARIANT, key + name + ".png")
             img.save(path)
             written.append(path)
-    g = grader()
-    ledger = {}
-    if os.path.exists(g.LEDGER):
-        for line in open(g.LEDGER):
-            if line.strip():
-                h, p = line.rstrip("\n").split(" ", 1)
-                ledger[p] = h
-    graded = 0
-    for path in written:
-        rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
-        if g.wanted(path):
-            g.grade_image(Image.open(path)).save(path, optimize=True)
-            ledger[rel] = hashlib.sha1(open(path, "rb").read()).hexdigest()
-            graded += 1
-    with open(g.LEDGER, "w") as f:
-        for p in sorted(ledger):
-            f.write(f"{ledger[p]} {p}\n")
-    print(len(written), "written,", graded, "graded, under", os.path.relpath(TEX, ROOT))
+    print(len(written), "written under", os.path.relpath(TEX, ROOT))
 
 
 if __name__ == "__main__":

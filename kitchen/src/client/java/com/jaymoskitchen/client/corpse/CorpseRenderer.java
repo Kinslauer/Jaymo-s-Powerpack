@@ -87,8 +87,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 
 	/** (0.5.23) How far a pinned body slumps forward off its wall (degrees). */
 	private static final float PIN_SLUMP = 8.0F;
-	/** (0.5.50) Where a body held in one hand is held: its neck, this share of its length forward and its height up. */
-	private static final float NECK_FRONT = 0.45F, NECK_UP = 0.75F;
+	/** (0.5.50) Where a body held in one hand is held: its neck (see CorpseEntity#NECK_FRONT). */
+	private static final float NECK_FRONT = CorpseEntity.NECK_FRONT, NECK_UP = CorpseEntity.NECK_UP;
 
 	/**
 	 * (0.4.42) A dead player's body: the player model, but baked from layers of its own. Entity Model Features finds
@@ -165,6 +165,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				extractPhysical(corpse, state, track, partialTicks);
 				return;
 			}
+		} else {
+			// (0.5.53) held, slung or in a cart: its old points are no good any more. Let go of, it's drawn falling from
+			// the pose it was held in until its new points come (never from where it lay before it was picked up)
+			ClientRagdolls.forget(corpse.getId());
 		}
 		// dropped and still falling: drawn limp as if carried, turning over as it goes, until it lands
 		boolean tumbling = carrier == null && corpse.isTumbling() && !corpse.isPassenger();
