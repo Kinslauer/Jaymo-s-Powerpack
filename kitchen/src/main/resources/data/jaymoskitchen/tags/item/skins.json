@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskitchen:hide",
+    "minecraft:leather",
+    "minecraft:rabbit_hide",
+    "minecraft:feather",
+    "#minecraft:wool",
+    {
+      "id": "#c:leathers",
+      "required": false
+    },
+    {
+      "id": "naturalist:bear_fur",
+      "required": false
+    },
+    {
+      "id": "naturalist:lizard_tail",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:beast_pelt",
+      "required": false
+    }
+  ]
+}

@@ -83,7 +83,7 @@ final class PackResourcePacks {
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
 			"fea54f680dc959e122189b2005d11adebcd18b5b", true),
-		// (0.19.62) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0: shipped unchanged, never edited or built on,
+		// (0.19.65) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0: shipped unchanged, never edited or built on,
 		// with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
 		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). It goes at the bottom of the pack order, so
 		// Fresh Animations, its patch below, our 3D items and every other pack draw over it. Our own textures are graded
@@ -91,7 +91,7 @@ final class PackResourcePacks {
 		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
 			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
 			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
-		// (0.19.62) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
+		// (0.19.65) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
 		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
 		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
 		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits

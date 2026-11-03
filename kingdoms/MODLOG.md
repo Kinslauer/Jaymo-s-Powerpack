@@ -8247,7 +8247,22 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
 - Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
   change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
 
-## 0.7.480: Excalibur's look (pack 0.19.62, Kitchen 0.5.51)
+## 0.7.482: blood magic draws from stains on the ground (pack 0.19.64)
+Andy: "Blood magic should draw from stains on ground". Blood magic here is the Blood Sorcerer's (and the camp blood
+witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`BloodTrail`, the trail decals).
+- **Blood Sorcerers** fill their blood pool from the stains within 6 blocks too, after the bleeding: up to 0.12 of each
+  stain a second, the nearest first, each unit of stain worth 4 pool (a drip's stain about 0.8, a pool 4-12), still at
+  most 2 a second in all and only while the pool has room. The blood rises to them in a thread of red motes and the
+  stain shrinks and fades, gone once drawn dry.
+- **Blood witches** heal from the stains round them the same way while hurt (every 2 s, after the bleeding foes).
+- `PowersCompat.drawStains` (reflection, nothing without Powers 0.19.62+). Tuning: `Hemomancy.STAIN_RANGE`,
+  `STAIN_EACH`, `STAIN_BLOOD`; Powers' `BloodTrail.DRAWN_DRY`, `DRAWN_GONE`, `BloodPuddle.DRAWN_EASE`.
+- **Blood grates** (Kitchen 0.5.51's butchery): Blood Sorcerers also draw a level (250 mB) a second out of the grates within
+  6 blocks, worth 3 pool each (`GRATE_RANGE`, `GRATE_MOST`, `GRATE_BLOOD`; `KitchenCompat.drawGrates`).
+- **Bottle of Blood** (Kitchen): a vampire drinks it (heals 2, 3 food, the blood fever eased as by a bite) and a Blood
+  Sorcerer pours it into their pool (+6); anyone else retches (`Hemomancy.drankBottle`, `BOTTLE_*`).
+
+## 0.7.483: Excalibur's look (pack 0.19.65, Kitchen 0.5.52)
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).

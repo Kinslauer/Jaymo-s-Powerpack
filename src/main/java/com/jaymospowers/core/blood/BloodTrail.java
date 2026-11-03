@@ -52,6 +52,9 @@ public final class BloodTrail {
 	static final double FALL = 6.0;
 	/** The most stains a level keeps (the oldest go first). */
 	static final int MAX_MARKS = 6000;
+	/** (0.19.62) Blood magic ({@link #draw}): a stain drawn smaller than this dries away, gone this many ticks later. */
+	static final float DRAWN_DRY = 0.08F;
+	static final int DRAWN_GONE = 20;
 
 	/** (0.17.182) Mobs that follow blood trails to whoever left them. */
 	public static final TagKey<EntityType<?>> TRACKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("blood_trackers"));
@@ -322,6 +325,43 @@ public final class BloodTrail {
 			}
 		}
 		return found == null || found.by == null ? null : new Object[] {found.position(), found.by, found.laid};
+	}
+
+	/**
+	 * (0.19.62) Andy: "Blood magic should draw from stains on ground". Draws the blood out of the stains within
+	 * {@code range} of {@code at}, the nearest first: each gives up to {@code each} of its size, until {@code most} is
+	 * drawn in all. A drawn stain shrinks (each player near is sent it smaller, and it eases down), and one drawn down
+	 * past {@link #DRAWN_DRY} dries away. {@code drawn} hears where each one lay, for the blood's path to whoever drew
+	 * it. Returns how much was drawn, in stain size (a drip's stain is about 0.2, a pool 1 to 3). Plain types only:
+	 * Jaymo's Kingdoms' blood magic calls it by reflection.
+	 */
+	public static float draw(ServerLevel level, Vec3 at, double range, float each, float most, java.util.function.@Nullable Consumer<Vec3> drawn) {
+		if (each <= 0.0F || most <= 0.0F) {
+			return 0.0F;
+		}
+		List<Mark> found = near(level, at, range, mark -> mark.scale > 0.0F);
+		found.sort(java.util.Comparator.comparingDouble(mark -> at.distanceToSqr(mark.x, mark.y, mark.z)));
+		long now = level.getGameTime();
+		float total = 0.0F;
+		for (Mark mark : found) {
+			float take = Math.min(Math.min(each, mark.scale), most - total);
+			if (take <= 0.0F) {
+				break;
+			}
+			mark.scale -= take;
+			if (mark.scale < DRAWN_DRY) {
+				// drawn dry: gone in a moment (the last of it, too little to hold the eye, counts as drawn)
+				take += mark.scale;
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
+			total += take;
+			if (drawn != null) {
+				drawn.accept(mark.position());
+			}
+		}
+		return total;
 	}
 
 	/** Whether {@code entity} is in this level and alive. */

@@ -1312,6 +1312,44 @@ rest of its length on the ground behind you (`ChainSpine.hang`). Your right arm 
 `ONE_HAND`, `HAND_HOLD/OUT/SWAY`), not both arms. `CorpseItem` stays registered so bags already held still work.
 Checked headless against the snake stand-in; not compile-checked; not seen in game.
 
-## 0.5.51: Excalibur's look (pack 0.19.62, Kingdoms 0.7.480)
+## 0.5.51: meat hooks, blood grates, hanging butchery (pack 0.19.64, Kingdoms 0.7.482)
+Andy: "add a hanging carcass and a butchery inspired by theirs" (Alex's Butchery's hooks and blood grates; GPLv3 Forge
+1.20.1 and needs Alex's Mobs, so ideas only, nothing copied). New package `butchery/`, the steps in `corpse/Hanging`.
+- **Meat Hook** (`MeatHookBlock`; 2 from chain + iron ingot + nugget): hangs under any block with collision. Right-click it
+  while carrying a carcass, or dragging one within 3 blocks (plus its height), and it hangs there by its hind legs: a
+  ragdoll gripped at the hook (`Hanging.held`: both hind feet, a person's feet, a snake's tail tip), so it swings and
+  turns. Picking it up or dragging it takes it down. Hook gone: it falls. Animals only (no fish, machines, iron).
+- **Blood Grate** (`BloodGrateBlock`; iron bars over an iron basin): `level` 0-8, 250 mB a level, the blood drawn rising
+  in it. A glass bottle takes a level as a **Bottle of Blood** (`BloodBottleItem`); right-click shows how full; a
+  comparator reads it.
+- **Steps on the hook** (right-clicks, each wears the tool): a cleaver (`#jaymoskitchen:cleavers`: axes, Armory and
+  Tinkering cleavers, the warchief cleaver) bleeds it out (small 10 s / 250 mB, most 20 s / 1000 mB, big 40 s / 2000 mB)
+  into a grate up to 4 blocks under it, else the blood pools on the ground (Powers lays stains); the cleaver takes the
+  head (the body's drawn headless; Powers drops it as a trophy head that never despawns); a skinning knife
+  (`#jaymoskitchen:skinning_knives`) takes everything in `#jaymoskitchen:skins` (hide, leather, wool, feathers, pelts),
+  skipped if it has none; three cleaver cuts give the rest a third at a time, with the butcher table's extras, then
+  1-3 bones (and 1-2 animal fat from anything bigger than a chicken) and it's gone. Drained, it can be taken down and finished on the ground.
+- **Too big to lift** (cow and up): bled where it lies with a cleaver (no sneak), then cut up there as before, with the
+  table's extras added.
+- Hooks for the other mods: `Hanging.setOnDrip/setOnSpill/setOnHead`, `Butchery.addOnDrink`, `Butchery.drawGrates`.
+- **Andy: "Yes all of this"** (the follow-up ideas):
+  - **Unbled meat spoils** (`Spoilage`): raw meat cut from a carcass that was never bled (table, ground, cut up where it
+    lay) is marked "Unbled" with the day; after `SPOIL_DAYS` (3) raw in a player's pockets it turns to rotten flesh. Bled on
+    a hook, or cut by a village butcher, it keeps. Fish aren't marked.
+  - **Prime skins**: skinning on the hook gives `PRIME_EXTRA` (1) more of each skin and 1-2 **Leather Scraps**.
+  - **Village butchers use hooks** (`Butchers`): a butcher with a meat hook near the back of the shop hangs the body,
+    bleeds it (`HOOK_CHOP_TICKS`) and works it there instead of on the floor.
+  - **Blood Sausage**: blood bottle + pork/beef/mutton + wheat + animal fat = 3 raw (2 hunger), cooked in a furnace,
+    smoker or campfire (7 hunger). Bottles come back.
+  - **Blood Meal**: blood bottle + bone meal = 3, works as bone meal.
+  - **Leather finishes**: tanned leather + animal fat = **Supple Leather** (book from 3 paper makes 2); + resin =
+    **Harness Leather** (saddle); smelted = **Hardened Leather** (leather horse armour). Leather + a work blade = 4
+    **Leather Scraps**; 4 scraps + resin = leather. Scraps, supple and hardened leather repair leather armour.
+  - **Hide Rug**: 2 hides make 2 rug carpets.
+  - Not done: skeleton displays (need a model per animal) and hide traits (need their own armour items); later if wanted.
+- Tuning: `Hanging.BLEED_*`, `BLOOD_*`, `DRIP_EVERY`, `SPILL_EVERY`, `GRATE_DEPTH`, `DRAG_TO_HOOK`; `BloodGrateBlock.MAX`;
+  `Butchery.MB_PER_LEVEL`; `BloodBottleItem.NAUSEA_TICKS/HUNGER_TICKS`.
+
+## 0.5.52: Excalibur's look (pack 0.19.65, Kingdoms 0.7.483)
 Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.

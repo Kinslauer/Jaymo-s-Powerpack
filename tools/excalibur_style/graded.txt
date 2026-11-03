@@ -738,6 +738,7 @@ fe7bb0f3da558a455d2e5e20d41a6d47ea12c816 kingdoms/src/main/resources/assets/jaym
 90a685b8d355d266b449f94d4f30459a3c38ad5c kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/stone_veins_4.png
 d1fc4662c854e246f707a20c1aecffb6e00856a6 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/wings_eurus_veins.png
 23c732bd6e19ffb9c7181fc1de5ff92ee977c492 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/wings_notus_veins.png
+b07f294a8d8eb41a8c54d4c9aa1944d4b54f111d kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/wings_sleeve_veins.png
 b51b0d0db0f96d7d3e922d7295ba37a642476541 kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/wings_veins.png
 8c9602e57579594cd4686381b1d5a6accc2f190b kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/valor/wings_zephyrus_veins.png
 73a5f74b6c71e78f970fa148895ae99c578d88bd kingdoms/src/main/resources/assets/jaymoskingdoms/textures/entity/vampire/bat_wings.png
@@ -981,6 +982,7 @@ f5494fdb1f0afb62a077f169285830438f9191f6 kitchen/src/main/resources/assets/jaymo
 a15693d52369b731933fa3d0369c959a166e2164 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/birch_cabinet_top.png
 8050cdddf9ba03f555420c7d0ea13c0a635d1a94 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/black_canvas_sign.png
 b15a292fb4db6060bf36713835f74d221dba8f9c kitchen/src/main/resources/assets/jaymoskitchen/textures/block/black_hanging_canvas_sign.png
+be47fc63817fae6a654f99d1ae969a9350fd6540 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/blood_still.png
 2db36b934288e1613d10ee61e0c7f5a4408a6def kitchen/src/main/resources/assets/jaymoskitchen/textures/block/bloody_chopper_blade.png
 7a417829100d61052171eb4b94e46c9f3a3a9a9d kitchen/src/main/resources/assets/jaymoskitchen/textures/block/bloody_chopper_blade_turning.png
 665d5adb0119a7e1f9b873186ff50c5ea588222c kitchen/src/main/resources/assets/jaymoskitchen/textures/block/bloody_chopper_front.png
@@ -1065,6 +1067,7 @@ fb1ba11a9dbf6e46ac3531f4c3b93d9752a74038 kitchen/src/main/resources/assets/jaymo
 deda7bc275161f31ffc2999da9b1803112ae350a kitchen/src/main/resources/assets/jaymoskitchen/textures/block/hemp_stage2.png
 af9f71e6ddf9649c5c64e92e2224090f9e657368 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/hemp_stage3.png
 c2b25df904d905e537c9a0d3f28d9fed6a7c05e1 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/hemp_top.png
+ba055c78d79f55b9b503e479ab1a73caea22a781 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/hide_rug.png
 23b69b0091a3b514f0d19da1a691b3f2f5f31480 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/honey_glazed_ham.png
 f435c6b9afea063301d9885c622f49cb2f7ebd7b kitchen/src/main/resources/assets/jaymoskitchen/textures/block/honey_glazed_ham_details.png
 e14d523609b3750c6f2451c6f300f9f4865f1aa2 kitchen/src/main/resources/assets/jaymoskitchen/textures/block/honey_glazed_ham_leftovers.png
@@ -1274,6 +1277,7 @@ b3228d737ebf1a27ff172cfdaf8051068717ae6c kitchen/src/main/resources/assets/jaymo
 5e12ae7f6f86dea123a52414be5757ddff4e8981 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/black_canvas_sign.png
 4fd13bab308fb491cc004be55a9386c1d396ae1a kitchen/src/main/resources/assets/jaymoskitchen/textures/item/black_hanging_canvas_sign.png
 7d85010f0b8323ba69a6e1b8cc6a1cdc03263683 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/blazing_steak.png
+eb1d2e4b5a4e064c56d4a05f2a17a809d721f21b kitchen/src/main/resources/assets/jaymoskitchen/textures/item/blood_sausage.png
 693211a70fb4176405683c1ece4ddfd607a08e90 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/blue_canvas_sign.png
 cdbfdcfbc3237ac3a792a360a2ee5bb2184d530b kitchen/src/main/resources/assets/jaymoskitchen/textures/item/blue_hanging_canvas_sign.png
 188eaed058fb559c4cf03c9906ad458c7871d9ee kitchen/src/main/resources/assets/jaymoskitchen/textures/item/bone_broth.png
@@ -1363,6 +1367,8 @@ bc8d3478d7390810c9e7b6b37593104e80fa9ab8 kitchen/src/main/resources/assets/jaymo
 de8126aa707bf8c6f30b4e37bc2554da586b16df kitchen/src/main/resources/assets/jaymoskitchen/textures/item/ham.png
 ca2a5a8aa801b8774186438201de6149ba14bae4 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hamburger.png
 b165c93d9305ce9199b775a097afc27ff4f087d3 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hanging_canvas_sign.png
+c2e4e6645e6fa95dc3018f3c4fd4de5933374f48 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hardened_leather.png
+43a4dc2a37353e415a7fff356fb876f9626f8af5 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/harness_leather.png
 4a3f2ce668aad568f75c152dd6edbf60fff5ddc4 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hearty_stew.png
 3e28655cba357bf3546ac87264e92a5fcfc7ab98 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hemp_cloth.png
 df709359a048ad20ed845d8548997456bad477f2 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/hemp_fibre.png
@@ -1385,6 +1391,7 @@ fe3933d57bc6ec53ede46081b267899fbbbd7568 kitchen/src/main/resources/assets/jaymo
 d7cc4299bcac0e9e4e202bc02f29fedb8b10d11b kitchen/src/main/resources/assets/jaymoskitchen/textures/item/kelp_roll.png
 8611ffde31ffe7d5a2a7828fbc51a34dd96f0e01 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/kelp_roll_slice.png
 9bcee552e8e4591db08abf7ed8ab0aa0e075d39e kitchen/src/main/resources/assets/jaymoskitchen/textures/item/kirrid_roast.png
+3726c32f9971d2d1c50f15301f0c82322e0d82b3 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/leather_scraps.png
 40745ac28c4d84d8cab17de09a5e5c5f0afe3e1c kitchen/src/main/resources/assets/jaymoskitchen/textures/item/leather_straps.png
 1b3e5fc461769749170285d15f3811c57954f241 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/lemon_chicken.png
 f14a66aae19ca4e64192e30acae9161f823dac7e kitchen/src/main/resources/assets/jaymoskitchen/textures/item/lemon_cod.png
@@ -1460,6 +1467,7 @@ d45a60ec2059b191bb45b1136558ab2f9807ff50 kitchen/src/main/resources/assets/jaymo
 86394a2ea22074196d5f85ff5ca8d48483b26ff9 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/quiver.png
 69008bed6bd828bc6747de9639cdd60dd818ba36 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/ratatouille.png
 9a4486097cfc7ec1f412b2ab6ab914df60bb6796 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/raw_bacon.png
+8bcff63c35552529abaceb132e64488840fa4a5a kitchen/src/main/resources/assets/jaymoskitchen/textures/item/raw_blood_sausage.png
 37b1e95af416a2203dc45050931507c2e90b9fb0 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/raw_hide.png
 35056d5b043e71b797106aaa814af2406204aa49 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/red_canvas_sign.png
 137bd9c98fddca782920bb689a9023f261fa2bc2 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/red_hanging_canvas_sign.png
@@ -1501,6 +1509,7 @@ ac2a17c3633709c8e851bf3785fa75b56eb60343 kitchen/src/main/resources/assets/jaymo
 28452beeac6c6e259af674c2562f5df94445f05a kitchen/src/main/resources/assets/jaymoskitchen/textures/item/stuffed_potato.png
 b7dcf997c462d4af07b0241818b0e510b3df7d6e kitchen/src/main/resources/assets/jaymoskitchen/textures/item/stuffed_pumpkin.png
 e04493a4e672d19f5a40bfebbc21f9ee9219c4d3 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/stuffed_pumpkin_feast.png
+a0591150f8554cb77b11f34799c2794e8d53b338 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/supple_leather.png
 7cd1e50e091ded1d1f6ab10b41d0313ff41357f2 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/sweet_berry_cheesecake.png
 942bdaabb79ccbcdf53b2d7f05a871b63fdf35b1 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/sweet_berry_cheesecake_slice.png
 41d79dd1ff177fa7744b6609cbfa6d82330721c0 kitchen/src/main/resources/assets/jaymoskitchen/textures/item/sweet_berry_cookie.png
@@ -2350,8 +2359,8 @@ ddfa4f1e157694388c7b51f1fc75728a9adcf38f src/main/resources/assets/jaymospowers/
 e18339eaedd80d7cc8369cddcb23720dd9918ac8 src/main/resources/assets/jaymospowers/textures/entity/xenoform_billow_ultimate.png
 9cc871f093531b3590e32be5098a5bc2bf821572 src/main/resources/assets/jaymospowers/textures/entity/xenoform_blight.png
 8559825e60d5fbeeba7bb817e60ff5291e13b65c src/main/resources/assets/jaymospowers/textures/entity/xenoform_blight_ultimate.png
-43b5ecd25d64675444fabd56ec35e652234004bf src/main/resources/assets/jaymospowers/textures/entity/xenoform_blur.png
-bf76b73d1f12da4554f3a649a4a64f3714f1cf1e src/main/resources/assets/jaymospowers/textures/entity/xenoform_blur_ultimate.png
+3f2c6f2f812147f5def4b1eba5aa571073a886c0 src/main/resources/assets/jaymospowers/textures/entity/xenoform_blur.png
+df1517f52fc33e45d8fe0268a468c72071f0f1e9 src/main/resources/assets/jaymospowers/textures/entity/xenoform_blur_ultimate.png
 4ff6a28ba17270b85d382972291399708d0a214c src/main/resources/assets/jaymospowers/textures/entity/xenoform_bulwark.png
 6a84dda17d2b746d2cf48cd31188422f4bbbec2c src/main/resources/assets/jaymospowers/textures/entity/xenoform_bulwark_ultimate.png
 dca66eb74c8b196df3bebbbdece00e6be5564abe src/main/resources/assets/jaymospowers/textures/entity/xenoform_cortex.png
@@ -2365,16 +2374,16 @@ f8ad996ec39d0450bda0177cfed51a36580467db src/main/resources/assets/jaymospowers/
 a82ded4564278c2fa58bb1376c8cd45c4d02c411 src/main/resources/assets/jaymospowers/textures/entity/xenoform_fuse_ultimate.png
 ba7aacbce7952c9e4b3f7034214e84b20a987845 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gnasher.png
 db3f7093d62e1e15846b98787d02c2d4615c18e6 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gnasher_ultimate.png
-111294b6055e0f090e9fb41ba027423222642519 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gorger.png
-0f231e3ab8d8d1258bc57be4770f4b9ed63cce7e src/main/resources/assets/jaymospowers/textures/entity/xenoform_gorger_ultimate.png
+90fcef078a404b907e5ee642b19c1fda53a01e4f src/main/resources/assets/jaymospowers/textures/entity/xenoform_gorger.png
+ab6214dfd160c8beca5f8cb3fadcc1b733912e2f src/main/resources/assets/jaymospowers/textures/entity/xenoform_gorger_ultimate.png
 5730882a02465ccb70ce694293a4adabc6ff4fcd src/main/resources/assets/jaymospowers/textures/entity/xenoform_gremlin.png
 d4c55de8bcb6b13112aa18c732aba07fd02fa899 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gremlin_ultimate.png
-e6008f5121896605a851085fb8378f665600a768 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gyre.png
-8db2e7e5afee48f5200941afc289cafb81b3edaa src/main/resources/assets/jaymospowers/textures/entity/xenoform_gyre_ultimate.png
+8e7b67d9caa338105a946d987bfc08a66c9ae1df src/main/resources/assets/jaymospowers/textures/entity/xenoform_gyre.png
+12c22070ea6f0472f467f3b4a7807b86f5172d37 src/main/resources/assets/jaymospowers/textures/entity/xenoform_gyre_ultimate.png
 09102452c1e39e2ad4f9c5c84c9261c21ac8e0e3 src/main/resources/assets/jaymospowers/textures/entity/xenoform_hive.png
 d08a34c3859048327b8fda62521e0d20403c1d40 src/main/resources/assets/jaymospowers/textures/entity/xenoform_hive_ultimate.png
-5162b881076acf9cd816f6bf36526ec228a73ea9 src/main/resources/assets/jaymospowers/textures/entity/xenoform_howl.png
-1f9e0c49bc331428b0054f4d0a2d7d7a0096bec5 src/main/resources/assets/jaymospowers/textures/entity/xenoform_howl_ultimate.png
+cd00c9d8ab0cc2945cc0a5cf2ba33292124f54c2 src/main/resources/assets/jaymospowers/textures/entity/xenoform_howl.png
+8ce90a4eff026afb0d3d8ad600a0506046cac4c8 src/main/resources/assets/jaymospowers/textures/entity/xenoform_howl_ultimate.png
 cdf253bc12c76378a5808e23b166e1d7b672e1b6 src/main/resources/assets/jaymospowers/textures/entity/xenoform_keen.png
 f76dd01cfbb9f6ef36cbd3b39f1da84d61e6662a src/main/resources/assets/jaymospowers/textures/entity/xenoform_keen_ultimate.png
 cc205db56380375e89f5f275903dd2923f8c8f61 src/main/resources/assets/jaymospowers/textures/entity/xenoform_knell.png
@@ -2400,8 +2409,8 @@ eec7590850ea8402a707a531b4ca0c466d31e3ec src/main/resources/assets/jaymospowers/
 f95878a6db49b80c7ef13ef1ef2f3dc0ea9ed860 src/main/resources/assets/jaymospowers/textures/entity/xenoform_polestar_ultimate.png
 62a1740950f104bb6701045352cb99ee7579ba00 src/main/resources/assets/jaymospowers/textures/entity/xenoform_prism.png
 5bb4ef99b2a40b3d8776993eca7af1f3a21217dc src/main/resources/assets/jaymospowers/textures/entity/xenoform_prism_ultimate.png
-6ba3d126cdb1e64fe8d25c77867f1d0ece159134 src/main/resources/assets/jaymospowers/textures/entity/xenoform_prowl.png
-6e4ccb18a4e57f1ccc002f083bc5734be120756a src/main/resources/assets/jaymospowers/textures/entity/xenoform_prowl_ultimate.png
+9b1afd2a4c0ffffaf1a69983926894e14fcba2cd src/main/resources/assets/jaymospowers/textures/entity/xenoform_prowl.png
+f40eae0b8c00fac00d0e4c91fe45cba71fdc9978 src/main/resources/assets/jaymospowers/textures/entity/xenoform_prowl_ultimate.png
 abc5a818f79d1dd45137128d32b18b82c86f07eb src/main/resources/assets/jaymospowers/textures/entity/xenoform_pyre.png
 928fd7f7b4a6f6cb8022345bfda566619cb352ee src/main/resources/assets/jaymospowers/textures/entity/xenoform_pyre_ultimate.png
 4c3216a22148520a790a7c484ac0f13ed26e48e8 src/main/resources/assets/jaymospowers/textures/entity/xenoform_rime.png
@@ -2410,8 +2419,8 @@ c1ed315f706def5267c8115c02057bc7a095bc5d src/main/resources/assets/jaymospowers/
 09dfafab7b8f6d3d088a1ba82b89b052fc83f464 src/main/resources/assets/jaymospowers/textures/entity/xenoform_rivet_ultimate.png
 fd46a76bed8ae0e133ccad47c2cdc04168ed411e src/main/resources/assets/jaymospowers/textures/entity/xenoform_shade.png
 9f7c459917b3cbb44ce6b75cbd35b1ff521e81ee src/main/resources/assets/jaymospowers/textures/entity/xenoform_shade_ultimate.png
-532cfc858a93b5cf8f23485abba6f2be74501eb0 src/main/resources/assets/jaymospowers/textures/entity/xenoform_skitter.png
-83201f063800200bd83af212f0f38a3903bbc398 src/main/resources/assets/jaymospowers/textures/entity/xenoform_skitter_ultimate.png
+7b8ce951998de52c2f0d5312be871a00d07789ef src/main/resources/assets/jaymospowers/textures/entity/xenoform_skitter.png
+dfcc6de5f666460a23907eeb06fad7b309a5e8dd src/main/resources/assets/jaymospowers/textures/entity/xenoform_skitter_ultimate.png
 af097641ce14b6905e4cf4b1f164a6143f8b25e9 src/main/resources/assets/jaymospowers/textures/entity/xenoform_slipfin.png
 5e0e7a27525e408c8dfd4cb93af03b6c9736ebc4 src/main/resources/assets/jaymospowers/textures/entity/xenoform_slipfin_ultimate.png
 87879d6dedfade968b93e75a0643b1fa3c9cc95a src/main/resources/assets/jaymospowers/textures/entity/xenoform_swathe.png
@@ -2422,8 +2431,8 @@ aec5260fcaeaccc0db36e8d0e9d3b687326b1c5d src/main/resources/assets/jaymospowers/
 3f58d98f648737dbe08f4d8b03a11ba13924990c src/main/resources/assets/jaymospowers/textures/entity/xenoform_thornwild_ultimate.png
 0a7d5e19737c0b6ee6df117340347e470c3788b8 src/main/resources/assets/jaymospowers/textures/entity/xenoform_towerback.png
 57b0e92c2421d731319427ce310a1ef6382281b5 src/main/resources/assets/jaymospowers/textures/entity/xenoform_towerback_ultimate.png
-6b39fbf042db2080e7b2287140251b06d8bfae0c src/main/resources/assets/jaymospowers/textures/entity/xenoform_tusk.png
-ab9639120289f050b29d94a67baad66f7032e881 src/main/resources/assets/jaymospowers/textures/entity/xenoform_tusk_ultimate.png
+b656e4daff3d537cbf476bf9afe8a19c90136e5b src/main/resources/assets/jaymospowers/textures/entity/xenoform_tusk.png
+021dc2636be841dcedad94373e13ccb9c2a3566b src/main/resources/assets/jaymospowers/textures/entity/xenoform_tusk_ultimate.png
 c0a3a5e6fa9b3349152dd80c2332ccb9bf2659b8 src/main/resources/assets/jaymospowers/textures/entity/xenoform_ultimate_spikes.png
 0de71270801768839a2c5983e917d4d18a367225 src/main/resources/assets/jaymospowers/textures/entity/xenoform_wyrm.png
 230448d3967bd41ca4e6f423acc4e93e86fe32db src/main/resources/assets/jaymospowers/textures/entity/xenoform_wyrm_ultimate.png
