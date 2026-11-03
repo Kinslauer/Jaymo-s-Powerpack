@@ -313,6 +313,9 @@ public final class LoreBooks {
 		List<Component> pages = new ArrayList<>();
 		pages.add(Dialects.trBrood(brood, "journal.cover." + random.nextInt(COVERS), tribeName, capA));
 		List<String> kinds = new ArrayList<>(orc ? ORC_PAGES : GOBLIN_PAGES);
+		if (realm0 == null) {
+			kinds.remove("map"); // (0.7.480) no realm in reach: a map with no way and no distance would read broken
+		}
 		Collections.shuffle(kinds, new java.util.Random(seed));
 		List<Integer> frags = new ArrayList<>();
 		for (int i = 0; i < FRAGMENTS; i++) {
