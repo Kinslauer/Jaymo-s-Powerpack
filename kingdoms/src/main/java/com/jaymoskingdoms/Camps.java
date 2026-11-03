@@ -204,6 +204,9 @@ public final class Camps {
 		CampBuildings.registerCatalogue();
 		// (0.7.475) greenskin camps grow in tiers
 		Hordes.register();
+		// (0.7.484) villages and Blossom villages grow into walled towns
+		JaymosKingdoms.LOGGER.debug("walled town attachment: {}", WalledTowns.TOWNS);
+		WalledTowns.register();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();

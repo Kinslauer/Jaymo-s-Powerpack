@@ -145,7 +145,7 @@ final class Hordes {
 	}
 
 	/** One entry of a tier's build list. */
-	private record Piece(String id, Supplier<Blueprint> design) {
+	record Piece(String id, Supplier<Blueprint> design) {
 	}
 
 	/** Camp id → its band's plan (worked out again after a restart: it's seeded from the camp). */
@@ -154,7 +154,7 @@ final class Hordes {
 	private static final Map<String, int[]> BOUNDS = new HashMap<>();
 
 	/** The stockades go up without reshaping their neighbours, so their stakes stay lone posts. */
-	private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
+	static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
 	private Hordes() {
 	}
@@ -218,6 +218,10 @@ final class Hordes {
 
 	/** The lang key of camp {@code f}'s tier name ("War camp", "Goblin town"...), or null for any other faction. */
 	static @Nullable String tierKey(MinecraftServer server, Faction f) {
+		if (f.type() == FactionType.VILLAGE) {
+			// (0.7.484) a village by its tier too ("Walled town"), see WalledTowns
+			return WalledTowns.tierKey(server, f);
+		}
 		if (f.type() != FactionType.BARBARIAN || !greenskin(server, f.id())) {
 			return null;
 		}
@@ -484,19 +488,19 @@ final class Hordes {
 	// ---- the palisade ----------------------------------------------------------------------------------------------------
 
 	/** The arc the column at camp-frame {@code (x, z)} belongs to (arc 0 is centred on the front gate, going round clockwise). */
-	private static int arcOf(int x, int z) {
+	static int arcOf(int x, int z) {
 		double angle = Math.toDegrees(Math.atan2(x, -z));
 		double span = 360.0 / ARCS;
 		return Math.floorMod((int)Math.floor((angle + span / 2.0) / span), ARCS);
 	}
 
 	/** The {@code n}th arc to go up: from the front gate, out to either side, the back last. */
-	private static int arcNumber(int n) {
+	static int arcNumber(int n) {
 		return n == 0 ? 0 : n % 2 == 1 ? (n + 1) / 2 : ARCS - n / 2;
 	}
 
 	/** A cell of a ring at camp-frame {@code (x, z)} is in one of its four gates (front, right, back, left). */
-	private static boolean gate(int x, int z, int half) {
+	static boolean gate(int x, int z, int half) {
 		return Math.abs(x) <= half && z != 0 || Math.abs(z) <= half && x != 0;
 	}
 
@@ -506,7 +510,7 @@ final class Hordes {
 	}
 
 	/** The same, and with {@code throughWall} through a palisade's parts too (where a ladder or a gate tower goes). */
-	private static int ground(ServerLevel level, BlockPos column, boolean throughWall) {
+	static int ground(ServerLevel level, BlockPos column, boolean throughWall) {
 		int y = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).getY();
 		int min = level.getMinY();
 		while (y > min + 1) {
@@ -526,7 +530,7 @@ final class Hordes {
 	}
 
 	/** {@code at} may be built over: nothing a player placed, nothing built; only air, plants, trees and the land. */
-	private static boolean clearable(ServerLevel level, BlockPos at) {
+	static boolean clearable(ServerLevel level, BlockPos at) {
 		BlockState s = level.getBlockState(at);
 		if (s.isAir()) {
 			return true;
@@ -539,7 +543,7 @@ final class Hordes {
 	}
 
 	/** {@code column} (camp frame {@code (x, z)}) is the camp's to build on: loaded, its own land or nobody's, and on dry land. */
-	private static boolean ours(ServerLevel level, Faction camp, BlockPos column) {
+	static boolean ours(ServerLevel level, Faction camp, BlockPos column) {
 		if (!level.isLoaded(column)) {
 			return false;
 		}
@@ -622,7 +626,7 @@ final class Hordes {
 	}
 
 	/** Where ladders go up to a ring's walkway (camp frame x, z, and the ladder's facing as a {@link Direction} ordinal). */
-	private static List<int[]> ladders(int r, int gateHalf) {
+	static List<int[]> ladders(int r, int gateHalf) {
 		int off = gateHalf + 1;
 		return List.of(new int[] {off, r - 1, Direction.NORTH.ordinal()}, new int[] {r - 1, off, Direction.WEST.ordinal()},
 			new int[] {-r + 1, off, Direction.EAST.ordinal()});
@@ -717,7 +721,7 @@ final class Hordes {
 	}
 
 	/** A ladder up a ring's inside at camp-frame {@code (x, z)}, on the land there, to its walkway. */
-	private static void ladder(ServerLevel level, Faction camp, CampBuildings.Placer frame, int x, int z, Direction facing, int walk) {
+	static void ladder(ServerLevel level, Faction camp, CampBuildings.Placer frame, int x, int z, Direction facing, int walk) {
 		BlockPos column = frame.at(x, 0, z);
 		if (!ours(level, camp, column)) {
 			return;
@@ -935,7 +939,7 @@ final class Hordes {
 		return out;
 	}
 
-	private static void add(List<Piece> out, Object... itemsAndCounts) {
+	static void add(List<Piece> out, Object... itemsAndCounts) {
 		for (int i = 0; i < itemsAndCounts.length; i += 2) {
 			for (int n = 0; n < (Integer)itemsAndCounts[i + 1]; n++) {
 				out.add((Piece)itemsAndCounts[i]);
@@ -962,9 +966,16 @@ final class Hordes {
 	 * no room is left out.
 	 */
 	private static List<IllagerBuildings.Spot> planBand(MinecraftServer server, boolean orc, int tier, long seed) {
+		return layout(WALL_RADIUS[tier - 2] + BAND_INNER, WALL_RADIUS[tier - 1] - BAND_OUTER, list(server, orc, tier), seed);
+	}
+
+	/**
+	 * (0.7.484) The same planner for any settlement's band ({@link WalledTowns}): {@code items} laid out between the radii
+	 * {@code inner} and {@code outer} round the centre, seeded by {@code seed}.
+	 */
+	static List<IllagerBuildings.Spot> layout(int inner, int outer, List<Piece> list, long seed) {
 		Random random = new Random(seed);
-		int inner = WALL_RADIUS[tier - 2] + BAND_INNER, outer = WALL_RADIUS[tier - 1] - BAND_OUTER;
-		List<Piece> items = new ArrayList<>(list(server, orc, tier));
+		List<Piece> items = new ArrayList<>(list);
 		java.util.Collections.shuffle(items, random);
 		List<Integer> order = new ArrayList<>();
 		for (int i = 0; i < items.size(); i++) {
@@ -1017,7 +1028,7 @@ final class Hordes {
 	}
 
 	/** A design's footprint in its own frame (min x, min z, max x, max z, height), worked out once. */
-	private static int[] bounds(Piece item) {
+	static int[] bounds(Piece item) {
 		return BOUNDS.computeIfAbsent(item.id(), id -> {
 			Blueprint design = item.design().get();
 			int[] b = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, design.height()};
@@ -1159,7 +1170,7 @@ final class Hordes {
 		return Raise.PLACED;
 	}
 
-	private static void joinFence(ServerLevel level, BlockPos at) {
+	static void joinFence(ServerLevel level, BlockPos at) {
 		BlockState state = level.getBlockState(at);
 		// (0.7.484) fences, window panes, bars and stone walls all join their neighbours
 		if (state.is(BlockTags.FENCES) || state.getBlock() instanceof CrossCollisionBlock || state.is(BlockTags.WALLS)) {
