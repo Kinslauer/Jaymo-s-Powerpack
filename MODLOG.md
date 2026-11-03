@@ -4955,3 +4955,45 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   stiff body with only the tail tip loose. Small bodies (chickens, rabbits, snakes, babies) are now carried
   in one hand by the neck, a snake's tail trailing on the ground, and the corpse bag that put them in your inventory is
   gone (Kitchen MODLOG). Not compile-checked; not played.
+- **0.19.62, Skitter stands up again:** Andy: "skitter to be the same model it had before, only going into the crawl
+  when you go prone". Standing, Skitter has its old upright shape back (four thin spider legs off its back, the small
+  abdomen); prone on the stance wheel it drops into the 0.19.34 spider (`SkitterCeiling.CRAWL_KEY`, eased over 5 ticks)
+  and scuttles at `Skitter.SPIDER_PACE` 2.6x a crawl. The spider sticks to whatever it crawls onto with no jump held:
+  up a wall it's turned to face it and tipped head-up against it for everyone (synced `XenoformState.CLIMB`, the wall's
+  side, legs stepping on the clock), and under a ceiling it clings upside down as before; a jump press lets go of the
+  ceiling (it won't grab one again until it lands). Standing up turns it back. The man's
+  crawl pose stays off for it (`CrawlPose.extract`), downed Skitters crawl as men, and the Ultimate's spikes are back on
+  the upright shape. Compile-checked (0 errors against the 26.3 jars); not played.
+- **0.19.62, Patch 2: beasts on four legs** (`docs/AlienBodies-Plan.md`): six aliens are no longer men.
+  - Howl is now a four-legged wolf: a long, level body on four legs that trot in diagonal pairs, a head with a muzzle and tall ears that turns where it looks, a bushy tail that lifts as it runs; it stalks low when crouched, stretches out in a leap and bites with a snapping jaw.
+  - Prowl is now a big cat on four legs: a long low chest and haunch that flex at the spine, round ears, two-jointed legs on flat paws that walk in a cat's lateral order and break into a bounding gallop at a sprint, a long tail that curls and twitches, a belly-low stalk with tucked paws when sneaking, and a forepaw rake on attack.
+  - Tusk is now a heavy boar on four legs: a barrel body, short thick legs, a big low head with snout and curved tusks, a mane ridge and a tail. It trots with a head bob, drops its head and gallops on Charge, and tosses its tusks up on an attack.
+  - Gorger is now a real armadillo on four legs: a horned snout, six shell bands that bob as it scurries, and a dragging tail; it drops its head and horn on a charge, and rolled up (B) the bands close into a hexagonal ball that rolls as it moves.
+  - Gyre is now a turtle on four flippers: a domed shell (carapace, crown and plastron) that rocks as it walks, flippers that paddle in diagonal pairs with feet planted on the ground and row like wings in water, a neck that pokes out and turns, and a short tail; rolled up it pulls in its limbs with only the beak peeking out, in Shell Spin the whole shell spins on the spot, and the insignia sits on the crown.
+  - Velox is now a raptor: a forward-leaning biped with a near-horizontal body on long bird legs that stride long and fast, tucked clawed forearms that slash, a long balancing tail, and a head on an S-neck whose jaw snaps; the visor still drops over its eyes at speed and its insignia sits on its back.
+  - Their ability poses are synced for everyone (`XenoformState.ACT`: charge, roll, spin). The six lost their Ultimate
+    spikes (the spike model is a man's). Each body was written and then checked by a second pass that simulated the
+    poses (feet on the ground, legs attached, no UV overlaps) and fixed what it found. Compile-checked; not played.
+- **0.19.63, dirty armour and wet weather:** Andy: armour "gets dirty when you walk in the desert or swampy muddy areas
+  and washes in the rain or by hand or in bodies of water", plus "subsurface scattering rays underwater and pooling water
+  on the ground near trees, during rain and under wet characters like the blood trail" (Gemini had tried it; nothing of
+  that was used; Andy's Recrafted resource pack noted as the look, nothing taken). `core/wet/ArmourGrime`: each armour
+  piece carries a `jaymospowers:grime` component (amount 0-100, how much is mud). Walking (or lying) on sand, gravel or
+  dry ground in deserts, badlands and dry or sandy biomes throws up dust; mud, clay, soul soil and wet earth (rain, swamps)
+  splash mud; boots first, then greaves, chest, helmet; sprinting doubles it, lying or crawling gets it everywhere. Water
+  washes it (wading: boots and greaves; under water: all of it fast), rain slowly, and by hand: sneak + use an empty hand
+  on a water cauldron (a level each scrub), sneak + use a wet sponge, or use a dirty piece on a water cauldron. Everyone
+  near a player is weathered, so guards come back muddy. The client tints the armour layers toward tan or mud brown
+  (`ArmourGrimeMixin`) and the tooltip says how dirty. `client/wet/WetClient`: wet bodies drip for a while after water
+  (30 s) or rain (15 s) and leave little water puddles under them (a trail as they walk); while it rains, puddles pool
+  under leaves and beside trunks (and sometimes in open hollows), grow while the rain lasts and dry after; under water
+  by day `LightShaft`s hang from the surface, leaning away from the sun. Water puddles are `BloodPuddle.water` in the
+  blood decals' group (now any `BloodDecals.Decal`). Sprites from `tools/wet_textures.py`. Tuning at the top of each class.
+  Then Andy shared Recrafted's settings (MR_CHOO, Patreon-only, so never in the pack): its light rays, fog, clouds and
+  swaying leaves/grass already come from Complementary Unbound, which every player starts with, so we added only what a
+  shader pack doesn't: bushy leaves, a built-in pack `living_world` ("Jaymo's Powers: bushy leaves", on by default),
+  where every vanilla leaf block also draws two crossed planes of its own texture reaching 3 px past the block
+  (`tools/bushy_leaves.py`; multipart blockstates; they wave with the leaves under Complementary).
+  Andy then chose "fill the gaps only" (no Sodium shaders-off versions). The same pack also gives grass blocks lips of
+  their own side-overlay blades leaning out 22.5 degrees over each open side, and snowy ones a lip of snow
+  (`tools/grass_edges.py`; each lip culls when a block stands against that side).

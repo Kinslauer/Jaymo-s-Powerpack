@@ -113,7 +113,9 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucentEmissive(model.ultimateGlow), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 			seams, null, 0);
 		UltimateSpikes spikes = UltimateSpikes.of(model.id, model);
-		if (spikes != null) {
+		// (0.19.62) Skitter's spider has no man's shape to hang them on
+		Float crawl = state.getData(SkitterCeiling.CRAWL_KEY);
+		if (spikes != null && !("skitter".equals(model.id) && crawl != null && crawl > XenoFormModels.Skitter.SPIDER_AT)) {
 			int r = (color >> 16 & 0xFF) * 3 / 5 + 60, g = (color >> 8 & 0xFF) * 3 / 5 + 60, b = (color & 0xFF) * 3 / 5 + 60;
 			renderColoredCutoutModel(spikes, UltimateSpikes.TEXTURE, poseStack, collector, lightCoords, state, 0xFF000000 | Math.min(255, r) << 16 | Math.min(255, g) << 8
 				| Math.min(255, b), 1);
