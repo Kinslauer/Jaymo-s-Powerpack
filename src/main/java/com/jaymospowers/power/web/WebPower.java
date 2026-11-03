@@ -652,8 +652,14 @@ public final class WebPower implements Power {
 			Vec3 burnt = player.tickCount % WebHeft.BURN_EVERY == 0 ? burnsThrough(player, hand) : null;
 			if (burnt != null) {
 				broken = true;
-				if (was != null) {
-					WebNet.snap(player, hand, lineAnchor(player, was), burnt, WebNet.SNAPPED);
+				if (WebSymbiote.suitShown(player)) {
+					// (0.19.71) a symbiote's cord is alive: it doesn't burn, it recoils into you
+					WebHeft.recoilFx(player.level(), burnt);
+				} else {
+					WebHeft.burnFx(player.level(), burnt);
+					if (was != null) {
+						WebNet.snap(player, hand, lineAnchor(player, was), burnt, WebNet.SNAPPED);
+					}
 				}
 			} else if (state.swingEntity[hand] >= 0) {
 				Entity on = player.level().getEntity(state.swingEntity[hand]);
@@ -868,10 +874,6 @@ public final class WebPower implements Power {
 		Entity stuckTo = line.entityId() >= 0 ? player.level().getEntity(line.entityId()) : null;
 		Vec3 to = stuckTo != null ? stuckTo.getBoundingBox().getCenter() : line.anchor();
 		Vec3 at = WebHeft.burning(player.level(), player.position().add(0.0, player.getBbHeight() * 0.7, 0.0), to, stuckTo);
-		if (at == null) {
-			return null;
-		}
-		WebHeft.burnFx(player.level(), at);
 		return at;
 	}
 
@@ -1145,9 +1147,15 @@ public final class WebPower implements Power {
 		if (player.tickCount % WebHeft.BURN_EVERY == 0) {
 			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), WebLead.burnTarget(target));
 			if (burn != null) {
-				// it burns through
-				WebHeft.burnFx(player.level(), burn);
-				snapTether(player, state, burn, true);
+				if (WebSymbiote.suitShown(player)) {
+					// (0.19.71) a symbiote's cord recoils from the fire and lets go
+					WebHeft.recoilFx(player.level(), burn);
+					releaseTether(player, state);
+				} else {
+					// it burns through
+					WebHeft.burnFx(player.level(), burn);
+					snapTether(player, state, burn, true);
+				}
 				return;
 			}
 		}
