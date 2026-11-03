@@ -4,9 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.PoseBlend;
 import com.jaymospowers.client.mixin.MinecraftAttackInvoker;
 import com.jaymospowers.client.power.zfighter.RaceHoldClient;
-import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.ember.EmberKindle;
-import com.jaymospowers.power.smoke.SmokePower;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -35,8 +33,8 @@ public final class EmberKindleClient {
 	static final int KINDLE_HOLD = 4, REFRESH = 5;
 	/** Ticks after asking before the server's word counts: if the flame isn't running by then, it was put out (no food). */
 	static final int GRACE = 10;
-	/** The bar's width (pixels), how far over the crosshair, and its colours. */
-	static final int BAR_WIDTH = 52, BAR_UP = 33, BAR_UP_SMOKE = 47;
+	/** The bar's width (pixels) and its colours. (HUD rework) Where it goes is the ABOVE zone's. */
+	static final int BAR_WIDTH = 52;
 	static final int HEAT_COLOR = 0xFF7A1A, WHITE_COLOR = 0xFFF4E0;
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:ember_kindle");
 	/** (0.15.42) The heat (0-1) on everyone kindling, for the arm's tremble and the throw. */
@@ -178,14 +176,13 @@ public final class EmberKindleClient {
 		Font font = minecraft.font;
 		boolean white = heat >= 1.0F;
 		int color = white ? WHITE_COLOR : HEAT_COLOR;
-		int cx = graphics.guiWidth() / 2;
-		// above Smoke's own bar when they have that power too
-		int y = graphics.guiHeight() / 2 - (Powers.has(player, SmokePower.INSTANCE) ? BAR_UP_SMOKE : BAR_UP);
-		int x0 = cx - BAR_WIDTH / 2;
-		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 4, 0x90000000);
-		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * Mth.clamp(heat, 0.0F, 1.0F)), y + 3, 0xFF000000 | color);
+		// (HUD rework) heat bar: ABOVE zone, row 30 (the zone stacks it over Smoke's bar, no special case)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:ember_heat", 30, BAR_WIDTH, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
+		if (at == null) {
+			return;
+		}
 		Component label = Component.translatable(white ? "hud.jaymospowers.ember.white" : "hud.jaymospowers.ember.heat");
-		graphics.centeredText(font, label.copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, label.copy().withColor(color), at[0], at[1], BAR_WIDTH, Mth.clamp(heat, 0.0F, 1.0F), color);
 	}
 
 	/** From the avatar renderer's extractRenderState (everyone): whether they're kindling. */

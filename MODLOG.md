@@ -5105,3 +5105,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Lumen is now an orb of light: a white-gold core in a dithered halo, floating about a block up and bobbing, with eight motes on tilted rings that stream out behind it as it moves and burst outward when it attacks. It is drawn a second time fullbright, so it shines in the dark.
   - The four lost their Ultimate spikes (the spike model is a man's). Each body was written, then checked by a second
     pass that simulated the poses and fixed what it found. Graded copies of the skins go in the optional `excalibur_style` pack. Compile-checked; not played.
+- **0.19.76, one HUD layout** (`client/hud/HudZones`, `HudStyle`, `PowerDock`; plan `docs/HUD-Layout.md`): Andy: "rework
+  the hud so nothing is clashing, there are alot of new elements now, so everything needs to feel coherent". Every HUD
+  piece of Powers, Kingdoms and Kitchen that isn't a full-screen wash now asks one of seven zones where to draw, and the
+  zone stacks whatever is showing, so two pieces can't land on one spot: the right dock (power chips, Flame Avatar,
+  beam-clash panel, mount bars, Rig panel), the left dock (stomach, valor, symbiote arm, a body row of stance figure,
+  wounds doll and body heat), the focus band over the action-bar line (struggles, forms belt, spirit line, clash
+  timing), over the crosshair (charge bars, awareness eye), under it (guard, roll pips, horse tag, smithing), right of it
+  (combo, lens, scouter), and a top-left rail under Xaero's minimap (power badge, kin sense, party). The badge no longer
+  sits on the minimap, the riding bar no longer covers the chips, the stance figure left the chat corner, and the
+  body-heat thermometer left the XP number. Our HUD hides during films (ultimates, beam and spirit clashes, handshakes,
+  curtains) as vanilla's does, and the armed crosshair now hides in an ultimate's film too. One look (`HudStyle`, Wind's
+  chips: see-through black plates, a rim in the piece's colour when ready, flat 3 px bars in a black frame, shadowed
+  text), with no resource-pack art, so it reads the same with Excalibur off. Compile-checked; not played.

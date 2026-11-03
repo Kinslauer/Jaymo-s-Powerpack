@@ -116,8 +116,14 @@ public final class WoundsHud {
 		// hurt: opaque; whole again: fading out
 		float alpha = player.getAttached(Wounds.PARTS) != null ? 1.0F : 1.0F - since / (float)FADE_TICKS;
 		int a = Mth.clamp((int)(alpha * 255.0F), 8, 255) << 24;
-		int x0 = graphics.guiWidth() - MARGIN - WIDTH * SCALE;
-		int y0 = graphics.guiHeight() - MARGIN - HEIGHT * SCALE;
+		// (HUD rework) the body row of the left dock, beside the stance figure (it sat in the bottom-right corner, under the Rig panel)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_LEFT, "jaymospowers:wounds_doll", 30,
+			WIDTH * SCALE + 2, HEIGHT * SCALE + 2);
+		if (at == null) {
+			return;
+		}
+		int x0 = at[0] + 1;
+		int y0 = at[1] + 1;
 		// the outline first, so shared edges stay dark
 		for (int[] box : BOXES) {
 			graphics.fill(x0 + box[0] * SCALE - 1, y0 + box[1] * SCALE - 1, x0 + (box[0] + box[2]) * SCALE + 1,

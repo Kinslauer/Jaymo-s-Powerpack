@@ -1357,3 +1357,8 @@ Item and block textures are graded toward Excalibur's darker, earthier palette b
 ## 0.5.53: the Excalibur look made optional (pack 0.19.72, Kingdoms 0.7.485)
 Every texture graded in 0.5.52 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.5.54: one HUD layout (pack 0.19.76, Kingdoms 0.7.486)
+The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
+copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
+attack indicator are; the thermometer no longer covers the XP number.
