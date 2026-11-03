@@ -5042,6 +5042,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
   Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
   Compile-checked; not played.
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
+- **0.19.70, broken web lines** (`WebSpentLines`, `WebNet.LineSnap`): Andy: "The b web dropped a fading line at the
+  wrong time ... only when the web is actually broken or deteriorated. it should also split where it was hit." A web
+  let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
+  apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
+  hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
 - **0.19.69, calmer leaves:** Andy: "the trees and leaves can look too patterened now due to the new bushyness ... it
   looks like a hall of mirrors". Excalibur's leaf models hang 6-pixel fringes and cross planes off every leaf block, and
   inside a canopy they repeat block after block. The new built-in pack `calm_leaves` (on by default, above Excalibur)

@@ -87,17 +87,19 @@ public final class WebCut {
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.02);
 			return;
 		}
+		// it parts where it was hit: two broken halves
+		Vec3 hit = closestPoint(eye, cut.a(), cut.b());
 		boolean done = switch (cut.kind()) {
-			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebPower.cutLine(owner, cut.b());
+			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebPower.cutLine(owner, cut.b(), hit);
 			case HITCH -> {
 				Entity tied = level.getEntity(cut.entity());
-				yield tied != null && WebHitches.cut(level, tied, cut.b());
+				yield tied != null && WebHitches.cut(level, tied, cut.b(), hit);
 			}
 			case BRIDGE -> WebBridges.cut(level, cut.a(), cut.b());
 			default -> false;
 		};
 		if (done) {
-			Vec3 at = closestPoint(eye, cut.a(), cut.b());
+			Vec3 at = hit;
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.2F);
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.15, 0.15, 0.15, 0.05);
 		}
