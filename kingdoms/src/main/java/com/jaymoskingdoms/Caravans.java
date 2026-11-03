@@ -710,12 +710,18 @@ final class Caravans {
 			}
 			BlockPos goal = goal(server, c, home, lord);
 			Live live = LIVE.get(c.id());
+			// ((0.7.484) a monster-crewed caravan on Peaceful: its crew can't stay in the world, so it stays out of sight)
+			boolean unseen = TradeRoutes.unseenCrew(level, c);
+			if (live != null && unseen) {
+				vanish(level, c);
+				live = null;
+			}
 			if (live != null) {
 				drive(level, c, live, goal, now);
 				continue;
 			}
 			// unseen: on along the road, or round at its end
-			if (level.isPositionEntityTicking(c.at())) {
+			if (!unseen && level.isPositionEntityTicking(c.at())) {
 				appear(level, c);
 				continue;
 			}

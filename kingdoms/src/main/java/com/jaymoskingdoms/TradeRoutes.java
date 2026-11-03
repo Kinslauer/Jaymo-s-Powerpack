@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.Difficulty;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.mixin.MobAccessor;
@@ -371,6 +372,11 @@ final class TradeRoutes {
 			Caravans.later(server, f, now + RETRY);
 			return null;
 		}
+		if (sort == Sort.ILLAGER && peaceful(level)) {
+			// ((0.7.484) on Peaceful no illager stays in the world to drive or guard a cart: the camp keeps its goods home)
+			Caravans.later(server, f, now + RETRY);
+			return null;
+		}
 		Profile p = profile(server, f, sort);
 		if (p.rig() == BOAT && (PirateCoves.cove(server, f.id()) == null || PirateCoves.cove(server, to.id()) == null)) {
 			// ((0.7.484) skiffs only from a mooring to a mooring: to a partner inland, the cove's trade goes by handcart)
@@ -575,6 +581,26 @@ final class TradeRoutes {
 		return man.mob();
 	}
 
+	/** (0.7.484) The world is on Peaceful, where monsters (illagers, ogres) are taken out of the world as soon as they're in it. */
+	static boolean peaceful(ServerLevel level) {
+		return level.getDifficulty() == Difficulty.PEACEFUL;
+	}
+
+	/**
+	 * (0.7.484) {@code c} is crewed by monsters (an ogre hold's haul, an illager camp's carts) and the world is on Peaceful: its crew
+	 * can't stay in the world, so it never comes into sight and goes on in the record instead of spilling its carts.
+	 */
+	static boolean unseenCrew(ServerLevel level, Caravans.Caravan c) {
+		if (!peaceful(level)) {
+			return false;
+		}
+		if (c.hold() >= 0) {
+			return true;
+		}
+		Faction home = Factions.get(level.getServer(), c.home());
+		return home != null && illagers(level.getServer(), home);
+	}
+
 	/** (0.7.484) {@code f} is an illager camp: its carts are driven and guarded by its own illagers ({@link #illager}). */
 	static boolean illagers(MinecraftServer server, Faction f) {
 		return sortOf(server, f) == Sort.ILLAGER;
@@ -650,6 +676,11 @@ final class TradeRoutes {
 				continue;
 			}
 			if (now < due || l.caravans().values().stream().anyMatch(c -> c.hold() == site.id())) {
+				continue;
+			}
+			if (peaceful(level)) {
+				// ((0.7.484) on Peaceful no ogre stays in the world to pull a haul: none is sent)
+				next(server, key, now + OGRE_RETRY);
 				continue;
 			}
 			Faction camp = ogreCamp(server, site.at());
