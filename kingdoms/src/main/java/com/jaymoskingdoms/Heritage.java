@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -428,6 +429,8 @@ public final class Heritage {
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind(), payload.variant()));
 		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
+		// (0.7.480) the risen are forgotten with the world, so singleplayer's next world never wakes a Hollow from this one
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> RISEN.clear());
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
 			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
@@ -1066,7 +1069,7 @@ public final class Heritage {
 
 	/**
 	 * (0.7.480) The Hollow wake in one who was killed by the undead and got up again, a moment after rising, each of them once.
-	 * Held in memory only: a restart in between forgets who was struck down, so the wake is missed, never given by mistake.
+	 * Held in memory only, and cleared when the server stops: a restart in between forgets who was struck down, so the wake is missed, never given by mistake.
 	 */
 	static final java.util.Set<UUID> RISEN = new java.util.HashSet<>();
 	/** (0.7.480) How long after rising before the Hollow wake (ticks of the check; they must live through it). */

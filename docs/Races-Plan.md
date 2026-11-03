@@ -48,6 +48,10 @@ Races we already have fold in as kits.
   the next unlock check (every 5 s) after they respawn alive wakes it (`Heritage.hollowCheck`; hint text stays oblique).
   Villagers are never rolled Hollow, only inherited from a Hollow parent. No birthplace answer (earned), no life-story birth.
   Shunned degree 4 (own `shunned.hollow` line). Lean: darktide. Not on the lab road or the greenskin road.
+  The mark is cleared when the server stops (so singleplayer never carries it into another world). Hollow does not count
+  as an earned heritage for `DragonRecords.trusted()`: dying to the undead is too easy to unveil disguised dragons
+  (**Andy to confirm**). The Wraith's mist marks draw translucent (`HeritageLooks.marksType`); the body under them stays
+  opaque, so it reads as a haze, not a see-through body.
 - **Sylvan** now has ten looks: the old `thornrose` and `blossomkin` keep their ids (saves and `LifeStory`), and `dryad`,
   `changeling`, `sprite`, `nymph`, `faerie`, `highelf`, `moonelf`, `bloodelf` follow. `HeritageVariants` has no cap: the
   screen lists every look and the first look's birth weight grows with the count (`BASE_SHARE_VARIANTS`).

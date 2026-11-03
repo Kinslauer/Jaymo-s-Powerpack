@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -91,6 +92,14 @@ import org.jspecify.annotations.Nullable;
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
+	/**
+	 * (0.7.480) How a heritage's marks are drawn: cutout, but a Wraith's mist is blended (its skin is painted half-clear), so
+	 * it shows as a haze over the body rather than solid patches. The body under it stays as it is.
+	 */
+	static RenderType marksType(Identifier skin, VariantLooks.@Nullable Style style) {
+		return style != null && style.variant() == HeritageVariants.Variant.WRAITH ? RenderTypes.entityTranslucent(skin) : RenderTypes.entityCutout(skin);
+	}
+
 	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
 	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
@@ -359,7 +368,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		Identifier skin = look.blood() ? BLOOD_SKIN : style != null ? style.skin() : kind.skin[look.variant()];
 		Identifier glow = look.blood() ? BLOOD_GLOW : style != null ? style.glow() : kind.glow[look.variant()];
 		if (!armFinsCovered) {
-			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.order(1).submitModel(marks, state, poseStack, marksType(skin, look.blood() ? null : style), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 		if (look.glow() != 0 && !armFinsCovered) {
