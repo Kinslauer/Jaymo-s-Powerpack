@@ -164,7 +164,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
-		// (0.7.477) the suit leggings bring with them when nothing covers the chest
+		// (0.7.478) the suit leggings bring with them when nothing covers the chest
 		UnderArmourLayer.register();
 		// (0.7.326) the Reverent Warplate
 		ReverentLayer.register();

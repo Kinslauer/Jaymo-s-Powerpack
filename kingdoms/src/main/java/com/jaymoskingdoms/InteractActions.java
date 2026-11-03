@@ -102,7 +102,7 @@ public final class InteractActions {
 			}
 			case WARES -> {
 				if (com.jaymoskingdoms.nether.CinderForge.ignis(v) && v instanceof Villager villager) {
-					// (0.7.477) Ignis Vael's wares
+					// (0.7.478) Ignis Vael's wares
 					com.jaymoskingdoms.nether.CinderForge.trade(player, villager);
 					return null;
 				}

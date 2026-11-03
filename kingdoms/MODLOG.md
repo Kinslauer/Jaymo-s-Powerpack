@@ -8228,7 +8228,7 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
   realm's harness as before), a quarter veterans (full plate), by their id (`Outfits.GUARD_RECRUIT_SHARE`). New guards
   only; `Outfits.VERSION` is unchanged so nobody already dressed is stripped. No gold.
 
-### Same release, passes 2 and 3: Ignis Vael's Cinder Forge, under-armour
+## 0.7.478: Ignis Vael's Cinder Forge, under-armour (pack 0.19.58; Gemini handoff passes 2 and 3)
 - **The Cinder Forge** (`nether/CinderForge`, built by `FortBuildings.cinderForge`): one per world, 300-700 blocks from
   the Nether's heart (fixed by the seed), built the first time a player comes within 96 blocks. **Ignis Vael** keeps it:
   an MCA villager (a plain one without MCA) of Emberborn blood, attuned at power 10, unhurt by anything but the void;

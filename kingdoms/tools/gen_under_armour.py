@@ -1,4 +1,4 @@
-"""(Kingdoms 0.7.477) Under-armour textures for client/UnderArmourLayer: our own pixel art, nothing from Armor Reimagined.
+"""(Kingdoms 0.7.478) Under-armour textures for client/UnderArmourLayer: our own pixel art, nothing from Armor Reimagined.
 
 64x32 classic armour layout, body (uv 16,16, 8x12x4) and arms (uv 40,16, 4x12x4) only.
 Run from kingdoms/: python -I tools/gen_under_armour.py

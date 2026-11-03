@@ -213,11 +213,11 @@ final class FortBuildings {
 		return new Layout(center.above(), hoard, f.pos(0, 1, r - 1));
 	}
 
-	/** (0.7.477) The Cinder Forge's reach from its anvil. */
+	/** (0.7.478) The Cinder Forge's reach from its anvil. */
 	static final int FORGE_RADIUS = 6;
 
 	/**
-	 * (0.7.477) Ignis Vael's Cinder Forge round {@code center} ({@link CinderForge}): a blackstone floor under a roof of
+	 * (0.7.478) Ignis Vael's Cinder Forge round {@code center} ({@link CinderForge}): a blackstone floor under a roof of
 	 * basalt on four pillars, a lava basin he drinks from at the back, a forge of blast furnaces round a magma hearth, an
 	 * anvil and a smithing table at the front, fires on the pillars' heads. Returns where Ignis stands.
 	 */

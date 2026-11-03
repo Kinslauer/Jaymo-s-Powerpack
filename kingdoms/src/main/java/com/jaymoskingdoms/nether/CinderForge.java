@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.477) The Cinder Forge and its master, <b>Ignis Vael</b> (Andy's Gemini handoff, pass 2): the oldest Emberborn smith,
+ * (0.7.478) The Cinder Forge and its master, <b>Ignis Vael</b> (Andy's Gemini handoff, pass 2): the oldest Emberborn smith,
  * rumoured all over the Overworld, keeps one forge somewhere in the Nether.
  * <ul>
  * <li><b>Where:</b> one per world, a few hundred blocks from the Nether's heart ({@link #SITE_MIN}-{@link #SITE_MAX}),

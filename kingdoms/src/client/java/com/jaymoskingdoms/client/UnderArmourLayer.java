@@ -27,7 +27,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.477) Under-armour, our own take on what Armor Reimagined (KhalMika, All Rights Reserved: the idea only, none of its
+ * (0.7.478) Under-armour, our own take on what Armor Reimagined (KhalMika, All Rights Reserved: the idea only, none of its
  * art) does with the leggings' layer (Andy's Gemini handoff, pass 3). Leggings worn with nothing over the chest (or only an
  * elytra) bring the rest of their suit: leather leggings an arming doublet (in the leggings' own dye), mail leggings a
  * quilted gambeson with mail sleeves, iron leggings a padded gambeson with an iron-studded collar. Drawn on the body and
