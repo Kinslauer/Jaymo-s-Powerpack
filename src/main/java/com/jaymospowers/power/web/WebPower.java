@@ -1145,7 +1145,7 @@ public final class WebPower implements Power {
 		Vec3 to = hand.subtract(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		double distance = to.length();
 		if (player.tickCount % WebHeft.BURN_EVERY == 0) {
-			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), WebLead.burnTarget(target));
+			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), target);
 			if (burn != null) {
 				if (WebSymbiote.suitShown(player)) {
 					// (0.19.71) a symbiote's cord recoils from the fire and lets go

@@ -191,8 +191,8 @@ public final class WebHeft {
 	/**
 	 * (0.19.71, Andy: "weblines should be flammable, giving a counter to web users") As above, and anything alight that
 	 * crosses the line burns it too: a burning creature or player brushing it, a fire arrow or a fireball flying through
-	 * it, the slinger themselves on fire (it goes at their hand). The undead burning in daylight don't (see
-	 * {@link WebLead#burnTarget}), else every line out by day would go. {@code skip}: one entity the scan leaves to the
+	 * it, the slinger themselves on fire (it goes at their hand), the undead burning in daylight too (Andy: "any
+	 * flammable means flammable"). {@code skip}: one entity the scan leaves to the
 	 * caller (what the line holds).
 	 */
 	static @Nullable Vec3 burning(ServerLevel level, Vec3 from, Vec3 to, @Nullable Entity stuckTo, @Nullable Entity skip) {
@@ -203,7 +203,7 @@ public final class WebHeft {
 		Vec3 nearest = null;
 		double best = Double.MAX_VALUE;
 		for (Entity e : level.getEntities((Entity)null, around, e -> e != skip && (e instanceof net.minecraft.world.entity.projectile.hurtingprojectile.Fireball
-			|| e.isOnFire() && WebLead.burnTarget(e) != null))) {
+			|| e.isOnFire()))) {
 			java.util.Optional<Vec3> hit = e.getBoundingBox().inflate(0.15).clip(from, to);
 			if (hit.isEmpty() && e.getBoundingBox().inflate(0.15).contains(from)) {
 				hit = java.util.Optional.of(from);

@@ -5055,7 +5055,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
   "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
   alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
-  or fireball through it, the slinger on fire (the undead burning by day don't). Hitches and weblines burn as well as
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
   swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
   and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
   symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.

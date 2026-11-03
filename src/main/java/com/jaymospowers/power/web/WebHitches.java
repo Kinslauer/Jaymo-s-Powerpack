@@ -174,7 +174,7 @@ public final class WebHitches {
 			}
 			if (clock % WebHeft.BURN_EVERY == 0) {
 				// (0.19.71) fire burns it through (a symbiote's cord recoils from it instead)
-				Vec3 burn = WebHeft.burning(level, hitch.anchor(), center(entity), WebLead.burnTarget(entity), entity);
+				Vec3 burn = WebHeft.burning(level, hitch.anchor(), center(entity), entity);
 				if (burn != null) {
 					it.remove();
 					if (hitch.dark()) {
