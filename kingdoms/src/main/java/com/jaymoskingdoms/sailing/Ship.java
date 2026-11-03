@@ -181,7 +181,7 @@ public final class Ship extends Entity {
 	private int sinking;
 	private final List<int[]> volley = new ArrayList<>();
 	/** (0.7.484) Guns run back by their recoil: {piece index, tick they're run out again}. */
-	private final List<int[]> recoiled = new ArrayList<>();
+	private final List<long[]> recoiled = new ArrayList<>();
 	private float turn;
 	private int adrift;
 	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
@@ -1171,8 +1171,14 @@ public final class Ship extends Entity {
 	 * back, {@link ShipCannonBlock#RECOILED}) and run out again {@link ShipCannonBlock#RECOIL_TICKS} later ({@link #runOut}).
 	 */
 	private void recoil(int i, BlockState state) {
+		Hull h = this.hull();
+		if (h == null || i < 0 || i >= h.pieces.size()) {
+			return;
+		}
+		// (0.7.484) kept by where the gun sits, not its piece number: pieces smashed out before she runs out shift the numbers
+		Piece p = h.pieces.get(i);
 		this.setPiece(i, state.setValue(ShipCannonBlock.RECOILED, true));
-		this.recoiled.add(new int[] {i, this.tickCount + ShipCannonBlock.RECOIL_TICKS});
+		this.recoiled.add(new long[] {BlockPos.asLong(p.x(), p.y(), p.z()), this.tickCount + ShipCannonBlock.RECOIL_TICKS});
 	}
 
 	/** (0.7.484) The guns whose recoil is over are run out again. */
@@ -1189,19 +1195,20 @@ public final class Ship extends Entity {
 			}
 			return;
 		}
-		for (java.util.Iterator<int[]> it = this.recoiled.iterator(); it.hasNext(); ) {
-			int[] r = it.next();
+		for (java.util.Iterator<long[]> it = this.recoiled.iterator(); it.hasNext(); ) {
+			long[] r = it.next();
 			if (r[1] > this.tickCount) {
 				continue;
 			}
 			it.remove();
 			Hull now = this.hull();
-			if (now == null || r[0] >= now.pieces.size()) {
+			int i = now == null ? -1 : now.index.get(r[0]);
+			if (i < 0 || i >= now.pieces.size()) {
 				continue;
 			}
-			BlockState state = now.pieces.get(r[0]).blockState();
+			BlockState state = now.pieces.get(i).blockState();
 			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.RECOILED)) {
-				this.setPiece(r[0], state.setValue(ShipCannonBlock.RECOILED, false));
+				this.setPiece(i, state.setValue(ShipCannonBlock.RECOILED, false));
 			}
 		}
 	}

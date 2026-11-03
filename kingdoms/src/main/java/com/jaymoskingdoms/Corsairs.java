@@ -298,7 +298,8 @@ final class Corsairs implements Ship.Captaincy {
 				float to = Fleet.bearing(ship, crew.shore.x, crew.shore.z);
 				float port = to - 90.0F, starboard = to + 90.0F;
 				want = Math.abs(Mth.wrapDegrees(port - ship.getYRot())) < Math.abs(Mth.wrapDegrees(starboard - ship.getYRot())) ? port : starboard;
-				sail = SHORE_SAIL;
+				// (0.7.484) on her mark she lies hove to (she still swings her beam round), not creeping off it
+				sail = d < WAYPOINT_REACH ? 0.0 : SHORE_SAIL;
 			}
 		} else {
 			crew.mode = "patrol";
@@ -323,7 +324,8 @@ final class Corsairs implements Ship.Captaincy {
 			}
 		}
 		// (0.7.285) her course round the land to where she's making for (not laying her guns on a foe close by)
-		if (sail > 0.0 && crew.detour == null && !"engage".equals(crew.mode)) {
+		// (0.7.484) nor on station shelling the shore, where her beam, not her bow, bears on her mark
+		if (sail > 0.0 && crew.detour == null && !"engage".equals(crew.mode) && !"shell".equals(crew.mode)) {
 			BlockPos goal = crew.goal != null ? crew.goal : BlockPos.containing(ship.getX() - Mth.sin(want * Mth.DEG_TO_RAD) * ROUTE_AIM,
 				ship.getY(), ship.getZ() + Mth.cos(want * Mth.DEG_TO_RAD) * ROUTE_AIM);
 			Float course = SeaRoutes.steer(level, ship, crew, goal);
