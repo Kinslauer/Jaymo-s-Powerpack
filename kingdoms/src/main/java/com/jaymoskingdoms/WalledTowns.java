@@ -179,6 +179,14 @@ final class WalledTowns {
 	static final AttachmentType<Map<String, Town>> TOWNS = AttachmentRegistry.create(JaymosKingdoms.id("walled_towns"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Town.CODEC)));
 
+	/**
+	 * (0.7.484) On the Overworld: the footprint of every band building a town has raised, every tier (settlement id to its
+	 * footprints, four numbers each: min x, min z, max x, max z). The builders ({@link Planner#taken}) keep off them, and
+	 * never take them for old ruins to tear down. Saved.
+	 */
+	static final AttachmentType<Map<String, List<Integer>>> RAISED = AttachmentRegistry.create(JaymosKingdoms.id("walled_town_band"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT.listOf())));
+
 	/** A planned band: the tier it's for, and its buildings in the order they go up (town frame). */
 	private record Plan(int tier, List<IllagerBuildings.Spot> spots) {
 	}
@@ -211,6 +219,26 @@ final class WalledTowns {
 		Map<String, Town> map = new HashMap<>(Factions.level(server).getAttachedOrElse(TOWNS, Map.of()));
 		map.put(Integer.toString(id), town);
 		Factions.level(server).setAttached(TOWNS, Map.copyOf(map));
+	}
+
+	/** (0.7.484) Every band building's footprint, every town: {minX, minZ, maxX, maxZ}. */
+	static List<int[]> raised(MinecraftServer server) {
+		List<int[]> out = new ArrayList<>();
+		for (List<Integer> all : Factions.level(server).getAttachedOrElse(RAISED, Map.of()).values()) {
+			for (int i = 0; i + 3 < all.size(); i += 4) {
+				out.add(new int[] {all.get(i), all.get(i + 1), all.get(i + 2), all.get(i + 3)});
+			}
+		}
+		return out;
+	}
+
+	/** (0.7.484) Notes a band building of town {@code id} stands over {@code minX..maxX, minZ..maxZ}. */
+	private static void raised(MinecraftServer server, int id, int minX, int minZ, int maxX, int maxZ) {
+		Map<String, List<Integer>> map = new HashMap<>(Factions.level(server).getAttachedOrElse(RAISED, Map.of()));
+		List<Integer> list = new ArrayList<>(map.getOrDefault(Integer.toString(id), List.of()));
+		list.addAll(List.of(minX, minZ, maxX, maxZ));
+		map.put(Integer.toString(id), List.copyOf(list));
+		Factions.level(server).setAttached(RAISED, Map.copyOf(map));
 	}
 
 	/** Village {@code id}'s tier (1 for any other settlement, or a village that hasn't grown). */
@@ -265,7 +293,8 @@ final class WalledTowns {
 
 	/**
 	 * (0.7.484) Whether the builders ({@link Planner}) may put up a building over {@code minX..maxX, minZ..maxZ}: well
-	 * inside a walled town's newest wall, and on none of its band's planned plots still to rise. True for any other place.
+	 * inside a walled town's newest wall, and on none of its band's planned plots (raised or still to rise: the raised ones,
+	 * and earlier tiers', are in {@link Planner#taken} too). True for any other place.
 	 */
 	static boolean plannable(ServerLevel level, Faction f, int minX, int minZ, int maxX, int maxZ) {
 		MinecraftServer server = level.getServer();
@@ -284,8 +313,8 @@ final class WalledTowns {
 		}
 		Town t = town(server, f.id());
 		List<IllagerBuildings.Spot> band = plan(level, f, kind(level, f), t.tier());
-		for (int i = t.built(); i < band.size(); i++) {
-			IllagerBuildings.Spot spot = band.get(i);
+		// (0.7.484) every plot of the band, the raised ones too: a building begun in a raised one's place would interleave with it
+		for (IllagerBuildings.Spot spot : band) {
 			CampBuildings.Placer flat = spot.placer(seat, gateOf(t, f));
 			int[] b = Hordes.bounds(new Hordes.Piece(spot.id(), spot.design()));
 			BlockPos a = flat.at(b[0], 0, b[1]), c = flat.at(b[2], 0, b[3]);
@@ -417,9 +446,13 @@ final class WalledTowns {
 			} else if (!t.opened()) {
 				out.add("gates and roads not yet cut");
 			}
-			int planned = plan(level, f, kind, tier).size();
-			if (t.built() < planned) {
-				out.add("band buildings " + t.built() + "/" + planned);
+			// (0.7.484) the band's designs are drawn only while the town is loaded (an unloaded one reads as bare land, and its
+			// designs and plan would keep default stuff for the session): till then it waits, its band not yet counted
+			List<IllagerBuildings.Spot> band = planned(level, f, kind, tier);
+			if (band == null) {
+				out.add("band buildings " + t.built() + "/? (town not loaded)");
+			} else if (t.built() < band.size()) {
+				out.add("band buildings " + t.built() + "/" + band.size());
 			}
 		}
 		long age = Math.max(0L, level.getGameTime() / Camps.DAY_TICKS - Math.max(0L, t.born()));
@@ -1023,6 +1056,18 @@ final class WalledTowns {
 		return spots;
 	}
 
+	/**
+	 * (0.7.484) Village {@code f}'s band plan for {@code tier} if it's already worked out or the town is loaded (so its
+	 * designs read its own land); null otherwise.
+	 */
+	private static @Nullable List<IllagerBuildings.Spot> planned(ServerLevel level, Faction f, Kind kind, int tier) {
+		Plan cached = PLANS.get(f.id());
+		if (cached != null && cached.tier() == tier) {
+			return cached.spots();
+		}
+		return level.isPositionEntityTicking(f.seat()) ? plan(level, f, kind, tier) : null;
+	}
+
 	private enum Raise {
 		/** It stands. */
 		PLACED,
@@ -1043,6 +1088,15 @@ final class WalledTowns {
 			return Raise.WAIT;
 		}
 		int[] b = Hordes.bounds(new Hordes.Piece(spot.id(), spot.design()));
+		// (0.7.484) never over the builders' own works: a building begun, finished or a plot marked there, or one raised before
+		BlockPos ca = flat.at(b[0], 0, b[1]), cc = flat.at(b[2], 0, b[3]);
+		int minX = Math.min(ca.getX(), cc.getX()), minZ = Math.min(ca.getZ(), cc.getZ()), maxX = Math.max(ca.getX(), cc.getX()),
+			maxZ = Math.max(ca.getZ(), cc.getZ());
+		for (int[] w : Planner.taken(level, f)) {
+			if (minX <= w[2] && maxX >= w[0] && minZ <= w[3] && maxZ >= w[1]) {
+				return Raise.SKIPPED;
+			}
+		}
 		List<BlockPos> columns = new ArrayList<>();
 		List<Integer> heights = new ArrayList<>();
 		for (int x = b[0]; x <= b[2]; x++) {
@@ -1101,6 +1155,7 @@ final class WalledTowns {
 		for (Blueprint.Placement p : design.blocks()) {
 			Hordes.joinFence(level, placer.at(p.offset()));
 		}
+		raised(level.getServer(), f.id(), minX, minZ, maxX, maxZ);
 		JaymosKingdoms.LOGGER.debug("{} raised a {} in its band", f.name(), spot.id());
 		return Raise.PLACED;
 	}
@@ -1154,10 +1209,11 @@ final class WalledTowns {
 			.append(", folk ").append(Math.max(t.folk(), f.holdings().population())).append('/').append(kind.folk[t.tier() - 1]).append(", purse ")
 			.append(t.purse()).append(", ").append(wealth(server, f).key()).append(" realm)");
 		if (t.tier() >= 2) {
-			int planned = plan(level, f, kind, t.tier()).size();
+			List<IllagerBuildings.Spot> band = planned(level, f, kind, t.tier());
+			String planned = band == null ? "?" : Integer.toString(band.size());
 			out.append("\nthis tier: ").append(t.stone() ? "stone" : kind == Kind.BLOSSOM ? "plaster and tile" : "log").append(" wall ").append(t.arcs())
 				.append('/').append(ARCS).append(" arcs").append(t.opened() ? ", gates and roads cut" : "").append(", band ")
-				.append(Math.min(t.built(), planned)).append('/').append(planned).append(" buildings");
+				.append(band == null ? t.built() : Math.min(t.built(), band.size())).append('/').append(planned).append(" buildings");
 		}
 		List<String> missing = missing(level, f, t, kind);
 		out.append("\nnext tier: ").append(t.tier() >= kind.tiers() ? "none, the top" : missing.isEmpty() ? "ready (it moves up at its next day)"

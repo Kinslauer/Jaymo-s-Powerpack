@@ -442,10 +442,13 @@ public final class Planner {
 		return best;
 	}
 
-	/** Every footprint already spoken for (all factions' buildings, projects and plots), as {minX, minZ, maxX, maxZ}. */
-	private static List<int[]> taken(ServerLevel level, Faction f) {
-		List<int[]> out = new ArrayList<>();
+	/**
+	 * Every footprint already spoken for (all factions' buildings, projects and plots, and (0.7.484) every walled town's
+	 * raised band buildings, {@link WalledTowns#raised}), as {minX, minZ, maxX, maxZ}.
+	 */
+	static List<int[]> taken(ServerLevel level, Faction f) {
 		MinecraftServer server = level.getServer();
+		List<int[]> out = new ArrayList<>(WalledTowns.raised(server));
 		for (var e : Works.all(server).entrySet()) {
 			Faction owner = Factions.get(server, e.getKey());
 			for (Works.Built b : e.getValue().built()) {
