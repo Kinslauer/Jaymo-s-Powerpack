@@ -15,9 +15,9 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
 | Tier | Orc name | Goblin name | Wall radius | Folk cap | Unlocked when |
 |---|---|---|---|---|---|
 | 1 | War camp | Village | 22 | 15 / 16 | founded |
-| 2 | Warhold | Warren | 36 | 20 | inner list built, folk at cap, 10 days old |
-| 3 | Horde town | Goblin town | 52 | 25 | tier 2 filled, 25 days old |
-| 4 | Horde kingdom | Goblin kingdom | 72 | 30 | tier 3 filled, the tribe's king seat, 50 days old |
+| 2 | Warhold | Warren | 36 | 25 | inner list built, folk at cap, 10 days old |
+| 3 | Horde town | Goblin town | 52 | 32 | tier 2 filled, 25 days old |
+| 4 | Horde kingdom | Goblin kingdom | 72 | 40 | tier 3 filled, the tribe's king seat, 50 days old |
 
 - Moving up a tier, the camp builds a new outer palisade one arc a day (ogres double the speed). Gates are cut in the old
   ring, and roads of coarse dirt run from gate to gate.
@@ -70,6 +70,20 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
    modpacks to help generate their structures.
 10. **Every settlement:** all kinds of settlements should work this way too (tiers, growth, economy).
 11. Mods to check: MCA Crime, MCA Mob Compat, MCA Kingdoms, Plant Fibers, MCA Quests, MCA Reputation, MCA Conversations.
+
+## Every settlement (design, needs Andy's say)
+Today each kind grows its own way: kingdoms and fiefdoms pick from the open building catalogue with no cap
+(`Construction`, `Buildings`), villages and blossom villages use the village catalogue, illager camps, pirate coves and
+plain barbarian camps raise a fixed list, ogre holds are tagged structures, havens only trade and pay tribute. Hordes'
+tier machinery (tier record, promote/step, band planner, great hall, vassals) is reusable once its walls and folk take a
+style per kind. Questions:
+1. Kingdoms and fiefdoms: keep open-ended growth, or add tiers and caps on top?
+2. Villages and blossom villages: tier up into walled towns? What do their walls look like?
+3. Pirate coves (by ship size?), illager camps, ogre holds: tiers at all?
+4. Human settlements keep emeralds? Blossom villages their own coin?
+5. Caravans for villages and greenskin camps too (today only fiefdoms send them)?
+6. Havens: tier, or only trade and tribute?
+7. 40 at the top for every kind, or each its own?
 
 ## Checklist
 - [x] Patch 1: ogres in orc camps, Jade names, half-orc skin slider, idle weapon loop (PR #849)
