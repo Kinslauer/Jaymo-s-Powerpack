@@ -5042,3 +5042,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
   Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
   Compile-checked; not played.
+- **0.19.69, calmer leaves:** Andy: "the trees and leaves can look too patterened now due to the new bushyness ... it
+  looks like a hall of mirrors". Excalibur's leaf models hang 6-pixel fringes and cross planes off every leaf block, and
+  inside a canopy they repeat block after block. The new built-in pack `calm_leaves` (on by default, above Excalibur)
+  puts vanilla's plain leaf cubes back for the 11 vanilla leaves, with Excalibur's textures still on them, and turns each
+  block at random so the canopy doesn't tile (docs/Excalibur-Style.md).

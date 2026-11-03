@@ -38,3 +38,10 @@ is new or changed. `--check` lists those files without changing anything.
 The grade sets the mood, but shapes stay as drawn. Hero items get redrawn by hand in the Excalibur direction, our own
 pixels only: slimmer blades with a fuller line, darker plate, muted metals and fewer hard outlines. Samples and a
 preview are in the project's `art-overhaul/excalibur-style/` folder (Durandal, rustic bread, paladin chestplate).
+
+## Leaves (0.19.69)
+Excalibur's leaf models hang a 6-pixel fringe off each side of every leaf block and put crossed planes on top. Leaf
+blocks never hide their neighbours' faces, so deep inside a canopy those fringes repeat block after block (Andy: "it
+looks like a hall of mirrors"). Our built-in pack `calm_leaves` puts vanilla's plain leaf cubes back for the 11 vanilla
+leaves. Excalibur's leaf textures still show, and each block is turned at random (4 turns, upright or flipped) so the
+canopy doesn't tile. It's on by default; switch it off under Resource Packs to get Excalibur's bushy leaves back.
