@@ -990,7 +990,8 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Languages.understands(player, villager)
-			? Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
+			// (0.7.480) an orc or goblin opens in its own dialect
+			? Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);

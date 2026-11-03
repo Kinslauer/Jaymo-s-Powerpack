@@ -228,7 +228,8 @@ public final class Introductions {
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
-			return Component.translatable("dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
+			// (0.7.480) an orc or goblin refuses in its own dialect
+			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {
