@@ -31,12 +31,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -94,6 +97,8 @@ final class WalledTowns {
 	static final int BAND_INNER = 3, BAND_OUTER = 2;
 	/** Roads are this half-width. */
 	static final int ROAD_HALF = 1;
+	/** (0.7.484) Folk and golems are counted this far past the town's wall radius. */
+	static final int HOME_MARGIN = 4;
 	// ================================================================================================================
 
 	/** Which way a settlement builds. */
@@ -210,13 +215,23 @@ final class WalledTowns {
 		return town(server, id).tier();
 	}
 
-	/** {@code f} is a village this class grows. */
-	static boolean grows(Faction f) {
-		return f.type() == FactionType.VILLAGE && !f.fallen();
+	/** {@code f} is a village this class grows. (0.7.484) Never a haven: havens only trade, and grow for their output. */
+	static boolean grows(MinecraftServer server, Faction f) {
+		return f.type() == FactionType.VILLAGE && !f.fallen() && !Havens.is(server, f);
 	}
 
+	/**
+	 * Which way {@code f} builds. (0.7.484) A Blossom village is known by its saved front ({@link Town#gate}, set only
+	 * when one rises), so one founded outside the cherry groves stays one after a restart; the land decides the rest.
+	 */
 	static Kind kind(ServerLevel level, Faction f) {
-		return BLOSSOMS.computeIfAbsent(f.id(), x -> BlossomVillages.blossom(level, f)) ? Kind.BLOSSOM : Kind.VILLAGE;
+		return BLOSSOMS.computeIfAbsent(f.id(), x -> town(level.getServer(), x).gate() >= 0 || BlossomVillages.blossom(level, f))
+			? Kind.BLOSSOM : Kind.VILLAGE;
+	}
+
+	/** (0.7.484) Where a town's folk and golems are counted: the bell's box, or out to its own wall, whichever is wider. */
+	private static AABB home(Faction f, Kind kind, int tier) {
+		return new AABB(f.seat()).inflate(Math.max(Villages.VILLAGE_RADIUS, kind.wall[tier - 1] + HOME_MARGIN));
 	}
 
 	/** Its folk cap at its tier. */
@@ -232,10 +247,10 @@ final class WalledTowns {
 
 	/** The lang key of village {@code f}'s tier name ("Walled town"...), or null for any other faction. */
 	static @Nullable String tierKey(MinecraftServer server, Faction f) {
-		if (f.type() != FactionType.VILLAGE) {
+		if (f.type() != FactionType.VILLAGE || Havens.is(server, f)) {
 			return null;
 		}
-		return "camp.jaymoskingdoms.tier." + (BLOSSOMS.getOrDefault(f.id(), false) ? "blossom." : "village.") + tier(server, f.id());
+		return "camp.jaymoskingdoms.tier." + (kind(Factions.level(server), f) == Kind.BLOSSOM ? "blossom." : "village.") + tier(server, f.id());
 	}
 
 	/** Remembers which way a Blossom village's torii faces (its front), when it rises. */
@@ -277,7 +292,7 @@ final class WalledTowns {
 		}
 		long today = time / Camps.DAY_TICKS;
 		for (Faction f : Factions.all(server, FactionType.VILLAGE)) {
-			if (!grows(f)) {
+			if (!grows(server, f)) {
 				continue;
 			}
 			Town t = town(server, f.id());
@@ -299,7 +314,7 @@ final class WalledTowns {
 		boolean loaded = level.isPositionEntityTicking(f.seat());
 		int folk = Math.max(t.folk(), f.holdings().population());
 		if (loaded) {
-			folk = Villages.people(level, f).size();
+			folk = level.getEntitiesOfClass(Villager.class, home(f, kind, t.tier()), Villager::isAlive).size();
 		}
 		long born = t.born() < 0 ? today : t.born();
 		long rich = 100 + (long)INCOME_RICH_PERCENT * wealth(server, f).ordinal();
@@ -410,7 +425,8 @@ final class WalledTowns {
 			}
 			EntityTypes.VILLAGER.spawn(level, Construction.standable(level, at, 4), EntitySpawnReason.STRUCTURE);
 		}
-		int golems = Villages.guards(level, f).size();
+		// (0.7.484) counted over the whole town, so the golem at the gate and newcomers out by the wall are seen
+		int golems = level.getEntitiesOfClass(IronGolem.class, home(f, kind, t.tier()), IronGolem::isAlive).size();
 		BlockPos gate = frame.at(0, 0, -(r - 5));
 		if (golems < GOLEMS[t.tier() - 1] && level.isLoaded(gate) && !Raids.playerNear(level, gate, BUILD_HIDE_RANGE)) {
 			EntityTypes.IRON_GOLEM.spawn(level, Construction.standable(level, gate, 4), EntitySpawnReason.STRUCTURE);
@@ -786,10 +802,11 @@ final class WalledTowns {
 
 	// ---- the band: what each kind builds -----------------------------------------------------------------------------------------
 
-	private static void piece(List<Hordes.Piece> out, ServerLevel level, Faction f, String key, int n, Function<Buildings.Kit, Blueprint> design) {
+	// (0.7.484) the tier is in each piece's id and seed: the same key at the next tier is a new building, not the old one's twin
+	private static void piece(List<Hordes.Piece> out, ServerLevel level, Faction f, int tier, String key, int n, Function<Buildings.Kit, Blueprint> design) {
 		for (int i = 0; i < n; i++) {
-			String id = "town_" + f.id() + "_" + key + "_" + i;
-			long seed = (f.id() * 0x9E3779B97F4A7C15L ^ key.hashCode() * 0x632BE59BD9B4E019L ^ i * 0x2545F4914F6CDD1DL) | 1L;
+			String id = "town_" + f.id() + "_t" + tier + "_" + key + "_" + i;
+			long seed = (f.id() * 0x9E3779B97F4A7C15L ^ key.hashCode() * 0x632BE59BD9B4E019L ^ i * 0x2545F4914F6CDD1DL ^ tier * 0x7F4A7C159E3779B9L) | 1L;
 			int fid = f.id();
 			out.add(new Hordes.Piece(id, () -> {
 				Blueprint known = DESIGNS.get(id);
@@ -803,9 +820,9 @@ final class WalledTowns {
 		}
 	}
 
-	private static void fixed(List<Hordes.Piece> out, Faction f, String key, int n, Supplier<Blueprint> design) {
+	private static void fixed(List<Hordes.Piece> out, Faction f, int tier, String key, int n, Supplier<Blueprint> design) {
 		for (int i = 0; i < n; i++) {
-			out.add(new Hordes.Piece("town_" + f.id() + "_" + key + "_" + i, design));
+			out.add(new Hordes.Piece("town_" + f.id() + "_t" + tier + "_" + key + "_" + i, design));
 		}
 	}
 
@@ -815,71 +832,71 @@ final class WalledTowns {
 		if (kind == Kind.VILLAGE) {
 			switch (tier) {
 				case 2 -> {
-					piece(out, level, f, "house", 3, Buildings::house);
-					piece(out, level, f, "well", 1, Buildings::well);
-					piece(out, level, f, "stall", 2, Buildings::stall);
-					piece(out, level, f, "farm", 1, Buildings::farm);
-					piece(out, level, f, "pen", 1, Buildings::pen);
+					piece(out, level, f, tier, "house", 3, Buildings::house);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					piece(out, level, f, tier, "stall", 2, Buildings::stall);
+					piece(out, level, f, tier, "farm", 1, Buildings::farm);
+					piece(out, level, f, tier, "pen", 1, Buildings::pen);
 				}
 				case 3 -> {
-					piece(out, level, f, "house", 4, Buildings::house);
-					piece(out, level, f, "well", 1, Buildings::well);
-					piece(out, level, f, "smithy", 1, Buildings::smithy);
-					piece(out, level, f, "mason", 1, Buildings::mason);
-					piece(out, level, f, "tavern", 1, k -> Buildings.tavern(k, 8));
-					piece(out, level, f, "market", 1, Buildings::market);
-					piece(out, level, f, "stall", 2, Buildings::stall);
-					piece(out, level, f, "farm", 2, Buildings::farm);
-					piece(out, level, f, "cookhouse", 1, Buildings::cookhouse);
+					piece(out, level, f, tier, "house", 4, Buildings::house);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					piece(out, level, f, tier, "smithy", 1, Buildings::smithy);
+					piece(out, level, f, tier, "mason", 1, Buildings::mason);
+					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 8));
+					piece(out, level, f, tier, "market", 1, Buildings::market);
+					piece(out, level, f, tier, "stall", 2, Buildings::stall);
+					piece(out, level, f, tier, "farm", 2, Buildings::farm);
+					piece(out, level, f, tier, "cookhouse", 1, Buildings::cookhouse);
 				}
 				default -> {
-					piece(out, level, f, "house", 5, Buildings::house);
-					piece(out, level, f, "barracks", 1, Buildings::barracks);
-					piece(out, level, f, "market", 1, Buildings::market);
-					piece(out, level, f, "tavern", 1, k -> Buildings.tavern(k, 14));
-					piece(out, level, f, "smithy", 1, Buildings::smithy);
-					piece(out, level, f, "mason", 1, Buildings::mason);
-					piece(out, level, f, "cookhouse", 1, Buildings::cookhouse);
-					piece(out, level, f, "farm", 2, Buildings::farm);
-					piece(out, level, f, "pen", 1, Buildings::pen);
-					piece(out, level, f, "well", 1, Buildings::well);
-					piece(out, level, f, "stables", 1, Buildings::stableYard);
-					piece(out, level, f, "tower", 1, Buildings::tower);
+					piece(out, level, f, tier, "house", 5, Buildings::house);
+					piece(out, level, f, tier, "barracks", 1, Buildings::barracks);
+					piece(out, level, f, tier, "market", 1, Buildings::market);
+					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 14));
+					piece(out, level, f, tier, "smithy", 1, Buildings::smithy);
+					piece(out, level, f, tier, "mason", 1, Buildings::mason);
+					piece(out, level, f, tier, "cookhouse", 1, Buildings::cookhouse);
+					piece(out, level, f, tier, "farm", 2, Buildings::farm);
+					piece(out, level, f, tier, "pen", 1, Buildings::pen);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					piece(out, level, f, tier, "stables", 1, Buildings::stableYard);
+					piece(out, level, f, tier, "tower", 1, Buildings::tower);
 				}
 			}
 		} else {
 			switch (tier) {
 				case 2 -> {
-					piece(out, level, f, "minka", 3, Blossom::minka);
-					piece(out, level, f, "stall", 2, Buildings::stall);
-					piece(out, level, f, "well", 1, Buildings::well);
-					piece(out, level, f, "smokehouse", 1, JobHalls::smokehouse);
-					fixed(out, f, "lantern", 3, Blossom::stoneLantern);
+					piece(out, level, f, tier, "minka", 3, Blossom::minka);
+					piece(out, level, f, tier, "stall", 2, Buildings::stall);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					piece(out, level, f, tier, "smokehouse", 1, JobHalls::smokehouse);
+					fixed(out, f, tier, "lantern", 3, Blossom::stoneLantern);
 				}
 				case 3 -> {
-					piece(out, level, f, "minka", 4, Blossom::minka);
-					piece(out, level, f, "stall", 2, Buildings::stall);
-					piece(out, level, f, "well", 1, Buildings::well);
-					piece(out, level, f, "butcher_shop", 1, JobHalls::butcherShop);
-					piece(out, level, f, "fishery", 1, JobHalls::fishery);
-					piece(out, level, f, "lodge", 1, JobHalls::huntingLodge);
-					piece(out, level, f, "tavern", 1, k -> Buildings.tavern(k, 8));
-					piece(out, level, f, "farm", 1, Buildings::farm);
-					fixed(out, f, "lantern", 4, Blossom::stoneLantern);
+					piece(out, level, f, tier, "minka", 4, Blossom::minka);
+					piece(out, level, f, tier, "stall", 2, Buildings::stall);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					piece(out, level, f, tier, "butcher_shop", 1, JobHalls::butcherShop);
+					piece(out, level, f, tier, "fishery", 1, JobHalls::fishery);
+					piece(out, level, f, tier, "lodge", 1, JobHalls::huntingLodge);
+					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 8));
+					piece(out, level, f, tier, "farm", 1, Buildings::farm);
+					fixed(out, f, tier, "lantern", 4, Blossom::stoneLantern);
 				}
 				default -> {
-					piece(out, level, f, "minka", 5, Blossom::minka);
-					piece(out, level, f, "stall", 3, Buildings::stall);
-					piece(out, level, f, "butcher", 1, JobHalls::butcher);
-					piece(out, level, f, "lodge", 1, JobHalls::huntingLodge);
-					piece(out, level, f, "dojo", 1, JobHalls::trainingHall);
-					piece(out, level, f, "infirmary", 1, JobHalls::infirmary);
-					piece(out, level, f, "tavern", 1, k -> Buildings.tavern(k, 14));
-					piece(out, level, f, "market", 1, Buildings::market);
-					piece(out, level, f, "farm", 2, Buildings::farm);
-					piece(out, level, f, "well", 1, Buildings::well);
-					fixed(out, f, "shrine", 1, Blossom::shrine);
-					fixed(out, f, "lantern", 6, Blossom::stoneLantern);
+					piece(out, level, f, tier, "minka", 5, Blossom::minka);
+					piece(out, level, f, tier, "stall", 3, Buildings::stall);
+					piece(out, level, f, tier, "butcher", 1, JobHalls::butcher);
+					piece(out, level, f, tier, "lodge", 1, JobHalls::huntingLodge);
+					piece(out, level, f, tier, "dojo", 1, JobHalls::trainingHall);
+					piece(out, level, f, tier, "infirmary", 1, JobHalls::infirmary);
+					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 14));
+					piece(out, level, f, tier, "market", 1, Buildings::market);
+					piece(out, level, f, tier, "farm", 2, Buildings::farm);
+					piece(out, level, f, tier, "well", 1, Buildings::well);
+					fixed(out, f, tier, "shrine", 1, Blossom::shrine);
+					fixed(out, f, tier, "lantern", 6, Blossom::stoneLantern);
 				}
 			}
 		}
@@ -997,7 +1014,7 @@ final class WalledTowns {
 		double bestDist = Double.MAX_VALUE;
 		for (Faction f : Factions.all(c.getSource().getServer(), FactionType.VILLAGE)) {
 			double d = Raids.horizontal(f.seat(), player.blockPosition());
-			if (grows(f) && d < bestDist) {
+			if (grows(c.getSource().getServer(), f) && d < bestDist) {
 				best = f;
 				bestDist = d;
 			}
