@@ -71,19 +71,21 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
 10. **Every settlement:** all kinds of settlements should work this way too (tiers, growth, economy).
 11. Mods to check: MCA Crime, MCA Mob Compat, MCA Kingdoms, Plant Fibers, MCA Quests, MCA Reputation, MCA Conversations.
 
-## Every settlement (design, needs Andy's say)
-Today each kind grows its own way: kingdoms and fiefdoms pick from the open building catalogue with no cap
-(`Construction`, `Buildings`), villages and blossom villages use the village catalogue, illager camps, pirate coves and
-plain barbarian camps raise a fixed list, ogre holds are tagged structures, havens only trade and pay tribute. Hordes'
-tier machinery (tier record, promote/step, band planner, great hall, vassals) is reusable once its walls and folk take a
-style per kind. Questions:
-1. Kingdoms and fiefdoms: keep open-ended growth, or add tiers and caps on top?
-2. Villages and blossom villages: tier up into walled towns? What do their walls look like?
-3. Pirate coves (by ship size?), illager camps, ogre holds: tiers at all?
-4. Human settlements keep emeralds? Blossom villages their own coin?
-5. Caravans for villages and greenskin camps too (today only fiefdoms send them)?
-6. Havens: tier, or only trade and tribute?
-7. 40 at the top for every kind, or each its own?
+## Patch 5: every settlement (Andy's answers 2026-11-03)
+1. **Kingdoms and fiefdoms** keep their open-ended growth (no tiers, no cap).
+2. **Villages and blossom villages** tier up into walled towns: log palisades, stone walls for the villages of richer
+   kingdoms.
+3. **Pirate coves, illager camps, ogre holds** grow as long as they hold territory and resources, so they plunder when
+   they fight or raid (loot goes home into their stores). Pirates need better cannons: better modelled and destructive to
+   all terrain, not just ships. Andy saw pirates shelling orcs throwing rocks from the shore; the blasts should have
+   torn the coast down to the stone. (Pirate Cannons! on CurseForge is All Rights Reserved, Forge only: ideas only.)
+   Terrain damage is spread over ticks, as the meteor fix does, to keep it from lagging.
+4. **Money:** currencies diversify. A settlement uses the currency of its prominent trading hub, or of another factor
+   such as its superior (overlord) realm. Greenskins keep bent ingots.
+5. **Caravans:** everyone trades in their own way, down to handcarts if that's all they have.
+6. **Havens** only trade, but expand massively to make the most of their output, and keep fierce fighters sworn to
+   defend them.
+7. **Caps:** each kind sets its own.
 
 ## Checklist
 - [x] Patch 1: ogres in orc camps, Jade names, half-orc skin slider, idle weapon loop (PR #849)
@@ -96,6 +98,6 @@ style per kind. Questions:
 - [ ] Goblin towns: elaborate, human-adjacent buildings for goblin tiers; caps 40
 - [ ] Living together: greenskins in human and heritage settlements, a distaste table between peoples
 - [ ] Patch 4: the greenskin kingdom city (throne hall, arena, market district, pacts, bounty line)
-- [ ] Every settlement kind grows in tiers with its own economy (design first)
+- [ ] Patch 5: walled towns, plundering coves/camps/holds, terrain-wrecking pirate cannons, currencies, caravans for all, haven growth
 - [ ] Structures from Andy's other modpacks (waiting on which packs)
 - [ ] Check the 7 MCA add-ons and Plant Fibers
