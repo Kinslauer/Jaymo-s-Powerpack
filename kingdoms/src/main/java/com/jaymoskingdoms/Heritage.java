@@ -841,7 +841,7 @@ public final class Heritage {
 		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
 	}
 
-	/** The heritage key: a Warrior-born's tail (a Frostborn's ice prison is their left mouse held, through Jaymo's Powers). */
+	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
 		if (kind == Kind.WARRIORBORN) {
@@ -857,6 +857,9 @@ public final class Heritage {
 		} else if (kind == Kind.RUBBERFOLK) {
 			// (0.7.288) starts (or stops) swallowing a weak foe
 			RubberFolk.press(player);
+		} else {
+			// (0.7.480) every other heritage and look: its kit's ability (or, for a left-mouse hold, a word on how to use it)
+			HeritageKits.press(player);
 		}
 	}
 

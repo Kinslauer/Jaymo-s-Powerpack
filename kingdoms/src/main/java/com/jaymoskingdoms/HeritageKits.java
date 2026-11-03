@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import com.jaymoskingdoms.mixin.MobAccessor;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -45,6 +47,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Enemy;
@@ -122,7 +125,12 @@ public final class HeritageKits {
 	static final float PHOTO_HEAL = 1.0F, SOUL_TAKER_HEAL = 3.0F;
 	static final double SUN_WEAK_DAMAGE = 0.12, SUN_HOLY_DAMAGE = 0.10, SUN_HOLY_SPEED = 0.05, WET_DAMAGE = 0.15, WET_SPEED = 0.15;
 	static final double COLD_BLOOD_DAMAGE = 0.15, COLD_BLOOD_SPEED = 0.20, DRY_DAMAGE = 0.15, DRY_SPEED = 0.10, LAND_SPEED = 0.05;
-	static final double HEAVY_SPEED = 0.15, HEAVY_SWIM = 0.7, GROUNDED_DAMAGE = 0.12, MOON_SPEED = 0.05;
+	static final double HEAVY_SPEED = 0.15, GROUNDED_DAMAGE = 0.12, MOON_SPEED = 0.05;
+	/**
+	 * (0.7.480) Heavy in water: each tick in water, the swim's sideways speed is kept at this factor (about 15% slower, sprinting
+	 * or not) and they're pulled down this much (blocks per tick), as a stone sinks. Swimming ignores speed attributes.
+	 */
+	public static final double HEAVY_DRAG = 0.97, HEAVY_SINK = 0.012;
 	/** Nine Lives: they live again, at 1 health, at most this often (ticks). */
 	static final int NINE_LIVES_COOLDOWN = 6000;
 	/** Night vision lasts this long each time it's given (ticks), over the 1 s between looks. */
@@ -227,13 +235,15 @@ public final class HeritageKits {
 		kind(Heritage.Kind.FROSTBORN, Move.FROSTBIND, Perk.GLACIAL, Perk.FIRE_FRAIL);
 		kind(Heritage.Kind.NIGHTBORN, Move.SHADOWMELD, Perk.NIGHT_EYES, Perk.NONE);
 		kind(Heritage.Kind.WARRIORBORN, Move.WAR_CRY, Perk.NONE, Perk.NONE);
-		kind(Heritage.Kind.EARTHLING, Move.SECOND_WIND, Perk.NONE, Perk.NONE);
+		// (0.7.480) every heritage has a flaw: the Earthling's body needs more feeding than a blooded one's
+		kind(Heritage.Kind.EARTHLING, Move.SECOND_WIND, Perk.NONE, Perk.HUNGRY);
 		kind(Heritage.Kind.STORMBORN, Move.THUNDERCLAP, Perk.NONE, Perk.WET_GROUNDED);
 		kind(Heritage.Kind.DAWNBORN, Move.SUNFLARE, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.ENDBORN, Move.ENDER_STEP, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.DRAGONBLOOD, Move.FIRE_BREATH, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.DEEPBORN, Move.TREMORSENSE, Perk.DEEP_EYES, Perk.NONE);
-		kind(Heritage.Kind.DIVINE, Move.HALO_PULSE, Perk.NONE, Perk.NONE);
+		// (0.7.480) the Divine-born never hunger, so theirs is a softer skin
+		kind(Heritage.Kind.DIVINE, Move.HALO_PULSE, Perk.NONE, Perk.SOFT);
 		kind(Heritage.Kind.BIOBUILT, Move.ENGULF, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.RUBBERFOLK, Move.ENGULF, Perk.NONE, Perk.NONE);
 		kind(Heritage.Kind.BEASTFOLK, Move.FERAL_SPRINT, Perk.SWIFT, Perk.HUNGRY);
@@ -243,7 +253,8 @@ public final class HeritageKits {
 		look(HeritageVariants.Variant.SKYMARKED, Move.UNBREAKABLE_STAND, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.OBSIDIAN, Move.RUNE_OF_WARDING, Perk.WARDED, Perk.NONE);
 		look(HeritageVariants.Variant.MAGMAVEIN, Move.MOUNTAIN_LEAP, Perk.FEATHERFALL, Perk.NONE);
-		look(HeritageVariants.Variant.GOLDSCALE, Move.TERRA_QUAKE, Perk.STURDY, Perk.NONE);
+		// (0.7.480) the Terra drake's matching weakness: earth-heavy, slow on its feet
+		look(HeritageVariants.Variant.GOLDSCALE, Move.TERRA_QUAKE, Perk.STURDY, Perk.HEAVY_FOOTED);
 		look(HeritageVariants.Variant.RIMEWYRM, Move.FROST_BREATH, Perk.ICE_SCALES, Perk.FIRE_FRAIL);
 		look(HeritageVariants.Variant.INKMARKED, Move.ARCANE_OVERFLOW, Perk.WARDED, Perk.FRAIL);
 		look(HeritageVariants.Variant.DRYAD, Move.VERDANT_BLOOM, Perk.PHOTOSYNTH, Perk.TRIPLE_FIRE);
@@ -270,7 +281,10 @@ public final class HeritageKits {
 	private static final List<Holder<Attribute>> TRACKED = List.of(Attributes.LUCK, Attributes.MOVEMENT_SPEED, Attributes.KNOCKBACK_RESISTANCE,
 		Attributes.ARMOR, Attributes.SAFE_FALL_DISTANCE, Attributes.ATTACK_SPEED, Attributes.SNEAKING_SPEED, Attributes.MAX_HEALTH);
 
-	/** Per player: when the ability is ready again (game time), and the windows the abilities open. */
+	/**
+	 * Per player: when the ability is ready again (game time), and the windows the abilities open. (0.7.480) {@code READY} and
+	 * {@code LIVED} outlast a logout, so a relog doesn't reset a cooldown.
+	 */
 	private static final Map<UUID, Long> READY = new HashMap<>();
 	private static final Map<UUID, Long> PHASED = new HashMap<>(), REFLEX = new HashMap<>(), POUNCED = new HashMap<>(), LIVED = new HashMap<>(), LAST_WET = new HashMap<>();
 	private static final Map<UUID, long[]> STEAL = new HashMap<>();
@@ -280,6 +294,8 @@ public final class HeritageKits {
 	}
 
 	private static final Map<UUID, Conscript> CONSCRIPTS = new HashMap<>();
+	/** (0.7.480) The scoreboard tag on a risen skeleton, so one that outlives its entry is found and dropped when it loads. */
+	private static final String CONSCRIPT_TAG = "jaymoskingdoms_conscript";
 
 	private HeritageKits() {
 	}
@@ -314,14 +330,19 @@ public final class HeritageKits {
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			UUID id = handler.player.getUUID();
-			READY.remove(id);
+			// (0.7.480) READY and LIVED stay: cooldowns run on through a relog
 			PHASED.remove(id);
 			REFLEX.remove(id);
 			POUNCED.remove(id);
-			LIVED.remove(id);
 			LAST_WET.remove(id);
 			STEAL.remove(id);
 			HEALTH.remove(id);
+		});
+		// (0.7.480) a risen skeleton left behind in an unloaded chunk (or saved over a restart) falls when it loads again
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity.entityTags().contains(CONSCRIPT_TAG) && !CONSCRIPTS.containsKey(entity.getUUID())) {
+				entity.discard();
+			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (UUID id : new ArrayList<>(CONSCRIPTS.keySet())) {
@@ -509,7 +530,7 @@ public final class HeritageKits {
 
 	/** The shares off blows and speed, and off swimming, that change with the weather and the land: set, or taken off, together. */
 	private static void dynamics(LivingEntity entity, @Nullable Kit kit) {
-		double damage = 0.0, speed = 0.0, swim = 0.0;
+		double damage = 0.0, speed = 0.0;
 		if (kit != null) {
 			boolean sunny = kit.has(Perk.SUN_WEAK) || kit.has(Perk.SUN_HOLY) ? sun(entity) : false;
 			if (kit.has(Perk.SUN_WEAK) && sunny) {
@@ -535,8 +556,8 @@ public final class HeritageKits {
 				speed -= LAND_SPEED;
 			}
 			if (kit.has(Perk.HEAVY_WATER) && entity.isInWater()) {
+				// (0.7.480) wading; the swim itself is slowed in travelInWater ({@link #heavyInWater})
 				speed -= HEAVY_SPEED;
-				swim -= HEAVY_SWIM;
 			}
 			if (kit.has(Perk.WET_GROUNDED) && entity.isInWater()) {
 				damage -= GROUNDED_DAMAGE;
@@ -547,7 +568,15 @@ public final class HeritageKits {
 		}
 		put(entity, Attributes.ATTACK_DAMAGE, KIT_ID + "place_damage", damage, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		put(entity, Attributes.MOVEMENT_SPEED, KIT_ID + "place_speed", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		put(entity, Attributes.WATER_MOVEMENT_EFFICIENCY, KIT_ID + "place_swim", swim, AttributeModifier.Operation.ADD_VALUE);
+	}
+
+	/**
+	 * (0.7.480) Whether {@code entity} is heavy in water (the Emberborn's flaw): read on both sides, from the synced heritage, by
+	 * {@code mixin.heritage.LivingEntityHeavyWaterMixin} after each tick's swim.
+	 */
+	public static boolean heavyInWater(LivingEntity entity) {
+		Kit kit = kit(entity);
+		return kit != null && kit.has(Perk.HEAVY_WATER);
 	}
 
 	/** A bound-to-water one who's been out of water and rain for {@link #DRY_LIMIT_TICKS} (a villager's count starts when it's loaded). */
@@ -1246,9 +1275,14 @@ public final class HeritageKits {
 			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.MOB_SUMMONED, null);
 			mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 			mob.setDropChance(EquipmentSlot.HEAD, 0.0F);
-			mob.setPersistenceRequired();
-			level.addFreshEntity(mob);
+			// (0.7.480) not kept for good, tagged (so a stray one is dropped on load), and blind to players: they pick foes only by conscripts()
+			mob.addTag(CONSCRIPT_TAG);
+			((MobAccessor) mob).jaymoskingdoms$targets().removeAllGoals(g -> g instanceof NearestAttackableTargetGoal<?>);
 			CONSCRIPTS.put(mob.getUUID(), new Conscript(level, p.getUUID(), now + CONSCRIPT_TICKS));
+			if (!level.addFreshEntity(mob)) {
+				CONSCRIPTS.remove(mob.getUUID());
+				continue;
+			}
 			level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY(0.5), mob.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 			risen++;
 		}
@@ -1278,7 +1312,9 @@ public final class HeritageKits {
 					prey = near;
 				}
 			}
-			mob.setTarget(prey);
+			if (prey != null || mob.getTarget() instanceof Player) {
+				mob.setTarget(prey);
+			}
 		}
 	}
 
