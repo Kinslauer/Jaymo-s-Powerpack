@@ -4950,3 +4950,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   palm and their Wave Beam now gathers 16 ticks in cupped hands before firing with a two-hand push and shout; rogue
   fighters and sparring mannequins throw from the palm. Tuning: `ZFighterHands` (hand spots, shout), `ZFighterHandsPose`
   (angles, timing, first-person spots), `FirstPersonArms.KI_*`, `ZFighterKi.BLAST_FORM_*`, `ZFighterGift.WAVE_GATHER`.
+- **0.19.61, dirty armour and wet weather:** Andy: armour "gets dirty when you walk in the desert or swampy muddy areas
+  and washes in the rain or by hand or in bodies of water", plus "subsurface scattering rays underwater and pooling water
+  on the ground near trees, during rain and under wet characters like the blood trail" (Gemini had tried it; nothing of
+  that was used; Andy's Recrafted resource pack noted as the look, nothing taken). `core/wet/ArmourGrime`: each armour
+  piece carries a `jaymospowers:grime` component (amount 0-100, how much is mud). Walking (or lying) on sand, gravel or
+  dry ground in deserts, badlands and dry or sandy biomes throws up dust; mud, clay, soul soil and wet earth (rain, swamps)
+  splash mud; boots first, then greaves, chest, helmet; sprinting doubles it, lying or crawling gets it everywhere. Water
+  washes it (wading: boots and greaves; under water: all of it fast), rain slowly, and by hand: sneak + use an empty hand
+  on a water cauldron (a level each scrub), sneak + use a wet sponge, or use a dirty piece on a water cauldron. Everyone
+  near a player is weathered, so guards come back muddy. The client tints the armour layers toward tan or mud brown
+  (`ArmourGrimeMixin`) and the tooltip says how dirty. `client/wet/WetClient`: wet bodies drip for a while after water
+  (30 s) or rain (15 s) and leave little water puddles under them (a trail as they walk); while it rains, puddles pool
+  under leaves and beside trunks (and sometimes in open hollows), grow while the rain lasts and dry after; under water
+  by day `LightShaft`s hang from the surface, leaning away from the sun. Water puddles are `BloodPuddle.water` in the
+  blood decals' group (now any `BloodDecals.Decal`). Sprites from `tools/wet_textures.py`. Tuning at the top of each class.
