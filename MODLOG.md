@@ -5042,3 +5042,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   shipped an old Kitchen; the jar is rebuilt from `kitchen/`. The build now stops if `libs/` holds more than one
   Kitchen jar (both would ship under one mod id) and warns when the jar isn't the Kitchen source's version.
   Compile-checked; not played.
+- **0.19.69, taking the symbiote suit off** (`WebSymbioteScreen`, `WebSymbiote.use`): Andy: "I cant seem to take off
+  the symbiote suit." The X menu's sneak-pick (one form down) read `isShiftKeyDown`, but opening a screen lets go of
+  every key binding, so the player had stopped sneaking by the time you picked and every pick climbed again. The menu
+  now reads the Sneak key off the keyboard, and a right-click on the Suit tile also comes down one form. A sulking or
+  locked-out symbiote no longer refuses to come off: it only refuses to come up a form.
