@@ -36,6 +36,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
+		com.jaymospowers.core.Sitting.init();
 		// (0.19.29) training gear and the Mastery ranks
 		com.jaymospowers.core.Training.init();
 		com.jaymospowers.core.SwallowedPower.init();
