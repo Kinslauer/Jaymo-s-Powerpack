@@ -152,7 +152,9 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		}
 		if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
 			// it smashes into what it hits: no mercy
-			this.burst(level, gunner, hit.getLocation(), null, true);
+			// (0.7.484) the crater is centred on the block it struck: a hit on an east or south face lies on the
+			// block's edge, and containing() would find the air in front of it
+			this.burst(level, gunner, hit.getLocation(), null, true, blockHit.getBlockPos());
 			return;
 		}
 		if (level.getFluidState(BlockPos.containing(next)).is(FluidTags.WATER)) {
@@ -223,6 +225,11 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 	 * (0.7.484) Where it bursts: everyone near is hurt, and if it's ashore, the ground is blasted (queued, {@link Bombardment}).
 	 */
 	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct, boolean ground) {
+		this.burst(level, gunner, at, direct, ground, null);
+	}
+
+	/** (0.7.484) As above; {@code struck}, when it hit a block, is that block, and the crater is centred on it. */
+	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct, boolean ground, @Nullable BlockPos struck) {
 		ShotKind kind = this.kind();
 		double radius = kind.burst;
 		DamageSource source = this.damageSources().explosion(this, gunner);
@@ -242,7 +249,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 				victim.syncVelocity = true;
 			}
 		}
-		BlockPos land = ground ? this.land(level, at) : null;
+		BlockPos land = !ground ? null : struck != null ? struck : this.land(level, at);
 		if (land != null) {
 			// (0.7.484) it struck land: the crater, centred on the block it hit
 			Bombardment.crater(level, Vec3.atCenterOf(land), kind.crater, gunner != null ? gunner : this);

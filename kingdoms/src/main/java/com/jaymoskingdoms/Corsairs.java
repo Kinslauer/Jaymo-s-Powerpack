@@ -74,7 +74,7 @@ final class Corsairs implements Ship.Captaincy {
 	 * (0.7.484) Shelling the shore her cove raids: how far her lookout sees a target ashore, how far grape carries, how near
 	 * the raid's landing she lies to lay her broadside on it, and the sail she keeps to hold her station.
 	 */
-	static final double SHORE_SIGHT = 52.0, GRAPE_RANGE = 20.0, SHORE_STATION = 36.0, SHORE_SAIL = 0.15;
+	static final double SHORE_SIGHT = 52.0, GRAPE_RANGE = 20.0, GRAPE_PICK = 0.6, SHORE_STATION = 36.0, SHORE_SAIL = 0.15;
 	/**
 	 * (0.7.484) Her guns hold off anywhere one of her own landing party is within this (blocks: past a shell's burst and
 	 * its crater), and lay on the ground ashore this far apart (blocks) as they look along the line in for clear ground.
@@ -457,7 +457,7 @@ final class Corsairs implements Ship.Captaincy {
 			if (roll < 0.12F) {
 				return ShotKind.CHAIN;
 			}
-			if (roll < 0.22F && d < GRAPE_RANGE) {
+			if (roll < 0.22F && d < GRAPE_RANGE * GRAPE_PICK) {
 				return ShotKind.GRAPE;
 			}
 			if (roll < 0.45F) {
@@ -467,7 +467,7 @@ final class Corsairs implements Ship.Captaincy {
 		}
 		if (crew.shore != null) {
 			double d = Math.sqrt(Raids.horizontal(BlockPos.containing(crew.shore), ship.blockPosition()));
-			if (crew.shoreLiving && d < GRAPE_RANGE && roll < 0.7F) {
+			if (crew.shoreLiving && d < GRAPE_RANGE * GRAPE_PICK && roll < 0.7F) {
 				return ShotKind.GRAPE;
 			}
 			return roll < 0.55F ? ShotKind.SHELL : roll < 0.9F ? ShotKind.HEAVY : ShotKind.ROUND;
@@ -603,7 +603,9 @@ final class Corsairs implements Ship.Captaincy {
 		double speed = SHOT_SPEED * kind.speed, fall = SHOT_FALL * kind.gravity;
 		Vec3 muzzle = ship.gunAt(gun);
 		double d = Math.sqrt((aim.x - muzzle.x) * (aim.x - muzzle.x) + (aim.z - muzzle.z) * (aim.z - muzzle.z));
-		if (d < GUN_NEAREST || d > (kind == ShotKind.GRAPE ? GRAPE_RANGE : GUN_RANGE)) {
+		// (0.7.484) grape loaded for a close foe who has since drawn off is fired anyway (it spreads short, at its life),
+		// so the gun is cleared for a better load and doesn't sit silent; it's only loaded well inside its range (GRAPE_PICK)
+		if (d < GUN_NEAREST || d > GUN_RANGE) {
 			return null;
 		}
 		// led: where she'll be when the ball gets there

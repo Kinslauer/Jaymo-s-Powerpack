@@ -1062,10 +1062,12 @@ public final class Ship extends Entity {
 			InteractionHand hand = player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
 			ShipCannonBlock.Handled done = ShipCannonBlock.handle(state, player.getItemInHand(hand), player, hand);
 			if (done != null) {
-				this.setPiece(i, done.next());
 				if (done.fires()) {
+					// (0.7.484) run back, and queued to run out again after its recoil
+					this.recoil(i, done.next());
 					this.fireGun(level, i, state, player);
 				} else {
+					this.setPiece(i, done.next());
 					Vec3 at = this.toWorld(x, y + 0.5, z);
 					level.playSound(null, at.x, at.y, at.z, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
 				}
