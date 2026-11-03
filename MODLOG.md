@@ -5113,3 +5113,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   checked; not played.
 - **0.19.77, Kingdoms 0.7.486, sea-blooded Tideborn:** Kingdoms only (13 new Tideborn looks with real model parts), see
   kingdoms/MODLOG.md.
+- **0.19.78, execution bars + double click** (`core/finisher/Finishers`, `client/finisher/FinisherClient`): Andy: "it should be 3 bars
+  that fill, and once the third is filled the execution plays", then "you must sneak and double click + hold, now releasing the hold
+  before the execution kills, will cancel it". Sneak + hold attack (1.5 s) is drawn as three bars under the crosshair (`Finishers.Charge`)
+  in place of the action-bar dots. Sneak + double click (0.3 s) starts the execution at once (`Finishers.Rush`), same checks, always the
+  kill; letting go of the second press before the killing blow calls it off (`Playing.held`). Symbiote suit executions don't cancel.
