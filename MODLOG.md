@@ -5062,4 +5062,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
   Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
   `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
-  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on.
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.

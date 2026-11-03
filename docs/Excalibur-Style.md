@@ -8,6 +8,9 @@ excalibur and all it's additions from here optional, and off by default. but kee
   above Fresh Animations, and our built-in `excalibur_style` pack on top. **`/excalibur off`** takes all three off;
   plain `/excalibur` says which it is (`client/ExcaliburLook`). They can also be picked by hand in Resource Packs, but
   then the order is up to you.
+- **Recrafted** (MR_CHOO) is a paid early-access pack with no licence to redistribute, so it's never shipped or
+  fetched. If a player has it in their own resourcepacks/, `/excalibur on` switches it on too, just above Excalibur.
+  It's made for 1.21.1-1.21.8, not 26.3, so some of it may not load.
 - Our mods' own textures are the originals again. The graded copies live only in `excalibur_style`.
 - Installs that 0.19.65 had switched on get the look switched off once, on the first launch with 0.19.71.
 

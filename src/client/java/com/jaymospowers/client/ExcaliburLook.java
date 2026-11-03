@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  * Animations patch (PackResourcePacks.OPTIONAL, fetched into resourcepacks/ but never switched on by us), and our
  * built-in excalibur_style pack (our textures graded toward Excalibur, calmer leaves). {@code /excalibur on} switches
  * all three on in the right order: Excalibur at the bottom, the patch just above Fresh Animations, ours on top.
- * {@code /excalibur off} takes all three off. They can also be picked by hand in Resource Packs.
+ * {@code /excalibur off} takes all three off. Recrafted joins them when the player has it ({@link #RECRAFTED}). They can also be picked by hand in Resource Packs.
  *
  * <p>0.19.65 switched Excalibur and its patch on for everyone; on the first launch with this version they're switched
  * off once (marker {@link #OFF_MARKER}). After that, players' own choice is never touched.
@@ -29,6 +29,13 @@ import org.jspecify.annotations.Nullable;
 final class ExcaliburLook {
 	private static final String OFF_MARKER = "jaymospowers-excalibur-off-v1";
 	private static final String OURS = "excalibur_style";
+	/**
+	 * (0.19.71) Recrafted (by MR_CHOO) is a paid early-access pack with no licence to redistribute, so it's never shipped
+	 * or fetched. A player who has it in their own resourcepacks/ gets it switched on with the look, just above
+	 * Excalibur (so it draws over Excalibur, and Fresh Animations and its patch still draw over both). It's made for
+	 * 1.21.1-1.21.8, so it's accepted as an older-format pack.
+	 */
+	private static final String RECRAFTED = "Recrafted";
 
 	private ExcaliburLook() {
 	}
@@ -103,6 +110,10 @@ final class ExcaliburLook {
 		return id.startsWith("file/" + pack.prefix());
 	}
 
+	private static boolean isRecrafted(String id) {
+		return id.startsWith("file/" + RECRAFTED);
+	}
+
 	private static boolean isOurs(String id) {
 		return id.contains(com.jaymospowers.JaymosPowers.MOD_ID) && id.endsWith(OURS);
 	}
@@ -111,7 +122,7 @@ final class ExcaliburLook {
 	private static boolean switchAll(Minecraft minecraft, boolean on) {
 		List<String> selected = minecraft.options.resourcePacks;
 		List<String> before = List.copyOf(selected);
-		selected.removeIf(id -> isOurs(id) || PackResourcePacks.OPTIONAL.stream().anyMatch(pack -> isExcalibur(id, pack)));
+		selected.removeIf(id -> isOurs(id) || isRecrafted(id) || PackResourcePacks.OPTIONAL.stream().anyMatch(pack -> isExcalibur(id, pack)));
 		minecraft.options.incompatibleResourcePacks.removeIf(id -> PackResourcePacks.OPTIONAL.stream().anyMatch(pack -> isExcalibur(id, pack)));
 		if (on) {
 			minecraft.getResourcePackRepository().reload();
@@ -121,6 +132,21 @@ final class ExcaliburLook {
 					selected.add(PackResourcePacks.placeAt(selected, pack.place()), "file/" + file);
 				}
 			}
+			minecraft.getResourcePackRepository().getAvailableIds().stream().filter(ExcaliburLook::isRecrafted).findFirst()
+				.ifPresent(id -> {
+					PackResourcePacks.Pack excalibur = PackResourcePacks.OPTIONAL.get(0);
+					int at = selected.size();
+					for (int i = 0; i < selected.size(); i++) {
+						if (isExcalibur(selected.get(i), excalibur)) {
+							at = i + 1;
+							break;
+						}
+					}
+					selected.add(at, id);
+					if (!minecraft.options.incompatibleResourcePacks.contains(id)) {
+						minecraft.options.incompatibleResourcePacks.add(id);
+					}
+				});
 			minecraft.getResourcePackRepository().getAvailableIds().stream().filter(ExcaliburLook::isOurs).findFirst()
 				.ifPresent(selected::add);
 		}
