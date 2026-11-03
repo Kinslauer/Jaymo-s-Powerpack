@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "minecraft:item/bone_meal",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -8185836
+      }
+    ]
+  }
+}

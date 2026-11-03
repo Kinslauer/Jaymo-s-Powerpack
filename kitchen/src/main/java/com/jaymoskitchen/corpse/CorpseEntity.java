@@ -134,8 +134,14 @@ public class CorpseEntity extends Entity {
 	private @Nullable Vec3 slingFrom;
 	private java.util.@Nullable UUID slungHorse;
 
-	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
-	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
+	/**
+	 * Animals at most this big (wide and tall, after baby scaling) are small: (0.5.50) carried in one hand by the neck
+	 * (a chicken, a rabbit, a snake); bigger ones in both arms. Andy: "You should carry small mobs like that with one
+	 * hand, so the snake and chicken would be from the neck". (They used to go in a bag in your pocket.)
+	 */
+	private static final float POCKET_WIDTH = 0.6F, POCKET_HEIGHT = 0.8F;
+	/** (0.5.50) Held in one hand: the hand this far in front of the carrier, to their right, and up (blocks, at 1.95 tall). */
+	private static final double HAND_FORWARD = 0.3, HAND_RIGHT = 0.36, HAND_HEIGHT = 0.75;
 	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
 	private static final double CARRY_FORWARD = 0.55, CARRY_HEIGHT = 0.9;
 	/** (0.4.31) The size of carrier the carry spot is set for (a villager); bigger ones hold it further out and higher. */
@@ -225,6 +231,13 @@ public class CorpseEntity extends Entity {
 	private long cutLast;
 	private int cutWork;
 	private int burnTicks;
+	/**
+	 * (0.5.51) Hung on a meat hook ({@link Hanging}): the hook (null: not hung), how far the butchering has got
+	 * ({@link Hanging#FRESH} on), the bleeding's length and ticks left, the blood put somewhere so far (grate levels),
+	 * and how much is still to pool on the ground.
+	 */
+	private @Nullable BlockPos hook;
+	private int butcherStage, bleedTotal, bleedLeft, bloodPoured, spilt;
 	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
 	private int firesLit;
 	private int age;
@@ -837,6 +850,132 @@ public class CorpseEntity extends Entity {
 		setYRot(yaw);
 	}
 
+	// ---- (0.5.51) hung on a meat hook (Hanging) -----------------------------------------------------------------------
+
+	public @Nullable BlockPos hook() {
+		return hook;
+	}
+
+	/** Hung on the hook at {@code at} by its hind legs: out of anyone's arms or hands, a ragdoll held at the hook. */
+	public void hangOn(BlockPos at) {
+		if (carrier() != null) {
+			setCarrier(null);
+		}
+		if (this.entityData.get(DRAGGER) >= 0) {
+			this.entityData.set(DRAGGER, -1);
+		}
+		unpin();
+		this.hook = at.immutable();
+		this.ragdoll = null;
+		grabCooldown = GRAB_COOLDOWN;
+		Vec3 hold = Hanging.holdPoint(at);
+		setPos(hold.x, hold.y - Math.max(0.5, getBbHeight()), hold.z);
+		setDeltaMovement(Vec3.ZERO);
+	}
+
+	/** Off the hook (taken down, or the hook's gone): it falls as it hung. */
+	public void unhook() {
+		if (hook != null) {
+			hook = null;
+			if (ragdoll != null) {
+				ragdoll.body.release();
+				ragdoll.body.wake();
+			}
+		}
+	}
+
+	public int butcherStage() {
+		return butcherStage;
+	}
+
+	void setButcherStage(int stage) {
+		this.butcherStage = stage;
+	}
+
+	void startBleeding(int ticks) {
+		this.butcherStage = Hanging.BLEEDING;
+		this.bleedTotal = ticks;
+		this.bleedLeft = ticks;
+		this.bloodPoured = 0;
+	}
+
+	int bleedTotal() {
+		return bleedTotal;
+	}
+
+	int bleedLeft() {
+		return bleedLeft;
+	}
+
+	void setBleedLeft(int left) {
+		this.bleedLeft = left;
+	}
+
+	int bloodPoured() {
+		return bloodPoured;
+	}
+
+	void setBloodPoured(int poured) {
+		this.bloodPoured = poured;
+	}
+
+	int spilt() {
+		return spilt;
+	}
+
+	void addSpilt(int by) {
+		this.spilt = Math.max(0, spilt + by);
+	}
+
+	void addLoot(List<ItemStack> more) {
+		for (ItemStack stack : more) {
+			if (!stack.isEmpty()) {
+				loot.add(stack.copy());
+			}
+		}
+	}
+
+	List<ItemStack> lootView() {
+		return java.util.Collections.unmodifiableList(loot);
+	}
+
+	/** Takes out of its loot everything {@code test} likes. */
+	List<ItemStack> takeLoot(java.util.function.Predicate<ItemStack> test) {
+		List<ItemStack> taken = new ArrayList<>();
+		loot.removeIf(stack -> {
+			if (!stack.isEmpty() && test.test(stack)) {
+				taken.add(stack);
+				return true;
+			}
+			return stack.isEmpty();
+		});
+		return taken;
+	}
+
+	RagdollRig.Shape rigShape() {
+		return rig().shape;
+	}
+
+	/** Where its head is now (its ragdoll's head or snout; else its middle). */
+	Vec3 headPoint() {
+		if (ragdoll != null) {
+			RagdollBody body = ragdoll.body;
+			int head = switch (body.rig.shape) {
+				case QUADRUPED -> RagdollRig.SNOUT;
+				case HUMANOID -> RagdollRig.HEAD;
+				default -> -1;
+			};
+			if (head >= 0) {
+				return new Vec3(body.x[head], body.y[head], body.z[head]);
+			}
+		}
+		return position().add(0.0, getBbHeight() * 0.5, 0.0);
+	}
+
+	CorpseKind kind() {
+		return kind;
+	}
+
 	/** (0.5.23) The way a pinned body faces out from its wall (degrees), or -1 if it isn't pinned. */
 	public int pinned() {
 		return this.entityData.get(PINNED);
@@ -1046,7 +1185,8 @@ public class CorpseEntity extends Entity {
 		if (carrier != null) {
 			this.ragdoll = null;
 			// held across the carrier's arms, in front of them
-			Vec3 at = carryPosition(carrier, carrier.getYRot(), carrier.getX(), carrier.getY(), carrier.getZ(), getBbWidth());
+			Vec3 at = oneHanded() ? handPosition(carrier, carrier.getYRot(), carrier.getX(), carrier.getY(), carrier.getZ())
+				: carryPosition(carrier, carrier.getYRot(), carrier.getX(), carrier.getY(), carrier.getZ(), getBbWidth());
 			setPos(at.x, at.y, at.z);
 			setYRot(carrier.getYRot() + 90.0F);
 			setDeltaMovement(Vec3.ZERO);
@@ -1096,6 +1236,20 @@ public class CorpseEntity extends Entity {
 		}
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
 			return;
+		}
+		if (hook != null && level() instanceof ServerLevel hookLevel) {
+			// (0.5.51) on a meat hook: a ragdoll held there by its hind legs, bleeding if it's being bled
+			ensureRagdoll();
+			Hanging.tick(this, hookLevel, ragdoll.body);
+			if (ragdoll != null) {
+				ragdoll.tick(this, hookLevel);
+			}
+			serverTick(hookLevel);
+			return;
+		}
+		if (butcherStage == Hanging.BLEEDING && level() instanceof ServerLevel groundLevel) {
+			// (0.5.51) bled where it lies
+			Hanging.tickGround(this, groundLevel);
 		}
 		if (pinned() >= 0) {
 			// (0.5.23) nailed to a wall: hangs where it is until the wall goes
@@ -1384,9 +1538,9 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return search(level, player);
 		}
-		// an empty hand on anything small enough (whatever it was): into a bag in your pocket
+		// an empty hand on anything small enough (whatever it was): (0.5.50) taken up in one hand, by the neck
 		if (held.isEmpty() && kind != CorpseKind.PLAYER && fitsInPocket()) {
-			return pickUp(level, player);
+			return carry(level, player);
 		}
 
 		switch (kind) {
@@ -1411,6 +1565,11 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
+		// (0.5.51) on a meat hook, or started on (bled, or being bled): its next step
+		InteractionResult step = Hanging.use(this, level, player, held);
+		if (step != null) {
+			return step;
+		}
 		// (0.5.31) too big to carry anywhere: cut up where it lies, a piece at a time
 		if (held.is(Corpses.BUTCHERING_TOOLS) && tooBigToLift() && !onButcherBlock()) {
 			return cutUp(level, player, held);
@@ -1436,8 +1595,8 @@ public class CorpseEntity extends Entity {
 				? "message.jaymoskitchen.corpse.need_axe" : tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.carry"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		// (0.5.39) too big for a pocket: an empty hand held on it takes it by the legs and drags it
-		return fitsInPocket() ? pickUp(level, player) : grab(level, player, true);
+		// (0.5.39) too big for one hand: an empty hand held on it takes it by the legs and drags it
+		return fitsInPocket() ? carry(level, player) : grab(level, player, true);
 	}
 
 	/**
@@ -1485,6 +1644,8 @@ public class CorpseEntity extends Entity {
 			unsling(false);
 		}
 		this.entityData.set(TUMBLING, false);
+		// (0.5.51) pulled down off a meat hook
+		unhook();
 		this.entityData.set(DRAGGER, player.getId());
 		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.dragging"));
@@ -1613,6 +1774,13 @@ public class CorpseEntity extends Entity {
 	 * needs a 2x2), else it's let go.
 	 */
 	public void dragOnto(Player player, BlockPos clicked, Vec3 hit) {
+		// (0.5.51) heaved up onto a meat hook near enough
+		if (com.jaymoskitchen.butchery.Butchery.isHook(level().getBlockState(clicked))
+			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= Hanging.DRAG_TO_HOOK + getBbHeight()) {
+			if (Hanging.hang(this, player, clicked)) {
+				return;
+			}
+		}
 		if (Corpses.isButcherBlock(level().getBlockState(clicked)) && position().distanceTo(Vec3.atCenterOf(clicked)) <= DRAG_TO_TABLE) {
 			Vec3 at = tableSpot(level(), clicked, hit, isBigCarcass());
 			if (at == null) {
@@ -1654,6 +1822,10 @@ public class CorpseEntity extends Entity {
 			getX(), getY() + 0.3, getZ(), 10, 0.3, 0.1, 0.3, 0.1);
 		ItemStack piece = nextPiece();
 		if (!piece.isEmpty()) {
+			if (butcherStage < Hanging.DRAINED) {
+				// (0.5.51) cut up unbled: spoils in a few days
+				com.jaymoskitchen.butchery.Spoilage.mark(piece, level.getOverworldClockTime() / 24000L);
+			}
 			spawnAtLocation(level, piece, 0.4F);
 		}
 		if (piecesLeft() > 0) {
@@ -1670,7 +1842,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.5.31) One piece off the loot: meat first, then whatever else it has (hide, wool, feathers...). Empty when it's bare. */
-	private ItemStack nextPiece() {
+	ItemStack nextPiece() {
 		loot.removeIf(ItemStack::isEmpty);
 		if (loot.isEmpty()) {
 			return ItemStack.EMPTY;
@@ -1688,7 +1860,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** (0.5.31) How many pieces are still on it. */
-	private int piecesLeft() {
+	int piecesLeft() {
 		int left = 0;
 		for (ItemStack stack : loot) {
 			left += stack.getCount();
@@ -1724,40 +1896,15 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * Takes the corpse: a small animal goes in your pocket; anything else (big animals, and any other corpse) is
-	 * carried in front of you, one at a time.
-	 */
-	private InteractionResult pickUp(ServerLevel level, Player player) {
-		if (!fitsInPocket()) {
-			// (0.5.31) not with a plain click any more: sneak + hold lifts it, and a big carcass not at all
-			player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
-			// ((0.5.31) too big: sneak + hold drags it, a knife cuts it up)
-			return InteractionResult.SUCCESS_SERVER;
-		}
-		ItemStack pocketed = CorpseItem.of(this);
-		if (!player.getInventory().add(pocketed)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.no_room"));
-			return InteractionResult.SUCCESS_SERVER;
-		}
-		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F);
-		discard();
-		return InteractionResult.SUCCESS_SERVER;
-	}
-
-	/**
-	 * Taken by something other than a click (Jaymo's Powers: Gravity draws a corpse in to you): into a pocket if it
-	 * fits (never a player's), otherwise carried in your arms.
+	 * Taken by something other than a click (Jaymo's Powers: Gravity draws a corpse in to you): carried, (0.5.50) a
+	 * small one in one hand.
 	 */
 	public void takeBy(Player player) {
 		if (!(level() instanceof ServerLevel level) || isRemoved()) {
 			return;
 		}
-		if (kind != CorpseKind.PLAYER && fitsInPocket()) {
-			pickUp(level, player);
-		} else {
-			// (a power lifts anything, a big carcass too)
-			carry(level, player);
-		}
+		// (a power lifts anything, a big carcass too)
+		carry(level, player);
 	}
 
 	/**
@@ -1820,8 +1967,14 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return;
 		}
+		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
+		boolean unbled = butcherStage < Hanging.DRAINED;
+		long day = level.getOverworldClockTime() / 24000L;
 		if (onBlock) {
 			for (ItemStack extra : blockExtras()) {
+				if (unbled) {
+					com.jaymoskitchen.butchery.Spoilage.mark(extra, day);
+				}
 				spawnAtLocation(level, extra, 0.4F);
 			}
 		} else {
@@ -1837,6 +1990,9 @@ public class CorpseEntity extends Entity {
 			}
 			loot = rough;
 		}
+		if (unbled) {
+			com.jaymoskitchen.butchery.Spoilage.mark(loot, day);
+		}
 		dropLoot(level);
 		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
 		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
@@ -1844,7 +2000,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** What butchering on a block adds to the loot: a little extra meat, and the block-only extras ({@link ButcheringBonus}). */
-	private List<ItemStack> blockExtras() {
+	List<ItemStack> blockExtras() {
 		List<ItemStack> extras = new ArrayList<>();
 		for (ItemStack stack : loot) {
 			if (stack.has(DataComponents.FOOD)) {
@@ -2283,11 +2439,28 @@ public class CorpseEntity extends Entity {
 		return !isRemoved() && carrier() == null;
 	}
 
-	/** Small animals (a chicken, a rabbit, any baby) can be pocketed; anything bigger has to be carried. */
+	/**
+	 * Small animals (a chicken, a rabbit, a snake, any baby): (0.5.50) carried in one hand. Never a player's or a
+	 * machine's body. Worked out once (it rebuilds the mob), on either side.
+	 */
 	private boolean fitsInPocket() {
-		Entity body = rebuild();
-		return body != null && body.getBbWidth() <= POCKET_WIDTH && body.getBbHeight() <= POCKET_HEIGHT;
+		if (smallCache == null) {
+			Entity body = level().isClientSide() ? clientBody() : rebuild();
+			if (body == null) {
+				return false;
+			}
+			smallCache = kind != CorpseKind.PLAYER && !isPlayerCorpse() && !isMachine()
+				&& body.getBbWidth() <= POCKET_WIDTH && body.getBbHeight() <= POCKET_HEIGHT;
+		}
+		return smallCache;
 	}
+
+	/** (0.5.50) Carried in one hand, by the neck (see {@link #fitsInPocket}). */
+	public boolean oneHanded() {
+		return fitsInPocket();
+	}
+
+	private @Nullable Boolean smallCache;
 
 	public @Nullable Entity carrier() {
 		int id = this.entityData.get(CARRIER);
@@ -2305,6 +2478,8 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		if (carrier != null) {
+			// (0.5.51) taken down off a meat hook
+			this.hook = null;
 			this.ragdoll = null;
 			// (0.5.23) pulled down off the wall
 			this.entityData.set(PINNED, -1);
@@ -2481,6 +2656,19 @@ public class CorpseEntity extends Entity {
 		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45) + Math.max(0.0, carrier.getBbWidth() * 0.5 - CARRIER_HALF_WIDTH);
 		double height = (width > 1.0F ? 0.3 : CARRY_HEIGHT) * Math.max(1.0, carrier.getBbHeight() / CARRIER_HEIGHT);
 		return new Vec3(x - Mth.sin(radians) * forward, y + height, z + Mth.cos(radians) * forward);
+	}
+
+	/**
+	 * (0.5.50) Where a small body is held in one hand, by the neck: the carrier's right hand, a little in front of them,
+	 * at about hip height (scaled up for a bigger carrier).
+	 */
+	public static Vec3 handPosition(Entity carrier, float yaw, double x, double y, double z) {
+		float radians = yaw * Mth.DEG_TO_RAD;
+		double size = Math.max(1.0, carrier.getBbHeight() / CARRIER_HEIGHT);
+		double forward = HAND_FORWARD * size, right = HAND_RIGHT * size;
+		// forward is (-sin, cos), the right (-cos, -sin)
+		return new Vec3(x - Mth.sin(radians) * forward - Mth.cos(radians) * right, y + HAND_HEIGHT * size,
+			z + Mth.cos(radians) * forward - Mth.sin(radians) * right);
 	}
 
 	/** The corpse this player is carrying, if any (either side). */
@@ -2763,6 +2951,12 @@ public class CorpseEntity extends Entity {
 			setNoGravity(true);
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
+		this.hook = input.getLong("Hook").map(BlockPos::of).orElse(null);
+		this.butcherStage = input.getIntOr("ButcherStage", 0);
+		this.bleedTotal = input.getIntOr("BleedTotal", 0);
+		this.bleedLeft = input.getIntOr("BleedLeft", 0);
+		this.bloodPoured = input.getIntOr("BloodPoured", 0);
+		this.spilt = input.getIntOr("Spilt", 0);
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
@@ -2810,6 +3004,16 @@ public class CorpseEntity extends Entity {
 		}
 		if (pinned() >= 0) {
 			output.putInt("Pinned", pinned());
+		}
+		if (hook != null) {
+			output.putLong("Hook", hook.asLong());
+		}
+		if (butcherStage != 0) {
+			output.putInt("ButcherStage", butcherStage);
+			output.putInt("BleedTotal", bleedTotal);
+			output.putInt("BleedLeft", bleedLeft);
+			output.putInt("BloodPoured", bloodPoured);
+			output.putInt("Spilt", spilt);
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());

@@ -1,0 +1,42 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:axes",
+    {
+      "id": "jaymospowers:wooden_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:tinker_cleaver",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:warchief_cleaver",
+      "required": false
+    },
+    {
+      "id": "#c:tools/cleaver",
+      "required": false
+    }
+  ]
+}

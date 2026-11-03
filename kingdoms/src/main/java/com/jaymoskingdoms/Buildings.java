@@ -62,7 +62,9 @@ final class Buildings {
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
-			realm(type, "butcher", JobHalls::butcher, 1, 22);
+			// (0.7.483) earlier now, with the healer's infirmary: every town keeps a butcher and a healer ({@link TownTrades})
+			realm(type, "butcher", JobHalls::butcher, 1, 10);
+			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
 			realm(type, "market", Buildings::market, 1, 24);
 			realm(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
@@ -94,7 +96,8 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "cookhouse", Buildings::cookhouse, 1, 8);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
-		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 10);
+		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 6);
+		realm(FactionType.VILLAGE, "infirmary", JobHalls::infirmary, 1, 8);
 		realm(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
@@ -1413,6 +1416,8 @@ final class Buildings {
 			"oxeye_daisy", "cornflower", "lily_of_the_valley", "fern"};
 
 		final Palette p;
+		/** (0.7.483) The land's own palette (one of {@link Palette}'s, by biome): what regional design a job hall takes ({@link JobHalls}). */
+		final Palette land;
 		final boolean village;
 		/** (0.7.250) It stands among the cherry trees: the Blossom land's way of building ({@link Blossom}). */
 		final boolean blossom;
@@ -1435,6 +1440,7 @@ final class Buildings {
 		/** The plain kit (variant 0), as before 0.5.7. */
 		private Kit(Palette p, boolean village, String wood, String color) {
 			this.p = p;
+			this.land = p;
 			this.village = village;
 			this.blossom = p == Palette.CHERRY;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
@@ -1461,8 +1467,9 @@ final class Buildings {
 
 		/** A building's own kit: its materials from {@code look} (and the land's palette), its details rolled from {@code r}. */
 		private Kit(Palette p, boolean village, String wood, String color, String accent, BlockState roofStairs, BlockState roofSlab, BlockState roofBlock,
-			BlockState infill, List<String> colours, boolean dry, boolean blossom, RandomSource r) {
+			BlockState infill, List<String> colours, boolean dry, boolean blossom, Palette land, RandomSource r) {
 			this.p = p;
+			this.land = land;
 			this.village = village;
 			this.blossom = blossom;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
@@ -1570,7 +1577,7 @@ final class Buildings {
 				infill = or(Townscape.named("white_terracotta"), Blocks.CALCITE.defaultBlockState());
 			}
 			return new Kit(p, village, wood, main, accent, roofStairs.defaultBlockState(), roofSlab.defaultBlockState(), roofBlock.defaultBlockState(),
-				infill, colours, dry, blossom, RandomSource.create(details ^ 0x5DEECE66DL));
+				infill, colours, dry, blossom, land, RandomSource.create(details ^ 0x5DEECE66DL));
 		}
 
 		// ---- rolling choices (the plain kit always takes the first) ----

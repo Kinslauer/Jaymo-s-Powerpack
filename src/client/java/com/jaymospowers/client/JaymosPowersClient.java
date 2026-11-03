@@ -64,6 +64,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
+		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
+		com.jaymospowers.client.wet.WetClient.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
 		com.jaymospowers.client.armory.LodgedLayer.register();
 		com.jaymospowers.client.wounds.ProstheticLayer.register();
@@ -132,6 +134,13 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_3d"),
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
+		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
+		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("living_world"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: bushy leaves, grass and snow edges"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (Motion patch 5) the iron golem's eyes glow
 		com.jaymospowers.client.glow.GolemEyes.init();

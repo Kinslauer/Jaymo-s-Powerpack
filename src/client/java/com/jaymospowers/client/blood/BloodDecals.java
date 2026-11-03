@@ -23,14 +23,23 @@ import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
  * state is a {@link QuadParticleRenderState} that hands vanilla's quad particle renderer ready-made vertices instead of
  * camera-facing squares, so a puddle can be cut to the block tops it lies on.
  */
-final class BloodDecals {
-	static final ParticleRenderType TYPE = new ParticleRenderType("jaymospowers:blood_decal", "BD");
+public final class BloodDecals {
+	public static final ParticleRenderType TYPE = new ParticleRenderType("jaymospowers:blood_decal", "BD");
 
 	private BloodDecals() {
 	}
 
-	/** The puddles; each frame lays the ones in view into its {@link State}. */
-	static final class Group extends ParticleGroup<BloodPuddle> {
+	/** (0.19.63) Anything drawn as ready-made quads in this group: blood and water puddles, underwater light shafts. */
+	public interface Decal {
+		/** Whether the camera could see it. */
+		boolean visible(Frustum frustum);
+
+		/** Lays its quads into {@code decals} for this frame. */
+		void emit(State decals, Camera camera, float partialTick);
+	}
+
+	/** The puddles (and other {@link Decal}s); each frame lays the ones in view into its {@link State}. */
+	static final class Group extends ParticleGroup<net.minecraft.client.particle.Particle> {
 		private final State state = new State();
 
 		Group(ParticleEngine engine) {
@@ -39,9 +48,9 @@ final class BloodDecals {
 
 		@Override
 		public ParticleGroupRenderState extractRenderState(Frustum frustum, Camera camera, float partialTick) {
-			for (BloodPuddle puddle : this.particles) {
-				if (puddle.visible(frustum)) {
-					puddle.emit(this.state, camera, partialTick);
+			for (net.minecraft.client.particle.Particle particle : this.particles) {
+				if (particle instanceof Decal decal && decal.visible(frustum)) {
+					decal.emit(this.state, camera, partialTick);
 				}
 			}
 			return this.state;
@@ -49,11 +58,11 @@ final class BloodDecals {
 	}
 
 	/** This frame's puddle vertices (camera-relative), by layer, four to a quad. Cleared by vanilla each frame. */
-	static final class State extends QuadParticleRenderState {
+	public static final class State extends QuadParticleRenderState {
 		private final Map<SingleQuadParticle.Layer, Vertices> layers = new IdentityHashMap<>();
 		private int count;
 
-		void add(SingleQuadParticle.Layer layer, float x, float y, float z, float u, float v, int color, int light) {
+		public void add(SingleQuadParticle.Layer layer, float x, float y, float z, float u, float v, int color, int light) {
 			this.layers.computeIfAbsent(layer, l -> new Vertices()).add(x, y, z, u, v, color, light);
 			this.count++;
 		}

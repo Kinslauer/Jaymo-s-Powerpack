@@ -11,21 +11,26 @@ spikes (`UltimateSpikes.STYLES`) only fit humanoid bodies, so a reworked alien d
 
 ## Patch 1 (done, 0.19.34): Skitter, Fuse, Billow
 - **Skitter:** a spider, low to the ground, 8 legs in a spider's alternating fours, body bob, abdomen sway, flat crouch,
-  biting lunge.
+  biting lunge. (0.19.62, Andy: "the same model it had before, only going into the crawl when you go prone") Standing it's
+  the old upright shape again; only prone does it drop into the spider, which crawls up walls and along ceilings
+  (tipped against the wall by `SkitterCeiling`, synced `XenoformState.CLIMB`) and turns back when it stands.
 - **Fuse:** a creeper's build, no arms, 4 stubby legs shuffling in diagonal pairs with a waddle, a bounce and a late
   nod; swells on each punch.
 - **Billow:** a cloud mass with a face puff and churning puffs that trail as it moves. Works like wholly-smoke: the
   swimming pose's low box, seeps through anything short of a full block (not what it rests on), shots and creatures
   pass through, sheds wisps as it drifts.
 
-## Patch 2: beasts on four legs
+## Patch 2 (done, 0.19.62): beasts on four legs
 Howl (wolf), Prowl (cat, stalking crouch), Tusk (boar, head-down charge), Gorger (armadillo, rolls into a ball for its
 roll), Gyre (turtle, shell spin). Velox becomes a raptor: leaning forward on two legs with a long balancing tail.
+Built with a synced `XenoformState.ACT` ("charge" for Tusk's Charge and Gorger's Horn Charge, "roll" for Gorger/Gyre
+rolled up, "spin" for Gyre's Shell Spin, set by `XenoformPower.syncAct`) read as `XenoformClient.ACT`. None of the six
+wears Ultimate spikes now (the spike model is a man's).
 
-## Patch 3: small critters
+## Patch 3 (done, 0.19.66): small critters
 Croaker (squat frog, hops instead of walking), Slipfin (axolotl, belly crawl on land, undulating swim), Locust
 (six legs, folded hind legs that kick on a leap), Hive (hovering insect, buzzing wings, legs dangling), Gremlin (a
-hunched imp on its knuckles, the big skull bobbing).
+hunched imp on its knuckles, the big skull bobbing). Croaker takes the low box (`XenoformState.LOW_BOX`, with Billow).
 
 ## Patch 4: fliers
 Talon (a bird: perches upright, wings spread in the air), Keen (a bat, hangs from ceilings), Wyrm (a small dragon on

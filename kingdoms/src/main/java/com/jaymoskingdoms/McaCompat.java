@@ -633,7 +633,7 @@ public final class McaCompat {
 	}
 
 	static boolean becomeVillager(ServerLevel level, Folk folk) {
-		return LOADED && folk.style() != FactionType.BARBARIAN && McaBridge.convert(level, folk);
+		return LOADED && McaBridge.convert(level, folk);
 	}
 
 	/**

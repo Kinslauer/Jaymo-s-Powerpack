@@ -34,9 +34,19 @@ final class PackResourcePacks {
 	 * for a new pack file in a later pack version). {@code prefix}: the start of its file names on CurseForge.
 	 * {@code olderFormat}: its file is made for an older game version, so 26.3 calls it incompatible and would drop it
 	 * from the options on load; it's listed as an accepted incompatible pack too, as the confirm button in the screen does.
+	 * {@code place}: where it goes in the pack order. {@code null}: on top, like any pack switched on in the screen.
+	 * {@link #BASE}: at the bottom, just above the game's and mods' own packs, so every other pack draws over it (a
+	 * full retexture other packs build on). Anything else: the prefix of a resource pack file it sits just above
+	 * (an add-on to that pack), or on top when that one isn't switched on.
 	 */
-	private record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
+	private record Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat,
+			@Nullable String place) {
+		Pack(String what, String marker, String prefix, String file, String url, String sha1, boolean olderFormat) {
+			this(what, marker, prefix, file, url, sha1, olderFormat, null);
+		}
 	}
+
+	private static final String BASE = "<base>";
 
 	private static final List<Pack> PACKS = List.of(
 		// "MCA - Default Medieval" (by DE4THR4SH, CurseForge 667175) dresses MCA's villagers in vanilla-style medieval
@@ -72,7 +82,23 @@ final class PackResourcePacks {
 		// (BreedHorseRenderer), so only donkeys and mules take its look. Listed after Fresh Animations so it wins there.
 		new Pack("Better Horses", "jaymospowers-better-horses-v1", "Better Horses", "Better Horses v4.3 1.21.11.zip",
 			"https://cdn.modrinth.com/data/alMAK8J4/versions/EfH2muyG/Better%20Horses%20v4.3%201.21.11.zip",
-			"fea54f680dc959e122189b2005d11adebcd18b5b", true));
+			"fea54f680dc959e122189b2005d11adebcd18b5b", true),
+		// (0.19.65) "Excalibur" (by Matt "Maffhew" Dillow; CC BY-NC-ND 3.0: shipped unchanged, never edited or built on,
+		// with a link to its official page on the pack's page): the whole game redrawn in its darker, earthier medieval
+		// style. Version 26.3_01, fetched from Modrinth (project hJAzl1Bs). It goes at the bottom of the pack order, so
+		// Fresh Animations, its patch below, our 3D items and every other pack draw over it. Our own textures are graded
+		// toward its look by tools/excalibur_style (docs/Excalibur-Style.md); none of its pixels are in them.
+		new Pack("Excalibur", "jaymospowers-excalibur-v1", "Excalibur", "Excalibur_V26.3_01.zip",
+			"https://cdn.modrinth.com/data/hJAzl1Bs/versions/lk2oxwrP/Excalibur_V26.3_01.zip",
+			"97348d602be6def05fdfa9eee339ac64be5badd6", false, BASE),
+		// (0.19.65) "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; all rights reserved, but its page lets
+		// modpacks include it unchanged, never reupload or alter it): Fresh Animations' mobs drawn in Excalibur's style.
+		// Version 1.10.5 Hotfix 1 for 26.3, fetched from Modrinth (project yiTthr0O). It's made against Fresh
+		// Animations 1.10.5 and we ship 1.11.1; the mobs it covers bring their own models, so they still match. It sits
+		// just above Fresh Animations, under Better Horses, so donkeys and mules keep Better Horses' look.
+		new Pack("Excalibur's Fresh Animations", "jaymospowers-excalibur-fa-v1", "EFA_", "EFA_1.10.5 Hotfix 1.zip",
+			"https://cdn.modrinth.com/data/yiTthr0O/versions/UmkPWet8/EFA_1.10.5%20Hotfix%201.zip",
+			"0380c78d4e0086b6cade7597a4b57f14d06616ec", false, "FreshAnimations"));
 
 	private PackResourcePacks() {
 	}
@@ -113,7 +139,16 @@ final class PackResourcePacks {
 			minecraft.options.incompatibleResourcePacks.add(id);
 		}
 		if (!minecraft.options.resourcePacks.contains(id)) {
-			minecraft.options.resourcePacks.add(id);
+			minecraft.options.resourcePacks.add(placeAt(minecraft.options.resourcePacks, pack.place()), id);
+		}
+		// downloads finish in any order: an add-on switched on before the pack it belongs above moves up over it now
+		for (Pack addOn : PACKS) {
+			if (pack.prefix().equals(addOn.place())) {
+				minecraft.options.resourcePacks.stream().filter(s -> s.startsWith("file/" + addOn.prefix())).findFirst().ifPresent(s -> {
+					minecraft.options.resourcePacks.remove(s);
+					minecraft.options.resourcePacks.add(placeAt(minecraft.options.resourcePacks, addOn.place()), s);
+				});
+			}
 		}
 		minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
 		minecraft.options.save();
@@ -123,6 +158,25 @@ final class PackResourcePacks {
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
+	}
+
+	/**
+	 * Where a pack goes in the selected list (first = bottom). On top by default; {@link #BASE} goes just under the
+	 * lowest resource pack file or pack of ours, so the game's and mods' own packs stay beneath it; a file prefix goes
+	 * just above that file.
+	 */
+	private static int placeAt(List<String> selected, @Nullable String place) {
+		if (place == null) {
+			return selected.size();
+		}
+		for (int i = 0; i < selected.size(); i++) {
+			String id = selected.get(i);
+			if (BASE.equals(place) ? id.startsWith("file/") || id.contains(com.jaymospowers.JaymosPowers.MOD_ID)
+					: id.startsWith("file/" + place)) {
+				return BASE.equals(place) ? i : i + 1;
+			}
+		}
+		return selected.size();
 	}
 
 	private static @Nullable String download(Path dir, Pack pack) {
