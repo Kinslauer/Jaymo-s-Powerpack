@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.71) Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you
+ * (0.19.74) Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you
  * wash it manually". Dirty armour ({@link ArmourGrime}) is drawn with a copy of its own texture that has grime painted
  * into it in splotches, and its inventory icon gets the same splotches on top. Every wash (a scrub at a cauldron, a wet
  * sponge, a dunk, rain, wading) takes splotches away, edges first, until the piece is clean.

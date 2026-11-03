@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.19.71) Dirty armour ({@link ArmourGrime}) is drawn with grime painted into its texture in splotches
+ * (0.19.74) Dirty armour ({@link ArmourGrime}) is drawn with grime painted into its texture in splotches
  * ({@link ArmourGrimeTextures}), so each wash visibly takes some away. (It was a flat tint over the whole piece before.)
  */
 @Mixin(EquipmentLayerRenderer.class)

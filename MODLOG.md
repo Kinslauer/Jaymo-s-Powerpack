@@ -5052,7 +5052,45 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   let go leaves nothing now; a line leaves its spent line only when the server says it broke (cut, burnt, pulled
   apart, a hitch worn out, its anchor gone). A cut or snapped line parts at the break into two halves, the stuck half
   hanging, the slinger's half falling, both whipping back. Compile-checked; not played.
-- **0.19.71, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
+- **0.19.71, web lines burn; a symbiote's recoil** (`WebHeft.burning`, `WebHitches`, `WebBridges`, `WebCut`): Andy:
+  "weblines should be flammable, giving a counter to web users ... their webs dont burn they recoil, as they are
+  alive." Anything alight crossing a line now burns it through: a burning creature or player brushing it, a fire arrow
+  or fireball through it, the slinger on fire, the undead burning by day too. Hitches and weblines burn as well as
+  swing lines and the Yank lead (webline planks are flammable like wool), and a punch with fire in hand (torch, flint
+  and steel, fire charge, blaze rod, lava, a hot or Fire Aspect blade, or you alight) goes through at once. A
+  symbiote's cords never burn: they recoil into the host with a hiss and a shriek and let go.
+- **0.19.71, tendril globs keep to the back** (`WebGooGlobs`): Andy: the blobs "should only grow tendrils for living
+  tendril grabs and attacks while they move along the back". The twelve tendril globs only creep over the back now;
+  ten bare globs roam the shoulders, arms, legs, sides and belly. The webs and spikes the tendrils form still come off
+  the arms and anywhere else. Compile-checked; not played.
+- **0.19.72, Kingdoms 0.7.485, Kitchen 0.5.53, the Excalibur look made optional:** Andy: "make excalibur and all it's
+  additions from here optional, and off by default. but keep it in the pack." All 7,713 textures graded in 0.19.65 are
+  back to their originals in Powers, Kingdoms and Kitchen. Each restored file was checked: grading it again gives back
+  the graded file exactly. The 10 xenoform skins whose originals were never committed came from `tools/gen_xenoform.py`.
+  The graded copies now live in the built-in pack `excalibur_style`, off by default (`tools/excalibur_style/grade.py`
+  rebuilds it; sources are never touched). The same pack holds calmer leaves: Excalibur's leaf models hang fringes off
+  every leaf block, which inside a canopy repeat "like a hall of mirrors", so it puts plain leaf cubes back, turned at
+  random. Excalibur and its Fresh Animations patch are still downloaded into resourcepacks/ but never switched on.
+  Installs that 0.19.65 switched on get them switched off once (`ExcaliburLook`, marker `jaymospowers-excalibur-off-v1`).
+  `/excalibur on` switches all three on in the right order: Excalibur at the bottom, the patch just above Fresh
+  Animations, ours on top. `/excalibur off` takes them off, and plain `/excalibur` says which is on. Recrafted
+  (MR_CHOO, paid, not redistributable, never shipped) joins them, just above Excalibur, when a player has it in their
+  own resourcepacks/.
+- **0.19.73, flail and whip swings worked out every time** (`armory/Lash`, `client/armory/LashRenderer`): Andy: "the
+  flail and whip do not swing at the proper trajectory, it should be calculated everytime instead of the same canned
+  swing from right to left, also the right click wind up sould take into account where the head is ... working to the
+  OVERHEAD swing ... a shorter axis overhead, that the player lowers infront of themselves as it rounds, to deal damage
+  while the button is held, some attacks can wrap around shields, and will stop momentum upon a heavy enough hit."
+  Each press sends `Lash.Aim` first: the head's real spot (the client's physics chain) and how the mouse turned over
+  the last 3 ticks. A swipe now lies along the flick (left, right, a chop, an uppercut) from the head's side round to
+  the other (`sweepShape`); no flick, from the side the head hangs on across. A swipe can follow a returning swipe.
+  The whirl sets off from the head, round the way you were turning, and works up from the held-out hand to overhead by
+  full speed (`whirlPoint`): tilted down in front (more as you look down), drawn in to 55% behind, the arm dipping as
+  the ball comes round the front. Let go and the ball carries its speed up over your head and down. Whirl (half speed
+  up), slam, chops and the whip's crack wrap a raised shield or guard (`jaymospowers:lash_wrap`, in #bypasses_shield,
+  75% damage); other swings are stopped by it. A guard or anything with more heft (bulk x (1 + 2 x knockback
+  resistance)) than the swing's momentum stops the head: a swipe drops back, a whirl winds up again from there.
+- **0.19.74, splotchy armour grime** (`client/wet/ArmourGrimeTextures`, `ArmourGrimeMixin`, `ArmourGrimeIconMixin`):
   Andy: "the dirty armor should be splotchier and reflect the grime in the png, so you can see it cleaned if you wash
   it manually". Dirty armour no longer gets a flat tint: it's drawn from a copy of its own texture with dust or mud
   splotches painted in (10 steps of dirt, 4 of muddiness), and its inventory icon wears the same splotches. Dirt
