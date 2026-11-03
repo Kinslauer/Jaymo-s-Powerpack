@@ -191,7 +191,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
-		// (0.7.485) the sea-blooded Tideborn's parts (players and villagers)
+		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
 		GreenskinLooks.register();

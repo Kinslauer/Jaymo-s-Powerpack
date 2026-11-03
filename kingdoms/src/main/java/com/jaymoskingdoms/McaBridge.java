@@ -1103,7 +1103,7 @@ final class McaBridge {
 		return true;
 	}
 
-	/** (0.7.485) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
+	/** (0.7.486) {@link SeaBodies}: drops the {@code slot} armour in an MCA villager's pack at their feet; whether there was any. */
 	static boolean shedPacked(net.minecraft.world.entity.Mob mob, EquipmentSlot slot, ServerLevel level) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return false;
@@ -1122,7 +1122,7 @@ final class McaBridge {
 		return any;
 	}
 
-	/** (0.7.485) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
+	/** (0.7.486) {@link SeaBodies}: an MCA guard (not yet an archer) made an archer, a bow and arrows packed if they carry none. */
 	static boolean toBow(net.minecraft.world.entity.Mob mob) {
 		if (!(mob instanceof VillagerEntityMCA villager) || villager.isBaby() || villager.getProfession() != ProfessionsMCA.GUARD) {
 			return false;

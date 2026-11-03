@@ -129,7 +129,7 @@ public final class HeritageVariants {
 		// ---- Tideborn
 		REEFCROWNED(Heritage.Kind.TIDEBORN, 0xE2A486, 0.15F, Land.WARM_SEA, null, null, Trait.add(Attributes.ARMOR, 1.5)),
 		ABYSSAL(Heritage.Kind.TIDEBORN, 0x30506E, 0.4F, Land.DEEP_SEA, null, Heritage.Kind.DEEPBORN, Trait.add(Attributes.OXYGEN_BONUS, 2.0)),
-		// (0.7.485, Andy: "tideborn need to vary wildly ... they can draw from any sealife") thirteen sea-blooded looks, each with
+		// (0.7.486, Andy: "tideborn need to vary wildly ... they can draw from any sealife") thirteen sea-blooded looks, each with
 		// real model parts (client SeaParts): shark, manta, octopus, anglerfish, jellyfish, moray, crab, pufferfish, lionfish,
 		// seadragon, swordfish, sea slug and sea turtle. They keep the Tideborn's kit; each has one small trait.
 		GREYFIN(Heritage.Kind.TIDEBORN, 0x7E8C96, 0.45F, Land.DEEP_SEA, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.05)),

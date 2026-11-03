@@ -44,7 +44,7 @@ public final class VariantLooks {
 		MOON_MOTE = new DustParticleOptions(0xE6EAFF, 0.5F), LODE_SPARK = new DustParticleOptions(0xA06CE0, 0.5F),
 		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
 		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
-		// (0.7.485) a jellyfish's shimmer and a sea slug's bright flecks
+		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks
 		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
 
 	static {
@@ -55,7 +55,7 @@ public final class VariantLooks {
 		style(Variant.MAGMAVEIN, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_LAVA, 30, When.DRY);
 		style(Variant.REEFCROWNED, 0xFFFFB49C, null, REEF_MOTE, 24, When.WET);
 		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 28, When.WET);
-		// (0.7.485) the thirteen sea-blooded Tideborn looks (their model parts are SeaParts')
+		// (0.7.486) the thirteen sea-blooded Tideborn looks (their model parts are SeaParts')
 		style(Variant.GREYFIN, 0xFFE8EEF2, null, null, 0, When.WET);
 		style(Variant.MANTAWING, 0xFFB8E0FF, null, null, 0, When.WET);
 		style(Variant.EIGHTARM, 0xFFFFC060, null, INK_MOTE, 40, When.WET);
@@ -107,7 +107,7 @@ public final class VariantLooks {
 
 	private static void style(Variant v, int eyeColor, HeritageLooks.@Nullable Eyes eyes, @Nullable ParticleOptions particle, int every, When when) {
 		String root = "textures/entity/heritage/variant/" + v.key();
-		// (0.7.485) every Tideborn look has its own fins' colours (those SeaParts says keep them)
+		// (0.7.486) every Tideborn look has its own fins' colours (those SeaParts says keep them)
 		boolean fins = v.heritage == com.jaymoskingdoms.Heritage.Kind.TIDEBORN;
 		STYLES.put(v, new Style(v, JaymosKingdoms.id(root + "_skin.png"), JaymosKingdoms.id(root + "_glow.png"), eyeColor,
 			eyeColor == 0 ? null : JaymosKingdoms.id(root + "_eyes.png"), eyes, particle, every, when,

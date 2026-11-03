@@ -1628,7 +1628,7 @@ public final class LifeStory {
 	private static @Nullable BlockPos freshVillage(ServerLevel level, Heritage.Kind heritage, BlockPos spawn, RandomSource random) {
 		BlockPos first = null, inland = null;
 		BlockPos from = spawn;
-		// (0.7.485) a Tideborn's is by the shore: a free one inland is kept only if no shore one turns up
+		// (0.7.486) a Tideborn's is by the shore: a free one inland is kept only if no shore one turns up
 		int tries = heritage == Heritage.Kind.TIDEBORN ? StoryHomes.FRESH_TRIES * 2 : StoryHomes.FRESH_TRIES;
 		for (int i = 0; i <= tries; i++) {
 			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
