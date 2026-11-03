@@ -359,7 +359,7 @@ final class WalledTowns {
 
 	/** The kingdom whose wealth a village shares: its overlord's chain up to a kingdom, or the nearest realm's. */
 	static @Nullable Faction realm(MinecraftServer server, Faction f) {
-		Faction x = f.overlord() >= 0 ? Factions.get(server, f.overlord()) : Factions.realmNear(server, f.seat(), REALM_RANGE);
+		Faction x = f.overlord() >= 0 ? Factions.get(server, f.overlord()) : nearestRealm(server, f.seat());
 		for (int i = 0; i < 4 && x != null; i++) {
 			if (x.type() == FactionType.KINGDOM) {
 				return x;
@@ -367,6 +367,23 @@ final class WalledTowns {
 			x = x.overlord() >= 0 ? Factions.get(server, x.overlord()) : null;
 		}
 		return null;
+	}
+
+	/** The closest standing realm within REALM_RANGE of a free village, by distance, not list order (0.7.484). */
+	private static @Nullable Faction nearestRealm(MinecraftServer server, BlockPos pos) {
+		Faction best = null;
+		double bestDist = REALM_RANGE * REALM_RANGE;
+		for (Faction r : Factions.all(server)) {
+			if (!r.type().isRealm() || r.fallen()) {
+				continue;
+			}
+			double d = r.seat().distSqr(pos);
+			if (d <= bestDist) {
+				best = r;
+				bestDist = d;
+			}
+		}
+		return best;
 	}
 
 	static Wealth.Tier wealth(MinecraftServer server, Faction f) {
