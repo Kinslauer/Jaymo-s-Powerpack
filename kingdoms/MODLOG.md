@@ -8317,6 +8317,10 @@ turtle).
   Villagers too (Andy: "this applies period, the villagers will comment on it, and find alternatives"): what they wear
   or carry for MCA's armour routine is shed at their feet with a remark; their guards become MCA archers (a bow and arrows
   packed if they have none, with a remark), and they're first in line for their realm's horses (`Cavalry`).
+- **By the shore** (Andy: "it just makes sense for their havens or settlements to be by the shore"): a haven is drawn
+  Tideborn only when its seat has sea, river or beach within 72 blocks (`Havens.shore`), and an inland haven never is; the
+  Tideborn village start looks for a village by the water first (plains maps, not desert), falling back inland only if
+  none is free. Havens already drawn keep their blood.
 - Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
   Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
   `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
