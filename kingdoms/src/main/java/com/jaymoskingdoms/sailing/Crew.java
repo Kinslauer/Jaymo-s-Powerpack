@@ -71,6 +71,9 @@ public final class Crew {
 	public int target = -1;
 	public @Nullable BlockPos waypoint;
 	public int stuck, lastFired, backing;
+	/** (0.7.484) Not saved: when her gunners last looked ashore for a foe (with no ship to fight), and what they found. */
+	public long shoreLooked = Long.MIN_VALUE / 2;
+	public @Nullable Vec3 shore;
 	/**
 	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
 	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.

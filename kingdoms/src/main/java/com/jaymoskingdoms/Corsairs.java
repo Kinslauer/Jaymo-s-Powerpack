@@ -65,6 +65,8 @@ final class Corsairs implements Ship.Captaincy {
 	/** Her guns: their reach, the least range, how far off their line they're laid (a cosine), and how long a reload takes (ticks). */
 	static final double GUN_RANGE = 52.0, GUN_NEAREST = 5.0, GUN_ARC = 0.86;
 	static final int RELOAD = 160, RELOAD_MONKEY = 100, GUN_GAP = 4;
+	/** (0.7.484) With no ship to fight, how often (ticks) her gunners look ashore for a foe; between looks they keep the last one. */
+	static final int SHORE_LOOK = 30;
 	/** How fast round shot flies and falls (as {@code ShipShot}), and how much they miss by (degrees). */
 	static final double SHOT_SPEED = 1.6, SHOT_FALL = 0.015;
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
@@ -465,7 +467,12 @@ final class Corsairs implements Ship.Captaincy {
 				// ((0.7.484) no ship to fight: she shells the enemy ashore, folk at war with her cove or the ones she is raiding)
 				if (!looked) {
 					looked = true;
-					shore = this.shoreFoe(level, ship, crew);
+					// ((0.7.484) a look ashore is a wide search: only every SHORE_LOOK ticks, the last one kept between)
+					if (now - crew.shoreLooked >= SHORE_LOOK || now < crew.shoreLooked) {
+						crew.shoreLooked = now;
+						crew.shore = this.shoreFoe(level, ship, crew);
+					}
+					shore = crew.shore;
 				}
 				if (shore != null) {
 					dir = this.layAt(level, ship, gun, shore, Vec3.ZERO);

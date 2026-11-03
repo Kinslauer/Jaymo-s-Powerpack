@@ -67,6 +67,8 @@ final class OgreGrowth {
 	static final int HUT_HALF = 2, HUT_WALL = 4;
 	/** (0.7.484) Rounds a stage may find no ground before the hold lets it go, unpaid, and tries the next stage's spot. */
 	static final int STAGE_TRIES = 3;
+	/** (0.7.484) How far (blocks, a square) from its centre a hold that lost every stash chest looks for ground for a new one. */
+	static final int HOARD_SEARCH = 6;
 	// ================================================================================================================
 
 		private OgreGrowth() {
@@ -113,10 +115,27 @@ final class OgreGrowth {
 		return out;
 	}
 
-	/** A hold raised before it kept a stash list has its hoard chest found (the nearest chest inside its walls) and kept. */
+	/**
+	 * A hold raised before it kept a stash list has its hoard chest found (the nearest chest inside its walls) and kept.
+	 * (0.7.484) Stash chests that are gone (looted and broken) are struck off the list; if none is left, the nearest chest
+	 * inside the walls is taken up instead, or failing that a new hoard chest is set down by its centre, so the hold
+	 * carries on growing (and its waiting loot has somewhere to go).
+	 */
 	private static OgreHolds.Site adopt(ServerLevel level, OgreHolds.Site site) {
-		if (!site.stash().isEmpty()) {
-			return site;
+		List<BlockPos> kept = new ArrayList<>();
+		for (BlockPos pos : site.stash()) {
+			// (one whose chunk isn't loaded is kept: it can't be told gone)
+			if (!level.isLoaded(pos) || level.getBlockEntity(pos) instanceof Container) {
+				kept.add(pos);
+			}
+		}
+		if (!kept.isEmpty()) {
+			if (kept.size() == site.stash().size()) {
+				return site;
+			}
+			OgreHolds.Site pruned = site.withStash(kept);
+			OgreHolds.put(level.getServer(), pruned);
+			return pruned;
 		}
 		int r = OgreHolds.HOLD_RADIUS;
 		BlockPos found = null;
@@ -128,11 +147,47 @@ final class OgreGrowth {
 			}
 		}
 		if (found == null) {
+			found = newHoard(level, site);
+		}
+		if (found == null) {
+			if (!site.stash().isEmpty()) {
+				OgreHolds.Site pruned = site.withStash(List.of());
+				OgreHolds.put(level.getServer(), pruned);
+				return pruned;
+			}
 			return site;
 		}
 		OgreHolds.Site adopted = site.withStash(List.of(found));
 		OgreHolds.put(level.getServer(), adopted);
 		return adopted;
+	}
+
+	/** (0.7.484) A new, empty hoard chest set down on clear ground near the hold's centre (not with a player near), or null. */
+	private static @Nullable BlockPos newHoard(ServerLevel level, OgreHolds.Site site) {
+		if (Raids.playerNear(level, site.at(), HIDE_RANGE)) {
+			return null;
+		}
+		for (int ring = 0; ring <= HOARD_SEARCH; ring++) {
+			for (int dx = -ring; dx <= ring; dx++) {
+				for (int dz = -ring; dz <= ring; dz++) {
+					if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) {
+						continue;
+					}
+					BlockPos column = site.at().offset(dx, 0, dz);
+					if (!level.isLoaded(column)) {
+						continue;
+					}
+					BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+					if (Math.abs(at.getY() - site.at().getY()) > FLOOR_SPREAD || !level.getBlockState(at).isAir()
+						|| !level.getBlockState(at.below()).isFaceSturdy(level, at.below(), Direction.UP)) {
+						continue;
+					}
+					set(level, at, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(level.getRandom())));
+					return level.getBlockEntity(at) instanceof Container ? at.immutable() : null;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Puts {@code stack} into the stash; what doesn't fit (or has nowhere loaded to go) waits in the site's record. Returns what is left. */
@@ -187,10 +242,21 @@ final class OgreGrowth {
 		}
 		Map<String, Integer> left = new HashMap<>();
 		for (var e : site.pending().entrySet()) {
-			Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(e.getKey()));
+			// ((0.7.484) an id that no longer names an item, a removed mod's, is dropped: it would never go in)
+			Identifier id = Identifier.tryParse(e.getKey());
+			if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
+				continue;
+			}
+			Item item = BuiltInRegistries.ITEM.getValue(id);
+			if (item == Items.AIR) {
+				continue;
+			}
 			int count = e.getValue();
 			while (count > 0) {
-				ItemStack stack = new ItemStack(item, Math.min(count, item.getDefaultMaxStackSize()));
+				ItemStack stack = new ItemStack(item, Math.min(count, Math.max(1, item.getDefaultMaxStackSize())));
+				if (stack.isEmpty()) {
+					break;
+				}
 				count -= stack.getCount();
 				int lost = put(level, site, stack).getCount();
 				if (lost > 0) {

@@ -18,6 +18,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -60,7 +61,7 @@ final class Plunder {
 	 * A raider at {@code target}'s land breaks into a chest or barrel that stands loose near him (one that isn't the
 	 * settlement's registered storage and that stands on its land) and takes up to {@link #LOOSE_TAKE} of its best stack.
 	 * A container that is stripped bare is smashed (with the sound of it); one with things left is sometimes smashed
-	 * anyway, spilling them for whoever comes by. Empty if there was nothing.
+	 * anyway, spilling them for whoever comes by ((0.7.484) only where mobGriefing is on). Empty if there was nothing.
 	 */
 	static ItemStack breakIn(ServerLevel level, Mob raider, Faction target, float smash, int take) {
 		MinecraftServer server = level.getServer();
@@ -115,7 +116,9 @@ final class Plunder {
 			bare = container.getItem(slot).isEmpty();
 		}
 		Vec3 at = Vec3.atCenterOf(bestAt);
-		if (bare || random.nextFloat() < smash) {
+		// ((0.7.484) the lid is smashed only where mobs may break blocks: otherwise it is opened and robbed)
+		boolean griefing = level.getGameRules().get(GameRules.MOB_GRIEFING);
+		if (griefing && (bare || random.nextFloat() < smash)) {
 			// (the lid is smashed in: whatever is left spills out)
 			level.destroyBlock(bestAt, true, raider);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.WOOD_BREAK, SoundSource.HOSTILE, 1.2F, 0.7F);
