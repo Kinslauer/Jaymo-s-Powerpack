@@ -154,7 +154,7 @@ public final class LifeStory {
 	/** (0.7.417, Andy) The heritages that can wake in the alchemist's lab. */
 	static final Set<Heritage.Kind> LAB_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.of(Heritage.Kind.BIOBUILT,
 		Heritage.Kind.RUBBERFOLK, Heritage.Kind.EMBERBORN, Heritage.Kind.STONEBORN, Heritage.Kind.SYLVAN));
-	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, (0.7.480) Beastfolk or Hollow). */
+	/** (0.7.443) The heritages that can take the greenskin road: those that pass for human (not the Tideborn, Stoneborn, Warrior-born, Sylvan, Bio-built, (0.7.484) Beastfolk or Hollow). */
 	static final Set<Heritage.Kind> GREENSKIN_KINDS = java.util.Collections.unmodifiableSet(java.util.EnumSet.complementOf(java.util.EnumSet.of(
 		Heritage.Kind.TIDEBORN, Heritage.Kind.STONEBORN, Heritage.Kind.WARRIORBORN, Heritage.Kind.SYLVAN, Heritage.Kind.BIOBUILT, Heritage.Kind.GOBLIN,
 		Heritage.Kind.ORC, Heritage.Kind.BEASTFOLK, Heritage.Kind.HOLLOW)));
@@ -394,7 +394,7 @@ public final class LifeStory {
 				// hilltop shrine is gone: that blood is earned now, by dying again in the afterlife)
 				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
 				Answer.born(Heritage.Kind.RUBBERFOLK, "fair"),
-				// (0.7.480) the beastfolk are picked at the start (a den in the wild); the Hollow are earned and have no birthplace
+				// (0.7.484) the beastfolk are picked at the start (a den in the wild); the Hollow are earned and have no birthplace
 				Answer.born(Heritage.Kind.BEASTFOLK, "den")));
 			RAISED.answers.addAll(List.of(
 				Answer.raised("farmers", Items.WHEAT_SEEDS, Stats.Stat.ENDURANCE, false),
@@ -424,7 +424,7 @@ public final class LifeStory {
 				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
 				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
 				Answer.raised("sunpriests", Items.GLOWSTONE_DUST, Stats.Stat.GRIT, false).onlyBorn(Heritage.Kind.DAWNBORN),
-				// (0.7.480) the pack that raised a beastfolk
+				// (0.7.484) the pack that raised a beastfolk
 				Answer.raised("pack", Items.BONE, Stats.Stat.AGILITY, false).onlyBorn(Heritage.Kind.BEASTFOLK),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(

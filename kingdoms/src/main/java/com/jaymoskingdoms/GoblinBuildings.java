@@ -501,7 +501,7 @@ final class GoblinBuildings {
 		return containers;
 	}
 
-	/** The king's hoard: gold (lots), bent ingots (0.7.480), a golden apple, mushroom stew, and a spare mask. */
+	/** The king's hoard: gold (lots), bent ingots (0.7.484), a golden apple, mushroom stew, and a spare mask. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;

@@ -65,7 +65,7 @@ public final class BodySizes {
 	 * anyone's box a man's size at most, so an orc still fits a door; a warchief's own scale makes him huge).
 	 */
 	/**
-	 * (0.7.480) Beastfolk run lean and quick across a wide span (a cat is slight, a serpen long); the Hollow are the dead's own
+	 * (0.7.484) Beastfolk run lean and quick across a wide span (a cat is slight, a serpen long); the Hollow are the dead's own
 	 * frames: gaunt, and never the broadest.
 	 */
 	static final Body BEASTFOLK = new Body(0.1F, 0.85F, 0.1F, 0.7F), HOLLOW = new Body(0.2F, 0.85F, 0.05F, 0.5F);

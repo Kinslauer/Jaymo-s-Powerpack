@@ -143,7 +143,7 @@ public final class Goblins {
 	/** What a goblin of village {@code village} attacks on sight ((0.7.292) a villager goblin's too, {@link Greenskins}). */
 	static boolean prey(int village, LivingEntity target) {
 		if (Brutality.foe(village, target)) {
-			// (0.7.480) the orcs of a camp raiding it
+			// (0.7.484) the orcs of a camp raiding it
 			return true;
 		}
 		if (target instanceof ServerPlayer player) {

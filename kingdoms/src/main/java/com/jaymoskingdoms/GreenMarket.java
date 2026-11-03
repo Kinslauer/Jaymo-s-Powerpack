@@ -25,7 +25,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.480) Hordes patch 3, the market: a greenskin camp's merchants are two of its own folk (MCA villagers, orcs or goblins)
+ * (0.7.484) Hordes patch 3, the market: a greenskin camp's merchants are two of its own folk (MCA villagers, orcs or goblins)
  * who keep a stall (the market square once it's built, else by the fire), tagged {@link #TAG}. Talk to one on the Interact
  * page ("Show me your wares", {@link InteractActions#WARES}) and the stall opens, like the havens' wares
  * ({@link HavenWares}) but priced in bent ingots ({@link BentIngots}):
@@ -72,7 +72,7 @@ final class GreenMarket {
 		new Good(Items.ARROW, 16, 3, 24, 48), new Good(Items.BONE, 8, 2, 8, 24), new Good(Items.COOKED_CHICKEN, 4, 3, 24, 40));
 
 	/**
-	 * An open trade: whose stall, and each offer's uses when the screen opened. ((0.7.480) {@code merchant} is kept so the trade
+	 * An open trade: whose stall, and each offer's uses when the screen opened. ((0.7.484) {@code merchant} is kept so the trade
 	 * can still be booked from his offers if he dies or unloads before it closes, or the server stops.)
 	 */
 	private record Session(Villager merchant, int camp, boolean stocked, List<Integer> uses) {
@@ -90,7 +90,7 @@ final class GreenMarket {
 				settleAll(server);
 			}
 		});
-		// ((0.7.480) every trade still open is booked while the levels are still up, before the world saves)
+		// ((0.7.484) every trade still open is booked while the levels are still up, before the world saves)
 		ServerLifecycleEvents.SERVER_STOPPING.register(GreenMarket::settleRemaining);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SESSIONS.clear());
 	}
@@ -158,7 +158,7 @@ final class GreenMarket {
 		AABB box = new AABB(stall).inflate(Hordes.radius(server, camp.id()) + 8.0);
 		List<Villager> have = level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && v.entityTags().contains(TAG_OF + camp.id()));
 		for (Villager v : have) {
-			// ((0.7.480) every pass, not on a tickCount gate: this runs every Camps.CHECK_TICKS, so a gate would skip most merchants forever)
+			// ((0.7.484) every pass, not on a tickCount gate: this runs every Camps.CHECK_TICKS, so a gate would skip most merchants forever)
 			if (v.getTradingPlayer() == null) {
 				v.setHomeTo(stall, STALL_RADIUS);
 			}
@@ -216,7 +216,7 @@ final class GreenMarket {
 			// (all they carry is straightened: refused, and the stall opens all the same)
 			BentIngots.refuse(level, merchant, player);
 		}
-		// ((0.7.480) a trade still waiting to be booked is booked now, before the stall is laid out afresh)
+		// ((0.7.484) a trade still waiting to be booked is booked now, before the stall is laid out afresh)
 		settleNow(v);
 		stock(level, camp, data, v);
 		if (v.getOffers().isEmpty()) {
@@ -243,9 +243,9 @@ final class GreenMarket {
 			if (spare > 0) {
 				offers.add(BentIngots.offer(price, new ItemStack(g.item(), g.lot()), Math.min(SELL_USES, spare), 0, 0.0F));
 			}
-			int pay = BentIngots.payable(bounty(g, stock)); // (0.7.480) what the one stack of coin really pays, so the hoard is charged no more or less than that
+			int pay = BentIngots.payable(bounty(g, stock)); // (0.7.484) what the one stack of coin really pays, so the hoard is charged no more or less than that
 			int short_ = (g.keep() - stock + g.lot() - 1) / g.lot();
-			// ((0.7.480) every buy offer draws on one budget, so all of them together never pay out more than the hoard holds)
+			// ((0.7.484) every buy offer draws on one budget, so all of them together never pay out more than the hoard holds)
 			long afford = hoard / pay;
 			if (short_ > 0 && afford > 0) {
 				int uses = (int)Math.min(Math.min(BUY_USES, short_), afford);
@@ -270,7 +270,7 @@ final class GreenMarket {
 		SESSIONS.put(v.getUUID(), new Session(v, camp, stocked, uses));
 	}
 
-	/** ((0.7.480)) {@code v}'s last trade, if it's still waiting for settleAll, booked now so a new one can't overwrite it. */
+	/** ((0.7.484)) {@code v}'s last trade, if it's still waiting for settleAll, booked now so a new one can't overwrite it. */
 	private static void settleNow(Villager v) {
 		Session s = SESSIONS.remove(v.getUUID());
 		if (s != null && v.level() instanceof ServerLevel level) {
@@ -283,7 +283,7 @@ final class GreenMarket {
 		for (var it = SESSIONS.entrySet().iterator(); it.hasNext();) {
 			var e = it.next();
 			if (!(level.getEntity(e.getKey()) instanceof Villager v)) {
-				// ((0.7.480) he died or his chunk unloaded: the trade is booked from the offers he left, not dropped)
+				// ((0.7.484) he died or his chunk unloaded: the trade is booked from the offers he left, not dropped)
 				it.remove();
 				settle(level, e.getValue().merchant(), e.getValue());
 				continue;
@@ -295,7 +295,7 @@ final class GreenMarket {
 		}
 	}
 
-	/** ((0.7.480)) Every trade still open, booked and dropped (the server is stopping). */
+	/** ((0.7.484)) Every trade still open, booked and dropped (the server is stopping). */
 	private static void settleRemaining(MinecraftServer server) {
 		if (SESSIONS.isEmpty()) {
 			return;
@@ -342,7 +342,7 @@ final class GreenMarket {
 			}
 		}
 		if (s.stocked()) {
-			// ((0.7.480) nothing priced is left on him between stall visits, so no other path can open an unbooked trade)
+			// ((0.7.484) nothing priced is left on him between stall visits, so no other path can open an unbooked trade)
 			offers.clear();
 		}
 	}

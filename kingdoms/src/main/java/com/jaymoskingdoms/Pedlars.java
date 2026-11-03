@@ -54,7 +54,7 @@ public final class Pedlars {
 	static final double ARRIVE = 20.0, STOP_FOR = 6.0;
 	/** Walking pace (his and his guards'), and how far his guards let him get. */
 	static final double PACE = 0.55, GUARD_PACE = 0.7, GUARD_SLACK = 5.0;
-	/** Prices ((0.7.480) in bent worth, BentIngots): his odd wares (each), the mask, a seat map, the bestiary. */
+	/** Prices ((0.7.484) in bent worth, BentIngots): his odd wares (each), the mask, a seat map, the bestiary. */
 	static final int WARES = 3, WARE_PRICE_MIN = 2, WARE_PRICE_MAX = 8, MASK_PRICE = 20, MAP_PRICE = 16, BESTIARY_PRICE = 12;
 	// ================================================================================================================
 
@@ -349,7 +349,7 @@ public final class Pedlars {
 	/** (From MCA's menu, "Show me your wares") his trading screen. */
 	public static void trade(ServerPlayer player, LivingEntity pedlar) {
 		if (pedlar instanceof Villager v && v.getTradingPlayer() == null) {
-			// ((0.7.480) what he's paid goes into his tribe's seat's hoard when the trading ends)
+			// ((0.7.484) what he's paid goes into his tribe's seat's hoard when the trading ends)
 			String tribe = Tribes.of(pedlar);
 			Faction keeper = tribe == null ? null : HordeEconomy.treasury(player.level().getServer(), tribe);
 			if (keeper != null) {

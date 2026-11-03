@@ -50,7 +50,7 @@ final class Raids {
 	static final float RAID_CHANCE = 0.12F;
 	/** (0.7.123) The raid chance's factor in summer and in winter (Kitchen's seasons). */
 	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
-	/** (0.7.480) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
+	/** (0.7.484) The raid chance's factor for a camp that can't feed its folk ({@link HordeEconomy#hungry}). */
 	static final float HUNGRY_RAIDS = 3.0F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
@@ -133,7 +133,7 @@ final class Raids {
 		return ACTIVE.containsKey(camp);
 	}
 
-	/** (0.7.480) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
+	/** (0.7.484) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
 	static boolean between(int a, int b) {
 		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);
 		return ab != null && ab.target == b || ba != null && ba.target == a;
@@ -192,7 +192,7 @@ final class Raids {
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
-			// ((0.7.480) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
+			// ((0.7.484) a hungry greenskin camp raids twice as often, and a hungry goblin village raids at all)
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
 			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < (hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
 				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry) {

@@ -5026,3 +5026,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
     one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
     man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
     The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
+- **0.19.67, Kingdoms 0.7.484, greenskin hordes and Runic Races heritages:** Kingdoms only, see kingdoms/MODLOG.md, except
+  that the Forge Hearth now superheats Kingdoms' bent ingots into Hot Ingots (`HotMetal.ingotMetal`), one way to straighten them.

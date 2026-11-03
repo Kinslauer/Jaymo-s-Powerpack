@@ -519,13 +519,13 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return true;
 		}
 		net.minecraft.server.MinecraftServer server = this.level().getServer();
-		// ((0.7.480) camps at war in a raid are not allies just now, Brutality)
+		// ((0.7.484) camps at war in a raid are not allies just now, Brutality)
 		return server != null && Relations.between(server, this.factionId(), other.factionId()) == Relation.ALLIED
 			&& !Brutality.atWar(server, this.factionId(), other.factionId());
 	}
 
 	/**
-	 * (0.7.480) It takes on another role of its faction in place (an orc made warchief by a challenge, a warchief brought
+	 * (0.7.484) It takes on another role of its faction in place (an orc made warchief by a challenge, a warchief brought
 	 * low): its gear, name and mettle those of the new role, its size and toughness back to a man's first, its bar and
 	 * second wind new.
 	 */
@@ -575,7 +575,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return;
 		}
 		if (this.role() == Slaves.SLAVE) {
-			// (0.7.480) a goblin slave in an orc camp: its chain, its hauling, its running off, a toss (Slaves)
+			// (0.7.484) a goblin slave in an orc camp: its chain, its hauling, its running off, a toss (Slaves)
 			Slaves.tick(level, this);
 			return;
 		}
@@ -651,7 +651,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.19) his bar: only for the players who've hit him, while they stay near
 			BossBars.show(level, this, this.bar());
 		}
-		// ((0.7.480) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
+		// ((0.7.484) not in a camp brawl: a chief challenge's blows aren't a fight to call his camp to)
 		if (this.leader() && !this.rallied && !Brutality.fighting(this) && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;

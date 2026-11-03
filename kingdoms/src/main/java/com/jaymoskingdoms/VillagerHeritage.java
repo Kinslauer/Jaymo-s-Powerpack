@@ -74,7 +74,7 @@ public final class VillagerHeritage {
 	 * Divine-born very rare (the peaks lean them); the Bio-built aren't born to villagers at all, only to a Bio-built parent.
 	 */
 	static final int W_RUBBERFOLK = 20, W_DIVINE = 4;
-	/** (0.7.480) The beastfolk: fairly rare, leaning to the savannas, taigas and jungles; the Hollow are earned, only ever inherited. */
+	/** (0.7.484) The beastfolk: fairly rare, leaning to the savannas, taigas and jungles; the Hollow are earned, only ever inherited. */
 	static final int W_BEASTFOLK = 18;
 	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
 	static final int HIGH_Y = 110;
@@ -225,7 +225,7 @@ public final class VillagerHeritage {
 				case BIOBUILT -> 0;
 				// (0.7.292) goblins and orcs are only ever born to their own (Greenskins)
 				case GOBLIN, ORC -> 0;
-				// (0.7.480) beastfolk like the wild lands; the Hollow are earned, so only inherited
+				// (0.7.484) beastfolk like the wild lands; the Hollow are earned, so only inherited
 				case BEASTFOLK -> W_BEASTFOLK * (biome.is(BiomeTags.IS_SAVANNA) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) ? LEAN : 1);
 				case HOLLOW -> 0;
 			};
@@ -429,7 +429,7 @@ public final class VillagerHeritage {
 		if (kind != Heritage.Kind.WARRIORBORN) {
 			modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
-		// (0.7.480) and its kit's plain attribute gifts and flaws (never its ability)
+		// (0.7.484) and its kit's plain attribute gifts and flaws (never its ability)
 		HeritageKits.attributes(villager);
 	}
 
@@ -446,7 +446,7 @@ public final class VillagerHeritage {
 			if (kind == null) {
 				continue;
 			}
-			// (0.7.480) the kit's gifts and flaws that follow the weather and the land
+			// (0.7.484) the kit's gifts and flaws that follow the weather and the land
 			HeritageKits.tick(villager, server.getTickCount());
 			switch (kind) {
 				case EMBERBORN -> {

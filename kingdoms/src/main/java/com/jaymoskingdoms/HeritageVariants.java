@@ -72,7 +72,7 @@ public final class HeritageVariants {
 	/** How likely a villager is born to the first look, against each other variant's weight. */
 	static final int W_BASE = 50, W_VARIANT = 25;
 	/**
-	 * (0.7.480) A heritage with more than this many variants (Sylvan has ten) has its first look weighed up in step, so the
+	 * (0.7.484) A heritage with more than this many variants (Sylvan has ten) has its first look weighed up in step, so the
 	 * many looks don't leave the first one almost never born.
 	 */
 	static final int BASE_SHARE_VARIANTS = 3;
@@ -118,7 +118,7 @@ public final class HeritageVariants {
 	}
 
 	/**
-	 * The variants past each heritage's first look, in order (two to ten each; (0.7.480) the Sylvan, Beastfolk and Hollow have more). {@code tint}: the colour laid over their skin
+	 * The variants past each heritage's first look, in order (two to ten each; (0.7.484) the Sylvan, Beastfolk and Hollow have more). {@code tint}: the colour laid over their skin
 	 * (MCA's skin layer; a Verdant's green), by {@code tintAmount} (0: none); {@code element}: a monolith of it near
 	 * leans births to it; {@code hybrid}: a child with a parent of that heritage leans to it.
 	 */
@@ -186,7 +186,7 @@ public final class HeritageVariants {
 		// ---- orcs: the ash-black of the burnt lands, and the red-brown bloodtusks of the badlands
 		ASHSKIN(Heritage.Kind.ORC, 0x34372E, 0.55F, Land.HOT, null, null, Trait.add(Attributes.ARMOR, 1.5)),
 		BLOODTUSK(Heritage.Kind.ORC, 0x7A4E34, 0.4F, Land.BADLANDS, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.05)),
-		// ---- (0.7.480, Andy: "Dryad and all the fae are kind of what i intended from sylvan") the rest of the Sylvan, after the
+		// ---- (0.7.484, Andy: "Dryad and all the fae are kind of what i intended from sylvan") the rest of the Sylvan, after the
 		// first two. Their ids are stable; the abilities, passives and weaknesses of each come with the next patch, so none carries a
 		// trait yet. The tints are light: the look is in the textures (variant/<id>_skin.png).
 		DRYAD(Heritage.Kind.SYLVAN, 0x7A8A4E, 0.3F, Land.JUNGLE, null, Heritage.Kind.VERDANT),
@@ -197,14 +197,14 @@ public final class HeritageVariants {
 		HIGHELF(Heritage.Kind.SYLVAN, 0xF4E8D0, 0.18F, Land.HIGH, Element.HIGHFIELD, null),
 		MOONELF(Heritage.Kind.SYLVAN, 0xB4B8E0, 0.25F, Land.DARK, null, Heritage.Kind.NIGHTBORN),
 		BLOODELF(Heritage.Kind.SYLVAN, 0xE0B0A8, 0.18F, Land.HOT, null, Heritage.Kind.EMBERBORN),
-		// ---- (0.7.480) Beastfolk, the family (ids stable; abilities come with the next patch)
+		// ---- (0.7.484) Beastfolk, the family (ids stable; abilities come with the next patch)
 		ARACHNID(Heritage.Kind.BEASTFOLK, 0x3A2E3E, 0.2F, Land.DARK, null, null),
 		AVIAN(Heritage.Kind.BEASTFOLK, 0, 0.0F, Land.HIGH, Element.HIGHFIELD, Heritage.Kind.STORMBORN),
 		CANINE(Heritage.Kind.BEASTFOLK, 0x9A7A58, 0.12F, Land.COLD, null, Heritage.Kind.FROSTBORN),
 		FELINE(Heritage.Kind.BEASTFOLK, 0xC89A5A, 0.12F, Land.PLAINS, null, null),
 		KITSUNE(Heritage.Kind.BEASTFOLK, 0xE08A4A, 0.14F, Land.FLOWERS, null, Heritage.Kind.SYLVAN),
 		SERPEN(Heritage.Kind.BEASTFOLK, 0x6E9A5A, 0.35F, Land.JUNGLE, null, null),
-		// ---- (0.7.480) the Hollow, the risen dead
+		// ---- (0.7.484) the Hollow, the risen dead
 		ZOMBIE(Heritage.Kind.HOLLOW, 0x7A9A6E, 0.45F, Land.SWAMP, null, null),
 		SKELETON(Heritage.Kind.HOLLOW, 0xE4E0D0, 0.5F, Land.DEEP, null, null),
 		WRAITH(Heritage.Kind.HOLLOW, 0x9AB0C8, 0.45F, Land.DARK, null, Heritage.Kind.NIGHTBORN),
@@ -315,7 +315,7 @@ public final class HeritageVariants {
 	public static void set(LivingEntity entity, @Nullable Variant v) {
 		entity.setAttached(VARIANT, v == null ? BASE : v.key());
 		traits(entity);
-		// (0.7.480) and the look's own kit attributes (the heritage's were put on before the look was)
+		// (0.7.484) and the look's own kit attributes (the heritage's were put on before the look was)
 		HeritageKits.attributes(entity);
 	}
 
@@ -444,7 +444,7 @@ public final class HeritageVariants {
 		Variant had = key == null ? null : Variant.byKey(key);
 		if (BASE.equals(key) || had != null && had.heritage == kind) {
 			traits(villager);
-			// (0.7.480) the kit attributes of the look it keeps
+			// (0.7.484) the kit attributes of the look it keeps
 			HeritageKits.attributes(villager);
 			return;
 		}

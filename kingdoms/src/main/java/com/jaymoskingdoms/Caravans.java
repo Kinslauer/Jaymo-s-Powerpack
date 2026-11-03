@@ -94,7 +94,7 @@ final class Caravans {
 	/** Reputation: a cart broken open by a player (with the fiefdom, and its overlord). */
 	static final int REP_ROB = -60;
 	/**
-	 * (0.7.480) Greenskin carts: a camp keeps this much of each good back, sends at most this many items, in this many carts, with this many
+	 * (0.7.484) Greenskin carts: a camp keeps this much of each good back, sends at most this many items, in this many carts, with this many
 	 * guards (and one more per {@link #CARTS_PER_GUARD} carts); it sends once in this long (ticks), and retries after the other; its tribe's
 	 * camp it sends to is this near at most (blocks); a cart robbed raises the tribe's grudge by this much.
 	 */
@@ -251,7 +251,7 @@ final class Caravans {
 			}
 			start(level, f, false);
 		}
-		// ((0.7.480) and the greenskin camps send their surplus to the other camps of their tribe)
+		// ((0.7.484) and the greenskin camps send their surplus to the other camps of their tribe)
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			if (f.fallen() || !Hordes.greenskin(server, f.id()) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())
 				|| now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
@@ -286,13 +286,13 @@ final class Caravans {
 		return best;
 	}
 
-	/** (0.7.480) The goods a greenskin camp of {@code orc}'s kind trades in. */
+	/** (0.7.484) The goods a greenskin camp of {@code orc}'s kind trades in. */
 	private static Predicate<ItemStack> greenGoods(boolean orc, boolean food) {
 		return x -> food ? HordeEconomy.eats(x) : GreenMarket.goods(orc).stream().anyMatch(g -> x.is(g.item()));
 	}
 
 	/**
-	 * (0.7.480) Greenskin camp {@code f} sends a cart or two of its surplus to a camp of its tribe (food, if that camp is hungry),
+	 * (0.7.484) Greenskin camp {@code f} sends a cart or two of its surplus to a camp of its tribe (food, if that camp is hungry),
 	 * along their road, guarded by its own folk; not while it is hungry itself. {@code force}: whatever the time and the load.
 	 */
 	static @Nullable Caravan startGreen(ServerLevel level, Faction f, boolean force) {
@@ -332,7 +332,7 @@ final class Caravans {
 		return c;
 	}
 
-	/** (0.7.480) What a cart's {@code cargo} is worth in bent ingots at a camp's prices (a lot of each good at its base price). */
+	/** (0.7.484) What a cart's {@code cargo} is worth in bent ingots at a camp's prices (a lot of each good at its base price). */
 	private static long cargoWorth(Map<String, Integer> cargo, boolean orc) {
 		long worth = 0L;
 		for (Map.Entry<String, Integer> e : cargo.entrySet()) {
@@ -586,7 +586,7 @@ final class Caravans {
 	}
 
 	/**
-	 * (0.7.480) A greenskin cart at its tribe's other camp: the goods handed over, the camp paying for them out of its hoard into the
+	 * (0.7.484) A greenskin cart at its tribe's other camp: the goods handed over, the camp paying for them out of its hoard into the
 	 * sender's (as much as it holds), and the carts loaded again for home with some of what that camp has in plenty.
 	 */
 	private static Caravan arriveGreen(ServerLevel level, Caravan c, Faction home, Faction lord, long now) {
@@ -918,7 +918,7 @@ final class Caravans {
 	}
 
 	/**
-	 * (0.7.480) A greenskin cart's carter for camp {@code f} at {@code at}: with MCA one of the camp's own goblins or orcs
+	 * (0.7.484) A greenskin cart's carter for camp {@code f} at {@code at}: with MCA one of the camp's own goblins or orcs
 	 * (raised as its grunt or goblin, then set to drive), else the folk carter {@link Drivers#hire} gives.
 	 */
 	static @Nullable Worker carter(ServerLevel level, Faction f, BlockPos at, float yaw) {
@@ -945,7 +945,7 @@ final class Caravans {
 	/** (0.7.294) One of a caravan's guards for {@code f} at {@code at}: with MCA an MCA guard of its people, else a folk. */
 	static @Nullable Worker guard(ServerLevel level, Faction f, BlockPos at, float yaw) {
 		if (f.type() == FactionType.BARBARIAN) {
-			// ((0.7.480) a greenskin cart's guards are the camp's own goblins or orcs, MCA villagers with MCA)
+			// ((0.7.484) a greenskin cart's guards are the camp's own goblins or orcs, MCA villagers with MCA)
 			Folk brute = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 			if (brute == null) {
 				return null;
@@ -1075,7 +1075,7 @@ final class Caravans {
 		Faction f = Factions.get(server, wagon.faction());
 		String tribe = f != null && f.type() == FactionType.BARBARIAN ? Tribes.of(server, f.id()) : null;
 		if (tribe != null) {
-			// ((0.7.480) a greenskin cart: the tribe's grudge against him rises)
+			// ((0.7.484) a greenskin cart: the tribe's grudge against him rises)
 			Tribes.add(server, player.getUUID(), tribe, GREEN_ROB_GRUDGE);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.caravan.robbed.green", Tribes.name(tribe)).withStyle(ChatFormatting.RED));
 		} else if (f != null) {
@@ -1098,7 +1098,7 @@ final class Caravans {
 		if (wagon.caravan() == Wagon.WAR_CART) {
 			WarParties.cartBroken(level, wagon);
 		}
-		// ((0.7.480) a greenskin cart may have a war journal among its goods)
+		// ((0.7.484) a greenskin cart may have a war journal among its goods)
 		Faction owner = Factions.get(server, wagon.faction());
 		if (owner != null) {
 			LoreBooks.cart(level, owner, wagon.blockPosition());

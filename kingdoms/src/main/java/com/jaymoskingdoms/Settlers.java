@@ -14,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.480) Hordes, "Living together" (Andy, 2026-11-03): now and then a lone orc or goblin (a trader, a tinker, a bruiser)
+ * (0.7.484) Hordes, "Living together" (Andy, 2026-11-03): now and then a lone orc or goblin (a trader, a tinker, a bruiser)
  * settles in a village, as an MCA villager like any other. How readily follows {@link Peoples}' table: the village's own
  * people's distaste for the newcomer's decides the odds ({@link #WELCOME}), so the other heritages and the havens take them
  * more easily than humans do; a human village only now and then ({@link #HUMAN_SHARE}), more where the ruler has decreed
@@ -32,7 +32,7 @@ public final class Settlers {
 	static final float[] WELCOME = {1.0F, 0.6F, 0.25F, 0.08F};
 	/** A human village's share of those odds, plus the same again per edict of tolerance its ruler has made. */
 	static final float HUMAN_SHARE = 0.35F;
-	/** (0.7.480) A human village with no tolerance edict takes none while a greenskin camp at war with it stands this near (or a raid is on it). */
+	/** (0.7.484) A human village with no tolerance edict takes none while a greenskin camp at war with it stands this near (or a raid is on it). */
 	static final double HOSTILE_CAMP_RANGE = 192.0;
 	/** A village holds at most this many of them (within {@link #VILLAGE_RANGE}), counted by blood. */
 	static final int CAP = 3;
@@ -90,7 +90,7 @@ public final class Settlers {
 		if (odds <= 0.0F || random.nextFloat() >= odds || !level.isLoaded(spot.center()) || crowded(level, spot.center())) {
 			return;
 		}
-		// ((0.7.480) never load or make chunks to look for ground: the whole search square must be in already)
+		// ((0.7.484) never load or make chunks to look for ground: the whole search square must be in already)
 		int seek = ShutIn.SEEK;
 		BlockPos c = spot.center();
 		if (!level.hasChunksAt(c.getX() - seek, c.getZ() - seek, c.getX() + seek, c.getZ() + seek)) {
@@ -129,7 +129,7 @@ public final class Settlers {
 
 	/**
 	 * The odds {@code f}'s village (null: an MCA village under no banner, a human one) takes in a settler of blood {@code kind}:
-	 * by how much its own people mind that blood ({@link Peoples#distaste}), a human village's only a share of that (and (0.7.480) only when
+	 * by how much its own people mind that blood ({@link Peoples#distaste}), a human village's only a share of that (and (0.7.484) only when
 	 * relations allow: an edict of tolerance, or {@link #atPeace}), and
 	 * none at all a purist's.
 	 */
@@ -147,14 +147,14 @@ public final class Settlers {
 		}
 		float edict = f == null ? 0.0F : Reforms.tolerance(server, Emigrants.ruler(server, f));
 		if (edict <= 0.0F && !atPeace(server, f, center)) {
-			// ((0.7.480) a human village takes them only when relations allow: an edict of tolerance, or no tribe at war with it near)
+			// ((0.7.484) a human village takes them only when relations allow: an edict of tolerance, or no tribe at war with it near)
 			return 0.0F;
 		}
 		return WELCOME[Math.min(3, Peoples.distaste((Heritage.Kind)null, kind))] * Math.min(1.0F, HUMAN_SHARE * (1.0F + edict));
 	}
 
 	/**
-	 * (0.7.480) Village {@code f} about {@code center} (null: an MCA village under no banner) is at peace with the tribes: no raid
+	 * (0.7.484) Village {@code f} about {@code center} (null: an MCA village under no banner) is at peace with the tribes: no raid
 	 * on it now, and no standing goblin or orc camp at war with it within {@link #HOSTILE_CAMP_RANGE}.
 	 */
 	private static boolean atPeace(MinecraftServer server, @Nullable Faction f, BlockPos center) {

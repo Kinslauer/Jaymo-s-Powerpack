@@ -874,7 +874,7 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.480) {@link McaCompat#reranked}. */
+	/** (0.7.484) {@link McaCompat#reranked}. */
 	static void reranked(PathfinderMob mob, Heritage.Kind kind, boolean chief) {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
@@ -1025,7 +1025,7 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Languages.understands(player, villager)
-			// (0.7.480) an orc or goblin opens in its own dialect
+			// (0.7.484) an orc or goblin opens in its own dialect
 			? Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.outlaw_opening." + villager.getRandom().nextInt(OUTLAW_OPENINGS))
 			: Component.translatable("dialogue.chat.jaymoskingdoms.outlaw_opening.wordless");
 		met(villager, player);
@@ -1697,11 +1697,11 @@ final class McaBridge {
 		return 2;
 	}
 
-	/** (0.7.480) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
+	/** (0.7.484) {@link McaCompat#leaveHome}: their bed let go, MCA finds them another. */
 	static void leaveHome(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getResidency().getHome().ifPresent(home -> {
-				// ((0.7.480) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
+				// ((0.7.484) invalidateHome only forgets the bed: free its POI ticket first (while HOME still names it), then
 				// drop the village's record of it, so MCA has to look for another bed and the old one is free for anyone)
 				v.releasePoi(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
 				v.getResidency().invalidateHome(home);
@@ -1710,7 +1710,7 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.480) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
+	/** (0.7.484) {@link McaCompat#knows}: {@code villager} already has MCA memories of {@code player} (read, never made). */
 	static boolean knows(Villager villager, ServerPlayer player) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().getMemories().get(player.getUUID()) != null;
 	}
@@ -1718,7 +1718,7 @@ final class McaBridge {
 	/** Trades a settler may take ({@link Settlers}): a pedlar, a tinker, a bruiser. */
 	static final int TRADER = 0, TINKER = 1, BRUISER = 2;
 
-	/** (0.7.480) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
+	/** (0.7.484) {@link McaCompat#settler}: a grown MCA villager of the brood, in the trade, new to the village. */
 	static @Nullable PathfinderMob settler(ServerLevel level, Heritage.Kind kind, String name, Vec3 at, int trade) {
 		VillagerProfession job = trade == BRUISER ? ProfessionsMCA.GUARD
 			: BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(trade == TINKER ? VillagerProfession.TOOLSMITH : VillagerProfession.CARTOGRAPHER).value();

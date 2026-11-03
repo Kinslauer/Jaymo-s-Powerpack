@@ -3,7 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.LoreCodex;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
-/** (0.7.480) Hordes, Orc war journals: opens the {@link LoreCodexScreen} when the server sends the codex to read. */
+/** (0.7.484) Hordes, Orc war journals: opens the {@link LoreCodexScreen} when the server sends the codex to read. */
 public final class LoreCodexClient {
 	private LoreCodexClient() {
 	}

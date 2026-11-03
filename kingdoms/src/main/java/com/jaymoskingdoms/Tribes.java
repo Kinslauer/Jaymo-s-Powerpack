@@ -69,9 +69,9 @@ public final class Tribes {
 	static final int REGION = 1536;
 	/** The grudge: its most, and what raises or lowers it. */
 	static final int MOST = 100, KILL = 4, CHIEF = 30, RIVAL = -2, DAILY = 3;
-	/** Tribute: (0.7.480) bent worth ({@link BentIngots}) for each {@link #TRIBUTE_STEP} of grudge paid off. */
+	/** Tribute: (0.7.484) bent worth ({@link BentIngots}) for each {@link #TRIBUTE_STEP} of grudge paid off. */
 	static final int TRIBUTE_BENT = 6, TRIBUTE_STEP = 10;
-	/** A truce token's truce (days), and what it costs at the pedlar ((0.7.480) in bent worth). */
+	/** A truce token's truce (days), and what it costs at the pedlar ((0.7.484) in bent worth). */
 	static final int TRUCE_DAYS = 3, TOKEN_PRICE = 30;
 	/** A hunting band: sent at this grudge, at most once in this long (ticks) for a player, while they're this near the tribe's camps. */
 	static final int HUNT_AT = 60;
@@ -338,7 +338,7 @@ public final class Tribes {
 		int g = grudge(server, player.getUUID(), tribe);
 		// ((0.7.443) no grudge left: a gift, toward the tribe's favour)
 		boolean gift = g <= 0;
-		// ((0.7.480) paid in bent ingots only: a plain one is refused, and what is paid goes into the chief's hoard)
+		// ((0.7.484) paid in bent ingots only: a plain one is refused, and what is paid goes into the chief's hoard)
 		int want = gift ? TribePacts.GIFT_BENT : (g + TRIBUTE_STEP - 1) / TRIBUTE_STEP * TRIBUTE_BENT;
 		int paid = BentIngots.take(player, want);
 		int steps = paid / TRIBUTE_BENT;

@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.480) Andy (2026-11-03): "goblins who stay in orc lands are slaves or toothpicks (thrown, worked, used up)". A few
+ * (0.7.484) Andy (2026-11-03): "goblins who stay in orc lands are slaves or toothpicks (thrown, worked, used up)". A few
  * goblins live chained in an orc camp ({@link #ORCS_PER_SLAVE}: one to every so many of its orcs, {@link #MOST} at most):
  * <ul>
  * <li>They are {@link Folk} of role {@link #SLAVE} in the camp's own faction, off its roster and never fighting (a goblin
@@ -70,7 +70,7 @@ public final class Slaves {
 	static final int WORK_EVERY = 20, REST_TICKS = 100;
 	static final double WORK_SPEED = 0.9, THERE = 2.5;
 	static final int HAUL_MAX = 3;
-	/** (0.7.480) While a slave is on a job its keep moves to the job's site, this many blocks round it, so the camp doesn't pull it back. */
+	/** (0.7.484) While a slave is on a job its keep moves to the job's site, this many blocks round it, so the camp doesn't pull it back. */
 	static final int JOB_RADIUS = 4;
 	static final double HAUL_RANGE = 40.0;
 	/** What they carry. */
@@ -170,7 +170,7 @@ public final class Slaves {
 			f -> f.role() == SLAVE && f.factionId() == camp && f.isAlive() && !f.entityTags().contains(RUNAWAY));
 	}
 
-	/** (0.7.480) How many slaves camp {@code camp} keeps in the loaded world: they eat and work (HordeEconomy), yet are no folk of its cap. */
+	/** (0.7.484) How many slaves camp {@code camp} keeps in the loaded world: they eat and work (HordeEconomy), yet are no folk of its cap. */
 	static int count(ServerLevel level, int camp, BlockPos center) {
 		return kept(level, camp, center).size();
 	}
@@ -253,7 +253,7 @@ public final class Slaves {
 			slave.setHomeTo(data.center(), HOME_RADIUS);
 			return;
 		}
-		// (0.7.480) its keep goes with the job, or the camp's keep would pull it back short of a far site
+		// (0.7.484) its keep goes with the job, or the camp's keep would pull it back short of a far site
 		if (!site.equals(slave.getHomePosition()) || slave.getHomeRadius() != JOB_RADIUS) {
 			slave.setHomeTo(site, JOB_RADIUS);
 		}
@@ -277,7 +277,7 @@ public final class Slaves {
 		}
 	}
 
-	/** (From {@link OrcCamps#tick}, and (0.7.480) {@link Hordes}' own building) a building has gone up at {@code where}: the camp's slaves carry logs to it. */
+	/** (From {@link OrcCamps#tick}, and (0.7.484) {@link Hordes}' own building) a building has gone up at {@code where}: the camp's slaves carry logs to it. */
 	static void haul(ServerLevel level, int camp, BlockPos center, BlockPos where) {
 		List<Folk> hands = kept(level, camp, center);
 		hands.removeIf(f -> f.entityTags().contains(FREED));
@@ -415,7 +415,7 @@ public final class Slaves {
 		return best;
 	}
 
-	/** (0.7.480) Whether goblin village {@code village} is under its Hordes folk cap, so a runaway may join it. */
+	/** (0.7.484) Whether goblin village {@code village} is under its Hordes folk cap, so a runaway may join it. */
 	private static boolean hasRoom(MinecraftServer server, Faction village) {
 		return GoblinVillages.goblins(village) < Hordes.folkCap(server, village.id(), false);
 	}
@@ -461,7 +461,7 @@ public final class Slaves {
 		if (fit && floor != Integer.MIN_VALUE) {
 			Faction founded = GoblinVillages.found(level, at, floor, net.minecraft.core.Direction.Plane.HORIZONTAL.getRandomDirection(random));
 			JaymosKingdoms.LOGGER.info("A runaway goblin slave raised {} at {}", founded.name(), at);
-			// ((0.7.480) only if its starting goblins left room under the cap; else it runs on)
+			// ((0.7.484) only if its starting goblins left room under the cap; else it runs on)
 			Faction fresh = Factions.get(server, founded.id());
 			if (fresh != null && hasRoom(server, fresh)) {
 				join(level, slave, fresh);

@@ -142,16 +142,16 @@ public final class GreenskinLife {
 		Heritage.Kind raisedAs = halfOrc(p) ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
 		Heritage.Kind brood = Greenskins.of(who);
 		if (brood != null) {
-			// (their own kind; (0.7.480) the other brood minds them as it minds its own kind of greenskin: Peoples)
+			// (their own kind; (0.7.484) the other brood minds them as it minds its own kind of greenskin: Peoples)
 			return brood == raisedAs ? 0.0F : Peoples.minds(who, brood, raisedAs, 1.0F);
 		}
 		Faction haven = Havens.home(who);
 		if (Havens.greenskin(level.getServer(), haven)) {
-			// ((0.7.480) a haven that lives alongside the tribes minds no one for being raised among them)
+			// ((0.7.484) a haven that lives alongside the tribes minds no one for being raised among them)
 			return 0.0F;
 		}
 		if (haven != null || Prejudice.degree(VillagerHeritage.of(who)) > 0) {
-			// ((0.7.480) the havens and anyone not plainly human mind a half-orc or a goblin-raised one as they'd mind an orc or a goblin: Peoples)
+			// ((0.7.484) the havens and anyone not plainly human mind a half-orc or a goblin-raised one as they'd mind an orc or a goblin: Peoples)
 			return Peoples.minds(who, VillagerHeritage.of(who), raisedAs, Prejudice.edict(who));
 		}
 		Faction f = Banners.owner(level.getServer(), net.minecraft.world.level.ChunkPos.containing(who.blockPosition()));

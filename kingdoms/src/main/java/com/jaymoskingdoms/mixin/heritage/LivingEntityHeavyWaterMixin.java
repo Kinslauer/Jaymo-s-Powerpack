@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.480) Heavy in water (the Emberborn's flaw, {@link HeritageKits#heavyInWater}): a swim ignores speed attributes (and water
+ * (0.7.484) Heavy in water (the Emberborn's flaw, {@link HeritageKits#heavyInWater}): a swim ignores speed attributes (and water
  * movement efficiency stops at 0), so after each tick's swim its sideways speed is cut and it's pulled down. Runs where the
  * movement is worked out: the player's own client, the server for a villager.
  */

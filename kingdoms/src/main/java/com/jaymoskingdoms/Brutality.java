@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.480) Andy (2026-11-03): orcs "get by on force and brutality, toward everyone and each other", and their camps
+ * (0.7.484) Andy (2026-11-03): orcs "get by on force and brutality, toward everyone and each other", and their camps
  * "brawl inside and war with each other all the time". Three parts, each on the machinery already there:
  * <ul>
  * <li><b>Camp brawls.</b> Now and then two idle grunts of a loaded camp square up and fight with their fists: each hit
@@ -64,9 +64,9 @@ final class Brutality {
 	/** A fighter starts at this share of his health or better. */
 	static final float START_HEALTH = 0.8F;
 	/** A fist's hit: this share of the other's top health, give or take {@link #HIT_SPREAD}; the loser is held at {@link #FLOOR}.
-	 * ((0.7.480) the floor stays above a chief's rally, {@link Folk#RALLY_AT}: a beaten warchief doesn't call his camp in) */
+	 * ((0.7.484) the floor stays above a chief's rally, {@link Folk#RALLY_AT}: a beaten warchief doesn't call his camp in) */
 	static final float HIT_SHARE = 0.07F, HIT_SPREAD = 0.3F, FLOOR = 0.45F;
-	/** (0.7.480) A new warchief: camp folk this near (blocks) that are after him are called off. */
+	/** (0.7.484) A new warchief: camp folk this near (blocks) that are after him are called off. */
 	static final double CALL_OFF_RANGE = 48.0;
 	/** A challenger lands this much of a hit against the warchief (below 1: the chief is the harder to beat). */
 	static final float CHALLENGER_EDGE = 0.9F;
@@ -80,7 +80,7 @@ final class Brutality {
 	static final double DISTURB_RANGE = 28.0;
 	/** The crowd: how far from the fight it comes from, how many, how close it stands, how fast it comes. */
 	static final double CROWD_RANGE = 18.0, CROWD_RING = 5.0, CROWD_SPEED = 1.0;
-	/** (0.7.480) An MCA villager's pace to the ring, as its brain's walk target (its own wandering pace is 0.6). */
+	/** (0.7.484) An MCA villager's pace to the ring, as its brain's walk target (its own wandering pace is 0.6). */
 	static final float CROWD_WALK_SPEED = 0.6F;
 	static final int CROWD_MAX = 6;
 	/** A jeer from the crowd about this often (ticks, and as much again at random); heard this far (blocks). */
@@ -222,7 +222,7 @@ final class Brutality {
 		for (Brawl brawl : List.copyOf(BRAWLS.values())) {
 			drive(level, brawl, now);
 		}
-		// (0.7.480) gate starts on the server tick count, the same clock as DRIVE_TICKS: game time has a fixed per-world offset
+		// (0.7.484) gate starts on the server tick count, the same clock as DRIVE_TICKS: game time has a fixed per-world offset
 		if (server.getTickCount() % START_TICKS != 0) {
 			return;
 		}
@@ -327,7 +327,7 @@ final class Brutality {
 
 	private static void start(ServerLevel level, int camp, PathfinderMob a, PathfinderMob b, boolean challenge) {
 		if (disturbed(level, a) || disturbed(level, b)) {
-			return; // (0.7.480) a foe is near: no fight is called, so no shout and no cooldown spent
+			return; // (0.7.484) a foe is near: no fight is called, so no shout and no cooldown spent
 		}
 		Brawl brawl = new Brawl(camp, a.getUUID(), b.getUUID(), challenge, level.getGameTime());
 		BRAWLS.put(camp, brawl);
@@ -370,7 +370,7 @@ final class Brutality {
 	}
 
 	/**
-	 * A foe of the camp's (a player it would hunt) is in sight of the fight. (0.7.480) Only players the orcs would really go
+	 * A foe of the camp's (a player it would hunt) is in sight of the fight. (0.7.484) Only players the orcs would really go
 	 * for count: a truce, the tribe's favour or a sworn captain spares them, as in {@code McaCompat.foe}.
 	 */
 	private static boolean disturbed(ServerLevel level, PathfinderMob fighter) {
@@ -403,7 +403,7 @@ final class Brutality {
 					}
 				} else if (!orc.getBrain().getMemory(MemoryModuleType.WALK_TARGET)
 					.map(t -> t.getTarget().currentPosition().distanceToSqr(mid) <= CROWD_RING * CROWD_RING).orElse(false)) {
-					// (0.7.480) an MCA villager walks where its brain is told to (as in Tempers); a path of our own is taken over by its wandering
+					// (0.7.484) an MCA villager walks where its brain is told to (as in Tempers); a path of our own is taken over by its wandering
 					orc.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(mid, CROWD_WALK_SPEED, (int) CROWD_RING));
 				}
 			}
@@ -505,7 +505,7 @@ final class Brutality {
 		JaymosKingdoms.LOGGER.info("{} has a new warchief, won in a challenge", camp.name());
 	}
 
-	/** (0.7.480) Camp folk after the new warchief {@code winner} (a rally that fired anyway) are called off him. */
+	/** (0.7.484) Camp folk after the new warchief {@code winner} (a rally that fired anyway) are called off him. */
 	private static void callOff(ServerLevel level, int campId, PathfinderMob winner) {
 		AABB box = winner.getBoundingBox().inflate(CALL_OFF_RANGE);
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, box, f -> f != winner && f.factionId() == campId && Rulers.target(f) == winner)) {

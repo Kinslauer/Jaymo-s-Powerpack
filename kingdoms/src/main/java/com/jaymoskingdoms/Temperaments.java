@@ -281,7 +281,7 @@ public final class Temperaments {
 	static void comes(ServerLevel level, LivingEntity helper, ServerPlayer player) {
 		Temperament t = of(helper);
 		if (t != null) {
-			// (0.7.480) an orc or goblin helper speaks in its own dialect
+			// (0.7.484) an orc or goblin helper speaks in its own dialect
 			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms." + t.key() + ".help." + level.getRandom().nextInt(LINES)),
 				Speech.WHITE);
 		}
@@ -302,7 +302,7 @@ public final class Temperaments {
 			}
 		}
 		if (took > 0) {
-			// (0.7.480) in dialect for an orc or goblin
+			// (0.7.484) in dialect for an orc or goblin
 			Speech.sayTo(level, helper, player, Dialects.trShared(helper, "temperament.jaymoskingdoms.greedy.fee." + level.getRandom().nextInt(LINES), took),
 				Speech.GOLD);
 		}
@@ -316,7 +316,7 @@ public final class Temperaments {
 		level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(JEER_RANGE),
 				e -> e.isAlive() && !e.isBaby() && !Downed.isDowned(e) && is(e, Temperament.SPITEFUL) && e.hasLineOfSight(player)).stream()
 			.min(Comparator.comparingDouble(player::distanceToSqr))
-			// (0.7.480) an orc or goblin jeers in its own dialect
+			// (0.7.484) an orc or goblin jeers in its own dialect
 			.ifPresent(e -> Speech.sayTo(level, e, player, Dialects.trShared(e, "temperament.jaymoskingdoms.spiteful.jeer." + level.getRandom().nextInt(LINES)),
 				Speech.RED));
 	}

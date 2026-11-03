@@ -289,7 +289,7 @@ def deepborn(rng, solid, glow):
     hands(hand)
 
 
-# ---- (Kingdoms 0.7.480) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
+# ---- (Kingdoms 0.7.484) Beastfolk and Hollow, and the family's variants. Painted on the same UVs as the rest, so every mark is
 # flat on the 64x64 skin: ears sit on the crown and the front's top corners, tails down the back of the body and legs.
 # Head: front (8-16, 8-16, eyes on row 12), top (8-16, 0-8, its front edge the bottom), sides (0-8 / 16-24, 8-16), back (24-32).
 # Body: front (20-28, 20-32), back (32-40, 20-32). Legs' backs: (12-16, 20-32) and (28-32, 52-64).
@@ -423,8 +423,8 @@ write("dawnborn", dawnborn)
 write("endborn", endborn)
 write("dragonblood", dragonblood)
 write("deepborn", deepborn)
-write("beastfolk", beastfolk)  # (0.7.480)
-write("hollow", hollow_heritage)  # (0.7.480) the heritage; hollow in variant/ is the Deepborn's
+write("beastfolk", beastfolk)  # (0.7.484)
+write("hollow", hollow_heritage)  # (0.7.484) the heritage; hollow in variant/ is the Deepborn's
 for key, c in EYE_COLOURS.items():
     img = blank()
     for x, y in EYES:
@@ -905,7 +905,7 @@ def geode(rng, solid, glow):
     hands(lambda x, y: (put(solid, x, y, AM[1]), put(glow, x, y, AM[0])) if rng.random() < 0.5 else None)
 
 
-# ---- (Kingdoms 0.7.480) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
+# ---- (Kingdoms 0.7.484) the Sylvan fae and elves, the Beastfolk family and the Hollow dead. Each is a variant over its heritage's
 # first look (beastfolk_skin / hollow_skin / sylvan_<n>_skin), so a variant paints only what is its own.
 
 def wings(rng, solid, glow, upper, lower, vein, shine, alpha, span=4, drop=9):
@@ -1399,7 +1399,7 @@ VARIANTS = {"sunfreckled": sunfreckled, "skymarked": skymarked, "obsidian": obsi
             "lodeborn": lodeborn, "galeborn": galeborn, "twilight": twilight, "gilded": gilded,
             "chorusgrown": chorusgrown, "voidpale": voidpale, "goldscale": goldscale, "rimewyrm": rimewyrm,
             "hollow": hollow, "geode": geode,
-            # (0.7.480) the Sylvan fae and elves, the Beastfolk, the Hollow dead
+            # (0.7.484) the Sylvan fae and elves, the Beastfolk, the Hollow dead
             "dryad": dryad, "changeling": changeling, "sprite": sprite, "nymph": nymph, "faerie": faerie, "highelf": highelf,
             "moonelf": moonelf, "bloodelf": bloodelf, "arachnid": arachnid, "avian": avian, "canine": canine, "feline": feline,
             "kitsune": kitsune, "serpen": serpen, "zombie": zombie, "skeleton": skeleton, "wraith": wraith, "reaper": reaper}

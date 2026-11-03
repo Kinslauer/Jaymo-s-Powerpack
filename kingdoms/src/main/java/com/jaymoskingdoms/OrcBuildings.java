@@ -579,7 +579,7 @@ final class OrcBuildings {
 		return containers;
 	}
 
-	/** The warchief's hoard: iron (lots), gold, bent ingots (0.7.480), a golden apple, an iron axe, meat, and now and then a diamond. */
+	/** The warchief's hoard: iron (lots), gold, bent ingots (0.7.484), a golden apple, an iron axe, meat, and now and then a diamond. */
 	private static void stockHoard(ServerLevel level, BlockPos chest, RandomSource random) {
 		if (!(level.getBlockEntity(chest) instanceof Container c)) {
 			return;

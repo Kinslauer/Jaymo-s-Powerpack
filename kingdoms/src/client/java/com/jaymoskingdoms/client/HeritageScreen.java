@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.184) The Blood Rite's mode is gone: an earned blood passes to your children ({@code Lineage}).
  * (0.7.214) Each heritage comes in three looks ({@link HeritageVariants}): the button at the bottom left steps through
  * the picked one's, and the pane's first row tells of the one shown (its look, its story and its trait).
- * (0.7.480) When the rows can't all fit even at their smallest, the list scrolls with the mouse wheel, a row a notch,
+ * (0.7.484) When the rows can't all fit even at their smallest, the list scrolls with the mouse wheel, a row a notch,
  * with a thin bar at its edge, so the last heritages (Beastfolk, the Hollow) can always be reached.
  */
 final class HeritageScreen extends Screen {
@@ -57,7 +57,7 @@ final class HeritageScreen extends Screen {
 	private int contentH, viewH;
 	/** The slow scroll on hover: when it began, and how far it had got (-1: not running). */
 	private long autoFrom = -1L;
-	/** (0.7.480) The first heritage row shown in the list, when it scrolls. */
+	/** (0.7.484) The first heritage row shown in the list, when it scrolls. */
 	private int listScroll;
 
 	/** The server asked for a heritage that can't be put off: the screen comes back whenever it's shut. */
@@ -129,17 +129,17 @@ final class HeritageScreen extends Screen {
 		return Math.clamp(fit, MIN_ROW, LIST_ROW);
 	}
 
-	/** (0.7.480) How many list rows fit at once. */
+	/** (0.7.484) How many list rows fit at once. */
 	private int listRows() {
 		return Math.max(1, (panelH() - HEADER - 4) / rowH());
 	}
 
-	/** (0.7.480) The furthest the list can scroll (0: every row fits). */
+	/** (0.7.484) The furthest the list can scroll (0: every row fits). */
 	private int listMax() {
 		return Math.max(0, Heritage.Kind.playable().length - listRows());
 	}
 
-	/** (0.7.480) The rows shown now: from {@link #listScroll}, as many as fit. */
+	/** (0.7.484) The rows shown now: from {@link #listScroll}, as many as fit. */
 	private int listEnd() {
 		this.listScroll = Math.clamp(this.listScroll, 0, listMax());
 		return Math.min(Heritage.Kind.playable().length, this.listScroll + listRows());
@@ -312,7 +312,7 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		// (0.7.480) over the list, the wheel scrolls the heritages a row a notch
+		// (0.7.484) over the list, the wheel scrolls the heritages a row a notch
 		if (mouseX < paneX() && listMax() > 0 && scrollY != 0.0) {
 			this.listScroll = Math.clamp(this.listScroll - (int)Math.signum(scrollY), 0, listMax());
 			return true;
@@ -361,7 +361,7 @@ final class HeritageScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.480) A card row's colour by what it is, not where it sits (the shunned line used to push the flaw into the gift's
+	 * (0.7.484) A card row's colour by what it is, not where it sits (the shunned line used to push the flaw into the gift's
 	 * green): gifts green, flaws red, an ability gold, the rest plain.
 	 */
 	private static int rowColor(Component row) {
@@ -370,7 +370,7 @@ final class HeritageScreen extends Screen {
 			if (key.endsWith(".flaw") || key.endsWith(".card.flaw")) {
 				return Ui.BAD;
 			}
-			// (0.7.480) a gift with its own card key (".gift_rimewyrm") is a gift too
+			// (0.7.484) a gift with its own card key (".gift_rimewyrm") is a gift too
 			if (key.endsWith(".gift") || key.endsWith(".card.gift") || key.contains(".gift_")) {
 				return Ui.GOOD;
 			}
@@ -392,7 +392,7 @@ final class HeritageScreen extends Screen {
 			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variant_row", HeritageVariants.title(kind, this.pickedVariant),
 				Component.translatable(root + ".desc"), Component.translatable(root + ".trait")));
 		} else {
-			// (0.7.480) any number of looks now (the Sylvan have ten): the count, then every name
+			// (0.7.484) any number of looks now (the Sylvan have ten): the count, then every name
 			net.minecraft.network.chat.MutableComponent names = Component.empty();
 			int count = HeritageVariants.of(kind).size() + 1;
 			for (int i = 0; i < count; i++) {
@@ -403,7 +403,7 @@ final class HeritageScreen extends Screen {
 			}
 			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", count, names));
 		}
-		// (0.7.480) the picked look's own kit, when it has one
+		// (0.7.484) the picked look's own kit, when it has one
 		rows.addAll(kind.card(kind == this.picked ? HeritageVariants.at(kind, this.pickedVariant) : null));
 		return rows;
 	}
@@ -436,7 +436,7 @@ final class HeritageScreen extends Screen {
 		int rh = rowH();
 		boolean icons = rh >= ICON_ROW;
 		int end = listEnd();
-		// (0.7.480) a thin bar at the list's edge when it scrolls
+		// (0.7.484) a thin bar at the list's edge when it scrolls
 		int shown = listRows() * rh;
 		Ui.scrollbar(graphics, x + LIST_W - 4, y + HEADER, shown - 2, shown, all.length * rh, this.listScroll * rh);
 		for (int i = this.listScroll; i < end; i++) {
