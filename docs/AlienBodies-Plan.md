@@ -32,9 +32,10 @@ Croaker (squat frog, hops instead of walking), Slipfin (axolotl, belly crawl on 
 (six legs, folded hind legs that kick on a leap), Hive (hovering insect, buzzing wings, legs dangling), Gremlin (a
 hunched imp on its knuckles, the big skull bobbing). Croaker takes the low box (`XenoformState.LOW_BOX`, with Billow).
 
-## Patch 4: fliers
+## Patch 4 (done, 0.19.67): fliers
 Talon (a bird: perches upright, wings spread in the air), Keen (a bat, hangs from ceilings), Wyrm (a small dragon on
 four legs with the wings it has), Lumen (an orb of light with trailing motes). Wisp keeps its hooded legless ghost.
+Keen's hang is synced as the "hang" act; Lumen is drawn a second time fullbright.
 
 ## Patch 5: floaters and blobs
 Ooze and Magma Ooze (a cube that squashes and bounces as it moves), Pyre (a blaze: a head over a ring of spinning

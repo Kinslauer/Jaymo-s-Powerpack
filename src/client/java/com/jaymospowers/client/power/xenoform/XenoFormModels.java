@@ -2496,38 +2496,326 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.109, Scan C) Talon: a hooked beak, broad feathered wings down its arms that spread when it lifts them, a tail fan. */
+	/**
+	 * (0.18.109, Scan C; 0.19.67 a bird of prey) Talon: a hooked beak, broad feathered wings and a tail fan, scaly legs
+	 * with hooked talons; now a hawk, not a man. On the ground it perches upright (the body leaning 60 degrees up from
+	 * level, the wings folded at its sides, the tail hanging behind), the head turning where it looks with the beak
+	 * hooked below it, and it walks in short two-footed hops. Flying, the body goes level, the wings spread (two parts,
+	 * an arm and a hand with four long flight feathers) and beat as it climbs ({@code Flight.wings}), hold out stiff in
+	 * a glide ({@code Flight.glide}) and sweep back on a stoop ({@code Flight.fold}), with the legs tucked under the tail
+	 * (talons forward on a stoop). A strike rakes both legs forward and pecks the head down. The man's parts are hidden
+	 * (the arm stays for the first-person hand); the torso is the rig every bird part hangs on, so the insignia plate sits on
+	 * its breast. Wind's cruise tilt ({@code WindPose}) and the glide's lean ({@code XenoformFlightPose#rotate}) turn the whole
+	 * drawn model, so the body undoes the part of them it does not want ({@link #setupAnim}).
+	 */
 	static final class Talon extends FormModel {
-		private final ModelPart rightWing, leftWing;
+		// ---- tuning ----
+		/** The perch: the body leans this far from upright (radians; 0.52 is 60 degrees up from level), more crouched or striking, and the rock of a hop. */
+		static final float PERCH_TILT = 0.52F, CROUCH_TILT = 0.95F, STRIKE_TILT = 0.4F, ROCK = 0.07F;
+		/** Standing legs (radians from straight down, + is back): the thigh forward, the shin back, and how much more a crouch bends them. */
+		static final float THIGH_REST = -0.45F, SHIN_REST = 0.25F, CROUCH_THIGH = -0.4F, CROUCH_SHIN = 0.55F;
+		/** The hop: radians of clock per unit of walk, its height (pixels), how far the legs tuck in it (thigh, shin), and the legs' alternate shuffle. */
+		static final float HOP = 1.6F, HOP_LIFT = 1.4F, HOP_TUCK_THIGH = 0.45F, HOP_TUCK_SHIN = 0.55F, SHUFFLE = 0.2F;
+		/** The head bobs forward and back as it hops (pixels). */
+		static final float HEAD_BOB = 0.8F;
+		/** A strike: how far the thighs rake forward and the shins with them (radians), how far the body lunges ahead (pixels) and the head pecks down. */
+		static final float STRIKE_THIGH = 1.35F, STRIKE_SHIN = 0.25F, STRIKE_LUNGE = 1.5F, PECK = 0.6F;
+		/** In the air: the body's height (model y; the ground is 24), how far it bobs with each wingbeat (pixels) and the wingbeat's rate (radians a tick). */
+		static final float AIR_Y = 10.5F, WING_BOB = 0.9F, BEAT = 0.95F;
+		/** Falling (not flying), the wings come this far open and flutter this hard. */
+		static final float FALL_SPREAD = 0.85F, FALL_FLAP = 0.6F;
+		/** The stroke: the wing's mean lift above level and how far it swings (radians), the nose-down of a glide and the body's pitch with each beat. */
+		static final float FLAP_BIAS = 0.1F, FLAP_SPAN = 0.55F, GLIDE_PITCH = 0.2F, BEAT_PITCH = 0.06F;
+		/** A glide holds the wings up at this angle and rocks them a little. */
+		static final float GLIDE_DIHEDRAL = 0.16F, GLIDE_ROCK = 0.04F;
+		/** The wings on a stoop sweep back this far; the hand follows this much more, and lags a beat this much. */
+		static final float SWEEP = 1.15F, HAND_SWEEP = 0.45F, HAND_LAG = 0.55F;
+		/** Folded: the wing leans out from the body this much and its hand folds back along the body this much (radians); spread, the wing pitches about its length this much. */
+		static final float FOLD_OUT = 0.1F, FOLD_HAND = 0.75F, WING_PITCH = 0.2F;
+		/** Legs in the air (radians back from hanging): hovering, tucked in a glide, forward on a stoop; the shin's and the foot's bend. */
+		private static final float HOVER_LEG = 0.7F, TUCK_LEG = 1.15F, STOOP_LEG = -0.9F;
+		private static final float HOVER_SHIN = 0.55F, TUCK_SHIN = 0.9F, STOOP_SHIN = 0.1F, HOVER_CURL = 0.5F, STOOP_CURL = -0.3F;
+		/** The tail: how it rests (the feathers' pitch), its fan (radians between feathers) perched and spread, and its lowest pitch (so its tip clears the ground). */
+		static final float TAIL_REST = 0.15F, TAIL_FAN = 0.12F, TAIL_FAN_WIDE = 0.34F, TAIL_LOW = -0.05F;
+		/** Where the parts hang in the torso's space (x of the right side; the left mirrors): the shoulders, the head and the hips (z and y as well). */
+		private static final float SHOULDER_X = 3.7F, SHOULDER_Y = -3.0F, SHOULDER_Z = 0.3F;
+		private static final float HEAD_Y = -5.0F, HEAD_Z = -0.5F;
+		private static final float HIP_X = 1.9F, HIP_Y = 3.0F, HIP_Z = 0.0F;
+		/** The legs' bones (pixels) and the foot's half thickness: a standing foot's sole is the sum below the hip. */
+		private static final float THIGH_LENGTH = 4.0F, SHIN_LENGTH = 6.0F, FOOT_HALF = 0.5F;
+		/** How far the front talons and the hind talon reach from the middle of the foot (pixels), for how low a curled foot hangs. */
+		private static final float TOE_REACH = 4.5F, HIND_REACH = 2.5F;
+		/**
+		 * A sneaking player is drawn 2/16 of a block lower (AvatarRenderer.getRenderOffset), 2/0.9375 model pixels: crouched,
+		 * the ground is that much higher in model space.
+		 */
+		private static final float CROUCH_SINK = 2.0F / 0.9375F;
+		/** The four flight feathers of a hand: where each is hinged (y, z), its length against the longest, and its fan open and shut (radians, the right wing's). */
+		private static final float[] FEATHER_Y = {-1.5F, -0.5F, 0.5F, 1.5F}, FEATHER_Z = {0.0F, 0.1F, 0.2F, 0.3F};
+		private static final float[] FEATHER_LENGTH = {1.0F, 0.95F, 0.88F, 0.78F};
+		private static final float[] FAN_OPEN = {0.14F, -0.05F, -0.24F, -0.42F}, FAN_SHUT = {0.0F, -0.02F, -0.04F, -0.06F};
+		/** The five tail feathers: their z (stacked so none shares a plane), and their length against the middle one. */
+		private static final float[] TAIL_Z = {1.0F, 1.1F, 1.2F, 1.1F, 1.0F}, TAIL_LENGTH = {0.8F, 0.92F, 1.0F, 0.92F, 0.8F};
+		private static final float HALF_PI = (float)Math.PI * 0.5F;
+
+		private final ModelPart skull;
+		/** 0 right, 1 left. */
+		private final ModelPart[] arm = new ModelPart[2], hand = new ModelPart[2];
+		private final ModelPart[][] feather = new ModelPart[2][4], toe = new ModelPart[2][4];
+		private final ModelPart[] thigh = new ModelPart[2], shin = new ModelPart[2], foot = new ModelPart[2];
+		private final ModelPart[] tail = new ModelPart[5];
 
 		Talon() {
 			super(bake(mesh()), "talon");
-			this.insigniaZ = -1.9F;
-			this.rightWing = this.rightArm.getChild("wing");
-			this.leftWing = this.leftArm.getChild("wing");
+			// on the breast, a small plate (the skin's insignia is the small one)
+			this.insigniaY = 0.5F;
+			this.insigniaZ = -2.5F;
+			this.insigniaSize = 0.7F;
+			this.skull = this.body.getChild("skull");
+			for (int s = 0; s < 2; s++) {
+				String p = s == 0 ? "r_" : "l_";
+				this.arm[s] = this.body.getChild(p + "arm");
+				this.hand[s] = this.arm[s].getChild("hand");
+				this.thigh[s] = this.body.getChild(p + "thigh");
+				this.shin[s] = this.thigh[s].getChild("shin");
+				this.foot[s] = this.shin[s].getChild("foot");
+				for (int i = 0; i < 4; i++) {
+					this.feather[s][i] = this.hand[s].getChild("feather" + i);
+					this.toe[s][i] = this.foot[s].getChild("toe" + i);
+				}
+			}
+			for (int i = 0; i < 5; i++) {
+				this.tail[i] = this.body.getChild("tail" + i);
+			}
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("head").addOrReplaceChild("beak", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -2.0F, -3.0F, 2.0F, 2.0F, 3.0F),
-				PartPose.offsetAndRotation(0.0F, -2.5F, -4.0F, 0.25F, 0.0F, 0.0F));
-			root.getChild("right_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(12, 64).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 6.0F),
-				PartPose.offset(-1.5F, 0.0F, 1.0F));
-			root.getChild("left_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(12, 64).mirror().addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 6.0F),
-				PartPose.offset(1.5F, 0.0F, 1.0F));
-			root.getChild("body").addOrReplaceChild("tail_fan", CubeListBuilder.create().texOffs(0, 82).addBox(-3.0F, 0.0F, 0.0F, 6.0F, 1.0F, 5.0F),
-				PartPose.offsetAndRotation(0.0F, 11.0F, 1.5F, -0.5F, 0.0F, 0.0F));
+			// the man's head, hat, arms and legs stay (hidden; the arms for the first-person hand); his body is replaced by the
+			// bird's torso, 7 wide, 10 long and 5 deep, which every other part hangs on
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 64).addBox(-3.5F, -5.0F, -2.5F, 7.0F, 10.0F, 5.0F),
+				PartPose.offset(0.0F, 12.0F, 0.0F));
+			// the head, sunk two pixels into the shoulders so it joins however the body leans; a brow, a hooked beak
+			PartDefinition skull = body.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(24, 64).addBox(-2.5F, -5.0F, -2.5F, 5.0F, 7.0F, 5.0F),
+				PartPose.offset(0.0F, HEAD_Y, HEAD_Z));
+			skull.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(44, 70).addBox(-2.5F, -0.5F, -1.0F, 5.0F, 1.0F, 1.0F),
+				PartPose.offset(0.0F, -3.6F, -2.4F));
+			PartDefinition beak = skull.addOrReplaceChild("beak", CubeListBuilder.create().texOffs(44, 64).addBox(-1.0F, -1.0F, -3.0F, 2.0F, 2.0F, 3.0F),
+				PartPose.offset(0.0F, -2.0F, -2.4F));
+			beak.addOrReplaceChild("hook", CubeListBuilder.create().texOffs(54, 64).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, 0.3F, -2.2F, 0.15F, 0.0F, 0.0F));
+			for (int s = 0; s < 2; s++) {
+				boolean left = s == 1;
+				String p = left ? "l_" : "r_";
+				float sx = left ? 1.0F : -1.0F;
+				// the wing: an arm (7 across, 5 chord) hinged on the shoulder, a hand on its tip, four flight feathers on the hand
+				PartDefinition wing = body.addOrReplaceChild(p + "arm", flip(CubeListBuilder.create().texOffs(0, 80), left).addBox(left ? -1.0F : -6.0F, -2.5F, -0.5F, 7.0F, 5.0F, 1.0F),
+					PartPose.offset(sx * SHOULDER_X, SHOULDER_Y, SHOULDER_Z));
+				PartDefinition palm = wing.addOrReplaceChild("hand", flip(CubeListBuilder.create().texOffs(16, 80), left).addBox(left ? 0.0F : -3.0F, -2.0F, -0.5F, 3.0F, 4.0F, 1.0F),
+					PartPose.offset(sx * 6.0F, 0.0F, 0.0F));
+				for (int i = 0; i < 4; i++) {
+					palm.addOrReplaceChild("feather" + i, flip(CubeListBuilder.create().texOffs(24, 80), left).addBox(left ? 0.0F : -8.0F, -1.0F, -0.5F, 8.0F, 2.0F, 1.0F),
+						PartPose.offset(sx * 3.0F, FEATHER_Y[i], FEATHER_Z[i]));
+				}
+				// the leg: a feathered thigh, a scaly shin, a foot with three toes forward and one back
+				PartDefinition leg = body.addOrReplaceChild(p + "thigh", flip(CubeListBuilder.create().texOffs(0, 90), left).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 4.0F, 3.0F),
+					PartPose.offset(sx * HIP_X, HIP_Y, HIP_Z));
+				PartDefinition shank = leg.addOrReplaceChild("shin", flip(CubeListBuilder.create().texOffs(12, 90), left).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 6.0F, 2.0F),
+					PartPose.offset(0.0F, THIGH_LENGTH, 0.0F));
+				PartDefinition paw = shank.addOrReplaceChild("foot", flip(CubeListBuilder.create().texOffs(20, 90), left).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 1.0F, 2.0F),
+					PartPose.offset(0.0F, SHIN_LENGTH, 0.0F));
+				for (int i = 0; i < 4; i++) {
+					// the outer toe to the side, the inner toe to the other, the hind toe (turned round and half the length, in setupAnim) behind
+					float x = (i == 1 ? -0.6F : i == 2 ? 0.6F : 0.0F) * -sx;
+					float z = i == 3 ? 0.5F : -0.5F;
+					paw.addOrReplaceChild("toe" + i, flip(CubeListBuilder.create().texOffs(28, 90), left).addBox(-0.5F, -0.5F, -4.0F, 1.0F, 1.0F, 4.0F),
+						PartPose.offsetAndRotation(x, i == 1 || i == 2 ? -0.04F : 0.0F, z, 0.0F, i == 3 ? (float)Math.PI : 0.0F, 0.0F));
+				}
+			}
+			// the tail: five feathers fanned from the rump
+			for (int i = 0; i < 5; i++) {
+				body.addOrReplaceChild("tail" + i, CubeListBuilder.create().texOffs(42, 80).addBox(-1.0F, 0.0F, -0.5F, 2.0F, 9.0F, 1.0F),
+					PartPose.offset(0.0F, 4.5F, TAIL_Z[i]));
+			}
 			return mesh;
 		}
+
+		/** The left side's boxes are drawn with the skin mirrored. */
+		private static CubeListBuilder flip(CubeListBuilder builder, boolean left) {
+			return left ? builder.mirror() : builder;
+		}
+
+		/** The standing legs this frame (world angles, radians from straight down, + back), kept to avoid allocating each frame. */
+		private final float[] groundThigh = new float[2], groundShin = new float[2];
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			// the feathers fan out as the arm lifts away from the side
-			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
-			this.rightWing.yRot = -spread * 0.6F;
-			this.leftWing.yRot = spread * 0.6F;
+			// the man is hidden (the arms are drawn alone in first person); the torso is the rig
+			this.head.visible = this.hat.visible = this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			XenoMotion.Read m = XenoMotion.read(state);
+			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
+			Float wind = state.getData(com.jaymospowers.client.power.wind.WindPose.KEY);
+			float age = state.ageInTicks;
+			float fly = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
+			float glide = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.glide());
+			float fold = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.fold()) * fly;
+			float cruise = wind == null ? 0.0F : Mth.clamp(wind, 0.0F, 1.0F);
+			// airborne (flying, gliding, or just off the ground) against perched
+			float air = m.air();
+			float lift = Math.max(Math.max(fly, glide), air);
+			float spread = Math.max(Math.max(fly, glide), air * FALL_SPREAD);
+			float flap = Math.max(fly, air * FALL_FLAP * (1.0F - glide));
+			float beat = age * BEAT;
+			float strike = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			float crouch = Math.max(m.crouching() ? 1.0F : 0.0F, m.land()) * (1.0F - lift);
+			// walking: short two-footed hops
+			float sp = Mth.clamp(state.walkAnimationSpeed * 1.5F, 0.0F, 1.0F) * (1.0F - lift);
+			float phase = state.walkAnimationPos * HOP;
+			float hop = Math.max(0.0F, Mth.sin(phase)) * sp;
+
+			// the body's pitch: the perch's lean, or level (following the look at speed); undoing what the whole-model tilts add
+			float look = state.xRot * Mth.DEG_TO_RAD;
+			float tGround = Mth.lerp(crouch, PERCH_TILT, CROUCH_TILT) + STRIKE_TILT * strike + Mth.sin(phase) * ROCK * sp + m.breath() * 0.02F;
+			float tAir = HALF_PI + GLIDE_PITCH * glide + BEAT_PITCH * fly * Mth.sin(beat) + cruise * look;
+			float t = Mth.lerp(lift, tGround, tAir);
+			// Wind's cruise tips the drawn model forward to lie along the flight, the glide leans it back; both about the middle of
+			// its box. The bird is already level, so it stands up in the model to arrive level (its pitch kept) after them.
+			float tilt = cruise * (HALF_PI + look) - XenoformFlightPose.GLIDE_LEAN * Mth.DEG_TO_RAD * glide;
+
+			// perched, the lowest foot is on the ground (a hop lifts the body further than the legs tuck up)
+			float lowest = 0.0F;
+			float chainZ = 0.0F;
+			for (int s = 0; s < 2; s++) {
+				float side = s == 0 ? 1.0F : -1.0F;
+				float swing = Mth.cos(phase) * SHUFFLE * sp * side;
+				this.groundThigh[s] = THIGH_REST + CROUCH_THIGH * crouch + swing;
+				this.groundShin[s] = SHIN_REST + CROUCH_SHIN * crouch - swing * 0.6F;
+				// (a tilted shin's lower corners hang a little below the foot)
+				lowest = Math.max(lowest, THIGH_LENGTH * Mth.cos(this.groundThigh[s]) + SHIN_LENGTH * Mth.cos(this.groundShin[s])
+					+ Math.max(FOOT_HALF, Math.abs(Mth.sin(this.groundShin[s]))));
+				chainZ += (THIGH_LENGTH * Mth.sin(this.groundThigh[s]) + SHIN_LENGTH * Mth.sin(this.groundShin[s])) * 0.5F;
+			}
+			float hipDrop = HIP_Y * Mth.cos(tGround) - HIP_Z * Mth.sin(tGround);
+			float hipBack = HIP_Y * Mth.sin(tGround) + HIP_Z * Mth.cos(tGround);
+			float floor = 24.0F - (state.isCrouching ? CROUCH_SINK : 0.0F);
+			float groundY = floor - lowest - hipDrop - hop * HOP_LIFT;
+			float groundZ = -(hipBack + chainZ) - strike * STRIKE_LUNGE;
+			float airY = AIR_Y + WING_BOB * fly * Mth.sin(beat);
+			float wantY = Mth.lerp(lift, groundY, airY);
+			float wantZ = Mth.lerp(lift, groundZ, 0.0F);
+			// between perched and airborne (a landing, the wings easing out) the legs swing through hanging straight down
+			// while the body has barely risen: lift it so neither foot goes through the ground
+			for (int s = 0; s < 2; s++) {
+				this.leg(s, lift, t, hop, strike, fold, glide, age);
+				wantY = Math.min(wantY, floor - this.footDrop(s, t));
+			}
+			// the tilt turns the model about its box's middle (in the renderer's frame, which is the model's scaled by 0.9375
+			// with its ground at y 24.016): put the body where, once turned, it is wanted
+			float pivot = 24.016F - state.boundingBoxHeight / Math.max(state.scale, 0.01F) * 8.0F / 0.9375F;
+			float vy = wantY - pivot;
+			float ce = Mth.cos(tilt), se = Mth.sin(tilt);
+			this.body.x = 0.0F;
+			this.body.y = pivot + vy * ce + wantZ * se;
+			this.body.z = -vy * se + wantZ * ce;
+			this.body.xRot = t - tilt;
+			this.body.yRot = this.body.zRot = 0.0F;
+
+			this.head(state, t, cruise, strike, sp, phase, age);
+			for (int s = 0; s < 2; s++) {
+				this.wing(s, spread, flap, beat, fold, glide, m.land() + Math.abs(m.turn()) * 0.25F, age);
+			}
+			this.tail(m, spread, glide, fold, fly, beat, age);
+		}
+
+		/** How far below the body's middle this leg reaches as it is posed, the body pitched {@code t} (pixels, down). */
+		private float footDrop(int s, float t) {
+			float a = t + this.thigh[s].xRot, b = a + this.shin[s].xRot, f = b + this.foot[s].xRot;
+			float toes = FOOT_HALF * Mth.abs(Mth.cos(f)) + Math.max(0.0F, Math.max(TOE_REACH * Mth.sin(f), -HIND_REACH * Mth.sin(f)));
+			return HIP_Y * Mth.cos(t) - HIP_Z * Mth.sin(t) + THIGH_LENGTH * Mth.cos(a) + SHIN_LENGTH * Mth.cos(b) + Math.max(Mth.abs(Mth.sin(b)), toes);
+		}
+
+		/** The head looks where the player does whatever the body is doing (the turn the body's tilt gives it undone), and bobs as it hops. */
+		private void head(AvatarRenderState state, float t, float cruise, float strike, float sp, float phase, float age) {
+			float idle = 1.0F - sp;
+			float yaw = Mth.clamp(state.yRot * (1.0F - cruise), -75.0F, 75.0F) * Mth.DEG_TO_RAD + Mth.sin(age * 0.047F) * 0.06F * idle;
+			float pitch = Mth.clamp(state.xRot, -80.0F, 80.0F) * Mth.DEG_TO_RAD + PECK * strike + Mth.sin(age * 0.031F + 1.0F) * 0.04F * idle;
+			// the head's turn in the world, Ry(yaw) Rx(pitch), seen from the body's frame, Rx(-t) first; as ModelPart's Rz Ry Rx
+			float cy = Mth.cos(yaw), sy = Mth.sin(yaw), cp = Mth.cos(pitch), sn = Mth.sin(pitch), ct = Mth.cos(t), st = Mth.sin(t);
+			this.skull.xRot = (float)Math.atan2(-st * cp + ct * cy * sn, st * sn + ct * cy * cp);
+			this.skull.yRot = (float)Math.asin(Mth.clamp(ct * sy, -1.0F, 1.0F));
+			this.skull.zRot = (float)Math.atan2(-st * sy, cy);
+			this.skull.x = 0.0F;
+			this.skull.y = HEAD_Y;
+			this.skull.z = HEAD_Z + Mth.sin(phase) * HEAD_BOB * sp - strike * STRIKE_LUNGE * 0.5F;
+		}
+
+		/**
+		 * One wing. Folded (spread 0) it lies against the body's side; spread, the arm goes out level and swings up and down
+		 * with the beat, the hand behind it by a beat's lag; a glide holds it up and still, a stoop sweeps it back, and the
+		 * flight feathers fan out when it is open.
+		 */
+		private void wing(int s, float spread, float flap, float beat, float fold, float glide, float flare, float age) {
+			float side = s == 0 ? 1.0F : -1.0F;
+			float up = flap * (FLAP_BIAS + FLAP_SPAN * Mth.sin(beat)) * (1.0F - glide)
+				+ glide * (GLIDE_DIHEDRAL + Mth.sin(age * 0.07F + side) * GLIDE_ROCK);
+			ModelPart a = this.arm[s];
+			// the roll about its length turns the folded wing's flat to the body's side
+			a.xRot = Mth.lerp(spread, HALF_PI, WING_PITCH * flap * Mth.cos(beat) * (1.0F - glide) - 0.1F * glide);
+			a.yRot = side * up * spread;
+			a.zRot = side * Mth.lerp(spread, -(HALF_PI - FOLD_OUT - Mth.clamp(flare, 0.0F, 1.0F) * 0.4F), -SWEEP * fold);
+			ModelPart h = this.hand[s];
+			h.xRot = 0.0F;
+			h.yRot = -side * spread * flap * HAND_LAG * Mth.cos(beat) * (1.0F - glide);
+			h.zRot = side * Mth.lerp(spread, -FOLD_HAND, -HAND_SWEEP * fold);
+			float open = spread * (1.0F - 0.85F * fold);
+			for (int i = 0; i < 4; i++) {
+				ModelPart f = this.feather[s][i];
+				f.xRot = 0.0F;
+				f.xScale = FEATHER_LENGTH[i];
+				f.zRot = side * (Mth.lerp(open, FAN_SHUT[i], FAN_OPEN[i]) + Mth.sin(age * 0.3F + i * 1.1F + side) * 0.02F * glide);
+				f.yRot = -side * spread * flap * Mth.cos(beat) * 0.3F * (0.4F + 0.2F * i) * (1.0F - glide);
+			}
+		}
+
+		/** The tail: five feathers that fan wider in the air and on a landing, close on a stoop, lift as it falls and swing out of a turn. */
+		private void tail(XenoMotion.Read m, float spread, float glide, float fold, float fly, float beat, float age) {
+			float open = Mth.clamp(spread * 0.6F + glide * 0.4F + m.land() * 0.6F, 0.0F, 1.0F) * (1.0F - 0.8F * fold);
+			float fan = Mth.lerp(open, TAIL_FAN, TAIL_FAN_WIDE);
+			float pitch = Math.max(TAIL_LOW, TAIL_REST + tailLift(m) * 0.5F);
+			for (int i = 0; i < 5; i++) {
+				ModelPart feather = this.tail[i];
+				feather.xRot = pitch + Mth.sin(age * 0.11F + i * 0.5F) * 0.02F + fly * Mth.sin(beat + 1.2F) * 0.05F;
+				feather.yRot = 0.0F;
+				feather.zRot = (i - 2) * fan + m.trail() * 0.3F + Mth.sin(age * 0.05F) * 0.02F;
+				feather.yScale = TAIL_LENGTH[i];
+			}
+		}
+
+		/**
+		 * One leg. Perched, the thigh and shin stand it on the ground, its foot flat (the walk's hop tucks it, a strike rakes
+		 * it forward, talons open); airborne it hangs from the belly, tucked back under the tail (forward on a stoop).
+		 */
+		private void leg(int s, float lift, float t, float hop, float strike, float fold, float glide, float age) {
+			float side = s == 0 ? 1.0F : -1.0F;
+			float a = this.groundThigh[s] - HOP_TUCK_THIGH * hop - STRIKE_THIGH * strike;
+			float b = this.groundShin[s] + HOP_TUCK_SHIN * hop - STRIKE_SHIN * strike;
+			float curl = 0.4F * hop + 0.5F * strike;
+			float tau = Mth.lerp(fold, Mth.lerp(glide, HOVER_LEG, TUCK_LEG), STOOP_LEG) - STRIKE_THIGH * 0.9F * strike
+				+ Mth.sin(age * 0.1F + side * 1.3F) * 0.04F * (1.0F - glide);
+			float shinAir = Mth.lerp(fold, Mth.lerp(glide, HOVER_SHIN, TUCK_SHIN), STOOP_SHIN);
+			float curlAir = Mth.lerp(fold, HOVER_CURL + 0.3F * glide, STOOP_CURL);
+			this.thigh[s].xRot = Mth.lerp(lift, a - t, -HALF_PI + tau);
+			this.shin[s].xRot = Mth.lerp(lift, b - a, shinAir);
+			this.foot[s].xRot = Mth.lerp(lift, -b + curl, curlAir);
+			// the talons spread wider when they strike or stoop
+			float splay = 0.3F + 0.35F * Math.max(strike, fold);
+			this.toe[s][0].yRot = 0.0F;
+			this.toe[s][1].yRot = side * splay;
+			this.toe[s][2].yRot = -side * splay;
+			this.toe[s][3].yRot = (float)Math.PI;
+			this.toe[s][3].zScale = 0.5F;
 		}
 	}
 
@@ -2596,68 +2884,626 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** (0.18.111, Scan D) Lumen: small and slight, two thin wing-fins on its back that flutter. */
+	/**
+	 * (0.18.111, Scan D) Lumen: small and slight, two thin wing-fins on its back that flutter.
+	 * <p>
+	 * (0.19.67) An orb of light: no body or limbs. A white-gold core (the head box, 7x7x8, with two crossed boxes to round
+	 * its corners) inside a dithered halo shell (its front left clear, so the core and the insignia on its front show),
+	 * hovering {@link #HOVER} pixels above the ground and bobbing slowly, with {@link #MOTES} tiny motes orbiting it on
+	 * tilted rings. Moving, the motes tighten and stream out behind it (+z), swinging away from its turns and rising as it
+	 * falls. An attack swing pulses the orb bigger and bursts the motes outward. The humanoid body and limbs are hidden (the
+	 * body is still posed at the core, for the insignia plate). Uses no {@code XenoformClient.ACT}: Lumen has no charge, roll or spin.
+	 */
 	static final class Lumen extends FormModel {
-		private final ModelPart rightFin, leftFin;
+		// ---- tuning ----
+		/** How high the core's centre floats (model pixels up from the ground at y 24: 22 is ~1 block at its 0.7 scale, the halo's underside ~0.7 block up), its bob, the bob's speed, how far it sinks when sneaking. */
+		static final float HOVER = 22.0F, BOB = 1.2F, BOB_RATE = 0.07F, CROUCH_DROP = 2.5F;
+		/** The core's idle breath (fraction) and how fast, and how much bigger it pulses on an attack swing. */
+		static final float BREATH = 0.04F, BREATH_RATE = 0.12F, BURST_CORE = 0.4F;
+		/** The halo shell's extra swell on a swing, and how far it tilts as it moves. */
+		static final float BURST_SHELL = 0.3F, SHELL_LEAN = 0.15F;
+		/** The motes: the number, ring radius (pixels), orbit speed (radians a tick), how far a swing flings them (fraction of the radius). */
+		static final int MOTES = 8;
+		static final float ORBIT_R = 8.5F, ORBIT_RATE = 0.05F, BURST_MOTES = 1.1F;
+		/** Moving: how far behind the longest-trailing mote streams (pixels), how much the rings tighten, a turn's sway, a fall's lift. */
+		static final float TRAIL_LEN = 15.0F, TRAIL_TIGHT = 0.4F, TURN_SWING = 5.0F, FALL_RISE = 4.0F;
+		/** Each mote's ring: radius scale, tilt about x, roll about z, direction and speed, how much of the stream it takes (0-1). */
+		private static final float[] RADIUS = {1.0F, 0.85F, 1.15F, 0.95F, 1.1F, 0.8F, 1.2F, 0.9F};
+		private static final float[] TILT = {0.3F, 1.0F, -0.6F, 0.7F, -1.1F, 1.4F, -0.2F, 0.5F};
+		private static final float[] ROLL = {0.0F, 0.9F, -0.8F, 1.6F, 0.4F, -1.3F, 1.1F, -0.4F};
+		private static final float[] RATE = {1.0F, -0.8F, 1.25F, -1.1F, 0.9F, -1.3F, 0.75F, 1.15F};
+		private static final float[] LAG = {0.35F, 0.9F, 0.55F, 1.0F, 0.2F, 0.75F, 0.45F, 0.65F};
+
+		private final ModelPart halo;
+		private final ModelPart[] motes = new ModelPart[MOTES];
 
 		Lumen() {
 			super(bake(mesh()), "lumen");
-			this.insigniaZ = -1.7F;
-			this.rightFin = this.body.getChild("right_fin");
-			this.leftFin = this.body.getChild("left_fin");
+			ModelPart root = this.root();
+			this.halo = root.getChild("halo");
+			for (int i = 0; i < MOTES; i++) {
+				this.motes[i] = root.getChild("mote" + i);
+			}
+			// flush on the front of the core (the head box's front is at z = -4), centred on the 7-pixel face
+			this.insigniaY = 0.0F;
+			this.insigniaZ = -4.0F;
+			this.insigniaSize = 0.95F;
 		}
 
 		private static MeshDefinition mesh() {
+			// the slim limbs it always had (-0.3), kept for the first-person hand
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.3F), 0.0F);
-			PartDefinition body = mesh.getRoot().getChild("body");
-			body.addOrReplaceChild("right_fin", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 5.0F, 4.0F),
-				PartPose.offsetAndRotation(-1.5F, 1.0F, 1.8F, 0.0F, -0.6F, 0.0F));
-			body.addOrReplaceChild("left_fin", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-0.5F, 0.0F, 0.0F, 1.0F, 5.0F, 4.0F),
-				PartPose.offsetAndRotation(1.5F, 1.0F, 1.8F, 0.0F, 0.6F, 0.0F));
+			PartDefinition root = mesh.getRoot();
+			// the core: the head, 7x7x8 (z the long way), with the crossed 8x7x7 and 7x8x7 boxes on it
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-3.5F, -3.5F, -4.0F, 7.0F, 7.0F, 8.0F),
+				PartPose.offset(0.0F, 24.0F - HOVER, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			head.addOrReplaceChild("core_x", CubeListBuilder.create().texOffs(0, 94).addBox(-4.0F, -3.5F, -3.5F, 8.0F, 7.0F, 7.0F), PartPose.ZERO);
+			head.addOrReplaceChild("core_y", CubeListBuilder.create().texOffs(30, 94).addBox(-3.5F, -4.0F, -3.5F, 7.0F, 8.0F, 7.0F), PartPose.ZERO);
+			// the halo shell round it (its front face is clear in the skin)
+			root.addOrReplaceChild("halo", CubeListBuilder.create().texOffs(0, 70).addBox(-5.5F, -5.5F, -5.5F, 11.0F, 11.0F, 11.0F),
+				PartPose.offset(0.0F, 24.0F - HOVER, 0.0F));
+			for (int i = 0; i < MOTES; i++) {
+				root.addOrReplaceChild("mote" + i, CubeListBuilder.create().texOffs(i < 4 ? 0 : 8, 64)
+					.addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.35F)), PartPose.offset(0.0F, 24.0F - HOVER, 0.0F));
+			}
 			return mesh;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float flutter = Mth.sin(state.ageInTicks * 0.9F) * 0.25F;
-			this.rightFin.yRot = -0.6F - flutter;
-			this.leftFin.yRot = 0.6F + flutter;
+			this.hat.visible = this.body.visible = this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			this.head.resetPose();
+			this.body.resetPose();
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			float burst = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			boolean crouch = state.isCrouching;
+			float cy = 24.0F - HOVER + Mth.sin(age * BOB_RATE) * BOB + (crouch ? CROUCH_DROP : 0.0F);
+			// the core swells with its breath and a swing
+			float pulse = 1.0F + Mth.sin(age * BREATH_RATE) * BREATH + burst * BURST_CORE;
+			this.head.y = cy;
+			this.head.xScale = this.head.yScale = this.head.zScale = pulse;
+			// the body (hidden) sits at the core's centre so the insignia plate lies on its front face
+			this.body.y = cy;
+			this.insigniaZ = -4.0F * pulse;
+			this.insigniaSize = 0.95F * pulse;
+			// the halo: breathing a beat behind the core, leaning into its way and wobbling
+			float shell = pulse + Mth.sin(age * 0.08F + 1.0F) * 0.04F + burst * BURST_SHELL;
+			this.halo.y = cy;
+			this.halo.xScale = this.halo.yScale = this.halo.zScale = shell;
+			this.halo.xRot = Mth.sin(age * 0.037F) * 0.08F + speed * SHELL_LEAN;
+			this.halo.zRot = Mth.sin(age * 0.05F) * 0.08F;
+			this.halo.yRot = 0.0F;
+			// the motes: each round its own tilted ring, streamed back by the walk
+			float tight = (1.0F - TRAIL_TIGHT * speed) * (crouch ? 0.75F : 1.0F) * (1.0F + BURST_MOTES * burst);
+			float rise = Math.max(0.0F, m.fall()) * m.air() * FALL_RISE;
+			for (int i = 0; i < MOTES; i++) {
+				float r = ORBIT_R * RADIUS[i] * tight;
+				float ph = age * ORBIT_RATE * RATE[i] + i * (float)Math.PI * 2.0F / MOTES;
+				float x0 = r * Mth.cos(ph);
+				float z0 = r * Mth.sin(ph);
+				// tilt the ring about x, then roll it about z
+				float y1 = -z0 * Mth.sin(TILT[i]);
+				float z1 = z0 * Mth.cos(TILT[i]);
+				float x2 = x0 * Mth.cos(ROLL[i]) - y1 * Mth.sin(ROLL[i]);
+				float y2 = x0 * Mth.sin(ROLL[i]) + y1 * Mth.cos(ROLL[i]);
+				float lag = LAG[i];
+				ModelPart mote = this.motes[i];
+				// a turn (+ to its left, +x) swings the stream the other way, as the tails' -trail does
+				mote.x = x2 - m.trail() * TURN_SWING * lag;
+				mote.y = cy + y2 + speed * lag * 1.5F - rise * lag;
+				mote.z = z1 + TRAIL_LEN * speed * lag;
+				float twinkle = (0.75F + Mth.sin(age * 0.3F + i * 2.1F) * 0.35F) * (1.0F + burst * 0.5F);
+				mote.xScale = mote.yScale = mote.zScale = twinkle;
+			}
 		}
 	}
 
-	/** (0.18.111, Scan D) Keen: huge ears, and leathery wings down its arms that spread when it lifts them. */
+	/**
+	 * (0.18.111, Scan D; 0.19.67 a real bat) Keen: a small furry bat, not a man: a round fur body with the insignia on
+	 * its back, a pug head with huge ears, a jaw and fangs, two hind legs and two long membrane wings (a humerus, a
+	 * long forearm, three finger bones fanned from the wrist, a thumb claw, and the membrane stretched between them).
+	 * On the ground the wings fold up against it and it crawls on its wrists and feet (a diagonal gait, the arms
+	 * solved so each wrist plants on the ground and the elbow rides up behind it); in the air the wings spread and beat
+	 * fast (FLY_WINGS), folding on the upstroke and sweeping back at speed, or hold out and ride the air (FLY_GLIDE);
+	 * under Wind's cruise pose the model is turned back level (the body is laid along the flight), and gliding is turned
+	 * back too. While it hangs ({@link XenoformClient#ACT} "hang") it hangs head-down by its feet from the ceiling, turned
+	 * belly to the front with the wings drawn across it like a cloak, swaying. A bite lunges the head, opens the jaw and
+	 * lays the ears back. The man's parts are hidden; the body is the bat's torso, laid face-up so the insignia sits on
+	 * its back, and every other part hangs off it.
+	 */
 	static final class Keen extends FormModel {
-		private final ModelPart rightWing, leftWing;
+		// ---- tuning ----
+		/** The body's height (model y; the ground is 24) crawling and flying, how far it drops when sneaking, and what the renderer sinks a crouching player. */
+		static final float CRAWL_Y = 17.0F, FLY_Y = 10.5F, CROUCH_DROP = 2.5F, CROUCH_SINK = 2.0F;
+		/** The middle of the player box (model y), which Wind's cruise pose and the glide tip the whole model about. */
+		static final float MIDDLE_Y = 9.6F;
+		/** The crawl: how fast the limbs step against the walk, how far each wrist and foot swings and lifts (pixels), how much the body bobs. */
+		static final float GAIT = 0.6662F * 1.3F, FORE_STRIDE = 2.6F, HIND_STRIDE = 2.2F, FORE_LIFT = 2.2F, HIND_LIFT = 1.6F, BOB = 0.5F;
+		/** Where a planted wrist rests (body space: out from the middle, and ahead of it) and its radius, and how much wider the wrists go when it sneaks. */
+		static final float WRIST_X = 4.6F, WRIST_Y = 5.2F, WRIST_R = 1.7F, CROUCH_WIDEN = 1.6F;
+		/** How far the hind feet splay out at rest and at most (radians), and a pad under the foot (pixels) so its sole sits on the ground. */
+		static final float SPLAY = 0.22F, SPLAY_MAX = 0.5F, FOOT_PAD = 0.25F;
+		/** The wing beat: radians a tick, the stroke and the mean raise (radians); the glide's slow dip likewise. */
+		static final float FLAP_RATE = 1.9F, FLAP_AMP = 0.75F, FLAP_UP = 0.12F, GLIDE_RATE = 0.16F, GLIDE_AMP = 0.10F, GLIDE_UP = 0.22F;
+		/** Pitch of the body hovering (negative is nose up) and cruising, how far it banks into a turn, and how far the wings spread when it falls. */
+		static final float HOVER_PITCH = -0.5F, CRUISE_PITCH = 0.1F, BANK = 0.3F, AIR_SPREAD = 0.6F;
+		/**
+		 * How much of the glide's tip ({@link XenoformFlightPose#GLIDE_LEAN}) is turned back out of the model (1 level the
+		 * bat out, 0 leave it to the renderer). The renderer turns the model by +38 degrees about the X axis, which leans the
+		 * model back; flip this to -1 if it is seen to lean forward in game.
+		 */
+		static final float GLIDE_COUNTER = 1.0F;
+		/** A bite lunges the body this far (pixels), and the head this much further out of the torso (kept under its 0.5 pixel overlap so it stays on). */
+		static final float LUNGE = 2.0F, NECK_LUNGE = 0.4F;
+		/** Hanging: the ceiling (model y), how far the body hangs below the grip of its feet, the sway (radians) and how far the belly sheets reach in. */
+		static final float CEILING_Y = -4.8F, HANG_REACH = 7.7F, HANG_SWAY = 0.07F, HANG_SHEET = 6.2F;
+		/** Hanging: how far each wing's sheet sits in from its root (pixels, toward the belly) so it lies on the belly, not a hair off it. */
+		static final float HANG_SHEET_IN = 0.65F;
+		/** Wind's air brake leans the body back this much (degrees); WindPose keeps it private. */
+		static final float BRAKE_LEAN_BACK = 25.0F;
+
+		private static final float HALF_PI = (float)Math.PI * 0.5F;
+		private static final float DEG = Mth.DEG_TO_RAD;
+		/** The skeleton (pixels): the shoulder on the torso's side, the humerus, forearm and three fingers. */
+		private static final float SHOULDER_X = 3.0F, SHOULDER_Y = 1.6F, SHOULDER_Z = -1.0F, HUMERUS = 5.0F, FOREARM = 9.0F;
+		private static final float[] FINGER = {10.0F, 9.0F, 7.0F};
+		/** Hips (body space) and the leg's length hip to sole. */
+		private static final float HIP_X = 2.2F, HIP_Y = -2.4F, HIP_Z = 1.5F, LEG = 5.5F;
+		/** The neck's joint on the torso's head end. */
+		private static final float NECK_Y = 3.0F, NECK_Z = -0.2F;
+		/** The wing's pose at the far ends: spread (finger angles from the forearm) and folded on the ground. */
+		private static final float[] FINGER_SPREAD = {-0.12F, -0.55F, -1.0F};
+		private static final float[] FINGER_FOLD = {-2.99F, -2.87F, -2.75F};
+		private static final CubeDeformation THIN = new CubeDeformation(0.0F, 0.0F, -0.25F);
+		private static final CubeDeformation BONE = new CubeDeformation(0.1F);
+
+		private final ModelPart batHead, jaw, web;
+		private final ModelPart[] ears = new ModelPart[2], legs = new ModelPart[2], feet = new ModelPart[2];
+		/** Index 0 right, 1 left. */
+		private final ModelPart[] shoulder = new ModelPart[2], arm = new ModelPart[2], fore = new ModelPart[2], thumb = new ModelPart[2];
+		private final ModelPart[] webIn = new ModelPart[2], webA = new ModelPart[2], webB = new ModelPart[2];
+		private final ModelPart[][] fingers = new ModelPart[2][3];
+		/** Scratch: the wing angles being solved (alpha, beta, A, F, g1, g2, g3): the crawl's (right, left), the flight's, the hang's, and the blend drawn. */
+		private final float[][] wingGround = new float[2][7];
+		private final float[] wingFly = new float[7], wingHang = new float[7], wingNow = new float[7];
 
 		Keen() {
 			super(bake(mesh()), "keen");
-			this.insigniaZ = -1.9F;
-			this.rightWing = this.rightArm.getChild("wing");
-			this.leftWing = this.leftArm.getChild("wing");
+			ModelPart torso = this.body;
+			this.batHead = torso.getChild("bat_head");
+			this.jaw = this.batHead.getChild("jaw");
+			this.web = torso.getChild("web");
+			for (int s = 0; s < 2; s++) {
+				String p = s == 1 ? "left_" : "right_";
+				this.ears[s] = this.batHead.getChild(p + "ear");
+				this.legs[s] = torso.getChild(p + "hind");
+				this.feet[s] = this.legs[s].getChild("foot");
+				this.shoulder[s] = torso.getChild(p + "shoulder");
+				this.webIn[s] = this.shoulder[s].getChild("web_in");
+				this.arm[s] = this.shoulder[s].getChild("arm");
+				this.fore[s] = this.arm[s].getChild("fore");
+				ModelPart knob = this.fore[s].getChild("knob");
+				this.thumb[s] = knob.getChild("thumb");
+				for (int i = 0; i < 3; i++) {
+					this.fingers[s][i] = this.fore[s].getChild("finger" + i);
+				}
+				this.webA[s] = this.fore[s].getChild("web_a");
+				this.webB[s] = this.fore[s].getChild("web_b");
+			}
+			// the plate lies on the torso's back (the body is laid face-up, see setupAnim)
+			this.insigniaY = -0.5F;
+			this.insigniaZ = -2.5F;
+			this.insigniaSize = 1.0F;
+		}
+
+		/** A box that is on the left (+x) side as given, or mirrored on the right (its texture too). */
+		private static CubeListBuilder cube(boolean left, int u, int v, float x, float y, float z, int w, int h, int d, CubeDeformation grow) {
+			CubeListBuilder builder = CubeListBuilder.create().texOffs(u, v);
+			return left ? builder.addBox(x, y, z, w, h, d, grow) : builder.mirror().addBox(-x - w, y, z, w, h, d, grow);
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.1F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -4.0F, -0.5F, 2.0F, 4.0F, 1.0F),
-				PartPose.offsetAndRotation(-2.5F, -8.0F, -0.5F, 0.0F, 0.0F, -0.3F));
-			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(0, 64).mirror().addBox(-1.0F, -4.0F, -0.5F, 2.0F, 4.0F, 1.0F),
-				PartPose.offsetAndRotation(2.5F, -8.0F, -0.5F, 0.0F, 0.0F, 0.3F));
-			root.getChild("right_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(6, 64).addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 5.0F),
-				PartPose.offset(-1.5F, 0.0F, 1.0F));
-			root.getChild("left_arm").addOrReplaceChild("wing", CubeListBuilder.create().texOffs(6, 64).mirror().addBox(-0.5F, -1.0F, 0.0F, 1.0F, 10.0F, 5.0F),
-				PartPose.offset(1.5F, 0.0F, 1.0F));
+			// the torso replaces the man's body; lying face-up (-90 degrees), its local +y is forward and +z is down
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 64).addBox(-3.0F, -3.5F, -2.5F, 6.0F, 7.0F, 5.0F),
+				PartPose.offsetAndRotation(0.0F, CRAWL_Y, 0.0F, -HALF_PI, 0.0F, 0.0F));
+			// the head sits in the man's frame (its face on -z) turned a quarter to face forward along the spine
+			PartDefinition head = body.addOrReplaceChild("bat_head", CubeListBuilder.create().texOffs(22, 64).addBox(-2.5F, -2.0F, -4.0F, 5.0F, 3.0F, 4.0F),
+				PartPose.offsetAndRotation(0.0F, NECK_Y, NECK_Z, HALF_PI, 0.0F, 0.0F));
+			head.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(40, 64).addBox(-1.5F, -1.0F, -5.0F, 3.0F, 2.0F, 1.0F), PartPose.ZERO);
+			head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(48, 64).addBox(-2.0F, 0.0F, -3.0F, 4.0F, 1.0F, 3.0F),
+				PartPose.offset(0.0F, 1.0F, -0.6F));
+			head.addOrReplaceChild("right_fang", CubeListBuilder.create().texOffs(8, 76).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+				PartPose.offset(-1.4F, 1.0F, -3.5F));
+			head.addOrReplaceChild("left_fang", CubeListBuilder.create().texOffs(8, 76).mirror().addBox(-0.5F, 0.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+				PartPose.offset(1.4F, 1.0F, -3.5F));
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(0, 76).addBox(-1.5F, -6.0F, -0.5F, 3.0F, 6.0F, 1.0F),
+				PartPose.offsetAndRotation(-1.4F, -1.8F, -1.2F, 0.1F, 0.0F, -0.25F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(0, 76).mirror().addBox(-1.5F, -6.0F, -0.5F, 3.0F, 6.0F, 1.0F),
+				PartPose.offsetAndRotation(1.4F, -1.8F, -1.2F, 0.1F, 0.0F, 0.25F));
+			// the tail membrane between the hind legs, hinged at the torso's tail end
+			body.addOrReplaceChild("web", CubeListBuilder.create().texOffs(0, 90).addBox(-3.5F, -5.0F, -0.5F, 7.0F, 5.0F, 1.0F, THIN),
+				PartPose.offset(0.0F, -3.0F, 1.0F));
+			for (int s = 0; s < 2; s++) {
+				boolean left = s == 1;
+				String p = left ? "left_" : "right_";
+				float side = left ? 1.0F : -1.0F;
+				// a hind leg hangs off the hip along +y turned a quarter (so it points down), a flat foot at its end
+				PartDefinition leg = body.addOrReplaceChild(p + "hind", cube(left, 12, 76, -1.0F, 0.0F, -1.0F, 2, 5, 2, CubeDeformation.NONE),
+					PartPose.offsetAndRotation(side * HIP_X, HIP_Y, HIP_Z, HALF_PI, 0.0F, 0.0F));
+				leg.addOrReplaceChild("foot", cube(left, 20, 76, -1.0F, -0.5F, -3.0F, 2, 1, 3, CubeDeformation.NONE), PartPose.offset(0.0F, 5.0F, 0.0F));
+				// a wing: a shoulder joint (roll and twist), the humerus, the forearm, a wrist knob with a thumb, three fingers
+				PartDefinition sh = body.addOrReplaceChild(p + "shoulder", CubeListBuilder.create(), PartPose.offset(side * SHOULDER_X, SHOULDER_Y, SHOULDER_Z));
+				sh.addOrReplaceChild("web_in", cube(left, 16, 90, 0.0F, -8.5F, -0.5F, 16, 9, 1, THIN), PartPose.offset(0.0F, 0.0F, 0.05F));
+				PartDefinition upper = sh.addOrReplaceChild("arm", cube(left, 30, 76, -1.0F, -1.0F, -1.0F, 6, 2, 2, CubeDeformation.NONE), PartPose.ZERO);
+				PartDefinition lower = upper.addOrReplaceChild("fore", cube(left, 0, 84, -1.0F, -0.5F, -0.5F, 11, 1, 1, CubeDeformation.NONE),
+					PartPose.offset(side * HUMERUS, 0.0F, 0.0F));
+				PartDefinition knob = lower.addOrReplaceChild("knob", cube(left, 40, 86, -1.0F, -1.0F, -1.0F, 2, 2, 2, CubeDeformation.NONE),
+					PartPose.offset(side * FOREARM, 0.0F, 0.0F));
+				knob.addOrReplaceChild("thumb", CubeListBuilder.create().texOffs(48, 84).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 3.0F, 1.0F), PartPose.ZERO);
+				int[][] fingerUv = {{24, 84, 11}, {0, 86, 10}, {22, 86, 8}};
+				for (int i = 0; i < 3; i++) {
+					lower.addOrReplaceChild("finger" + i, cube(left, fingerUv[i][0], fingerUv[i][1], -0.5F, -0.5F, -0.5F, fingerUv[i][2], 1, 1, BONE),
+						PartPose.offset(side * FOREARM, 0.0F, 0.0F));
+				}
+				lower.addOrReplaceChild("web_a", cube(left, 0, 100, 0.0F, -3.0F, -0.5F, 10, 6, 1, THIN), PartPose.offset(side * FOREARM, 0.0F, 0.12F));
+				lower.addOrReplaceChild("web_b", cube(left, 22, 100, 0.0F, -3.0F, -0.5F, 9, 6, 1, THIN), PartPose.offset(side * FOREARM, 0.0F, -0.12F));
+			}
 			return mesh;
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float spread = Math.min(1.0F, Math.abs(this.rightArm.zRot) + Math.abs(this.rightArm.xRot) * 0.3F);
-			this.rightWing.yRot = -spread * 0.7F;
-			this.leftWing.yRot = spread * 0.7F;
+			this.head.visible = this.hat.visible = false;
+			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			this.body.visible = true;
+			this.body.resetPose();
+			XenoMotion.Read m = XenoMotion.read(state);
+			float age = state.ageInTicks;
+			boolean hang = "hang".equals(state.getData(XenoformClient.ACT));
+			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
+			Float windAmount = state.getData(com.jaymospowers.client.power.wind.WindPose.KEY);
+			Float brakeAmount = state.getData(com.jaymospowers.client.power.wind.WindPose.BRAKE_KEY);
+			float cruise = hang || windAmount == null ? 0.0F : windAmount;
+			float wings = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
+			float glide = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.glide());
+			float fold = flight == null ? 0.0F : flight.fold();
+			float time = flight == null ? age : flight.time();
+			// how far it is airborne (the body lifts and the legs tuck) and how far the wings are spread
+			float fly = hang ? 0.0F : Math.max(wings, glide);
+			float spread = hang ? 0.0F : Mth.clamp(Math.max(fly, m.air() * AIR_SPREAD), 0.0F, 1.0F);
+			float speed = Math.min(1.0F, state.walkAnimationSpeed);
+			float walk = state.walkAnimationPos * GAIT;
+			float turn = m.turn();
+			float bite = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			// under Wind's cruise the renderer turns the whole model to the look (WindPose.tilt), so the head's own turn and nod fade out
+			float lookYaw = Mth.clamp(state.yRot * DEG, -1.1F, 1.1F) * (1.0F - cruise);
+			float lookPitch = Mth.clamp(state.xRot * DEG, -0.9F, 0.9F) * (1.0F - cruise);
+			float sinkFix = state.isCrouching ? -CROUCH_SINK : 0.0F;
+			// ---- the body ----
+			float crouch = state.isCrouching && !hang ? CROUCH_DROP * (1.0F - fly) : 0.0F;
+			float bob = Mth.abs(Mth.sin(walk)) * BOB * speed * (1.0F - fly);
+			float groundBodyY = CRAWL_Y + crouch - bob;
+			float hover = Mth.sin(time * 0.21F) * 0.5F * fly;
+			float bodyY = Mth.lerp(fly, groundBodyY, FLY_Y + hover);
+			float flyPitch = Mth.lerp(Math.min(1.0F, speed * 1.6F), HOVER_PITCH, CRUISE_PITCH) + m.fall() * 0.3F * m.air();
+			float pitch = (hang ? 0.0F : flyPitch * fly) * (1.0F - cruise);
+			// Wind's cruise tips the whole model by (90 + look pitch) degrees about the player box's middle (a man laid out
+			// along the flight), and a glide by a few more. The body is turned back by the 90 degrees (and the glide), so it
+			// lies along the flight; the look pitch it keeps, so it dives and climbs where it looks. tilt is what the
+			// renderer does (its position is moved to match), turnBack the part undone.
+			float tilt = 0.0F, turnBack = 0.0F;
+			if (cruise > 0.001F) {
+				float brake = brakeAmount == null ? 0.0F : brakeAmount;
+				float laid = cruise * (1.0F - 0.75F * brake);
+				tilt += laid * (90.0F + state.xRot) * DEG - brake * BRAKE_LEAN_BACK * DEG;
+				turnBack += laid * 90.0F * DEG;
+			}
+			if (!hang && glide > 0.001F && state.deathTime <= 0.0F) {
+				float lean = -XenoformFlightPose.GLIDE_LEAN * glide * DEG * GLIDE_COUNTER;
+				tilt += lean;
+				turnBack += lean;
+			}
+			float forwardY = Mth.sin(pitch), forwardZ = -Mth.cos(pitch);
+			float wantY = bodyY + sinkFix + forwardY * bite * LUNGE;
+			float wantZ = forwardZ * bite * LUNGE;
+			float cs = Mth.cos(tilt), sn = Mth.sin(tilt);
+			this.body.x = 0.0F;
+			this.body.y = MIDDLE_Y + (wantY - MIDDLE_Y) * cs + wantZ * sn;
+			this.body.z = -(wantY - MIDDLE_Y) * sn + wantZ * cs;
+			this.body.xRot = -HALF_PI + pitch - turnBack;
+			this.body.yRot = 0.0F;
+			// rolled into a turn (under Wind's cruise it banks the model itself)
+			this.body.zRot = hang || cruise > 0.001F ? 0.0F : -turn * BANK * spread + Mth.sin(walk) * 0.05F * speed * (1.0F - fly);
+			if (hang) {
+				// head-down by its feet, belly to the front (turned half round), swaying about its grip on the ceiling
+				float sway = Mth.sin(age * 0.045F) * HANG_SWAY;
+				this.body.xRot = sway;
+				this.body.yRot = (float)Math.PI;
+				this.body.y = CEILING_Y + HANG_REACH * Mth.cos(sway) + sinkFix;
+				this.body.z = -HANG_REACH * Mth.sin(sway);
+			}
+			// ---- the head ----
+			float headPitch;
+			float neckY = NECK_Y + bite * NECK_LUNGE;
+			float neckZ = NECK_Z;
+			if (hang) {
+				// the face turned out to the front (the belly's side) from the hanging line of the body; hanging head-down,
+				// a smaller angle turns the face further down, so looking down takes from it
+				neckY = NECK_Y + 0.6F;
+				neckZ = 0.4F;
+				headPitch = HALF_PI + 0.9F - lookPitch * 0.4F;
+			} else {
+				float ground = HALF_PI - 0.3F + lookPitch * 0.7F + bite * 0.2F + Mth.sin(age * 0.07F) * 0.03F;
+				float air = HALF_PI + 0.02F + lookPitch + Mth.sin(time * FLAP_RATE + 0.8F) * 0.05F * fly;
+				headPitch = Mth.lerp(fly, ground, air);
+			}
+			this.batHead.x = 0.0F;
+			this.batHead.y = neckY;
+			this.batHead.z = neckZ;
+			this.batHead.xRot = headPitch;
+			// turned where it looks: about the body's down axis, or hanging head-down, about the vertical
+			this.batHead.zRot = hang ? 0.0F : lookYaw;
+			this.batHead.yRot = hang ? lookYaw : 0.0F;
+			this.jaw.xRot = 0.12F + bite * 0.9F + (hang ? 0.0F : Math.max(0.0F, Mth.sin(age * 0.05F)) * 0.04F);
+			for (int s = 0; s < 2; s++) {
+				float side = s == 1 ? 1.0F : -1.0F;
+				float twitch = Mth.sin(age * 0.19F + s * 2.3F) * (0.05F + (1.0F - speed) * 0.03F);
+				// ears: pricked at rest, laid back flying and biting, drooped hanging
+				float back = bite * 0.6F + fly * 0.35F + cruise * 0.3F + (hang ? 0.9F : 0.0F);
+				this.ears[s].xRot = 0.1F - back + twitch;
+				this.ears[s].zRot = side * (0.25F + twitch - bite * 0.1F);
+			}
+			// ---- the tail membrane ----
+			this.web.xRot = (hang ? 0.5F : Mth.lerp(fly, -0.1F, -0.3F + Mth.sin(time * FLAP_RATE) * 0.12F * wings)) + Math.max(-0.4F, tailLift(m)) * 0.8F;
+			// ---- the hind legs ----
+			float groundZ = 24.0F - groundBodyY;
+			for (int s = 0; s < 2; s++) {
+				float side = s == 1 ? 1.0F : -1.0F;
+				ModelPart leg = this.legs[s];
+				ModelPart foot = this.feet[s];
+				if (hang) {
+					leg.xRot = (float)Math.PI - 0.12F + Mth.sin(age * 0.045F + s) * 0.02F;
+					leg.yRot = side * 0.35F;
+					leg.yScale = 1.0F;
+					foot.xRot = -0.3F;
+					continue;
+				}
+				// the right hind steps with the left wrist: diagonal pairs
+				float psi = walk + (s == 1 ? (float)Math.PI : 0.0F);
+				float p = HIND_STRIDE * speed * Mth.sin(psi);
+				float lift = HIND_LIFT * speed * Math.max(0.0F, Mth.cos(psi));
+				float delta = -(float)Math.asin(Mth.clamp(p / LEG, -0.9F, 0.9F));
+				float hv = groundZ - HIP_Z - lift - FOOT_PAD;
+				float cd = LEG * Mth.cos(delta);
+				float minCos = Mth.cos(SPLAY);
+				// a lifted or lowered hip is met by splaying the foot out, and past that by shortening the leg; the foot's
+				// outer edge dips as it rolls out, so it is solved twice, the second time a foot's half width higher
+				float splay = SPLAY;
+				float ratio = hv / cd;
+				for (int pass = 0; pass < 2; pass++) {
+					ratio = (hv - (pass == 0 ? 0.0F : Mth.sin(splay))) / cd;
+					splay = ratio >= minCos ? SPLAY : Math.min(SPLAY_MAX, (float)Math.acos(Math.max(0.0F, ratio)));
+				}
+				float stretch = ratio / Mth.cos(splay);
+				float groundAngle = HALF_PI + delta;
+				float flightAngle = 2.55F + Mth.sin(time * FLAP_RATE + 0.5F + s) * 0.1F * wings + m.trail() * 0.1F;
+				leg.xRot = Mth.lerp(fly, groundAngle, flightAngle);
+				leg.yRot = side * Mth.lerp(fly, splay, 0.3F);
+				leg.yScale = Mth.lerp(fly, stretch, 1.0F);
+				foot.xRot = Mth.lerp(fly, -delta - lift * 0.15F, 0.5F);
+			}
+			// ---- the wings ----
+			for (int s = 0; s < 2; s++) {
+				this.solveGround(s, walk, speed, groundZ, crouch);
+			}
+			this.solveFlight(time, wings, fold, cruise);
+			this.solveHang(age);
+			for (int s = 0; s < 2; s++) {
+				float[] w = this.wingNow;
+				for (int i = 0; i < 7; i++) {
+					w[i] = hang ? this.wingHang[i] : Mth.lerp(spread, this.wingGround[s][i], this.wingFly[i]);
+				}
+				// banking: the inside wing drops, the outside lifts
+				if (!hang) {
+					w[1] += (s == 1 ? -turn : turn) * BANK * spread;
+				}
+				float side = s == 1 ? 1.0F : -1.0F;
+				// hanging, the wing's root sits under the belly (the second wing a little lower so the two sheets never share a plane)
+				this.shoulder[s].x = side * (hang ? 3.4F : SHOULDER_X);
+				this.shoulder[s].y = hang ? 2.6F : SHOULDER_Y;
+				this.shoulder[s].z = hang ? (s == 1 ? 3.2F : 3.55F) : SHOULDER_Z;
+				this.placeWing(s, w, hang ? 0.0F : spread, hang);
+			}
+		}
+
+		/** The crawl: a wing reaching to its planted (or stepping) wrist, its fingers folded back along the forearm. */
+		private void solveGround(int s, float walk, float speed, float groundZ, float crouch) {
+			// diagonal pairs: the left wrist steps with the right hind foot; both sides are solved as a left wing
+			float psi = walk + (s == 1 ? 0.0F : (float)Math.PI);
+			float tx = WRIST_X + crouch * (CROUCH_WIDEN / CROUCH_DROP) - SHOULDER_X;
+			float ty = WRIST_Y + FORE_STRIDE * speed * Mth.sin(psi) - SHOULDER_Y;
+			float lift = FORE_LIFT * speed * Math.max(0.0F, Mth.cos(psi));
+			float tz = groundZ - WRIST_R - lift - SHOULDER_Z;
+			float[] w = this.wingGround[s];
+			reach(tx, ty, tz, 0.4F, -0.7F, -0.6F, w);
+			for (int i = 0; i < 3; i++) {
+				w[4 + i] = FINGER_FOLD[i];
+			}
+		}
+
+		/** In the air: the beat (the wing lifts and drops, folding at the elbow and closing its fingers as it rises), swept back at speed. */
+		private void solveFlight(float time, float wings, float fold, float cruise) {
+			float rate = Mth.lerp(wings, GLIDE_RATE, FLAP_RATE);
+			float amp = Mth.lerp(wings, GLIDE_AMP, FLAP_AMP);
+			float up = Mth.lerp(wings, GLIDE_UP, FLAP_UP);
+			float theta = time * rate;
+			float flex = wings * Math.max(0.0F, Mth.cos(theta)) * 0.9F;
+			float[] w = this.wingFly;
+			w[0] = 0.1F + 0.2F * Mth.cos(theta) * wings;
+			w[1] = up + amp * Mth.sin(theta);
+			w[2] = 0.2F - fold * 0.7F - cruise * 0.1F;
+			w[3] = -0.2F - flex - fold * 0.5F;
+			float close = 1.0F - 0.45F * flex - 0.4F * fold;
+			for (int i = 0; i < 3; i++) {
+				w[4 + i] = FINGER_SPREAD[i] * close;
+			}
+		}
+
+		/**
+		 * Hanging: both wings drawn across the belly like a cloak: the humerus reaches in across the chest, the forearm
+		 * runs back along the belly toward the feet, the fingers fold forward along it, the membrane lying under the belly.
+		 */
+		private void solveHang(float age) {
+			float[] w = this.wingHang;
+			float loose = Mth.sin(age * 0.04F) * 0.03F;
+			w[0] = 0.0F;
+			w[1] = loose;
+			w[2] = (float)Math.PI;
+			w[3] = HALF_PI + loose;
+			for (int i = 0; i < 3; i++) {
+				w[4 + i] = FINGER_FOLD[i];
+			}
+		}
+
+		/**
+		 * Poses wing {@code s} from its canonical (left wing) angles: the shoulder's twist and roll, the humerus' sweep, the
+		 * elbow's bend and each finger's fan, then sizes the membranes to the shape the bones make, and points the thumb forward.
+		 */
+		private void placeWing(int s, float[] w, float spread, boolean hang) {
+			float side = s == 1 ? 1.0F : -1.0F;
+			float alpha = w[0], beta = w[1], a = w[2], f = w[3];
+			this.shoulder[s].xRot = alpha;
+			this.shoulder[s].yRot = side * beta;
+			this.shoulder[s].zRot = 0.0F;
+			this.arm[s].zRot = side * a;
+			this.fore[s].zRot = side * f;
+			float phi = a + f;
+			// the bones in the wing's plane (u out along the shoulder's axis, v forward): the wrist and the finger tips
+			float wu = HUMERUS * Mth.cos(a) + FOREARM * Mth.cos(phi);
+			float wv = HUMERUS * Mth.sin(a) + FOREARM * Mth.sin(phi);
+			for (int i = 0; i < 3; i++) {
+				this.fingers[s][i].zRot = side * w[4 + i];
+			}
+			float tip2U = wu + FINGER[2] * Mth.cos(phi + w[6]);
+			float tip1V = wv + FINGER[1] * Mth.sin(phi + w[5]), tip2V = wv + FINGER[2] * Mth.sin(phi + w[6]);
+			// the membrane from the body out to the wrist, as deep as the trailing finger reaches back
+			float reachU = Math.max(0.5F, Math.max(wu, tip2U) * 0.97F);
+			float depth = Mth.clamp(1.5F - Math.min(tip1V, tip2V), 0.5F, 8.5F);
+			if (hang) {
+				// the sheet lies on the belly, reaching in across it (the membrane's box shifted in, not turned)
+				this.webIn[s].x = -side * HANG_SHEET;
+				this.webIn[s].z = 0.05F - HANG_SHEET_IN;
+				this.webIn[s].xScale = HANG_SHEET / 16.0F;
+				this.webIn[s].yScale = 1.0F;
+				this.webIn[s].zRot = 0.0F;
+			} else {
+				this.webIn[s].x = 0.0F;
+				this.webIn[s].z = 0.05F;
+				this.webIn[s].xScale = Mth.lerp(spread, 0.4F, reachU / 16.0F);
+				this.webIn[s].yScale = Mth.lerp(spread, 0.55F, depth / 8.5F);
+				this.webIn[s].zRot = side * a * 0.4F;
+			}
+			// the panels between the fingers: along the bisector, as wide as the gap
+			float gapA = Math.abs(w[4] - w[5]), gapB = Math.abs(w[5] - w[6]);
+			this.webA[s].zRot = side * (w[4] + w[5]) * 0.5F;
+			this.webB[s].zRot = side * (w[5] + w[6]) * 0.5F;
+			this.webA[s].xScale = (FINGER[0] + FINGER[1]) * 0.5F * 0.92F / 10.0F;
+			this.webB[s].xScale = (FINGER[1] + FINGER[2]) * 0.5F * 0.92F / 9.0F;
+			this.webA[s].yScale = Math.max(0.04F, (FINGER[0] + FINGER[1]) * 0.5F * gapA * 0.65F / 6.0F);
+			this.webB[s].yScale = Math.max(0.04F, (FINGER[1] + FINGER[2]) * 0.5F * gapB * 0.65F / 6.0F);
+			// the thumb points ahead of the body whichever way the forearm lies: its direction in the forearm's own frame
+			float ca = Mth.cos(alpha), sa = Mth.sin(alpha), cb = Mth.cos(beta), sb = Mth.sin(beta);
+			float e1x = cb, e1y = 0.0F, e1z = -sb;
+			float e3x = ca * sb, e3y = -sa, e3z = ca * cb;
+			float e2x = e3y * e1z - e3z * e1y, e2y = e3z * e1x - e3x * e1z, e2z = e3x * e1y - e3y * e1x;
+			float cp = Mth.cos(phi), sp = Mth.sin(phi);
+			float fxx = cp * e1x + sp * e2x, fxy = cp * e1y + sp * e2y, fxz = cp * e1z + sp * e2z;
+			float fyx = -sp * e1x + cp * e2x, fyy = -sp * e1y + cp * e2y, fyz = -sp * e1z + cp * e2z;
+			// ahead and a little down
+			float dx = 0.0F, dy = 0.96F, dz = 0.29F;
+			float ux = dx * fxx + dy * fxy + dz * fxz;
+			float uy = dx * fyx + dy * fyy + dz * fyz;
+			float uz = dx * e3x + dy * e3y + dz * e3z;
+			this.thumb[s].xRot = (float)Math.asin(Mth.clamp(uz, -1.0F, 1.0F));
+			this.thumb[s].zRot = side * (float)Math.atan2(-ux, uy);
+		}
+
+		/**
+		 * Solves a left wing's joint angles to put the wrist at (tx, ty, tz) from the shoulder (body space), the elbow
+		 * toward the pole (px, py, pz). out = alpha (the shoulder's twist), beta (its roll), A (the humerus' sweep in the
+		 * wing's plane), F (the elbow's bend). The wing's plane is the one through the shoulder, the wrist and the pole,
+		 * which always contains a line across the body, the one the shoulder's twist and roll can lay the wing along.
+		 */
+		private static void reach(float tx, float ty, float tz, float px, float py, float pz, float[] out) {
+			float d = (float)Math.sqrt(tx * tx + ty * ty + tz * tz);
+			float dc = Mth.clamp(d, Math.abs(HUMERUS - FOREARM) + 0.05F, HUMERUS + FOREARM - 0.05F);
+			float ex = tx / d, ey = ty / d, ez = tz / d;
+			// the pole's part across the line to the wrist is which way the elbow bows
+			float dot = px * ex + py * ey + pz * ez;
+			float qx = px - dot * ex, qy = py - dot * ey, qz = pz - dot * ez;
+			float ql = (float)Math.sqrt(qx * qx + qy * qy + qz * qz);
+			if (ql < 1.0E-4F) {
+				qx = 0.0F;
+				qy = 0.0F;
+				qz = -1.0F;
+				dot = ez * -1.0F;
+				qx -= dot * ex;
+				qy -= dot * ey;
+				qz -= dot * ez;
+				ql = (float)Math.sqrt(qx * qx + qy * qy + qz * qz);
+			}
+			qx /= ql;
+			qy /= ql;
+			qz /= ql;
+			float nx = ey * qz - ez * qy, ny = ez * qx - ex * qz, nz = ex * qy - ey * qx;
+			// the humerus' direction, the forearm's
+			float cosD = (HUMERUS * HUMERUS + dc * dc - FOREARM * FOREARM) / (2.0F * HUMERUS * dc);
+			float sinD = (float)Math.sqrt(Math.max(0.0F, 1.0F - cosD * cosD));
+			float hx = cosD * ex + sinD * qx, hy = cosD * ey + sinD * qy, hz = cosD * ez + sinD * qz;
+			float fx = (dc * ex - HUMERUS * hx) / FOREARM, fy = (dc * ey - HUMERUS * hy) / FOREARM, fz = (dc * ez - HUMERUS * hz) / FOREARM;
+			// the wing's frame: e3 (its face) down-ish, e1 across the body and outward, e2 = e3 x e1
+			if (nz < 0.0F) {
+				nx = -nx;
+				ny = -ny;
+				nz = -nz;
+			}
+			float e1x = -nz, e1z = nx;
+			float l1 = (float)Math.sqrt(e1x * e1x + e1z * e1z);
+			if (l1 < 1.0E-4F) {
+				// the wing's face straight along the body: lay it across the body
+				e1x = 1.0F;
+				e1z = 0.0F;
+				l1 = 1.0F;
+			}
+			e1x /= l1;
+			e1z /= l1;
+			if (e1x < 0.0F) {
+				e1x = -e1x;
+				e1z = -e1z;
+			}
+			float e2x = ny * e1z, e2y = nz * e1x - nx * e1z, e2z = -ny * e1x;
+			float beta = (float)Math.atan2(-e1z, e1x);
+			float alpha = (float)Math.atan2(-ny, nx * Mth.sin(beta) + nz * Mth.cos(beta));
+			float a = (float)Math.atan2(hx * e2x + hy * e2y + hz * e2z, hx * e1x + hz * e1z);
+			float phi = (float)Math.atan2(fx * e2x + fy * e2y + fz * e2z, fx * e1x + fz * e1z);
+			float bend = phi - a;
+			while (bend > Math.PI) {
+				bend -= (float)(Math.PI * 2.0);
+			}
+			while (bend < -Math.PI) {
+				bend += (float)(Math.PI * 2.0);
+			}
+			out[0] = alpha;
+			out[1] = beta;
+			out[2] = a;
+			out[3] = bend;
 		}
 	}
 
@@ -4396,62 +5242,347 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Wyrm: horned, winged and long-tailed. Each wing has an inner and an outer half: flying they spread wide and beat;
-	 * on the ground they hang from the shoulders and wrap round the body like a cloak, the outer halves folded across the
-	 * chest. The tail runs in three joints to a finned tip.
+	 * Wyrm: horned, winged and long-tailed (0.19.67 a small dragon on four legs). A long low scaly body on four clawed
+	 * legs that trot in a lizard's diagonal gait (each leg two bones and a foot, solved so the planted feet never slide off
+	 * the ground), a neck that rises to a horned head with a hinged jaw (a bite throws the head forward and opens the jaw),
+	 * a spine ridge, and a tail in three joints to a spade tip that sways behind each turn. The dragon hangs off its own
+	 * torso on the root, not off the man's body, so the poses laid over a man's body after it animates (the chest turning
+	 * after the head, the crouch's lean and sway, the knee) leave it alone; the man's parts are all hidden, and his body
+	 * copies the torso's pose each frame so the insignia sits on the chest's front. The torso carries the wings
+	 * ({@link WyrmWings}, which copy it: on its shoulders, folded along its back on the ground) and cancels Wind's cruise
+	 * tilt (a dragon already lies level; see {@link #CRUISE_BRAKE_LEAN}). Flying the body is level and the legs tuck up.
 	 */
 	static final class Wyrm extends FormModel {
-		private final ModelPart tail, tailMid, tailTip;
+		// ---- tuning ----
+		/** The torso's height (model y of its middle) at rest; how far it sinks when sneaking and on a landing. */
+		static final float BODY_Y = 14.0F, CROUCH_DROP = 2.0F, LAND_DIP = 1.5F;
+		/**
+		 * Where Wind's cruise tilt pivots (WindPose.rotate: half the box's height over the feet), found in model space: the
+		 * player renderer draws the model at this scale (AvatarRenderer.scale) from this far over the feet (blocks).
+		 */
+		static final float PLAYER_SCALE = 0.9375F, MODEL_ORIGIN = 1.501F;
+		/**
+		 * The renderer draws a sneaking player 2 pixels of the world lower (AvatarRenderer.getRenderOffset), this many model
+		 * pixels: sneaking, the feet are planted that much higher to stay on the ground.
+		 */
+		static final float CROUCH_SINK = 2.0F / PLAYER_SCALE;
+		/** The gait: radians of step cycle per unit of walkAnimationPos, half a stride (pixels), the lift of a swinging foot, the fraction of the cycle a foot is down. */
+		static final float GAIT = 1.8F, STRIDE = 3.5F, LIFT = 2.2F, DUTY = 0.6F;
+		/** How far the walk bobs the torso (pixels), rolls it (radians) and wriggles it side to side (radians). */
+		static final float BOB = 0.6F, ROLL = 0.04F, WRIGGLE = 0.06F;
+		/** A foot lifting off curls its toes up this much (radians). */
+		static final float TOE_LIFT = 0.35F;
+		/** walkAnimationSpeed at which the gait is at full stride. */
+		static final float WALK_FULL = 0.3F;
+		/** The legs: a hip's offset from the torso's middle (x either side, y, z fore and hind), the two bones' and the foot's lengths. */
+		static final float HIP_X = 3.7F, HIP_Y = 1.5F, FRONT_Z = -4.2F, HIND_Z = 4.0F, THIGH = 4.0F, SHIN = 4.5F, FOOT_H = 1.5F;
+		/** The legs splay out a little (radians). */
+		static final float SPLAY = 0.08F;
+		/** Where an ankle rests ahead of its hip (pixels): the forelegs a touch forward, the hind straight under. */
+		static final float FRONT_REACH = -0.5F, HIND_REACH = 0.0F;
+		/** Flying, the legs tuck up under the body: the ankle's offset from its hip (z: fore, hind; y), and the toes' angle. */
+		static final float TUCK_FRONT_Z = -0.5F, TUCK_HIND_Z = 2.5F, TUCK_Y = 3.6F, TUCK_TOE = 0.5F;
+		/** Falling, the legs reach down and out: how far they reach (0-1), the ankle's offset (front z, hind z, y). */
+		static final float REACH = 0.7F, REACH_FRONT_Z = -2.0F, REACH_HIND_Z = 1.5F, REACH_Y = 7.6F;
+		/** The tail's resting pitch at each joint (+ is up): arching a little from the back, then drooping. */
+		static final float[] TAIL_REST = {0.22F, -0.16F, -0.10F, 0.0F};
+		/** How far the tail's lift (tailLift) may drop it and raise it (radians), and how much of it each joint takes. */
+		static final float TAIL_DROOP = 0.35F, TAIL_RISE = 0.5F;
+		private static final float[] TAIL_SHARE = {0.3F, 0.3F, 0.2F, 0.1F};
+		/** The neck's resting pitch at its two joints and the head (+ is down): up from the chest, then level. */
+		static final float NECK1 = -0.7F, NECK2 = 0.45F, HEAD = 0.3F;
+		/** A bite: how far the neck straightens (joint 1, joint 2), how far the head thrusts forward (pixels), how wide the jaw opens (radians). */
+		static final float BITE_NECK1 = 0.6F, BITE_NECK2 = -0.2F, BITE_THRUST = 0.9F, JAW_OPEN = 1.0F, JAW_REST = 0.06F;
+		/** Flying, the neck stretches out ahead. */
+		static final float FLY_NECK1 = 0.35F, FLY_NECK2 = -0.1F;
+		/** How far the head follows where the player looks (degrees clamp: yaw, pitch). */
+		static final float LOOK_YAW = 80.0F, LOOK_PITCH = 60.0F;
+		/** Cruising (Wind's pose), the body dives and climbs after the look by this much of it (degrees clamp, share). */
+		static final float DIVE_MAX = 60.0F, DIVE_FOLLOW = 0.7F;
+		/** WindPose's air brake leans the body back this much (degrees); copied from it so it can be cancelled. */
+		static final float CRUISE_BRAKE_LEAN = 25.0F;
+		/** The spine's ridge tilts back this much (radians). */
+		static final float SPIKE_TILT = -0.35F;
+		/** Its flying wing beat bobs the body (pixels). */
+		static final float BEAT_BOB = 0.6F;
+
+		private static final float TWO_PI = (float)Math.PI * 2.0F;
+		/** Spikes on the back: where each sits (parent: 0 torso, 1 first neck joint, 2 second, 3 first tail joint, 4 second; z along it). */
+		private static final float[][] SPIKES = {
+			{0, -3.5F}, {0, -1.0F}, {0, 1.5F}, {0, 4.0F}, {1, -2.0F}, {2, -1.0F}, {3, 2.5F}, {3, 5.0F}, {4, 2.5F}};
+
+		private final ModelPart torso, chest, neck1, neck2, skull, jaw, tail1, tail2, tail3, spade;
+		/** Fore right, fore left, hind right, hind left. */
+		private final ModelPart[] thighs = new ModelPart[4], shins = new ModelPart[4], feet = new ModelPart[4];
+		private final ModelPart[] spikes = new ModelPart[SPIKES.length];
+		/** Every part that is animated, to put back to its resting pose each frame. */
+		private final ModelPart[] moving;
 
 		Wyrm() {
 			super(bake(mesh()), "wyrm");
-			this.insigniaZ = -2.5F;
-			this.tail = this.body.getChild("tail");
-			this.tailMid = this.tail.getChild("mid");
-			this.tailTip = this.tailMid.getChild("tip");
+			// on the chest's front, under the neck (the man's body copies the torso's pose, so this is in the torso's space)
+			this.insigniaY = 1.0F;
+			this.insigniaZ = -8.0F;
+			this.insigniaSize = 0.8F;
+			this.torso = this.root().getChild("torso");
+			this.chest = this.torso.getChild("chest");
+			this.neck1 = this.torso.getChild("neck1");
+			this.neck2 = this.neck1.getChild("neck2");
+			this.skull = this.neck2.getChild("skull");
+			this.jaw = this.skull.getChild("jaw");
+			this.tail1 = this.torso.getChild("tail1");
+			this.tail2 = this.tail1.getChild("tail2");
+			this.tail3 = this.tail2.getChild("tail3");
+			this.spade = this.tail3.getChild("spade");
+			java.util.List<ModelPart> all = new java.util.ArrayList<>(java.util.List.of(this.torso, this.chest, this.neck1, this.neck2, this.skull,
+				this.jaw, this.tail1, this.tail2, this.tail3, this.spade));
+			for (int i = 0; i < 4; i++) {
+				this.thighs[i] = this.torso.getChild("thigh" + i);
+				this.shins[i] = this.thighs[i].getChild("shin");
+				this.feet[i] = this.shins[i].getChild("foot");
+				all.add(this.thighs[i]);
+				all.add(this.shins[i]);
+				all.add(this.feet[i]);
+			}
+			for (int i = 0; i < SPIKES.length; i++) {
+				this.spikes[i] = this.spikeParent(i).getChild("spike" + i);
+				all.add(this.spikes[i]);
+			}
+			this.moving = all.toArray(new ModelPart[0]);
+		}
+
+		/** The dragon's torso as it is posed this frame: every other part of it hangs off this, and the wings copy it ({@link WyrmWings}). */
+		ModelPart torso() {
+			return this.torso;
+		}
+
+		private ModelPart spikeParent(int i) {
+			return switch ((int)SPIKES[i][0]) {
+				case 0 -> this.torso;
+				case 1 -> this.neck1;
+				case 2 -> this.neck2;
+				case 3 -> this.tail1;
+				default -> this.tail2;
+			};
 		}
 
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
-				PartPose.offsetAndRotation(-3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
-			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
-				PartPose.offsetAndRotation(3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
-			PartDefinition body = root.getChild("body");
-			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 106).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 13.0F),
-				PartPose.offsetAndRotation(0.0F, 11.0F, 2.0F, TAIL_REST[0], 0.0F, 0.0F));
-			PartDefinition mid = tail.addOrReplaceChild("mid", CubeListBuilder.create().texOffs(32, 106).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 10.0F),
-				PartPose.offsetAndRotation(0.0F, 0.0F, 12.5F, TAIL_REST[1], 0.0F, 0.0F));
-			PartDefinition tip = mid.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
-				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, TAIL_REST[2], 0.0F, 0.0F));
-			tip.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(44, 64).addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 3.0F), PartPose.offset(0.0F, -0.5F, 5.0F));
-			// the wings are the ender dragon's own, drawn small by XenoformLayer (WyrmWings)
+			// the man's head, body and legs are never drawn (the arms are only for the first-person hand); his body is the
+			// insignia's anchor, posed as the torso
+			root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, BODY_Y, -6.0F)).addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, BODY_Y, 0.0F));
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create(), PartPose.offset(-HIP_X, BODY_Y + HIP_Y, HIND_Z));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create(), PartPose.offset(HIP_X, BODY_Y + HIP_Y, HIND_Z));
+			PartDefinition torso = root.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(0, 64).addBox(-3.5F, -3.0F, -5.5F, 7.0F, 6.0F, 11.0F),
+				PartPose.offset(0.0F, BODY_Y, 0.0F));
+			torso.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(36, 64).addBox(-3.5F, -3.5F, -2.0F, 7.0F, 7.0F, 4.0F), PartPose.offset(0.0F, 1.0F, -6.0F));
+			// the neck: two joints rising from the chest, then the head with its snout, jaw and horns
+			PartDefinition neck1 = torso.addOrReplaceChild("neck1", CubeListBuilder.create().texOffs(0, 92).addBox(-1.5F, -1.5F, -5.0F, 3.0F, 3.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, -2.0F, -6.0F, NECK1, 0.0F, 0.0F));
+			PartDefinition neck2 = neck1.addOrReplaceChild("neck2", CubeListBuilder.create().texOffs(38, 92).addBox(-1.5F, -1.5F, -4.0F, 3.0F, 3.0F, 5.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, -4.5F, NECK2, 0.0F, 0.0F));
+			PartDefinition skull = neck2.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(18, 92).addBox(-2.5F, -2.0F, -4.0F, 5.0F, 4.0F, 5.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, -3.5F, HEAD, 0.0F, 0.0F));
+			skull.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(8, 109).addBox(-1.5F, -0.7F, -4.0F, 3.0F, 2.0F, 4.0F), PartPose.offset(0.0F, 0.0F, -4.0F));
+			skull.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(28, 101).addBox(-1.5F, 0.0F, -6.0F, 3.0F, 1.0F, 6.0F), PartPose.offset(0.0F, 1.4F, -0.5F));
+			// the horns sweep back and out, up a little
+			skull.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(46, 101).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 5.0F),
+				PartPose.offsetAndRotation(-1.8F, -1.3F, 0.2F, 0.5F, -0.3F, 0.0F));
+			skull.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(46, 101).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 5.0F),
+				PartPose.offsetAndRotation(1.8F, -1.3F, 0.2F, 0.5F, 0.3F, 0.0F));
+			// the tail: three joints and a spade
+			PartDefinition tail1 = torso.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0, 81).addBox(-2.0F, -2.0F, -1.0F, 4.0F, 4.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, -0.5F, 5.2F, TAIL_REST[0], 0.0F, 0.0F));
+			PartDefinition tail2 = tail1.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(22, 81).addBox(-1.5F, -1.5F, -1.0F, 3.0F, 3.0F, 7.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, 5.5F, TAIL_REST[1], 0.0F, 0.0F));
+			PartDefinition tail3 = tail2.addOrReplaceChild("tail3", CubeListBuilder.create().texOffs(0, 101).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, 5.5F, TAIL_REST[2], 0.0F, 0.0F));
+			tail3.addOrReplaceChild("spade", CubeListBuilder.create().texOffs(42, 81).addBox(-0.5F, -2.5F, -1.0F, 1.0F, 5.0F, 5.0F)
+				.texOffs(36, 109).addBox(-2.5F, -0.5F, -0.5F, 5.0F, 1.0F, 4.0F), PartPose.offsetAndRotation(0.0F, 0.0F, 4.5F, TAIL_REST[3], 0.0F, 0.0F));
+			// the spine ridge
+			for (int i = 0; i < SPIKES.length; i++) {
+				PartDefinition parent = switch ((int)SPIKES[i][0]) {
+					case 0 -> torso;
+					case 1 -> neck1;
+					case 2 -> neck2;
+					case 3 -> tail1;
+					default -> tail2;
+				};
+				float y = switch ((int)SPIKES[i][0]) {
+					case 0 -> -3.0F;
+					case 1, 2 -> -1.5F;
+					case 3 -> -2.0F;
+					default -> -1.5F;
+				};
+				parent.addOrReplaceChild("spike" + i, CubeListBuilder.create().texOffs(54, 109).addBox(-0.5F, -2.0F, -1.0F, 1.0F, 2.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, y, SPIKES[i][1], SPIKE_TILT, 0.0F, 0.0F));
+			}
+			// the legs: thigh, shin, foot; fore right, fore left, hind right, hind left
+			for (int i = 0; i < 4; i++) {
+				boolean front = i < 2, left = (i & 1) == 1;
+				PartDefinition thigh = torso.addOrReplaceChild("thigh" + i, CubeListBuilder.create().texOffs(16, 101).addBox(-1.5F, -0.5F, -1.5F, 3.0F, 5.0F, 3.0F),
+					PartPose.offset(left ? HIP_X : -HIP_X, HIP_Y, front ? FRONT_Z : HIND_Z));
+				PartDefinition shin = thigh.addOrReplaceChild("shin", CubeListBuilder.create().texOffs(0, 109).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 5.0F, 2.0F),
+					PartPose.offset(0.0F, THIGH, 0.0F));
+				shin.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(22, 109).addBox(-1.5F, -0.5F, -3.5F, 3.0F, 2.0F, 4.0F), PartPose.offset(0.0F, SHIN, 0.0F));
+			}
 			return mesh;
 		}
 
-		/** The tail's resting pitch at each joint (+ is up): down from the back, levelling out near the ground. */
-		static final float[] TAIL_REST = {-0.35F, -0.12F, 0.32F};
+		/** Where a foot is along its stride (-1 forward .. +1 back, relative to the body) a fraction u of the way through its cycle. */
+		private static float stride(float u) {
+			if (u < DUTY) {
+				// planted: the ground slides back under it
+				return -1.0F + 2.0F * u / DUTY;
+			}
+			// swinging: forward again, easing at both ends
+			float s = (u - DUTY) / (1.0F - DUTY);
+			return 1.0F - 2.0F * (0.5F - 0.5F * Mth.cos(s * (float)Math.PI));
+		}
+
+		/** How high a foot is lifted (0-1) a fraction u of the way through its cycle. */
+		private static float lifted(float u) {
+			return u < DUTY ? 0.0F : Mth.sin((u - DUTY) / (1.0F - DUTY) * (float)Math.PI);
+		}
+
+		/**
+		 * Two bones from the hip to an ankle {@code (tz, ty)} away (z back, y down, from the hip), the middle joint
+		 * forward (hind legs) or back (forelegs); the foot is kept at {@code toe} to the ground.
+		 */
+		private static void solve(ModelPart thigh, ModelPart shin, ModelPart foot, float tz, float ty, boolean kneeForward, float toe) {
+			float reach = Mth.clamp((float)Math.sqrt(tz * tz + ty * ty), Math.abs(THIGH - SHIN) + 0.3F, THIGH + SHIN - 0.05F);
+			float dir = (float)Math.atan2(tz, ty);
+			float bend = (float)Math.acos(Mth.clamp((THIGH * THIGH + reach * reach - SHIN * SHIN) / (2.0F * THIGH * reach), -1.0F, 1.0F));
+			float a = kneeForward ? dir - bend : dir + bend;
+			float ankleZ = reach * Mth.sin(dir), ankleY = reach * Mth.cos(dir);
+			float b = (float)Math.atan2(ankleZ - THIGH * Mth.sin(a), ankleY - THIGH * Mth.cos(a)) - a;
+			thigh.xRot = a;
+			shin.xRot = b;
+			foot.xRot = -(a + b) + toe;
+		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
+			// the man is never drawn: his body is only the insignia's anchor (posed as the torso below)
+			this.head.visible = this.hat.visible = this.body.visible = false;
+			this.rightArm.visible = this.leftArm.visible = this.rightLeg.visible = this.leftLeg.visible = false;
+			this.body.resetPose();
+			for (ModelPart part : this.moving) {
+				part.resetPose();
+			}
 			float t = state.ageInTicks;
 			XenoMotion.Read m = XenoMotion.read(state);
-			float walk = state.walkAnimationSpeed;
+			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
+			float fly = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
+			float fold = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.fold());
+			Float cruiseData = state.getData(com.jaymospowers.client.power.wind.WindPose.KEY);
+			float cruise = cruiseData == null || state.deathTime > 0.0F ? 0.0F : cruiseData;
 
-			// the tail swings behind each turn, each joint a beat after the last; it lifts as it drops, whips down on
-			// landing and droops when crouched
-			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.25F * walk + Mth.sin(t * 0.08F) * 0.08F;
+			// ---- the walk: diagonal pairs (fore right with hind left) in step, the torso bobbing twice a cycle ----
+			float walk = Mth.clamp(state.walkAnimationSpeed / WALK_FULL, 0.0F, 1.0F) * (1.0F - fly);
+			float cycle = state.walkAnimationPos * GAIT / TWO_PI;
+			cycle -= (float)Math.floor(cycle);
+			float rise = 0.5F + 0.5F * Mth.cos(2.0F * TWO_PI * (cycle - 0.3F));
+			float by = BODY_Y - BOB * rise * walk + m.land() * LAND_DIP;
+			// the ground, in model y: higher when sneaking, as the whole model is drawn lower
+			float ground = 24.0F;
+			if (state.isCrouching) {
+				by += CROUCH_DROP - CROUCH_SINK;
+				ground -= CROUCH_SINK;
+			}
+			// flying, the wings' beat lifts it
+			by += Mth.sin(t * WyrmWings.FLAP_RATE) * BEAT_BOB * fly * (1.0F - fold);
+			float roll = Mth.sin(cycle * TWO_PI) * ROLL * walk;
+			float wriggle = Mth.sin(cycle * TWO_PI + 0.4F) * WRIGGLE * walk;
+
+			// ---- the torso. Wind's cruise tilt (WindPose.rotate) lays an upright body flat about the middle of the box, and rolls
+			// it about its length; a dragon already lies level, so it tips back by the same angle about the same point, and
+			// follows the look's pitch instead ----
+			float tilt = 0.0F;
+			if (cruise > 0.0F) {
+				Float brakeData = state.getData(com.jaymospowers.client.power.wind.WindPose.BRAKE_KEY);
+				float brake = brakeData == null ? 0.0F : brakeData;
+				float laid = cruise * (1.0F - 0.75F * brake) * (-90.0F - state.xRot) + brake * CRUISE_BRAKE_LEAN;
+				float dive = Mth.clamp(state.xRot, -DIVE_MAX, DIVE_MAX) * cruise * DIVE_FOLLOW;
+				tilt = (laid + dive) * Mth.DEG_TO_RAD;
+			}
+			// the pivot, in model pixels: half the box's height over the feet (WindPose's), through the renderer's scale
+			float middle = (MODEL_ORIGIN - state.boundingBoxHeight / Math.max(state.scale, 0.01F) * 0.5F / PLAYER_SCALE) * 16.0F;
+			float toMiddle = by - middle;
+			this.torso.y = middle + toMiddle * Mth.cos(tilt);
+			this.torso.z = toMiddle * Mth.sin(tilt);
+			this.torso.xRot = tilt;
+			this.torso.yRot = wriggle;
+			this.torso.zRot = roll;
+			this.chest.yScale = 1.0F + m.breath() * 0.03F;
+			// the man's body is the insignia's anchor: on the torso
+			this.body.x = this.torso.x;
+			this.body.y = this.torso.y;
+			this.body.z = this.torso.z;
+			this.body.xRot = this.torso.xRot;
+			this.body.yRot = this.torso.yRot;
+			this.body.zRot = this.torso.zRot;
+
+			// ---- the legs ----
+			float air = m.air() * (1.0F - fly) * REACH;
+			for (int i = 0; i < 4; i++) {
+				boolean front = i < 2, left = (i & 1) == 1;
+				float u = cycle + (front == left ? 0.5F : 0.0F);
+				u -= (float)Math.floor(u);
+				float swing = lifted(u) * walk;
+				float tz = (front ? FRONT_REACH : HIND_REACH) + STRIDE * walk * stride(u);
+				// the ankle's height over the ground, in the torso's frame: the planted foot stays on the ground as the torso bobs
+				float ty = ground - FOOT_H - by - HIP_Y - LIFT * swing;
+				float toe = -TOE_LIFT * swing;
+				// falling: reaching down; flying: tucked up under the body
+				tz = Mth.lerp(air, tz, front ? REACH_FRONT_Z : REACH_HIND_Z);
+				ty = Mth.lerp(air, ty, REACH_Y);
+				tz = Mth.lerp(fly, tz, front ? TUCK_FRONT_Z : TUCK_HIND_Z);
+				ty = Mth.lerp(fly, ty, TUCK_Y);
+				toe = Mth.lerp(fly, toe, TUCK_TOE);
+				solve(this.thighs[i], this.shins[i], this.feet[i], tz, ty, !front, toe);
+				this.thighs[i].zRot = left ? -SPLAY : SPLAY;
+				this.shins[i].zRot = left ? SPLAY * 0.8F : -SPLAY * 0.8F;
+			}
+
+			// ---- the neck and head: they follow where the player looks, and a bite throws the head forward ----
+			float bite = Mth.sin(Mth.clamp(state.swingAnimation, 0.0F, 1.0F) * (float)Math.PI);
+			float yaw = Mth.clamp(state.yRot, -LOOK_YAW, LOOK_YAW) * Mth.DEG_TO_RAD * (1.0F - cruise);
+			float pitch = Mth.clamp(state.xRot, -LOOK_PITCH, LOOK_PITCH) * Mth.DEG_TO_RAD * (1.0F - DIVE_FOLLOW * cruise);
+			// the head rides level against the torso's bob, and sways a little as it breathes
+			float nod = Mth.cos(2.0F * TWO_PI * (cycle - 0.3F)) * 0.06F * walk + m.breath() * 0.03F;
+			float sway = Mth.sin(t * 0.05F) * 0.05F;
+			this.neck1.xRot = NECK1 + pitch * 0.3F + BITE_NECK1 * bite + FLY_NECK1 * fly;
+			this.neck2.xRot = NECK2 + pitch * 0.3F + BITE_NECK2 * bite + FLY_NECK2 * fly + nod;
+			this.skull.xRot = HEAD + pitch * 0.4F - nod;
+			this.neck1.yRot = yaw * 0.3F - wriggle * 1.5F + sway;
+			this.neck2.yRot = yaw * 0.3F - sway * 0.5F;
+			this.skull.yRot = yaw * 0.4F;
+			this.skull.zRot = Mth.sin(t * 0.07F + 0.5F) * 0.03F;
+			this.neck2.z -= BITE_THRUST * bite;
+			this.skull.z -= BITE_THRUST * bite;
+			this.jaw.xRot = JAW_REST + (1.0F + Mth.sin(t * 0.09F)) * 0.04F + JAW_OPEN * bite;
+
+			// ---- the tail swings behind each turn, each joint a beat after the last; it lifts as it drops, whips down on landing and droops when crouched ----
 			float lag = m.trail() - m.turn();
-			float tailUp = tailLift(m);
-			this.tail.yRot = sway - m.trail() * 0.5F;
-			this.tailMid.yRot = Mth.sin(t * 0.08F - 0.8F) * 0.1F + sway * 0.6F - lag * 0.6F - m.trail() * 0.2F;
-			this.tailTip.yRot = Mth.sin(t * 0.08F - 1.6F) * 0.14F + sway * 0.5F - lag * 0.8F;
-			this.tail.xRot = TAIL_REST[0] + walk * 0.15F + tailUp * 0.6F;
-			this.tailMid.xRot = TAIL_REST[1] + tailUp * 0.5F;
-			this.tailTip.xRot = TAIL_REST[2] + tailUp * 0.4F;
+			float tailUp = Mth.clamp(tailLift(m), -TAIL_DROOP, TAIL_RISE);
+			float wag = Mth.cos(cycle * TWO_PI) * 0.25F * walk + Mth.sin(t * 0.08F) * 0.08F;
+			this.tail1.yRot = wag - m.trail() * 0.5F - wriggle * 1.2F;
+			this.tail2.yRot = Mth.sin(t * 0.08F - 0.8F) * 0.1F + wag * 0.6F - lag * 0.6F - m.trail() * 0.2F;
+			this.tail3.yRot = Mth.sin(t * 0.08F - 1.6F) * 0.14F + wag * 0.5F - lag * 0.8F;
+			this.spade.yRot = Mth.sin(t * 0.08F - 2.4F) * 0.2F + wag * 0.4F - lag * 0.8F;
+			this.tail1.xRot = TAIL_REST[0] + walk * 0.05F + tailUp * TAIL_SHARE[0] + fly * 0.1F;
+			this.tail2.xRot = TAIL_REST[1] + tailUp * TAIL_SHARE[1] - fly * 0.05F;
+			this.tail3.xRot = TAIL_REST[2] + tailUp * TAIL_SHARE[2];
+			this.spade.xRot = TAIL_REST[3] + tailUp * TAIL_SHARE[3];
+
+			// ---- the ridge ripples ----
+			for (int i = 0; i < this.spikes.length; i++) {
+				this.spikes[i].xRot = SPIKE_TILT + Mth.sin(t * 0.1F - i * 0.7F) * 0.04F + m.breath() * 0.02F;
+			}
 		}
 	}
 }

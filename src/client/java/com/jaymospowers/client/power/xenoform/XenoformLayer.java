@@ -73,6 +73,11 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, 0);
 		}
+		if (model instanceof XenoFormModels.Lumen) {
+			// (0.19.67) Lumen is an orb of light: its own skin again, fullbright (the Ultimate's armoured one when it is)
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(skin(model, state, ultimate)), lightCoords,
+				OverlayTexture.NO_OVERLAY, -1, null, 0);
+		}
 		XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 		if (slap != null && slap.chest()) {
 			// (0.18.90) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)
