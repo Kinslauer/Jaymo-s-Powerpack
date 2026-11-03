@@ -397,13 +397,13 @@ public final class Slaves {
 		return BlockPos.containing(slave.getX() + Math.cos(angle) * distance, slave.getY(), slave.getZ() + Math.sin(angle) * distance);
 	}
 
-	/** The nearest standing goblin village (with a king) within {@code reach} of {@code from}. */
+	/** The nearest standing goblin village (with a king, and room under its folk cap) within {@code reach} of {@code from}. */
 	private static @Nullable Faction nearestVillage(MinecraftServer server, BlockPos from, double reach) {
 		Faction best = null;
 		double bestD = reach * reach;
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = f.fallen() ? null : Camps.data(server, f.id());
-			if (data == null || data.clearedAt() >= 0 || f.leader().isEmpty() || !Camps.goblin(server, f.id())) {
+			if (data == null || data.clearedAt() >= 0 || f.leader().isEmpty() || !Camps.goblin(server, f.id()) || !hasRoom(server, f)) {
 				continue;
 			}
 			double d = Raids.horizontal(f.seat(), from);
@@ -413,6 +413,11 @@ public final class Slaves {
 			}
 		}
 		return best;
+	}
+
+	/** (0.7.480) Whether goblin village {@code village} is under its Hordes folk cap, so a runaway may join it. */
+	private static boolean hasRoom(MinecraftServer server, Faction village) {
+		return GoblinVillages.goblins(village) < Hordes.folkCap(server, village.id(), false);
 	}
 
 	/** A runaway on its way: a waypoint at a time toward its site, and what to do when it gets there. */
@@ -456,7 +461,13 @@ public final class Slaves {
 		if (fit && floor != Integer.MIN_VALUE) {
 			Faction founded = GoblinVillages.found(level, at, floor, net.minecraft.core.Direction.Plane.HORIZONTAL.getRandomDirection(random));
 			JaymosKingdoms.LOGGER.info("A runaway goblin slave raised {} at {}", founded.name(), at);
-			join(level, slave, founded);
+			// ((0.7.480) only if its starting goblins left room under the cap; else it runs on)
+			Faction fresh = Factions.get(server, founded.id());
+			if (fresh != null && hasRoom(server, fresh)) {
+				join(level, slave, fresh);
+			} else {
+				slave.setSite(farSite(level, slave, RUN_STEP));
+			}
 		} else if (random.nextFloat() < LOST_CHANCE && !Raids.playerNear(level, at, Raids.VANISH_RANGE)) {
 			// (lost to the wild, unseen)
 			slave.discard();
