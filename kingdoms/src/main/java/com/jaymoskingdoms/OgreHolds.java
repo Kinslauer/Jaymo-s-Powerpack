@@ -104,10 +104,11 @@ public final class OgreHolds {
 	 * An ogre site: an outpost or a hold, where, its region, its leader (or king), and whether it's cleared. (0.7.484) A hold
 	 * also keeps its stores ({@code stash}: the chests its raiders fill, the first its hoard), how many growth stages it has
 	 * been through ({@link OgreGrowth}), when it last raided and when it last grew ({@link OgreRaids}), and loot waiting for
-	 * its chests to load (item id to count).
+	 * its chests to load (whole stacks, enchantments, names and contents kept; an older save's item-id-to-count map is
+	 * read once and turned into plain stacks).
 	 */
 	record Site(int id, boolean hold, BlockPos at, String region, UUID leader, boolean cleared, List<BlockPos> stash, int stage, long lastRaid,
-		long grewAt, Map<String, Integer> pending) {
+		long grewAt, List<ItemStack> pending) {
 		static final Codec<Site> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.INT.fieldOf("id").forGetter(Site::id),
 				Codec.BOOL.fieldOf("hold").forGetter(Site::hold), BlockPos.CODEC.fieldOf("at").forGetter(Site::at),
 				Codec.STRING.fieldOf("region").forGetter(Site::region), net.minecraft.core.UUIDUtil.CODEC.fieldOf("leader").forGetter(Site::leader),
@@ -116,12 +117,43 @@ public final class OgreHolds {
 				Codec.INT.optionalFieldOf("stage", 0).forGetter(Site::stage),
 				Codec.LONG.optionalFieldOf("last_raid", 0L).forGetter(Site::lastRaid),
 				Codec.LONG.optionalFieldOf("grew_at", 0L).forGetter(Site::grewAt),
-				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(Site::pending))
-			.apply(i, Site::new));
+				// (0.7.484) loot waiting is kept as full stacks; the old "pending" map (id to count) is only read, and never written again
+				ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("pending_stacks", List.of()).forGetter(Site::pending),
+				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(site -> Map.of()))
+			.apply(i, (id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, stacks, old) ->
+				new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, withOld(stacks, old))));
+
+		/** (0.7.484) An older save's waiting loot (item id to count) as plain stacks after the full ones; ids that name no item are dropped. */
+		private static List<ItemStack> withOld(List<ItemStack> stacks, Map<String, Integer> old) {
+			List<ItemStack> all = new ArrayList<>();
+			for (ItemStack stack : stacks) {
+				if (!stack.isEmpty()) {
+					all.add(stack);
+				}
+			}
+			for (var e : old.entrySet()) {
+				net.minecraft.resources.Identifier key = net.minecraft.resources.Identifier.tryParse(e.getKey());
+				if (key == null || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(key)) {
+					continue;
+				}
+				net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(key);
+				if (item == Items.AIR) {
+					continue;
+				}
+				int count = e.getValue() == null ? 0 : e.getValue();
+				int most = Math.max(1, item.getDefaultMaxStackSize());
+				while (count > 0) {
+					int n = Math.min(count, most);
+					all.add(new ItemStack(item, n));
+					count -= n;
+				}
+			}
+			return List.copyOf(all);
+		}
 
 		/** A new site with nothing stored yet. */
 		static Site fresh(int id, boolean hold, BlockPos at, String region, UUID leader, List<BlockPos> stash) {
-			return new Site(id, hold, at, region, leader, false, List.copyOf(stash), 0, 0L, 0L, Map.of());
+			return new Site(id, hold, at, region, leader, false, List.copyOf(stash), 0, 0L, 0L, List.of());
 		}
 
 		Site clear() {
@@ -140,8 +172,8 @@ public final class OgreHolds {
 			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, pending);
 		}
 
-		Site withPending(Map<String, Integer> pending) {
-			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, Map.copyOf(pending));
+		Site withPending(List<ItemStack> pending) {
+			return new Site(id, hold, at, region, leader, cleared, stash, stage, lastRaid, grewAt, List.copyOf(pending));
 		}
 	}
 

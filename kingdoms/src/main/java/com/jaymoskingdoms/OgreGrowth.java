@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -219,19 +217,19 @@ final class OgreGrowth {
 		return left;
 	}
 
-	/** A raider brought {@code load} home: into the stash, or kept for it (item id to count) if it was not there to take it. */
+	/** A raider brought {@code load} home: into the stash, or kept for it (the whole stack) if it was not there to take it. */
 	static void deposit(ServerLevel level, OgreHolds.Site site, ItemStack load) {
 		ItemStack left = put(level, site, load);
 		if (left.isEmpty()) {
 			return;
 		}
 		MinecraftServer server = level.getServer();
-		String key = BuiltInRegistries.ITEM.getKey(left.getItem()).toString();
 		// (0.7.484) the record as it now stands: an ogre home before this one may have left loot waiting too
 		OgreHolds.Site current = OgreHolds.site(server, site.id());
 		OgreHolds.Site base = current != null ? current : site;
-		Map<String, Integer> pending = new HashMap<>(base.pending());
-		pending.merge(key, left.getCount(), Integer::sum);
+		// (0.7.484) the whole stack waits, so enchantments, names, potions and a box's contents come home with it
+		List<ItemStack> pending = new ArrayList<>(base.pending());
+		pending.add(left.copy());
 		OgreHolds.put(server, base.withPending(pending));
 	}
 
@@ -240,28 +238,14 @@ final class OgreGrowth {
 		if (site.pending().isEmpty()) {
 			return site;
 		}
-		Map<String, Integer> left = new HashMap<>();
-		for (var e : site.pending().entrySet()) {
-			// ((0.7.484) an id that no longer names an item, a removed mod's, is dropped: it would never go in)
-			Identifier id = Identifier.tryParse(e.getKey());
-			if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
+		List<ItemStack> left = new ArrayList<>();
+		for (ItemStack stack : site.pending()) {
+			if (stack.isEmpty()) {
 				continue;
 			}
-			Item item = BuiltInRegistries.ITEM.getValue(id);
-			if (item == Items.AIR) {
-				continue;
-			}
-			int count = e.getValue();
-			while (count > 0) {
-				ItemStack stack = new ItemStack(item, Math.min(count, Math.max(1, item.getDefaultMaxStackSize())));
-				if (stack.isEmpty()) {
-					break;
-				}
-				count -= stack.getCount();
-				int lost = put(level, site, stack).getCount();
-				if (lost > 0) {
-					left.merge(e.getKey(), lost, Integer::sum);
-				}
+			ItemStack lost = put(level, site, stack);
+			if (!lost.isEmpty()) {
+				left.add(lost);
 			}
 		}
 		OgreHolds.Site flushed = site.withPending(left);
