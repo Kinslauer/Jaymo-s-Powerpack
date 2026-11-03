@@ -43,7 +43,9 @@ public final class VariantLooks {
 		GLOWCAP_SPORE = new DustParticleOptions(0xE8F05A, 0.5F), AURORA_MOTE = new DustParticleOptions(0x7CF0B4, 0.6F),
 		MOON_MOTE = new DustParticleOptions(0xE6EAFF, 0.5F), LODE_SPARK = new DustParticleOptions(0xA06CE0, 0.5F),
 		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
-		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F);
+		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
+		// (0.7.485) a jellyfish's shimmer and a sea slug's bright flecks
+		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
 
 	static {
 		// variant, eye colour (0: its heritage's), eyes, particle, every, when
@@ -53,6 +55,20 @@ public final class VariantLooks {
 		style(Variant.MAGMAVEIN, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_LAVA, 30, When.DRY);
 		style(Variant.REEFCROWNED, 0xFFFFB49C, null, REEF_MOTE, 24, When.WET);
 		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 28, When.WET);
+		// (0.7.485) the thirteen sea-blooded Tideborn looks (their model parts are SeaParts')
+		style(Variant.GREYFIN, 0xFFE8EEF2, null, null, 0, When.WET);
+		style(Variant.MANTAWING, 0xFFB8E0FF, null, null, 0, When.WET);
+		style(Variant.EIGHTARM, 0xFFFFC060, null, INK_MOTE, 40, When.WET);
+		style(Variant.LANTERNJAW, 0xFFF0FFE0, null, ParticleTypes.GLOW, 30, When.ALWAYS);
+		style(Variant.DRIFTBELL, 0xFFF0C8FF, null, JELLY_MOTE, 18, When.ALWAYS);
+		style(Variant.MORAY, 0xFFFFE060, null, null, 0, When.WET);
+		style(Variant.SHELLCLAW, 0xFFFFD040, null, null, 0, When.WET);
+		style(Variant.SPINEPUFF, 0xFF60D8FF, null, null, 0, When.WET);
+		style(Variant.LIONMANE, 0xFFFF5040, null, REEF_MOTE, 30, When.WET);
+		style(Variant.WEEDFROND, 0xFFFFB040, null, LEAF_MOTE, 40, When.WET);
+		style(Variant.SWORDBILL, 0xFFC8E8FF, null, null, 0, When.WET);
+		style(Variant.FRILLBACK, 0xFFFF9030, null, FRILL_MOTE, 24, When.WET);
+		style(Variant.OLDSHELL, 0xFFE0D890, null, null, 0, When.WET);
 		style(Variant.THORNROSE, 0xFFFF7088, HeritageLooks.Eyes.ALWAYS, THORN_PETAL, 26, When.ALWAYS);
 		style(Variant.BLOSSOMKIN, 0xFFFFD0E4, HeritageLooks.Eyes.ALWAYS, ParticleTypes.CHERRY_LEAVES, 22, When.ALWAYS);
 		style(Variant.GLOWCAP, 0xFFE8F57A, HeritageLooks.Eyes.NIGHT, GLOWCAP_SPORE, 20, When.ALWAYS);
@@ -91,7 +107,8 @@ public final class VariantLooks {
 
 	private static void style(Variant v, int eyeColor, HeritageLooks.@Nullable Eyes eyes, @Nullable ParticleOptions particle, int every, When when) {
 		String root = "textures/entity/heritage/variant/" + v.key();
-		boolean fins = v == Variant.REEFCROWNED || v == Variant.ABYSSAL;
+		// (0.7.485) every Tideborn look has its own fins' colours (those SeaParts says keep them)
+		boolean fins = v.heritage == com.jaymoskingdoms.Heritage.Kind.TIDEBORN;
 		STYLES.put(v, new Style(v, JaymosKingdoms.id(root + "_skin.png"), JaymosKingdoms.id(root + "_glow.png"), eyeColor,
 			eyeColor == 0 ? null : JaymosKingdoms.id(root + "_eyes.png"), eyes, particle, every, when,
 			fins ? JaymosKingdoms.id(root + "_fins.png") : null, fins ? JaymosKingdoms.id(root + "_fins_glow.png") : null, new HashMap<>()));

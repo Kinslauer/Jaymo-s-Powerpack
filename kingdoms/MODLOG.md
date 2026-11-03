@@ -8278,3 +8278,20 @@ or the symbiote suit it isn't drawn (`PowersCover.body`).
 ## 0.7.485: the Excalibur look made optional (pack 0.19.72, Kitchen 0.5.53)
 Every texture graded in 0.7.483 is back to its original. The graded copies live only in the pack's optional,
 off-by-default `excalibur_style` built-in pack (`/excalibur on`).
+
+## 0.7.486: thirteen sea-blooded Tideborn looks (pack 0.19.77)
+Andy (2026-11-03): "tideborn need to vary wildly, at least 13 different tideborn variations, they are fish people so they
+can draw from any sealife". Tideborn now have 16 looks: the first three, plus Greyfin (shark), Mantawing (manta),
+Eightarm (octopus), Lanternjaw (anglerfish), Driftbell (jellyfish), Moray (eel), Shellclaw (crab), Spinepuff
+(pufferfish), Lionmane (lionfish), Weedfrond (seadragon), Swordbill (swordfish), Frillback (sea slug) and Oldshell (sea
+turtle).
+- **Real model parts** (client `SeaParts`, beside `BeastParts`): dorsal fins, tails and caudal fins, back-wings, horns,
+  a mantle and tentacles, a lit lure and fangs, a clear bell and threads, ribbon fins, a shell, claws and eyestalks,
+  spines, a mane of venom rays and arm fans, leafy fronds, a bill and sail, frills, a turtle's shell and beak. Every piece
+  is one line of `SeaParts.TABLE` (box, pivot, turn, segments, sway); they follow the head, body and arms on players and
+  MCA villagers, hide under helmets (head parts) and Powers costumes, and stand off a chestplate.
+- Each look keeps only the Tideborn fins its parts leave room for (`SeaParts.Fins`), has its own marks, eyes and fin
+  colours, a tint, a land lean and one small trait (`HeritageVariants`); they keep the Tideborn kit.
+- Textures from `tools/gen_tideborn_sea.py` (reads the table, packs the sheets the same way, grades the results to the
+  Excalibur look and records them in `tools/excalibur_style/graded.txt`). Preview: project files
+  `art-overhaul/tideborn-sealife/`. Parse-checked only; not seen in game.
