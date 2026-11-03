@@ -197,6 +197,8 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
+		// (0.7.480) goblin slaves in the orc camps
+		Slaves.init();
 		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();

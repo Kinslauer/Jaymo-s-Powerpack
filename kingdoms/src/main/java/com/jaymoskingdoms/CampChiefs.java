@@ -56,7 +56,7 @@ final class CampChiefs {
 		});
 	}
 
-	private static void dropBar(UUID id) {
+	static void dropBar(UUID id) {
 		ServerBossEvent bar = BARS.remove(id);
 		if (bar != null) {
 			bar.removeAllPlayers();
