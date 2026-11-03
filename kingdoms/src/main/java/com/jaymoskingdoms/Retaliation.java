@@ -156,8 +156,8 @@ final class Retaliation {
 			return;
 		}
 		List<LivingEntity> seen = f == null ? List.of() : Theft.witnesses(level, f, player);
-		if (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
-			|| Temperaments.runs(victim)) {
+		if (!HavenGrowth.sworn(victim) && (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
+			|| Temperaments.runs(victim))) {
 			// they know what you are: they run; ((0.7.186) the brave and the hotheaded stand anyway, and the timid always run)
 			say(level, victim, "flee");
 			return;
@@ -299,7 +299,8 @@ final class Retaliation {
 					b.remove();
 					continue;
 				}
-				if (mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
+				if (!HavenGrowth.sworn(mob) && mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
+					// ((0.7.484) a haven's sworn fights on)
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
 					say(level, mob, "flee");

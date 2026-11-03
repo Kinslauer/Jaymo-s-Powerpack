@@ -542,7 +542,7 @@ public final class HavenGrowth {
 		}
 	}
 
-	/** {@code w} takes the oath (once) and is armed in its blood's way (every time, in case its gear was reset). */
+	/** {@code w} takes the oath (once) and is armed in its blood's way then; (0.7.484) arms lost later are its own to win back (Rearm). */
 	private static void swear(ServerLevel level, Faction f, Worker w) {
 		PathfinderMob mob = w.mob();
 		Heritage.Kind kind = VillagerHeritage.of(mob);
@@ -558,9 +558,12 @@ public final class HavenGrowth {
 			modifier(mob, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_ID, oath.knockback(), AttributeModifier.Operation.ADD_VALUE);
 			modifier(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, oath.speed(), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 			mob.heal((float)oath.health());
+			if (mob instanceof Folk folk && !mob.entityTags().contains(Caravans.TAG)) {
+				// (0.7.484) armed once, at the oath: a weapon struck from its hand is not handed back for free
+				arm(folk, kind);
+			}
 		}
 		if (mob instanceof Folk folk && !mob.entityTags().contains(Caravans.TAG)) {
-			arm(folk, kind);
 			if (folk.role() == Folk.GUARD || folk.role() == Folk.ARCHER) {
 				folk.setCustomName(Component.translatable("entity.jaymoskingdoms.haven_guard." + oath.title(), f.name()));
 			}
@@ -620,7 +623,7 @@ public final class HavenGrowth {
 			return;
 		}
 		Faction theirs = resident(level, attacker);
-		if (theirs != null && theirs.id() == haven.id()) {
+		if (theirs != null && theirs.id() == haven.id() || sanctioned(haven, attacker, victim)) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -631,8 +634,24 @@ public final class HavenGrowth {
 		rally(level, haven, victim, attacker);
 	}
 
+	/** (0.7.484) {@code sworn} took the haven's oath: it never runs. */
+	static boolean sworn(Entity sworn) {
+		return sworn.entityTags().contains(SWORN);
+	}
+
+	/** (0.7.484) A blow between {@code a} and {@code b} that is no attack on {@code haven}: an honour duel, a drill's spar, or one of its own sworn members. */
+	private static boolean sanctioned(Faction haven, Entity a, Entity b) {
+		if (com.jaymoskingdoms.forms.Duels.dueling(a, b) || com.jaymoskingdoms.forms.GuardDrills.sparring(a, b)) {
+			return true;
+		}
+		return a instanceof Player p && haven.member(p.getUUID()) != null || b instanceof Player q && haven.member(q.getUUID()) != null;
+	}
+
 	/** The sworn of {@code haven} within reach of {@code at} go for {@code foe}, harder for it; the nearest sounds the horn and cries out. */
 	static void rally(ServerLevel level, Faction haven, LivingEntity at, LivingEntity foe) {
+		if (sanctioned(haven, foe, at)) {
+			return;
+		}
 		List<Worker> sworn = Workers.near(level, at.getBoundingBox().inflate(RALLY_RANGE),
 			x -> x.factionId() == haven.id() && x.mob().isAlive() && fighter(x) && x.mob() != foe && !Downed.isDowned(x.mob()));
 		if (sworn.isEmpty()) {

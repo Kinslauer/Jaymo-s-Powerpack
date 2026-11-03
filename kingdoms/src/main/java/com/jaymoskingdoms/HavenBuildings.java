@@ -379,8 +379,10 @@ final class HavenBuildings {
 					} else if (z % 3 == 0) {
 						s.set(x, 0, z, water);
 					} else {
-						s.set(x, 0, z, dirt);
-						s.set(x, 1, z, x % 4 == 2 ? Blocks.SUGAR_CANE.defaultBlockState() : crops[(x / 4) % crops.length].defaultBlockState());
+						// (0.7.484) crops stand on farmland (the water rows keep it wet); reeds only on dirt beside a water row
+						boolean reed = x % 4 == 2 && z > 1;
+						s.set(x, 0, z, reed ? dirt : farmland);
+						s.set(x, 1, z, reed ? Blocks.SUGAR_CANE.defaultBlockState() : crops[(x / 4) % crops.length].defaultBlockState());
 					}
 				}
 			}
