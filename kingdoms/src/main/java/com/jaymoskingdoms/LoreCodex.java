@@ -176,7 +176,8 @@ public final class LoreCodex extends Item {
 
 	/** Gives {@code player} their codex back if it was taken as they died. */
 	private static void restore(ServerPlayer player) {
-		if (ITEM != null && Boolean.TRUE.equals(player.getAttached(DUE))) {
+		// (0.7.480) not to a dead one (rejoined on the death screen): their pack is not carried over, so DUE waits for the respawn
+		if (ITEM != null && player.isAlive() && Boolean.TRUE.equals(player.getAttached(DUE))) {
 			player.removeAttached(DUE);
 			if (!player.getInventory().contains(stack -> stack.is(ITEM))) {
 				player.getInventory().placeItemBackInInventory(new ItemStack(ITEM), net.minecraft.util.Prediction.SERVER_ONLY);
@@ -252,6 +253,8 @@ public final class LoreCodex extends Item {
 					}
 				}
 				Component title = stack.get(DataComponents.CUSTOM_NAME);
+				// (0.7.480) a captain's orders filed unread still teach what reading them would
+				Captains.readOrders(player, stack);
 				pack.setItem(i, ItemStack.EMPTY);
 				shelf.add(new Entry(id, title != null ? title : Component.literal(content == null ? "?" : content.title().raw()), pages));
 			}

@@ -30,6 +30,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringUtil;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -183,7 +184,13 @@ public final class LoreBooks {
 		for (Component page : lore.pages()) {
 			pages.add(Filterable.passThrough(page));
 		}
-		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(lore.title().getString()), lore.author().orElse(""), 0, pages, true));
+		// (0.7.480) a written book's title is capped (32): a longer one could not be sent or saved, so it is cut, and the full one goes on the name
+		String title = lore.title().getString();
+		String shortTitle = StringUtil.truncateStringIfNecessary(title, WrittenBookContent.TITLE_MAX_LENGTH, false);
+		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(shortTitle), lore.author().orElse(""), 0, pages, true));
+		if (!shortTitle.equals(title)) {
+			book.set(DataComponents.CUSTOM_NAME, lore.title());
+		}
 		tag(book, id.toString());
 		return book;
 	}
