@@ -42,6 +42,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		// (0.7.479) a corpse's body, drawn outside the world: found again by its id (MCA's skin colour)
 		com.jaymoskingdoms.client.DrawnBodies.drawn(entity);
 		com.jaymoskingdoms.client.VillagerLooks.extract(entity, state);
+		// (0.7.484) the Beastfolk's and the fae's ears, tails and wings: real model parts
+		com.jaymoskingdoms.client.BeastParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);
 		com.jaymoskingdoms.client.bb.BbBodies.extract(entity, state, partialTicks);
 	}
