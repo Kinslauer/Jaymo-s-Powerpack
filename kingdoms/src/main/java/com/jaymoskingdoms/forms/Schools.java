@@ -494,6 +494,8 @@ public final class Schools {
 			pages.add(Filterable.passThrough(Component.translatable("book.jaymoskingdoms.school." + s.key() + "." + i)));
 		}
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough(title(s)), author(s), 0, pages, true));
+		// ((0.7.480) the Lore Codex files it, one of each)
+		com.jaymoskingdoms.LoreBooks.tag(book, "manual:" + s.key());
 		return book;
 	}
 

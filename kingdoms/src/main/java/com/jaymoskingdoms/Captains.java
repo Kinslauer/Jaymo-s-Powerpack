@@ -413,17 +413,8 @@ public final class Captains {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> hurt(victim, source, taken, blocked));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack held = player.getItemInHand(hand);
-			if (player instanceof ServerPlayer sp && held.is(Items.WRITTEN_BOOK)) {
-				CustomData data = held.get(DataComponents.CUSTOM_DATA);
-				if (data != null) {
-					CompoundTag tag = data.copyTag();
-					String captain = tag.getStringOr(ORDERS_CAPTAIN, "");
-					Trait trait = Trait.parse(tag.getStringOr(ORDERS_TRAIT, ""));
-					if (!captain.isEmpty() && trait != null) {
-						// (a chief's orders, read: you know it now; the book opens as any)
-						learn(sp, captain, trait);
-					}
-				}
+			if (player instanceof ServerPlayer sp) {
+				readOrders(sp, held);
 			}
 			return InteractionResult.PASS;
 		});
@@ -897,6 +888,8 @@ public final class Captains {
 		CompoundTag tag = new CompoundTag();
 		tag.putString(ORDERS_CAPTAIN, c.id());
 		tag.putString(ORDERS_TRAIT, t.key());
+		// ((0.7.480) the Lore Codex files it, one of each)
+		tag.putString(LoreBooks.KEY, "orders:" + c.id() + ":" + t.key());
 		book.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return book;
 	}
@@ -1674,6 +1667,23 @@ public final class Captains {
 	/** (0.7.480) The same in the dialect of whoever tells it ({@link Dialects#ORC}, {@link Dialects#GOBLIN}). */
 	static Component told(Captain c, Trait t, String brood) {
 		return Dialects.trBrood(brood, "captain.jaymoskingdoms.trait." + t.key() + ".told", Component.literal(c.name()));
+	}
+
+	/** (0.7.480) If {@code stack} is a captain's orders, {@code player} has read them: they know what they told. Used on use, and as the codex files them. */
+	static void readOrders(ServerPlayer player, ItemStack stack) {
+		if (!stack.is(Items.WRITTEN_BOOK)) {
+			return;
+		}
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		if (data != null) {
+			CompoundTag tag = data.copyTag();
+			String captain = tag.getStringOr(ORDERS_CAPTAIN, "");
+			Trait trait = Trait.parse(tag.getStringOr(ORDERS_TRAIT, ""));
+			if (!captain.isEmpty() && trait != null) {
+				// (a chief's orders, read: you know it now; the book opens as any)
+				learn(player, captain, trait);
+			}
+		}
 	}
 
 	/** {@code player} knows {@code t} of captain {@code id} now. */
