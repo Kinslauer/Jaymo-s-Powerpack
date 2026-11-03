@@ -314,7 +314,7 @@ public final class Tribes {
 		MinecraftServer server = player.level().getServer();
 		int g = grudge(server, player.getUUID(), tribe);
 		String band = g <= TribePacts.ALLY_AT ? "friend" : truce(server, player.getUUID(), tribe) ? "truce" : g >= MOOD_HUNTED ? "hunted" : g >= MOOD_ANGRY ? "angry" : g >= MOOD_WARY ? "wary" : "calm";
-		return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.mood." + band + "." + speaker.getRandom().nextInt(3),
+		return Dialects.tr(speaker, "dialogue.chat.jaymoskingdoms.tribe.mood." + band + "." + speaker.getRandom().nextInt(3),
 			Recollections.nameTo(player, speaker), name(tribe));
 	}
 
@@ -370,7 +370,7 @@ public final class Tribes {
 			line = grudge(server, player.getUUID(), tribe) == 0 ? "paid" : "part";
 			player.level().playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		}
-		return Component.translatable("dialogue.chat.jaymoskingdoms.tribe.tribute." + line + "." + villager.getRandom().nextInt(3),
+		return Dialects.tr(villager, "dialogue.chat.jaymoskingdoms.tribe.tribute." + line + "." + villager.getRandom().nextInt(3),
 			Recollections.nameTo(player, villager), Component.literal(Integer.toString(want)));
 	}
 
@@ -599,7 +599,7 @@ public final class Tribes {
 						mob.getNavigation().moveTo(quarry, 1.1);
 					}
 					if (mob.tickCount % 200 == 0 && mob.distanceTo(quarry) < 24.0F && mob.getRandom().nextInt(3) == 0) {
-						Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.tribe.hunter." + mob.getRandom().nextInt(4)), Speech.RED, 24.0);
+						Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.tribe.hunter." + mob.getRandom().nextInt(4)), Speech.RED, 24.0);
 					}
 					return true;
 				}
