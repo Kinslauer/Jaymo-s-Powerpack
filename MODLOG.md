@@ -5016,3 +5016,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Excalibur in place (`tools/excalibur_style`): darker, less saturated, warmer greys. Glows, effects, eyes and
   see-through art are left alone. `graded.txt` stops a file being graded twice. **Run `tools/excalibur_style/grade.py`
   after any new or redrawn texture.** Hand repaints of hero items come next. Details: `docs/Excalibur-Style.md`.
+- **0.19.66, Patch 3: small critters** (`docs/AlienBodies-Plan.md`): five more aliens are no longer men.
+  - Croaker is now a squat, low frog (about 9 px tall, 10 px wide) with big eyes on top, a jaw that opens and a throat sac that swells; it hops instead of walking, its hind legs solved by two-bone IK so the feet stay planted through the push, then trail behind in flight and tuck to land.
+  - Slipfin is now an axolotl: long and low, with a wide flat head, waving gill stalks, a two-part trunk, a four-segment finned tail and four splayed legs. On land it belly-crawls on diagonal leg pairs while its body bends side to side in an S; in water it tucks its legs and swims with an up-and-down wave; a bite is a lunge with the jaw open.
+  - Locust is now a six-legged grasshopper. Its walking legs step in a tripod gait and its two huge folded hind legs (IK-posed) kick straight back on a leap or a Kick. Crouching to charge Crash Leap folds them tighter. Its feelers sway and its wings flutter in the air.
+  - Hive is now a big hovering bee: a fuzzy thorax with the insignia on its back, a head with compound eyes and antennae, two pairs of always-buzzing wings, six dangling legs and a striped abdomen whose stinger curls forward under it to sting. It bobs about 4 px off the ground and pitches nose-down as it flies.
+  - Gremlin is now a hunched imp that walks on its knuckles: a small, nearly flat body between long arms planted on the fists and short bowed back legs, with a big eared skull held up in front. It lopes in diagonal pairs, each limb solved so it stays on the ground, the skull bobs and nods a beat behind every footfall, an attack is a snapping bite with a swipe of the right arm, and the insignia sits on its back.
+  - Croaker takes Billow's low swimming-pose box out of water too (`XenoformState.LOW_BOX`), so it fits through
+    one-high gaps, drawn level and hopping at its own pace. The five lost their Ultimate spikes (the spike model is a
+    man's). Each body was written, then checked by a second pass that simulated the poses and fixed what it found.
+    The five skins are graded to the Excalibur look (`tools/excalibur_style`). Compile-checked; not played.
