@@ -71,8 +71,11 @@ final class GreenMarket {
 		new Good(Items.RED_MUSHROOM, 6, 2, 12, 30), new Good(Items.GOLD_NUGGET, 6, 5, 8, 24), new Good(Items.BREAD, 4, 3, 8, 16),
 		new Good(Items.ARROW, 16, 3, 24, 48), new Good(Items.BONE, 8, 2, 8, 24), new Good(Items.COOKED_CHICKEN, 4, 3, 24, 40));
 
-	/** An open trade: whose stall, and each offer's uses when the screen opened. */
-	private record Session(int camp, boolean stocked, List<Integer> uses) {
+	/**
+	 * An open trade: whose stall, and each offer's uses when the screen opened. ((0.7.480) {@code merchant} is kept so the trade
+	 * can still be booked from his offers if he dies or unloads before it closes, or the server stops.)
+	 */
+	private record Session(Villager merchant, int camp, boolean stocked, List<Integer> uses) {
 	}
 
 	/** Merchant (or pedlar) id → the trade open with him. */
@@ -87,6 +90,8 @@ final class GreenMarket {
 				settleAll(server);
 			}
 		});
+		// ((0.7.480) every trade still open is booked while the levels are still up, before the world saves)
+		ServerLifecycleEvents.SERVER_STOPPING.register(GreenMarket::settleRemaining);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SESSIONS.clear());
 	}
 
@@ -262,7 +267,7 @@ final class GreenMarket {
 		for (MerchantOffer o : v.getOffers()) {
 			uses.add(o.getUses());
 		}
-		SESSIONS.put(v.getUUID(), new Session(camp, stocked, uses));
+		SESSIONS.put(v.getUUID(), new Session(v, camp, stocked, uses));
 	}
 
 	/** ((0.7.480)) {@code v}'s last trade, if it's still waiting for settleAll, booked now so a new one can't overwrite it. */
@@ -278,12 +283,29 @@ final class GreenMarket {
 		for (var it = SESSIONS.entrySet().iterator(); it.hasNext();) {
 			var e = it.next();
 			if (!(level.getEntity(e.getKey()) instanceof Villager v)) {
+				// ((0.7.480) he died or his chunk unloaded: the trade is booked from the offers he left, not dropped)
 				it.remove();
+				settle(level, e.getValue().merchant(), e.getValue());
 				continue;
 			}
 			if (v.getTradingPlayer() == null) {
 				settle(level, v, e.getValue());
 				it.remove();
+			}
+		}
+	}
+
+	/** ((0.7.480)) Every trade still open, booked and dropped (the server is stopping). */
+	private static void settleRemaining(MinecraftServer server) {
+		if (SESSIONS.isEmpty()) {
+			return;
+		}
+		ServerLevel level = Factions.level(server);
+		List<Session> open = new ArrayList<>(SESSIONS.values());
+		SESSIONS.clear();
+		for (Session s : open) {
+			if (level != null) {
+				settle(level, s.merchant(), s);
 			}
 		}
 	}
