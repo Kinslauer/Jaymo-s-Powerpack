@@ -1,0 +1,663 @@
+package com.jaymoskingdoms;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * (0.7.484) Building from a design yourself, in survival, from your own materials: our own take on a schematic
+ * builder, through designs only (saved with the {@link Surveyor}, or uploaded from a schematic file, see {@link Designs}).
+ * <ul>
+ * <li>A <b>building plan</b> (paper and charcoal) is written with a design: {@code /kingdom design plan <name>} while
+ * holding it. Use it on the ground to lay the building out there (its lowest north-west corner on the block in front of
+ * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.</li>
+ * <li>A <b>mason's table</b> takes a laid-out plan (use it on the table) and builds it, bottom up, a block at a time,
+ * from the chests, barrels and the like touching it: the very block (planks are planks, stairs are stairs; the second
+ * half of a door or bed comes with the first). What's already there is left be: a block in the way is skipped, a
+ * matching one only turned to match. Nothing comes with the blocks: chests empty, signs blank, no water or fire.</li>
+ * <li>Use the table empty-handed to hear how far it is and what it waits for (and, once finished, to try the skipped
+ * blocks again); sneak to take the plan back. Breaking the table drops the plan.</li>
+ * </ul>
+ * Blocks it lays count as placed by whoever put the plan in, so they're theirs to break ({@link Placed}).
+ */
+public final class MasonTable {
+	/** Ticks between blocks laid; between looks in the chests when the last look found nothing needed. */
+	static final int PLACE_TICKS = 5, WAIT_TICKS = 60;
+	/** Blocks already there (or left out) gone past in one go. */
+	static final int SKIP_PER_STEP = 64;
+	/** How far from the table the middle of its plan may lie (blocks, across). */
+	static final int REACH = 64;
+	/** How often a held plan's outline shows (ticks); how far from it its holder may be. */
+	static final int SHOW_TICKS = 20, SHOW_RANGE = 128;
+	/** The materials listed when the table is asked. */
+	static final int LIST_MATERIALS = 6;
+	/** How a block is set: clients told, neighbours left as the design has them. */
+	static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
+	/** Where a plan's details sit in its custom data. */
+	static final String TAG = "jaymoskingdoms_plan";
+
+	public static Item PLAN;
+	public static Block TABLE;
+	public static Item TABLE_ITEM;
+	public static BlockEntityType<Entity> ENTITY;
+
+	private MasonTable() {
+	}
+
+	static void register() {
+		ResourceKey<Item> planKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("building_plan"));
+		PLAN = Registry.register(BuiltInRegistries.ITEM, planKey, new Plan(new Item.Properties().setId(planKey).stacksTo(1)));
+		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("mason_table"));
+		TABLE = Registry.register(BuiltInRegistries.BLOCK, key, new TableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+			.strength(2.5F).sound(SoundType.STONE).setId(key)));
+		ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKingdoms.id("mason_table"), new BlockEntityType<>(Entity::new, java.util.Set.of(TABLE)));
+		ResourceKey<Item> tableKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("mason_table"));
+		TABLE_ITEM = Registry.register(BuiltInRegistries.ITEM, tableKey, new BlockItem(TABLE, new Item.Properties().setId(tableKey).useBlockDescriptionPrefix()));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.insertAfter(Items.CARTOGRAPHY_TABLE, TABLE_ITEM));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Surveyor.ROD, PLAN));
+		ServerTickEvents.END_SERVER_TICK.register(MasonTable::showPlans);
+	}
+
+	// ---- the plan ---------------------------------------------------------------------------------------------------
+
+	/** A written plan's details: its design, how it's turned, and where it's laid (if it is). */
+	record Laid(String design, Rotation rotation, @Nullable BlockPos anchor, String dimension, int w, int d, int h, int blocks) {
+		static @Nullable Laid of(ItemStack stack) {
+			CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+			if (data == null) {
+				return null;
+			}
+			CompoundTag t = data.copyTag().getCompoundOrEmpty(TAG);
+			String design = t.getStringOr("design", "");
+			if (design.isEmpty()) {
+				return null;
+			}
+			Rotation r = Rotation.values()[Math.floorMod(t.getIntOr("rot", 0), 4)];
+			BlockPos anchor = t.getBooleanOr("laid", false) ? new BlockPos(t.getIntOr("x", 0), t.getIntOr("y", 0), t.getIntOr("z", 0)) : null;
+			return new Laid(design, r, anchor, t.getStringOr("dim", ""), t.getIntOr("w", 0), t.getIntOr("d", 0), t.getIntOr("h", 0), t.getIntOr("n", 0));
+		}
+
+		void write(ItemStack stack) {
+			CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, root -> {
+				CompoundTag t = new CompoundTag();
+				t.putString("design", this.design);
+				t.putInt("rot", this.rotation.ordinal());
+				t.putInt("w", this.w);
+				t.putInt("d", this.d);
+				t.putInt("h", this.h);
+				t.putInt("n", this.blocks);
+				if (this.anchor != null) {
+					t.putBoolean("laid", true);
+					t.putInt("x", this.anchor.getX());
+					t.putInt("y", this.anchor.getY());
+					t.putInt("z", this.anchor.getZ());
+					t.putString("dim", this.dimension);
+				}
+				root.put(TAG, t);
+			});
+		}
+
+		Laid turned() {
+			return new Laid(this.design, this.rotation.getRotated(Rotation.CLOCKWISE_90), this.anchor, this.dimension, this.w, this.d, this.h, this.blocks);
+		}
+
+		Laid at(BlockPos anchor, String dimension) {
+			return new Laid(this.design, this.rotation, anchor.immutable(), dimension, this.w, this.d, this.h, this.blocks);
+		}
+
+		/** The footprint turned: {width, depth}. */
+		int[] footprint() {
+			return this.rotation == Rotation.CLOCKWISE_90 || this.rotation == Rotation.COUNTERCLOCKWISE_90 ? new int[] {this.d, this.w} : new int[] {this.w, this.d};
+		}
+
+		@Nullable BlockPos max() {
+			if (this.anchor == null) {
+				return null;
+			}
+			int[] f = this.footprint();
+			return this.anchor.offset(f[0] - 1, this.h - 1, f[1] - 1);
+		}
+	}
+
+	/** {@code /kingdom design plan <name>}: writes design {@code name} on the building plan in hand (creative: a new one). */
+	static boolean inscribe(ServerPlayer player, String name) {
+		name = name.toLowerCase(java.util.Locale.ROOT);
+		Blueprint bp = Designs.blueprint(player.level().getServer(), name);
+		if (bp == null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		ItemStack stack = player.getMainHandItem().is(PLAN) ? player.getMainHandItem() : player.getOffhandItem().is(PLAN) ? player.getOffhandItem() : ItemStack.EMPTY;
+		if (stack.isEmpty()) {
+			if (!player.isCreative()) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plan.hold").withStyle(ChatFormatting.RED));
+				return false;
+			}
+			stack = new ItemStack(PLAN);
+			new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size()).write(stack);
+			player.getInventory().add(stack);
+		} else {
+			new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size()).write(stack);
+		}
+		player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.9F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plan.written", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size())
+			.withStyle(ChatFormatting.GREEN));
+		return true;
+	}
+
+	static final class Plan extends Item {
+		Plan(Properties properties) {
+			super(properties);
+		}
+
+		@Override
+		public InteractionResult use(Level level, Player player, InteractionHand hand) {
+			ItemStack stack = player.getItemInHand(hand);
+			Laid laid = Laid.of(stack);
+			if (!(player instanceof ServerPlayer sp)) {
+				return InteractionResult.SUCCESS;
+			}
+			if (laid == null) {
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.blank").withStyle(ChatFormatting.GRAY));
+				return InteractionResult.FAIL;
+			}
+			if (player.isShiftKeyDown()) {
+				turn(sp, stack, laid);
+			} else {
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.how").withStyle(ChatFormatting.GRAY));
+			}
+			return InteractionResult.SUCCESS;
+		}
+
+		@Override
+		public InteractionResult useOn(UseOnContext context) {
+			if (!(context.getPlayer() instanceof ServerPlayer player)) {
+				return InteractionResult.SUCCESS;
+			}
+			ItemStack stack = context.getItemInHand();
+			Laid laid = Laid.of(stack);
+			if (laid == null) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.blank").withStyle(ChatFormatting.GRAY));
+				return InteractionResult.FAIL;
+			}
+			if (player.isShiftKeyDown()) {
+				turn(player, stack, laid);
+				return InteractionResult.SUCCESS;
+			}
+			BlockPos anchor = context.getClickedPos().relative(context.getClickedFace());
+			Laid now = laid.at(anchor, player.level().dimension().identifier().toString());
+			now.write(stack);
+			int[] f = now.footprint();
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.laid", laid.design(), f[0], f[1], now.h()).withStyle(ChatFormatting.YELLOW));
+			player.level().playSound(null, anchor, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8F, 1.2F);
+			Surveyor.outline(player.level(), anchor, now.max());
+			return InteractionResult.SUCCESS;
+		}
+
+		private static void turn(ServerPlayer player, ItemStack stack, Laid laid) {
+			Laid now = laid.turned();
+			now.write(stack);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.turned", now.rotation().ordinal() * 90).withStyle(ChatFormatting.YELLOW));
+			player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.6F, 1.5F);
+			if (now.anchor() != null) {
+				Surveyor.outline(player.level(), now.anchor(), now.max());
+			}
+		}
+
+		@Override
+		public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+			Laid laid = Laid.of(stack);
+			if (laid == null) {
+				builder.accept(Component.translatable("item.jaymoskingdoms.building_plan.blank").withStyle(ChatFormatting.GRAY));
+				return;
+			}
+			int[] f = laid.footprint();
+			builder.accept(Component.translatable("item.jaymoskingdoms.building_plan.design", laid.design(), f[0], f[1], laid.h(), laid.blocks())
+				.withStyle(ChatFormatting.GRAY));
+			builder.accept(laid.anchor() == null ? Component.translatable("item.jaymoskingdoms.building_plan.not_laid").withStyle(ChatFormatting.DARK_GRAY)
+				: Component.translatable("item.jaymoskingdoms.building_plan.laid", laid.anchor().toShortString(), laid.rotation().ordinal() * 90)
+					.withStyle(ChatFormatting.DARK_GRAY));
+		}
+	}
+
+	/** Sparks round the plans players hold that are laid out near them. */
+	private static void showPlans(MinecraftServer server) {
+		if (server.getTickCount() % SHOW_TICKS != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			ItemStack stack = player.getMainHandItem().is(PLAN) ? player.getMainHandItem() : player.getOffhandItem().is(PLAN) ? player.getOffhandItem() : null;
+			Laid laid = stack == null ? null : Laid.of(stack);
+			if (laid == null || laid.anchor() == null || !laid.dimension().equals(player.level().dimension().identifier().toString())
+				|| laid.anchor().distSqr(player.blockPosition()) > (double)SHOW_RANGE * SHOW_RANGE) {
+				continue;
+			}
+			Surveyor.outline(player.level(), laid.anchor(), laid.max());
+		}
+	}
+
+	// ---- the table --------------------------------------------------------------------------------------------------
+
+	static final class TableBlock extends BaseEntityBlock {
+		TableBlock(BlockBehaviour.Properties properties) {
+			super(properties);
+		}
+
+		@Override
+		public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+			return new Entity(pos, state);
+		}
+
+		@Override
+		protected RenderShape getRenderShape(BlockState state) {
+			return RenderShape.MODEL;
+		}
+
+		@Override
+		public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+			return level.isClientSide() ? null : createTickerHelper(type, ENTITY, (l, p, s, table) -> table.serverTick((ServerLevel)l));
+		}
+
+		@Override
+		protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
+			BlockHitResult hit) {
+			if (!stack.is(PLAN)) {
+				return InteractionResult.TRY_WITH_EMPTY_HAND;
+			}
+			if (player instanceof ServerPlayer sp && level.getBlockEntity(pos) instanceof Entity table) {
+				table.insert(sp, stack);
+			}
+			return InteractionResult.SUCCESS;
+		}
+
+		@Override
+		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+			if (player instanceof ServerPlayer sp && level.getBlockEntity(pos) instanceof Entity table) {
+				if (player.isShiftKeyDown()) {
+					table.takeOut(sp);
+				} else {
+					table.report(sp);
+				}
+			}
+			return InteractionResult.SUCCESS;
+		}
+	}
+
+	/** One block of the building, where it goes and what. */
+	record Op(BlockPos pos, BlockState state) {
+	}
+
+	/** A table's plan and how far it's got. */
+	public static final class Entity extends BlockEntity {
+		private ItemStack plan = ItemStack.EMPTY;
+		private int index;
+		private int skipped;
+		private boolean done;
+		private @Nullable UUID owner;
+		/** Not saved: the building laid out from the plan, its blocks by place, what it waits for and till when. */
+		private @Nullable List<Op> ops;
+		private @Nullable Map<BlockPos, BlockState> byPos;
+		private @Nullable Item waitingFor;
+		private long waitUntil;
+
+		public Entity(BlockPos pos, BlockState state) {
+			super(ENTITY, pos, state);
+		}
+
+		void insert(ServerPlayer player, ItemStack stack) {
+			if (!this.plan.isEmpty()) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mason_table.full").withStyle(ChatFormatting.RED));
+				return;
+			}
+			Laid laid = Laid.of(stack);
+			if (laid == null) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.blank").withStyle(ChatFormatting.RED));
+				return;
+			}
+			if (laid.anchor() == null || !laid.dimension().equals(player.level().dimension().identifier().toString())) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mason_table.not_laid").withStyle(ChatFormatting.RED));
+				return;
+			}
+			int[] f = laid.footprint();
+			double cx = laid.anchor().getX() + f[0] / 2.0, cz = laid.anchor().getZ() + f[1] / 2.0;
+			double dx = cx - this.worldPosition.getX(), dz = cz - this.worldPosition.getZ();
+			if (dx * dx + dz * dz > (double)REACH * REACH) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mason_table.too_far", REACH).withStyle(ChatFormatting.RED));
+				return;
+			}
+			if (Designs.blueprint(player.level().getServer(), laid.design()) == null) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.design.unknown", laid.design()).withStyle(ChatFormatting.RED));
+				return;
+			}
+			this.plan = stack.split(1);
+			this.owner = player.getUUID();
+			this.index = 0;
+			this.skipped = 0;
+			this.done = false;
+			this.ops = null;
+			this.waitUntil = 0L;
+			this.setChanged();
+			player.level().playSound(null, this.worldPosition, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.0F);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.started", laid.design()).withStyle(ChatFormatting.GREEN));
+		}
+
+		void takeOut(ServerPlayer player) {
+			if (this.plan.isEmpty()) {
+				this.report(player);
+				return;
+			}
+			ItemStack out = this.plan;
+			this.clear();
+			if (!player.getInventory().add(out)) {
+				player.drop(out, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			player.level().playSound(null, this.worldPosition, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 0.8F);
+		}
+
+		private void clear() {
+			this.plan = ItemStack.EMPTY;
+			this.owner = null;
+			this.index = 0;
+			this.skipped = 0;
+			this.done = false;
+			this.ops = null;
+			this.byPos = null;
+			this.waitingFor = null;
+			this.setChanged();
+		}
+
+		void report(ServerPlayer player) {
+			Laid laid = Laid.of(this.plan);
+			if (laid == null) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.empty").withStyle(ChatFormatting.GRAY));
+				return;
+			}
+			ServerLevel level = (ServerLevel)this.level;
+			List<Op> ops = this.ops(level, laid);
+			if (ops == null) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", laid.design()).withStyle(ChatFormatting.RED));
+				return;
+			}
+			if (this.done) {
+				if (this.skipped > 0) {
+					// try what was in the way again
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.retry", this.skipped).withStyle(ChatFormatting.YELLOW));
+					this.index = 0;
+					this.skipped = 0;
+					this.done = false;
+					this.setChanged();
+				} else {
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.finished", laid.design()).withStyle(ChatFormatting.GREEN));
+				}
+				return;
+			}
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.progress", laid.design(), this.index, ops.size())
+				.withStyle(ChatFormatting.GOLD));
+			if (this.waitingFor != null) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.waiting", new ItemStack(this.waitingFor).getHoverName())
+					.withStyle(ChatFormatting.YELLOW));
+			}
+			// what's still to come, most first
+			Map<Item, Integer> need = new LinkedHashMap<>();
+			for (int i = this.index; i < ops.size(); i++) {
+				Op op = ops.get(i);
+				BlockState here = level.isLoaded(op.pos()) ? level.getBlockState(op.pos()) : null;
+				Item item = cost(op.state());
+				if (item != null && (here == null || !here.is(op.state().getBlock()))) {
+					need.merge(item, 1, Integer::sum);
+				}
+			}
+			need.entrySet().stream().sorted(Map.Entry.<Item, Integer>comparingByValue().reversed()).limit(LIST_MATERIALS)
+				.forEach(e -> player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.need", e.getValue(),
+					new ItemStack(e.getKey()).getHoverName()).withStyle(ChatFormatting.GRAY)));
+			if (this.skipped > 0) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.skipped", this.skipped).withStyle(ChatFormatting.GRAY));
+			}
+		}
+
+		/** The building laid out from {@code laid} (cached), bottom up, solid blocks before what hangs on them; null if its design is gone. */
+		private @Nullable List<Op> ops(ServerLevel level, Laid laid) {
+			if (this.ops != null) {
+				return this.ops;
+			}
+			Blueprint bp = Designs.blueprint(level.getServer(), laid.design());
+			if (bp == null || laid.anchor() == null) {
+				return null;
+			}
+			List<Op> ops = new ArrayList<>();
+			Map<BlockPos, BlockState> byPos = new HashMap<>();
+			for (Blueprint.Placement pl : bp.blocks()) {
+				BlockPos at = laid.anchor().offset(Planner.turn(bp, pl.offset(), laid.rotation()));
+				BlockState state = pl.state().rotate(laid.rotation());
+				if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+					// (no water comes with a block)
+					state = state.setValue(BlockStateProperties.WATERLOGGED, false);
+				}
+				ops.add(new Op(at, state));
+				byPos.put(at, state);
+			}
+			ops.sort(Comparator.<Op>comparingInt(o -> o.pos().getY()).thenComparingInt(o -> o.state().isCollisionShapeFullBlock(level, o.pos()) ? 0 : 1)
+				.thenComparingInt(o -> o.pos().getZ()).thenComparingInt(o -> o.pos().getX()));
+			this.ops = List.copyOf(ops);
+			this.byPos = byPos;
+			return this.ops;
+		}
+
+		void serverTick(ServerLevel level) {
+			if (this.plan.isEmpty() || this.done || level.getGameTime() % PLACE_TICKS != 0 || level.getGameTime() < this.waitUntil) {
+				return;
+			}
+			Laid laid = Laid.of(this.plan);
+			if (laid == null || laid.anchor() == null || !laid.dimension().equals(level.dimension().identifier().toString())) {
+				return;
+			}
+			List<Op> ops = this.ops(level, laid);
+			if (ops == null) {
+				return;
+			}
+			for (int n = 0; n < SKIP_PER_STEP && this.index < ops.size(); n++) {
+				Op op = ops.get(this.index);
+				if (!level.isLoaded(op.pos())) {
+					return;
+				}
+				BlockState here = level.getBlockState(op.pos());
+				if (here == op.state()) {
+					this.index++;
+					continue;
+				}
+				if (here.is(op.state().getBlock())) {
+					// the right block, turned or set otherwise: made to match, free
+					level.setBlock(op.pos(), op.state(), FLAGS);
+					this.index++;
+					continue;
+				}
+				Item item = cost(op.state());
+				if (item == null || secondHalf(op.state())) {
+					// (water, fire and the like are left out; a door's top or a bed's head came with its other half)
+					this.index++;
+					continue;
+				}
+				if (!here.canBeReplaced()) {
+					this.skipped++;
+					this.index++;
+					continue;
+				}
+				if (!this.take(level, item)) {
+					if (this.waitingFor != item) {
+						this.waitingFor = item;
+					}
+					this.waitUntil = level.getGameTime() + WAIT_TICKS;
+					this.setChanged();
+					return;
+				}
+				this.waitingFor = null;
+				this.lay(level, op.pos(), op.state());
+				this.partner(level, op);
+				this.index++;
+				this.setChanged();
+				return;
+			}
+			if (this.index >= ops.size()) {
+				this.done = true;
+				this.setChanged();
+				level.playSound(null, this.worldPosition, SoundEvents.VILLAGER_WORK_MASON, SoundSource.BLOCKS, 1.0F, 1.0F);
+				ServerPlayer owner = this.owner == null ? null : level.getServer().getPlayerList().getPlayer(this.owner);
+				if (owner != null) {
+					owner.sendSystemMessage(Component.translatable(this.skipped > 0 ? "message.jaymoskingdoms.mason_table.done_skipped" : "message.jaymoskingdoms.mason_table.done",
+						laid.design(), this.skipped).withStyle(ChatFormatting.GREEN));
+				}
+			}
+		}
+
+		private void lay(ServerLevel level, BlockPos pos, BlockState state) {
+			level.setBlock(pos, state, FLAGS);
+			SoundType sound = state.getSoundType();
+			level.playSound(null, pos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F * 0.8F, sound.getPitch() * 0.8F);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+			if (this.owner != null) {
+				Placed.placed(this.owner, level, pos, state);
+			}
+		}
+
+		/** The second half of a door, tall plant or bed, laid with its first (free). */
+		private void partner(ServerLevel level, Op op) {
+			BlockState s = op.state();
+			BlockPos other = null;
+			if (s.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && s.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+				other = op.pos().above();
+			} else if (s.hasProperty(BlockStateProperties.BED_PART) && s.getValue(BlockStateProperties.BED_PART) == BedPart.FOOT
+				&& s.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+				other = op.pos().relative(s.getValue(BlockStateProperties.HORIZONTAL_FACING));
+			}
+			BlockState want = other == null || this.byPos == null ? null : this.byPos.get(other);
+			if (want != null && want.is(s.getBlock()) && level.getBlockState(other).canBeReplaced()) {
+				this.lay(level, other, want);
+			}
+		}
+
+		/** Takes one {@code item} from a container touching the table; false if none has it. */
+		private boolean take(ServerLevel level, Item item) {
+			for (Direction d : Direction.values()) {
+				Container c = HopperBlockEntity.getContainerAt(level, this.worldPosition.relative(d));
+				if (c == null) {
+					continue;
+				}
+				for (int i = 0; i < c.getContainerSize(); i++) {
+					if (c.getItem(i).is(item)) {
+						c.removeItem(i, 1);
+						c.setChanged();
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+			if (this.level != null && !this.plan.isEmpty()) {
+				Containers.dropItemStack(this.level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, this.plan);
+				this.plan = ItemStack.EMPTY;
+			}
+			super.preRemoveSideEffects(pos, state);
+		}
+
+		@Override
+		protected void loadAdditional(ValueInput input) {
+			super.loadAdditional(input);
+			this.plan = input.read("plan", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+			this.index = input.getIntOr("index", 0);
+			this.skipped = input.getIntOr("skipped", 0);
+			this.done = input.getBooleanOr("done", false);
+			this.owner = input.read("owner", UUIDUtil.CODEC).orElse(null);
+			this.ops = null;
+		}
+
+		@Override
+		protected void saveAdditional(ValueOutput output) {
+			super.saveAdditional(output);
+			if (!this.plan.isEmpty()) {
+				output.store("plan", ItemStack.CODEC, this.plan);
+			}
+			output.putInt("index", this.index);
+			output.putInt("skipped", this.skipped);
+			output.putBoolean("done", this.done);
+			if (this.owner != null) {
+				output.store("owner", UUIDUtil.CODEC, this.owner);
+			}
+		}
+	}
+
+	/** The item a block is laid from, or null for one laid from nothing (air, water, fire, a portal). */
+	static @Nullable Item cost(BlockState state) {
+		if (state.isAir()) {
+			return null;
+		}
+		Item item = state.getBlock().asItem();
+		return item == Items.AIR ? null : item;
+	}
+
+	/** The top of a door or tall plant, or a bed's head: laid with the other half. */
+	static boolean secondHalf(BlockState s) {
+		return s.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && s.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER
+			|| s.hasProperty(BlockStateProperties.BED_PART) && s.getValue(BlockStateProperties.BED_PART) == BedPart.HEAD;
+	}
+}

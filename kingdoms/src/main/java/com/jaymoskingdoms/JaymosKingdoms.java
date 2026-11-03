@@ -86,6 +86,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();
+		// (0.7.484) schematic files: uploads from players' computers, the mason's table, plans given to settlements
+		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
+		DesignUploads.register();
+		MasonTable.register();
+		Commissions.register();
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();

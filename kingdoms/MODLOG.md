@@ -8266,3 +8266,26 @@ witch's) `Hemomancy`; the stains are Jaymo's Powers' lasting blood stains (`Bloo
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
+
+## 0.7.484: building from schematics (pack 0.19.66)
+- **Schematic files as designs** (`SchematicFiles`): a design may now be a `.nbt` (structure block), `.schem` (Sponge
+  v1 to v3) or `.litematic` (every region), dropped in `<world>/jaymoskingdoms_designs/` or uploaded; older files are
+  brought up to date by the game's data fixer. Only blocks come along (no block entities, no entities). Checked on
+  Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
+- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): `/schematics list | folder |
+  upload <file> [name]` reads the game folder's `schematics/` (Litematica's own folder) and sends the file in 30 KB
+  pieces (at most about 1.9 MB). The server reads it as NBT within a 64 MB quota and keeps it as the uploader's design
+  (same name and per-player rules as `/kingdom design save`).
+- **Bigger designs**: up to 96 across, 128 high, 120,000 blocks. Builder crews still take only plot-sized ones
+  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" in `/kingdom design list`.
+- **Building plan and mason's table** (`MasonTable`): two paper and a charcoal make a blank plan;
+  `/kingdom design plan <name>` draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
+  its outline shows while held), then put it in a mason's table (paper, crafting table, stone bricks). The table lays
+  it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
+  in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
+  Use the table to see progress and what's still needed; sneak-use takes the plan back. Laid blocks count as the
+  plan owner's (`Placed`).
+- **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
+  can `/kingdom design submit <name>` (or `withdraw`). Its builders put it up on open ground of their choosing before
+  their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
+  the giver gets +40 reputation and a message.
