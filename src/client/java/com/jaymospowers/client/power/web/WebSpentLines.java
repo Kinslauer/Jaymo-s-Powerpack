@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Spent web lines. A line that breaks (cut, burnt through, pulled apart, worn out, or what it was stuck to gone)
  * doesn't vanish: what's left goes slack and falls, draping down from where it was stuck and swaying, then comes loose,
- * fades and breaks up into wisps. A line that is only let go leaves nothing (0.19.57: it used to drop one every time).
+ * fades and breaks up into wisps. A line that is only let go leaves nothing (0.19.70: it used to drop one every time).
  * A line cut or snapped partway parts there: two broken halves, one hanging from where it was stuck and one falling
  * from the slinger's (or the hitched creature's) end, each whipping back from the break. Purely visual, on each
  * client: the server says when and where a line broke ({@link WebNet.LineSnap}) and the line as last seen here is
