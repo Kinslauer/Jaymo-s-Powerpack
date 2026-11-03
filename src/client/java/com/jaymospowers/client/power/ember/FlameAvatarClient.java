@@ -132,16 +132,14 @@ public final class FlameAvatarClient {
 		Power power = Powers.of(player);
 		int total = CHIP * 3 + CHIP_GAP * 2;
 		int width = graphics.guiWidth(), height = graphics.guiHeight();
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + CHIP * 4 + CHIP_GAP * 3 > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
+		// (HUD rework) its own row in the right dock, over the power's block (the zone stacks them)
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.DOCK_RIGHT, "jaymospowers:flame_avatar", 20,
+			total, CHIP + 16);
+		if (at == null) {
+			return;
 		}
-		if (power != null) {
-			// above the power's own chips
-			y -= CHIP + 14;
-		}
+		int x = at[0];
+		int y = at[1] + 16;
 		float flame = FlameAvatar.flame(player);
 		int color = flame < 0.25F ? LOW_COLOR : COLOR;
 		int barY = y - 6;

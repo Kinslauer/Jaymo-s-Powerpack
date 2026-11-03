@@ -152,8 +152,13 @@ public final class ZFighterScouterClient {
 		}
 		String line = Component.translatable("hud.jaymospowers.zfighter_scouter.level", number).getString();
 		int w = Math.max(font.width(name), font.width(line)) + 8;
-		int x = cx + 14;
-		int y = cy - 12;
+		// (HUD rework) power-level panel: INSPECT zone, row 30
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.INSPECT, "jaymospowers:zfighter_scouter", 30, w, 22);
+		if (at == null) {
+			return;
+		}
+		int x = at[0];
+		int y = at[1];
 		if (glitching) {
 			// the lens is failing: the panel jumps about and tears
 			x += (int)(Mth.sin(now * 2.7F) * 3.0F);

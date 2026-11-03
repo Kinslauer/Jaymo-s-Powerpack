@@ -1377,3 +1377,8 @@ Andy: "thrown mobs should stop snapping to a pose, and instead keep the ragdoll,
   again that way (Andy: "the zombie died and changed skins"). It now gets up with the id it had alive, unless
   something in the world already has it.
 - Compile-checked; not played.
+
+## 0.5.55: one HUD layout (pack 0.19.79, Kingdoms 0.7.487)
+The stomach slots and the body-heat thermometer moved into the left dock beside the hotbar (`client/hud/HudZones`, a
+copy of Powers'; see `docs/HUD-Layout.md` in the pack). The stomach no longer sits where the power chips and the
+attack indicator are; the thermometer no longer covers the XP number.
