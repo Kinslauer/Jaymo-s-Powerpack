@@ -4936,3 +4936,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   without Kingdoms everyone sees them. Kitchen jar in libs to 0.5.48.
 - **0.19.58, Kingdoms 0.7.478, Gemini handoff passes 2-3:** Kingdoms only: Ignis Vael's Cinder Forge in the Nether (the
   Writ of Rebirth, cinder-forged reforging, smiths' rumours, the Charred Wayfinder) and under-armour (kingdoms/MODLOG.md).
+- **0.19.60, ki from the hands:** Andy: "the ki blasts from z fighters should originate from their hands or fingers
+  realistically". Every Z Fighter ki technique is made in and thrown from the hands (`ZFighterHands` on the server, synced
+  pose `zfighter_hands` + `HandThrow` packet; `client/power/zfighter/ZFighterHandsPose` draws it). The Ki Wave (and bomb)
+  gathers between hands cupped at the lead hip (shoulders turned, trembling), the Frost Needle at a pointed finger; let go,
+  the hands drive forward into the firing pose with a shout (`ZFighterHands.shout`, a vindicator cry for now) and the beam's
+  root stays in the pushed hands. A tapped Ki Blast forms in the main palm for 3 ticks as the arm draws back, then is thrown
+  with a thrust; the barrage's balls form in both palms held out, then each is thrown by its own arm, the hands taking
+  turns, the next ball already forming in the other palm. Homing volley and the technique creator's shots thrust too.
+  The posed model's hands are read back every frame, so the gathering orbs and the travelling beam's root are drawn in the
+  hands, not in front of the body; in first person `FirstPersonArms` poses your own hands the same way (cup, point, palms,
+  draw-back, thrust, push) and the ki sits in them. NPCs share it by entity: gifted villagers' blasts thrust from the
+  palm and their Wave Beam now gathers 16 ticks in cupped hands before firing with a two-hand push and shout; rogue
+  fighters and sparring mannequins throw from the palm. Tuning: `ZFighterHands` (hand spots, shout), `ZFighterHandsPose`
+  (angles, timing, first-person spots), `FirstPersonArms.KI_*`, `ZFighterKi.BLAST_FORM_*`, `ZFighterGift.WAVE_GATHER`.
