@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.19.61) Dirty armour ({@link ArmourGrime}) is drawn tinted toward dusty tan or mud brown, the dirtier the more. The
+ * (0.19.63) Dirty armour ({@link ArmourGrime}) is drawn tinted toward dusty tan or mud brown, the dirtier the more. The
  * tint multiplies the piece's own colour (and a dyed piece's dye), so see-through bits of the texture stay see-through.
  */
 @Mixin(EquipmentLayerRenderer.class)

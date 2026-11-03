@@ -42,7 +42,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** (0.19.55) A smear ({@code BloodTrail.smear}) is this many times as long as a puddle across, and this many times as narrow. */
 	static final float SMEAR_LONG = 1.9F, SMEAR_NARROW = 0.5F;
 	private static final double SAME_HEIGHT = 1.0E-4;
-	/** (0.19.61) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
+	/** (0.19.63) A water puddle's opacity, its colour, how long it takes to dry up (ticks), and the biggest it grows (scale). */
 	static final float WET_ALPHA = 0.5F;
 	static final int WATER = 0x8EA4B6;
 	static final int WET_FADE = 400;
@@ -51,7 +51,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private float baseSize;
 	/** (0.17.182) Whether it's one of the server's lasting stains (darkens as it dries, fades slowly). */
 	private final boolean stain;
-	/** (0.19.61) Whether it's water (rain or drips: never darkens, dries up slowly). */
+	/** (0.19.63) Whether it's water (rain or drips: never darkens, dries up slowly). */
 	private final boolean wet;
 	private final float yaw;
 	/** (0.19.55) Its stretch east-west and north-south (1 and 1 round; a smear long one way and narrow the other). */
@@ -70,7 +70,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	}
 
 	/**
-	 * (0.19.61) A puddle of water (rain pooling, drips off a wet body) this big, lying {@code life} ticks before it starts to
+	 * (0.19.63) A puddle of water (rain pooling, drips off a wet body) this big, lying {@code life} ticks before it starts to
 	 * dry up; {@link #feed} keeps it (and grows it) while more water falls on it.
 	 */
 	public static BloodPuddle water(ClientLevel level, double x, double y, double z, SpriteSet sprites, float scale, int life) {
@@ -115,7 +115,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.lifetime = this.age + life;
 	}
 
-	/** (0.19.61) More water fell on this puddle: it lasts at least {@code life} more ticks and grows by {@code grow} (scale). */
+	/** (0.19.63) More water fell on this puddle: it lasts at least {@code life} more ticks and grows by {@code grow} (scale). */
 	public void feed(int life, float grow) {
 		if (!this.wet) {
 			return;
@@ -124,12 +124,12 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.baseSize = Math.min(SIZE * WET_MAX_SCALE, this.baseSize + SIZE * grow);
 	}
 
-	/** (0.19.61) Where it lies. */
+	/** (0.19.63) Where it lies. */
 	public Vec3 position() {
 		return new Vec3(this.x, this.y, this.z);
 	}
 
-	/** (0.19.61) Its size now (blocks across). */
+	/** (0.19.63) Its size now (blocks across). */
 	public float size() {
 		return this.baseSize;
 	}

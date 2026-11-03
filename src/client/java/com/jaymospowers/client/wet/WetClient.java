@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.19.61) Wet weather on the client (Andy: "pooling water on the ground near trees, during rain, and under wet characters
+ * (0.19.63) Wet weather on the client (Andy: "pooling water on the ground near trees, during rain, and under wet characters
  * like the blood trail", and "subsurface scattering rays underwater"). All of it is only for show, so each client works
  * it out for itself:
  * <ul>

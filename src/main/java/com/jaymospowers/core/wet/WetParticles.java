@@ -7,7 +7,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
- * (0.19.61) The wet weather's particle types, registered on both sides so their sprites load into the particle atlas.
+ * (0.19.63) The wet weather's particle types, registered on both sides so their sprites load into the particle atlas.
  * Only the client makes them (the client's {@code client/wet}): water puddles left by rain and by dripping bodies, and
  * the light shafts seen under water.
  */

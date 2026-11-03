@@ -29,7 +29,7 @@ public final class BloodDecals {
 	private BloodDecals() {
 	}
 
-	/** (0.19.61) Anything drawn as ready-made quads in this group: blood and water puddles, underwater light shafts. */
+	/** (0.19.63) Anything drawn as ready-made quads in this group: blood and water puddles, underwater light shafts. */
 	public interface Decal {
 		/** Whether the camera could see it. */
 		boolean visible(Frustum frustum);
