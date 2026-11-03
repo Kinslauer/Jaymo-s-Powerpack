@@ -118,6 +118,8 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			return;
 		}
 		if (hit.getType() != HitResult.Type.MISS) {
+			// (0.7.484) it scuffs the soil where it lands (a field gun's ball is no shell: loose ground and growth only)
+			com.jaymoskingdoms.sailing.Bombardment.crater(level, Vec3.atCenterOf(((BlockHitResult) hit).getBlockPos()), com.jaymoskingdoms.sailing.Bombardment.FIELD, gunner);
 			this.burst(level, gunner, ((BlockHitResult) hit).getLocation(), null);
 			return;
 		}

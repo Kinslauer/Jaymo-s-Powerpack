@@ -57,8 +57,8 @@ public final class Cannon extends Entity {
 	static final double CREW_REACH = 3.5;
 	/** The entity event that kicks its barrel back on the client. */
 	static final byte FIRED = 60;
-	/** How long the barrel's kick lasts (ticks). */
-	public static final int RECOIL_TICKS = 8;
+	/** How long the barrel's kick lasts (ticks). (0.7.484) The gun runs back fast and is hauled up again slowly. */
+	public static final int RECOIL_TICKS = 16;
 
 	public static EntityType<Cannon> TYPE;
 
@@ -236,8 +236,12 @@ public final class Cannon extends Entity {
 		Vec3 muzzle = pivot.add(dir.scale(MUZZLE));
 		Cannonball.fire(level, gunner, muzzle, dir);
 		level.sendParticles(ParticleTypes.EXPLOSION, muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 14, 0.25, 0.25, 0.25, 0.03);
-		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 4, 0.1, 0.1, 0.1, 0.02);
+		// (0.7.484) the flash at the muzzle, a bank of smoke rolling out, a little off the vent
+		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFE9A8), muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 20, 0.3, 0.3, 0.3, 0.05);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, muzzle.x + dir.x, muzzle.y + dir.y, muzzle.z + dir.z, 3, 0.2, 0.15, 0.2, 0.01);
+		level.sendParticles(ParticleTypes.SMOKE, pivot.x - dir.x * 0.6, pivot.y + 0.2, pivot.z - dir.z * 0.6, 5, 0.15, 0.1, 0.15, 0.02);
+		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 6, 0.12, 0.12, 0.12, 0.05);
 		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 3.0F,
 			0.6F + level.getRandom().nextFloat() * 0.15F);
 		level.broadcastEntityEvent(this, FIRED);

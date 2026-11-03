@@ -115,6 +115,8 @@ public final class Ship extends Entity {
 	 * the bottom (ticks) before she's laid there as a wreck.
 	 */
 	static final double HOLE = 1.3, SINK = 0.03;
+	/** (0.7.484) How far round chain shot tears her sails (blocks). */
+	static final double CHAIN_REACH = 2.2;
 	static final float SALVAGE = 0.25F;
 	static final int SINKING_MOST = 600;
 	/** (0.7.18) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
@@ -1059,7 +1061,7 @@ public final class Ship extends Entity {
 			if (done != null) {
 				this.setPiece(i, done.next());
 				if (done.fires()) {
-					this.fireGun(level, i, done.next(), player);
+					this.fireGun(level, i, state, player);
 				} else {
 					Vec3 at = this.toWorld(x, y + 0.5, z);
 					level.playSound(null, at.x, at.y, at.z, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
@@ -1193,7 +1195,13 @@ public final class Ship extends Entity {
 	/** Whether the gun at {@code key} is still aboard, and loaded with powder and shot. */
 	public boolean gunLoaded(long key) {
 		BlockState state = this.gunState(key);
-		return state != null && state.getValue(ShipCannonBlock.LOAD) == ShipCannonBlock.Load.SHOT;
+		return state != null && state.getValue(ShipCannonBlock.LOAD).loaded();
+	}
+
+	/** (0.7.484) What the gun at {@code key} is loaded with, or null if it's empty (or gone). */
+	public @Nullable ShotKind gunKind(long key) {
+		BlockState state = this.gunState(key);
+		return state == null ? null : ShotKind.of(state.getValue(ShipCannonBlock.LOAD));
 	}
 
 	/** Whether the gun at {@code key} is still aboard. */
@@ -1201,11 +1209,11 @@ public final class Ship extends Entity {
 		return this.gunState(key) != null;
 	}
 
-	/** Her crew load the gun at {@code key} (powder and shot at once). */
-	public void loadGun(long key) {
+	/** Her crew load the gun at {@code key} with {@code kind} (powder and shot at once). */
+	public void loadGun(long key, ShotKind kind) {
 		BlockState state = this.gunState(key);
-		if (state != null && state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
-			this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.SHOT));
+		if (state != null && !state.getValue(ShipCannonBlock.LOAD).loaded()) {
+			this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, kind.load()));
 		}
 	}
 
@@ -1224,11 +1232,12 @@ public final class Ship extends Entity {
 	/** Her crew fire the (loaded) gun at {@code key} along {@code dir}, laid by {@code gunner}. False if it couldn't. */
 	public boolean fireGunAlong(ServerLevel level, long key, Vec3 dir, @Nullable Entity gunner) {
 		BlockState state = this.gunState(key);
-		if (state == null || state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
+		ShotKind kind = state == null ? null : ShotKind.of(state.getValue(ShipCannonBlock.LOAD));
+		if (state == null || kind == null) {
 			return false;
 		}
 		this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
-		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this);
+		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this, kind);
 		return true;
 	}
 
@@ -1309,7 +1318,7 @@ public final class Ship extends Entity {
 		return h == null ? 0.0 : this.rowSpeed(h);
 	}
 
-	/** Gun {@code i} (now {@code state}, emptied) fires. */
+	/** Gun {@code i} (as it was, loaded, in {@code state}) fires. */
 	private void fireGun(ServerLevel level, int i, BlockState state, @Nullable Player gunner) {
 		Hull h = this.hull();
 		if (h == null) {
@@ -1317,7 +1326,8 @@ public final class Ship extends Entity {
 		}
 		Piece p = h.pieces.get(i);
 		double[] way = this.worldWay(state.getValue(ShipCannonBlock.FACING));
-		ShipCannonBlock.fire(level, this.toWorld(p.x(), p.y() + 0.5, p.z()), way[0], way[1], gunner, this);
+		ShotKind kind = ShotKind.of(state.getValue(ShipCannonBlock.LOAD));
+		ShipCannonBlock.fire(level, this.toWorld(p.x(), p.y() + 0.5, p.z()), way[0], way[1], gunner, this, kind == null ? ShotKind.ROUND : kind);
 	}
 
 	/**
@@ -1334,7 +1344,7 @@ public final class Ship extends Entity {
 		boolean any = false;
 		for (int i : h.cannons) {
 			BlockState state = h.pieces.get(i).blockState();
-			if (state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
+			if (!state.getValue(ShipCannonBlock.LOAD).loaded()) {
 				continue;
 			}
 			double[] way = this.worldWay(state.getValue(ShipCannonBlock.FACING));
@@ -1372,10 +1382,10 @@ public final class Ship extends Entity {
 				continue;
 			}
 			BlockState state = now.pieces.get(v[0]).blockState();
-			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.LOAD) == ShipCannonBlock.Load.SHOT) {
+			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.LOAD).loaded()) {
 				BlockState empty = state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY);
 				this.setPiece(v[0], empty);
-				this.fireGun(level, v[0], empty, this.pilot());
+				this.fireGun(level, v[0], state, this.pilot());
 			}
 		}
 	}
@@ -1423,6 +1433,34 @@ public final class Ship extends Entity {
 		}
 		this.smash(level, h, gone);
 		return true;
+	}
+
+	/**
+	 * (0.7.484) Chain shot at {@code world}: her sails within reach of it are torn away (her timbers untouched). 1 if it tore
+	 * any, 2 if it met her hull (where it stops), 0 if it's not in her.
+	 */
+	public int rigged(Vec3 world, @Nullable Entity by) {
+		Hull h = this.hull();
+		if (h == null || this.isRemoved() || !(this.level() instanceof ServerLevel level)) {
+			return 0;
+		}
+		Vec3 l = this.toLocal(world);
+		int i = h.at(Mth.floor(l.x + 0.5), Mth.floor(l.y), Mth.floor(l.z + 0.5));
+		java.util.Set<Integer> gone = new java.util.HashSet<>();
+		for (int j = 0; j < h.pieces.size(); j++) {
+			Piece p = h.pieces.get(j);
+			if (p.blockState().getBlock() instanceof SailBlock && l.distanceTo(new Vec3(p.x(), p.y() + 0.5, p.z())) <= CHAIN_REACH) {
+				gone.add(j);
+			}
+		}
+		if (!gone.isEmpty()) {
+			if (by != null) {
+				this.holedBy = by.getUUID();
+			}
+			this.smash(level, h, gone);
+			return 1;
+		}
+		return i >= 0 && !(h.pieces.get(i).blockState().getBlock() instanceof SailBlock) ? 2 : 0;
 	}
 
 	/** Her pieces {@code gone} are smashed out: splinters, some wash up, her chests spill. */

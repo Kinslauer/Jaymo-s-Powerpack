@@ -72,6 +72,12 @@ public final class Crew {
 	public @Nullable BlockPos waypoint;
 	public int stuck, lastFired, backing;
 	/**
+	 * (0.7.484) Not saved: a shore target her guns are laid on while her cove's landing party is ashore (where to aim), and
+	 * whether it's someone living (grape for crews) or ground and works (shell and heavy shot).
+	 */
+	public @Nullable Vec3 shore;
+	public boolean shoreLiving;
+	/**
 	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
 	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.
 	 */

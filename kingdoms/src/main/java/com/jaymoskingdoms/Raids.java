@@ -133,6 +133,12 @@ final class Raids {
 		return ACTIVE.containsKey(camp);
 	}
 
+	/** (0.7.484) The settlement camp {@code camp} is raiding just now (its id), or -1 if it isn't. */
+	static int targetOf(int camp) {
+		Raid raid = ACTIVE.get(camp);
+		return raid == null ? -1 : raid.target;
+	}
+
 	/** (0.7.484) Camp {@code a} is raiding camp {@code b} just now, or the other way about. */
 	static boolean between(int a, int b) {
 		Raid ab = ACTIVE.get(a), ba = ACTIVE.get(b);

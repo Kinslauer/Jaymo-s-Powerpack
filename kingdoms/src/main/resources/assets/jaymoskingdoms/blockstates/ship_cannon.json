@@ -9,6 +9,18 @@
     "facing=north,load=shot": {
       "model": "jaymoskingdoms:block/ship_cannon"
     },
+    "facing=north,load=heavy": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=north,load=shell": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=north,load=chain": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=north,load=grape": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
     "facing=east,load=empty": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 90
@@ -18,6 +30,22 @@
       "y": 90
     },
     "facing=east,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=heavy": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=shell": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=chain": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=grape": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 90
     },
@@ -33,6 +61,22 @@
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 180
     },
+    "facing=south,load=heavy": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=south,load=shell": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=south,load=chain": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=south,load=grape": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
     "facing=west,load=empty": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 270
@@ -42,6 +86,22 @@
       "y": 270
     },
     "facing=west,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=heavy": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=shell": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=chain": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=grape": {
       "model": "jaymoskingdoms:block/ship_cannon",
       "y": 270
     }
