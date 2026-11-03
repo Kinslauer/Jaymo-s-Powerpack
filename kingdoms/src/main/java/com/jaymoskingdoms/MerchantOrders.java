@@ -280,9 +280,11 @@ final class MerchantOrders {
 				Currency sold = coin.human() ? coin : priced == null ? Currency.EMERALD : priced;
 				int price = asked;
 				if (coin.human() && priced != null && priced != coin) {
-					// (0.7.484) the same worth in the town's coin, unless that is more than a stack: then it stays in its own coin
-					long local = Math.max(1L, ((long)asked * priced.base + coin.base - 1L) / coin.base);
-					if (local <= 64L) {
+					// (0.7.484) the same worth in the town's coin, unless that is more than a stack, or rounding to the town's coin
+					// would ask much more than it is worth: then it stays in its own coin
+					long worth = (long)asked * priced.base;
+					long local = Math.max(1L, (worth + coin.base - 1L) / coin.base);
+					if (local <= 64L && Currencies.near(local * coin.base, worth, true)) {
 						price = (int)local;
 					} else {
 						sold = priced;

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -818,7 +820,33 @@ public final class Careers {
 			int owedCoins = owed > 0 ? Currencies.coinsPaid(money, owed) : 0;
 			int floorCoins = p.done() > 0 ? Currencies.coinsPaid(money, (long)p.done() * WAGE_FLOOR) : 0;
 			int fromStore = Storage.take(store, f, money.item(), owedCoins).getCount();
-			int fresh = Math.max(0, Math.min(owedCoins - fromStore, floorCoins - fromStore));
+			// (0.7.484) short of the town's coin: the rest out of the storehouse's emeralds, then any other realm's coin at its
+			// standard worth (old saves, earlier orders, a coin the town used before), each paid out as it is
+			long owedMilli = (long)owedCoins * money.base;
+			long storeMilli = (long)fromStore * money.base;
+			Map<Currency, Integer> others = new LinkedHashMap<>();
+			if (money.human()) {
+				List<Currency> order = new ArrayList<>();
+				order.add(Currency.EMERALD);
+				for (Currency x : Currency.values()) {
+					if (x.human() && x != Currency.EMERALD) {
+						order.add(x);
+					}
+				}
+				for (Currency x : order) {
+					long want = (owedMilli - storeMilli) / x.base;
+					if (x == money || want <= 0L) {
+						continue;
+					}
+					int got = Storage.take(store, f, x.item(), (int)Math.min(Integer.MAX_VALUE, want)).getCount();
+					if (got > 0) {
+						others.merge(x, got, Integer::sum);
+						storeMilli += (long)got * x.base;
+					}
+				}
+			}
+			int storeCoins = (int)(storeMilli / money.base);
+			int fresh = Math.max(0, Math.min(owedCoins - storeCoins, floorCoins - storeCoins));
 			int paid = fromStore + fresh;
 			if (apprentice && p.kind() != null && !p.kind().goods.isEmpty()) {
 				// their apprentice's day: a stack of the trade's goods into the storehouse
@@ -830,8 +858,18 @@ public final class Careers {
 			if (paid > 0) {
 				Currencies.give(player, money, paid);
 			}
-			player.sendSystemMessage(Component.translatable(fromStore < owedCoins ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
-				Currencies.amount(money, paid), f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
+			boolean listed = paid > 0 || others.isEmpty();
+			MutableComponent shown = listed ? Currencies.amount(money, paid).copy() : Component.empty();
+			for (Map.Entry<Currency, Integer> e : others.entrySet()) {
+				Currencies.give(player, e.getKey(), e.getValue());
+				if (listed) {
+					shown.append(Component.literal(", "));
+				}
+				shown.append(Currencies.amount(e.getKey(), e.getValue()));
+				listed = true;
+			}
+			player.sendSystemMessage(Component.translatable(storeMilli < owedMilli ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
+				shown, f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
 			edit(player, k -> {
 				Post now = k.post(p.job());
 				return now == null ? k : k.withPost(now.withDone(0));

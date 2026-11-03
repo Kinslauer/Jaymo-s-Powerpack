@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -82,23 +83,34 @@ public final class Currencies {
 	static final double STAFF_RANGE = Economy.POPULATION_RANGE;
 	/** A kingdom's taxes: this share (percent) is also paid into the storehouse in its coin, for the town's own wages. */
 	static final int TAX_COIN_PERCENT = 20;
+	/**
+	 * (0.7.484) A price is put in a coin only when that many coins come within this share of its worth (asked: never under
+	 * it; paid: never over it); else it stays in emeralds, or its own coin, so rounding to a big coin never makes money.
+	 */
+	static final double ROUND_SLACK = 0.10;
+	/** (0.7.484) How many offers' worths a trader keeps, those in its list now first, then those put away for a while (TierGate). */
+	static final int BASES_KEPT = 64;
 	// ================================================================================================================
 
 	public static Item REALM_SILVER, HACKSILVER, GOLD_DINAR, SHELL_STRING, MON_COIN;
 
 	/**
-	 * (0.7.484) A trader's offer as it was before any town's coin was put on it: its place in the trader's list, the offer
-	 * as last set (to know it is still that offer), and the worth of each of its coin slots (cost A, cost B, result) in
-	 * thousandths of an emerald (0 where the slot isn't coin). Prices are always worked out from this, never from the last
-	 * town's coin, so they don't creep as a town changes coin back and forth.
+	 * (0.7.484) A trader's offer as it was before any town's coin was put on it: its place in the trader's list when last
+	 * set (only a note), the offer as last set (how it is known again, wherever it has moved to in the list or if it was
+	 * put away and brought back), the worth of each of its coin slots (cost A, cost B, result) in thousandths of an emerald
+	 * (0 where the slot isn't coin), and the coin each slot first was ({@link Currency#id}, "" where unknown). Prices are
+	 * always worked out from this, never from the last town's coin, so they don't creep as a town changes coin back and forth.
 	 */
-	record Base(int index, String print, int a, int b, int r) {
+	record Base(int index, String print, int a, int b, int r, String ca, String cb, String cr) {
 		static final Codec<Base> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("index").forGetter(Base::index),
 				Codec.STRING.fieldOf("print").forGetter(Base::print),
 				Codec.INT.fieldOf("a").forGetter(Base::a),
 				Codec.INT.fieldOf("b").forGetter(Base::b),
-				Codec.INT.fieldOf("r").forGetter(Base::r))
+				Codec.INT.fieldOf("r").forGetter(Base::r),
+				Codec.STRING.optionalFieldOf("ca", "").forGetter(Base::ca),
+				Codec.STRING.optionalFieldOf("cb", "").forGetter(Base::cb),
+				Codec.STRING.optionalFieldOf("cr", "").forGetter(Base::cr))
 			.apply(i, Base::new));
 	}
 
@@ -356,10 +368,12 @@ public final class Currencies {
 		if (Underworld.blackMarket(villager) || !c.human()) {
 			return;
 		}
-		// (0.7.484) each price worked out from the offer's own worth (Base), never from the coin it was last set in
-		Map<Integer, Base> known = new HashMap<>();
-		for (Base base : villager.getAttachedOrElse(BASES, List.<Base>of())) {
-			known.put(base.index(), base);
+		// (0.7.484) each price worked out from the offer's own worth (Base), never from the coin it was last set in; a Base is
+		// found by the offer as it was last set (its print), not by its place, since TierGate moves offers about and puts them away
+		Map<String, ArrayDeque<Base>> known = new HashMap<>();
+		List<Base> stored = villager.getAttachedOrElse(BASES, List.<Base>of());
+		for (Base base : stored) {
+			known.computeIfAbsent(base.print(), k -> new ArrayDeque<>()).add(base);
 		}
 		List<Base> now = new ArrayList<>();
 		MerchantOffers offers = villager.getOffers();
@@ -369,24 +383,37 @@ public final class Currencies {
 			if (wa == 0 && wb == 0 && wr == 0) {
 				continue;
 			}
-			Base base = known.get(i);
-			if (base == null || !base.print().equals(print(o.getItemCostA(), o.getItemCostB(), o.getResult()))) {
-				// (new, or not the offer it was: what it asks now is its worth)
-				base = new Base(i, "", wa, wb, wr);
+			String had = print(o.getItemCostA(), o.getItemCostB(), o.getResult());
+			ArrayDeque<Base> same = known.get(had);
+			Base base = same == null ? null : same.poll();
+			if (base == null) {
+				// (new, or not an offer it knows: what it asks now is its worth, in the coin it asks it in)
+				base = new Base(i, "", wa, wb, wr, coinId(o.getItemCostA().item().value()),
+					o.getItemCostB().map(x -> coinId(x.item().value())).orElse(""), coinId(o.getResult().getItem()));
 			}
 			Base was = base;
-			ItemCost a = was.a() > 0 ? asked(was.a(), c, o.getItemCostA()) : o.getItemCostA();
-			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, x)) : o.getItemCostB();
-			ItemStack result = was.r() > 0 ? paid(was.r(), c, o.getResult()) : o.getResult();
+			ItemCost a = was.a() > 0 ? asked(was.a(), c, was.ca(), o.getItemCostA()) : o.getItemCostA();
+			Optional<ItemCost> b = was.b() > 0 ? o.getItemCostB().map(x -> asked(was.b(), c, was.cb(), x)) : o.getItemCostB();
+			ItemStack result = was.r() > 0 ? paid(was.r(), c, was.cr(), o.getResult()) : o.getResult();
 			String print = print(a, b, result);
-			now.add(new Base(i, print, was.a(), was.b(), was.r()));
-			if (print.equals(print(o.getItemCostA(), o.getItemCostB(), o.getResult()))) {
+			now.add(new Base(i, print, was.a(), was.b(), was.r(), was.ca(), was.cb(), was.cr()));
+			if (print.equals(had)) {
 				continue;
 			}
 			MerchantOffer fresh = new MerchantOffer(a, b, result, o.getUses(), o.getMaxUses(), o.getXp(), o.getPriceMultiplier(), o.getDemand());
 			int before = o.getItemCostA().count();
 			fresh.setSpecialPriceDiff(before <= 0 ? 0 : Math.round(o.getSpecialPriceDiff() * (float)a.count() / before));
 			offers.set(i, fresh);
+		}
+		// (the worths of offers put away for now are kept, so they are known again when they come back)
+		for (Base base : stored) {
+			ArrayDeque<Base> left = known.get(base.print());
+			if (now.size() >= BASES_KEPT) {
+				break;
+			}
+			if (left != null && left.remove(base)) {
+				now.add(base);
+			}
 		}
 		if (!now.isEmpty()) {
 			villager.setAttached(BASES, List.copyOf(now));
@@ -413,24 +440,55 @@ public final class Currencies {
 			+ BuiltInRegistries.ITEM.getKey(result.getItem()) + "*" + result.getCount();
 	}
 
-	/** {@code milli} of worth asked in {@code c}'s coin (rounded up); in emeralds if that is more than a stack; else {@code fallback}. */
-	private static ItemCost asked(int milli, Currency c, ItemCost fallback) {
-		long n = (milli + c.base - 1L) / c.base;
-		if (n >= 1L && n <= 64L) {
-			return new ItemCost(c.item(), (int)n);
-		}
-		long e = (milli + 999L) / 1000L;
-		return e >= 1L && e <= 64L ? new ItemCost(Items.EMERALD, (int)e) : fallback;
+	/** {@code item}'s {@link Currency#id} if it is a human coin, else "". */
+	private static String coinId(Item item) {
+		Currency from = Currency.byItem(item);
+		return from == null || !from.human() ? "" : from.id();
 	}
 
-	/** {@code milli} of worth paid in {@code c}'s coin (rounded down, never nothing); in emeralds if that is more than a stack; else {@code fallback}. */
-	private static ItemStack paid(int milli, Currency c, ItemStack fallback) {
-		long n = Math.max(1L, milli / c.base);
-		if (n <= 64L) {
-			return new ItemStack(c.item(), (int)n);
+	private static @Nullable Currency byId(String id) {
+		for (Currency x : Currency.values()) {
+			if (x.id().equals(id)) {
+				return x;
+			}
 		}
-		long e = Math.max(1L, milli / 1000L);
-		return e <= 64L ? new ItemStack(Items.EMERALD, (int)e) : fallback;
+		return null;
+	}
+
+	/** (0.7.484) {@code coins} (thousandths of an emerald) is within {@link #ROUND_SLACK} of {@code milli}: over it if {@code over}, else under it. */
+	public static boolean near(long coins, long milli, boolean over) {
+		return over ? coins >= milli && coins <= milli * (1.0 + ROUND_SLACK) : coins <= milli && coins >= milli * (1.0 - ROUND_SLACK);
+	}
+
+	/**
+	 * {@code milli} of worth asked in {@code c}'s coin (rounded up); else in emeralds; else in the coin {@code first} it was
+	 * first asked in; else {@code fallback}. A coin is used only for a stack or less, and when it comes near the worth.
+	 */
+	private static ItemCost asked(int milli, Currency c, String first, ItemCost fallback) {
+		for (Currency x : new Currency[] {c, Currency.EMERALD, byId(first)}) {
+			if (x == null || !x.human()) {
+				continue;
+			}
+			long n = (milli + x.base - 1L) / x.base;
+			if (n >= 1L && n <= 64L && near(n * x.base, milli, true)) {
+				return new ItemCost(x.item(), (int)n);
+			}
+		}
+		return fallback;
+	}
+
+	/** {@code milli} of worth paid in {@code c}'s coin (rounded down), else in emeralds, else in its first coin, as for {@link #asked}; else {@code fallback}. */
+	private static ItemStack paid(int milli, Currency c, String first, ItemStack fallback) {
+		for (Currency x : new Currency[] {c, Currency.EMERALD, byId(first)}) {
+			if (x == null || !x.human()) {
+				continue;
+			}
+			long n = milli / x.base;
+			if (n >= 1L && n <= 64L && near(n * x.base, milli, false)) {
+				return new ItemStack(x.item(), (int)n);
+			}
+		}
+		return fallback;
 	}
 
 	// ---- money-changers --------------------------------------------------------------------------------------------------------
