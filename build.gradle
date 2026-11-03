@@ -373,7 +373,7 @@ def packResourcePacks = [
 	// (Havens patch 8) Better Horses (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): redrawn
 	// donkeys and mules through Entity Model Features. Same story as Fresh Animations: fetched from Modrinth by
 	// client/PackResourcePacks until its CurseForge file id is added here, [cf: [<project>, <file>], file: "Better Horses v4.3 1.21.11.zip"].
-	// (0.19.61) Excalibur (by Maffhew; CC BY-NC-ND 3.0, shipped unchanged, link to its page on the pack's page) and
+	// (0.19.62) Excalibur (by Maffhew; CC BY-NC-ND 3.0, shipped unchanged, link to its page on the pack's page) and
 	// "Excalibur | Fresh Animations" (by Ruseki and GrandPappyJay; modpacks may include it): fetched from Modrinth by
 	// client/PackResourcePacks for now, like Fresh Animations (docs/Excalibur-Style.md). Add their CurseForge ids here once known.
 ]

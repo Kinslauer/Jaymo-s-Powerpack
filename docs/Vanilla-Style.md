@@ -1,6 +1,6 @@
 # Vanilla style for every modded item
 
-> 2026-11-03 (0.19.61): the pack moved to Excalibur's look (`docs/Excalibur-Style.md`). These redraws stay, graded
+> 2026-11-03 (0.19.62): the pack moved to Excalibur's look (`docs/Excalibur-Style.md`). These redraws stay, graded
 > toward Excalibur in place. After rerunning a painter here, run `tools/excalibur_style/grade.py`.
 
 Goal: every item in the pack looks like Mojang drew it. Delivered as the built-in resource pack

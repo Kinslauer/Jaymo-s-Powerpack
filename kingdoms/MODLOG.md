@@ -8247,7 +8247,7 @@ Andy's Gemini handoff, pass 1 (design intent; Gemini's 1.21.1 code not used).
 - Skipped from the handoff: its MCA outfit mixin (the Medieval villagers pack already dresses them, and clothes only
   change at a tailor), Gemini's alloy items without uses, and its 1.21.1 mixins on APIs 26.3 doesn't have.
 
-## 0.7.480: Excalibur's look (pack 0.19.61)
+## 0.7.480: Excalibur's look (pack 0.19.62, Kitchen 0.5.51)
 All item, block, entity and clothing textures are graded toward Excalibur's darker, earthier palette by the pack's
 `tools/excalibur_style/grade.py`. Glows, eyes and see-through art are unchanged. Rerun the grade after adding or
 redrawing a texture (`docs/Excalibur-Style.md` in the pack).
