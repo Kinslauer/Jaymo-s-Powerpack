@@ -323,6 +323,9 @@ final class Brutality {
 	}
 
 	private static void start(ServerLevel level, int camp, PathfinderMob a, PathfinderMob b, boolean challenge) {
+		if (disturbed(level, a) || disturbed(level, b)) {
+			return; // (0.7.480) a foe is near: no fight is called, so no shout and no cooldown spent
+		}
 		Brawl brawl = new Brawl(camp, a.getUUID(), b.getUUID(), challenge, level.getGameTime());
 		BRAWLS.put(camp, brawl);
 		FIGHTERS.put(a.getUUID(), brawl);
@@ -363,9 +366,13 @@ final class Brutality {
 		crowd(level, brawl, a, b, now);
 	}
 
-	/** A foe of the camp's (a player it would hunt) is in sight of the fight. */
+	/**
+	 * A foe of the camp's (a player it would hunt) is in sight of the fight. (0.7.480) Only players the orcs would really go
+	 * for count: a truce, the tribe's favour or a sworn captain spares them, as in {@code McaCompat.foe}.
+	 */
 	private static boolean disturbed(ServerLevel level, PathfinderMob fighter) {
-		return !level.getEntitiesOfClass(ServerPlayer.class, fighter.getBoundingBox().inflate(DISTURB_RANGE), Orcs::prey).isEmpty();
+		return !level.getEntitiesOfClass(ServerPlayer.class, fighter.getBoundingBox().inflate(DISTURB_RANGE),
+				p -> Orcs.prey(p) && !Tribes.spares(fighter, p)).isEmpty();
 	}
 
 	/** The idle orcs round about come to watch, and jeer. */
