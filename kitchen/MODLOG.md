@@ -1291,3 +1291,7 @@ in game.
 an overlay line); sneak-use with an empty hand on a fire or lit campfire drinks it (+4; a loose fire goes out, a campfire
 keeps burning), on lava gulps it (+12, a short regeneration, 3 s apart); soaking in lava gives a point every 3 s; the
 Nether doesn't dry them. Non-water potions, milk, stews and fruit still count. The HUD's sip packet also goes out at open lava.
+
+## 0.5.50: Excalibur's look (pack 0.19.61, Kingdoms 0.7.480)
+Item and block textures are graded toward Excalibur's darker, earthier palette by the pack's
+`tools/excalibur_style/grade.py`. Rerun it after adding or redrawing a texture.
