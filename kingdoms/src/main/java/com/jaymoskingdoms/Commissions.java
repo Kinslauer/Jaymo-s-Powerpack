@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.484) Plans offered to a settlement for its growth: a member (or a well-liked friend) standing in its land gives
- * its steward one of their designs ({@code /kingdom design submit <name>}), and its builders put it up on open ground
+ * its steward one of their designs (from a {@link MasonTable}'s screen), and its builders put it up on open ground
  * of their own choosing, before anything of their own catalogue, once they're free and its storage holds the
  * materials ({@link Planner#eligible}). Built like any of their buildings: block by block from raw materials, the
  * crew walking to and from the storage ({@link Construction}). When it's finished the one who gave it is thanked,
@@ -171,80 +171,52 @@ public final class Commissions {
 		return f != null ? f : Factions.around(server, player.level(), player.blockPosition(), NEAR_SEAT);
 	}
 
-	/** {@code /kingdom design submit <name>}: offers design {@code name} to the settlement {@code player} stands in. */
+	/** Offers design {@code name} to the settlement {@code player} stands in. */
 	static boolean submit(ServerPlayer player, String name) {
 		MinecraftServer server = player.level().getServer();
 		name = name.toLowerCase(java.util.Locale.ROOT);
 		Faction f = here(player);
 		if (f == null || f.fallen()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.nowhere").withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.nowhere").withStyle(ChatFormatting.RED));
 			return false;
 		}
 		boolean member = f.member(player.getUUID()) != null;
 		if (!member && !player.isCreative() && Reputation.get(player, f.id()) < SUBMIT_REPUTATION) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.stranger", f.name()).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.stranger", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		Blueprint bp = Designs.blueprint(server, name);
 		if (bp == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!Designs.forCrews(bp)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.table_only", Designs.MAX_SIDE, Designs.MAX_HEIGHT, Designs.MAX_BLOCKS)
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.table_only", Designs.MAX_SIDE, Designs.MAX_HEIGHT, Designs.MAX_BLOCKS)
 				.withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (Blueprint.catalogue(f.type()).isEmpty()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.no_builders", f.name()).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.no_builders", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		List<Commission> list = new ArrayList<>(of(server, f.id()));
 		String id = Designs.PREFIX + name;
 		if (!player.isCreative() && list.stream().filter(c -> c.by().equals(player.getUUID())).count() >= MAX_PER_PLAYER) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.yours_waiting", f.name()).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.yours_waiting", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (list.size() >= MAX_WAITING) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.full", f.name()).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.full", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		// (a second plan for the same design waits for the first to be finished)
 		int baseline = Works.of(server, f.id()).count(id) + (int)list.stream().filter(c -> c.design().equals(id)).count();
 		list.add(new Commission(id, player.getUUID(), player.getGameProfile().name(), baseline));
 		put(server, f.id(), list);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.taken", name, f.name(), bp.width(), bp.depth(), bp.height())
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.taken", name, f.name(), bp.width(), bp.depth(), bp.height())
 			.withStyle(ChatFormatting.GREEN));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 		JaymosKingdoms.LOGGER.info("{} gave {} the plans for {}", player.getGameProfile().name(), f.name(), id);
 		return true;
-	}
-
-	/** {@code /kingdom design withdraw <name>}: takes back a plan you gave the settlement you stand in (not once it's begun). */
-	static boolean withdraw(ServerPlayer player, String name) {
-		MinecraftServer server = player.level().getServer();
-		Faction f = here(player);
-		String id = Designs.PREFIX + name.toLowerCase(java.util.Locale.ROOT);
-		if (f == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.nowhere").withStyle(ChatFormatting.RED));
-			return false;
-		}
-		List<Commission> list = new ArrayList<>(of(server, f.id()));
-		Works.Site works = Works.of(server, f.id());
-		for (int i = 0; i < list.size(); i++) {
-			Commission c = list.get(i);
-			if (c.design().equals(id) && (c.by().equals(player.getUUID()) || player.isCreative())) {
-				if (works.projects().stream().anyMatch(p -> p.entry().equals(id))) {
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.begun", name).withStyle(ChatFormatting.RED));
-					return false;
-				}
-				list.remove(i);
-				put(server, f.id(), list);
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.withdrawn", name, f.name()).withStyle(ChatFormatting.YELLOW));
-				return true;
-			}
-		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.commission.none", name, f.name()).withStyle(ChatFormatting.RED));
-		return false;
 	}
 }

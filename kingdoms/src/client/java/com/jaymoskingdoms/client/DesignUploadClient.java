@@ -2,8 +2,6 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.DesignUploads;
 import com.jaymoskingdoms.SchematicFiles;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,24 +9,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.484) {@code /schematics}: the schematic files on this computer, and sending one to the server as a design
- * ({@link DesignUploads}). Files are read from the game folder's {@code schematics} folder (where Litematica keeps
- * its own, so files downloaded for it are already there): {@code .nbt}, {@code .schem} and {@code .litematic}.
- * <ul>
- * <li>{@code /schematics list}: the files there.</li>
- * <li>{@code /schematics upload <file> [name]}: sends one; its design takes the file's name unless given another.</li>
- * <li>{@code /schematics folder}: where the folder is.</li>
- * </ul>
+ * (0.7.484) The schematic files on this computer, and sending one to the server as a design ({@link DesignUploads}).
+ * Files are read from the game folder's {@code schematics} folder (where Litematica keeps its own, so files downloaded
+ * for it are already there): {@code .nbt}, {@code .schem} and {@code .litematic}. (0.7.485) Used by the mason's table's
+ * screen ({@link MasonScreen}); no commands.
  */
 public final class DesignUploadClient {
 	/** The folder in the game directory. */
@@ -37,21 +28,19 @@ public final class DesignUploadClient {
 	private DesignUploadClient() {
 	}
 
-	static void register() {
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal("schematics")
-			.then(ClientCommands.literal("list").executes(DesignUploadClient::list))
-			.then(ClientCommands.literal("folder").executes(c -> {
-				c.getSource().sendFeedback(Component.translatable("message.jaymoskingdoms.schematics.folder", folder().toString()).withStyle(ChatFormatting.GRAY));
-				return 1;
-			}))
-			.then(ClientCommands.literal("upload").then(ClientCommands.argument("file", StringArgumentType.string())
-				.suggests((c, builder) -> SharedSuggestionProvider.suggest(files().stream().map(DesignUploadClient::quoted), builder))
-				.executes(c -> upload(c, null))
-				.then(ClientCommands.argument("name", StringArgumentType.word()).executes(c -> upload(c, StringArgumentType.getString(c, "name"))))))));
-	}
-
 	static Path folder() {
 		return Minecraft.getInstance().gameDirectory.toPath().resolve(FOLDER);
+	}
+
+	/** Makes the folder if it isn't there yet (so it can be opened and filled). */
+	static Path ensureFolder() {
+		Path dir = folder();
+		try {
+			Files.createDirectories(dir);
+		} catch (IOException ignored) {
+			// (opening it then just fails)
+		}
+		return dir;
 	}
 
 	/** The schematic files in the folder (and its subfolders, as {@code sub/file.schem}), sorted. */
@@ -62,31 +51,10 @@ public final class DesignUploadClient {
 		}
 		try (Stream<Path> walk = Files.walk(dir, 3)) {
 			return walk.filter(Files::isRegularFile).filter(p -> SchematicFiles.extension(p.getFileName().toString()) != null)
-				.map(p -> dir.relativize(p).toString().replace('\\', '/')).sorted().toList();
+				.map(p -> dir.relativize(p).toString().replace('\\', '/')).sorted(String.CASE_INSENSITIVE_ORDER).toList();
 		} catch (IOException e) {
 			return List.of();
 		}
-	}
-
-	private static String quoted(String file) {
-		return file.matches("[A-Za-z0-9_.+-]+") ? file : "\"" + file.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
-	}
-
-	private static int list(CommandContext<FabricClientCommandSource> c) {
-		List<String> files = files();
-		try {
-			Files.createDirectories(folder());
-		} catch (IOException ignored) {
-			// (only so the folder is there to drop files in)
-		}
-		if (files.isEmpty()) {
-			c.getSource().sendFeedback(Component.translatable("message.jaymoskingdoms.schematics.none", folder().toString()).withStyle(ChatFormatting.GRAY));
-			return 0;
-		}
-		for (String f : files) {
-			c.getSource().sendFeedback(Component.literal(" " + f).withStyle(ChatFormatting.GRAY));
-		}
-		return files.size();
 	}
 
 	/** A design name from a file's name: lower case, anything else made _, at most 32. */
@@ -104,41 +72,38 @@ public final class DesignUploadClient {
 		return name.isEmpty() ? "design" : name;
 	}
 
-	private static int upload(CommandContext<FabricClientCommandSource> c, String name) {
-		String file = StringArgumentType.getString(c, "file");
+	/**
+	 * Sends {@code file} (from the folder) up as design {@link #nameFor its name}, from the screen of the table at
+	 * {@code table}. Null if it went; else what's wrong.
+	 */
+	static @Nullable Component upload(String file, BlockPos table) {
 		Path dir = folder().normalize();
 		Path path = dir.resolve(file).normalize();
 		if (!path.startsWith(dir) || !Files.isRegularFile(path) || SchematicFiles.extension(path.getFileName().toString()) == null) {
-			c.getSource().sendError(Component.translatable("message.jaymoskingdoms.schematics.no_file", file));
-			return 0;
+			return Component.translatable("message.jaymoskingdoms.schematics.no_file", file);
 		}
 		if (!ClientPlayNetworking.canSend(DesignUploads.Piece.TYPE)) {
-			c.getSource().sendError(Component.translatable("message.jaymoskingdoms.schematics.no_server"));
-			return 0;
+			return Component.translatable("message.jaymoskingdoms.schematics.no_server");
 		}
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(path);
 		} catch (IOException e) {
-			c.getSource().sendError(Component.translatable("message.jaymoskingdoms.schematics.no_file", file));
-			return 0;
+			return Component.translatable("message.jaymoskingdoms.schematics.no_file", file);
 		}
 		// every one of the three formats is gzipped NBT
 		if (bytes.length < 2 || (bytes[0] & 0xFF) != 0x1F || (bytes[1] & 0xFF) != 0x8B) {
-			c.getSource().sendError(Component.translatable("message.jaymoskingdoms.design.unreadable"));
-			return 0;
+			return Component.translatable("message.jaymoskingdoms.design.unreadable");
 		}
 		int total = (bytes.length + DesignUploads.PIECE - 1) / DesignUploads.PIECE;
 		if (total > DesignUploads.MAX_PIECES) {
-			c.getSource().sendError(Component.translatable("message.jaymoskingdoms.design.upload_big", DesignUploads.PIECE * DesignUploads.MAX_PIECES / 1024));
-			return 0;
+			return Component.translatable("message.jaymoskingdoms.design.upload_big", DesignUploads.PIECE * DesignUploads.MAX_PIECES / 1024);
 		}
-		String design = name != null ? name.toLowerCase(Locale.ROOT) : nameFor(file);
+		String design = nameFor(file);
 		for (int i = 0; i < total; i++) {
 			byte[] part = Arrays.copyOfRange(bytes, i * DesignUploads.PIECE, Math.min(bytes.length, (i + 1) * DesignUploads.PIECE));
-			ClientPlayNetworking.send(new DesignUploads.Piece(design, i, total, part));
+			ClientPlayNetworking.send(new DesignUploads.Piece(design, i, total, part, table));
 		}
-		c.getSource().sendFeedback(Component.translatable("message.jaymoskingdoms.schematics.sent", file, design).withStyle(ChatFormatting.GRAY));
-		return 1;
+		return null;
 	}
 }

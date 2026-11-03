@@ -8274,21 +8274,25 @@ redrawing a texture (`docs/Excalibur-Style.md` in the pack).
   Structura's "Medieval House": all three of its Java files read to the same 1,410 blocks.
   26.3 names a palette entry `id`/`properties`; the formats (and tools writing .nbt themselves) still use
   `Name`/`Properties`, which 26.3 reads as air, so entries are renamed after fixing.
-- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): `/schematics list | folder |
-  upload <file> [name]` reads the game folder's `schematics/` (Litematica's own folder) and sends the file in 30 KB
-  pieces (at most about 1.9 MB). The server reads it as NBT within a 64 MB quota and keeps it as the uploader's design
-  (same name and per-player rules as `/kingdom design save`).
+- **Uploads from your own computer** (`DesignUploads`, client `DesignUploadClient`): put files in the game folder's
+  `schematics/` (Litematica's own folder; the screen's Open folder button opens it) and pick one on the mason's table's
+  screen. It goes up in 30 KB pieces (at most about 1.9 MB); the server reads it as NBT within a 64 MB quota and keeps it
+  as the uploader's design (if someone else has that name, it gets `_2`, `_3`...). No commands.
 - **Bigger designs**: up to 96 across, 128 high, 120,000 blocks. Builder crews still take only plot-sized ones
-  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" in `/kingdom design list`.
+  (32 across, 48 high, 16,000 blocks); bigger ones are marked "mason's table only" on the table's screen.
 - **Building plan and mason's table** (`MasonTable`): two paper and a charcoal make a blank plan;
-  `/kingdom design plan <name>` draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
+  the table's screen draws a design on it. Use it on the ground to lay it out (sneak-use turns it a quarter;
   its outline shows while held), then put it in a mason's table (paper, crafting table, stone bricks). The table lays
   it bottom up, one block every 5 ticks, from the containers touching it, the exact block each time; doors and beds go
   in whole. Blocks in the way are skipped (use the finished table to try them again), matching ones only turned.
-  Use the table to see progress and what's still needed; sneak-use takes the plan back. Laid blocks count as the
-  plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
+  Laid blocks count as the plan owner's (`Placed`). Dev-server test: a table built the whole Medieval House (turned 90 degrees) from barrels in
   about six minutes, 1,409 of 1,410 blocks exact (one dirt had greened).
+- **Mason's table screen** (`MasonNet`, client `MasonScreen`), opened by using the table: your schematic files on the
+  left, the world's designs on the right (size, author, whether crews can build it). Buttons: Draw on a blank plan,
+  Offer to this settlement, Save marked build (the area marked with a surveyor's rod, under a typed name), Take the
+  plan back, Try skipped blocks again. It shows the plan's progress, the block it waits for and the top materials
+  still needed; answers show at the bottom. The lists shrink to fit at large GUI scales. Sneak-use takes the plan back.
 - **Plans for a settlement** (`Commissions`): a member, or a friend with 100 reputation, standing in a settlement
-  can `/kingdom design submit <name>` (or `withdraw`). Its builders put it up on open ground of their choosing before
+  can offer one of the world's designs from a mason's table's screen. Its builders put it up on open ground of their choosing before
   their own catalogue, from storage, like any building. Up to 4 waiting per settlement, 1 per player. When finished,
   the giver gets +40 reputation and a message.

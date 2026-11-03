@@ -89,6 +89,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.484) schematic files: uploads from players' computers, the mason's table, plans given to settlements
 		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
 		DesignUploads.register();
+		MasonNet.register();
 		MasonTable.register();
 		Commissions.register();
 		Armory.register();

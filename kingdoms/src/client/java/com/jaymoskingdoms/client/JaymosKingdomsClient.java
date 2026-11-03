@@ -145,7 +145,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ScentClient.register();
 		WolfTells.register();
 		ClothesColourClient.register();
-		DesignUploadClient.register();
+		MasonScreen.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();

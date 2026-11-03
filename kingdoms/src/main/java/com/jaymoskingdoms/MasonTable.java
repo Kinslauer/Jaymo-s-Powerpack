@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -65,17 +66,20 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.484) Building from a design yourself, in survival, from your own materials: our own take on a schematic
  * builder, through designs only (saved with the {@link Surveyor}, or uploaded from a schematic file, see {@link Designs}).
+ * (0.7.485) Everything is done at the table's screen ({@link MasonNet}, {@code MasonScreen}), no commands:
  * <ul>
- * <li>A <b>building plan</b> (paper and charcoal) is written with a design: {@code /kingdom design plan <name>} while
- * holding it. Use it on the ground to lay the building out there (its lowest north-west corner on the block in front of
+ * <li>Use the <b>mason's table</b> empty-handed: its screen lists the schematic files in your game's {@code schematics}
+ * folder (a button opens the folder to drop files in) and the designs already on the world. Pick one and draw it on a
+ * blank <b>building plan</b> (paper and charcoal) you carry; a file of yours is sent up first. The screen also saves what
+ * you marked with a surveyor's rod as a design, offers a design to the settlement you're in ({@link Commissions}), and
+ * shows the table's progress and the materials still needed.</li>
+ * <li>Use the plan on the ground to lay the building out there (its lowest north-west corner on the block in front of
  * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.</li>
- * <li>A <b>mason's table</b> takes a laid-out plan (use it on the table) and builds it, bottom up, a block at a time,
- * from the chests, barrels and the like touching it: the very block (planks are planks, stairs are stairs, though
- * dirt does for grass and paths; the second
+ * <li>Use the plan on the table and it builds it, bottom up, a block at a time, from the chests, barrels and the like
+ * touching it: the very block (planks are planks, stairs are stairs, though dirt does for grass and paths; the second
  * half of a door or bed comes with the first). What's already there is left be: a block in the way is skipped, a
  * matching one only turned to match. Nothing comes with the blocks: chests empty, signs blank, no water or fire.</li>
- * <li>Use the table empty-handed to hear how far it is and what it waits for (and, once finished, to try the skipped
- * blocks again); sneak to take the plan back. Breaking the table drops the plan.</li>
+ * <li>Sneak-use the table empty-handed to take the plan back. Breaking the table drops the plan.</li>
  * </ul>
  * Blocks it lays count as placed by whoever put the plan in, so they're theirs to break ({@link Placed}).
  */
@@ -89,7 +93,7 @@ public final class MasonTable {
 	/** How often a held plan's outline shows (ticks); how far from it its holder may be. */
 	static final int SHOW_TICKS = 20, SHOW_RANGE = 128;
 	/** The materials listed when the table is asked. */
-	static final int LIST_MATERIALS = 6;
+	static final int LIST_MATERIALS = 8;
 	/** How a block is set: clients told, neighbours left as the design has them. */
 	static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 	/** Where a plan's details sit in its custom data. */
@@ -178,30 +182,128 @@ public final class MasonTable {
 		}
 	}
 
-	/** {@code /kingdom design plan <name>}: writes design {@code name} on the building plan in hand (creative: a new one). */
+	/**
+	 * Draws design {@code name} on a building plan {@code player} carries: a blank one first, else the one in hand
+	 * (creative: a new one if none). Tells them how it went.
+	 */
 	static boolean inscribe(ServerPlayer player, String name) {
 		name = name.toLowerCase(java.util.Locale.ROOT);
 		Blueprint bp = Designs.blueprint(player.level().getServer(), name);
 		if (bp == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
+			tell(player, Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		ItemStack stack = player.getMainHandItem().is(PLAN) ? player.getMainHandItem() : player.getOffhandItem().is(PLAN) ? player.getOffhandItem() : ItemStack.EMPTY;
+		ItemStack stack = ItemStack.EMPTY;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack s = player.getInventory().getItem(i);
+			if (s.is(PLAN) && Laid.of(s) == null) {
+				stack = s;
+				break;
+			}
+		}
+		if (stack.isEmpty()) {
+			stack = player.getMainHandItem().is(PLAN) ? player.getMainHandItem() : player.getOffhandItem().is(PLAN) ? player.getOffhandItem() : ItemStack.EMPTY;
+		}
+		Laid laid = new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size());
 		if (stack.isEmpty()) {
 			if (!player.isCreative()) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plan.hold").withStyle(ChatFormatting.RED));
+				tell(player, Component.translatable("message.jaymoskingdoms.plan.hold").withStyle(ChatFormatting.RED));
 				return false;
 			}
 			stack = new ItemStack(PLAN);
-			new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size()).write(stack);
+			laid.write(stack);
 			player.getInventory().add(stack);
 		} else {
-			new Laid(name, Rotation.NONE, null, "", bp.width(), bp.depth(), bp.height(), bp.blocks().size()).write(stack);
+			laid.write(stack);
 		}
 		player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.9F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plan.written", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size())
+		tell(player, Component.translatable("message.jaymoskingdoms.plan.written", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size())
 			.withStyle(ChatFormatting.GREEN));
 		return true;
+	}
+
+	// ---- the screen -------------------------------------------------------------------------------------------------
+
+	/** While a screen's choice is handled: what the player is told goes on the screen instead of in chat. */
+	private static @Nullable List<Component> capture;
+
+	/** Tells {@code player} {@code message}: on the table's screen while a choice of theirs is handled, else in chat. */
+	static void tell(ServerPlayer player, Component message) {
+		if (capture != null) {
+			capture.add(message);
+		} else {
+			player.sendSystemMessage(message);
+		}
+	}
+
+	/** Runs {@code work} with what it tells the player kept, and returns that (empty: nothing told). */
+	static Component captured(Runnable work) {
+		List<Component> before = capture;
+		List<Component> got = new ArrayList<>();
+		capture = got;
+		try {
+			work.run();
+		} finally {
+			capture = before;
+		}
+		if (got.isEmpty()) {
+			return Component.empty();
+		}
+		net.minecraft.network.chat.MutableComponent out = Component.empty();
+		for (int i = 0; i < got.size(); i++) {
+			if (i > 0) {
+				out.append(" ");
+			}
+			out.append(got.get(i));
+		}
+		return out;
+	}
+
+	/** The most blocks away a player may be from a table to work its screen. */
+	static final double SCREEN_REACH = 8.0;
+
+	/** A choice sent from the screen of the table at {@code act.pos()}. */
+	static void act(ServerPlayer player, MasonNet.Act act) {
+		ServerLevel level = player.level();
+		BlockPos pos = act.pos();
+		if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) > SCREEN_REACH * SCREEN_REACH || !(level.getBlockEntity(pos) instanceof Entity table)) {
+			return;
+		}
+		String name = act.name().toLowerCase(java.util.Locale.ROOT);
+		Component note = captured(() -> {
+			switch (act.action()) {
+				case MasonNet.DRAW -> inscribe(player, name);
+				case MasonNet.TAKE -> table.takeOut(player);
+				case MasonNet.RETRY -> table.retry(player);
+				case MasonNet.SUBMIT -> Commissions.submit(player, name);
+				case MasonNet.SAVE -> {
+					Surveyor.Selection sel = Surveyor.selection(player);
+					if (sel == null || sel.a() == null || sel.b() == null) {
+						tell(player, Component.translatable("message.jaymoskingdoms.design.no_selection").withStyle(ChatFormatting.RED));
+					} else {
+						Designs.save(player, sel.a(), sel.b(), name);
+					}
+				}
+				default -> {
+				}
+			}
+		});
+		table.open(player, note);
+	}
+
+	/** (0.7.485) A file {@code player} uploaded from the table at {@code pos}'s screen is in: drawn on a plan, and the screen shown again. */
+	static void uploaded(ServerPlayer player, BlockPos pos, java.util.function.Supplier<@Nullable String> save) {
+		Component note = captured(() -> {
+			String name = save.get();
+			if (name != null) {
+				inscribe(player, name);
+			}
+		});
+		if (player.level().getBlockEntity(pos) instanceof Entity table && player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) <= SCREEN_REACH * SCREEN_REACH) {
+			table.open(player, note);
+		} else if (!note.getString().isEmpty()) {
+			player.sendSystemMessage(note);
+		}
 	}
 
 	static final class Plan extends Item {
@@ -332,10 +434,10 @@ public final class MasonTable {
 		@Override
 		protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 			if (player instanceof ServerPlayer sp && level.getBlockEntity(pos) instanceof Entity table) {
-				if (player.isShiftKeyDown()) {
+				if (player.isShiftKeyDown() && !table.plan.isEmpty()) {
 					table.takeOut(sp);
 				} else {
-					table.report(sp);
+					table.open(sp, Component.empty());
 				}
 			}
 			return InteractionResult.SUCCESS;
@@ -402,7 +504,6 @@ public final class MasonTable {
 
 		void takeOut(ServerPlayer player) {
 			if (this.plan.isEmpty()) {
-				this.report(player);
 				return;
 			}
 			ItemStack out = this.plan;
@@ -425,53 +526,56 @@ public final class MasonTable {
 			this.setChanged();
 		}
 
-		void report(ServerPlayer player) {
-			Laid laid = Laid.of(this.plan);
-			if (laid == null) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.empty").withStyle(ChatFormatting.GRAY));
-				return;
+		/** Once finished with blocks left out (they were in the way): tries them again. */
+		void retry(ServerPlayer player) {
+			if (this.done && this.skipped > 0) {
+				tell(player, Component.translatable("message.jaymoskingdoms.mason_table.retry", this.skipped).withStyle(ChatFormatting.YELLOW));
+				this.index = 0;
+				this.skipped = 0;
+				this.done = false;
+				this.setChanged();
 			}
+		}
+
+		/** Sends {@code player} the table's screen: the designs, what it's doing, what it still needs, and {@code note}. */
+		void open(ServerPlayer player, Component note) {
 			ServerLevel level = (ServerLevel)this.level;
-			List<Op> ops = this.ops(level, laid);
-			if (ops == null) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", laid.design()).withStyle(ChatFormatting.RED));
-				return;
-			}
-			if (this.done) {
-				if (this.skipped > 0) {
-					// try what was in the way again
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.retry", this.skipped).withStyle(ChatFormatting.YELLOW));
-					this.index = 0;
-					this.skipped = 0;
-					this.done = false;
-					this.setChanged();
-				} else {
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.finished", laid.design()).withStyle(ChatFormatting.GREEN));
-				}
-				return;
-			}
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.progress", laid.design(), this.index, ops.size())
-				.withStyle(ChatFormatting.GOLD));
-			if (this.waitingFor != null) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.waiting", new ItemStack(this.waitingFor).getHoverName())
-					.withStyle(ChatFormatting.YELLOW));
-			}
-			// what's still to come, most first
-			Map<Item, Integer> need = new LinkedHashMap<>();
-			for (int i = this.index; i < ops.size(); i++) {
-				Op op = ops.get(i);
-				BlockState here = level.isLoaded(op.pos()) ? level.getBlockState(op.pos()) : null;
-				Item item = cost(op.state());
-				if (item != null && (here == null || !here.is(op.state().getBlock()))) {
-					need.merge(item, 1, Integer::sum);
+			MinecraftServer server = level.getServer();
+			List<MasonNet.Design> designs = new ArrayList<>();
+			for (String n : Designs.names(server)) {
+				Blueprint bp = Designs.blueprint(server, n);
+				if (bp != null) {
+					designs.add(new MasonNet.Design(n, bp.width(), bp.depth(), bp.height(), bp.blocks().size(), Designs.author(server, n), Designs.forCrews(bp)));
 				}
 			}
-			need.entrySet().stream().sorted(Map.Entry.<Item, Integer>comparingByValue().reversed()).limit(LIST_MATERIALS)
-				.forEach(e -> player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.need", e.getValue(),
-					new ItemStack(e.getKey()).getHoverName()).withStyle(ChatFormatting.GRAY)));
-			if (this.skipped > 0) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.mason_table.skipped", this.skipped).withStyle(ChatFormatting.GRAY));
+			Laid laid = Laid.of(this.plan);
+			List<Op> ops = laid == null ? null : this.ops(level, laid);
+			List<MasonNet.Need> needs = new ArrayList<>();
+			if (ops != null && !this.done) {
+				// what's still to come, most first
+				Map<Item, Integer> need = new LinkedHashMap<>();
+				for (int i = this.index; i < ops.size(); i++) {
+					Op op = ops.get(i);
+					BlockState here = level.isLoaded(op.pos()) ? level.getBlockState(op.pos()) : null;
+					Item item = cost(op.state());
+					if (item != null && !secondHalf(op.state()) && (here == null || !here.is(op.state().getBlock()))) {
+						need.merge(item, 1, Integer::sum);
+					}
+				}
+				need.entrySet().stream().sorted(Map.Entry.<Item, Integer>comparingByValue().reversed()).limit(LIST_MATERIALS)
+					.forEach(e -> needs.add(new MasonNet.Need(new ItemStack(e.getKey()), e.getValue())));
 			}
+			int blank = 0;
+			for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+				ItemStack s = player.getInventory().getItem(i);
+				if (s.is(PLAN) && Laid.of(s) == null) {
+					blank += s.getCount();
+				}
+			}
+			Surveyor.Selection sel = Surveyor.selection(player);
+			ServerPlayNetworking.send(player, new MasonNet.Open(this.worldPosition, designs, laid == null ? "" : laid.design(), this.index,
+				ops == null ? 0 : ops.size(), this.done, this.skipped, this.waitingFor == null ? ItemStack.EMPTY : new ItemStack(this.waitingFor), needs, blank,
+				sel != null && sel.a() != null && sel.b() != null, note));
 		}
 
 		/** The building laid out from {@code laid} (cached), bottom up, solid blocks before what hangs on them; null if its design is gone. */

@@ -198,26 +198,26 @@ public final class Designs {
 		BlockPos min = Surveyor.min(a, b), max = Surveyor.max(a, b);
 		Vec3i size = new Vec3i(max.getX() - min.getX() + 1, max.getY() - min.getY() + 1, max.getZ() - min.getZ() + 1);
 		if (!name.matches(NAME_PATTERN)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (size.getX() > PLAN_SIDE || size.getZ() > PLAN_SIDE || size.getY() > PLAN_HEIGHT || size.getX() < MIN_SIDE || size.getZ() < MIN_SIDE) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.size", size.getX(), size.getZ(), size.getY(), PLAN_SIDE, PLAN_HEIGHT)
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.size", size.getX(), size.getZ(), size.getY(), PLAN_SIDE, PLAN_HEIGHT)
 				.withStyle(ChatFormatting.RED));
 			return false;
 		}
 		boolean creative = player.isCreative();
 		boolean exists = Files.isRegularFile(file(server, name));
 		if (exists && !creative && !author(server, name).equals(player.getGameProfile().name())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (exists && inUse(server, name)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!exists && !creative && names(server).stream().filter(n -> author(server, n).equals(player.getGameProfile().name())).count() >= PER_PLAYER) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		StructureTemplate template = new StructureTemplate();
@@ -226,18 +226,18 @@ public final class Designs {
 		tag.putString("author", player.getGameProfile().name());
 		Blueprint bp = Blueprint.fromTemplate(PREFIX + name, tag);
 		if (bp == null || bp.blocks().size() > PLAN_BLOCKS) {
-			player.sendSystemMessage(Component.translatable(bp == null ? "message.jaymoskingdoms.design.empty" : "message.jaymoskingdoms.design.too_many_blocks",
+			MasonTable.tell(player, Component.translatable(bp == null ? "message.jaymoskingdoms.design.empty" : "message.jaymoskingdoms.design.too_many_blocks",
 				PLAN_BLOCKS).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!store(server, name, tag)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.saved", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.saved", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
 			PREFIX + name).withStyle(ChatFormatting.GREEN));
 		if (!forCrews(bp)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
 				.withStyle(ChatFormatting.GRAY));
 		}
 		return true;
@@ -261,77 +261,83 @@ public final class Designs {
 
 	/**
 	 * (0.7.484) A schematic file {@code player} sent from their own computer ({@link DesignUploads}): read, checked like a
-	 * design saved in the world, and kept as design {@code name}, theirs.
+	 * design saved in the world, and kept as design {@code name}, theirs (or the next free name). The name it's kept as, or null.
 	 */
-	static boolean saveUploaded(ServerPlayer player, String name, CompoundTag root) {
+	static @Nullable String saveUploaded(ServerPlayer player, String name, CompoundTag root) {
 		MinecraftServer server = player.level().getServer();
 		if (!name.matches(NAME_PATTERN)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.bad_name").withStyle(ChatFormatting.RED));
+			return null;
 		}
 		boolean creative = player.isCreative();
+		// (0.7.485) a name someone else has: the next free one (house_2, house_3...)
+		String base = name;
+		for (int n = 2; Files.isRegularFile(file(server, name)) && !author(server, name).equals(player.getGameProfile().name()) && n < 100; n++) {
+			String suffix = "_" + n;
+			name = (base.length() + suffix.length() > 32 ? base.substring(0, 32 - suffix.length()) : base) + suffix;
+		}
 		boolean exists = Files.isRegularFile(file(server, name));
 		if (exists && !creative && !author(server, name).equals(player.getGameProfile().name())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.taken", name).withStyle(ChatFormatting.RED));
+			return null;
 		}
 		if (exists && inUse(server, name)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			return null;
 		}
 		if (!exists && !creative && names(server).stream().filter(n -> author(server, n).equals(player.getGameProfile().name())).count() >= PER_PLAYER) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_many", PER_PLAYER).withStyle(ChatFormatting.RED));
+			return null;
 		}
 		CompoundTag tag = SchematicFiles.toTemplate(root, server.getFixerUpper());
 		Blueprint bp = tag == null ? null : Blueprint.fromTemplate(PREFIX + name, tag);
 		if (tag == null || bp == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unreadable").withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unreadable").withStyle(ChatFormatting.RED));
+			return null;
 		}
 		if (!fits(bp)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.too_big", bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.too_big", bp.width(), bp.depth(), bp.height(), bp.blocks().size(),
 				PLAN_SIDE, PLAN_HEIGHT, PLAN_BLOCKS).withStyle(ChatFormatting.RED));
-			return false;
+			return null;
 		}
 		// (whoever drew it first, the design on this world is the uploader's)
 		tag.putString("author", player.getGameProfile().name());
 		if (!store(server, name, tag)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
-			return false;
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			return null;
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.uploaded", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(), name)
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.uploaded", name, bp.width(), bp.depth(), bp.height(), bp.blocks().size(), name)
 			.withStyle(ChatFormatting.GREEN));
 		if (!forCrews(bp)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.table_only", MAX_SIDE, MAX_HEIGHT, MAX_BLOCKS)
 				.withStyle(ChatFormatting.GRAY));
 		}
-		return true;
+		return name;
 	}
 
 	static boolean delete(ServerPlayer player, String name) {
 		MinecraftServer server = player.level().getServer();
 		boolean creative = player.isCreative();
 		if (!name.matches(NAME_PATTERN) || !Files.isRegularFile(file(server, name))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.unknown", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (!creative && !author(server, name).equals(player.getGameProfile().name())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.not_yours", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.not_yours", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		if (inUse(server, name)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.in_use", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		try {
 			Files.deleteIfExists(file(server, name));
 		} catch (IOException e) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.failed", name).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		CACHE.remove(name);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
+		MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.deleted", name).withStyle(ChatFormatting.YELLOW));
 		return true;
 	}
 
@@ -354,13 +360,7 @@ public final class Designs {
 		return Commands.literal("design")
 			.then(Commands.literal("save").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES).executes(Designs::saveCommand)))
 			.then(Commands.literal("list").executes(Designs::list))
-			// (0.7.484) a building plan of it, for a mason's table; offering it to the settlement you stand in
-			.then(Commands.literal("plan").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES)
-				.executes(c -> MasonTable.inscribe(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")) ? 1 : 0)))
-			.then(Commands.literal("submit").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES)
-				.executes(c -> Commissions.submit(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")) ? 1 : 0)))
-			.then(Commands.literal("withdraw").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES)
-				.executes(c -> Commissions.withdraw(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")) ? 1 : 0)))
+
 			.then(Commands.literal("delete").then(Commands.argument("name", StringArgumentType.word()).suggests(NAMES)
 				.executes(c -> delete(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")) ? 1 : 0)));
 	}
@@ -369,7 +369,7 @@ public final class Designs {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Surveyor.Selection sel = Surveyor.selection(player);
 		if (sel == null || sel.a() == null || sel.b() == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.design.no_selection").withStyle(ChatFormatting.RED));
+			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.design.no_selection").withStyle(ChatFormatting.RED));
 			return 0;
 		}
 		return save(player, sel.a(), sel.b(), StringArgumentType.getString(c, "name").toLowerCase(java.util.Locale.ROOT)) ? 1 : 0;
