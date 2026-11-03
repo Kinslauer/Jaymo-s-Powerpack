@@ -170,6 +170,11 @@ public final class Slaves {
 			f -> f.role() == SLAVE && f.factionId() == camp && f.isAlive() && !f.entityTags().contains(RUNAWAY));
 	}
 
+	/** (0.7.480) How many slaves camp {@code camp} keeps in the loaded world: they eat and work (HordeEconomy), yet are no folk of its cap. */
+	static int count(ServerLevel level, int camp, BlockPos center) {
+		return kept(level, camp, center).size();
+	}
+
 	/** (From {@link OrcCamps#tick}) a loaded camp with fewer slaves than it can keep takes another now and then. */
 	static void restock(ServerLevel level, Faction camp, Camps.CampData data) {
 		if (!OrcCamps.wholeCampLoaded(level, data.center()) || level.getRandom().nextFloat() >= RESTOCK_CHANCE) {
@@ -328,8 +333,8 @@ public final class Slaves {
 		orc.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, orc.getX(), orc.getY(), orc.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.HOSTILE, 1.0F, 0.6F);
 		RandomSource random = level.getRandom();
-		Speech.say(level, orc, Component.translatable("speech.jaymoskingdoms.orc.toss_" + random.nextInt(TOSS_LINES)), Speech.RED, SAY_RANGE);
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.squeak_" + random.nextInt(SQUEAK_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, orc, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.toss_" + random.nextInt(TOSS_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.squeak_" + random.nextInt(SQUEAK_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	/** A thrown slave in the air: when it comes down it is hurt and stunned, and a foe under it is hit. */
@@ -378,7 +383,7 @@ public final class Slaves {
 		} else {
 			slave.setSite(farSite(level, slave, RUN_DISTANCE));
 		}
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.run_" + level.getRandom().nextInt(RUN_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.run_" + level.getRandom().nextInt(RUN_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	/** A site {@code distance} blocks off, away from the slave's camp (or any way at all if it has none). */
@@ -482,7 +487,7 @@ public final class Slaves {
 		slave.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 		slave.setup(Goblins.GOBLIN, village, village.seat(), GoblinBuildings.HOME_RADIUS);
 		Factions.update(server, village.id(), f -> f.withHoldings(f.holdings().adjust(Goblins.GOBLIN, 1)));
-		Speech.say(level, slave, Component.translatable("speech.jaymoskingdoms.slave.join_" + level.getRandom().nextInt(JOIN_LINES)), Speech.YELLOW, SAY_RANGE);
+		Speech.say(level, slave, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.join_" + level.getRandom().nextInt(JOIN_LINES)), Speech.YELLOW, SAY_RANGE);
 	}
 
 	// ---- freeing one -------------------------------------------------------------------------------------------------------------
@@ -500,10 +505,10 @@ public final class Slaves {
 			Tribes.add(server, player.getUUID(), orcs, FREED_GRUDGE);
 		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.slave.freed"), true);
-		Speech.sayTo(level, slave, player, Component.translatable("speech.jaymoskingdoms.slave.freed_" + random.nextInt(FREED_LINES)), Speech.YELLOW);
+		Speech.sayTo(level, slave, player, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.slave.freed_" + random.nextInt(FREED_LINES)), Speech.YELLOW);
 		for (PathfinderMob orc : level.getEntitiesOfClass(PathfinderMob.class, slave.getBoundingBox().inflate(SHOUT_RANGE),
 			e -> e instanceof Worker w && w.factionId() == slave.factionId() && Orcs.isOrc(w.role()) && e.isAlive() && !e.isSleeping())) {
-			Speech.say(level, orc, Component.translatable("speech.jaymoskingdoms.orc.freed_" + random.nextInt(SHOUT_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, orc, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.freed_" + random.nextInt(SHOUT_LINES)), Speech.RED, SAY_RANGE);
 			Rulers.charge(orc, player);
 			break;
 		}

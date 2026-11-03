@@ -337,10 +337,10 @@ final class Brutality {
 		Rulers.charge(b, a);
 		RandomSource random = level.getRandom();
 		if (challenge) {
-			Speech.say(level, a, Component.translatable("speech.jaymoskingdoms.orc.challenge_" + random.nextInt(CHALLENGE_LINES)), Speech.RED, SAY_RANGE);
-			Speech.say(level, b, Component.translatable("speech.jaymoskingdoms.orc.reply_" + random.nextInt(REPLY_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, a, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.challenge_" + random.nextInt(CHALLENGE_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, b, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.reply_" + random.nextInt(REPLY_LINES)), Speech.RED, SAY_RANGE);
 		} else {
-			Speech.say(level, a, Component.translatable("speech.jaymoskingdoms.orc.brawl_" + random.nextInt(START_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, a, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.brawl_" + random.nextInt(START_LINES)), Speech.RED, SAY_RANGE);
 		}
 		level.playSound(null, a.getX(), a.getY(), a.getZ(), SoundEvents.PIGLIN_BRUTE_ANGRY, SoundSource.HOSTILE, 1.2F, 0.6F);
 	}
@@ -416,7 +416,7 @@ final class Brutality {
 	}
 
 	private static void jeer(ServerLevel level, PathfinderMob orc) {
-		Speech.say(level, orc, Component.translatable("speech.jaymoskingdoms.orc.jeer_" + level.getRandom().nextInt(JEER_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, orc, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.jeer_" + level.getRandom().nextInt(JEER_LINES)), Speech.RED, SAY_RANGE);
 	}
 
 	/** Stops {@code mob} fighting whom it was. */
@@ -460,11 +460,11 @@ final class Brutality {
 		winner.addEffect(new MobEffectInstance(MobEffects.REGENERATION, MEND_TICKS, 1));
 		level.sendParticles(ParticleTypes.CRIT, loser.getX(), loser.getY() + 1.0, loser.getZ(), 12, 0.4, 0.4, 0.4, 0.1);
 		level.playSound(null, loser.getX(), loser.getY(), loser.getZ(), SoundEvents.PIGLIN_BRUTE_HURT, SoundSource.HOSTILE, 1.2F, 0.5F);
-		Speech.say(level, loser, Component.translatable("speech.jaymoskingdoms.orc.lose_" + random.nextInt(LOSE_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, loser, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.lose_" + random.nextInt(LOSE_LINES)), Speech.RED, SAY_RANGE);
 		if (brawl.challenge && loser == b) {
 			depose(level, brawl.camp, b, a);
 		} else {
-			Speech.say(level, winner, Component.translatable("speech.jaymoskingdoms.orc.win_" + random.nextInt(WIN_LINES)), Speech.RED, SAY_RANGE);
+			Speech.say(level, winner, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.win_" + random.nextInt(WIN_LINES)), Speech.RED, SAY_RANGE);
 		}
 		for (UUID id : brawl.crowd) {
 			PathfinderMob orc = mob(level, id);
@@ -494,8 +494,8 @@ final class Brutality {
 		Factions.update(server, campId, f -> f.withLeader(Optional.of(winner.getUUID())));
 		callOff(level, campId, winner);
 		RandomSource random = level.getRandom();
-		Speech.say(level, winner, Component.translatable("speech.jaymoskingdoms.orc.new_chief_" + random.nextInt(NEW_CHIEF_LINES)), Speech.RED, SAY_RANGE);
-		Speech.say(level, old, Component.translatable("speech.jaymoskingdoms.orc.deposed_" + random.nextInt(DEPOSED_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, winner, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.new_chief_" + random.nextInt(NEW_CHIEF_LINES)), Speech.RED, SAY_RANGE);
+		Speech.say(level, old, Dialects.trBrood(Dialects.ORC, "speech.jaymoskingdoms.orc.deposed_" + random.nextInt(DEPOSED_LINES)), Speech.RED, SAY_RANGE);
 		level.playSound(null, winner.getX(), winner.getY(), winner.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 3.0F, 0.9F);
 		Component news = Component.translatable("message.jaymoskingdoms.orc.new_chief", winner.getDisplayName(), old.getDisplayName(), camp.name())
 			.withStyle(ChatFormatting.GOLD);
