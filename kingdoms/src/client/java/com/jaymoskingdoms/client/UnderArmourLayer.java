@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.McaCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
@@ -33,6 +34,9 @@ import org.jspecify.annotations.Nullable;
  * quilted gambeson with mail sleeves, iron leggings a padded gambeson with an iron-studded collar. Drawn on the body and
  * arms of anything humanoid (players, folk, zombies), just over the skin and under anything worn later; posed as the
  * wearer is ({@link WornModel}). Textures are drawn by {@code tools/gen_under_armour.py}.
+ * <p>
+ * (0.7.484) On a body MCA draws it goes on MCA's armour body, past MCA's clothes ({@link McaUnderArmour}), and under a
+ * costume or the symbiote's suit it isn't drawn at all ({@link PowersCover}).
  */
 public final class UnderArmourLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 	/** How far the suit sits out from the skin (model pixels): over it, under a chestplate's 1.0. */
@@ -67,7 +71,7 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-		if (state.isBaby || state.isInvisible) {
+		if (state.isBaby || state.isInvisible || PowersCover.body(state)) {
 			return;
 		}
 		ItemStack chest = state.chestEquipment;
@@ -84,7 +88,11 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 			DyedItemColor dyed = legs.get(DataComponents.DYED_COLOR);
 			color = ARGB.opaque(dyed != null ? dyed.rgb() : UNDYED);
 		}
-		collector.submitModel(this.suit, state, poseStack, RenderTypes.armorCutoutNoCull(texture), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
+		HumanoidModel<HumanoidRenderState> model = McaCompat.LOADED ? McaUnderArmour.model(state) : null;
+		if (model == null) {
+			model = this.suit;
+		}
+		collector.submitModel(model, state, poseStack, RenderTypes.armorCutoutNoCull(texture), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
 			state.outlineColor);
 	}
 
