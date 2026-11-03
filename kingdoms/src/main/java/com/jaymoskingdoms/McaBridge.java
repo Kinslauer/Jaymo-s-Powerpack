@@ -418,6 +418,8 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// (0.7.484) and a money-changer (Currencies sets its offers)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 	}
 
 	private static Enlisted worker(VillagerEntityMCA villager) {

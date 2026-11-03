@@ -30,6 +30,8 @@ public final class Professions {
 	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
 	/** (0.7.299) A town's cook, at its cookhouse or tavern ({@link Meals}): taken on by the town, never a player's pick. Trades meals. */
 	public static VillagerProfession COOK;
+	/** (0.7.484) A town's money-changer ({@link Currencies}): taken on by the town, never a player's pick. Trades coin for coin. */
+	public static VillagerProfession CHANGER;
 
 	private Professions() {
 	}
@@ -52,6 +54,8 @@ public final class Professions {
 		BLOOD_WITCH = register("blood_witch", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.299)
 		COOK = register("cook", SoundEvents.VILLAGER_WORK_BUTCHER);
+		// (0.7.484)
+		CHANGER = register("changer", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {

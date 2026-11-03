@@ -813,8 +813,12 @@ public final class Careers {
 				continue;
 			}
 			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
-			int fromStore = Storage.take(store, f, Items.EMERALD, owed).getCount();
-			int fresh = Math.max(0, Math.min(owed - fromStore, p.done() * WAGE_FLOOR - fromStore));
+			// (0.7.484) wages are paid in the coin of the settlement, out of the same coin in its storehouse
+			Currency money = Currencies.of(server, f);
+			int owedCoins = owed > 0 ? Currencies.coinsPaid(money, owed) : 0;
+			int floorCoins = p.done() > 0 ? Currencies.coinsPaid(money, (long)p.done() * WAGE_FLOOR) : 0;
+			int fromStore = Storage.take(store, f, money.item(), owedCoins).getCount();
+			int fresh = Math.max(0, Math.min(owedCoins - fromStore, floorCoins - fromStore));
 			int paid = fromStore + fresh;
 			if (apprentice && p.kind() != null && !p.kind().goods.isEmpty()) {
 				// their apprentice's day: a stack of the trade's goods into the storehouse
@@ -824,10 +828,10 @@ public final class Careers {
 				}
 			}
 			if (paid > 0) {
-				give(player, new ItemStack(Items.EMERALD, paid));
+				Currencies.give(player, money, paid);
 			}
-			player.sendSystemMessage(Component.translatable(fromStore < owed ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
-				paid, f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
+			player.sendSystemMessage(Component.translatable(fromStore < owedCoins ? "message.jaymoskingdoms.job.paid_short" : "message.jaymoskingdoms.job.paid",
+				Currencies.amount(money, paid), f.name(), p.kind() == null ? "" : p.kind().title(), p.done()).withStyle(ChatFormatting.GREEN));
 			edit(player, k -> {
 				Post now = k.post(p.job());
 				return now == null ? k : k.withPost(now.withDone(0));
@@ -891,13 +895,16 @@ public final class Careers {
 		}
 		edit(player, k -> k.withSoldDay(today));
 		if (earned > 0) {
-			ItemStack pay = new ItemStack(Items.EMERALD, earned);
+			// (0.7.484) the villagers pay in the town's coin
+			Currency money = Currencies.of(server, f);
+			int coins = Math.min(64, Currencies.coinsPaid(money, earned));
+			ItemStack pay = new ItemStack(money.item(), coins);
 			for (int slot = 0; slot < box.getContainerSize() && !pay.isEmpty(); slot++) {
 				ItemStack there = box.getItem(slot);
 				if (there.isEmpty()) {
 					box.setItem(slot, pay.copy());
 					pay = ItemStack.EMPTY;
-				} else if (there.is(Items.EMERALD) && there.getCount() < there.getMaxStackSize()) {
+				} else if (there.is(money.item()) && there.getCount() < there.getMaxStackSize()) {
 					int n = Math.min(pay.getCount(), there.getMaxStackSize() - there.getCount());
 					there.grow(n);
 					pay.shrink(n);
@@ -907,7 +914,7 @@ public final class Careers {
 				give(player, pay);
 			}
 			box.setChanged();
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_sold", earned, f.name()).withStyle(ChatFormatting.GREEN));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.stall_sold", Currencies.amount(money, coins), f.name()).withStyle(ChatFormatting.GREEN));
 		}
 	}
 

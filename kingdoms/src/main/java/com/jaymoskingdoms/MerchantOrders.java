@@ -118,7 +118,7 @@ final class MerchantOrders {
 	 * what it counted against the buyer's day and earned their standing (taken back if it's cancelled).
 	 */
 	record Order(String id, UUID buyer, ItemStack goods, int paid, String merchant, String town, int townId, BlockPos board, long ready,
-		String ware, int xp) {
+		String ware, int xp, String coin) {
 		static final Codec<Order> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.STRING.fieldOf("id").forGetter(Order::id),
 			UUIDUtil.CODEC.fieldOf("buyer").forGetter(Order::buyer),
@@ -130,7 +130,18 @@ final class MerchantOrders {
 			BlockPos.CODEC.fieldOf("board").forGetter(Order::board),
 			Codec.LONG.fieldOf("ready").forGetter(Order::ready),
 			Codec.STRING.optionalFieldOf("ware", "").forGetter(Order::ware),
-			Codec.INT.optionalFieldOf("xp", 0).forGetter(Order::xp)).apply(i, Order::new));
+			Codec.INT.optionalFieldOf("xp", 0).forGetter(Order::xp),
+			// (0.7.484) the coin it was paid in (emeralds in an older save)
+			Codec.STRING.optionalFieldOf("coin", Currency.EMERALD.id()).forGetter(Order::coin)).apply(i, Order::new));
+
+		Currency currency() {
+			for (Currency c : Currency.values()) {
+				if (c.id().equals(this.coin)) {
+					return c;
+				}
+			}
+			return Currency.EMERALD;
+		}
 	}
 
 	/** A player's standing with the merchants ({@code xp}), and what they've ordered today ({@code day}: ware → how many). */
@@ -215,8 +226,8 @@ final class MerchantOrders {
 
 	// ---- the catalog -------------------------------------------------------------------------------------------------------
 
-	/** One ware: {@code merchant}'s offer number {@code index}, for this many emeralds; the standing it needs. */
-	private record Ware(String id, Villager merchant, int index, MerchantOffer offer, int price, int tier) {
+	/** One ware: {@code merchant}'s offer number {@code index}, for this many of the town's coin ({@link Currencies}); the standing it needs. */
+	private record Ware(String id, Villager merchant, int index, MerchantOffer offer, int price, int tier, Currency coin) {
 	}
 
 	/** The standing (1 Novice .. 5 Master) {@code xp} makes. */
@@ -250,6 +261,8 @@ final class MerchantOrders {
 		List<Ware> out = new ArrayList<>();
 		// (0.7.385) lower while a pod stands in the town's landing yard
 		float factor = LandingYard.tradeFactor(level, town(level, anchor));
+		// (0.7.484) priced in the coin of the town whose board it is
+		Currency coin = Currencies.of(level.getServer(), town(level, anchor));
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(anchor).inflate(CATALOG_RANGE),
 			v -> v.isAlive() && !v.isBaby() && !Downed.isDowned(v))) {
 			if (v.getVillagerData().profession().is(VillagerProfession.NONE) || v.getVillagerData().profession().is(VillagerProfession.NITWIT)) {
@@ -259,10 +272,14 @@ final class MerchantOrders {
 			for (int i = 0; i < offers.size(); i++) {
 				MerchantOffer o = offers.get(i);
 				ItemStack result = o.getResult();
-				if (result.isEmpty() || result.is(Items.EMERALD) || !o.getBaseCostA().is(Items.EMERALD) || o.getItemCostB().isPresent()) {
+				if (result.isEmpty() || Currencies.isMoney(result) || !Currencies.isMoney(o.getBaseCostA()) || o.getItemCostB().isPresent()) {
 					continue;
 				}
-				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price(o, factor), Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1)));
+				int asked = price(o, factor);
+				Currency priced = Currency.byItem(o.getBaseCostA().getItem());
+				int price = coin.human() && priced != null && priced != coin ? Math.min(64, Currencies.coinsFor(coin, (long)asked * priced.base / 1000L)) : asked;
+				out.add(new Ware(v.getStringUUID() + "#" + i, v, i, o, price, Math.min(STANDING_XP.length, i / OFFERS_A_LEVEL + 1),
+					coin.human() ? coin : priced == null ? Currency.EMERALD : priced));
 			}
 		}
 		out.sort(Comparator.comparingInt(Ware::tier).thenComparing(w -> w.merchant().getStringUUID()).thenComparingInt(Ware::index));
@@ -308,14 +325,14 @@ final class MerchantOrders {
 				views.add(new QuestNet.View("order:" + o.id(), QuestNet.ACTIVE, false,
 					Component.translatable("orders.jaymoskingdoms.title.ordered", o.goods().getHoverName(), o.goods().getCount()),
 					o.paid() == 0 ? Component.translatable("orders.jaymoskingdoms.text.taken", o.merchant())
-						: Component.translatable("orders.jaymoskingdoms.text.ordered", o.merchant(), o.paid()),
+						: Component.translatable("orders.jaymoskingdoms.text.ordered", o.merchant(), Currencies.amount(o.currency(), o.paid())),
 					Component.translatable(level.getGameTime() < o.ready() ? "orders.jaymoskingdoms.objective.making" : "orders.jaymoskingdoms.objective.courier"),
 					List.of(o.goods().copy()), List.of()));
 			}
 		}
 		if (OffWorldGoods.asks(player)) {
 			for (OffWorldGoods.Good g : OffWorldGoods.today(anchor, today)) {
-				views.add(wantView(player, g, ledger, today));
+				views.add(wantView(level, player, g, ledger, today));
 			}
 		}
 		int locked = 0;
@@ -331,11 +348,12 @@ final class MerchantOrders {
 			ItemStack result = w.offer().getResult();
 			Component job = Component.translatable("orders.jaymoskingdoms.job." + Mth.clamp(w.tier(), 1, 5));
 			views.add(new QuestNet.View(w.id(), QuestNet.OFFER, left == 0,
-				Component.translatable("orders.jaymoskingdoms.title", result.getHoverName(), result.getCount(), w.price()),
-				Component.translatable("orders.jaymoskingdoms.text", w.merchant().getDisplayName(), professionName(w.merchant()), town.name(), w.price()),
+				Component.translatable("orders.jaymoskingdoms.title", result.getHoverName(), result.getCount(), Currencies.amount(w.coin(), w.price())),
+				Component.translatable("orders.jaymoskingdoms.text", w.merchant().getDisplayName(), professionName(w.merchant()), town.name(),
+					Currencies.amount(w.coin(), w.price())),
 				left == 0 ? Component.translatable("orders.jaymoskingdoms.objective.sold_out")
 					: Component.translatable("orders.jaymoskingdoms.objective.left", left),
-				List.of(result.copy(), new ItemStack(Items.EMERALD, w.price())),
+				List.of(result.copy(), new ItemStack(w.coin().item(), w.price())),
 				List.of(Component.translatable("orders.jaymoskingdoms.extra.standing", job, w.offer().getXp()))));
 		}
 		Component note = Component.translatable("orders.jaymoskingdoms.standing", Component.translatable("orders.jaymoskingdoms.job." + standing), ledger.xp(),
@@ -395,14 +413,14 @@ final class MerchantOrders {
 			player.sendSystemMessage(Component.translatable("orders.jaymoskingdoms.too_many").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (!pay(player, w.price())) {
-			player.sendSystemMessage(Component.translatable("orders.jaymoskingdoms.poor", w.price()).withStyle(ChatFormatting.GRAY));
+		if (!pay(player, w.coin().item(), w.price())) {
+			player.sendSystemMessage(Component.translatable("orders.jaymoskingdoms.poor", Currencies.amount(w.coin(), w.price())).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		// (the emeralds go into the town's storehouse, where its wages come from)
-		Storage.put(Factions.level(level.getServer()), town, new ItemStack(Items.EMERALD, w.price()));
+		// (the coin goes into the town's storehouse, where its wages come from)
+		Storage.put(Factions.level(level.getServer()), town, new ItemStack(w.coin().item(), w.price()));
 		Order o = new Order(UUID.randomUUID().toString(), player.getUUID(), w.offer().getResult().copy(), w.price(), w.merchant().getName().getString(),
-			town.name(), town.id(), at.immutable(), level.getGameTime() + PREP, w.id(), w.offer().getXp());
+			town.name(), town.id(), at.immutable(), level.getGameTime() + PREP, w.id(), w.offer().getXp(), w.coin().id());
 		put(level.getServer(), o);
 		player.setAttached(LEDGER, ledger.bought(w.id(), today, 1, w.offer().getXp()));
 		level.playSound(null, at, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.7F, 1.0F);
@@ -418,7 +436,7 @@ final class MerchantOrders {
 		// (0.7.419) a road deed: a merchant's order taken on
 		Deeds.done(buyer, "orders.taken");
 		put(level.getServer(), new Order(UUID.randomUUID().toString(), buyer.getUUID(), goods, 0, town.name(), town.name(), town.id(),
-			town.seat(), level.getGameTime() + wait, "", 0));
+			town.seat(), level.getGameTime() + wait, "", 0, Currency.EMERALD.id()));
 	}
 
 	// ---- off-world wants (0.7.385) ---------------------------------------------------------------------------------------
@@ -432,16 +450,19 @@ final class MerchantOrders {
 		return Component.translatable("order.jaymoskingdoms.world." + g.world());
 	}
 
-	private static QuestNet.View wantView(ServerPlayer player, OffWorldGoods.Good g, Ledger ledger, long today) {
+	private static QuestNet.View wantView(ServerLevel level, ServerPlayer player, OffWorldGoods.Good g, Ledger ledger, long today) {
 		BlockPos anchor = READING.getOrDefault(player.getUUID(), BlockPos.ZERO);
+		// (0.7.484) paid in the town's coin
+		Currency coin = Currencies.of(level.getServer(), town(level, anchor));
+		int pay = Currencies.coinsPaid(coin, g.emeralds());
 		int count = wanted(g, anchor, today);
 		ItemStack goods = new ItemStack(g.item(), count);
 		boolean done = ledger.boughtToday(WANT + g.key(), today) > 0;
 		return new QuestNet.View(WANT + g.key(), QuestNet.OFFER, done,
 			Component.translatable("orders.jaymoskingdoms.want.title", goods.getHoverName(), count, worldName(g)),
-			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), g.emeralds()),
+			Component.translatable("orders.jaymoskingdoms.want.text", worldName(g), Currencies.amount(coin, pay)),
 			done ? Component.translatable("orders.jaymoskingdoms.want.done") : Component.translatable("orders.jaymoskingdoms.want.objective", count),
-			List.of(goods.copy(), new ItemStack(Items.EMERALD, g.emeralds())),
+			List.of(goods.copy(), new ItemStack(coin.item(), pay)),
 			List.of(Component.translatable("orders.jaymoskingdoms.want.standing", FAR_STANDING_XP)));
 	}
 
@@ -486,7 +507,8 @@ final class MerchantOrders {
 			// a full storehouse hands the rest back rather than losing it
 			player.drop(left, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
-		ItemStack pay = new ItemStack(Items.EMERALD, g.emeralds());
+		Currency coin = Currencies.of(level.getServer(), town);
+		ItemStack pay = new ItemStack(coin.item(), Currencies.coinsPaid(coin, g.emeralds()));
 		if (!player.getInventory().add(pay) && !pay.isEmpty()) {
 			player.drop(pay, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
@@ -518,12 +540,12 @@ final class MerchantOrders {
 		return parcel.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
 	}
 
-	/** Takes {@code price} emeralds out of {@code player}'s pack, if they have that many. */
-	private static boolean pay(ServerPlayer player, int price) {
+	/** Takes {@code price} of {@code coin} out of {@code player}'s pack, if they have that many. */
+	private static boolean pay(ServerPlayer player, Item coin, int price) {
 		var inv = player.getInventory();
 		int have = 0;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
-			if (inv.getItem(i).is(Items.EMERALD)) {
+			if (inv.getItem(i).is(coin)) {
 				have += inv.getItem(i).getCount();
 			}
 		}
@@ -532,7 +554,7 @@ final class MerchantOrders {
 		}
 		for (int i = 0, left = price; i < inv.getContainerSize() && left > 0; i++) {
 			ItemStack s = inv.getItem(i);
-			if (s.is(Items.EMERALD)) {
+			if (s.is(coin)) {
 				int n = Math.min(left, s.getCount());
 				s.shrink(n);
 				left -= n;
@@ -549,7 +571,7 @@ final class MerchantOrders {
 		}
 		remove(level.getServer(), id);
 		player.setAttached(LEDGER, ledger(player).bought(o.ware(), Quests.day(level), -1, -o.xp()));
-		ItemStack refund = new ItemStack(Items.EMERALD, o.paid());
+		ItemStack refund = new ItemStack(o.currency().item(), o.paid());
 		if (!player.getInventory().add(refund) && !refund.isEmpty()) {
 			player.drop(refund, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}

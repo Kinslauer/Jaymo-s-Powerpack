@@ -82,6 +82,13 @@ so on, whatever happens to the camp. Once the list is done, they stop growing.
    Terrain damage is spread over ticks, as the meteor fix does, to keep it from lagging.
 4. **Money:** currencies diversify. A settlement uses the currency of its prominent trading hub, or of another factor
    such as its superior (overlord) realm. Greenskins keep bent ingots.
+   Built (settle/currency, 0.7.484): `Currency`/`Currencies`. Emeralds stay the common coin and the treasury's unit of
+   account (old saves hold). Coins by culture: plains Realm Silver, taiga/snow Hacksilver, savanna/desert/badlands
+   Gold Dinar, jungle/swamp Shell String, cherry Mon; greenskins bent copper, pirates gold (dinars in their coves).
+   A vassal uses its overlord's; a kingdom its land's unless a far richer kingdom nearby is the hub; villages and havens
+   the hub's. Villager prices, merchant orders, bounties, fines, career wages and stall sales use the local coin;
+   a Money-changer villager (towns of 8+ folk) swaps any coin for any at a rate that moves with the realms' wealth.
+   `/kingdom currency` shows the coin and the rates.
 5. **Caravans:** everyone trades in their own way, down to handcarts if that's all they have.
 6. **Havens** only trade, but expand massively to make the most of their output, and keep fierce fighters sworn to
    defend them.

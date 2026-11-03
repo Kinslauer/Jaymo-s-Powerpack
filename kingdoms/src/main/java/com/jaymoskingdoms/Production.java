@@ -141,6 +141,12 @@ public final class Production {
 			if (tribute > 0) {
 				Factions.update(server, f.overlord(), x -> x.withTreasury(x.treasury() + tribute));
 			}
+			// (0.7.484) and some of it comes in as coin, in the settlement's own currency, to the storehouse its wages are paid from
+			Currency money = Currencies.of(server, f);
+			long coins = taxes * Currencies.TAX_COIN_PERCENT / 100;
+			if (coins > 0L) {
+				lost += Storage.put(level, f, money.item(), Currencies.coinsPaid(money, coins));
+			}
 		}
 		JaymosKingdoms.LOGGER.debug("{} produced {} logs, {} rock, {} food, {} emeralds ({} days; {} lost for want of room)", f.name(), logs, rock, food,
 			taxes, days, lost);

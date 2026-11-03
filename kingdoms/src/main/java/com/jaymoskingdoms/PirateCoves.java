@@ -199,7 +199,8 @@ final class PirateCoves {
 		Storage.register(server, id, layout.storage(), layout.depot());
 		Faction stocked = Factions.get(server, id);
 		Storage.put(level, stocked, Items.GOLD_INGOT, START_GOLD);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		// (0.7.484) pirates take anything gold: what they have taken off ships is dinars, not emeralds
+		Storage.put(level, stocked, Currencies.GOLD_DINAR, START_EMERALDS);
 		Storage.put(level, stocked, Items.GUNPOWDER, START_GUNPOWDER);
 		Storage.put(level, stocked, com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, START_SHOT);
 		Storage.put(level, stocked, Items.HONEY_BOTTLE, START_RUM);
@@ -512,7 +513,7 @@ final class PirateCoves {
 	static void grow(ServerLevel level, Faction camp, int days) {
 		if (Storage.loaded(level, camp)) {
 			Storage.put(level, camp, Items.GOLD_NUGGET, DAY_GOLD * 9 * days);
-			Storage.put(level, camp, Items.EMERALD, DAY_EMERALDS * days);
+			Storage.put(level, camp, Currencies.GOLD_DINAR, DAY_EMERALDS * days);
 			Storage.put(level, camp, Items.GUNPOWDER, DAY_GUNPOWDER * days);
 			Storage.put(level, camp, Items.COOKED_COD, DAY_FISH * days);
 		}
