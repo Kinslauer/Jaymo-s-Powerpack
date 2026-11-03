@@ -142,6 +142,8 @@ public final class Production {
 				Factions.update(server, f.overlord(), x -> x.withTreasury(x.treasury() + tribute));
 			}
 		}
+		// (0.7.484) a haven's works make their goods besides
+		HavenGrowth.produce(level, f, days);
 		JaymosKingdoms.LOGGER.debug("{} produced {} logs, {} rock, {} food, {} emeralds ({} days; {} lost for want of room)", f.name(), logs, rock, food,
 			taxes, days, lost);
 	}

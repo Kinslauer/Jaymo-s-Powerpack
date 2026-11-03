@@ -281,6 +281,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// (0.7.484) Havens expand: their works, land and sworn order
+		HavenGrowth.register();
 		// (0.7.484) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market
 		BentIngots.register();
 		HordeEconomy.register();

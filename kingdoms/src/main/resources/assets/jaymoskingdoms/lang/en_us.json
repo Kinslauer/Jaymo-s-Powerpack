@@ -11313,5 +11313,19 @@
 	"kit.jaymoskingdoms.perk.less_healing": "you mend at three quarters of the rate",
 	"kit.jaymoskingdoms.perk.ravenous": "hunger drains 30% faster",
 	"kit.jaymoskingdoms.perk.hungry": "hunger drains 15% faster",
-	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)"
+	"heritage.jaymoskingdoms.dragonblood.gift_rimewyrm": "Gift: the more gold you carry, the harder you hit (up to 15% with a stack of ingots)",
+	"building.jaymoskingdoms.haven_fields": "fields",
+	"building.jaymoskingdoms.haven_workshop": "workshop",
+	"building.jaymoskingdoms.haven_mine": "mine head",
+	"building.jaymoskingdoms.haven_dock": "dock",
+	"building.jaymoskingdoms.haven_mill": "mill",
+	"entity.jaymoskingdoms.haven_guard.harpooner": "Harpooner of %s",
+	"entity.jaymoskingdoms.haven_guard.shield_warden": "Shield-warden of %s",
+	"entity.jaymoskingdoms.haven_guard.warden": "Warden of %s",
+	"entity.jaymoskingdoms.haven_guard.sworn_blade": "Sworn blade of %s",
+	"entity.jaymoskingdoms.haven_guard.sworn_guard": "Sworn guard of %s",
+	"speech.jaymoskingdoms.haven_guard.rally.0": "To me! They've struck one of ours!",
+	"speech.jaymoskingdoms.haven_guard.rally.1": "Sworn to the haven, every one of us. Hold the line!",
+	"speech.jaymoskingdoms.haven_guard.rally.2": "Blow the horn! No one walks away from this!",
+	"speech.jaymoskingdoms.haven_guard.rally.3": "Shoulder to shoulder. We do not run."
 }

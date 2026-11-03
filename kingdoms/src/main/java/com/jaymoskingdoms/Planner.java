@@ -153,7 +153,8 @@ public final class Planner {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
 			}
-			if (size >= e.minPopulation() && works.count(e.id()) < Focus.max(server, f, e.id(), e.max()) && seen.add(e.id())) {
+			// (0.7.484) a haven's works by its blood and its size ({@link HavenGrowth})
+			if (size >= e.minPopulation() && works.count(e.id()) < HavenGrowth.max(server, f, e.id(), Focus.max(server, f, e.id(), e.max())) && seen.add(e.id())) {
 				out.add(e);
 			}
 		}
@@ -172,7 +173,7 @@ public final class Planner {
 		Works.Site works = Works.of(server, f.id());
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
-			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE
+			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
 				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}

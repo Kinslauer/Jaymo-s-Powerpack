@@ -155,7 +155,10 @@ public final class HavenWares {
 			wares.add(sale(HIDE_PRICE, new ItemStack(WAR_HIDE, HIDE_COUNT)));
 			wares.add(sale(JERKIN_PRICE, jerkin(level, blood)));
 		}
-		for (MerchantOffer ware : wares) {
+		// (0.7.484) the haven's works keep its traders stocked: more uses before an offer runs out
+		int more = HavenGrowth.stock(level.getServer(), f);
+		for (MerchantOffer base : wares) {
+			MerchantOffer ware = new MerchantOffer(base.getItemCostA(), base.getResult(), SELL_USES + more, XP, PRICE_MULT);
 			if (v.getOffers().stream().noneMatch(o -> same(o.getResult(), ware.getResult()))) {
 				v.getOffers().add(ware);
 			}
